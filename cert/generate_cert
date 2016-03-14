@@ -1,0 +1,20 @@
+#gen key
+openssl genrsa -aes128 -out client.key 1024
+#gen certificate req
+openssl req -new -key client.key -out client.csr
+
+#remove passphrase from key
+cp client.key client.key.org
+openssl rsa -in client.key.org -out client.key
+
+# another way to generate key (without password) and certificate signature request in 1 step but need correct conf file
+# openssl req -config openssl.my.cnf -new -nodes -keyout private/server.key -out server.csr -days 365
+
+#gen SELFSIGNED certificate
+openssl x509 -req -days 365 -in client.csr -signkey client.key -out client.crt
+
+#gen CA signed "client" certificate (see generate_ca):
+openssl ca -config cassl.cnf -policy signing_policy -days 365 -in client.csr -out client.crt
+
+#gen certificate format parsed by UA stack
+openssl x509 -in client.crt -out client.der -outform DER

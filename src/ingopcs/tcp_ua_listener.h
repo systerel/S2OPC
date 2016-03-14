@@ -1,0 +1,27 @@
+/*
+ * tcp_ua_listener.H
+ *
+ *  Created on: Jul 26, 2016
+ *      Author: vincent
+ */
+
+#ifndef INGOPCS_TCP_UA_LISTENER_H_
+#define INGOPCS_TCP_UA_LISTENER_H_
+
+#include <opcua_listener.h>
+
+typedef OpcUa_Listener_PfnOnNotify TCP_UA_Listener_Event_CB;
+
+typedef struct TCP_UA_Listener {
+    UA_String                   url;
+    uint32_t                    protocolVersion;
+    Socket_Manager              socketManager;
+    Socket                      socket;
+    TCP_UA_Connection*          clientConnections;
+    UA_Msg_Buffer*              pendingMsgBuffer;
+    TCP_UA_Listener_Event_CB* eventCB;
+
+} TCP_UA_Listener;
+
+
+#endif /* INGOPCS_TCP_UA_LISTENER_H_ */
