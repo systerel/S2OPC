@@ -15,7 +15,7 @@ Private_Key* Create_Private_Key (UA_Byte_String* key){
         if(key->length > 0){
             pkey = (Private_Key*) malloc(sizeof(Private_Key));
             if(pkey != NULL){
-            	pkey->key = Create_Byte_String_Copy(key);
+                pkey->key = Create_Byte_String_Copy(key);
             }
         }
     }
@@ -40,9 +40,9 @@ void End_Use_Private_Key (UA_Byte_String* key){
 
 void Delete_Private_Key (Private_Key* pkey){
     if(pkey != NULL){
-    	if(pkey->key != NULL){
-    		Delete_Byte_String(pkey->key);
-    	}
+        if(pkey->key != NULL){
+            Delete_Byte_String(pkey->key);
+        }
         free(pkey);
     }
 }

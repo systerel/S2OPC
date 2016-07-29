@@ -30,9 +30,9 @@ typedef struct SC_Channel_Client_Connection
     PKIProvider               pkiProvider;
     UA_Byte_String*           serverCertificate;
     UA_Byte_String*           clientCertificate;
-    Private_Key               clientKey;
+    Private_Key*              clientKey;
     SC_Connection_State       state;
-    uint32_t				  nbPendingRequests; // array size
+    uint32_t                  nbPendingRequests; // array size
     PendingRequest*           pendingRequests; //replace by a linked list impl
     uint32_t                  nextRequestId;
     Msg_Security_Mode         securityMode;
@@ -51,14 +51,16 @@ SC_Channel_Client_Connection* Create_Client_Channel(Namespace*      namespac,
 void Delete_Client_Channel(SC_Channel_Client_Connection* scConnection);
 
 StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
-                                  UA_String                     uri,
+                                  char*                         uri,
                                   void*                         pkiConfig,
                                   UA_Byte_String*               clientCertificate,
                                   UA_Byte_String*               clientKey,
                                   UA_Byte_String*               serverCertificate,
                                   Msg_Security_Mode             securityMode,
-                                  UA_String*                    securityPolicy,
-                                  uint32_t                      requestedLifetime
+                                  char*                         securityPolicy,
+                                  uint32_t                      requestedLifetime,
+                                  SC_Connection_Event_CB*       callback,
+                                  void*                         callbackData
                                   );
 
 #endif /* INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_ */

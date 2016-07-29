@@ -21,6 +21,12 @@ typedef enum TCP_Connection_State
     TCP_Connection_Error
 } TCP_Connection_State;
 
+typedef StatusCode (TCP_UA_Connection_Event_CB) (void*            connection,
+                                                 void*            callbackData,
+                                                 ConnectionEvent  event,
+                                                 UA_Msg_Buffer*   msgBuffer,
+                                                 StatusCode       status);
+
 typedef struct TCP_UA_Connection {
     UA_String*                  url;
     uint32_t                    protocolVersion;
@@ -42,10 +48,9 @@ typedef struct TCP_UA_Connection {
 TCP_UA_Connection* Create_Connection(void);
 void Delete_Connection(TCP_UA_Connection* connection);
 
-StatusCode Connect (TCP_UA_Connection*          scConnection,
-                    UA_String                   uri,
-                    TCP_UA_Connection_Event_CB* callback,
-                    void*                       callbackData
-                    );
+StatusCode Connect_Transport (TCP_UA_Connection*          connection,
+                              char*                       uri,
+                              TCP_UA_Connection_Event_CB* callback,
+                              void*                       callbackData);
 
 #endif /* INGOPCS_TCP_UA_CONNECTION_H_ */
