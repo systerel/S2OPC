@@ -4,6 +4,9 @@
  *  Created on: Jul 27, 2016
  *      Author: vincent
  */
+
+#include <wrappers.h>
+
 #include <stdlib.h>
 #include <secure_channel_low_level.h>
 #include <tcp_ua_connection.h>
@@ -20,7 +23,7 @@ SecureChannel_Connection* Create_Secure_Connection (){
             sConnection->state = SC_Connection_Error;
 
         }else{
-            // Delete connection
+            Delete_Connection(connection);
         }
     }
     return sConnection;
@@ -34,9 +37,9 @@ void Delete_Secure_Connection (SecureChannel_Connection* scConnection){
         if(scConnection->currentNonce != NULL){
             Delete_Private_Key(scConnection->currentNonce);
         }
-        // clear string secu policy
-        // clear crypto provider ? Who provide it ?
-        // clear crypto provider PREC ? Who provide it ?
+        Delete_String(scConnection->currentSecuPolicy);
+        Delete_Crypto_Provider(scConnection->currentCryptoProvider);
+        Delete_Crypto_Provider(scConnection->precCryptoProvider);
         free(scConnection);
     }
 }

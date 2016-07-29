@@ -8,18 +8,10 @@
 #ifndef INGOPCS_TCP_UA_CONNECTION_H_
 #define INGOPCS_TCP_UA_CONNECTION_H_
 
-#include <opcua.h>
-#include <opcua_p_types.h>
-#include <opcua_connection.h>
+#include <wrappers.h>
 
 #include <opcua_ingopcs_types.h>
 #include <msg_buffer.h>
-
-typedef OpcUa_SocketManager Socket_Manager;
-
-typedef OpcUa_Socket Socket;
-
-typedef OpcUa_Connection_PfnOnNotify TCP_UA_Connection_Event_CB;
 
 typedef enum TCP_Connection_State
 {

@@ -15,7 +15,6 @@ TCP_UA_Connection* Create_Connection(){
 
     if(connection != NULL){
         memset (connection, 0, sizeof(TCP_UA_Connection));
-        connection->protocolVersion = 0;
         connection->state = TCP_Connection_Error;
     }
 
@@ -26,8 +25,12 @@ void Delete_Connection(TCP_UA_Connection* connection){
     if(connection != NULL){
         if(connection->url != NULL){
             free(connection->url);
-            // Socket and socket manager close ?
         }
+        Delete_Socket_Manager(&connection->socketManager);
+        Close_Socket(connection->socket);
+        Delete_Msg_Buffer(connection->inputMsgBuffer);
+        Delete_Msg_Buffer(connection->outputMsgBuffer);
+        Delete_Msg_Buffer(connection->sendingQueue);
         free(connection);
     }
 }

@@ -8,9 +8,7 @@
 #ifndef INGOPCS_TCP_UA_LISTENER_H_
 #define INGOPCS_TCP_UA_LISTENER_H_
 
-#include <opcua_listener.h>
-
-typedef OpcUa_Listener_PfnOnNotify TCP_UA_Listener_Event_CB;
+#include <wrappers.h>
 
 typedef struct TCP_UA_Listener {
     UA_String                   url;

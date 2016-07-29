@@ -8,10 +8,10 @@
 #ifndef INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_
 #define INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_
 
+#include <wrappers.h>
+
 #include <tcp_ua_connection.h>
 #include <private_key.h>
-
-typedef OpcUa_CryptoProvider Crypto_Provider;
 
 typedef struct SC_Security_Token {
     uint32_t channelId;
@@ -53,7 +53,7 @@ typedef struct SecureChannel_Connection {
     SC_Security_Key_Sets  currentSecuKeySets;
     Crypto_Provider*      currentCryptoProvider;
     Msg_Security_Mode     precSecuMode;
-    UA_String             precSecuPolicy;
+    UA_String*            precSecuPolicy;
     SC_Security_Token     precSecuToken;
     SC_Security_Key_Sets  precSecuKeySets;
     Crypto_Provider*      precCryptoProvider;

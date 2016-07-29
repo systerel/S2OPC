@@ -25,4 +25,13 @@ typedef UA_Byte_String UA_String;
 
 typedef uint32_t StatusCode;
 
+UA_Byte_String* Create_Byte_String(void);
+UA_Byte_String* Create_Byte_String_Copy(UA_Byte_String* src);
+void Delete_Byte_String (UA_Byte_String* bstring);
+
+UA_String* Create_String(void);
+UA_String* Create_String_Copy(UA_String* src);
+void Delete_String (UA_String* bstring);
+
+
 #endif /* INGOPCS_OPCUA_TYPES_H_ */

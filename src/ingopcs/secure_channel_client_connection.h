@@ -8,24 +8,15 @@
 #ifndef INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_
 #define INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_
 
-#include <opcua.h>
-#include <opcua_channel.h>
-#include <opcua_stringtable.h>
+#include <wrappers.h>
 
 #include <opcua_ingopcs_types.h>
 #include <private_key.h>
 #include <secure_channel_low_level.h>
 
-typedef OpcUa_StringTable Namespace;
-typedef OpcUa_EncodeableType EncodeableType;
-typedef OpcUa_PKIProvider PKIProvider;
-typedef OpcUa_Connection_PfnOnResponse Response_Event_CB;
-typedef OpcUa_Timer Timer;
-typedef OpcUa_Connection_PfnOnNotify SC_Connection_Event_CB;
-
 typedef struct PendingRequest
 {
-    uint32_t           requestId;
+    uint32_t           requestId; // 0 is invalid request
     uint32_t           timeoutHint;
     uint32_t           startTime;
     Response_Event_CB* callback;
@@ -41,31 +32,33 @@ typedef struct SC_Channel_Client_Connection
     UA_Byte_String*           clientCertificate;
     Private_Key               clientKey;
     SC_Connection_State       state;
-    PendingRequest*           pendingRequests;
+    uint32_t				  nbPendingRequests; // array size
+    PendingRequest*           pendingRequests; //replace by a linked list impl
     uint32_t                  nextRequestId;
     Msg_Security_Mode         securityMode;
     UA_String*                securityPolicy;
     uint32_t                  requestedLifetime;
     SecureChannel_Connection* instance;
-    Timer                     watchdogTimer;
+    P_Timer                   watchdogTimer;
     SC_Connection_Event_CB*   callback;
     void*                     callbackData;
 
 } SC_Channel_Client_Connection;
 
 
-SC_Channel_Client_Connection* Create_Client_Channel (Namespace*      namespac,
-                                                     EncodeableType* encodeableTypes);
+SC_Channel_Client_Connection* Create_Client_Channel(Namespace*      namespac,
+                                                    EncodeableType* encodeableTypes);
+void Delete_Client_Channel(SC_Channel_Client_Connection* scConnection);
 
-StatusCode Connect_Client_Channel (SC_Channel_Client_Connection* connection,
-                                   UA_String                     uri,
-                                   void*                         pkiConfig,
-                                   UA_Byte_String*               clientCertificate,
-                                   UA_Byte_String*               clientKey,
-                                   UA_Byte_String*               serverCertificate,
-                                   Msg_Security_Mode             securityMode,
-                                   UA_String*                    securityPolicy,
-                                   uint32_t                      requestedLifetime
-                                   );
+StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
+                                  UA_String                     uri,
+                                  void*                         pkiConfig,
+                                  UA_Byte_String*               clientCertificate,
+                                  UA_Byte_String*               clientKey,
+                                  UA_Byte_String*               serverCertificate,
+                                  Msg_Security_Mode             securityMode,
+                                  UA_String*                    securityPolicy,
+                                  uint32_t                      requestedLifetime
+                                  );
 
 #endif /* INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_ */

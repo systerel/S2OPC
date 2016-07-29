@@ -11,7 +11,7 @@
 #include <opcua_ingopcs_types.h>
 
 typedef struct Private_Key {
-    UA_Byte_String key; // to modify into non contiguous memory storage
+    UA_Byte_String* key; // to modify into non contiguous memory storage
 } Private_Key;
 
 Private_Key* Create_Private_Key (UA_Byte_String* key);

@@ -8,11 +8,9 @@
 #ifndef INGOPCS_MSG_BUFFER_H_
 #define INGOPCS_MSG_BUFFER_H_
 
-#include <opcua_tcpstream.h>
+#include <wrappers.h>
 
 #include <buffer.h>
-
-typedef OpcUa_TcpStream_MessageType TCP_UA_Message_Type;
 
 typedef struct UA_Msg_Buffer {
     Buffer*             buffer;
@@ -21,5 +19,8 @@ typedef struct UA_Msg_Buffer {
     uint32_t            nbChunks;
     uint32_t            chunkSize;
 } UA_Msg_Buffer;
+
+UA_Msg_Buffer* Create_Msg_Buffer(Buffer* buffer);
+void Delete_Msg_Buffer(UA_Msg_Buffer* mBuffer);
 
 #endif /* INGOPCS_MSG_BUFFER_H_ */
