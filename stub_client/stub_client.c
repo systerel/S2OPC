@@ -190,7 +190,7 @@ int main(void){
     OpcUa_GotoErrorIfBad(uStatus);
 
 #if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
-    // uStatus = OpcUa_SocketManager_Create (OpcUa_Null, 0, OPCUA_SOCKET_NO_FLAG);
+    //uStatus = OpcUa_SocketManager_Create (OpcUa_Null, 0, OPCUA_SOCKET_NO_FLAG);
 #endif //OPCUA_MULTITHREADED
 
     // Start connection to server
