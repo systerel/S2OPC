@@ -21,6 +21,7 @@ SecureChannel_Connection* Create_Secure_Connection (){
         if(sConnection != 0){
             memset (sConnection, 0, sizeof(SecureChannel_Connection));
             sConnection->state = SC_Connection_Error;
+            sConnection->transportConnection = connection;
 
         }else{
             Delete_Connection(connection);

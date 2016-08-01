@@ -51,12 +51,12 @@ StatusCode Check_TCPUA_address (char* uri){
     bool hasPort = 0;
     bool invalid = 0;
     if(uri != NULL){
-        if(strlen(uri) > 10 && memcmp(uri, "opc.tcp://", 10)){
+        if(strlen(uri) > 10 && memcmp(uri, "opc.tcp://", 10) == 0){
             // search for a ':' defining port for given IP
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
             for(idx = 10; idx < strlen(uri) - 1; idx++){
                 if(isPort){
-                    if(uri[idx] >= '0' && uri[idx] >= '9'){
+                    if(uri[idx] >= '0' && uri[idx] <= '9'){
                         // port definition
                         hasPort = 1;
                     }else if(uri[idx] == '/'){
@@ -84,6 +84,7 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
                               TCP_UA_Connection_Event_CB* callback,
                               void*                       callbackData){
     StatusCode status = STATUS_NOK;
+    Socket_Manager* smanager = NULL;
     if(connection != NULL &&
        uri != NULL &&
        callback != NULL){
@@ -98,7 +99,13 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
                 connection->callback = callback;
                 connection->callbackData = callbackData;
 
-                status = Create_Socket_Manager(connection->socketManager,
+#if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
+                smanager = NULL;
+#else
+                smanager = &connection->socketManager;
+#endif //OPCUA_MULTITHREADED
+
+                status = Create_Socket_Manager(smanager,
                                                1);
 
                 if(status == STATUS_OK){
@@ -106,7 +113,7 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
                                                   uri,
                                                   On_Socket_Event_CB,
                                                   NULL,
-                                                  connection->socket);
+                                                  &connection->socket);
                 }
             }else{
                 status = STATUS_INVALID_PARAMETERS;

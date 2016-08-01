@@ -9,7 +9,7 @@
 #define INGOPCS_OPCUA_TYPES_H_
 
 #ifndef NULL
-#define NULL 0
+#define NULL ((void *)0)
 #endif
 
 #include <stdint.h>
@@ -24,9 +24,9 @@ typedef struct UA_Byte_String {
 typedef UA_Byte_String UA_String;
 
 #define STATUS_OK 0x0
-#define STATUS_NOK 0x1
-#define STATUS_INVALID_PARAMETERS 0x2
-#define STATUS_INVALID_STATE 0x3
+#define STATUS_NOK 0x80000000//0x10000000
+#define STATUS_INVALID_PARAMETERS 0x80000000//0x20000000
+#define STATUS_INVALID_STATE 0x80000000//0x30000000
 typedef uint32_t StatusCode;
 
 UA_Byte_String* Create_Byte_String(void);
