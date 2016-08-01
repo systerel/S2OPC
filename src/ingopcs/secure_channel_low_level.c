@@ -12,10 +12,10 @@
 #include <tcp_ua_connection.h>
 
 SecureChannel_Connection* Create_Secure_Connection (){
-    SecureChannel_Connection* sConnection = NULL;
+    SecureChannel_Connection* sConnection = UA_NULL;
     TCP_UA_Connection* connection = Create_Connection();
 
-    if(connection != NULL){
+    if(connection != UA_NULL){
         sConnection = (SecureChannel_Connection *) malloc(sizeof(SecureChannel_Connection));
 
         if(sConnection != 0){
@@ -31,11 +31,11 @@ SecureChannel_Connection* Create_Secure_Connection (){
 }
 
 void Delete_Secure_Connection (SecureChannel_Connection* scConnection){
-    if(scConnection != NULL){
-        if(scConnection->transportConnection != NULL){
+    if(scConnection != UA_NULL){
+        if(scConnection->transportConnection != UA_NULL){
             Delete_Connection(scConnection->transportConnection);
         }
-        if(scConnection->currentNonce != NULL){
+        if(scConnection->currentNonce != UA_NULL){
             Delete_Private_Key(scConnection->currentNonce);
         }
         Delete_String(scConnection->currentSecuPolicy);

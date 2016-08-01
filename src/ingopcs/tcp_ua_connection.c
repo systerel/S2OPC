@@ -10,21 +10,33 @@
 #include <tcp_ua_connection.h>
 
 TCP_UA_Connection* Create_Connection(){
-    TCP_UA_Connection* connection = NULL;
-
+    TCP_UA_Connection* connection = UA_NULL;
+    StatusCode status = STATUS_NOK;
     connection = (TCP_UA_Connection *) malloc(sizeof(TCP_UA_Connection));
 
-    if(connection != NULL){
+    if(connection != UA_NULL){
         memset (connection, 0, sizeof(TCP_UA_Connection));
         connection->state = TCP_Connection_Disconnected;
+#if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
+       status = Create_Socket_Manager(UA_NULL,
+                                      1);
+#else
+       status = Create_Socket_Manager(&(connection->socketManager),
+                                      1);
+#endif //OPCUA_MULTITHREADED
+
+        if(status != STATUS_OK){
+            free(connection);
+            connection = UA_NULL;
+        }
     }
 
     return connection;
 }
 
 void Delete_Connection(TCP_UA_Connection* connection){
-    if(connection != NULL){
-        if(connection->url != NULL){
+    if(connection != UA_NULL){
+        if(connection->url != UA_NULL){
             free(connection->url);
         }
         Delete_Socket_Manager(&connection->socketManager);
@@ -50,7 +62,7 @@ StatusCode Check_TCPUA_address (char* uri){
     bool isPort = 0;
     bool hasPort = 0;
     bool invalid = 0;
-    if(uri != NULL){
+    if(uri != UA_NULL){
         if(strlen(uri) > 10 && memcmp(uri, "opc.tcp://", 10) == 0){
             // search for a ':' defining port for given IP
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
@@ -84,13 +96,12 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
                               TCP_UA_Connection_Event_CB* callback,
                               void*                       callbackData){
     StatusCode status = STATUS_NOK;
-    Socket_Manager* smanager = NULL;
-    if(connection != NULL &&
-       uri != NULL &&
-       callback != NULL){
-        if(connection->url == NULL &&
-           connection->callback == NULL &&
-           connection->callbackData == NULL &&
+    if(connection != UA_NULL &&
+       uri != UA_NULL &&
+       callback != UA_NULL){
+        if(connection->url == UA_NULL &&
+           connection->callback == UA_NULL &&
+           connection->callbackData == UA_NULL &&
            connection->state == TCP_Connection_Disconnected)
         {
             // replace by correct uri check
@@ -100,21 +111,22 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
                 connection->callbackData = callbackData;
 
 #if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
-                smanager = NULL;
+                status = Create_Client_Socket(UA_NULL,
+                                              uri,
+                                              On_Socket_Event_CB,
+                                              UA_NULL,
+                                              &(connection->socket));
 #else
-                smanager = &connection->socketManager;
-#endif //OPCUA_MULTITHREADED
-
-                status = Create_Socket_Manager(smanager,
-                                               1);
 
                 if(status == STATUS_OK){
                     status = Create_Client_Socket(connection->socketManager,
                                                   uri,
                                                   On_Socket_Event_CB,
-                                                  NULL,
-                                                  &connection->socket);
+                                                  UA_NULL,
+                                                  &(connection->socket));
                 }
+#endif //OPCUA_MULTITHREADED
+
             }else{
                 status = STATUS_INVALID_PARAMETERS;
             }

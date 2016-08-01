@@ -8,9 +8,7 @@
 #ifndef INGOPCS_OPCUA_TYPES_H_
 #define INGOPCS_OPCUA_TYPES_H_
 
-#ifndef NULL
-#define NULL ((void *)0)
-#endif
+#define UA_NULL ((void *)0)
 
 #include <stdint.h>
 

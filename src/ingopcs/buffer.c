@@ -10,10 +10,10 @@
 #include <buffer.h>
 
 Buffer* Create_Buffer(uint32_t size){
-    Buffer* buf = NULL;
+    Buffer* buf = UA_NULL;
     if(size > 0){
         buf = (Buffer*) malloc(sizeof(Buffer));
-        if(buf != NULL){
+        if(buf != UA_NULL){
             buf->size = size;
             buf->data = (UA_Byte*) malloc(sizeof(UA_Byte)*size);
             memset(buf->data, 0, sizeof(UA_Byte)*size);
@@ -23,10 +23,10 @@ Buffer* Create_Buffer(uint32_t size){
 }
 
 Buffer* Set_Buffer(UA_Byte* data, uint32_t size){
-    Buffer* buf = NULL;
-    if(data != NULL && size > 0){
+    Buffer* buf = UA_NULL;
+    if(data != UA_NULL && size > 0){
         buf = (Buffer*) malloc(sizeof(Buffer));
-        if(buf != NULL){
+        if(buf != UA_NULL){
             buf->size = size;
             buf->data = data;
         }
@@ -35,8 +35,8 @@ Buffer* Set_Buffer(UA_Byte* data, uint32_t size){
 }
 
 void Delete_Buffer(Buffer* buffer){
-    if(buffer != NULL){
-        if(buffer->data != NULL){
+    if(buffer != UA_NULL){
+        if(buffer->data != UA_NULL){
             free(buffer->data);
         }
         free(buffer);

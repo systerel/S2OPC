@@ -12,13 +12,13 @@
 
 SC_Channel_Client_Connection* Create_Client_Channel (Namespace*      namespac,
                                                      EncodeableType* encodeableTypes){
-    SC_Channel_Client_Connection* scClientConnection = NULL;
+    SC_Channel_Client_Connection* scClientConnection = UA_NULL;
     SecureChannel_Connection* sConnection = Create_Secure_Connection();
 
-    if(sConnection != NULL){
+    if(sConnection != UA_NULL){
         scClientConnection = (SC_Channel_Client_Connection *) malloc (sizeof(SC_Channel_Client_Connection));
 
-        if(scClientConnection != NULL){
+        if(scClientConnection != UA_NULL){
             memset (scClientConnection, 0, sizeof(SC_Channel_Client_Connection));
             scClientConnection->instance = sConnection;
             scClientConnection->namespaces = namespac;
@@ -33,20 +33,20 @@ SC_Channel_Client_Connection* Create_Client_Channel (Namespace*      namespac,
 }
 
 void Delete_Client_Channel(SC_Channel_Client_Connection* scConnection){
-    if(scConnection != NULL){
-        if(scConnection->serverCertificate != NULL){
+    if(scConnection != UA_NULL){
+        if(scConnection->serverCertificate != UA_NULL){
             Delete_Byte_String(scConnection->serverCertificate);
         }
-        if(scConnection->clientCertificate != NULL){
+        if(scConnection->clientCertificate != UA_NULL){
             Delete_Byte_String(scConnection->clientCertificate);
         }
-        if(scConnection->pendingRequests != NULL){
+        if(scConnection->pendingRequests != UA_NULL){
             free(scConnection->pendingRequests);
         }
-        if(scConnection->securityPolicy != NULL){
+        if(scConnection->securityPolicy != UA_NULL){
             Delete_String(scConnection->securityPolicy);
         }
-        if(scConnection->instance != NULL){
+        if(scConnection->instance != UA_NULL){
             Delete_Secure_Connection(scConnection->instance);
         }
         Delete_Timer(&scConnection->watchdogTimer);
@@ -76,22 +76,22 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
 {
     StatusCode status = STATUS_NOK;
 
-    if(uri != NULL &&
-       pkiConfig != NULL &&
-       clientCertificate != NULL &&
-       clientKey != NULL &&
-       serverCertificate != NULL &&
+    if(uri != UA_NULL &&
+       pkiConfig != UA_NULL &&
+       clientCertificate != UA_NULL &&
+       clientKey != UA_NULL &&
+       serverCertificate != UA_NULL &&
        securityMode != Msg_Security_Mode_Invalid &&
-       securityPolicy != NULL &&
+       securityPolicy != UA_NULL &&
        requestedLifetime > 0)
     {
-        if(connection->clientCertificate == NULL &&
-           connection->clientKey == NULL &&
-           connection->serverCertificate == NULL &&
+        if(connection->clientCertificate == UA_NULL &&
+           connection->clientKey == UA_NULL &&
+           connection->serverCertificate == UA_NULL &&
            connection->securityMode == Msg_Security_Mode_Invalid &&
-           connection->securityPolicy == NULL &&
-           connection->callback == NULL &&
-           connection->callbackData == NULL)
+           connection->securityPolicy == UA_NULL &&
+           connection->callback == UA_NULL &&
+           connection->callbackData == UA_NULL)
         {
             // Create PKI provider
             connection->clientCertificate = Create_Byte_String_Copy(clientCertificate);
@@ -103,11 +103,11 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
             connection->callback = callback;
             connection->callbackData = callbackData;
 
-            if(connection->clientCertificate == NULL ||
-               connection->clientKey == NULL ||
-               connection->serverCertificate == NULL ||
+            if(connection->clientCertificate == UA_NULL ||
+               connection->clientKey == UA_NULL ||
+               connection->serverCertificate == UA_NULL ||
                connection->securityMode == Msg_Security_Mode_Invalid ||
-               connection->securityPolicy == NULL)
+               connection->securityPolicy == UA_NULL)
             {
                 status = STATUS_NOK;
             }else{
@@ -115,7 +115,7 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
                 status = Connect_Transport(connection->instance->transportConnection,
                                            uri,
                                            On_Transport_Event_CB,
-                                           NULL);
+                                           UA_NULL);
 
                 if(status != STATUS_OK){
                     connection->state = SC_Connection_Disconnected;
