@@ -63,8 +63,7 @@ StatusCode On_Socket_Event_CB (Socket        socket,
         case SOCKET_CONNECT_EVENT:
             // Manage connection
             assert(connection->socket == socket);
-            Send_Hello_Msg(connection,
-                           socket);
+            status = Send_Hello_Msg(connection);
             break;
         case SOCKET_EXCEPT_EVENT:
         case SOCKET_READ_EVENT:
@@ -158,4 +157,29 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
         status = STATUS_INVALID_PARAMETERS;
     }
     return status;
+}
+
+StatusCode Initiate_Send_Message(TCP_UA_Connection* connection){
+	StatusCode status = STATUS_NOK;
+	if(connection->inputMsgBuffer == NULL){
+		Buffer* buf = Create_Buffer(OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE);
+		if(buf != UA_NULL){
+			connection->inputMsgBuffer = Create_Msg_Buffer(buf);
+			if(connection->inputMsgBuffer != UA_NULL){
+				status = STATUS_OK;
+			}
+		}
+	}else{
+		status = STATUS_INVALID_STATE;
+	}
+	return status;
+}
+
+StatusCode Send_Hello_Msg(TCP_UA_Connection* connection){
+	StatusCode status = STATUS_NOK;
+	status = Initiate_Send_Message(connection);
+	if(status == STATUS_OK){
+		// encode message
+	}
+	return status;
 }

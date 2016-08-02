@@ -86,5 +86,3 @@ UA_String* Create_String_From_CString(char* cString){
     }
     return string;
 }
-
-

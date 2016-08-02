@@ -53,4 +53,9 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
                               TCP_UA_Connection_Event_CB* callback,
                               void*                       callbackData);
 
+StatusCode Initiate_Send_Message(TCP_UA_Connection* connection);
+
+StatusCode Send_Hello_Msg(TCP_UA_Connection* connection);
+
+
 #endif /* INGOPCS_TCP_UA_CONNECTION_H_ */

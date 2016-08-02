@@ -17,7 +17,7 @@ typedef struct UA_Msg_Buffer {
     TCP_UA_Message_Type type;
     uint32_t            length;
     uint32_t            nbChunks;
-    uint32_t            chunkSize;
+    //uint32_t            chunkSize;
 } UA_Msg_Buffer;
 
 UA_Msg_Buffer* Create_Msg_Buffer(Buffer* buffer);

@@ -38,5 +38,7 @@ UA_String* Create_String(void);
 UA_String* Create_String_Copy(UA_String* src);
 void Delete_String (UA_String* bstring);
 
+int32_t little_endian (void);
+
 
 #endif /* INGOPCS_OPCUA_TYPES_H_ */

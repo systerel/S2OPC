@@ -13,7 +13,7 @@ UA_Msg_Buffer* Create_Msg_Buffer(Buffer* buffer){
     if(buffer != UA_NULL){
         mBuffer = (UA_Msg_Buffer*) malloc(sizeof(UA_Msg_Buffer));
         mBuffer->buffer = buffer;
-        mBuffer->chunkSize = 0;
+        //mBuffer->chunkSize = 0;
         mBuffer->length = 0;
         mBuffer->nbChunks = 0;
         mBuffer->type = OpcUa_TcpStream_MessageType_Unknown;
