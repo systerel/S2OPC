@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <assert.h>
 #include <tcp_ua_connection.h>
 
 TCP_UA_Connection* Create_Connection(){
@@ -53,7 +54,27 @@ StatusCode On_Socket_Event_CB (Socket        socket,
                                void*         callbackData,
                                uint16_t      usPortNumber,
                                unsigned char bIsSSL){
-    return STATUS_OK;
+    StatusCode status = STATUS_NOK;
+    TCP_UA_Connection* connection = (TCP_UA_Connection*) callbackData;
+    switch(socketEvent){
+        case SOCKET_ACCEPT_EVENT:
+        case SOCKET_CLOSE_EVENT:
+            break;
+        case SOCKET_CONNECT_EVENT:
+            // Manage connection
+            assert(connection->socket == socket);
+            Send_Hello_Msg(connection,
+                           socket);
+            break;
+        case SOCKET_EXCEPT_EVENT:
+        case SOCKET_READ_EVENT:
+        case SOCKET_SHUTDOWN_EVENT:
+        case SOCKET_TIMEOUT_EVENT:
+        case SOCKET_WRITE_EVENT:
+        default:
+            break;
+    }
+    return status;
 }
 
 StatusCode Check_TCPUA_address (char* uri){
@@ -114,7 +135,7 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
                 status = Create_Client_Socket(UA_NULL,
                                               uri,
                                               On_Socket_Event_CB,
-                                              UA_NULL,
+                                              (void*) connection,
                                               &(connection->socket));
 #else
 
@@ -122,7 +143,7 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
                     status = Create_Client_Socket(connection->socketManager,
                                                   uri,
                                                   On_Socket_Event_CB,
-                                                  UA_NULL,
+                                                  (void*) connection,
                                                   &(connection->socket));
                 }
 #endif //OPCUA_MULTITHREADED
