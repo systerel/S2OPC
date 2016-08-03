@@ -16,7 +16,7 @@ UA_Msg_Buffer* Create_Msg_Buffer(Buffer* buffer){
         //mBuffer->chunkSize = 0;
         mBuffer->length = 0;
         mBuffer->nbChunks = 0;
-        mBuffer->type = OpcUa_TcpStream_MessageType_Unknown;
+        mBuffer->type = TCP_UA_Message_Unknown;
     }
     return mBuffer;
 }

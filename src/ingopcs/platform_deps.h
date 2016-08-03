@@ -10,9 +10,15 @@
 
 #include <stdint.h>
 
-// Invalid before call to initialize
-uint32_t isLittleEndian;
+typedef enum Endianess{
+    Endianess_Undefined,
+    Endianess_LittleEndian,
+    Endianess_BigEndian
+} Endianess;
 
-uint32_t Initialize(void);
+// Undefined before call to initialize
+extern uint32_t pendianess;
+
+void Initialize_Platform_Dependencies(void);
 
 #endif /* INGOPCS_PLATFORM_DEPS_H_ */

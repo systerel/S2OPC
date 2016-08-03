@@ -7,12 +7,17 @@
 
 #include <platform_deps.h>
 
-void little_endian (){
+uint32_t pendianess  = Endianess_Undefined;
+
+uint32_t little_endian(){
   uint32_t x = 0x0001;
-  isLittleEndian = ( x == *((char *)&x));
+  return ( x == *((char *)&x));
 }
 
-uint32_t Initialize(){
-	little_endian();
-	return 0;
+void Initialize_Platform_Dependencies(){
+    if(little_endian() == 0){
+        pendianess = Endianess_BigEndian;
+    }else{
+        pendianess = Endianess_LittleEndian;
+    }
 }

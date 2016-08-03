@@ -70,7 +70,7 @@ UA_String* Create_String_From_CString(char* cString){
             string->characters = (UA_Byte*) malloc(sizeof(UA_Byte)*stringLength);
             if(string->characters != UA_NULL){
                 if(CHAR_BIT == 8){
-                    memcpy(string, cString, stringLength);
+                    memcpy(string->characters, cString, stringLength);
                 }else{
                     // On systems for which char is not encoded on 1 byte
                     for(idx = 0; idx < stringLength; idx++){

@@ -12,6 +12,9 @@
 
 #include <buffer.h>
 
+#define TCP_UA_HEADER_LENGTH 8
+#define TCP_UA_HEADER_LENGTH_POSITION 4
+
 typedef struct UA_Msg_Buffer {
     Buffer*             buffer;
     TCP_UA_Message_Type type;

@@ -9,6 +9,8 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <tcp_ua_connection.h>
+#include <tcp_ua_low_level.h>
+#include <ua_encoder.h>
 
 TCP_UA_Connection* Create_Connection(){
     TCP_UA_Connection* connection = UA_NULL;
@@ -18,6 +20,11 @@ TCP_UA_Connection* Create_Connection(){
     if(connection != UA_NULL){
         memset (connection, 0, sizeof(TCP_UA_Connection));
         connection->state = TCP_Connection_Disconnected;
+        connection->protocolVersion = 0;
+        connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+        connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+        connection->maxMessageSize = OPCUA_ENCODER_MAXMESSAGELENGTH;
+        connection->maxChunkCount = 0;
 #if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
        status = Create_Socket_Manager(UA_NULL,
                                       1);
@@ -160,26 +167,52 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
 }
 
 StatusCode Initiate_Send_Message(TCP_UA_Connection* connection){
-	StatusCode status = STATUS_NOK;
-	if(connection->inputMsgBuffer == NULL){
-		Buffer* buf = Create_Buffer(OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE);
-		if(buf != UA_NULL){
-			connection->inputMsgBuffer = Create_Msg_Buffer(buf);
-			if(connection->inputMsgBuffer != UA_NULL){
-				status = STATUS_OK;
-			}
-		}
-	}else{
-		status = STATUS_INVALID_STATE;
-	}
-	return status;
+    StatusCode status = STATUS_NOK;
+    if(connection->outputMsgBuffer == NULL){
+        Buffer* buf = Create_Buffer(OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE);
+        if(buf != UA_NULL){
+            connection->outputMsgBuffer = Create_Msg_Buffer(buf);
+            if(connection->outputMsgBuffer != UA_NULL){
+                status = STATUS_OK;
+            }
+        }
+    }else{
+        status = STATUS_INVALID_STATE;
+    }
+    return status;
 }
 
 StatusCode Send_Hello_Msg(TCP_UA_Connection* connection){
-	StatusCode status = STATUS_NOK;
-	status = Initiate_Send_Message(connection);
-	if(status == STATUS_OK){
-		// encode message
-	}
-	return status;
+    StatusCode status = STATUS_NOK;
+    status = Initiate_Send_Message(connection);
+    if(status == STATUS_OK){
+        // encode message
+        status = Encode_TCP_UA_Header(connection->outputMsgBuffer,
+                                      TCP_UA_Message_Hello);
+    }
+    if(status == STATUS_OK){
+        status = Write_UInt32(connection->outputMsgBuffer, connection->protocolVersion);
+    }
+    if(status == STATUS_OK){
+        status = Write_UInt32(connection->outputMsgBuffer, connection->receiveBufferSize);
+    }
+    if(status == STATUS_OK){
+        status = Write_UInt32(connection->outputMsgBuffer, connection->sendBufferSize);
+    }
+    if(status == STATUS_OK){
+        status = Write_UInt32(connection->outputMsgBuffer, connection->maxMessageSize);
+    }
+    if(status == STATUS_OK){
+        status = Write_UInt32(connection->outputMsgBuffer, connection->maxChunkCount);
+    }
+    if(status == STATUS_OK){
+        status = Write_UA_String(connection->outputMsgBuffer, connection->url);
+    }
+    if(status == STATUS_OK){
+        status = Finalize_TCP_UA_Header(connection->outputMsgBuffer);
+    }
+    if(status == STATUS_OK){
+        status = Flush_Msg_Buffer(connection->socket, connection->outputMsgBuffer);
+    }
+    return status;
 }
