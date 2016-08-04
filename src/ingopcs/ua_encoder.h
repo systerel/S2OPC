@@ -27,6 +27,8 @@
 | (x & 0x000000FF00000000) >> 8
 
 StatusCode Write_UInt32(UA_Msg_Buffer* msgBuffer, uint32_t value);
+StatusCode Read_UInt32(UA_Msg_Buffer* msgBuffer, uint32_t* value);
 StatusCode Write_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str);
+StatusCode Read_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str);
 
 #endif /* INGOPCS_UA_ENCODER_H_ */

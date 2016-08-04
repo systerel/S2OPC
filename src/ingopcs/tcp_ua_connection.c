@@ -12,6 +12,38 @@
 #include <tcp_ua_low_level.h>
 #include <ua_encoder.h>
 
+StatusCode Initiate_Send_Buffer(TCP_UA_Connection* connection){
+    StatusCode status = STATUS_NOK;
+    if(connection->outputMsgBuffer == NULL){
+        Buffer* buf = Create_Buffer(connection->sendBufferSize);
+        if(buf != UA_NULL){
+            connection->outputMsgBuffer = Create_Msg_Buffer(buf, connection->maxChunkCount);
+            if(connection->outputMsgBuffer != UA_NULL){
+                status = STATUS_OK;
+            }
+        }
+    }else{
+        status = STATUS_INVALID_STATE;
+    }
+    return status;
+}
+
+StatusCode Initiate_Receive_Buffer(TCP_UA_Connection* connection){
+    StatusCode status = STATUS_NOK;
+    if(connection->inputMsgBuffer == UA_NULL){
+        Buffer* buf = Create_Buffer(connection->receiveBufferSize);
+        if(buf != UA_NULL){
+            connection->inputMsgBuffer = Create_Msg_Buffer(buf, connection->maxChunkCount);
+            if(connection->inputMsgBuffer != UA_NULL){
+                status = STATUS_OK;
+            }
+        }
+    }else{
+        status = STATUS_INVALID_STATE;
+    }
+    return status;
+}
+
 TCP_UA_Connection* Create_Connection(){
     TCP_UA_Connection* connection = UA_NULL;
     StatusCode status = STATUS_NOK;
@@ -21,6 +53,7 @@ TCP_UA_Connection* Create_Connection(){
         memset (connection, 0, sizeof(TCP_UA_Connection));
         connection->state = TCP_Connection_Disconnected;
         connection->protocolVersion = 0;
+        // TODO: check constraints on connection properties (>8192 bytes ...)
         connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
         connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
         connection->maxMessageSize = OPCUA_ENCODER_MAXMESSAGELENGTH;
@@ -40,6 +73,17 @@ TCP_UA_Connection* Create_Connection(){
     }
 
     return connection;
+}
+
+void Reset_Connection_State(TCP_UA_Connection* connection){
+    connection->state = TCP_Connection_Disconnected;
+    connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+    connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+    connection->maxMessageSize = OPCUA_ENCODER_MAXMESSAGELENGTH;
+    connection->maxChunkCount = 0;
+    Delete_Msg_Buffer(connection->inputMsgBuffer);
+    Delete_Msg_Buffer(connection->outputMsgBuffer);
+    Delete_Msg_Buffer(connection->sendingQueue);
 }
 
 void Delete_Connection(TCP_UA_Connection* connection){
@@ -65,16 +109,57 @@ StatusCode On_Socket_Event_CB (Socket        socket,
     TCP_UA_Connection* connection = (TCP_UA_Connection*) callbackData;
     switch(socketEvent){
         case SOCKET_ACCEPT_EVENT:
+            break;
         case SOCKET_CLOSE_EVENT:
+            Reset_Connection_State(connection);
             break;
         case SOCKET_CONNECT_EVENT:
             // Manage connection
             assert(connection->socket == socket);
             status = Send_Hello_Msg(connection);
+            if(status == STATUS_OK){
+                status = Initiate_Receive_Buffer(connection);
+            }else{
+                // Close socket if status != OK ?
+            }
             break;
         case SOCKET_EXCEPT_EVENT:
         case SOCKET_READ_EVENT:
+            // Manage message reception
+            status = Read_TCP_UA_Data(socket, connection->inputMsgBuffer);
+            if(status == STATUS_OK){
+                switch(connection->inputMsgBuffer->type){
+                    case(TCP_UA_Message_Hello):
+                        status = STATUS_INVALID_RCV_PARAMETER;
+                        break;
+                    case(TCP_UA_Message_Acknowledge):
+                        status = Receive_Ack_Msg(connection);
+                    case(TCP_UA_Message_Error):
+                        // Socket will close: => do something ?
+                        break;
+                    case(TCP_UA_Message_SecureMessage):
+                        // call sc CB
+                        break;
+                    case(TCP_UA_Message_Unknown):
+                    case(TCP_UA_Message_Invalid):
+                    default:
+                        status = STATUS_INVALID_STATE;
+                        break;
+                }
+            }
+
+            if(status == STATUS_OK_INCOMPLETE){
+                // Wait for next event
+                status = STATUS_OK;
+            }else{
+                // Erase content since incorrect reading
+                // TODO: add trace with reason
+                Reset_Msg_Buffer(connection->inputMsgBuffer);
+            }
+            break;
         case SOCKET_SHUTDOWN_EVENT:
+            Reset_Connection_State(connection);
+            break;
         case SOCKET_TIMEOUT_EVENT:
         case SOCKET_WRITE_EVENT:
         default:
@@ -90,7 +175,7 @@ StatusCode Check_TCPUA_address (char* uri){
     bool hasPort = 0;
     bool invalid = 0;
     if(uri != UA_NULL){
-        if(strlen(uri) > 10 && memcmp(uri, "opc.tcp://", 10) == 0){
+        if(strlen(uri) > 10 && memcmp(uri, (const char*) "opc.tcp://", 10) == 0){
             // search for a ':' defining port for given IP
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
             for(idx = 10; idx < strlen(uri) - 1; idx++){
@@ -133,6 +218,7 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
         {
             // replace by correct uri check
             if(Check_TCPUA_address(uri) == STATUS_OK){
+                // TODO: check constraints on uri (<4096 length)
                 connection->url = Create_String_From_CString(uri);
                 connection->callback = callback;
                 connection->callbackData = callbackData;
@@ -166,25 +252,9 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
     return status;
 }
 
-StatusCode Initiate_Send_Message(TCP_UA_Connection* connection){
-    StatusCode status = STATUS_NOK;
-    if(connection->outputMsgBuffer == NULL){
-        Buffer* buf = Create_Buffer(OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE);
-        if(buf != UA_NULL){
-            connection->outputMsgBuffer = Create_Msg_Buffer(buf);
-            if(connection->outputMsgBuffer != UA_NULL){
-                status = STATUS_OK;
-            }
-        }
-    }else{
-        status = STATUS_INVALID_STATE;
-    }
-    return status;
-}
-
 StatusCode Send_Hello_Msg(TCP_UA_Connection* connection){
     StatusCode status = STATUS_NOK;
-    status = Initiate_Send_Message(connection);
+    status = Initiate_Send_Buffer(connection);
     if(status == STATUS_OK){
         // encode message
         status = Encode_TCP_UA_Header(connection->outputMsgBuffer,
@@ -213,6 +283,83 @@ StatusCode Send_Hello_Msg(TCP_UA_Connection* connection){
     }
     if(status == STATUS_OK){
         status = Flush_Msg_Buffer(connection->socket, connection->outputMsgBuffer);
+    }
+    // Check status and manage incorrect sending: close the connection or manage ?
+
+    return status;
+}
+
+StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t tempValue = 0;
+    uint32_t modifiedReceiveBuffer = 0;
+    if(connection != UA_NULL
+       && connection->inputMsgBuffer != UA_NULL){
+        if(connection->inputMsgBuffer->msgSize == TCP_UA_ACK_MSG_LENGTH){
+            // Read protocol version of server
+            status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+            if(status == STATUS_OK){
+                // Check protocol version compatible
+                if(connection->protocolVersion > tempValue){
+                    //TODO: change protocol version or fail
+                }
+            }
+
+            // ReceiveBufferSize
+            if(status == STATUS_OK){
+                // Read received buffer size of SERVER
+                status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+                if(status == STATUS_OK){
+                    // Adapt send buffer size if needed
+                    if(connection->sendBufferSize > tempValue){
+                        if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ //TODO: add CR reference for >= instead of >
+                            connection->sendBufferSize = tempValue;
+                            // Adapt send buffer size
+                            Delete_Msg_Buffer(connection->outputMsgBuffer);
+                            connection->outputMsgBuffer = UA_NULL;
+                            Initiate_Send_Buffer(connection);
+                        }else{
+                            status = STATUS_INVALID_RCV_PARAMETER;
+                        }
+                    }
+                }
+            }
+
+            // SendBufferSize
+            if(status == STATUS_OK){
+                // Read sending buffer size of SERVER
+                status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+                if(status == STATUS_OK){
+                    // Check size and adapt receive buffer size if needed
+                    if(connection->receiveBufferSize > tempValue){
+                        if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ //TODO: add CR reference for >= instead of >
+                            connection->receiveBufferSize = tempValue;
+                            modifiedReceiveBuffer = 1;
+                        }else{
+                            status = STATUS_INVALID_RCV_PARAMETER;
+                        }
+                    }else if(connection->receiveBufferSize < tempValue){
+                        // Cannot be greater than requested by client
+                        status = STATUS_INVALID_RCV_PARAMETER;
+                    }
+                }
+            }
+
+
+            //MaxMessageSize: TODO
+            //MaxChunkCount: TODO
+
+
+            // After end of decoding: modify receive buffer if needed
+            if(modifiedReceiveBuffer != UA_FALSE && status == STATUS_OK){
+                // Adapt receive buffer size
+                Delete_Msg_Buffer(connection->inputMsgBuffer);
+                connection->inputMsgBuffer = UA_NULL;
+                Initiate_Receive_Buffer(connection);
+            }
+        }else{
+            status = STATUS_INVALID_RCV_PARAMETER;
+        }
     }
     return status;
 }

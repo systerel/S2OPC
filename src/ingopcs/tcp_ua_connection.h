@@ -13,6 +13,9 @@
 #include <opcua_ingopcs_types.h>
 #include <msg_buffer.h>
 
+#define TCP_UA_MIN_BUFFER_SIZE 8192
+#define TCP_UA_MAX_URL_LENGTH 4096
+
 typedef enum TCP_Connection_State
 {
     TCP_Connection_Connecting,
@@ -56,6 +59,7 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
 StatusCode Initiate_Send_Message(TCP_UA_Connection* connection);
 
 StatusCode Send_Hello_Msg(TCP_UA_Connection* connection);
+StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection);
 
 
 #endif /* INGOPCS_TCP_UA_CONNECTION_H_ */

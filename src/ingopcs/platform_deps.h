@@ -17,7 +17,8 @@ typedef enum Endianess{
 } Endianess;
 
 // Undefined before call to initialize
-extern uint32_t pendianess;
+extern Endianess endianess;
+extern Endianess floatEndianess;
 
 void Initialize_Platform_Dependencies(void);
 

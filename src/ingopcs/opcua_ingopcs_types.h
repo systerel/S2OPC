@@ -21,10 +21,15 @@ typedef struct UA_Byte_String {
 
 typedef UA_Byte_String UA_String;
 
-#define STATUS_OK 0x0
+typedef uint32_t UA_Boolean;
+#define UA_FALSE 0
+
+#define STATUS_OK 0x0 // TODO: change values
+#define STATUS_OK_INCOMPLETE 0x00000001
 #define STATUS_NOK 0x80000000//0x10000000
 #define STATUS_INVALID_PARAMETERS 0x80000000//0x20000000
 #define STATUS_INVALID_STATE 0x80000000//0x30000000
+#define STATUS_INVALID_RCV_PARAMETER 0x80000000//0x40000000
 typedef uint32_t StatusCode;
 
 UA_Byte_String* Create_Byte_String(void);
