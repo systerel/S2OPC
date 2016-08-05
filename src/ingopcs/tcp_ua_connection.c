@@ -118,10 +118,23 @@ StatusCode On_Socket_Event_CB (Socket        socket,
     switch(socketEvent){
         case SOCKET_ACCEPT_EVENT:
             status = STATUS_INVALID_STATE;
-            Close_Socket(connection->socket);
+            if(connection->callback != UA_NULL){
+                connection->callback(connection,
+                                     connection->callbackData,
+                                     ConnectionEvent_Error,
+                                     UA_NULL,
+                                     status);
+            }
             break;
         case SOCKET_CLOSE_EVENT:
-            Reset_Connection_State(connection);
+            status = STATUS_OK;
+            if(connection->callback != UA_NULL){
+                connection->callback(connection,
+                                     connection->callbackData,
+                                     ConnectionEvent_Disconnected,
+                                     UA_NULL,
+                                     status);
+            }
             break;
         case SOCKET_CONNECT_EVENT:
             // Manage connection
@@ -130,7 +143,13 @@ StatusCode On_Socket_Event_CB (Socket        socket,
             if(status == STATUS_OK){
                 status = Initiate_Receive_Buffer(connection);
             }else{
-                Close_Socket(connection->socket);
+                if(connection->callback != UA_NULL){
+                    connection->callback(connection,
+                                         connection->callbackData,
+                                         ConnectionEvent_Error,
+                                         UA_NULL,
+                                         status);
+                }
             }
             break;
         case SOCKET_EXCEPT_EVENT:
@@ -148,34 +167,41 @@ StatusCode On_Socket_Event_CB (Socket        socket,
                     case(TCP_UA_Message_Acknowledge):
                         status = Receive_Ack_Msg(connection);
                         if(status == STATUS_OK){
-                            connection->callback(connection,
-                                                 connection->callbackData,
-                                                 ConnectionEvent_Connected,
-                                                 UA_NULL,
-                                                 status);
+                            if(connection->callback != UA_NULL){
+                                connection->callback(connection,
+                                                     connection->callbackData,
+                                                     ConnectionEvent_Connected,
+                                                     UA_NULL,
+                                                     status);
+                            }
                         }else{
-                            connection->callback(connection,
-                                                 connection->callbackData,
-                                                 ConnectionEvent_Error,
-                                                 UA_NULL,
-                                                 status);
+                            if(connection->callback != UA_NULL){
+                                connection->callback(connection,
+                                                     connection->callbackData,
+                                                     ConnectionEvent_Error,
+                                                     UA_NULL,
+                                                     status);
+                            }
                         }
                         break;
                     case(TCP_UA_Message_Error):
                         status = Receive_Error_Msg(connection);
-                        Close_Socket(socket);
-                        connection->callback(connection,
-                                             connection->callbackData,
-                                             ConnectionEvent_Disconnected,
-                                             UA_NULL,
-                                             status);
+                        if(connection->callback != UA_NULL){
+                            connection->callback(connection,
+                                                 connection->callbackData,
+                                                 ConnectionEvent_Disconnected,
+                                                 UA_NULL,
+                                                 status);
+                        }
                         break;
                     case(TCP_UA_Message_SecureMessage):
-                        connection->callback(connection,
-                                             connection->callbackData,
-                                             ConnectionEvent_Error,
-                                             UA_NULL,
-                                             status);
+                        if(connection->callback != UA_NULL){
+                            connection->callback(connection,
+                                                 connection->callbackData,
+                                                 ConnectionEvent_Error,
+                                                 connection->inputMsgBuffer,
+                                                 status);
+                        }
                         break;
                     case(TCP_UA_Message_Unknown):
                     case(TCP_UA_Message_Invalid):
@@ -294,6 +320,15 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
         status = STATUS_INVALID_PARAMETERS;
     }
     return status;
+}
+
+void Disconnect_Transport(TCP_UA_Connection* connection){
+    Close_Socket(connection->socket);
+    connection->socket = UA_NULL;
+    connection->url = UA_NULL;
+    connection->callback = UA_NULL;
+    connection->callbackData = UA_NULL;
+    Reset_Connection_State(connection);
 }
 
 StatusCode Send_Hello_Msg(TCP_UA_Connection* connection){

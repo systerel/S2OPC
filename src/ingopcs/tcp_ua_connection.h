@@ -27,7 +27,7 @@ typedef enum TCP_Connection_State
 typedef enum Connection_Event{
     ConnectionEvent_Connected,
 
-    ConnectionEvent_Reconnecting,
+//    ConnectionEvent_Reconnecting, => see what to do with #3371, not really clear
 
     ConnectionEvent_Disconnected,
 
@@ -36,11 +36,11 @@ typedef enum Connection_Event{
     ConnectionEvent_Error
 } Connection_Event;
 
-typedef StatusCode (TCP_UA_Connection_Event_CB) (void*             connection,
-                                                 void*             callbackData,
-                                                 Connection_Event  event,
-                                                 UA_Msg_Buffer*    msgBuffer,
-                                                 StatusCode        status);
+typedef StatusCode (TCP_UA_Connection_Event_CB) (TCP_UA_Connection* connection,
+                                                 void*              callbackData,
+                                                 Connection_Event   event,
+                                                 UA_Msg_Buffer*     msgBuffer,
+                                                 StatusCode         status);
 
 typedef struct TCP_UA_Connection {
     UA_String*                  url;
@@ -65,10 +65,11 @@ typedef struct TCP_UA_Connection {
 TCP_UA_Connection* Create_Connection(void);
 void Delete_Connection(TCP_UA_Connection* connection);
 
-StatusCode Connect_Transport (TCP_UA_Connection*          connection,
-                              char*                       uri,
-                              TCP_UA_Connection_Event_CB* callback,
-                              void*                       callbackData);
+StatusCode Connect_Transport(TCP_UA_Connection*          connection,
+                             char*                       uri,
+                             TCP_UA_Connection_Event_CB* callback,
+                             void*                       callbackData);
+void Disconnect_Transport(TCP_UA_Connection* connection);
 
 StatusCode Initiate_Send_Message(TCP_UA_Connection* connection);
 

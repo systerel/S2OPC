@@ -20,10 +20,10 @@ SC_Channel_Client_Connection* Create_Client_Channel (Namespace*      namespac,
 
         if(scClientConnection != UA_NULL){
             memset (scClientConnection, 0, sizeof(SC_Channel_Client_Connection));
+            sConnection->state = SC_Connection_Disconnected;
             scClientConnection->instance = sConnection;
             scClientConnection->namespaces = namespac;
             scClientConnection->encodeableTypes = encodeableTypes;
-            scClientConnection->state = SC_Connection_Disconnected;
             scClientConnection->securityMode = Msg_Security_Mode_Invalid;
         }
     }else{
@@ -53,11 +53,33 @@ void Delete_Client_Channel(SC_Channel_Client_Connection* scConnection){
     }
 }
 
-StatusCode On_Transport_Event_CB(void*             connection,
-                                 void*             callbackData,
-                                 Connection_Event  event,
-                                 UA_Msg_Buffer*    msgBuffer,
-                                 StatusCode        status){
+StatusCode On_Transport_Event_CB(TCP_UA_Connection* connection,
+                                 void*              callbackData,
+                                 Connection_Event   event,
+                                 UA_Msg_Buffer*     msgBuffer,
+                                 StatusCode         status){
+    SC_Channel_Client_Connection* scConnection = (SC_Channel_Client_Connection*) callbackData;
+    assert(scConnection->instance->transportConnection == connection);
+    switch(event){
+        case ConnectionEvent_Connected:
+            assert(status == STATUS_OK);
+            assert(scConnection->instance->state == SC_Connection_Connecting_Transport);
+
+            }
+            break;
+        case ConnectionEvent_Disconnected:
+            break;
+        case ConnectionEvent_Message:
+            break;
+        case ConnectionEvent_Error:
+            //log ?
+            Disconnect_Transport(connection);
+            scConnection->instance->state = SC_Connection_Disconnected;
+            //scConnection->callback: TODO: incompatible types to modify in foundation code
+            break;
+        default:
+            assert(UA_FALSE);
+    }
     return STATUS_OK;
 }
 
@@ -111,14 +133,14 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
             {
                 status = STATUS_NOK;
             }else{
-                connection->state = SC_Connection_Connecting_Transport;
+                connection->instance->state = SC_Connection_Connecting_Transport;
                 status = Connect_Transport(connection->instance->transportConnection,
                                            uri,
                                            On_Transport_Event_CB,
                                            (void*) connection);
 
                 if(status != STATUS_OK){
-                    connection->state = SC_Connection_Disconnected;
+                    connection->instance->state = SC_Connection_Disconnected;
                 }
             }
 

@@ -31,7 +31,6 @@ typedef struct SC_Channel_Client_Connection
     UA_Byte_String*           serverCertificate;
     UA_Byte_String*           clientCertificate;
     Private_Key*              clientKey;
-    SC_Connection_State       state;
     uint32_t                  nbPendingRequests; // array size
     PendingRequest*           pendingRequests; //replace by a linked list impl
     uint32_t                  nextRequestId;
