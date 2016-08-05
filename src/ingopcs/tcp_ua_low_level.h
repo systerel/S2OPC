@@ -19,8 +19,7 @@ StatusCode Read_Msg_Buffer(UA_Byte* data_dest,
                            UA_Msg_Buffer* msgBuffer,
                            uint32_t count);
 
-StatusCode Flush_Msg_Buffer(Socket socket,
-                            UA_Msg_Buffer* msgBuffer);
+StatusCode Flush_Msg_Buffer(UA_Msg_Buffer* msgBuffer);
 
 StatusCode Encode_TCP_UA_Header(UA_Msg_Buffer* msgBuffer,
                                 TCP_UA_Message_Type type);

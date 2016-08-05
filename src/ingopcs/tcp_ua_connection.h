@@ -24,19 +24,33 @@ typedef enum TCP_Connection_State
     TCP_Connection_Error
 } TCP_Connection_State;
 
-typedef StatusCode (TCP_UA_Connection_Event_CB) (void*            connection,
-                                                 void*            callbackData,
-                                                 ConnectionEvent  event,
-                                                 UA_Msg_Buffer*   msgBuffer,
-                                                 StatusCode       status);
+typedef enum Connection_Event{
+    ConnectionEvent_Connected,
+
+    ConnectionEvent_Reconnecting,
+
+    ConnectionEvent_Disconnected,
+
+    ConnectionEvent_Message,
+
+    ConnectionEvent_Error
+} Connection_Event;
+
+typedef StatusCode (TCP_UA_Connection_Event_CB) (void*             connection,
+                                                 void*             callbackData,
+                                                 Connection_Event  event,
+                                                 UA_Msg_Buffer*    msgBuffer,
+                                                 StatusCode        status);
 
 typedef struct TCP_UA_Connection {
     UA_String*                  url;
     uint32_t                    protocolVersion;
     uint32_t                    receiveBufferSize;
     uint32_t                    sendBufferSize;
-    uint32_t                    maxMessageSize;
-    uint32_t                    maxChunkCount;
+    uint32_t                    maxMessageSizeRcv;
+    uint32_t                    maxChunkCountRcv;
+    uint32_t                    maxMessageSizeSnd;
+    uint32_t                    maxChunkCountSnd;
     TCP_Connection_State        state;
     Socket_Manager              socketManager;
     Socket                      socket;

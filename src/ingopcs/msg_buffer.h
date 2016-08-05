@@ -14,7 +14,7 @@
 
 #define TCP_UA_HEADER_LENGTH 8
 #define TCP_UA_HEADER_LENGTH_POSITION 4
-#define TCP_UA_ACK_MSG_LENGTH 48
+#define TCP_UA_ACK_MSG_LENGTH 28
 
 typedef enum UA_Secure_Message_Type{
     UA_SecureMessage,
@@ -41,6 +41,7 @@ typedef enum UA_Msg_Final_Chunk{
 } UA_Msg_Final_Chunk;
 
 typedef struct UA_Msg_Buffer {
+    Socket                 socket;
     Buffer*                buffer;
     TCP_UA_Message_Type    type;
     UA_Secure_Message_Type secureType; //only valid if type = SecureMessage
@@ -51,7 +52,8 @@ typedef struct UA_Msg_Buffer {
     //uint32_t            chunkSize;
 } UA_Msg_Buffer;
 
-UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
+UA_Msg_Buffer* Create_Msg_Buffer(Socket   socket,
+                                 Buffer*  buffer,
                                  uint32_t maxChunks);
 void Delete_Msg_Buffer(UA_Msg_Buffer* mBuffer);
 void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer);

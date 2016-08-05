@@ -119,7 +119,10 @@ StatusCode Read_TCP_UA_Data(Socket socket,
         if(msgBuffer->buffer->max_size >= msgBuffer->msgSize){
 
             readBytes = msgBuffer->msgSize - msgBuffer->buffer->length;
-            status = Socket_Read(socket, msgBuffer->buffer->data, readBytes, &readBytes);
+            status = Socket_Read(socket,
+                                 &(msgBuffer->buffer->data[msgBuffer->buffer->length]),
+                                 readBytes,
+                                 &readBytes);
             if(status == STATUS_OK && readBytes > 0){
                 Set_Data_Length_Buffer(msgBuffer->buffer, msgBuffer->buffer->length + readBytes);
             }
@@ -230,8 +233,13 @@ StatusCode Write_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
             status = STATUS_INVALID_PARAMETERS;
     }else{
         if(msgBuffer->buffer->position + count > msgBuffer->buffer->max_size){
-            // if(msgBuffer->nbChunks + 1 > maxChunks) ???
-            // Flush and increase nbChunks
+            if(msgBuffer->nbChunks + 1 > msgBuffer->maxChunks){
+                // Error message should be managed at secure channel level
+                status = STATUS_INVALID_STATE;
+            }else{
+                Flush_Msg_Buffer(msgBuffer);
+                Reset_Msg_Buffer_Next_Chunk(msgBuffer);
+            }
         }
         status = Write_Buffer(msgBuffer->buffer, data_src, count);
     }
@@ -254,11 +262,12 @@ StatusCode Read_Msg_Buffer(UA_Byte* data_dest,
     return status;
 }
 
-StatusCode Flush_Msg_Buffer(Socket socket,
-                            UA_Msg_Buffer* msgBuffer){
+StatusCode Flush_Msg_Buffer(UA_Msg_Buffer* msgBuffer){
     StatusCode status = STATUS_NOK;
     int32_t writtenBytes = 0;
-    writtenBytes = Socket_Write(socket, msgBuffer->buffer->data, msgBuffer->buffer->position);
+    writtenBytes = Socket_Write(msgBuffer->socket,
+                                msgBuffer->buffer->data,
+                                msgBuffer->buffer->position);
     if(writtenBytes == msgBuffer->buffer->position){
         status = STATUS_OK;
     }

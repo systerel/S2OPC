@@ -8,11 +8,13 @@
 #include <stdlib.h>
 #include <msg_buffer.h>
 
-UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
+UA_Msg_Buffer* Create_Msg_Buffer(Socket   socket,
+                                 Buffer*  buffer,
                                  uint32_t maxChunks){
     UA_Msg_Buffer* mBuffer = UA_NULL;
     if(buffer != UA_NULL){
         mBuffer = (UA_Msg_Buffer*) malloc(sizeof(UA_Msg_Buffer));
+        mBuffer->socket = socket;
         mBuffer->buffer = buffer;
         //mBuffer->chunkSize = 0;
         mBuffer->msgSize = 0;

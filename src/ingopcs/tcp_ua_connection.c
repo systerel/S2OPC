@@ -17,7 +17,9 @@ StatusCode Initiate_Send_Buffer(TCP_UA_Connection* connection){
     if(connection->outputMsgBuffer == NULL){
         Buffer* buf = Create_Buffer(connection->sendBufferSize);
         if(buf != UA_NULL){
-            connection->outputMsgBuffer = Create_Msg_Buffer(buf, connection->maxChunkCount);
+            connection->outputMsgBuffer = Create_Msg_Buffer(connection->socket,
+                                                            buf,
+                                                            connection->maxChunkCountSnd);
             if(connection->outputMsgBuffer != UA_NULL){
                 status = STATUS_OK;
             }
@@ -33,7 +35,9 @@ StatusCode Initiate_Receive_Buffer(TCP_UA_Connection* connection){
     if(connection->inputMsgBuffer == UA_NULL){
         Buffer* buf = Create_Buffer(connection->receiveBufferSize);
         if(buf != UA_NULL){
-            connection->inputMsgBuffer = Create_Msg_Buffer(buf, connection->maxChunkCount);
+            connection->inputMsgBuffer = Create_Msg_Buffer(connection->socket,
+                                                           buf,
+                                                           connection->maxChunkCountRcv);
             if(connection->inputMsgBuffer != UA_NULL){
                 status = STATUS_OK;
             }
@@ -56,8 +60,10 @@ TCP_UA_Connection* Create_Connection(){
         // TODO: check constraints on connection properties (>8192 bytes ...)
         connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
         connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-        connection->maxMessageSize = OPCUA_ENCODER_MAXMESSAGELENGTH;
-        connection->maxChunkCount = 0;
+        connection->maxMessageSizeRcv = OPCUA_ENCODER_MAXMESSAGELENGTH;
+        connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
+        connection->maxChunkCountRcv = 0;
+        connection->maxChunkCountSnd = 0;
 #if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
        status = Create_Socket_Manager(UA_NULL,
                                       1);
@@ -79,8 +85,10 @@ void Reset_Connection_State(TCP_UA_Connection* connection){
     connection->state = TCP_Connection_Disconnected;
     connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
     connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-    connection->maxMessageSize = OPCUA_ENCODER_MAXMESSAGELENGTH;
-    connection->maxChunkCount = 0;
+    connection->maxMessageSizeRcv = OPCUA_ENCODER_MAXMESSAGELENGTH;
+    connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
+    connection->maxChunkCountRcv = 0;
+    connection->maxChunkCountSnd = 0;
     Delete_Msg_Buffer(connection->inputMsgBuffer);
     Delete_Msg_Buffer(connection->outputMsgBuffer);
     Delete_Msg_Buffer(connection->sendingQueue);
@@ -134,6 +142,20 @@ StatusCode On_Socket_Event_CB (Socket        socket,
                         break;
                     case(TCP_UA_Message_Acknowledge):
                         status = Receive_Ack_Msg(connection);
+                        if(status == STATUS_OK){
+                            connection->callback(connection,
+                                                 connection->callbackData,
+                                                 ConnectionEvent_Connected,
+                                                 UA_NULL,
+                                                 status);
+                        }else{
+                            connection->callback(connection,
+                                                 connection->callbackData,
+                                                 ConnectionEvent_Error,
+                                                 UA_NULL,
+                                                 status);
+                        }
+                        break;
                     case(TCP_UA_Message_Error):
                         // Socket will close: => do something ?
                         break;
@@ -148,7 +170,7 @@ StatusCode On_Socket_Event_CB (Socket        socket,
                 }
             }
 
-            if(status == STATUS_OK_INCOMPLETE){
+            if(status == STATUS_OK_INCOMPLETE || status == STATUS_OK){
                 // Wait for next event
                 status = STATUS_OK;
             }else{
@@ -175,7 +197,11 @@ StatusCode Check_TCPUA_address (char* uri){
     bool hasPort = 0;
     bool invalid = 0;
     if(uri != UA_NULL){
-        if(strlen(uri) > 10 && memcmp(uri, (const char*) "opc.tcp://", 10) == 0){
+
+        if(strlen(uri) + 4  > 4096){
+            // Encoded value shall be less than 4096 bytes
+            status = STATUS_INVALID_PARAMETERS;
+        }else if(strlen(uri) > 10 && memcmp(uri, (const char*) "opc.tcp://", 10) == 0){
             // search for a ':' defining port for given IP
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
             for(idx = 10; idx < strlen(uri) - 1; idx++){
@@ -216,9 +242,7 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
            connection->callbackData == UA_NULL &&
            connection->state == TCP_Connection_Disconnected)
         {
-            // replace by correct uri check
             if(Check_TCPUA_address(uri) == STATUS_OK){
-                // TODO: check constraints on uri (<4096 length)
                 connection->url = Create_String_From_CString(uri);
                 connection->callback = callback;
                 connection->callbackData = callbackData;
@@ -270,10 +294,10 @@ StatusCode Send_Hello_Msg(TCP_UA_Connection* connection){
         status = Write_UInt32(connection->outputMsgBuffer, connection->sendBufferSize);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer, connection->maxMessageSize);
+        status = Write_UInt32(connection->outputMsgBuffer, connection->maxMessageSizeRcv);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer, connection->maxChunkCount);
+        status = Write_UInt32(connection->outputMsgBuffer, connection->maxChunkCountRcv);
     }
     if(status == STATUS_OK){
         status = Write_UA_String(connection->outputMsgBuffer, connection->url);
@@ -282,7 +306,7 @@ StatusCode Send_Hello_Msg(TCP_UA_Connection* connection){
         status = Finalize_TCP_UA_Header(connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = Flush_Msg_Buffer(connection->socket, connection->outputMsgBuffer);
+        status = Flush_Msg_Buffer(connection->outputMsgBuffer);
     }
     // Check status and manage incorrect sending: close the connection or manage ?
 
@@ -312,7 +336,7 @@ StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
                 if(status == STATUS_OK){
                     // Adapt send buffer size if needed
                     if(connection->sendBufferSize > tempValue){
-                        if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ //TODO: add CR reference for >= instead of >
+                        if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ // see mantis #3447 for >= instead of >
                             connection->sendBufferSize = tempValue;
                             // Adapt send buffer size
                             Delete_Msg_Buffer(connection->outputMsgBuffer);
@@ -332,7 +356,7 @@ StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
                 if(status == STATUS_OK){
                     // Check size and adapt receive buffer size if needed
                     if(connection->receiveBufferSize > tempValue){
-                        if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ //TODO: add CR reference for >= instead of >
+                        if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ // see mantis #3447 for >= instead of >
                             connection->receiveBufferSize = tempValue;
                             modifiedReceiveBuffer = 1;
                         }else{
@@ -346,9 +370,25 @@ StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
             }
 
 
-            //MaxMessageSize: TODO
-            //MaxChunkCount: TODO
+            //MaxMessageSize of SERVER
+            if(status == STATUS_OK){
+                status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+                if(status == STATUS_OK){
+                    if(connection->maxMessageSizeSnd > tempValue){
+                        connection->maxMessageSizeSnd = tempValue;
+                    }
+                }
+            }
 
+            //MaxChunkCount of SERVER
+            if(status == STATUS_OK){
+                status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+                if(status == STATUS_OK){
+                    if(connection->maxChunkCountSnd > tempValue){
+                        connection->maxChunkCountSnd = tempValue;
+                    }
+                }
+            }
 
             // After end of decoding: modify receive buffer if needed
             if(modifiedReceiveBuffer != UA_FALSE && status == STATUS_OK){

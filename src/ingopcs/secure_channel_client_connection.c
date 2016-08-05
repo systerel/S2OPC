@@ -53,11 +53,11 @@ void Delete_Client_Channel(SC_Channel_Client_Connection* scConnection){
     }
 }
 
-StatusCode On_Transport_Event_CB(void*            connection,
-                                 void*            callbackData,
-                                 ConnectionEvent  event,
-                                 UA_Msg_Buffer*   msgBuffer,
-                                 StatusCode       status){
+StatusCode On_Transport_Event_CB(void*             connection,
+                                 void*             callbackData,
+                                 Connection_Event  event,
+                                 UA_Msg_Buffer*    msgBuffer,
+                                 StatusCode        status){
     return STATUS_OK;
 }
 
@@ -115,7 +115,7 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
                 status = Connect_Transport(connection->instance->transportConnection,
                                            uri,
                                            On_Transport_Event_CB,
-                                           UA_NULL);
+                                           (void*) connection);
 
                 if(status != STATUS_OK){
                     connection->state = SC_Connection_Disconnected;
