@@ -136,7 +136,7 @@ StatusCode Read_TCP_UA_Data(Socket socket,
             }
 
         }else{
-            status = STATUS_INVALID_STATE;
+            status = OpcUa_BadTcpMessageTooLarge;
         }
     }
 
@@ -176,7 +176,7 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
                     msgBuffer->secureType = UA_CloseSecureChannel;
                 }else{
                     msgBuffer->type = TCP_UA_Message_Invalid;
-                    status = STATUS_INVALID_RCV_PARAMETER;
+                    status = OpcUa_BadTcpMessageTypeInvalid;
                 }
             }
 
@@ -201,7 +201,7 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
                         break;
                     default:
                         msgBuffer->isFinal = UA_Msg_Chunk_Invalid;
-                        status = STATUS_INVALID_RCV_PARAMETER;
+                        status = OpcUa_BadTcpMessageTypeInvalid;
                         break;
                 }
 

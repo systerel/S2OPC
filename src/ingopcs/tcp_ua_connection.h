@@ -74,6 +74,7 @@ StatusCode Initiate_Send_Message(TCP_UA_Connection* connection);
 
 StatusCode Send_Hello_Msg(TCP_UA_Connection* connection);
 StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection);
+StatusCode Receive_Error_Msg(TCP_UA_Connection* connection);
 
 
 #endif /* INGOPCS_TCP_UA_CONNECTION_H_ */

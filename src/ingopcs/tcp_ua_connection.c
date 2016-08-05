@@ -117,6 +117,8 @@ StatusCode On_Socket_Event_CB (Socket        socket,
     TCP_UA_Connection* connection = (TCP_UA_Connection*) callbackData;
     switch(socketEvent){
         case SOCKET_ACCEPT_EVENT:
+            status = STATUS_INVALID_STATE;
+            Close_Socket(connection->socket);
             break;
         case SOCKET_CLOSE_EVENT:
             Reset_Connection_State(connection);
@@ -128,10 +130,13 @@ StatusCode On_Socket_Event_CB (Socket        socket,
             if(status == STATUS_OK){
                 status = Initiate_Receive_Buffer(connection);
             }else{
-                // Close socket if status != OK ?
+                Close_Socket(connection->socket);
             }
             break;
         case SOCKET_EXCEPT_EVENT:
+            status = STATUS_INVALID_STATE;
+            Close_Socket(connection->socket);
+            break;
         case SOCKET_READ_EVENT:
             // Manage message reception
             status = Read_TCP_UA_Data(socket, connection->inputMsgBuffer);
@@ -157,10 +162,20 @@ StatusCode On_Socket_Event_CB (Socket        socket,
                         }
                         break;
                     case(TCP_UA_Message_Error):
-                        // Socket will close: => do something ?
+                        status = Receive_Error_Msg(connection);
+                        Close_Socket(socket);
+                        connection->callback(connection,
+                                             connection->callbackData,
+                                             ConnectionEvent_Disconnected,
+                                             UA_NULL,
+                                             status);
                         break;
                     case(TCP_UA_Message_SecureMessage):
-                        // call sc CB
+                        connection->callback(connection,
+                                             connection->callbackData,
+                                             ConnectionEvent_Error,
+                                             UA_NULL,
+                                             status);
                         break;
                     case(TCP_UA_Message_Unknown):
                     case(TCP_UA_Message_Invalid):
@@ -168,16 +183,21 @@ StatusCode On_Socket_Event_CB (Socket        socket,
                         status = STATUS_INVALID_STATE;
                         break;
                 }
+
+                switch(status){
+                                case(STATUS_OK):
+                                        break;
+                                case(STATUS_OK_INCOMPLETE):
+                                        // Wait for next event
+                                        status = STATUS_OK;
+                                        break;
+                                default:
+                                    // Erase content since incorrect reading
+                                    // TODO: add trace with reason Invalid header ? => more precise erorrs
+                                    Reset_Msg_Buffer(connection->inputMsgBuffer);
+                            }
             }
 
-            if(status == STATUS_OK_INCOMPLETE || status == STATUS_OK){
-                // Wait for next event
-                status = STATUS_OK;
-            }else{
-                // Erase content since incorrect reading
-                // TODO: add trace with reason
-                Reset_Msg_Buffer(connection->inputMsgBuffer);
-            }
             break;
         case SOCKET_SHUTDOWN_EVENT:
             Reset_Connection_State(connection);
@@ -400,6 +420,30 @@ StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
         }else{
             status = STATUS_INVALID_RCV_PARAMETER;
         }
+    }
+    return status;
+}
+
+StatusCode Receive_Error_Msg(TCP_UA_Connection* connection){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    StatusCode tmpStatus = STATUS_NOK;
+    uint32_t error = 0;
+    UA_String* reason = UA_NULL;
+    if(connection != UA_NULL && connection->inputMsgBuffer != UA_NULL)
+    {
+        if(connection->inputMsgBuffer->msgSize >= TCP_UA_ERR_MIN_MSG_LENGTH)
+        {
+            // Read error cpde
+            status = Read_UInt32(connection->inputMsgBuffer, &error);
+            if(status == STATUS_OK){
+                status = error;
+                tmpStatus = Read_UA_String(connection->inputMsgBuffer, reason);
+                if(tmpStatus == STATUS_OK){
+                    //TODO: log error reason !!!
+                }
+            }
+        }
+
     }
     return status;
 }

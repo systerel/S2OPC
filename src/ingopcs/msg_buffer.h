@@ -15,6 +15,7 @@
 #define TCP_UA_HEADER_LENGTH 8
 #define TCP_UA_HEADER_LENGTH_POSITION 4
 #define TCP_UA_ACK_MSG_LENGTH 28
+#define TCP_UA_ERR_MIN_MSG_LENGTH 16
 
 typedef enum UA_Secure_Message_Type{
     UA_SecureMessage,
