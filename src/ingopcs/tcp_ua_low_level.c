@@ -207,9 +207,12 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
 
                 //In TCP UA non secure messages reserved byte shall be set to 'F'
                 if(msgBuffer->type != TCP_UA_Message_SecureMessage
-                   && msgBuffer->isFinal != UA_Msg_Chunk_Final)
+                   || msgBuffer->secureType == UA_OpenSecureChannel // As indicated by mantis #3378
+                   || msgBuffer->secureType == UA_CloseSecureChannel ) // As indicated by mantis #3378
                 {
-                    status = STATUS_INVALID_RCV_PARAMETER;
+                    if(msgBuffer->isFinal != UA_Msg_Chunk_Final){
+                        status = OpcUa_BadTcpMessageTypeInvalid;
+                    }
                 }
             } // read isFinal chunk
         }
