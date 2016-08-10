@@ -36,11 +36,11 @@ typedef enum Connection_Event{
     ConnectionEvent_Error
 } Connection_Event;
 
-typedef StatusCode (TCP_UA_Connection_Event_CB) (TCP_UA_Connection* connection,
-                                                 void*              callbackData,
-                                                 Connection_Event   event,
-                                                 UA_Msg_Buffer*     msgBuffer,
-                                                 StatusCode         status);
+typedef StatusCode (TCP_UA_Connection_Event_CB) (void*            tcpConnection,
+                                                 void*            callbackData,
+                                                 Connection_Event event,
+                                                 UA_Msg_Buffer*   msgBuffer,
+                                                 StatusCode       status);
 
 typedef struct TCP_UA_Connection {
     UA_String*                  url;

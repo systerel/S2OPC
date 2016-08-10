@@ -47,6 +47,10 @@ typedef struct SecureChannel_Connection {
     TCP_UA_Connection*    transportConnection;
     SC_Connection_State   state;
     uint32_t              startTime;
+    UA_Msg_Buffer*        sendingBuffer;
+    uint32_t              sendingBufferSNPosition;
+    uint32_t              sendingMaxBodySize;
+    UA_Msg_Buffers*       receptionBuffers;
     Msg_Security_Mode     currentSecuMode;
     UA_String*            currentSecuPolicy;
     SC_Security_Token     currentSecuToken;
@@ -65,5 +69,28 @@ typedef struct SecureChannel_Connection {
 
 SecureChannel_Connection* Create_Secure_Connection (void);
 void Delete_Secure_Connection (SecureChannel_Connection* scConnection);
+//Configure secure connection regarding the transport connection properties
+StatusCode Initiate_Receive_Secure_Buffers(SecureChannel_Connection* scConnection);
+StatusCode Initiate_Send_Secure_Buffer(SecureChannel_Connection* scConnection);
+
+StatusCode Encode_Secure_Message_Header(UA_Msg_Buffer* msgBuffer,
+                                        UA_Secure_Message_Type smType,
+                                        uint32_t secureChannelId);
+
+StatusCode Encode_Asymmetric_Security_Header(SecureChannel_Connection* scConnection,
+                                             OpcUa_CryptoProvider*     cryptoProvider,
+                                             UA_String*                securityPolicy,
+                                             UA_Byte_String*           clientCertificate,
+                                             UA_Byte_String*           serverCertificate);
+
+StatusCode Encode_Sequence_Header(SecureChannel_Connection* scConnection,
+                                  uint32_t                  sequenceNumber,
+                                  uint32_t                  requestId);
+
+StatusCode Write_Secure_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
+                                   UA_Byte*       data_src,
+                                   uint32_t       count);
+
+StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer* msgBuffer);
 
 #endif /* INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_ */

@@ -7,7 +7,10 @@
 
 #include <wrappers.h>
 
+#include <assert.h>
 #include <stdlib.h>
+
+#include <ua_encoder.h>
 #include <secure_channel_client_connection.h>
 
 SC_Channel_Client_Connection* Create_Client_Channel (Namespace*      namespac,
@@ -53,34 +56,69 @@ void Delete_Client_Channel(SC_Channel_Client_Connection* scConnection){
     }
 }
 
-StatusCode On_Transport_Event_CB(TCP_UA_Connection* connection,
-                                 void*              callbackData,
-                                 Connection_Event   event,
-                                 UA_Msg_Buffer*     msgBuffer,
-                                 StatusCode         status){
+StatusCode On_Transport_Event_CB(void*            connection,
+                                 void*            callbackData,
+                                 Connection_Event event,
+                                 UA_Msg_Buffer*   msgBuffer,
+                                 StatusCode       status){
     SC_Channel_Client_Connection* scConnection = (SC_Channel_Client_Connection*) callbackData;
-    assert(scConnection->instance->transportConnection == connection);
+    TCP_UA_Connection* tcpConnection = (TCP_UA_Connection*) connection;
+    StatusCode retStatus = STATUS_OK;
+    assert(scConnection->instance->transportConnection == tcpConnection);
     switch(event){
         case ConnectionEvent_Connected:
             assert(status == STATUS_OK);
             assert(scConnection->instance->state == SC_Connection_Connecting_Transport);
+            // Configure secure connection for encoding / decoding messages
+            Initiate_Receive_Secure_Buffers(scConnection->instance);
+            Initiate_Send_Secure_Buffer(scConnection->instance);
+            // Send Open Secure channel request
+            Send_Open_Secure_Channel_Request();
+            break;
 
-            }
-            break;
         case ConnectionEvent_Disconnected:
+            //log ?
+            Disconnect_Transport(tcpConnection);
+            scConnection->instance->state = SC_Connection_Disconnected;
             break;
+
         case ConnectionEvent_Message:
+            assert(status == STATUS_OK);
+            switch(msgBuffer->secureType){
+                case UA_OpenSecureChannel:
+                    if(scConnection->instance->state == SC_Connection_Connecting_Secure){
+                        // Receive Open Secure Channel response
+                        Receive_Open_Secure_Channel_Response();
+                    }else{
+                        retStatus = STATUS_INVALID_RCV_PARAMETER;
+                    }
+                    break;
+                case UA_CloseSecureChannel:
+                    if(scConnection->instance->state == SC_Connection_Connected){
+
+                    }else{
+                        retStatus = STATUS_INVALID_RCV_PARAMETER;
+                    }
+                    break;
+                case UA_SecureMessage:
+                    if(scConnection->instance->state == SC_Connection_Connected){
+
+                    }else{
+                        retStatus = STATUS_INVALID_RCV_PARAMETER;
+                    }
+                    break;
+            }
             break;
         case ConnectionEvent_Error:
             //log ?
-            Disconnect_Transport(connection);
+            Disconnect_Transport(tcpConnection);
             scConnection->instance->state = SC_Connection_Disconnected;
             //scConnection->callback: TODO: incompatible types to modify in foundation code
             break;
         default:
             assert(UA_FALSE);
     }
-    return STATUS_OK;
+    return retStatus;
 }
 
 StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
@@ -152,3 +190,13 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
     }
     return status;
 }
+
+StatusCode Send_Open_Secure_Channel_Request(){
+    // TODO: Set max body size in connection in order to could compute flush on writing
+    return STATUS_OK;
+}
+
+StatusCode Receive_Open_Secure_Channel_Response(){
+    return STATUS_OK;
+}
+

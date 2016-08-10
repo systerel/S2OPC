@@ -62,4 +62,8 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
                                   void*                         callbackData
                                   );
 
+StatusCode Send_Open_Secure_Channel_Request(void);
+StatusCode Receive_Open_Secure_Channel_Response(void);
+
+
 #endif /* INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_ */

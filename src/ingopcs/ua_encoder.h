@@ -10,6 +10,7 @@
 
 #include <opcua_ingopcs_types.h>
 #include <platform_deps.h>
+#include <msg_buffer.h>
 
 #define SWAP_2_BYTES(x) (x & 0x00FF << 8) | (x & 0xFF00 >> 8)
 #define SWAP_3_BYTES(x) (x & 0x0000FF << 16) | (x & 0x00FF00) \
@@ -28,6 +29,8 @@
 
 StatusCode Write_UInt32(UA_Msg_Buffer* msgBuffer, uint32_t value);
 StatusCode Read_UInt32(UA_Msg_Buffer* msgBuffer, uint32_t* value);
+StatusCode Write_Int32(UA_Msg_Buffer* msgBuffer, int32_t value);
+StatusCode Read_Int32(UA_Msg_Buffer* msgBuffer, int32_t* value);
 StatusCode Write_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str);
 StatusCode Read_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str);
 

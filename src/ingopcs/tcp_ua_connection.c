@@ -17,9 +17,9 @@ StatusCode Initiate_Send_Buffer(TCP_UA_Connection* connection){
     if(connection->outputMsgBuffer == NULL){
         Buffer* buf = Create_Buffer(connection->sendBufferSize);
         if(buf != UA_NULL){
-            connection->outputMsgBuffer = Create_Msg_Buffer(connection->socket,
-                                                            buf,
-                                                            connection->maxChunkCountSnd);
+            connection->outputMsgBuffer = Create_Msg_Buffer(buf,
+                                                            connection->maxChunkCountSnd,
+                                                            connection->socket);
             if(connection->outputMsgBuffer != UA_NULL){
                 status = STATUS_OK;
             }
@@ -35,9 +35,9 @@ StatusCode Initiate_Receive_Buffer(TCP_UA_Connection* connection){
     if(connection->inputMsgBuffer == UA_NULL){
         Buffer* buf = Create_Buffer(connection->receiveBufferSize);
         if(buf != UA_NULL){
-            connection->inputMsgBuffer = Create_Msg_Buffer(connection->socket,
-                                                           buf,
-                                                           connection->maxChunkCountRcv);
+            connection->inputMsgBuffer = Create_Msg_Buffer(buf,
+                                                           connection->maxChunkCountRcv,
+                                                           connection->socket);
             if(connection->inputMsgBuffer != UA_NULL){
                 status = STATUS_OK;
             }

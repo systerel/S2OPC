@@ -9,27 +9,20 @@
 #include <tcp_ua_low_level.h>
 #include <ua_encoder.h>
 
-const UA_Byte HEL[3] = {'H','E','L'};
-const UA_Byte ACK[3] = {'A','C','K'};
-const UA_Byte ERR[3] = {'E','R','R'};
-const UA_Byte MSG[3] = {'M','S','G'};
-const UA_Byte OPN[3] = {'O','P','N'};
-const UA_Byte CLO[3] = {'C','L','O'};
-
 StatusCode Encode_TCP_UA_Header(UA_Msg_Buffer* msgBuffer,
                                 TCP_UA_Message_Type type){
     StatusCode status = STATUS_OK;
     UA_Byte fByte = 'F';
-    assert(msgBuffer->buffer->max_size > TCP_UA_HEADER_LENGTH);
+    assert(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH);
     switch(type){
         case TCP_UA_Message_Hello:
-            status = Write_Buffer(msgBuffer->buffer, HEL, 3);
+            status = Write_Buffer(msgBuffer->buffers, HEL, 3);
             break;
         case TCP_UA_Message_Acknowledge:
-            status = Write_Buffer(msgBuffer->buffer, ACK, 3);
+            status = Write_Buffer(msgBuffer->buffers, ACK, 3);
             break;
         case TCP_UA_Message_Error:
-            status = Write_Buffer(msgBuffer->buffer, ERR, 3);
+            status = Write_Buffer(msgBuffer->buffers, ERR, 3);
             break;
         case TCP_UA_Message_SecureMessage:
             // Managed by secure channel layer
@@ -58,13 +51,13 @@ StatusCode Finalize_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
            || msgBuffer->type == TCP_UA_Message_Acknowledge
            || msgBuffer->type == TCP_UA_Message_Error);
     StatusCode status = STATUS_NOK;
-    const uint32_t currentPosition = msgBuffer->buffer->position;
-    status = Set_Position_Buffer(msgBuffer->buffer, TCP_UA_HEADER_LENGTH_POSITION);
+    const uint32_t currentPosition = msgBuffer->buffers->position;
+    status = Set_Position_Buffer(msgBuffer->buffers, TCP_UA_HEADER_LENGTH_POSITION);
     if(status == STATUS_OK){
         status = Write_UInt32(msgBuffer, currentPosition);
     }
     if(status == STATUS_OK){
-        status = Set_Position_Buffer(msgBuffer->buffer, currentPosition);
+        status = Set_Position_Buffer(msgBuffer->buffers, currentPosition);
         msgBuffer->msgSize = currentPosition;
     }
     return status;
@@ -76,13 +69,13 @@ StatusCode Read_TCP_UA_Data(Socket socket,
     StatusCode status = STATUS_NOK;
     uint32_t readBytes;
 
-    if(msgBuffer->buffer->length >= TCP_UA_HEADER_LENGTH){
+    if(msgBuffer->buffers->length >= TCP_UA_HEADER_LENGTH){
         assert(msgBuffer->msgSize > 0);
 
-        if(msgBuffer->buffer->length < msgBuffer->msgSize){
+        if(msgBuffer->buffers->length < msgBuffer->msgSize){
             //incomplete message, continue to read it
             status = STATUS_OK;
-        }else if(msgBuffer->buffer->length == msgBuffer->msgSize){
+        }else if(msgBuffer->buffers->length == msgBuffer->msgSize){
             if(msgBuffer->isFinal == UA_Msg_Chunk_Intermediate){
                 status = Reset_Msg_Buffer_Next_Chunk(msgBuffer);
             }else{
@@ -95,18 +88,18 @@ StatusCode Read_TCP_UA_Data(Socket socket,
         }
     }
 
-    if(msgBuffer->buffer->length < TCP_UA_HEADER_LENGTH){
+    if(msgBuffer->buffers->length < TCP_UA_HEADER_LENGTH){
 
         // Attempt to read header
-        if(msgBuffer->buffer->max_size > TCP_UA_HEADER_LENGTH){
-            readBytes = TCP_UA_HEADER_LENGTH - msgBuffer->buffer->length;
-            status = Socket_Read(socket, msgBuffer->buffer->data, readBytes, &readBytes);
+        if(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH){
+            readBytes = TCP_UA_HEADER_LENGTH - msgBuffer->buffers->length;
+            status = Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
             if(status == STATUS_OK && readBytes > 0){
-                Set_Data_Length_Buffer(msgBuffer->buffer, msgBuffer->buffer->length + readBytes);
+                Set_Data_Length_Buffer(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
             }
-            if(msgBuffer->buffer->length == TCP_UA_HEADER_LENGTH){
+            if(msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH){
                 status = Read_TCP_UA_Header(msgBuffer);
-            }else if(msgBuffer->buffer->length > TCP_UA_HEADER_LENGTH){
+            }else if(msgBuffer->buffers->length > TCP_UA_HEADER_LENGTH){
                 status = STATUS_INVALID_STATE;
             }else{
                 // Incomplete header: Wait for new read event !
@@ -116,20 +109,20 @@ StatusCode Read_TCP_UA_Data(Socket socket,
     }
 
     if(status == STATUS_OK){
-        if(msgBuffer->buffer->max_size >= msgBuffer->msgSize){
+        if(msgBuffer->buffers->max_size >= msgBuffer->msgSize){
 
-            readBytes = msgBuffer->msgSize - msgBuffer->buffer->length;
+            readBytes = msgBuffer->msgSize - msgBuffer->buffers->length;
             status = Socket_Read(socket,
-                                 &(msgBuffer->buffer->data[msgBuffer->buffer->length]),
+                                 &(msgBuffer->buffers->data[msgBuffer->buffers->length]),
                                  readBytes,
                                  &readBytes);
             if(status == STATUS_OK && readBytes > 0){
-                Set_Data_Length_Buffer(msgBuffer->buffer, msgBuffer->buffer->length + readBytes);
+                Set_Data_Length_Buffer(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
             }
-            if(msgBuffer->buffer->length == msgBuffer->msgSize){
+            if(msgBuffer->buffers->length == msgBuffer->msgSize){
                 // Message complete just return
                 assert(status == STATUS_OK);
-            }else if(msgBuffer->buffer->length == msgBuffer->msgSize){
+            }else if(msgBuffer->buffers->length == msgBuffer->msgSize){
                 status = STATUS_INVALID_STATE;
             }else{
                 status = STATUS_OK_INCOMPLETE;
@@ -149,11 +142,11 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
     UA_Byte isFinal;
 
     if(msgBuffer != UA_NULL
-       && msgBuffer->buffer->length == TCP_UA_HEADER_LENGTH
+       && msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH
        && msgBuffer->type == TCP_UA_Message_Unknown)
     {
         // READ message type
-        status = Read_Buffer(msgType, msgBuffer->buffer, 3);
+        status = Read_Buffer(msgType, msgBuffer->buffers, 3);
         if(status == STATUS_OK){
             if(memcmp(msgType, HEL, 3) == 0){
                 msgBuffer->type = TCP_UA_Message_Hello;
@@ -187,7 +180,7 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
         // READ IsFinal message chunk
         if(status == STATUS_OK)
         {
-            status = Read_Buffer(&isFinal, msgBuffer->buffer, 1);
+            status = Read_Buffer(&isFinal, msgBuffer->buffers, 1);
             if(status == STATUS_OK){
                 switch(isFinal){
                     case 'C':
@@ -228,14 +221,46 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
     return status;
 }
 
-StatusCode Write_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
-                            UA_Byte* data_src,
-                            uint32_t count){
+StatusCode Read_Msg_Buffer(UA_Byte* data_dest,
+                           uint32_t size,
+                           UA_Msg_Buffer* msgBuffer,
+                           uint32_t count){
     StatusCode status = STATUS_NOK;
-    if(data_src == UA_NULL || msgBuffer == UA_NULL){
+    if(data_dest == UA_NULL || msgBuffer == UA_NULL
+       || size < count
+       || msgBuffer->buffers->length - msgBuffer->buffers->position < count)
+    {
             status = STATUS_INVALID_PARAMETERS;
     }else{
-        if(msgBuffer->buffer->position + count > msgBuffer->buffer->max_size){
+        status = Read_Buffer(data_dest, msgBuffer->buffers, count);
+    }
+    return status;
+}
+
+StatusCode Flush_Msg_Buffer(UA_Msg_Buffer* msgBuffer){
+    StatusCode status = STATUS_NOK;
+    int32_t writtenBytes = 0;
+    writtenBytes = Socket_Write((Socket) msgBuffer->flushData,
+                                msgBuffer->buffers->data,
+                                msgBuffer->buffers->position);
+    if(writtenBytes == msgBuffer->buffers->position){
+        status = STATUS_OK;
+    }
+    // Manage different cases ? (socket error, blocked sending)
+    return status;
+}
+
+
+StatusCode Write_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
+                            UA_Byte*       data_src,
+                            uint32_t       count)
+{
+    StatusCode status = STATUS_NOK;
+    if(data_src == UA_NULL || msgBuffer == UA_NULL)
+    {
+            status = STATUS_INVALID_PARAMETERS;
+    }else{
+        if(msgBuffer->buffers->position + count > msgBuffer->buffers->max_size){
             if(msgBuffer->nbChunks + 1 > msgBuffer->maxChunks){
                 // Error message should be managed at secure channel level
                 status = STATUS_INVALID_STATE;
@@ -244,36 +269,7 @@ StatusCode Write_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
                 Reset_Msg_Buffer_Next_Chunk(msgBuffer);
             }
         }
-        status = Write_Buffer(msgBuffer->buffer, data_src, count);
+        status = Write_Buffer(msgBuffer->buffers, data_src, count);
     }
-    return status;
-}
-
-StatusCode Read_Msg_Buffer(UA_Byte* data_dest,
-                           uint32_t size,
-                           UA_Msg_Buffer* msgBuffer,
-                           uint32_t count){
-    StatusCode status = STATUS_NOK;
-    if(data_dest == UA_NULL || msgBuffer == UA_NULL
-       || size < count
-       || msgBuffer->buffer->length - msgBuffer->buffer->position < count)
-    {
-            status = STATUS_INVALID_PARAMETERS;
-    }else{
-        status = Read_Buffer(data_dest, msgBuffer->buffer, count);
-    }
-    return status;
-}
-
-StatusCode Flush_Msg_Buffer(UA_Msg_Buffer* msgBuffer){
-    StatusCode status = STATUS_NOK;
-    int32_t writtenBytes = 0;
-    writtenBytes = Socket_Write(msgBuffer->socket,
-                                msgBuffer->buffer->data,
-                                msgBuffer->buffer->position);
-    if(writtenBytes == msgBuffer->buffer->position){
-        status = STATUS_OK;
-    }
-    // Manage different cases ? (socket error, blocked sending)
     return status;
 }

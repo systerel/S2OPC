@@ -17,6 +17,16 @@
 #define TCP_UA_ACK_MSG_LENGTH 28
 #define TCP_UA_ERR_MIN_MSG_LENGTH 16
 
+#define UA_SECURE_MESSAGE_HEADER_LENGTH 12
+#define UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
+
+extern const UA_Byte HEL[3];
+extern const UA_Byte ACK[3];
+extern const UA_Byte ERR[3];
+extern const UA_Byte MSG[3];
+extern const UA_Byte OPN[3];
+extern const UA_Byte CLO[3];
+
 typedef enum UA_Secure_Message_Type{
     UA_SecureMessage,
     UA_OpenSecureChannel,
@@ -42,22 +52,31 @@ typedef enum UA_Msg_Final_Chunk{
 } UA_Msg_Final_Chunk;
 
 typedef struct UA_Msg_Buffer {
-    Socket                 socket;
-    Buffer*                buffer;
+    uint32_t               nbBuffers;
+    Buffer*                buffers;
     TCP_UA_Message_Type    type;
     UA_Secure_Message_Type secureType; //only valid if type = SecureMessage
     uint32_t               msgSize;
     uint32_t               nbChunks;
     uint32_t               maxChunks;
     UA_Msg_Final_Chunk     isFinal;
-    //uint32_t            chunkSize;
+    void*                  flushData;
 } UA_Msg_Buffer;
 
-UA_Msg_Buffer* Create_Msg_Buffer(Socket   socket,
-                                 Buffer*  buffer,
-                                 uint32_t maxChunks);
+// Only 1 buffer by msg mode:
+UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
+                                 uint32_t maxChunks,
+                                 void*    flushData);
 void Delete_Msg_Buffer(UA_Msg_Buffer* mBuffer);
 void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer);
 StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer);
+StatusCode Set_Secure_Message_Type(UA_Msg_Buffer* mBuffer,
+                                   UA_Secure_Message_Type sType);
+
+typedef struct UA_Msg_Buffer UA_Msg_Buffers;
+// Several buffers by msg mode (secure message input buffer only)
+UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks);
+void Delete_Msg_Buffers(UA_Msg_Buffers* mBuffer);
+
 
 #endif /* INGOPCS_MSG_BUFFER_H_ */
