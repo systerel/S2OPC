@@ -10,6 +10,15 @@
 #include <tcp_ua_low_level.h>
 #include <ua_encoder.h>
 
+uint16_t EncodeDecode_UInt16(uint16_t from){
+    assert(endianess != Endianess_Undefined);
+    if(endianess == Endianess_BigEndian){
+        return SWAP_2_BYTES(from);
+    }else{
+        return from;
+    }
+}
+
 uint32_t EncodeDecode_UInt32(uint32_t from){
     assert(endianess != Endianess_Undefined);
     if(endianess == Endianess_BigEndian){

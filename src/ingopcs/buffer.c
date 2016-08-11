@@ -53,6 +53,13 @@ void Reset_Buffer(Buffer* buffer){
     memset(buffer->data, 0, buffer->max_size);
 }
 
+void Reset_Buffer_After_Position(Buffer*  buffer,
+                                 uint32_t position){
+    buffer->position = position;
+    buffer->length = position;
+    memset(&(buffer->data[buffer->position]), 0, buffer->max_size);
+}
+
 StatusCode Set_Position_Buffer(Buffer* buffer, uint32_t position){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(buffer->max_size >= position){

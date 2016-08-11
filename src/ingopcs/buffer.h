@@ -21,6 +21,8 @@ Buffer* Create_Buffer(uint32_t size);
 Buffer* Set_Buffer(UA_Byte* data, uint32_t position, uint32_t length, uint32_t maxsize);
 void Delete_Buffer(Buffer* buffer);
 void Reset_Buffer(Buffer* buffer);
+void Reset_Buffer_After_Position(Buffer*  buffer,
+                                 uint32_t position);
 
 StatusCode Set_Position_Buffer(Buffer* buffer, uint32_t position);
 StatusCode Set_Data_Length_Buffer(Buffer* buffer, uint32_t length);

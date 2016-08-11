@@ -20,9 +20,14 @@ typedef struct SC_Security_Token {
     int32_t  revisedLifetime;
 } SC_Security_Token;
 
+typedef struct SC_Security_Key_Set{
+    Private_Key* signKey;
+    Private_Key* encryptKey;
+} SC_Security_Key_Set;
+
 typedef struct SC_Security_Key_Sets {
-    Private_Key* senderKeySet;
-    Private_Key* receiverKeySet;
+    SC_Security_Key_Set* senderKeySet;
+    SC_Security_Key_Set* receiverKeySet;
 } SC_Security_Key_Sets;
 
 typedef enum SC_Connection_State
@@ -47,6 +52,9 @@ typedef struct SecureChannel_Connection {
     TCP_UA_Connection*    transportConnection;
     SC_Connection_State   state;
     uint32_t              startTime;
+    UA_Byte_String*       runningAppCertificate;
+    Private_Key*          runningAppPrivateKey;
+    UA_Byte_String*       otherAppCertificate;
     UA_Msg_Buffer*        sendingBuffer;
     uint32_t              sendingBufferSNPosition;
     uint32_t              sendingMaxBodySize;
@@ -69,6 +77,11 @@ typedef struct SecureChannel_Connection {
 
 SecureChannel_Connection* Create_Secure_Connection (void);
 void Delete_Secure_Connection (SecureChannel_Connection* scConnection);
+
+StatusCode Initiate_Applications_Identities(SecureChannel_Connection* scConnection,
+                                            UA_Byte_String* runningAppCertificate,
+                                            Private_Key*    runningAppPrivateKey,
+                                            UA_Byte_String* otherAppCertificate);
 //Configure secure connection regarding the transport connection properties
 StatusCode Initiate_Receive_Secure_Buffers(SecureChannel_Connection* scConnection);
 StatusCode Initiate_Send_Secure_Buffer(SecureChannel_Connection* scConnection);
@@ -78,7 +91,7 @@ StatusCode Encode_Secure_Message_Header(UA_Msg_Buffer* msgBuffer,
                                         uint32_t secureChannelId);
 
 StatusCode Encode_Asymmetric_Security_Header(SecureChannel_Connection* scConnection,
-                                             OpcUa_CryptoProvider*     cryptoProvider,
+                                             Crypto_Provider*          cryptoProvider,
                                              UA_String*                securityPolicy,
                                              UA_Byte_String*           clientCertificate,
                                              UA_Byte_String*           serverCertificate);
@@ -91,6 +104,7 @@ StatusCode Write_Secure_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
                                    UA_Byte*       data_src,
                                    uint32_t       count);
 
-StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer* msgBuffer);
+StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
+                                   UA_Msg_Final_Chunk chunkType);
 
 #endif /* INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_ */

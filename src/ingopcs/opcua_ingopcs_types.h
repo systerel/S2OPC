@@ -32,16 +32,29 @@ typedef uint32_t UA_Boolean;
 #define STATUS_INVALID_RCV_PARAMETER 0x80000000//0x40000000
 typedef uint32_t StatusCode;
 
+
+#define SECURITY_POLICY_NONE           "http://opcfoundation.org/UA/SecurityPolicy#None"
+#define SECURITY_POLICY_BASIC128RSA15  "http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15"
+#define SECURITY_POLICY_BASIC256       "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
+#define SECURITY_POLICY_BASIC256SHA256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
+
+typedef enum Security_Policy {
+    Security_Policy_None = 0,
+    Security_Policy_Basic128Rsa15 = 1,
+    Security_Policy_Basic256 = 2,
+    Security_Policy_Basic256Sha256 = 3,
+} Security_Policy;
+
 UA_Byte_String* Create_Byte_String(void);
 UA_Byte_String* Create_Byte_String_Copy(UA_Byte_String* src);
-void Delete_Byte_String (UA_Byte_String* bstring);
+void Delete_Byte_String(UA_Byte_String* bstring);
 
 UA_String* Create_String_From_CString(char* cString);
 
 
 UA_String* Create_String(void);
 UA_String* Create_String_Copy(UA_String* src);
-void Delete_String (UA_String* bstring);
+void Delete_String(UA_String* bstring);
 
 int32_t little_endian (void);
 

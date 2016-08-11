@@ -13,7 +13,7 @@ StatusCode Encode_TCP_UA_Header(UA_Msg_Buffer* msgBuffer,
                                 TCP_UA_Message_Type type){
     StatusCode status = STATUS_OK;
     UA_Byte fByte = 'F';
-    assert(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH);
+    assert(msgBuffer->buffers->max_size > UA_HEADER_LENGTH);
     switch(type){
         case TCP_UA_Message_Hello:
             status = Write_Buffer(msgBuffer->buffers, HEL, 3);
@@ -36,10 +36,10 @@ StatusCode Encode_TCP_UA_Header(UA_Msg_Buffer* msgBuffer,
         status = Write_Msg_Buffer(msgBuffer, &fByte, 1);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(msgBuffer, TCP_UA_HEADER_LENGTH);
+        status = Write_UInt32(msgBuffer, UA_HEADER_LENGTH);
         if(status == STATUS_OK){
             msgBuffer->type = type;
-            msgBuffer->msgSize = TCP_UA_HEADER_LENGTH;
+            msgBuffer->msgSize = UA_HEADER_LENGTH;
             msgBuffer->nbChunks = 1;
         }
     }
@@ -52,7 +52,7 @@ StatusCode Finalize_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
            || msgBuffer->type == TCP_UA_Message_Error);
     StatusCode status = STATUS_NOK;
     const uint32_t currentPosition = msgBuffer->buffers->position;
-    status = Set_Position_Buffer(msgBuffer->buffers, TCP_UA_HEADER_LENGTH_POSITION);
+    status = Set_Position_Buffer(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
     if(status == STATUS_OK){
         status = Write_UInt32(msgBuffer, currentPosition);
     }
@@ -69,7 +69,7 @@ StatusCode Read_TCP_UA_Data(Socket socket,
     StatusCode status = STATUS_NOK;
     uint32_t readBytes;
 
-    if(msgBuffer->buffers->length >= TCP_UA_HEADER_LENGTH){
+    if(msgBuffer->buffers->length >= UA_HEADER_LENGTH){
         assert(msgBuffer->msgSize > 0);
 
         if(msgBuffer->buffers->length < msgBuffer->msgSize){
@@ -77,7 +77,7 @@ StatusCode Read_TCP_UA_Data(Socket socket,
             status = STATUS_OK;
         }else if(msgBuffer->buffers->length == msgBuffer->msgSize){
             if(msgBuffer->isFinal == UA_Msg_Chunk_Intermediate){
-                status = Reset_Msg_Buffer_Next_Chunk(msgBuffer);
+                status = Reset_Msg_Buffer_Next_Chunk(msgBuffer, 0);
             }else{
                 Reset_Msg_Buffer(msgBuffer);
                 // status will be set reading the header
@@ -88,18 +88,18 @@ StatusCode Read_TCP_UA_Data(Socket socket,
         }
     }
 
-    if(msgBuffer->buffers->length < TCP_UA_HEADER_LENGTH){
+    if(msgBuffer->buffers->length < UA_HEADER_LENGTH){
 
         // Attempt to read header
-        if(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH){
-            readBytes = TCP_UA_HEADER_LENGTH - msgBuffer->buffers->length;
+        if(msgBuffer->buffers->max_size > UA_HEADER_LENGTH){
+            readBytes = UA_HEADER_LENGTH - msgBuffer->buffers->length;
             status = Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
             if(status == STATUS_OK && readBytes > 0){
                 Set_Data_Length_Buffer(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
             }
-            if(msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH){
+            if(msgBuffer->buffers->length == UA_HEADER_LENGTH){
                 status = Read_TCP_UA_Header(msgBuffer);
-            }else if(msgBuffer->buffers->length > TCP_UA_HEADER_LENGTH){
+            }else if(msgBuffer->buffers->length > UA_HEADER_LENGTH){
                 status = STATUS_INVALID_STATE;
             }else{
                 // Incomplete header: Wait for new read event !
@@ -142,7 +142,7 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
     UA_Byte isFinal;
 
     if(msgBuffer != UA_NULL
-       && msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH
+       && msgBuffer->buffers->length == UA_HEADER_LENGTH
        && msgBuffer->type == TCP_UA_Message_Unknown)
     {
         // READ message type
@@ -261,15 +261,12 @@ StatusCode Write_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
             status = STATUS_INVALID_PARAMETERS;
     }else{
         if(msgBuffer->buffers->position + count > msgBuffer->buffers->max_size){
-            if(msgBuffer->nbChunks + 1 > msgBuffer->maxChunks){
-                // Error message should be managed at secure channel level
-                status = STATUS_INVALID_STATE;
-            }else{
-                Flush_Msg_Buffer(msgBuffer);
-                Reset_Msg_Buffer_Next_Chunk(msgBuffer);
-            }
+            // Error message should be managed at secure channel level:
+            //  no possible message chunks except for MSG type !
+            status = STATUS_INVALID_STATE;
+        }else{
+            status = Write_Buffer(msgBuffer->buffers, data_src, count);
         }
-        status = Write_Buffer(msgBuffer->buffers, data_src, count);
     }
     return status;
 }

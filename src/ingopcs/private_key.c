@@ -22,6 +22,15 @@ Private_Key* Create_Private_Key (UA_Byte_String* key){
     return pkey;
 }
 
+void Delete_Private_Key (Private_Key* pkey){
+    if(pkey != UA_NULL){
+        if(pkey->key != UA_NULL){
+            Delete_Byte_String(pkey->key);
+        }
+        free(pkey);
+    }
+}
+
 UA_Byte_String* Begin_Use_Private_Key (Private_Key* pkey){
     UA_Byte_String* key = UA_NULL;
     if(pkey != UA_NULL){
@@ -38,13 +47,7 @@ void End_Use_Private_Key (UA_Byte_String* key){
     }
 }
 
-void Delete_Private_Key (Private_Key* pkey){
-    if(pkey != UA_NULL){
-        if(pkey->key != UA_NULL){
-            Delete_Byte_String(pkey->key);
-        }
-        free(pkey);
-    }
+uint32_t Get_Private_Key_Size(Private_Key* pkey){
+    return pkey->key->length;
 }
-
 

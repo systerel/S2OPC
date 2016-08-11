@@ -12,10 +12,11 @@
 
 #include <buffer.h>
 
-#define TCP_UA_HEADER_LENGTH 8
-#define TCP_UA_HEADER_LENGTH_POSITION 4
 #define TCP_UA_ACK_MSG_LENGTH 28
 #define TCP_UA_ERR_MIN_MSG_LENGTH 16
+
+#define UA_HEADER_LENGTH 8
+#define UA_HEADER_LENGTH_POSITION 4
 
 #define UA_SECURE_MESSAGE_HEADER_LENGTH 12
 #define UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
@@ -69,7 +70,8 @@ UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
                                  void*    flushData);
 void Delete_Msg_Buffer(UA_Msg_Buffer* mBuffer);
 void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer);
-StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer);
+StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer,
+                                       uint32_t       bodyPosition);
 StatusCode Set_Secure_Message_Type(UA_Msg_Buffer* mBuffer,
                                    UA_Secure_Message_Type sType);
 

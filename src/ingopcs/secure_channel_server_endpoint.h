@@ -39,7 +39,7 @@ typedef struct SC_Channel_Server_Endpoint
     SC_Endpoint_Event_CB*     callback;
     void*                     callbackData;
 
-} SC_Channel_Client_Connection;
+} SC_Channel_Server_Endpoint;
 
 
 #endif /* INGOPCS_SECURE_CHANNEL_SERVER_ENDPOINT_H_ */

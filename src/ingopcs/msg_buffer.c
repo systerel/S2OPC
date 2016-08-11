@@ -64,11 +64,13 @@ void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer){
     }
 }
 
-StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer){
+StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer,
+                                       uint32_t       bodyPosition){
     assert(mBuffer->nbBuffers == 1);
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(mBuffer != UA_NULL){
-        Reset_Buffer_Properties(mBuffer);
+        mBuffer->msgSize = bodyPosition;
+        Reset_Buffer_After_Position(mBuffer->buffers, bodyPosition);
         if(mBuffer->maxChunks == 0
            || mBuffer->nbChunks < mBuffer->maxChunks)
         {
