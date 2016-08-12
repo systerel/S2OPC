@@ -75,6 +75,9 @@ StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer,
 StatusCode Set_Secure_Message_Type(UA_Msg_Buffer* mBuffer,
                                    UA_Secure_Message_Type sType);
 
+StatusCode Attach_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
+                                       UA_Msg_Buffer* srcMsgBuffer);
+
 typedef struct UA_Msg_Buffer UA_Msg_Buffers;
 // Several buffers by msg mode (secure message input buffer only)
 UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks);

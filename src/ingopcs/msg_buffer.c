@@ -26,7 +26,6 @@ UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
         mBuffer->flushData = flushData;
         mBuffer->nbBuffers = 1;
         mBuffer->buffers = buffer;
-        //mBuffer->chunkSize = 0;
         mBuffer->msgSize = 0;
         mBuffer->nbChunks = 1;
         mBuffer->type = TCP_UA_Message_Unknown;
@@ -38,8 +37,8 @@ UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
 }
 
 void Delete_Msg_Buffer(UA_Msg_Buffer* mBuffer){
-    assert(mBuffer->nbBuffers == 1);
     if(mBuffer != UA_NULL){
+        assert(mBuffer->nbBuffers == 1);
         if(mBuffer->buffers != UA_NULL){
             Delete_Buffer (mBuffer->buffers);
         }
@@ -48,17 +47,19 @@ void Delete_Msg_Buffer(UA_Msg_Buffer* mBuffer){
 }
 
 void Reset_Buffer_Properties(UA_Msg_Buffer* mBuffer){
-    assert(mBuffer->nbBuffers == 1);
-    mBuffer->msgSize = 0;
-    mBuffer->type = TCP_UA_Message_Unknown;
-    mBuffer->isFinal = UA_Msg_Chunk_Unknown;
-    mBuffer->secureType = UA_SecureMessage;
-    Reset_Buffer(mBuffer->buffers);
+    if(mBuffer != UA_NULL){
+        assert(mBuffer->nbBuffers == 1);
+        mBuffer->msgSize = 0;
+        mBuffer->type = TCP_UA_Message_Unknown;
+        mBuffer->isFinal = UA_Msg_Chunk_Unknown;
+        mBuffer->secureType = UA_SecureMessage;
+        Reset_Buffer(mBuffer->buffers);
+    }
 }
 
 void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer){
-    assert(mBuffer->nbBuffers == 1);
     if(mBuffer != UA_NULL){
+        assert(mBuffer->nbBuffers == 1);
         Reset_Buffer_Properties(mBuffer);
         mBuffer->nbChunks = 1;
     }
@@ -66,9 +67,9 @@ void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer){
 
 StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer,
                                        uint32_t       bodyPosition){
-    assert(mBuffer->nbBuffers == 1);
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(mBuffer != UA_NULL){
+        assert(mBuffer->nbBuffers == 1);
         mBuffer->msgSize = bodyPosition;
         Reset_Buffer_After_Position(mBuffer->buffers, bodyPosition);
         if(mBuffer->maxChunks == 0
@@ -86,9 +87,27 @@ StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer,
 StatusCode Set_Secure_Message_Type(UA_Msg_Buffer* mBuffer,
                                    UA_Secure_Message_Type sType){
     StatusCode status = STATUS_INVALID_STATE;
-    if(mBuffer->type == TCP_UA_Message_Unknown){
+    if(mBuffer != UA_NULL && mBuffer->type == TCP_UA_Message_Unknown){
+        assert(mBuffer->nbBuffers == 1);
         mBuffer->secureType = sType;
         status = STATUS_OK;
+    }
+    return status;
+}
+
+StatusCode Attach_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
+                                       UA_Msg_Buffer* srcMsgBuffer){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(destMsgBuffer != UA_NULL && srcMsgBuffer != UA_NULL){
+        assert(destMsgBuffer->nbBuffers == 1);
+        assert(srcMsgBuffer->nbBuffers == 1);
+        status = STATUS_OK;
+        Delete_Buffer(destMsgBuffer->buffers);
+        destMsgBuffer->nbChunks = srcMsgBuffer->nbChunks;
+        destMsgBuffer->buffers = srcMsgBuffer->buffers;
+        destMsgBuffer->type = srcMsgBuffer->type;
+        destMsgBuffer->secureType = srcMsgBuffer->secureType;
+        destMsgBuffer->msgSize = srcMsgBuffer->msgSize;
     }
     return status;
 }
