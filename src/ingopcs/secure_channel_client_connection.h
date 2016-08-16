@@ -62,7 +62,7 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
                                   void*                         callbackData
                                   );
 
-StatusCode Send_Open_Secure_Channel_Request(void);
+StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConnection);
 StatusCode Receive_Open_Secure_Channel_Response(void);
 
 

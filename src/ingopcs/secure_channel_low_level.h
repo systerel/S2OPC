@@ -23,6 +23,7 @@ typedef struct SC_Security_Token {
 typedef struct SC_Security_Key_Set{
     Private_Key* signKey;
     Private_Key* encryptKey;
+    Private_Key* initVector;
 } SC_Security_Key_Set;
 
 typedef struct SC_Security_Key_Sets {
@@ -72,6 +73,7 @@ typedef struct SecureChannel_Connection {
     Private_Key*          currentNonce;
     uint32_t              lastSeqNumSent;
     uint32_t              lastSeqNumReceived;
+    uint32_t              lastRequestIdSent;
 
 } SecureChannel_Connection;
 
@@ -96,12 +98,14 @@ StatusCode Encode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
                                              UA_Byte_String*           clientCertificate,
                                              UA_Byte_String*           serverCertificate);
 
+StatusCode Set_MaxBodySize(SecureChannel_Connection* scConnection,
+                           uint32_t                  isAsymmetric);
+
 StatusCode Encode_Sequence_Header(SecureChannel_Connection* scConnection,
-                                  uint32_t                  sequenceNumber,
-                                  uint32_t                  requestId);
+                                  uint32_t*                 requestId);
 
 StatusCode Write_Secure_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
-                                   UA_Byte*       data_src,
+                                   const UA_Byte* data_src,
                                    uint32_t       count);
 
 StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,

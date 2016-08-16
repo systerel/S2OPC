@@ -12,6 +12,7 @@
 
 #include <ua_encoder.h>
 #include <secure_channel_client_connection.h>
+#include <secure_channel_low_level.h>
 
 SC_Channel_Client_Connection* Create_Client_Channel (Namespace*      namespac,
                                                      EncodeableType* encodeableTypes){
@@ -83,7 +84,7 @@ StatusCode On_Transport_Event_CB(void*            connection,
             }
             // Send Open Secure channel request
             if(status == STATUS_OK){
-                status = Send_Open_Secure_Channel_Request();
+                status = Send_Open_Secure_Channel_Request(cConnection);
             }
             break;
 
@@ -202,9 +203,111 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
     return status;
 }
 
-StatusCode Send_Open_Secure_Channel_Request(){
-    // TODO: Set max body size in connection in order to could compute flush on writing
+StatusCode Write_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConnection){
+    const UA_Byte twoByteNodeIdType = 0x01;
+    const UA_Byte fourByteNodeIdType = 0x01;
+    const UA_Byte namespace = 0;
+    const UA_Byte nullTypeId = 0;
+    const uint16_t openSecureChannelRequestTypeId = 444;
+    UA_String* auditId = Create_String_From_CString("audit1");
+    UA_String* nullString = Create_String();
+
+    UA_Msg_Buffer* sendBuf = cConnection->instance->sendingBuffer;
+
+    // Encode request type Node Id (prior to message body)
+    Write_Secure_Msg_Buffer(sendBuf, &fourByteNodeIdType, 1);
+    Write_Secure_Msg_Buffer(sendBuf, &namespace, 1);
+    Write_UInt16(sendBuf, openSecureChannelRequestTypeId);
+
+    //// Encode request header
+    // Encode authentication token (omitted opaque identifier ???? => must be a bytestring ?)
+    Write_Secure_Msg_Buffer(sendBuf, &twoByteNodeIdType, 1);
+    Write_Secure_Msg_Buffer(sendBuf, &nullTypeId, 1);
+    // Encode 64 bits UtcTime => null ok ?
+    Write_UInt32(sendBuf, 0);
+    Write_UInt32(sendBuf, 0);
+    // Encode requestHandler
+    Write_UInt32(sendBuf, sendBuf->requestId);
+    // Encode returnDiagnostic => symbolic id
+    Write_UInt32(sendBuf, 1);
+    // Encode auditEntryId
+    Write_UA_String(sendBuf, auditId);
+    // Encode timeoutHint => no timeout (for now)
+    Write_UInt32(sendBuf, 0);
+
+    // Extensible parameter: additional header => null node id => no content
+    Write_Secure_Msg_Buffer(sendBuf, &twoByteNodeIdType, 1);
+    Write_Secure_Msg_Buffer(sendBuf, &nullTypeId, 1);
+
+    //// Encode request content
+    // Client protocol version => 0
+    Write_UInt32(sendBuf, 0);
+    // Enumeration request type => ISSUE_0
+    Write_Int32(sendBuf, 0);
+    // Enumeration security mode => NONE_1
+    Write_Int32(sendBuf, 1);
+    // Client nonce => null string
+    Write_UA_String(sendBuf, nullString);
+    // Requested lifetime
+    Write_Int32(sendBuf, cConnection->requestedLifetime);
+
     return STATUS_OK;
+}
+
+StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConnection){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    Crypto_Provider* cProvider = UA_NULL;
+    uint32_t requestId = 0;
+
+    if(cConnection != UA_NULL){
+        status = Initiate_Send_Secure_Buffer(cConnection->instance);
+    }
+
+    if(status == STATUS_OK){
+        status = Initiate_Receive_Secure_Buffers(cConnection->instance);
+    }
+
+    if(status == STATUS_OK){
+        cProvider = Create_Crypto_Provider(cConnection->securityPolicy);
+        if(cProvider == UA_NULL){
+            status = STATUS_NOK;
+        }else{
+            cConnection->instance->currentCryptoProvider = cProvider;
+        }
+    }
+
+    if(status == STATUS_OK){
+        status = Encode_Secure_Message_Header(cConnection->instance->sendingBuffer,
+                                              UA_OpenSecureChannel,
+                                              0);
+    }
+
+    if(status == STATUS_OK){
+        status = Encode_Asymmetric_Security_Header(cConnection->instance,
+                                                   cProvider,
+                                                   cConnection->securityPolicy,
+                                                   cConnection->clientCertificate,
+                                                   cConnection->serverCertificate);
+    }
+
+    if(status == STATUS_OK){
+        status = Set_MaxBodySize(cConnection->instance, 1);
+    }
+
+
+    if(status == STATUS_OK){
+        status = Encode_Sequence_Header(cConnection->instance, &requestId);
+    }
+
+    if(status == STATUS_OK){
+        status = Write_Open_Secure_Channel_Request(cConnection);
+    }
+
+    if(status == STATUS_OK){
+        status = Flush_Secure_Msg_Buffer(cConnection->instance->sendingBuffer, UA_Msg_Chunk_Final);
+    }
+
+    return status;
 }
 
 StatusCode Receive_Open_Secure_Channel_Response(){

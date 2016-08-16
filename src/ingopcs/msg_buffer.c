@@ -30,6 +30,7 @@ UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
         mBuffer->nbChunks = 1;
         mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
+        mBuffer->requestId = 0;
         mBuffer->secureType = UA_SecureMessage;
         mBuffer->maxChunks = maxChunks;
     }
@@ -52,6 +53,7 @@ void Reset_Buffer_Properties(UA_Msg_Buffer* mBuffer){
         mBuffer->msgSize = 0;
         mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
+        mBuffer->requestId = 0;
         mBuffer->secureType = UA_SecureMessage;
         Reset_Buffer(mBuffer->buffers);
     }

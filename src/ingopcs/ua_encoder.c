@@ -67,6 +67,27 @@ StatusCode Read_UA_Boolean(UA_Msg_Buffer* msgBuffer, UA_Boolean* value){
     return status;
 }
 
+StatusCode Write_UInt16(UA_Msg_Buffer* msgBuffer, uint16_t value){
+    StatusCode status = STATUS_NOK;
+    uint16_t encodedValue = EncodeDecode_UInt16(value);
+    status = Write_Msg_Buffer(msgBuffer, (UA_Byte*) &encodedValue, 2);
+    return status;
+}
+
+StatusCode Read_UInt16(UA_Msg_Buffer* msgBuffer, uint16_t* value){
+    StatusCode status = STATUS_NOK;
+    uint16_t readValue;
+    if(value == UA_NULL){
+        status = STATUS_INVALID_PARAMETERS;
+    }else{
+        status = Read_Msg_Buffer((UA_Byte*)&readValue, 2, msgBuffer, 2);
+        if(status == STATUS_OK){
+            *value = EncodeDecode_UInt16(readValue);
+        }
+    }
+    return status;
+}
+
 StatusCode Write_UInt32(UA_Msg_Buffer* msgBuffer, uint32_t value){
     StatusCode status = STATUS_NOK;
     uint32_t encodedValue = EncodeDecode_UInt32(value);

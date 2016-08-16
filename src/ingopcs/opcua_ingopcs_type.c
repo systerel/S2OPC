@@ -86,3 +86,26 @@ UA_String* Create_String_From_CString(char* cString){
     }
     return string;
 }
+
+
+char* Create_CString_From_String(UA_String* string){
+    char* cString = UA_NULL;
+    int32_t idx = 0;
+    if(string != UA_NULL &&
+       string->length > 0)
+    {
+        cString = (char*) malloc(sizeof(char)* (string->length + 1));
+        if(cString != UA_NULL){
+            if(CHAR_BIT == 8){
+                memcpy(cString, string->characters, string->length);
+            }else{
+                // On systems for which char is not encoded on 1 byte
+                for(idx = 0; idx < string->length; idx++){
+                    cString[idx] = (char) string->characters[idx];
+                }
+            }
+            cString[string->length] = '\0';
+        }
+    }
+    return cString;
+}

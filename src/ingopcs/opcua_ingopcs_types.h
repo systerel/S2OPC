@@ -50,7 +50,7 @@ UA_Byte_String* Create_Byte_String_Copy(UA_Byte_String* src);
 void Delete_Byte_String(UA_Byte_String* bstring);
 
 UA_String* Create_String_From_CString(char* cString);
-
+char* Create_CString_From_String(UA_String* string);
 
 UA_String* Create_String(void);
 UA_String* Create_String_Copy(UA_String* src);

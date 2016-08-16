@@ -16,7 +16,9 @@
 #define TCP_UA_ERR_MIN_MSG_LENGTH 16
 
 #define UA_HEADER_LENGTH 8
+#define UA_HEADER_SN_LENGTH 4
 #define UA_HEADER_LENGTH_POSITION 4
+#define UA_HEADER_ISFINAL_POSITION 3
 
 #define UA_SECURE_MESSAGE_HEADER_LENGTH 12
 #define UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
@@ -61,6 +63,7 @@ typedef struct UA_Msg_Buffer {
     uint32_t               nbChunks;
     uint32_t               maxChunks;
     UA_Msg_Final_Chunk     isFinal;
+    uint32_t               requestId;
     void*                  flushData;
 } UA_Msg_Buffer;
 

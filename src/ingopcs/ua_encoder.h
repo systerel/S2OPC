@@ -31,6 +31,8 @@ uint16_t EncodeDecode_UInt16(uint16_t from);
 uint32_t EncodeDecode_UInt32(uint32_t from);
 uint32_t EncodeDecode_Int32(int32_t from);
 
+StatusCode Write_UInt16(UA_Msg_Buffer* msgBuffer, uint16_t value);
+StatusCode Read_UInt16(UA_Msg_Buffer* msgBuffer, uint16_t* value);
 StatusCode Write_UInt32(UA_Msg_Buffer* msgBuffer, uint32_t value);
 StatusCode Read_UInt32(UA_Msg_Buffer* msgBuffer, uint32_t* value);
 StatusCode Write_Int32(UA_Msg_Buffer* msgBuffer, int32_t value);

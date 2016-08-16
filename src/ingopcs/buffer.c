@@ -88,7 +88,10 @@ StatusCode Write_Buffer(Buffer* buffer, const UA_Byte* data_src, uint32_t count)
         }else{
             if(memcpy(&(buffer->data[buffer->position]), data_src, count) == &(buffer->data[buffer->position])){
                 buffer->position = buffer->position + count;
-                buffer->length = buffer->position;
+                // In case we write in existing buffer position: does not change length
+                if(buffer->position > buffer->length){
+                    buffer->length = buffer->position;
+                }
                 status = STATUS_OK;
             }else{
                 status = STATUS_INVALID_STATE;
