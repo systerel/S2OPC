@@ -242,7 +242,7 @@ StatusCode Flush_Msg_Buffer(UA_Msg_Buffer* msgBuffer){
     int32_t writtenBytes = 0;
     writtenBytes = Socket_Write((Socket) msgBuffer->flushData,
                                 msgBuffer->buffers->data,
-                                msgBuffer->buffers->position);
+                                msgBuffer->buffers->length);
     if(writtenBytes == msgBuffer->buffers->position){
         status = STATUS_OK;
     }

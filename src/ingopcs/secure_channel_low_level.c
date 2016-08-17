@@ -121,7 +121,7 @@ StatusCode Initiate_Receive_Secure_Buffers(SecureChannel_Connection* scConnectio
 StatusCode Initiate_Send_Secure_Buffer(SecureChannel_Connection* scConnection){
     StatusCode status = STATUS_NOK;
     UA_Msg_Buffer* msgBuffer;
-    if(scConnection->sendingBuffer == NULL){
+    if(scConnection->sendingBuffer == UA_NULL){
         Buffer* buf = Create_Buffer(scConnection->transportConnection->sendBufferSize);
         msgBuffer = Create_Msg_Buffer(buf,
                                       scConnection->transportConnection->maxChunkCountSnd,
@@ -459,13 +459,19 @@ StatusCode Write_Secure_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
     {
         status = STATUS_INVALID_PARAMETERS;
     }else{
+        status = STATUS_OK;
         scConnection = (SecureChannel_Connection*) msgBuffer->flushData;
         if(msgBuffer->buffers->position + count >
             scConnection->sendingBufferSNPosition +
             UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
             scConnection->sendingMaxBodySize)
         {
-            if(msgBuffer->nbChunks + 1 > msgBuffer->maxChunks){
+            // Precedent position cannot be greater than message size:
+            //  otherwise it means size has not been checked precedent time (it could occurs only when writing headers)
+            assert(scConnection->sendingBufferSNPosition +
+                    UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+                    scConnection->sendingMaxBodySize >= msgBuffer->buffers->position);
+            if(msgBuffer->maxChunks != 0 && msgBuffer->nbChunks + 1 > msgBuffer->maxChunks){
                 // TODO: send an abort message instead of message !!!
                 status = STATUS_INVALID_STATE;
             }else{
@@ -515,6 +521,11 @@ StatusCode Set_Message_Length(UA_Msg_Buffer* msgBuffer){
 StatusCode Set_Message_Chunk_Type(UA_Msg_Buffer*     msgBuffer,
                                   UA_Msg_Final_Chunk chunkType){
     StatusCode status = STATUS_INVALID_PARAMETERS;
+
+    if(msgBuffer != UA_NULL){
+        status = Set_Position_Buffer(msgBuffer->buffers, UA_HEADER_ISFINAL_POSITION);
+    }
+
     UA_Byte chunkTypeByte;
     switch(chunkType){
         case UA_Msg_Chunk_Final:
@@ -530,9 +541,6 @@ StatusCode Set_Message_Chunk_Type(UA_Msg_Buffer*     msgBuffer,
             status = STATUS_INVALID_PARAMETERS;
     }
 
-    if(status == STATUS_OK && msgBuffer != UA_NULL){
-        status = Set_Position_Buffer(msgBuffer->buffers, UA_HEADER_ISFINAL_POSITION);
-    }
     if(status == STATUS_OK){
         status = Write_Msg_Buffer(msgBuffer, &chunkTypeByte, 1);
     }
@@ -880,6 +888,7 @@ StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
     {
         status = STATUS_INVALID_PARAMETERS;
     }else{
+        status = STATUS_OK;
         scConnection = (SecureChannel_Connection*) msgBuffer->flushData;
         // Determine if the message must be encrypted
         if(scConnection->currentSecuMode == Msg_Security_Mode_None ||
@@ -889,8 +898,7 @@ StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
             toEncrypt = UA_FALSE;
         }
         // Determine if the message must be signed
-        if(scConnection->currentSecuMode == Msg_Security_Mode_Sign ||
-           scConnection->currentSecuMode == Msg_Security_Mode_SignAndEncrypt)
+        if(scConnection->currentSecuMode == Msg_Security_Mode_None)
         {
             toSign = UA_FALSE;
         }
@@ -945,7 +953,9 @@ StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
         }
 
         if(status == STATUS_OK && toEncrypt == UA_FALSE){
-            // No encryption necessary
+            // No encryption necessary but we need to attach buffer as transport buffer (done during encryption otherwise)
+            status = Attach_Buffer_To_Msg_Buffer(scConnection->transportConnection->outputMsgBuffer,
+                                                 scConnection->sendingBuffer);
         }else{
             // TODO: use detach / attach to control references on the transport msg buffer ?
             status = Encrypt_Message(scConnection,
@@ -956,7 +966,7 @@ StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
 
         if(status == STATUS_OK){
             // TODO: detach transport buffer ?
-            Flush_Msg_Buffer(scConnection->transportConnection->outputMsgBuffer);
+            status = Flush_Msg_Buffer(scConnection->transportConnection->outputMsgBuffer);
         }
     }
     return status;

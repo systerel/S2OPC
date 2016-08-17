@@ -260,12 +260,12 @@ StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConne
     uint32_t requestId = 0;
 
     if(cConnection != UA_NULL){
-        status = Initiate_Send_Secure_Buffer(cConnection->instance);
+        status = STATUS_OK;
     }
 
-    if(status == STATUS_OK){
-        status = Initiate_Receive_Secure_Buffers(cConnection->instance);
-    }
+    // Set security configuration for secure channel request
+    cConnection->instance->currentSecuMode = cConnection->securityMode;
+    cConnection->instance->currentSecuPolicy = cConnection->securityPolicy;
 
     if(status == STATUS_OK){
         cProvider = Create_Crypto_Provider(cConnection->securityPolicy);
@@ -274,6 +274,12 @@ StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConne
         }else{
             cConnection->instance->currentCryptoProvider = cProvider;
         }
+    }
+
+
+    // MaxBodySize to be computed prior any write in sending buffer
+    if(status == STATUS_OK){
+        status = Set_MaxBodySize(cConnection->instance, 1);
     }
 
     if(status == STATUS_OK){
@@ -289,11 +295,6 @@ StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConne
                                                    cConnection->clientCertificate,
                                                    cConnection->serverCertificate);
     }
-
-    if(status == STATUS_OK){
-        status = Set_MaxBodySize(cConnection->instance, 1);
-    }
-
 
     if(status == STATUS_OK){
         status = Encode_Sequence_Header(cConnection->instance, &requestId);
