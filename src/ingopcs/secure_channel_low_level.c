@@ -381,12 +381,24 @@ StatusCode Encode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
     // Receiver Certificate Thumbprint:
     if(status == STATUS_OK){
 
-        UA_Byte_String* recCertThumbprint = Create_Byte_String();
+        UA_Byte_String* recCertThumbprint = UA_NULL;
         if(recCertThumbprint != UA_NULL){
-            // TODO: get certificate thumbprint from crypto provider
-            //OpcUa_Crypto_GetCertificateThumbprint(cryptoProvider, serverCertificate, recCertThumbprint);
-
             if(toEncrypt != UA_FALSE && recCertThumbprint->length>0){ // Field shall be null if message not encrypted
+                uint32_t thumbprintLength = 0;
+                status = Asymmetric_Get_Certificate_Thumbprint_Length(cryptoProvider,
+                                                                      serverCertificate,
+                                                                      &thumbprintLength);
+                if(status == STATUS_OK){
+                    recCertThumbprint = Create_Byte_String_Fixed_Size(thumbprintLength);
+                    if(recCertThumbprint != UA_NULL){
+                        status = Asymmetric_Get_Certificate_Thumbprint(cryptoProvider,
+                                                                       serverCertificate,
+                                                                       recCertThumbprint);
+                    }else{
+                        status = STATUS_NOK;
+                    }
+                }
+
                 status = Write_UA_String(scConnection->sendingBuffer, recCertThumbprint);
             }else{
                 // TODO:

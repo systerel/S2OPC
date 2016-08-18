@@ -20,6 +20,22 @@ UA_Byte_String* Create_Byte_String(){
     return bstring;
 }
 
+UA_Byte_String* Create_Byte_String_Fixed_Size(uint32_t size){
+    UA_Byte_String* bstring = UA_NULL;
+    bstring = (UA_Byte_String*) malloc(sizeof(UA_Byte_String));
+    if(bstring != UA_NULL){
+        bstring->length = size;
+        bstring->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*size);
+        if(bstring->characters != UA_NULL){
+            memset(bstring->characters, 0, size);
+        }else{
+            free(bstring);
+            bstring = UA_NULL;
+        }
+    }
+    return bstring;
+}
+
 UA_Byte_String* Create_Byte_String_Copy(UA_Byte_String* src){
     UA_Byte_String* dest = UA_NULL;
     if(src != UA_NULL){

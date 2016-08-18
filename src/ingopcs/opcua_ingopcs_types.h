@@ -46,6 +46,7 @@ typedef enum Security_Policy {
 } Security_Policy;
 
 UA_Byte_String* Create_Byte_String(void);
+UA_Byte_String* Create_Byte_String_Fixed_Size(uint32_t size);
 UA_Byte_String* Create_Byte_String_Copy(UA_Byte_String* src);
 void Delete_Byte_String(UA_Byte_String* bstring);
 
