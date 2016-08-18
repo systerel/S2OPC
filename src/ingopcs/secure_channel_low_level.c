@@ -198,7 +198,8 @@ StatusCode Get_Asymmetric_Algorithm_Blocks_Sizes(UA_String* securityPolicyUri,
                    securityPolicyUri->length)
             == 0)
    {
-        // RSA 1.5: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
+        // RSA OAEP: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
+        // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
         *cipherTextBlockSize = keySize;
         *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
    }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic256->length &&
@@ -207,7 +208,8 @@ StatusCode Get_Asymmetric_Algorithm_Blocks_Sizes(UA_String* securityPolicyUri,
                   securityPolicyUri->length)
            == 0)
    {
-       // RSA 1.5: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
+       // RSA OAEP: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
+       // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
        *cipherTextBlockSize = keySize;
        *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
    }else{
@@ -483,37 +485,35 @@ StatusCode Encode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
     if(status == STATUS_OK){
 
         UA_Byte_String* recCertThumbprint = UA_NULL;
-        if(recCertThumbprint != UA_NULL){
-            if(toEncrypt != UA_FALSE && recCertThumbprint->length>0){ // Field shall be null if message not encrypted
-                uint32_t thumbprintLength = 0;
-                status = Asymmetric_Get_Certificate_Thumbprint_Length(cryptoProvider,
-                                                                      serverCertificate,
-                                                                      &thumbprintLength);
-                if(status == STATUS_OK){
-                    recCertThumbprint = Create_Byte_String_Fixed_Size(thumbprintLength);
-                    if(recCertThumbprint != UA_NULL){
-                        status = Asymmetric_Get_Certificate_Thumbprint(cryptoProvider,
-                                                                       serverCertificate,
-                                                                       recCertThumbprint);
-                    }else{
-                        status = STATUS_NOK;
-                    }
+        if(toEncrypt != UA_FALSE){
+            uint32_t thumbprintLength = 0;
+            status = Asymmetric_Get_Certificate_Thumbprint_Length(cryptoProvider,
+                                                                  serverCertificate,
+                                                                  &thumbprintLength);
+            if(status == STATUS_OK){
+                recCertThumbprint = Create_Byte_String_Fixed_Size(thumbprintLength);
+                if(recCertThumbprint != UA_NULL){
+                    status = Asymmetric_Get_Certificate_Thumbprint(cryptoProvider,
+                                                                   serverCertificate,
+                                                                   recCertThumbprint);
+                }else{
+                    status = STATUS_NOK;
                 }
-
-                status = Write_UA_String(scConnection->sendingBuffer, recCertThumbprint);
-            }else{
-                // TODO:
-                // regarding mantis #3335 negative values are not valid anymore
-                //status = Write_Int32(scConnection->sendingBuffer, 0);
-                // BUT FOUNDATION STACK IS EXPECTING -1 !!!
-                status = Write_Int32(scConnection->sendingBuffer, -1);
-                // NULL string: nothing to write
             }
 
-            Delete_Byte_String(recCertThumbprint);
+            status = Write_UA_String(scConnection->sendingBuffer, recCertThumbprint);
         }else{
-            status = STATUS_NOK;
+            // TODO:
+            // regarding mantis #3335 negative values are not valid anymore
+            //status = Write_Int32(scConnection->sendingBuffer, 0);
+            // BUT FOUNDATION STACK IS EXPECTING -1 !!!
+            status = Write_Int32(scConnection->sendingBuffer, -1);
+            // NULL string: nothing to write
         }
+
+        Delete_Byte_String(recCertThumbprint);
+    }else{
+        status = STATUS_NOK;
     }
 
     return status;
@@ -848,10 +848,8 @@ StatusCode Encode_Signature(SecureChannel_Connection* scConnection,
            scConnection->otherAppCertificate == UA_NULL){
            status = STATUS_INVALID_STATE;
         }else{
-            UA_Byte_String* signedData = Create_Byte_String();
+            UA_Byte_String* signedData = Create_Byte_String_Fixed_Size(signatureSize);
             if(signedData != UA_NULL){
-                signedData->length = msgBuffer->buffers->length;
-                signedData->characters = msgBuffer->buffers->data;
                 status = AsymmetricSign_Crypto_Provider
                           (scConnection->currentCryptoProvider,
                            msgBuffer->buffers->data,
@@ -863,7 +861,6 @@ StatusCode Encode_Signature(SecureChannel_Connection* scConnection,
             }
 
             if(status == STATUS_OK){
-                assert(signedData->length == signatureSize);
                 status = Write_Buffer(msgBuffer->buffers,
                                       signedData->characters,
                                       signedData->length);
@@ -875,10 +872,8 @@ StatusCode Encode_Signature(SecureChannel_Connection* scConnection,
            scConnection->currentSecuKeySets.receiverKeySet == UA_NULL){
             status = STATUS_INVALID_STATE;
         }else{
-            UA_Byte_String* signedData = Create_Byte_String();
+            UA_Byte_String* signedData = Create_Byte_String_Fixed_Size(signatureSize);
             if(signedData != UA_NULL){
-                signedData->length = msgBuffer->buffers->length;
-                signedData->characters = msgBuffer->buffers->data;
                 status = SymmetricSign_Crypto_Provider
                           (scConnection->currentCryptoProvider,
                            msgBuffer->buffers->data,
@@ -890,7 +885,6 @@ StatusCode Encode_Signature(SecureChannel_Connection* scConnection,
             }
 
             if(status == STATUS_OK){
-                assert(signedData->length == signatureSize);
                 status = Write_Buffer(msgBuffer->buffers,
                                       signedData->characters,
                                       signedData->length);
@@ -961,7 +955,9 @@ StatusCode Encrypt_Message(SecureChannel_Connection* scConnection,
                     status = STATUS_NOK;
                 }else{
                     // Copy non encrypted headers part
-                    memcpy(encryptedData, msgBuffer->buffers, scConnection->sendingBufferSNPosition);
+                    memcpy(encryptedData, msgBuffer->buffers->data, scConnection->sendingBufferSNPosition);
+                    // Set correct message size and encrypted buffer length
+                    encryptedMsgBuffer->buffers->length = scConnection->sendingBufferSNPosition + encryptedDataLength;
                 }
             }
 
@@ -1007,7 +1003,9 @@ StatusCode Encrypt_Message(SecureChannel_Connection* scConnection,
                     status = STATUS_NOK;
                 }else{
                     // Copy non encrypted headers part
-                    memcpy(encryptedData, msgBuffer->buffers, scConnection->sendingBufferSNPosition);
+                    memcpy(encryptedData, msgBuffer->buffers->data, scConnection->sendingBufferSNPosition);
+                    // Set correct message size and encrypted buffer length
+                    encryptedMsgBuffer->buffers->length = scConnection->sendingBufferSNPosition + encryptedDataLength;
                 }
             }
 
@@ -1068,6 +1066,11 @@ StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
                                     &signatureSize);
         }
 
+        //TODO: encrypted message length must be set here to have correct signature !!!
+        if(status == STATUS_OK){
+            status = Set_Message_Length(scConnection->transportConnection->outputMsgBuffer);
+        }
+
         if(toSign == UA_FALSE){
             // No signature field
         }else if(status == STATUS_OK){
@@ -1092,14 +1095,6 @@ StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
         }
 
         if(status == STATUS_OK){
-            status = Set_Message_Chunk_Type(msgBuffer, chunkType);
-        }
-
-        if(status == STATUS_OK){
-            status = Set_Message_Length(msgBuffer);
-        }
-
-        if(status == STATUS_OK){
             status = Set_Sequence_Number(msgBuffer);
         }
 
@@ -1113,6 +1108,11 @@ StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
                                      msgBuffer,
                                      symmetricAlgo,
                                      scConnection->transportConnection->outputMsgBuffer);
+        }
+
+
+        if(status == STATUS_OK){
+            status = Set_Message_Chunk_Type(msgBuffer, chunkType);
         }
 
         if(status == STATUS_OK){
