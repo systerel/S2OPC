@@ -646,13 +646,20 @@ StatusCode Encode_Padding(SecureChannel_Connection* scConnection,
            scConnection->otherAppCertificate == UA_NULL){
            status = STATUS_INVALID_STATE;
         }else{
-            UA_Byte_String* publicKey = Create_Byte_String();
+            UA_Byte_String* publicKey = UA_NULL;
+            uint32_t publicKeyLength = 0;
+            status = Asymmetric_Get_Public_Key_Length(scConnection->currentCryptoProvider,
+                                                      scConnection->runningAppCertificate,
+                                                      &publicKeyLength);
+            if(status == STATUS_OK){
+                publicKey = Create_Byte_String_Fixed_Size(publicKeyLength);
+            }
 
             if(publicKey != UA_NULL){
+
                 status = GetPublicKeyFromCert_Crypto_Provider
                           (scConnection->currentCryptoProvider,
                            scConnection->runningAppCertificate,
-                           UA_NULL,
                            publicKey);
                 encryptKeySize = Get_Private_Key_Size(scConnection->runningAppPrivateKey);
 
@@ -814,12 +821,24 @@ StatusCode Encrypt_Message(SecureChannel_Connection* scConnection,
            status = STATUS_INVALID_STATE;
         }else{
             UA_Byte* encryptedData = UA_NULL;
-            UA_Byte_String* otherAppPublicKey = Create_Byte_String();
+            UA_Byte_String* otherAppPublicKey = UA_NULL;
+            uint32_t otherAppPublicKeyLength = 0;
             uint32_t encryptedDataLength = 0;
-            status = GetPublicKeyFromCert_Crypto_Provider(scConnection->currentCryptoProvider,
-                                                          scConnection->otherAppCertificate,
-                                                          UA_NULL,
-                                                          otherAppPublicKey);
+            status = Asymmetric_Get_Public_Key_Length(scConnection->currentCryptoProvider,
+                                                      scConnection->otherAppCertificate,
+                                                      &otherAppPublicKeyLength);
+            if(status == STATUS_OK){
+                otherAppPublicKey = Create_Byte_String_Fixed_Size(otherAppPublicKeyLength);
+            }
+
+            if(otherAppPublicKey != UA_NULL){
+                status = GetPublicKeyFromCert_Crypto_Provider(scConnection->currentCryptoProvider,
+                                                              scConnection->otherAppCertificate,
+                                                              otherAppPublicKey);
+            }else{
+                status = STATUS_NOK;
+            }
+
             // Retrieve cipher length
             if(status == STATUS_OK){
                 status = AsymmetricEncrypt_Length_Crypto_Provider
