@@ -84,6 +84,7 @@ StatusCode On_Transport_Event_CB(void*            connection,
             }
             // Send Open Secure channel request
             if(status == STATUS_OK){
+                cConnection->instance->state = SC_Connection_Connecting_Secure;
                 status = Send_Open_Secure_Channel_Request(cConnection);
             }
             break;
@@ -204,10 +205,11 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
 }
 
 StatusCode Write_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConnection){
-    const UA_Byte twoByteNodeIdType = 0x01;
+    const UA_Byte twoByteNodeIdType = 0x00;
     const UA_Byte fourByteNodeIdType = 0x01;
     const UA_Byte namespace = 0;
     const UA_Byte nullTypeId = 0;
+    const UA_Byte noBodyEncoded = 0;
     const uint16_t openSecureChannelRequestTypeId = 444;
     UA_String* auditId = Create_String_From_CString("audit1");
     UA_String* nullString = Create_String();
@@ -235,9 +237,13 @@ StatusCode Write_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConn
     // Encode timeoutHint => no timeout (for now)
     Write_UInt32(sendBuf, 0);
 
-    // Extensible parameter: additional header => null node id => no content
+    // Extension object: additional header => null node id => no content
+    // !! Extensible parameter indicated in specification but Extension object in XML file !!
+    // Type Id: Node Id
     Write_Secure_Msg_Buffer(sendBuf, &twoByteNodeIdType, 1);
     Write_Secure_Msg_Buffer(sendBuf, &nullTypeId, 1);
+    // Encoding body byte:
+    Write_Secure_Msg_Buffer(sendBuf, &noBodyEncoded, 1);
 
     //// Encode request content
     // Client protocol version => 0

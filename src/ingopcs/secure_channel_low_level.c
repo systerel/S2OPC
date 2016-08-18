@@ -56,10 +56,10 @@ void Delete_Secure_Connection (SecureChannel_Connection* scConnection){
         // Do not delete runningAppCertificate, runnigAppPrivateKey and otherAppCertificate:
         //  managed by upper level
         if(scConnection->sendingBuffer != UA_NULL){
-            Delete_Msg_Buffer(scConnection->sendingBuffer);
+            Delete_Msg_Buffer(&scConnection->sendingBuffer);
         }
         if(scConnection->receptionBuffers != UA_NULL){
-                    Delete_Msg_Buffers(scConnection->receptionBuffers);
+            Delete_Msg_Buffers(&scConnection->receptionBuffers);
         }
         if(scConnection->transportConnection != UA_NULL){
             Delete_Connection(scConnection->transportConnection);
@@ -185,6 +185,31 @@ uint32_t Get_Asymmetric_Signature_Size(UA_String* securityPolicyUri,
     return 0;
 }
 
+uint32_t Is_Msg_Encrypted(SecureChannel_Connection* scConnection,
+                          UA_Msg_Buffer*            msgBuffer)
+{
+    uint32_t toEncrypt = 1; // True
+    // Determine if the message must be encrypted
+    if(scConnection->currentSecuMode == Msg_Security_Mode_None ||
+       (scConnection->currentSecuMode == Msg_Security_Mode_Sign &&
+        msgBuffer->secureType != UA_OpenSecureChannel))
+    {
+        toEncrypt = UA_FALSE;
+    }
+
+    return toEncrypt;
+}
+
+uint32_t Is_Msg_Signed(SecureChannel_Connection* scConnection)
+{
+    uint32_t toSign = 1; // True
+    // Determine if the message must be signed
+    if(scConnection->currentSecuMode == Msg_Security_Mode_None)
+    {
+        toSign = UA_FALSE;
+    }
+    return toSign;
+}
 
 StatusCode Get_Symmetric_Algorithm_Blocks_Sizes(UA_String* securityPolicyUri,
                                                 uint32_t*  cipherTextBlockSize,
@@ -313,41 +338,42 @@ StatusCode Encode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
                                              UA_Byte_String*           clientCertificate,
                                              UA_Byte_String*           serverCertificate){
     StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t toEncrypt = 1; // True
+    uint32_t toSign = 1; // True
     if(scConnection != UA_NULL && scConnection->sendingBuffer != UA_NULL &&
        //cryptoProvider != UA_NULL &&
        securityPolicy != UA_NULL &&
        clientCertificate != UA_NULL &&
-       serverCertificate != UA_NULL){
+       serverCertificate != UA_NULL)
+    {
+        toEncrypt = Is_Msg_Encrypted(scConnection, scConnection->sendingBuffer);
+        toSign = Is_Msg_Signed(scConnection);
         status = STATUS_OK;
     }
 
     // Security Policy:
     if(status == STATUS_OK){
         if(securityPolicy->length>0){
-            status = Write_Int32(scConnection->sendingBuffer, securityPolicy->length);
-            if(status == STATUS_OK){
-                status = Write_Secure_Msg_Buffer(scConnection->sendingBuffer,
-                                                 securityPolicy->characters,
-                                                 securityPolicy->length);
-            }
+            status = Write_UA_String(scConnection->sendingBuffer, securityPolicy);
         }else{
+            // TODO:
             // regarding mantis #3335 negative values are not valid anymore
-            status = Write_Int32(scConnection->sendingBuffer, 0);
+            //status = Write_Int32(scConnection->sendingBuffer, 0);
+            // BUT FOUNDATION STACK IS EXPECTING -1 !!!
+            status = Write_Int32(scConnection->sendingBuffer, -1);
             // NULL string: nothing to write
         }
     }
     // Sender Certificate:
     if(status == STATUS_OK){
-        if(clientCertificate->length>0){
-            status = Write_Int32(scConnection->sendingBuffer, clientCertificate->length);
-            if(status == STATUS_OK){
-                status = Write_Secure_Msg_Buffer(scConnection->sendingBuffer,
-                                                 clientCertificate->characters,
-                                                 clientCertificate->length);
-            }
+        if(toSign != UA_FALSE && clientCertificate->length>0){ // Field shall be null if message not signed
+            status = Write_UA_String(scConnection->sendingBuffer, clientCertificate);
         }else{
+            // TODO:
             // regarding mantis #3335 negative values are not valid anymore
-            status = Write_Int32(scConnection->sendingBuffer, 0);
+            // status = Write_Int32(scConnection->sendingBuffer, 0);
+            // BUT FOUNDATION STACK IS EXPECTING -1 !!!
+            status = Write_Int32(scConnection->sendingBuffer, -1);
             // NULL string: nothing to write
         }
     }
@@ -360,16 +386,14 @@ StatusCode Encode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
             // TODO: get certificate thumbprint from crypto provider
             //OpcUa_Crypto_GetCertificateThumbprint(cryptoProvider, serverCertificate, recCertThumbprint);
 
-            if(recCertThumbprint->length>0){
-                status = Write_Int32(scConnection->sendingBuffer, recCertThumbprint->length);
-                if(status == STATUS_OK){
-                    status = Write_Secure_Msg_Buffer(scConnection->sendingBuffer,
-                                                     recCertThumbprint->characters,
-                                                     recCertThumbprint->length);
-                }
+            if(toEncrypt != UA_FALSE && recCertThumbprint->length>0){ // Field shall be null if message not encrypted
+                status = Write_UA_String(scConnection->sendingBuffer, recCertThumbprint);
             }else{
+                // TODO:
                 // regarding mantis #3335 negative values are not valid anymore
-                status = Write_Int32(scConnection->sendingBuffer, 0);
+                //status = Write_Int32(scConnection->sendingBuffer, 0);
+                // BUT FOUNDATION STACK IS EXPECTING -1 !!!
+                status = Write_Int32(scConnection->sendingBuffer, -1);
                 // NULL string: nothing to write
             }
 
@@ -890,18 +914,11 @@ StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
     }else{
         status = STATUS_OK;
         scConnection = (SecureChannel_Connection*) msgBuffer->flushData;
-        // Determine if the message must be encrypted
-        if(scConnection->currentSecuMode == Msg_Security_Mode_None ||
-           (scConnection->currentSecuMode == Msg_Security_Mode_Sign &&
-            msgBuffer->secureType != UA_OpenSecureChannel))
-        {
-            toEncrypt = UA_FALSE;
-        }
-        // Determine if the message must be signed
-        if(scConnection->currentSecuMode == Msg_Security_Mode_None)
-        {
-            toSign = UA_FALSE;
-        }
+
+        toEncrypt = Is_Msg_Encrypted(scConnection, msgBuffer);
+
+        toSign = Is_Msg_Signed(scConnection);
+
         // Determine if the asymmetric algorithms must be used
         if(msgBuffer->secureType == UA_OpenSecureChannel){
             symmetricAlgo = UA_FALSE;
@@ -929,10 +946,12 @@ StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
 
         }
 
-        if(status == STATUS_OK && msgBuffer->secureType == UA_OpenSecureChannel){
+        if(status == STATUS_OK &&
+           msgBuffer->secureType == UA_OpenSecureChannel &&
+           toSign != UA_FALSE){
             status = Check_Max_Sender_Certificate_Size(scConnection->currentCryptoProvider,
                                                        scConnection->runningAppCertificate,
-                                                       msgBuffer->buffers->length,
+                                                       msgBuffer->buffers->max_size,
                                                        scConnection->currentSecuPolicy,
                                                        hasPadding,
                                                        paddingSize,

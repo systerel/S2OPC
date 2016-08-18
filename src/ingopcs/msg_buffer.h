@@ -71,7 +71,7 @@ typedef struct UA_Msg_Buffer {
 UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
                                  uint32_t maxChunks,
                                  void*    flushData);
-void Delete_Msg_Buffer(UA_Msg_Buffer* mBuffer);
+void Delete_Msg_Buffer(UA_Msg_Buffer** mBuffer);
 void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer);
 StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer,
                                        uint32_t       bodyPosition);
@@ -84,7 +84,7 @@ StatusCode Attach_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
 typedef struct UA_Msg_Buffer UA_Msg_Buffers;
 // Several buffers by msg mode (secure message input buffer only)
 UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks);
-void Delete_Msg_Buffers(UA_Msg_Buffers* mBuffer);
+void Delete_Msg_Buffers(UA_Msg_Buffers** mBuffer);
 
 
 #endif /* INGOPCS_MSG_BUFFER_H_ */

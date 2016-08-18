@@ -37,13 +37,14 @@ UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
     return mBuffer;
 }
 
-void Delete_Msg_Buffer(UA_Msg_Buffer* mBuffer){
-    if(mBuffer != UA_NULL){
-        assert(mBuffer->nbBuffers == 1);
-        if(mBuffer->buffers != UA_NULL){
-            Delete_Buffer (mBuffer->buffers);
+void Delete_Msg_Buffer(UA_Msg_Buffer** ptBuffer){
+    if(ptBuffer != UA_NULL && *ptBuffer != UA_NULL){
+        assert((*ptBuffer)->nbBuffers == 1);
+        if((*ptBuffer)->buffers != UA_NULL){
+            Delete_Buffer((*ptBuffer)->buffers);
         }
-        free(mBuffer);
+        free(*ptBuffer);
+        *ptBuffer = UA_NULL;
     }
 }
 
@@ -115,6 +116,7 @@ StatusCode Attach_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
 }
 
 UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks){
+    assert(maxChunks > 0);
     UA_Msg_Buffers* mBuffers = UA_NULL;
     mBuffers = (UA_Msg_Buffer*) malloc(sizeof(UA_Msg_Buffer));
     mBuffers->flushData = UA_NULL;
@@ -129,15 +131,16 @@ UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks){
     return mBuffers;
 }
 
-void Delete_Msg_Buffers(UA_Msg_Buffer* mBuffers){
+void Delete_Msg_Buffers(UA_Msg_Buffer** ptBuffers){
     uint32_t idx = 0;
-    if(mBuffers != UA_NULL){
-        if(mBuffers->buffers != UA_NULL){
-            for(idx = 0; idx < mBuffers->nbBuffers; idx++){
-                Delete_Buffer (&(mBuffers->buffers[idx]));
+    if(ptBuffers != UA_NULL && *ptBuffers != UA_NULL){
+        if((*ptBuffers)->buffers != UA_NULL){
+            for(idx = 0; idx < (*ptBuffers)->nbBuffers; idx++){
+                Delete_Buffer (&((*ptBuffers)->buffers[idx]));
             }
         }
-        free(mBuffers);
+        free(*ptBuffers);
+        *ptBuffers = UA_NULL;
     }
 }
 

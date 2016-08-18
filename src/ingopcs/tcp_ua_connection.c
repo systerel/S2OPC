@@ -89,9 +89,9 @@ void Reset_Connection_State(TCP_UA_Connection* connection){
     connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
     connection->maxChunkCountRcv = 0;
     connection->maxChunkCountSnd = 0;
-    Delete_Msg_Buffer(connection->inputMsgBuffer);
-    Delete_Msg_Buffer(connection->outputMsgBuffer);
-    Delete_Msg_Buffer(connection->sendingQueue);
+    Delete_Msg_Buffer(&connection->inputMsgBuffer);
+    Delete_Msg_Buffer(&connection->outputMsgBuffer);
+    Delete_Msg_Buffer(&connection->sendingQueue);
 }
 
 void Delete_Connection(TCP_UA_Connection* connection){
@@ -101,9 +101,9 @@ void Delete_Connection(TCP_UA_Connection* connection){
         }
         Delete_Socket_Manager(&connection->socketManager);
         Close_Socket(connection->socket);
-        Delete_Msg_Buffer(connection->inputMsgBuffer);
-        Delete_Msg_Buffer(connection->outputMsgBuffer);
-        Delete_Msg_Buffer(connection->sendingQueue);
+        Delete_Msg_Buffer(&connection->inputMsgBuffer);
+        Delete_Msg_Buffer(&connection->outputMsgBuffer);
+        Delete_Msg_Buffer(&connection->sendingQueue);
         free(connection);
     }
 }
@@ -198,7 +198,7 @@ StatusCode On_Socket_Event_CB (Socket        socket,
                         if(connection->callback != UA_NULL){
                             connection->callback(connection,
                                                  connection->callbackData,
-                                                 ConnectionEvent_Error,
+                                                 ConnectionEvent_Message,
                                                  connection->inputMsgBuffer,
                                                  status);
                         }
@@ -211,17 +211,17 @@ StatusCode On_Socket_Event_CB (Socket        socket,
                 }
 
                 switch(status){
-                                case(STATUS_OK):
-                                        break;
-                                case(STATUS_OK_INCOMPLETE):
-                                        // Wait for next event
-                                        status = STATUS_OK;
-                                        break;
-                                default:
-                                    // Erase content since incorrect reading
-                                    // TODO: add trace with reason Invalid header ? => more precise erorrs
-                                    Reset_Msg_Buffer(connection->inputMsgBuffer);
-                            }
+                    case(STATUS_OK):
+                            break;
+                    case(STATUS_OK_INCOMPLETE):
+                            // Wait for next event
+                            status = STATUS_OK;
+                            break;
+                    default:
+                        // Erase content since incorrect reading
+                        // TODO: add trace with reason Invalid header ? => more precise erorrs
+                        Reset_Msg_Buffer(connection->inputMsgBuffer);
+                }
             }
 
             break;
@@ -394,7 +394,7 @@ StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
                         if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ // see mantis #3447 for >= instead of >
                             connection->sendBufferSize = tempValue;
                             // Adapt send buffer size
-                            Delete_Msg_Buffer(connection->outputMsgBuffer);
+                            Delete_Msg_Buffer(&connection->outputMsgBuffer);
                             connection->outputMsgBuffer = UA_NULL;
                             Initiate_Send_Buffer(connection);
                         }else{
@@ -448,7 +448,7 @@ StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
             // After end of decoding: modify receive buffer if needed
             if(modifiedReceiveBuffer != UA_FALSE && status == STATUS_OK){
                 // Adapt receive buffer size
-                Delete_Msg_Buffer(connection->inputMsgBuffer);
+                Delete_Msg_Buffer(&connection->inputMsgBuffer);
                 connection->inputMsgBuffer = UA_NULL;
                 Initiate_Receive_Buffer(connection);
             }
