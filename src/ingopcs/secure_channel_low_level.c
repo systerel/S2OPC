@@ -173,16 +173,85 @@ StatusCode Get_Asymmetric_Algorithm_Blocks_Sizes(UA_String* securityPolicyUri,
                                                  uint32_t*  cipherTextBlockSize,
                                                  uint32_t*  plainTextBlockSize){
     StatusCode status = STATUS_OK;
-    // TODO: implement with correct sizes
-    *cipherTextBlockSize = 1;
-    *plainTextBlockSize = 1;
-    return status;
+    const uint32_t sha1outputLength = 20; // bytes (160 bits)
+
+    if(securityPolicyUri->length == UA_String_Security_Policy_None->length &&
+       memcmp(securityPolicyUri->characters,
+              UA_String_Security_Policy_None->characters,
+              securityPolicyUri->length)
+       == 0)
+    {
+        *cipherTextBlockSize = 1;
+        *plainTextBlockSize = 1;
+    }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic128Rsa15->length &&
+             memcmp(securityPolicyUri->characters,
+                     UA_String_Security_Policy_Basic128Rsa15->characters,
+                    securityPolicyUri->length)
+             == 0)
+    {
+        // RSA 1.5: RSA spec 7.2.1 (https://www.ietf.org/rfc/rfc2437.txt)
+        *cipherTextBlockSize = keySize;
+        *plainTextBlockSize = keySize - 11;
+    }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic256->length &&
+            memcmp(securityPolicyUri->characters,
+                    UA_String_Security_Policy_Basic256->characters,
+                   securityPolicyUri->length)
+            == 0)
+   {
+        // RSA 1.5: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
+        *cipherTextBlockSize = keySize;
+        *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
+   }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic256->length &&
+           memcmp(securityPolicyUri->characters,
+                   UA_String_Security_Policy_Basic256->characters,
+                  securityPolicyUri->length)
+           == 0)
+   {
+       // RSA 1.5: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
+       *cipherTextBlockSize = keySize;
+       *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
+   }else{
+       status = STATUS_INVALID_PARAMETERS;
+   }
+   return status;
 }
 
 uint32_t Get_Asymmetric_Signature_Size(UA_String* securityPolicyUri,
-                                       uint32_t   pubKeySize){
-    // TODO: implement with correct sizes
-    return 0;
+                                       uint32_t   privateKeySize){
+    uint32_t signatureSize = 0;
+    if(securityPolicyUri->length == UA_String_Security_Policy_None->length &&
+       memcmp(securityPolicyUri->characters,
+              UA_String_Security_Policy_None->characters,
+              securityPolicyUri->length)
+       == 0)
+    {
+        signatureSize = 0;
+    }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic128Rsa15->length &&
+             memcmp(securityPolicyUri->characters,
+                     UA_String_Security_Policy_Basic128Rsa15->characters,
+                    securityPolicyUri->length)
+             == 0)
+    {
+        // Regarding RSA spec 5.2 (https://www.ietf.org/rfc/rfc2437.txt), signature size = key size
+        signatureSize = privateKeySize;
+    }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic256->length &&
+            memcmp(securityPolicyUri->characters,
+                    UA_String_Security_Policy_Basic256->characters,
+                   securityPolicyUri->length)
+            == 0)
+    {
+        // Regarding RSA spec 5.2 (https://www.ietf.org/rfc/rfc2437.txt), signature size = key size
+        signatureSize = privateKeySize;
+    }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic256->length &&
+           memcmp(securityPolicyUri->characters,
+                   UA_String_Security_Policy_Basic256->characters,
+                  securityPolicyUri->length)
+           == 0)
+    {
+        // Regarding RSA spec 5.2 (https://www.ietf.org/rfc/rfc2437.txt), signature size = key size
+        signatureSize = privateKeySize;
+    }
+    return signatureSize;
 }
 
 uint32_t Is_Msg_Encrypted(SecureChannel_Connection* scConnection,
@@ -258,8 +327,40 @@ StatusCode Get_Symmetric_Algorithm_Blocks_Sizes(UA_String* securityPolicyUri,
 }
 
 uint32_t Get_Symmetric_Signature_Size(UA_String* securityPolicyUri){
-    // TODO: implement with correct sizes
-    return 1;
+    uint32_t signatureSize = 0;
+    if(securityPolicyUri->length == UA_String_Security_Policy_None->length &&
+       memcmp(securityPolicyUri->characters,
+              UA_String_Security_Policy_None->characters,
+              securityPolicyUri->length)
+       == 0)
+    {
+        signatureSize = 0;
+    }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic128Rsa15->length &&
+             memcmp(securityPolicyUri->characters,
+                     UA_String_Security_Policy_Basic128Rsa15->characters,
+                    securityPolicyUri->length)
+             == 0)
+    {
+        // Symmetric signature algo is Sha1 => output size is 160 bits = 20 bytes
+        signatureSize = 20;
+    }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic256->length &&
+            memcmp(securityPolicyUri->characters,
+                    UA_String_Security_Policy_Basic256->characters,
+                   securityPolicyUri->length)
+            == 0)
+    {
+        // Symmetric signature algo is Sha1 => output size is 160 bits = 20 bytes
+        signatureSize = 20;
+    }else if(securityPolicyUri->length == UA_String_Security_Policy_Basic256->length &&
+           memcmp(securityPolicyUri->characters,
+                   UA_String_Security_Policy_Basic256->characters,
+                  securityPolicyUri->length)
+           == 0)
+    {
+        // Symmetric signature algo is Sha256 => output size is 256 bits = 32 bytes
+        signatureSize = 32;
+    }
+    return signatureSize;
 }
 
 StatusCode Encode_Secure_Message_Header(UA_Msg_Buffer* msgBuffer,
