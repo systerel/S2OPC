@@ -54,8 +54,10 @@ typedef struct SecureChannel_Connection {
     SC_Connection_State   state;
     uint32_t              startTime;
     UA_Byte_String*       runningAppCertificate;
+    UA_Byte_String*       runningAppPublicKey;
     Private_Key*          runningAppPrivateKey;
     UA_Byte_String*       otherAppCertificate;
+    UA_Byte_String*       otherAppPublicKey;
     UA_Msg_Buffer*        sendingBuffer;
     uint32_t              sendingBufferSNPosition;
     uint32_t              sendingMaxBodySize;

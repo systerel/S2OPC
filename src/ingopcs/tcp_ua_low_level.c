@@ -243,7 +243,7 @@ StatusCode Flush_Msg_Buffer(UA_Msg_Buffer* msgBuffer){
     writtenBytes = Socket_Write((Socket) msgBuffer->flushData,
                                 msgBuffer->buffers->data,
                                 msgBuffer->buffers->length);
-    if(writtenBytes == msgBuffer->buffers->position){
+    if(writtenBytes == msgBuffer->buffers->length){
         status = STATUS_OK;
     }
     // Manage different cases ? (socket error, blocked sending)
