@@ -62,6 +62,7 @@ typedef struct UA_Msg_Buffer {
     uint32_t               msgSize;
     uint32_t               nbChunks;
     uint32_t               maxChunks;
+    uint32_t               sequenceNumberPosition; // Position of sequence number (data to encrypt)
     UA_Msg_Final_Chunk     isFinal;
     uint32_t               requestId;
     void*                  flushData;

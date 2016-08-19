@@ -23,16 +23,17 @@ UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
     UA_Msg_Buffer* mBuffer = UA_NULL;
     if(buffer != UA_NULL){
         mBuffer = (UA_Msg_Buffer*) malloc(sizeof(UA_Msg_Buffer));
-        mBuffer->flushData = flushData;
         mBuffer->nbBuffers = 1;
         mBuffer->buffers = buffer;
+        mBuffer->type = TCP_UA_Message_Unknown;
+        mBuffer->secureType = UA_SecureMessage;
         mBuffer->msgSize = 0;
         mBuffer->nbChunks = 1;
-        mBuffer->type = TCP_UA_Message_Unknown;
+        mBuffer->maxChunks = maxChunks;
+        mBuffer->sequenceNumberPosition = 0;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
         mBuffer->requestId = 0;
-        mBuffer->secureType = UA_SecureMessage;
-        mBuffer->maxChunks = maxChunks;
+        mBuffer->flushData = flushData;
     }
     return mBuffer;
 }
@@ -51,20 +52,21 @@ void Delete_Msg_Buffer(UA_Msg_Buffer** ptBuffer){
 void Reset_Buffer_Properties(UA_Msg_Buffer* mBuffer){
     if(mBuffer != UA_NULL){
         assert(mBuffer->nbBuffers == 1);
-        mBuffer->msgSize = 0;
-        mBuffer->type = TCP_UA_Message_Unknown;
-        mBuffer->isFinal = UA_Msg_Chunk_Unknown;
-        mBuffer->requestId = 0;
-        mBuffer->secureType = UA_SecureMessage;
-        Reset_Buffer(mBuffer->buffers);
+
     }
 }
 
 void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer){
     if(mBuffer != UA_NULL){
         assert(mBuffer->nbBuffers == 1);
-        Reset_Buffer_Properties(mBuffer);
+        Reset_Buffer(mBuffer->buffers);
+        mBuffer->type = TCP_UA_Message_Unknown;
+        mBuffer->secureType = UA_SecureMessage;
+        mBuffer->msgSize = 0;
         mBuffer->nbChunks = 1;
+        mBuffer->isFinal = UA_Msg_Chunk_Unknown;
+        mBuffer->requestId = 0;
+        mBuffer->sequenceNumberPosition = 0;
     }
 }
 
@@ -105,12 +107,16 @@ StatusCode Attach_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
         assert(destMsgBuffer->nbBuffers == 1);
         assert(srcMsgBuffer->nbBuffers == 1);
         status = STATUS_OK;
+        // Attach everything except the flush data which can be used for a different flush level
         Delete_Buffer(destMsgBuffer->buffers);
-        destMsgBuffer->nbChunks = srcMsgBuffer->nbChunks;
         destMsgBuffer->buffers = srcMsgBuffer->buffers;
         destMsgBuffer->type = srcMsgBuffer->type;
         destMsgBuffer->secureType = srcMsgBuffer->secureType;
         destMsgBuffer->msgSize = srcMsgBuffer->msgSize;
+        destMsgBuffer->nbChunks = srcMsgBuffer->nbChunks;
+        destMsgBuffer->sequenceNumberPosition = srcMsgBuffer->sequenceNumberPosition;
+        destMsgBuffer->isFinal = srcMsgBuffer->isFinal;
+        destMsgBuffer->requestId = srcMsgBuffer->requestId;
     }
     return status;
 }
@@ -119,15 +125,17 @@ UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks){
     assert(maxChunks > 0);
     UA_Msg_Buffers* mBuffers = UA_NULL;
     mBuffers = (UA_Msg_Buffer*) malloc(sizeof(UA_Msg_Buffer));
-    mBuffers->flushData = UA_NULL;
     mBuffers->nbBuffers = maxChunks;
     mBuffers->buffers = (Buffer*) malloc(sizeof(Buffer) * maxChunks);
+    mBuffers->type = TCP_UA_Message_Unknown;
+    mBuffers->secureType = UA_SecureMessage;
     mBuffers->msgSize = 0;
     mBuffers->nbChunks = 1;
-    mBuffers->type = TCP_UA_Message_Unknown;
-    mBuffers->isFinal = UA_Msg_Chunk_Unknown;
-    mBuffers->secureType = UA_SecureMessage;
     mBuffers->maxChunks = maxChunks;
+    mBuffers->sequenceNumberPosition = 0;
+    mBuffers->isFinal = UA_Msg_Chunk_Unknown;
+    mBuffers->requestId = 0;
+    mBuffers->flushData = UA_NULL;
     return mBuffers;
 }
 

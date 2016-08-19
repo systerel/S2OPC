@@ -59,7 +59,6 @@ typedef struct SecureChannel_Connection {
     UA_Byte_String*       otherAppCertificate;
     UA_Byte_String*       otherAppPublicKey;
     UA_Msg_Buffer*        sendingBuffer;
-    uint32_t              sendingBufferSNPosition;
     uint32_t              sendingMaxBodySize;
     UA_Msg_Buffers*       receptionBuffers;
     Msg_Security_Mode     currentSecuMode;
