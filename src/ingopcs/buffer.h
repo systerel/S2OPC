@@ -18,6 +18,7 @@ typedef struct Buffer {
 } Buffer;
 
 Buffer* Create_Buffer(uint32_t size);
+StatusCode Init_Buffer(Buffer* buffer, uint32_t size);
 Buffer* Set_Buffer(UA_Byte* data, uint32_t position, uint32_t length, uint32_t maxsize);
 void Delete_Buffer(Buffer* buffer);
 void Reset_Buffer(Buffer* buffer);

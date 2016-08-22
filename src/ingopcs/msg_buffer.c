@@ -121,25 +121,67 @@ StatusCode Attach_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
     return status;
 }
 
-UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks){
+UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks,
+                                   uint32_t bufferSize){
     assert(maxChunks > 0);
+    StatusCode status = STATUS_OK;
     UA_Msg_Buffers* mBuffers = UA_NULL;
+    uint32_t idx = 0;
     mBuffers = (UA_Msg_Buffer*) malloc(sizeof(UA_Msg_Buffer));
-    mBuffers->nbBuffers = maxChunks;
-    mBuffers->buffers = (Buffer*) malloc(sizeof(Buffer) * maxChunks);
-    mBuffers->type = TCP_UA_Message_Unknown;
-    mBuffers->secureType = UA_SecureMessage;
-    mBuffers->msgSize = 0;
-    mBuffers->nbChunks = 1;
-    mBuffers->maxChunks = maxChunks;
-    mBuffers->sequenceNumberPosition = 0;
-    mBuffers->isFinal = UA_Msg_Chunk_Unknown;
-    mBuffers->requestId = 0;
-    mBuffers->flushData = UA_NULL;
+    if(mBuffers != UA_NULL){
+        mBuffers->nbBuffers = maxChunks;
+        mBuffers->buffers = (Buffer*) malloc(sizeof(Buffer) * maxChunks);
+
+        if(mBuffers->buffers != UA_NULL){
+            while(status == STATUS_OK && idx < maxChunks){
+                status = Init_Buffer(&(mBuffers->buffers[idx]), bufferSize);
+                idx++;
+            }
+
+            if(status != STATUS_OK){
+                // To could deallocate correctly
+                mBuffers->nbBuffers = idx + 1;
+            }
+
+        }else{
+           status = STATUS_NOK;
+           mBuffers->nbBuffers = 0;
+        }
+
+        if(status == STATUS_OK){
+            mBuffers->type = TCP_UA_Message_Unknown;
+            mBuffers->secureType = UA_SecureMessage;
+            mBuffers->msgSize = 0;
+            mBuffers->nbChunks = 0;
+            mBuffers->maxChunks = maxChunks;
+            mBuffers->sequenceNumberPosition = 0;
+            mBuffers->isFinal = UA_Msg_Chunk_Unknown;
+            mBuffers->requestId = 0;
+            mBuffers->flushData = UA_NULL;
+        }else{
+            Delete_Msg_Buffers(&mBuffers);
+        }
+    }
     return mBuffers;
 }
 
-void Delete_Msg_Buffers(UA_Msg_Buffer** ptBuffers){
+void Reset_Msg_Buffers(UA_Msg_Buffers* mBuffer){
+    uint32_t idx = 0;
+    if(mBuffer != UA_NULL){
+        for(idx = 0; idx < mBuffer->maxChunks; idx++){
+            Reset_Buffer(&(mBuffer->buffers[idx]));
+        }
+        mBuffer->type = TCP_UA_Message_Unknown;
+        mBuffer->secureType = UA_SecureMessage;
+        mBuffer->msgSize = 0;
+        mBuffer->nbChunks = 0;
+        mBuffer->isFinal = UA_Msg_Chunk_Unknown;
+        mBuffer->requestId = 0;
+        mBuffer->sequenceNumberPosition = 0;
+    }
+}
+
+void Delete_Msg_Buffers(UA_Msg_Buffers** ptBuffers){
     uint32_t idx = 0;
     if(ptBuffers != UA_NULL && *ptBuffers != UA_NULL){
         if((*ptBuffers)->buffers != UA_NULL){
@@ -150,5 +192,26 @@ void Delete_Msg_Buffers(UA_Msg_Buffer** ptBuffers){
         free(*ptBuffers);
         *ptBuffers = UA_NULL;
     }
+}
+
+Buffer* Get_Current_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer){
+    Buffer* buf = UA_NULL;
+    if(mBuffer != UA_NULL){
+        if(mBuffer->nbChunks > 0){
+            buf = &(mBuffer->buffers[mBuffer->nbChunks - 1]);
+        }
+    }
+    return buf;
+}
+
+Buffer* Next_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer){
+    Buffer* buf = UA_NULL;
+    if(mBuffer != UA_NULL){
+        if(mBuffer->nbChunks < mBuffer->maxChunks){
+            buf = &(mBuffer->buffers[mBuffer->nbChunks]);
+            mBuffer->nbChunks = mBuffer->nbChunks + 1;
+        }
+    }
+    return buf;
 }
 

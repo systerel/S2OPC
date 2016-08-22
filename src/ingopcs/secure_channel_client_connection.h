@@ -27,13 +27,12 @@ typedef struct SC_Channel_Client_Connection
 {
     Namespace*                namespaces;
     EncodeableType*           encodeableTypes;
-    PKIProvider               pkiProvider;
+    PKIProvider*              pkiProvider;
     UA_Byte_String*           serverCertificate;
     UA_Byte_String*           clientCertificate;
     Private_Key*              clientKey;
     uint32_t                  nbPendingRequests; // array size
     PendingRequest*           pendingRequests; //replace by a linked list impl
-    uint32_t                  nextRequestId;
     Msg_Security_Mode         securityMode;
     UA_String*                securityPolicy;
     uint32_t                  requestedLifetime;
@@ -63,7 +62,8 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
                                   );
 
 StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConnection);
-StatusCode Receive_Open_Secure_Channel_Response(void);
+StatusCode Receive_Open_Secure_Channel_Response(SC_Channel_Client_Connection* cConnection,
+                                                UA_Msg_Buffer* transportMsgBuffer);
 
 
 #endif /* INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_ */

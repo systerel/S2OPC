@@ -125,3 +125,51 @@ char* Create_CString_From_String(UA_String* string){
     }
     return cString;
 }
+
+StatusCode Compare_Byte_Strings(UA_Byte_String* left,
+                                UA_Byte_String* right,
+                                uint32_t*  comparison)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t idx = 0;
+
+    if(left != UA_NULL && right != UA_NULL){
+        status = STATUS_OK;
+    }
+
+    if(left->length == right->length ||
+       (left->length <= 0 && right->length <= 0)){
+        if(left->length <= 0 && right->length <= 0){
+            *comparison = 0;
+        }else{
+            while(left->characters[idx] == right->characters[idx] &&
+                  idx < left->length)
+            {
+                idx++;
+            }
+            if(left->characters[idx] == right->characters[idx]){
+                *comparison = 0;
+            }else if(left->characters[idx] > right->characters[idx]){
+                *comparison = +1;
+            }else{
+                *comparison = -1;
+            }
+        }
+    }else if(left->length > right->length){
+
+        *comparison = +1;
+    }else{
+        *comparison = -1;
+    }
+
+    return status;
+}
+
+StatusCode Compare_Strings(UA_String* left,
+                           UA_String* right,
+                           uint32_t*  comparison)
+{
+
+    return Compare_Byte_Strings((UA_Byte_String*) left,
+                                (UA_Byte_String*) right, comparison);
+}

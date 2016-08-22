@@ -49,6 +49,9 @@ UA_Byte_String* Create_Byte_String(void);
 UA_Byte_String* Create_Byte_String_Fixed_Size(uint32_t size);
 UA_Byte_String* Create_Byte_String_Copy(UA_Byte_String* src);
 void Delete_Byte_String(UA_Byte_String* bstring);
+StatusCode Compare_Byte_Strings(UA_String* left,
+                                UA_String* right,
+                                uint32_t*  comparison);
 
 UA_String* Create_String_From_CString(char* cString);
 char* Create_CString_From_String(UA_String* string);
@@ -56,6 +59,9 @@ char* Create_CString_From_String(UA_String* string);
 UA_String* Create_String(void);
 UA_String* Create_String_Copy(UA_String* src);
 void Delete_String(UA_String* bstring);
+StatusCode Compare_Strings(UA_String* left,
+                           UA_String* right,
+                           uint32_t*  comparison);
 
 int32_t little_endian (void);
 

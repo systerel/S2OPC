@@ -130,7 +130,7 @@ StatusCode Read_Int32(UA_Msg_Buffer* msgBuffer, int32_t* value){
     return status;
 }
 
-StatusCode Write_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str){
+StatusCode Write_UA_Byte_String(UA_Msg_Buffer* msgBuffer, UA_Byte_String* str){
     StatusCode status = STATUS_NOK;
     if(str == UA_NULL){
         status = STATUS_INVALID_PARAMETERS;
@@ -149,7 +149,7 @@ StatusCode Write_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str){
     return status;
 }
 
-StatusCode Read_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str){
+StatusCode Read_UA_Byte_String(UA_Msg_Buffer* msgBuffer, UA_Byte_String* str){
     StatusCode status = STATUS_NOK;
     int32_t readValue, length;
     if(str == UA_NULL || (str != UA_NULL && str->characters != UA_NULL)){
@@ -177,4 +177,12 @@ StatusCode Read_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str){
 
     }
     return status;
+}
+
+StatusCode Write_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str){
+    return Write_UA_Byte_String(msgBuffer, (UA_Byte_String*) str);
+}
+
+StatusCode Read_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str){
+    return Read_UA_Byte_String(msgBuffer, (UA_Byte_String*) str);
 }

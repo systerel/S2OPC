@@ -101,7 +101,7 @@ StatusCode On_Transport_Event_CB(void*            connection,
                 case UA_OpenSecureChannel:
                     if(cConnection->instance->state == SC_Connection_Connecting_Secure){
                         // Receive Open Secure Channel response
-                        Receive_Open_Secure_Channel_Response();
+                        Receive_Open_Secure_Channel_Response(cConnection, msgBuffer);
                     }else{
                         retStatus = STATUS_INVALID_RCV_PARAMETER;
                     }
@@ -296,7 +296,6 @@ StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConne
 
     if(status == STATUS_OK){
         status = Encode_Asymmetric_Security_Header(cConnection->instance,
-                                                   cProvider,
                                                    cConnection->securityPolicy,
                                                    cConnection->clientCertificate,
                                                    cConnection->serverCertificate);
@@ -317,7 +316,61 @@ StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConne
     return status;
 }
 
-StatusCode Receive_Open_Secure_Channel_Response(){
-    return STATUS_OK;
+StatusCode Read_Open_Secure_Channel_Reponse(SC_Channel_Client_Connection* cConneciton){
+    return STATUS_NOK;
+}
+
+StatusCode Receive_Open_Secure_Channel_Response(SC_Channel_Client_Connection* cConnection,
+                                                UA_Msg_Buffer* transportMsgBuffer){
+    StatusCode status = STATUS_INVALID_RCV_PARAMETER;
+    uint32_t validateSenderCertificate = 1; // True: always activated as indicated in API
+
+    if(transportMsgBuffer->isFinal == UA_Msg_Chunk_Final){
+        // OPN request/response must be in one chunk only
+        status = STATUS_OK;
+    }
+
+    // Message header already managed by transport layer
+    // (except secure channel Id)
+    if(status == STATUS_OK){
+        Decode_Secure_Message_SecureChannelId(cConnection->instance,
+                                              transportMsgBuffer);
+    }
+
+    if(status == STATUS_OK){
+        // Check security policy
+        // Validate other app certificate
+        // Check current app certificate thumbprint
+        status = Decode_Asymmetric_Security_Header(cConnection->instance,
+                                                   cConnection->pkiProvider,
+                                                   transportMsgBuffer,
+                                                   validateSenderCertificate);
+    }
+
+    if(status == STATUS_OK){
+        // Decrypt message content and store complete message in secure connection buffer
+        status = Decrypt_Message_Content(cConnection->instance,
+                                         UA_FALSE, // No token id to evaluate,
+                                         0, // Not evaluated token id value
+                                         transportMsgBuffer,
+                                         1); // IsAsymmetric = TRUE
+    }
+
+    if(status == STATUS_OK){
+        // Decrypt message content and store complete message in secure connection buffer
+        status = Verify_Message_Signature(cConnection->instance,
+                                          1); // IsAsymmetric = TRUE
+    }
+
+    if(status == STATUS_OK){
+        status = Check_Sequence_Number_Received(cConnection->instance);
+    }
+
+    if(status == STATUS_OK){
+        // Decode message body content
+        status = Read_Open_Secure_Channel_Reponse(cConnection);
+    }
+
+    return status;
 }
 

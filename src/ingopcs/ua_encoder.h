@@ -37,6 +37,8 @@ StatusCode Write_UInt32(UA_Msg_Buffer* msgBuffer, uint32_t value);
 StatusCode Read_UInt32(UA_Msg_Buffer* msgBuffer, uint32_t* value);
 StatusCode Write_Int32(UA_Msg_Buffer* msgBuffer, int32_t value);
 StatusCode Read_Int32(UA_Msg_Buffer* msgBuffer, int32_t* value);
+StatusCode Write_UA_Byte_String(UA_Msg_Buffer* msgBuffer, UA_Byte_String* str);
+StatusCode Read_UA_Byte_String(UA_Msg_Buffer* msgBuffer, UA_Byte_String* str);
 StatusCode Write_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str);
 StatusCode Read_UA_String(UA_Msg_Buffer* msgBuffer, UA_String* str);
 

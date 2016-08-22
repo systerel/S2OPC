@@ -14,14 +14,29 @@ Buffer* Create_Buffer(uint32_t size){
     if(size > 0){
         buf = (Buffer*) malloc(sizeof(Buffer));
         if(buf != UA_NULL){
-            buf->position = 0;
-            buf->length = 0;
-            buf->max_size = size;
-            buf->data = (UA_Byte*) malloc(sizeof(UA_Byte)*size);
-            memset(buf->data, 0, sizeof(UA_Byte)*size);
+            StatusCode status = Init_Buffer(buf, size);
+            if(status != STATUS_OK){
+                Delete_Buffer(buf);
+                buf = UA_NULL;
+            }
         }
     }
     return buf;
+}
+
+StatusCode Init_Buffer(Buffer* buffer, uint32_t size){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(buffer != UA_NULL && size > 0){
+        status = STATUS_OK;
+    }
+    if(status == STATUS_OK){
+        buffer->position = 0;
+        buffer->length = 0;
+        buffer->max_size = size;
+        buffer->data = (UA_Byte*) malloc(sizeof(UA_Byte)*size);
+        memset(buffer->data, 0, sizeof(UA_Byte)*size);
+    }
+    return status;
 }
 
 Buffer* Set_Buffer(UA_Byte* data, uint32_t position, uint32_t length, uint32_t maxsize){
