@@ -2,7 +2,7 @@
  * stub_server.h
  *
  *  Created on: Feb 25, 2016
- *      Author: vincent
+ *      Author: Vincent Monfort (Systerel)
  */
 
 #ifndef STUB_SERVER_STUB_CLIENT_H_

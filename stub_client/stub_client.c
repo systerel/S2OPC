@@ -2,7 +2,7 @@
  * stub_server.c
  *
  *  Created on: Feb 25, 2016
- *      Author: vincent
+ *      Author: Vincent Monfort (Systerel)
  */
 
 #include "stub_client.h"
