@@ -100,23 +100,31 @@ StatusCode Set_Secure_Message_Type(UA_Msg_Buffer* mBuffer,
     return status;
 }
 
-StatusCode Attach_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
-                                       UA_Msg_Buffer* srcMsgBuffer){
+void Internal_Copy_Msg_Buffer_Properties(UA_Msg_Buffer* destMsgBuffer,
+                                         UA_Msg_Buffer* srcMsgBuffer){
+    assert(destMsgBuffer != UA_NULL && srcMsgBuffer != UA_NULL);
+    // Copy all internal properties except the buffers and number of buffers
+    destMsgBuffer->type = srcMsgBuffer->type;
+    destMsgBuffer->secureType = srcMsgBuffer->secureType;
+    destMsgBuffer->msgSize = srcMsgBuffer->msgSize;
+    destMsgBuffer->nbChunks = srcMsgBuffer->nbChunks;
+    destMsgBuffer->sequenceNumberPosition = srcMsgBuffer->sequenceNumberPosition;
+    destMsgBuffer->isFinal = srcMsgBuffer->isFinal;
+    destMsgBuffer->requestId = srcMsgBuffer->requestId;
+}
+
+StatusCode Copy_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
+                                     UA_Msg_Buffer* srcMsgBuffer){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(destMsgBuffer != UA_NULL && srcMsgBuffer != UA_NULL){
         assert(destMsgBuffer->nbBuffers == 1);
         assert(srcMsgBuffer->nbBuffers == 1);
         status = STATUS_OK;
-        // Attach everything except the flush data which can be used for a different flush level
-        Delete_Buffer(destMsgBuffer->buffers);
-        destMsgBuffer->buffers = srcMsgBuffer->buffers;
-        destMsgBuffer->type = srcMsgBuffer->type;
-        destMsgBuffer->secureType = srcMsgBuffer->secureType;
-        destMsgBuffer->msgSize = srcMsgBuffer->msgSize;
-        destMsgBuffer->nbChunks = srcMsgBuffer->nbChunks;
-        destMsgBuffer->sequenceNumberPosition = srcMsgBuffer->sequenceNumberPosition;
-        destMsgBuffer->isFinal = srcMsgBuffer->isFinal;
-        destMsgBuffer->requestId = srcMsgBuffer->requestId;
+        // Copy everything except the flush data which can be used for a different flush level
+        //  and nbBuffers which is set on initialization
+        Internal_Copy_Msg_Buffer_Properties(destMsgBuffer, srcMsgBuffer);
+
+        status = Copy_Buffer(destMsgBuffer->buffers, srcMsgBuffer->buffers);
     }
     return status;
 }
@@ -204,14 +212,37 @@ Buffer* Get_Current_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer){
     return buf;
 }
 
-Buffer* Next_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer){
+Buffer* Next_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer,
+                                    uint32_t*       bufferIdx){
     Buffer* buf = UA_NULL;
-    if(mBuffer != UA_NULL){
+    if(mBuffer != UA_NULL && bufferIdx != UA_NULL){
         if(mBuffer->nbChunks < mBuffer->maxChunks){
+            *bufferIdx = mBuffer->nbChunks;
             buf = &(mBuffer->buffers[mBuffer->nbChunks]);
             mBuffer->nbChunks = mBuffer->nbChunks + 1;
         }
     }
     return buf;
+}
+
+void Internal_Copy_Msg_Buffers_Properties(UA_Msg_Buffers* destMsgBuffer,
+                                          UA_Msg_Buffer*  srcMsgBuffer){
+    Internal_Copy_Msg_Buffer_Properties((UA_Msg_Buffer*) destMsgBuffer, srcMsgBuffer);
+}
+
+StatusCode Copy_Buffer_To_Msg_Buffers(UA_Msg_Buffers* destMsgBuffer,
+                                      uint32_t        bufferIdx,
+                                      UA_Msg_Buffer*  srcMsgBuffer){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(destMsgBuffer != UA_NULL && srcMsgBuffer != UA_NULL){
+        assert(srcMsgBuffer->nbBuffers == 1);
+        status = STATUS_OK;
+        // Copy everything except the flush data which can be used for a different flush level
+        //  and nbBuffers which is set on initialization
+        Internal_Copy_Msg_Buffer_Properties(destMsgBuffer, srcMsgBuffer);
+
+        status = Copy_Buffer(&(destMsgBuffer->buffers[bufferIdx]), srcMsgBuffer->buffers);
+    }
+    return status;
 }
 

@@ -79,8 +79,8 @@ StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer,
 StatusCode Set_Secure_Message_Type(UA_Msg_Buffer* mBuffer,
                                    UA_Secure_Message_Type sType);
 
-StatusCode Attach_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
-                                       UA_Msg_Buffer* srcMsgBuffer);
+StatusCode Copy_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
+                                     UA_Msg_Buffer* srcMsgBuffer);
 
 typedef struct UA_Msg_Buffer UA_Msg_Buffers;
 // Several buffers by msg mode (secure message input buffer only)
@@ -90,7 +90,12 @@ void Reset_Msg_Buffers(UA_Msg_Buffers* mBuffer);
 void Delete_Msg_Buffers(UA_Msg_Buffers** mBuffer);
 
 Buffer* Get_Current_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer);
-Buffer* Next_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer);
+Buffer* Next_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer,
+                                    uint32_t*       bufferIdx);
+
+StatusCode Copy_Buffer_To_Msg_Buffers(UA_Msg_Buffers* destMsgBuffer,
+                                      uint32_t        bufferIdx,
+                                      UA_Msg_Buffer*  srcMsgBuffer);
 
 
 #endif /* INGOPCS_MSG_BUFFER_H_ */

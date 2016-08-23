@@ -285,7 +285,7 @@ StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConne
 
     // MaxBodySize to be computed prior any write in sending buffer
     if(status == STATUS_OK){
-        status = Set_MaxBodySize(cConnection->instance, 1);
+        status = Set_MaxBodySize(cConnection->instance, UA_FALSE);
     }
 
     if(status == STATUS_OK){
@@ -323,7 +323,9 @@ StatusCode Read_Open_Secure_Channel_Reponse(SC_Channel_Client_Connection* cConne
 StatusCode Receive_Open_Secure_Channel_Response(SC_Channel_Client_Connection* cConnection,
                                                 UA_Msg_Buffer* transportMsgBuffer){
     StatusCode status = STATUS_INVALID_RCV_PARAMETER;
-    uint32_t validateSenderCertificate = 1; // True: always activated as indicated in API
+    const uint32_t validateSenderCertificateTrue = 1; // True: always activated as indicated in API
+    const uint32_t isSymmetricFalse = UA_FALSE; // TRUE
+    const uint32_t isPrecCryptoDataFalse = UA_FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
 
     if(transportMsgBuffer->isFinal == UA_Msg_Chunk_Final){
         // OPN request/response must be in one chunk only
@@ -344,22 +346,22 @@ StatusCode Receive_Open_Secure_Channel_Response(SC_Channel_Client_Connection* cC
         status = Decode_Asymmetric_Security_Header(cConnection->instance,
                                                    cConnection->pkiProvider,
                                                    transportMsgBuffer,
-                                                   validateSenderCertificate);
+                                                   validateSenderCertificateTrue);
     }
 
     if(status == STATUS_OK){
         // Decrypt message content and store complete message in secure connection buffer
         status = Decrypt_Message_Content(cConnection->instance,
-                                         UA_FALSE, // No token id to evaluate,
-                                         0, // Not evaluated token id value
                                          transportMsgBuffer,
-                                         1); // IsAsymmetric = TRUE
+                                         isSymmetricFalse,
+                                         isPrecCryptoDataFalse);
     }
 
     if(status == STATUS_OK){
         // Decrypt message content and store complete message in secure connection buffer
         status = Verify_Message_Signature(cConnection->instance,
-                                          1); // IsAsymmetric = TRUE
+                                          isSymmetricFalse,
+                                          isPrecCryptoDataFalse); // IsAsymmetric = TRUE
     }
 
     if(status == STATUS_OK){

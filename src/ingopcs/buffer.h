@@ -31,4 +31,6 @@ StatusCode Set_Data_Length_Buffer(Buffer* buffer, uint32_t length);
 StatusCode Write_Buffer(Buffer* buffer, const UA_Byte* data_src, uint32_t count);
 StatusCode Read_Buffer(UA_Byte* data_dest, Buffer* buffer, uint32_t count);
 
+StatusCode Copy_Buffer(Buffer* dest, Buffer* src);
+
 #endif /* INGOPCS_BUFFER_H_ */

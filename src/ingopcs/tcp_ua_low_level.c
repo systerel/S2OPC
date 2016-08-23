@@ -225,14 +225,25 @@ StatusCode Read_Msg_Buffer(UA_Byte* data_dest,
                            uint32_t size,
                            UA_Msg_Buffer* msgBuffer,
                            uint32_t count){
-    StatusCode status = STATUS_NOK;
-    if(data_dest == UA_NULL || msgBuffer == UA_NULL
-       || size < count
-       || msgBuffer->buffers->length - msgBuffer->buffers->position < count)
-    {
-            status = STATUS_INVALID_PARAMETERS;
-    }else{
-        status = Read_Buffer(data_dest, msgBuffer->buffers, count);
+    StatusCode status = STATUS_OK;
+    Buffer* buffer = UA_NULL;
+    if(msgBuffer->nbBuffers == 1){
+        buffer = msgBuffer->buffers;
+    }else if(msgBuffer->nbBuffers > 1 && msgBuffer->nbChunks > 0){
+        buffer = Get_Current_Chunk_From_Msg_Buffers(msgBuffer);
+        if(buffer == UA_NULL){
+            status = STATUS_NOK;
+        }
+    }
+    if(status == STATUS_OK){
+        if(data_dest == UA_NULL || msgBuffer == UA_NULL
+           || size < count
+           || buffer->length - buffer->position < count)
+        {
+                status = STATUS_INVALID_PARAMETERS;
+        }else{
+            status = Read_Buffer(data_dest, buffer, count);
+        }
     }
     return status;
 }

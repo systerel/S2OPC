@@ -100,7 +100,7 @@ StatusCode Encode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
                                              UA_Byte_String*           receiverCertificate);
 
 StatusCode Set_MaxBodySize(SecureChannel_Connection* scConnection,
-                           uint32_t                  isAsymmetric);
+                           uint32_t                  isSymmetric);
 
 StatusCode Encode_Sequence_Header(SecureChannel_Connection* scConnection,
                                   uint32_t*                 requestId);
@@ -112,6 +112,10 @@ StatusCode Write_Secure_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
 StatusCode Flush_Secure_Msg_Buffer(UA_Msg_Buffer*     msgBuffer,
                                    UA_Msg_Final_Chunk chunkType);
 
+StatusCode Is_Precedent_Crypto_Data(SecureChannel_Connection* scConnection,
+                                   uint32_t                  receivedTokenId,
+                                   uint32_t*                 isPrecCryptoData);
+
 StatusCode Decode_Secure_Message_SecureChannelId(SecureChannel_Connection* scConnection,
                                                  UA_Msg_Buffer*            transportBuffer);
 
@@ -121,13 +125,13 @@ StatusCode Decode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
                                              uint32_t                  validateSenderCert);
 
 StatusCode Decrypt_Message_Content(SecureChannel_Connection* scConnection,
-                                   uint32_t                  useTokenId,
-                                   uint32_t                  receivedTokenId,
                                    UA_Msg_Buffer*            transportBuffer,
-                                   uint32_t                  isAsymmetric);
+                                   uint32_t                  isSymmetric,
+                                   uint32_t                  isPrecCryptoData);
 
 StatusCode Verify_Message_Signature(SecureChannel_Connection* scConnection,
-                                    uint32_t                  isAsymmetric);
+                                    uint32_t                  isSymmetric,
+                                    uint32_t                  isPrecCryptoData);
 
 StatusCode Check_Sequence_Number_Received(SecureChannel_Connection* scConnection);
 

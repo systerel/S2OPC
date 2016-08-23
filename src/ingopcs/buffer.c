@@ -5,6 +5,7 @@
  *      Author: Vincent
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <buffer.h>
@@ -86,8 +87,12 @@ StatusCode Set_Position_Buffer(Buffer* buffer, uint32_t position){
 
 StatusCode Set_Data_Length_Buffer(Buffer* buffer, uint32_t length){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(buffer->max_size >= length){
+    if(buffer != UA_NULL && buffer->max_size >= length){
         status = STATUS_OK;
+        if(buffer->length > length){
+            // Reset unused bytes to 0
+            memset(buffer, 0, buffer->length - length);
+        }
         buffer->length = length;
     }
     return status;
@@ -126,6 +131,25 @@ StatusCode Read_Buffer(UA_Byte* data_dest, Buffer* buffer, uint32_t count){
             status = STATUS_OK;
         }else{
             status = STATUS_INVALID_STATE;
+        }
+    }
+    return status;
+}
+
+StatusCode Copy_Buffer(Buffer* dest, Buffer* src){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(dest != UA_NULL && src != UA_NULL &&
+       src->length <= dest->max_size)
+    {
+        assert(src->position <= src->length);
+        status = STATUS_OK;
+    }
+
+    if(status == STATUS_OK){
+        memcpy(dest, src, src->length);
+        status = Set_Data_Length_Buffer(dest, src->length);
+        if(status == STATUS_OK){
+            status = Set_Position_Buffer(dest, src->position);
         }
     }
     return status;
