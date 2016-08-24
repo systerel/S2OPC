@@ -38,6 +38,9 @@ SC_Channel_Client_Connection* Create_Client_Channel (Namespace*      namespac,
 
 void Delete_Client_Channel(SC_Channel_Client_Connection* scConnection){
     if(scConnection != UA_NULL){
+        if(scConnection->pkiProvider != UA_NULL){
+            Delete_PKI_Provider(scConnection->pkiProvider);
+        }
         if(scConnection->serverCertificate != UA_NULL){
             Delete_Byte_String(scConnection->serverCertificate);
         }
@@ -167,6 +170,7 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
            connection->callbackData == UA_NULL)
         {
             // Create PKI provider
+            connection->pkiProvider = Create_PKI_Provider(pkiConfig);
             connection->clientCertificate = Create_Byte_String_Copy(clientCertificate);
             connection->clientKey = Create_Private_Key(clientKey);
             connection->serverCertificate = Create_Byte_String_Copy(serverCertificate);
