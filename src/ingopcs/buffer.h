@@ -33,4 +33,6 @@ StatusCode Read_Buffer(UA_Byte* data_dest, Buffer* buffer, uint32_t count);
 
 StatusCode Copy_Buffer(Buffer* dest, Buffer* src);
 
+StatusCode Copy_Buffer_Limited_Length(Buffer* dest, Buffer* src, uint32_t limitedLength);
+
 #endif /* INGOPCS_BUFFER_H_ */

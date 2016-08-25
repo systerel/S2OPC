@@ -160,7 +160,7 @@ StatusCode Read_UA_Byte_String(UA_Msg_Buffer* msgBuffer, UA_Byte_String* str){
             length = EncodeDecode_Int32(readValue);
             if(length > 0){
                 str->length = length;
-                str->characters = malloc(sizeof(length));
+                str->characters = malloc(sizeof(UA_Byte) * length);
                 if(str->characters != UA_NULL){
                     status = Read_Msg_Buffer(str->characters, length, msgBuffer, length);
                     if(status != STATUS_OK){

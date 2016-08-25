@@ -209,6 +209,7 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
 }
 
 StatusCode Write_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConnection){
+    StatusCode status = STATUS_OK;
     const UA_Byte twoByteNodeIdType = 0x00;
     const UA_Byte fourByteNodeIdType = 0x01;
     const UA_Byte namespace = 0;
@@ -216,9 +217,10 @@ StatusCode Write_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConn
     const UA_Byte noBodyEncoded = 0;
     const uint16_t openSecureChannelRequestTypeId = 444;
     UA_String* auditId = Create_String_From_CString("audit1");
-    UA_String* nullString = Create_String();
 
     UA_Msg_Buffer* sendBuf = cConnection->instance->sendingBuffer;
+    Private_Key* pkey = UA_NULL;
+    uint32_t pkeyLength = 0;
 
     // Encode request type Node Id (prior to message body)
     Write_Secure_Msg_Buffer(sendBuf, &fourByteNodeIdType, 1);
@@ -254,14 +256,32 @@ StatusCode Write_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConn
     Write_UInt32(sendBuf, 0);
     // Enumeration request type => ISSUE_0
     Write_Int32(sendBuf, 0);
-    // Enumeration security mode => NONE_1
-    Write_Int32(sendBuf, 1);
+    // Enumeration security mode => SIGNANDENCRYPT_3 // NONE_1
+    Write_Int32(sendBuf, 3);
     // Client nonce => null string
-    Write_UA_String(sendBuf, nullString);
-    // Requested lifetime
-    Write_Int32(sendBuf, cConnection->requestedLifetime);
+    status = CryptoProvider_Get_Sym_Gen_Key_Length(cConnection->instance->currentCryptoProvider, &pkeyLength);
+    if(status == STATUS_OK){
+        pkey = CryptoProvider_Sym_Genereate_Key(cConnection->instance->currentCryptoProvider,
+                                                pkeyLength);
+        if(pkey != UA_NULL){
+            UA_Byte_String* bsKey = Begin_Use_Private_Key(pkey);
+            Write_UA_Byte_String(sendBuf, bsKey);
+            End_Use_Private_Key(bsKey);
 
-    return STATUS_OK;
+            cConnection->instance->currentNonce = pkey;
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+
+    if(status == STATUS_OK){
+        // Requested lifetime
+        Write_Int32(sendBuf, cConnection->requestedLifetime);
+    }
+
+    Delete_Byte_String(auditId);
+
+    return status;
 }
 
 StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConnection){
@@ -331,6 +351,8 @@ StatusCode Receive_Open_Secure_Channel_Response(SC_Channel_Client_Connection* cC
     const uint32_t isSymmetricFalse = UA_FALSE; // TRUE
     const uint32_t isPrecCryptoDataFalse = UA_FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
 
+    uint32_t snPosition = 0;
+
     if(transportMsgBuffer->isFinal == UA_Msg_Chunk_Final){
         // OPN request/response must be in one chunk only
         status = STATUS_OK;
@@ -350,13 +372,15 @@ StatusCode Receive_Open_Secure_Channel_Response(SC_Channel_Client_Connection* cC
         status = Decode_Asymmetric_Security_Header(cConnection->instance,
                                                    cConnection->pkiProvider,
                                                    transportMsgBuffer,
-                                                   validateSenderCertificateTrue);
+                                                   validateSenderCertificateTrue,
+                                                   &snPosition);
     }
 
     if(status == STATUS_OK){
         // Decrypt message content and store complete message in secure connection buffer
         status = Decrypt_Message_Content(cConnection->instance,
                                          transportMsgBuffer,
+                                         snPosition,
                                          isSymmetricFalse,
                                          isPrecCryptoDataFalse);
     }

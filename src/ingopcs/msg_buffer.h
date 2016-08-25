@@ -95,7 +95,8 @@ Buffer* Next_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer,
 
 StatusCode Copy_Buffer_To_Msg_Buffers(UA_Msg_Buffers* destMsgBuffer,
                                       uint32_t        bufferIdx,
-                                      UA_Msg_Buffer*  srcMsgBuffer);
+                                      UA_Msg_Buffer*  srcMsgBuffer,
+                                      uint32_t        limitedLength);
 
 
 #endif /* INGOPCS_MSG_BUFFER_H_ */

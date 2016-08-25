@@ -136,9 +136,10 @@ StatusCode Read_Buffer(UA_Byte* data_dest, Buffer* buffer, uint32_t count){
     return status;
 }
 
-StatusCode Copy_Buffer(Buffer* dest, Buffer* src){
+StatusCode Copy_Buffer_Limited_Length(Buffer* dest, Buffer* src, uint32_t limitedLength){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != UA_NULL && src != UA_NULL &&
+       src->length >= limitedLength &&
        src->length <= dest->max_size)
     {
         assert(src->position <= src->length);
@@ -146,11 +147,22 @@ StatusCode Copy_Buffer(Buffer* dest, Buffer* src){
     }
 
     if(status == STATUS_OK){
-        memcpy(dest, src, src->length);
-        status = Set_Data_Length_Buffer(dest, src->length);
+        memcpy(dest->data, src->data, limitedLength);
+        status = Set_Data_Length_Buffer(dest, limitedLength);
         if(status == STATUS_OK){
             status = Set_Position_Buffer(dest, src->position);
         }
     }
+    return status;
+}
+
+
+StatusCode Copy_Buffer(Buffer* dest, Buffer* src){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(src != UA_NULL)
+    {
+        status = Copy_Buffer_Limited_Length(dest, src, src->length);
+    }
+
     return status;
 }

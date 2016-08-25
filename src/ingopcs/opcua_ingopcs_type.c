@@ -137,29 +137,20 @@ StatusCode Compare_Byte_Strings(UA_Byte_String* left,
         status = STATUS_OK;
     }
 
-    if(left->length == right->length ||
-       (left->length <= 0 && right->length <= 0)){
-        if(left->length <= 0 && right->length <= 0){
-            *comparison = 0;
-        }else{
-            while(left->characters[idx] == right->characters[idx] &&
-                  idx < left->length)
-            {
-                idx++;
-            }
-            if(left->characters[idx] == right->characters[idx]){
+    if(status == STATUS_OK){
+        if(left->length == right->length ||
+           (left->length <= 0 && right->length <= 0)){
+            if(left->length <= 0 && right->length <= 0){
                 *comparison = 0;
-            }else if(left->characters[idx] > right->characters[idx]){
-                *comparison = +1;
             }else{
-                *comparison = -1;
+                *comparison = memcmp(left->characters, right->characters, left->length);
             }
-        }
-    }else if(left->length > right->length){
+        }else if(left->length > right->length){
 
-        *comparison = +1;
-    }else{
-        *comparison = -1;
+            *comparison = +1;
+        }else{
+            *comparison = -1;
+        }
     }
 
     return status;

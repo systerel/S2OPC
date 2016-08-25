@@ -232,7 +232,8 @@ void Internal_Copy_Msg_Buffers_Properties(UA_Msg_Buffers* destMsgBuffer,
 
 StatusCode Copy_Buffer_To_Msg_Buffers(UA_Msg_Buffers* destMsgBuffer,
                                       uint32_t        bufferIdx,
-                                      UA_Msg_Buffer*  srcMsgBuffer){
+                                      UA_Msg_Buffer*  srcMsgBuffer,
+                                      uint32_t        limitedLength){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(destMsgBuffer != UA_NULL && srcMsgBuffer != UA_NULL){
         assert(srcMsgBuffer->nbBuffers == 1);
@@ -241,7 +242,9 @@ StatusCode Copy_Buffer_To_Msg_Buffers(UA_Msg_Buffers* destMsgBuffer,
         //  and nbBuffers which is set on initialization
         Internal_Copy_Msg_Buffer_Properties(destMsgBuffer, srcMsgBuffer);
 
-        status = Copy_Buffer(&(destMsgBuffer->buffers[bufferIdx]), srcMsgBuffer->buffers);
+        status = Copy_Buffer_Limited_Length(&(destMsgBuffer->buffers[bufferIdx]),
+                                            srcMsgBuffer->buffers,
+                                            limitedLength);
     }
     return status;
 }

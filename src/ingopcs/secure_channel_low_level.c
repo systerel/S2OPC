@@ -1277,7 +1277,8 @@ StatusCode Decode_Secure_Message_SecureChannelId(SecureChannel_Connection* scCon
 StatusCode Decode_Asymmetric_Security_Header(SecureChannel_Connection* scConnection,
                                              PKIProvider*              pkiProvider,
                                              UA_Msg_Buffer*            transportBuffer,
-                                             uint32_t                  validateSenderCert)
+                                             uint32_t                  validateSenderCert,
+                                             uint32_t*                 sequenceNumberPosition)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toEncrypt = 1; // True
@@ -1314,7 +1315,6 @@ StatusCode Decode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
         }
     }
 
-
     // Sender Certificate:
     if(status == STATUS_OK){
         status = Read_UA_Byte_String(transportBuffer, senderCertificate);
@@ -1334,9 +1334,10 @@ StatusCode Decode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
                 }
 
                 if(status == STATUS_OK && validateSenderCert != UA_FALSE){
-                    status = PKIProvider_Validate_Certificate(pkiProvider,
-                                                              senderCertificate,
-                                                              &validationStatusCode);
+                    // TODO: find memory access pb
+//                    status = PKIProvider_Validate_Certificate(pkiProvider,
+//                                                              senderCertificate,
+//                                                              &validationStatusCode);
                     if(status != STATUS_OK){
                         // TODO: report validation status code
                     }
@@ -1379,8 +1380,8 @@ StatusCode Decode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
                                 if(status != STATUS_OK || runningAppCertComparison != 0){
                                     status = STATUS_INVALID_RCV_PARAMETER; // TODO: BadCertificateUnknown error ? part 6 6.7.6 p40
                                 }
-
                             }
+
                         }else{
                             status = STATUS_NOK;
                         }
@@ -1389,6 +1390,9 @@ StatusCode Decode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
                     }
                 } // if thumbprint length correctly computed
             } // if toEncrypt
+            // Set the sequence number position which is the next position to read
+            //  since whole asymmetric security header was read
+            *sequenceNumberPosition = transportBuffer->buffers->position;
         } // if decoded thumbprint
     }
 
@@ -1419,6 +1423,7 @@ StatusCode Is_Precedent_Crypto_Data(SecureChannel_Connection* scConnection,
 
 StatusCode Decrypt_Message_Content(SecureChannel_Connection* scConnection,
                                    UA_Msg_Buffer*            transportBuffer,
+                                   uint32_t                  sequenceNumberPosition,
                                    uint32_t                  isSymmetric,
                                    uint32_t                  isPrecCryptoData)
 {
@@ -1446,27 +1451,42 @@ StatusCode Decrypt_Message_Content(SecureChannel_Connection* scConnection,
         toDecrypt = Is_Msg_Encrypted(securityMode, transportBuffer);
     }
 
+    // TODO: factorize common code between length retrieved and decrypt ...
     if(toDecrypt != UA_FALSE){
         // Message is encrypted
+        UA_Byte* dataToDecrypt = &(transportBuffer->buffers->data[sequenceNumberPosition]);
+        uint32_t lengthToDecrypt = transportBuffer->buffers->length - sequenceNumberPosition;
 
         if(status == STATUS_OK){
             if(isSymmetric == UA_FALSE){
                 status = AsymmetricDecrypt_Length_Crypto_Provider(cryptoProvider,
-                                                                  transportBuffer->buffers->data,
-                                                                  transportBuffer->buffers->length,
+                                                                  dataToDecrypt,
+                                                                  lengthToDecrypt,
                                                                   scConnection->runningAppPrivateKey,
                                                                   &decryptedTextLength);
 
                 if(status == STATUS_OK && decryptedTextLength <= scConnection->receptionBuffers->buffers->max_size){
+                    // Retrieve next chunk empty buffer
                     plainBuffer = Next_Chunk_From_Msg_Buffers(scConnection->receptionBuffers, &bufferIdx);
                     if(plainBuffer != UA_NULL){
+                        // Copy non encrypted data from original buffer to plain text buffer
+                        // and set position to current read position
+                        status = Copy_Buffer_To_Msg_Buffers(scConnection->receptionBuffers,
+                                                            bufferIdx,
+                                                            transportBuffer,
+                                                            sequenceNumberPosition);
+                    }
+                    if(status == STATUS_OK){
                         assert(plainBuffer->max_size >= decryptedTextLength);
                         status = AsymmetricDecrypt_Crypto_Provider(cryptoProvider,
-                                                                   transportBuffer->buffers->data,
-                                                                   transportBuffer->buffers->length,
+                                                                   dataToDecrypt,
+                                                                   lengthToDecrypt,
                                                                    scConnection->runningAppPrivateKey,
-                                                                   plainBuffer->data,
+                                                                   &(plainBuffer->data[sequenceNumberPosition]),
                                                                    &decryptedTextLength);
+                        if(status == STATUS_OK){
+                            Set_Data_Length_Buffer(plainBuffer, sequenceNumberPosition + decryptedTextLength);
+                        }
                     }else{
                         status = STATUS_NOK;
                     }
@@ -1482,23 +1502,36 @@ StatusCode Decrypt_Message_Content(SecureChannel_Connection* scConnection,
                     receiverKeySet = scConnection->precSecuKeySets.receiverKeySet;
                 }
                 status = SymmetricDecrypt_Length_Crypto_Provider(cryptoProvider,
-                                                                 transportBuffer->buffers->data,
-                                                                 transportBuffer->buffers->length,
+                                                                 dataToDecrypt,
+                                                                 lengthToDecrypt,
                                                                  receiverKeySet->encryptKey,
                                                                  receiverKeySet->initVector,
                                                                  &decryptedTextLength);
 
                 if(status == STATUS_OK && decryptedTextLength <= scConnection->receptionBuffers->buffers->max_size){
+                    // Retrieve next chunk empty buffer
                     plainBuffer = Next_Chunk_From_Msg_Buffers(scConnection->receptionBuffers, &bufferIdx);
+
                     if(plainBuffer != UA_NULL){
+                        // Copy non encrypted data from original buffer to plain text buffer
+                        // and set position to current read position
+                        status = Copy_Buffer_To_Msg_Buffers(scConnection->receptionBuffers,
+                                                            bufferIdx,
+                                                            transportBuffer,
+                                                            sequenceNumberPosition);
+                    }
+                    if(status == STATUS_OK){
                         assert(plainBuffer->max_size >= decryptedTextLength);
                         status = SymmetricDecrypt_Crypto_Provider(cryptoProvider,
-                                                                  transportBuffer->buffers->data,
-                                                                  transportBuffer->buffers->length,
+                                                                  dataToDecrypt,
+                                                                  lengthToDecrypt,
                                                                   receiverKeySet->encryptKey,
                                                                   receiverKeySet->initVector,
-                                                                  plainBuffer->data,
+                                                                  &(plainBuffer->data[sequenceNumberPosition]),
                                                                   &decryptedTextLength);
+                        if(status == STATUS_OK){
+                            Set_Data_Length_Buffer(plainBuffer, sequenceNumberPosition + decryptedTextLength);
+                        }
                     }else{
                         status = STATUS_NOK;
                     }
@@ -1511,7 +1544,10 @@ StatusCode Decrypt_Message_Content(SecureChannel_Connection* scConnection,
         // Message is not encrypted
         plainBuffer = Next_Chunk_From_Msg_Buffers(scConnection->receptionBuffers, &bufferIdx);
         assert(transportBuffer->nbChunks == scConnection->receptionBuffers->nbChunks);
-        status = Copy_Buffer_To_Msg_Buffers(scConnection->receptionBuffers, bufferIdx, transportBuffer);
+        status = Copy_Buffer_To_Msg_Buffers(scConnection->receptionBuffers,
+                                            bufferIdx,
+                                            transportBuffer,
+                                            transportBuffer->buffers->length);
     }
 
     return status;

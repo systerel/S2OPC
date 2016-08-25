@@ -325,6 +325,7 @@ StatusCode Connect_Transport (TCP_UA_Connection*          connection,
 void Disconnect_Transport(TCP_UA_Connection* connection){
     Close_Socket(connection->socket);
     connection->socket = UA_NULL;
+    Delete_String(connection->url);
     connection->url = UA_NULL;
     connection->callback = UA_NULL;
     connection->callbackData = UA_NULL;

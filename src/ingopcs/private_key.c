@@ -43,6 +43,7 @@ UA_Byte_String* Begin_Use_Private_Key (Private_Key* pkey){
 
 void End_Use_Private_Key (UA_Byte_String* key){
     if(key != UA_NULL){
+        memset(key->characters, 0, key->length);
         Delete_Byte_String(key);
     }
 }

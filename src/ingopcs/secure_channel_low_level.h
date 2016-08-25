@@ -122,10 +122,12 @@ StatusCode Decode_Secure_Message_SecureChannelId(SecureChannel_Connection* scCon
 StatusCode Decode_Asymmetric_Security_Header(SecureChannel_Connection* scConnection,
                                              PKIProvider*              pkiProvider,
                                              UA_Msg_Buffer*            transportBuffer,
-                                             uint32_t                  validateSenderCert);
+                                             uint32_t                  validateSenderCert,
+                                             uint32_t*                 sequenceNumberPosition);
 
 StatusCode Decrypt_Message_Content(SecureChannel_Connection* scConnection,
                                    UA_Msg_Buffer*            transportBuffer,
+                                   uint32_t                  sequenceNumberPosition,
                                    uint32_t                  isSymmetric,
                                    uint32_t                  isPrecCryptoData);
 
