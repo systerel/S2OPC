@@ -216,11 +216,14 @@ StatusCode Write_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConn
     const UA_Byte nullTypeId = 0;
     const UA_Byte noBodyEncoded = 0;
     const uint16_t openSecureChannelRequestTypeId = 444;
+
     UA_String* auditId = Create_String_From_CString("audit1");
 
     UA_Msg_Buffer* sendBuf = cConnection->instance->sendingBuffer;
     Private_Key* pkey = UA_NULL;
     uint32_t pkeyLength = 0;
+    uint32_t enumSecuMode = 0;
+
 
     // Encode request type Node Id (prior to message body)
     Write_Secure_Msg_Buffer(sendBuf, &fourByteNodeIdType, 1);
@@ -256,10 +259,34 @@ StatusCode Write_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConn
     Write_UInt32(sendBuf, 0);
     // Enumeration request type => ISSUE_0
     Write_Int32(sendBuf, 0);
-    // Enumeration security mode => SIGNANDENCRYPT_3 // NONE_1
-    Write_Int32(sendBuf, 3);
-    // Client nonce => null string
-    status = CryptoProvider_Get_Sym_Gen_Key_Length(cConnection->instance->currentCryptoProvider, &pkeyLength);
+
+    // Enumeration security mode => SIGNANDENCRYPT_3 // SIGN_2 // NONE_1
+    switch(cConnection->securityMode){
+        case Msg_Security_Mode_Invalid:
+            status = STATUS_INVALID_PARAMETERS;
+            break;
+        case Msg_Security_Mode_None:
+            enumSecuMode = 1;
+            break;
+        case Msg_Security_Mode_Sign:
+            enumSecuMode = 2;
+            break;
+        case Msg_Security_Mode_SignAndEncrypt:
+            enumSecuMode = 3;
+            break;
+        default:
+            assert(UA_FALSE);
+    }
+
+    if(status == STATUS_OK){
+        status = Write_Int32(sendBuf, enumSecuMode);
+    }
+
+    if(status == STATUS_OK){
+        // Client nonce => null string
+        status = CryptoProvider_Get_Sym_Gen_Key_Length(cConnection->instance->currentCryptoProvider, &pkeyLength);
+    }
+
     if(status == STATUS_OK){
         pkey = CryptoProvider_Sym_Genereate_Key(cConnection->instance->currentCryptoProvider,
                                                 pkeyLength);
