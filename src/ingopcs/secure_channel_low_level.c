@@ -14,6 +14,8 @@
 #include <tcp_ua_connection.h>
 #include <tcp_ua_low_level.h>
 
+const uint32_t scProtocolVersion = 0;
+
 UA_String* UA_String_Security_Policy_None;
 UA_String* UA_String_Security_Policy_Basic128Rsa15;
 UA_String* UA_String_Security_Policy_Basic256;
@@ -21,7 +23,7 @@ UA_String* UA_String_Security_Policy_Basic256Sha256;
 
 SecureChannel_Connection* Create_Secure_Connection (){
     SecureChannel_Connection* sConnection = UA_NULL;
-    TCP_UA_Connection* connection = Create_Connection();
+    TCP_UA_Connection* connection = Create_Connection(scProtocolVersion);
     UA_String_Security_Policy_None =
      Create_String_From_CString(SECURITY_POLICY_NONE);
     UA_String_Security_Policy_Basic128Rsa15 =

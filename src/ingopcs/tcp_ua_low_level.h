@@ -10,6 +10,8 @@
 
 #include <msg_buffer.h>
 
+extern const uint32_t tcpProtocolVersion;
+
 StatusCode Write_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
                             UA_Byte* data_src,
                             uint32_t count);

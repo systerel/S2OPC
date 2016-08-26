@@ -48,15 +48,18 @@ StatusCode Initiate_Receive_Buffer(TCP_UA_Connection* connection){
     return status;
 }
 
-TCP_UA_Connection* Create_Connection(){
+TCP_UA_Connection* Create_Connection(uint32_t scProtocolVersion){
     TCP_UA_Connection* connection = UA_NULL;
     StatusCode status = STATUS_NOK;
-    connection = (TCP_UA_Connection *) malloc(sizeof(TCP_UA_Connection));
+
+    if(tcpProtocolVersion == scProtocolVersion){
+        connection = (TCP_UA_Connection *) malloc(sizeof(TCP_UA_Connection));
+    }
 
     if(connection != UA_NULL){
         memset (connection, 0, sizeof(TCP_UA_Connection));
         connection->state = TCP_Connection_Disconnected;
-        connection->protocolVersion = 0;
+        connection->protocolVersion = tcpProtocolVersion;
         // TODO: check constraints on connection properties (>8192 bytes ...)
         connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
         connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;

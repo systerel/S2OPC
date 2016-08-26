@@ -9,6 +9,8 @@
 #include <tcp_ua_low_level.h>
 #include <ua_encoder.h>
 
+const uint32_t tcpProtocolVersion = 0;
+
 StatusCode Encode_TCP_UA_Header(UA_Msg_Buffer* msgBuffer,
                                 TCP_UA_Message_Type type){
     StatusCode status = STATUS_OK;

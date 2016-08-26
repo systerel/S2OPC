@@ -188,6 +188,7 @@ StatusCode Connect_Client_Channel(SC_Channel_Client_Connection* connection,
             {
                 status = STATUS_NOK;
             }else{
+                // TODO: check security mode = None if securityPolicy != None ??? => see http://opcfoundation.org/UA-Profile/UA/SecurityPolicy%23Basic128Rsa15
                 connection->instance->state = SC_Connection_Connecting_Transport;
                 status = Connect_Transport(connection->instance->transportConnection,
                                            uri,
@@ -255,8 +256,8 @@ StatusCode Write_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConn
     Write_Secure_Msg_Buffer(sendBuf, &noBodyEncoded, 1);
 
     //// Encode request content
-    // Client protocol version => 0
-    Write_UInt32(sendBuf, 0);
+    // Client protocol version
+    Write_UInt32(sendBuf, scProtocolVersion);
     // Enumeration request type => ISSUE_0
     Write_Int32(sendBuf, 0);
 
@@ -367,7 +368,8 @@ StatusCode Send_Open_Secure_Channel_Request(SC_Channel_Client_Connection* cConne
     return status;
 }
 
-StatusCode Read_Open_Secure_Channel_Reponse(SC_Channel_Client_Connection* cConneciton){
+StatusCode Read_Open_Secure_Channel_Reponse(SC_Channel_Client_Connection* cConnection){
+    // use Get_Rcv_Protocol_Version and check it is the same as the one received in SC
     return STATUS_NOK;
 }
 

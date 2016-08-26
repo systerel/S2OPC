@@ -45,6 +45,7 @@ typedef StatusCode (TCP_UA_Connection_Event_CB) (void*            tcpConnection,
 typedef struct TCP_UA_Connection {
     UA_String*                  url;
     uint32_t                    protocolVersion;
+    uint32_t                    receivedProtocolVersion;
     uint32_t                    receiveBufferSize;
     uint32_t                    sendBufferSize;
     uint32_t                    maxMessageSizeRcv;
@@ -62,7 +63,7 @@ typedef struct TCP_UA_Connection {
 
 } TCP_UA_Connection;
 
-TCP_UA_Connection* Create_Connection(void);
+TCP_UA_Connection* Create_Connection(uint32_t scProtocolVersion);
 void Delete_Connection(TCP_UA_Connection* connection);
 
 StatusCode Connect_Transport(TCP_UA_Connection*          connection,
@@ -77,5 +78,8 @@ StatusCode Send_Hello_Msg(TCP_UA_Connection* connection);
 StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection);
 StatusCode Receive_Error_Msg(TCP_UA_Connection* connection);
 
+// return UA_FALSE if no protocol version (for non TCP protocol only: must be generic)
+uint32_t Get_Rcv_Protocol_Version(TCP_UA_Connection* connection,
+                                  uint32_t*          protocolVersion);
 
 #endif /* INGOPCS_TCP_UA_CONNECTION_H_ */

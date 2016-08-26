@@ -13,6 +13,8 @@
 #include <tcp_ua_connection.h>
 #include <private_key.h>
 
+extern const uint32_t scProtocolVersion;
+
 typedef struct SC_Security_Token {
     uint32_t channelId;
     uint32_t tokenId;
