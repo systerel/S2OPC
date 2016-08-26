@@ -8,17 +8,17 @@
 #ifndef INGOPCS_PRIVATE_KEY_H_
 #define INGOPCS_PRIVATE_KEY_H_
 
-#include <opcua_ingopcs_types.h>
+#include "ua_types.h"
 
-typedef struct Private_Key {
-    UA_Byte_String* key; // to modify into non contiguous memory storage
-} Private_Key;
+typedef struct PrivateKey {
+    UA_ByteString* key; // to modify into non contiguous memory storage
+} PrivateKey;
 
-Private_Key* Create_Private_Key(UA_Byte_String* key);
-void Delete_Private_Key(Private_Key* pkey);
+PrivateKey* PrivateKey_Create(UA_ByteString* key);
+void PrivateKey_Delete(PrivateKey* pkey);
 
-UA_Byte_String* Begin_Use_Private_Key(Private_Key* pkey);
-void End_Use_Private_Key(UA_Byte_String* key);
-uint32_t Get_Private_Key_Size(Private_Key* pkey);
+UA_ByteString* PrivateKey_BeginUse(PrivateKey* pkey);
+void PrivateKey_EndUse(UA_ByteString* key);
+uint32_t PrivateKey_GetSize(PrivateKey* pkey);
 
 #endif /* INGOPCS_PRIVATE_KEY_H_ */

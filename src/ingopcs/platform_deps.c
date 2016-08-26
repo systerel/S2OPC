@@ -24,7 +24,7 @@ uint32_t float_big_endian(){
     return (0b10000000 & *((char*) &f)) == 0b10000000;
 }
 
-void Initialize_Platform_Dependencies(){
+void InitPlatformDependencies(){
     if(little_endian() == 0){
         endianess = Endianess_BigEndian;
     }else{

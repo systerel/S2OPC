@@ -20,6 +20,6 @@ typedef enum Endianess{
 extern Endianess endianess;
 extern Endianess floatEndianess;
 
-void Initialize_Platform_Dependencies(void);
+void InitPlatformDependencies(void);
 
 #endif /* INGOPCS_PLATFORM_DEPS_H_ */

@@ -5,9 +5,10 @@
  *      Author: Vincent
  */
 
+#include "ua_msg_buffer.h"
+
 #include <assert.h>
 #include <stdlib.h>
-#include <msg_buffer.h>
 
 const UA_Byte HEL[3] = {'H','E','L'};
 const UA_Byte ACK[3] = {'A','C','K'};
@@ -16,13 +17,13 @@ const UA_Byte MSG[3] = {'M','S','G'};
 const UA_Byte OPN[3] = {'O','P','N'};
 const UA_Byte CLO[3] = {'C','L','O'};
 
-UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
-                                 uint32_t maxChunks,
-                                 void*    flushData)
+UA_MsgBuffer* MsgBuffer_Create(Buffer*  buffer,
+                               uint32_t maxChunks,
+                               void*    flushData)
 {
-    UA_Msg_Buffer* mBuffer = UA_NULL;
+    UA_MsgBuffer* mBuffer = UA_NULL;
     if(buffer != UA_NULL){
-        mBuffer = (UA_Msg_Buffer*) malloc(sizeof(UA_Msg_Buffer));
+        mBuffer = (UA_MsgBuffer*) malloc(sizeof(UA_MsgBuffer));
         mBuffer->nbBuffers = 1;
         mBuffer->buffers = buffer;
         mBuffer->type = TCP_UA_Message_Unknown;
@@ -38,28 +39,21 @@ UA_Msg_Buffer* Create_Msg_Buffer(Buffer*  buffer,
     return mBuffer;
 }
 
-void Delete_Msg_Buffer(UA_Msg_Buffer** ptBuffer){
+void MsgBuffer_Delete(UA_MsgBuffer** ptBuffer){
     if(ptBuffer != UA_NULL && *ptBuffer != UA_NULL){
         assert((*ptBuffer)->nbBuffers == 1);
         if((*ptBuffer)->buffers != UA_NULL){
-            Delete_Buffer((*ptBuffer)->buffers);
+            Buffer_Delete((*ptBuffer)->buffers);
         }
         free(*ptBuffer);
         *ptBuffer = UA_NULL;
     }
 }
 
-void Reset_Buffer_Properties(UA_Msg_Buffer* mBuffer){
+void MsgBuffer_Reset(UA_MsgBuffer* mBuffer){
     if(mBuffer != UA_NULL){
         assert(mBuffer->nbBuffers == 1);
-
-    }
-}
-
-void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer){
-    if(mBuffer != UA_NULL){
-        assert(mBuffer->nbBuffers == 1);
-        Reset_Buffer(mBuffer->buffers);
+        Buffer_Reset(mBuffer->buffers);
         mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = UA_SecureMessage;
         mBuffer->msgSize = 0;
@@ -70,13 +64,13 @@ void Reset_Msg_Buffer(UA_Msg_Buffer* mBuffer){
     }
 }
 
-StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer,
-                                       uint32_t       bodyPosition){
+StatusCode MsgBuffer_ResetNextChunk(UA_MsgBuffer* mBuffer,
+                                    uint32_t      bodyPosition){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(mBuffer != UA_NULL){
         assert(mBuffer->nbBuffers == 1);
         mBuffer->msgSize = bodyPosition;
-        Reset_Buffer_After_Position(mBuffer->buffers, bodyPosition);
+        Buffer_ResetAfterPosition(mBuffer->buffers, bodyPosition);
         if(mBuffer->maxChunks == 0
            || mBuffer->nbChunks < mBuffer->maxChunks)
         {
@@ -89,8 +83,8 @@ StatusCode Reset_Msg_Buffer_Next_Chunk(UA_Msg_Buffer* mBuffer,
 }
 
 
-StatusCode Set_Secure_Message_Type(UA_Msg_Buffer* mBuffer,
-                                   UA_Secure_Message_Type sType){
+StatusCode MsgBuffer_SetSecureMsgType(UA_MsgBuffer*        mBuffer,
+                                      UA_SecureMessageType sType){
     StatusCode status = STATUS_INVALID_STATE;
     if(mBuffer != UA_NULL && mBuffer->type == TCP_UA_Message_Unknown){
         assert(mBuffer->nbBuffers == 1);
@@ -100,8 +94,8 @@ StatusCode Set_Secure_Message_Type(UA_Msg_Buffer* mBuffer,
     return status;
 }
 
-void Internal_Copy_Msg_Buffer_Properties(UA_Msg_Buffer* destMsgBuffer,
-                                         UA_Msg_Buffer* srcMsgBuffer){
+void MsgBuffer_InternalCopyProperties(UA_MsgBuffer* destMsgBuffer,
+                                      UA_MsgBuffer* srcMsgBuffer){
     assert(destMsgBuffer != UA_NULL && srcMsgBuffer != UA_NULL);
     // Copy all internal properties except the buffers and number of buffers
     destMsgBuffer->type = srcMsgBuffer->type;
@@ -113,8 +107,8 @@ void Internal_Copy_Msg_Buffer_Properties(UA_Msg_Buffer* destMsgBuffer,
     destMsgBuffer->requestId = srcMsgBuffer->requestId;
 }
 
-StatusCode Copy_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
-                                     UA_Msg_Buffer* srcMsgBuffer){
+StatusCode MsgBuffer_CopyBuffer(UA_MsgBuffer* destMsgBuffer,
+                                UA_MsgBuffer* srcMsgBuffer){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(destMsgBuffer != UA_NULL && srcMsgBuffer != UA_NULL){
         assert(destMsgBuffer->nbBuffers == 1);
@@ -122,27 +116,27 @@ StatusCode Copy_Buffer_To_Msg_Buffer(UA_Msg_Buffer* destMsgBuffer,
         status = STATUS_OK;
         // Copy everything except the flush data which can be used for a different flush level
         //  and nbBuffers which is set on initialization
-        Internal_Copy_Msg_Buffer_Properties(destMsgBuffer, srcMsgBuffer);
+        MsgBuffer_InternalCopyProperties(destMsgBuffer, srcMsgBuffer);
 
-        status = Copy_Buffer(destMsgBuffer->buffers, srcMsgBuffer->buffers);
+        status = Buffer_Copy(destMsgBuffer->buffers, srcMsgBuffer->buffers);
     }
     return status;
 }
 
-UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks,
-                                   uint32_t bufferSize){
+UA_MsgBuffers* MsgBuffers_Create(uint32_t maxChunks,
+                                 uint32_t bufferSize){
     assert(maxChunks > 0);
     StatusCode status = STATUS_OK;
-    UA_Msg_Buffers* mBuffers = UA_NULL;
+    UA_MsgBuffers* mBuffers = UA_NULL;
     uint32_t idx = 0;
-    mBuffers = (UA_Msg_Buffer*) malloc(sizeof(UA_Msg_Buffer));
+    mBuffers = (UA_MsgBuffer*) malloc(sizeof(UA_MsgBuffer));
     if(mBuffers != UA_NULL){
         mBuffers->nbBuffers = maxChunks;
         mBuffers->buffers = (Buffer*) malloc(sizeof(Buffer) * maxChunks);
 
         if(mBuffers->buffers != UA_NULL){
             while(status == STATUS_OK && idx < maxChunks){
-                status = Init_Buffer(&(mBuffers->buffers[idx]), bufferSize);
+                status = Buffer_Init(&(mBuffers->buffers[idx]), bufferSize);
                 idx++;
             }
 
@@ -167,17 +161,17 @@ UA_Msg_Buffers* Create_Msg_Buffers(uint32_t maxChunks,
             mBuffers->requestId = 0;
             mBuffers->flushData = UA_NULL;
         }else{
-            Delete_Msg_Buffers(&mBuffers);
+            MsgBuffers_Delete(&mBuffers);
         }
     }
     return mBuffers;
 }
 
-void Reset_Msg_Buffers(UA_Msg_Buffers* mBuffer){
+void MsgBuffers_Reset(UA_MsgBuffers* mBuffer){
     uint32_t idx = 0;
     if(mBuffer != UA_NULL){
         for(idx = 0; idx < mBuffer->maxChunks; idx++){
-            Reset_Buffer(&(mBuffer->buffers[idx]));
+            Buffer_Reset(&(mBuffer->buffers[idx]));
         }
         mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = UA_SecureMessage;
@@ -189,12 +183,12 @@ void Reset_Msg_Buffers(UA_Msg_Buffers* mBuffer){
     }
 }
 
-void Delete_Msg_Buffers(UA_Msg_Buffers** ptBuffers){
+void MsgBuffers_Delete(UA_MsgBuffers** ptBuffers){
     uint32_t idx = 0;
     if(ptBuffers != UA_NULL && *ptBuffers != UA_NULL){
         if((*ptBuffers)->buffers != UA_NULL){
             for(idx = 0; idx < (*ptBuffers)->nbBuffers; idx++){
-                Delete_Buffer (&((*ptBuffers)->buffers[idx]));
+                Buffer_Delete (&((*ptBuffers)->buffers[idx]));
             }
         }
         free(*ptBuffers);
@@ -202,7 +196,7 @@ void Delete_Msg_Buffers(UA_Msg_Buffers** ptBuffers){
     }
 }
 
-Buffer* Get_Current_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer){
+Buffer* MsgBuffers_GetCurrentChunk(UA_MsgBuffers* mBuffer){
     Buffer* buf = UA_NULL;
     if(mBuffer != UA_NULL){
         if(mBuffer->nbChunks > 0){
@@ -212,8 +206,8 @@ Buffer* Get_Current_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer){
     return buf;
 }
 
-Buffer* Next_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer,
-                                    uint32_t*       bufferIdx){
+Buffer* MsgBuffers_NextChunk(UA_MsgBuffers* mBuffer,
+                             uint32_t*      bufferIdx){
     Buffer* buf = UA_NULL;
     if(mBuffer != UA_NULL && bufferIdx != UA_NULL){
         if(mBuffer->nbChunks < mBuffer->maxChunks){
@@ -225,26 +219,26 @@ Buffer* Next_Chunk_From_Msg_Buffers(UA_Msg_Buffers* mBuffer,
     return buf;
 }
 
-void Internal_Copy_Msg_Buffers_Properties(UA_Msg_Buffers* destMsgBuffer,
-                                          UA_Msg_Buffer*  srcMsgBuffer){
-    Internal_Copy_Msg_Buffer_Properties((UA_Msg_Buffer*) destMsgBuffer, srcMsgBuffer);
+void MsgBuffers_InternalCopyProperties(UA_MsgBuffers* destMsgBuffer,
+                                       UA_MsgBuffer*  srcMsgBuffer){
+    MsgBuffer_InternalCopyProperties((UA_MsgBuffer*) destMsgBuffer, srcMsgBuffer);
 }
 
-StatusCode Copy_Buffer_To_Msg_Buffers(UA_Msg_Buffers* destMsgBuffer,
-                                      uint32_t        bufferIdx,
-                                      UA_Msg_Buffer*  srcMsgBuffer,
-                                      uint32_t        limitedLength){
+StatusCode MsgBuffers_CopyBuffer(UA_MsgBuffers* destMsgBuffer,
+                                 uint32_t       bufferIdx,
+                                 UA_MsgBuffer*  srcMsgBuffer,
+                                 uint32_t       limitedLength){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(destMsgBuffer != UA_NULL && srcMsgBuffer != UA_NULL){
         assert(srcMsgBuffer->nbBuffers == 1);
         status = STATUS_OK;
         // Copy everything except the flush data which can be used for a different flush level
         //  and nbBuffers which is set on initialization
-        Internal_Copy_Msg_Buffer_Properties(destMsgBuffer, srcMsgBuffer);
+        MsgBuffer_InternalCopyProperties(destMsgBuffer, srcMsgBuffer);
 
-        status = Copy_Buffer_Limited_Length(&(destMsgBuffer->buffers[bufferIdx]),
-                                            srcMsgBuffer->buffers,
-                                            limitedLength);
+        status = Buffer_CopyWithLength(&(destMsgBuffer->buffers[bufferIdx]),
+                                       srcMsgBuffer->buffers,
+                                       limitedLength);
     }
     return status;
 }

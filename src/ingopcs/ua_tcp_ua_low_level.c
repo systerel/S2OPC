@@ -5,26 +5,27 @@
  *      Author: vincent
  */
 
+#include "ua_tcp_ua_low_level.h"
+
 #include <assert.h>
-#include <tcp_ua_low_level.h>
 #include <ua_encoder.h>
 
 const uint32_t tcpProtocolVersion = 0;
 
-StatusCode Encode_TCP_UA_Header(UA_Msg_Buffer* msgBuffer,
-                                TCP_UA_Message_Type type){
+StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
+                               TCP_UA_MsgType type){
     StatusCode status = STATUS_OK;
     UA_Byte fByte = 'F';
     assert(msgBuffer->buffers->max_size > UA_HEADER_LENGTH);
     switch(type){
         case TCP_UA_Message_Hello:
-            status = Write_Buffer(msgBuffer->buffers, HEL, 3);
+            status = Buffer_Write(msgBuffer->buffers, HEL, 3);
             break;
         case TCP_UA_Message_Acknowledge:
-            status = Write_Buffer(msgBuffer->buffers, ACK, 3);
+            status = Buffer_Write(msgBuffer->buffers, ACK, 3);
             break;
         case TCP_UA_Message_Error:
-            status = Write_Buffer(msgBuffer->buffers, ERR, 3);
+            status = Buffer_Write(msgBuffer->buffers, ERR, 3);
             break;
         case TCP_UA_Message_SecureMessage:
             // Managed by secure channel layer
@@ -35,7 +36,7 @@ StatusCode Encode_TCP_UA_Header(UA_Msg_Buffer* msgBuffer,
     }
     if(status == STATUS_OK){
         // reserved byte
-        status = Write_Msg_Buffer(msgBuffer, &fByte, 1);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, &fByte, 1);
     }
     if(status == STATUS_OK){
         status = Write_UInt32(msgBuffer, UA_HEADER_LENGTH);
@@ -48,26 +49,28 @@ StatusCode Encode_TCP_UA_Header(UA_Msg_Buffer* msgBuffer,
     return status;
 }
 
-StatusCode Finalize_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
+StatusCode TCP_UA_FinalizeHeader(UA_MsgBuffer* msgBuffer){
     assert(msgBuffer->type == TCP_UA_Message_Hello
            || msgBuffer->type == TCP_UA_Message_Acknowledge
            || msgBuffer->type == TCP_UA_Message_Error);
     StatusCode status = STATUS_NOK;
     const uint32_t currentPosition = msgBuffer->buffers->position;
-    status = Set_Position_Buffer(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
+
+    status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
+
     if(status == STATUS_OK){
         status = Write_UInt32(msgBuffer, currentPosition);
     }
     if(status == STATUS_OK){
-        status = Set_Position_Buffer(msgBuffer->buffers, currentPosition);
+        status = Buffer_SetPosition(msgBuffer->buffers, currentPosition);
         msgBuffer->msgSize = currentPosition;
     }
     return status;
 }
 
 
-StatusCode Read_TCP_UA_Data(Socket socket,
-                            UA_Msg_Buffer* msgBuffer){
+StatusCode TCP_UA_ReadData(Socket        socket,
+                           UA_MsgBuffer* msgBuffer){
     StatusCode status = STATUS_NOK;
     uint32_t readBytes;
 
@@ -79,9 +82,9 @@ StatusCode Read_TCP_UA_Data(Socket socket,
             status = STATUS_OK;
         }else if(msgBuffer->buffers->length == msgBuffer->msgSize){
             if(msgBuffer->isFinal == UA_Msg_Chunk_Intermediate){
-                status = Reset_Msg_Buffer_Next_Chunk(msgBuffer, 0);
+                status = MsgBuffer_ResetNextChunk(msgBuffer, 0);
             }else{
-                Reset_Msg_Buffer(msgBuffer);
+                MsgBuffer_Reset(msgBuffer);
                 // status will be set reading the header
             }
         }else{
@@ -97,10 +100,10 @@ StatusCode Read_TCP_UA_Data(Socket socket,
             readBytes = UA_HEADER_LENGTH - msgBuffer->buffers->length;
             status = Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
             if(status == STATUS_OK && readBytes > 0){
-                Set_Data_Length_Buffer(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
+                Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
             }
             if(msgBuffer->buffers->length == UA_HEADER_LENGTH){
-                status = Read_TCP_UA_Header(msgBuffer);
+                status = TCP_UA_ReadHeader(msgBuffer);
             }else if(msgBuffer->buffers->length > UA_HEADER_LENGTH){
                 status = STATUS_INVALID_STATE;
             }else{
@@ -119,7 +122,7 @@ StatusCode Read_TCP_UA_Data(Socket socket,
                                  readBytes,
                                  &readBytes);
             if(status == STATUS_OK && readBytes > 0){
-                Set_Data_Length_Buffer(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
+                Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
             }
             if(msgBuffer->buffers->length == msgBuffer->msgSize){
                 // Message complete just return
@@ -138,7 +141,7 @@ StatusCode Read_TCP_UA_Data(Socket socket,
     return status;
 }
 
-StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
+StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer){
     StatusCode status = STATUS_OK;
     UA_Byte msgType[3];
     UA_Byte isFinal;
@@ -148,7 +151,7 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
        && msgBuffer->type == TCP_UA_Message_Unknown)
     {
         // READ message type
-        status = Read_Buffer(msgType, msgBuffer->buffers, 3);
+        status = Buffer_Read(msgType, msgBuffer->buffers, 3);
         if(status == STATUS_OK){
             if(memcmp(msgType, HEL, 3) == 0){
                 msgBuffer->type = TCP_UA_Message_Hello;
@@ -182,7 +185,7 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
         // READ IsFinal message chunk
         if(status == STATUS_OK)
         {
-            status = Read_Buffer(&isFinal, msgBuffer->buffers, 1);
+            status = Buffer_Read(&isFinal, msgBuffer->buffers, 1);
             if(status == STATUS_OK){
                 switch(isFinal){
                     case 'C':
@@ -223,16 +226,16 @@ StatusCode Read_TCP_UA_Header(UA_Msg_Buffer* msgBuffer){
     return status;
 }
 
-StatusCode Read_Msg_Buffer(UA_Byte* data_dest,
-                           uint32_t size,
-                           UA_Msg_Buffer* msgBuffer,
-                           uint32_t count){
+StatusCode TCP_UA_ReadMsgBuffer(UA_Byte*      data_dest,
+                                uint32_t      size,
+                                UA_MsgBuffer* msgBuffer,
+                                uint32_t      count){
     StatusCode status = STATUS_OK;
     Buffer* buffer = UA_NULL;
     if(msgBuffer->nbBuffers == 1){
         buffer = msgBuffer->buffers;
     }else if(msgBuffer->nbBuffers > 1 && msgBuffer->nbChunks > 0){
-        buffer = Get_Current_Chunk_From_Msg_Buffers(msgBuffer);
+        buffer = MsgBuffers_GetCurrentChunk(msgBuffer);
         if(buffer == UA_NULL){
             status = STATUS_NOK;
         }
@@ -244,13 +247,13 @@ StatusCode Read_Msg_Buffer(UA_Byte* data_dest,
         {
                 status = STATUS_INVALID_PARAMETERS;
         }else{
-            status = Read_Buffer(data_dest, buffer, count);
+            status = Buffer_Read(data_dest, buffer, count);
         }
     }
     return status;
 }
 
-StatusCode Flush_Msg_Buffer(UA_Msg_Buffer* msgBuffer){
+StatusCode TCP_UA_FlushMsgBuffer(UA_MsgBuffer* msgBuffer){
     StatusCode status = STATUS_NOK;
     int32_t writtenBytes = 0;
     writtenBytes = Socket_Write((Socket) msgBuffer->flushData,
@@ -264,9 +267,9 @@ StatusCode Flush_Msg_Buffer(UA_Msg_Buffer* msgBuffer){
 }
 
 
-StatusCode Write_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
-                            UA_Byte*       data_src,
-                            uint32_t       count)
+StatusCode TCP_UA_WriteMsgBuffer(UA_MsgBuffer* msgBuffer,
+                                 UA_Byte*      data_src,
+                                 uint32_t      count)
 {
     StatusCode status = STATUS_NOK;
     if(data_src == UA_NULL || msgBuffer == UA_NULL)
@@ -278,7 +281,7 @@ StatusCode Write_Msg_Buffer(UA_Msg_Buffer* msgBuffer,
             //  no possible message chunks except for MSG type !
             status = STATUS_INVALID_STATE;
         }else{
-            status = Write_Buffer(msgBuffer->buffers, data_src, count);
+            status = Buffer_Write(msgBuffer->buffers, data_src, count);
         }
     }
     return status;

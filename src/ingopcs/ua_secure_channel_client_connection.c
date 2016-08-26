@@ -1,0 +1,441 @@
+/*
+ * secure_channel_client_connection.c
+ *
+ *  Created on: Jul 22, 2016
+ *      Author: vincent
+ */
+
+#include "ua_secure_channel_client_connection.h"
+
+#include <wrappers.h>
+
+#include <assert.h>
+#include <stdlib.h>
+
+#include <ua_encoder.h>
+#include "ua_secure_channel_low_level.h"
+
+SC_ClientConnection* SC_Client_Create(Namespace*      namespac,
+                                      EncodeableType* encodeableTypes)
+{
+    SC_ClientConnection* scClientConnection = UA_NULL;
+    SC_Connection* sConnection = SC_Create();
+
+    if(sConnection != UA_NULL){
+        scClientConnection = (SC_ClientConnection *) malloc (sizeof(SC_ClientConnection));
+
+        if(scClientConnection != UA_NULL){
+            memset (scClientConnection, 0, sizeof(SC_ClientConnection));
+            sConnection->state = SC_Connection_Disconnected;
+            scClientConnection->instance = sConnection;
+            scClientConnection->namespaces = namespac;
+            scClientConnection->encodeableTypes = encodeableTypes;
+            scClientConnection->securityMode = Msg_Security_Mode_Invalid;
+        }
+    }else{
+        SC_Delete(sConnection);
+    }
+    return scClientConnection;
+}
+
+void SC_Client_Delete(SC_ClientConnection* scConnection)
+{
+    if(scConnection != UA_NULL){
+        if(scConnection->pkiProvider != UA_NULL){
+            PKIProvider_Delete(scConnection->pkiProvider);
+        }
+        if(scConnection->serverCertificate != UA_NULL){
+            ByteString_Delete(scConnection->serverCertificate);
+        }
+        if(scConnection->clientCertificate != UA_NULL){
+            ByteString_Delete(scConnection->clientCertificate);
+        }
+        if(scConnection->pendingRequests != UA_NULL){
+            free(scConnection->pendingRequests);
+        }
+        if(scConnection->securityPolicy != UA_NULL){
+            String_Delete(scConnection->securityPolicy);
+        }
+        if(scConnection->instance != UA_NULL){
+            SC_Delete(scConnection->instance);
+        }
+        Timer_Delete(&scConnection->watchdogTimer);
+    }
+}
+
+StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
+{
+    StatusCode status = STATUS_OK;
+    const UA_Byte twoByteNodeIdType = 0x00;
+    const UA_Byte fourByteNodeIdType = 0x01;
+    const UA_Byte namespace = 0;
+    const UA_Byte nullTypeId = 0;
+    const UA_Byte noBodyEncoded = 0;
+    const uint16_t openSecureChannelRequestTypeId = 444;
+
+    UA_String* auditId = String_CreateFromCString("audit1");
+
+    UA_MsgBuffer* sendBuf = cConnection->instance->sendingBuffer;
+    PrivateKey* pkey = UA_NULL;
+    uint32_t pkeyLength = 0;
+    uint32_t enumSecuMode = 0;
+
+
+    // Encode request type Node Id (prior to message body)
+    SC_WriteSecureMsgBuffer(sendBuf, &fourByteNodeIdType, 1);
+    SC_WriteSecureMsgBuffer(sendBuf, &namespace, 1);
+    Write_UInt16(sendBuf, openSecureChannelRequestTypeId);
+
+    //// Encode request header
+    // Encode authentication token (omitted opaque identifier ???? => must be a bytestring ?)
+    SC_WriteSecureMsgBuffer(sendBuf, &twoByteNodeIdType, 1);
+    SC_WriteSecureMsgBuffer(sendBuf, &nullTypeId, 1);
+    // Encode 64 bits UtcTime => null ok ?
+    Write_UInt32(sendBuf, 0);
+    Write_UInt32(sendBuf, 0);
+    // Encode requestHandler
+    Write_UInt32(sendBuf, sendBuf->requestId);
+    // Encode returnDiagnostic => symbolic id
+    Write_UInt32(sendBuf, 1);
+    // Encode auditEntryId
+    Write_UA_String(sendBuf, auditId);
+    // Encode timeoutHint => no timeout (for now)
+    Write_UInt32(sendBuf, 0);
+
+    // Extension object: additional header => null node id => no content
+    // !! Extensible parameter indicated in specification but Extension object in XML file !!
+    // Type Id: Node Id
+    SC_WriteSecureMsgBuffer(sendBuf, &twoByteNodeIdType, 1);
+    SC_WriteSecureMsgBuffer(sendBuf, &nullTypeId, 1);
+    // Encoding body byte:
+    SC_WriteSecureMsgBuffer(sendBuf, &noBodyEncoded, 1);
+
+    //// Encode request content
+    // Client protocol version
+    Write_UInt32(sendBuf, scProtocolVersion);
+    // Enumeration request type => ISSUE_0
+    Write_Int32(sendBuf, 0);
+
+    // Enumeration security mode => SIGNANDENCRYPT_3 // SIGN_2 // NONE_1
+    switch(cConnection->securityMode){
+        case Msg_Security_Mode_Invalid:
+            status = STATUS_INVALID_PARAMETERS;
+            break;
+        case Msg_Security_Mode_None:
+            enumSecuMode = 1;
+            break;
+        case Msg_Security_Mode_Sign:
+            enumSecuMode = 2;
+            break;
+        case Msg_Security_Mode_SignAndEncrypt:
+            enumSecuMode = 3;
+            break;
+        default:
+            assert(UA_FALSE);
+    }
+
+    if(status == STATUS_OK){
+        status = Write_Int32(sendBuf, enumSecuMode);
+    }
+
+    if(status == STATUS_OK){
+        // Client nonce => null string
+        status = CryptoProvider_SymmetricGenerateKeyLength(cConnection->instance->currentCryptoProvider, &pkeyLength);
+    }
+
+    if(status == STATUS_OK){
+        pkey = CryptoProvider_SymmetricGenereateKey(cConnection->instance->currentCryptoProvider,
+                                                    pkeyLength);
+        if(pkey != UA_NULL){
+            UA_ByteString* bsKey = PrivateKey_BeginUse(pkey);
+            Write_UA_ByteString(sendBuf, bsKey);
+            PrivateKey_EndUse(bsKey);
+
+            cConnection->instance->currentNonce = pkey;
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+
+    if(status == STATUS_OK){
+        // Requested lifetime
+        Write_Int32(sendBuf, cConnection->requestedLifetime);
+    }
+
+    ByteString_Delete(auditId);
+
+    return status;
+}
+
+StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    CryptoProvider* cProvider = UA_NULL;
+    uint32_t requestId = 0;
+
+    if(cConnection != UA_NULL){
+        status = STATUS_OK;
+    }
+
+    // Set security configuration for secure channel request
+    cConnection->instance->currentSecuMode = cConnection->securityMode;
+    cConnection->instance->currentSecuPolicy = cConnection->securityPolicy;
+
+    if(status == STATUS_OK){
+        cProvider = CryptoProvider_Create(cConnection->securityPolicy);
+        if(cProvider == UA_NULL){
+            status = STATUS_NOK;
+        }else{
+            cConnection->instance->currentCryptoProvider = cProvider;
+        }
+    }
+
+
+    // MaxBodySize to be computed prior any write in sending buffer
+    if(status == STATUS_OK){
+        status = SC_SetMaxBodySize(cConnection->instance, UA_FALSE);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_EncodeSecureMsgHeader(cConnection->instance->sendingBuffer,
+                                          UA_OpenSecureChannel,
+                                          0);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_EncodeAsymmSecurityHeader(cConnection->instance,
+                                              cConnection->securityPolicy,
+                                              cConnection->clientCertificate,
+                                              cConnection->serverCertificate);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_EncodeSequenceHeader(cConnection->instance, &requestId);
+    }
+
+    if(status == STATUS_OK){
+        status = Write_OpenSecureChannelRequest(cConnection);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_FlushSecureMsgBuffer(cConnection->instance->sendingBuffer, UA_Msg_Chunk_Final);
+    }
+
+    return status;
+}
+
+StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection)
+{
+    // use Get_Rcv_Protocol_Version and check it is the same as the one received in SC
+    return STATUS_NOK;
+}
+
+StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
+                                             UA_MsgBuffer*        transportMsgBuffer)
+{
+    StatusCode status = STATUS_INVALID_RCV_PARAMETER;
+    const uint32_t validateSenderCertificateTrue = 1; // True: always activated as indicated in API
+    const uint32_t isSymmetricFalse = UA_FALSE; // TRUE
+    const uint32_t isPrecCryptoDataFalse = UA_FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
+
+    uint32_t snPosition = 0;
+
+    if(transportMsgBuffer->isFinal == UA_Msg_Chunk_Final){
+        // OPN request/response must be in one chunk only
+        status = STATUS_OK;
+    }
+
+    // Message header already managed by transport layer
+    // (except secure channel Id)
+    if(status == STATUS_OK){
+        SC_DecodeSecureMsgSCid(cConnection->instance,
+                               transportMsgBuffer);
+    }
+
+    if(status == STATUS_OK){
+        // Check security policy
+        // Validate other app certificate
+        // Check current app certificate thumbprint
+        status = SC_DecodeAsymmSecurityHeader(cConnection->instance,
+                                              cConnection->pkiProvider,
+                                              transportMsgBuffer,
+                                              validateSenderCertificateTrue,
+                                              &snPosition);
+    }
+
+    if(status == STATUS_OK){
+        // Decrypt message content and store complete message in secure connection buffer
+        status = SC_DecryptMsg(cConnection->instance,
+                               transportMsgBuffer,
+                               snPosition,
+                               isSymmetricFalse,
+                               isPrecCryptoDataFalse);
+    }
+
+    if(status == STATUS_OK){
+        // Decrypt message content and store complete message in secure connection buffer
+        status = SC_VerifyMsgSignature(cConnection->instance,
+                                       isSymmetricFalse,
+                                       isPrecCryptoDataFalse); // IsAsymmetric = TRUE
+    }
+
+    if(status == STATUS_OK){
+        status = SC_CheckSeqNumReceived(cConnection->instance);
+    }
+
+    if(status == STATUS_OK){
+        // Decode message body content
+        status = Read_OpenSecureChannelReponse(cConnection);
+    }
+
+    return status;
+}
+
+StatusCode OnTransportEvent_CB(void*           connection,
+                               void*           callbackData,
+                               ConnectionEvent event,
+                               UA_MsgBuffer*   msgBuffer,
+                               StatusCode      status)
+{
+    SC_ClientConnection* cConnection = (SC_ClientConnection*) callbackData;
+    TCP_UA_Connection* tcpConnection = (TCP_UA_Connection*) connection;
+    StatusCode retStatus = STATUS_OK;
+    assert(cConnection->instance->transportConnection == tcpConnection);
+    switch(event){
+        case ConnectionEvent_Connected:
+            assert(status == STATUS_OK);
+            assert(cConnection->instance->state == SC_Connection_Connecting_Transport);
+            retStatus = SC_InitApplicationIdentities
+                         (cConnection->instance,
+                          cConnection->clientCertificate,
+                          cConnection->clientKey,
+                          cConnection->serverCertificate);
+            // Configure secure connection for encoding / decoding messages
+            if(status == STATUS_OK){
+                status = SC_InitReceiveSecureBuffers(cConnection->instance);
+            }
+            if(status == STATUS_OK){
+                status = SC_InitSendSecureBuffer(cConnection->instance);
+            }
+            // Send Open Secure channel request
+            if(status == STATUS_OK){
+                cConnection->instance->state = SC_Connection_Connecting_Secure;
+                status = Send_OpenSecureChannelRequest(cConnection);
+            }
+            break;
+
+        case ConnectionEvent_Disconnected:
+            //log ?
+            TCP_UA_Connection_Disconnect(tcpConnection);
+            cConnection->instance->state = SC_Connection_Disconnected;
+            break;
+
+        case ConnectionEvent_Message:
+            assert(status == STATUS_OK);
+            switch(msgBuffer->secureType){
+                case UA_OpenSecureChannel:
+                    if(cConnection->instance->state == SC_Connection_Connecting_Secure){
+                        // Receive Open Secure Channel response
+                        Receive_OpenSecureChannelResponse(cConnection, msgBuffer);
+                    }else{
+                        retStatus = STATUS_INVALID_RCV_PARAMETER;
+                    }
+                    break;
+                case UA_CloseSecureChannel:
+                    if(cConnection->instance->state == SC_Connection_Connected){
+
+                    }else{
+                        retStatus = STATUS_INVALID_RCV_PARAMETER;
+                    }
+                    break;
+                case UA_SecureMessage:
+                    if(cConnection->instance->state == SC_Connection_Connected){
+
+                    }else{
+                        retStatus = STATUS_INVALID_RCV_PARAMETER;
+                    }
+                    break;
+            }
+            break;
+        case ConnectionEvent_Error:
+            //log ?
+            TCP_UA_Connection_Disconnect(tcpConnection);
+            cConnection->instance->state = SC_Connection_Disconnected;
+            //scConnection->callback: TODO: incompatible types to modify in foundation code
+            break;
+        default:
+            assert(UA_FALSE);
+    }
+    return retStatus;
+}
+
+StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
+                             char*                  uri,
+                             void*                  pkiConfig,
+                             UA_ByteString*         clientCertificate,
+                             UA_ByteString*         clientKey,
+                             UA_ByteString*         serverCertificate,
+                             MsgSecurityMode        securityMode,
+                             char*                  securityPolicy,
+                             uint32_t               requestedLifetime,
+                             SC_ConnectionEvent_CB* callback,
+                             void*                  callbackData)
+{
+    StatusCode status = STATUS_NOK;
+
+    if(uri != UA_NULL &&
+       pkiConfig != UA_NULL &&
+       clientCertificate != UA_NULL &&
+       clientKey != UA_NULL &&
+       serverCertificate != UA_NULL &&
+       securityMode != Msg_Security_Mode_Invalid &&
+       securityPolicy != UA_NULL &&
+       requestedLifetime > 0)
+    {
+        if(connection->clientCertificate == UA_NULL &&
+           connection->clientKey == UA_NULL &&
+           connection->serverCertificate == UA_NULL &&
+           connection->securityMode == Msg_Security_Mode_Invalid &&
+           connection->securityPolicy == UA_NULL &&
+           connection->callback == UA_NULL &&
+           connection->callbackData == UA_NULL)
+        {
+            // Create PKI provider
+            connection->pkiProvider = PKIProvider_Create(pkiConfig);
+            connection->clientCertificate = ByteString_Copy(clientCertificate);
+            connection->clientKey = PrivateKey_Create(clientKey);
+            connection->serverCertificate = ByteString_Copy(serverCertificate);
+            connection->securityMode = securityMode;
+            connection->securityPolicy = String_CreateFromCString(securityPolicy);
+            connection->requestedLifetime = requestedLifetime;
+            connection->callback = callback;
+            connection->callbackData = callbackData;
+
+            if(connection->clientCertificate == UA_NULL ||
+               connection->clientKey == UA_NULL ||
+               connection->serverCertificate == UA_NULL ||
+               connection->securityMode == Msg_Security_Mode_Invalid ||
+               connection->securityPolicy == UA_NULL)
+            {
+                status = STATUS_NOK;
+            }else{
+                // TODO: check security mode = None if securityPolicy != None ??? => see http://opcfoundation.org/UA-Profile/UA/SecurityPolicy%23Basic128Rsa15
+                connection->instance->state = SC_Connection_Connecting_Transport;
+                status = TCP_UA_Connection_Connect(connection->instance->transportConnection,
+                                                   uri,
+                                                   OnTransportEvent_CB,
+                                                   (void*) connection);
+
+                if(status != STATUS_OK){
+                    connection->instance->state = SC_Connection_Disconnected;
+                }
+            }
+
+        }else{
+            status = STATUS_INVALID_STATE;
+        }
+    }else{
+        status = STATUS_INVALID_PARAMETERS;
+    }
+    return status;
+}

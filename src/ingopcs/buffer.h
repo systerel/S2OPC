@@ -8,7 +8,7 @@
 #ifndef INGOPCS_BUFFER_H_
 #define INGOPCS_BUFFER_H_
 
-#include <opcua_ingopcs_types.h>
+#include "ua_types.h"
 
 typedef struct Buffer {
     uint32_t max_size; // maximum size
@@ -17,22 +17,22 @@ typedef struct Buffer {
     UA_Byte* data;
 } Buffer;
 
-Buffer* Create_Buffer(uint32_t size);
-StatusCode Init_Buffer(Buffer* buffer, uint32_t size);
-Buffer* Set_Buffer(UA_Byte* data, uint32_t position, uint32_t length, uint32_t maxsize);
-void Delete_Buffer(Buffer* buffer);
-void Reset_Buffer(Buffer* buffer);
-void Reset_Buffer_After_Position(Buffer*  buffer,
+Buffer* Buffer_Create(uint32_t size);
+StatusCode Buffer_Init(Buffer* buffer, uint32_t size);
+Buffer* Buffer_Set_Data(UA_Byte* data, uint32_t position, uint32_t length, uint32_t maxsize);
+void Buffer_Delete(Buffer* buffer);
+void Buffer_Reset(Buffer* buffer);
+void Buffer_ResetAfterPosition(Buffer*  buffer,
                                  uint32_t position);
 
-StatusCode Set_Position_Buffer(Buffer* buffer, uint32_t position);
-StatusCode Set_Data_Length_Buffer(Buffer* buffer, uint32_t length);
+StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position);
+StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length);
 
-StatusCode Write_Buffer(Buffer* buffer, const UA_Byte* data_src, uint32_t count);
-StatusCode Read_Buffer(UA_Byte* data_dest, Buffer* buffer, uint32_t count);
+StatusCode Buffer_Write(Buffer* buffer, const UA_Byte* data_src, uint32_t count);
+StatusCode Buffer_Read(UA_Byte* data_dest, Buffer* buffer, uint32_t count);
 
-StatusCode Copy_Buffer(Buffer* dest, Buffer* src);
+StatusCode Buffer_Copy(Buffer* dest, Buffer* src);
 
-StatusCode Copy_Buffer_Limited_Length(Buffer* dest, Buffer* src, uint32_t limitedLength);
+StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLength);
 
 #endif /* INGOPCS_BUFFER_H_ */

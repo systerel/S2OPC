@@ -8,11 +8,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include <opcua_ingopcs_types.h>
 
-UA_Byte_String* Create_Byte_String(){
-    UA_Byte_String* bstring = UA_NULL;
-    bstring = (UA_Byte_String*) malloc(sizeof(UA_Byte_String));
+#include "ua_types.h"
+
+UA_ByteString* ByteString_Create(){
+    UA_ByteString* bstring = UA_NULL;
+    bstring = (UA_ByteString*) malloc(sizeof(UA_ByteString));
     if(bstring != UA_NULL){
         bstring->length = -1;
         bstring->characters = UA_NULL;
@@ -20,9 +21,9 @@ UA_Byte_String* Create_Byte_String(){
     return bstring;
 }
 
-UA_Byte_String* Create_Byte_String_Fixed_Size(uint32_t size){
-    UA_Byte_String* bstring = UA_NULL;
-    bstring = (UA_Byte_String*) malloc(sizeof(UA_Byte_String));
+UA_ByteString* ByteString_CreateFixedSize(uint32_t size){
+    UA_ByteString* bstring = UA_NULL;
+    bstring = (UA_ByteString*) malloc(sizeof(UA_ByteString));
     if(bstring != UA_NULL){
         bstring->length = size;
         bstring->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*size);
@@ -36,10 +37,10 @@ UA_Byte_String* Create_Byte_String_Fixed_Size(uint32_t size){
     return bstring;
 }
 
-UA_Byte_String* Create_Byte_String_Copy(UA_Byte_String* src){
-    UA_Byte_String* dest = UA_NULL;
+UA_ByteString* ByteString_Copy(UA_ByteString* src){
+    UA_ByteString* dest = UA_NULL;
     if(src != UA_NULL){
-        dest = Create_Byte_String();
+        dest = ByteString_Create();
         if(dest != UA_NULL){
             if(src->length > 0){
                 dest->length = src->length;
@@ -52,7 +53,7 @@ UA_Byte_String* Create_Byte_String_Copy(UA_Byte_String* src){
     return dest;
 }
 
-void Delete_Byte_String(UA_Byte_String* bstring){
+void ByteString_Delete(UA_ByteString* bstring){
     if(bstring != UA_NULL){
         if(bstring->characters != UA_NULL){
             free(bstring->characters);
@@ -61,22 +62,22 @@ void Delete_Byte_String(UA_Byte_String* bstring){
     }
 }
 
-UA_String* Create_String(){
-    return (UA_String*) Create_Byte_String();
+UA_String* String_Create(){
+    return (UA_String*) ByteString_Create();
 }
-UA_String* Create_String_Copy(UA_String* src){
-    return (UA_String*) Create_Byte_String_Copy((UA_Byte_String*) src);
+UA_String* String_Copy(UA_String* src){
+    return (UA_String*) ByteString_Copy((UA_ByteString*) src);
 }
-void Delete_String(UA_String* bstring){
-    Delete_Byte_String((UA_Byte_String*) bstring);
+void String_Delete(UA_String* bstring){
+    ByteString_Delete((UA_ByteString*) bstring);
 }
 
-UA_String* Create_String_From_CString(char* cString){
+UA_String* String_CreateFromCString(char* cString){
     UA_String* string = UA_NULL;
     size_t stringLength = 0;
     int32_t idx = 0;
     if(cString != UA_NULL){
-        string = Create_String();
+        string = String_Create();
         stringLength = strlen(cString);
         if(string != UA_NULL &&
            stringLength > 0 &&
@@ -94,17 +95,17 @@ UA_String* Create_String_From_CString(char* cString){
                     }
                 }
             }else{
-                Delete_String(string);
+                String_Delete(string);
             }
         }else{
-            Delete_String(string);
+            String_Delete(string);
         }
     }
     return string;
 }
 
 
-char* Create_CString_From_String(UA_String* string){
+char* String_GetCString(UA_String* string){
     char* cString = UA_NULL;
     int32_t idx = 0;
     if(string != UA_NULL &&
@@ -126,12 +127,11 @@ char* Create_CString_From_String(UA_String* string){
     return cString;
 }
 
-StatusCode Compare_Byte_Strings(UA_Byte_String* left,
-                                UA_Byte_String* right,
-                                uint32_t*  comparison)
+StatusCode ByteString_Compare(UA_ByteString* left,
+                              UA_ByteString* right,
+                              uint32_t*      comparison)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    uint32_t idx = 0;
 
     if(left != UA_NULL && right != UA_NULL){
         status = STATUS_OK;
@@ -156,11 +156,31 @@ StatusCode Compare_Byte_Strings(UA_Byte_String* left,
     return status;
 }
 
-StatusCode Compare_Strings(UA_String* left,
-                           UA_String* right,
-                           uint32_t*  comparison)
+uint32_t ByteString_Equal(UA_ByteString* left,
+                          UA_ByteString* right)
+{
+    uint32_t compare = 0;
+    uint32_t result = UA_FALSE;
+
+    if(ByteString_Compare(left, right, &compare) == STATUS_OK){
+        result = compare == 0;
+    }
+
+    return result;
+}
+
+StatusCode String_Compare(UA_String* left,
+                          UA_String* right,
+                          uint32_t*  comparison)
 {
 
-    return Compare_Byte_Strings((UA_Byte_String*) left,
-                                (UA_Byte_String*) right, comparison);
+    return ByteString_Compare((UA_ByteString*) left,
+                              (UA_ByteString*) right, comparison);
+}
+
+uint32_t String_Equal(UA_String* left,
+                      UA_String* right)
+{
+    return ByteString_Equal((UA_ByteString*) left,
+                              (UA_ByteString*) right);
 }

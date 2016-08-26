@@ -5,21 +5,22 @@
  *      Author: vincent
  */
 
+#include "ua_tcp_ua_connection.h"
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
-#include <tcp_ua_connection.h>
-#include <tcp_ua_low_level.h>
 #include <ua_encoder.h>
+#include "ua_tcp_ua_low_level.h"
 
-StatusCode Initiate_Send_Buffer(TCP_UA_Connection* connection){
+StatusCode InitSendBuffer(TCP_UA_Connection* connection){
     StatusCode status = STATUS_NOK;
     if(connection->outputMsgBuffer == NULL){
-        Buffer* buf = Create_Buffer(connection->sendBufferSize);
+        Buffer* buf = Buffer_Create(connection->sendBufferSize);
         if(buf != UA_NULL){
-            connection->outputMsgBuffer = Create_Msg_Buffer(buf,
-                                                            connection->maxChunkCountSnd,
-                                                            connection->socket);
+            connection->outputMsgBuffer = MsgBuffer_Create(buf,
+                                                           connection->maxChunkCountSnd,
+                                                           connection->socket);
             if(connection->outputMsgBuffer != UA_NULL){
                 status = STATUS_OK;
             }
@@ -30,14 +31,14 @@ StatusCode Initiate_Send_Buffer(TCP_UA_Connection* connection){
     return status;
 }
 
-StatusCode Initiate_Receive_Buffer(TCP_UA_Connection* connection){
+StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
     StatusCode status = STATUS_NOK;
     if(connection->inputMsgBuffer == UA_NULL){
-        Buffer* buf = Create_Buffer(connection->receiveBufferSize);
+        Buffer* buf = Buffer_Create(connection->receiveBufferSize);
         if(buf != UA_NULL){
-            connection->inputMsgBuffer = Create_Msg_Buffer(buf,
-                                                           connection->maxChunkCountRcv,
-                                                           connection->socket);
+            connection->inputMsgBuffer = MsgBuffer_Create(buf,
+                                                          connection->maxChunkCountRcv,
+                                                          connection->socket);
             if(connection->inputMsgBuffer != UA_NULL){
                 status = STATUS_OK;
             }
@@ -48,7 +49,7 @@ StatusCode Initiate_Receive_Buffer(TCP_UA_Connection* connection){
     return status;
 }
 
-TCP_UA_Connection* Create_Connection(uint32_t scProtocolVersion){
+TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
     TCP_UA_Connection* connection = UA_NULL;
     StatusCode status = STATUS_NOK;
 
@@ -68,11 +69,11 @@ TCP_UA_Connection* Create_Connection(uint32_t scProtocolVersion){
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
 #if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
-       status = Create_Socket_Manager(UA_NULL,
-                                      1);
+       status = SocketManager_Create(UA_NULL,
+                                     1);
 #else
-       status = Create_Socket_Manager(&(connection->socketManager),
-                                      1);
+       status = SocketManager_Create(&(connection->socketManager),
+                                     1);
 #endif //OPCUA_MULTITHREADED
 
         if(status != STATUS_OK){
@@ -84,7 +85,7 @@ TCP_UA_Connection* Create_Connection(uint32_t scProtocolVersion){
     return connection;
 }
 
-void Reset_Connection_State(TCP_UA_Connection* connection){
+void ResetConnectionState(TCP_UA_Connection* connection){
     connection->state = TCP_Connection_Disconnected;
     connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
     connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
@@ -92,287 +93,69 @@ void Reset_Connection_State(TCP_UA_Connection* connection){
     connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
     connection->maxChunkCountRcv = 0;
     connection->maxChunkCountSnd = 0;
-    Delete_Msg_Buffer(&connection->inputMsgBuffer);
-    Delete_Msg_Buffer(&connection->outputMsgBuffer);
-    Delete_Msg_Buffer(&connection->sendingQueue);
+    MsgBuffer_Delete(&connection->inputMsgBuffer);
+    MsgBuffer_Delete(&connection->outputMsgBuffer);
+    MsgBuffer_Delete(&connection->sendingQueue);
 }
 
-void Delete_Connection(TCP_UA_Connection* connection){
+void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
     if(connection != UA_NULL){
         if(connection->url != UA_NULL){
             free(connection->url);
         }
-        Delete_Socket_Manager(&connection->socketManager);
-        Close_Socket(connection->socket);
-        Delete_Msg_Buffer(&connection->inputMsgBuffer);
-        Delete_Msg_Buffer(&connection->outputMsgBuffer);
-        Delete_Msg_Buffer(&connection->sendingQueue);
+        SocketManager_Delete(&connection->socketManager);
+        Socket_Close(connection->socket);
+        MsgBuffer_Delete(&connection->inputMsgBuffer);
+        MsgBuffer_Delete(&connection->outputMsgBuffer);
+        MsgBuffer_Delete(&connection->sendingQueue);
         free(connection);
     }
 }
 
-StatusCode On_Socket_Event_CB (Socket        socket,
-                               uint32_t      socketEvent,
-                               void*         callbackData,
-                               uint16_t      usPortNumber,
-                               unsigned char bIsSSL){
+StatusCode SendHelloMsg(TCP_UA_Connection* connection){
     StatusCode status = STATUS_NOK;
-    TCP_UA_Connection* connection = (TCP_UA_Connection*) callbackData;
-    switch(socketEvent){
-        case SOCKET_ACCEPT_EVENT:
-            status = STATUS_INVALID_STATE;
-            if(connection->callback != UA_NULL){
-                connection->callback(connection,
-                                     connection->callbackData,
-                                     ConnectionEvent_Error,
-                                     UA_NULL,
-                                     status);
-            }
-            break;
-        case SOCKET_CLOSE_EVENT:
-            status = STATUS_OK;
-            if(connection->callback != UA_NULL){
-                connection->callback(connection,
-                                     connection->callbackData,
-                                     ConnectionEvent_Disconnected,
-                                     UA_NULL,
-                                     status);
-            }
-            break;
-        case SOCKET_CONNECT_EVENT:
-            // Manage connection
-            assert(connection->socket == socket);
-            status = Send_Hello_Msg(connection);
-            if(status == STATUS_OK){
-                status = Initiate_Receive_Buffer(connection);
-            }else{
-                if(connection->callback != UA_NULL){
-                    connection->callback(connection,
-                                         connection->callbackData,
-                                         ConnectionEvent_Error,
-                                         UA_NULL,
-                                         status);
-                }
-            }
-            break;
-        case SOCKET_EXCEPT_EVENT:
-            status = STATUS_INVALID_STATE;
-            Close_Socket(connection->socket);
-            break;
-        case SOCKET_READ_EVENT:
-            // Manage message reception
-            status = Read_TCP_UA_Data(socket, connection->inputMsgBuffer);
-            if(status == STATUS_OK){
-                switch(connection->inputMsgBuffer->type){
-                    case(TCP_UA_Message_Hello):
-                        status = STATUS_INVALID_RCV_PARAMETER;
-                        break;
-                    case(TCP_UA_Message_Acknowledge):
-                        status = Receive_Ack_Msg(connection);
-                        if(status == STATUS_OK){
-                            if(connection->callback != UA_NULL){
-                                connection->callback(connection,
-                                                     connection->callbackData,
-                                                     ConnectionEvent_Connected,
-                                                     UA_NULL,
-                                                     status);
-                            }
-                        }else{
-                            if(connection->callback != UA_NULL){
-                                connection->callback(connection,
-                                                     connection->callbackData,
-                                                     ConnectionEvent_Error,
-                                                     UA_NULL,
-                                                     status);
-                            }
-                        }
-                        break;
-                    case(TCP_UA_Message_Error):
-                        status = Receive_Error_Msg(connection);
-                        if(connection->callback != UA_NULL){
-                            connection->callback(connection,
-                                                 connection->callbackData,
-                                                 ConnectionEvent_Disconnected,
-                                                 UA_NULL,
-                                                 status);
-                        }
-                        break;
-                    case(TCP_UA_Message_SecureMessage):
-                        if(connection->callback != UA_NULL){
-                            connection->callback(connection,
-                                                 connection->callbackData,
-                                                 ConnectionEvent_Message,
-                                                 connection->inputMsgBuffer,
-                                                 status);
-                        }
-                        break;
-                    case(TCP_UA_Message_Unknown):
-                    case(TCP_UA_Message_Invalid):
-                    default:
-                        status = STATUS_INVALID_STATE;
-                        break;
-                }
-
-                switch(status){
-                    case(STATUS_OK):
-                            break;
-                    case(STATUS_OK_INCOMPLETE):
-                            // Wait for next event
-                            status = STATUS_OK;
-                            break;
-                    default:
-                        // Erase content since incorrect reading
-                        // TODO: add trace with reason Invalid header ? => more precise erorrs
-                        Reset_Msg_Buffer(connection->inputMsgBuffer);
-                }
-            }
-
-            break;
-        case SOCKET_SHUTDOWN_EVENT:
-            Reset_Connection_State(connection);
-            break;
-        case SOCKET_TIMEOUT_EVENT:
-        case SOCKET_WRITE_EVENT:
-        default:
-            break;
-    }
-    return status;
-}
-
-StatusCode Check_TCPUA_address (char* uri){
-    StatusCode status = STATUS_NOK;
-    int idx = 0;
-    bool isPort = 0;
-    bool hasPort = 0;
-    bool invalid = 0;
-    if(uri != UA_NULL){
-
-        if(strlen(uri) + 4  > 4096){
-            // Encoded value shall be less than 4096 bytes
-            status = STATUS_INVALID_PARAMETERS;
-        }else if(strlen(uri) > 10 && memcmp(uri, (const char*) "opc.tcp://", 10) == 0){
-            // search for a ':' defining port for given IP
-            // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
-            for(idx = 10; idx < strlen(uri) - 1; idx++){
-                if(isPort){
-                    if(uri[idx] >= '0' && uri[idx] <= '9'){
-                        // port definition
-                        hasPort = 1;
-                    }else if(uri[idx] == '/'){
-                        // end of port definition + at least one character remaining
-                        if(hasPort != 0 && invalid == 0){
-                            status = STATUS_OK;
-                        }
-                    }else{
-                        // unexpected character
-                        invalid = 1;
-                    }
-                }else{
-                    if(uri[idx] == ':'){
-                        isPort = 1;
-                    }
-                }
-            }
-        }
-    }
-    return status;
-}
-
-StatusCode Connect_Transport (TCP_UA_Connection*          connection,
-                              char*                       uri,
-                              TCP_UA_Connection_Event_CB* callback,
-                              void*                       callbackData){
-    StatusCode status = STATUS_NOK;
-    if(connection != UA_NULL &&
-       uri != UA_NULL &&
-       callback != UA_NULL){
-        if(connection->url == UA_NULL &&
-           connection->callback == UA_NULL &&
-           connection->callbackData == UA_NULL &&
-           connection->state == TCP_Connection_Disconnected)
-        {
-            if(Check_TCPUA_address(uri) == STATUS_OK){
-                connection->url = Create_String_From_CString(uri);
-                connection->callback = callback;
-                connection->callbackData = callbackData;
-
-#if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
-                status = Create_Client_Socket(UA_NULL,
-                                              uri,
-                                              On_Socket_Event_CB,
-                                              (void*) connection,
-                                              &(connection->socket));
-#else
-
-                if(status == STATUS_OK){
-                    status = Create_Client_Socket(connection->socketManager,
-                                                  uri,
-                                                  On_Socket_Event_CB,
-                                                  (void*) connection,
-                                                  &(connection->socket));
-                }
-#endif //OPCUA_MULTITHREADED
-
-            }else{
-                status = STATUS_INVALID_PARAMETERS;
-            }
-        }else{
-            status = STATUS_INVALID_STATE;
-        }
-    }else{
-        status = STATUS_INVALID_PARAMETERS;
-    }
-    return status;
-}
-
-void Disconnect_Transport(TCP_UA_Connection* connection){
-    Close_Socket(connection->socket);
-    connection->socket = UA_NULL;
-    Delete_String(connection->url);
-    connection->url = UA_NULL;
-    connection->callback = UA_NULL;
-    connection->callbackData = UA_NULL;
-    Reset_Connection_State(connection);
-}
-
-StatusCode Send_Hello_Msg(TCP_UA_Connection* connection){
-    StatusCode status = STATUS_NOK;
-    status = Initiate_Send_Buffer(connection);
+    status = InitSendBuffer(connection);
     if(status == STATUS_OK){
         // encode message
-        status = Encode_TCP_UA_Header(connection->outputMsgBuffer,
-                                      TCP_UA_Message_Hello);
+        status = TCP_UA_EncodeHeader(connection->outputMsgBuffer,
+                                     TCP_UA_Message_Hello);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer, connection->protocolVersion);
+        status = Write_UInt32(connection->outputMsgBuffer,
+                              connection->protocolVersion);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer, connection->receiveBufferSize);
+        status = Write_UInt32(connection->outputMsgBuffer,
+                              connection->receiveBufferSize);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer, connection->sendBufferSize);
+        status = Write_UInt32(connection->outputMsgBuffer,
+                              connection->sendBufferSize);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer, connection->maxMessageSizeRcv);
+        status = Write_UInt32(connection->outputMsgBuffer,
+                              connection->maxMessageSizeRcv);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer, connection->maxChunkCountRcv);
+        status = Write_UInt32(connection->outputMsgBuffer,
+                              connection->maxChunkCountRcv);
     }
     if(status == STATUS_OK){
-        status = Write_UA_String(connection->outputMsgBuffer, connection->url);
+        status = Write_UA_String(connection->outputMsgBuffer,
+                                 connection->url);
     }
     if(status == STATUS_OK){
-        status = Finalize_TCP_UA_Header(connection->outputMsgBuffer);
+        status = TCP_UA_FinalizeHeader(connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = Flush_Msg_Buffer(connection->outputMsgBuffer);
+        status = TCP_UA_FlushMsgBuffer(connection->outputMsgBuffer);
     }
     // Check status and manage incorrect sending: close the connection or manage ?
 
     return status;
 }
 
-StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
+StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t tempValue = 0;
     uint32_t modifiedReceiveBuffer = 0;
@@ -398,9 +181,9 @@ StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
                         if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ // see mantis #3447 for >= instead of >
                             connection->sendBufferSize = tempValue;
                             // Adapt send buffer size
-                            Delete_Msg_Buffer(&connection->outputMsgBuffer);
+                            MsgBuffer_Delete(&connection->outputMsgBuffer);
                             connection->outputMsgBuffer = UA_NULL;
-                            Initiate_Send_Buffer(connection);
+                            InitSendBuffer(connection);
                         }else{
                             status = STATUS_INVALID_RCV_PARAMETER;
                         }
@@ -452,9 +235,9 @@ StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
             // After end of decoding: modify receive buffer if needed
             if(modifiedReceiveBuffer != UA_FALSE && status == STATUS_OK){
                 // Adapt receive buffer size
-                Delete_Msg_Buffer(&connection->inputMsgBuffer);
+                MsgBuffer_Delete(&connection->inputMsgBuffer);
                 connection->inputMsgBuffer = UA_NULL;
-                Initiate_Receive_Buffer(connection);
+                InitReceiveBuffer(connection);
             }
         }else{
             status = STATUS_INVALID_RCV_PARAMETER;
@@ -463,7 +246,7 @@ StatusCode Receive_Ack_Msg(TCP_UA_Connection* connection){
     return status;
 }
 
-StatusCode Receive_Error_Msg(TCP_UA_Connection* connection){
+StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     StatusCode tmpStatus = STATUS_NOK;
     uint32_t error = 0;
@@ -485,4 +268,228 @@ StatusCode Receive_Error_Msg(TCP_UA_Connection* connection){
 
     }
     return status;
+}
+
+StatusCode OnSocketEvent_CB (Socket        socket,
+                             uint32_t      socketEvent,
+                             void*         callbackData,
+                             uint16_t      usPortNumber,
+                             unsigned char bIsSSL){
+    StatusCode status = STATUS_NOK;
+    TCP_UA_Connection* connection = (TCP_UA_Connection*) callbackData;
+    switch(socketEvent){
+        case SOCKET_ACCEPT_EVENT:
+            status = STATUS_INVALID_STATE;
+            if(connection->callback != UA_NULL){
+                connection->callback(connection,
+                                     connection->callbackData,
+                                     ConnectionEvent_Error,
+                                     UA_NULL,
+                                     status);
+            }
+            break;
+        case SOCKET_CLOSE_EVENT:
+            status = STATUS_OK;
+            if(connection->callback != UA_NULL){
+                connection->callback(connection,
+                                     connection->callbackData,
+                                     ConnectionEvent_Disconnected,
+                                     UA_NULL,
+                                     status);
+            }
+            break;
+        case SOCKET_CONNECT_EVENT:
+            // Manage connection
+            assert(connection->socket == socket);
+            status = SendHelloMsg(connection);
+            if(status == STATUS_OK){
+                status = InitReceiveBuffer(connection);
+            }else{
+                if(connection->callback != UA_NULL){
+                    connection->callback(connection,
+                                         connection->callbackData,
+                                         ConnectionEvent_Error,
+                                         UA_NULL,
+                                         status);
+                }
+            }
+            break;
+        case SOCKET_EXCEPT_EVENT:
+            status = STATUS_INVALID_STATE;
+            Socket_Close(connection->socket);
+            break;
+        case SOCKET_READ_EVENT:
+            // Manage message reception
+            status = TCP_UA_ReadData(socket, connection->inputMsgBuffer);
+            if(status == STATUS_OK){
+                switch(connection->inputMsgBuffer->type){
+                    case(TCP_UA_Message_Hello):
+                        status = STATUS_INVALID_RCV_PARAMETER;
+                        break;
+                    case(TCP_UA_Message_Acknowledge):
+                        status = ReceiveAckMsg(connection);
+                        if(status == STATUS_OK){
+                            if(connection->callback != UA_NULL){
+                                connection->callback(connection,
+                                                     connection->callbackData,
+                                                     ConnectionEvent_Connected,
+                                                     UA_NULL,
+                                                     status);
+                            }
+                        }else{
+                            if(connection->callback != UA_NULL){
+                                connection->callback(connection,
+                                                     connection->callbackData,
+                                                     ConnectionEvent_Error,
+                                                     UA_NULL,
+                                                     status);
+                            }
+                        }
+                        break;
+                    case(TCP_UA_Message_Error):
+                        status = ReceiveErrorMsg(connection);
+                        if(connection->callback != UA_NULL){
+                            connection->callback(connection,
+                                                 connection->callbackData,
+                                                 ConnectionEvent_Disconnected,
+                                                 UA_NULL,
+                                                 status);
+                        }
+                        break;
+                    case(TCP_UA_Message_SecureMessage):
+                        if(connection->callback != UA_NULL){
+                            connection->callback(connection,
+                                                 connection->callbackData,
+                                                 ConnectionEvent_Message,
+                                                 connection->inputMsgBuffer,
+                                                 status);
+                        }
+                        break;
+                    case(TCP_UA_Message_Unknown):
+                    case(TCP_UA_Message_Invalid):
+                    default:
+                        status = STATUS_INVALID_STATE;
+                        break;
+                }
+
+                switch(status){
+                    case(STATUS_OK):
+                            break;
+                    case(STATUS_OK_INCOMPLETE):
+                            // Wait for next event
+                            status = STATUS_OK;
+                            break;
+                    default:
+                        // Erase content since incorrect reading
+                        // TODO: add trace with reason Invalid header ? => more precise erorrs
+                        MsgBuffer_Reset(connection->inputMsgBuffer);
+                }
+            }
+
+            break;
+        case SOCKET_SHUTDOWN_EVENT:
+            ResetConnectionState(connection);
+            break;
+        case SOCKET_TIMEOUT_EVENT:
+        case SOCKET_WRITE_EVENT:
+        default:
+            break;
+    }
+    return status;
+}
+
+StatusCode CheckURI (char* uri){
+    StatusCode status = STATUS_NOK;
+    int idx = 0;
+    bool isPort = 0;
+    bool hasPort = 0;
+    bool invalid = 0;
+    if(uri != UA_NULL){
+
+        if(strlen(uri) + 4  > 4096){
+            // Encoded value shall be less than 4096 bytes
+            status = STATUS_INVALID_PARAMETERS;
+        }else if(strlen(uri) > 10 && memcmp(uri, (const char*) "opc.tcp://", 10) == 0){
+            // search for a ':' defining port for given IP
+            // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
+            for(idx = 10; idx < strlen(uri) - 1; idx++){
+                if(isPort){
+                    if(uri[idx] >= '0' && uri[idx] <= '9'){
+                        // port definition
+                        hasPort = 1;
+                    }else if(uri[idx] == '/'){
+                        // end of port definition + at least one character remaining
+                        if(hasPort != 0 && invalid == 0){
+                            status = STATUS_OK;
+                        }
+                    }else{
+                        // unexpected character
+                        invalid = 1;
+                    }
+                }else{
+                    if(uri[idx] == ':'){
+                        isPort = 1;
+                    }
+                }
+            }
+        }
+    }
+    return status;
+}
+
+StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
+                                      char*                       uri,
+                                      TCP_UA_Connection_Event_CB* callback,
+                                      void*                       callbackData){
+    StatusCode status = STATUS_NOK;
+    if(connection != UA_NULL &&
+       uri != UA_NULL &&
+       callback != UA_NULL){
+        if(connection->url == UA_NULL &&
+           connection->callback == UA_NULL &&
+           connection->callbackData == UA_NULL &&
+           connection->state == TCP_Connection_Disconnected)
+        {
+            if(CheckURI(uri) == STATUS_OK){
+                connection->url = String_CreateFromCString(uri);
+                connection->callback = callback;
+                connection->callbackData = callbackData;
+
+#if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
+                status = SocketManager_CreateClientSocket(UA_NULL,
+                                              uri,
+                                              OnSocketEvent_CB,
+                                              (void*) connection,
+                                              &(connection->socket));
+#else
+
+                if(status == STATUS_OK){
+                    status = SocketManager_CreateClientSocket(connection->socketManager,
+                                                  uri,
+                                                  OnSocketEvent_CB,
+                                                  (void*) connection,
+                                                  &(connection->socket));
+                }
+#endif //OPCUA_MULTITHREADED
+
+            }else{
+                status = STATUS_INVALID_PARAMETERS;
+            }
+        }else{
+            status = STATUS_INVALID_STATE;
+        }
+    }else{
+        status = STATUS_INVALID_PARAMETERS;
+    }
+    return status;
+}
+
+void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
+    Socket_Close(connection->socket);
+    connection->socket = UA_NULL;
+    String_Delete(connection->url);
+    connection->url = UA_NULL;
+    connection->callback = UA_NULL;
+    connection->callbackData = UA_NULL;
+    ResetConnectionState(connection);
 }
