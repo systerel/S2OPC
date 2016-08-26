@@ -1334,10 +1334,15 @@ StatusCode Decode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
                 }
 
                 if(status == STATUS_OK && validateSenderCert != UA_FALSE){
-                    // TODO: find memory access pb
-//                    status = PKIProvider_Validate_Certificate(pkiProvider,
-//                                                              senderCertificate,
-//                                                              &validationStatusCode);
+                    void* certStore = UA_NULL;
+                    certStore = PKIProvider_Open_Cert_Store(pkiProvider);
+                    if(certStore != UA_NULL){
+                        status = PKIProvider_Validate_Certificate(pkiProvider,
+                                                                  senderCertificate,
+                                                                  certStore,
+                                                                  &validationStatusCode);
+                        PKIProvider_Close_Cert_Store(pkiProvider, &certStore);
+                    }
                     if(status != STATUS_OK){
                         // TODO: report validation status code
                     }
@@ -1389,6 +1394,9 @@ StatusCode Decode_Asymmetric_Security_Header(SecureChannel_Connection* scConnect
                         status = STATUS_INVALID_RCV_PARAMETER; // TODO: BadCertificateUnknown error ? part 6 6.7.6 p40
                     }
                 } // if thumbprint length correctly computed
+
+                Delete_Byte_String(curAppCertThumbprint);
+
             } // if toEncrypt
             // Set the sequence number position which is the next position to read
             //  since whole asymmetric security header was read
