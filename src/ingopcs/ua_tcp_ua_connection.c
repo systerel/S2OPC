@@ -122,23 +122,23 @@ StatusCode SendHelloMsg(TCP_UA_Connection* connection){
     }
     if(status == STATUS_OK){
         status = Write_UInt32(connection->outputMsgBuffer,
-                              connection->protocolVersion);
+                              &connection->protocolVersion);
     }
     if(status == STATUS_OK){
         status = Write_UInt32(connection->outputMsgBuffer,
-                              connection->receiveBufferSize);
+                              &connection->receiveBufferSize);
     }
     if(status == STATUS_OK){
         status = Write_UInt32(connection->outputMsgBuffer,
-                              connection->sendBufferSize);
+                              &connection->sendBufferSize);
     }
     if(status == STATUS_OK){
         status = Write_UInt32(connection->outputMsgBuffer,
-                              connection->maxMessageSizeRcv);
+                              &connection->maxMessageSizeRcv);
     }
     if(status == STATUS_OK){
         status = Write_UInt32(connection->outputMsgBuffer,
-                              connection->maxChunkCountRcv);
+                              &connection->maxChunkCountRcv);
     }
     if(status == STATUS_OK){
         status = Write_UA_String(connection->outputMsgBuffer,

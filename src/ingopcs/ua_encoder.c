@@ -72,10 +72,10 @@ StatusCode Read_UA_Boolean(UA_MsgBuffer* msgBuffer, UA_Boolean* value)
     return status;
 }
 
-StatusCode Write_UInt16(UA_MsgBuffer* msgBuffer, uint16_t value)
+StatusCode Write_UInt16(UA_MsgBuffer* msgBuffer, const uint16_t* value)
 {
     StatusCode status = STATUS_NOK;
-    uint16_t encodedValue = EncodeDecode_UInt16(value);
+    uint16_t encodedValue = EncodeDecode_UInt16(*value);
     status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 2);
     return status;
 }
@@ -95,10 +95,10 @@ StatusCode Read_UInt16(UA_MsgBuffer* msgBuffer, uint16_t* value)
     return status;
 }
 
-StatusCode Write_UInt32(UA_MsgBuffer* msgBuffer, uint32_t value)
+StatusCode Write_UInt32(UA_MsgBuffer* msgBuffer, const uint32_t* value)
 {
     StatusCode status = STATUS_NOK;
-    uint32_t encodedValue = EncodeDecode_UInt32(value);
+    uint32_t encodedValue = EncodeDecode_UInt32(*value);
     status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
     return status;
 }
@@ -118,10 +118,10 @@ StatusCode Read_UInt32(UA_MsgBuffer* msgBuffer, uint32_t* value)
     return status;
 }
 
-StatusCode Write_Int32(UA_MsgBuffer* msgBuffer, int32_t value)
+StatusCode Write_Int32(UA_MsgBuffer* msgBuffer, const int32_t* value)
 {
     StatusCode status = STATUS_NOK;
-    int32_t encodedValue = EncodeDecode_Int32(value);
+    int32_t encodedValue = EncodeDecode_Int32(*value);
     status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
     return status;
 }
@@ -141,17 +141,19 @@ StatusCode Read_Int32(UA_MsgBuffer* msgBuffer, int32_t* value)
     return status;
 }
 
-StatusCode Write_UA_ByteString(UA_MsgBuffer* msgBuffer, UA_ByteString* str)
+StatusCode Write_UA_ByteString(UA_MsgBuffer* msgBuffer, const UA_ByteString* str)
 {
     StatusCode status = STATUS_NOK;
     if(str == UA_NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
+        int32_t length;
         if(str->length > 0){
-            status = Write_Int32(msgBuffer, str->length);
+            length = str->length;
         }else{
-            status = Write_Int32(msgBuffer, -1);
+            length = -1;
         }
+        status = Write_Int32(msgBuffer, &length);
         if(status == STATUS_OK &&
            str->length > 0)
         {
@@ -192,7 +194,7 @@ StatusCode Read_UA_ByteString(UA_MsgBuffer* msgBuffer, UA_ByteString* str)
     return status;
 }
 
-StatusCode Write_UA_String(UA_MsgBuffer* msgBuffer, UA_String* str)
+StatusCode Write_UA_String(UA_MsgBuffer* msgBuffer, const UA_String* str)
 {
     return Write_UA_ByteString(msgBuffer, (UA_ByteString*) str);
 }

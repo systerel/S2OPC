@@ -72,35 +72,38 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     const UA_Byte nullTypeId = 0;
     const UA_Byte noBodyEncoded = 0;
     const uint16_t openSecureChannelRequestTypeId = 444;
+    const uint32_t uzero = 0;
+    const uint32_t uone = 1;
+    const int32_t one = 1;
 
     UA_String* auditId = String_CreateFromCString("audit1");
 
     UA_MsgBuffer* sendBuf = cConnection->instance->sendingBuffer;
     PrivateKey* pkey = UA_NULL;
     uint32_t pkeyLength = 0;
-    uint32_t enumSecuMode = 0;
+    int32_t enumSecuMode = 0;
 
 
     // Encode request type Node Id (prior to message body)
     SC_WriteSecureMsgBuffer(sendBuf, &fourByteNodeIdType, 1);
     SC_WriteSecureMsgBuffer(sendBuf, &namespace, 1);
-    Write_UInt16(sendBuf, openSecureChannelRequestTypeId);
+    Write_UInt16(sendBuf, &openSecureChannelRequestTypeId);
 
     //// Encode request header
     // Encode authentication token (omitted opaque identifier ???? => must be a bytestring ?)
     SC_WriteSecureMsgBuffer(sendBuf, &twoByteNodeIdType, 1);
     SC_WriteSecureMsgBuffer(sendBuf, &nullTypeId, 1);
     // Encode 64 bits UtcTime => null ok ?
-    Write_UInt32(sendBuf, 0);
-    Write_UInt32(sendBuf, 0);
+    Write_UInt32(sendBuf, &uzero);
+    Write_UInt32(sendBuf, &uzero);
     // Encode requestHandler
-    Write_UInt32(sendBuf, sendBuf->requestId);
+    Write_UInt32(sendBuf, &sendBuf->requestId);
     // Encode returnDiagnostic => symbolic id
-    Write_UInt32(sendBuf, 1);
+    Write_UInt32(sendBuf, &uone);
     // Encode auditEntryId
     Write_UA_String(sendBuf, auditId);
     // Encode timeoutHint => no timeout (for now)
-    Write_UInt32(sendBuf, 0);
+    Write_UInt32(sendBuf, &uzero);
 
     // Extension object: additional header => null node id => no content
     // !! Extensible parameter indicated in specification but Extension object in XML file !!
@@ -112,9 +115,9 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
     //// Encode request content
     // Client protocol version
-    Write_UInt32(sendBuf, scProtocolVersion);
+    Write_UInt32(sendBuf, &scProtocolVersion);
     // Enumeration request type => ISSUE_0
-    Write_Int32(sendBuf, 0);
+    Write_Int32(sendBuf, &one);
 
     // Enumeration security mode => SIGNANDENCRYPT_3 // SIGN_2 // NONE_1
     switch(cConnection->securityMode){
@@ -135,7 +138,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     }
 
     if(status == STATUS_OK){
-        status = Write_Int32(sendBuf, enumSecuMode);
+        status = Write_Int32(sendBuf, &enumSecuMode);
     }
 
     if(status == STATUS_OK){
@@ -159,7 +162,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
     if(status == STATUS_OK){
         // Requested lifetime
-        Write_Int32(sendBuf, cConnection->requestedLifetime);
+        Write_Int32(sendBuf, (int32_t*) &cConnection->requestedLifetime);
     }
 
     ByteString_Delete(auditId);

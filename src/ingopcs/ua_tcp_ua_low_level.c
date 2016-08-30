@@ -39,7 +39,8 @@ StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
         status = TCP_UA_WriteMsgBuffer(msgBuffer, &fByte, 1);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(msgBuffer, UA_HEADER_LENGTH);
+        const uint32_t headerLength = UA_HEADER_LENGTH;
+        status = Write_UInt32(msgBuffer, &headerLength);
         if(status == STATUS_OK){
             msgBuffer->type = type;
             msgBuffer->msgSize = UA_HEADER_LENGTH;
@@ -59,7 +60,7 @@ StatusCode TCP_UA_FinalizeHeader(UA_MsgBuffer* msgBuffer){
     status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
 
     if(status == STATUS_OK){
-        status = Write_UInt32(msgBuffer, currentPosition);
+        status = Write_UInt32(msgBuffer, &currentPosition);
     }
     if(status == STATUS_OK){
         status = Buffer_SetPosition(msgBuffer->buffers, currentPosition);

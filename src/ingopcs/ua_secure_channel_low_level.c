@@ -528,11 +528,12 @@ StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
         if(status == STATUS_OK){
             msgBuffer->isFinal = UA_Msg_Chunk_Final;
             // Temporary message size
-            status = Write_UInt32(msgBuffer, UA_SECURE_MESSAGE_HEADER_LENGTH);
+            const uint32_t msgHeaderLength = UA_SECURE_MESSAGE_HEADER_LENGTH;
+            status = Write_UInt32(msgBuffer, &msgHeaderLength);
         }
         if(status == STATUS_OK){
             // Secure channel Id
-            status = Write_UInt32(msgBuffer, secureChannelId);
+            status = Write_UInt32(msgBuffer, &secureChannelId);
         }
 
     }else{
@@ -564,7 +565,7 @@ StatusCode SC_EncodeSequenceHeader(SC_Connection* scConnection,
     }
     scConnection->sendingBuffer->requestId = *requestId;
     if(status == STATUS_OK){
-        Write_UInt32(scConnection->sendingBuffer, *requestId);
+        Write_UInt32(scConnection->sendingBuffer, requestId);
     }
     scConnection->lastRequestIdSent = *requestId;
 
@@ -607,7 +608,8 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
             // regarding mantis #3335 negative values are not valid anymore
             // status = Write_Int32(scConnection->sendingBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
-            status = Write_Int32(scConnection->sendingBuffer, -1);
+            const int32_t minusOne = -1;
+            status = Write_Int32(scConnection->sendingBuffer, &minusOne);
             // NULL string: nothing to write
         }
     }
@@ -638,7 +640,8 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
             // regarding mantis #3335 negative values are not valid anymore
             //status = Write_Int32(scConnection->sendingBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
-            status = Write_Int32(scConnection->sendingBuffer, -1);
+            const int32_t minusOne = -1;
+            status = Write_Int32(scConnection->sendingBuffer, &minusOne);
             // NULL string: nothing to write
         }
 
@@ -705,7 +708,7 @@ StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
 }
 
 StatusCode Set_Message_Length(UA_MsgBuffer* msgBuffer,
-                              uint32_t       msgLength){
+                              uint32_t      msgLength){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t originPosition = 0;
     if(msgBuffer != UA_NULL && msgLength < msgBuffer->buffers->max_size){
@@ -713,7 +716,7 @@ StatusCode Set_Message_Length(UA_MsgBuffer* msgBuffer,
         status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(msgBuffer, msgLength);
+        status = Write_UInt32(msgBuffer, &msgLength);
     }
     if(status == STATUS_OK){
         status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
@@ -774,7 +777,7 @@ StatusCode Set_Sequence_Number(UA_MsgBuffer* msgBuffer){
        originPosition = msgBuffer->buffers->position;
        status = Buffer_SetPosition(msgBuffer->buffers, msgBuffer->sequenceNumberPosition);
        if(status == STATUS_OK){
-           Write_UInt32(msgBuffer, scConnection->lastSeqNumSent);
+           Write_UInt32(msgBuffer, &scConnection->lastSeqNumSent);
        }
 
        if(status == STATUS_OK){
@@ -802,7 +805,7 @@ StatusCode Set_Request_Id(UA_MsgBuffer* msgBuffer,
        }
        msgBuffer->requestId = scConnection->lastRequestIdSent;
        if(status == STATUS_OK){
-           Write_UInt32(msgBuffer, scConnection->lastRequestIdSent);
+           Write_UInt32(msgBuffer, &scConnection->lastRequestIdSent);
        }
     }
 
