@@ -9,7 +9,7 @@
 #include <string.h>
 #include <limits.h>
 
-#include "ua_types.h"
+#include "ua_builtintypes.h"
 
 UA_ByteString* ByteString_Create(){
     UA_ByteString* bstring = UA_NULL;

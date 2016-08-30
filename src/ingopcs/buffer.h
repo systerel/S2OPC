@@ -8,7 +8,7 @@
 #ifndef INGOPCS_BUFFER_H_
 #define INGOPCS_BUFFER_H_
 
-#include "ua_types.h"
+#include "ua_builtintypes.h"
 
 typedef struct Buffer {
     uint32_t max_size; // maximum size

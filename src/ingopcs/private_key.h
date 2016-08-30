@@ -8,7 +8,7 @@
 #ifndef INGOPCS_PRIVATE_KEY_H_
 #define INGOPCS_PRIVATE_KEY_H_
 
-#include "ua_types.h"
+#include "ua_builtintypes.h"
 
 typedef struct PrivateKey {
     UA_ByteString* key; // to modify into non contiguous memory storage

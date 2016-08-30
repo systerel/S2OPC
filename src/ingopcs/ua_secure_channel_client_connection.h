@@ -11,8 +11,8 @@
 #include <wrappers.h>
 
 #include <private_key.h>
+#include "ua_builtintypes.h"
 #include "ua_secure_channel_low_level.h"
-#include "ua_types.h"
 
 typedef struct PendingRequest
 {
