@@ -121,27 +121,27 @@ StatusCode SendHelloMsg(TCP_UA_Connection* connection){
                                      TCP_UA_Message_Hello);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer,
+        status = UInt32_Write(connection->outputMsgBuffer,
                               &connection->protocolVersion);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer,
+        status = UInt32_Write(connection->outputMsgBuffer,
                               &connection->receiveBufferSize);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer,
+        status = UInt32_Write(connection->outputMsgBuffer,
                               &connection->sendBufferSize);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer,
+        status = UInt32_Write(connection->outputMsgBuffer,
                               &connection->maxMessageSizeRcv);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(connection->outputMsgBuffer,
+        status = UInt32_Write(connection->outputMsgBuffer,
                               &connection->maxChunkCountRcv);
     }
     if(status == STATUS_OK){
-        status = Write_UA_String(connection->outputMsgBuffer,
+        status = String_Write(connection->outputMsgBuffer,
                                  connection->url);
     }
     if(status == STATUS_OK){
@@ -163,7 +163,7 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
        && connection->inputMsgBuffer != UA_NULL){
         if(connection->inputMsgBuffer->msgSize == TCP_UA_ACK_MSG_LENGTH){
             // Read protocol version of server
-            status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+            status = UInt32_Read(connection->inputMsgBuffer, &tempValue);
             if(status == STATUS_OK){
                 // Check protocol version compatible
                 if(connection->protocolVersion > tempValue){
@@ -174,7 +174,7 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
             // ReceiveBufferSize
             if(status == STATUS_OK){
                 // Read received buffer size of SERVER
-                status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+                status = UInt32_Read(connection->inputMsgBuffer, &tempValue);
                 if(status == STATUS_OK){
                     // Adapt send buffer size if needed
                     if(connection->sendBufferSize > tempValue){
@@ -194,7 +194,7 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
             // SendBufferSize
             if(status == STATUS_OK){
                 // Read sending buffer size of SERVER
-                status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+                status = UInt32_Read(connection->inputMsgBuffer, &tempValue);
                 if(status == STATUS_OK){
                     // Check size and adapt receive buffer size if needed
                     if(connection->receiveBufferSize > tempValue){
@@ -214,7 +214,7 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
 
             //MaxMessageSize of SERVER
             if(status == STATUS_OK){
-                status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+                status = UInt32_Read(connection->inputMsgBuffer, &tempValue);
                 if(status == STATUS_OK){
                     if(connection->maxMessageSizeSnd > tempValue){
                         connection->maxMessageSizeSnd = tempValue;
@@ -224,7 +224,7 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
 
             //MaxChunkCount of SERVER
             if(status == STATUS_OK){
-                status = Read_UInt32(connection->inputMsgBuffer, &tempValue);
+                status = UInt32_Read(connection->inputMsgBuffer, &tempValue);
                 if(status == STATUS_OK){
                     if(connection->maxChunkCountSnd > tempValue){
                         connection->maxChunkCountSnd = tempValue;
@@ -256,10 +256,10 @@ StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
         if(connection->inputMsgBuffer->msgSize >= TCP_UA_ERR_MIN_MSG_LENGTH)
         {
             // Read error cpde
-            status = Read_UInt32(connection->inputMsgBuffer, &error);
+            status = UInt32_Read(connection->inputMsgBuffer, &error);
             if(status == STATUS_OK){
                 status = error;
-                tmpStatus = Read_UA_String(connection->inputMsgBuffer, reason);
+                tmpStatus = String_Read(connection->inputMsgBuffer, reason);
                 if(tmpStatus == STATUS_OK){
                     //TODO: log error reason !!!
                 }
@@ -487,7 +487,7 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
 void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
     Socket_Close(connection->socket);
     connection->socket = UA_NULL;
-    String_Delete(connection->url);
+    String_Clear(connection->url);
     connection->url = UA_NULL;
     connection->callback = UA_NULL;
     connection->callbackData = UA_NULL;

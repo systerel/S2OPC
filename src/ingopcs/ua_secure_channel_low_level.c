@@ -51,20 +51,20 @@ SC_Connection* SC_Create (){
 }
 
 void SC_Delete (SC_Connection* scConnection){
-    String_Delete(UA_String_Security_Policy_None);
-    String_Delete(UA_String_Security_Policy_Basic128Rsa15);
-    String_Delete(UA_String_Security_Policy_Basic256);
-    String_Delete(UA_String_Security_Policy_Basic256Sha256);
+    String_Clear(UA_String_Security_Policy_None);
+    String_Clear(UA_String_Security_Policy_Basic128Rsa15);
+    String_Clear(UA_String_Security_Policy_Basic256);
+    String_Clear(UA_String_Security_Policy_Basic256Sha256);
     if(scConnection != UA_NULL){
         // Do not delete runningAppCertificate, runnigAppPrivateKey and otherAppCertificate:
         //  managed by upper level
         if(scConnection->runningAppPublicKey != UA_NULL)
         {
-            ByteString_Delete(scConnection->runningAppPublicKey);
+            ByteString_Clear(scConnection->runningAppPublicKey);
         }
         if(scConnection->otherAppPublicKey != UA_NULL)
         {
-            ByteString_Delete(scConnection->otherAppPublicKey);
+            ByteString_Clear(scConnection->otherAppPublicKey);
         }
         if(scConnection->sendingBuffer != UA_NULL)
         {
@@ -82,7 +82,7 @@ void SC_Delete (SC_Connection* scConnection){
         {
             PrivateKey_Delete(scConnection->currentNonce);
         }
-        String_Delete(scConnection->currentSecuPolicy);
+        String_Clear(scConnection->currentSecuPolicy);
         CryptoProvider_Delete(scConnection->currentCryptoProvider);
         CryptoProvider_Delete(scConnection->precCryptoProvider);
         free(scConnection);
@@ -99,11 +99,11 @@ StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
        scConnection->otherAppCertificate == UA_NULL)
     {
         scConnection->runningAppCertificate = runningAppCertificate;
-        ByteString_Delete(scConnection->runningAppPublicKey);
+        ByteString_Clear(scConnection->runningAppPublicKey);
         scConnection->runningAppPublicKey = UA_NULL;
         scConnection->runningAppPrivateKey = runningAppPrivateKey;
         scConnection->otherAppCertificate = otherAppCertificate;
-        ByteString_Delete(scConnection->otherAppPublicKey);
+        ByteString_Clear(scConnection->otherAppPublicKey);
         scConnection->otherAppPublicKey = UA_NULL;
     }else{
         status = STATUS_INVALID_STATE;
@@ -529,11 +529,11 @@ StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
             msgBuffer->isFinal = UA_Msg_Chunk_Final;
             // Temporary message size
             const uint32_t msgHeaderLength = UA_SECURE_MESSAGE_HEADER_LENGTH;
-            status = Write_UInt32(msgBuffer, &msgHeaderLength);
+            status = UInt32_Write(msgBuffer, &msgHeaderLength);
         }
         if(status == STATUS_OK){
             // Secure channel Id
-            status = Write_UInt32(msgBuffer, &secureChannelId);
+            status = UInt32_Write(msgBuffer, &secureChannelId);
         }
 
     }else{
@@ -556,7 +556,7 @@ StatusCode SC_EncodeSequenceHeader(SC_Connection* scConnection,
     // Set temporary SN value: to be set on message sending (ensure contiguous SNs)
     if(status == STATUS_OK){
         scConnection->sendingBuffer->sequenceNumberPosition = scConnection->sendingBuffer->buffers->position;
-        Write_UInt32(scConnection->sendingBuffer, 0);
+        UInt32_Write(scConnection->sendingBuffer, 0);
     }
 
     *requestId = scConnection->lastRequestIdSent + 1;
@@ -565,7 +565,7 @@ StatusCode SC_EncodeSequenceHeader(SC_Connection* scConnection,
     }
     scConnection->sendingBuffer->requestId = *requestId;
     if(status == STATUS_OK){
-        Write_UInt32(scConnection->sendingBuffer, requestId);
+        UInt32_Write(scConnection->sendingBuffer, requestId);
     }
     scConnection->lastRequestIdSent = *requestId;
 
@@ -593,7 +593,7 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
     // Security Policy:
     if(status == STATUS_OK){
         if(securityPolicy->length>0){
-            status = Write_UA_String(scConnection->sendingBuffer, securityPolicy);
+            status = String_Write(scConnection->sendingBuffer, securityPolicy);
         }else{
             // Null security policy is invalid parameter since unspecified
             status = STATUS_INVALID_PARAMETERS;
@@ -602,14 +602,14 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
     // Sender Certificate:
     if(status == STATUS_OK){
         if(toSign != UA_FALSE && senderCertificate->length>0){ // Field shall be null if message not signed
-            status = Write_UA_String(scConnection->sendingBuffer, senderCertificate);
+            status = String_Write(scConnection->sendingBuffer, senderCertificate);
         }else{
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
             // status = Write_Int32(scConnection->sendingBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
             const int32_t minusOne = -1;
-            status = Write_Int32(scConnection->sendingBuffer, &minusOne);
+            status = Int32_Write(scConnection->sendingBuffer, &minusOne);
             // NULL string: nothing to write
         }
     }
@@ -634,18 +634,18 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
                 }
             }
 
-            status = Write_UA_String(scConnection->sendingBuffer, recCertThumbprint);
+            status = String_Write(scConnection->sendingBuffer, recCertThumbprint);
         }else{
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
             //status = Write_Int32(scConnection->sendingBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
             const int32_t minusOne = -1;
-            status = Write_Int32(scConnection->sendingBuffer, &minusOne);
+            status = Int32_Write(scConnection->sendingBuffer, &minusOne);
             // NULL string: nothing to write
         }
 
-        ByteString_Delete(recCertThumbprint);
+        ByteString_Clear(recCertThumbprint);
     }else{
         status = STATUS_NOK;
     }
@@ -716,7 +716,7 @@ StatusCode Set_Message_Length(UA_MsgBuffer* msgBuffer,
         status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
     }
     if(status == STATUS_OK){
-        status = Write_UInt32(msgBuffer, &msgLength);
+        status = UInt32_Write(msgBuffer, &msgLength);
     }
     if(status == STATUS_OK){
         status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
@@ -777,7 +777,7 @@ StatusCode Set_Sequence_Number(UA_MsgBuffer* msgBuffer){
        originPosition = msgBuffer->buffers->position;
        status = Buffer_SetPosition(msgBuffer->buffers, msgBuffer->sequenceNumberPosition);
        if(status == STATUS_OK){
-           Write_UInt32(msgBuffer, &scConnection->lastSeqNumSent);
+           UInt32_Write(msgBuffer, &scConnection->lastSeqNumSent);
        }
 
        if(status == STATUS_OK){
@@ -805,7 +805,7 @@ StatusCode Set_Request_Id(UA_MsgBuffer* msgBuffer,
        }
        msgBuffer->requestId = scConnection->lastRequestIdSent;
        if(status == STATUS_OK){
-           Write_UInt32(msgBuffer, &scConnection->lastRequestIdSent);
+           UInt32_Write(msgBuffer, &scConnection->lastRequestIdSent);
        }
     }
 
@@ -931,7 +931,7 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
                                       signedData->characters,
                                       signedData->length);
             }
-            ByteString_Delete(signedData);
+            ByteString_Clear(signedData);
         }
     }else{
         if(scConnection->currentSecuKeySets.senderKeySet == UA_NULL ||
@@ -955,7 +955,7 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
                                       signedData->characters,
                                       signedData->length);
             }
-            ByteString_Delete(signedData);
+            ByteString_Clear(signedData);
         }
     }
     return status;
@@ -1201,7 +1201,7 @@ StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
 
     if(status == STATUS_OK){
         //TODO: on server side, randomize secure channel ids (table 26 part 6)!
-        status = Read_UInt32(transportBuffer, &secureChannelId);
+        status = UInt32_Read(transportBuffer, &secureChannelId);
     }
 
     if(status == STATUS_OK){
@@ -1250,7 +1250,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     // Security Policy:
     if(status == STATUS_OK){
-        status = Read_UA_ByteString(transportBuffer, securityPolicy);
+        status = ByteString_Read(transportBuffer, securityPolicy);
 
         if(status == STATUS_OK){
             uint32_t secuPolicyComparison = 0;
@@ -1264,7 +1264,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     // Sender Certificate:
     if(status == STATUS_OK){
-        status = Read_UA_ByteString(transportBuffer, senderCertificate);
+        status = ByteString_Read(transportBuffer, senderCertificate);
         if(status == STATUS_OK){
             if (toSign == UA_FALSE && senderCertificate->length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not signed"
@@ -1300,7 +1300,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     // Receiver Certificate Thumbprint:
     if(status == STATUS_OK){
-        status = Read_UA_ByteString(transportBuffer, receiverCertThumb);
+        status = ByteString_Read(transportBuffer, receiverCertThumb);
 
         if(status == STATUS_OK){
             if(toEncrypt == UA_FALSE && receiverCertThumb->length > 0){
@@ -1342,7 +1342,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                     }
                 } // if thumbprint length correctly computed
 
-                ByteString_Delete(curAppCertThumbprint);
+                ByteString_Clear(curAppCertThumbprint);
 
             } // if toEncrypt
             // Set the sequence number position which is the next position to read
@@ -1351,9 +1351,9 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
         } // if decoded thumbprint
     }
 
-    ByteString_Delete(securityPolicy);
-    ByteString_Delete(senderCertificate);
-    ByteString_Delete(receiverCertThumb);
+    ByteString_Clear(securityPolicy);
+    ByteString_Clear(senderCertificate);
+    ByteString_Clear(receiverCertThumb);
 
     return status;
 }
@@ -1592,7 +1592,7 @@ StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection)
 
     if(scConnection != UA_NULL){
         status = STATUS_OK;
-        status = Read_UInt32(scConnection->receptionBuffers, &seqNumber);
+        status = UInt32_Read(scConnection->receptionBuffers, &seqNumber);
     }
 
     if(status == STATUS_OK){

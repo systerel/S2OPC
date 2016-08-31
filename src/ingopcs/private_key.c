@@ -27,7 +27,7 @@ void PrivateKey_Delete(PrivateKey* pkey)
 {
     if(pkey != UA_NULL){
         if(pkey->key != UA_NULL){
-            ByteString_Delete(pkey->key);
+            ByteString_Clear(pkey->key);
         }
         free(pkey);
     }
@@ -48,7 +48,7 @@ void PrivateKey_EndUse(UA_ByteString* key)
 {
     if(key != UA_NULL){
         memset(key->characters, 0, key->length);
-        ByteString_Delete(key);
+        ByteString_Clear(key);
     }
 }
 

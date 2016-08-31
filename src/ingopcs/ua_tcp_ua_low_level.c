@@ -40,7 +40,7 @@ StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
     }
     if(status == STATUS_OK){
         const uint32_t headerLength = UA_HEADER_LENGTH;
-        status = Write_UInt32(msgBuffer, &headerLength);
+        status = UInt32_Write(msgBuffer, &headerLength);
         if(status == STATUS_OK){
             msgBuffer->type = type;
             msgBuffer->msgSize = UA_HEADER_LENGTH;
@@ -60,7 +60,7 @@ StatusCode TCP_UA_FinalizeHeader(UA_MsgBuffer* msgBuffer){
     status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
 
     if(status == STATUS_OK){
-        status = Write_UInt32(msgBuffer, &currentPosition);
+        status = UInt32_Write(msgBuffer, &currentPosition);
     }
     if(status == STATUS_OK){
         status = Buffer_SetPosition(msgBuffer->buffers, currentPosition);
@@ -218,7 +218,7 @@ StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer){
 
         // READ message size
         if(status == STATUS_OK){
-            status = Read_UInt32(msgBuffer, &msgBuffer->msgSize);
+            status = UInt32_Read(msgBuffer, &msgBuffer->msgSize);
         }
 
     }else{
@@ -268,9 +268,9 @@ StatusCode TCP_UA_FlushMsgBuffer(UA_MsgBuffer* msgBuffer){
 }
 
 
-StatusCode TCP_UA_WriteMsgBuffer(UA_MsgBuffer* msgBuffer,
-                                 UA_Byte*      data_src,
-                                 uint32_t      count)
+StatusCode TCP_UA_WriteMsgBuffer(UA_MsgBuffer*  msgBuffer,
+                                 const UA_Byte* data_src,
+                                 uint32_t       count)
 {
     StatusCode status = STATUS_NOK;
     if(data_src == UA_NULL || msgBuffer == UA_NULL)

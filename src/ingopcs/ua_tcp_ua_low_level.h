@@ -12,9 +12,9 @@
 
 extern const uint32_t tcpProtocolVersion;
 
-StatusCode TCP_UA_WriteMsgBuffer(UA_MsgBuffer* msgBuffer,
-                                 UA_Byte* data_src,
-                                 uint32_t count);
+StatusCode TCP_UA_WriteMsgBuffer(UA_MsgBuffer*  msgBuffer,
+                                 const UA_Byte* data_src,
+                                 uint32_t       count);
 
 StatusCode TCP_UA_ReadMsgBuffer(UA_Byte* data_dest,
                                 uint32_t size,

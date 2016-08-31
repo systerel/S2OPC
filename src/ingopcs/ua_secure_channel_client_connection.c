@@ -45,16 +45,16 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
             PKIProvider_Delete(scConnection->pkiProvider);
         }
         if(scConnection->serverCertificate != UA_NULL){
-            ByteString_Delete(scConnection->serverCertificate);
+            ByteString_Clear(scConnection->serverCertificate);
         }
         if(scConnection->clientCertificate != UA_NULL){
-            ByteString_Delete(scConnection->clientCertificate);
+            ByteString_Clear(scConnection->clientCertificate);
         }
         if(scConnection->pendingRequests != UA_NULL){
             free(scConnection->pendingRequests);
         }
         if(scConnection->securityPolicy != UA_NULL){
-            String_Delete(scConnection->securityPolicy);
+            String_Clear(scConnection->securityPolicy);
         }
         if(scConnection->instance != UA_NULL){
             SC_Delete(scConnection->instance);
@@ -87,23 +87,23 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     // Encode request type Node Id (prior to message body)
     SC_WriteSecureMsgBuffer(sendBuf, &fourByteNodeIdType, 1);
     SC_WriteSecureMsgBuffer(sendBuf, &namespace, 1);
-    Write_UInt16(sendBuf, &openSecureChannelRequestTypeId);
+    UInt16_Write(sendBuf, &openSecureChannelRequestTypeId);
 
     //// Encode request header
     // Encode authentication token (omitted opaque identifier ???? => must be a bytestring ?)
     SC_WriteSecureMsgBuffer(sendBuf, &twoByteNodeIdType, 1);
     SC_WriteSecureMsgBuffer(sendBuf, &nullTypeId, 1);
     // Encode 64 bits UtcTime => null ok ?
-    Write_UInt32(sendBuf, &uzero);
-    Write_UInt32(sendBuf, &uzero);
+    UInt32_Write(sendBuf, &uzero);
+    UInt32_Write(sendBuf, &uzero);
     // Encode requestHandler
-    Write_UInt32(sendBuf, &sendBuf->requestId);
+    UInt32_Write(sendBuf, &sendBuf->requestId);
     // Encode returnDiagnostic => symbolic id
-    Write_UInt32(sendBuf, &uone);
+    UInt32_Write(sendBuf, &uone);
     // Encode auditEntryId
-    Write_UA_String(sendBuf, auditId);
+    String_Write(sendBuf, auditId);
     // Encode timeoutHint => no timeout (for now)
-    Write_UInt32(sendBuf, &uzero);
+    UInt32_Write(sendBuf, &uzero);
 
     // Extension object: additional header => null node id => no content
     // !! Extensible parameter indicated in specification but Extension object in XML file !!
@@ -115,9 +115,9 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
     //// Encode request content
     // Client protocol version
-    Write_UInt32(sendBuf, &scProtocolVersion);
+    UInt32_Write(sendBuf, &scProtocolVersion);
     // Enumeration request type => ISSUE_0
-    Write_Int32(sendBuf, &one);
+    Int32_Write(sendBuf, &one);
 
     // Enumeration security mode => SIGNANDENCRYPT_3 // SIGN_2 // NONE_1
     switch(cConnection->securityMode){
@@ -138,7 +138,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     }
 
     if(status == STATUS_OK){
-        status = Write_Int32(sendBuf, &enumSecuMode);
+        status = Int32_Write(sendBuf, &enumSecuMode);
     }
 
     if(status == STATUS_OK){
@@ -151,7 +151,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
                                                     pkeyLength);
         if(pkey != UA_NULL){
             UA_ByteString* bsKey = PrivateKey_BeginUse(pkey);
-            Write_UA_ByteString(sendBuf, bsKey);
+            ByteString_Write(sendBuf, bsKey);
             PrivateKey_EndUse(bsKey);
 
             cConnection->instance->currentNonce = pkey;
@@ -162,10 +162,10 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
     if(status == STATUS_OK){
         // Requested lifetime
-        Write_Int32(sendBuf, (int32_t*) &cConnection->requestedLifetime);
+        Int32_Write(sendBuf, (int32_t*) &cConnection->requestedLifetime);
     }
 
-    ByteString_Delete(auditId);
+    ByteString_Clear(auditId);
 
     return status;
 }
