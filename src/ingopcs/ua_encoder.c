@@ -324,13 +324,337 @@ StatusCode Guid_Read(UA_MsgBuffer* msgBuffer, UA_Guid* guid)
     return status;
 }
 
-StatusCode NodeId_Write(UA_MsgBuffer* msgBuffer, const UA_NodeId* nodeId);
-StatusCode NodeId_Read(UA_MsgBuffer* msgBuffer, UA_NodeId* nodeId);
-StatusCode ExpandedNodeId_Write(UA_MsgBuffer* msgBuffer, const UA_ExpandedNodeId* expNodeId);
-StatusCode ExpandedNodeId_Read(UA_MsgBuffer* msgBuffer, UA_ExpandedNodeId* expNodeId);
-StatusCode Guid_Write(UA_MsgBuffer* msgBuffer, const UA_Guid* guid);
-StatusCode Guid_Read(UA_MsgBuffer* msgBuffer, UA_Guid* guid);
-StatusCode StatusCode_Write(UA_MsgBuffer* msgBuffer, const StatusCode* status);
-StatusCode StatusCode_Read(UA_MsgBuffer* msgBuffer, StatusCode* status);
-StatusCode DiagnosticInfo_Write(UA_MsgBuffer* msgBuffer, const UA_DiagnosticInfo* diagInfo);
-StatusCode DiagnosticInfo_Read(UA_MsgBuffer* msgBuffer, UA_DiagnosticInfo* diagInfo);
+UA_NodeId_DataEncoding GetNodeIdDataEncoding(const UA_NodeId* nodeId){
+    UA_NodeId_DataEncoding encodingEnum = NodeIdEncoding_Invalid;
+    switch(nodeId->identifierType){
+        case IdentifierType_Numeric:
+            if(nodeId->numeric <= UINT8_MAX){
+                encodingEnum = NodeIdEncoding_TwoByte;
+            }else if(nodeId->numeric <= UINT16_MAX){
+                encodingEnum = NodeIdEncoding_FourByte;
+            }else{
+                encodingEnum = NodeIdEncoding_Numeric;
+            }
+            break;
+        case IdentifierType_String:
+            encodingEnum = NodeIdEncoding_String;
+            break;
+        case IdentifierType_Guid:
+            encodingEnum = NodeIdEncoding_Guid;
+            break;
+        case IdentifierType_ByteString:
+            encodingEnum = NodeIdEncoding_ByteString;
+            break;
+        case IdentifierType_Undefined:
+            encodingEnum = NodeIdEncoding_Invalid;
+            break;
+    }
+    return encodingEnum;
+}
+
+StatusCode Internal_NodeId_Write(UA_MsgBuffer* msgBuffer,
+                                 UA_Byte encodingByte,
+                                 const UA_NodeId* nodeId)
+{
+    assert(nodeId != UA_NULL);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_NodeId_DataEncoding encodingType = 0x0F & encodingByte; // Eliminate flags
+
+    UA_Byte byte = 0;
+    uint16_t twoBytes = 0;
+
+    status = Byte_Write(msgBuffer, &encodingByte);
+    if(status == STATUS_OK){
+        switch(encodingType){
+            case NodeIdEncoding_Invalid:
+                status = STATUS_INVALID_PARAMETERS;
+                break;
+            case NodeIdEncoding_TwoByte:
+                byte = (UA_Byte) nodeId->numeric;
+                status = Byte_Write(msgBuffer, &byte);
+                break;
+            case  NodeIdEncoding_FourByte:
+                twoBytes = (uint16_t) nodeId->numeric;
+                if(nodeId->namespace <= UINT8_MAX){
+                    const UA_Byte namespace = nodeId->namespace;
+                    status = Byte_Write(msgBuffer, &namespace);
+                }else{
+                    status = STATUS_INVALID_PARAMETERS;
+                }
+                if(status == STATUS_OK){
+                    status = UInt16_Write(msgBuffer, &twoBytes);
+                }
+                break;
+            case  NodeIdEncoding_Numeric:
+                status = UInt16_Write(msgBuffer, &nodeId->namespace);
+                if(status == STATUS_OK){
+                    status = UInt32_Write(msgBuffer, &nodeId->numeric);
+                }
+                break;
+            case  NodeIdEncoding_String:
+                status = UInt16_Write(msgBuffer, &nodeId->namespace);
+                if(status == STATUS_OK){
+                    status = String_Write(msgBuffer, &nodeId->string);
+                }
+                break;
+            case  NodeIdEncoding_Guid:
+                status = UInt16_Write(msgBuffer, &nodeId->namespace);
+                if(status == STATUS_OK){
+                    status = Guid_Write(msgBuffer, &nodeId->guid);
+                }
+                break;
+            case  NodeIdEncoding_ByteString:
+                status = UInt16_Write(msgBuffer, &nodeId->namespace);
+                if(status == STATUS_OK){
+                    status = ByteString_Write(msgBuffer, &nodeId->bstring);
+                }
+                break;
+            default:
+                status = STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    return status;
+}
+
+StatusCode NodeId_Write(UA_MsgBuffer* msgBuffer, const UA_NodeId* nodeId)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(nodeId != UA_NULL){
+        status = Internal_NodeId_Write(msgBuffer, GetNodeIdDataEncoding(nodeId), nodeId);
+    }
+    return status;
+}
+
+StatusCode Internal_NodeId_Read(UA_MsgBuffer* msgBuffer,
+                                UA_NodeId* nodeId,
+                                UA_Byte* encodingByte)
+{
+    assert(nodeId != UA_NULL);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_NodeId_DataEncoding encodingType = 0x0F;
+
+    UA_Byte byte = 0;
+    uint16_t twoBytes = 0;
+
+    status = Byte_Read(msgBuffer, encodingByte);
+
+    if(status == STATUS_OK){
+        encodingType = 0x0F & *encodingByte; // Eliminate flags
+
+        switch(encodingType){
+            case NodeIdEncoding_Invalid:
+                status = STATUS_INVALID_RCV_PARAMETER;
+                break;
+            case NodeIdEncoding_TwoByte:
+                nodeId->namespace = 0;
+                status = Byte_Read(msgBuffer, &byte);
+                nodeId->numeric = (uint32_t) byte;
+                break;
+            case  NodeIdEncoding_FourByte:
+                status = Byte_Read(msgBuffer, &byte);
+                nodeId->namespace = byte;
+                if(status == STATUS_OK){
+                    status = UInt16_Read(msgBuffer, &twoBytes);
+                    nodeId->numeric = twoBytes;
+                }
+                break;
+            case  NodeIdEncoding_Numeric:
+                status = UInt16_Read(msgBuffer, &nodeId->namespace);
+                if(status == STATUS_OK){
+                    status = UInt32_Read(msgBuffer, &nodeId->numeric);
+                }
+                break;
+            case  NodeIdEncoding_String:
+                status = UInt16_Read(msgBuffer, &nodeId->namespace);
+                if(status == STATUS_OK){
+                    status = String_Read(msgBuffer, &nodeId->string);
+                }
+                break;
+            case  NodeIdEncoding_Guid:
+                status = UInt16_Read(msgBuffer, &nodeId->namespace);
+                if(status == STATUS_OK){
+                    status = Guid_Read(msgBuffer, &nodeId->guid);
+                }
+                break;
+            case  NodeIdEncoding_ByteString:
+                status = UInt16_Read(msgBuffer, &nodeId->namespace);
+                if(status == STATUS_OK){
+                    status = ByteString_Read(msgBuffer, &nodeId->bstring);
+                }
+                break;
+            default:
+                status = STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    return status;
+}
+
+StatusCode NodeId_Read(UA_MsgBuffer* msgBuffer, UA_NodeId* nodeId)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_Byte encodingByte = 0;
+    if(nodeId != UA_NULL){
+        status = Internal_NodeId_Read(msgBuffer, nodeId, &encodingByte);
+    }
+    return status;
+}
+
+StatusCode ExpandedNodeId_Write(UA_MsgBuffer* msgBuffer, const UA_ExpandedNodeId* expNodeId){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_Byte encodingByte = 0xFF;
+    if(expNodeId != UA_NULL){
+        encodingByte = GetNodeIdDataEncoding(&expNodeId->nodeId);
+        if(expNodeId->namespaceUri.length > 0){
+            encodingByte |= NodeIdEncoding_NamespaceUriFlag;
+        }
+        if(expNodeId->serverIndex > 0){
+            encodingByte |= NodeIdEncoding_ServerIndexFlag;
+        }
+        status = Internal_NodeId_Write(msgBuffer, encodingByte, &expNodeId->nodeId);
+    }
+    if(status == STATUS_OK && expNodeId->namespaceUri.length > 0)
+    {
+        status = String_Write(msgBuffer, &expNodeId->namespaceUri);
+    }
+    if(status == STATUS_OK && expNodeId->serverIndex > 0)
+    {
+        status = UInt32_Write(msgBuffer, &expNodeId->serverIndex);
+    }
+
+    return status;
+}
+
+StatusCode ExpandedNodeId_Read(UA_MsgBuffer* msgBuffer, UA_ExpandedNodeId* expNodeId){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_Byte encodingByte = 0;
+    if(expNodeId != UA_NULL){
+        status = Internal_NodeId_Read(msgBuffer, &expNodeId->nodeId, &encodingByte);
+    }
+    if(status == STATUS_OK &&
+       (encodingByte & NodeIdEncoding_NamespaceUriFlag) != 0x00)
+    {
+        status = String_Read(msgBuffer, &expNodeId->namespaceUri);
+    }else{
+        String_Clear(&expNodeId->namespaceUri);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & NodeIdEncoding_ServerIndexFlag) != 0)
+    {
+        status = UInt32_Read(msgBuffer, &expNodeId->serverIndex);
+    }else{
+        UInt32_Clear(&expNodeId->serverIndex);
+    }
+    return status;
+}
+
+StatusCode StatusCode_Write(UA_MsgBuffer* msgBuffer, const StatusCode* status){
+    return UInt32_Write(msgBuffer, status);
+}
+
+StatusCode StatusCode_Read(UA_MsgBuffer* msgBuffer, StatusCode* status){
+    return UInt32_Read(msgBuffer, status);
+}
+
+UA_Byte GetDiagInfoEncodingByte(const UA_DiagnosticInfo* diagInfo){
+    assert(diagInfo != UA_NULL);
+    UA_Byte encodingByte = 0x00;
+    if(diagInfo->symbolicId > -1){
+        encodingByte |= DiagInfoEncoding_SymbolicId;
+    }
+    if(diagInfo->namespaceUri > -1){
+        encodingByte |= DiagInfoEncoding_Namespace;
+    }
+    if(diagInfo->locale > -1){
+        encodingByte |= DiagInfoEncoding_Locale;
+    }
+    if(diagInfo->localizedText > -1){
+        encodingByte |= DiagInfoEncoding_LocalizedTest;
+    }
+    if(diagInfo->additionalInfo.length > 0){
+        encodingByte |= DiagInfoEncoding_AdditionalInfo;
+    }
+    if(diagInfo->innerStatusCode > 0){ // OK status code does not provide information
+        encodingByte |= DiagInfoEncoding_InnerStatusCode;
+    }
+    if(diagInfo->innerDiagnosticInfo != UA_NULL){
+        encodingByte |= DiagInfoEncoding_InnerDianosticInfo;
+    }
+    return encodingByte;
+}
+
+StatusCode DiagnosticInfo_Write(UA_MsgBuffer* msgBuffer, const UA_DiagnosticInfo* diagInfo){
+    UA_Byte encodingByte = 0x00;
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(diagInfo != UA_NULL){
+        status = STATUS_OK;
+        encodingByte = GetDiagInfoEncodingByte(diagInfo);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_SymbolicId) != 0x00){
+        status = Int32_Write(msgBuffer, &diagInfo->symbolicId);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_Namespace) != 0x00){
+        status = Int32_Write(msgBuffer, &diagInfo->namespaceUri);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_Locale) != 0x00){
+        status = Int32_Write(msgBuffer, &diagInfo->locale);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_LocalizedTest) != 0x00){
+        status = Int32_Write(msgBuffer, &diagInfo->localizedText);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_AdditionalInfo) != 0x00){
+        status = String_Write(msgBuffer, &diagInfo->additionalInfo);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_InnerStatusCode) != 0x00){
+        status = StatusCode_Write(msgBuffer, &diagInfo->innerStatusCode);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_InnerDianosticInfo) != 0x00){
+        status = DiagnosticInfo_Write(msgBuffer, diagInfo->innerDiagnosticInfo);
+    }
+    return status;
+}
+
+StatusCode DiagnosticInfo_Read(UA_MsgBuffer* msgBuffer, UA_DiagnosticInfo* diagInfo){
+    UA_Byte encodingByte = 0x00;
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(diagInfo != UA_NULL){
+        status  = Byte_Read(msgBuffer, &encodingByte);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_SymbolicId) != 0x00){
+        status = Int32_Read(msgBuffer, &diagInfo->symbolicId);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_Namespace) != 0x00){
+        status = Int32_Read(msgBuffer, &diagInfo->namespaceUri);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_Locale) != 0x00){
+        status = Int32_Read(msgBuffer, &diagInfo->locale);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_LocalizedTest) != 0x00){
+        status = Int32_Read(msgBuffer, &diagInfo->localizedText);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_AdditionalInfo) != 0x00){
+        status = String_Read(msgBuffer, &diagInfo->additionalInfo);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_InnerStatusCode) != 0x00){
+        status = StatusCode_Read(msgBuffer, &diagInfo->innerStatusCode);
+    }
+    if(status == STATUS_OK &&
+        (encodingByte & DiagInfoEncoding_InnerDianosticInfo) != 0x00){
+        status = DiagnosticInfo_Read(msgBuffer, diagInfo->innerDiagnosticInfo);
+    }
+    return status;
+}

@@ -27,11 +27,32 @@
 | (x & 0x0000FF0000000000) >> 24 \
 | (x & 0x000000FF00000000) >> 8
 
+typedef enum UA_NodeId_DataEncoding {
+    NodeIdEncoding_TwoByte = 0x00,
+    NodeIdEncoding_FourByte = 0x01,
+    NodeIdEncoding_Numeric = 0x02,
+    NodeIdEncoding_String = 0x03,
+    NodeIdEncoding_Guid = 0x04,
+    NodeIdEncoding_ByteString = 0x05,
+    NodeIdEncoding_NamespaceUriFlag = 0x80,
+    NodeIdEncoding_ServerIndexFlag = 0x40,
+    NodeIdEncoding_Invalid = 0xFF
+} UA_NodeId_DataEncoding;
+
+typedef enum UA_DiagInfo_EncodingFlag {
+    DiagInfoEncoding_SymbolicId = 0x01,
+    DiagInfoEncoding_Namespace = 0x02,
+    DiagInfoEncoding_LocalizedTest = 0x04,
+    DiagInfoEncoding_Locale = 0x08,
+    DiagInfoEncoding_AdditionalInfo = 0x10,
+    DiagInfoEncoding_InnerStatusCode = 0x20,
+    DiagInfoEncoding_InnerDianosticInfo = 0x40,
+} UA_DiagInfo_EncodingFlag;
+
 uint16_t EncodeDecode_UInt16(uint16_t from);
 uint32_t EncodeDecode_UInt32(uint32_t from);
 uint32_t EncodeDecode_Int32(int32_t from);
 uint64_t EncodeDecode_Int64(int64_t from);
-
 
 StatusCode Byte_Write(UA_MsgBuffer* msgBuffer, const UA_Byte* value);
 StatusCode Byte_Read(UA_MsgBuffer* msgBuffer, UA_Byte* value);
@@ -59,8 +80,6 @@ StatusCode NodeId_Write(UA_MsgBuffer* msgBuffer, const UA_NodeId* nodeId);
 StatusCode NodeId_Read(UA_MsgBuffer* msgBuffer, UA_NodeId* nodeId);
 StatusCode ExpandedNodeId_Write(UA_MsgBuffer* msgBuffer, const UA_ExpandedNodeId* expNodeId);
 StatusCode ExpandedNodeId_Read(UA_MsgBuffer* msgBuffer, UA_ExpandedNodeId* expNodeId);
-StatusCode Guid_Write(UA_MsgBuffer* msgBuffer, const UA_Guid* guid);
-StatusCode Guid_Read(UA_MsgBuffer* msgBuffer, UA_Guid* guid);
 StatusCode StatusCode_Write(UA_MsgBuffer* msgBuffer, const StatusCode* status);
 StatusCode StatusCode_Read(UA_MsgBuffer* msgBuffer, StatusCode* status);
 StatusCode DiagnosticInfo_Write(UA_MsgBuffer* msgBuffer, const UA_DiagnosticInfo* diagInfo);
