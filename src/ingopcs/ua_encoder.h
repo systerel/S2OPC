@@ -27,7 +27,7 @@
 | (x & 0x0000FF0000000000) >> 24 \
 | (x & 0x000000FF00000000) >> 8
 
-typedef enum UA_NodeId_DataEncoding {
+typedef enum {
     NodeIdEncoding_TwoByte = 0x00,
     NodeIdEncoding_FourByte = 0x01,
     NodeIdEncoding_Numeric = 0x02,
@@ -39,7 +39,7 @@ typedef enum UA_NodeId_DataEncoding {
     NodeIdEncoding_Invalid = 0xFF
 } UA_NodeId_DataEncoding;
 
-typedef enum UA_DiagInfo_EncodingFlag {
+typedef enum {
     DiagInfoEncoding_SymbolicId = 0x01,
     DiagInfoEncoding_Namespace = 0x02,
     DiagInfoEncoding_LocalizedTest = 0x04,

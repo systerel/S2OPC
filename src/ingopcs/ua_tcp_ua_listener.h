@@ -10,7 +10,7 @@
 
 #include <wrappers.h>
 
-typedef struct TCP_UA_Listener {
+typedef struct {
     UA_String                url;
     uint32_t                 protocolVersion;
     SocketManager            socketManager;

@@ -24,7 +24,7 @@ typedef enum TCP_ConnectionState
     TCP_Connection_Error
 } TCP_ConnectionState;
 
-typedef enum ConnectionEvent{
+typedef enum {
     ConnectionEvent_Connected,
 
 //    ConnectionEvent_Reconnecting, => see what to do with #3371, not really clear
@@ -42,7 +42,7 @@ typedef StatusCode (TCP_UA_Connection_Event_CB) (void*           tcpConnection,
                                                  UA_MsgBuffer*   msgBuffer,
                                                  StatusCode      status);
 
-typedef struct TCP_UA_Connection {
+typedef struct {
     UA_String*                  url;
     uint32_t                    protocolVersion;
     uint32_t                    receivedProtocolVersion;

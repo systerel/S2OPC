@@ -15,7 +15,7 @@
 
 extern const uint32_t scProtocolVersion;
 
-typedef struct SC_SecurityToken {
+typedef struct {
     uint32_t channelId;
     uint32_t tokenId;
     int64_t  createdAt;
@@ -28,7 +28,7 @@ typedef struct SC_SecurityKeySet{
     PrivateKey* initVector;
 } SC_SecurityKeySet;
 
-typedef struct SC_SecurityKeySets {
+typedef struct {
     SC_SecurityKeySet* senderKeySet;
     SC_SecurityKeySet* receiverKeySet;
 } SC_SecurityKeySets;
@@ -51,7 +51,7 @@ typedef enum MsgSecurityMode
     Msg_Security_Mode_SignAndEncrypt = 3,
 } MsgSecurityMode;
 
-typedef struct SC_Connection {
+typedef struct {
     TCP_UA_Connection* transportConnection;
     SC_ConnectionState state;
     uint32_t           startTime;

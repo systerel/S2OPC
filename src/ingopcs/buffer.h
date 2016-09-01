@@ -10,7 +10,7 @@
 
 #include "ua_builtintypes.h"
 
-typedef struct Buffer {
+typedef struct {
     uint32_t max_size; // maximum size
     uint32_t position; // read/write position
     uint32_t length; // data length

@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-typedef enum Endianess{
+typedef enum {
     Endianess_Undefined,
     Endianess_LittleEndian,
     Endianess_BigEndian

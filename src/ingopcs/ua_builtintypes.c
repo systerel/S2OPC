@@ -12,14 +12,6 @@
 
 #include "ua_builtintypes.h"
 
-void Byte_Initialize(UA_Byte* byte){
-    *byte = 0;
-}
-
-void Byte_Clear(UA_Byte* byte){
-    *byte = 0;
-}
-
 void Boolean_Initialize(UA_Boolean* b){
     *b = UA_FALSE;
 }
@@ -28,11 +20,62 @@ void Boolean_Clear(UA_Boolean* b){
     *b = UA_FALSE;
 }
 
-void UInt32_Initialize(uint32_t* uint){
+void SByte_Initialize(UA_SByte* sbyte){
+    *sbyte = 0;
+}
+
+void SByte_Clear(UA_SByte* sbyte){
+    *sbyte = 0;
+}
+
+void Byte_Initialize(UA_Byte* byte){
+    *byte = 0;
+}
+
+void Byte_Clear(UA_Byte* byte){
+    *byte = 0;
+}
+
+void Int16_Initialize(int16_t* intv){
+    *intv = 0;
+}
+
+void Int16_Clear(int16_t* intv){
+    *intv = 0;
+}
+
+void UInt16_Initialize(uint16_t* uint){
+    *uint = 0;
+}
+void UInt16_Clear(uint16_t* uint){
     *uint = 0;
 }
 
+void Int32_Initialize(int32_t* intv){
+    *intv = 0;
+}
+void Int32_Clear(int32_t* intv){
+    *intv = 0;
+}
+
+void UInt32_Initialize(uint32_t* uint){
+    *uint = 0;
+}
 void UInt32_Clear(uint32_t* uint){
+    *uint = 0;
+}
+
+void Int64_Initialize(int64_t* intv){
+    *intv = 0;
+}
+void Int64_Clear(int64_t* intv){
+    *intv = 0;
+}
+
+void UInt64_Initialize(uint64_t* uint){
+    *uint = 0;
+}
+void UInt64_Clear(uint64_t* uint){
     *uint = 0;
 }
 
@@ -352,3 +395,87 @@ void DiagnosticInfo_Clear(UA_DiagnosticInfo* diagInfo){
     diagInfo->innerStatusCode = STATUS_OK;
     diagInfo->innerDiagnosticInfo = UA_NULL;
 }
+
+
+void QualifiedName_Initialize(UA_QualifiedName* qname){
+    qname->namespaceIndex = 0;
+    String_Initialize(&qname->name);
+}
+
+void QualifiedName_Clear(UA_QualifiedName* qname){
+    qname->namespaceIndex = 0;
+    String_Clear(&qname->name);
+}
+
+void LocalizedText_Initialize(UA_LocalizedText* localizedText){
+    String_Initialize(&localizedText->locale);
+    String_Initialize(&localizedText->text);
+}
+
+void LocalizedText_Clear(UA_LocalizedText* localizedText){
+    String_Clear(&localizedText->locale);
+    String_Clear(&localizedText->text);
+}
+
+void ExtensionObject_Initialize(UA_ExtensionObject* extObj){
+    memset(extObj, 0, sizeof(UA_ExtensionObject));
+    NodeId_Initialize(&extObj->typeId);
+}
+
+void ExtensionObject_Clear(UA_ExtensionObject* extObj){
+    NodeId_Clear(&extObj->typeId);
+    switch(extObj->encoding){
+        case UA_ExtObjBodyEncoding_None:
+            break;
+        case UA_ExtObjBodyEncoding_ByteString:
+            ByteString_Clear(&extObj->body.bstring);
+            break;
+        case UA_ExtObjBodyEncoding_XMLElement:
+            XmlElement_Clear(&extObj->body.xml);
+            break;
+        case UA_ExtObjBodyEncoding_Object:
+            // TODO: EncodeableType !!!!
+            //extObj->body.object.objType->Clear(extObj->body.object.value);
+            break;
+    }
+    extObj->length = 0;
+}
+
+void Variant_Initialize(UA_Variant* variant){
+    memset(variant, 0, sizeof(UA_Variant));
+}
+
+void Variant_Clear(UA_Variant* variant){
+    //check (variant->arrayTypeMask){
+
+    switch(variant->builtInTypeMask){
+        case UA_Boolean_Id:
+
+        case UA_SByte_Id:
+        case UA_Byte_Id:
+        case UA_Int16_Id:
+        case UA_UInt16_Id:
+        case UA_Int32_Id:
+        case UA_UInt32_Id:
+        case UA_Int64_Id:
+        case UA_UInt64_Id:
+        case UA_Float_Id:
+        case UA_Double_Id:
+        case UA_String_Id:
+        case UA_DateTime_Id:
+        case UA_Guid_Id:
+        case UA_ByteString_Id:
+        case UA_XmlElement_Id:
+        case UA_NodeId_Id:
+        case UA_ExpandedNodeId_Id:
+        case UA_StatusCode_Id:
+        case UA_QualifiedName_Id:
+        case UA_LocalizedText_Id:
+        case UA_ExtensionObject_Id:
+        case UA_DataValue_Id:
+        case UA_Variant_Id:
+        case UA_DiagnosticInfo_Id:
+            break;
+    }
+}
+

@@ -30,13 +30,13 @@ extern const UA_Byte MSG[3];
 extern const UA_Byte OPN[3];
 extern const UA_Byte CLO[3];
 
-typedef enum UA_SecureMessageType{
+typedef enum {
     UA_SecureMessage,
     UA_OpenSecureChannel,
     UA_CloseSecureChannel
 } UA_SecureMessageType;
 
-typedef enum TCP_UA_MessageType{
+typedef enum {
     TCP_UA_Message_Unknown,
     TCP_UA_Message_Invalid,
     TCP_UA_Message_Hello,
@@ -46,7 +46,7 @@ typedef enum TCP_UA_MessageType{
 } TCP_UA_MsgType;
 
 
-typedef enum UA_Msg_Final_Chunk{
+typedef enum {
     UA_Msg_Chunk_Unknown,
     UA_Msg_Chunk_Invalid,
     UA_Msg_Chunk_Intermediate,
@@ -55,17 +55,17 @@ typedef enum UA_Msg_Final_Chunk{
 } UA_MsgFinalChunk;
 
 typedef struct UA_MsgBuffer {
-    uint32_t               nbBuffers;
-    Buffer*                buffers;
-    TCP_UA_MsgType    type;
+    uint32_t             nbBuffers;
+    Buffer*              buffers;
+    TCP_UA_MsgType       type;
     UA_SecureMessageType secureType; //only valid if type = SecureMessage
-    uint32_t               msgSize;
-    uint32_t               nbChunks;
-    uint32_t               maxChunks;
-    uint32_t               sequenceNumberPosition; // Position of sequence number (data to encrypt)
+    uint32_t             msgSize;
+    uint32_t             nbChunks;
+    uint32_t             maxChunks;
+    uint32_t             sequenceNumberPosition; // Position of sequence number (data to encrypt)
     UA_MsgFinalChunk     isFinal;
-    uint32_t               requestId;
-    void*                  flushData;
+    uint32_t             requestId;
+    void*                flushData;
 } UA_MsgBuffer;
 
 // Only 1 buffer by msg mode:
