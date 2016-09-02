@@ -17,7 +17,7 @@ else
     COPY_SSL=cp $(SSL_DLL_DIR)/* ../out/
 endif
 
-CCFLAGS=-c -g -Wall -O0
+CCFLAGS=-c -g -Wall -Wextra -O0 #-pedantic -std=c99 
 LFLAGS=-g
 
 WORKSPACE_DIR=..
