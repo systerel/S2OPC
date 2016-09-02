@@ -422,7 +422,7 @@ StatusCode CheckMaxSenderCertificateSize(CryptoProvider* cryptoProvider,
                                          uint32_t        extraPadding,
                                          uint32_t        asymmetricSignatureSize){
     StatusCode status = STATUS_NOK;
-    uint32_t maxSize = // Fit in a single message chunk with at least 1 byte of body
+    int32_t maxSize = // Fit in a single message chunk with at least 1 byte of body
      messageChunkSize -
      UA_SECURE_MESSAGE_HEADER_LENGTH -
      4 - // URI length field size
@@ -619,7 +619,7 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
 
         UA_ByteString* recCertThumbprint = UA_NULL;
         if(toEncrypt != UA_FALSE){
-            uint32_t thumbprintLength = 0;
+            int32_t thumbprintLength = 0;
             status = CryptoProvider_GetCertThumbprintLength(scConnection->currentCryptoProvider,
                                                             receiverCertificate,
                                                             &thumbprintLength);
@@ -1310,7 +1310,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                 // Check thumbprint matches current app certificate thumbprint
 
                 UA_ByteString* curAppCertThumbprint = UA_NULL;
-                uint32_t thumbprintLength = 0;
+                int32_t thumbprintLength = 0;
                 uint32_t runningAppCertComparison = 0;
 
                 status = CryptoProvider_GetCertThumbprintLength(scConnection->currentCryptoProvider,

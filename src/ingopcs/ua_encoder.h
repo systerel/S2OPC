@@ -49,15 +49,24 @@ typedef enum {
     DiagInfoEncoding_InnerDianosticInfo = 0x40,
 } UA_DiagInfo_EncodingFlag;
 
+typedef enum {
+    LocalizedText_Locale = 0x01,
+    LocalizedText_Text   = 0x02
+} UA_LocalizedText_EncodingFlag;
+
+int16_t EncodeDecode_Int16(int16_t from);
 uint16_t EncodeDecode_UInt16(uint16_t from);
+int32_t EncodeDecode_Int32(int32_t from);
 uint32_t EncodeDecode_UInt32(uint32_t from);
-uint32_t EncodeDecode_Int32(int32_t from);
-uint64_t EncodeDecode_Int64(int64_t from);
+int64_t EncodeDecode_Int64(int64_t from);
+uint64_t EncodeDecode_UInt64(uint64_t from);
 
 StatusCode Byte_Write(UA_MsgBuffer* msgBuffer, const UA_Byte* value);
 StatusCode Byte_Read(UA_MsgBuffer* msgBuffer, UA_Byte* value);
 StatusCode Boolean_Write(UA_MsgBuffer* msgBuffer, const UA_Boolean* value);
 StatusCode Boolean_Read(UA_MsgBuffer* msgBuffer, UA_Boolean* value);
+StatusCode SByte_Write(UA_MsgBuffer* msgBuffer, const UA_SByte* value);
+StatusCode SByte_Read(UA_MsgBuffer* msgBuffer, UA_SByte* value);
 StatusCode UInt16_Write(UA_MsgBuffer* msgBuffer, const uint16_t* value);
 StatusCode UInt16_Read(UA_MsgBuffer* msgBuffer, uint16_t* value);
 StatusCode UInt32_Write(UA_MsgBuffer* msgBuffer, const uint32_t* value);
@@ -84,6 +93,16 @@ StatusCode StatusCode_Write(UA_MsgBuffer* msgBuffer, const StatusCode* status);
 StatusCode StatusCode_Read(UA_MsgBuffer* msgBuffer, StatusCode* status);
 StatusCode DiagnosticInfo_Write(UA_MsgBuffer* msgBuffer, const UA_DiagnosticInfo* diagInfo);
 StatusCode DiagnosticInfo_Read(UA_MsgBuffer* msgBuffer, UA_DiagnosticInfo* diagInfo);
+StatusCode QualifiedName_Write(UA_MsgBuffer* msgBuffer, const UA_QualifiedName* qname);
+StatusCode QualifiedName_Read(UA_MsgBuffer* msgBuffer, UA_QualifiedName* qname);
+StatusCode LocalizedText_Write(UA_MsgBuffer* msgBuffer, const UA_LocalizedText* localizedText);
+StatusCode LocalizedText_Read(UA_MsgBuffer* msgBuffer, UA_LocalizedText* localizedText);
+StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObject* extObj);
+StatusCode ExtensionObject_Read(UA_MsgBuffer* msgBuffer, UA_ExtensionObject* extObj);
+StatusCode Variant_Write(UA_MsgBuffer* msgBuffer, const UA_Variant* variant);
+StatusCode Variant_Read(UA_MsgBuffer* msgBuffer, UA_Variant* variant);
+StatusCode DataValue_Write(UA_MsgBuffer* msgBuffer, const UA_DataValue* dataValue);
+StatusCode DataValue_Read(UA_MsgBuffer* msgBuffer, UA_DataValue* dataValue);
 
 
 #endif /* INGOPCS_UA_ENCODER_H_ */

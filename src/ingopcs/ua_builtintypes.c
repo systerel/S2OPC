@@ -168,7 +168,7 @@ void String_Clear(UA_String* string){
 UA_String* String_CreateFromCString(char* cString){
     UA_String* string = UA_NULL;
     size_t stringLength = 0;
-    int32_t idx = 0;
+    size_t idx = 0;
     if(cString != UA_NULL){
         string = String_Create();
         stringLength = strlen(cString);
@@ -420,6 +420,7 @@ void LocalizedText_Clear(UA_LocalizedText* localizedText){
 void ExtensionObject_Initialize(UA_ExtensionObject* extObj){
     memset(extObj, 0, sizeof(UA_ExtensionObject));
     NodeId_Initialize(&extObj->typeId);
+    extObj->length = -1;
 }
 
 void ExtensionObject_Clear(UA_ExtensionObject* extObj){
@@ -438,44 +439,359 @@ void ExtensionObject_Clear(UA_ExtensionObject* extObj){
             //extObj->body.object.objType->Clear(extObj->body.object.value);
             break;
     }
-    extObj->length = 0;
+    extObj->length = -1;
+}
+
+typedef void (*BuiltInFunction) (void*);
+
+void ApplyToVariantNonArrayBuiltInType(UA_BuiltinId builtInTypeId,
+                                       UA_VariantValue val,
+                                       BuiltInFunction builtInFunction){
+    switch(builtInTypeId){
+        case UA_Boolean_Id:
+            builtInFunction(&val.boolean);
+            break;
+        case UA_SByte_Id:
+            builtInFunction(&val.sbyte);
+            break;
+        case UA_Byte_Id:
+            builtInFunction(&val.byte);
+            break;
+        case UA_Int16_Id:
+            builtInFunction(&val.int16);
+            break;
+        case UA_UInt16_Id:
+            builtInFunction(&val.uint16);
+            break;
+        case UA_Int32_Id:
+            builtInFunction(&val.int32);
+            break;
+        case UA_UInt32_Id:
+            builtInFunction(&val.uint32);
+            break;
+        case UA_Int64_Id:
+            builtInFunction(&val.int64);
+            break;
+        case UA_UInt64_Id:
+            builtInFunction(&val.uint64);
+            break;
+        case UA_Float_Id:
+            builtInFunction(&val.floatv);
+            break;
+        case UA_Double_Id:
+            builtInFunction(&val.doublev);
+            break;
+        case UA_String_Id:
+            builtInFunction(&val.string);
+            break;
+        case UA_DateTime_Id:
+            builtInFunction(&val.date);
+            break;
+        case UA_Guid_Id:
+            builtInFunction(val.guid);
+            break;
+        case UA_ByteString_Id:
+            builtInFunction(&val.bstring);
+            break;
+        case UA_XmlElement_Id:
+            builtInFunction(&val.xmlElt);
+            break;
+        case UA_NodeId_Id:
+            builtInFunction(val.nodeId);
+            break;
+        case UA_ExpandedNodeId_Id:
+            builtInFunction(val.expNodeId);
+            break;
+        case UA_StatusCode_Id:
+            builtInFunction(&val.status);
+            break;
+        case UA_QualifiedName_Id:
+            builtInFunction(val.qname);
+            break;
+        case UA_LocalizedText_Id:
+            builtInFunction(val.localizedText);
+            break;
+        case UA_ExtensionObject_Id:
+            builtInFunction(val.extObject);
+            break;
+        case UA_DataValue_Id:
+            builtInFunction(val.dataValue);
+            break;
+        case UA_Variant_Id:
+            assert(UA_FALSE);
+            break;
+        case UA_DiagnosticInfo_Id:
+            builtInFunction(val.diagInfo);
+            break;
+        default:
+            break;
+    }
+}
+
+void ApplyToVariantArrayBuiltInType(UA_BuiltinId builtInTypeId,
+                                    UA_VariantArrayValue array,
+                                    int32_t length,
+                                    BuiltInFunction builtInFunction){
+    int32_t idx = 0;
+    switch(builtInTypeId){
+        case UA_Boolean_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.booleanArr[idx]);
+            }
+            break;
+        case UA_SByte_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.sbyteArr[idx]);
+            }
+            break;
+        case UA_Byte_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.byteArr[idx]);
+            }
+            break;
+        case UA_Int16_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.int16Arr[idx]);
+            }
+            break;
+        case UA_UInt16_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.uint16Arr[idx]);
+            }
+            break;
+        case UA_Int32_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.int32Arr[idx]);
+            }
+            break;
+        case UA_UInt32_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.uint32Arr[idx]);
+            }
+            break;
+        case UA_Int64_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.int64Arr[idx]);
+            }
+            break;
+        case UA_UInt64_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.uint64Arr[idx]);
+            }
+            break;
+        case UA_Float_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.floatvArr[idx]);
+            }
+            break;
+        case UA_Double_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.doublevArr[idx]);
+            }
+            break;
+        case UA_String_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.stringArr[idx]);
+            }
+            break;
+        case UA_DateTime_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.dateArr[idx]);
+            }
+            break;
+        case UA_Guid_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.guidArr[idx]);
+            }
+            break;
+        case UA_ByteString_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.bstringArr[idx]);
+            }
+            break;
+        case UA_XmlElement_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.xmlEltArr[idx]);
+            }
+            break;
+        case UA_NodeId_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.nodeIdArr[idx]);
+            }
+            break;
+        case UA_ExpandedNodeId_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.expNodeIdArr[idx]);
+            }
+            break;
+        case UA_StatusCode_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.statusArr[idx]);
+            }
+            break;
+        case UA_QualifiedName_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.qnameArr[idx]);
+            }
+            break;
+        case UA_LocalizedText_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.localizedTextArr[idx]);
+            }
+            break;
+        case UA_ExtensionObject_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.extObjectArr[idx]);
+            }
+            break;
+        case UA_DataValue_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.dataValueArr[idx]);
+            }
+            break;
+        case UA_Variant_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.variantArr[idx]);
+            }
+            break;
+        case UA_DiagnosticInfo_Id:
+            for(idx = 0; idx < length; idx++){
+                builtInFunction(&array.diagInfoArr[idx]);
+            }
+            break;
+        default:
+            break;
+    }
 }
 
 void Variant_Initialize(UA_Variant* variant){
     memset(variant, 0, sizeof(UA_Variant));
 }
 
+void* GetBuiltInTypeClearFunction(UA_BuiltinId builtInTypeId){
+    void* clearFunction = UA_NULL;
+    switch(builtInTypeId){
+            case UA_Boolean_Id:
+                clearFunction = Boolean_Clear;
+                break;
+            case UA_SByte_Id:
+                clearFunction = SByte_Clear;
+                break;
+            case UA_Byte_Id:
+                clearFunction = Byte_Clear;
+                break;
+            case UA_Int16_Id:
+                clearFunction = Int16_Clear;
+                break;
+            case UA_UInt16_Id:
+                clearFunction = UInt16_Clear;
+                break;
+            case UA_Int32_Id:
+                clearFunction = Int32_Clear;
+                break;
+            case UA_UInt32_Id:
+                clearFunction = UInt32_Clear;
+                break;
+            case UA_Int64_Id:
+                clearFunction = Int64_Clear;
+                break;
+            case UA_UInt64_Id:
+                clearFunction = UInt64_Clear;
+                break;
+            case UA_Float_Id:
+                clearFunction = Float_Clear;
+                break;
+            case UA_Double_Id:
+                clearFunction = Double_Clear;
+                break;
+            case UA_String_Id:
+                clearFunction = String_Clear;
+                break;
+            case UA_DateTime_Id:
+                clearFunction = DateTime_Clear;
+                break;
+            case UA_Guid_Id:
+                clearFunction = Guid_Clear;
+                break;
+            case UA_ByteString_Id:
+                clearFunction = ByteString_Clear;
+                break;
+            case UA_XmlElement_Id:
+                clearFunction = XmlElement_Clear;
+                break;
+            case UA_NodeId_Id:
+                clearFunction = NodeId_Clear;
+                break;
+            case UA_ExpandedNodeId_Id:
+                clearFunction = ExpandedNodeId_Clear;
+                break;
+            case UA_StatusCode_Id:
+                clearFunction = StatusCode_Clear;
+                break;
+            case UA_QualifiedName_Id:
+                clearFunction = QualifiedName_Clear;
+                break;
+            case UA_LocalizedText_Id:
+                clearFunction = LocalizedText_Clear;
+                break;
+            case UA_ExtensionObject_Id:
+                clearFunction = ExtensionObject_Clear;
+                break;
+            case UA_DataValue_Id:
+                clearFunction = DataValue_Clear;
+                break;
+            case UA_Variant_Id:
+                clearFunction = Variant_Clear;
+                break;
+            case UA_DiagnosticInfo_Id:
+                clearFunction = DiagnosticInfo_Clear;
+                break;
+            default:
+                break;
+        }
+    return clearFunction;
+}
+
 void Variant_Clear(UA_Variant* variant){
-    //check (variant->arrayTypeMask){
+    void* clearFunction = GetBuiltInTypeClearFunction(variant->builtInTypeMask);
+    // Matrix flag => array flag
+    assert(((variant->arrayTypeMask & UA_VariantArrayMatrixFlag) != 0 &&
+             (variant->arrayTypeMask & UA_VariantArrayValueFlag) != 0)
+           || ((variant->arrayTypeMask & UA_VariantArrayMatrixFlag) == 0));
 
-    switch(variant->builtInTypeMask){
-        case UA_Boolean_Id:
-
-        case UA_SByte_Id:
-        case UA_Byte_Id:
-        case UA_Int16_Id:
-        case UA_UInt16_Id:
-        case UA_Int32_Id:
-        case UA_UInt32_Id:
-        case UA_Int64_Id:
-        case UA_UInt64_Id:
-        case UA_Float_Id:
-        case UA_Double_Id:
-        case UA_String_Id:
-        case UA_DateTime_Id:
-        case UA_Guid_Id:
-        case UA_ByteString_Id:
-        case UA_XmlElement_Id:
-        case UA_NodeId_Id:
-        case UA_ExpandedNodeId_Id:
-        case UA_StatusCode_Id:
-        case UA_QualifiedName_Id:
-        case UA_LocalizedText_Id:
-        case UA_ExtensionObject_Id:
-        case UA_DataValue_Id:
-        case UA_Variant_Id:
-        case UA_DiagnosticInfo_Id:
-            break;
+    if((variant->arrayTypeMask & UA_VariantArrayValueFlag) != 0){
+        int32_t length = 0;
+        if((variant->arrayTypeMask & UA_VariantArrayMatrixFlag) != 0){
+            int32_t idx = 0;
+            for(idx = 0; idx < variant->value.matrix.dimensions; idx ++){
+                length *= variant->value.matrix.arrayDimensions[idx];
+            }
+            ApplyToVariantArrayBuiltInType(variant->builtInTypeMask,
+                                           variant->value.matrix.content,
+                                           length,
+                                           clearFunction);
+        }else{
+            ApplyToVariantArrayBuiltInType(variant->builtInTypeMask,
+                                           variant->value.array.content,
+                                           variant->value.array.length,
+                                           clearFunction);
+        }
+    }else{
+        ApplyToVariantNonArrayBuiltInType(variant->builtInTypeMask,
+                                          variant->value,
+                                          clearFunction);
     }
+}
+
+void DataValue_Initialize(UA_DataValue* dataValue){
+    memset(dataValue, 0, sizeof(UA_DataValue));
+}
+void DataValue_Clear(UA_DataValue* dataValue){
+    Variant_Clear(&dataValue->value);
+    StatusCode_Clear(&dataValue->status);
+    dataValue->sourceTimestamp = 0;
+    dataValue->serverTimestamp = 0;
+    dataValue->sourcePicoSeconds = 0;
+    dataValue->serverPicoSeconds = 0;
 }
 

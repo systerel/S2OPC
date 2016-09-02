@@ -256,7 +256,7 @@ StatusCode TCP_UA_ReadMsgBuffer(UA_Byte*      data_dest,
 
 StatusCode TCP_UA_FlushMsgBuffer(UA_MsgBuffer* msgBuffer){
     StatusCode status = STATUS_NOK;
-    int32_t writtenBytes = 0;
+    uint32_t writtenBytes = 0;
     writtenBytes = Socket_Write((Socket) msgBuffer->flushData,
                                 msgBuffer->buffers->data,
                                 msgBuffer->buffers->length);

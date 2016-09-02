@@ -11,9 +11,9 @@
 #include <stdint.h>
 
 typedef enum {
-    Endianess_Undefined,
-    Endianess_LittleEndian,
-    Endianess_BigEndian
+    P_Endianess_Undefined,
+    P_Endianess_LittleEndian,
+    P_Endianess_BigEndian
 } Endianess;
 
 // Undefined before call to initialize

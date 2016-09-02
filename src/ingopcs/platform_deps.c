@@ -8,12 +8,12 @@
 #include <assert.h>
 #include <platform_deps.h>
 
-Endianess endianess  = Endianess_Undefined;
-Endianess floatEndianess = Endianess_Undefined;
+Endianess endianess  = P_Endianess_Undefined;
+Endianess floatEndianess = P_Endianess_Undefined;
 
 uint32_t little_endian(){
   uint32_t x = 0x0001;
-  return (x == *((char *)&x));
+  return (x == *((uint8_t *)&x));
 }
 
 uint32_t float_big_endian(){
@@ -26,13 +26,13 @@ uint32_t float_big_endian(){
 
 void InitPlatformDependencies(){
     if(little_endian() == 0){
-        endianess = Endianess_BigEndian;
+        endianess = P_Endianess_BigEndian;
     }else{
-        endianess = Endianess_LittleEndian;
+        endianess = P_Endianess_LittleEndian;
     }
     if(float_big_endian() == 0){
-        floatEndianess = Endianess_LittleEndian;
+        floatEndianess = P_Endianess_LittleEndian;
     }else{
-        floatEndianess = Endianess_BigEndian;
+        floatEndianess = P_Endianess_BigEndian;
     }
 }

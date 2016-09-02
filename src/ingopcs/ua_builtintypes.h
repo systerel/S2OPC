@@ -13,6 +13,7 @@
 #define UA_NULL ((void *)0)
 
 typedef enum {
+    UA_Null_Id            = 0,
     UA_Boolean_Id         = 1,
     UA_SByte_Id           = 2,
     UA_Byte_Id            = 3,
@@ -76,8 +77,8 @@ typedef enum {
 } UA_IdentifierType;
 
 typedef struct {
-    uint16_t namespace;
     uint16_t identifierType; // UA_IdentifierType
+    uint16_t namespace;
 
     union {
         uint32_t      numeric;
@@ -150,7 +151,13 @@ typedef struct {
 
 } UA_ExtensionObject;
 
+typedef enum {
+    UA_VariantArrayMatrixFlag = 64, // 2^6 => bit 6
+    UA_VariantArrayValueFlag = 128 // 2^7 => bit 7
+} UA_VariantArrayTypeFlag;
+
 struct UA_DataValue;
+struct UA_Variant;
 
 typedef union {
     UA_Boolean*          booleanArr;
@@ -176,20 +183,11 @@ typedef union {
     UA_LocalizedText*    localizedTextArr;
     UA_ExtensionObject*  extObjectArr;
     struct UA_DataValue* dataValueArr;
+    struct UA_Variant*   variantArr;
     UA_DiagnosticInfo*   diagInfoArr; // TODO: not present ?
 } UA_VariantArrayValue;
 
-typedef enum {
-    UA_VariantArrayMatrixFlag = 64, // 2^6 => bit 6
-    UA_VariantArrayValueFlag = 128 // 2^7 => bit 7
-} UA_VariantArrayTypeFlag;
-
-typedef struct {
-    UA_Byte  builtInTypeMask;
-    UA_Byte  arrayTypeMask;
-    UA_Byte  padding[2];
-
-    union {
+typedef union {
         UA_Boolean           boolean;
         UA_SByte             sbyte;
         UA_Byte              byte;
@@ -213,19 +211,34 @@ typedef struct {
         UA_LocalizedText*    localizedText;
         UA_ExtensionObject*  extObject;
         struct UA_DataValue* dataValue;
-        UA_DiagnosticInfo    diagInfo; // TODO: not present ?
+        UA_DiagnosticInfo*   diagInfo; // TODO: not present ?
         struct {
             int32_t              length;
             UA_VariantArrayValue content;
         } array;
         struct {
             int32_t              dimensions;
-            int32_t*             arrayDimensions;
+            int32_t*             arrayDimensions; // Product of dimensions must be <= INT32_MAX ! (binary arrayLength valid for matrix too)
             UA_VariantArrayValue content;
         } matrix;
 
-    } value;
+} UA_VariantValue;
+
+typedef struct UA_Variant {
+    UA_Byte         builtInTypeMask;
+    UA_Byte         arrayTypeMask;
+    UA_Byte         padding[2];
+    UA_VariantValue value;
 } UA_Variant;
+
+typedef struct UA_DataValue {
+    UA_Variant  value;
+    StatusCode  status;
+    UA_DateTime sourceTimestamp;
+    UA_DateTime serverTimestamp;
+    uint16_t    sourcePicoSeconds;
+    uint16_t    serverPicoSeconds;
+} UA_DataValue;
 
 #define SECURITY_POLICY_NONE           "http://opcfoundation.org/UA/SecurityPolicy#None"
 #define SECURITY_POLICY_BASIC128RSA15  "http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15"
@@ -332,5 +345,9 @@ void ExtensionObject_Clear(UA_ExtensionObject* extObj);
 
 void Variant_Initialize(UA_Variant* variant);
 void Variant_Clear(UA_Variant* variant);
+
+void DataValue_Initialize(UA_DataValue* dataValue);
+void DataValue_Clear(UA_DataValue* dataValue);
+
 
 #endif /* INGOPCS_UA_TYPES_H_ */
