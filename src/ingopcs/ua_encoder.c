@@ -1705,5 +1705,95 @@ StatusCode Variant_Read(UA_MsgBuffer* msgBuffer, UA_Variant* variant){
     return status;
 }
 
-StatusCode DataValue_Write(UA_MsgBuffer* msgBuffer, const UA_DataValue* dataValue){}
-StatusCode DataValue_Read(UA_MsgBuffer* msgBuffer, UA_DataValue* dataValue){}
+UA_Byte GetDataValueEncodingMask(const UA_DataValue* dataValue){
+    assert(dataValue != UA_NULL);
+    UA_Byte mask = 0;
+    if(dataValue->value.builtInTypeMask != UA_Null_Id && dataValue->value.builtInTypeMask <= UA_BUILTINID_MAX){
+        mask |= DataValue_NotNullValue;
+    }
+    if(dataValue->status != STATUS_OK){
+        mask |= DataValue_NotGoodStatusCode;
+    }
+    if(dataValue->sourceTimestamp > 0){
+        mask |= DataValue_NotMinSourceDate;
+    }
+    if(dataValue->sourcePicoSeconds > 0){
+        mask |= DataValue_NotZeroSourcePico;
+    }
+    if(dataValue->serverTimestamp > 0){
+            mask |= DataValue_NotMinServerDate;
+    }
+    if(dataValue->serverPicoSeconds > 0){
+        mask |= DataValue_NotZeroServerPico;
+    }
+    return mask;
+}
+
+StatusCode DataValue_Write(UA_MsgBuffer* msgBuffer, const UA_DataValue* dataValue)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_Byte encodingMask = 0;
+    if(dataValue != UA_NULL){
+        encodingMask = GetDataValueEncodingMask(dataValue);
+        status = Byte_Write(msgBuffer, &encodingMask);
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotNullValue) != 0){
+        status = Variant_Write(msgBuffer, &dataValue->value);
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotGoodStatusCode) != 0){
+        status = StatusCode_Write(msgBuffer, &dataValue->status);
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotMinSourceDate) != 0){
+        status = DateTime_Write(msgBuffer, &dataValue->sourceTimestamp);
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotZeroSourcePico) != 0){
+        status = UInt16_Write(msgBuffer, &dataValue->sourcePicoSeconds);
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotMinServerDate) != 0){
+            status = DateTime_Write(msgBuffer, &dataValue->serverTimestamp);
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotZeroServerPico) != 0){
+        status = UInt16_Write(msgBuffer, &dataValue->serverPicoSeconds);
+    }
+    return status;
+}
+
+StatusCode DataValue_Read(UA_MsgBuffer* msgBuffer, UA_DataValue* dataValue){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_Byte encodingMask = 0;
+    if(dataValue != UA_NULL){
+        status = Byte_Read(msgBuffer, &encodingMask);
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotNullValue) != 0){
+        status = Variant_Read(msgBuffer, &dataValue->value);
+    }else{
+        dataValue->value.builtInTypeMask = UA_Null_Id;
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotGoodStatusCode) != 0){
+        status = StatusCode_Read(msgBuffer, &dataValue->status);
+    }else{
+        dataValue->status = STATUS_OK;
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotMinSourceDate) != 0){
+        status = DateTime_Read(msgBuffer, &dataValue->sourceTimestamp);
+    }else{
+        dataValue->sourceTimestamp = 0;
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotZeroSourcePico) != 0){
+        status = UInt16_Read(msgBuffer, &dataValue->sourcePicoSeconds);
+    }else{
+        dataValue->sourcePicoSeconds = 0;
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotMinServerDate) != 0){
+            status = DateTime_Read(msgBuffer, &dataValue->serverTimestamp);
+    }else{
+        dataValue->serverTimestamp = 0;
+    }
+    if(status == STATUS_OK && (encodingMask & DataValue_NotZeroServerPico) != 0){
+        status = UInt16_Read(msgBuffer, &dataValue->serverPicoSeconds);
+    }else{
+        dataValue->serverPicoSeconds = 0;
+    }
+    return status;
+}
+

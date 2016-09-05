@@ -54,6 +54,15 @@ typedef enum {
     LocalizedText_Text   = 0x02
 } UA_LocalizedText_EncodingFlag;
 
+typedef enum {
+    DataValue_NotNullValue = 0x01,
+    DataValue_NotGoodStatusCode = 0x02,
+    DataValue_NotMinSourceDate = 0x04,
+    DataValue_NotMinServerDate = 0x08,
+    DataValue_NotZeroSourcePico = 0x10,
+    DataValue_NotZeroServerPico = 0x20
+} UA_DataValue_EncodingFlag;
+
 void EncodeDecode_Int16(int16_t* intv);
 void EncodeDecode_UInt16(uint16_t* uintv);
 void EncodeDecode_Int32(int32_t* intv);

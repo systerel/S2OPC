@@ -40,6 +40,7 @@ typedef enum {
     UA_Variant_Id         = 24,
     UA_DiagnosticInfo_Id  = 25
 } UA_BuiltinId;
+#define UA_BUILTINID_MAX 25
 
 typedef uint8_t UA_Byte;
 
