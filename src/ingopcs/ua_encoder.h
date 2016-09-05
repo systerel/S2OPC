@@ -54,12 +54,14 @@ typedef enum {
     LocalizedText_Text   = 0x02
 } UA_LocalizedText_EncodingFlag;
 
-int16_t EncodeDecode_Int16(int16_t from);
-uint16_t EncodeDecode_UInt16(uint16_t from);
-int32_t EncodeDecode_Int32(int32_t from);
-uint32_t EncodeDecode_UInt32(uint32_t from);
-int64_t EncodeDecode_Int64(int64_t from);
-uint64_t EncodeDecode_UInt64(uint64_t from);
+void EncodeDecode_Int16(int16_t* intv);
+void EncodeDecode_UInt16(uint16_t* uintv);
+void EncodeDecode_Int32(int32_t* intv);
+void EncodeDecode_UInt32(uint32_t* uintv);
+void EncodeDecode_Int64(int64_t* intv);
+void EncodeDecode_UInt64(uint64_t* uintv);
+void EncodeDecode_Float(float* floatv);
+void EncodeDecode_Double(double* doublev);
 
 StatusCode Byte_Write(UA_MsgBuffer* msgBuffer, const UA_Byte* value);
 StatusCode Byte_Read(UA_MsgBuffer* msgBuffer, UA_Byte* value);

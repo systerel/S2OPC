@@ -879,9 +879,9 @@ StatusCode EncodePadding(SC_Connection* scConnection,
                              plainBlockSize,
                              *signatureSize);
         //Little endian conversion of padding:
-        uint16_t littleEndianPadding = EncodeDecode_UInt16(padding);
-        status = Buffer_Write(msgBuffer->buffers, (UA_Byte*) &littleEndianPadding, 1);
-        *paddingSize = 0xFF & littleEndianPadding;
+        EncodeDecode_UInt16(&padding);
+        status = Buffer_Write(msgBuffer->buffers, (UA_Byte*) &padding, 1);
+        *paddingSize = 0xFF & padding;
 
         if(status == STATUS_OK){
             // The value of each byte of the padding is equal to paddingSize:
@@ -894,7 +894,7 @@ StatusCode EncodePadding(SC_Connection* scConnection,
         if(status == STATUS_OK && encryptKeySize > 256){
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
-            UA_Byte extraPadding = 0x00FF & littleEndianPadding;
+            UA_Byte extraPadding = 0x00FF & padding;
             Buffer_Write(msgBuffer->buffers, &extraPadding, 1);
         }
     }
