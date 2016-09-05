@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ua_encoder.h>
+#include <ua_encodeable.h>
 #include <ua_tcp_ua_low_level.h>
 
 void EncodeDecode_Int16(int16_t* intv)

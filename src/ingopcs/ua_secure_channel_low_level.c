@@ -546,6 +546,7 @@ StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
 StatusCode SC_EncodeSequenceHeader(SC_Connection* scConnection,
                                    uint32_t*      requestId){
     StatusCode status = STATUS_INVALID_PARAMETERS;
+    const uint32_t zero = 0;
     if(scConnection != UA_NULL &&
        scConnection->sendingBuffer != UA_NULL &&
        requestId != UA_NULL){
@@ -556,7 +557,7 @@ StatusCode SC_EncodeSequenceHeader(SC_Connection* scConnection,
     // Set temporary SN value: to be set on message sending (ensure contiguous SNs)
     if(status == STATUS_OK){
         scConnection->sendingBuffer->sequenceNumberPosition = scConnection->sendingBuffer->buffers->position;
-        UInt32_Write(scConnection->sendingBuffer, 0);
+        UInt32_Write(scConnection->sendingBuffer, &zero);
     }
 
     *requestId = scConnection->lastRequestIdSent + 1;

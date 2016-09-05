@@ -97,7 +97,6 @@ void Double_Clear(double* d){
 
 void ByteString_Initialize(UA_ByteString* bstring){
     if(bstring != UA_NULL){
-        assert(bstring->characters == UA_NULL);
         bstring->length = -1;
         bstring->characters = UA_NULL;
     }

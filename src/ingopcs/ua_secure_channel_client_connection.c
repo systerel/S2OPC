@@ -75,6 +75,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     const uint32_t uzero = 0;
     const uint32_t uone = 1;
     const int32_t one = 1;
+    const int32_t zero = 0;
 
     UA_String* auditId = String_CreateFromCString("audit1");
 
@@ -117,7 +118,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     // Client protocol version
     UInt32_Write(sendBuf, &scProtocolVersion);
     // Enumeration request type => ISSUE_0
-    Int32_Write(sendBuf, &one);
+    Int32_Write(sendBuf, &zero);
 
     // Enumeration security mode => SIGNANDENCRYPT_3 // SIGN_2 // NONE_1
     switch(cConnection->securityMode){
