@@ -25,3 +25,6 @@ clean:
 	\rm -rf bin
 	\rm -rf lib/linux src/linux AnsiCSample/linux
 	\rm -rf lib/win32 src/win32 AnsiCSample/win32
+
+check: all
+	$(MAKE) -C $(BUILD_DIR) check
