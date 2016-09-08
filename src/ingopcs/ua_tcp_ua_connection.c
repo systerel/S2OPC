@@ -400,7 +400,7 @@ StatusCode OnSocketEvent_CB (Socket        socket,
 
 StatusCode CheckURI (char* uri){
     StatusCode status = STATUS_NOK;
-    int idx = 0;
+    size_t idx = 0;
     bool isPort = 0;
     bool hasPort = 0;
     bool invalid = 0;
