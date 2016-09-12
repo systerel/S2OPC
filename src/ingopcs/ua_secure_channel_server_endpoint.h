@@ -17,8 +17,8 @@ typedef enum SC_EndpointState
 
 typedef struct SecurityPolicy
 {
-    MsgSecurityMode securityMode;
-    UA_String         SecurityPolicy;
+    UA_MessageSecurityMode securityMode;
+    UA_String              SecurityPolicy;
 } SecurityPolicy;
 
 typedef struct SC_ServerEndpoint

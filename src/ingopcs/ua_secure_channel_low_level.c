@@ -386,14 +386,14 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
 
 // Check OPCUA cryptographic properties
 
-uint32_t IsMsgEncrypted(MsgSecurityMode securityMode,
-                        UA_MsgBuffer*   msgBuffer)
+uint32_t IsMsgEncrypted(UA_MessageSecurityMode securityMode,
+                        UA_MsgBuffer*          msgBuffer)
 {
-    assert(securityMode != Msg_Security_Mode_Invalid);
+    assert(securityMode != UA_MessageSecurityMode_Invalid);
     uint32_t toEncrypt = 1; // True
     // Determine if the message must be encrypted
-    if(securityMode == Msg_Security_Mode_None ||
-       (securityMode == Msg_Security_Mode_Sign &&
+    if(securityMode == UA_MessageSecurityMode_None ||
+       (securityMode == UA_MessageSecurityMode_Sign &&
         msgBuffer->secureType != UA_OpenSecureChannel))
     {
         toEncrypt = UA_FALSE;
@@ -402,19 +402,18 @@ uint32_t IsMsgEncrypted(MsgSecurityMode securityMode,
     return toEncrypt;
 }
 
-uint32_t IsMsgSigned(MsgSecurityMode securityMode)
+uint32_t IsMsgSigned(UA_MessageSecurityMode securityMode)
 {
     uint32_t toSign = 1; // True
     // Determine if the message must be signed
-    if(securityMode == Msg_Security_Mode_None)
+    if(securityMode == UA_MessageSecurityMode_None)
     {
         toSign = UA_FALSE;
     }
     return toSign;
 }
 
-StatusCode CheckMaxSenderCertificateSize(CryptoProvider* cryptoProvider,
-                                         UA_ByteString*  senderCertificate,
+StatusCode CheckMaxSenderCertificateSize(UA_ByteString*  senderCertificate,
                                          uint32_t        messageChunkSize,
                                          UA_String*      securityPolicyUri,
                                          uint8_t         hasPadding,
@@ -654,6 +653,31 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
     return status;
 }
 
+StatusCode SC_EncodeMsgBody(UA_MsgBuffer*     msgBuffer,
+                            UA_EncodeableType encType,
+                            void*             msgBody)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_NodeId nodeId;
+    NodeId_Initialize(&nodeId);
+
+    if(msgBuffer != UA_NULL && msgBody != UA_NULL){
+        nodeId.identifierType = IdentifierType_Numeric;
+        if(encType.namespace == UA_NULL){
+            nodeId.namespace = 0;
+        }else{
+            // TODO: find namespace Id
+        }
+        nodeId.numeric = encType.typeId;
+
+        status = NodeId_Write(msgBuffer, &nodeId);
+    }
+    if(status == STATUS_OK){
+        status = encType.encodeFunction(msgBuffer, msgBody);
+    }
+    return status;
+}
+
 StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
                                    const UA_Byte* data_src,
                                    uint32_t       count){
@@ -785,29 +809,6 @@ StatusCode Set_Sequence_Number(UA_MsgBuffer* msgBuffer){
                status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
        }
 
-    }
-
-    return status;
-}
-
-StatusCode Set_Request_Id(UA_MsgBuffer* msgBuffer,
-                          uint32_t*      requestId){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
-    SC_Connection* scConnection = UA_NULL;
-    if(msgBuffer != UA_NULL && msgBuffer->flushData != UA_NULL){
-       status = STATUS_OK;
-       scConnection = (SC_Connection*) msgBuffer->flushData;
-       status = Buffer_SetPosition
-                 (msgBuffer->buffers, msgBuffer->sequenceNumberPosition + UA_HEADER_SN_LENGTH);
-       // TODO: request Id must be randomized ?
-       scConnection->lastRequestIdSent++;
-       if(scConnection->lastRequestIdSent + 1 == 0){
-           scConnection->lastRequestIdSent++;
-       }
-       msgBuffer->requestId = scConnection->lastRequestIdSent;
-       if(status == STATUS_OK){
-           UInt32_Write(msgBuffer, &scConnection->lastRequestIdSent);
-       }
     }
 
     return status;
@@ -1158,8 +1159,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
            msgBuffer->secureType == UA_OpenSecureChannel &&
            toSign != UA_FALSE)
         {
-            status = CheckMaxSenderCertificateSize(scConnection->currentCryptoProvider,
-                                                   scConnection->runningAppCertificate,
+            status = CheckMaxSenderCertificateSize(scConnection->runningAppCertificate,
                                                    msgBuffer->buffers->max_size,
                                                    scConnection->currentSecuPolicy,
                                                    hasPadding,
@@ -1387,7 +1387,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     uint32_t toDecrypt = 1;
     uint32_t decryptedTextLength = 0;
     CryptoProvider* cryptoProvider = UA_NULL;
-    MsgSecurityMode securityMode = Msg_Security_Mode_Invalid;
+    UA_MessageSecurityMode securityMode = UA_MessageSecurityMode_Invalid;
     Buffer* plainBuffer = UA_NULL;
     uint32_t bufferIdx = 0;
 
@@ -1517,7 +1517,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
     uint32_t toVerify = 1;
 
     CryptoProvider* cryptoProvider = UA_NULL;
-    MsgSecurityMode securityMode = Msg_Security_Mode_Invalid;
+    UA_MessageSecurityMode securityMode = UA_MessageSecurityMode_Invalid;
     UA_String* securityPolicy = UA_NULL;
     Buffer* receptionBuffer = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
 

@@ -14,6 +14,7 @@
 
 #include <ua_encoder.h>
 #include "ua_secure_channel_low_level.h"
+#include <ua_types.h>
 
 SC_ClientConnection* SC_Client_Create(Namespace*      namespac,
                                       EncodeableType* encodeableTypes)
@@ -30,7 +31,7 @@ SC_ClientConnection* SC_Client_Create(Namespace*      namespac,
             scClientConnection->instance = sConnection;
             scClientConnection->namespaces = namespac;
             scClientConnection->encodeableTypes = encodeableTypes;
-            scClientConnection->securityMode = Msg_Security_Mode_Invalid;
+            scClientConnection->securityMode = UA_MessageSecurityMode_Invalid;
         }
     }else{
         SC_Delete(sConnection);
@@ -66,84 +67,61 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
 StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 {
     StatusCode status = STATUS_OK;
-    const UA_Byte twoByteNodeIdType = 0x00;
+    UA_OpenSecureChannelRequest openRequest;
+    UA_OpenSecureChannelRequest_Initialize(&openRequest);
     const UA_Byte fourByteNodeIdType = 0x01;
     const UA_Byte namespace = 0;
-    const UA_Byte nullTypeId = 0;
-    const UA_Byte noBodyEncoded = 0;
     const uint16_t openSecureChannelRequestTypeId = 444;
     const uint32_t uzero = 0;
     const uint32_t uone = 1;
-    const int32_t one = 1;
-    const int32_t zero = 0;
 
-    UA_String* auditId = String_CreateFromCString("audit1");
+    UA_ByteString* bsKey = UA_NULL;
 
     UA_MsgBuffer* sendBuf = cConnection->instance->sendingBuffer;
     PrivateKey* pkey = UA_NULL;
     uint32_t pkeyLength = 0;
-    int32_t enumSecuMode = 0;
-
-
-    // Encode request type Node Id (prior to message body)
-    SC_WriteSecureMsgBuffer(sendBuf, &fourByteNodeIdType, 1);
-    SC_WriteSecureMsgBuffer(sendBuf, &namespace, 1);
-    UInt16_Write(sendBuf, &openSecureChannelRequestTypeId);
 
     //// Encode request header
     // Encode authentication token (omitted opaque identifier ???? => must be a bytestring ?)
-    SC_WriteSecureMsgBuffer(sendBuf, &twoByteNodeIdType, 1);
-    SC_WriteSecureMsgBuffer(sendBuf, &nullTypeId, 1);
+    openRequest.RequestHeader.AuthenticationToken.identifierType = IdentifierType_Numeric;
+    openRequest.RequestHeader.AuthenticationToken.numeric = UA_Null_Id;
     // Encode 64 bits UtcTime => null ok ?
-    UInt32_Write(sendBuf, &uzero);
-    UInt32_Write(sendBuf, &uzero);
+    openRequest.RequestHeader.Timestamp = 0;
     // Encode requestHandler
-    UInt32_Write(sendBuf, &sendBuf->requestId);
+    openRequest.RequestHeader.RequestHandle = sendBuf->requestId;
     // Encode returnDiagnostic => symbolic id
-    UInt32_Write(sendBuf, &uone);
+    openRequest.RequestHeader.ReturnDiagnostics = uone;
     // Encode auditEntryId
-    String_Write(sendBuf, auditId);
-    // Encode timeoutHint => no timeout (for now)
-    UInt32_Write(sendBuf, &uzero);
+    status = String_CopyFromCString(&openRequest.RequestHeader.AuditEntryId, "audit1");
 
-    // Extension object: additional header => null node id => no content
-    // !! Extensible parameter indicated in specification but Extension object in XML file !!
-    // Type Id: Node Id
-    SC_WriteSecureMsgBuffer(sendBuf, &twoByteNodeIdType, 1);
-    SC_WriteSecureMsgBuffer(sendBuf, &nullTypeId, 1);
-    // Encoding body byte:
-    SC_WriteSecureMsgBuffer(sendBuf, &noBodyEncoded, 1);
+    if(status == STATUS_OK){
+        // Encode timeoutHint => no timeout (for now)
+        openRequest.RequestHeader.TimeoutHint = uzero;
 
-    //// Encode request content
-    // Client protocol version
-    UInt32_Write(sendBuf, &scProtocolVersion);
-    // Enumeration request type => ISSUE_0
-    Int32_Write(sendBuf, &zero);
+        // Extension object: additional header => null node id => no content
+        // !! Extensible parameter indicated in specification but Extension object in XML file !!
+        // Encoding body byte:
+        openRequest.RequestHeader.AdditionalHeader.encoding = UA_ExtObjBodyEncoding_None;
+        // Type Id: Node Id
+        openRequest.RequestHeader.AdditionalHeader.typeId.identifierType = IdentifierType_Numeric;
+        openRequest.RequestHeader.AdditionalHeader.typeId.numeric = UA_Null_Id;
 
-    // Enumeration security mode => SIGNANDENCRYPT_3 // SIGN_2 // NONE_1
-    switch(cConnection->securityMode){
-        case Msg_Security_Mode_Invalid:
+        //// Encode request content
+        // Client protocol version
+        openRequest.ClientProtocolVersion = scProtocolVersion;
+        // Enumeration request type => ISSUE_0
+        openRequest.RequestType = UA_SecurityTokenRequestType_Issue;
+
+        // Security mode value check
+        if(cConnection->securityMode == UA_MessageSecurityMode_Invalid){
             status = STATUS_INVALID_PARAMETERS;
-            break;
-        case Msg_Security_Mode_None:
-            enumSecuMode = 1;
-            break;
-        case Msg_Security_Mode_Sign:
-            enumSecuMode = 2;
-            break;
-        case Msg_Security_Mode_SignAndEncrypt:
-            enumSecuMode = 3;
-            break;
-        default:
-            assert(UA_FALSE);
+        }else{
+            openRequest.SecurityMode = cConnection->securityMode;
+        }
     }
 
     if(status == STATUS_OK){
-        status = Int32_Write(sendBuf, &enumSecuMode);
-    }
-
-    if(status == STATUS_OK){
-        // Client nonce => null string
+        // Security mode
         status = CryptoProvider_SymmetricGenerateKeyLength(cConnection->instance->currentCryptoProvider, &pkeyLength);
     }
 
@@ -152,21 +130,24 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
                                                     pkeyLength);
         if(pkey != UA_NULL){
             UA_ByteString* bsKey = PrivateKey_BeginUse(pkey);
-            ByteString_Write(sendBuf, bsKey);
-            PrivateKey_EndUse(bsKey);
-
-            cConnection->instance->currentNonce = pkey;
+            status = ByteString_AttachFrom(&openRequest.ClientNonce, bsKey);
+            if(status == STATUS_OK){
+                cConnection->instance->currentNonce = pkey;
+            }
         }else{
             status = STATUS_NOK;
         }
     }
 
     if(status == STATUS_OK){
-        // Requested lifetime
-        Int32_Write(sendBuf, (int32_t*) &cConnection->requestedLifetime);
+        openRequest.RequestedLifetime = cConnection->requestedLifetime;
     }
 
-    ByteString_Clear(auditId);
+    status = SC_EncodeMsgBody(sendBuf,
+                              UA_OpenSecureChannelRequest_EncodeableType,
+                              &openRequest);
+
+    PrivateKey_EndUse(bsKey);
 
     return status;
 }
@@ -379,7 +360,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                              UA_ByteString*         clientCertificate,
                              UA_ByteString*         clientKey,
                              UA_ByteString*         serverCertificate,
-                             MsgSecurityMode        securityMode,
+                             UA_MessageSecurityMode securityMode,
                              char*                  securityPolicy,
                              uint32_t               requestedLifetime,
                              SC_ConnectionEvent_CB* callback,
@@ -392,14 +373,14 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
        clientCertificate != UA_NULL &&
        clientKey != UA_NULL &&
        serverCertificate != UA_NULL &&
-       securityMode != Msg_Security_Mode_Invalid &&
+       securityMode != UA_MessageSecurityMode_Invalid &&
        securityPolicy != UA_NULL &&
        requestedLifetime > 0)
     {
         if(connection->clientCertificate == UA_NULL &&
            connection->clientKey == UA_NULL &&
            connection->serverCertificate == UA_NULL &&
-           connection->securityMode == Msg_Security_Mode_Invalid &&
+           connection->securityMode == UA_MessageSecurityMode_Invalid &&
            connection->securityPolicy == UA_NULL &&
            connection->callback == UA_NULL &&
            connection->callbackData == UA_NULL)
@@ -418,7 +399,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
             if(connection->clientCertificate == UA_NULL ||
                connection->clientKey == UA_NULL ||
                connection->serverCertificate == UA_NULL ||
-               connection->securityMode == Msg_Security_Mode_Invalid ||
+               connection->securityMode == UA_MessageSecurityMode_Invalid ||
                connection->securityPolicy == UA_NULL)
             {
                 status = STATUS_NOK;

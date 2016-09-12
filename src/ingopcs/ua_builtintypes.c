@@ -125,6 +125,18 @@ UA_ByteString* ByteString_CreateFixedSize(uint32_t size){
     return bstring;
 }
 
+StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(dest != UA_NULL && src != UA_NULL
+       && src->length > 0 && src->characters != UA_NULL){
+        status = STATUS_OK;
+        dest->length = src->length;
+        dest->characters = src->characters;
+    }
+    return status;
+}
+
 UA_ByteString* ByteString_Copy(UA_ByteString* src){
     UA_ByteString* dest = UA_NULL;
     if(src != UA_NULL){
@@ -157,6 +169,11 @@ void String_Initialize(UA_String* string){
 UA_String* String_Create(){
     return (UA_String*) ByteString_Create();
 }
+
+StatusCode String_AttachFrom(UA_String* dest, UA_String* src){
+    return ByteString_AttachFrom((UA_ByteString*) dest, (UA_ByteString*) src);
+}
+
 UA_String* String_Copy(UA_String* src){
     return (UA_String*) ByteString_Copy((UA_ByteString*) src);
 }
@@ -164,15 +181,17 @@ void String_Clear(UA_String* string){
     ByteString_Clear((UA_ByteString*) string);
 }
 
-UA_String* String_CreateFromCString(char* cString){
-    UA_String* string = UA_NULL;
+StatusCode String_CopyFromCString(UA_String* string, char* cString){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
     size_t stringLength = 0;
     size_t idx = 0;
-    if(cString != UA_NULL){
-        string = String_Create();
+    if(string != UA_NULL && string->characters == UA_NULL
+       && cString != UA_NULL){
+        status = STATUS_OK;
+    }
+    if(status == STATUS_OK){
         stringLength = strlen(cString);
-        if(string != UA_NULL &&
-           stringLength > 0 &&
+        if(stringLength > 0 &&
            stringLength <= INT32_MAX)
         {
             string->length = stringLength;
@@ -187,11 +206,24 @@ UA_String* String_CreateFromCString(char* cString){
                     }
                 }
             }else{
-                String_Clear(string);
+                status = STATUS_NOK;
             }
         }else{
-            String_Clear(string);
+            status = STATUS_NOK;
         }
+    }
+
+    return status;
+}
+
+UA_String* String_CreateFromCString(char* cString){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_String* string = String_Create();
+    status = String_CopyFromCString(string, cString);
+
+    if(status != STATUS_OK){
+        String_Clear(string);
+        string = UA_NULL;
     }
     return string;
 }

@@ -33,7 +33,7 @@ typedef struct SC_ClientConnection
     PrivateKey*            clientKey;
     uint32_t               nbPendingRequests; // array size
     PendingRequest*        pendingRequests; //replace by a linked list impl
-    MsgSecurityMode        securityMode;
+    UA_MessageSecurityMode securityMode;
     UA_String*             securityPolicy;
     uint32_t               requestedLifetime;
     SC_Connection*         instance;
@@ -54,7 +54,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                              UA_ByteString*         clientCertificate,
                              UA_ByteString*         clientKey,
                              UA_ByteString*         serverCertificate,
-                             MsgSecurityMode        securityMode,
+                             UA_MessageSecurityMode securityMode,
                              char*                  securityPolicy,
                              uint32_t               requestedLifetime,
                              SC_ConnectionEvent_CB* callback,

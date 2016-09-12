@@ -288,6 +288,7 @@ void Double_Clear(double* d);
 void ByteString_Initialize(UA_ByteString* bstring);
 UA_ByteString* ByteString_Create(void);
 UA_ByteString* ByteString_CreateFixedSize(uint32_t size);
+StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src);
 UA_ByteString* ByteString_Copy(UA_ByteString* src);
 void ByteString_Clear(UA_ByteString* bstring);
 StatusCode ByteString_Compare(UA_ByteString* left,
@@ -299,9 +300,11 @@ uint32_t ByteString_Equal(UA_ByteString* left,
 void String_Initialize(UA_String* string);
 UA_String* String_Create(void);
 
+StatusCode String_CopyFromCString(UA_String* string, char* cString);
 UA_String* String_CreateFromCString(char* cString);
 char* String_GetCString(UA_String* string);
 
+StatusCode String_AttachFrom(UA_String* dest, UA_String* src);
 UA_String* String_Copy(UA_String* src);
 void String_Clear(UA_String* bstring);
 

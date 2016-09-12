@@ -11,6 +11,7 @@
 #include <wrappers.h>
 
 #include <private_key.h>
+#include <ua_types.h>
 #include "ua_tcp_ua_connection.h"
 
 extern const uint32_t scProtocolVersion;
@@ -43,41 +44,33 @@ typedef enum SC_ConnectionState
     SC_Connection_Error
 } SC_ConnectionState;
 
-typedef enum MsgSecurityMode
-{
-    Msg_Security_Mode_Invalid        = 0,
-    Msg_Security_Mode_None           = 1,
-    Msg_Security_Mode_Sign           = 2,
-    Msg_Security_Mode_SignAndEncrypt = 3,
-} MsgSecurityMode;
-
 typedef struct {
-    TCP_UA_Connection* transportConnection;
-    SC_ConnectionState state;
-    uint32_t           startTime;
-    UA_ByteString*     runningAppCertificate;
-    UA_ByteString*     runningAppPublicKey;
-    PrivateKey*        runningAppPrivateKey;
-    UA_ByteString*     otherAppCertificate;
-    UA_ByteString*     otherAppPublicKey;
-    UA_MsgBuffer*      sendingBuffer;
-    uint32_t           sendingMaxBodySize;
-    UA_MsgBuffers*     receptionBuffers;
-    MsgSecurityMode    currentSecuMode;
-    UA_String*         currentSecuPolicy;
-    SC_SecurityToken   currentSecuToken;
-    SC_SecurityKeySets currentSecuKeySets;
-    CryptoProvider*    currentCryptoProvider;
-    MsgSecurityMode    precSecuMode;
-    UA_String*         precSecuPolicy;
-    SC_SecurityToken   precSecuToken;
-    SC_SecurityKeySets precSecuKeySets;
-    CryptoProvider*    precCryptoProvider;
-    PrivateKey*        currentNonce;
-    uint32_t           lastSeqNumSent;
-    uint32_t           lastSeqNumReceived;
-    uint32_t           lastRequestIdSent;
-    uint32_t           secureChannelId;
+    TCP_UA_Connection*     transportConnection;
+    SC_ConnectionState     state;
+    uint32_t               startTime;
+    UA_ByteString*         runningAppCertificate;
+    UA_ByteString*         runningAppPublicKey;
+    PrivateKey*            runningAppPrivateKey;
+    UA_ByteString*         otherAppCertificate;
+    UA_ByteString*         otherAppPublicKey;
+    UA_MsgBuffer*          sendingBuffer;
+    uint32_t               sendingMaxBodySize;
+    UA_MsgBuffers*         receptionBuffers;
+    UA_MessageSecurityMode currentSecuMode;
+    UA_String*             currentSecuPolicy;
+    SC_SecurityToken       currentSecuToken;
+    SC_SecurityKeySets     currentSecuKeySets;
+    CryptoProvider*        currentCryptoProvider;
+    UA_MessageSecurityMode precSecuMode;
+    UA_String*             precSecuPolicy;
+    SC_SecurityToken       precSecuToken;
+    SC_SecurityKeySets     precSecuKeySets;
+    CryptoProvider*        precCryptoProvider;
+    PrivateKey*            currentNonce;
+    uint32_t               lastSeqNumSent;
+    uint32_t               lastSeqNumReceived;
+    uint32_t               lastRequestIdSent;
+    uint32_t               secureChannelId;
 
 } SC_Connection;
 
@@ -107,6 +100,10 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
 
 StatusCode SC_EncodeSequenceHeader(SC_Connection* scConnection,
                                    uint32_t*      requestId);
+
+StatusCode SC_EncodeMsgBody(UA_MsgBuffer*     msgBuffer,
+                            UA_EncodeableType encType,
+                            void*             msgBody);
 
 StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
                                    const UA_Byte* data_src,
