@@ -5,15 +5,13 @@
  *      Author: vincent
  */
 
-#include "ua_secure_channel_low_level.h"
-
 #include <wrappers.h>
 
 #include <assert.h>
 #include <stdlib.h>
 #include <ua_encoder.h>
-#include <ua_tcp_ua_connection.h>
 #include <ua_tcp_ua_low_level.h>
+#include <ua_secure_channel_low_level.h>
 
 const uint32_t scProtocolVersion = 0;
 
@@ -1509,6 +1507,31 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     return status;
 }
 
+StatusCode SC_DecodeMsgBody(SC_Connection* scConnection,
+                            UA_EncodeableType** encType,
+                            void** encodeableObj){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_NodeId nodeId;
+    NodeId_Initialize(&nodeId);
+    if(scConnection != UA_NULL && encType != UA_NULL && encodeableObj != UA_NULL){
+        status = NodeId_Read(scConnection->receptionBuffers, &nodeId);
+    }
+    //TODO: manage id -> encodeable type
+    // For now only OPN response type accepted
+    assert(nodeId.identifierType == UA_IdType_Numeric
+            && nodeId.namespace == 0
+            && nodeId.numeric == UA_OpenSecureChannelResponse_EncodeableType.typeId);
+    *encType = &UA_OpenSecureChannelResponse_EncodeableType;
+    *encodeableObj = malloc((*encType)->allocSize);
+    if(*encodeableObj != UA_NULL){
+        status = (*encType)->decodeFunction(scConnection->receptionBuffers, *encodeableObj);
+    }else{
+        status = STATUS_NOK;
+    }
+    NodeId_Clear(&nodeId);
+    return status;
+}
+
 StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                  uint32_t       isSymmetric,
                                  uint32_t       isPrecCryptoData)
@@ -1612,5 +1635,26 @@ StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection)
         }
     }
 
+    return status;
+}
+
+StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
+                                           uint32_t       scProtocolVersion)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t transportProtocolVersion = 0;
+
+    if(scConnection != UA_NULL){
+        status = STATUS_OK;
+        // use Get_Rcv_Protocol_Version and check it is the same as the one received in SC
+        if(TCP_UA_Connection_GetReceiveProtocolVersion(scConnection->transportConnection,
+                                                       &transportProtocolVersion)
+                   != UA_FALSE)
+        {
+            if(scProtocolVersion != transportProtocolVersion){
+                status = STATUS_INVALID_RCV_PARAMETER;
+            }
+        }
+    }
     return status;
 }

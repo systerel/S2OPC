@@ -8,7 +8,7 @@
 #ifndef INGOPCS_TCP_UA_LOW_LEVEL_H_
 #define INGOPCS_TCP_UA_LOW_LEVEL_H_
 
-#include "ua_msg_buffer.h"
+#include <ua_msg_buffer.h>
 
 extern const uint32_t tcpProtocolVersion;
 

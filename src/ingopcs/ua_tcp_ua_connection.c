@@ -493,3 +493,9 @@ void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
     connection->callbackData = UA_NULL;
     ResetConnectionState(connection);
 }
+
+uint32_t TCP_UA_Connection_GetReceiveProtocolVersion(TCP_UA_Connection* connection,
+                                                     uint32_t*          protocolVersion){
+    *protocolVersion = connection->receivedProtocolVersion;
+    return 1;
+}

@@ -12,7 +12,7 @@
 
 #include <private_key.h>
 #include <ua_types.h>
-#include "ua_tcp_ua_connection.h"
+#include <ua_tcp_ua_connection.h>
 
 extern const uint32_t scProtocolVersion;
 
@@ -131,12 +131,18 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                          uint32_t       isSymmetric,
                          uint32_t       isPrecCryptoData);
 
+StatusCode SC_DecodeMsgBody(SC_Connection* scConnection,
+                            UA_EncodeableType** encType,
+                            void** encodeableObj);
+
 StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                  uint32_t       isSymmetric,
                                  uint32_t       isPrecCryptoData);
 
 StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection);
 
+StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
+                                           uint32_t       scProtocolVersion);
 
 
 #endif /* INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_ */

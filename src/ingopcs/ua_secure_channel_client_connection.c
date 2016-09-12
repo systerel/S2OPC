@@ -69,9 +69,6 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     StatusCode status = STATUS_OK;
     UA_OpenSecureChannelRequest openRequest;
     UA_OpenSecureChannelRequest_Initialize(&openRequest);
-    const UA_Byte fourByteNodeIdType = 0x01;
-    const UA_Byte namespace = 0;
-    const uint16_t openSecureChannelRequestTypeId = 444;
     const uint32_t uzero = 0;
     const uint32_t uone = 1;
 
@@ -211,8 +208,19 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
 StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection)
 {
-    // use Get_Rcv_Protocol_Version and check it is the same as the one received in SC
-    return STATUS_NOK;
+    assert(cConnection != UA_NULL);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_EncodeableType* encType = UA_NULL;
+    UA_OpenSecureChannelResponse* encObj = UA_NULL;
+
+    status = SC_DecodeMsgBody(cConnection->instance,
+                              &encType,
+                              (void**) &encObj);
+    if(status == STATUS_OK){
+        status = SC_CheckReceivedProtocolVersion(cConnection->instance, encObj->ServerProtocolVersion);
+    }
+
+    return status;
 }
 
 StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
@@ -222,6 +230,7 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     const uint32_t validateSenderCertificateTrue = 1; // True: always activated as indicated in API
     const uint32_t isSymmetricFalse = UA_FALSE; // TRUE
     const uint32_t isPrecCryptoDataFalse = UA_FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
+    uint32_t requestId = 0;
 
     uint32_t snPosition = 0;
 
@@ -258,7 +267,7 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     }
 
     if(status == STATUS_OK){
-        // Decrypt message content and store complete message in secure connection buffer
+        // Check decrypted message signature
         status = SC_VerifyMsgSignature(cConnection->instance,
                                        isSymmetricFalse,
                                        isPrecCryptoDataFalse); // IsAsymmetric = TRUE
@@ -266,6 +275,11 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
 
     if(status == STATUS_OK){
         status = SC_CheckSeqNumReceived(cConnection->instance);
+    }
+
+    if(status == STATUS_OK){
+        // TODO: Check request id valid
+        status = UInt32_Read(cConnection->instance->receptionBuffers, &requestId);
     }
 
     if(status == STATUS_OK){

@@ -9,9 +9,9 @@
 #define INGOPCS_TCP_UA_CONNECTION_H_
 
 #include <wrappers.h>
-#include "ua_builtintypes.h"
+#include <ua_builtintypes.h>
 
-#include "ua_msg_buffer.h"
+#include <ua_msg_buffer.h>
 
 #define TCP_UA_MIN_BUFFER_SIZE 8192
 #define TCP_UA_MAX_URL_LENGTH 4096

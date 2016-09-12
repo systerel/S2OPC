@@ -583,17 +583,18 @@ StatusCode Internal_NodeId_Read(UA_MsgBuffer* msgBuffer,
 
     if(status == STATUS_OK){
         encodingType = 0x0F & *encodingByte; // Eliminate flags
-
         switch(encodingType){
             case NodeIdEncoding_Invalid:
                 status = STATUS_INVALID_RCV_PARAMETER;
                 break;
             case NodeIdEncoding_TwoByte:
+                nodeId->identifierType = IdentifierType_Numeric;
                 nodeId->namespace = 0;
                 status = Byte_Read(msgBuffer, &byte);
                 nodeId->numeric = (uint32_t) byte;
                 break;
             case  NodeIdEncoding_FourByte:
+                nodeId->identifierType = IdentifierType_Numeric;
                 status = Byte_Read(msgBuffer, &byte);
                 nodeId->namespace = byte;
                 if(status == STATUS_OK){
@@ -602,24 +603,28 @@ StatusCode Internal_NodeId_Read(UA_MsgBuffer* msgBuffer,
                 }
                 break;
             case  NodeIdEncoding_Numeric:
+                nodeId->identifierType = IdentifierType_Numeric;
                 status = UInt16_Read(msgBuffer, &nodeId->namespace);
                 if(status == STATUS_OK){
                     status = UInt32_Read(msgBuffer, &nodeId->numeric);
                 }
                 break;
             case  NodeIdEncoding_String:
+                nodeId->identifierType = IdentifierType_String;
                 status = UInt16_Read(msgBuffer, &nodeId->namespace);
                 if(status == STATUS_OK){
                     status = String_Read(msgBuffer, &nodeId->string);
                 }
                 break;
             case  NodeIdEncoding_Guid:
+                nodeId->identifierType = IdentifierType_Guid;
                 status = UInt16_Read(msgBuffer, &nodeId->namespace);
                 if(status == STATUS_OK){
                     status = Guid_Read(msgBuffer, &nodeId->guid);
                 }
                 break;
             case  NodeIdEncoding_ByteString:
+                nodeId->identifierType = IdentifierType_ByteString;
                 status = UInt16_Read(msgBuffer, &nodeId->namespace);
                 if(status == STATUS_OK){
                     status = ByteString_Read(msgBuffer, &nodeId->bstring);
