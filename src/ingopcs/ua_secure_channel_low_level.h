@@ -132,7 +132,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                          uint32_t       isPrecCryptoData);
 
 StatusCode SC_DecodeMsgBody(SC_Connection* scConnection,
-                            UA_EncodeableType** encType,
+                            UA_EncodeableType* encType,
                             void** encodeableObj);
 
 StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,

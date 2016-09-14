@@ -16,6 +16,33 @@
 #include "ua_secure_channel_low_level.h"
 #include <ua_types.h>
 
+PendingRequest* SC_PendingRequestCreate(uint32_t           requestId,
+                                        UA_EncodeableType* responseType,
+                                        uint32_t           timeoutHint,
+                                        uint32_t           startTime,
+                                        ResponseEvent_CB*  callback,
+                                        void*              callbackData){
+    PendingRequest* result = UA_NULL;
+    if(requestId != 0){
+        result = malloc(sizeof(PendingRequest));
+    }
+    if(result != UA_NULL){
+        result->requestId = requestId;
+        result->responseType = responseType;
+        result->timeoutHint = timeoutHint;
+        result->startTime = startTime;
+        result->callback = callback;
+        result->callbackData = callbackData;
+    }
+    return result;
+}
+
+void SC_PendingRequestDelete(PendingRequest* pRequest){
+    if(pRequest != UA_NULL){
+        free(pRequest);
+    }
+}
+
 SC_ClientConnection* SC_Client_Create(Namespace*      namespac,
                                       EncodeableType* encodeableTypes)
 {
@@ -32,6 +59,11 @@ SC_ClientConnection* SC_Client_Create(Namespace*      namespac,
             scClientConnection->namespaces = namespac;
             scClientConnection->encodeableTypes = encodeableTypes;
             scClientConnection->securityMode = UA_MessageSecurityMode_Invalid;
+            scClientConnection->pendingRequests = SLinkedList_Create();
+            if(scClientConnection->pendingRequests == UA_NULL){
+                free(scClientConnection);
+                scClientConnection = UA_NULL;
+            }
         }
     }else{
         SC_Delete(sConnection);
@@ -203,18 +235,33 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
         status = SC_FlushSecureMsgBuffer(cConnection->instance->sendingBuffer, UA_Msg_Chunk_Final);
     }
 
+    if(status == STATUS_OK){
+        PendingRequest* pRequest = SC_PendingRequestCreate(requestId,
+                                                           &UA_OpenSecureChannelResponse_EncodeableType,
+                                                           0, // Not managed now
+                                                           0, // Not managed now
+                                                           UA_NULL, // No callback, specifc message header used (OPN)
+                                                           UA_NULL);
+        if(pRequest != SLinkedList_Add(cConnection->pendingRequests, requestId, pRequest)){
+            status = STATUS_NOK;
+        }else{
+            cConnection->nbPendingRequests += 1;
+        }
+    }
+
     return status;
 }
 
-StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection)
+StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
+                                         PendingRequest*      pRequest)
 {
-    assert(cConnection != UA_NULL);
+    assert(cConnection != UA_NULL &&
+           pRequest != UA_NULL && pRequest->responseType != UA_NULL);
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_EncodeableType* encType = UA_NULL;
     UA_OpenSecureChannelResponse* encObj = UA_NULL;
 
     status = SC_DecodeMsgBody(cConnection->instance,
-                              &encType,
+                              pRequest->responseType,
                               (void**) &encObj);
     if(status == STATUS_OK){
         status = SC_CheckReceivedProtocolVersion(cConnection->instance, encObj->ServerProtocolVersion);
@@ -231,8 +278,8 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     const uint32_t isSymmetricFalse = UA_FALSE; // TRUE
     const uint32_t isPrecCryptoDataFalse = UA_FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
     uint32_t requestId = 0;
-
     uint32_t snPosition = 0;
+    PendingRequest* pRequest = UA_NULL;
 
     if(transportMsgBuffer->isFinal == UA_Msg_Chunk_Final){
         // OPN request/response must be in one chunk only
@@ -283,8 +330,15 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     }
 
     if(status == STATUS_OK){
+        pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
+        if(pRequest == UA_NULL){
+            status = STATUS_NOK;
+        }
+    }
+
+    if(status == STATUS_OK){
         // Decode message body content
-        status = Read_OpenSecureChannelReponse(cConnection);
+        status = Read_OpenSecureChannelReponse(cConnection, pRequest);
     }
 
     return status;

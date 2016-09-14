@@ -11,17 +11,30 @@
 #include <wrappers.h>
 
 #include <private_key.h>
-#include "ua_builtintypes.h"
-#include "ua_secure_channel_low_level.h"
+#include <ua_builtintypes.h>
+#include <ua_encodeable.h>
+#include <ua_secure_channel_low_level.h>
+#include <singly_linked_list.h>
 
 typedef struct PendingRequest
 {
-    uint32_t          requestId; // 0 is invalid request
-    uint32_t          timeoutHint;
-    uint32_t          startTime;
-    ResponseEvent_CB* callback;
-    void*             callbackData;
+    uint32_t           requestId; // 0 is invalid request
+    UA_EncodeableType* responseType;
+    uint32_t           timeoutHint;
+    uint32_t           startTime;
+    ResponseEvent_CB*  callback;
+    void*              callbackData;
 } PendingRequest;
+
+PendingRequest* SC_PendingRequestCreate(uint32_t           requestId,
+                                        UA_EncodeableType* responseType,
+                                        uint32_t           timeoutHint,
+                                        uint32_t           startTime,
+                                        ResponseEvent_CB*  callback,
+                                        void*              callbackData);
+
+void SC_PendingRequestDelete(PendingRequest*);
+
 
 typedef struct SC_ClientConnection
 {
@@ -32,7 +45,7 @@ typedef struct SC_ClientConnection
     UA_ByteString*         clientCertificate;
     PrivateKey*            clientKey;
     uint32_t               nbPendingRequests; // array size
-    PendingRequest*        pendingRequests; //replace by a linked list impl
+    SLinkedList *          pendingRequests;
     UA_MessageSecurityMode securityMode;
     UA_String*             securityPolicy;
     uint32_t               requestedLifetime;

@@ -666,7 +666,7 @@ StatusCode SC_EncodeMsgBody(UA_MsgBuffer*     msgBuffer,
         }else{
             // TODO: find namespace Id
         }
-        nodeId.numeric = encType.typeId;
+        nodeId.numeric = encType.binaryTypeId;
 
         status = NodeId_Write(msgBuffer, &nodeId);
     }
@@ -1508,7 +1508,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
 }
 
 StatusCode SC_DecodeMsgBody(SC_Connection* scConnection,
-                            UA_EncodeableType** encType,
+                            UA_EncodeableType* encType,
                             void** encodeableObj){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_NodeId nodeId;
@@ -1516,17 +1516,26 @@ StatusCode SC_DecodeMsgBody(SC_Connection* scConnection,
     if(scConnection != UA_NULL && encType != UA_NULL && encodeableObj != UA_NULL){
         status = NodeId_Read(scConnection->receptionBuffers, &nodeId);
     }
-    //TODO: manage id -> encodeable type
-    // For now only OPN response type accepted
-    assert(nodeId.identifierType == UA_IdType_Numeric
-            && nodeId.namespace == 0
-            && nodeId.numeric == UA_OpenSecureChannelResponse_EncodeableType.typeId);
-    *encType = &UA_OpenSecureChannelResponse_EncodeableType;
-    *encodeableObj = malloc((*encType)->allocSize);
-    if(*encodeableObj != UA_NULL){
-        status = (*encType)->decodeFunction(scConnection->receptionBuffers, *encodeableObj);
+    if(status == STATUS_OK && nodeId.identifierType == UA_IdType_Numeric &&
+        (nodeId.numeric == encType->typeId || nodeId.numeric == encType->binaryTypeId)){
+//         || nodeId.numeric == encType->xmlTypeId){ => what is the point to accept this type ?
+        if(encType->namespace == UA_NULL && nodeId.namespace != 0){
+            status = STATUS_INVALID_RCV_PARAMETER;
+        }else if(encType->namespace != UA_NULL){
+            //TODO: manage ns <-> ns id conversion
+            assert(UA_FALSE);
+        }
     }else{
-        status = STATUS_NOK;
+        status = STATUS_INVALID_RCV_PARAMETER;
+    }
+
+    if(status == STATUS_OK){
+        *encodeableObj = malloc(encType->allocSize);
+        if(*encodeableObj != UA_NULL){
+            status = encType->decodeFunction(scConnection->receptionBuffers, *encodeableObj);
+        }else{
+            status = STATUS_NOK;
+        }
     }
     NodeId_Clear(&nodeId);
     return status;
