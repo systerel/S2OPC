@@ -45,7 +45,6 @@ typedef struct SC_ClientConnection
     UA_ByteString*         serverCertificate;
     UA_ByteString*         clientCertificate;
     PrivateKey*            clientKey;
-    uint32_t               nbPendingRequests; // array size
     SLinkedList *          pendingRequests;
     UA_MessageSecurityMode securityMode;
     UA_String*             securityPolicy;

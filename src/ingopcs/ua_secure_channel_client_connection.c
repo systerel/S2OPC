@@ -236,6 +236,7 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     }
 
     if(status == STATUS_OK){
+        // TODO: remove precedent OPN request if existing => before flush ?
         PendingRequest* pRequest = SC_PendingRequestCreate(requestId,
                                                            &UA_OpenSecureChannelResponse_EncodeableType,
                                                            0, // Not managed now
@@ -244,8 +245,6 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
                                                            UA_NULL);
         if(pRequest != SLinkedList_Add(cConnection->pendingRequests, requestId, pRequest)){
             status = STATUS_NOK;
-        }else{
-            cConnection->nbPendingRequests += 1;
         }
     }
 
