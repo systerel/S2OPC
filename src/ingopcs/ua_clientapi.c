@@ -91,6 +91,7 @@ StatusCode UA_ClientApi_FindServers(
             "FindServers",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_FindServersRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_FindServersResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -167,6 +168,7 @@ StatusCode UA_ClientApi_BeginFindServers(
             "FindServers",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_FindServersRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_FindServersResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -222,6 +224,7 @@ StatusCode UA_ClientApi_FindServersOnNetwork(
             "FindServersOnNetwork",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_FindServersOnNetworkRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_FindServersOnNetworkResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -295,6 +298,7 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
             "FindServersOnNetwork",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_FindServersOnNetworkRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_FindServersOnNetworkResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -352,6 +356,7 @@ StatusCode UA_ClientApi_GetEndpoints(
             "GetEndpoints",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_GetEndpointsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_GetEndpointsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -428,6 +433,7 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
             "GetEndpoints",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_GetEndpointsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_GetEndpointsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -471,6 +477,7 @@ StatusCode UA_ClientApi_RegisterServer(
             "RegisterServer",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_RegisterServerRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_RegisterServerResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -535,6 +542,7 @@ StatusCode UA_ClientApi_BeginRegisterServer(
             "RegisterServer",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_RegisterServerRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_RegisterServerResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -591,6 +599,7 @@ StatusCode UA_ClientApi_RegisterServer2(
             "RegisterServer2",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_RegisterServer2Request_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_RegisterServer2Response_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -664,6 +673,7 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
             "RegisterServer2",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_RegisterServer2Request_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_RegisterServer2Response_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -748,6 +758,7 @@ StatusCode UA_ClientApi_CreateSession(
             "CreateSession",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CreateSessionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CreateSessionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -842,6 +853,7 @@ StatusCode UA_ClientApi_BeginCreateSession(
             "CreateSession",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CreateSessionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CreateSessionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -911,6 +923,7 @@ StatusCode UA_ClientApi_ActivateSession(
             "ActivateSession",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_ActivateSessionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_ActivateSessionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -996,6 +1009,7 @@ StatusCode UA_ClientApi_BeginActivateSession(
             "ActivateSession",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_ActivateSessionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_ActivateSessionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1038,6 +1052,7 @@ StatusCode UA_ClientApi_CloseSession(
             "CloseSession",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CloseSessionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CloseSessionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1101,6 +1116,7 @@ StatusCode UA_ClientApi_BeginCloseSession(
             "CloseSession",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CloseSessionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CloseSessionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1145,6 +1161,7 @@ StatusCode UA_ClientApi_Cancel(
             "Cancel",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CancelRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CancelResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1209,6 +1226,7 @@ StatusCode UA_ClientApi_BeginCancel(
             "Cancel",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CancelRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CancelResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1262,6 +1280,7 @@ StatusCode UA_ClientApi_AddNodes(
             "AddNodes",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_AddNodesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_AddNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1332,6 +1351,7 @@ StatusCode UA_ClientApi_BeginAddNodes(
             "AddNodes",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_AddNodesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_AddNodesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1385,6 +1405,7 @@ StatusCode UA_ClientApi_AddReferences(
             "AddReferences",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_AddReferencesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_AddReferencesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1455,6 +1476,7 @@ StatusCode UA_ClientApi_BeginAddReferences(
             "AddReferences",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_AddReferencesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_AddReferencesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1508,6 +1530,7 @@ StatusCode UA_ClientApi_DeleteNodes(
             "DeleteNodes",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_DeleteNodesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_DeleteNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1578,6 +1601,7 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
             "DeleteNodes",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_DeleteNodesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_DeleteNodesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1631,6 +1655,7 @@ StatusCode UA_ClientApi_DeleteReferences(
             "DeleteReferences",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_DeleteReferencesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_DeleteReferencesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1701,6 +1726,7 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
             "DeleteReferences",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_DeleteReferencesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_DeleteReferencesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1759,6 +1785,7 @@ StatusCode UA_ClientApi_Browse(
             "Browse",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_BrowseRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_BrowseResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1834,6 +1861,7 @@ StatusCode UA_ClientApi_BeginBrowse(
             "Browse",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_BrowseRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_BrowseResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1889,6 +1917,7 @@ StatusCode UA_ClientApi_BrowseNext(
             "BrowseNext",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_BrowseNextRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_BrowseNextResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1961,6 +1990,7 @@ StatusCode UA_ClientApi_BeginBrowseNext(
             "BrowseNext",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_BrowseNextRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_BrowseNextResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2014,6 +2044,7 @@ StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
             "TranslateBrowsePathsToNodeIds",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2084,6 +2115,7 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
             "TranslateBrowsePathsToNodeIds",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2133,6 +2165,7 @@ StatusCode UA_ClientApi_RegisterNodes(
             "RegisterNodes",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_RegisterNodesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_RegisterNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2201,6 +2234,7 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
             "RegisterNodes",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_RegisterNodesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_RegisterNodesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2246,6 +2280,7 @@ StatusCode UA_ClientApi_UnregisterNodes(
             "UnregisterNodes",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_UnregisterNodesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_UnregisterNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2312,6 +2347,7 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
             "UnregisterNodes",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_UnregisterNodesRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_UnregisterNodesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2383,6 +2419,7 @@ StatusCode UA_ClientApi_QueryFirst(
             "QueryFirst",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_QueryFirstRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_QueryFirstResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2467,6 +2504,7 @@ StatusCode UA_ClientApi_BeginQueryFirst(
             "QueryFirst",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_QueryFirstRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_QueryFirstResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2518,6 +2556,7 @@ StatusCode UA_ClientApi_QueryNext(
             "QueryNext",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_QueryNextRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_QueryNextResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2587,6 +2626,7 @@ StatusCode UA_ClientApi_BeginQueryNext(
             "QueryNext",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_QueryNextRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_QueryNextResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2644,6 +2684,7 @@ StatusCode UA_ClientApi_Read(
             "Read",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_ReadRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_ReadResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2718,6 +2759,7 @@ StatusCode UA_ClientApi_BeginRead(
             "Read",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_ReadRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_ReadResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2778,6 +2820,7 @@ StatusCode UA_ClientApi_HistoryRead(
             "HistoryRead",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_HistoryReadRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_HistoryReadResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2855,6 +2898,7 @@ StatusCode UA_ClientApi_BeginHistoryRead(
             "HistoryRead",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_HistoryReadRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_HistoryReadResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2908,6 +2952,7 @@ StatusCode UA_ClientApi_Write(
             "Write",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_WriteRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_WriteResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2978,6 +3023,7 @@ StatusCode UA_ClientApi_BeginWrite(
             "Write",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_WriteRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_WriteResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3031,6 +3077,7 @@ StatusCode UA_ClientApi_HistoryUpdate(
             "HistoryUpdate",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_HistoryUpdateRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_HistoryUpdateResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3101,6 +3148,7 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
             "HistoryUpdate",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_HistoryUpdateRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_HistoryUpdateResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3154,6 +3202,7 @@ StatusCode UA_ClientApi_Call(
             "Call",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CallRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CallResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3224,6 +3273,7 @@ StatusCode UA_ClientApi_BeginCall(
             "Call",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CallRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CallResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3281,6 +3331,7 @@ StatusCode UA_ClientApi_CreateMonitoredItems(
             "CreateMonitoredItems",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CreateMonitoredItemsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CreateMonitoredItemsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3355,6 +3406,7 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
             "CreateMonitoredItems",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CreateMonitoredItemsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CreateMonitoredItemsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3412,6 +3464,7 @@ StatusCode UA_ClientApi_ModifyMonitoredItems(
             "ModifyMonitoredItems",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_ModifyMonitoredItemsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_ModifyMonitoredItemsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3486,6 +3539,7 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
             "ModifyMonitoredItems",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_ModifyMonitoredItemsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_ModifyMonitoredItemsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3543,6 +3597,7 @@ StatusCode UA_ClientApi_SetMonitoringMode(
             "SetMonitoringMode",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_SetMonitoringModeRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_SetMonitoringModeResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3617,6 +3672,7 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
             "SetMonitoringMode",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_SetMonitoringModeRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_SetMonitoringModeResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3687,6 +3743,7 @@ StatusCode UA_ClientApi_SetTriggering(
             "SetTriggering",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_SetTriggeringRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_SetTriggeringResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3770,6 +3827,7 @@ StatusCode UA_ClientApi_BeginSetTriggering(
             "SetTriggering",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_SetTriggeringRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_SetTriggeringResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3825,6 +3883,7 @@ StatusCode UA_ClientApi_DeleteMonitoredItems(
             "DeleteMonitoredItems",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_DeleteMonitoredItemsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_DeleteMonitoredItemsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3897,6 +3956,7 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
             "DeleteMonitoredItems",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_DeleteMonitoredItemsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_DeleteMonitoredItemsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3957,6 +4017,7 @@ StatusCode UA_ClientApi_CreateSubscription(
             "CreateSubscription",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CreateSubscriptionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CreateSubscriptionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4034,6 +4095,7 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
             "CreateSubscription",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_CreateSubscriptionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_CreateSubscriptionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4092,6 +4154,7 @@ StatusCode UA_ClientApi_ModifySubscription(
             "ModifySubscription",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_ModifySubscriptionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_ModifySubscriptionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4168,6 +4231,7 @@ StatusCode UA_ClientApi_BeginModifySubscription(
             "ModifySubscription",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_ModifySubscriptionRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_ModifySubscriptionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4223,6 +4287,7 @@ StatusCode UA_ClientApi_SetPublishingMode(
             "SetPublishingMode",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_SetPublishingModeRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_SetPublishingModeResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4295,6 +4360,7 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
             "SetPublishingMode",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_SetPublishingModeRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_SetPublishingModeResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4358,6 +4424,7 @@ StatusCode UA_ClientApi_Publish(
             "Publish",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_PublishRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_PublishResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4433,6 +4500,7 @@ StatusCode UA_ClientApi_BeginPublish(
             "Publish",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_PublishRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_PublishResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4479,6 +4547,7 @@ StatusCode UA_ClientApi_Republish(
             "Republish",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_RepublishRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_RepublishResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4545,6 +4614,7 @@ StatusCode UA_ClientApi_BeginRepublish(
             "Republish",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_RepublishRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_RepublishResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4600,6 +4670,7 @@ StatusCode UA_ClientApi_TransferSubscriptions(
             "TransferSubscriptions",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_TransferSubscriptionsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_TransferSubscriptionsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4672,6 +4743,7 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
             "TransferSubscriptions",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_TransferSubscriptionsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_TransferSubscriptionsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4725,6 +4797,7 @@ StatusCode UA_ClientApi_DeleteSubscriptions(
             "DeleteSubscriptions",
             (void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_DeleteSubscriptionsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_DeleteSubscriptionsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4795,6 +4868,7 @@ StatusCode UA_ClientApi_BeginDeleteSubscriptions(
             "DeleteSubscriptions",
             (OpcUa_Void*)&cRequest,
             (OpcUa_EncodeableType *) &UA_DeleteSubscriptionsRequest_EncodeableType,
+            (OpcUa_EncodeableType *) &UA_DeleteSubscriptionsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
