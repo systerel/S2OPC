@@ -11,10 +11,11 @@
 #include <wrappers.h>
 
 #include <private_key.h>
+#include <singly_linked_list.h>
 #include <ua_builtintypes.h>
 #include <ua_encodeable.h>
+#include <ua_namespace_table.h>
 #include <ua_secure_channel_low_level.h>
-#include <singly_linked_list.h>
 
 typedef struct PendingRequest
 {
@@ -38,8 +39,8 @@ void SC_PendingRequestDelete(PendingRequest*);
 
 typedef struct SC_ClientConnection
 {
-    Namespace*             namespaces;
-    EncodeableType*        encodeableTypes;
+    UA_NamespaceTable*     namespaces;
+    UA_EncodeableType**    encodeableTypes;
     PKIProvider*           pkiProvider;
     UA_ByteString*         serverCertificate;
     UA_ByteString*         clientCertificate;
@@ -57,8 +58,8 @@ typedef struct SC_ClientConnection
 } SC_ClientConnection;
 
 
-SC_ClientConnection* SC_Client_Create(Namespace*      namespac,
-                                      EncodeableType* encodeableTypes);
+SC_ClientConnection* SC_Client_Create(UA_NamespaceTable*  namespaceTable,
+                                      UA_EncodeableType** encodeableTypes);
 void SC_Client_Delete(SC_ClientConnection* scConnection);
 
 StatusCode SC_Client_Connect(SC_ClientConnection*   connection,

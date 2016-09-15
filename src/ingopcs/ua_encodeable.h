@@ -30,4 +30,9 @@ typedef struct UA_EncodeableType {
     UA_EncodeableObject_PfnDecode*     decodeFunction;
 } UA_EncodeableType;
 
+
+UA_EncodeableType* EncodeableType_GetEncodeableType(UA_EncodeableType** encTypesTable, // null terminated enctype* list
+                                                    char*               namespace,
+                                                    uint32_t            typeId);
+
 #endif /* INGOPCS_UA_ENCODEABLE_H_ */

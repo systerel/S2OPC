@@ -43,8 +43,8 @@ void SC_PendingRequestDelete(PendingRequest* pRequest){
     }
 }
 
-SC_ClientConnection* SC_Client_Create(Namespace*      namespac,
-                                      EncodeableType* encodeableTypes)
+SC_ClientConnection* SC_Client_Create(UA_NamespaceTable*  namespaceTable,
+                                      UA_EncodeableType** encodeableTypes)
 {
     SC_ClientConnection* scClientConnection = UA_NULL;
     SC_Connection* sConnection = SC_Create();
@@ -56,7 +56,7 @@ SC_ClientConnection* SC_Client_Create(Namespace*      namespac,
             memset (scClientConnection, 0, sizeof(SC_ClientConnection));
             sConnection->state = SC_Connection_Disconnected;
             scClientConnection->instance = sConnection;
-            scClientConnection->namespaces = namespac;
+            scClientConnection->namespaces = namespaceTable;
             scClientConnection->encodeableTypes = encodeableTypes;
             scClientConnection->securityMode = UA_MessageSecurityMode_Invalid;
             scClientConnection->pendingRequests = SLinkedList_Create();
@@ -267,6 +267,41 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
         status = SC_CheckReceivedProtocolVersion(cConnection->instance, encObj->ServerProtocolVersion);
     }
 
+    if(status == STATUS_OK){
+        // TODO: in case of renew: when moving from current to prec ?
+        // TODO: is the sc ID the same after a renew ? => It should => to be checked
+
+        if(encObj->SecurityToken.ChannelId != 0){
+            cConnection->instance->currentSecuToken.channelId = encObj->SecurityToken.ChannelId;
+            cConnection->instance->currentSecuToken.tokenId = encObj->SecurityToken.TokenId;
+            cConnection->instance->currentSecuToken.createdAt = encObj->SecurityToken.CreatedAt;
+            cConnection->instance->currentSecuToken.revisedLifetime = encObj->SecurityToken.RevisedLifetime;
+        }else{
+            // NULL SC ID !
+            status = STATUS_INVALID_RCV_PARAMETER;
+        }
+    }
+
+    if(status == STATUS_OK){
+        int32_t encryptKeyLength, signKeyLength, initVectorLength;
+        status = CryptoProvider_DeriveKeyLengths(cConnection->instance->currentCryptoProvider,
+                                                 &encryptKeyLength,
+                                                 &signKeyLength,
+                                                 &initVectorLength);
+        if(status == STATUS_OK && encObj->ServerNonce.length > 0){
+            cConnection->instance->currentSecuKeySets.receiverKeySet = KeySet_Create();
+            cConnection->instance->currentSecuKeySets.senderKeySet = KeySet_Create();
+            status = CryptoProvider_ClientDeriveKeySets(cConnection->instance->currentCryptoProvider,
+                                                        cConnection->instance->currentNonce,
+                                                        &encObj->ServerNonce,
+                                                        encryptKeyLength,
+                                                        signKeyLength,
+                                                        initVectorLength,
+                                                        cConnection->instance->currentSecuKeySets.senderKeySet,
+                                                        cConnection->instance->currentSecuKeySets.receiverKeySet);
+        }
+    }
+
     return status;
 }
 
@@ -325,11 +360,12 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     }
 
     if(status == STATUS_OK){
-        // TODO: Check request id valid
+        // Retrieve request id
         status = UInt32_Read(cConnection->instance->receptionBuffers, &requestId);
     }
 
     if(status == STATUS_OK){
+        // Retrieve associated pending request
         pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
         if(pRequest == UA_NULL){
             status = STATUS_NOK;
@@ -339,6 +375,13 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     if(status == STATUS_OK){
         // Decode message body content
         status = Read_OpenSecureChannelReponse(cConnection, pRequest);
+    }
+
+    if(status == STATUS_OK){
+        SC_PendingRequestDelete(pRequest);
+        pRequest = UA_NULL;
+    }else{
+        // Trace / channel CB
     }
 
     return status;

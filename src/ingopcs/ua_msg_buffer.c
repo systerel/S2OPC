@@ -170,7 +170,7 @@ UA_MsgBuffers* MsgBuffers_Create(uint32_t maxChunks,
 void MsgBuffers_Reset(UA_MsgBuffers* mBuffer){
     uint32_t idx = 0;
     if(mBuffer != UA_NULL){
-        for(idx = 0; idx < mBuffer->maxChunks; idx++){
+        for(idx = 0; idx < mBuffer->nbChunks; idx++){
             Buffer_Reset(&(mBuffer->buffers[idx]));
         }
         mBuffer->type = TCP_UA_Message_Unknown;

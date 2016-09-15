@@ -11,6 +11,7 @@
 #include <wrappers.h>
 
 #include <private_key.h>
+#include <key_sets.h>
 #include <ua_types.h>
 #include <ua_tcp_ua_connection.h>
 
@@ -22,17 +23,6 @@ typedef struct {
     int64_t  createdAt;
     int32_t  revisedLifetime;
 } SC_SecurityToken;
-
-typedef struct SC_SecurityKeySet{
-    PrivateKey* signKey;
-    PrivateKey* encryptKey;
-    PrivateKey* initVector;
-} SC_SecurityKeySet;
-
-typedef struct {
-    SC_SecurityKeySet* senderKeySet;
-    SC_SecurityKeySet* receiverKeySet;
-} SC_SecurityKeySets;
 
 typedef enum SC_ConnectionState
 {

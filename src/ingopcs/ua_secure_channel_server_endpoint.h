@@ -23,8 +23,8 @@ typedef struct SecurityPolicy
 
 typedef struct SC_ServerEndpoint
 {
-    Namespace            namespaces;
-    EncodeableType*      encodeableTypes;
+    UA_NamespaceTable*   namespaces;
+    UA_EncodeableType*   encodeableTypes;
     PKIProvider          pkiProvider;
     UA_Byte*             serverCertificate;
     PrivateKey           serverKey;
