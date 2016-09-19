@@ -8,7 +8,7 @@
 #include <string.h>
 
 UA_EncodeableType* EncodeableType_GetEncodeableType(UA_EncodeableType** encTypesTable,
-                                                    char*               namespace,
+                                                    const char*         namespace,
                                                     uint32_t            typeId){
     UA_EncodeableType* current = UA_NULL;
     UA_EncodeableType* result = UA_NULL;

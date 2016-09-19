@@ -109,7 +109,10 @@ StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
     return status;
 }
 
-StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection){
+StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
+                                       UA_NamespaceTable*  namespaceTable,
+                                       UA_EncodeableType** encodeableTypes)
+{
     StatusCode status = STATUS_INVALID_STATE;
     if(scConnection->receptionBuffers == UA_NULL){
         if(scConnection->transportConnection->maxChunkCountRcv != 0)
@@ -139,7 +142,10 @@ StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection){
     return status;
 }
 
-StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection){
+StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
+                                   UA_NamespaceTable*  namespaceTable,
+                                   UA_EncodeableType** encodeableTypes)
+{
     StatusCode status = STATUS_NOK;
     UA_MsgBuffer* msgBuffer;
     if(scConnection->sendingBuffer == UA_NULL){

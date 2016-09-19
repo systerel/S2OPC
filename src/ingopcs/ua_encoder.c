@@ -873,9 +873,11 @@ StatusCode LocalizedText_Read(UA_MsgBuffer* msgBuffer, UA_LocalizedText* localiz
 
 StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObject* extObj){
     const int32_t tmpLength = -1;
+    UA_NodeId objNodeId = extObj->typeId;
     uint32_t lengthPos;
     uint32_t curPos;
     int32_t length;
+    uint16_t nsIndex = OPCUA_NAMESPACE_INDEX;
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     if(extObj != UA_NULL){
@@ -887,14 +889,26 @@ StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObje
         if(extObj->body.object.objType == UA_NULL){
             status = STATUS_INVALID_PARAMETERS;
         }else{
-            // TODO: Fullfil node Id with correct values from encodeable type !
-            // need of the namespaces table (URI -> idx)
+            if(strncmp(extObj->body.object.objType->namespace,
+                       OPCUA_NAMESPACE_NAME,
+                       strlen(OPCUA_NAMESPACE_NAME))
+               !=  0)
+            {
+                status = Namespace_GetIndex(msgBuffer->nsTable, extObj->body.object.objType->namespace, &nsIndex);
+            }
+
+            objNodeId.identifierType = IdentifierType_Numeric;
+            objNodeId.namespace = nsIndex;
+            objNodeId.numeric = extObj->body.object.objType->binaryTypeId;
         }
     }
 
-    status = Byte_Write(msgBuffer, &encodingByte);
     if(status == STATUS_OK){
-        status = NodeId_Write(msgBuffer, &extObj->typeId);
+        status = Byte_Write(msgBuffer, &encodingByte);
+    }
+
+    if(status == STATUS_OK){
+        status = NodeId_Write(msgBuffer, &objNodeId);
     }
 
     if(status == STATUS_OK){
@@ -910,7 +924,9 @@ StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObje
             case UA_ExtObjBodyEncoding_Object:
                 lengthPos = msgBuffer->buffers->position;
                 status = Int32_Write(msgBuffer, &tmpLength);
-                // TODO: use encoding function pointer from the encodeable type !
+                if(status == STATUS_OK){
+                    status = extObj->body.object.objType->encodeFunction(msgBuffer, extObj->body.object.value);
+                }
                 if(status == STATUS_OK){
                     // Go backward to write correct length value
                     curPos = msgBuffer->buffers->position;
@@ -928,6 +944,8 @@ StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObje
 
 StatusCode ExtensionObject_Read(UA_MsgBuffer* msgBuffer, UA_ExtensionObject* extObj){
     StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_EncodeableType* encType;
+    const char* nsName;
     UA_Byte encodingByte = 0;
     if(extObj != UA_NULL){
         status = NodeId_Read(msgBuffer, &extObj->typeId);
@@ -936,14 +954,33 @@ StatusCode ExtensionObject_Read(UA_MsgBuffer* msgBuffer, UA_ExtensionObject* ext
         status = Byte_Read(msgBuffer, &encodingByte);
     }
 
-    if(encodingByte == UA_ExtObjBodyEncoding_ByteString){
-        // TODO: find encodeable type
-        // if found:
-        // encodingByte = UA_ExtObjBodyEncoding_Object
+    if(status == STATUS_OK &&
+       encodingByte == UA_ExtObjBodyEncoding_ByteString){
+        if(extObj->typeId.identifierType == IdentifierType_Numeric){
+            if(extObj->typeId.namespace != OPCUA_NAMESPACE_INDEX){
+                nsName = Namespace_GetName(msgBuffer->nsTable, extObj->typeId.namespace);
+            }else{
+                nsName = OPCUA_NAMESPACE_NAME;
+            }
+            if(nsName != UA_NULL){
+                encType = EncodeableType_GetEncodeableType(msgBuffer->encTypesTable,
+                                                           nsName,
+                                                           extObj->typeId.numeric);
+            }
+            if(nsName == UA_NULL || encType == UA_NULL){
+                status = STATUS_NOK;
+            }else{
+                encodingByte = UA_ExtObjBodyEncoding_Object;
+                extObj->body.object.objType = encType;
+            }
+        }else{
+            status = STATUS_INVALID_RCV_PARAMETER;
+        }
+
     }
 
     if(status == STATUS_OK){
-        switch(extObj->encoding){
+        switch(encodingByte){
             case UA_ExtObjBodyEncoding_None:
                 extObj->length = -1;
                 break;
@@ -955,8 +992,16 @@ StatusCode ExtensionObject_Read(UA_MsgBuffer* msgBuffer, UA_ExtensionObject* ext
                 break;
             case UA_ExtObjBodyEncoding_Object:
                 status = Int32_Read(msgBuffer, &extObj->length);
-                // TODO: use encoding function pointer from the encodeable type !
+                if(status == STATUS_OK){
+                    extObj->body.object.value = malloc(extObj->body.object.objType->allocSize);
+                    status = extObj->body.object.objType->decodeFunction(msgBuffer, &extObj->body.object.value);
+                }
                 break;
+            default:
+                status = STATUS_INVALID_RCV_PARAMETER;
+        }
+        if(status == STATUS_OK){
+            extObj->encoding = encodingByte;
         }
     }
 

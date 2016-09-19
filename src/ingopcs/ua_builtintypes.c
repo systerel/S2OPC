@@ -466,8 +466,7 @@ void ExtensionObject_Clear(UA_ExtensionObject* extObj){
             XmlElement_Clear(&extObj->body.xml);
             break;
         case UA_ExtObjBodyEncoding_Object:
-            // TODO: EncodeableType !!!!
-            //extObj->body.object.objType->Clear(extObj->body.object.value);
+            extObj->body.object.objType->clearFunction(extObj->body.object.value);
             break;
     }
     extObj->length = -1;

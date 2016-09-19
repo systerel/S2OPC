@@ -407,10 +407,14 @@ StatusCode OnTransportEvent_CB(void*           connection,
                           cConnection->serverCertificate);
             // Configure secure connection for encoding / decoding messages
             if(status == STATUS_OK){
-                status = SC_InitReceiveSecureBuffers(cConnection->instance);
+                status = SC_InitReceiveSecureBuffers(cConnection->instance,
+                                                     cConnection->namespaces,
+                                                     cConnection->encodeableTypes);
             }
             if(status == STATUS_OK){
-                status = SC_InitSendSecureBuffer(cConnection->instance);
+                status = SC_InitSendSecureBuffer(cConnection->instance,
+                                                 cConnection->namespaces,
+                                                 cConnection->encodeableTypes);
             }
             // Send Open Secure channel request
             if(status == STATUS_OK){

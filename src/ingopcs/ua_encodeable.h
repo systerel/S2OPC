@@ -24,7 +24,7 @@ typedef struct UA_EncodeableType {
     char*                              namespace;
     uint32_t                           allocSize;
     UA_EncodeableObject_PfnInitialize* initFunction;
-    UA_EncodeableObject_PfnClear*      clearsFunction;
+    UA_EncodeableObject_PfnClear*      clearFunction;
     UA_EncodeableObject_PfnGetSize*    getSizeFunction;
     UA_EncodeableObject_PfnEncode*     encodeFunction;
     UA_EncodeableObject_PfnDecode*     decodeFunction;
@@ -32,7 +32,7 @@ typedef struct UA_EncodeableType {
 
 
 UA_EncodeableType* EncodeableType_GetEncodeableType(UA_EncodeableType** encTypesTable, // null terminated enctype* list
-                                                    char*               namespace,
+                                                    const char*         namespace,
                                                     uint32_t            typeId);
 
 #endif /* INGOPCS_UA_ENCODEABLE_H_ */

@@ -73,8 +73,12 @@ StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
                                         UA_ByteString* otherAppCertificate);
 
 //Configure secure connection regarding the transport connection properties
-StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection);
-StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection);
+StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
+                                       UA_NamespaceTable*  namespaceTable,
+                                       UA_EncodeableType** encodeableTypes);
+StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
+                                   UA_NamespaceTable*  namespaceTable,
+                                   UA_EncodeableType** encodeableTypes);
 
 StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
                                     UA_SecureMessageType smType,

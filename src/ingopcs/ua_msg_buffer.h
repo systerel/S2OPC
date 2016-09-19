@@ -9,8 +9,9 @@
 #define INGOPCS_MSG_BUFFER_H_
 
 #include <wrappers.h>
-
 #include <buffer.h>
+#include <ua_encodeable.h>
+#include <ua_namespace_table.h>
 
 #define TCP_UA_ACK_MSG_LENGTH 28
 #define TCP_UA_ERR_MIN_MSG_LENGTH 16
@@ -66,6 +67,8 @@ typedef struct UA_MsgBuffer {
     UA_MsgFinalChunk     isFinal;
     uint32_t             requestId;
     void*                flushData;
+    UA_NamespaceTable*   nsTable;
+    UA_EncodeableType**  encTypesTable;
 } UA_MsgBuffer;
 
 // Only 1 buffer by msg mode:
