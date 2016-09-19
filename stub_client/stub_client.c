@@ -6,6 +6,7 @@
  */
 
 #include "stub_client.h"
+#include <ua_clientapi.h>
 
 int noEvent = 1;
 int noResp = 1;
@@ -220,9 +221,11 @@ int main(void){
     // Request header
     OpcUa_RequestHeader rHeader;
     // Local configuration: empty
-    OpcUa_String localId, profileUri;
+    //OpcUa_String localId, profileUri;
+    UA_String localId, profileUri;
     // Endpoint URL in OPC UA string format
-    const OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
+    //const OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
+    const UA_String* stEndpointUrl = String_CreateFromCString(sEndpointUrl);
     // Empty callback data
     StubClient_CallbackData Callback_Data_Get;
 
@@ -249,15 +252,16 @@ int main(void){
     OpcUa_RequestHeader_Initialize (&rHeader);
 
     // To retrieve response from callaback
-    uStatus = OpcUa_ClientApi_BeginGetEndpoints(hChannel,     // Channel
-    											&rHeader,      // Request header
-												stEndpointUrl, // Endpoint
-												0,            // No of local id
-												&localId,           // local id
-												0,            // No of profile URI
-												&profileUri,           // profile uri
-												StubClient_ResponseEvent_Callback, // response call back
-												&Callback_Data_Get); // call back data
+
+    uStatus = UA_ClientApi_BeginGetEndpoints(hChannel,     // Channel
+                                             (UA_RequestHeader*) &rHeader,      // Request header
+                                             stEndpointUrl, // Endpoint
+                                             0,            // No of local id
+                                             &localId,           // local id
+                                             0,            // No of profile URI
+                                             &profileUri,           // profile uri
+                                             StubClient_ResponseEvent_Callback, // response call back
+                                             &Callback_Data_Get); // call back data
 
     while (noResp)
     {

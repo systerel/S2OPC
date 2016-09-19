@@ -16,12 +16,12 @@
 #include "ua_secure_channel_low_level.h"
 #include <ua_types.h>
 
-PendingRequest* SC_PendingRequestCreate(uint32_t           requestId,
-                                        UA_EncodeableType* responseType,
-                                        uint32_t           timeoutHint,
-                                        uint32_t           startTime,
-                                        ResponseEvent_CB*  callback,
-                                        void*              callbackData){
+PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
+                                        UA_EncodeableType*   responseType,
+                                        uint32_t             timeoutHint,
+                                        uint32_t             startTime,
+                                        SC_ResponseEvent_CB* callback,
+                                        void*                callbackData){
     PendingRequest* result = UA_NULL;
     if(requestId != 0){
         result = malloc(sizeof(PendingRequest));
@@ -96,7 +96,21 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
     }
 }
 
-StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
+uint32_t GetNextRequestId(SC_Connection* scConnection){
+    uint32_t requestId = 0;
+    assert(scConnection != UA_NULL);
+
+    requestId = scConnection->lastRequestIdSent + 1;
+    if(requestId == 0){
+        (requestId)++;
+    }
+    scConnection->lastRequestIdSent = requestId;
+
+    return requestId;
+}
+
+StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
+                                          uint32_t             requestId)
 {
     StatusCode status = STATUS_OK;
     UA_OpenSecureChannelRequest openRequest;
@@ -117,7 +131,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     // Encode 64 bits UtcTime => null ok ?
     openRequest.RequestHeader.Timestamp = 0;
     // Encode requestHandler
-    openRequest.RequestHeader.RequestHandle = sendBuf->requestId;
+    openRequest.RequestHeader.RequestHandle = requestId;
     // Encode returnDiagnostic => symbolic id
     openRequest.RequestHeader.ReturnDiagnostics = uone;
     // Encode auditEntryId
@@ -173,7 +187,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     }
 
     status = SC_EncodeMsgBody(sendBuf,
-                              UA_OpenSecureChannelRequest_EncodeableType,
+                              &UA_OpenSecureChannelRequest_EncodeableType,
                               &openRequest);
 
     PrivateKey_EndUse(bsKey);
@@ -190,6 +204,9 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     if(cConnection != UA_NULL){
         status = STATUS_OK;
     }
+
+    // Generate next request id
+    requestId = GetNextRequestId(cConnection->instance);
 
     // Set security configuration for secure channel request
     cConnection->instance->currentSecuMode = cConnection->securityMode;
@@ -224,11 +241,11 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     }
 
     if(status == STATUS_OK){
-        status = SC_EncodeSequenceHeader(cConnection->instance, &requestId);
+        status = SC_EncodeSequenceHeader(cConnection->instance->sendingBuffer, requestId);
     }
 
     if(status == STATUS_OK){
-        status = Write_OpenSecureChannelRequest(cConnection);
+        status = Write_OpenSecureChannelRequest(cConnection, requestId);
     }
 
     if(status == STATUS_OK){
@@ -258,9 +275,12 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
            pRequest != UA_NULL && pRequest->responseType != UA_NULL);
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_OpenSecureChannelResponse* encObj = UA_NULL;
+    UA_EncodeableType* receivedType = UA_NULL;
 
     status = SC_DecodeMsgBody(cConnection->instance,
                               pRequest->responseType,
+                              UA_NULL,
+                              &receivedType,
                               (void**) &encObj);
     if(status == STATUS_OK){
         status = SC_CheckReceivedProtocolVersion(cConnection->instance, encObj->ServerProtocolVersion);
@@ -271,10 +291,15 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
         // TODO: is the sc ID the same after a renew ? => It should => to be checked
 
         if(encObj->SecurityToken.ChannelId != 0){
-            cConnection->instance->currentSecuToken.channelId = encObj->SecurityToken.ChannelId;
-            cConnection->instance->currentSecuToken.tokenId = encObj->SecurityToken.TokenId;
-            cConnection->instance->currentSecuToken.createdAt = encObj->SecurityToken.CreatedAt;
-            cConnection->instance->currentSecuToken.revisedLifetime = encObj->SecurityToken.RevisedLifetime;
+            // Check same secure channel id was used in secure message header
+            if(encObj->SecurityToken.ChannelId != cConnection->instance->secureChannelId){
+                status = STATUS_INVALID_RCV_PARAMETER;
+            }else{
+                cConnection->instance->currentSecuToken.channelId = encObj->SecurityToken.ChannelId;
+                cConnection->instance->currentSecuToken.tokenId = encObj->SecurityToken.TokenId;
+                cConnection->instance->currentSecuToken.createdAt = encObj->SecurityToken.CreatedAt;
+                cConnection->instance->currentSecuToken.revisedLifetime = encObj->SecurityToken.RevisedLifetime;
+            }
         }else{
             // NULL SC ID !
             status = STATUS_INVALID_RCV_PARAMETER;
@@ -537,4 +562,47 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
         status = STATUS_INVALID_PARAMETERS;
     }
     return status;
+}
+
+StatusCode SC_Send_Request(SC_ClientConnection* connection,
+                           UA_EncodeableType*   requestType,
+                           void*                request,
+                           UA_EncodeableType*   responseType,
+                           uint32_t             timeout,
+                           SC_ResponseEvent_CB* callback,
+                           void*                callbackData)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t requestId = 0;
+    if(connection != UA_NULL &&
+       requestType != UA_NULL &&
+       request != UA_NULL &&
+       responseType != UA_NULL)
+    {
+        requestId = GetNextRequestId(connection->instance);
+        status = SC_EncodeSecureMessage(connection->instance,
+                                        requestType,
+                                        request,
+                                        requestId);
+    }
+
+    if(status == STATUS_OK){
+        // Create associated pending request
+        PendingRequest* pRequest = SC_PendingRequestCreate(requestId,
+                                                           responseType,
+                                                           timeout,
+                                                           0, // Not managed now
+                                                           callback, // No callback, specifc message header used (OPN)
+                                                           callbackData);
+        if(pRequest != SLinkedList_Add(connection->pendingRequests, requestId, pRequest)){
+            status = STATUS_NOK;
+        }
+    }
+
+    if(status == STATUS_OK){
+        status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, UA_Msg_Chunk_Final);
+    }
+
+    return status;
+
 }

@@ -92,12 +92,12 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
 StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                              uint32_t       isSymmetric);
 
-StatusCode SC_EncodeSequenceHeader(SC_Connection* scConnection,
-                                   uint32_t*      requestId);
+StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
+                                   uint32_t      requestId);
 
-StatusCode SC_EncodeMsgBody(UA_MsgBuffer*     msgBuffer,
-                            UA_EncodeableType encType,
-                            void*             msgBody);
+StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
+                            UA_EncodeableType* encType,
+                            void*              msgBody);
 
 StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
                                    const UA_Byte* data_src,
@@ -125,9 +125,11 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                          uint32_t       isSymmetric,
                          uint32_t       isPrecCryptoData);
 
-StatusCode SC_DecodeMsgBody(SC_Connection* scConnection,
-                            UA_EncodeableType* encType,
-                            void** encodeableObj);
+StatusCode SC_DecodeMsgBody(SC_Connection*      scConnection,
+                            UA_EncodeableType*  respEncType, // expected response type
+                            UA_EncodeableType*  errEncType,  // expected response error type
+                            UA_EncodeableType** receivedEncType, // actual received type (in those provided)
+                            void**              encodeableObj);
 
 StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                  uint32_t       isSymmetric,
@@ -137,6 +139,11 @@ StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection);
 
 StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
                                            uint32_t       scProtocolVersion);
+
+StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
+                                  UA_EncodeableType* encType,
+                                  void*              value,
+                                  uint32_t           requestId);
 
 
 #endif /* INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_ */

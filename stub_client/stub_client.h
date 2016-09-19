@@ -10,7 +10,6 @@
 
 #include <opcua_proxystub.h>
 #include <opcua_channel.h>
-#include <opcua_clientapi.h>
 #include <opcua_string.h>
 #include <opcua_core.h>
 #include <opcua.h>

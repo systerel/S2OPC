@@ -65,16 +65,17 @@ typedef struct UA_MsgBuffer {
     uint32_t             maxChunks;
     uint32_t             sequenceNumberPosition; // Position of sequence number (data to encrypt)
     UA_MsgFinalChunk     isFinal;
-    uint32_t             requestId;
     void*                flushData;
     UA_NamespaceTable*   nsTable;
     UA_EncodeableType**  encTypesTable;
 } UA_MsgBuffer;
 
 // Only 1 buffer by msg mode:
-UA_MsgBuffer* MsgBuffer_Create(Buffer*  buffer,
-                               uint32_t maxChunks,
-                               void*    flushData);
+UA_MsgBuffer* MsgBuffer_Create(Buffer*             buffer,
+                               uint32_t            maxChunks,
+                               void*               flushData,
+                               UA_NamespaceTable*  nsTable,
+                               UA_EncodeableType** encTypesTable);
 void MsgBuffer_Delete(UA_MsgBuffer** mBuffer);
 void MsgBuffer_Reset(UA_MsgBuffer* mBuffer);
 StatusCode MsgBuffer_ResetNextChunk(UA_MsgBuffer* mBuffer,
@@ -87,8 +88,10 @@ StatusCode MsgBuffer_CopyBuffer(UA_MsgBuffer* destMsgBuffer,
 
 typedef struct UA_MsgBuffer UA_MsgBuffers;
 // Several buffers by msg mode (secure message input buffer only)
-UA_MsgBuffers* MsgBuffers_Create(uint32_t maxChunks,
-                                 uint32_t bufferSize);
+UA_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
+                                 uint32_t            bufferSize,
+                                 UA_NamespaceTable*  nsTable,
+                                 UA_EncodeableType** encTypesTable);
 void MsgBuffers_Reset(UA_MsgBuffers* mBuffer);
 void MsgBuffers_Delete(UA_MsgBuffers** mBuffer);
 

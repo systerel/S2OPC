@@ -27,8 +27,11 @@
  * http://opcfoundation.org/License/MIT/1.00/
  * ======================================================================*/
 
+#include <stdlib.h>
+
 /* core */
-//#include <opcua.h>
+#include <opcua_platformdefs.h>
+#include <opcua_config.h>
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
@@ -38,7 +41,6 @@
 /* types */
 #include <ua_builtintypes.h>
 
-#include <opcua_channel.h>
 #include <ua_identifiers.h>
 #include <ua_clientapi.h>
 
@@ -86,12 +88,12 @@ StatusCode UA_ClientApi_FindServers(
         cRequest.ServerUris     = (UA_String*)a_pServerUris;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "FindServers",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_FindServersRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_FindServersResponse_EncodeableType,
+            &UA_FindServersRequest_EncodeableType,
+            &UA_FindServersResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -105,9 +107,9 @@ StatusCode UA_ClientApi_FindServers(
         }
 
         /* check response type */
-        else if (OpcUa_FindServersResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_FindServersResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -163,12 +165,12 @@ StatusCode UA_ClientApi_BeginFindServers(
         cRequest.ServerUris     = (UA_String*)a_pServerUris;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "FindServers",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_FindServersRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_FindServersResponse_EncodeableType,
+            &UA_FindServersRequest_EncodeableType,
+            &UA_FindServersResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -219,12 +221,12 @@ StatusCode UA_ClientApi_FindServersOnNetwork(
         cRequest.ServerCapabilityFilter     = (UA_String*)a_pServerCapabilityFilter;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "FindServersOnNetwork",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_FindServersOnNetworkRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_FindServersOnNetworkResponse_EncodeableType,
+            &UA_FindServersOnNetworkRequest_EncodeableType,
+            &UA_FindServersOnNetworkResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -238,9 +240,9 @@ StatusCode UA_ClientApi_FindServersOnNetwork(
         }
 
         /* check response type */
-        else if (OpcUa_FindServersOnNetworkResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_FindServersOnNetworkResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -293,12 +295,12 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
         cRequest.ServerCapabilityFilter     = (UA_String*)a_pServerCapabilityFilter;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "FindServersOnNetwork",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_FindServersOnNetworkRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_FindServersOnNetworkResponse_EncodeableType,
+            &UA_FindServersOnNetworkRequest_EncodeableType,
+            &UA_FindServersOnNetworkResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -351,12 +353,12 @@ StatusCode UA_ClientApi_GetEndpoints(
         cRequest.ProfileUris     = (UA_String*)a_pProfileUris;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "GetEndpoints",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_GetEndpointsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_GetEndpointsResponse_EncodeableType,
+            &UA_GetEndpointsRequest_EncodeableType,
+            &UA_GetEndpointsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -370,9 +372,9 @@ StatusCode UA_ClientApi_GetEndpoints(
         }
 
         /* check response type */
-        else if (OpcUa_GetEndpointsResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_GetEndpointsResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -428,12 +430,12 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
         cRequest.ProfileUris     = (UA_String*)a_pProfileUris;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "GetEndpoints",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_GetEndpointsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_GetEndpointsResponse_EncodeableType,
+            &UA_GetEndpointsRequest_EncodeableType,
+            &UA_GetEndpointsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -472,12 +474,12 @@ StatusCode UA_ClientApi_RegisterServer(
         cRequest.Server        = *a_pServer;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "RegisterServer",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_RegisterServerRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_RegisterServerResponse_EncodeableType,
+            &UA_RegisterServerRequest_EncodeableType,
+            &UA_RegisterServerResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -491,9 +493,9 @@ StatusCode UA_ClientApi_RegisterServer(
         }
 
         /* check response type */
-        else if (OpcUa_RegisterServerResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_RegisterServerResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -537,12 +539,12 @@ StatusCode UA_ClientApi_BeginRegisterServer(
         cRequest.Server        = *a_pServer;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "RegisterServer",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_RegisterServerRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_RegisterServerResponse_EncodeableType,
+            &UA_RegisterServerRequest_EncodeableType,
+            &UA_RegisterServerResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -594,12 +596,12 @@ StatusCode UA_ClientApi_RegisterServer2(
         cRequest.DiscoveryConfiguration     = (UA_ExtensionObject*)a_pDiscoveryConfiguration;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "RegisterServer2",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_RegisterServer2Request_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_RegisterServer2Response_EncodeableType,
+            &UA_RegisterServer2Request_EncodeableType,
+            &UA_RegisterServer2Response_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -613,9 +615,9 @@ StatusCode UA_ClientApi_RegisterServer2(
         }
 
         /* check response type */
-        else if (OpcUa_RegisterServer2Response_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_RegisterServer2Response_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -668,12 +670,12 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
         cRequest.DiscoveryConfiguration     = (UA_ExtensionObject*)a_pDiscoveryConfiguration;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "RegisterServer2",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_RegisterServer2Request_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_RegisterServer2Response_EncodeableType,
+            &UA_RegisterServer2Request_EncodeableType,
+            &UA_RegisterServer2Response_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -753,12 +755,12 @@ StatusCode UA_ClientApi_CreateSession(
         cRequest.MaxResponseMessageSize  = a_nMaxResponseMessageSize;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "CreateSession",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CreateSessionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CreateSessionResponse_EncodeableType,
+            &UA_CreateSessionRequest_EncodeableType,
+            &UA_CreateSessionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -772,9 +774,9 @@ StatusCode UA_ClientApi_CreateSession(
         }
 
         /* check response type */
-        else if (OpcUa_CreateSessionResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_CreateSessionResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -848,12 +850,12 @@ StatusCode UA_ClientApi_BeginCreateSession(
         cRequest.MaxResponseMessageSize  = a_nMaxResponseMessageSize;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "CreateSession",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CreateSessionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CreateSessionResponse_EncodeableType,
+            &UA_CreateSessionRequest_EncodeableType,
+            &UA_CreateSessionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -918,12 +920,12 @@ StatusCode UA_ClientApi_ActivateSession(
         cRequest.UserTokenSignature             = *a_pUserTokenSignature;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "ActivateSession",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_ActivateSessionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_ActivateSessionResponse_EncodeableType,
+            &UA_ActivateSessionRequest_EncodeableType,
+            &UA_ActivateSessionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -937,9 +939,9 @@ StatusCode UA_ClientApi_ActivateSession(
         }
 
         /* check response type */
-        else if (OpcUa_ActivateSessionResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_ActivateSessionResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1004,12 +1006,12 @@ StatusCode UA_ClientApi_BeginActivateSession(
         cRequest.UserTokenSignature             = *a_pUserTokenSignature;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "ActivateSession",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_ActivateSessionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_ActivateSessionResponse_EncodeableType,
+            &UA_ActivateSessionRequest_EncodeableType,
+            &UA_ActivateSessionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1047,12 +1049,12 @@ StatusCode UA_ClientApi_CloseSession(
         cRequest.DeleteSubscriptions = a_bDeleteSubscriptions;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "CloseSession",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CloseSessionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CloseSessionResponse_EncodeableType,
+            &UA_CloseSessionRequest_EncodeableType,
+            &UA_CloseSessionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1066,9 +1068,9 @@ StatusCode UA_ClientApi_CloseSession(
         }
 
         /* check response type */
-        else if (OpcUa_CloseSessionResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_CloseSessionResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1111,12 +1113,12 @@ StatusCode UA_ClientApi_BeginCloseSession(
         cRequest.DeleteSubscriptions = a_bDeleteSubscriptions;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "CloseSession",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CloseSessionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CloseSessionResponse_EncodeableType,
+            &UA_CloseSessionRequest_EncodeableType,
+            &UA_CloseSessionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1156,12 +1158,12 @@ StatusCode UA_ClientApi_Cancel(
         cRequest.RequestHandle = a_nRequestHandle;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "Cancel",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CancelRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CancelResponse_EncodeableType,
+            &UA_CancelRequest_EncodeableType,
+            &UA_CancelResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1175,9 +1177,9 @@ StatusCode UA_ClientApi_Cancel(
         }
 
         /* check response type */
-        else if (OpcUa_CancelResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_CancelResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1221,12 +1223,12 @@ StatusCode UA_ClientApi_BeginCancel(
         cRequest.RequestHandle = a_nRequestHandle;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Cancel",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CancelRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CancelResponse_EncodeableType,
+            &UA_CancelRequest_EncodeableType,
+            &UA_CancelResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1275,12 +1277,12 @@ StatusCode UA_ClientApi_AddNodes(
         cRequest.NodesToAdd     = (UA_AddNodesItem*)a_pNodesToAdd;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "AddNodes",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_AddNodesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_AddNodesResponse_EncodeableType,
+            &UA_AddNodesRequest_EncodeableType,
+            &UA_AddNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1294,9 +1296,9 @@ StatusCode UA_ClientApi_AddNodes(
         }
 
         /* check response type */
-        else if (OpcUa_AddNodesResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_AddNodesResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1346,12 +1348,12 @@ StatusCode UA_ClientApi_BeginAddNodes(
         cRequest.NodesToAdd     = (UA_AddNodesItem*)a_pNodesToAdd;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "AddNodes",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_AddNodesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_AddNodesResponse_EncodeableType,
+            &UA_AddNodesRequest_EncodeableType,
+            &UA_AddNodesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1400,12 +1402,12 @@ StatusCode UA_ClientApi_AddReferences(
         cRequest.ReferencesToAdd     = (UA_AddReferencesItem*)a_pReferencesToAdd;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "AddReferences",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_AddReferencesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_AddReferencesResponse_EncodeableType,
+            &UA_AddReferencesRequest_EncodeableType,
+            &UA_AddReferencesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1419,9 +1421,9 @@ StatusCode UA_ClientApi_AddReferences(
         }
 
         /* check response type */
-        else if (OpcUa_AddReferencesResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_AddReferencesResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1471,12 +1473,12 @@ StatusCode UA_ClientApi_BeginAddReferences(
         cRequest.ReferencesToAdd     = (UA_AddReferencesItem*)a_pReferencesToAdd;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "AddReferences",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_AddReferencesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_AddReferencesResponse_EncodeableType,
+            &UA_AddReferencesRequest_EncodeableType,
+            &UA_AddReferencesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1525,12 +1527,12 @@ StatusCode UA_ClientApi_DeleteNodes(
         cRequest.NodesToDelete     = (UA_DeleteNodesItem*)a_pNodesToDelete;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "DeleteNodes",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_DeleteNodesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_DeleteNodesResponse_EncodeableType,
+            &UA_DeleteNodesRequest_EncodeableType,
+            &UA_DeleteNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1544,9 +1546,9 @@ StatusCode UA_ClientApi_DeleteNodes(
         }
 
         /* check response type */
-        else if (OpcUa_DeleteNodesResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_DeleteNodesResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1596,12 +1598,12 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
         cRequest.NodesToDelete     = (UA_DeleteNodesItem*)a_pNodesToDelete;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteNodes",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_DeleteNodesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_DeleteNodesResponse_EncodeableType,
+            &UA_DeleteNodesRequest_EncodeableType,
+            &UA_DeleteNodesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1650,12 +1652,12 @@ StatusCode UA_ClientApi_DeleteReferences(
         cRequest.ReferencesToDelete     = (UA_DeleteReferencesItem*)a_pReferencesToDelete;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "DeleteReferences",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_DeleteReferencesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_DeleteReferencesResponse_EncodeableType,
+            &UA_DeleteReferencesRequest_EncodeableType,
+            &UA_DeleteReferencesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1669,9 +1671,9 @@ StatusCode UA_ClientApi_DeleteReferences(
         }
 
         /* check response type */
-        else if (OpcUa_DeleteReferencesResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_DeleteReferencesResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1721,12 +1723,12 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
         cRequest.ReferencesToDelete     = (UA_DeleteReferencesItem*)a_pReferencesToDelete;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteReferences",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_DeleteReferencesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_DeleteReferencesResponse_EncodeableType,
+            &UA_DeleteReferencesRequest_EncodeableType,
+            &UA_DeleteReferencesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1780,12 +1782,12 @@ StatusCode UA_ClientApi_Browse(
         cRequest.NodesToBrowse                 = (UA_BrowseDescription*)a_pNodesToBrowse;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "Browse",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_BrowseRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_BrowseResponse_EncodeableType,
+            &UA_BrowseRequest_EncodeableType,
+            &UA_BrowseResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1799,9 +1801,9 @@ StatusCode UA_ClientApi_Browse(
         }
 
         /* check response type */
-        else if (OpcUa_BrowseResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_BrowseResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1856,12 +1858,12 @@ StatusCode UA_ClientApi_BeginBrowse(
         cRequest.NodesToBrowse                 = (UA_BrowseDescription*)a_pNodesToBrowse;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Browse",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_BrowseRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_BrowseResponse_EncodeableType,
+            &UA_BrowseRequest_EncodeableType,
+            &UA_BrowseResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1912,12 +1914,12 @@ StatusCode UA_ClientApi_BrowseNext(
         cRequest.ContinuationPoints        = (UA_ByteString*)a_pContinuationPoints;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "BrowseNext",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_BrowseNextRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_BrowseNextResponse_EncodeableType,
+            &UA_BrowseNextRequest_EncodeableType,
+            &UA_BrowseNextResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -1931,9 +1933,9 @@ StatusCode UA_ClientApi_BrowseNext(
         }
 
         /* check response type */
-        else if (OpcUa_BrowseNextResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_BrowseNextResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1985,12 +1987,12 @@ StatusCode UA_ClientApi_BeginBrowseNext(
         cRequest.ContinuationPoints        = (UA_ByteString*)a_pContinuationPoints;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "BrowseNext",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_BrowseNextRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_BrowseNextResponse_EncodeableType,
+            &UA_BrowseNextRequest_EncodeableType,
+            &UA_BrowseNextResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2039,12 +2041,12 @@ StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
         cRequest.BrowsePaths     = (UA_BrowsePath*)a_pBrowsePaths;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "TranslateBrowsePathsToNodeIds",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
+            &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
+            &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2058,9 +2060,9 @@ StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
         }
 
         /* check response type */
-        else if (OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2110,12 +2112,12 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
         cRequest.BrowsePaths     = (UA_BrowsePath*)a_pBrowsePaths;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "TranslateBrowsePathsToNodeIds",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
+            &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
+            &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2160,12 +2162,12 @@ StatusCode UA_ClientApi_RegisterNodes(
         cRequest.NodesToRegister     = (UA_NodeId*)a_pNodesToRegister;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "RegisterNodes",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_RegisterNodesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_RegisterNodesResponse_EncodeableType,
+            &UA_RegisterNodesRequest_EncodeableType,
+            &UA_RegisterNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2179,9 +2181,9 @@ StatusCode UA_ClientApi_RegisterNodes(
         }
 
         /* check response type */
-        else if (OpcUa_RegisterNodesResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_RegisterNodesResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2229,12 +2231,12 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
         cRequest.NodesToRegister     = (UA_NodeId*)a_pNodesToRegister;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "RegisterNodes",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_RegisterNodesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_RegisterNodesResponse_EncodeableType,
+            &UA_RegisterNodesRequest_EncodeableType,
+            &UA_RegisterNodesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2275,12 +2277,12 @@ StatusCode UA_ClientApi_UnregisterNodes(
         cRequest.NodesToUnregister     = (UA_NodeId*)a_pNodesToUnregister;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "UnregisterNodes",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_UnregisterNodesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_UnregisterNodesResponse_EncodeableType,
+            &UA_UnregisterNodesRequest_EncodeableType,
+            &UA_UnregisterNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2294,9 +2296,9 @@ StatusCode UA_ClientApi_UnregisterNodes(
         }
 
         /* check response type */
-        else if (OpcUa_UnregisterNodesResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_UnregisterNodesResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2342,12 +2344,12 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
         cRequest.NodesToUnregister     = (UA_NodeId*)a_pNodesToUnregister;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "UnregisterNodes",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_UnregisterNodesRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_UnregisterNodesResponse_EncodeableType,
+            &UA_UnregisterNodesRequest_EncodeableType,
+            &UA_UnregisterNodesResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2414,12 +2416,12 @@ StatusCode UA_ClientApi_QueryFirst(
         cRequest.MaxReferencesToReturn = a_nMaxReferencesToReturn;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "QueryFirst",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_QueryFirstRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_QueryFirstResponse_EncodeableType,
+            &UA_QueryFirstRequest_EncodeableType,
+            &UA_QueryFirstResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2433,9 +2435,9 @@ StatusCode UA_ClientApi_QueryFirst(
         }
 
         /* check response type */
-        else if (OpcUa_QueryFirstResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_QueryFirstResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2499,12 +2501,12 @@ StatusCode UA_ClientApi_BeginQueryFirst(
         cRequest.MaxReferencesToReturn = a_nMaxReferencesToReturn;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "QueryFirst",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_QueryFirstRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_QueryFirstResponse_EncodeableType,
+            &UA_QueryFirstRequest_EncodeableType,
+            &UA_QueryFirstResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2551,12 +2553,12 @@ StatusCode UA_ClientApi_QueryNext(
         cRequest.ContinuationPoint        = *a_pContinuationPoint;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "QueryNext",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_QueryNextRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_QueryNextResponse_EncodeableType,
+            &UA_QueryNextRequest_EncodeableType,
+            &UA_QueryNextResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2570,9 +2572,9 @@ StatusCode UA_ClientApi_QueryNext(
         }
 
         /* check response type */
-        else if (OpcUa_QueryNextResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_QueryNextResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2621,12 +2623,12 @@ StatusCode UA_ClientApi_BeginQueryNext(
         cRequest.ContinuationPoint        = *a_pContinuationPoint;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "QueryNext",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_QueryNextRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_QueryNextResponse_EncodeableType,
+            &UA_QueryNextRequest_EncodeableType,
+            &UA_QueryNextResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2679,12 +2681,12 @@ StatusCode UA_ClientApi_Read(
         cRequest.NodesToRead        = (UA_ReadValueId*)a_pNodesToRead;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "Read",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_ReadRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_ReadResponse_EncodeableType,
+            &UA_ReadRequest_EncodeableType,
+            &UA_ReadResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2698,9 +2700,9 @@ StatusCode UA_ClientApi_Read(
         }
 
         /* check response type */
-        else if (OpcUa_ReadResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_ReadResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2754,12 +2756,12 @@ StatusCode UA_ClientApi_BeginRead(
         cRequest.NodesToRead        = (UA_ReadValueId*)a_pNodesToRead;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Read",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_ReadRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_ReadResponse_EncodeableType,
+            &UA_ReadRequest_EncodeableType,
+            &UA_ReadResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2815,12 +2817,12 @@ StatusCode UA_ClientApi_HistoryRead(
         cRequest.NodesToRead               = (UA_HistoryReadValueId*)a_pNodesToRead;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "HistoryRead",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_HistoryReadRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_HistoryReadResponse_EncodeableType,
+            &UA_HistoryReadRequest_EncodeableType,
+            &UA_HistoryReadResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2834,9 +2836,9 @@ StatusCode UA_ClientApi_HistoryRead(
         }
 
         /* check response type */
-        else if (OpcUa_HistoryReadResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_HistoryReadResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2893,12 +2895,12 @@ StatusCode UA_ClientApi_BeginHistoryRead(
         cRequest.NodesToRead               = (UA_HistoryReadValueId*)a_pNodesToRead;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "HistoryRead",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_HistoryReadRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_HistoryReadResponse_EncodeableType,
+            &UA_HistoryReadRequest_EncodeableType,
+            &UA_HistoryReadResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2947,12 +2949,12 @@ StatusCode UA_ClientApi_Write(
         cRequest.NodesToWrite     = (UA_WriteValue*)a_pNodesToWrite;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "Write",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_WriteRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_WriteResponse_EncodeableType,
+            &UA_WriteRequest_EncodeableType,
+            &UA_WriteResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -2966,9 +2968,9 @@ StatusCode UA_ClientApi_Write(
         }
 
         /* check response type */
-        else if (OpcUa_WriteResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_WriteResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3018,12 +3020,12 @@ StatusCode UA_ClientApi_BeginWrite(
         cRequest.NodesToWrite     = (UA_WriteValue*)a_pNodesToWrite;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Write",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_WriteRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_WriteResponse_EncodeableType,
+            &UA_WriteRequest_EncodeableType,
+            &UA_WriteResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3072,12 +3074,12 @@ StatusCode UA_ClientApi_HistoryUpdate(
         cRequest.HistoryUpdateDetails     = (UA_ExtensionObject*)a_pHistoryUpdateDetails;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "HistoryUpdate",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_HistoryUpdateRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_HistoryUpdateResponse_EncodeableType,
+            &UA_HistoryUpdateRequest_EncodeableType,
+            &UA_HistoryUpdateResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3091,9 +3093,9 @@ StatusCode UA_ClientApi_HistoryUpdate(
         }
 
         /* check response type */
-        else if (OpcUa_HistoryUpdateResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_HistoryUpdateResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3143,12 +3145,12 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
         cRequest.HistoryUpdateDetails     = (UA_ExtensionObject*)a_pHistoryUpdateDetails;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "HistoryUpdate",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_HistoryUpdateRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_HistoryUpdateResponse_EncodeableType,
+            &UA_HistoryUpdateRequest_EncodeableType,
+            &UA_HistoryUpdateResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3197,12 +3199,12 @@ StatusCode UA_ClientApi_Call(
         cRequest.MethodsToCall     = (UA_CallMethodRequest*)a_pMethodsToCall;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "Call",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CallRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CallResponse_EncodeableType,
+            &UA_CallRequest_EncodeableType,
+            &UA_CallResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3216,9 +3218,9 @@ StatusCode UA_ClientApi_Call(
         }
 
         /* check response type */
-        else if (OpcUa_CallResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_CallResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3268,12 +3270,12 @@ StatusCode UA_ClientApi_BeginCall(
         cRequest.MethodsToCall     = (UA_CallMethodRequest*)a_pMethodsToCall;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Call",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CallRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CallResponse_EncodeableType,
+            &UA_CallRequest_EncodeableType,
+            &UA_CallResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3326,12 +3328,12 @@ StatusCode UA_ClientApi_CreateMonitoredItems(
         cRequest.ItemsToCreate      = (UA_MonitoredItemCreateRequest*)a_pItemsToCreate;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "CreateMonitoredItems",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CreateMonitoredItemsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CreateMonitoredItemsResponse_EncodeableType,
+            &UA_CreateMonitoredItemsRequest_EncodeableType,
+            &UA_CreateMonitoredItemsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3345,9 +3347,9 @@ StatusCode UA_ClientApi_CreateMonitoredItems(
         }
 
         /* check response type */
-        else if (OpcUa_CreateMonitoredItemsResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_CreateMonitoredItemsResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3401,12 +3403,12 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
         cRequest.ItemsToCreate      = (UA_MonitoredItemCreateRequest*)a_pItemsToCreate;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "CreateMonitoredItems",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CreateMonitoredItemsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CreateMonitoredItemsResponse_EncodeableType,
+            &UA_CreateMonitoredItemsRequest_EncodeableType,
+            &UA_CreateMonitoredItemsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3459,12 +3461,12 @@ StatusCode UA_ClientApi_ModifyMonitoredItems(
         cRequest.ItemsToModify      = (UA_MonitoredItemModifyRequest*)a_pItemsToModify;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "ModifyMonitoredItems",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_ModifyMonitoredItemsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_ModifyMonitoredItemsResponse_EncodeableType,
+            &UA_ModifyMonitoredItemsRequest_EncodeableType,
+            &UA_ModifyMonitoredItemsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3478,9 +3480,9 @@ StatusCode UA_ClientApi_ModifyMonitoredItems(
         }
 
         /* check response type */
-        else if (OpcUa_ModifyMonitoredItemsResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_ModifyMonitoredItemsResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3534,12 +3536,12 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
         cRequest.ItemsToModify      = (UA_MonitoredItemModifyRequest*)a_pItemsToModify;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "ModifyMonitoredItems",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_ModifyMonitoredItemsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_ModifyMonitoredItemsResponse_EncodeableType,
+            &UA_ModifyMonitoredItemsRequest_EncodeableType,
+            &UA_ModifyMonitoredItemsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3592,12 +3594,12 @@ StatusCode UA_ClientApi_SetMonitoringMode(
         cRequest.MonitoredItemIds     = (uint32_t*)a_pMonitoredItemIds;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "SetMonitoringMode",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_SetMonitoringModeRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_SetMonitoringModeResponse_EncodeableType,
+            &UA_SetMonitoringModeRequest_EncodeableType,
+            &UA_SetMonitoringModeResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3611,9 +3613,9 @@ StatusCode UA_ClientApi_SetMonitoringMode(
         }
 
         /* check response type */
-        else if (OpcUa_SetMonitoringModeResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_SetMonitoringModeResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3667,12 +3669,12 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
         cRequest.MonitoredItemIds     = (uint32_t*)a_pMonitoredItemIds;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "SetMonitoringMode",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_SetMonitoringModeRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_SetMonitoringModeResponse_EncodeableType,
+            &UA_SetMonitoringModeRequest_EncodeableType,
+            &UA_SetMonitoringModeResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3738,12 +3740,12 @@ StatusCode UA_ClientApi_SetTriggering(
         cRequest.LinksToRemove     = (uint32_t*)a_pLinksToRemove;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "SetTriggering",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_SetTriggeringRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_SetTriggeringResponse_EncodeableType,
+            &UA_SetTriggeringRequest_EncodeableType,
+            &UA_SetTriggeringResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3757,9 +3759,9 @@ StatusCode UA_ClientApi_SetTriggering(
         }
 
         /* check response type */
-        else if (OpcUa_SetTriggeringResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_SetTriggeringResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3822,12 +3824,12 @@ StatusCode UA_ClientApi_BeginSetTriggering(
         cRequest.LinksToRemove     = (uint32_t*)a_pLinksToRemove;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "SetTriggering",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_SetTriggeringRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_SetTriggeringResponse_EncodeableType,
+            &UA_SetTriggeringRequest_EncodeableType,
+            &UA_SetTriggeringResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3878,12 +3880,12 @@ StatusCode UA_ClientApi_DeleteMonitoredItems(
         cRequest.MonitoredItemIds     = (uint32_t*)a_pMonitoredItemIds;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "DeleteMonitoredItems",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_DeleteMonitoredItemsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_DeleteMonitoredItemsResponse_EncodeableType,
+            &UA_DeleteMonitoredItemsRequest_EncodeableType,
+            &UA_DeleteMonitoredItemsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -3897,9 +3899,9 @@ StatusCode UA_ClientApi_DeleteMonitoredItems(
         }
 
         /* check response type */
-        else if (OpcUa_DeleteMonitoredItemsResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_DeleteMonitoredItemsResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3951,12 +3953,12 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
         cRequest.MonitoredItemIds     = (uint32_t*)a_pMonitoredItemIds;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteMonitoredItems",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_DeleteMonitoredItemsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_DeleteMonitoredItemsResponse_EncodeableType,
+            &UA_DeleteMonitoredItemsRequest_EncodeableType,
+            &UA_DeleteMonitoredItemsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4012,12 +4014,12 @@ StatusCode UA_ClientApi_CreateSubscription(
         cRequest.Priority                    = a_nPriority;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "CreateSubscription",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CreateSubscriptionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CreateSubscriptionResponse_EncodeableType,
+            &UA_CreateSubscriptionRequest_EncodeableType,
+            &UA_CreateSubscriptionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4031,9 +4033,9 @@ StatusCode UA_ClientApi_CreateSubscription(
         }
 
         /* check response type */
-        else if (OpcUa_CreateSubscriptionResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_CreateSubscriptionResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4090,12 +4092,12 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
         cRequest.Priority                    = a_nPriority;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "CreateSubscription",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_CreateSubscriptionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_CreateSubscriptionResponse_EncodeableType,
+            &UA_CreateSubscriptionRequest_EncodeableType,
+            &UA_CreateSubscriptionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4149,12 +4151,12 @@ StatusCode UA_ClientApi_ModifySubscription(
         cRequest.Priority                    = a_nPriority;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "ModifySubscription",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_ModifySubscriptionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_ModifySubscriptionResponse_EncodeableType,
+            &UA_ModifySubscriptionRequest_EncodeableType,
+            &UA_ModifySubscriptionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4168,9 +4170,9 @@ StatusCode UA_ClientApi_ModifySubscription(
         }
 
         /* check response type */
-        else if (OpcUa_ModifySubscriptionResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_ModifySubscriptionResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4226,12 +4228,12 @@ StatusCode UA_ClientApi_BeginModifySubscription(
         cRequest.Priority                    = a_nPriority;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "ModifySubscription",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_ModifySubscriptionRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_ModifySubscriptionResponse_EncodeableType,
+            &UA_ModifySubscriptionRequest_EncodeableType,
+            &UA_ModifySubscriptionResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4282,12 +4284,12 @@ StatusCode UA_ClientApi_SetPublishingMode(
         cRequest.SubscriptionIds     = (uint32_t*)a_pSubscriptionIds;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "SetPublishingMode",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_SetPublishingModeRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_SetPublishingModeResponse_EncodeableType,
+            &UA_SetPublishingModeRequest_EncodeableType,
+            &UA_SetPublishingModeResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4301,9 +4303,9 @@ StatusCode UA_ClientApi_SetPublishingMode(
         }
 
         /* check response type */
-        else if (OpcUa_SetPublishingModeResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_SetPublishingModeResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4355,12 +4357,12 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
         cRequest.SubscriptionIds     = (uint32_t*)a_pSubscriptionIds;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "SetPublishingMode",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_SetPublishingModeRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_SetPublishingModeResponse_EncodeableType,
+            &UA_SetPublishingModeRequest_EncodeableType,
+            &UA_SetPublishingModeResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4419,12 +4421,12 @@ StatusCode UA_ClientApi_Publish(
         cRequest.SubscriptionAcknowledgements     = (UA_SubscriptionAcknowledgement*)a_pSubscriptionAcknowledgements;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "Publish",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_PublishRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_PublishResponse_EncodeableType,
+            &UA_PublishRequest_EncodeableType,
+            &UA_PublishResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4438,9 +4440,9 @@ StatusCode UA_ClientApi_Publish(
         }
 
         /* check response type */
-        else if (OpcUa_PublishResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_PublishResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4495,12 +4497,12 @@ StatusCode UA_ClientApi_BeginPublish(
         cRequest.SubscriptionAcknowledgements     = (UA_SubscriptionAcknowledgement*)a_pSubscriptionAcknowledgements;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Publish",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_PublishRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_PublishResponse_EncodeableType,
+            &UA_PublishRequest_EncodeableType,
+            &UA_PublishResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4542,12 +4544,12 @@ StatusCode UA_ClientApi_Republish(
         cRequest.RetransmitSequenceNumber = a_nRetransmitSequenceNumber;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "Republish",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_RepublishRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_RepublishResponse_EncodeableType,
+            &UA_RepublishRequest_EncodeableType,
+            &UA_RepublishResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4561,9 +4563,9 @@ StatusCode UA_ClientApi_Republish(
         }
 
         /* check response type */
-        else if (OpcUa_RepublishResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_RepublishResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4609,12 +4611,12 @@ StatusCode UA_ClientApi_BeginRepublish(
         cRequest.RetransmitSequenceNumber = a_nRetransmitSequenceNumber;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Republish",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_RepublishRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_RepublishResponse_EncodeableType,
+            &UA_RepublishRequest_EncodeableType,
+            &UA_RepublishResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4665,12 +4667,12 @@ StatusCode UA_ClientApi_TransferSubscriptions(
         cRequest.SendInitialValues   = a_bSendInitialValues;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "TransferSubscriptions",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_TransferSubscriptionsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_TransferSubscriptionsResponse_EncodeableType,
+            &UA_TransferSubscriptionsRequest_EncodeableType,
+            &UA_TransferSubscriptionsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4684,9 +4686,9 @@ StatusCode UA_ClientApi_TransferSubscriptions(
         }
 
         /* check response type */
-        else if (OpcUa_TransferSubscriptionsResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_TransferSubscriptionsResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4738,12 +4740,12 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
         cRequest.SendInitialValues   = a_bSendInitialValues;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "TransferSubscriptions",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_TransferSubscriptionsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_TransferSubscriptionsResponse_EncodeableType,
+            &UA_TransferSubscriptionsRequest_EncodeableType,
+            &UA_TransferSubscriptionsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4792,12 +4794,12 @@ StatusCode UA_ClientApi_DeleteSubscriptions(
         cRequest.SubscriptionIds     = (uint32_t*)a_pSubscriptionIds;
 
         /* invoke service */
-        status = OpcUa_Channel_InvokeService(
+        status = UA_Channel_InvokeService(
             a_hChannel,
             "DeleteSubscriptions",
             (void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_DeleteSubscriptionsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_DeleteSubscriptionsResponse_EncodeableType,
+            &UA_DeleteSubscriptionsRequest_EncodeableType,
+            &UA_DeleteSubscriptionsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
@@ -4811,9 +4813,9 @@ StatusCode UA_ClientApi_DeleteSubscriptions(
         }
 
         /* check response type */
-        else if (OpcUa_DeleteSubscriptionsResponse_EncodeableType.TypeId != pResponseType->typeId)
+        else if (UA_DeleteSubscriptionsResponse_EncodeableType.typeId != pResponseType->typeId)
         {
-            pResponseType->clearsFunction(pResponse);
+            pResponseType->clearFunction(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4863,12 +4865,12 @@ StatusCode UA_ClientApi_BeginDeleteSubscriptions(
         cRequest.SubscriptionIds     = (uint32_t*)a_pSubscriptionIds;
 
         /* begin invoke service */
-        status = OpcUa_Channel_BeginInvokeService(
+        status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteSubscriptions",
             (OpcUa_Void*)&cRequest,
-            (OpcUa_EncodeableType *) &UA_DeleteSubscriptionsRequest_EncodeableType,
-            (OpcUa_EncodeableType *) &UA_DeleteSubscriptionsResponse_EncodeableType,
+            &UA_DeleteSubscriptionsRequest_EncodeableType,
+            &UA_DeleteSubscriptionsResponse_EncodeableType,
             (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }

@@ -17,9 +17,11 @@ const UA_Byte MSG[3] = {'M','S','G'};
 const UA_Byte OPN[3] = {'O','P','N'};
 const UA_Byte CLO[3] = {'C','L','O'};
 
-UA_MsgBuffer* MsgBuffer_Create(Buffer*  buffer,
-                               uint32_t maxChunks,
-                               void*    flushData)
+UA_MsgBuffer* MsgBuffer_Create(Buffer*             buffer,
+                               uint32_t            maxChunks,
+                               void*               flushData,
+                               UA_NamespaceTable*  nsTable,
+                               UA_EncodeableType** encTypesTable)
 {
     UA_MsgBuffer* mBuffer = UA_NULL;
     if(buffer != UA_NULL){
@@ -33,8 +35,9 @@ UA_MsgBuffer* MsgBuffer_Create(Buffer*  buffer,
         mBuffer->maxChunks = maxChunks;
         mBuffer->sequenceNumberPosition = 0;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
-        mBuffer->requestId = 0;
         mBuffer->flushData = flushData;
+        mBuffer->nsTable = nsTable;
+        mBuffer->encTypesTable = encTypesTable;
     }
     return mBuffer;
 }
@@ -59,7 +62,6 @@ void MsgBuffer_Reset(UA_MsgBuffer* mBuffer){
         mBuffer->msgSize = 0;
         mBuffer->nbChunks = 1;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
-        mBuffer->requestId = 0;
         mBuffer->sequenceNumberPosition = 0;
     }
 }
@@ -104,7 +106,6 @@ void MsgBuffer_InternalCopyProperties(UA_MsgBuffer* destMsgBuffer,
     destMsgBuffer->nbChunks = srcMsgBuffer->nbChunks;
     destMsgBuffer->sequenceNumberPosition = srcMsgBuffer->sequenceNumberPosition;
     destMsgBuffer->isFinal = srcMsgBuffer->isFinal;
-    destMsgBuffer->requestId = srcMsgBuffer->requestId;
 }
 
 StatusCode MsgBuffer_CopyBuffer(UA_MsgBuffer* destMsgBuffer,
@@ -123,8 +124,11 @@ StatusCode MsgBuffer_CopyBuffer(UA_MsgBuffer* destMsgBuffer,
     return status;
 }
 
-UA_MsgBuffers* MsgBuffers_Create(uint32_t maxChunks,
-                                 uint32_t bufferSize){
+UA_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
+                                 uint32_t            bufferSize,
+                                 UA_NamespaceTable*  nsTable,
+                                 UA_EncodeableType** encTypesTable)
+{
     assert(maxChunks > 0);
     StatusCode status = STATUS_OK;
     UA_MsgBuffers* mBuffers = UA_NULL;
@@ -158,8 +162,9 @@ UA_MsgBuffers* MsgBuffers_Create(uint32_t maxChunks,
             mBuffers->maxChunks = maxChunks;
             mBuffers->sequenceNumberPosition = 0;
             mBuffers->isFinal = UA_Msg_Chunk_Unknown;
-            mBuffers->requestId = 0;
             mBuffers->flushData = UA_NULL;
+            mBuffers->nsTable = nsTable;
+            mBuffers->encTypesTable = encTypesTable;
         }else{
             MsgBuffers_Delete(&mBuffers);
         }
@@ -178,7 +183,6 @@ void MsgBuffers_Reset(UA_MsgBuffers* mBuffer){
         mBuffer->msgSize = 0;
         mBuffer->nbChunks = 0;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
-        mBuffer->requestId = 0;
         mBuffer->sequenceNumberPosition = 0;
     }
 }

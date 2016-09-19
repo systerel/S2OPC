@@ -6,6 +6,7 @@
  */
 
 #include <key_sets.h>
+#include <stdlib.h>
 
 SC_SecurityKeySet* KeySet_Create(){
     SC_SecurityKeySet* keySet = malloc(sizeof(SC_SecurityKeySet));

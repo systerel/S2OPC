@@ -20,7 +20,9 @@ StatusCode InitSendBuffer(TCP_UA_Connection* connection){
         if(buf != UA_NULL){
             connection->outputMsgBuffer = MsgBuffer_Create(buf,
                                                            connection->maxChunkCountSnd,
-                                                           connection->socket);
+                                                           connection->socket,
+                                                           UA_NULL, // no need for namespaces and types for decoding TCP UA headers
+                                                           UA_NULL);
             if(connection->outputMsgBuffer != UA_NULL){
                 status = STATUS_OK;
             }
@@ -38,7 +40,9 @@ StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
         if(buf != UA_NULL){
             connection->inputMsgBuffer = MsgBuffer_Create(buf,
                                                           connection->maxChunkCountRcv,
-                                                          connection->socket);
+                                                          connection->socket,
+                                                          UA_NULL, // no need for namespaces and types for decoding TCP UA headers
+                                                          UA_NULL);
             if(connection->inputMsgBuffer != UA_NULL){
                 status = STATUS_OK;
             }

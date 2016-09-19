@@ -119,14 +119,18 @@ StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
         {
             scConnection->receptionBuffers = MsgBuffers_Create
              (scConnection->transportConnection->maxChunkCountRcv,
-              scConnection->transportConnection->receiveBufferSize);
+              scConnection->transportConnection->receiveBufferSize,
+              namespaceTable,
+              encodeableTypes);
 
         }else if(scConnection->transportConnection->maxMessageSizeRcv != 0){
             // Is message size including whole message or only body as it is the case in part 4 §5.3 last § ???
             scConnection->receptionBuffers = MsgBuffers_Create
               (scConnection->transportConnection->maxMessageSizeRcv
                /scConnection->transportConnection->receiveBufferSize,
-               scConnection->transportConnection->receiveBufferSize);
+               scConnection->transportConnection->receiveBufferSize,
+               namespaceTable,
+               encodeableTypes);
             // Using receive buffer size is correct over-approximation of un-encrypted size (blocks) ?
         }else{
             // We need to know either nbChunks or max message size to could limit the number of buffers:
@@ -152,7 +156,9 @@ StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
         Buffer* buf = Buffer_Create(scConnection->transportConnection->sendBufferSize);
         msgBuffer = MsgBuffer_Create(buf,
                                      scConnection->transportConnection->maxChunkCountSnd,
-                                     scConnection);
+                                     scConnection,
+                                     namespaceTable,
+                                     encodeableTypes);
         if(msgBuffer != UA_NULL){
             scConnection->sendingBuffer = msgBuffer;
             status = STATUS_OK;
@@ -546,32 +552,23 @@ StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
     return status;
 }
 
-StatusCode SC_EncodeSequenceHeader(SC_Connection* scConnection,
-                                   uint32_t*      requestId){
+StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
+                                   uint32_t      requestId){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t zero = 0;
-    if(scConnection != UA_NULL &&
-       scConnection->sendingBuffer != UA_NULL &&
-       requestId != UA_NULL){
-        //TODO: check constraints on sequence number ? Modified in next spec ?
+    if(msgBuffer != UA_NULL){
         status = STATUS_OK;
     }
 
     // Set temporary SN value: to be set on message sending (ensure contiguous SNs)
     if(status == STATUS_OK){
-        scConnection->sendingBuffer->sequenceNumberPosition = scConnection->sendingBuffer->buffers->position;
-        UInt32_Write(scConnection->sendingBuffer, &zero);
+        msgBuffer->sequenceNumberPosition = msgBuffer->buffers->position;
+        UInt32_Write(msgBuffer, &zero);
     }
 
-    *requestId = scConnection->lastRequestIdSent + 1;
-    if(*requestId == 0){
-        (*requestId)++;
-    }
-    scConnection->sendingBuffer->requestId = *requestId;
     if(status == STATUS_OK){
-        UInt32_Write(scConnection->sendingBuffer, requestId);
+        UInt32_Write(msgBuffer, &requestId);
     }
-    scConnection->lastRequestIdSent = *requestId;
 
     return status;
 }
@@ -657,27 +654,28 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
     return status;
 }
 
-StatusCode SC_EncodeMsgBody(UA_MsgBuffer*     msgBuffer,
-                            UA_EncodeableType encType,
-                            void*             msgBody)
+StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
+                            UA_EncodeableType* encType,
+                            void*              msgBody)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_NodeId nodeId;
     NodeId_Initialize(&nodeId);
 
-    if(msgBuffer != UA_NULL && msgBody != UA_NULL){
+    if(msgBuffer != UA_NULL && msgBody != UA_NULL &&
+       encType != UA_NULL){
         nodeId.identifierType = IdentifierType_Numeric;
-        if(encType.namespace == UA_NULL){
+        if(encType->namespace == UA_NULL){
             nodeId.namespace = 0;
         }else{
             // TODO: find namespace Id
         }
-        nodeId.numeric = encType.binaryTypeId;
+        nodeId.numeric = encType->binaryTypeId;
 
         status = NodeId_Write(msgBuffer, &nodeId);
     }
     if(status == STATUS_OK){
-        status = encType.encodeFunction(msgBuffer, msgBody);
+        status = encType->encodeFunction(msgBuffer, msgBody);
     }
     return status;
 }
@@ -1021,7 +1019,6 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
                     // Ensure internal properties coherency (even if not used)
                     encryptedMsgBuffer->isFinal = msgBuffer->isFinal;
                     encryptedMsgBuffer->type = msgBuffer->type;
-                    encryptedMsgBuffer->requestId = msgBuffer->requestId;
                     encryptedMsgBuffer->secureType = msgBuffer->secureType;
                     encryptedMsgBuffer->nbChunks = msgBuffer->nbChunks;
                 }
@@ -1513,32 +1510,55 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     return status;
 }
 
-StatusCode SC_DecodeMsgBody(SC_Connection* scConnection,
-                            UA_EncodeableType* encType,
-                            void** encodeableObj){
+StatusCode SC_DecodeMsgBody(SC_Connection*      scConnection,
+                            UA_EncodeableType*  respEncType,
+                            UA_EncodeableType*  errEncType,
+                            UA_EncodeableType** receivedEncType,
+                            void**              encodeableObj)
+{
     StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_EncodeableType* recEncType;
     UA_NodeId nodeId;
+    uint16_t nsIndex = 0;
     NodeId_Initialize(&nodeId);
-    if(scConnection != UA_NULL && encType != UA_NULL && encodeableObj != UA_NULL){
+    if(scConnection != UA_NULL && respEncType != UA_NULL && encodeableObj != UA_NULL){
         status = NodeId_Read(scConnection->receptionBuffers, &nodeId);
     }
-    if(status == STATUS_OK && nodeId.identifierType == UA_IdType_Numeric &&
-        (nodeId.numeric == encType->typeId || nodeId.numeric == encType->binaryTypeId)){
-//         || nodeId.numeric == encType->xmlTypeId){ => what is the point to accept this type ?
-        if(encType->namespace == UA_NULL && nodeId.namespace != 0){
+    if(status == STATUS_OK && nodeId.identifierType == UA_IdType_Numeric){
+
+        if (nodeId.numeric == respEncType->typeId || nodeId.numeric == respEncType->binaryTypeId){
+//          || nodeId.numeric == respEncType->xmlTypeId){ => what is the point to accept this type ?
+            *receivedEncType = respEncType;
+        }else if(nodeId.numeric == errEncType->typeId || nodeId.numeric == errEncType->binaryTypeId){
+//               || nodeId.numeric == errEncType->xmlTypeId){ => what is the point to accept this type ?
+            *receivedEncType = errEncType;
+        }else{
             status = STATUS_INVALID_RCV_PARAMETER;
-        }else if(encType->namespace != UA_NULL){
-            //TODO: manage ns <-> ns id conversion
-            assert(UA_FALSE);
+        }
+
+        if(status == STATUS_OK){
+            recEncType = *receivedEncType;
+            if(recEncType->namespace == UA_NULL && nodeId.namespace != 0){
+                status = STATUS_INVALID_RCV_PARAMETER;
+            }else if(recEncType->namespace != UA_NULL){
+                status = Namespace_GetIndex(scConnection->receptionBuffers->nsTable,
+                                            recEncType->namespace,
+                                            &nsIndex);
+                if(status == STATUS_OK){
+                    if(nodeId.namespace != nsIndex){
+                        status = STATUS_INVALID_RCV_PARAMETER;
+                    }
+                }
+            }
         }
     }else{
         status = STATUS_INVALID_RCV_PARAMETER;
     }
 
     if(status == STATUS_OK){
-        *encodeableObj = malloc(encType->allocSize);
+        *encodeableObj = malloc(recEncType->allocSize);
         if(*encodeableObj != UA_NULL){
-            status = encType->decodeFunction(scConnection->receptionBuffers, *encodeableObj);
+            status = recEncType->decodeFunction(scConnection->receptionBuffers, *encodeableObj);
         }else{
             status = STATUS_NOK;
         }
@@ -1672,4 +1692,38 @@ StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
         }
     }
     return status;
+}
+
+StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
+                                  UA_EncodeableType* encType,
+                                  void*              value,
+                                  uint32_t           requestId)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_MsgBuffer* msgBuffer = scConnection->sendingBuffer;
+    if(scConnection != UA_NULL &&
+       encType != UA_NULL &&
+       value != UA_NULL)
+    {
+        // Encode secure message header:
+        status = SC_EncodeSecureMsgHeader(msgBuffer,
+                                          UA_SecureMessage,
+                                          scConnection->currentSecuToken.channelId);
+    }
+
+    if(status == STATUS_OK){
+        // Encode symmetric security header
+        status = UInt32_Write(msgBuffer, &scConnection->currentSecuToken.tokenId);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_EncodeSequenceHeader(msgBuffer, requestId);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_EncodeMsgBody(msgBuffer, encType, value);
+    }
+
+    return status;
+
 }

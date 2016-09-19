@@ -17,25 +17,6 @@
 #include <ua_namespace_table.h>
 #include <ua_secure_channel_low_level.h>
 
-typedef struct PendingRequest
-{
-    uint32_t           requestId; // 0 is invalid request
-    UA_EncodeableType* responseType;
-    uint32_t           timeoutHint;
-    uint32_t           startTime;
-    ResponseEvent_CB*  callback;
-    void*              callbackData;
-} PendingRequest;
-
-PendingRequest* SC_PendingRequestCreate(uint32_t           requestId,
-                                        UA_EncodeableType* responseType,
-                                        uint32_t           timeoutHint,
-                                        uint32_t           startTime,
-                                        ResponseEvent_CB*  callback,
-                                        void*              callbackData);
-
-void SC_PendingRequestDelete(PendingRequest*);
-
 
 typedef struct SC_ClientConnection
 {
@@ -56,6 +37,31 @@ typedef struct SC_ClientConnection
 
 } SC_ClientConnection;
 
+typedef StatusCode (SC_ResponseEvent_CB) (SC_ClientConnection* connection,
+                                          void*                response,
+                                          UA_EncodeableType*   responseType,
+                                          void*                callbackData,
+                                          StatusCode           status);
+
+typedef struct PendingRequest
+{
+    uint32_t             requestId; // 0 is invalid request
+    UA_EncodeableType*   responseType;
+    uint32_t             timeoutHint;
+    uint32_t             startTime;
+    SC_ResponseEvent_CB* callback;
+    void*                callbackData;
+} PendingRequest;
+
+PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
+                                        UA_EncodeableType*   responseType,
+                                        uint32_t             timeoutHint,
+                                        uint32_t             startTime,
+                                        SC_ResponseEvent_CB* callback,
+                                        void*                callbackData);
+
+void SC_PendingRequestDelete(PendingRequest*);
+
 
 SC_ClientConnection* SC_Client_Create(UA_NamespaceTable*  namespaceTable,
                                       UA_EncodeableType** encodeableTypes);
@@ -72,5 +78,14 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                              uint32_t               requestedLifetime,
                              SC_ConnectionEvent_CB* callback,
                              void*                  callbackData);
+
+StatusCode SC_Send_Request(SC_ClientConnection* connection,
+                           UA_EncodeableType*   requestType,
+                           void*                request,
+                           UA_EncodeableType*   responseType,
+                           uint32_t             timeout,
+                           SC_ResponseEvent_CB* callback,
+                           void*                callbackData);
+
 
 #endif /* INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_ */
