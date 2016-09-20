@@ -460,10 +460,17 @@ StatusCode OnTransportEvent_CB(void*           connection,
                 case UA_OpenSecureChannel:
                     if(cConnection->instance->state == SC_Connection_Connecting_Secure){
                         // Receive Open Secure Channel response
-                        Receive_OpenSecureChannelResponse(cConnection, msgBuffer);
+                        retStatus = Receive_OpenSecureChannelResponse(cConnection, msgBuffer);
                     }else{
                         retStatus = STATUS_INVALID_RCV_PARAMETER;
                     }
+                    //TODO: retStatus = ??
+                    cConnection->callback((OpcUa_Connection*) cConnection,
+                                          cConnection->callbackData,
+                                          OpcUa_ConnectionEvent_Connect,
+                                          UA_NULL,
+                                          retStatus);
+
                     break;
                 case UA_CloseSecureChannel:
                     if(cConnection->instance->state == SC_Connection_Connected){

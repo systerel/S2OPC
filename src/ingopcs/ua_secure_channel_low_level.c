@@ -370,7 +370,6 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
             if(status == STATUS_OK){
                 status = CryptoProvider_AsymmetricEncryptLength
                           (scConnection->currentCryptoProvider,
-                           UA_NULL,
                            plainDataLength,
                            otherAppPublicKey,
                            cipherDataLength);
@@ -383,7 +382,6 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
             // Retrieve cipher length
             status = CryptoProvider_SymmetricEncryptLength
                       (scConnection->currentCryptoProvider,
-                       UA_NULL,
                        plainDataLength,
                        scConnection->currentSecuKeySets.senderKeySet->encryptKey,
                        scConnection->currentSecuKeySets.senderKeySet->initVector,
@@ -1185,6 +1183,11 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
         if(status == STATUS_OK){
             // TODO: detach transport buffer ?
             status = TCP_UA_FlushMsgBuffer(scConnection->transportConnection->outputMsgBuffer);
+        }
+
+        if(status == STATUS_OK && chunkType == UA_Msg_Chunk_Final){
+            // Reset buffer for next sending
+            MsgBuffer_Reset(scConnection->sendingBuffer);
         }
     }
     return status;

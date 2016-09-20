@@ -88,13 +88,6 @@ void OpcUa_ProxyStubConfiguration_InitializeDefault(OpcUa_ProxyStubConfiguration
 }
 
 
-
-
-
-
-
-
-
 int main(void){
 
 	// Init proxy stub configuration with default values
