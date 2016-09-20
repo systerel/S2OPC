@@ -882,9 +882,12 @@ StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObje
     UA_Byte encodingByte = 0;
     if(extObj != UA_NULL){
         encodingByte = extObj->encoding;
+        status = STATUS_OK;
     }
 
-    if(encodingByte == UA_ExtObjBodyEncoding_Object){
+    if(status == STATUS_OK &&
+       encodingByte == UA_ExtObjBodyEncoding_Object)
+    {
         encodingByte = UA_ExtObjBodyEncoding_ByteString;
         if(extObj->body.object.objType == UA_NULL){
             status = STATUS_INVALID_PARAMETERS;
@@ -904,11 +907,11 @@ StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObje
     }
 
     if(status == STATUS_OK){
-        status = Byte_Write(msgBuffer, &encodingByte);
+        status = NodeId_Write(msgBuffer, &objNodeId);
     }
 
     if(status == STATUS_OK){
-        status = NodeId_Write(msgBuffer, &objNodeId);
+        status = Byte_Write(msgBuffer, &encodingByte);
     }
 
     if(status == STATUS_OK){
