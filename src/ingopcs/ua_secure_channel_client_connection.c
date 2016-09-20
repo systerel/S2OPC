@@ -332,24 +332,29 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
 StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
                                              UA_MsgBuffer*        transportMsgBuffer)
 {
-    StatusCode status = STATUS_INVALID_RCV_PARAMETER;
+    StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t validateSenderCertificateTrue = 1; // True: always activated as indicated in API
-    const uint32_t isSymmetricFalse = UA_FALSE; // TRUE
+    const uint32_t isSymmetricFalse = UA_FALSE;
     const uint32_t isPrecCryptoDataFalse = UA_FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
     uint32_t requestId = 0;
     uint32_t snPosition = 0;
     PendingRequest* pRequest = UA_NULL;
 
-    if(transportMsgBuffer->isFinal == UA_Msg_Chunk_Final){
-        // OPN request/response must be in one chunk only
+    if(cConnection != UA_NULL && transportMsgBuffer != UA_NULL){
         status = STATUS_OK;
+    }
+
+    if(status == STATUS_OK &&
+       transportMsgBuffer->isFinal != UA_Msg_Chunk_Final){
+        // OPN request/response must be in one chunk only
+        status = STATUS_INVALID_RCV_PARAMETER;
     }
 
     // Message header already managed by transport layer
     // (except secure channel Id)
     if(status == STATUS_OK){
-        SC_DecodeSecureMsgSCid(cConnection->instance,
-                               transportMsgBuffer);
+        status = SC_DecodeSecureMsgSCid(cConnection->instance,
+                                        transportMsgBuffer);
     }
 
     if(status == STATUS_OK){
@@ -404,8 +409,107 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     if(status == STATUS_OK){
         SC_PendingRequestDelete(pRequest);
         pRequest = UA_NULL;
+        // Reset reception buffers for next messages
+        MsgBuffers_Reset(cConnection->instance->receptionBuffers);
     }else{
         // Trace / channel CB
+    }
+
+    return status;
+}
+
+StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
+                                   UA_MsgBuffer*        transportMsgBuffer)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    const uint32_t isSymmetricTrue = 1; // TRUE
+    uint32_t isPrecCryptoDataFalse = UA_FALSE;
+    uint32_t requestId = 0;
+    uint32_t tokenId = 0;
+    uint32_t snPosition = 0;
+    PendingRequest* pRequest = UA_NULL;
+    UA_EncodeableType* recEncType = UA_NULL;
+    void* encObj = UA_NULL;
+
+    // Message header already managed by transport layer
+    // (except secure channel Id)
+    if(cConnection != UA_NULL){
+        status = SC_DecodeSecureMsgSCid(cConnection->instance,
+                                        transportMsgBuffer);
+    }
+
+    if(status == STATUS_OK){
+        // Check security policy
+        // Validate other app certificate
+        // Check current app certificate thumbprint
+        status = SC_DecodeSymmSecurityHeader(transportMsgBuffer,
+                                             &tokenId,
+                                             &snPosition);
+    }
+
+    if(status == STATUS_OK){
+        // Determine keyset to use regarding token id provided
+        status = SC_IsPrecedentCryptoData(cConnection->instance,
+                                          tokenId,
+                                          &isPrecCryptoDataFalse);
+    }
+
+    if(status == STATUS_OK){
+        // Decrypt message content and store complete message in secure connection buffer
+        status = SC_DecryptMsg(cConnection->instance,
+                               transportMsgBuffer,
+                               snPosition,
+                               isSymmetricTrue,
+                               isPrecCryptoDataFalse);
+    }
+
+    if(status == STATUS_OK){
+        // Check decrypted message signature
+        status = SC_VerifyMsgSignature(cConnection->instance,
+                                       isSymmetricTrue,
+                                       isPrecCryptoDataFalse);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_CheckSeqNumReceived(cConnection->instance);
+    }
+
+    if(status == STATUS_OK){
+        // Retrieve request id
+        status = UInt32_Read(cConnection->instance->receptionBuffers, &requestId);
+    }
+
+    if(transportMsgBuffer->isFinal != UA_Msg_Chunk_Final){
+        // TODO: manage chunks:
+        // -store content of msg body only ? (remove padding)
+        // + add verification on request id (same for all chunks ?) ?
+        status = STATUS_NOK;
+    }else{
+        if(status == STATUS_OK){
+            // Retrieve associated pending request
+            pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
+            if(pRequest == UA_NULL){
+                status = STATUS_NOK;
+            }
+        }
+
+        if(status == STATUS_OK){
+            status = SC_DecodeMsgBody(cConnection->instance,
+                                      pRequest->responseType,
+                                      &UA_ServiceFault_EncodeableType,
+                                      &recEncType,
+                                      &encObj);
+        }
+
+        if(status == STATUS_OK){
+            if(pRequest->callback != UA_NULL){
+                pRequest->callback(cConnection,
+                                   encObj,
+                                   recEncType,
+                                   pRequest->callbackData,
+                                   status);
+            }
+        }
     }
 
     return status;
@@ -461,9 +565,11 @@ StatusCode OnTransportEvent_CB(void*           connection,
                     if(cConnection->instance->state == SC_Connection_Connecting_Secure){
                         // Receive Open Secure Channel response
                         retStatus = Receive_OpenSecureChannelResponse(cConnection, msgBuffer);
+                        cConnection->instance->state = SC_Connection_Connected;
                     }else{
                         retStatus = STATUS_INVALID_RCV_PARAMETER;
                     }
+
                     //TODO: retStatus = ??
                     cConnection->callback((OpcUa_Connection*) cConnection,
                                           cConnection->callbackData,
@@ -474,14 +580,14 @@ StatusCode OnTransportEvent_CB(void*           connection,
                     break;
                 case UA_CloseSecureChannel:
                     if(cConnection->instance->state == SC_Connection_Connected){
-
+                        assert(UA_FALSE);
                     }else{
                         retStatus = STATUS_INVALID_RCV_PARAMETER;
                     }
                     break;
                 case UA_SecureMessage:
                     if(cConnection->instance->state == SC_Connection_Connected){
-
+                        retStatus = Receive_ServiceResponse(cConnection, msgBuffer);
                     }else{
                         retStatus = STATUS_INVALID_RCV_PARAMETER;
                     }

@@ -145,5 +145,8 @@ StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
                                   void*              value,
                                   uint32_t           requestId);
 
+StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
+                                       uint32_t*     tokenId,
+                                       uint32_t*     snPosition);
 
 #endif /* INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_ */

@@ -1730,3 +1730,18 @@ StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
     return status;
 
 }
+
+StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
+                                       uint32_t*     tokenId,
+                                       uint32_t*     snPosition)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(transportBuffer != UA_NULL)
+    {
+        status = UInt32_Read(transportBuffer, tokenId);
+    }
+    if(status == STATUS_OK){
+        *snPosition = transportBuffer->buffers->position;
+    }
+    return status;
+}
