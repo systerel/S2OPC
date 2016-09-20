@@ -94,11 +94,13 @@ StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
 StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_Byte* data = buffer->data;
     if(buffer != UA_NULL && buffer->max_size >= length){
         status = STATUS_OK;
         if(buffer->length > length){
+            data = &(buffer->data[length]);
             // Reset unused bytes to 0
-            memset(buffer, 0, buffer->length - length);
+            memset(data, 0, buffer->length - length);
         }
         buffer->length = length;
     }
