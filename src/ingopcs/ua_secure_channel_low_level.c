@@ -452,10 +452,10 @@ StatusCode CheckMaxSenderCertificateSize(UA_ByteString*  senderCertificate,
     return status;
 }
 
-uint16_t GetPaddingSize(uint32_t bytesToWrite,
+uint16_t GetPaddingSize(uint32_t bytesToEncrypt, // called bytesToWrite in spec part6 but it should not since it includes SN header !
                         uint32_t plainBlockSize,
                         uint32_t signatureSize){
-    return plainBlockSize - ((bytesToWrite + signatureSize + 1) % plainBlockSize);
+    return plainBlockSize - ((bytesToEncrypt + signatureSize + 1) % plainBlockSize);
 }
 
 // Set internal properties
@@ -704,10 +704,9 @@ StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
                 status = STATUS_INVALID_STATE;
             }else{
                 // Fulfill buffer with maximum amount of bytes
-                uint32_t tmpCount =
-                 msgBuffer->sequenceNumberPosition +
-                 UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
-                 scConnection->sendingMaxBodySize - msgBuffer->buffers->position;
+                uint32_t tmpCount = // Maximum Count - Precedent Count => Count to write
+                 (msgBuffer->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+                  scConnection->sendingMaxBodySize) - msgBuffer->buffers->position;
                 count = count - tmpCount;
                 status = Buffer_Write(msgBuffer->buffers, data_src, tmpCount);
 
@@ -876,8 +875,7 @@ StatusCode EncodePadding(SC_Connection* scConnection,
     if(status == STATUS_OK){
         uint8_t paddingSizeField = 0;
         *realPaddingLength = GetPaddingSize(msgBuffer->buffers->length -
-                                              msgBuffer->sequenceNumberPosition +
-                                              UA_SECURE_MESSAGE_SEQUENCE_LENGTH,
+                                              msgBuffer->sequenceNumberPosition,
                                             plainBlockSize,
                                             *signatureSize);
         //Little endian conversion of padding:
