@@ -149,4 +149,8 @@ StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
                                        uint32_t*     tokenId,
                                        uint32_t*     snPosition);
 
+// Only for symmetric encrypted buffer
+StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
+                                  uint32_t       isPrecCryptoData);
+
 #endif /* INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_ */

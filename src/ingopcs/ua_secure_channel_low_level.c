@@ -1755,3 +1755,55 @@ StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
     }
     return status;
 }
+
+StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
+                                  uint32_t       isPrecCryptoData)
+{
+    // Only valid for symmetric encryption ! No need for asymm (1 chunk maximum)
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_String* secuPolicy = UA_NULL;
+    uint32_t sigSize = 0;
+    uint32_t cipherBlockSize = 0;
+    uint32_t plainBlockSize = 0;
+    uint16_t padding = 0;
+    Buffer* curChunk = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
+    uint32_t newBufferLength = curChunk->length;
+    if(scConnection != UA_NULL){
+        if(isPrecCryptoData == UA_FALSE){
+            secuPolicy = scConnection->currentSecuPolicy;
+        }else{
+            secuPolicy = scConnection->precSecuPolicy;
+        }
+        // Compute signature size and remove from buffer length
+        sigSize = GetSymmSignatureSize(secuPolicy);
+        newBufferLength = newBufferLength - sigSize;
+
+        status = GetSymmBlocksSizes(secuPolicy,
+                                    &cipherBlockSize,
+                                    &plainBlockSize);
+    }
+
+    if(status == STATUS_OK){
+        // Extra padding management: possible if block size greater than:
+        // UINT8_MAX (1 byte representation max)+ 1 (padding size field byte))
+        if(plainBlockSize > 256){
+            // compute most significant byte value
+            padding = curChunk->data[newBufferLength-1] << 8;
+            // remove extra padding size field
+            newBufferLength -= 1;
+        }
+
+        // Pading bytes are containing the (low byte) of padding length (<=> paddingSize value)
+        padding += curChunk->data[newBufferLength-1];
+        // Remove padding bytes (including extra if existing)
+        newBufferLength -= padding;
+        // Remove padding field
+        newBufferLength -= 1;
+
+        // Set new buffer length without padding and signature
+        status = Buffer_SetDataLength(curChunk, newBufferLength);
+    }
+
+
+    return status;
+}

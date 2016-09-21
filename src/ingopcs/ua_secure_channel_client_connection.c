@@ -479,6 +479,11 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
         status = UInt32_Read(cConnection->instance->receptionBuffers, &requestId);
     }
 
+    if(status == STATUS_OK){
+        status = SC_RemovePaddingAndSig(cConnection->instance,
+                                        isPrecCryptoDataFalse);
+    }
+
     switch(transportMsgBuffer->isFinal){
         case UA_Msg_Chunk_Final:
             // Treat case with only 1 chunk for response
@@ -509,7 +514,6 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                         }
                     }
             }else{
-                // TODO: remove padding + sig from buffer
                 // TODO: store all buffers in 1 to could decode msg body !
             }
             // TODO: reset buffer
@@ -526,7 +530,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                     // TODO: trace
                     status = STATUS_NOK;
                 }else{
-                    cConnection->instance->receptionBuffers->receivedReqId;
+                    cConnection->instance->receptionBuffers->receivedReqId = requestId;
                 }
             }else{
                 if(cConnection->instance->receptionBuffers->receivedReqId != requestId){
