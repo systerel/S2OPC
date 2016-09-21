@@ -35,6 +35,7 @@ UA_MsgBuffer* MsgBuffer_Create(Buffer*             buffer,
         mBuffer->maxChunks = maxChunks;
         mBuffer->sequenceNumberPosition = 0;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
+        mBuffer->receivedReqId = 0;
         mBuffer->flushData = flushData;
         mBuffer->nsTable = nsTable;
         mBuffer->encTypesTable = encTypesTable;
@@ -62,6 +63,7 @@ void MsgBuffer_Reset(UA_MsgBuffer* mBuffer){
         mBuffer->msgSize = 0;
         mBuffer->nbChunks = 1;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
+        mBuffer->receivedReqId = 0;
         mBuffer->sequenceNumberPosition = 0;
     }
 }
@@ -106,6 +108,7 @@ void MsgBuffer_InternalCopyProperties(UA_MsgBuffer* destMsgBuffer,
     destMsgBuffer->nbChunks = srcMsgBuffer->nbChunks;
     destMsgBuffer->sequenceNumberPosition = srcMsgBuffer->sequenceNumberPosition;
     destMsgBuffer->isFinal = srcMsgBuffer->isFinal;
+    destMsgBuffer->receivedReqId = srcMsgBuffer->receivedReqId;
 }
 
 StatusCode MsgBuffer_CopyBuffer(UA_MsgBuffer* destMsgBuffer,
@@ -162,6 +165,7 @@ UA_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
             mBuffers->maxChunks = maxChunks;
             mBuffers->sequenceNumberPosition = 0;
             mBuffers->isFinal = UA_Msg_Chunk_Unknown;
+            mBuffers->receivedReqId = 0;
             mBuffers->flushData = UA_NULL;
             mBuffers->nsTable = nsTable;
             mBuffers->encTypesTable = encTypesTable;
@@ -183,6 +187,7 @@ void MsgBuffers_Reset(UA_MsgBuffers* mBuffer){
         mBuffer->msgSize = 0;
         mBuffer->nbChunks = 0;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
+        mBuffer->receivedReqId = 0;
         mBuffer->sequenceNumberPosition = 0;
     }
 }

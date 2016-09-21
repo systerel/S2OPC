@@ -479,37 +479,83 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
         status = UInt32_Read(cConnection->instance->receptionBuffers, &requestId);
     }
 
+    switch(transportMsgBuffer->isFinal){
+        case UA_Msg_Chunk_Final:
+            // Treat case with only 1 chunk for response
+            if(cConnection->instance->receptionBuffers->nbChunks == 1){
+                if(status == STATUS_OK){
+                        // Retrieve associated pending request
+                        pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
+                        if(pRequest == UA_NULL){
+                            status = STATUS_NOK;
+                        }
+                    }
+
+                    if(status == STATUS_OK){
+                        status = SC_DecodeMsgBody(cConnection->instance,
+                                                  pRequest->responseType,
+                                                  &UA_ServiceFault_EncodeableType,
+                                                  &recEncType,
+                                                  &encObj);
+                    }
+
+                    if(status == STATUS_OK){
+                        if(pRequest->callback != UA_NULL){
+                            pRequest->callback(cConnection,
+                                               encObj,
+                                               recEncType,
+                                               pRequest->callbackData,
+                                               status);
+                        }
+                    }
+            }else{
+                // TODO: remove padding + sig from buffer
+                // TODO: store all buffers in 1 to could decode msg body !
+            }
+            // TODO: reset buffer
+            break;
+        case UA_Msg_Chunk_Intermediate:
+            assert(cConnection->instance->receptionBuffers->nbChunks >= 1);
+            if(cConnection->instance->receptionBuffers->nbChunks == 1){
+                if(status == STATUS_OK){
+                    // Retrieve associated pending request
+                    pRequest = SLinkedList_Find(cConnection->pendingRequests, requestId);
+                }
+                if(pRequest == UA_NULL){
+                    // Error: unknown request id !
+                    // TODO: trace
+                    status = STATUS_NOK;
+                }else{
+                    cConnection->instance->receptionBuffers->receivedReqId;
+                }
+            }else{
+                if(cConnection->instance->receptionBuffers->receivedReqId != requestId){
+                    // Error: unexpected request Id
+                    // TODO: error on precedent service or ignore new request (if invalid only ?) ?
+                    status = STATUS_NOK;
+                }else{
+
+                }
+            }
+            if(status == STATUS_OK){
+                // TODO: Remove padding + sig from buffer ?
+            }
+            break;
+        case UA_Msg_Chunk_Abort:
+            // TODO: callback for request id with error !
+            // TODO: reset buffer
+        case UA_Msg_Chunk_Unknown:
+        case UA_Msg_Chunk_Invalid:
+            assert(UA_FALSE);
+    }
+
     if(transportMsgBuffer->isFinal != UA_Msg_Chunk_Final){
         // TODO: manage chunks:
         // -store content of msg body only ? (remove padding)
         // + add verification on request id (same for all chunks ?) ?
         status = STATUS_NOK;
     }else{
-        if(status == STATUS_OK){
-            // Retrieve associated pending request
-            pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
-            if(pRequest == UA_NULL){
-                status = STATUS_NOK;
-            }
-        }
 
-        if(status == STATUS_OK){
-            status = SC_DecodeMsgBody(cConnection->instance,
-                                      pRequest->responseType,
-                                      &UA_ServiceFault_EncodeableType,
-                                      &recEncType,
-                                      &encObj);
-        }
-
-        if(status == STATUS_OK){
-            if(pRequest->callback != UA_NULL){
-                pRequest->callback(cConnection,
-                                   encObj,
-                                   recEncType,
-                                   pRequest->callbackData,
-                                   status);
-            }
-        }
     }
 
     return status;
@@ -565,18 +611,18 @@ StatusCode OnTransportEvent_CB(void*           connection,
                     if(cConnection->instance->state == SC_Connection_Connecting_Secure){
                         // Receive Open Secure Channel response
                         retStatus = Receive_OpenSecureChannelResponse(cConnection, msgBuffer);
-                        cConnection->instance->state = SC_Connection_Connected;
+                        if(retStatus == STATUS_OK){
+                            cConnection->instance->state = SC_Connection_Connected;
+                            // TODO: cases in which retStatus != OK should be sent ?
+                            retStatus = cConnection->callback((OpcUa_Connection*) cConnection,
+                                                              cConnection->callbackData,
+                                                              OpcUa_ConnectionEvent_Connect,
+                                                              UA_NULL,
+                                                              retStatus);
+                        }
                     }else{
                         retStatus = STATUS_INVALID_RCV_PARAMETER;
                     }
-
-                    //TODO: retStatus = ??
-                    cConnection->callback((OpcUa_Connection*) cConnection,
-                                          cConnection->callbackData,
-                                          OpcUa_ConnectionEvent_Connect,
-                                          UA_NULL,
-                                          retStatus);
-
                     break;
                 case UA_CloseSecureChannel:
                     if(cConnection->instance->state == SC_Connection_Connected){
@@ -705,7 +751,7 @@ StatusCode SC_Send_Request(SC_ClientConnection* connection,
                                                            responseType,
                                                            timeout,
                                                            0, // Not managed now
-                                                           callback, // No callback, specifc message header used (OPN)
+                                                           callback,
                                                            callbackData);
         if(pRequest != SLinkedList_Add(connection->pendingRequests, requestId, pRequest)){
             status = STATUS_NOK;
