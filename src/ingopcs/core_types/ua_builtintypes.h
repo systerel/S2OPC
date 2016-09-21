@@ -283,7 +283,7 @@ UA_ByteString* ByteString_Create(void);
 StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size);
 StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length);
 StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src);
-StatusCode ByteString_Copy(UA_ByteString* dest, UA_ByteString* src);
+StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src);
 void ByteString_Clear(UA_ByteString* bstring);
 void ByteString_Delete(UA_ByteString* bstring);
 
@@ -295,13 +295,15 @@ uint32_t ByteString_Equal(const UA_ByteString* left,
 
 void String_Initialize(UA_String* string);
 UA_String* String_Create(void);
-
-StatusCode String_CopyFromCString(UA_String* string, char* cString);
-StatusCode String_InitializeFromCString(UA_String* string, char* cString);
-char* String_GetCString(UA_String* string);
+StatusCode String_CopyFromCString(UA_String* string, const char* cString);
+StatusCode String_InitializeFromCString(UA_String* string, const char* cString);
+char* String_GetCString(const UA_String* string); // Copy
+const char* String_GetRawCString(const UA_String* string); // Pointer to string
 
 StatusCode String_AttachFrom(UA_String* dest, UA_String* src);
-StatusCode String_Copy(UA_String* dest, UA_String* src);
+StatusCode String_AttachFromCstring(UA_String* dest, char* src);
+
+StatusCode String_Copy(UA_String* dest, const UA_String* src);
 void String_Clear(UA_String* bstring);
 void String_Delete(UA_String* bstring);
 

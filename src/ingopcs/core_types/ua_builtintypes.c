@@ -152,7 +152,7 @@ StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
     return status;
 }
 
-StatusCode ByteString_Copy(UA_ByteString* dest, UA_ByteString* src){
+StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && dest->characters == NULL &&
        src != NULL && src->length > 0){
@@ -197,8 +197,37 @@ StatusCode String_AttachFrom(UA_String* dest, UA_String* src){
     return ByteString_AttachFrom((UA_ByteString*) dest, (UA_ByteString*) src);
 }
 
-StatusCode String_Copy(UA_String* dest, UA_String* src){
-    return ByteString_Copy((UA_ByteString*) dest, (UA_ByteString*) src);
+StatusCode String_AttachFromCstring(UA_String* dest, char* src){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(dest != NULL && dest->characters == NULL && src != NULL){
+        status = STATUS_OK;
+        if(CHAR_BIT == 8){
+            dest->length = strlen(src);
+            dest->characters = (uint8_t*) src;
+            dest->clearBytes = UA_FALSE; // dest->characters will not be freed on clear
+        }else{
+            assert(UA_FALSE);
+        }
+    }
+    return status;
+}
+
+StatusCode String_Copy(UA_String* dest, const UA_String* src){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(dest != NULL && dest->characters == NULL && src != NULL){
+        // Keep null terminator for C string compatibility
+        status = STATUS_OK;
+        dest->length = src->length;
+        dest->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->length+1);
+        if(dest->characters != NULL){
+            // No need of secure copy, both have same size here
+            memcpy(dest->characters, src->characters, dest->length);
+            dest->characters[dest->length] = '\0';
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+    return status;
 }
 
 void String_Clear(UA_String* string){
@@ -209,27 +238,29 @@ void String_Delete(UA_String* string){
     String_Delete((UA_ByteString*) string);
 }
 
-StatusCode String_CopyFromCString(UA_String* string, char* cString){
+StatusCode String_CopyFromCString(UA_String* string, const char* cString){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     size_t stringLength = 0;
     size_t idx = 0;
     if(string != NULL && string->characters == NULL
        && cString != NULL){
         status = STATUS_OK;
-    }
-    if(status == STATUS_OK){
+
         stringLength = strlen(cString);
         if(stringLength > 0 &&
            stringLength <= INT32_MAX)
         {
+            // length without null terminator
             string->length = stringLength;
-            string->characters = (UA_Byte*) malloc(sizeof(UA_Byte)*stringLength);
+            // keep terminator for compatibility with char* strings
+            string->characters = (UA_Byte*) malloc(sizeof(UA_Byte)*(stringLength+1));
             if(string->characters != NULL){
+                // Keep null terminator for compatibility with c strings !
                 if(CHAR_BIT == 8){
-                    memcpy(string->characters, cString, stringLength);
+                    memcpy(string->characters, cString, stringLength + 1);
                 }else{
                     // On systems for which char is not encoded on 1 byte
-                    for(idx = 0; idx < stringLength; idx++){
+                    for(idx = 0; idx < stringLength + 1; idx++){
                         string->characters[idx] = (uint8_t) cString[idx];
                     }
                 }
@@ -244,7 +275,7 @@ StatusCode String_CopyFromCString(UA_String* string, char* cString){
     return status;
 }
 
-StatusCode String_InitializeFromCString(UA_String* string, char* cString){
+StatusCode String_InitializeFromCString(UA_String* string, const char* cString){
     StatusCode status = STATUS_INVALID_PARAMETERS;
 
     if(string != NULL){
@@ -256,7 +287,7 @@ StatusCode String_InitializeFromCString(UA_String* string, char* cString){
 }
 
 
-char* String_GetCString(UA_String* string){
+char* String_GetCString(const UA_String* string){
     char* cString = NULL;
     int32_t idx = 0;
     if(string != NULL &&
@@ -265,14 +296,28 @@ char* String_GetCString(UA_String* string){
         cString = (char*) malloc(sizeof(char)* (string->length + 1));
         if(cString != NULL){
             if(CHAR_BIT == 8){
-                memcpy(cString, string->characters, string->length);
+                memcpy(cString, string->characters, string->length + 1);
             }else{
                 // On systems for which char is not encoded on 1 byte
-                for(idx = 0; idx < string->length; idx++){
+                for(idx = 0; idx < string->length + 1; idx++){
                     cString[idx] = (char) string->characters[idx];
                 }
             }
-            cString[string->length] = '\0';
+        }
+    }
+    return cString;
+}
+
+const char* String_GetRawCString(const UA_String* string){
+    char* cString = NULL;
+    if(string != NULL &&
+       string->length > 0)
+    {
+        if(CHAR_BIT == 8){
+            cString = (char*) string->characters;
+            assert(string->characters[string->length] == '\0');
+        }else{
+            assert(UA_FALSE);
         }
     }
     return cString;
