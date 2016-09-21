@@ -280,10 +280,16 @@ uint32_t GetAsymmSignatureSize(UA_String* securityPolicyUri,
     return signatureSize;
 }
 
-StatusCode Get_Symmetric_Algorithm_Blocks_Sizes(UA_String* securityPolicyUri,
-                                                uint32_t*  cipherTextBlockSize,
-                                                uint32_t*  plainTextBlockSize){
-    StatusCode status = STATUS_NOK;
+StatusCode GetSymmBlocksSizes(UA_String* securityPolicyUri,
+                              uint32_t*  cipherTextBlockSize,
+                              uint32_t*  plainTextBlockSize){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+
+    if(securityPolicyUri != UA_NULL &&
+       cipherTextBlockSize != UA_NULL &&
+       plainTextBlockSize != UA_NULL){
+        status = STATUS_OK;
+    }
 
     if(String_Equal(securityPolicyUri, UA_String_Security_Policy_None) != UA_FALSE)
     {
@@ -307,7 +313,7 @@ StatusCode Get_Symmetric_Algorithm_Blocks_Sizes(UA_String* securityPolicyUri,
    return status;
 }
 
-uint32_t Get_Symmetric_Signature_Size(UA_String* securityPolicyUri){
+uint32_t GetSymmSignatureSize(UA_String* securityPolicyUri){
     uint32_t signatureSize = 0;
     if(String_Equal(securityPolicyUri, UA_String_Security_Policy_None) != UA_FALSE)
     {
@@ -491,14 +497,14 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                 status = STATUS_NOK;
             }
         }else{
-            status = Get_Symmetric_Algorithm_Blocks_Sizes(scConnection->currentSecuPolicy,
-                                                          &cipherBlockSize,
-                                                          &plainBlockSize);
+            status = GetSymmBlocksSizes(scConnection->currentSecuPolicy,
+                                        &cipherBlockSize,
+                                        &plainBlockSize);
              if(status == STATUS_OK){
                  scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
                                                                    cipherBlockSize,
                                                                    plainBlockSize,
-                                                                   Get_Symmetric_Signature_Size
+                                                                   GetSymmSignatureSize
                                                                     (scConnection->currentSecuPolicy));
              }
         }
@@ -824,7 +830,6 @@ StatusCode EncodePadding(SC_Connection* scConnection,
     StatusCode status = STATUS_OK;
     uint32_t plainBlockSize = 0;
     uint32_t cipherBlockSize = 0;
-    uint32_t encryptKeySize = 0;
     *hasPadding = 1; // True
 
     if(symmetricAlgo == UA_FALSE){
@@ -859,16 +864,10 @@ StatusCode EncodePadding(SC_Connection* scConnection,
            scConnection->currentSecuKeySets.receiverKeySet == UA_NULL){
             status = STATUS_INVALID_STATE;
         }else{
-            *signatureSize = Get_Symmetric_Signature_Size(scConnection->currentSecuPolicy);
-            // Here public key is the signing key
-            encryptKeySize =
-             PrivateKey_GetSize
-              (scConnection->currentSecuKeySets.senderKeySet->encryptKey);
-            status = GetAsymmBlocksSizes
-                      (scConnection->currentSecuPolicy,
-                       encryptKeySize,
-                       &cipherBlockSize,
-                       &plainBlockSize);
+            *signatureSize = GetSymmSignatureSize(scConnection->currentSecuPolicy);
+            status = GetSymmBlocksSizes(scConnection->currentSecuPolicy,
+                                        &cipherBlockSize,
+                                        &plainBlockSize);
         }
     }
 
@@ -890,8 +889,10 @@ StatusCode EncodePadding(SC_Connection* scConnection,
             status = Buffer_Write(msgBuffer->buffers, paddingBytes, *realPaddingLength);
         }
 
-        // Extra-padding necessary if
-        if(status == STATUS_OK && encryptKeySize > 256){
+        // Extra-padding necessary if padding could be greater 256 bytes
+        // (1 byte for padding size field + 255 bytes of padding).
+        // => padding max value is plainBlockSize regarding the formula of padding size
+        if(status == STATUS_OK && plainBlockSize > 256){
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
             UA_Byte extraPadding = 0x00FF & *realPaddingLength;
@@ -1149,6 +1150,15 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
                                      symmetricAlgo,
                                      signatureSize);
 
+            if(symmetricAlgo != UA_FALSE){
+                status = CryptoProvider_SymmetricVerify(scConnection->currentCryptoProvider,
+                                                        scConnection->sendingBuffer->buffers->data,
+                                                        scConnection->sendingBuffer->buffers->length - signatureSize,
+                                                        scConnection->currentSecuKeySets.senderKeySet->signKey,
+                                                        &scConnection->sendingBuffer->buffers->data[scConnection->sendingBuffer->buffers->length - signatureSize],
+                                                        signatureSize);
+            }
+
         }
 
         //// Check sender certificate size is not bigger than maximum size to be sent
@@ -1165,17 +1175,19 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
                                                    signatureSize);
         }
 
-        if(status == STATUS_OK && toEncrypt == UA_FALSE){
-            // No encryption necessary but we need to attach buffer as transport buffer (done during encryption otherwise)
-            status = MsgBuffer_CopyBuffer(scConnection->transportConnection->outputMsgBuffer,
-                                          scConnection->sendingBuffer);
-        }else{
-            // TODO: use detach / attach to control references on the transport msg buffer ?
-            status = EncryptMsg(scConnection,
-                                msgBuffer,
-                                symmetricAlgo,
-                                encryptedLength,
-                                scConnection->transportConnection->outputMsgBuffer);
+        if(status == STATUS_OK){
+            if(toEncrypt == UA_FALSE){
+                // No encryption necessary but we need to attach buffer as transport buffer (done during encryption otherwise)
+                status = MsgBuffer_CopyBuffer(scConnection->transportConnection->outputMsgBuffer,
+                                              scConnection->sendingBuffer);
+            }else{
+                // TODO: use detach / attach to control references on the transport msg buffer ?
+                status = EncryptMsg(scConnection,
+                                    msgBuffer,
+                                    symmetricAlgo,
+                                    encryptedLength,
+                                    scConnection->transportConnection->outputMsgBuffer);
+            }
         }
 
         if(status == STATUS_OK){
@@ -1630,7 +1642,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                 receiverKeySet = scConnection->precSecuKeySets.receiverKeySet;
             }
 
-            signatureSize = Get_Symmetric_Signature_Size(securityPolicy);
+            signatureSize = GetSymmSignatureSize(securityPolicy);
             signaturePosition = receptionBuffer->length - signatureSize;
 
             status = CryptoProvider_SymmetricVerify(cryptoProvider,
