@@ -818,7 +818,7 @@ StatusCode EncodePadding(SC_Connection* scConnection,
                           UA_MsgBuffer* msgBuffer,
                           uint8_t       symmetricAlgo,
                           uint8_t*      hasPadding,
-                          uint8_t*      paddingSize,
+                          uint16_t*     realPaddingLength, // >= paddingSizeField
                           uint8_t*      hasExtraPadding,
                           uint32_t*     signatureSize)
 {
@@ -874,29 +874,29 @@ StatusCode EncodePadding(SC_Connection* scConnection,
     }
 
     if(status == STATUS_OK){
-        uint16_t padding = GetPaddingSize
-                            (msgBuffer->buffers->length -
-                              msgBuffer->sequenceNumberPosition +
-                              UA_SECURE_MESSAGE_SEQUENCE_LENGTH,
-                             plainBlockSize,
-                             *signatureSize);
+        uint8_t paddingSizeField = 0;
+        *realPaddingLength = GetPaddingSize(msgBuffer->buffers->length -
+                                              msgBuffer->sequenceNumberPosition +
+                                              UA_SECURE_MESSAGE_SEQUENCE_LENGTH,
+                                            plainBlockSize,
+                                            *signatureSize);
         //Little endian conversion of padding:
-        EncodeDecode_UInt16(&padding);
-        status = Buffer_Write(msgBuffer->buffers, (UA_Byte*) &padding, 1);
-        *paddingSize = 0xFF & padding;
+        EncodeDecode_UInt16(realPaddingLength);
+        status = Buffer_Write(msgBuffer->buffers, (UA_Byte*) realPaddingLength, 1);
+        paddingSizeField = 0xFF & *realPaddingLength;
 
         if(status == STATUS_OK){
             // The value of each byte of the padding is equal to paddingSize:
-            UA_Byte paddingBytes[*paddingSize];
-            memset(paddingBytes, *paddingSize, *paddingSize);
-            status = Buffer_Write(msgBuffer->buffers, paddingBytes, *paddingSize);
+            UA_Byte paddingBytes[*realPaddingLength];
+            memset(paddingBytes, paddingSizeField, *realPaddingLength);
+            status = Buffer_Write(msgBuffer->buffers, paddingBytes, *realPaddingLength);
         }
 
         // Extra-padding necessary if
         if(status == STATUS_OK && encryptKeySize > 256){
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
-            UA_Byte extraPadding = 0x00FF & padding;
+            UA_Byte extraPadding = 0x00FF & *realPaddingLength;
             Buffer_Write(msgBuffer->buffers, &extraPadding, 1);
         }
     }
@@ -1084,7 +1084,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
     uint8_t toSign = 1; // True
     uint8_t symmetricAlgo = 1; // True;
     uint8_t hasPadding = 0;
-    uint8_t paddingSize = 0;
+    uint16_t paddingLength = 0;
     uint8_t hasExtraPadding = 0;
     uint32_t signatureSize = 0;
     uint32_t encryptedLength = 0;
@@ -1114,7 +1114,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
                                    msgBuffer,
                                    symmetricAlgo,
                                    &hasPadding,
-                                   &paddingSize,
+                                   &paddingLength,
                                    &hasExtraPadding,
                                    &signatureSize);
         }
@@ -1162,7 +1162,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
                                                    msgBuffer->buffers->max_size,
                                                    scConnection->currentSecuPolicy,
                                                    hasPadding,
-                                                   paddingSize,
+                                                   paddingLength,
                                                    hasExtraPadding,
                                                    signatureSize);
         }
