@@ -279,6 +279,8 @@ StatusCode OnSocketEvent_CB (Socket        socket,
                              void*         callbackData,
                              uint16_t      usPortNumber,
                              unsigned char bIsSSL){
+    (void) usPortNumber;
+    (void) bIsSSL;
     StatusCode status = STATUS_NOK;
     TCP_UA_Connection* connection = (TCP_UA_Connection*) callbackData;
     switch(socketEvent){
