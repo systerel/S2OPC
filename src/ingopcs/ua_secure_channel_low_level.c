@@ -88,9 +88,9 @@ void SC_Delete (SC_Connection* scConnection){
 }
 
 StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
-                                            UA_ByteString* runningAppCertificate,
-                                            PrivateKey*    runningAppPrivateKey,
-                                            UA_ByteString* otherAppCertificate){
+                                        UA_ByteString* runningAppCertificate,
+                                        PrivateKey*    runningAppPrivateKey,
+                                        UA_ByteString* otherAppCertificate){
     StatusCode status = STATUS_OK;
     if(scConnection->runningAppCertificate == UA_NULL &&
        scConnection->runningAppPrivateKey == UA_NULL &&
@@ -169,59 +169,80 @@ StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
     return status;
 }
 
-// Retrieve public key from certificate and set it in internal properties
-StatusCode Retrieve_Public_Key_From_Cert(SC_Connection*  scConnection,
-                                         uint32_t        runningApp,
-                                         UA_ByteString** publicKey)
+StatusCode RetrievePublicKeyFromCert(CryptoProvider* cryptoProvider,
+                                     UA_ByteString*  certificate,
+                                     UA_ByteString** publicKey)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ByteString* certificate = UA_NULL;
     uint32_t publicKeyLength = 0;
-
-    if(scConnection != UA_NULL && *publicKey == UA_NULL){
-        status = STATUS_OK;
-    }
-
-    if(runningApp == UA_FALSE)
+    if(cryptoProvider != UA_NULL &&
+       publicKey != UA_NULL &&
+       certificate != UA_NULL)
     {
-        if(scConnection->otherAppPublicKey == UA_NULL){
-            certificate = scConnection->otherAppCertificate;
-        }else{
-            *publicKey = scConnection->otherAppPublicKey;
-        }
-    }else{
-        if(scConnection->runningAppPublicKey == UA_NULL){
-            certificate = scConnection->runningAppCertificate;
-        }else{
-            *publicKey = scConnection->runningAppPublicKey;
-        }
-    }
-
-    if(*publicKey == UA_NULL && certificate != UA_NULL)
-    {
-        status = CryptoProvider_GetPublicKeyLengthFromCert(scConnection->currentCryptoProvider,
-                                                  certificate,
-                                                  &publicKeyLength);
+        status = CryptoProvider_GetPublicKeyLengthFromCert(cryptoProvider,
+                                                           certificate,
+                                                           &publicKeyLength);
         if(status == STATUS_OK){
             *publicKey = ByteString_CreateFixedSize(publicKeyLength);
         }
 
         if(*publicKey != UA_NULL){
-            status = CryptoProvider_GetPublicKeyFromCert(scConnection->currentCryptoProvider,
-                                                          certificate,
-                                                          *publicKey);
+            status = CryptoProvider_GetPublicKeyFromCert(cryptoProvider,
+                                                         certificate,
+                                                         *publicKey);
         }else{
             status = STATUS_NOK;
         }
 
-        if(status == STATUS_OK && runningApp == UA_FALSE){
-            scConnection->otherAppPublicKey = *publicKey;
-        }else if (status == STATUS_OK && runningApp != UA_FALSE){
-            scConnection->runningAppPublicKey = *publicKey;
-        }
-
     }else if(*publicKey == UA_NULL){
         status = STATUS_NOK;
+    }
+
+    return status;
+}
+
+// Retrieve public key from certificate and set it in internal properties
+StatusCode SC_RetrieveAndSetPublicKeyFromCert(SC_Connection*  scConnection,
+                                              uint32_t        runningApp,
+                                              UA_ByteString** publicKey)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    UA_ByteString* certificate = UA_NULL;
+
+    if(scConnection != UA_NULL &&
+       publicKey != UA_NULL && *publicKey == UA_NULL)
+    {
+        if(runningApp == UA_FALSE)
+        {
+            if(scConnection->otherAppPublicKey == UA_NULL){
+                certificate = scConnection->otherAppCertificate;
+            }else{
+                *publicKey = scConnection->otherAppPublicKey;
+            }
+        }else{
+            if(scConnection->runningAppPublicKey == UA_NULL){
+                certificate = scConnection->runningAppCertificate;
+            }else{
+                *publicKey = scConnection->runningAppPublicKey;
+            }
+        }
+
+        if(*publicKey == UA_NULL){
+            // Key never extracted from cert. before:
+            status = RetrievePublicKeyFromCert(scConnection->currentCryptoProvider,
+                                               certificate,
+                                               publicKey);
+        }else{
+            status = STATUS_OK;
+        }
+    }
+
+    if(status == STATUS_OK){
+        if(runningApp == UA_FALSE){
+            scConnection->otherAppPublicKey = *publicKey;
+        }else if(runningApp != UA_FALSE){
+            scConnection->runningAppPublicKey = *publicKey;
+        }
     }
 
     return status;
@@ -370,7 +391,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
             UA_ByteString* otherAppPublicKey = UA_NULL;
 
             // Retrieve other app public key from certificate
-            status = Retrieve_Public_Key_From_Cert(scConnection, UA_FALSE, &otherAppPublicKey);
+            status = SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &otherAppPublicKey);
 
             // Retrieve cipher length
             if(status == STATUS_OK){
@@ -475,7 +496,7 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
         if(isSymmetric == UA_FALSE){
             uint32_t publicKeyModulusLength = 0;
             UA_ByteString* publicKey = UA_NULL;
-            Retrieve_Public_Key_From_Cert(scConnection, UA_FALSE, &publicKey);
+            SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &publicKey);
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
                                                                    publicKey,
                                                                    &publicKeyModulusLength);
@@ -577,28 +598,29 @@ StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
     return status;
 }
 
-StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
-                                        UA_String*     securityPolicy,
-                                        UA_ByteString* senderCertificate,
-                                        UA_ByteString* receiverCertificate){
+StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
+                                     UA_MsgBuffer*          msgBuffer,
+                                     UA_MessageSecurityMode secuMode,
+                                     UA_String*             securityPolicy,
+                                     UA_ByteString*         senderCertificate,
+                                     UA_ByteString*         receiverCertificate){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toEncrypt = 1; // True
     uint32_t toSign = 1; // True
-    if(scConnection != UA_NULL && scConnection->sendingBuffer != UA_NULL &&
-       //cryptoProvider != UA_NULL &&
+    if(cryptoProvider != UA_NULL && msgBuffer != UA_NULL &&
        securityPolicy != UA_NULL &&
        senderCertificate != UA_NULL &&
        receiverCertificate != UA_NULL)
     {
-        toEncrypt = IsMsgEncrypted(scConnection->currentSecuMode, scConnection->sendingBuffer);
-        toSign = IsMsgSigned(scConnection->currentSecuMode);
+        toEncrypt = IsMsgEncrypted(secuMode, msgBuffer);
+        toSign = IsMsgSigned(secuMode);
         status = STATUS_OK;
     }
 
     // Security Policy:
     if(status == STATUS_OK){
         if(securityPolicy->length>0){
-            status = String_Write(scConnection->sendingBuffer, securityPolicy);
+            status = String_Write(msgBuffer, securityPolicy);
         }else{
             // Null security policy is invalid parameter since unspecified
             status = STATUS_INVALID_PARAMETERS;
@@ -607,14 +629,14 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
     // Sender Certificate:
     if(status == STATUS_OK){
         if(toSign != UA_FALSE && senderCertificate->length>0){ // Field shall be null if message not signed
-            status = String_Write(scConnection->sendingBuffer, senderCertificate);
+            status = String_Write(msgBuffer, senderCertificate);
         }else{
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
-            // status = Write_Int32(scConnection->sendingBuffer, 0);
+            // status = Write_Int32(msgBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
             const int32_t minusOne = -1;
-            status = Int32_Write(scConnection->sendingBuffer, &minusOne);
+            status = Int32_Write(msgBuffer, &minusOne);
             // NULL string: nothing to write
         }
     }
@@ -625,13 +647,13 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
         UA_ByteString* recCertThumbprint = UA_NULL;
         if(toEncrypt != UA_FALSE){
             int32_t thumbprintLength = 0;
-            status = CryptoProvider_GetCertThumbprintLength(scConnection->currentCryptoProvider,
+            status = CryptoProvider_GetCertThumbprintLength(cryptoProvider,
                                                             receiverCertificate,
                                                             &thumbprintLength);
             if(status == STATUS_OK){
                 recCertThumbprint = ByteString_CreateFixedSize(thumbprintLength);
                 if(recCertThumbprint != UA_NULL){
-                    status = CryptoProvider_GetCertThumbprint(scConnection->currentCryptoProvider,
+                    status = CryptoProvider_GetCertThumbprint(cryptoProvider,
                                                               receiverCertificate,
                                                               recCertThumbprint);
                 }else{
@@ -639,20 +661,38 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
                 }
             }
 
-            status = String_Write(scConnection->sendingBuffer, recCertThumbprint);
+            status = String_Write(msgBuffer, recCertThumbprint);
         }else{
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
-            //status = Write_Int32(scConnection->sendingBuffer, 0);
+            //status = Write_Int32(msgBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
             const int32_t minusOne = -1;
-            status = Int32_Write(scConnection->sendingBuffer, &minusOne);
+            status = Int32_Write(msgBuffer, &minusOne);
             // NULL string: nothing to write
         }
 
         ByteString_Clear(recCertThumbprint);
     }else{
         status = STATUS_NOK;
+    }
+
+    return status;
+}
+
+StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
+                                        UA_String*     securityPolicy,
+                                        UA_ByteString* senderCertificate,
+                                        UA_ByteString* receiverCertificate){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(scConnection != UA_NULL)
+    {
+        status = EncodeAsymmSecurityHeader(scConnection->currentCryptoProvider,
+                                           scConnection->sendingBuffer,
+                                           scConnection->currentSecuMode,
+                                           securityPolicy,
+                                           senderCertificate,
+                                           receiverCertificate);
     }
 
     return status;
@@ -841,7 +881,7 @@ StatusCode EncodePadding(SC_Connection* scConnection,
 
             uint32_t publicKeyModulusLength = 0;
             UA_ByteString* publicKey = UA_NULL;
-            Retrieve_Public_Key_From_Cert(scConnection, UA_FALSE, &publicKey);
+            SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &publicKey);
 
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
                                                                    publicKey,
@@ -904,9 +944,9 @@ StatusCode EncodePadding(SC_Connection* scConnection,
 }
 
 StatusCode EncodeSignature(SC_Connection* scConnection,
-                            UA_MsgBuffer* msgBuffer,
-                            uint8_t       symmetricAlgo,
-                            uint32_t      signatureSize)
+                           UA_MsgBuffer* msgBuffer,
+                           uint8_t       symmetricAlgo,
+                           uint32_t      signatureSize)
 {
     StatusCode status = STATUS_OK;
     if(symmetricAlgo == UA_FALSE){
@@ -989,7 +1029,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
 
             if(status == STATUS_OK){
                 // Retrieve other app public key from certificate
-                status = Retrieve_Public_Key_From_Cert(scConnection, UA_FALSE, &otherAppPublicKey);
+                status = SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &otherAppPublicKey);
             }
 
             // Check size of encrypted data array
@@ -1615,7 +1655,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
         if(isSymmetric == UA_FALSE){
             uint32_t publicKeyModulusLength = 0;
             UA_ByteString* publicKey = UA_NULL;
-            Retrieve_Public_Key_From_Cert(scConnection, UA_FALSE, &publicKey);
+            SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &publicKey);
 
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(cryptoProvider,
                                                                    publicKey,
