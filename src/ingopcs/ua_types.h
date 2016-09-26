@@ -38,7 +38,6 @@
 #include <ua_msg_buffer.h>
 #include <ua_builtintypes.h>
 #include <ua_encodeable.h>
-//#include <opcua_builtintypes.h>
 
 OPCUA_BEGIN_EXTERN_C
 

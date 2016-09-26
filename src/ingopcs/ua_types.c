@@ -21116,6 +21116,8 @@ void UA_Initialize_EnumeratedType(int32_t* enumerationValue)
 void UA_Initialize_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
                          UA_EncodeableObject_PfnInitialize* initFct)
 {
+    (void) initFct;
+    (void) sizeOfElt;
     *noOfElts = 0;
     *eltsArray = UA_NULL;
 }

@@ -35,9 +35,6 @@
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
-/* stack */
-//#include <opcua_stream.h>
-
 /* types */
 #include <ua_builtintypes.h>
 
