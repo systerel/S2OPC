@@ -6,9 +6,11 @@
  */
 
 #include "stub_server.h"
+#include <stdint.h>
 
 // indicates if a connection was closed (after being opened)
 int connectionClosed = 0;
+int connected = 0;
 
 OpcUa_Handle StubServer_g_pPortLayerHandle = OpcUa_Null;
 
@@ -20,12 +22,19 @@ OpcUa_StatusCode StubServer_EndpointEvent_Callback(OpcUa_Endpoint          a_hEn
                                                    OpcUa_ByteString       *a_pbsClientCertificate,
                                                    OpcUa_String           *a_pSecurityPolicy,
                                                    OpcUa_UInt16            a_uSecurityMode){
+    (void) a_hEndpoint;
+    (void) a_pCallbackData;
+    (void) a_uSecureChannelId;
+    (void) a_pbsClientCertificate;
+    (void) a_pSecurityPolicy;
+    (void) a_uSecurityMode;
     printf ("\nEndpoint CALLBACK called with event %d and status %x !\n", a_eEvent, a_uStatus);
     if (a_eEvent == eOpcUa_Endpoint_Event_SecureChannelClosed){
     	connectionClosed = 1;
     }
     else if (a_eEvent == eOpcUa_Endpoint_Event_SecureChannelOpened){
     	// By pass certificate validation for secure channel in any result case
+        connected = 1;
     	//return OpcUa_BadContinue;
     	return 0;
     }
@@ -59,6 +68,13 @@ void OpcUa_ProxyStubConfiguration_InitializeDefault(OpcUa_ProxyStubConfiguration
 }
 
 int main(void){
+
+    // Sleep timeout in milliseconds
+    const uint32_t sleepTimeout = 500;
+    // Loop timeout in milliseconds
+    const uint32_t loopTimeout = 5000;
+    // Counter to stop waiting responses after 5 seconds
+    uint32_t loopCpt = 0;
 
 	// Init proxy stub configuration with default values
 	OpcUa_ProxyStubConfiguration_InitializeDefault(&OpcUa_ProxyStub_g_Configuration);
@@ -183,20 +199,29 @@ int main(void){
     printf ("%d\n", uStatus);
     OpcUa_GotoErrorIfBad(uStatus);
 
-    while (connectionClosed == 0 && OpcUa_IsGood(uStatus))
+    while (connectionClosed == 0 && OpcUa_IsGood(uStatus) && loopCpt * sleepTimeout <= loopTimeout)
     {
+        loopCpt++;
 #if OPCUA_MULTITHREADED
     	// just wait for callback
-    	OpcUa_Thread_Sleep (500);
+    	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve connections / messages until connection is closed by a client
-    	uStatus = OpcUa_SocketManager_Loop(OpcUa_Null, (OpcUa_UInt32)10, OpcUa_True);
+    	uStatus = OpcUa_SocketManager_Loop(OpcUa_Null, sleepTimeout, OpcUa_True);
 #endif //OPCUA_MULTITHREADED
 
     }
+    loopCpt = 0;
+    if(connected == 0){
+        uStatus = OpcUa_Bad;
+    }
+    OpcUa_GotoErrorIfBad(uStatus);
 
     OpcUa_ReturnStatusCode;
     OpcUa_BeginErrorHandling;
-    printf ("Error status: %d", uStatus);
+    printf ("Error status: %d\n", uStatus);
+    if(uStatus != 0){
+        return -1;
+    }
     OpcUa_FinishErrorHandling;
 }

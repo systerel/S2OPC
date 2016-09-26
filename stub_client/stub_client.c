@@ -11,6 +11,7 @@
 int noEvent = 1;
 int noResp = 1;
 int disconnect = 0;
+int connected = 0;
 
 OpcUa_Handle StubClient_g_pPortLayerHandle = OpcUa_Null;
 
@@ -19,8 +20,11 @@ OpcUa_StatusCode StubClient_ConnectionEvent_Callback(OpcUa_Channel              
 													 OpcUa_Channel_Event             eEvent,
 													 OpcUa_StatusCode                uStatus){
 													 //OpcUa_Channel_SecurityToken*    pSecurityToken){
-	printf ("\nConnection event: channel event=%d and status=%x\n", eEvent, uStatus);
+    (void) pCallbackData;
+    (void) hChannel;
+    printf ("\nConnection event: channel event=%d and status=%x\n", eEvent, uStatus);
 	if (uStatus == OpcUa_Good){
+	    connected = 1;
 		noEvent = 0;
 	}
 	if (eEvent == eOpcUa_Channel_Event_Disconnected){
@@ -34,7 +38,10 @@ OpcUa_StatusCode StubClient_ResponseEvent_Callback(OpcUa_Channel         hChanne
 												   OpcUa_EncodeableType* pResponseType,
 												   OpcUa_Void*           pCallbackData,
 												   OpcUa_StatusCode      uStatus){
-	printf ("\nResponse event\n");
+    (void) pCallbackData;
+    (void) hChannel;
+    (void) uStatus;
+    printf ("\nResponse event\n");
 	noResp = 0;
 
     /* check for fault */
@@ -89,6 +96,12 @@ void OpcUa_ProxyStubConfiguration_InitializeDefault(OpcUa_ProxyStubConfiguration
 
 
 int main(void){
+    // Sleep timeout in milliseconds
+    const uint32_t sleepTimeout = 500;
+    // Loop timeout in milliseconds
+    const uint32_t loopTimeout = 5000;
+    // Counter to stop waiting responses after 5 seconds
+    uint32_t loopCpt = 0;
 
 	// Init proxy stub configuration with default values
 	OpcUa_ProxyStubConfiguration_InitializeDefault(&OpcUa_ProxyStub_g_Configuration);
@@ -222,22 +235,25 @@ int main(void){
     // Empty callback data
     StubClient_CallbackData Callback_Data_Get;
 
-    while (noEvent)
+    while (noEvent && loopCpt * sleepTimeout <= loopTimeout)
     {
+        loopCpt++;
 #if OPCUA_MULTITHREADED
     	// just wait for callback called
-    	OpcUa_Thread_Sleep (500);
+    	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
     	uStatus = OpcUa_SocketManager_Loop (OpcUa_Null, // global socket manager
-    				                        1000,       // 1 second timeout
+    				                        sleepTimeout,
 											OpcUa_True);
         printf ("ServerLoop status: %d\n", uStatus);
         OpcUa_GotoErrorIfBad(uStatus);
 #endif //OPCUA_MULTITHREADED
     }
+    loopCpt = 0;
 
-    if (disconnect){
+    if (disconnect != 0 || connected == 0){
+        uStatus = STATUS_NOK;
     	goto Error;
     }
 
@@ -256,22 +272,25 @@ int main(void){
                                              StubClient_ResponseEvent_Callback, // response call back
                                              &Callback_Data_Get); // call back data
 
-    while (noResp)
+    while (noResp && loopCpt * sleepTimeout <= loopTimeout)
     {
+        loopCpt++;
 #if OPCUA_MULTITHREADED
     	// just wait for callback
-    	OpcUa_Thread_Sleep (500);
+    	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
     	uStatus = OpcUa_P_SocketManager_ServeLoop (OpcUa_Null, // global socket manager
-    				                               1000,       // 1 second timeout
+    				                               sleepTimeout,
 												   OpcUa_True);
         printf ("ServerLoop status: %d\n", uStatus);
         OpcUa_GotoErrorIfBad(uStatus);
 #endif //OPCUA_MULTITHREADED
     }
+    loopCpt = 0;
 
-    if (disconnect){
+    if (disconnect != 0 || noResp != 0){
+        uStatus = STATUS_NOK;
     	goto Error;
     }
 
@@ -295,5 +314,8 @@ int main(void){
     OpcUa_ReturnStatusCode;
     OpcUa_BeginErrorHandling;
     printf ("Error status: %d\n", uStatus);
+    if(uStatus != 0){
+        return -1;
+    }
     OpcUa_FinishErrorHandling;
 }
