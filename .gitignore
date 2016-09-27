@@ -1,2 +1,6 @@
 .cproject
+.project
 .settings/
+.*.swp
+build/
+out/
