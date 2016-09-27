@@ -277,7 +277,8 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
     UA_OpenSecureChannelResponse* encObj = UA_NULL;
     UA_EncodeableType* receivedType = UA_NULL;
 
-    status = SC_DecodeMsgBody(cConnection->instance,
+    status = SC_DecodeMsgBody(cConnection->instance->receptionBuffers,
+                              cConnection->instance->receptionBuffers->nsTable,
                               pRequest->responseType,
                               UA_NULL,
                               &receivedType,
@@ -422,7 +423,11 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                    UA_MsgBuffer*        transportMsgBuffer)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint8_t  abortReqPresence = 0;
+    uint32_t abortedRequestId = 0;
+    StatusCode abortReqStatus = STATUS_NOK;
     uint32_t requestId = 0;
+    UA_String* reason = UA_NULL;
     PendingRequest* pRequest = UA_NULL;
     UA_EncodeableType* recEncType = UA_NULL;
     void* encObj = UA_NULL;
@@ -435,82 +440,89 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                          &requestId);
     }
 
-    switch(transportMsgBuffer->isFinal){
-        case UA_Msg_Chunk_Final:
-            // Treat case with only 1 chunk for response
-            if(cConnection->instance->receptionBuffers->nbChunks == 1){
-                if(status == STATUS_OK){
-                        // Retrieve associated pending request
-                        pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
-                        if(pRequest == UA_NULL){
-                            status = STATUS_NOK;
-                        }
-                    }
+    if(status == STATUS_OK){
+        status = SC_CheckAbortChunk(cConnection->instance->receptionBuffers,
+                                    &reason);
+        // Decoded request id to be aborted
+        abortReqPresence = 1;
+        abortedRequestId = requestId;
 
-                    if(status == STATUS_OK){
-                        status = SC_DecodeMsgBody(cConnection->instance,
-                                                  pRequest->responseType,
-                                                  &UA_ServiceFault_EncodeableType,
-                                                  &recEncType,
-                                                  &encObj);
-                    }
-
-                    if(status == STATUS_OK){
-                        if(pRequest->callback != UA_NULL){
-                            pRequest->callback(cConnection,
-                                               encObj,
-                                               recEncType,
-                                               pRequest->callbackData,
-                                               status);
-                        }
-                    }
-            }else{
-                // TODO: store all buffers in 1 to could decode msg body !
+        if(status != STATUS_OK){
+            abortReqStatus = status;
+            //TODO: report (trace) and call appropriate callback ?
+            if(reason != UA_NULL){
+                String_Clear(reason);
             }
-            // TODO: reset buffer
-            break;
-        case UA_Msg_Chunk_Intermediate:
-            assert(cConnection->instance->receptionBuffers->nbChunks >= 1);
-            if(cConnection->instance->receptionBuffers->nbChunks == 1){
-                if(status == STATUS_OK){
-                    // Retrieve associated pending request
-                    pRequest = SLinkedList_Find(cConnection->pendingRequests, requestId);
-                }
-                if(pRequest == UA_NULL){
-                    // Error: unknown request id !
-                    // TODO: trace
-                    status = STATUS_NOK;
-                }else{
-                    cConnection->instance->receptionBuffers->receivedReqId = requestId;
-                }
-            }else{
-                if(cConnection->instance->receptionBuffers->receivedReqId != requestId){
-                    // Error: unexpected request Id
-                    // TODO: error on precedent service or ignore new request (if invalid only ?) ?
-                    status = STATUS_NOK;
-                }else{
-
-                }
-            }
-            if(status == STATUS_OK){
-                // TODO: Remove padding + sig from buffer ?
-            }
-            break;
-        case UA_Msg_Chunk_Abort:
-            // TODO: callback for request id with error !
-            // TODO: reset buffer
-        case UA_Msg_Chunk_Unknown:
-        case UA_Msg_Chunk_Invalid:
-            assert(UA_FALSE);
+        }
     }
 
-    if(transportMsgBuffer->isFinal != UA_Msg_Chunk_Final){
-        // TODO: manage chunks:
-        // -store content of msg body only ? (remove padding)
-        // + add verification on request id (same for all chunks ?) ?
-        status = STATUS_NOK;
-    }else{
+    if(status == STATUS_OK){
+        status = SC_CheckPrecChunk(cConnection->instance->receptionBuffers,
+                                   requestId,
+                                   &abortReqPresence,
+                                   &abortedRequestId);
+    }
 
+    if(abortReqPresence != UA_FALSE){
+        // Note: status is OK if from a prec chunk or NOK if current chunk is abort chunk
+        // Retrieve request id to be aborted and call callback if any
+        pRequest = SLinkedList_Remove(cConnection->pendingRequests, abortedRequestId);
+        if(pRequest != UA_NULL){
+            if(pRequest->callback != UA_NULL){
+                pRequest->callback(cConnection,
+                                   encObj,
+                                   recEncType,
+                                   pRequest->callbackData,
+                                   abortReqStatus);
+            }
+        }
+    }
+
+    if(status == STATUS_OK){
+        if(cConnection->instance->receptionBuffers->isFinal == UA_Msg_Chunk_Final){
+            // Retrieve associated pending request for current chunk which is final
+            pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
+            if(pRequest == UA_NULL){
+                status = STATUS_NOK;
+            }
+        }else if(cConnection->instance->receptionBuffers->isFinal == UA_Msg_Chunk_Intermediate &&
+                cConnection->instance->receptionBuffers->nbChunks == 1){
+            // When it is the first chunk and it is intermediate we have to check request id is valid
+            //  otherwise request id already validated before and not pending request not necessary
+            pRequest = SLinkedList_Find(cConnection->pendingRequests, requestId);
+            if(pRequest == UA_NULL){
+                // Error: unknown request id !
+                // TODO: trace + callback for audit ?
+                MsgBuffers_Reset(cConnection->instance->receptionBuffers);
+                status = STATUS_NOK;
+            }
+        }
+    }
+
+    if(status == STATUS_OK){
+        if(pRequest == UA_NULL){
+            status = SC_DecodeChunk(cConnection->instance->receptionBuffers,
+                                    requestId,
+                                    UA_NULL,
+                                    &UA_ServiceFault_EncodeableType,
+                                    &recEncType,
+                                    &encObj);
+        }else{
+            status = SC_DecodeChunk(cConnection->instance->receptionBuffers,
+                                    requestId,
+                                    pRequest->responseType,
+                                    &UA_ServiceFault_EncodeableType,
+                                    &recEncType,
+                                    &encObj);
+            // TODO: check status before ?
+            if(pRequest->callback != UA_NULL){
+                pRequest->callback(cConnection,
+                                   encObj,
+                                   recEncType,
+                                   pRequest->callbackData,
+                                   status);
+            }
+        }
     }
 
     return status;

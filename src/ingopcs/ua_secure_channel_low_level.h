@@ -125,9 +125,10 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                          uint32_t       isSymmetric,
                          uint32_t       isPrecCryptoData);
 
-StatusCode SC_DecodeMsgBody(SC_Connection*      scConnection,
-                            UA_EncodeableType*  respEncType, // expected response type
-                            UA_EncodeableType*  errEncType,  // expected response error type
+StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
+                            UA_NamespaceTable*  namespaceTable,
+                            UA_EncodeableType*  respEncType, // expected type (or null if unknown)
+                            UA_EncodeableType*  errEncType,  // expected error type (or null if unknown)
                             UA_EncodeableType** receivedEncType, // actual received type (in those provided)
                             void**              encodeableObj);
 
@@ -156,5 +157,23 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
 StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
                                    UA_MsgBuffer*  transportMsgBuffer,
                                    uint32_t*      requestId);
+
+StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
+                             uint32_t       requestId,
+                             uint8_t*       abortReqPresence,
+                             uint32_t*      abortReqId);
+
+StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
+                              UA_String**    reason);
+
+// SC_CheckPrecChunk and SC_CheckAbortChunk to be called before calling decode chunk
+// HYP: msgBuffers->isFinal = Intermediate or Final
+// (otherwise could fail on abort chunk or unexpected request id)
+StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
+                          uint32_t            requestId,
+                          UA_EncodeableType*  expEncType,
+                          UA_EncodeableType*  errEncType,
+                          UA_EncodeableType** recEncType,
+                          void**              encObj);
 
 #endif /* INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_ */

@@ -228,6 +228,24 @@ Buffer* MsgBuffers_NextChunk(UA_MsgBuffers* mBuffer,
     return buf;
 }
 
+StatusCode MsgBuffers_SetCurrentChunkFirst(UA_MsgBuffers* mBuffer){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t idx = 0;
+    Buffer* buffer = UA_NULL;
+    if(mBuffer != UA_NULL && mBuffer->nbChunks > 1){
+        // Keep current buffer reference
+        buffer = MsgBuffers_GetCurrentChunk(mBuffer);
+        if(buffer != UA_NULL){
+            status = Buffer_Copy(&mBuffer->buffers[0], buffer);
+            for(idx = 1; idx < mBuffer->nbChunks; idx++){
+                Buffer_Reset(&mBuffer->buffers[idx]);
+            }
+            mBuffer->nbChunks = 0;
+        }
+    }
+    return status;
+}
+
 void MsgBuffers_InternalCopyProperties(UA_MsgBuffers* destMsgBuffer,
                                        UA_MsgBuffer*  srcMsgBuffer){
     MsgBuffer_InternalCopyProperties((UA_MsgBuffer*) destMsgBuffer, srcMsgBuffer);

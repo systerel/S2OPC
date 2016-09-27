@@ -236,6 +236,8 @@ StatusCode TCP_UA_ReadMsgBuffer(UA_Byte*      data_dest,
     if(msgBuffer->nbBuffers == 1){
         buffer = msgBuffer->buffers;
     }else if(msgBuffer->nbBuffers > 1 && msgBuffer->nbChunks > 0){
+        // TCP UA layer never treat chunks
+        assert(msgBuffer->nbChunks == 1);
         buffer = MsgBuffers_GetCurrentChunk(msgBuffer);
         if(buffer == UA_NULL){
             status = STATUS_NOK;

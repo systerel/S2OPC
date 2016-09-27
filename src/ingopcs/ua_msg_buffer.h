@@ -99,6 +99,7 @@ void MsgBuffers_Delete(UA_MsgBuffers** mBuffer);
 Buffer* MsgBuffers_GetCurrentChunk(UA_MsgBuffers* mBuffer);
 Buffer* MsgBuffers_NextChunk(UA_MsgBuffers* mBuffer,
                              uint32_t*      bufferIdx);
+StatusCode MsgBuffers_SetCurrentChunkFirst(UA_MsgBuffers* mBuffer);
 
 StatusCode MsgBuffers_CopyBuffer(UA_MsgBuffers* destMsgBuffer,
                                  uint32_t       bufferIdx,

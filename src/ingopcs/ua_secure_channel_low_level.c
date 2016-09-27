@@ -1581,7 +1581,8 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     return status;
 }
 
-StatusCode SC_DecodeMsgBody(SC_Connection*      scConnection,
+StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
+                            UA_NamespaceTable*  namespaceTable,
                             UA_EncodeableType*  respEncType,
                             UA_EncodeableType*  errEncType,
                             UA_EncodeableType** receivedEncType,
@@ -1592,8 +1593,10 @@ StatusCode SC_DecodeMsgBody(SC_Connection*      scConnection,
     UA_NodeId nodeId;
     uint16_t nsIndex = 0;
     NodeId_Initialize(&nodeId);
-    if(scConnection != UA_NULL && respEncType != UA_NULL && encodeableObj != UA_NULL){
-        status = NodeId_Read(scConnection->receptionBuffers, &nodeId);
+    if(receptionBuffer != UA_NULL && namespaceTable != UA_NULL &&
+       respEncType != UA_NULL && encodeableObj != UA_NULL)
+    {
+        status = NodeId_Read(receptionBuffer, &nodeId);
     }
     if(status == STATUS_OK && nodeId.identifierType == UA_IdType_Numeric){
 
@@ -1612,7 +1615,7 @@ StatusCode SC_DecodeMsgBody(SC_Connection*      scConnection,
             if(recEncType->namespace == UA_NULL && nodeId.namespace != 0){
                 status = STATUS_INVALID_RCV_PARAMETER;
             }else if(recEncType->namespace != UA_NULL){
-                status = Namespace_GetIndex(scConnection->receptionBuffers->nsTable,
+                status = Namespace_GetIndex(namespaceTable,
                                             recEncType->namespace,
                                             &nsIndex);
                 if(status == STATUS_OK){
@@ -1629,7 +1632,7 @@ StatusCode SC_DecodeMsgBody(SC_Connection*      scConnection,
     if(status == STATUS_OK){
         *encodeableObj = malloc(recEncType->allocSize);
         if(*encodeableObj != UA_NULL){
-            status = recEncType->decodeFunction(scConnection->receptionBuffers, *encodeableObj);
+            status = recEncType->decodeFunction(receptionBuffer, *encodeableObj);
         }else{
             status = STATUS_NOK;
         }
@@ -1927,6 +1930,149 @@ StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
     if(status == STATUS_OK){
         status = SC_RemovePaddingAndSig(scConnection,
                                         isPrecCryptoDataFalse);
+    }
+
+    return status;
+}
+
+StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
+                             uint32_t       requestId,
+                             uint8_t*       abortReqPresence,
+                             uint32_t*      abortReqId)
+{
+    assert(msgBuffer != UA_NULL);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+
+    if(msgBuffer != UA_NULL &&
+       abortReqPresence != UA_NULL && abortReqId != UA_NULL)
+    {
+        // Check if we received a new request id related message before
+        //  precedent treatment end
+        if(msgBuffer->nbChunks > 1 &&
+           msgBuffer->receivedReqId != requestId)
+        {
+            *abortReqPresence = 1;
+            *abortReqId = msgBuffer->receivedReqId;
+            status = MsgBuffers_SetCurrentChunkFirst(msgBuffer);
+        }else{
+            *abortReqPresence = UA_FALSE;
+            status = STATUS_OK;
+        }
+    }
+    return status;
+}
+
+StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
+                              UA_String**    reason){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t errorCode = 0;
+    if(msgBuffer != UA_NULL && reason != UA_NULL){
+        if(msgBuffer->isFinal == UA_Msg_Chunk_Abort){
+            status = UInt32_Read(msgBuffer, &errorCode);
+            if(status == STATUS_OK){
+                status = errorCode;
+                *reason = String_Create();
+                String_Read(msgBuffer, *reason);
+            }
+
+        }else{
+            status = STATUS_OK;
+        }
+    }
+    return status;
+}
+
+StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
+                          uint32_t            requestId,
+                          UA_EncodeableType*  expEncType,
+                          UA_EncodeableType*  errEncType,
+                          UA_EncodeableType** recEncType,
+                          void**              encObj){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t msgSize = 0;
+    Buffer* tmpBuffer = UA_NULL;
+    uint32_t idx = 0;
+    UA_MsgBuffer* tmpMsgBuffer = UA_NULL;
+    Buffer* buffer = UA_NULL;
+
+    if(msgBuffers != UA_NULL &&
+       recEncType != UA_NULL && encObj != UA_NULL)
+    {
+
+        switch(msgBuffers->isFinal){
+            case UA_Msg_Chunk_Final:
+                // Treat case with only 1 chunk for response
+                if(msgBuffers->nbChunks == 1){
+                    if(status == STATUS_OK){
+                        status = SC_DecodeMsgBody(msgBuffers,
+                                                  msgBuffers->nsTable,
+                                                  expEncType,
+                                                  errEncType,
+                                                  recEncType,
+                                                  encObj);
+                    }
+                }else{
+                    //Store all buffers in 1 to could decode msg body !
+                    for(idx = 0; idx < msgBuffers->nbChunks; idx++){
+                        msgSize += msgBuffers->buffers[idx].length;
+                    }
+                    buffer = Buffer_Create(msgSize);
+
+                    if(buffer == UA_NULL){
+                        status = STATUS_NOK;
+                    }
+
+                    // Copy all buffers content into temporary buffer for decoding
+                    for(idx = 0; idx < msgBuffers->nbChunks && status == STATUS_OK; idx++){
+                        tmpBuffer = &msgBuffers->buffers[idx];
+                        status = Buffer_Write(buffer, tmpBuffer->data, tmpBuffer->length);
+                    }
+
+                    if(status == STATUS_OK){
+                        tmpMsgBuffer = MsgBuffer_Create(buffer,
+                                                        msgBuffers->maxChunks,
+                                                        UA_NULL,
+                                                        msgBuffers->nsTable,
+                                                        msgBuffers->encTypesTable);
+                        if(tmpMsgBuffer != UA_NULL){
+                            status = SC_DecodeMsgBody(tmpMsgBuffer,
+                                                      msgBuffers->nsTable,
+                                                      expEncType,
+                                                      errEncType,
+                                                      recEncType,
+                                                      encObj);
+                        }
+                    }
+
+                    if(tmpMsgBuffer == UA_NULL){
+                        // In any case buffer deallocation guarantee
+                        Buffer_Delete(buffer);
+                    }else{
+                        // In case msg buffer is allocated, buffer also deallocated here
+                        MsgBuffers_Delete(&tmpMsgBuffer);
+                    }
+                }
+
+                MsgBuffers_Reset(msgBuffers);
+                break;
+            case UA_Msg_Chunk_Intermediate:
+                assert(msgBuffers->nbChunks >= 1);
+                if(msgBuffers->nbChunks == 1){
+                    msgBuffers->receivedReqId = requestId;
+                }else if(msgBuffers->receivedReqId != requestId){
+                    status = STATUS_NOK;
+                    assert(UA_FALSE);
+                }
+                break;
+            case UA_Msg_Chunk_Abort:
+                status = STATUS_NOK;
+                assert(UA_FALSE);
+                break;
+            case UA_Msg_Chunk_Unknown:
+            case UA_Msg_Chunk_Invalid:
+                status = STATUS_NOK;
+                assert(UA_FALSE);
+        }
     }
 
     return status;
