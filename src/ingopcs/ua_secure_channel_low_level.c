@@ -1847,3 +1847,70 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
 
     return status;
 }
+
+StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
+                                   UA_MsgBuffer*  transportMsgBuffer,
+                                   uint32_t*      requestId)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    const uint32_t isSymmetricTrue = 1; // TRUE
+    uint32_t isPrecCryptoDataFalse = UA_FALSE;
+    uint32_t tokenId = 0;
+    uint32_t snPosition = 0;
+
+    // Message header already managed by transport layer
+    // (except secure channel Id)
+    if(scConnection != UA_NULL){
+        status = SC_DecodeSecureMsgSCid(scConnection,
+                                        transportMsgBuffer);
+    }
+
+    if(status == STATUS_OK){
+        // Check security policy
+        // Validate other app certificate
+        // Check current app certificate thumbprint
+        status = SC_DecodeSymmSecurityHeader(transportMsgBuffer,
+                                             &tokenId,
+                                             &snPosition);
+    }
+
+    if(status == STATUS_OK){
+        // Determine keyset to use regarding token id provided
+        status = SC_IsPrecedentCryptoData(scConnection,
+                                          tokenId,
+                                          &isPrecCryptoDataFalse);
+    }
+
+    if(status == STATUS_OK){
+        // Decrypt message content and store complete message in secure connection buffer
+        status = SC_DecryptMsg(scConnection,
+                               transportMsgBuffer,
+                               snPosition,
+                               isSymmetricTrue,
+                               isPrecCryptoDataFalse);
+    }
+
+    if(status == STATUS_OK){
+        // Check decrypted message signature
+        status = SC_VerifyMsgSignature(scConnection,
+                                       isSymmetricTrue,
+                                       isPrecCryptoDataFalse);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_CheckSeqNumReceived(scConnection);
+    }
+
+    if(status == STATUS_OK){
+        // Retrieve request id
+        status = UInt32_Read(scConnection->receptionBuffers, requestId);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_RemovePaddingAndSig(scConnection,
+                                        isPrecCryptoDataFalse);
+    }
+
+    return status;
+}
+

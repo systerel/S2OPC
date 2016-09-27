@@ -422,11 +422,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                    UA_MsgBuffer*        transportMsgBuffer)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    const uint32_t isSymmetricTrue = 1; // TRUE
-    uint32_t isPrecCryptoDataFalse = UA_FALSE;
     uint32_t requestId = 0;
-    uint32_t tokenId = 0;
-    uint32_t snPosition = 0;
     PendingRequest* pRequest = UA_NULL;
     UA_EncodeableType* recEncType = UA_NULL;
     void* encObj = UA_NULL;
@@ -434,54 +430,9 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     // Message header already managed by transport layer
     // (except secure channel Id)
     if(cConnection != UA_NULL){
-        status = SC_DecodeSecureMsgSCid(cConnection->instance,
-                                        transportMsgBuffer);
-    }
-
-    if(status == STATUS_OK){
-        // Check security policy
-        // Validate other app certificate
-        // Check current app certificate thumbprint
-        status = SC_DecodeSymmSecurityHeader(transportMsgBuffer,
-                                             &tokenId,
-                                             &snPosition);
-    }
-
-    if(status == STATUS_OK){
-        // Determine keyset to use regarding token id provided
-        status = SC_IsPrecedentCryptoData(cConnection->instance,
-                                          tokenId,
-                                          &isPrecCryptoDataFalse);
-    }
-
-    if(status == STATUS_OK){
-        // Decrypt message content and store complete message in secure connection buffer
-        status = SC_DecryptMsg(cConnection->instance,
-                               transportMsgBuffer,
-                               snPosition,
-                               isSymmetricTrue,
-                               isPrecCryptoDataFalse);
-    }
-
-    if(status == STATUS_OK){
-        // Check decrypted message signature
-        status = SC_VerifyMsgSignature(cConnection->instance,
-                                       isSymmetricTrue,
-                                       isPrecCryptoDataFalse);
-    }
-
-    if(status == STATUS_OK){
-        status = SC_CheckSeqNumReceived(cConnection->instance);
-    }
-
-    if(status == STATUS_OK){
-        // Retrieve request id
-        status = UInt32_Read(cConnection->instance->receptionBuffers, &requestId);
-    }
-
-    if(status == STATUS_OK){
-        status = SC_RemovePaddingAndSig(cConnection->instance,
-                                        isPrecCryptoDataFalse);
+        status = SC_DecryptSecureMessage(cConnection->instance,
+                                         transportMsgBuffer,
+                                         &requestId);
     }
 
     switch(transportMsgBuffer->isFinal){
