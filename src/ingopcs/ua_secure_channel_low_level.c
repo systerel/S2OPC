@@ -250,6 +250,14 @@ StatusCode SC_RetrieveAndSetPublicKeyFromCert(SC_Connection*  scConnection,
 
 //// Cryptographic properties helpers
 
+uint8_t Is_ExtraPaddingSizePresent(uint32_t plainBlockSize){
+    // Extra-padding necessary if padding could be greater 256 bytes (2048 bits)
+    // (1 byte for padding size field + 255 bytes of padding).
+    // => padding max value is plainBlockSize regarding the formula of padding size
+    //    (whereas spec part 6 indicates it depends on the key size which is incorrect)
+    return plainBlockSize > 256;
+}
+
 StatusCode GetAsymmBlocksSizes(UA_String* securityPolicyUri,
                                uint32_t   keySize,
                                uint32_t*  cipherTextBlockSize,
@@ -353,21 +361,28 @@ uint32_t GetSymmSignatureSize(UA_String* securityPolicyUri){
 }
 
 uint32_t GetMaxBodySize(UA_MsgBuffer* msgBuffer,
-                         uint32_t     cipherBlockSize,
-                         uint32_t     plainBlockSize,
-                         uint32_t     signatureSize)
+                        uint32_t     cipherBlockSize,
+                        uint32_t     plainBlockSize,
+                        uint32_t     signatureSize)
 {
     // Ensure cipher block size is greater or equal to plain block size:
     //  otherwise the plain size could be greater than the  buffer size regarding computation
     assert(cipherBlockSize >= plainBlockSize);
+    // By default only 1 byte for padding size field. +1 if extra padding
+    uint32_t paddingSizeFields = 1;
     const uint32_t headersSize = msgBuffer->sequenceNumberPosition - 1;
     const uint32_t bodyChunkSize = msgBuffer->buffers->max_size - headersSize;
 
     // Computed maxBlock and then maxBodySize based on revised formula of mantis ticket #2897
     // Spec 1.03 part 6 incoherent
     const uint32_t maxBlocks = bodyChunkSize / cipherBlockSize;
-    // MaxBodySize = unCiphered block size * max blocs - sequence header -1 for PaddingSize field
-    return plainBlockSize * maxBlocks - UA_SECURE_MESSAGE_SEQUENCE_LENGTH - signatureSize - 1;
+
+    if(Is_ExtraPaddingSizePresent(plainBlockSize) != UA_FALSE){
+        paddingSizeFields += 1;
+    }
+
+    // MaxBodySize = unCiphered block size * max blocs - sequence header -1 for PaddingSize field(s)
+    return plainBlockSize * maxBlocks - UA_SECURE_MESSAGE_SEQUENCE_LENGTH - signatureSize - paddingSizeFields;
 }
 
 // Get information from internal properties
@@ -482,7 +497,12 @@ StatusCode CheckMaxSenderCertificateSize(UA_ByteString*  senderCertificate,
 uint16_t GetPaddingSize(uint32_t bytesToEncrypt, // called bytesToWrite in spec part6 but it should not since it includes SN header !
                         uint32_t plainBlockSize,
                         uint32_t signatureSize){
-    return plainBlockSize - ((bytesToEncrypt + signatureSize + 1) % plainBlockSize);
+    // By default only 1 padding size field + 1 if extra padding
+    uint8_t paddingSizeFields = 1;
+    if(Is_ExtraPaddingSizePresent(plainBlockSize)){
+        paddingSizeFields += 1;
+    }
+    return plainBlockSize - ((bytesToEncrypt + signatureSize + paddingSizeFields) % plainBlockSize);
 }
 
 // Set internal properties
@@ -930,9 +950,7 @@ StatusCode EncodePadding(SC_Connection* scConnection,
         }
 
         // Extra-padding necessary if padding could be greater 256 bytes
-        // (1 byte for padding size field + 255 bytes of padding).
-        // => padding max value is plainBlockSize regarding the formula of padding size
-        if(status == STATUS_OK && plainBlockSize > 256){
+        if(status == STATUS_OK && Is_ExtraPaddingSizePresent(plainBlockSize) != UA_FALSE){
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
             UA_Byte extraPadding = 0x00FF & *realPaddingLength;
@@ -1826,7 +1844,7 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
     if(status == STATUS_OK){
         // Extra padding management: possible if block size greater than:
         // UINT8_MAX (1 byte representation max)+ 1 (padding size field byte))
-        if(plainBlockSize > 256){
+        if(Is_ExtraPaddingSizePresent(plainBlockSize) != UA_FALSE){
             // compute most significant byte value
             padding = curChunk->data[newBufferLength-1] << 8;
             // remove extra padding size field
