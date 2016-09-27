@@ -21,9 +21,34 @@
  * MaxAsymmetricKeyLength – 4096
  * CertificateSignatureAlgorithm – Sha256
  */
+
+static StatusCode cpSymmEncrypt_AES256(const struct CryptoProvider *pProvider,
+                                       const uint8_t *pInput,
+                                       uint32_t lenPlainText,
+                                       const KeyBuffer *pKey,
+                                       const uint8_t *pIV,
+                                       uint8_t *pOutput,
+                                       uint32_t lenOutput)
+{
+    return STATUS_OK;
+}
+
+static StatusCode cpSymmDecrypt_AES256(const struct CryptoProvider *pProvider,
+                                       const uint8_t *pInput,
+                                       uint32_t lenPlainText,
+                                       const KeyBuffer *pKey,
+                                       const uint8_t *pIV,
+                                       uint8_t *pOutput,
+                                       uint32_t lenOutput)
+{
+    return STATUS_OK;
+}
+
 static const struct CryptoProfile g_cpBasic256Sha256 = {
         .DerivedSignatureKeyBitLength = 256,
         .MinAsymmetricKeyBitLength = 2048,
-        .MaxAsymmetricKeyBitLength = 4096
+        .MaxAsymmetricKeyBitLength = 4096,
+        .pFnSymmEncrypt = &cpSymmEncrypt_AES256,
+        .pFnSymmDecrypt = &cpSymmDecrypt_AES256,
 };
 
