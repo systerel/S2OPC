@@ -84,7 +84,6 @@ typedef enum {
     IdentifierType_String = 0x01,
     IdentifierType_Guid = 0x02,
     IdentifierType_ByteString = 0x03,
-    IdentifierType_Undefined = 0xFF
 } UA_IdentifierType;
 
 typedef struct {

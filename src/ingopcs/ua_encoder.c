@@ -487,9 +487,6 @@ UA_NodeId_DataEncoding GetNodeIdDataEncoding(const UA_NodeId* nodeId){
         case IdentifierType_ByteString:
             encodingEnum = NodeIdEncoding_ByteString;
             break;
-        case IdentifierType_Undefined:
-            encodingEnum = NodeIdEncoding_Invalid;
-            break;
     }
     return encodingEnum;
 }

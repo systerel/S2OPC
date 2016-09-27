@@ -336,17 +336,12 @@ void Guid_Clear(UA_Guid* guid){
 
 void NodeId_Initialize(UA_NodeId* nodeId){
     memset(nodeId, 0, sizeof(UA_NodeId));
-    nodeId->identifierType = IdentifierType_Undefined;
 }
 
 void NodeId_InitType(UA_NodeId* nodeId, UA_IdentifierType knownIdType){
-    assert(nodeId->identifierType == IdentifierType_Undefined);
     nodeId->namespace = 0; // OPCUA namespace
     nodeId->identifierType = knownIdType;
     switch(knownIdType){
-        case IdentifierType_Undefined:
-            assert(UA_FALSE);
-            break;
         case IdentifierType_Numeric:
             UInt32_Initialize(&nodeId->numeric);
             break;
@@ -365,8 +360,6 @@ void NodeId_InitType(UA_NodeId* nodeId, UA_IdentifierType knownIdType){
 void NodeId_Clear(UA_NodeId* nodeId){
     nodeId->namespace = 0; // OPCUA namespace
     switch(nodeId->identifierType){
-        case IdentifierType_Undefined:
-            break;
         case IdentifierType_Numeric:
             UInt32_Clear(&nodeId->numeric);
             break;
@@ -380,7 +373,7 @@ void NodeId_Clear(UA_NodeId* nodeId){
             ByteString_Clear(&nodeId->bstring);
             break;
     }
-    nodeId->identifierType = IdentifierType_Undefined;
+    nodeId->identifierType = IdentifierType_Numeric;
 }
 
 void ExpandedNodeId_Initialize(UA_ExpandedNodeId* expNodeId){
