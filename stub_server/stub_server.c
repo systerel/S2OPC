@@ -72,7 +72,7 @@ int main(void){
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 5000;
+    const uint32_t loopTimeout = 20000;
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 

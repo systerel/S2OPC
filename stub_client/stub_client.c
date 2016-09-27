@@ -99,7 +99,7 @@ int main(void){
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 5000;
+    const uint32_t loopTimeout = 10000;
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
@@ -225,11 +225,16 @@ int main(void){
     OpcUa_GotoErrorIfBad(uStatus);
 
     // Request header
-    OpcUa_RequestHeader rHeader;
+    // TODO: wrappers for managing OpcUa_String (inside request header ...)
+    //OpcUa_RequestHeader rHeader;
+    UA_RequestHeader rHeader;
+
     // Local configuration: empty
+    // TODO: wrappers for managing OpcUa_String
     //OpcUa_String localId, profileUri;
     UA_String localId, profileUri;
     // Endpoint URL in OPC UA string format
+    // TODO: wrappers for managing OpcUa_String
     //const OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
     const UA_String* stEndpointUrl = String_CreateFromCString(sEndpointUrl);
     // Empty callback data
@@ -258,12 +263,13 @@ int main(void){
     }
 
     // Initialization of empty request header
-    OpcUa_RequestHeader_Initialize (&rHeader);
+    // TODO: wrappers for managing OpcUa_String (inside request header ...)
+    UA_RequestHeader_Initialize (&rHeader);
 
     // To retrieve response from callaback
 
     uStatus = UA_ClientApi_BeginGetEndpoints(hChannel,     // Channel
-                                             (UA_RequestHeader*) &rHeader,      // Request header
+                                             &rHeader,      // Request header
                                              stEndpointUrl, // Endpoint
                                              0,            // No of local id
                                              &localId,           // local id
