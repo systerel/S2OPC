@@ -3,14 +3,14 @@ OSTYPE=$(shell echo $$OSTYPE)
 ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      CC=gcc
      EXCLUDE_DIR="*win32*"
-     LIBS=-lssl -lcrypto -lrt -lpthread
+     LIBS=$(LIBS_MBEDTLS) -lssl -lcrypto -lrt -lpthread
      COPY_SSL=@cat /dev/null
 else
     CC=i686-w64-mingw32-gcc #i686-pc-mingw32-gcc
     EXCLUDE_DIR="*linux*"
     OPEN_SSL_FILES=$(WORKSPACE_DIR)/lib/openssl/include
     INCLUDES_SSL=-I$(OPEN_SSL_FILES)
-    LIBS=-lcrypt32 -lrpcrt4 -lws2_32 -llibeay32 -lssleay32
+    LIBS=$(LIBS_MBEDTLS) -lcrypt32 -lrpcrt4 -lws2_32 -llibeay32 -lssleay32
     SSL_DLL_DIR=$(WORKSPACE_DIR)/lib/openssl/bin/vs2008
     SSL_DIR=$(WORKSPACE_DIR)/lib/openssl/lib/win32/
     LIBS_DIR=-L$(SSL_DIR)
@@ -29,16 +29,19 @@ UASTACK_DIRS=$(shell find $(UASTACK_DIR) -not -path $(EXCLUDE_DIR) -type d)
 UASTACK_SRCS=$(shell find $(UASTACK_DIR) -not -path $(EXCLUDE_DIR) -type f -name "*.c" ! -name "*.h")
 STUBSERVER_SRC=$(shell find $(STUBSERVER_DIR) -type f -name "*.c" ! -name "*.h")
 STUBCLIENT_SRC=$(shell find $(STUBCLIENT_DIR) -type f -name "*.c" ! -name "*.h")
-TESTS_SRC=$(shell find $(TESTS_DIR) -type f -name "*.c" ! -name "*.h")
+TESTS_SRCS=$(shell find $(TESTS_DIR) -type f -name "*.c" ! -name "*.h")
 UASTACK_SRC_FILES=$(foreach src, $(UASTACK_SRCS), $(shell basename $(src)))
+TESTS_SRC_FILES=$(foreach src, $(TESTS_SRCS), $(shell basename $(src)))
+INCLUDES_MBEDTLS=-I$(WORKSPACE_DIR)/lib/mbedtls-2.3.0/include
+LIBS_MBEDTLS=-L$(WORKSPACE_DIR)/lib/mbedtls-2.3.0/library -lmbedtls -lmbedx509 -lmbedcrypto
 
-INCLUDES=$(INCLUDES_SSL) $(addprefix -I, $(UASTACK_DIRS))
+INCLUDES=$(INCLUDES_MBEDTLS) $(INCLUDES_SSL) $(addprefix -I, $(UASTACK_DIRS))
 DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=1 #-DOPCUA_HAVE_SERVERAPI=1 -DOPCUA_HAVE_OPENSSL=1
 
 .PHONY : all clean clean
 .DELETE_ON_ERROR : .depend
 
-all: ../out/stub_client ../out/stub_server ../out/stack_check
+all: ../out/stub_client ../out/stub_server ../out/check_stack
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
@@ -49,7 +52,7 @@ endif
 %.o:
 	$(CC) $(CCFLAGS) $(INCLUDES) $< -o $@ $(DEFS)
 
-.depend: $(UASTACK_SRCS) $(STUBSERVER_SRC) $(STUBCLIENT_SRC) $(TESTS_SRC)
+.depend: $(UASTACK_SRCS) $(STUBSERVER_SRC) $(STUBCLIENT_SRC) $(TESTS_SRCS)
 	$(CC) $(CCFLAGS) $(DEFS) $(INCLUDES) -MM $^ > ./.depend
 
 ../out/stub_server: $(UASTACK_SRC_FILES:%.c=%.o) stub_server.o
@@ -60,11 +63,11 @@ endif
 	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
 	$(COPY_SSL)
 
-../out/stack_check: $(UASTACK_SRC_FILES:%.c=%.o) stack_check.o
+../out/check_stack: $(UASTACK_SRC_FILES:%.c=%.o) $(TESTS_SRC_FILES:%.c=%.o) check_stack.o
 	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
 clean:
 	\rm -f .depend
 
-check: ../out/stack_check
-	../out/stack_check
+check: ../out/check_stack
+	../out/check_stack

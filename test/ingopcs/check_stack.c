@@ -1,7 +1,16 @@
-// https://libcheck.github.io/check/doc/check_html/check_3.html
+/*
+ * Entry point for tests. Tests use libcheck.
+ * https://libcheck.github.io/check/doc/check_html/check_3.html
+ *
+ *  Created on: Sep 6, 2016
+ *      Author: PAB
+ */
+
 
 #include <stdlib.h>
 #include <check.h>
+#include "check_stack.h"
+
 
 START_TEST(test_empty)
 {
@@ -9,7 +18,8 @@ START_TEST(test_empty)
 }
 END_TEST
 
-Suite *stack_suite(void)
+
+Suite *tests_make_suite_stack(void)
 {
     Suite *s;
     TCase *tc_core;
@@ -22,14 +32,14 @@ Suite *stack_suite(void)
     return s;
 }
 
+
 int main(void)
 {
     int number_failed;
-    Suite *s;
     SRunner *sr;
 
-    s = stack_suite();
-    sr = srunner_create(s);
+    sr = srunner_create(tests_make_suite_stack());
+    srunner_add_suite(sr, tests_make_suite_crypto());
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);
