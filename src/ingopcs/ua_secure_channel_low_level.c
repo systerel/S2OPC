@@ -2003,14 +2003,12 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
             case UA_Msg_Chunk_Final:
                 // Treat case with only 1 chunk for response
                 if(msgBuffers->nbChunks == 1){
-                    if(status == STATUS_OK){
-                        status = SC_DecodeMsgBody(msgBuffers,
-                                                  msgBuffers->nsTable,
-                                                  expEncType,
-                                                  errEncType,
-                                                  recEncType,
-                                                  encObj);
-                    }
+                    status = SC_DecodeMsgBody(msgBuffers,
+                                              msgBuffers->nsTable,
+                                              expEncType,
+                                              errEncType,
+                                              recEncType,
+                                              encObj);
                 }else{
                     //Store all buffers in 1 to could decode msg body !
                     for(idx = 0; idx < msgBuffers->nbChunks; idx++){
