@@ -172,7 +172,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         pkey = CryptoProvider_SymmetricGenereateKey(cConnection->instance->currentCryptoProvider,
                                                     pkeyLength);
         if(pkey != UA_NULL){
-            UA_ByteString* bsKey = PrivateKey_BeginUse(pkey);
+            bsKey = PrivateKey_BeginUse(pkey);
             status = ByteString_AttachFrom(&openRequest.ClientNonce, bsKey);
             if(status == STATUS_OK){
                 cConnection->instance->currentNonce = pkey;

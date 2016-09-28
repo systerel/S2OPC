@@ -397,27 +397,31 @@ void StatusCode_Clear(StatusCode* status){
 }
 
 void DiagnosticInfo_Initialize(UA_DiagnosticInfo* diagInfo){
-    diagInfo->symbolicId = -1;
-    diagInfo->namespaceUri = -1;
-    diagInfo->locale = -1;
-    diagInfo->localizedText = -1;
-    String_Initialize(&diagInfo->additionalInfo);
-    diagInfo->innerStatusCode = STATUS_OK;
-    diagInfo->innerDiagnosticInfo = UA_NULL;
+    if(diagInfo != UA_NULL){
+        diagInfo->symbolicId = -1;
+        diagInfo->namespaceUri = -1;
+        diagInfo->locale = -1;
+        diagInfo->localizedText = -1;
+        String_Initialize(&diagInfo->additionalInfo);
+        diagInfo->innerStatusCode = STATUS_OK;
+        diagInfo->innerDiagnosticInfo = UA_NULL;
+    }
 }
 
 void DiagnosticInfo_Clear(UA_DiagnosticInfo* diagInfo){
-    String_Clear(&diagInfo->additionalInfo);
-    if(diagInfo->innerDiagnosticInfo != UA_NULL){
-        DiagnosticInfo_Clear(diagInfo->innerDiagnosticInfo);
-        free(diagInfo->innerDiagnosticInfo);
+    if(diagInfo != UA_NULL){
+        String_Clear(&diagInfo->additionalInfo);
+        if(diagInfo->innerDiagnosticInfo != UA_NULL){
+            DiagnosticInfo_Clear(diagInfo->innerDiagnosticInfo);
+            free(diagInfo->innerDiagnosticInfo);
+        }
+        diagInfo->symbolicId = -1;
+        diagInfo->namespaceUri = -1;
+        diagInfo->locale = -1;
+        diagInfo->localizedText = -1;
+        diagInfo->innerStatusCode = STATUS_OK;
+        diagInfo->innerDiagnosticInfo = UA_NULL;
     }
-    diagInfo->symbolicId = -1;
-    diagInfo->namespaceUri = -1;
-    diagInfo->locale = -1;
-    diagInfo->localizedText = -1;
-    diagInfo->innerStatusCode = STATUS_OK;
-    diagInfo->innerDiagnosticInfo = UA_NULL;
 }
 
 

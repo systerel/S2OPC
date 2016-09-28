@@ -142,6 +142,7 @@ int main(void){
     // The certificates: init
     OpcUa_ByteString ClientCertificate, ServerCertificate;
     OpcUa_ByteString_Initialize (&ClientCertificate);
+    OpcUa_ByteString_Initialize (&ServerCertificate);
 
     // Private key: init
     OpcUa_ByteString ClientPrivateKey;
@@ -236,7 +237,7 @@ int main(void){
     // Endpoint URL in OPC UA string format
     // TODO: wrappers for managing OpcUa_String
     //const OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
-    const UA_String* stEndpointUrl = String_CreateFromCString(sEndpointUrl);
+    UA_String* stEndpointUrl = String_CreateFromCString(sEndpointUrl);
     // Empty callback data
     StubClient_CallbackData Callback_Data_Get;
 
@@ -317,8 +318,23 @@ int main(void){
 //										   &pEndpoints); // call back data
 
     printf ("Final status: %d\n", uStatus);
+    pkiProvider.CloseCertificateStore(&pkiProvider, &hCertificateStore);
+    OpcUa_PKIProvider_Delete(&pkiProvider);
+    String_Clear(stEndpointUrl);
+    OpcUa_ByteString_Clear(&ClientCertificate);
+    OpcUa_ByteString_Clear(&ClientPrivateKey);
+    OpcUa_ByteString_Clear(&ServerCertificate);
+
     OpcUa_ReturnStatusCode;
+
     OpcUa_BeginErrorHandling;
+    pkiProvider.CloseCertificateStore(&pkiProvider, &hCertificateStore);
+    OpcUa_PKIProvider_Delete(&pkiProvider);
+    String_Clear(stEndpointUrl);
+    OpcUa_ByteString_Clear(&ClientCertificate);
+    OpcUa_ByteString_Clear(&ClientPrivateKey);
+    OpcUa_ByteString_Clear(&ServerCertificate);
+
     printf ("Error status: %d\n", uStatus);
     if(uStatus != 0){
         return -1;
