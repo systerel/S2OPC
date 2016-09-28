@@ -23,7 +23,7 @@
 #define SecurityPolicy_Basic256Sha256_ID    1
 
 
-typedef uint8_t KeyBuffer;  // TODO: move towards private_key.h
+typedef uint8_t KeyBuffer;  // TODO: move towards private_key.h + This definition is unclear
 
 struct CryptoProvider; // TODO: circular dependency CryptoProvider <-> CryptoProfile
 
@@ -37,13 +37,13 @@ typedef StatusCode (*FnSymmetricEncrypt) (const struct CryptoProvider *pProvider
                                           uint32_t lenOutput);
 typedef StatusCode (*FnSymmetricDecrypt) (const struct CryptoProvider *pProvider,
                                           const uint8_t *pInput,
-                                          uint32_t lenPlainText,
+                                          uint32_t lenCipherText,
                                           const KeyBuffer *pKey,
                                           const uint8_t *pIV,
                                           uint8_t *pOutput,
                                           uint32_t lenOutput);
 
-typedef struct
+typedef struct CryptoProfile
 {
     const uint32_t      SecurityPolicyID;
     const uint32_t      DerivedSignatureKeyBitLength;

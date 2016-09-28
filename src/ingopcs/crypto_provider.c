@@ -25,7 +25,7 @@ CryptoProvider *CryptoProvider_Create_char(const char *uri)
         pCryptoProvider = (CryptoProvider *)malloc(sizeof(CryptoProvider));
         if(UA_NULL != pCryptoProvider)
         {
-            *(const CryptoProfile **)(pCryptoProvider->pProfile) = pProfile; // TODO: this is a side-effect of putting too much const
+            *(const CryptoProfile **)(&pCryptoProvider->pProfile) = pProfile; // TODO: this is a side-effect of putting too much const
             if(STATUS_OK != CryptoProvider_LibInit(pCryptoProvider))
             {
                 free(pCryptoProvider);
