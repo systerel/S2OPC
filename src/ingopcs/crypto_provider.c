@@ -6,13 +6,8 @@
  */
 
 
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 #include <stdlib.h>
+#include <string.h>
 
 #include "ua_builtintypes.h"
 #include "crypto_provider.h"
@@ -21,10 +16,23 @@ extern "C" {
 
 CryptoProvider *CryptoProvider_Create_char(const char *uri)
 {
-    CryptoProvider *pCryptoProvider;
+    CryptoProvider *pCryptoProvider = UA_NULL;
+    const CryptoProfile *pProfile = UA_NULL;
 
-    pCryptoProvider = (CryptoProvider *)malloc(sizeof(CryptoProvider));
-    // TODO: get correct profile
+    pProfile = CryptoProfile_Get(uri);
+    if(UA_NULL != pProfile)
+    {
+        pCryptoProvider = (CryptoProvider *)malloc(sizeof(CryptoProvider));
+        if(UA_NULL != pCryptoProvider)
+        {
+            *(const CryptoProfile **)(pCryptoProvider->pProfile) = pProfile; // TODO: this is a side-effect of putting too much const
+            if(STATUS_OK != CryptoProvider_LibInit(pCryptoProvider))
+            {
+                free(pCryptoProvider);
+                pCryptoProvider = UA_NULL;
+            }
+        }
+    }
 
     return pCryptoProvider;
 }
@@ -49,11 +57,8 @@ void CryptoProvider_Delete(CryptoProvider* pCryptoProvider)
 {
     if(UA_NULL != pCryptoProvider)
     {
-        // TODO
+        CryptoProvider_LibDeinit(pCryptoProvider);
         free(pCryptoProvider);
     }
 }
 
-#ifdef __cplusplus
-}
-#endif

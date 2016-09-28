@@ -24,6 +24,8 @@ typedef struct CryptoProvider
 CryptoProvider *CryptoProvider_Create(const UA_String *uri);
 //CryptoProvider *CryptoProvider_Create(const char *uri);
 void CryptoProvider_Delete(CryptoProvider *pCryptoProvider);
+StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
+StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
 
 
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_

@@ -10,6 +10,7 @@
 #ifndef INGOPCS_CRYPTO_PROFILES_H_
 #define INGOPCS_CRYPTO_PROFILES_H_
 
+
 #include <inttypes.h>
 #include "ua_builtintypes.h"  // StatusCode
 #include "private_key.h"
@@ -42,7 +43,7 @@ typedef StatusCode (*FnSymmetricDecrypt) (const struct CryptoProvider *pProvider
                                           uint8_t *pOutput,
                                           uint32_t lenOutput);
 
-struct CryptoProfile
+typedef struct
 {
     const uint32_t      SecurityPolicyID;
     const uint32_t      DerivedSignatureKeyBitLength;
@@ -50,6 +51,11 @@ struct CryptoProfile
     const uint32_t      MaxAsymmetricKeyBitLength;
     const FnSymmetricEncrypt    pFnSymmEncrypt;
     const FnSymmetricDecrypt    pFnSymmDecrypt;
-};
+} CryptoProfile;
+
+
+const CryptoProfile * CryptoProfile_Get(const char *uri);
+
+extern const CryptoProfile g_cpBasic256Sha256;
 
 #endif  // INGOPCS_CRYPTO_PROFILES_H_
