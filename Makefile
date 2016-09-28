@@ -18,7 +18,6 @@ else
     COPY_SSL=cp $(SSL_DLL_DIR)/* ../out/
 endif
 
-
 # OUTPUTS
 WORKSPACE_DIR=.
 CERT_DIR=$(WORKSPACE_DIR)/cert
@@ -27,39 +26,50 @@ BUILD_DIR=$(WORKSPACE_DIR)/build
 BUILD_DIR_SED=$(subst /,\/,$(BUILD_DIR))
 
 # INPUTS
+
+## Directories
+### srcs directories definition
 UASTACK_DIR=$(WORKSPACE_DIR)/src/
 STUBSERVER_DIR=$(WORKSPACE_DIR)/stub_server
 STUBCLIENT_DIR=$(WORKSPACE_DIR)/stub_client
 TESTS_DIR=$(WORKSPACE_DIR)/test/ingopcs
-UASTACK_DIRS=$(shell find $(UASTACK_DIR) -not -path $(EXCLUDE_DIR) -type d)
-UASTACK_SRCS=$(shell find $(UASTACK_DIR) -not -path $(EXCLUDE_DIR) -type f -name "*.c" ! -name "*.h")
-STUBSERVER_SRC=$(shell find $(STUBSERVER_DIR) -type f -name "*.c" ! -name "*.h")
-STUBCLIENT_SRC=$(shell find $(STUBCLIENT_DIR) -type f -name "*.c" ! -name "*.h")
-UASTACK_SRC_FILES=$(foreach src, $(UASTACK_SRCS), $(shell basename $(src)))
+### concatenate all srcs directories
+C_SRC_DIRS=$(UASTACK_DIR) $(STUBCLIENT_DIR) $(STUBSERVER_DIR) $(TESTS_DIR)
+
+## Stack
+### includes stack
+INCLUDES_UASTACK=$(shell find $(UASTACK_DIR) -not -path $(EXCLUDE_DIR) -type d)
+## object files stack
+UASTACK_SRC_FILES=$(shell find $(UASTACK_DIR) -not -path $(EXCLUDE_DIR) -type f -name "*.c" -exec basename "{}" \;)
 UASTACK_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(UASTACK_SRC_FILES))
-TESTS_SRC=$(shell find $(TESTS_DIR) -type f -name "*.c" ! -name "*.h")
-TESTS_SRC_FILES=$(foreach src, $(TESTS_SRCS), $(shell basename $(src)))
+
+## Tests object files
+TESTS_SRC_FILES=$(shell find $(TESTS_DIR) -type f -name "*.c" -exec basename "{}" \;)
+TESTS_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(TESTS_SRC_FILES))
+
+## All .c and .h files to compute dependencies
+C_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.c")
+H_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.h")
 
 # MBEDTLS INPUTS
 MBEDTLS_DIR=$(WORKSPACE_DIR)/lib/mbedtls-2.3.0
 INCLUDES_MBEDTLS=-I$(MBEDTLS_DIR)/include
 LIBS_MBEDTLS=-L$(MBEDTLS_DIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
 
-
 # C COMPILER CONFIG
 CCFLAGS=-c -g -Wall -Wextra -O0 #-pedantic -std=c99
 LFLAGS=-g
-INCLUDES=$(INCLUDES_MBEDTLS) $(INCLUDES_SSL) $(addprefix -I, $(UASTACK_DIRS))
+INCLUDES=$(INCLUDES_MBEDTLS) $(INCLUDES_SSL) $(addprefix -I, $(INCLUDES_UASTACK))
 DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=1 #-DOPCUA_HAVE_SERVERAPI=1 -DOPCUA_HAVE_OPENSSL=1
 
 # MAKEFILE CONTENT
 
-.PHONY : all config mbedtls clean clean_mbedtls cleanall
+.PHONY : all config mbedtls check clean clean_mbedtls cleanall
 .DELETE_ON_ERROR : .depend
 
 default: all
 
-all: config mbedtls $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_server #$(EXEC_DIR)/check_stack
+all: config mbedtls $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_server $(EXEC_DIR)/check_stack
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
@@ -81,8 +91,8 @@ config:
 $(BUILD_DIR)/%.o:
 	$(CC) $(CCFLAGS) $(INCLUDES) $< -o $@ $(DEFS)
 
-.depend: $(UASTACK_SRCS) $(STUBSERVER_SRC) $(STUBCLIENT_SRC) $(TESTS_SRC)
-	$(CC) $(CCFLAGS) $(DEFS) $(INCLUDES) -MM $^ > .depend
+.depend: $(C_SRC_PATHS) #$(H_SRC_PATHS)
+	$(CC) $(CCFLAGS) $(DEFS) $(INCLUDES) -MM $(C_SRC_PATHS) > .depend
 	sed 's/^\(.*\)\.o:/$(BUILD_DIR_SED)\/\1.o:/g' -i .depend
 
 $(EXEC_DIR)/stub_server: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server.o
@@ -93,13 +103,14 @@ $(EXEC_DIR)/stub_client: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client.o
 	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
 	$(COPY_SSL)
 
-$(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/check_stack.o
+$(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/check_stack.o
+	echo $^
 	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
 mbedtls:
 	$(MAKE) -C $(MBEDTLS_DIR)
 
-check: $(EXEC_DIR)/check_stack
+check: config $(EXEC_DIR)/check_stack
 	$(EXEC_DIR)/check_stack
 
 clean_mbedtls:
