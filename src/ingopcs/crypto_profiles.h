@@ -13,11 +13,18 @@
 #include <inttypes.h>
 #include "ua_builtintypes.h"  // StatusCode
 #include "private_key.h"
+#include "crypto_provider.h"
 
-struct CryptoProfile;
 
-struct CryptoProvider;  // TODO: move to crypto_provider.h
+// Crypto profiles uri and ID
+#define SecurityPolicy_Invalid_ID           0
+#define SecurityPolicy_Basic256Sha256_URI   "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
+#define SecurityPolicy_Basic256Sha256_ID    1
+
+
 typedef uint8_t KeyBuffer;  // TODO: move towards private_key.h
+
+struct CryptoProvider; // TODO: circular dependency CryptoProvider <-> CryptoProfile
 
 // TODO: move these somewhere?
 typedef StatusCode (*FnSymmetricEncrypt) (const struct CryptoProvider *pProvider,
@@ -37,6 +44,7 @@ typedef StatusCode (*FnSymmetricDecrypt) (const struct CryptoProvider *pProvider
 
 struct CryptoProfile
 {
+    const uint32_t      SecurityPolicyID;
     const uint32_t      DerivedSignatureKeyBitLength;
     const uint32_t      MinAsymmetricKeyBitLength;
     const uint32_t      MaxAsymmetricKeyBitLength;

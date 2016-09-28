@@ -9,6 +9,10 @@
 
 #include "crypto_profiles.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Security policy "Basic256Sha256", as of 09/09/2016:
  * SymmetricSignatureAlgorithm – Hmac_Sha256
  * SymmetricEncryptionAlgorithm – Aes256_CBC
@@ -52,3 +56,7 @@ static const struct CryptoProfile g_cpBasic256Sha256 = {
         .pFnSymmDecrypt = &cpSymmDecrypt_AES256,
 };
 
+
+#ifdef __cplusplus
+}
+#endif
