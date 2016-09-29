@@ -74,19 +74,22 @@ START_TEST(test_hexlify)
 }
 END_TEST
 
-CryptoProvider *CryptoProvider_Create_char(const char *uri); // Temp
-// TODO: wrap these tests inside a cryptoprovider !!
-START_TEST(test_aes)
+
+START_TEST(test_crypto_sym)
 {
     // Tests based on the test vectors provided by the NIST
     //  (http://csrc.nist.gov/groups/STM/cavp/block-ciphers.html#aes)
-    mbedtls_aes_context aes;
     unsigned char key[32];
     unsigned char iv[16];
     unsigned char input[128];
     unsigned char output[128];
     char hexoutput[256];
     int i;
+    CryptoProvider *crypto = UA_NULL;
+
+    // Context init
+    crypto = CryptoProvider_Create_Low(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(crypto);
 
     // Encrypt
     // This single test is not taken from the NIST test vectors...
@@ -95,8 +98,7 @@ START_TEST(test_aes)
     memset(input, 0, sizeof(input));
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(mbedtls_aes_setkey_enc(&aes, key, 256) == 0);
-    ck_assert(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, 16, iv, input, output) == 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "dc95c078a2408989ad48a21492842087", 32) == 0);
 
@@ -105,8 +107,7 @@ START_TEST(test_aes)
     memset(input, 0, sizeof(input));
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(mbedtls_aes_setkey_enc(&aes, key, 256) == 0);
-    ck_assert(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, 16, iv, input, output) == 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "46f2fb342d6f0ab477476fc501242c5f", 32) == 0);
 
@@ -115,8 +116,7 @@ START_TEST(test_aes)
     memset(input, 0, sizeof(input));
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(mbedtls_aes_setkey_enc(&aes, key, 256) == 0);
-    ck_assert(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, 16, iv, input, output) == 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "304f81ab61a80c2e743b94d5002a126b", 32) == 0);
 
@@ -124,8 +124,7 @@ START_TEST(test_aes)
     memset(iv, 0, sizeof(iv));
     ck_assert(unhexlify("0b24af36193ce4665f2825d7b4749c98", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(mbedtls_aes_setkey_enc(&aes, key, 256) == 0);
-    ck_assert(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, 16, iv, input, output) == 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "a9ff75bd7cf6613d3731c77c3b6d0c04", 32) == 0);
 
@@ -134,8 +133,7 @@ START_TEST(test_aes)
     memset(iv, 0, sizeof(iv));
     ck_assert(unhexlify("4bf3b0a69aeb6657794f2901b1440ad4", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(mbedtls_aes_setkey_dec(&aes, key, 256) == 0);
-    ck_assert(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, 16, iv, input, output) == 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     for(i=0; i<16; ++i)
         ck_assert(output[i] == 0);
@@ -144,8 +142,7 @@ START_TEST(test_aes)
     memset(iv, 0, sizeof(iv));
     ck_assert(unhexlify("47cb030da2ab051dfc6c4bf6910d12bb", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(mbedtls_aes_setkey_dec(&aes, key, 256) == 0);
-    ck_assert(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, 16, iv, input, output) == 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, output, 16) == STATUS_OK);
     for(i=0; i<16; ++i)
         ck_assert(output[i] == 0);
 
@@ -153,26 +150,22 @@ START_TEST(test_aes)
     memset(iv, 0, sizeof(iv));
     ck_assert(unhexlify("623a52fcea5d443e48d9181ab32c7421", input, 16) == 16);
     memset(output, 0, sizeof(output));
-    ck_assert(mbedtls_aes_setkey_dec(&aes, key, 256) == 0);
-    ck_assert(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, 16, iv, input, output) == 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "761c1fe41a18acf20d241650611d90f1", 32) == 0);
 
-    // Quicktest
-    ck_assert(unhexlify("c47b0294dbbbee0fec4757f22ffeee3587ca4730c3d33b691df38bab076bc558", key, 32) == 32);
+    // Encrypt + Decrypt
+    ck_assert(unhexlify("07eb03a08d291d1b07408bf3512ab40c91097ac77461aad4bb859647f74f00ee", key, 32) == 32);
     memset(iv, 0, sizeof(iv));
     memset(input, 0, sizeof(input));
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    UA_String *uri = String_CreateFromCString(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(uri);
-    //CryptoProvider *crypto = CryptoProvider_Create(uri);
-    CryptoProvider *crypto = CryptoProvider_Create_char(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(crypto);
-    ck_assert(crypto->pProfile->pFnSymmEncrypt(crypto, input, 16, key, iv, output, 16) == STATUS_OK);
-
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, output, 16) == STATUS_OK);
     ck_assert(hexlify(output, hexoutput, 16) == 16);
-    ck_assert(memcmp(hexoutput, "46f2fb342d6f0ab477476fc501242c5f", 32) == 0);
+    ck_assert(memcmp(hexoutput, "47cb030da2ab051dfc6c4bf6910d12bb", 32) == 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, output, 16, key, iv, input, 16) == STATUS_OK);
+    ck_assert(hexlify(input, hexoutput, 16) == 16);
+    ck_assert(memcmp(hexoutput, "00000000000000000000000000000000", 32) == 0);
 }
 END_TEST
 
@@ -188,7 +181,7 @@ Suite *tests_make_suite_crypto()
     tc_misc = tcase_create("Misc");
 
     suite_add_tcase(s, tc_ciphers);
-    tcase_add_test(tc_ciphers, test_aes);
+    tcase_add_test(tc_ciphers, test_crypto_sym);
 
     suite_add_tcase(s, tc_providers);
 
