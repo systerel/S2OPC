@@ -92,3 +92,37 @@ StatusCode CryptoProvider_SymmetricDecrypt_Low(const CryptoProvider *pProvider,
     return STATUS_INVALID_PARAMETERS;
 }
 
+
+StatusCode CryptoProvider_Symmetric_GetKeyLength_Low(const CryptoProvider *pProvider,
+                                                     uint32_t *length)
+{
+    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == length)
+        return STATUS_INVALID_PARAMETERS;
+
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_NOK;
+    case SecurityPolicy_Basic256Sha256_ID:
+        *length = SecurityPolicy_Basic256Sha256_Symm_KeyLength;
+        break;
+    }
+
+    return STATUS_OK;
+}
+
+
+StatusCode CryptoProvider_Symmetric_GetOutputLength_Low(const CryptoProvider *pProvider,
+                                                        uint32_t lengthIn,
+                                                        uint32_t *pLengthOut)
+{
+    if(UA_NULL == pLengthOut)
+        return STATUS_INVALID_PARAMETERS;
+
+    *pLengthOut = lengthIn;
+
+    return STATUS_OK;
+}
+
+

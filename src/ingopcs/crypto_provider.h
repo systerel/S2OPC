@@ -46,5 +46,10 @@ StatusCode CryptoProvider_SymmetricDecrypt_Low(const CryptoProvider *pProvider,
                                            const uint8_t *pIV,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput);
+StatusCode CryptoProvider_Symmetric_GetKeyLength_Low(const CryptoProvider *pProvider,
+                                                     uint32_t *length);
+StatusCode CryptoProvider_Symmetric_GetOutputLength_Low(const CryptoProvider *pProvider,
+                                                        uint32_t lengthIn,
+                                                        uint32_t *pLengthOut);
 
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_

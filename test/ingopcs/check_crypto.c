@@ -166,6 +166,9 @@ START_TEST(test_crypto_sym)
     ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, output, 16, key, iv, input, 16) == STATUS_OK);
     ck_assert(hexlify(input, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "00000000000000000000000000000000", 32) == 0);
+
+    // TODO: assert failure on wrong size
+    // TODO: choose a MMT
 }
 END_TEST
 
