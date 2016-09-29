@@ -22,6 +22,10 @@
 #define SecurityPolicy_Basic256Sha256_URI   "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 #define SecurityPolicy_Basic256Sha256_ID    1
 
+// Basic256Sha256, sizes in bytes
+#define SecurityPolicy_Basic256Sha256_Symm_BlockLength      16
+#define SecurityPolicy_Basic256Sha256_Symm_KeyLength        32
+
 
 typedef uint8_t KeyBuffer;  // TODO: move towards private_key.h + This definition is unclear
 

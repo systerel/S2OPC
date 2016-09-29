@@ -63,7 +63,7 @@ void CryptoProvider_Delete(CryptoProvider* pCryptoProvider)
 }
 
 
-StatusCode CryptoProvider_SymmetricEncrypt_Low(const struct CryptoProvider *pProvider,
+StatusCode CryptoProvider_SymmetricEncrypt_Low(const CryptoProvider *pProvider,
                                                const uint8_t *pInput,
                                                uint32_t lenPlainText,
                                                const KeyBuffer *pKey,
@@ -78,7 +78,7 @@ StatusCode CryptoProvider_SymmetricEncrypt_Low(const struct CryptoProvider *pPro
 }
 
 
-StatusCode CryptoProvider_SymmetricDecrypt_Low(const struct CryptoProvider *pProvider,
+StatusCode CryptoProvider_SymmetricDecrypt_Low(const CryptoProvider *pProvider,
                                                const uint8_t *pInput,
                                                uint32_t lenCipherText,
                                                const KeyBuffer *pKey,

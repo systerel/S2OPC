@@ -32,14 +32,14 @@ StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
 StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
 
 // Real API ("_Low" suffix because temporary wrappers already use the shorter names)
-StatusCode CryptoProvider_SymmetricEncrypt_Low(const struct CryptoProvider *pProvider,
+StatusCode CryptoProvider_SymmetricEncrypt_Low(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
                                            const KeyBuffer *pKey,
                                            const uint8_t *pIV,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput);
-StatusCode CryptoProvider_SymmetricDecrypt_Low(const struct CryptoProvider *pProvider,
+StatusCode CryptoProvider_SymmetricDecrypt_Low(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenCipherText,
                                            const KeyBuffer *pKey,
