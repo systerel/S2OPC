@@ -71,10 +71,10 @@ StatusCode CryptoProvider_SymmetricEncrypt_Low(const CryptoProvider *pProvider,
                                                uint8_t *pOutput,
                                                uint32_t lenOutput)
 {
-    if(UA_NULL != pProvider && UA_NULL != pProvider->pProfile)
-        return pProvider->pProfile->pFnSymmEncrypt(pProvider, pInput, lenPlainText, pKey, pIV, pOutput, lenOutput);
+    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pIV || UA_NULL == pOutput)
+        return STATUS_INVALID_PARAMETERS;
 
-    return STATUS_INVALID_PARAMETERS;
+    return pProvider->pProfile->pFnSymmEncrypt(pProvider, pInput, lenPlainText, pKey, pIV, pOutput, lenOutput);
 }
 
 
@@ -86,10 +86,10 @@ StatusCode CryptoProvider_SymmetricDecrypt_Low(const CryptoProvider *pProvider,
                                                uint8_t *pOutput,
                                                uint32_t lenOutput)
 {
-    if(UA_NULL != pProvider && UA_NULL != pProvider->pProfile)
-        return pProvider->pProfile->pFnSymmDecrypt(pProvider, pInput, lenCipherText, pKey, pIV, pOutput, lenOutput);
+    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pIV || UA_NULL == pOutput)
+        return STATUS_INVALID_PARAMETERS;
 
-    return STATUS_INVALID_PARAMETERS;
+    return pProvider->pProfile->pFnSymmDecrypt(pProvider, pInput, lenCipherText, pKey, pIV, pOutput, lenOutput);
 }
 
 

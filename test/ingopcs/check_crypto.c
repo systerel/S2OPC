@@ -11,7 +11,7 @@
 #include <check.h>
 
 #include "check_stack.h"
-#include "mbedtls/aes.h"
+#include "mbedtls/md.h"
 #include "crypto_provider.h"
 #include "ua_builtintypes.h"
 
@@ -75,7 +75,7 @@ START_TEST(test_hexlify)
 END_TEST
 
 
-START_TEST(test_crypto_sym)
+START_TEST(test_crypto_symm_crypt)
 {
     // Tests based on the test vectors provided by the NIST
     //  (http://csrc.nist.gov/groups/STM/cavp/block-ciphers.html#aes)
@@ -167,8 +167,58 @@ START_TEST(test_crypto_sym)
     ck_assert(hexlify(input, hexoutput, 16) == 16);
     ck_assert(memcmp(hexoutput, "00000000000000000000000000000000", 32) == 0);
 
-    // TODO: assert failure on wrong size
-    // TODO: choose a MMT
+    // Multi-block messages
+    ck_assert(unhexlify("458b67bf212d20f3a57fce392065582dcefbf381aa22949f8338ab9052260e1d", key, 32) == 32);
+    ck_assert(unhexlify("4c12effc5963d40459602675153e9649", iv, 16) == 16);
+    ck_assert(unhexlify("256fd73ce35ae3ea9c25dd2a9454493e96d8633fe633b56176dce8785ce5dbbb84dbf2c8a2eeb1e96b51899605e4f13bbc11b93bf6f39b3469be14858b5b720d4a522d36feed7a329c9b1e852c9280c47db8039c17c4921571a07d1864128330e09c308ddea1694e95c84500f1a61e614197e86a30ecc28df64ccb3ccf5437aa", input, 128) == 128);
+    memset(output, 0, sizeof(output));
+    memset(hexoutput, 0, sizeof(hexoutput));
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 128, key, iv, output, 128) == STATUS_OK);
+    ck_assert(hexlify(output, hexoutput, 128) == 128);
+    ck_assert(memcmp(hexoutput, "90b7b9630a2378f53f501ab7beff039155008071bc8438e789932cfd3eb1299195465e6633849463fdb44375278e2fdb1310821e6492cf80ff15cb772509fb426f3aeee27bd4938882fd2ae6b5bd9d91fa4a43b17bb439ebbe59c042310163a82a5fe5388796eee35a181a1271f00be29b852d8fa759bad01ff4678f010594cd", 256) == 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, output, 128, key, iv, input, 128) == STATUS_OK);
+    ck_assert(hexlify(input, hexoutput, 128) == 128);
+    ck_assert(memcmp(hexoutput, "256fd73ce35ae3ea9c25dd2a9454493e96d8633fe633b56176dce8785ce5dbbb84dbf2c8a2eeb1e96b51899605e4f13bbc11b93bf6f39b3469be14858b5b720d4a522d36feed7a329c9b1e852c9280c47db8039c17c4921571a07d1864128330e09c308ddea1694e95c84500f1a61e614197e86a30ecc28df64ccb3ccf5437aa", 256) == 0);
+
+
+    // Assert failure on wrong parameteres
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(UA_NULL, input, 16, key, iv, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, UA_NULL, 16, key, iv, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 15, key, iv, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, UA_NULL, iv, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, UA_NULL, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, UA_NULL, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, output, 15) != 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(UA_NULL, input, 16, key, iv, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, UA_NULL, 16, key, iv, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 15, key, iv, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, UA_NULL, iv, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, UA_NULL, output, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, UA_NULL, 16) != 0);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, output, 15) != 0);
+}
+END_TEST
+
+
+START_TEST(test_crypto_symm_sign)
+{
+    const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    unsigned char key[256];
+    unsigned char input[] = "This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm.";
+    unsigned char output[32];
+    char hexoutput[1024];
+
+    ck_assert(pinfo);
+    ck_assert(mbedtls_md_get_size(pinfo) == 32);
+
+    // Test case 7 of https://tools.ietf.org/html/rfc4231
+    ck_assert(hexlify(input, hexoutput, 152) == 152);
+    ck_assert(unhexlify("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", key, 131) == 131);
+    memset(output, 0, sizeof(output));
+    memset(hexoutput, 0, sizeof(hexoutput));
+    ck_assert(mbedtls_md_hmac(pinfo, key, 131, input, 152, output) == 0);
+    ck_assert(hexlify(output, hexoutput, 32) == 32);
+    ck_assert(memcmp(hexoutput, "9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2", 64) == 0);
 }
 END_TEST
 
@@ -183,13 +233,14 @@ Suite *tests_make_suite_crypto()
     tc_providers = tcase_create("Crypto Provider");
     tc_misc = tcase_create("Misc");
 
-    suite_add_tcase(s, tc_ciphers);
-    tcase_add_test(tc_ciphers, test_crypto_sym);
-
-    suite_add_tcase(s, tc_providers);
-
     suite_add_tcase(s, tc_misc);
     tcase_add_test(tc_misc, test_hexlify);
+
+    suite_add_tcase(s, tc_ciphers);
+    tcase_add_test(tc_ciphers, test_crypto_symm_crypt);
+    tcase_add_test(tc_ciphers, test_crypto_symm_sign);
+
+    suite_add_tcase(s, tc_providers);
 
     return s;
 }
