@@ -63,6 +63,7 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
 
     if(connection != UA_NULL){
         memset (connection, 0, sizeof(TCP_UA_Connection));
+        String_Initialize(&connection->url);
         connection->state = TCP_Connection_Disconnected;
         connection->protocolVersion = tcpProtocolVersion;
         // TODO: check constraints on connection properties (>8192 bytes ...)
@@ -104,9 +105,7 @@ void ResetConnectionState(TCP_UA_Connection* connection){
 
 void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
     if(connection != UA_NULL){
-        if(connection->url != UA_NULL){
-            free(connection->url);
-        }
+        String_Clear(&connection->url);
         SocketManager_Delete(&connection->socketManager);
         Socket_Close(connection->socket);
         MsgBuffer_Delete(&connection->inputMsgBuffer);
@@ -146,7 +145,7 @@ StatusCode SendHelloMsg(TCP_UA_Connection* connection){
     }
     if(status == STATUS_OK){
         status = String_Write(connection->outputMsgBuffer,
-                                 connection->url);
+                              &connection->url);
     }
     if(status == STATUS_OK){
         status = TCP_UA_FinalizeHeader(connection->outputMsgBuffer);
@@ -451,15 +450,15 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
     if(connection != UA_NULL &&
        uri != UA_NULL &&
        callback != UA_NULL){
-        if(connection->url == UA_NULL &&
+        if(connection->url.length <= 0 &&
            connection->callback == UA_NULL &&
            connection->callbackData == UA_NULL &&
            connection->state == TCP_Connection_Disconnected)
         {
             if(CheckURI(uri) == STATUS_OK){
-                connection->url = String_Create();
-                status = String_InitializeFromCString(connection->url, uri);
+                status = String_InitializeFromCString(&connection->url, uri);
             }
+
             if(status == STATUS_OK){
                 connection->callback = callback;
                 connection->callbackData = callbackData;
@@ -496,8 +495,7 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
 void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
     Socket_Close(connection->socket);
     connection->socket = UA_NULL;
-    String_Delete(connection->url);
-    connection->url = UA_NULL;
+    String_Clear(&connection->url);
     connection->callback = UA_NULL;
     connection->callbackData = UA_NULL;
     ResetConnectionState(connection);

@@ -48,8 +48,15 @@ SC_Connection* SC_Create (){
 
         if(sConnection != 0){
             memset (sConnection, 0, sizeof(SC_Connection));
-            sConnection->state = SC_Connection_Error;
             sConnection->transportConnection = connection;
+            sConnection->state = SC_Connection_Error;
+            ByteString_Initialize(&sConnection->runningAppCertificate);
+            ByteString_Initialize(&sConnection->runningAppPublicKey);
+            ByteString_Initialize(&sConnection->otherAppCertificate);
+            ByteString_Initialize(&sConnection->otherAppPublicKey);
+            ByteString_Initialize(&sConnection->currentSecuPolicy);
+            ByteString_Initialize(&sConnection->precSecuPolicy);
+            PrivateKey_Initialize(&sConnection->currentNonce);
 
         }else{
             TCP_UA_Connection_Delete(connection);
@@ -62,14 +69,12 @@ void SC_Delete (SC_Connection* scConnection){
     if(scConnection != UA_NULL){
         // Do not delete runningAppCertificate, runnigAppPrivateKey and otherAppCertificate:
         //  managed by upper level
-        if(scConnection->runningAppPublicKey != UA_NULL)
-        {
-            ByteString_Delete(scConnection->runningAppPublicKey);
-        }
-        if(scConnection->otherAppPublicKey != UA_NULL)
-        {
-            ByteString_Delete(scConnection->otherAppPublicKey);
-        }
+        ByteString_Clear(&scConnection->runningAppCertificate);
+        ByteString_Clear(&scConnection->runningAppPublicKey);
+        // Never deallocate private key, provided by upper level (client/server connection)
+        scConnection->runningAppPrivateKey = UA_NULL;
+        ByteString_Clear(&scConnection->otherAppCertificate);
+        ByteString_Clear(&scConnection->otherAppPublicKey);
         if(scConnection->sendingBuffer != UA_NULL)
         {
             MsgBuffer_Delete(&scConnection->sendingBuffer);
@@ -82,11 +87,9 @@ void SC_Delete (SC_Connection* scConnection){
         {
             TCP_UA_Connection_Delete(scConnection->transportConnection);
         }
-        if(scConnection->currentNonce != UA_NULL)
-        {
-            PrivateKey_Delete(scConnection->currentNonce);
-        }
-        String_Clear(scConnection->currentSecuPolicy);
+        String_Clear(&scConnection->currentSecuPolicy);
+        ByteString_Clear(&scConnection->precSecuPolicy);
+        PrivateKey_Clear(&scConnection->currentNonce);
         CryptoProvider_Delete(scConnection->currentCryptoProvider);
         CryptoProvider_Delete(scConnection->precCryptoProvider);
         free(scConnection);
@@ -98,17 +101,22 @@ StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
                                         PrivateKey*    runningAppPrivateKey,
                                         UA_ByteString* otherAppCertificate){
     StatusCode status = STATUS_OK;
-    if(scConnection->runningAppCertificate == UA_NULL &&
+    if(scConnection->runningAppCertificate.length <= 0 &&
        scConnection->runningAppPrivateKey == UA_NULL &&
-       scConnection->otherAppCertificate == UA_NULL)
+       scConnection->otherAppCertificate.length <= 0)
     {
-        scConnection->runningAppCertificate = runningAppCertificate;
-        ByteString_Delete(scConnection->runningAppPublicKey);
-        scConnection->runningAppPublicKey = UA_NULL;
+        if(runningAppCertificate != UA_NULL){
+            status = ByteString_AttachFrom(&scConnection->runningAppCertificate,
+                                           runningAppCertificate);
+        }
+        ByteString_Clear(&scConnection->runningAppPublicKey);
         scConnection->runningAppPrivateKey = runningAppPrivateKey;
-        scConnection->otherAppCertificate = otherAppCertificate;
-        ByteString_Delete(scConnection->otherAppPublicKey);
-        scConnection->otherAppPublicKey = UA_NULL;
+
+        if(otherAppCertificate != UA_NULL){
+            status = ByteString_AttachFrom(&scConnection->otherAppCertificate,
+                                           otherAppCertificate);
+        }
+        ByteString_Clear(&scConnection->otherAppPublicKey);
     }else{
         status = STATUS_INVALID_STATE;
     }
@@ -177,7 +185,7 @@ StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
 
 StatusCode RetrievePublicKeyFromCert(CryptoProvider* cryptoProvider,
                                      UA_ByteString*  certificate,
-                                     UA_ByteString** publicKey)
+                                     UA_ByteString*  publicKey)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t publicKeyLength = 0;
@@ -189,19 +197,18 @@ StatusCode RetrievePublicKeyFromCert(CryptoProvider* cryptoProvider,
                                                            certificate,
                                                            &publicKeyLength);
         if(status == STATUS_OK){
-            *publicKey = ByteString_Create();
-            status = ByteString_InitializeFixedSize(*publicKey, publicKeyLength);
+            status = ByteString_InitializeFixedSize(publicKey, publicKeyLength);
         }
 
         if(status == STATUS_OK){
             status = CryptoProvider_GetPublicKeyFromCert(cryptoProvider,
                                                          certificate,
-                                                         *publicKey);
+                                                         publicKey);
         }else{
             status = STATUS_NOK;
         }
 
-    }else if(*publicKey == UA_NULL){
+    }else if(publicKey == UA_NULL){
         status = STATUS_NOK;
     }
 
@@ -221,34 +228,20 @@ StatusCode SC_RetrieveAndSetPublicKeyFromCert(SC_Connection*  scConnection,
     {
         if(runningApp == UA_FALSE)
         {
-            if(scConnection->otherAppPublicKey == UA_NULL){
-                certificate = scConnection->otherAppCertificate;
-            }else{
-                *publicKey = scConnection->otherAppPublicKey;
-            }
+            certificate = &scConnection->otherAppCertificate;
+            *publicKey = &scConnection->otherAppPublicKey;
         }else{
-            if(scConnection->runningAppPublicKey == UA_NULL){
-                certificate = scConnection->runningAppCertificate;
-            }else{
-                *publicKey = scConnection->runningAppPublicKey;
-            }
+            certificate = &scConnection->runningAppCertificate;
+            *publicKey = &scConnection->runningAppPublicKey;
         }
 
-        if(*publicKey == UA_NULL){
+        if((*publicKey)->length <= 0){
             // Key never extracted from cert. before:
             status = RetrievePublicKeyFromCert(scConnection->currentCryptoProvider,
                                                certificate,
-                                               publicKey);
+                                               *publicKey);
         }else{
             status = STATUS_OK;
-        }
-    }
-
-    if(status == STATUS_OK){
-        if(runningApp == UA_FALSE){
-            scConnection->otherAppPublicKey = *publicKey;
-        }else if(runningApp != UA_FALSE){
-            scConnection->runningAppPublicKey = *publicKey;
         }
     }
 
@@ -406,7 +399,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
     }
 
     if(status == STATUS_OK && symmetricAlgo == UA_FALSE){
-        if(scConnection->otherAppCertificate == UA_NULL){
+        if(scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
 
@@ -529,7 +522,7 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                                                                    &publicKeyModulusLength);
 
             if(status == STATUS_OK){
-                status = GetAsymmBlocksSizes(scConnection->currentSecuPolicy,
+                status = GetAsymmBlocksSizes(&scConnection->currentSecuPolicy,
                                              publicKeyModulusLength,
                                              &cipherBlockSize,
                                              &plainBlockSize);
@@ -538,14 +531,14 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                                                                        cipherBlockSize,
                                                                        plainBlockSize,
                                                                        GetAsymmSignatureSize
-                                                                        (scConnection->currentSecuPolicy,
+                                                                        (&scConnection->currentSecuPolicy,
                                                                          publicKeyModulusLength));
                  }
             }else{
                 status = STATUS_NOK;
             }
         }else{
-            status = GetSymmBlocksSizes(scConnection->currentSecuPolicy,
+            status = GetSymmBlocksSizes(&scConnection->currentSecuPolicy,
                                         &cipherBlockSize,
                                         &plainBlockSize);
              if(status == STATUS_OK){
@@ -553,7 +546,7 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                                                                    cipherBlockSize,
                                                                    plainBlockSize,
                                                                    GetSymmSignatureSize
-                                                                    (scConnection->currentSecuPolicy));
+                                                                    (&scConnection->currentSecuPolicy));
              }
         }
     }
@@ -900,9 +893,9 @@ StatusCode EncodePadding(SC_Connection* scConnection,
     *hasPadding = 1; // True
 
     if(symmetricAlgo == UA_FALSE){
-        if(scConnection->runningAppCertificate == UA_NULL ||
+        if(scConnection->runningAppCertificate.length <= 0 ||
            scConnection->runningAppPrivateKey == UA_NULL ||
-           scConnection->otherAppCertificate == UA_NULL){
+           scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
 
@@ -916,10 +909,10 @@ StatusCode EncodePadding(SC_Connection* scConnection,
 
             if(status == STATUS_OK){
                 *signatureSize = GetAsymmSignatureSize
-                                  (scConnection->currentSecuPolicy,
+                                  (&scConnection->currentSecuPolicy,
                                    publicKeyModulusLength);
                 status = GetAsymmBlocksSizes
-                          (scConnection->currentSecuPolicy,
+                          (&scConnection->currentSecuPolicy,
                            publicKeyModulusLength,
                            &cipherBlockSize,
                            &plainBlockSize);
@@ -931,8 +924,8 @@ StatusCode EncodePadding(SC_Connection* scConnection,
            scConnection->currentSecuKeySets.receiverKeySet == UA_NULL){
             status = STATUS_INVALID_STATE;
         }else{
-            *signatureSize = GetSymmSignatureSize(scConnection->currentSecuPolicy);
-            status = GetSymmBlocksSizes(scConnection->currentSecuPolicy,
+            *signatureSize = GetSymmSignatureSize(&scConnection->currentSecuPolicy);
+            status = GetSymmBlocksSizes(&scConnection->currentSecuPolicy,
                                         &cipherBlockSize,
                                         &plainBlockSize);
         }
@@ -976,9 +969,9 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
     StatusCode status = STATUS_OK;
     UA_ByteString signedData;
     if(symmetricAlgo == UA_FALSE){
-        if(scConnection->runningAppCertificate == UA_NULL ||
+        if(scConnection->runningAppCertificate.length <= 0 ||
            scConnection->runningAppPrivateKey == UA_NULL ||
-           scConnection->otherAppCertificate == UA_NULL){
+           scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
             status = ByteString_InitializeFixedSize(&signedData, signatureSize);
@@ -1044,10 +1037,9 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
     }
 
     if(status == STATUS_OK && symmetricAlgo == UA_FALSE){
-        if(scConnection->runningAppCertificate == UA_NULL ||
+        if(scConnection->runningAppCertificate.length <= 0 ||
            scConnection->runningAppPrivateKey == UA_NULL ||
-           scConnection->otherAppCertificate == UA_NULL)
-        {
+           scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
             UA_ByteString* otherAppPublicKey = UA_NULL;
@@ -1232,9 +1224,9 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
            msgBuffer->secureType == UA_OpenSecureChannel &&
            toSign != UA_FALSE)
         {
-            status = CheckMaxSenderCertificateSize(scConnection->runningAppCertificate,
+            status = CheckMaxSenderCertificateSize(&scConnection->runningAppCertificate,
                                                    msgBuffer->buffers->max_size,
-                                                   scConnection->currentSecuPolicy,
+                                                   &scConnection->currentSecuPolicy,
                                                    hasPadding,
                                                    paddingLength,
                                                    hasExtraPadding,
@@ -1338,7 +1330,8 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
         if(status == STATUS_OK){
             uint32_t secuPolicyComparison = 0;
-            status = ByteString_Compare(scConnection->currentSecuPolicy, &securityPolicy, &secuPolicyComparison);
+            status = ByteString_Compare(&scConnection->currentSecuPolicy,
+                                        &securityPolicy, &secuPolicyComparison);
 
             if(status != STATUS_OK || secuPolicyComparison != 0){
                 status = STATUS_INVALID_RCV_PARAMETER;
@@ -1356,7 +1349,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
             }else if(toSign != UA_FALSE){
                 // Check certificate is the same as the one in memory
                 uint32_t otherAppCertComparison = 0;
-                status = ByteString_Compare(scConnection->otherAppCertificate,
+                status = ByteString_Compare(&scConnection->otherAppCertificate,
                                             &senderCertificate,
                                             &otherAppCertComparison);
 
@@ -1398,14 +1391,14 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                 uint32_t runningAppCertComparison = 0;
 
                 status = CryptoProvider_GetCertThumbprintLength(scConnection->currentCryptoProvider,
-                                                                scConnection->runningAppCertificate,
+                                                                &scConnection->runningAppCertificate,
                                                                 &thumbprintLength);
                 if(status == STATUS_OK){
                     if(thumbprintLength == receiverCertThumb.length){
                         status = ByteString_InitializeFixedSize(&curAppCertThumbprint, thumbprintLength);
                         if(status == STATUS_OK){
                             status = CryptoProvider_GetCertThumbprint(scConnection->currentCryptoProvider,
-                                                                      scConnection->runningAppCertificate,
+                                                                      &scConnection->runningAppCertificate,
                                                                       &curAppCertThumbprint);
 
                             if(status == STATUS_OK){
@@ -1673,11 +1666,11 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
         if(isPrecCryptoData == UA_FALSE){
             cryptoProvider = scConnection->currentCryptoProvider;
             securityMode = scConnection->currentSecuMode;
-            securityPolicy = scConnection->currentSecuPolicy;
+            securityPolicy = &scConnection->currentSecuPolicy;
         }else{
             cryptoProvider = scConnection->precCryptoProvider;
             securityMode = scConnection->precSecuMode;
-            securityPolicy = scConnection->precSecuPolicy;
+            securityPolicy = &scConnection->precSecuPolicy;
         }
 
         toVerify = IsMsgSigned(securityMode);
@@ -1842,9 +1835,9 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
     uint32_t newBufferLength = curChunk->length;
     if(scConnection != UA_NULL){
         if(isPrecCryptoData == UA_FALSE){
-            secuPolicy = scConnection->currentSecuPolicy;
+            secuPolicy = &scConnection->currentSecuPolicy;
         }else{
-            secuPolicy = scConnection->precSecuPolicy;
+            secuPolicy = &scConnection->precSecuPolicy;
         }
         // Compute signature size and remove from buffer length
         sigSize = GetSymmSignatureSize(secuPolicy);

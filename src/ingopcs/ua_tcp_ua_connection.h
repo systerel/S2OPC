@@ -43,7 +43,7 @@ typedef StatusCode (TCP_UA_Connection_Event_CB) (void*           tcpConnection,
                                                  StatusCode      status);
 
 typedef struct {
-    UA_String*                  url;
+    UA_String                   url;
     uint32_t                    protocolVersion;
     uint32_t                    receivedProtocolVersion;
     uint32_t                    receiveBufferSize;

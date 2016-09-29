@@ -121,7 +121,6 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     UA_ByteString* bsKey = UA_NULL;
 
     UA_MsgBuffer* sendBuf = cConnection->instance->sendingBuffer;
-    PrivateKey* pkey = UA_NULL;
     uint32_t pkeyLength = 0;
 
     //// Encode request header
@@ -169,14 +168,12 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     }
 
     if(status == STATUS_OK){
-        pkey = CryptoProvider_SymmetricGenereateKey(cConnection->instance->currentCryptoProvider,
-                                                    pkeyLength);
-        if(pkey != UA_NULL){
-            bsKey = PrivateKey_BeginUse(pkey);
+        status = CryptoProvider_SymmetricGenereateKey(cConnection->instance->currentCryptoProvider,
+                                                      pkeyLength,
+                                                      &cConnection->instance->currentNonce);
+        if(status == STATUS_OK){
+            bsKey = PrivateKey_BeginUse(&cConnection->instance->currentNonce);
             status = ByteString_AttachFrom(&openRequest.ClientNonce, bsKey);
-            if(status == STATUS_OK){
-                cConnection->instance->currentNonce = pkey;
-            }
         }else{
             status = STATUS_NOK;
         }
@@ -206,12 +203,15 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
         status = STATUS_OK;
     }
 
-    // Generate next request id
-    requestId = GetNextRequestId(cConnection->instance);
+    if(status == STATUS_OK){
+        // Generate next request id
+        requestId = GetNextRequestId(cConnection->instance);
 
-    // Set security configuration for secure channel request
-    cConnection->instance->currentSecuMode = cConnection->securityMode;
-    cConnection->instance->currentSecuPolicy = &cConnection->securityPolicy;
+        // Set security configuration for secure channel request
+        cConnection->instance->currentSecuMode = cConnection->securityMode;
+        status = String_AttachFrom(&cConnection->instance->currentSecuPolicy,
+                                   &cConnection->securityPolicy);
+    }
 
     if(status == STATUS_OK){
         cProvider = CryptoProvider_Create(&cConnection->securityPolicy);
@@ -318,7 +318,7 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
             cConnection->instance->currentSecuKeySets.receiverKeySet = KeySet_Create();
             cConnection->instance->currentSecuKeySets.senderKeySet = KeySet_Create();
             status = CryptoProvider_ClientDeriveKeySets(cConnection->instance->currentCryptoProvider,
-                                                        cConnection->instance->currentNonce,
+                                                        &cConnection->instance->currentNonce,
                                                         &encObj->ServerNonce,
                                                         encryptKeyLength,
                                                         signKeyLength,
