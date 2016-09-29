@@ -137,7 +137,7 @@ StatusCode UA_ClientApi_BeginFindServers(
     const UA_String*                  a_pLocaleIds,
     int32_t                           a_nNoOfServerUris,
     const UA_String*                  a_pServerUris,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -168,7 +168,7 @@ StatusCode UA_ClientApi_BeginFindServers(
             (OpcUa_Void*)&cRequest,
             &UA_FindServersRequest_EncodeableType,
             &UA_FindServersResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -270,7 +270,7 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
     uint32_t                          a_nMaxRecordsToReturn,
     int32_t                           a_nNoOfServerCapabilityFilter,
     const UA_String*                  a_pServerCapabilityFilter,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -298,7 +298,7 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
             (OpcUa_Void*)&cRequest,
             &UA_FindServersOnNetworkRequest_EncodeableType,
             &UA_FindServersOnNetworkResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -402,7 +402,7 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
     const UA_String*                  a_pLocaleIds,
     int32_t                           a_nNoOfProfileUris,
     const UA_String*                  a_pProfileUris,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -433,7 +433,7 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
             (OpcUa_Void*)&cRequest,
             &UA_GetEndpointsRequest_EncodeableType,
             &UA_GetEndpointsResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -517,7 +517,7 @@ StatusCode UA_ClientApi_BeginRegisterServer(
     OpcUa_Channel                     a_hChannel,
     const UA_RequestHeader*           a_pRequestHeader,
     const UA_RegisteredServer*        a_pServer,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -542,7 +542,7 @@ StatusCode UA_ClientApi_BeginRegisterServer(
             (OpcUa_Void*)&cRequest,
             &UA_RegisterServerRequest_EncodeableType,
             &UA_RegisterServerResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -645,7 +645,7 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
     const UA_RegisteredServer*        a_pServer,
     int32_t                           a_nNoOfDiscoveryConfiguration,
     const UA_ExtensionObject*         a_pDiscoveryConfiguration,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -673,7 +673,7 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
             (OpcUa_Void*)&cRequest,
             &UA_RegisterServer2Request_EncodeableType,
             &UA_RegisterServer2Response_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -816,7 +816,7 @@ StatusCode UA_ClientApi_BeginCreateSession(
     const UA_ByteString*              a_pClientCertificate,
     double                            a_nRequestedSessionTimeout,
     uint32_t                          a_nMaxResponseMessageSize,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -853,7 +853,7 @@ StatusCode UA_ClientApi_BeginCreateSession(
             (OpcUa_Void*)&cRequest,
             &UA_CreateSessionRequest_EncodeableType,
             &UA_CreateSessionResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -974,7 +974,7 @@ StatusCode UA_ClientApi_BeginActivateSession(
     const UA_String*                    a_pLocaleIds,
     const UA_ExtensionObject*           a_pUserIdentityToken,
     const UA_SignatureData*             a_pUserTokenSignature,
-    OpcUa_Channel_PfnRequestComplete*   a_pCallback,
+    UA_Channel_PfnRequestComplete*      a_pCallback,
     OpcUa_Void*                         a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1009,7 +1009,7 @@ StatusCode UA_ClientApi_BeginActivateSession(
             (OpcUa_Void*)&cRequest,
             &UA_ActivateSessionRequest_EncodeableType,
             &UA_ActivateSessionResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -1092,7 +1092,7 @@ StatusCode UA_ClientApi_BeginCloseSession(
     OpcUa_Channel                     a_hChannel,
     const UA_RequestHeader*           a_pRequestHeader,
     UA_Boolean                        a_bDeleteSubscriptions,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1116,7 +1116,7 @@ StatusCode UA_ClientApi_BeginCloseSession(
             (OpcUa_Void*)&cRequest,
             &UA_CloseSessionRequest_EncodeableType,
             &UA_CloseSessionResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -1202,7 +1202,7 @@ StatusCode UA_ClientApi_BeginCancel(
     OpcUa_Channel                     a_hChannel,
     const UA_RequestHeader*           a_pRequestHeader,
     uint32_t                          a_nRequestHandle,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1226,7 +1226,7 @@ StatusCode UA_ClientApi_BeginCancel(
             (OpcUa_Void*)&cRequest,
             &UA_CancelRequest_EncodeableType,
             &UA_CancelResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -1325,7 +1325,7 @@ StatusCode UA_ClientApi_BeginAddNodes(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfNodesToAdd,
     const UA_AddNodesItem*            a_pNodesToAdd,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1351,7 +1351,7 @@ StatusCode UA_ClientApi_BeginAddNodes(
             (OpcUa_Void*)&cRequest,
             &UA_AddNodesRequest_EncodeableType,
             &UA_AddNodesResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -1450,7 +1450,7 @@ StatusCode UA_ClientApi_BeginAddReferences(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfReferencesToAdd,
     const UA_AddReferencesItem*       a_pReferencesToAdd,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1476,7 +1476,7 @@ StatusCode UA_ClientApi_BeginAddReferences(
             (OpcUa_Void*)&cRequest,
             &UA_AddReferencesRequest_EncodeableType,
             &UA_AddReferencesResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -1575,7 +1575,7 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfNodesToDelete,
     const UA_DeleteNodesItem*         a_pNodesToDelete,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1601,7 +1601,7 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
             (OpcUa_Void*)&cRequest,
             &UA_DeleteNodesRequest_EncodeableType,
             &UA_DeleteNodesResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -1700,7 +1700,7 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfReferencesToDelete,
     const UA_DeleteReferencesItem*    a_pReferencesToDelete,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1726,7 +1726,7 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
             (OpcUa_Void*)&cRequest,
             &UA_DeleteReferencesRequest_EncodeableType,
             &UA_DeleteReferencesResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -1832,7 +1832,7 @@ StatusCode UA_ClientApi_BeginBrowse(
     uint32_t                          a_nRequestedMaxReferencesPerNode,
     int32_t                           a_nNoOfNodesToBrowse,
     const UA_BrowseDescription*       a_pNodesToBrowse,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1861,7 +1861,7 @@ StatusCode UA_ClientApi_BeginBrowse(
             (OpcUa_Void*)&cRequest,
             &UA_BrowseRequest_EncodeableType,
             &UA_BrowseResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -1963,7 +1963,7 @@ StatusCode UA_ClientApi_BeginBrowseNext(
     UA_Boolean                        a_bReleaseContinuationPoints,
     int32_t                           a_nNoOfContinuationPoints,
     const UA_ByteString*              a_pContinuationPoints,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1990,7 +1990,7 @@ StatusCode UA_ClientApi_BeginBrowseNext(
             (OpcUa_Void*)&cRequest,
             &UA_BrowseNextRequest_EncodeableType,
             &UA_BrowseNextResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -2089,7 +2089,7 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfBrowsePaths,
     const UA_BrowsePath*              a_pBrowsePaths,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2115,7 +2115,7 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
             (OpcUa_Void*)&cRequest,
             &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
             &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -2208,7 +2208,7 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfNodesToRegister,
     const UA_NodeId*                  a_pNodesToRegister,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2234,7 +2234,7 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
             (OpcUa_Void*)&cRequest,
             &UA_RegisterNodesRequest_EncodeableType,
             &UA_RegisterNodesResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -2321,7 +2321,7 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfNodesToUnregister,
     const UA_NodeId*                  a_pNodesToUnregister,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2347,7 +2347,7 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
             (OpcUa_Void*)&cRequest,
             &UA_UnregisterNodesRequest_EncodeableType,
             &UA_UnregisterNodesResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -2472,7 +2472,7 @@ StatusCode UA_ClientApi_BeginQueryFirst(
     const UA_ContentFilter*           a_pFilter,
     uint32_t                          a_nMaxDataSetsToReturn,
     uint32_t                          a_nMaxReferencesToReturn,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2504,7 +2504,7 @@ StatusCode UA_ClientApi_BeginQueryFirst(
             (OpcUa_Void*)&cRequest,
             &UA_QueryFirstRequest_EncodeableType,
             &UA_QueryFirstResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -2600,7 +2600,7 @@ StatusCode UA_ClientApi_BeginQueryNext(
     const UA_RequestHeader*           a_pRequestHeader,
     UA_Boolean                        a_bReleaseContinuationPoint,
     const UA_ByteString*              a_pContinuationPoint,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2626,7 +2626,7 @@ StatusCode UA_ClientApi_BeginQueryNext(
             (OpcUa_Void*)&cRequest,
             &UA_QueryNextRequest_EncodeableType,
             &UA_QueryNextResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -2731,7 +2731,7 @@ StatusCode UA_ClientApi_BeginRead(
     UA_TimestampsToReturn             a_eTimestampsToReturn,
     int32_t                           a_nNoOfNodesToRead,
     const UA_ReadValueId*             a_pNodesToRead,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2759,7 +2759,7 @@ StatusCode UA_ClientApi_BeginRead(
             (OpcUa_Void*)&cRequest,
             &UA_ReadRequest_EncodeableType,
             &UA_ReadResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -2868,7 +2868,7 @@ StatusCode UA_ClientApi_BeginHistoryRead(
     UA_Boolean                        a_bReleaseContinuationPoints,
     int32_t                           a_nNoOfNodesToRead,
     const UA_HistoryReadValueId*      a_pNodesToRead,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2898,7 +2898,7 @@ StatusCode UA_ClientApi_BeginHistoryRead(
             (OpcUa_Void*)&cRequest,
             &UA_HistoryReadRequest_EncodeableType,
             &UA_HistoryReadResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -2997,7 +2997,7 @@ StatusCode UA_ClientApi_BeginWrite(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfNodesToWrite,
     const UA_WriteValue*              a_pNodesToWrite,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3023,7 +3023,7 @@ StatusCode UA_ClientApi_BeginWrite(
             (OpcUa_Void*)&cRequest,
             &UA_WriteRequest_EncodeableType,
             &UA_WriteResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -3122,7 +3122,7 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfHistoryUpdateDetails,
     const UA_ExtensionObject*         a_pHistoryUpdateDetails,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3148,7 +3148,7 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
             (OpcUa_Void*)&cRequest,
             &UA_HistoryUpdateRequest_EncodeableType,
             &UA_HistoryUpdateResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -3247,7 +3247,7 @@ StatusCode UA_ClientApi_BeginCall(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfMethodsToCall,
     const UA_CallMethodRequest*       a_pMethodsToCall,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3273,7 +3273,7 @@ StatusCode UA_ClientApi_BeginCall(
             (OpcUa_Void*)&cRequest,
             &UA_CallRequest_EncodeableType,
             &UA_CallResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -3378,7 +3378,7 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
     UA_TimestampsToReturn                a_eTimestampsToReturn,
     int32_t                              a_nNoOfItemsToCreate,
     const UA_MonitoredItemCreateRequest* a_pItemsToCreate,
-    OpcUa_Channel_PfnRequestComplete*    a_pCallback,
+    UA_Channel_PfnRequestComplete*       a_pCallback,
     OpcUa_Void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3406,7 +3406,7 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
             (OpcUa_Void*)&cRequest,
             &UA_CreateMonitoredItemsRequest_EncodeableType,
             &UA_CreateMonitoredItemsResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -3511,7 +3511,7 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
     UA_TimestampsToReturn                a_eTimestampsToReturn,
     int32_t                              a_nNoOfItemsToModify,
     const UA_MonitoredItemModifyRequest* a_pItemsToModify,
-    OpcUa_Channel_PfnRequestComplete*    a_pCallback,
+    UA_Channel_PfnRequestComplete*       a_pCallback,
     OpcUa_Void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3539,7 +3539,7 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
             (OpcUa_Void*)&cRequest,
             &UA_ModifyMonitoredItemsRequest_EncodeableType,
             &UA_ModifyMonitoredItemsResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -3644,7 +3644,7 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
     UA_MonitoringMode                 a_eMonitoringMode,
     int32_t                           a_nNoOfMonitoredItemIds,
     const uint32_t*                   a_pMonitoredItemIds,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3672,7 +3672,7 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
             (OpcUa_Void*)&cRequest,
             &UA_SetMonitoringModeRequest_EncodeableType,
             &UA_SetMonitoringModeResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -3796,7 +3796,7 @@ StatusCode UA_ClientApi_BeginSetTriggering(
     const uint32_t*                   a_pLinksToAdd,
     int32_t                           a_nNoOfLinksToRemove,
     const uint32_t*                   a_pLinksToRemove,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3827,7 +3827,7 @@ StatusCode UA_ClientApi_BeginSetTriggering(
             (OpcUa_Void*)&cRequest,
             &UA_SetTriggeringRequest_EncodeableType,
             &UA_SetTriggeringResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -3929,7 +3929,7 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
     uint32_t                          a_nSubscriptionId,
     int32_t                           a_nNoOfMonitoredItemIds,
     const uint32_t*                   a_pMonitoredItemIds,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3956,7 +3956,7 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
             (OpcUa_Void*)&cRequest,
             &UA_DeleteMonitoredItemsRequest_EncodeableType,
             &UA_DeleteMonitoredItemsResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -4066,7 +4066,7 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
     uint32_t                          a_nMaxNotificationsPerPublish,
     UA_Boolean                        a_bPublishingEnabled,
     UA_Byte                           a_nPriority,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4095,7 +4095,7 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
             (OpcUa_Void*)&cRequest,
             &UA_CreateSubscriptionRequest_EncodeableType,
             &UA_CreateSubscriptionResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -4202,7 +4202,7 @@ StatusCode UA_ClientApi_BeginModifySubscription(
     uint32_t                          a_nRequestedMaxKeepAliveCount,
     uint32_t                          a_nMaxNotificationsPerPublish,
     UA_Byte                           a_nPriority,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4231,7 +4231,7 @@ StatusCode UA_ClientApi_BeginModifySubscription(
             (OpcUa_Void*)&cRequest,
             &UA_ModifySubscriptionRequest_EncodeableType,
             &UA_ModifySubscriptionResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -4333,7 +4333,7 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
     UA_Boolean                        a_bPublishingEnabled,
     int32_t                           a_nNoOfSubscriptionIds,
     const uint32_t*                   a_pSubscriptionIds,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4360,7 +4360,7 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
             (OpcUa_Void*)&cRequest,
             &UA_SetPublishingModeRequest_EncodeableType,
             &UA_SetPublishingModeResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -4474,7 +4474,7 @@ StatusCode UA_ClientApi_BeginPublish(
     const UA_RequestHeader*               a_pRequestHeader,
     int32_t                               a_nNoOfSubscriptionAcknowledgements,
     const UA_SubscriptionAcknowledgement* a_pSubscriptionAcknowledgements,
-    OpcUa_Channel_PfnRequestComplete*     a_pCallback,
+    UA_Channel_PfnRequestComplete*        a_pCallback,
     OpcUa_Void*                           a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4500,7 +4500,7 @@ StatusCode UA_ClientApi_BeginPublish(
             (OpcUa_Void*)&cRequest,
             &UA_PublishRequest_EncodeableType,
             &UA_PublishResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -4589,7 +4589,7 @@ StatusCode UA_ClientApi_BeginRepublish(
     const UA_RequestHeader*           a_pRequestHeader,
     uint32_t                          a_nSubscriptionId,
     uint32_t                          a_nRetransmitSequenceNumber,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4614,7 +4614,7 @@ StatusCode UA_ClientApi_BeginRepublish(
             (OpcUa_Void*)&cRequest,
             &UA_RepublishRequest_EncodeableType,
             &UA_RepublishResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -4716,7 +4716,7 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
     int32_t                           a_nNoOfSubscriptionIds,
     const uint32_t*                   a_pSubscriptionIds,
     UA_Boolean                        a_bSendInitialValues,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4743,7 +4743,7 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
             (OpcUa_Void*)&cRequest,
             &UA_TransferSubscriptionsRequest_EncodeableType,
             &UA_TransferSubscriptionsResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 
@@ -4842,7 +4842,7 @@ StatusCode UA_ClientApi_BeginDeleteSubscriptions(
     const UA_RequestHeader*           a_pRequestHeader,
     int32_t                           a_nNoOfSubscriptionIds,
     const uint32_t*                   a_pSubscriptionIds,
-    OpcUa_Channel_PfnRequestComplete* a_pCallback,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
     OpcUa_Void*                       a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4868,7 +4868,7 @@ StatusCode UA_ClientApi_BeginDeleteSubscriptions(
             (OpcUa_Void*)&cRequest,
             &UA_DeleteSubscriptionsRequest_EncodeableType,
             &UA_DeleteSubscriptionsResponse_EncodeableType,
-            (OpcUa_Channel_PfnRequestComplete*)a_pCallback,
+            (UA_Channel_PfnRequestComplete*   )a_pCallback,
             a_pCallbackData);
     }
 

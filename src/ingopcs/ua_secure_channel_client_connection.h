@@ -17,6 +17,12 @@
 #include <ua_namespace_table.h>
 #include <ua_secure_channel_low_level.h>
 
+struct SC_ClientConnection;
+
+typedef StatusCode (SC_ConnectionEvent_CB)(struct SC_ClientConnection* cConnection,
+                                           void*                       cbData,
+                                           SC_ConnectionEvent          event,
+                                           StatusCode                  status);
 
 typedef struct SC_ClientConnection
 {
@@ -63,8 +69,14 @@ PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
 void SC_PendingRequestDelete(PendingRequest*);
 
 
-SC_ClientConnection* SC_Client_Create(UA_NamespaceTable*  namespaceTable,
-                                      UA_EncodeableType** encodeableTypes);
+SC_ClientConnection* SC_Client_Create();
+StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
+                               UA_NamespaceTable*   namespaceTable,
+                               UA_EncodeableType**  encodeableTypes);
+
+SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*  namespaceTable,
+                                                  UA_EncodeableType** encodeableTypes);
+
 void SC_Client_Delete(SC_ClientConnection* scConnection);
 
 StatusCode SC_Client_Connect(SC_ClientConnection*   connection,

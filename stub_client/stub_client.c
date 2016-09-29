@@ -171,7 +171,7 @@ int main(void){
 	OpcUa_GotoErrorIfBad(uStatus);
 
     // Create channel object
-    uStatus = OpcUa_Channel_Create(&hChannel, OpcUa_Channel_SerializerType_Binary);
+    uStatus = UA_Channel_Create(&hChannel, OpcUa_Channel_SerializerType_Binary);
 	OpcUa_GotoErrorIfBad(uStatus);
 
     printf ("%d\n", uStatus);
@@ -209,19 +209,19 @@ int main(void){
 #endif //OPCUA_MULTITHREADED
 
     // Start connection to server
-    uStatus = OpcUa_Channel_BeginConnect(hChannel,
-    									 sEndpointUrl,
-										 //sTransportProfileUri,
-										 &ClientCertificate,           /* Client Certificate       */
-										 &ClientPrivateKey,            /* Private Key              */
-										 &ServerCertificate,           /* Server Certificate       */
-										 &pPKIConfig,                  /* PKI Config               */
-										 pRequestedSecurityPolicyUri, /* Request secu policy */
-										 5,                            /* Request lifetime */
-										 messageSecurityMode,          /* Message secu mode */
-										 10,                           /* Network timeout */
-										 StubClient_ConnectionEvent_Callback,
-										 &Callback_Data);              /* Connect Callback Data   */
+    uStatus = UA_Channel_BeginConnect(hChannel,
+                                      sEndpointUrl,
+                                      //sTransportProfileUri,
+                                      (UA_ByteString*) &ClientCertificate,           /* Client Certificate       */
+                                      (UA_ByteString*) &ClientPrivateKey,            /* Private Key              */
+                                      (UA_ByteString*) &ServerCertificate,           /* Server Certificate       */
+                                      &pPKIConfig,                  /* PKI Config               */
+                                      (char*) pRequestedSecurityPolicyUri, /* Request secu policy */
+                                      5,                            /* Request lifetime */
+                                      messageSecurityMode,          /* Message secu mode */
+                                      10,                           /* Network timeout */
+                                      (UA_Channel_PfnConnectionStateChanged*) StubClient_ConnectionEvent_Callback,
+                                      &Callback_Data);              /* Connect Callback Data   */
 
     OpcUa_GotoErrorIfBad(uStatus);
 
@@ -279,7 +279,7 @@ int main(void){
                                              &localId,           // local id
                                              0,            // No of profile URI
                                              &profileUri,           // profile uri
-                                             StubClient_ResponseEvent_Callback, // response call back
+                                             (UA_Channel_PfnRequestComplete*) StubClient_ResponseEvent_Callback, // response call back
                                              &Callback_Data_Get); // call back data
 
     while (noResp && loopCpt * sleepTimeout <= loopTimeout)

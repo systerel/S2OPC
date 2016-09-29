@@ -34,6 +34,20 @@ typedef enum SC_ConnectionState
     SC_Connection_Error
 } SC_ConnectionState;
 
+
+typedef enum {
+    UA_ConnectionEvent_Invalid = 0x00,
+    UA_ConnectionEvent_Connected = 0x01,
+//    UA_ConnectionEvent_Reconnecting, => not the case anymore ? mantis #3371
+    UA_ConnectionEvent_Disconnected = 0x02,
+    UA_ConnectionEvent_SecureMessageComplete = 0x03,
+    UA_ConnectionEvent_SecureMessageChunk = 0x04,
+    UA_ConnectionEvent_SecureMessageAbort = 0x05,
+//    UA_ConnectionEvent_RefillSendQueue, => to be evaluated, socket behavior
+    UA_ConnectionEvent_UnexpectedError = 0x06
+} SC_ConnectionEvent;
+
+
 typedef struct {
     TCP_UA_Connection*     transportConnection;
     SC_ConnectionState     state;
@@ -172,7 +186,7 @@ StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
 // (otherwise could fail on abort chunk or unexpected request id)
 StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                           uint32_t            requestId,
-                          UA_EncodeableType*  expEncType,
+                          UA_EncodeableType*  expEncType, // Should not be null for efficiency !
                           UA_EncodeableType*  errEncType,
                           UA_EncodeableType** recEncType,
                           void**              encObj);

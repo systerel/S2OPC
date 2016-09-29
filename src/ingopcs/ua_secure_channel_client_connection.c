@@ -43,9 +43,7 @@ void SC_PendingRequestDelete(PendingRequest* pRequest){
     }
 }
 
-SC_ClientConnection* SC_Client_Create(UA_NamespaceTable*  namespaceTable,
-                                      UA_EncodeableType** encodeableTypes)
-{
+SC_ClientConnection* SC_Client_Create(){
     SC_ClientConnection* scClientConnection = UA_NULL;
     SC_Connection* sConnection = SC_Create();
 
@@ -55,8 +53,6 @@ SC_ClientConnection* SC_Client_Create(UA_NamespaceTable*  namespaceTable,
         if(scClientConnection != UA_NULL){
             memset (scClientConnection, 0, sizeof(SC_ClientConnection));
             Namespace_Initialize(&scClientConnection->namespaces);
-            Namespace_AttachTable(&scClientConnection->namespaces, namespaceTable);
-            scClientConnection->encodeableTypes = encodeableTypes;
             ByteString_Initialize(&scClientConnection->serverCertificate);
             ByteString_Initialize(&scClientConnection->clientCertificate);
             PrivateKey_Initialize(&scClientConnection->clientKey);
@@ -74,6 +70,33 @@ SC_ClientConnection* SC_Client_Create(UA_NamespaceTable*  namespaceTable,
         }
     }else{
         SC_Delete(sConnection);
+    }
+    return scClientConnection;
+}
+
+StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
+                               UA_NamespaceTable*   namespaceTable,
+                               UA_EncodeableType**  encodeableTypes){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(cConnection != UA_NULL && cConnection->instance != UA_NULL){
+        status = Namespace_AttachTable(&cConnection->namespaces, namespaceTable);
+        cConnection->encodeableTypes = encodeableTypes;
+    }
+    return status;
+}
+
+SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*   namespaceTable,
+                                                  UA_EncodeableType**  encodeableTypes)
+{
+    SC_ClientConnection* scClientConnection = UA_NULL;
+    StatusCode status = STATUS_OK;
+    scClientConnection = SC_Client_Create();
+    status = SC_Client_Configure(scClientConnection,
+                                 namespaceTable,
+                                 encodeableTypes);
+    if(status != STATUS_OK){
+        SC_Client_Delete(scClientConnection);
+        scClientConnection = UA_NULL;
     }
     return scClientConnection;
 }
@@ -592,10 +615,9 @@ StatusCode OnTransportEvent_CB(void*           connection,
                         if(retStatus == STATUS_OK){
                             cConnection->instance->state = SC_Connection_Connected;
                             // TODO: cases in which retStatus != OK should be sent ?
-                            retStatus = cConnection->callback((OpcUa_Connection*) cConnection,
+                            retStatus = cConnection->callback(cConnection,
                                                               cConnection->callbackData,
                                                               OpcUa_ConnectionEvent_Connect,
-                                                              UA_NULL,
                                                               retStatus);
                         }
                     }else{
@@ -720,8 +742,7 @@ StatusCode SC_Send_Request(SC_ClientConnection* connection,
     uint32_t requestId = 0;
     if(connection != UA_NULL &&
        requestType != UA_NULL &&
-       request != UA_NULL &&
-       responseType != UA_NULL)
+       request != UA_NULL)
     {
         requestId = GetNextRequestId(connection->instance);
         status = SC_EncodeSecureMessage(connection->instance,

@@ -32,7 +32,7 @@
 #ifdef OPCUA_HAVE_CLIENTAPI
 
 #include <ua_types.h>
-#include <opcua_channel.h>
+#include <ua_channel.h>
 
 OPCUA_BEGIN_EXTERN_C
 
@@ -63,7 +63,7 @@ StatusCode UA_ClientApi_BeginFindServers(
     const UA_String*                  pLocaleIds,
     int32_t                           nNoOfServerUris,
     const UA_String*                  pServerUris,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -93,7 +93,7 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
     uint32_t                          nMaxRecordsToReturn,
     int32_t                           nNoOfServerCapabilityFilter,
     const UA_String*                  pServerCapabilityFilter,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -124,7 +124,7 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
     const UA_String*                  pLocaleIds,
     int32_t                           nNoOfProfileUris,
     const UA_String*                  pProfileUris,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -145,7 +145,7 @@ StatusCode UA_ClientApi_BeginRegisterServer(
     OpcUa_Channel                     hChannel,
     const UA_RequestHeader*           pRequestHeader,
     const UA_RegisteredServer*        pServer,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -174,7 +174,7 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
     const UA_RegisteredServer*        pServer,
     int32_t                           nNoOfDiscoveryConfiguration,
     const UA_ExtensionObject*         pDiscoveryConfiguration,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -220,7 +220,7 @@ StatusCode UA_ClientApi_BeginCreateSession(
     const UA_ByteString*              pClientCertificate,
     double                            nRequestedSessionTimeout,
     uint32_t                          nMaxResponseMessageSize,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -258,7 +258,7 @@ StatusCode UA_ClientApi_BeginActivateSession(
     const UA_String*                    pLocaleIds,
     const UA_ExtensionObject*           pUserIdentityToken,
     const UA_SignatureData*             pUserTokenSignature,
-    OpcUa_Channel_PfnRequestComplete*   pCallback,
+    UA_Channel_PfnRequestComplete*      pCallback,
     OpcUa_Void*                         pCallbackData);
 #endif
 
@@ -279,7 +279,7 @@ StatusCode UA_ClientApi_BeginCloseSession(
     OpcUa_Channel                     hChannel,
     const UA_RequestHeader*           pRequestHeader,
     UA_Boolean                        bDeleteSubscriptions,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -301,7 +301,7 @@ StatusCode UA_ClientApi_BeginCancel(
     OpcUa_Channel                     hChannel,
     const UA_RequestHeader*           pRequestHeader,
     uint32_t                          nRequestHandle,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -328,7 +328,7 @@ StatusCode UA_ClientApi_BeginAddNodes(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfNodesToAdd,
     const UA_AddNodesItem*            pNodesToAdd,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -355,7 +355,7 @@ StatusCode UA_ClientApi_BeginAddReferences(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfReferencesToAdd,
     const UA_AddReferencesItem*       pReferencesToAdd,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -382,7 +382,7 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfNodesToDelete,
     const UA_DeleteNodesItem*         pNodesToDelete,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -409,7 +409,7 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfReferencesToDelete,
     const UA_DeleteReferencesItem*    pReferencesToDelete,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -440,7 +440,7 @@ StatusCode UA_ClientApi_BeginBrowse(
     uint32_t                          nRequestedMaxReferencesPerNode,
     int32_t                           nNoOfNodesToBrowse,
     const UA_BrowseDescription*       pNodesToBrowse,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -469,7 +469,7 @@ StatusCode UA_ClientApi_BeginBrowseNext(
     UA_Boolean                        bReleaseContinuationPoints,
     int32_t                           nNoOfContinuationPoints,
     const UA_ByteString*              pContinuationPoints,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -496,7 +496,7 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfBrowsePaths,
     const UA_BrowsePath*              pBrowsePaths,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -521,7 +521,7 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfNodesToRegister,
     const UA_NodeId*                  pNodesToRegister,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -544,7 +544,7 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfNodesToUnregister,
     const UA_NodeId*                  pNodesToUnregister,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -583,7 +583,7 @@ StatusCode UA_ClientApi_BeginQueryFirst(
     const UA_ContentFilter*           pFilter,
     uint32_t                          nMaxDataSetsToReturn,
     uint32_t                          nMaxReferencesToReturn,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -609,7 +609,7 @@ StatusCode UA_ClientApi_BeginQueryNext(
     const UA_RequestHeader*           pRequestHeader,
     UA_Boolean                        bReleaseContinuationPoint,
     const UA_ByteString*              pContinuationPoint,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -640,7 +640,7 @@ StatusCode UA_ClientApi_BeginRead(
     UA_TimestampsToReturn             eTimestampsToReturn,
     int32_t                           nNoOfNodesToRead,
     const UA_ReadValueId*             pNodesToRead,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -673,7 +673,7 @@ StatusCode UA_ClientApi_BeginHistoryRead(
     UA_Boolean                        bReleaseContinuationPoints,
     int32_t                           nNoOfNodesToRead,
     const UA_HistoryReadValueId*      pNodesToRead,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -700,7 +700,7 @@ StatusCode UA_ClientApi_BeginWrite(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfNodesToWrite,
     const UA_WriteValue*              pNodesToWrite,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -727,7 +727,7 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfHistoryUpdateDetails,
     const UA_ExtensionObject*         pHistoryUpdateDetails,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -754,7 +754,7 @@ StatusCode UA_ClientApi_BeginCall(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfMethodsToCall,
     const UA_CallMethodRequest*       pMethodsToCall,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -785,7 +785,7 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
     UA_TimestampsToReturn                eTimestampsToReturn,
     int32_t                              nNoOfItemsToCreate,
     const UA_MonitoredItemCreateRequest* pItemsToCreate,
-    OpcUa_Channel_PfnRequestComplete*    pCallback,
+    UA_Channel_PfnRequestComplete*       pCallback,
     OpcUa_Void*                          pCallbackData);
 #endif
 
@@ -816,7 +816,7 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
     UA_TimestampsToReturn                eTimestampsToReturn,
     int32_t                              nNoOfItemsToModify,
     const UA_MonitoredItemModifyRequest* pItemsToModify,
-    OpcUa_Channel_PfnRequestComplete*    pCallback,
+    UA_Channel_PfnRequestComplete*       pCallback,
     OpcUa_Void*                          pCallbackData);
 #endif
 
@@ -847,7 +847,7 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
     UA_MonitoringMode                 eMonitoringMode,
     int32_t                           nNoOfMonitoredItemIds,
     const uint32_t*                   pMonitoredItemIds,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -886,7 +886,7 @@ StatusCode UA_ClientApi_BeginSetTriggering(
     const uint32_t*                   pLinksToAdd,
     int32_t                           nNoOfLinksToRemove,
     const uint32_t*                   pLinksToRemove,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -915,7 +915,7 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
     uint32_t                          nSubscriptionId,
     int32_t                           nNoOfMonitoredItemIds,
     const uint32_t*                   pMonitoredItemIds,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -950,7 +950,7 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
     uint32_t                          nMaxNotificationsPerPublish,
     UA_Boolean                        bPublishingEnabled,
     UA_Byte                           nPriority,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -984,7 +984,7 @@ StatusCode UA_ClientApi_BeginModifySubscription(
     uint32_t                          nRequestedMaxKeepAliveCount,
     uint32_t                          nMaxNotificationsPerPublish,
     UA_Byte                           nPriority,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -1013,7 +1013,7 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
     UA_Boolean                        bPublishingEnabled,
     int32_t                           nNoOfSubscriptionIds,
     const uint32_t*                   pSubscriptionIds,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -1045,7 +1045,7 @@ StatusCode UA_ClientApi_BeginPublish(
     const UA_RequestHeader*               pRequestHeader,
     int32_t                               nNoOfSubscriptionAcknowledgements,
     const UA_SubscriptionAcknowledgement* pSubscriptionAcknowledgements,
-    OpcUa_Channel_PfnRequestComplete*     pCallback,
+    UA_Channel_PfnRequestComplete*        pCallback,
     OpcUa_Void*                           pCallbackData);
 #endif
 
@@ -1069,7 +1069,7 @@ StatusCode UA_ClientApi_BeginRepublish(
     const UA_RequestHeader*           pRequestHeader,
     uint32_t                          nSubscriptionId,
     uint32_t                          nRetransmitSequenceNumber,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -1098,7 +1098,7 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
     int32_t                           nNoOfSubscriptionIds,
     const uint32_t*                   pSubscriptionIds,
     UA_Boolean                        bSendInitialValues,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
@@ -1125,7 +1125,7 @@ StatusCode UA_ClientApi_BeginDeleteSubscriptions(
     const UA_RequestHeader*           pRequestHeader,
     int32_t                           nNoOfSubscriptionIds,
     const uint32_t*                   pSubscriptionIds,
-    OpcUa_Channel_PfnRequestComplete* pCallback,
+    UA_Channel_PfnRequestComplete*    pCallback,
     OpcUa_Void*                       pCallbackData);
 #endif
 
