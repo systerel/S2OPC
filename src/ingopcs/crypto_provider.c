@@ -14,7 +14,7 @@
 #include "crypto_profiles.h"
 
 
-CryptoProvider *CryptoProvider_Create_char(const char *uri)
+CryptoProvider *CryptoProvider_Create_Low(const char *uri)
 {
     CryptoProvider *pCryptoProvider = UA_NULL;
     const CryptoProfile *pProfile = UA_NULL;
@@ -45,7 +45,7 @@ CryptoProvider *CryptoProvider_Create(const UA_String *uri)
 
     if(UA_NULL != cUri)
     {
-        pCrypto = CryptoProvider_Create_char(cUri);
+        pCrypto = CryptoProvider_Create_Low(cUri);
         free(cUri);
     }
 
@@ -60,5 +60,35 @@ void CryptoProvider_Delete(CryptoProvider* pCryptoProvider)
         CryptoProvider_LibDeinit(pCryptoProvider);
         free(pCryptoProvider);
     }
+}
+
+
+StatusCode CryptoProvider_SymmetricEncrypt_Low(const struct CryptoProvider *pProvider,
+                                               const uint8_t *pInput,
+                                               uint32_t lenPlainText,
+                                               const KeyBuffer *pKey,
+                                               const uint8_t *pIV,
+                                               uint8_t *pOutput,
+                                               uint32_t lenOutput)
+{
+    if(UA_NULL != pProvider && UA_NULL != pProvider->pProfile)
+        return pProvider->pProfile->pFnSymmEncrypt(pProvider, pInput, lenPlainText, pKey, pIV, pOutput, lenOutput);
+
+    return STATUS_INVALID_PARAMETERS;
+}
+
+
+StatusCode CryptoProvider_SymmetricDecrypt_Low(const struct CryptoProvider *pProvider,
+                                               const uint8_t *pInput,
+                                               uint32_t lenCipherText,
+                                               const KeyBuffer *pKey,
+                                               const uint8_t *pIV,
+                                               uint8_t *pOutput,
+                                               uint32_t lenOutput)
+{
+    if(UA_NULL != pProvider && UA_NULL != pProvider->pProfile)
+        return pProvider->pProfile->pFnSymmDecrypt(pProvider, pInput, lenCipherText, pKey, pIV, pOutput, lenOutput);
+
+    return STATUS_INVALID_PARAMETERS;
 }
 
