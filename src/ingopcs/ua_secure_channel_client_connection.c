@@ -78,16 +78,16 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
             PKIProvider_Delete(scConnection->pkiProvider);
         }
         if(scConnection->serverCertificate != UA_NULL){
-            ByteString_Clear(scConnection->serverCertificate);
+            ByteString_Delete(scConnection->serverCertificate);
         }
         if(scConnection->clientCertificate != UA_NULL){
-            ByteString_Clear(scConnection->clientCertificate);
+            ByteString_Delete(scConnection->clientCertificate);
         }
         if(scConnection->pendingRequests != UA_NULL){
             free(scConnection->pendingRequests);
         }
         if(scConnection->securityPolicy != UA_NULL){
-            String_Clear(scConnection->securityPolicy);
+            String_Delete(scConnection->securityPolicy);
         }
         if(scConnection->instance != UA_NULL){
             SC_Delete(scConnection->instance);
@@ -191,6 +191,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
                               &openRequest);
 
     PrivateKey_EndUse(bsKey);
+    UA_OpenSecureChannelRequest_Clear(&openRequest);
 
     return status;
 }
@@ -427,7 +428,9 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     uint32_t abortedRequestId = 0;
     StatusCode abortReqStatus = STATUS_NOK;
     uint32_t requestId = 0;
-    UA_String* reason = UA_NULL;
+    UA_String reason;
+    String_Initialize(&reason);
+
     PendingRequest* pRequest = UA_NULL;
     UA_EncodeableType* recEncType = UA_NULL;
     void* encObj = UA_NULL;
@@ -450,9 +453,6 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
         if(status != STATUS_OK){
             abortReqStatus = status;
             //TODO: report (trace) and call appropriate callback ?
-            if(reason != UA_NULL){
-                String_Clear(reason);
-            }
         }
     }
 
@@ -525,6 +525,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
         }
     }
 
+    String_Clear(&reason);
     return status;
 }
 
@@ -652,11 +653,16 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
         {
             // Create PKI provider
             connection->pkiProvider = PKIProvider_Create(pkiConfig);
-            connection->clientCertificate = ByteString_Copy(clientCertificate);
+            connection->clientCertificate = ByteString_Create();
+            ByteString_Copy(connection->clientCertificate, clientCertificate);
             connection->clientKey = PrivateKey_Create(clientKey);
-            connection->serverCertificate = ByteString_Copy(serverCertificate);
+            connection->serverCertificate = ByteString_Create();
+            ByteString_Copy(connection->serverCertificate, serverCertificate);
             connection->securityMode = securityMode;
-            connection->securityPolicy = String_CreateFromCString(securityPolicy);
+
+            connection->securityPolicy = String_Create();
+            status = String_InitializeFromCString(connection->securityPolicy, securityPolicy);
+
             connection->requestedLifetime = requestedLifetime;
             connection->callback = callback;
             connection->callbackData = callbackData;
@@ -668,7 +674,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                connection->securityPolicy == UA_NULL)
             {
                 status = STATUS_NOK;
-            }else{
+            }else if(status == STATUS_OK){
                 // TODO: check security mode = None if securityPolicy != None ??? => see http://opcfoundation.org/UA-Profile/UA/SecurityPolicy%23Basic128Rsa15
                 connection->instance->state = SC_Connection_Connecting_Transport;
                 status = TCP_UA_Connection_Connect(connection->instance->transportConnection,

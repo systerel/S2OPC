@@ -164,7 +164,7 @@ StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
                              uint32_t*      abortReqId);
 
 StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
-                              UA_String**    reason);
+                              UA_String*     reason);
 
 // SC_CheckPrecChunk and SC_CheckAbortChunk to be called before calling decode chunk
 // HYP: msgBuffers->isFinal = Intermediate or Final

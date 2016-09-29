@@ -62,6 +62,7 @@ typedef int8_t UA_SByte;
 typedef struct {
     int32_t   length;
     UA_Byte*  characters;
+    uint8_t   clearBytes; // flag indicating if bytes must be freed
 } UA_ByteString;
 
 // TODO: modify string representation for binary compatibility ?
@@ -286,33 +287,36 @@ void Double_Clear(double* d);
 
 void ByteString_Initialize(UA_ByteString* bstring);
 UA_ByteString* ByteString_Create(void);
-UA_ByteString* ByteString_CreateFixedSize(uint32_t size);
+StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size);
 StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src);
-UA_ByteString* ByteString_Copy(UA_ByteString* src);
+StatusCode ByteString_Copy(UA_ByteString* dest, UA_ByteString* src);
 void ByteString_Clear(UA_ByteString* bstring);
-StatusCode ByteString_Compare(UA_ByteString* left,
-                              UA_ByteString* right,
-                              uint32_t*  comparison);
-uint32_t ByteString_Equal(UA_ByteString* left,
-                          UA_ByteString* right);
+void ByteString_Delete(UA_ByteString* bstring);
+
+StatusCode ByteString_Compare(const UA_ByteString* left,
+                              const UA_ByteString* right,
+                              uint32_t*            comparison);
+uint32_t ByteString_Equal(const UA_ByteString* left,
+                          const UA_ByteString* right);
 
 void String_Initialize(UA_String* string);
 UA_String* String_Create(void);
 
 StatusCode String_CopyFromCString(UA_String* string, char* cString);
-UA_String* String_CreateFromCString(char* cString);
+StatusCode String_InitializeFromCString(UA_String* string, char* cString);
 char* String_GetCString(UA_String* string);
 
 StatusCode String_AttachFrom(UA_String* dest, UA_String* src);
-UA_String* String_Copy(UA_String* src);
+StatusCode String_Copy(UA_String* dest, UA_String* src);
 void String_Clear(UA_String* bstring);
+void String_Delete(UA_String* bstring);
 
-StatusCode String_Compare(UA_String* left,
-                          UA_String* right,
-                          uint32_t*  comparison);
+StatusCode String_Compare(const UA_String* left,
+                          const UA_String* right,
+                          uint32_t*        comparison);
 
-uint32_t String_Equal(UA_String* left,
-                      UA_String* right);
+uint32_t String_Equal(const UA_String* left,
+                      const UA_String* right);
 
 void XmlElement_Initialize(UA_XmlElement* xmlElt);
 void XmlElement_Clear(UA_XmlElement* xmlElt);

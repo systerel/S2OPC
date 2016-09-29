@@ -16,7 +16,8 @@ PrivateKey* PrivateKey_Create(UA_ByteString* key)
         if(key->length > 0){
             pkey = (PrivateKey*) malloc(sizeof(PrivateKey));
             if(pkey != UA_NULL){
-                pkey->key = ByteString_Copy(key);
+                ByteString_Initialize(&pkey->key);
+                ByteString_Copy(&pkey->key, key);
             }
         }
     }
@@ -26,19 +27,17 @@ PrivateKey* PrivateKey_Create(UA_ByteString* key)
 void PrivateKey_Delete(PrivateKey* pkey)
 {
     if(pkey != UA_NULL){
-        if(pkey->key != UA_NULL){
-            ByteString_Clear(pkey->key);
-        }
+        ByteString_Clear(&pkey->key);
         free(pkey);
     }
 }
 
 UA_ByteString* PrivateKey_BeginUse(PrivateKey* pkey)
 {
-    UA_ByteString* key = UA_NULL;
+    UA_ByteString* key = ByteString_Create();
     if(pkey != UA_NULL){
-        if(pkey->key->length > 0){
-            key = ByteString_Copy(pkey->key);
+        if(pkey->key.length > 0){
+            ByteString_Copy(key, &pkey->key);
         }// In other cases an empty key is not a valid key
     }
     return key;
@@ -48,12 +47,12 @@ void PrivateKey_EndUse(UA_ByteString* key)
 {
     if(key != UA_NULL){
         memset(key->characters, 0, key->length);
-        ByteString_Clear(key);
+        ByteString_Delete(key);
     }
 }
 
 uint32_t PrivateKey_GetSize(PrivateKey* pkey)
 {
-    return pkey->key->length;
+    return pkey->key.length;
 }
 

@@ -11,7 +11,7 @@
 #include "ua_builtintypes.h"
 
 typedef struct {
-    UA_ByteString* key; // to modify into non contiguous memory storage
+    UA_ByteString key; // to modify into non contiguous memory storage
 } PrivateKey;
 
 PrivateKey* PrivateKey_Create(UA_ByteString* key);

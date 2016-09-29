@@ -99,6 +99,7 @@ void ByteString_Initialize(UA_ByteString* bstring){
     if(bstring != UA_NULL){
         bstring->length = -1;
         bstring->characters = UA_NULL;
+        bstring->clearBytes = 1; // True unless characters attached
     }
 }
 
@@ -109,20 +110,20 @@ UA_ByteString* ByteString_Create(){
     return bstring;
 }
 
-UA_ByteString* ByteString_CreateFixedSize(uint32_t size){
-    UA_ByteString* bstring = UA_NULL;
-    bstring = (UA_ByteString*) malloc(sizeof(UA_ByteString));
+StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
     if(bstring != UA_NULL){
+        status = STATUS_OK;
+        ByteString_Initialize(bstring);
         bstring->length = size;
         bstring->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*size);
         if(bstring->characters != UA_NULL){
             memset(bstring->characters, 0, size);
         }else{
-            free(bstring);
-            bstring = UA_NULL;
+            status = STATUS_NOK;
         }
     }
-    return bstring;
+    return status;
 }
 
 StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
@@ -133,31 +134,40 @@ StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
         status = STATUS_OK;
         dest->length = src->length;
         dest->characters = src->characters;
+        dest->clearBytes = UA_FALSE; // dest->characters will not be freed on clear
     }
     return status;
 }
 
-UA_ByteString* ByteString_Copy(UA_ByteString* src){
-    UA_ByteString* dest = UA_NULL;
-    if(src != UA_NULL){
-        dest = ByteString_Create();
-        if(dest != UA_NULL){
-            if(src->length > 0){
-                dest->length = src->length;
-                dest->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->length);
-                // No need of secure copy, both have same size here
-                memcpy(dest->characters, src->characters, dest->length);
-            } // else only -1 value is a correct value as created
+StatusCode ByteString_Copy(UA_ByteString* dest, UA_ByteString* src){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(dest != UA_NULL && dest->characters == UA_NULL &&
+       src != UA_NULL && src->length > 0){
+        status = STATUS_OK;
+        dest->length = src->length;
+        dest->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->length);
+        if(dest->characters != UA_NULL){
+            // No need of secure copy, both have same size here
+            memcpy(dest->characters, src->characters, dest->length);
+        }else{
+            status = STATUS_NOK;
         }
     }
-    return dest;
+    return status;
 }
 
 void ByteString_Clear(UA_ByteString* bstring){
     if(bstring != UA_NULL){
-        if(bstring->characters != UA_NULL){
+        if(bstring->characters != UA_NULL &&
+           bstring->clearBytes != UA_FALSE){
             free(bstring->characters);
         }
+    }
+}
+
+void ByteString_Delete(UA_ByteString* bstring){
+    if(bstring != UA_NULL){
+        ByteString_Clear(bstring);
         free(bstring);
     }
 }
@@ -174,11 +184,16 @@ StatusCode String_AttachFrom(UA_String* dest, UA_String* src){
     return ByteString_AttachFrom((UA_ByteString*) dest, (UA_ByteString*) src);
 }
 
-UA_String* String_Copy(UA_String* src){
-    return (UA_String*) ByteString_Copy((UA_ByteString*) src);
+StatusCode String_Copy(UA_String* dest, UA_String* src){
+    return ByteString_Copy((UA_ByteString*) dest, (UA_ByteString*) src);
 }
+
 void String_Clear(UA_String* string){
     ByteString_Clear((UA_ByteString*) string);
+}
+
+void String_Delete(UA_String* string){
+    String_Delete((UA_ByteString*) string);
 }
 
 StatusCode String_CopyFromCString(UA_String* string, char* cString){
@@ -216,16 +231,15 @@ StatusCode String_CopyFromCString(UA_String* string, char* cString){
     return status;
 }
 
-UA_String* String_CreateFromCString(char* cString){
+StatusCode String_InitializeFromCString(UA_String* string, char* cString){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_String* string = String_Create();
-    status = String_CopyFromCString(string, cString);
 
-    if(status != STATUS_OK){
-        String_Clear(string);
-        string = UA_NULL;
+    if(string != UA_NULL){
+        String_Initialize(string);
+        status = String_CopyFromCString(string, cString);
     }
-    return string;
+
+    return status;
 }
 
 
@@ -251,9 +265,9 @@ char* String_GetCString(UA_String* string){
     return cString;
 }
 
-StatusCode ByteString_Compare(UA_ByteString* left,
-                              UA_ByteString* right,
-                              uint32_t*      comparison)
+StatusCode ByteString_Compare(const UA_ByteString* left,
+                              const UA_ByteString* right,
+                              uint32_t*            comparison)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
 
@@ -280,8 +294,8 @@ StatusCode ByteString_Compare(UA_ByteString* left,
     return status;
 }
 
-uint32_t ByteString_Equal(UA_ByteString* left,
-                          UA_ByteString* right)
+uint32_t ByteString_Equal(const UA_ByteString* left,
+                          const UA_ByteString* right)
 {
     uint32_t compare = 0;
     uint32_t result = UA_FALSE;
@@ -293,17 +307,17 @@ uint32_t ByteString_Equal(UA_ByteString* left,
     return result;
 }
 
-StatusCode String_Compare(UA_String* left,
-                          UA_String* right,
-                          uint32_t*  comparison)
+StatusCode String_Compare(const UA_String* left,
+                          const UA_String* right,
+                          uint32_t*        comparison)
 {
 
     return ByteString_Compare((UA_ByteString*) left,
                               (UA_ByteString*) right, comparison);
 }
 
-uint32_t String_Equal(UA_String* left,
-                      UA_String* right)
+uint32_t String_Equal(const UA_String* left,
+                      const UA_String* right)
 {
     return ByteString_Equal((UA_ByteString*) left,
                               (UA_ByteString*) right);

@@ -15,23 +15,33 @@
 
 const uint32_t scProtocolVersion = 0;
 
-UA_String* UA_String_Security_Policy_None;
-UA_String* UA_String_Security_Policy_Basic128Rsa15;
-UA_String* UA_String_Security_Policy_Basic256;
-UA_String* UA_String_Security_Policy_Basic256Sha256;
+static const UA_String UA_String_Security_Policy_None = {
+        .length = 47,
+        .characters = (UA_Byte*) SECURITY_POLICY_NONE,
+        .clearBytes = UA_FALSE
+};
+
+static const UA_String UA_String_Security_Policy_Basic128Rsa15 = {
+        .length = 56,
+        .characters = (UA_Byte*) SECURITY_POLICY_BASIC128RSA15,
+        .clearBytes = UA_FALSE
+};
+
+static const UA_String UA_String_Security_Policy_Basic256 = {
+        .length = 51,
+        .characters = (UA_Byte*) SECURITY_POLICY_BASIC256,
+        .clearBytes = UA_FALSE
+};
+
+static const UA_String UA_String_Security_Policy_Basic256Sha256 = {
+        .length = 57,
+        .characters = (UA_Byte*) SECURITY_POLICY_BASIC256SHA256,
+        .clearBytes = UA_FALSE
+};
 
 SC_Connection* SC_Create (){
     SC_Connection* sConnection = UA_NULL;
     TCP_UA_Connection* connection = TCP_UA_Connection_Create(scProtocolVersion);
-    UA_String_Security_Policy_None =
-     String_CreateFromCString(SECURITY_POLICY_NONE);
-    UA_String_Security_Policy_Basic128Rsa15 =
-     String_CreateFromCString(SECURITY_POLICY_BASIC128RSA15);
-    UA_String_Security_Policy_Basic256 =
-     String_CreateFromCString(SECURITY_POLICY_BASIC256);
-    UA_String_Security_Policy_Basic256Sha256 =
-     String_CreateFromCString(SECURITY_POLICY_BASIC256SHA256);
-
 
     if(connection != UA_NULL){
         sConnection = (SC_Connection *) malloc(sizeof(SC_Connection));
@@ -49,20 +59,16 @@ SC_Connection* SC_Create (){
 }
 
 void SC_Delete (SC_Connection* scConnection){
-    String_Clear(UA_String_Security_Policy_None);
-    String_Clear(UA_String_Security_Policy_Basic128Rsa15);
-    String_Clear(UA_String_Security_Policy_Basic256);
-    String_Clear(UA_String_Security_Policy_Basic256Sha256);
     if(scConnection != UA_NULL){
         // Do not delete runningAppCertificate, runnigAppPrivateKey and otherAppCertificate:
         //  managed by upper level
         if(scConnection->runningAppPublicKey != UA_NULL)
         {
-            ByteString_Clear(scConnection->runningAppPublicKey);
+            ByteString_Delete(scConnection->runningAppPublicKey);
         }
         if(scConnection->otherAppPublicKey != UA_NULL)
         {
-            ByteString_Clear(scConnection->otherAppPublicKey);
+            ByteString_Delete(scConnection->otherAppPublicKey);
         }
         if(scConnection->sendingBuffer != UA_NULL)
         {
@@ -97,11 +103,11 @@ StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
        scConnection->otherAppCertificate == UA_NULL)
     {
         scConnection->runningAppCertificate = runningAppCertificate;
-        ByteString_Clear(scConnection->runningAppPublicKey);
+        ByteString_Delete(scConnection->runningAppPublicKey);
         scConnection->runningAppPublicKey = UA_NULL;
         scConnection->runningAppPrivateKey = runningAppPrivateKey;
         scConnection->otherAppCertificate = otherAppCertificate;
-        ByteString_Clear(scConnection->otherAppPublicKey);
+        ByteString_Delete(scConnection->otherAppPublicKey);
         scConnection->otherAppPublicKey = UA_NULL;
     }else{
         status = STATUS_INVALID_STATE;
@@ -183,10 +189,11 @@ StatusCode RetrievePublicKeyFromCert(CryptoProvider* cryptoProvider,
                                                            certificate,
                                                            &publicKeyLength);
         if(status == STATUS_OK){
-            *publicKey = ByteString_CreateFixedSize(publicKeyLength);
+            *publicKey = ByteString_Create();
+            status = ByteString_InitializeFixedSize(*publicKey, publicKeyLength);
         }
 
-        if(*publicKey != UA_NULL){
+        if(status == STATUS_OK){
             status = CryptoProvider_GetPublicKeyFromCert(cryptoProvider,
                                                          certificate,
                                                          *publicKey);
@@ -265,20 +272,20 @@ StatusCode GetAsymmBlocksSizes(UA_String* securityPolicyUri,
     StatusCode status = STATUS_OK;
     const uint32_t sha1outputLength = 20; // bytes (160 bits)
 
-    if(String_Equal(securityPolicyUri, UA_String_Security_Policy_None) != UA_FALSE)
+    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != UA_FALSE)
     {
         *cipherTextBlockSize = 1;
         *plainTextBlockSize = 1;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
         // RSA 1.5: RSA spec 7.2.1 (https://www.ietf.org/rfc/rfc2437.txt)
         *cipherTextBlockSize = keySize;
         *plainTextBlockSize = keySize - 11;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic256) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
         // RSA OAEP: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
         // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
         *cipherTextBlockSize = keySize;
         *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
-   }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
+   }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
        // RSA OAEP: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
        // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
        *cipherTextBlockSize = keySize;
@@ -293,16 +300,16 @@ uint32_t GetAsymmSignatureSize(UA_String* securityPolicyUri,
                                uint32_t   privateKeySize)
 {
     uint32_t signatureSize = 0;
-    if(String_Equal(securityPolicyUri, UA_String_Security_Policy_None) != UA_FALSE)
+    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != UA_FALSE)
     {
         signatureSize = 0;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
         // Regarding RSA spec 5.2 (https://www.ietf.org/rfc/rfc2437.txt), signature size = key size
         signatureSize = privateKeySize;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic256) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
         // Regarding RSA spec 5.2 (https://www.ietf.org/rfc/rfc2437.txt), signature size = key size
         signatureSize = privateKeySize;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
         // Regarding RSA spec 5.2 (https://www.ietf.org/rfc/rfc2437.txt), signature size = key size
         signatureSize = privateKeySize;
     }
@@ -320,19 +327,19 @@ StatusCode GetSymmBlocksSizes(UA_String* securityPolicyUri,
         status = STATUS_OK;
     }
 
-    if(String_Equal(securityPolicyUri, UA_String_Security_Policy_None) != UA_FALSE)
+    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != UA_FALSE)
     {
         *cipherTextBlockSize = 1;
         *plainTextBlockSize = 1;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
         // AES: 128 bits block size
         *cipherTextBlockSize = 16;
         *plainTextBlockSize = 16;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic256) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
         // AES: 128 bits block size
         *cipherTextBlockSize = 16;
         *plainTextBlockSize = 16;
-   }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
+   }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
        // AES: 128 bits block size
        *cipherTextBlockSize = 16;
        *plainTextBlockSize = 16;
@@ -344,16 +351,16 @@ StatusCode GetSymmBlocksSizes(UA_String* securityPolicyUri,
 
 uint32_t GetSymmSignatureSize(UA_String* securityPolicyUri){
     uint32_t signatureSize = 0;
-    if(String_Equal(securityPolicyUri, UA_String_Security_Policy_None) != UA_FALSE)
+    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != UA_FALSE)
     {
         signatureSize = 0;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
         // Symmetric signature algo is Sha1 => output size is 160 bits = 20 bytes
         signatureSize = 20;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic256) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
         // Symmetric signature algo is Sha1 => output size is 160 bits = 20 bytes
         signatureSize = 20;
-    }else if(String_Equal(securityPolicyUri, UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
         // Symmetric signature algo is Sha256 => output size is 256 bits = 32 bytes
         signatureSize = 32;
     }
@@ -664,24 +671,24 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
     // Receiver Certificate Thumbprint:
     if(status == STATUS_OK){
 
-        UA_ByteString* recCertThumbprint = UA_NULL;
+        UA_ByteString recCertThumbprint;
         if(toEncrypt != UA_FALSE){
             int32_t thumbprintLength = 0;
             status = CryptoProvider_GetCertThumbprintLength(cryptoProvider,
                                                             receiverCertificate,
                                                             &thumbprintLength);
             if(status == STATUS_OK){
-                recCertThumbprint = ByteString_CreateFixedSize(thumbprintLength);
-                if(recCertThumbprint != UA_NULL){
+                status = ByteString_InitializeFixedSize(&recCertThumbprint, thumbprintLength);
+                if(status == STATUS_OK){
                     status = CryptoProvider_GetCertThumbprint(cryptoProvider,
                                                               receiverCertificate,
-                                                              recCertThumbprint);
+                                                              &recCertThumbprint);
                 }else{
                     status = STATUS_NOK;
                 }
             }
 
-            status = String_Write(msgBuffer, recCertThumbprint);
+            status = String_Write(msgBuffer, &recCertThumbprint);
         }else{
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
@@ -692,7 +699,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
             // NULL string: nothing to write
         }
 
-        ByteString_Clear(recCertThumbprint);
+        ByteString_Clear(&recCertThumbprint);
     }else{
         status = STATUS_NOK;
     }
@@ -967,54 +974,55 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
                            uint32_t      signatureSize)
 {
     StatusCode status = STATUS_OK;
+    UA_ByteString signedData;
     if(symmetricAlgo == UA_FALSE){
         if(scConnection->runningAppCertificate == UA_NULL ||
            scConnection->runningAppPrivateKey == UA_NULL ||
            scConnection->otherAppCertificate == UA_NULL){
            status = STATUS_INVALID_STATE;
         }else{
-            UA_ByteString* signedData = ByteString_CreateFixedSize(signatureSize);
-            if(signedData != UA_NULL){
+            status = ByteString_InitializeFixedSize(&signedData, signatureSize);
+            if(status == STATUS_OK){
                 status = CryptoProvider_AsymmetricSign
                           (scConnection->currentCryptoProvider,
                            msgBuffer->buffers->data,
                            msgBuffer->buffers->length,
                            scConnection->runningAppPrivateKey,
-                           signedData);
+                           &signedData);
             }else{
                 status = STATUS_NOK;
             }
 
             if(status == STATUS_OK){
                 status = Buffer_Write(msgBuffer->buffers,
-                                      signedData->characters,
-                                      signedData->length);
+                                      signedData.characters,
+                                      signedData.length);
             }
-            ByteString_Clear(signedData);
+            ByteString_Clear(&signedData);
         }
     }else{
         if(scConnection->currentSecuKeySets.senderKeySet == UA_NULL ||
            scConnection->currentSecuKeySets.receiverKeySet == UA_NULL){
             status = STATUS_INVALID_STATE;
         }else{
-            UA_ByteString* signedData = ByteString_CreateFixedSize(signatureSize);
-            if(signedData != UA_NULL){
+            status = ByteString_InitializeFixedSize(&signedData, signatureSize);
+            if(status == STATUS_OK){
                 status = CryptoProvider_SymmetricSign
                           (scConnection->currentCryptoProvider,
                            msgBuffer->buffers->data,
                            msgBuffer->buffers->length,
                            scConnection->currentSecuKeySets.senderKeySet->signKey,
-                           signedData);
+                           &signedData);
             }else{
                 status = STATUS_NOK;
             }
 
             if(status == STATUS_OK){
                 status = Buffer_Write(msgBuffer->buffers,
-                                      signedData->characters,
-                                      signedData->length);
+                                      signedData.characters,
+                                      signedData.length);
             }
-            ByteString_Clear(signedData);
+            ByteString_Clear(&signedData);
         }
     }
     return status;
@@ -1304,9 +1312,12 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
     uint32_t toEncrypt = 1; // True
     uint32_t toSign = 1; // True
 
-    UA_ByteString* securityPolicy = ByteString_Create();
-    UA_ByteString* senderCertificate = ByteString_Create();
-    UA_ByteString* receiverCertThumb = ByteString_Create();
+    UA_ByteString securityPolicy;
+    ByteString_Initialize(&securityPolicy);
+    UA_ByteString senderCertificate;
+    ByteString_Initialize(&senderCertificate);
+    UA_ByteString receiverCertThumb;
+    ByteString_Initialize(&receiverCertThumb);
 
     uint32_t validationStatusCode = 0;
 
@@ -1323,11 +1334,11 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     // Security Policy:
     if(status == STATUS_OK){
-        status = ByteString_Read(transportBuffer, securityPolicy);
+        status = ByteString_Read(transportBuffer, &securityPolicy);
 
         if(status == STATUS_OK){
             uint32_t secuPolicyComparison = 0;
-            status = ByteString_Compare(scConnection->currentSecuPolicy, securityPolicy, &secuPolicyComparison);
+            status = ByteString_Compare(scConnection->currentSecuPolicy, &securityPolicy, &secuPolicyComparison);
 
             if(status != STATUS_OK || secuPolicyComparison != 0){
                 status = STATUS_INVALID_RCV_PARAMETER;
@@ -1337,16 +1348,16 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     // Sender Certificate:
     if(status == STATUS_OK){
-        status = ByteString_Read(transportBuffer, senderCertificate);
+        status = ByteString_Read(transportBuffer, &senderCertificate);
         if(status == STATUS_OK){
-            if (toSign == UA_FALSE && senderCertificate->length > 0){
+            if (toSign == UA_FALSE && senderCertificate.length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not signed"
                 status = STATUS_INVALID_RCV_PARAMETER;
             }else if(toSign != UA_FALSE){
                 // Check certificate is the same as the one in memory
                 uint32_t otherAppCertComparison = 0;
                 status = ByteString_Compare(scConnection->otherAppCertificate,
-                                            senderCertificate,
+                                            &senderCertificate,
                                             &otherAppCertComparison);
 
                 if(status != STATUS_OK || otherAppCertComparison != 0){
@@ -1358,7 +1369,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                     certStore = PKIProvider_Open_Cert_Store(pkiProvider);
                     if(certStore != UA_NULL){
                         status = PKIProvider_Validate_Certificate(pkiProvider,
-                                                                  senderCertificate,
+                                                                  &senderCertificate,
                                                                   certStore,
                                                                   &validationStatusCode);
                         PKIProvider_Close_Cert_Store(pkiProvider, &certStore);
@@ -1373,16 +1384,16 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     // Receiver Certificate Thumbprint:
     if(status == STATUS_OK){
-        status = ByteString_Read(transportBuffer, receiverCertThumb);
+        status = ByteString_Read(transportBuffer, &receiverCertThumb);
 
         if(status == STATUS_OK){
-            if(toEncrypt == UA_FALSE && receiverCertThumb->length > 0){
+            if(toEncrypt == UA_FALSE && receiverCertThumb.length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not encrypted"
                 status =STATUS_INVALID_RCV_PARAMETER;
             }else if(toEncrypt != UA_FALSE){
                 // Check thumbprint matches current app certificate thumbprint
 
-                UA_ByteString* curAppCertThumbprint = UA_NULL;
+                UA_ByteString curAppCertThumbprint;
                 int32_t thumbprintLength = 0;
                 uint32_t runningAppCertComparison = 0;
 
@@ -1390,16 +1401,16 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                                                                 scConnection->runningAppCertificate,
                                                                 &thumbprintLength);
                 if(status == STATUS_OK){
-                    if(thumbprintLength == receiverCertThumb->length){
-                        curAppCertThumbprint = ByteString_CreateFixedSize(thumbprintLength);
-                        if(curAppCertThumbprint != UA_NULL){
+                    if(thumbprintLength == receiverCertThumb.length){
+                        status = ByteString_InitializeFixedSize(&curAppCertThumbprint, thumbprintLength);
+                        if(status == STATUS_OK){
                             status = CryptoProvider_GetCertThumbprint(scConnection->currentCryptoProvider,
                                                                       scConnection->runningAppCertificate,
-                                                                      curAppCertThumbprint);
+                                                                      &curAppCertThumbprint);
 
                             if(status == STATUS_OK){
-                                status = ByteString_Compare(curAppCertThumbprint,
-                                                            receiverCertThumb,
+                                status = ByteString_Compare(&curAppCertThumbprint,
+                                                            &receiverCertThumb,
                                                             &runningAppCertComparison);
 
                                 if(status != STATUS_OK || runningAppCertComparison != 0){
@@ -1415,7 +1426,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                     }
                 } // if thumbprint length correctly computed
 
-                ByteString_Clear(curAppCertThumbprint);
+                ByteString_Clear(&curAppCertThumbprint);
 
             } // if toEncrypt
             // Set the sequence number position which is the next position to read
@@ -1424,9 +1435,9 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
         } // if decoded thumbprint
     }
 
-    ByteString_Clear(securityPolicy);
-    ByteString_Clear(senderCertificate);
-    ByteString_Clear(receiverCertThumb);
+    ByteString_Clear(&securityPolicy);
+    ByteString_Clear(&senderCertificate);
+    ByteString_Clear(&receiverCertThumb);
 
     return status;
 }
@@ -1963,7 +1974,7 @@ StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
 }
 
 StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
-                              UA_String**    reason){
+                              UA_String*     reason){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t errorCode = 0;
     if(msgBuffer != UA_NULL && reason != UA_NULL){
@@ -1971,8 +1982,7 @@ StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
             status = UInt32_Read(msgBuffer, &errorCode);
             if(status == STATUS_OK){
                 status = errorCode;
-                *reason = String_Create();
-                String_Read(msgBuffer, *reason);
+                String_Read(msgBuffer, reason);
             }
 
         }else{

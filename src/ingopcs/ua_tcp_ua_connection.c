@@ -457,7 +457,10 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
            connection->state == TCP_Connection_Disconnected)
         {
             if(CheckURI(uri) == STATUS_OK){
-                connection->url = String_CreateFromCString(uri);
+                connection->url = String_Create();
+                status = String_InitializeFromCString(connection->url, uri);
+            }
+            if(status == STATUS_OK){
                 connection->callback = callback;
                 connection->callbackData = callbackData;
 
@@ -493,7 +496,7 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
 void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
     Socket_Close(connection->socket);
     connection->socket = UA_NULL;
-    String_Clear(connection->url);
+    String_Delete(connection->url);
     connection->url = UA_NULL;
     connection->callback = UA_NULL;
     connection->callbackData = UA_NULL;
