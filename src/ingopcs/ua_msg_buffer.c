@@ -30,14 +30,14 @@ UA_MsgBuffer* MsgBuffer_Create(Buffer*             buffer,
         mBuffer->buffers = buffer;
         mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = UA_SecureMessage;
-        mBuffer->msgSize = 0;
+        mBuffer->currentChunkSize = 0;
         mBuffer->nbChunks = 1;
         mBuffer->maxChunks = maxChunks;
         mBuffer->sequenceNumberPosition = 0;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
         mBuffer->receivedReqId = 0;
         mBuffer->flushData = flushData;
-        mBuffer->nsTable = nsTable;
+        Namespace_Initialize(&mBuffer->nsTable);
         mBuffer->encTypesTable = encTypesTable;
     }
     return mBuffer;
@@ -60,7 +60,7 @@ void MsgBuffer_Reset(UA_MsgBuffer* mBuffer){
         Buffer_Reset(mBuffer->buffers);
         mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = UA_SecureMessage;
-        mBuffer->msgSize = 0;
+        mBuffer->currentChunkSize = 0;
         mBuffer->nbChunks = 1;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
         mBuffer->receivedReqId = 0;
@@ -73,7 +73,7 @@ StatusCode MsgBuffer_ResetNextChunk(UA_MsgBuffer* mBuffer,
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(mBuffer != UA_NULL){
         assert(mBuffer->nbBuffers == 1);
-        mBuffer->msgSize = bodyPosition;
+        mBuffer->currentChunkSize = bodyPosition;
         Buffer_ResetAfterPosition(mBuffer->buffers, bodyPosition);
         if(mBuffer->maxChunks == 0
            || mBuffer->nbChunks < mBuffer->maxChunks)
@@ -104,7 +104,7 @@ void MsgBuffer_InternalCopyProperties(UA_MsgBuffer* destMsgBuffer,
     // Copy all internal properties except the buffers and number of buffers
     destMsgBuffer->type = srcMsgBuffer->type;
     destMsgBuffer->secureType = srcMsgBuffer->secureType;
-    destMsgBuffer->msgSize = srcMsgBuffer->msgSize;
+    destMsgBuffer->currentChunkSize = srcMsgBuffer->currentChunkSize;
     destMsgBuffer->nbChunks = srcMsgBuffer->nbChunks;
     destMsgBuffer->sequenceNumberPosition = srcMsgBuffer->sequenceNumberPosition;
     destMsgBuffer->isFinal = srcMsgBuffer->isFinal;
@@ -137,7 +137,7 @@ UA_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
     UA_MsgBuffers* mBuffers = UA_NULL;
     uint32_t idx = 0;
     mBuffers = (UA_MsgBuffer*) malloc(sizeof(UA_MsgBuffer));
-    if(mBuffers != UA_NULL){
+    if(mBuffers != UA_NULL && nsTable != UA_NULL && encTypesTable != UA_NULL){
         mBuffers->nbBuffers = maxChunks;
         mBuffers->buffers = (Buffer*) malloc(sizeof(Buffer) * maxChunks);
 
@@ -160,14 +160,15 @@ UA_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
         if(status == STATUS_OK){
             mBuffers->type = TCP_UA_Message_Unknown;
             mBuffers->secureType = UA_SecureMessage;
-            mBuffers->msgSize = 0;
+            mBuffers->currentChunkSize = 0;
             mBuffers->nbChunks = 0;
             mBuffers->maxChunks = maxChunks;
             mBuffers->sequenceNumberPosition = 0;
             mBuffers->isFinal = UA_Msg_Chunk_Unknown;
             mBuffers->receivedReqId = 0;
             mBuffers->flushData = UA_NULL;
-            mBuffers->nsTable = nsTable;
+            Namespace_Initialize(&mBuffers->nsTable);
+            Namespace_AttachTable(&mBuffers->nsTable, nsTable);
             mBuffers->encTypesTable = encTypesTable;
         }else{
             MsgBuffers_Delete(&mBuffers);
@@ -184,7 +185,7 @@ void MsgBuffers_Reset(UA_MsgBuffers* mBuffer){
         }
         mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = UA_SecureMessage;
-        mBuffer->msgSize = 0;
+        mBuffer->currentChunkSize = 0;
         mBuffer->nbChunks = 0;
         mBuffer->isFinal = UA_Msg_Chunk_Unknown;
         mBuffer->receivedReqId = 0;

@@ -60,14 +60,14 @@ typedef struct UA_MsgBuffer {
     Buffer*              buffers;
     TCP_UA_MsgType       type;
     UA_SecureMessageType secureType; //only valid if type = SecureMessage
-    uint32_t             msgSize;
+    uint32_t             currentChunkSize;
     uint32_t             nbChunks;
     uint32_t             maxChunks;
     uint32_t             sequenceNumberPosition; // Position of sequence number (data to encrypt)
     UA_MsgFinalChunk     isFinal;
     uint32_t             receivedReqId; // only to ensure all chunks have same id => valid when nbChunks > 1
     void*                flushData;
-    UA_NamespaceTable*   nsTable;
+    UA_NamespaceTable    nsTable;
     UA_EncodeableType**  encTypesTable;
 } UA_MsgBuffer;
 

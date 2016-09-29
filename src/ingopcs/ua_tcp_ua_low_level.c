@@ -43,7 +43,7 @@ StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
         status = UInt32_Write(msgBuffer, &headerLength);
         if(status == STATUS_OK){
             msgBuffer->type = type;
-            msgBuffer->msgSize = UA_HEADER_LENGTH;
+            msgBuffer->currentChunkSize = UA_HEADER_LENGTH;
             msgBuffer->nbChunks = 1;
         }
     }
@@ -64,7 +64,7 @@ StatusCode TCP_UA_FinalizeHeader(UA_MsgBuffer* msgBuffer){
     }
     if(status == STATUS_OK){
         status = Buffer_SetPosition(msgBuffer->buffers, currentPosition);
-        msgBuffer->msgSize = currentPosition;
+        msgBuffer->currentChunkSize = currentPosition;
     }
     return status;
 }
@@ -76,12 +76,12 @@ StatusCode TCP_UA_ReadData(Socket        socket,
     uint32_t readBytes;
 
     if(msgBuffer->buffers->length >= UA_HEADER_LENGTH){
-        assert(msgBuffer->msgSize > 0);
+        assert(msgBuffer->currentChunkSize > 0);
 
-        if(msgBuffer->buffers->length < msgBuffer->msgSize){
+        if(msgBuffer->buffers->length < msgBuffer->currentChunkSize){
             //incomplete message, continue to read it
             status = STATUS_OK;
-        }else if(msgBuffer->buffers->length == msgBuffer->msgSize){
+        }else if(msgBuffer->buffers->length == msgBuffer->currentChunkSize){
             if(msgBuffer->isFinal == UA_Msg_Chunk_Intermediate){
                 status = MsgBuffer_ResetNextChunk(msgBuffer, 0);
             }else{
@@ -115,9 +115,9 @@ StatusCode TCP_UA_ReadData(Socket        socket,
     }
 
     if(status == STATUS_OK){
-        if(msgBuffer->buffers->max_size >= msgBuffer->msgSize){
+        if(msgBuffer->buffers->max_size >= msgBuffer->currentChunkSize){
 
-            readBytes = msgBuffer->msgSize - msgBuffer->buffers->length;
+            readBytes = msgBuffer->currentChunkSize - msgBuffer->buffers->length;
             status = Socket_Read(socket,
                                  &(msgBuffer->buffers->data[msgBuffer->buffers->length]),
                                  readBytes,
@@ -125,10 +125,10 @@ StatusCode TCP_UA_ReadData(Socket        socket,
             if(status == STATUS_OK && readBytes > 0){
                 Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
             }
-            if(msgBuffer->buffers->length == msgBuffer->msgSize){
+            if(msgBuffer->buffers->length == msgBuffer->currentChunkSize){
                 // Message complete just return
                 assert(status == STATUS_OK);
-            }else if(msgBuffer->buffers->length == msgBuffer->msgSize){
+            }else if(msgBuffer->buffers->length == msgBuffer->currentChunkSize){
                 status = STATUS_INVALID_STATE;
             }else{
                 status = STATUS_OK_INCOMPLETE;
@@ -218,7 +218,7 @@ StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer){
 
         // READ message size
         if(status == STATUS_OK){
-            status = UInt32_Read(msgBuffer, &msgBuffer->msgSize);
+            status = UInt32_Read(msgBuffer, &msgBuffer->currentChunkSize);
         }
 
     }else{

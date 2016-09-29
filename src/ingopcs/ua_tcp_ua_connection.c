@@ -164,7 +164,7 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
     uint32_t modifiedReceiveBuffer = 0;
     if(connection != UA_NULL
        && connection->inputMsgBuffer != UA_NULL){
-        if(connection->inputMsgBuffer->msgSize == TCP_UA_ACK_MSG_LENGTH){
+        if(connection->inputMsgBuffer->currentChunkSize == TCP_UA_ACK_MSG_LENGTH){
             // Read protocol version of server
             status = UInt32_Read(connection->inputMsgBuffer, &tempValue);
             if(status == STATUS_OK){
@@ -256,7 +256,7 @@ StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
     UA_String* reason = UA_NULL;
     if(connection != UA_NULL && connection->inputMsgBuffer != UA_NULL)
     {
-        if(connection->inputMsgBuffer->msgSize >= TCP_UA_ERR_MIN_MSG_LENGTH)
+        if(connection->inputMsgBuffer->currentChunkSize >= TCP_UA_ERR_MIN_MSG_LENGTH)
         {
             // Read error cpde
             status = UInt32_Read(connection->inputMsgBuffer, &error);

@@ -279,7 +279,7 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
     UA_EncodeableType* receivedType = UA_NULL;
 
     status = SC_DecodeMsgBody(cConnection->instance->receptionBuffers,
-                              cConnection->instance->receptionBuffers->nsTable,
+                              &cConnection->instance->receptionBuffers->nsTable,
                               pRequest->responseType,
                               UA_NULL,
                               &receivedType,

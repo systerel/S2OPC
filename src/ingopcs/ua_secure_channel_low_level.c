@@ -810,7 +810,7 @@ StatusCode Set_Message_Length(UA_MsgBuffer* msgBuffer,
     }
     if(status == STATUS_OK){
         status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
-        msgBuffer->msgSize = msgLength;
+        msgBuffer->currentChunkSize = msgLength;
     }
     return status;
 }
@@ -1068,9 +1068,9 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
                     // Set correct message size and encrypted buffer length
                     Buffer_SetDataLength(encryptedMsgBuffer->buffers,
                                            msgBuffer->sequenceNumberPosition + encryptedDataLength);
-                    encryptedMsgBuffer->msgSize = msgBuffer->msgSize;
+                    encryptedMsgBuffer->currentChunkSize = msgBuffer->currentChunkSize;
                     // Message size was already encrypted message length, it must be the same now
-                    assert(encryptedMsgBuffer->buffers->length == encryptedMsgBuffer->msgSize);
+                    assert(encryptedMsgBuffer->buffers->length == encryptedMsgBuffer->currentChunkSize);
                     // Ensure internal properties coherency (even if not used)
                     encryptedMsgBuffer->isFinal = msgBuffer->isFinal;
                     encryptedMsgBuffer->type = msgBuffer->type;
@@ -2007,7 +2007,7 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                 // Treat case with only 1 chunk for response
                 if(msgBuffers->nbChunks == 1){
                     status = SC_DecodeMsgBody(msgBuffers,
-                                              msgBuffers->nsTable,
+                                              &msgBuffers->nsTable,
                                               expEncType,
                                               errEncType,
                                               recEncType,
@@ -2033,11 +2033,11 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                         tmpMsgBuffer = MsgBuffer_Create(buffer,
                                                         msgBuffers->maxChunks,
                                                         UA_NULL,
-                                                        msgBuffers->nsTable,
+                                                        &msgBuffers->nsTable,
                                                         msgBuffers->encTypesTable);
                         if(tmpMsgBuffer != UA_NULL){
                             status = SC_DecodeMsgBody(tmpMsgBuffer,
-                                                      msgBuffers->nsTable,
+                                                      &msgBuffers->nsTable,
                                                       expEncType,
                                                       errEncType,
                                                       recEncType,

@@ -894,7 +894,7 @@ StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObje
                        strlen(OPCUA_NAMESPACE_NAME))
                !=  0)
             {
-                status = Namespace_GetIndex(msgBuffer->nsTable, extObj->body.object.objType->namespace, &nsIndex);
+                status = Namespace_GetIndex(&msgBuffer->nsTable, extObj->body.object.objType->namespace, &nsIndex);
             }
 
             objNodeId.identifierType = IdentifierType_Numeric;
@@ -958,7 +958,7 @@ StatusCode ExtensionObject_Read(UA_MsgBuffer* msgBuffer, UA_ExtensionObject* ext
        encodingByte == UA_ExtObjBodyEncoding_ByteString){
         if(extObj->typeId.identifierType == IdentifierType_Numeric){
             if(extObj->typeId.namespace != OPCUA_NAMESPACE_INDEX){
-                nsName = Namespace_GetName(msgBuffer->nsTable, extObj->typeId.namespace);
+                nsName = Namespace_GetName(&msgBuffer->nsTable, extObj->typeId.namespace);
             }else{
                 nsName = OPCUA_NAMESPACE_NAME;
             }
