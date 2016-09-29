@@ -456,7 +456,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
 
         if(status != STATUS_OK){
             abortReqStatus = status;
-            //TODO: report (trace) and call appropriate callback ?
+            //TODO: report (trace)
         }
     }
 
@@ -521,15 +521,13 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                     &recEncType,
                                     &encObj);
             // TODO: check status before ?
-            // TODO: do not call in case of chunk ?
-            if(pRequest->callback != UA_NULL){
+            if(pRequest->callback != UA_NULL && requestToRemove != UA_FALSE){
                 pRequest->callback(cConnection,
                                    encObj,
                                    recEncType,
                                    pRequest->callbackData,
                                    status);
-            }
-            if(requestToRemove != UA_FALSE){
+
                 // Deallocate pending request
                 SC_PendingRequestDelete(pRequest);
             }
