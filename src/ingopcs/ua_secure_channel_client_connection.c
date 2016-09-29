@@ -328,6 +328,9 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
         }
     }
 
+    UA_OpenSecureChannelResponse_Clear(encObj);
+    free(encObj);
+
     return status;
 }
 
@@ -428,6 +431,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     uint32_t abortedRequestId = 0;
     StatusCode abortReqStatus = STATUS_NOK;
     uint32_t requestId = 0;
+    uint8_t requestToRemove = UA_FALSE;
     UA_String reason;
     String_Initialize(&reason);
 
@@ -475,6 +479,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                    pRequest->callbackData,
                                    abortReqStatus);
             }
+            SC_PendingRequestDelete(pRequest);
         }
     }
 
@@ -482,6 +487,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
         if(cConnection->instance->receptionBuffers->isFinal == UA_Msg_Chunk_Final){
             // Retrieve associated pending request for current chunk which is final
             pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
+            requestToRemove = 1; // True
             if(pRequest == UA_NULL){
                 status = STATUS_NOK;
             }
@@ -515,12 +521,17 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                     &recEncType,
                                     &encObj);
             // TODO: check status before ?
+            // TODO: do not call in case of chunk ?
             if(pRequest->callback != UA_NULL){
                 pRequest->callback(cConnection,
                                    encObj,
                                    recEncType,
                                    pRequest->callbackData,
                                    status);
+            }
+            if(requestToRemove != UA_FALSE){
+                // Deallocate pending request
+                SC_PendingRequestDelete(pRequest);
             }
         }
     }

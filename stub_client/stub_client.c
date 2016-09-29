@@ -327,6 +327,7 @@ int main(void){
     OpcUa_ByteString_Clear(&ClientCertificate);
     OpcUa_ByteString_Clear(&ClientPrivateKey);
     OpcUa_ByteString_Clear(&ServerCertificate);
+    OpcUa_ProxyStub_Clear();
 
     OpcUa_ReturnStatusCode;
 
@@ -336,6 +337,7 @@ int main(void){
     OpcUa_ByteString_Clear(&ClientCertificate);
     OpcUa_ByteString_Clear(&ClientPrivateKey);
     OpcUa_ByteString_Clear(&ServerCertificate);
+    OpcUa_ProxyStub_Clear();
 
     printf ("Error status: %d\n", uStatus);
     if(uStatus != 0){
