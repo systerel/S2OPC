@@ -23,15 +23,24 @@ typedef struct {
 typedef struct {
     uint16_t      lastIdx;
     UA_Namespace* namespaceArray;
+    uint8_t       clearTable;
 } UA_NamespaceTable;
 
+void Namespace_Initialize(UA_NamespaceTable* nsTable);
+
+StatusCode Namespace_AllocateTable(UA_NamespaceTable* nsTable, uint32_t length);
+
 UA_NamespaceTable* Namespace_CreateTable(uint32_t length); // length + 1 <= UINT16_MAX
+
+StatusCode Namespace_AttachTable(UA_NamespaceTable* dst, UA_NamespaceTable* src);
 
 StatusCode Namespace_GetIndex(UA_NamespaceTable* namespaceTable,
                               const char*        namespaceName,
                               uint16_t*          index);
 const char* Namespace_GetName(UA_NamespaceTable* namespaceTable,
                               uint16_t           index);
+
+void Namespace_Clear(UA_NamespaceTable* namespaceTable);
 
 void Namespace_Delete(UA_NamespaceTable* namespaceTable);
 

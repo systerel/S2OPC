@@ -20,15 +20,15 @@
 
 typedef struct SC_ClientConnection
 {
-    UA_NamespaceTable*     namespaces;
+    UA_NamespaceTable      namespaces;
     UA_EncodeableType**    encodeableTypes;
     PKIProvider*           pkiProvider;
-    UA_ByteString*         serverCertificate;
-    UA_ByteString*         clientCertificate;
-    PrivateKey*            clientKey;
-    SLinkedList *          pendingRequests;
+    UA_ByteString          serverCertificate;
+    UA_ByteString          clientCertificate;
+    PrivateKey             clientKey;
+    SLinkedList*           pendingRequests;
     UA_MessageSecurityMode securityMode;
-    UA_String*             securityPolicy;
+    UA_String              securityPolicy;
     uint32_t               requestedLifetime;
     SC_Connection*         instance;
     P_Timer                watchdogTimer;

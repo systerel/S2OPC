@@ -15,6 +15,10 @@ typedef struct {
 } PrivateKey;
 
 PrivateKey* PrivateKey_Create(UA_ByteString* key);
+void PrivateKey_Initialize(PrivateKey* pkey);
+void PrivateKey_InitKey(PrivateKey* pkey, UA_ByteString* key);
+
+void PrivateKey_Clear(PrivateKey* pkey);
 void PrivateKey_Delete(PrivateKey* pkey);
 
 UA_ByteString* PrivateKey_BeginUse(PrivateKey* pkey);

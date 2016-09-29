@@ -54,11 +54,18 @@ SC_ClientConnection* SC_Client_Create(UA_NamespaceTable*  namespaceTable,
 
         if(scClientConnection != UA_NULL){
             memset (scClientConnection, 0, sizeof(SC_ClientConnection));
+            Namespace_Initialize(&scClientConnection->namespaces);
+            Namespace_AttachTable(&scClientConnection->namespaces, namespaceTable);
+            scClientConnection->encodeableTypes = encodeableTypes;
+            ByteString_Initialize(&scClientConnection->serverCertificate);
+            ByteString_Initialize(&scClientConnection->clientCertificate);
+            PrivateKey_Initialize(&scClientConnection->clientKey);
+            scClientConnection->securityMode = UA_MessageSecurityMode_Invalid;
+            ByteString_Initialize(&scClientConnection->securityPolicy);
+
             sConnection->state = SC_Connection_Disconnected;
             scClientConnection->instance = sConnection;
-            scClientConnection->namespaces = namespaceTable;
-            scClientConnection->encodeableTypes = encodeableTypes;
-            scClientConnection->securityMode = UA_MessageSecurityMode_Invalid;
+
             scClientConnection->pendingRequests = SLinkedList_Create();
             if(scClientConnection->pendingRequests == UA_NULL){
                 free(scClientConnection);
@@ -77,22 +84,15 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
         if(scConnection->pkiProvider != UA_NULL){
             PKIProvider_Delete(scConnection->pkiProvider);
         }
-        if(scConnection->serverCertificate != UA_NULL){
-            ByteString_Delete(scConnection->serverCertificate);
-        }
-        if(scConnection->clientCertificate != UA_NULL){
-            ByteString_Delete(scConnection->clientCertificate);
-        }
-        if(scConnection->pendingRequests != UA_NULL){
-            free(scConnection->pendingRequests);
-        }
-        if(scConnection->securityPolicy != UA_NULL){
-            String_Delete(scConnection->securityPolicy);
-        }
+        ByteString_Clear(&scConnection->serverCertificate);
+        ByteString_Clear(&scConnection->clientCertificate);
+        SLinkedList_Delete(scConnection->pendingRequests);
+        String_Clear(&scConnection->securityPolicy);
         if(scConnection->instance != UA_NULL){
             SC_Delete(scConnection->instance);
         }
         Timer_Delete(&scConnection->watchdogTimer);
+        free(scConnection);
     }
 }
 
@@ -211,10 +211,10 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
     // Set security configuration for secure channel request
     cConnection->instance->currentSecuMode = cConnection->securityMode;
-    cConnection->instance->currentSecuPolicy = cConnection->securityPolicy;
+    cConnection->instance->currentSecuPolicy = &cConnection->securityPolicy;
 
     if(status == STATUS_OK){
-        cProvider = CryptoProvider_Create(cConnection->securityPolicy);
+        cProvider = CryptoProvider_Create(&cConnection->securityPolicy);
         if(cProvider == UA_NULL){
             status = STATUS_NOK;
         }else{
@@ -236,9 +236,9 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
     if(status == STATUS_OK){
         status = SC_EncodeAsymmSecurityHeader(cConnection->instance,
-                                              cConnection->securityPolicy,
-                                              cConnection->clientCertificate,
-                                              cConnection->serverCertificate);
+                                              &cConnection->securityPolicy,
+                                              &cConnection->clientCertificate,
+                                              &cConnection->serverCertificate);
     }
 
     if(status == STATUS_OK){
@@ -545,18 +545,18 @@ StatusCode OnTransportEvent_CB(void*           connection,
             assert(cConnection->instance->state == SC_Connection_Connecting_Transport);
             retStatus = SC_InitApplicationIdentities
                          (cConnection->instance,
-                          cConnection->clientCertificate,
-                          cConnection->clientKey,
-                          cConnection->serverCertificate);
+                          &cConnection->clientCertificate,
+                          &cConnection->clientKey,
+                          &cConnection->serverCertificate);
             // Configure secure connection for encoding / decoding messages
             if(status == STATUS_OK){
                 status = SC_InitReceiveSecureBuffers(cConnection->instance,
-                                                     cConnection->namespaces,
+                                                     &cConnection->namespaces,
                                                      cConnection->encodeableTypes);
             }
             if(status == STATUS_OK){
                 status = SC_InitSendSecureBuffer(cConnection->instance,
-                                                 cConnection->namespaces,
+                                                 &cConnection->namespaces,
                                                  cConnection->encodeableTypes);
             }
             // Send Open Secure channel request
@@ -643,38 +643,40 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
        securityPolicy != UA_NULL &&
        requestedLifetime > 0)
     {
-        if(connection->clientCertificate == UA_NULL &&
-           connection->clientKey == UA_NULL &&
-           connection->serverCertificate == UA_NULL &&
+        if(connection->clientCertificate.length <= 0 &&
+           PrivateKey_GetSize(&connection->clientKey) == 0 &&
+           connection->serverCertificate.length <= 0 &&
            connection->securityMode == UA_MessageSecurityMode_Invalid &&
-           connection->securityPolicy == UA_NULL &&
+           connection->securityPolicy.length <= 0 &&
            connection->callback == UA_NULL &&
            connection->callbackData == UA_NULL)
         {
             // Create PKI provider
             connection->pkiProvider = PKIProvider_Create(pkiConfig);
-            connection->clientCertificate = ByteString_Create();
-            ByteString_Copy(connection->clientCertificate, clientCertificate);
-            connection->clientKey = PrivateKey_Create(clientKey);
-            connection->serverCertificate = ByteString_Create();
-            ByteString_Copy(connection->serverCertificate, serverCertificate);
-            connection->securityMode = securityMode;
+            status = ByteString_Copy(&connection->clientCertificate, clientCertificate);
 
-            connection->securityPolicy = String_Create();
-            status = String_InitializeFromCString(connection->securityPolicy, securityPolicy);
+            if(status == STATUS_OK){
+                PrivateKey_InitKey(&connection->clientKey, clientKey);
+                status = ByteString_Copy(&connection->serverCertificate, serverCertificate);
+            }
+
+            if(status == STATUS_OK){
+                if(securityMode != UA_MessageSecurityMode_Invalid){
+                    connection->securityMode = securityMode;
+                }else{
+                    status = STATUS_NOK;
+                }
+            }
+
+            if(status == STATUS_OK){
+                status = String_InitializeFromCString(&connection->securityPolicy, securityPolicy);
+            }
 
             connection->requestedLifetime = requestedLifetime;
             connection->callback = callback;
             connection->callbackData = callbackData;
 
-            if(connection->clientCertificate == UA_NULL ||
-               connection->clientKey == UA_NULL ||
-               connection->serverCertificate == UA_NULL ||
-               connection->securityMode == UA_MessageSecurityMode_Invalid ||
-               connection->securityPolicy == UA_NULL)
-            {
-                status = STATUS_NOK;
-            }else if(status == STATUS_OK){
+            if(status == STATUS_OK){
                 // TODO: check security mode = None if securityPolicy != None ??? => see http://opcfoundation.org/UA-Profile/UA/SecurityPolicy%23Basic128Rsa15
                 connection->instance->state = SC_Connection_Connecting_Transport;
                 status = TCP_UA_Connection_Connect(connection->instance->transportConnection,

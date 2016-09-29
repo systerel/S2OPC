@@ -333,7 +333,6 @@ int main(void){
     OpcUa_BeginErrorHandling;
     pkiProvider.CloseCertificateStore(&pkiProvider, &hCertificateStore);
     OpcUa_PKIProvider_Delete(&pkiProvider);
-    String_Clear(&stEndpointUrl);
     OpcUa_ByteString_Clear(&ClientCertificate);
     OpcUa_ByteString_Clear(&ClientPrivateKey);
     OpcUa_ByteString_Clear(&ServerCertificate);
