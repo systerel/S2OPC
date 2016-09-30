@@ -35,7 +35,7 @@
 #include <ua_encoder.h>
 
 /* types */
-#include <ua_identifiers.h>
+#include <opcua_identifiers.h>
 
 /* self */
 #include <ua_types.h>

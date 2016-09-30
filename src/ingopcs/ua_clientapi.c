@@ -38,7 +38,7 @@
 /* types */
 #include <ua_builtintypes.h>
 
-#include <ua_identifiers.h>
+#include <opcua_identifiers.h>
 #include <ua_clientapi.h>
 
 #ifndef OPCUA_EXCLUDE_FindServers
