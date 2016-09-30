@@ -50,8 +50,7 @@ UA_NamespaceTable* Namespace_CreateTable(uint32_t length){
 StatusCode Namespace_AttachTable(UA_NamespaceTable* dst, UA_NamespaceTable* src){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dst != UA_NULL && dst->namespaceArray == UA_NULL &&
-       src != UA_NULL && src->lastIdx > 0 &&
-       src->namespaceArray != UA_NULL){
+       src != UA_NULL && src->namespaceArray != UA_NULL){
         status = STATUS_OK;
         dst->clearTable = UA_FALSE;
         dst->lastIdx = src->lastIdx;
