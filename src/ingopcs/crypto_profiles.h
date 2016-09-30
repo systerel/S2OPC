@@ -25,6 +25,7 @@
 // Basic256Sha256, sizes in bytes
 #define SecurityPolicy_Basic256Sha256_Symm_BlockLength      16
 #define SecurityPolicy_Basic256Sha256_Symm_KeyLength        32
+#define SecurityPolicy_Basic256Sha256_Symm_SignatureLength  32
 
 
 typedef uint8_t KeyBuffer;  // TODO: move towards private_key.h + This definition is unclear
@@ -46,6 +47,16 @@ typedef StatusCode (*FnSymmetricDecrypt) (const struct CryptoProvider *pProvider
                                           const uint8_t *pIV,
                                           uint8_t *pOutput,
                                           uint32_t lenOutput);
+typedef StatusCode (*FnSymmetricSign) (const struct CryptoProvider *pProvider,
+                                       const uint8_t *pInput,
+                                       uint32_t lenInput,
+                                       const uint8_t *pKey,
+                                       uint8_t *pOutput);
+typedef StatusCode (*FnSymmetricVerify) (const struct CryptoProvider *pProvider,
+                                         const uint8_t *pInput,
+                                         uint32_t lenInput,
+                                         const uint8_t *pKey,
+                                         const uint8_t *pSignature);
 
 typedef struct CryptoProfile
 {
@@ -55,6 +66,8 @@ typedef struct CryptoProfile
     const uint32_t      MaxAsymmetricKeyBitLength;
     const FnSymmetricEncrypt    pFnSymmEncrypt;
     const FnSymmetricDecrypt    pFnSymmDecrypt;
+    const FnSymmetricSign       pFnSymmSign;
+    const FnSymmetricVerify     pFnSymmVerif;
 } CryptoProfile;
 
 

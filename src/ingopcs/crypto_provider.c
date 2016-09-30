@@ -126,3 +126,53 @@ StatusCode CryptoProvider_Symmetric_GetOutputLength_Low(const CryptoProvider *pP
 }
 
 
+// pLenOutput can be UA_NULL
+StatusCode CryptoProvider_SymmetricSign_Low(const CryptoProvider *pProvider,
+                                            const uint8_t *pInput,
+                                            uint32_t lenInput,
+                                            const uint8_t *pKey,
+                                            uint8_t *pOutput,
+                                            uint32_t *pLenOutput)
+{
+    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pOutput)
+        return STATUS_INVALID_PARAMETERS;
+
+    if(UA_NULL != pLenOutput)
+        CryptoProvider_SymmetricSignature_GetLength_Low(pProvider, pLenOutput);
+
+    return pProvider->pProfile->pFnSymmSign(pProvider, pInput, lenInput, pKey, pOutput);
+}
+
+
+StatusCode CryptoProvider_SymmetricVerify_Low(const CryptoProvider *pProvider,
+                                              const uint8_t *pInput,
+                                              uint32_t lenInput,
+                                              const uint8_t *pKey,
+                                              const uint8_t *pSignature)
+{
+    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pSignature)
+        return STATUS_INVALID_PARAMETERS;
+
+    return pProvider->pProfile->pFnSymmVerif(pProvider, pInput, lenInput, pKey, pSignature);
+}
+
+
+StatusCode CryptoProvider_SymmetricSignature_GetLength_Low(const CryptoProvider *pProvider,
+                                                           uint32_t *pLength)
+{
+    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pLength)
+        return STATUS_INVALID_PARAMETERS;
+
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_NOK;
+    case SecurityPolicy_Basic256Sha256_ID:
+        *pLength = SecurityPolicy_Basic256Sha256_Symm_SignatureLength;
+        break;
+    }
+
+    return STATUS_OK;
+}
+

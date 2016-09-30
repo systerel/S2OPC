@@ -11,7 +11,6 @@
 #include <check.h>
 
 #include "check_stack.h"
-#include "mbedtls/md.h"
 #include "crypto_provider.h"
 #include "ua_builtintypes.h"
 
@@ -77,6 +76,8 @@ END_TEST
 
 START_TEST(test_crypto_symm_crypt)
 {
+    // TODO: these tests test only Basic256Sha256
+
     // Tests based on the test vectors provided by the NIST
     //  (http://csrc.nist.gov/groups/STM/cavp/block-ciphers.html#aes)
     unsigned char key[32];
@@ -90,6 +91,8 @@ START_TEST(test_crypto_symm_crypt)
     // Context init
     crypto = CryptoProvider_Create_Low(SecurityPolicy_Basic256Sha256_URI);
     ck_assert(crypto);
+    ck_assert(CryptoProvider_Symmetric_GetKeyLength_Low(crypto, &i) == STATUS_OK);
+    ck_assert(i == 32);
 
     // Encrypt
     // This single test is not taken from the NIST test vectors...
@@ -182,43 +185,81 @@ START_TEST(test_crypto_symm_crypt)
 
 
     // Assert failure on wrong parameteres
-    ck_assert(CryptoProvider_SymmetricEncrypt_Low(UA_NULL, input, 16, key, iv, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, UA_NULL, 16, key, iv, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 15, key, iv, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, UA_NULL, iv, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, UA_NULL, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, UA_NULL, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, output, 15) != 0);
-    ck_assert(CryptoProvider_SymmetricDecrypt_Low(UA_NULL, input, 16, key, iv, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, UA_NULL, 16, key, iv, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 15, key, iv, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, UA_NULL, iv, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, UA_NULL, output, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, UA_NULL, 16) != 0);
-    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, output, 15) != 0);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(UA_NULL, input, 16, key, iv, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, UA_NULL, 16, key, iv, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 15, key, iv, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, UA_NULL, iv, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, UA_NULL, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, UA_NULL, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricEncrypt_Low(crypto, input, 16, key, iv, output, 15) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(UA_NULL, input, 16, key, iv, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, UA_NULL, 16, key, iv, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 15, key, iv, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, UA_NULL, iv, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, UA_NULL, output, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, UA_NULL, 16) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, output, 15) != STATUS_OK);
 }
 END_TEST
 
 
 START_TEST(test_crypto_symm_sign)
 {
-    const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    // TODO: these tests test only Basic256Sha256
     unsigned char key[256];
-    unsigned char input[] = "This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm.";
+    unsigned char input[256];
     unsigned char output[32];
     char hexoutput[1024];
+    CryptoProvider *crypto = UA_NULL;
+    uint32_t i;
 
-    ck_assert(pinfo);
-    ck_assert(mbedtls_md_get_size(pinfo) == 32);
+    // Context init
+    crypto = CryptoProvider_Create_Low(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(crypto);
+    ck_assert(CryptoProvider_Symmetric_GetKeyLength_Low(crypto, &i) == STATUS_OK);
+    ck_assert(i == 32);
+    ck_assert(CryptoProvider_SymmetricSignature_GetLength_Low(crypto, &i) == STATUS_OK);
+    ck_assert(i == 32);
 
-    // Test case 7 of https://tools.ietf.org/html/rfc4231
-    ck_assert(hexlify(input, hexoutput, 152) == 152);
-    ck_assert(unhexlify("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", key, 131) == 131);
+    // Test cases of https://tools.ietf.org/html/rfc4231 cannot be used for Basic256Sha256
+    // Test cases of http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#hmac cannot be used either, as there is no corresponding key_length=32 and sig_length=32
+    // So this is a test case from an informal source (Python3 Crypto module and online)
+    // The text is obtained by concatenating sha256 hashes of the strings "InGoPcS" and "iNgOpCs",
+    //  and the key is obtained by sha256 hashing "INGOPCS".
+    // Python code: HMAC.new(SHA256.new(b"INGOPCS").digest(), SHA256.new(b"InGoPcS").digest()+SHA256.new(b"iNgOpCs").digest(), SHA256).hexdigest()
+    memset(input, 0, sizeof(input));
+    memset(key, 0, sizeof(key));
+    ck_assert(unhexlify("ec7b07fb4f3a6b87ca8cff06ba9e0ec619a34a2d9618dc2a02bde67709ded8b4e7069d582665f23a361324d1f84807e30d2227b266c287cc342980d62cb53017", input, 64) == 64);
+    ck_assert(unhexlify("7203d5e504eafe00e5dd77519eb640de3bbac660ec781166c4d460362a94c372", key, 32) == 32);
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    ck_assert(mbedtls_md_hmac(pinfo, key, 131, input, 152, output) == 0);
+    i = 0;
+    ck_assert(CryptoProvider_SymmetricSign_Low(crypto, input, 64, key, output, &i) == STATUS_OK);
+    ck_assert(i == 32);
     ck_assert(hexlify(output, hexoutput, 32) == 32);
-    ck_assert(memcmp(hexoutput, "9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2", 64) == 0);
+    ck_assert(memcmp(hexoutput, "e4185b6d49f06e8b94a552ad950983852ef20b58ee75f2c448fea587728d94db", 64) == 0);
+
+    // Check verify
+    ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, input, 64, key, output) == STATUS_OK);
+    output[1] ^= 0x20; // Change 1 bit
+    ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, input, 64, key, output) == STATUS_NOK);
+    output[1] ^= 0x20; // Revert changed bit
+    ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, input, 64, key, output) == STATUS_OK);
+    output[31] = 0x04; // Change 1 bit in last byte
+    ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, input, 64, key, output) == STATUS_NOK);
+
+    // Check optional feature
+    ck_assert(CryptoProvider_SymmetricSign_Low(crypto, input, 64, key, output, UA_NULL) == STATUS_OK);
+
+    // Check invalid parameters
+    ck_assert(CryptoProvider_SymmetricSign_Low(UA_NULL, input, 64, key, output, UA_NULL) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricSign_Low(crypto, UA_NULL, 64, key, output, UA_NULL) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricSign_Low(crypto, input, 64, UA_NULL, output, UA_NULL) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricSign_Low(crypto, input, 64, key, UA_NULL, UA_NULL) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricVerify_Low(UA_NULL, input, 64, key, output) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, UA_NULL, 64, key, output) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, input, 64, UA_NULL, output) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, input, 64, key, UA_NULL) != STATUS_OK);
 }
 END_TEST
 

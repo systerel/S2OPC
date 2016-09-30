@@ -32,6 +32,7 @@ StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
 StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
 
 // Real API ("_Low" suffix because temporary wrappers already use the shorter names)
+// TODO: shorter and unified names
 StatusCode CryptoProvider_SymmetricEncrypt_Low(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
@@ -51,5 +52,18 @@ StatusCode CryptoProvider_Symmetric_GetKeyLength_Low(const CryptoProvider *pProv
 StatusCode CryptoProvider_Symmetric_GetOutputLength_Low(const CryptoProvider *pProvider,
                                                         uint32_t lengthIn,
                                                         uint32_t *pLengthOut);
+StatusCode CryptoProvider_SymmetricSign_Low(const CryptoProvider *pProvider,
+                                            const uint8_t *pInput,
+                                            uint32_t lenInput,
+                                            const uint8_t *pKey,
+                                            uint8_t *pOutput,
+                                            uint32_t *pLenOutput);
+StatusCode CryptoProvider_SymmetricVerify_Low(const CryptoProvider *pProvider,
+                                              const uint8_t *pInput,
+                                              uint32_t lenInput,
+                                              const uint8_t *pKey,
+                                              const uint8_t *pSignature);
+StatusCode CryptoProvider_SymmetricSignature_GetLength_Low(const CryptoProvider *pProvider,
+                                                           uint32_t *pLength);
 
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_
