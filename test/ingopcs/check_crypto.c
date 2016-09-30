@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <check.h>
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
 
 #include "check_stack.h"
 #include "crypto_provider.h"
@@ -199,6 +201,9 @@ START_TEST(test_crypto_symm_crypt)
     ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, UA_NULL, output, 16) != STATUS_OK);
     ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, UA_NULL, 16) != STATUS_OK);
     ck_assert(CryptoProvider_SymmetricDecrypt_Low(crypto, input, 16, key, iv, output, 15) != STATUS_OK);
+
+    CryptoProvider_Delete_Low(crypto);
+    crypto = UA_NULL;
 }
 END_TEST
 
@@ -260,6 +265,38 @@ START_TEST(test_crypto_symm_sign)
     ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, UA_NULL, 64, key, output) != STATUS_OK);
     ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, input, 64, UA_NULL, output) != STATUS_OK);
     ck_assert(CryptoProvider_SymmetricVerify_Low(crypto, input, 64, key, UA_NULL) != STATUS_OK);
+
+    CryptoProvider_Delete_Low(crypto);
+    crypto = UA_NULL;
+}
+END_TEST
+
+
+START_TEST(test_crypto_symm_gen)
+{
+    // TODO: these tests test only Basic256Sha256
+    unsigned char keys[64];
+    char hexoutput[64];
+
+    CryptoProvider *crypto = UA_NULL;
+    uint32_t i;
+
+    // Context init
+    crypto = CryptoProvider_Create_Low(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(crypto);
+    ck_assert(CryptoProvider_Symmetric_GetKeyLength_Low(crypto, &i) == STATUS_OK);
+    ck_assert(i == 32);
+
+    // It is random, so...
+    ck_assert(CryptoProvider_SymmetricGenerateKey_Low(crypto, keys) == STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricGenerateKey_Low(crypto, &keys[32]) == STATUS_OK);
+    //ck_assert(hexlify(key, hexoutput, 32) == 32);
+    //printf("Random key: %64s\n", hexoutput);
+    ck_assert(memcmp(keys, &keys[32], 32) != 0);
+
+    // Test invalid inputs
+    ck_assert(CryptoProvider_SymmetricGenerateKey_Low(UA_NULL, keys) != STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricGenerateKey_Low(crypto, UA_NULL) != STATUS_OK);
 }
 END_TEST
 
@@ -280,6 +317,7 @@ Suite *tests_make_suite_crypto()
     suite_add_tcase(s, tc_ciphers);
     tcase_add_test(tc_ciphers, test_crypto_symm_crypt);
     tcase_add_test(tc_ciphers, test_crypto_symm_sign);
+    tcase_add_test(tc_ciphers, test_crypto_symm_gen);
 
     suite_add_tcase(s, tc_providers);
 
