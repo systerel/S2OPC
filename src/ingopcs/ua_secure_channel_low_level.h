@@ -127,9 +127,10 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
 
 StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
                             UA_NamespaceTable*  namespaceTable,
-                            UA_EncodeableType*  respEncType, // expected type (or null if unknown)
-                            UA_EncodeableType*  errEncType,  // expected error type (or null if unknown)
-                            UA_EncodeableType** receivedEncType, // actual received type (in those provided)
+                            UA_EncodeableType** knownTypes, // only in case next 2 types not provided
+                            UA_EncodeableType*  respEncType, // expected type
+                            UA_EncodeableType*  errEncType,  // + expected error type (or both null if unknown)
+                            UA_EncodeableType** receivedEncType, // actually received type
                             void**              encodeableObj);
 
 StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,

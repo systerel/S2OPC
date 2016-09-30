@@ -1587,6 +1587,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
 
 StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
                             UA_NamespaceTable*  namespaceTable,
+                            UA_EncodeableType** knownTypes,
                             UA_EncodeableType*  respEncType,
                             UA_EncodeableType*  errEncType,
                             UA_EncodeableType** receivedEncType,
@@ -1595,41 +1596,64 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_EncodeableType* recEncType;
     UA_NodeId nodeId;
+    const char* nsName;
     uint16_t nsIndex = 0;
     NodeId_Initialize(&nodeId);
-    if(receptionBuffer != UA_NULL && namespaceTable != UA_NULL &&
-       respEncType != UA_NULL && encodeableObj != UA_NULL)
+    if(receptionBuffer != UA_NULL && namespaceTable != UA_NULL && encodeableObj != UA_NULL &&
+       (knownTypes != UA_NULL || respEncType != UA_NULL))
     {
         status = NodeId_Read(receptionBuffer, &nodeId);
     }
+
     if(status == STATUS_OK && nodeId.identifierType == UA_IdType_Numeric){
 
-        if (nodeId.numeric == respEncType->typeId || nodeId.numeric == respEncType->binaryTypeId){
-//          || nodeId.numeric == respEncType->xmlTypeId){ => what is the point to accept this type ?
-            *receivedEncType = respEncType;
-        }else if(nodeId.numeric == errEncType->typeId || nodeId.numeric == errEncType->binaryTypeId){
-//               || nodeId.numeric == errEncType->xmlTypeId){ => what is the point to accept this type ?
-            *receivedEncType = errEncType;
-        }else{
-            status = STATUS_INVALID_RCV_PARAMETER;
-        }
-
-        if(status == STATUS_OK){
-            recEncType = *receivedEncType;
-            if(recEncType->namespace == UA_NULL && nodeId.namespace != 0){
+        if(respEncType != UA_NULL){
+            // Case in which we know the expected type from the request Id
+            if (nodeId.numeric == respEncType->typeId || nodeId.numeric == respEncType->binaryTypeId){
+    //          || nodeId.numeric == respEncType->xmlTypeId){ => what is the point to accept this type ?
+                *receivedEncType = respEncType;
+            }else if(errEncType != UA_NULL &&
+                     (nodeId.numeric == errEncType->typeId || nodeId.numeric == errEncType->binaryTypeId)){
+    //               || nodeId.numeric == errEncType->xmlTypeId){ => what is the point to accept this type ?
+                *receivedEncType = errEncType;
+            }else{
                 status = STATUS_INVALID_RCV_PARAMETER;
-            }else if(recEncType->namespace != UA_NULL){
-                status = Namespace_GetIndex(namespaceTable,
-                                            recEncType->namespace,
-                                            &nsIndex);
-                if(status == STATUS_OK){
-                    if(nodeId.namespace != nsIndex){
+            }
+
+            // Check namespace of received type using index
+            if(status == STATUS_OK){
+                    recEncType = *receivedEncType;
+                    if(recEncType->namespace == UA_NULL && nodeId.namespace != OPCUA_NAMESPACE_INDEX){
                         status = STATUS_INVALID_RCV_PARAMETER;
+                    }else if(recEncType->namespace != UA_NULL){
+                        status = Namespace_GetIndex(namespaceTable,
+                                                    recEncType->namespace,
+                                                    &nsIndex);
+                        if(status == STATUS_OK){
+                            if(nodeId.namespace != nsIndex){
+                                status = STATUS_INVALID_RCV_PARAMETER;
+                            }
+                        }
                     }
+                }
+
+        }else{
+            // Must be the case in which we cannot know the type before decoding it
+            if(nodeId.namespace == OPCUA_NAMESPACE_INDEX){
+                EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.numeric);
+            }else{
+                nsName = Namespace_GetName(namespaceTable, nodeId.namespace);
+                if(nsName != UA_NULL){
+                    recEncType = EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.numeric);
+                }
+                if(recEncType == UA_NULL){
+                    status = STATUS_INVALID_RCV_PARAMETER;
                 }
             }
         }
-    }else{
+
+
+    }else if(status == STATUS_OK){
         status = STATUS_INVALID_RCV_PARAMETER;
     }
 
@@ -2008,6 +2032,7 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                 if(msgBuffers->nbChunks == 1){
                     status = SC_DecodeMsgBody(msgBuffers,
                                               &msgBuffers->nsTable,
+                                              msgBuffers->encTypesTable,
                                               expEncType,
                                               errEncType,
                                               recEncType,
@@ -2038,6 +2063,7 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                         if(tmpMsgBuffer != UA_NULL){
                             status = SC_DecodeMsgBody(tmpMsgBuffer,
                                                       &msgBuffers->nsTable,
+                                                      msgBuffers->encTypesTable,
                                                       expEncType,
                                                       errEncType,
                                                       recEncType,
