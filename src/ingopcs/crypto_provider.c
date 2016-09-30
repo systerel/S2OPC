@@ -38,22 +38,7 @@ CryptoProvider *CryptoProvider_Create_Low(const char *uri)
 }
 
 
-CryptoProvider *CryptoProvider_Create(const UA_String *uri)
-{
-    char *cUri = String_GetCString(uri);
-    CryptoProvider *pCrypto = UA_NULL;
-
-    if(UA_NULL != cUri)
-    {
-        pCrypto = CryptoProvider_Create_Low(cUri);
-        free(cUri);
-    }
-
-    return pCrypto;
-}
-
-
-void CryptoProvider_Delete(CryptoProvider* pCryptoProvider)
+void CryptoProvider_Delete_Low(CryptoProvider* pCryptoProvider)
 {
     if(UA_NULL != pCryptoProvider)
     {

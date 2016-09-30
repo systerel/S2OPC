@@ -23,9 +23,8 @@ typedef struct CryptoProvider
 } CryptoProvider;
 
 
-CryptoProvider *CryptoProvider_Create(const UA_String *uri);
 CryptoProvider *CryptoProvider_Create_Low(const char *uri);
-void CryptoProvider_Delete(CryptoProvider *pCryptoProvider);
+void CryptoProvider_Delete_Low(CryptoProvider *pCryptoProvider);
 
 // Lib specific
 StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
