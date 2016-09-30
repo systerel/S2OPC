@@ -31,7 +31,6 @@
 
 /* core */
 #include <opcua_platformdefs.h>
-#include <opcua_config.h>
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
@@ -46,7 +45,7 @@
  * Synchronously calls the FindServers service.
  *===========================================================================*/
 StatusCode UA_ClientApi_FindServers(
-    OpcUa_Channel               a_hChannel,
+    UA_Channel                  a_hChannel,
     const UA_RequestHeader*     a_pRequestHeader,
     const UA_String*            a_pEndpointUrl,
     int32_t                     a_nNoOfLocaleIds,
@@ -130,15 +129,15 @@ StatusCode UA_ClientApi_FindServers(
  * Asynchronously calls the FindServers service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginFindServers(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    const UA_String*                  a_pEndpointUrl,
-    int32_t                           a_nNoOfLocaleIds,
-    const UA_String*                  a_pLocaleIds,
-    int32_t                           a_nNoOfServerUris,
-    const UA_String*                  a_pServerUris,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    const UA_String*               a_pEndpointUrl,
+    int32_t                        a_nNoOfLocaleIds,
+    const UA_String*               a_pLocaleIds,
+    int32_t                        a_nNoOfServerUris,
+    const UA_String*               a_pServerUris,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_FindServersRequest cRequest;
@@ -165,10 +164,10 @@ StatusCode UA_ClientApi_BeginFindServers(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "FindServers",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_FindServersRequest_EncodeableType,
             &UA_FindServersResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -181,7 +180,7 @@ StatusCode UA_ClientApi_BeginFindServers(
  * Synchronously calls the FindServersOnNetwork service.
  *===========================================================================*/
 StatusCode UA_ClientApi_FindServersOnNetwork(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     uint32_t                a_nStartingRecordId,
     uint32_t                a_nMaxRecordsToReturn,
@@ -264,14 +263,14 @@ StatusCode UA_ClientApi_FindServersOnNetwork(
  * Asynchronously calls the FindServersOnNetwork service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginFindServersOnNetwork(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    uint32_t                          a_nStartingRecordId,
-    uint32_t                          a_nMaxRecordsToReturn,
-    int32_t                           a_nNoOfServerCapabilityFilter,
-    const UA_String*                  a_pServerCapabilityFilter,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    uint32_t                       a_nStartingRecordId,
+    uint32_t                       a_nMaxRecordsToReturn,
+    int32_t                        a_nNoOfServerCapabilityFilter,
+    const UA_String*               a_pServerCapabilityFilter,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_FindServersOnNetworkRequest cRequest;
@@ -295,10 +294,10 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "FindServersOnNetwork",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_FindServersOnNetworkRequest_EncodeableType,
             &UA_FindServersOnNetworkResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -311,7 +310,7 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
  * Synchronously calls the GetEndpoints service.
  *===========================================================================*/
 StatusCode UA_ClientApi_GetEndpoints(
-    OpcUa_Channel            a_hChannel,
+    UA_Channel               a_hChannel,
     const UA_RequestHeader*  a_pRequestHeader,
     const UA_String*         a_pEndpointUrl,
     int32_t                  a_nNoOfLocaleIds,
@@ -395,15 +394,15 @@ StatusCode UA_ClientApi_GetEndpoints(
  * Asynchronously calls the GetEndpoints service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginGetEndpoints(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    const UA_String*                  a_pEndpointUrl,
-    int32_t                           a_nNoOfLocaleIds,
-    const UA_String*                  a_pLocaleIds,
-    int32_t                           a_nNoOfProfileUris,
-    const UA_String*                  a_pProfileUris,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    const UA_String*               a_pEndpointUrl,
+    int32_t                        a_nNoOfLocaleIds,
+    const UA_String*               a_pLocaleIds,
+    int32_t                        a_nNoOfProfileUris,
+    const UA_String*               a_pProfileUris,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_GetEndpointsRequest cRequest;
@@ -430,10 +429,10 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "GetEndpoints",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_GetEndpointsRequest_EncodeableType,
             &UA_GetEndpointsResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -446,7 +445,7 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
  * Synchronously calls the RegisterServer service.
  *===========================================================================*/
 StatusCode UA_ClientApi_RegisterServer(
-    OpcUa_Channel              a_hChannel,
+    UA_Channel                 a_hChannel,
     const UA_RequestHeader*    a_pRequestHeader,
     const UA_RegisteredServer* a_pServer,
     UA_ResponseHeader*         a_pResponseHeader)
@@ -514,11 +513,11 @@ StatusCode UA_ClientApi_RegisterServer(
  * Asynchronously calls the RegisterServer service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginRegisterServer(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    const UA_RegisteredServer*        a_pServer,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    const UA_RegisteredServer*     a_pServer,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_RegisterServerRequest cRequest;
@@ -539,10 +538,10 @@ StatusCode UA_ClientApi_BeginRegisterServer(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "RegisterServer",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_RegisterServerRequest_EncodeableType,
             &UA_RegisterServerResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -555,7 +554,7 @@ StatusCode UA_ClientApi_BeginRegisterServer(
  * Synchronously calls the RegisterServer2 service.
  *===========================================================================*/
 StatusCode UA_ClientApi_RegisterServer2(
-    OpcUa_Channel              a_hChannel,
+    UA_Channel                 a_hChannel,
     const UA_RequestHeader*    a_pRequestHeader,
     const UA_RegisteredServer* a_pServer,
     int32_t                    a_nNoOfDiscoveryConfiguration,
@@ -640,13 +639,13 @@ StatusCode UA_ClientApi_RegisterServer2(
  * Asynchronously calls the RegisterServer2 service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginRegisterServer2(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    const UA_RegisteredServer*        a_pServer,
-    int32_t                           a_nNoOfDiscoveryConfiguration,
-    const UA_ExtensionObject*         a_pDiscoveryConfiguration,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    const UA_RegisteredServer*     a_pServer,
+    int32_t                        a_nNoOfDiscoveryConfiguration,
+    const UA_ExtensionObject*      a_pDiscoveryConfiguration,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_RegisterServer2Request cRequest;
@@ -670,10 +669,10 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "RegisterServer2",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_RegisterServer2Request_EncodeableType,
             &UA_RegisterServer2Response_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -686,7 +685,7 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
  * Synchronously calls the CreateSession service.
  *===========================================================================*/
 StatusCode UA_ClientApi_CreateSession(
-    OpcUa_Channel                    a_hChannel,
+    UA_Channel                       a_hChannel,
     const UA_RequestHeader*          a_pRequestHeader,
     const UA_ApplicationDescription* a_pClientDescription,
     const UA_String*                 a_pServerUri,
@@ -806,18 +805,18 @@ StatusCode UA_ClientApi_CreateSession(
  * Asynchronously calls the CreateSession service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginCreateSession(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    const UA_ApplicationDescription*  a_pClientDescription,
-    const UA_String*                  a_pServerUri,
-    const UA_String*                  a_pEndpointUrl,
-    const UA_String*                  a_pSessionName,
-    const UA_ByteString*              a_pClientNonce,
-    const UA_ByteString*              a_pClientCertificate,
-    double                            a_nRequestedSessionTimeout,
-    uint32_t                          a_nMaxResponseMessageSize,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                       a_hChannel,
+    const UA_RequestHeader*          a_pRequestHeader,
+    const UA_ApplicationDescription* a_pClientDescription,
+    const UA_String*                 a_pServerUri,
+    const UA_String*                 a_pEndpointUrl,
+    const UA_String*                 a_pSessionName,
+    const UA_ByteString*             a_pClientNonce,
+    const UA_ByteString*             a_pClientCertificate,
+    double                           a_nRequestedSessionTimeout,
+    uint32_t                         a_nMaxResponseMessageSize,
+    UA_Channel_PfnRequestComplete*   a_pCallback,
+    void*                            a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CreateSessionRequest cRequest;
@@ -850,10 +849,10 @@ StatusCode UA_ClientApi_BeginCreateSession(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "CreateSession",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_CreateSessionRequest_EncodeableType,
             &UA_CreateSessionResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -866,7 +865,7 @@ StatusCode UA_ClientApi_BeginCreateSession(
  * Synchronously calls the ActivateSession service.
  *===========================================================================*/
 StatusCode UA_ClientApi_ActivateSession(
-    OpcUa_Channel                       a_hChannel,
+    UA_Channel                          a_hChannel,
     const UA_RequestHeader*             a_pRequestHeader,
     const UA_SignatureData*             a_pClientSignature,
     int32_t                             a_nNoOfClientSoftwareCertificates,
@@ -965,7 +964,7 @@ StatusCode UA_ClientApi_ActivateSession(
  * Asynchronously calls the ActivateSession service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginActivateSession(
-    OpcUa_Channel                       a_hChannel,
+    UA_Channel                          a_hChannel,
     const UA_RequestHeader*             a_pRequestHeader,
     const UA_SignatureData*             a_pClientSignature,
     int32_t                             a_nNoOfClientSoftwareCertificates,
@@ -975,7 +974,7 @@ StatusCode UA_ClientApi_BeginActivateSession(
     const UA_ExtensionObject*           a_pUserIdentityToken,
     const UA_SignatureData*             a_pUserTokenSignature,
     UA_Channel_PfnRequestComplete*      a_pCallback,
-    OpcUa_Void*                         a_pCallbackData)
+    void*                               a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ActivateSessionRequest cRequest;
@@ -1006,10 +1005,10 @@ StatusCode UA_ClientApi_BeginActivateSession(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "ActivateSession",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_ActivateSessionRequest_EncodeableType,
             &UA_ActivateSessionResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -1022,7 +1021,7 @@ StatusCode UA_ClientApi_BeginActivateSession(
  * Synchronously calls the CloseSession service.
  *===========================================================================*/
 StatusCode UA_ClientApi_CloseSession(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     UA_Boolean              a_bDeleteSubscriptions,
     UA_ResponseHeader*      a_pResponseHeader)
@@ -1089,11 +1088,11 @@ StatusCode UA_ClientApi_CloseSession(
  * Asynchronously calls the CloseSession service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginCloseSession(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    UA_Boolean                        a_bDeleteSubscriptions,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    UA_Boolean                     a_bDeleteSubscriptions,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CloseSessionRequest cRequest;
@@ -1113,10 +1112,10 @@ StatusCode UA_ClientApi_BeginCloseSession(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "CloseSession",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_CloseSessionRequest_EncodeableType,
             &UA_CloseSessionResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -1129,7 +1128,7 @@ StatusCode UA_ClientApi_BeginCloseSession(
  * Synchronously calls the Cancel service.
  *===========================================================================*/
 StatusCode UA_ClientApi_Cancel(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     uint32_t                a_nRequestHandle,
     UA_ResponseHeader*      a_pResponseHeader,
@@ -1199,11 +1198,11 @@ StatusCode UA_ClientApi_Cancel(
  * Asynchronously calls the Cancel service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginCancel(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    uint32_t                          a_nRequestHandle,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    uint32_t                       a_nRequestHandle,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CancelRequest cRequest;
@@ -1223,10 +1222,10 @@ StatusCode UA_ClientApi_BeginCancel(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Cancel",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_CancelRequest_EncodeableType,
             &UA_CancelResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -1239,7 +1238,7 @@ StatusCode UA_ClientApi_BeginCancel(
  * Synchronously calls the AddNodes service.
  *===========================================================================*/
 StatusCode UA_ClientApi_AddNodes(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     int32_t                 a_nNoOfNodesToAdd,
     const UA_AddNodesItem*  a_pNodesToAdd,
@@ -1321,12 +1320,12 @@ StatusCode UA_ClientApi_AddNodes(
  * Asynchronously calls the AddNodes service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginAddNodes(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfNodesToAdd,
-    const UA_AddNodesItem*            a_pNodesToAdd,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfNodesToAdd,
+    const UA_AddNodesItem*         a_pNodesToAdd,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_AddNodesRequest cRequest;
@@ -1348,10 +1347,10 @@ StatusCode UA_ClientApi_BeginAddNodes(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "AddNodes",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_AddNodesRequest_EncodeableType,
             &UA_AddNodesResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -1364,7 +1363,7 @@ StatusCode UA_ClientApi_BeginAddNodes(
  * Synchronously calls the AddReferences service.
  *===========================================================================*/
 StatusCode UA_ClientApi_AddReferences(
-    OpcUa_Channel               a_hChannel,
+    UA_Channel                  a_hChannel,
     const UA_RequestHeader*     a_pRequestHeader,
     int32_t                     a_nNoOfReferencesToAdd,
     const UA_AddReferencesItem* a_pReferencesToAdd,
@@ -1446,12 +1445,12 @@ StatusCode UA_ClientApi_AddReferences(
  * Asynchronously calls the AddReferences service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginAddReferences(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfReferencesToAdd,
-    const UA_AddReferencesItem*       a_pReferencesToAdd,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfReferencesToAdd,
+    const UA_AddReferencesItem*    a_pReferencesToAdd,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_AddReferencesRequest cRequest;
@@ -1473,10 +1472,10 @@ StatusCode UA_ClientApi_BeginAddReferences(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "AddReferences",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_AddReferencesRequest_EncodeableType,
             &UA_AddReferencesResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -1489,7 +1488,7 @@ StatusCode UA_ClientApi_BeginAddReferences(
  * Synchronously calls the DeleteNodes service.
  *===========================================================================*/
 StatusCode UA_ClientApi_DeleteNodes(
-    OpcUa_Channel             a_hChannel,
+    UA_Channel                a_hChannel,
     const UA_RequestHeader*   a_pRequestHeader,
     int32_t                   a_nNoOfNodesToDelete,
     const UA_DeleteNodesItem* a_pNodesToDelete,
@@ -1571,12 +1570,12 @@ StatusCode UA_ClientApi_DeleteNodes(
  * Asynchronously calls the DeleteNodes service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginDeleteNodes(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfNodesToDelete,
-    const UA_DeleteNodesItem*         a_pNodesToDelete,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfNodesToDelete,
+    const UA_DeleteNodesItem*      a_pNodesToDelete,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_DeleteNodesRequest cRequest;
@@ -1598,10 +1597,10 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteNodes",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_DeleteNodesRequest_EncodeableType,
             &UA_DeleteNodesResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -1614,7 +1613,7 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
  * Synchronously calls the DeleteReferences service.
  *===========================================================================*/
 StatusCode UA_ClientApi_DeleteReferences(
-    OpcUa_Channel                  a_hChannel,
+    UA_Channel                     a_hChannel,
     const UA_RequestHeader*        a_pRequestHeader,
     int32_t                        a_nNoOfReferencesToDelete,
     const UA_DeleteReferencesItem* a_pReferencesToDelete,
@@ -1696,12 +1695,12 @@ StatusCode UA_ClientApi_DeleteReferences(
  * Asynchronously calls the DeleteReferences service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginDeleteReferences(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfReferencesToDelete,
-    const UA_DeleteReferencesItem*    a_pReferencesToDelete,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfReferencesToDelete,
+    const UA_DeleteReferencesItem* a_pReferencesToDelete,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_DeleteReferencesRequest cRequest;
@@ -1723,10 +1722,10 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteReferences",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_DeleteReferencesRequest_EncodeableType,
             &UA_DeleteReferencesResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -1739,7 +1738,7 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
  * Synchronously calls the Browse service.
  *===========================================================================*/
 StatusCode UA_ClientApi_Browse(
-    OpcUa_Channel               a_hChannel,
+    UA_Channel                  a_hChannel,
     const UA_RequestHeader*     a_pRequestHeader,
     const UA_ViewDescription*   a_pView,
     uint32_t                    a_nRequestedMaxReferencesPerNode,
@@ -1826,14 +1825,14 @@ StatusCode UA_ClientApi_Browse(
  * Asynchronously calls the Browse service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginBrowse(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    const UA_ViewDescription*         a_pView,
-    uint32_t                          a_nRequestedMaxReferencesPerNode,
-    int32_t                           a_nNoOfNodesToBrowse,
-    const UA_BrowseDescription*       a_pNodesToBrowse,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    const UA_ViewDescription*      a_pView,
+    uint32_t                       a_nRequestedMaxReferencesPerNode,
+    int32_t                        a_nNoOfNodesToBrowse,
+    const UA_BrowseDescription*    a_pNodesToBrowse,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_BrowseRequest cRequest;
@@ -1858,10 +1857,10 @@ StatusCode UA_ClientApi_BeginBrowse(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Browse",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_BrowseRequest_EncodeableType,
             &UA_BrowseResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -1874,7 +1873,7 @@ StatusCode UA_ClientApi_BeginBrowse(
  * Synchronously calls the BrowseNext service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BrowseNext(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     UA_Boolean              a_bReleaseContinuationPoints,
     int32_t                 a_nNoOfContinuationPoints,
@@ -1958,13 +1957,13 @@ StatusCode UA_ClientApi_BrowseNext(
  * Asynchronously calls the BrowseNext service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginBrowseNext(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    UA_Boolean                        a_bReleaseContinuationPoints,
-    int32_t                           a_nNoOfContinuationPoints,
-    const UA_ByteString*              a_pContinuationPoints,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    UA_Boolean                     a_bReleaseContinuationPoints,
+    int32_t                        a_nNoOfContinuationPoints,
+    const UA_ByteString*           a_pContinuationPoints,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_BrowseNextRequest cRequest;
@@ -1987,10 +1986,10 @@ StatusCode UA_ClientApi_BeginBrowseNext(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "BrowseNext",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_BrowseNextRequest_EncodeableType,
             &UA_BrowseNextResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -2003,7 +2002,7 @@ StatusCode UA_ClientApi_BeginBrowseNext(
  * Synchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
 StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     int32_t                 a_nNoOfBrowsePaths,
     const UA_BrowsePath*    a_pBrowsePaths,
@@ -2085,12 +2084,12 @@ StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
  * Asynchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfBrowsePaths,
-    const UA_BrowsePath*              a_pBrowsePaths,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfBrowsePaths,
+    const UA_BrowsePath*           a_pBrowsePaths,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_TranslateBrowsePathsToNodeIdsRequest cRequest;
@@ -2112,10 +2111,10 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "TranslateBrowsePathsToNodeIds",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
             &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -2128,7 +2127,7 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
  * Synchronously calls the RegisterNodes service.
  *===========================================================================*/
 StatusCode UA_ClientApi_RegisterNodes(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     int32_t                 a_nNoOfNodesToRegister,
     const UA_NodeId*        a_pNodesToRegister,
@@ -2204,12 +2203,12 @@ StatusCode UA_ClientApi_RegisterNodes(
  * Asynchronously calls the RegisterNodes service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginRegisterNodes(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfNodesToRegister,
-    const UA_NodeId*                  a_pNodesToRegister,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfNodesToRegister,
+    const UA_NodeId*               a_pNodesToRegister,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_RegisterNodesRequest cRequest;
@@ -2231,10 +2230,10 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "RegisterNodes",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_RegisterNodesRequest_EncodeableType,
             &UA_RegisterNodesResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -2247,7 +2246,7 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
  * Synchronously calls the UnregisterNodes service.
  *===========================================================================*/
 StatusCode UA_ClientApi_UnregisterNodes(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     int32_t                 a_nNoOfNodesToUnregister,
     const UA_NodeId*        a_pNodesToUnregister,
@@ -2317,12 +2316,12 @@ StatusCode UA_ClientApi_UnregisterNodes(
  * Asynchronously calls the UnregisterNodes service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginUnregisterNodes(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfNodesToUnregister,
-    const UA_NodeId*                  a_pNodesToUnregister,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfNodesToUnregister,
+    const UA_NodeId*               a_pNodesToUnregister,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_UnregisterNodesRequest cRequest;
@@ -2344,10 +2343,10 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "UnregisterNodes",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_UnregisterNodesRequest_EncodeableType,
             &UA_UnregisterNodesResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -2360,7 +2359,7 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
  * Synchronously calls the QueryFirst service.
  *===========================================================================*/
 StatusCode UA_ClientApi_QueryFirst(
-    OpcUa_Channel                 a_hChannel,
+    UA_Channel                    a_hChannel,
     const UA_RequestHeader*       a_pRequestHeader,
     const UA_ViewDescription*     a_pView,
     int32_t                       a_nNoOfNodeTypes,
@@ -2464,16 +2463,16 @@ StatusCode UA_ClientApi_QueryFirst(
  * Asynchronously calls the QueryFirst service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginQueryFirst(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    const UA_ViewDescription*         a_pView,
-    int32_t                           a_nNoOfNodeTypes,
-    const UA_NodeTypeDescription*     a_pNodeTypes,
-    const UA_ContentFilter*           a_pFilter,
-    uint32_t                          a_nMaxDataSetsToReturn,
-    uint32_t                          a_nMaxReferencesToReturn,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    const UA_ViewDescription*      a_pView,
+    int32_t                        a_nNoOfNodeTypes,
+    const UA_NodeTypeDescription*  a_pNodeTypes,
+    const UA_ContentFilter*        a_pFilter,
+    uint32_t                       a_nMaxDataSetsToReturn,
+    uint32_t                       a_nMaxReferencesToReturn,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_QueryFirstRequest cRequest;
@@ -2501,10 +2500,10 @@ StatusCode UA_ClientApi_BeginQueryFirst(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "QueryFirst",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_QueryFirstRequest_EncodeableType,
             &UA_QueryFirstResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -2517,7 +2516,7 @@ StatusCode UA_ClientApi_BeginQueryFirst(
  * Synchronously calls the QueryNext service.
  *===========================================================================*/
 StatusCode UA_ClientApi_QueryNext(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     UA_Boolean              a_bReleaseContinuationPoint,
     const UA_ByteString*    a_pContinuationPoint,
@@ -2596,12 +2595,12 @@ StatusCode UA_ClientApi_QueryNext(
  * Asynchronously calls the QueryNext service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginQueryNext(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    UA_Boolean                        a_bReleaseContinuationPoint,
-    const UA_ByteString*              a_pContinuationPoint,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    UA_Boolean                     a_bReleaseContinuationPoint,
+    const UA_ByteString*           a_pContinuationPoint,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_QueryNextRequest cRequest;
@@ -2623,10 +2622,10 @@ StatusCode UA_ClientApi_BeginQueryNext(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "QueryNext",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_QueryNextRequest_EncodeableType,
             &UA_QueryNextResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -2639,7 +2638,7 @@ StatusCode UA_ClientApi_BeginQueryNext(
  * Synchronously calls the Read service.
  *===========================================================================*/
 StatusCode UA_ClientApi_Read(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     double                  a_nMaxAge,
     UA_TimestampsToReturn   a_eTimestampsToReturn,
@@ -2725,14 +2724,14 @@ StatusCode UA_ClientApi_Read(
  * Asynchronously calls the Read service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginRead(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    double                            a_nMaxAge,
-    UA_TimestampsToReturn             a_eTimestampsToReturn,
-    int32_t                           a_nNoOfNodesToRead,
-    const UA_ReadValueId*             a_pNodesToRead,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    double                         a_nMaxAge,
+    UA_TimestampsToReturn          a_eTimestampsToReturn,
+    int32_t                        a_nNoOfNodesToRead,
+    const UA_ReadValueId*          a_pNodesToRead,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ReadRequest cRequest;
@@ -2756,10 +2755,10 @@ StatusCode UA_ClientApi_BeginRead(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Read",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_ReadRequest_EncodeableType,
             &UA_ReadResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -2772,7 +2771,7 @@ StatusCode UA_ClientApi_BeginRead(
  * Synchronously calls the HistoryRead service.
  *===========================================================================*/
 StatusCode UA_ClientApi_HistoryRead(
-    OpcUa_Channel                a_hChannel,
+    UA_Channel                   a_hChannel,
     const UA_RequestHeader*      a_pRequestHeader,
     const UA_ExtensionObject*    a_pHistoryReadDetails,
     UA_TimestampsToReturn        a_eTimestampsToReturn,
@@ -2861,15 +2860,15 @@ StatusCode UA_ClientApi_HistoryRead(
  * Asynchronously calls the HistoryRead service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginHistoryRead(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    const UA_ExtensionObject*         a_pHistoryReadDetails,
-    UA_TimestampsToReturn             a_eTimestampsToReturn,
-    UA_Boolean                        a_bReleaseContinuationPoints,
-    int32_t                           a_nNoOfNodesToRead,
-    const UA_HistoryReadValueId*      a_pNodesToRead,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    const UA_ExtensionObject*      a_pHistoryReadDetails,
+    UA_TimestampsToReturn          a_eTimestampsToReturn,
+    UA_Boolean                     a_bReleaseContinuationPoints,
+    int32_t                        a_nNoOfNodesToRead,
+    const UA_HistoryReadValueId*   a_pNodesToRead,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_HistoryReadRequest cRequest;
@@ -2895,10 +2894,10 @@ StatusCode UA_ClientApi_BeginHistoryRead(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "HistoryRead",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_HistoryReadRequest_EncodeableType,
             &UA_HistoryReadResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -2911,7 +2910,7 @@ StatusCode UA_ClientApi_BeginHistoryRead(
  * Synchronously calls the Write service.
  *===========================================================================*/
 StatusCode UA_ClientApi_Write(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     int32_t                 a_nNoOfNodesToWrite,
     const UA_WriteValue*    a_pNodesToWrite,
@@ -2993,12 +2992,12 @@ StatusCode UA_ClientApi_Write(
  * Asynchronously calls the Write service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginWrite(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfNodesToWrite,
-    const UA_WriteValue*              a_pNodesToWrite,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfNodesToWrite,
+    const UA_WriteValue*           a_pNodesToWrite,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_WriteRequest cRequest;
@@ -3020,10 +3019,10 @@ StatusCode UA_ClientApi_BeginWrite(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Write",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_WriteRequest_EncodeableType,
             &UA_WriteResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -3036,7 +3035,7 @@ StatusCode UA_ClientApi_BeginWrite(
  * Synchronously calls the HistoryUpdate service.
  *===========================================================================*/
 StatusCode UA_ClientApi_HistoryUpdate(
-    OpcUa_Channel             a_hChannel,
+    UA_Channel                a_hChannel,
     const UA_RequestHeader*   a_pRequestHeader,
     int32_t                   a_nNoOfHistoryUpdateDetails,
     const UA_ExtensionObject* a_pHistoryUpdateDetails,
@@ -3118,12 +3117,12 @@ StatusCode UA_ClientApi_HistoryUpdate(
  * Asynchronously calls the HistoryUpdate service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginHistoryUpdate(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfHistoryUpdateDetails,
-    const UA_ExtensionObject*         a_pHistoryUpdateDetails,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfHistoryUpdateDetails,
+    const UA_ExtensionObject*      a_pHistoryUpdateDetails,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_HistoryUpdateRequest cRequest;
@@ -3145,10 +3144,10 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "HistoryUpdate",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_HistoryUpdateRequest_EncodeableType,
             &UA_HistoryUpdateResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -3161,7 +3160,7 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
  * Synchronously calls the Call service.
  *===========================================================================*/
 StatusCode UA_ClientApi_Call(
-    OpcUa_Channel               a_hChannel,
+    UA_Channel                  a_hChannel,
     const UA_RequestHeader*     a_pRequestHeader,
     int32_t                     a_nNoOfMethodsToCall,
     const UA_CallMethodRequest* a_pMethodsToCall,
@@ -3243,12 +3242,12 @@ StatusCode UA_ClientApi_Call(
  * Asynchronously calls the Call service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginCall(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfMethodsToCall,
-    const UA_CallMethodRequest*       a_pMethodsToCall,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfMethodsToCall,
+    const UA_CallMethodRequest*    a_pMethodsToCall,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CallRequest cRequest;
@@ -3270,10 +3269,10 @@ StatusCode UA_ClientApi_BeginCall(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Call",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_CallRequest_EncodeableType,
             &UA_CallResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -3286,7 +3285,7 @@ StatusCode UA_ClientApi_BeginCall(
  * Synchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
 StatusCode UA_ClientApi_CreateMonitoredItems(
-    OpcUa_Channel                        a_hChannel,
+    UA_Channel                           a_hChannel,
     const UA_RequestHeader*              a_pRequestHeader,
     uint32_t                             a_nSubscriptionId,
     UA_TimestampsToReturn                a_eTimestampsToReturn,
@@ -3372,14 +3371,14 @@ StatusCode UA_ClientApi_CreateMonitoredItems(
  * Asynchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginCreateMonitoredItems(
-    OpcUa_Channel                        a_hChannel,
+    UA_Channel                           a_hChannel,
     const UA_RequestHeader*              a_pRequestHeader,
     uint32_t                             a_nSubscriptionId,
     UA_TimestampsToReturn                a_eTimestampsToReturn,
     int32_t                              a_nNoOfItemsToCreate,
     const UA_MonitoredItemCreateRequest* a_pItemsToCreate,
     UA_Channel_PfnRequestComplete*       a_pCallback,
-    OpcUa_Void*                          a_pCallbackData)
+    void*                                a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CreateMonitoredItemsRequest cRequest;
@@ -3403,10 +3402,10 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "CreateMonitoredItems",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_CreateMonitoredItemsRequest_EncodeableType,
             &UA_CreateMonitoredItemsResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -3419,7 +3418,7 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
  * Synchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
 StatusCode UA_ClientApi_ModifyMonitoredItems(
-    OpcUa_Channel                        a_hChannel,
+    UA_Channel                           a_hChannel,
     const UA_RequestHeader*              a_pRequestHeader,
     uint32_t                             a_nSubscriptionId,
     UA_TimestampsToReturn                a_eTimestampsToReturn,
@@ -3505,14 +3504,14 @@ StatusCode UA_ClientApi_ModifyMonitoredItems(
  * Asynchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginModifyMonitoredItems(
-    OpcUa_Channel                        a_hChannel,
+    UA_Channel                           a_hChannel,
     const UA_RequestHeader*              a_pRequestHeader,
     uint32_t                             a_nSubscriptionId,
     UA_TimestampsToReturn                a_eTimestampsToReturn,
     int32_t                              a_nNoOfItemsToModify,
     const UA_MonitoredItemModifyRequest* a_pItemsToModify,
     UA_Channel_PfnRequestComplete*       a_pCallback,
-    OpcUa_Void*                          a_pCallbackData)
+    void*                                a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ModifyMonitoredItemsRequest cRequest;
@@ -3536,10 +3535,10 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "ModifyMonitoredItems",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_ModifyMonitoredItemsRequest_EncodeableType,
             &UA_ModifyMonitoredItemsResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -3552,7 +3551,7 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
  * Synchronously calls the SetMonitoringMode service.
  *===========================================================================*/
 StatusCode UA_ClientApi_SetMonitoringMode(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     uint32_t                a_nSubscriptionId,
     UA_MonitoringMode       a_eMonitoringMode,
@@ -3638,14 +3637,14 @@ StatusCode UA_ClientApi_SetMonitoringMode(
  * Asynchronously calls the SetMonitoringMode service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginSetMonitoringMode(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    uint32_t                          a_nSubscriptionId,
-    UA_MonitoringMode                 a_eMonitoringMode,
-    int32_t                           a_nNoOfMonitoredItemIds,
-    const uint32_t*                   a_pMonitoredItemIds,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    uint32_t                       a_nSubscriptionId,
+    UA_MonitoringMode              a_eMonitoringMode,
+    int32_t                        a_nNoOfMonitoredItemIds,
+    const uint32_t*                a_pMonitoredItemIds,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_SetMonitoringModeRequest cRequest;
@@ -3669,10 +3668,10 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "SetMonitoringMode",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_SetMonitoringModeRequest_EncodeableType,
             &UA_SetMonitoringModeResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -3685,7 +3684,7 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
  * Synchronously calls the SetTriggering service.
  *===========================================================================*/
 StatusCode UA_ClientApi_SetTriggering(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     uint32_t                a_nSubscriptionId,
     uint32_t                a_nTriggeringItemId,
@@ -3788,16 +3787,16 @@ StatusCode UA_ClientApi_SetTriggering(
  * Asynchronously calls the SetTriggering service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginSetTriggering(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    uint32_t                          a_nSubscriptionId,
-    uint32_t                          a_nTriggeringItemId,
-    int32_t                           a_nNoOfLinksToAdd,
-    const uint32_t*                   a_pLinksToAdd,
-    int32_t                           a_nNoOfLinksToRemove,
-    const uint32_t*                   a_pLinksToRemove,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    uint32_t                       a_nSubscriptionId,
+    uint32_t                       a_nTriggeringItemId,
+    int32_t                        a_nNoOfLinksToAdd,
+    const uint32_t*                a_pLinksToAdd,
+    int32_t                        a_nNoOfLinksToRemove,
+    const uint32_t*                a_pLinksToRemove,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_SetTriggeringRequest cRequest;
@@ -3824,10 +3823,10 @@ StatusCode UA_ClientApi_BeginSetTriggering(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "SetTriggering",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_SetTriggeringRequest_EncodeableType,
             &UA_SetTriggeringResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -3840,7 +3839,7 @@ StatusCode UA_ClientApi_BeginSetTriggering(
  * Synchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
 StatusCode UA_ClientApi_DeleteMonitoredItems(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     uint32_t                a_nSubscriptionId,
     int32_t                 a_nNoOfMonitoredItemIds,
@@ -3924,13 +3923,13 @@ StatusCode UA_ClientApi_DeleteMonitoredItems(
  * Asynchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    uint32_t                          a_nSubscriptionId,
-    int32_t                           a_nNoOfMonitoredItemIds,
-    const uint32_t*                   a_pMonitoredItemIds,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    uint32_t                       a_nSubscriptionId,
+    int32_t                        a_nNoOfMonitoredItemIds,
+    const uint32_t*                a_pMonitoredItemIds,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_DeleteMonitoredItemsRequest cRequest;
@@ -3953,10 +3952,10 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteMonitoredItems",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_DeleteMonitoredItemsRequest_EncodeableType,
             &UA_DeleteMonitoredItemsResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -3969,7 +3968,7 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
  * Synchronously calls the CreateSubscription service.
  *===========================================================================*/
 StatusCode UA_ClientApi_CreateSubscription(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     double                  a_nRequestedPublishingInterval,
     uint32_t                a_nRequestedLifetimeCount,
@@ -4058,16 +4057,16 @@ StatusCode UA_ClientApi_CreateSubscription(
  * Asynchronously calls the CreateSubscription service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginCreateSubscription(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    double                            a_nRequestedPublishingInterval,
-    uint32_t                          a_nRequestedLifetimeCount,
-    uint32_t                          a_nRequestedMaxKeepAliveCount,
-    uint32_t                          a_nMaxNotificationsPerPublish,
-    UA_Boolean                        a_bPublishingEnabled,
-    UA_Byte                           a_nPriority,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    double                         a_nRequestedPublishingInterval,
+    uint32_t                       a_nRequestedLifetimeCount,
+    uint32_t                       a_nRequestedMaxKeepAliveCount,
+    uint32_t                       a_nMaxNotificationsPerPublish,
+    UA_Boolean                     a_bPublishingEnabled,
+    UA_Byte                        a_nPriority,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CreateSubscriptionRequest cRequest;
@@ -4092,10 +4091,10 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "CreateSubscription",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_CreateSubscriptionRequest_EncodeableType,
             &UA_CreateSubscriptionResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -4108,7 +4107,7 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
  * Synchronously calls the ModifySubscription service.
  *===========================================================================*/
 StatusCode UA_ClientApi_ModifySubscription(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     uint32_t                a_nSubscriptionId,
     double                  a_nRequestedPublishingInterval,
@@ -4194,16 +4193,16 @@ StatusCode UA_ClientApi_ModifySubscription(
  * Asynchronously calls the ModifySubscription service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginModifySubscription(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    uint32_t                          a_nSubscriptionId,
-    double                            a_nRequestedPublishingInterval,
-    uint32_t                          a_nRequestedLifetimeCount,
-    uint32_t                          a_nRequestedMaxKeepAliveCount,
-    uint32_t                          a_nMaxNotificationsPerPublish,
-    UA_Byte                           a_nPriority,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    uint32_t                       a_nSubscriptionId,
+    double                         a_nRequestedPublishingInterval,
+    uint32_t                       a_nRequestedLifetimeCount,
+    uint32_t                       a_nRequestedMaxKeepAliveCount,
+    uint32_t                       a_nMaxNotificationsPerPublish,
+    UA_Byte                        a_nPriority,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ModifySubscriptionRequest cRequest;
@@ -4228,10 +4227,10 @@ StatusCode UA_ClientApi_BeginModifySubscription(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "ModifySubscription",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_ModifySubscriptionRequest_EncodeableType,
             &UA_ModifySubscriptionResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -4244,7 +4243,7 @@ StatusCode UA_ClientApi_BeginModifySubscription(
  * Synchronously calls the SetPublishingMode service.
  *===========================================================================*/
 StatusCode UA_ClientApi_SetPublishingMode(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     UA_Boolean              a_bPublishingEnabled,
     int32_t                 a_nNoOfSubscriptionIds,
@@ -4328,13 +4327,13 @@ StatusCode UA_ClientApi_SetPublishingMode(
  * Asynchronously calls the SetPublishingMode service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginSetPublishingMode(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    UA_Boolean                        a_bPublishingEnabled,
-    int32_t                           a_nNoOfSubscriptionIds,
-    const uint32_t*                   a_pSubscriptionIds,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    UA_Boolean                     a_bPublishingEnabled,
+    int32_t                        a_nNoOfSubscriptionIds,
+    const uint32_t*                a_pSubscriptionIds,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_SetPublishingModeRequest cRequest;
@@ -4357,10 +4356,10 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "SetPublishingMode",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_SetPublishingModeRequest_EncodeableType,
             &UA_SetPublishingModeResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -4373,7 +4372,7 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
  * Synchronously calls the Publish service.
  *===========================================================================*/
 StatusCode UA_ClientApi_Publish(
-    OpcUa_Channel                         a_hChannel,
+    UA_Channel                            a_hChannel,
     const UA_RequestHeader*               a_pRequestHeader,
     int32_t                               a_nNoOfSubscriptionAcknowledgements,
     const UA_SubscriptionAcknowledgement* a_pSubscriptionAcknowledgements,
@@ -4470,12 +4469,12 @@ StatusCode UA_ClientApi_Publish(
  * Asynchronously calls the Publish service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginPublish(
-    OpcUa_Channel                         a_hChannel,
+    UA_Channel                            a_hChannel,
     const UA_RequestHeader*               a_pRequestHeader,
     int32_t                               a_nNoOfSubscriptionAcknowledgements,
     const UA_SubscriptionAcknowledgement* a_pSubscriptionAcknowledgements,
     UA_Channel_PfnRequestComplete*        a_pCallback,
-    OpcUa_Void*                           a_pCallbackData)
+    void*                                 a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_PublishRequest cRequest;
@@ -4497,10 +4496,10 @@ StatusCode UA_ClientApi_BeginPublish(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Publish",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_PublishRequest_EncodeableType,
             &UA_PublishResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -4513,7 +4512,7 @@ StatusCode UA_ClientApi_BeginPublish(
  * Synchronously calls the Republish service.
  *===========================================================================*/
 StatusCode UA_ClientApi_Republish(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     uint32_t                a_nSubscriptionId,
     uint32_t                a_nRetransmitSequenceNumber,
@@ -4585,12 +4584,12 @@ StatusCode UA_ClientApi_Republish(
  * Asynchronously calls the Republish service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginRepublish(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    uint32_t                          a_nSubscriptionId,
-    uint32_t                          a_nRetransmitSequenceNumber,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    uint32_t                       a_nSubscriptionId,
+    uint32_t                       a_nRetransmitSequenceNumber,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_RepublishRequest cRequest;
@@ -4611,10 +4610,10 @@ StatusCode UA_ClientApi_BeginRepublish(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Republish",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_RepublishRequest_EncodeableType,
             &UA_RepublishResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -4627,7 +4626,7 @@ StatusCode UA_ClientApi_BeginRepublish(
  * Synchronously calls the TransferSubscriptions service.
  *===========================================================================*/
 StatusCode UA_ClientApi_TransferSubscriptions(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     int32_t                 a_nNoOfSubscriptionIds,
     const uint32_t*         a_pSubscriptionIds,
@@ -4711,13 +4710,13 @@ StatusCode UA_ClientApi_TransferSubscriptions(
  * Asynchronously calls the TransferSubscriptions service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginTransferSubscriptions(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfSubscriptionIds,
-    const uint32_t*                   a_pSubscriptionIds,
-    UA_Boolean                        a_bSendInitialValues,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfSubscriptionIds,
+    const uint32_t*                a_pSubscriptionIds,
+    UA_Boolean                     a_bSendInitialValues,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_TransferSubscriptionsRequest cRequest;
@@ -4740,10 +4739,10 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "TransferSubscriptions",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_TransferSubscriptionsRequest_EncodeableType,
             &UA_TransferSubscriptionsResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
@@ -4756,7 +4755,7 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
  * Synchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
 StatusCode UA_ClientApi_DeleteSubscriptions(
-    OpcUa_Channel           a_hChannel,
+    UA_Channel              a_hChannel,
     const UA_RequestHeader* a_pRequestHeader,
     int32_t                 a_nNoOfSubscriptionIds,
     const uint32_t*         a_pSubscriptionIds,
@@ -4838,12 +4837,12 @@ StatusCode UA_ClientApi_DeleteSubscriptions(
  * Asynchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
 StatusCode UA_ClientApi_BeginDeleteSubscriptions(
-    OpcUa_Channel                     a_hChannel,
-    const UA_RequestHeader*           a_pRequestHeader,
-    int32_t                           a_nNoOfSubscriptionIds,
-    const uint32_t*                   a_pSubscriptionIds,
-    UA_Channel_PfnRequestComplete*    a_pCallback,
-    OpcUa_Void*                       a_pCallbackData)
+    UA_Channel                     a_hChannel,
+    const UA_RequestHeader*        a_pRequestHeader,
+    int32_t                        a_nNoOfSubscriptionIds,
+    const uint32_t*                a_pSubscriptionIds,
+    UA_Channel_PfnRequestComplete* a_pCallback,
+    void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_DeleteSubscriptionsRequest cRequest;
@@ -4865,10 +4864,10 @@ StatusCode UA_ClientApi_BeginDeleteSubscriptions(
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteSubscriptions",
-            (OpcUa_Void*)&cRequest,
+            (void*)&cRequest,
             &UA_DeleteSubscriptionsRequest_EncodeableType,
             &UA_DeleteSubscriptionsResponse_EncodeableType,
-            (UA_Channel_PfnRequestComplete*   )a_pCallback,
+            (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
 
