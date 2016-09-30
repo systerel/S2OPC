@@ -38,6 +38,7 @@ UA_MsgBuffer* MsgBuffer_Create(Buffer*             buffer,
         mBuffer->receivedReqId = 0;
         mBuffer->flushData = flushData;
         Namespace_Initialize(&mBuffer->nsTable);
+        Namespace_AttachTable(&mBuffer->nsTable, nsTable);
         mBuffer->encTypesTable = encTypesTable;
     }
     return mBuffer;
