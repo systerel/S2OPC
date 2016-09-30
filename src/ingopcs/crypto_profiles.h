@@ -57,6 +57,8 @@ typedef StatusCode (*FnSymmetricVerify) (const struct CryptoProvider *pProvider,
                                          uint32_t lenInput,
                                          const uint8_t *pKey,
                                          const uint8_t *pSignature);
+typedef StatusCode (*FnSymmetricGenKey) (const struct CryptoProvider *pProvider,
+                                         uint8_t *pKey);
 
 typedef struct CryptoProfile
 {
@@ -68,6 +70,7 @@ typedef struct CryptoProfile
     const FnSymmetricDecrypt    pFnSymmDecrypt;
     const FnSymmetricSign       pFnSymmSign;
     const FnSymmetricVerify     pFnSymmVerif;
+    const FnSymmetricGenKey     pFnSymmGenKey;
 } CryptoProfile;
 
 

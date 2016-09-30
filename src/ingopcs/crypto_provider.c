@@ -161,3 +161,12 @@ StatusCode CryptoProvider_SymmetricSignature_GetLength_Low(const CryptoProvider 
     return STATUS_OK;
 }
 
+
+StatusCode CryptoProvider_SymmetricGenerateKey_Low(const CryptoProvider *pProvider,
+                                                   uint8_t *pKey)
+{
+    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pProvider->pCryptolibContext || UA_NULL == pKey)
+        return STATUS_INVALID_PARAMETERS;
+
+    return pProvider->pProfile->pFnSymmGenKey(pProvider, pKey);
+}

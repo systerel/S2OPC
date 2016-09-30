@@ -11,8 +11,12 @@
 #include <string.h>
 
 #include "crypto_profiles.h"
+#include "crypto_provider.h"
+#include "crypto_provider_lib.h"
 #include "mbedtls/aes.h"
 #include "mbedtls/md.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
 
 
 /* Security policy "Basic256Sha256", as of 09/09/2016:
@@ -71,7 +75,7 @@ static StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvi
 
     memcpy(iv_cpy, pIV, 16);
 
-    if(mbedtls_aes_setkey_dec(&aes, (unsigned char *)pKey, 256) != 0)
+    if(mbedtls_aes_setkey_dec(&aes, (unsigned char *)pKey, SecurityPolicy_Basic256Sha256_Symm_KeyLength*8) != 0)
         return STATUS_INVALID_PARAMETERS;
     if(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (unsigned char *)pInput, (unsigned char *)pOutput) != 0)
         return STATUS_INVALID_PARAMETERS;
@@ -136,6 +140,23 @@ static StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pP
 }
 
 
+// Fills pKey with SecurityPolicy_Basic256Sha256_Symm_KeyLength bytes of random data
+StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
+                                            uint8_t *pKey)
+{
+    CryptolibContext *pCtx = UA_NULL;
+
+    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pProvider->pCryptolibContext || UA_NULL == pKey)
+        return STATUS_INVALID_PARAMETERS;
+
+    pCtx = pProvider->pCryptolibContext;
+    if(mbedtls_ctr_drbg_random(&(pCtx->ctxDrbg), pKey, SecurityPolicy_Basic256Sha256_Symm_KeyLength) != 0)
+        return STATUS_NOK;
+
+    return STATUS_OK;
+}
+
+
 const CryptoProfile g_cpBasic256Sha256 = {
         .SecurityPolicyID = SecurityPolicy_Basic256Sha256_ID,
         .DerivedSignatureKeyBitLength = 256,
@@ -145,6 +166,7 @@ const CryptoProfile g_cpBasic256Sha256 = {
         .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
         .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
         .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
+        .pFnSymmGenKey = &CryptoProvider_SymmGenKey_AES256,
 };
 
 

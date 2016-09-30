@@ -5,16 +5,51 @@
  *      Author: PAB
  */
 
+#include <string.h>
+
 #include "crypto_provider.h"
+#include "crypto_provider_lib.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
+
 
 StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider)
 {
-    pCryptoProvider->pCryptolibContext = UA_NULL;
+    CryptolibContext *pctx = UA_NULL;
+    StatusCode status;
+
+    if(UA_NULL == pCryptoProvider)
+        return STATUS_INVALID_PARAMETERS;
+
+    pctx = (CryptolibContext *)malloc(sizeof(CryptolibContext));
+    if(UA_NULL == pctx)
+        return STATUS_NOK;
+    memset(pctx, 0, sizeof(CryptolibContext));
+
+    pCryptoProvider->pCryptolibContext = (void *)pctx;
+    mbedtls_entropy_init(&pctx->ctxEnt); //
+    mbedtls_ctr_drbg_init(&pctx->ctxDrbg);
+    if(mbedtls_ctr_drbg_seed(&pctx->ctxDrbg, &mbedtls_entropy_func, &pctx->ctxEnt, UA_NULL, 0) != 0)
+        return STATUS_NOK;
+
     return STATUS_OK;
 }
 
 
 StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider)
 {
+    CryptolibContext *pCtx = UA_NULL;
+
+    if(UA_NULL == pCryptoProvider)
+        return STATUS_INVALID_PARAMETERS;
+
+    pCtx = pCryptoProvider->pCryptolibContext;
+    if(UA_NULL != pCtx)
+    {
+        mbedtls_ctr_drbg_free(&pCtx->ctxDrbg);
+        mbedtls_entropy_free(&pCtx->ctxEnt);
+        free(pCtx);
+    }
+
     return STATUS_OK;
 }

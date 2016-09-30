@@ -16,15 +16,13 @@
 
 typedef uint8_t KeyBuffer;  // TODO: move towards private_key.h + This definition is unclear
 
+
 typedef struct CryptoProvider
 {
     const struct CryptoProfile * const pProfile;
-    void *pCryptolibContext;
+    struct CryptolibContext *pCryptolibContext;
 } CryptoProvider;
 
-
-CryptoProvider *CryptoProvider_Create_Low(const char *uri);
-void CryptoProvider_Delete_Low(CryptoProvider *pCryptoProvider);
 
 // Lib specific
 StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
@@ -32,6 +30,8 @@ StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
 
 // Real API ("_Low" suffix because temporary wrappers already use the shorter names)
 // TODO: shorter and unified names
+CryptoProvider *CryptoProvider_Create_Low(const char *uri);
+void CryptoProvider_Delete_Low(CryptoProvider *pCryptoProvider);
 StatusCode CryptoProvider_SymmetricEncrypt_Low(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
@@ -64,5 +64,7 @@ StatusCode CryptoProvider_SymmetricVerify_Low(const CryptoProvider *pProvider,
                                               const uint8_t *pSignature);
 StatusCode CryptoProvider_SymmetricSignature_GetLength_Low(const CryptoProvider *pProvider,
                                                            uint32_t *pLength);
+StatusCode CryptoProvider_SymmetricGenerateKey_Low(const CryptoProvider *pProvider,
+                                                   uint8_t *pKey);
 
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_
