@@ -109,6 +109,7 @@ int main(void){
 
     OpcUa_Channel hChannel;
     // Endpoint URL
+    UA_String stEndpointUrl;
     OpcUa_CharA *sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
     // Transport profile
     //const OpcUa_CharA *sTransportProfileUri = OpcUa_TransportProfile_UaTcp;
@@ -153,7 +154,7 @@ int main(void){
     StubClient_CallbackData Callback_Data;
 
     // Policy security: None
-    OpcUa_String* pRequestedSecurityPolicyUri = OpcUa_String_FromCString(OpcUa_SecurityPolicy_Basic128Rsa15); //OpcUa_String_FromCString(OpcUa_SecurityPolicy_None);
+    OpcUa_String* pRequestedSecurityPolicyUri = OpcUa_String_FromCString(OpcUa_SecurityPolicy_Basic256Sha256); //OpcUa_String_FromCString(OpcUa_SecurityPolicy_None);
 
 
     // Message security mode: None
@@ -237,7 +238,6 @@ int main(void){
     // Endpoint URL in OPC UA string format
     // TODO: wrappers for managing OpcUa_String
     //const OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
-    UA_String stEndpointUrl;
     uStatus = String_InitializeFromCString(&stEndpointUrl, sEndpointUrl);
     OpcUa_GotoErrorIfBad(uStatus);
 
@@ -334,6 +334,7 @@ int main(void){
     OpcUa_BeginErrorHandling;
     pkiProvider.CloseCertificateStore(&pkiProvider, &hCertificateStore);
     OpcUa_PKIProvider_Delete(&pkiProvider);
+    String_Clear(&stEndpointUrl);
     OpcUa_ByteString_Clear(&ClientCertificate);
     OpcUa_ByteString_Clear(&ClientPrivateKey);
     OpcUa_ByteString_Clear(&ServerCertificate);

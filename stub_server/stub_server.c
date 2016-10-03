@@ -144,7 +144,7 @@ int main(void){
 
     // Secu policy configuration: empty
     OpcUa_Endpoint_SecurityPolicyConfiguration* secuConfig = (OpcUa_Endpoint_SecurityPolicyConfiguration*)OpcUa_Alloc(NbOfSecurityPolicyConfigurations * sizeof(OpcUa_Endpoint_SecurityPolicyConfiguration));
-    OpcUa_String_AttachReadOnly(&secuConfig[0].sSecurityPolicy, OpcUa_SecurityPolicy_Basic128Rsa15);
+    OpcUa_String_AttachReadOnly(&secuConfig[0].sSecurityPolicy, OpcUa_SecurityPolicy_Basic256Sha256);
     secuConfig[0].uMessageSecurityModes = OPCUA_SECURECHANNEL_MESSAGESECURITYMODE_SIGNANDENCRYPT | OPCUA_SECURECHANNEL_MESSAGESECURITYMODE_NONE |\
     		OPCUA_SECURECHANNEL_MESSAGESECURITYMODE_SIGN;
 
