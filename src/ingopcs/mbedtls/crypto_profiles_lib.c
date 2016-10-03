@@ -20,16 +20,16 @@
 
 
 /* Security policy "Basic256Sha256", as of 09/09/2016:
- * SymmetricSignatureAlgorithm – Hmac_Sha256
- * SymmetricEncryptionAlgorithm – Aes256_CBC
+ * SymmetricSignatureAlgorithm – Hmac_Sha256        OK
+ * SymmetricEncryptionAlgorithm – Aes256_CBC        OK
  * AsymmetricSignatureAlgorithm – Rsa_Sha256
  * AsymmetricKeyWrapAlgorithm – KwRsaOaep
  * AsymmetricEncryptionAlgorithm – Rsa_Oaep
  * KeyDerivationAlgorithm – PSHA256
  * DerivedSignatureKeyLength – 256
- * MinAsymmetricKeyLength – 2048
- * MaxAsymmetricKeyLength – 4096
- * CertificateSignatureAlgorithm – Sha256
+ * MinAsymmetricKeyLength – 2048                    OK
+ * MaxAsymmetricKeyLength – 4096                    OK
+ * CertificateSignatureAlgorithm – Sha256           OK
  */
 
 
@@ -37,8 +37,8 @@
 static StatusCode CryptoProvider_SymmEncrypt_AES256(const CryptoProvider *pProvider,
                                                     const uint8_t *pInput,
                                                     uint32_t lenPlainText,
-                                                    const KeyBuffer *pKey,
-                                                    const uint8_t *pIV,
+                                                    const ExposedBuffer *pKey,
+                                                    const ExposedBuffer *pIV,
                                                     uint8_t *pOutput,
                                                     uint32_t lenOutput)
 {
@@ -63,8 +63,8 @@ static StatusCode CryptoProvider_SymmEncrypt_AES256(const CryptoProvider *pProvi
 static StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvider,
                                        const uint8_t *pInput,
                                        uint32_t lenCipherText,
-                                       const KeyBuffer *pKey,
-                                       const uint8_t *pIV,
+                                       const ExposedBuffer *pKey,
+                                       const ExposedBuffer *pIV,
                                        uint8_t *pOutput,
                                        uint32_t lenOutput)
 {
@@ -77,7 +77,7 @@ static StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvi
 
     memcpy(iv_cpy, pIV, 16);
 
-    if(mbedtls_aes_setkey_dec(&aes, (unsigned char *)pKey, SecurityPolicy_Basic256Sha256_Symm_KeyLength*8) != 0)
+    if(mbedtls_aes_setkey_dec(&aes, (unsigned char *)pKey, SecurityPolicy_Basic256Sha256_SymmLen_Key*8) != 0)
         return STATUS_INVALID_PARAMETERS;
     if(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (unsigned char *)pInput, (unsigned char *)pOutput) != 0)
         return STATUS_INVALID_PARAMETERS;
@@ -89,7 +89,7 @@ static StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvi
 static StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pProvider,
                                                       const uint8_t *pInput,
                                                       uint32_t lenInput,
-                                                      const uint8_t *pKey,
+                                                      const ExposedBuffer *pKey,
                                                       uint8_t *pOutput)
 {
     const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
@@ -98,7 +98,7 @@ static StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pPro
     if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pOutput)
         return STATUS_INVALID_PARAMETERS;
 
-    if(CryptoProvider_Symmetric_GetKeyLength_Low(pProvider, &lenKey) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKey) != STATUS_OK)
         return STATUS_NOK;
 
     if(mbedtls_md_hmac(pinfo, pKey, lenKey, pInput, lenInput, pOutput) != 0)
@@ -111,7 +111,7 @@ static StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pPro
 static StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider,
                                                         const uint8_t *pInput,
                                                         uint32_t lenInput,
-                                                        const uint8_t *pKey,
+                                                        const ExposedBuffer *pKey,
                                                         const uint8_t *pSignature)
 {
     const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
@@ -122,7 +122,7 @@ static StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pP
     if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pSignature)
         return STATUS_INVALID_PARAMETERS;
 
-    if(CryptoProvider_Symmetric_GetKeyLength_Low(pProvider, &lenKey) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKey) != STATUS_OK)
         return STATUS_NOK;
 
     if(CryptoProvider_SymmetricSignature_GetLength_Low(pProvider, &lenSig) != STATUS_OK)
@@ -144,7 +144,7 @@ static StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pP
 
 // Fills pKey with SecurityPolicy_Basic256Sha256_Symm_KeyLength bytes of random data
 StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
-                                            uint8_t *pKey)
+                                            ExposedBuffer *pKey)
 {
     CryptolibContext *pCtx = UA_NULL;
 
@@ -152,7 +152,7 @@ StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
 
     pCtx = pProvider->pCryptolibContext;
-    if(mbedtls_ctr_drbg_random(&(pCtx->ctxDrbg), pKey, SecurityPolicy_Basic256Sha256_Symm_KeyLength) != 0)
+    if(mbedtls_ctr_drbg_random(&(pCtx->ctxDrbg), pKey, SecurityPolicy_Basic256Sha256_SymmLen_Key) != 0)
         return STATUS_NOK;
 
     return STATUS_OK;
@@ -171,7 +171,3 @@ const CryptoProfile g_cpBasic256Sha256 = {
         .pFnSymmGenKey = &CryptoProvider_SymmGenKey_AES256,
 };
 
-
-#ifdef __cplusplus
-}
-#endif

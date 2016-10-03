@@ -23,9 +23,9 @@
 #define SecurityPolicy_Basic256Sha256_ID    1
 
 // Basic256Sha256, sizes in bytes
-#define SecurityPolicy_Basic256Sha256_Symm_BlockLength      16
-#define SecurityPolicy_Basic256Sha256_Symm_KeyLength        32
-#define SecurityPolicy_Basic256Sha256_Symm_SignatureLength  32
+#define SecurityPolicy_Basic256Sha256_SymmLen_Block         16
+#define SecurityPolicy_Basic256Sha256_SymmLen_Key           32
+#define SecurityPolicy_Basic256Sha256_SymmLen_Signature     32
 
 
 typedef uint8_t KeyBuffer;  // TODO: move towards private_key.h + This definition is unclear
@@ -36,29 +36,29 @@ struct CryptoProvider; // TODO: circular dependency CryptoProvider <-> CryptoPro
 typedef StatusCode (*FnSymmetricEncrypt) (const struct CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenPlainText,
-                                          const KeyBuffer *pKey,
-                                          const uint8_t *pIV,
+                                          const ExposedBuffer *pKey,
+                                          const ExposedBuffer *pIV,
                                           uint8_t *pOutput,
                                           uint32_t lenOutput);
 typedef StatusCode (*FnSymmetricDecrypt) (const struct CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenCipherText,
-                                          const KeyBuffer *pKey,
-                                          const uint8_t *pIV,
+                                          const ExposedBuffer *pKey,
+                                          const ExposedBuffer *pIV,
                                           uint8_t *pOutput,
                                           uint32_t lenOutput);
 typedef StatusCode (*FnSymmetricSign) (const struct CryptoProvider *pProvider,
                                        const uint8_t *pInput,
                                        uint32_t lenInput,
-                                       const uint8_t *pKey,
+                                       const ExposedBuffer *pKey,
                                        uint8_t *pOutput);
 typedef StatusCode (*FnSymmetricVerify) (const struct CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,
-                                         const uint8_t *pKey,
+                                         const ExposedBuffer *pKey,
                                          const uint8_t *pSignature);
 typedef StatusCode (*FnSymmetricGenKey) (const struct CryptoProvider *pProvider,
-                                         uint8_t *pKey);
+                                         ExposedBuffer *pKey);
 
 typedef struct CryptoProfile
 {
@@ -74,7 +74,7 @@ typedef struct CryptoProfile
 } CryptoProfile;
 
 
-const CryptoProfile * CryptoProfile_Get(const char *uri);
+const CryptoProfile * CryptoProfile_Get(const uint8_t *uri);
 
 extern const CryptoProfile g_cpBasic256Sha256;
 
