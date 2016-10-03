@@ -185,15 +185,20 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         }
     }
 
-    if(status == STATUS_OK){
+    // TODO: to remove after complete integration of INGOPCS crypto provider
+    CryptoProvider* cProvider = CryptoProvider_Create(&cConnection->securityPolicy);
+    if(status == STATUS_OK && cProvider != UA_NULL){
         // Security mode
-        status = CryptoProvider_SymmetricGenerateKeyLength(cConnection->instance->currentCryptoProvider, &pkeyLength);
+        status = CryptoProvider_SymmetricGenerateKeyLength(cProvider, //cConnection->instance->currentCryptoProvider,
+                                                           &pkeyLength);
     }
 
-    if(status == STATUS_OK){
-        status = CryptoProvider_SymmetricGenereateKey(cConnection->instance->currentCryptoProvider,
+    if(status == STATUS_OK && cProvider != UA_NULL){
+        status = CryptoProvider_SymmetricGenereateKey(cProvider, //cConnection->instance->currentCryptoProvider,
                                                       pkeyLength,
                                                       &cConnection->instance->currentNonce);
+        CryptoProvider_Delete(cProvider);
+        cProvider = UA_NULL;
         if(status == STATUS_OK){
             bsKey = PrivateKey_BeginUse(&cConnection->instance->currentNonce);
             status = ByteString_AttachFrom(&openRequest.ClientNonce, bsKey);
@@ -239,7 +244,12 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     }
 
     if(status == STATUS_OK){
-        cProvider = CryptoProvider_Create(&cConnection->securityPolicy);
+        // TODO: temporary replacement of code to gen a foundation crypto provider
+        //cProvider = CryptoProvider_Create(&cConnection->securityPolicy);
+        char* secuPolC = String_GetCString(&cConnection->securityPolicy);
+        cProvider = malloc(sizeof(OpcUa_CryptoProvider));
+        status = OpcUa_CreateCryptoProvider(secuPolC, (OpcUa_CryptoProvider*) cProvider);
+        free(secuPolC);
         if(cProvider == UA_NULL){
             status = STATUS_NOK;
         }else{
@@ -445,6 +455,20 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     }else{
         // Trace / channel CB
     }
+
+    // TODO: remove only because foundation and ingopcs crypto provider are coexisting
+    if(status == STATUS_OK){
+        if(cConnection->instance->currentCryptoProvider != UA_NULL){
+            OpcUa_DeleteCryptoProvider((OpcUa_CryptoProvider*)cConnection->instance->currentCryptoProvider);
+            free(cConnection->instance->currentCryptoProvider);
+            cConnection->instance->currentCryptoProvider = UA_NULL;
+        }
+        cConnection->instance->currentCryptoProvider = CryptoProvider_Create(&cConnection->securityPolicy);
+        if(cConnection->instance->currentCryptoProvider == UA_NULL){
+            status = STATUS_NOK;
+        }
+    }
+
 
     return status;
 }
