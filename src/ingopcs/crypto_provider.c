@@ -102,6 +102,7 @@ StatusCode CryptoProvider_Symmetric_GetOutputLength_Low(const CryptoProvider *pP
                                                         uint32_t lengthIn,
                                                         uint32_t *pLengthOut)
 {
+    (void) pProvider;
     if(UA_NULL == pLengthOut)
         return STATUS_INVALID_PARAMETERS;
 

@@ -6,17 +6,16 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "crypto_provider.h"
 #include "crypto_provider_lib.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 
-
 StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider)
 {
     CryptolibContext *pctx = UA_NULL;
-    StatusCode status;
 
     if(UA_NULL == pCryptoProvider)
         return STATUS_INVALID_PARAMETERS;

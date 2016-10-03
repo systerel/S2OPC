@@ -42,6 +42,7 @@ static StatusCode CryptoProvider_SymmEncrypt_AES256(const CryptoProvider *pProvi
                                                     uint8_t *pOutput,
                                                     uint32_t lenOutput)
 {
+    (void) pProvider;
     mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation initialize a new context.
     unsigned char iv_cpy[16]; // Performance note: IV is modified during the operation, so it should be copied first
 
@@ -67,6 +68,7 @@ static StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvi
                                        uint8_t *pOutput,
                                        uint32_t lenOutput)
 {
+    (void) pProvider;
     mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation initialize a new context.
     unsigned char iv_cpy[16]; // Performance note: IV is modified during the operation, so it should be copied first
 
