@@ -88,13 +88,14 @@ START_TEST(test_crypto_symm_crypt)
     unsigned char output[128];
     char hexoutput[256];
     int i;
+    uint32_t len;
     CryptoProvider *crypto = UA_NULL;
 
     // Context init
     crypto = CryptoProvider_Create_Low(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(crypto);
-    ck_assert(CryptoProvider_Symmetric_GetKeyLength_Low(crypto, &i) == STATUS_OK);
-    ck_assert(i == 32);
+    ck_assert(UA_NULL != crypto);
+    ck_assert(CryptoProvider_Symmetric_GetKeyLength_Low(crypto, &len) == STATUS_OK);
+    ck_assert(len == 32);
 
     // Encrypt
     // This single test is not taken from the NIST test vectors...
@@ -216,15 +217,15 @@ START_TEST(test_crypto_symm_sign)
     unsigned char output[32];
     char hexoutput[1024];
     CryptoProvider *crypto = UA_NULL;
-    uint32_t i;
+    uint32_t len;
 
     // Context init
     crypto = CryptoProvider_Create_Low(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(crypto);
-    ck_assert(CryptoProvider_Symmetric_GetKeyLength_Low(crypto, &i) == STATUS_OK);
-    ck_assert(i == 32);
-    ck_assert(CryptoProvider_SymmetricSignature_GetLength_Low(crypto, &i) == STATUS_OK);
-    ck_assert(i == 32);
+    ck_assert(UA_NULL != crypto);
+    ck_assert(CryptoProvider_Symmetric_GetKeyLength_Low(crypto, &len) == STATUS_OK);
+    ck_assert(len == 32);
+    ck_assert(CryptoProvider_SymmetricSignature_GetLength_Low(crypto, &len) == STATUS_OK);
+    ck_assert(len == 32);
 
     // Test cases of https://tools.ietf.org/html/rfc4231 cannot be used for Basic256Sha256
     // Test cases of http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#hmac cannot be used either, as there is no corresponding key_length=32 and sig_length=32
@@ -238,9 +239,9 @@ START_TEST(test_crypto_symm_sign)
     ck_assert(unhexlify("7203d5e504eafe00e5dd77519eb640de3bbac660ec781166c4d460362a94c372", key, 32) == 32);
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
-    i = 0;
-    ck_assert(CryptoProvider_SymmetricSign_Low(crypto, input, 64, key, output, &i) == STATUS_OK);
-    ck_assert(i == 32);
+    len = 0;
+    ck_assert(CryptoProvider_SymmetricSign_Low(crypto, input, 64, key, output, &len) == STATUS_OK);
+    ck_assert(len == 32);
     ck_assert(hexlify(output, hexoutput, 32) == 32);
     ck_assert(memcmp(hexoutput, "e4185b6d49f06e8b94a552ad950983852ef20b58ee75f2c448fea587728d94db", 64) == 0);
 
@@ -276,14 +277,14 @@ START_TEST(test_crypto_symm_gen)
 {
     // TODO: these tests test only Basic256Sha256
     unsigned char keys[64];
-    char hexoutput[64];
+    //char hexoutput[64];
 
     CryptoProvider *crypto = UA_NULL;
     uint32_t i;
 
     // Context init
     crypto = CryptoProvider_Create_Low(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(crypto);
+    ck_assert(UA_NULL != crypto);
     ck_assert(CryptoProvider_Symmetric_GetKeyLength_Low(crypto, &i) == STATUS_OK);
     ck_assert(i == 32);
 
