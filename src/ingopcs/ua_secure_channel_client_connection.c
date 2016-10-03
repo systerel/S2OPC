@@ -206,9 +206,11 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         openRequest.RequestedLifetime = cConnection->requestedLifetime;
     }
 
-    status = SC_EncodeMsgBody(sendBuf,
-                              &UA_OpenSecureChannelRequest_EncodeableType,
-                              &openRequest);
+    if(status == STATUS_OK){
+        status = SC_EncodeMsgBody(sendBuf,
+                                  &UA_OpenSecureChannelRequest_EncodeableType,
+                                  &openRequest);
+    }
 
     PrivateKey_EndUse(bsKey);
     UA_OpenSecureChannelRequest_Clear(&openRequest);
