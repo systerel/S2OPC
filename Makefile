@@ -78,46 +78,55 @@ endif
 endif
 
 config:
-	\mkdir -p $(BUILD_DIR) $(EXEC_DIR)
-	\mkdir -p $(EXEC_DIR)/revoked $(EXEC_DIR)/untrusted $(EXEC_DIR)/trusted \
+	@echo "Configuring build dirs..."
+	@\mkdir -p $(BUILD_DIR) $(EXEC_DIR)
+	@\mkdir -p $(EXEC_DIR)/revoked $(EXEC_DIR)/untrusted $(EXEC_DIR)/trusted \
 	$(EXEC_DIR)/client_private $(EXEC_DIR)/server_private \
 	$(EXEC_DIR)/client_public $(EXEC_DIR)/server_public
-	\cp $(CERT_DIR)/cacert.der $(EXEC_DIR)/trusted
-	\cp $(CERT_DIR)/client.key $(EXEC_DIR)/client_private
-	\cp $(CERT_DIR)/client.der $(EXEC_DIR)/client_public
-	\cp $(CERT_DIR)/server.key $(EXEC_DIR)/server_private
-	\cp $(CERT_DIR)/server.der $(EXEC_DIR)/server_public
+	@\cp $(CERT_DIR)/cacert.der $(EXEC_DIR)/trusted
+	@\cp $(CERT_DIR)/client.key $(EXEC_DIR)/client_private
+	@\cp $(CERT_DIR)/client.der $(EXEC_DIR)/client_public
+	@\cp $(CERT_DIR)/server.key $(EXEC_DIR)/server_private
+	@\cp $(CERT_DIR)/server.der $(EXEC_DIR)/server_public
 
 $(BUILD_DIR)/%.o:
-	$(CC) $(CCFLAGS) $(INCLUDES) $< -o $@ $(DEFS)
+	@echo "  CC $@"
+	@$(CC) $(CCFLAGS) $(INCLUDES) $< -o $@ $(DEFS)
 
 .depend: $(C_SRC_PATHS) #$(H_SRC_PATHS)
-	$(CC) $(CCFLAGS) $(DEFS) $(INCLUDES) -MM $(C_SRC_PATHS) > .depend
-	sed 's/^\(.*\)\.o:/$(BUILD_DIR_SED)\/\1.o:/g' -i .depend
+	@echo "Building dependencies..."
+	@$(CC) $(CCFLAGS) $(DEFS) $(INCLUDES) -MM $(C_SRC_PATHS) > .depend
+	@sed 's/^\(.*\)\.o:/$(BUILD_DIR_SED)\/\1.o:/g' -i .depend
 
 $(EXEC_DIR)/stub_server: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server.o
-	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
-	$(COPY_SSL)
+	@echo "Linking $@..."
+	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
+	@$(COPY_SSL)
 
 $(EXEC_DIR)/stub_client: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client.o
-	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
-	$(COPY_SSL)
+	@echo "Linking $@..."
+	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
+	@$(COPY_SSL)
 
 $(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/check_stack.o
-	echo $^
-	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
+	@echo "Linking $@..."
+	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
 mbedtls:
-	$(MAKE) -C $(MBEDTLS_DIR)
+	@echo "Building mbedtls..."
+	@$(MAKE) -C $(MBEDTLS_DIR)
 
 check: config $(EXEC_DIR)/check_stack
-	$(EXEC_DIR)/check_stack
+	@echo "Executing tests..."
+	@$(EXEC_DIR)/check_stack
 
 clean_mbedtls:
-	$(MAKE) -C $(MBEDTLS_DIR) clean
+	@echo "Cleaning mbedtls"
+	@$(MAKE) -C $(MBEDTLS_DIR) clean
 
 clean:
-	\rm -rf $(BUILD_DIR) $(EXEC_DIR)
-	\rm -f .depend
+	@echo "Cleaning..."
+	@\rm -rf $(BUILD_DIR) $(EXEC_DIR)
+	@\rm -f .depend
 
 cleanall: clean clean_mbedtls
