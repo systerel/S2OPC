@@ -9,6 +9,8 @@
 #ifndef INGOPCS_SECRET_BUFFER_H_
 #define INGOPCS_SECRET_BUFFER_H_
 
+#include <stdint.h>
+
 // Types
 typedef struct SecretBuffer
 {
@@ -21,9 +23,9 @@ typedef uint8_t ExposedBuffer;
 // API
 SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len);
 void SecretBuffer_DeleteClear(SecretBuffer *sec);
-uint32_t SecretBuffer_GetLength(SecretBuffer *sec);
+uint32_t SecretBuffer_GetLength(const SecretBuffer *sec);
 
-ExposedBuffer * SecretBuffer_Expose(SecretBuffer *sec);
+ExposedBuffer * SecretBuffer_Expose(const SecretBuffer *sec);
 void SecretBuffer_Unexpose(ExposedBuffer *buf);
 
 

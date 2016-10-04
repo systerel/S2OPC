@@ -6,9 +6,9 @@
  */
 
 
-#include "ua_builtintypes.h" // UA_NULL
 #include "secret_buffer.h"
-
+#include <stdlib.h>
+#include <string.h>
 
 /* Creates a new SecretBuffer from an exposed buffer and a length. Copies the buffer, so ExposedBuffer
  *  can be cleared and de-allocated.
@@ -16,21 +16,21 @@
  */
 SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len)
 {
-    SecretBuffer *sec = UA_NULL;
+    SecretBuffer *sec = 0;
 
-    if(UA_NULL != buf && 0 != len)
+    if(0 != buf && 0 != len)
     {
         sec = malloc(sizeof(SecretBuffer));
-        if(UA_NULL != sec)
+        if(0 != sec)
         {
             sec->len = len;
             sec->buf = malloc(len);
-            if(UA_NULL != sec->buf)
+            if(0 != sec->buf)
                 memcpy(sec->buf, buf, len);
             else
             {
                 free(sec->buf);
-                sec = UA_NULL;
+                sec = 0;
             }
         }
     }
@@ -39,7 +39,7 @@ SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len
 }
 void SecretBuffer_DeleteClear(SecretBuffer *sec)
 {
-    if(UA_NULL != sec)
+    if(0 != sec)
     {
         if(sec->buf)
         {
@@ -50,9 +50,9 @@ void SecretBuffer_DeleteClear(SecretBuffer *sec)
     }
 }
 
-uint32_t SecretBuffer_GetLength(SecretBuffer *sec)
+uint32_t SecretBuffer_GetLength(const SecretBuffer *sec)
 {
-    if(UA_NULL == sec)
+    if(0 == sec)
         return 0;
     return sec->len;
 }
@@ -61,11 +61,11 @@ uint32_t SecretBuffer_GetLength(SecretBuffer *sec)
  * Each call to Expose should be followed by a call to Unexpose.
  * SecretBuffer should not be destroyed before the call to Unexpose.
  */
-ExposedBuffer *SecretBuffer_Expose(SecretBuffer *sec)
+ExposedBuffer *SecretBuffer_Expose(const SecretBuffer *sec)
 {
-    if(UA_NULL != sec)
+    if(0 != sec)
         return sec->buf;
-    return UA_NULL;
+    return 0;
 }
 
 void SecretBuffer_Unexpose(ExposedBuffer *buf)
