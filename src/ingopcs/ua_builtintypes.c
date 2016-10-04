@@ -126,6 +126,19 @@ StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size)
     return status;
 }
 
+StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(dest != UA_NULL && bytes != UA_NULL
+       && length > 0){
+        status = STATUS_OK;
+        dest->length = length;
+        dest->characters = bytes;
+        dest->clearBytes = UA_FALSE; // dest->characters will not be freed on clear
+    }
+    return status;
+}
+
 StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;

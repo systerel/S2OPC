@@ -288,6 +288,7 @@ void Double_Clear(double* d);
 void ByteString_Initialize(UA_ByteString* bstring);
 UA_ByteString* ByteString_Create(void);
 StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size);
+StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length);
 StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src);
 StatusCode ByteString_Copy(UA_ByteString* dest, UA_ByteString* src);
 void ByteString_Clear(UA_ByteString* bstring);
