@@ -2,6 +2,9 @@
  * Entry point for tests. Tests use libcheck.
  * https://libcheck.github.io/check/doc/check_html/check_3.html
  *
+ * If you want to debug the exe, you should define env var CK_FORK=no
+ * http://check.sourceforge.net/doc/check_html/check_4.html#No-Fork-Mode
+ *
  *  Created on: Sep 6, 2016
  *      Author: PAB
  */
