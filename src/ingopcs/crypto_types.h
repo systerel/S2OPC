@@ -10,9 +10,8 @@
 #define INGOPCS_CRYPTO_TYPES_H_
 
 
-#include <inttypes.h>
-#include "secret_buffer.h"
-
+#include <secret_buffer.h>
+#include <ua_base_types.h>
 
 struct CryptoProvider;
 struct CryptoProfile;

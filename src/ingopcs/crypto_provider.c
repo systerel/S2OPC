@@ -221,7 +221,7 @@ StatusCode CryptoProvider_SymmetricGetLength_BlockSizes(const CryptoProvider *pP
     if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile)
         return STATUS_INVALID_PARAMETERS;
 
-    switch(pProvider->pProfile)
+    switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
     default:
@@ -276,12 +276,12 @@ StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_SymmetricVerify_Low(const CryptoProvider *pProvider,
-                                              const uint8_t *pInput,
-                                              uint32_t lenInput,
-                                              const SecretBuffer *pKey,
-                                              const uint8_t *pSignature,
-                                              uint32_t lenOutput)
+StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
+                                          const uint8_t *pInput,
+                                          uint32_t lenInput,
+                                          const SecretBuffer *pKey,
+                                          const uint8_t *pSignature,
+                                          uint32_t lenOutput)
 {
     StatusCode status = STATUS_OK;
     ExposedBuffer* pExpKey = UA_NULL;
