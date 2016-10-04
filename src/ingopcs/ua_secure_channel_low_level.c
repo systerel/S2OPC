@@ -12,6 +12,8 @@
 #include <ua_encoder.h>
 #include <ua_tcp_ua_low_level.h>
 #include <ua_secure_channel_low_level.h>
+#include <secret_buffer.h>
+#include <crypto_provider.h>
 
 const uint32_t scProtocolVersion = 0;
 
@@ -56,7 +58,6 @@ SC_Connection* SC_Create (){
             ByteString_Initialize(&sConnection->otherAppPublicKey);
             ByteString_Initialize(&sConnection->currentSecuPolicy);
             ByteString_Initialize(&sConnection->precSecuPolicy);
-            PrivateKey_Initialize(&sConnection->currentNonce);
 
         }else{
             TCP_UA_Connection_Delete(connection);
@@ -89,7 +90,7 @@ void SC_Delete (SC_Connection* scConnection){
         }
         String_Clear(&scConnection->currentSecuPolicy);
         ByteString_Clear(&scConnection->precSecuPolicy);
-        PrivateKey_Clear(&scConnection->currentNonce);
+        SecretBuffer_DeleteClear(scConnection->currentNonce);
         CryptoProvider_Delete(scConnection->currentCryptoProvider);
         CryptoProvider_Delete(scConnection->precCryptoProvider);
         free(scConnection);
@@ -98,7 +99,7 @@ void SC_Delete (SC_Connection* scConnection){
 
 StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
                                         UA_ByteString* runningAppCertificate,
-                                        PrivateKey*    runningAppPrivateKey,
+                                        SecretBuffer*  runningAppPrivateKey,
                                         UA_ByteString* otherAppCertificate){
     StatusCode status = STATUS_OK;
     if(scConnection->runningAppCertificate.length <= 0 &&
@@ -422,12 +423,10 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
             status = STATUS_INVALID_STATE;
         }else{
             // Retrieve cipher length
-            status = CryptoProvider_SymmetricEncryptLength
+            status = CryptoProvider_SymmetricGetLength_Encryption
                       (scConnection->currentCryptoProvider,
-                       plainDataLength,
-                       scConnection->currentSecuKeySets.senderKeySet->encryptKey,
-                       scConnection->currentSecuKeySets.senderKeySet->initVector,
-                       cipherDataLength);
+                      plainDataLength,
+                      cipherDataLength);
         }
     }
 
@@ -1005,7 +1004,8 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
                            msgBuffer->buffers->data,
                            msgBuffer->buffers->length,
                            scConnection->currentSecuKeySets.senderKeySet->signKey,
-                           &signedData);
+                           signedData.characters,
+                           signedData.length);
             }else{
                 status = STATUS_NOK;
             }
@@ -1126,7 +1126,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
                            scConnection->currentSecuKeySets.senderKeySet->encryptKey,
                            scConnection->currentSecuKeySets.senderKeySet->initVector,
                            &encryptedData[msgBuffer->sequenceNumberPosition],
-                           &encryptedDataLength);
+                           encryptedDataLength);
             }
         } // End valid key set
     }
@@ -1533,12 +1533,9 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                 }else{
                     receiverKeySet = scConnection->precSecuKeySets.receiverKeySet;
                 }
-                status = CryptoProvider_SymmetricDecryptLength(cryptoProvider,
-                                                               dataToDecrypt,
-                                                               lengthToDecrypt,
-                                                               receiverKeySet->encryptKey,
-                                                               receiverKeySet->initVector,
-                                                               &decryptedTextLength);
+                status = CryptoProvider_SymmetricGetLength_Decryption(cryptoProvider,
+                                                                      lengthToDecrypt,
+                                                                      &decryptedTextLength);
 
                 if(status == STATUS_OK && decryptedTextLength <= scConnection->receptionBuffers->buffers->max_size){
                     // Retrieve next chunk empty buffer
@@ -1560,7 +1557,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                                                                  receiverKeySet->encryptKey,
                                                                  receiverKeySet->initVector,
                                                                  &(plainBuffer->data[sequenceNumberPosition]),
-                                                                 &decryptedTextLength);
+                                                                 decryptedTextLength);
                         if(status == STATUS_OK){
                             Buffer_SetDataLength(plainBuffer, sequenceNumberPosition + decryptedTextLength);
                         }

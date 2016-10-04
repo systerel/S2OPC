@@ -8,12 +8,12 @@
 #ifndef INGOPCS_KEY_SETS_H_
 #define INGOPCS_KEY_SETS_H_
 
-#include <private_key.h>
+#include <secret_buffer.h>
 
 typedef struct SC_SecurityKeySet{
-    PrivateKey* signKey;
-    PrivateKey* encryptKey;
-    PrivateKey* initVector;
+    SecretBuffer* signKey;
+    SecretBuffer* encryptKey;
+    SecretBuffer* initVector;
 } SC_SecurityKeySet;
 
 typedef struct {

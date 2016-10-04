@@ -8,9 +8,8 @@
 #ifndef INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_
 #define INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_
 
-#include <wrappers.h>
+#include <secret_buffer.h>
 
-#include <private_key.h>
 #include <singly_linked_list.h>
 #include <ua_builtintypes.h>
 #include <ua_encodeable.h>
@@ -31,7 +30,7 @@ typedef struct SC_ClientConnection
     PKIProvider*           pkiProvider;
     UA_ByteString          serverCertificate;
     UA_ByteString          clientCertificate;
-    PrivateKey             clientKey;
+    SecretBuffer*          clientKey;
     SLinkedList*           pendingRequests;
     UA_MessageSecurityMode securityMode;
     UA_String              securityPolicy;

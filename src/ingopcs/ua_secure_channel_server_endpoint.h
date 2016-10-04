@@ -27,7 +27,7 @@ typedef struct SC_ServerEndpoint
     UA_EncodeableType*   encodeableTypes;
     PKIProvider          pkiProvider;
     UA_Byte*             serverCertificate;
-    PrivateKey           serverKey;
+    SecretBuffer*        serverKey;
     SC_EndpointState     state;
     SecurityPolicy*      securityPolicies;
     uint32_t             lastSecureChannelId;

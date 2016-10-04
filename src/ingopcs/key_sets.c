@@ -15,9 +15,9 @@ SC_SecurityKeySet* KeySet_Create(){
 
 void KeySet_Delete(SC_SecurityKeySet* keySet){
     if(keySet != 0){
-        PrivateKey_Delete(keySet->encryptKey);
-        PrivateKey_Delete(keySet->initVector);
-        PrivateKey_Delete(keySet->signKey);
+        SecretBuffer_DeleteClear(keySet->encryptKey);
+        SecretBuffer_DeleteClear(keySet->initVector);
+        SecretBuffer_DeleteClear(keySet->signKey);
         free(keySet);
     }
 }

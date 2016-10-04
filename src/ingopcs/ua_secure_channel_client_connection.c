@@ -12,8 +12,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include <crypto_provider.h>
+
 #include <ua_encoder.h>
-#include "ua_secure_channel_low_level.h"
+#include <ua_secure_channel_low_level.h>
 #include <ua_types.h>
 
 PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
@@ -55,7 +57,6 @@ SC_ClientConnection* SC_Client_Create(){
             Namespace_Initialize(&scClientConnection->namespaces);
             ByteString_Initialize(&scClientConnection->serverCertificate);
             ByteString_Initialize(&scClientConnection->clientCertificate);
-            PrivateKey_Initialize(&scClientConnection->clientKey);
             scClientConnection->securityMode = UA_MessageSecurityMode_Invalid;
             ByteString_Initialize(&scClientConnection->securityPolicy);
 
@@ -141,10 +142,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     const uint32_t uzero = 0;
     const uint32_t uone = 1;
 
-    UA_ByteString* bsKey = UA_NULL;
-
     UA_MsgBuffer* sendBuf = cConnection->instance->sendingBuffer;
-    uint32_t pkeyLength = 0;
 
     //// Encode request header
     // Encode authentication token (omitted opaque identifier ???? => must be a bytestring ?)
@@ -186,22 +184,19 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     }
 
     // TODO: to remove after complete integration of INGOPCS crypto provider
-    CryptoProvider* cProvider = CryptoProvider_Create(&cConnection->securityPolicy);
-    if(status == STATUS_OK && cProvider != UA_NULL){
-        // Security mode
-        status = CryptoProvider_SymmetricGenerateKeyLength(cProvider, //cConnection->instance->currentCryptoProvider,
-                                                           &pkeyLength);
-    }
+    CryptoProvider* cProvider = CryptoProvider_Create(String_GetCString(&cConnection->securityPolicy));
 
     if(status == STATUS_OK && cProvider != UA_NULL){
-        status = CryptoProvider_SymmetricGenereateKey(cProvider, //cConnection->instance->currentCryptoProvider,
-                                                      pkeyLength,
-                                                      &cConnection->instance->currentNonce);
+        status = CryptoProvider_SymmetricGenerateKey(cProvider, //cConnection->instance->currentCryptoProvider,
+                                                     &cConnection->instance->currentNonce);
         CryptoProvider_Delete(cProvider);
         cProvider = UA_NULL;
         if(status == STATUS_OK){
-            bsKey = PrivateKey_BeginUse(&cConnection->instance->currentNonce);
-            status = ByteString_AttachFrom(&openRequest.ClientNonce, bsKey);
+            uint8_t* bytes = UA_NULL;
+            bytes = SecretBuffer_Expose(cConnection->instance->currentNonce);
+            status = ByteString_AttachFromBytes(&openRequest.ClientNonce,
+                                                bytes,
+                                                SecretBuffer_GetLength(cConnection->instance->currentNonce));
         }else{
             status = STATUS_NOK;
         }
@@ -217,7 +212,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
                                   &openRequest);
     }
 
-    PrivateKey_EndUse(bsKey);
+    SecretBuffer_Unexpose(openRequest.ClientNonce.characters);
     UA_OpenSecureChannelRequest_Clear(&openRequest);
 
     return status;
@@ -354,7 +349,7 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
             cConnection->instance->currentSecuKeySets.receiverKeySet = KeySet_Create();
             cConnection->instance->currentSecuKeySets.senderKeySet = KeySet_Create();
             status = CryptoProvider_ClientDeriveKeySets(cConnection->instance->currentCryptoProvider,
-                                                        &cConnection->instance->currentNonce,
+                                                        cConnection->instance->currentNonce,
                                                         &encObj->ServerNonce,
                                                         encryptKeyLength,
                                                         signKeyLength,
@@ -463,7 +458,8 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
             free(cConnection->instance->currentCryptoProvider);
             cConnection->instance->currentCryptoProvider = UA_NULL;
         }
-        cConnection->instance->currentCryptoProvider = CryptoProvider_Create(&cConnection->securityPolicy);
+        cConnection->instance->currentCryptoProvider = CryptoProvider_Create
+                                                        (String_GetCString(&cConnection->securityPolicy));
         if(cConnection->instance->currentCryptoProvider == UA_NULL){
             status = STATUS_NOK;
         }
@@ -605,7 +601,7 @@ StatusCode OnTransportEvent_CB(void*           connection,
             retStatus = SC_InitApplicationIdentities
                          (cConnection->instance,
                           &cConnection->clientCertificate,
-                          &cConnection->clientKey,
+                          cConnection->clientKey,
                           &cConnection->serverCertificate);
             // Configure secure connection for encoding / decoding messages
             if(status == STATUS_OK){
@@ -702,7 +698,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
        requestedLifetime > 0)
     {
         if(connection->clientCertificate.length <= 0 &&
-           PrivateKey_GetSize(&connection->clientKey) == 0 &&
+           SecretBuffer_GetLength(connection->clientKey) == 0 &&
            connection->serverCertificate.length <= 0 &&
            connection->securityMode == UA_MessageSecurityMode_Invalid &&
            connection->securityPolicy.length <= 0 &&
@@ -714,7 +710,8 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
             status = ByteString_Copy(&connection->clientCertificate, clientCertificate);
 
             if(status == STATUS_OK){
-                PrivateKey_InitKey(&connection->clientKey, clientKey);
+                connection->clientKey = SecretBuffer_NewFromExposedBuffer
+                                         (clientKey->characters, clientKey->length);
                 status = ByteString_Copy(&connection->serverCertificate, serverCertificate);
             }
 

@@ -10,7 +10,6 @@
 
 #include <wrappers.h>
 
-#include <private_key.h>
 #include <key_sets.h>
 #include <ua_types.h>
 #include <ua_tcp_ua_connection.h>
@@ -54,7 +53,7 @@ typedef struct {
     uint32_t               startTime;
     UA_ByteString          runningAppCertificate;
     UA_ByteString          runningAppPublicKey;
-    PrivateKey*            runningAppPrivateKey; // Pointer on running app private key: do not manage allocation on it
+    SecretBuffer*          runningAppPrivateKey; // Pointer on running app private key: do not manage allocation on it
     UA_ByteString          otherAppCertificate;
     UA_ByteString          otherAppPublicKey;
     UA_MsgBuffer*          sendingBuffer;
@@ -70,7 +69,7 @@ typedef struct {
     SC_SecurityToken       precSecuToken;
     SC_SecurityKeySets     precSecuKeySets;
     CryptoProvider*        precCryptoProvider;
-    PrivateKey             currentNonce;
+    SecretBuffer*          currentNonce;
     uint32_t               lastSeqNumSent;
     uint32_t               lastSeqNumReceived;
     uint32_t               lastRequestIdSent;
@@ -83,7 +82,7 @@ void SC_Delete (SC_Connection* scConnection);
 
 StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
                                         UA_ByteString* runningAppCertificate,
-                                        PrivateKey*    runningAppPrivateKey,
+                                        SecretBuffer*  runningAppPrivateKey,
                                         UA_ByteString* otherAppCertificate);
 
 //Configure secure connection regarding the transport connection properties
