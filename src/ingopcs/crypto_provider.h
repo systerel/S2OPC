@@ -34,7 +34,6 @@ StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
 StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
 
 // Real API ("_Low" suffix because temporary wrappers already use the shorter names)
-// TODO: shorter and unified names
 CryptoProvider *CryptoProvider_Create(const uint8_t *uri);
 void CryptoProvider_Delete(CryptoProvider *pCryptoProvider);
 
@@ -48,7 +47,9 @@ StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pP
                                                         uint32_t *pLengthOut);
 StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pProvider,
                                                        uint32_t *pLength);
-// TODO: GetLength_Block
+StatusCode CryptoProvider_SymmetricGetLength_BlockSizes(const CryptoProvider *pProvider,
+                                                        uint32_t *cipherTextBlockSize,
+                                                        uint32_t *plainTextBlockSize);
 
 StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,

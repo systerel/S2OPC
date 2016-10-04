@@ -10,6 +10,7 @@
 #include <string.h>
 
 //#include "ua_builtintypes.h"
+#include "crypto_types.h"
 #include "crypto_provider.h"
 #include "crypto_profiles.h"
 
@@ -278,6 +279,30 @@ StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pPr
         return STATUS_NOK;
     case SecurityPolicy_Basic256Sha256_ID:
         *pLength = SecurityPolicy_Basic256Sha256_SymmLen_Signature;
+        break;
+    }
+
+    return STATUS_OK;
+}
+
+
+StatusCode CryptoProvider_SymmetricGetLength_BlockSizes(const CryptoProvider *pProvider,
+                                                        uint32_t *cipherTextBlockSize,
+                                                        uint32_t *plainTextBlockSize)
+{
+    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile)
+        return STATUS_INVALID_PARAMETERS;
+
+    switch(pProvider->pProfile)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_INVALID_PARAMETERS;
+    case SecurityPolicy_Basic256Sha256_ID:
+        if(UA_NULL != cipherTextBlockSize)
+            *cipherTextBlockSize = SecurityPolicy_Basic256Sha256_SymmLen_Block;
+        if(UA_NULL != plainTextBlockSize)
+            *plainTextBlockSize = SecurityPolicy_Basic256Sha256_SymmLen_Block;
         break;
     }
 
