@@ -10,22 +10,11 @@
 #define INGOPCS_CRYPTO_PROVIDER_H_
 
 
-#include "crypto_profiles.h"
-//#include "ua_builtintypes.h"  // Asssert l'indépendance à ua_builtintypes
+#include "ua_builtintypes.h"  // StatusCode
+#include "crypto_types.h"
 
 
-/* ------------------------------------------------------------------------------------------------
- * SecretBuffer (mangled key) and ExposedKeyBuffer (contiguous deciphered buffered) APIs.
- * TODO: move these decl secret_buffer.h ?
- * ------------------------------------------------------------------------------------------------
- */
-typedef struct SecretBuffer
-{
-    uint32_t len; // Mandatory
-    uint8_t *buf;
-} SecretBuffer;
-typedef uint8_t ExposedBuffer;  // TODO: move towards private_key.h + This definition is unclear
-
+// TODO: move API
 SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len);
 void SecretBuffer_DeleteClear(SecretBuffer *sec);
 uint32_t SecretBuffer_GetLength(SecretBuffer *sec);
@@ -38,11 +27,6 @@ void SecretBuffer_Unexpose(ExposedBuffer *buf);
  * CryptoProvider API
  * ------------------------------------------------------------------------------------------------
  */
-typedef struct CryptoProvider
-{
-    const struct CryptoProfile * const pProfile;
-    struct CryptolibContext *pCryptolibContext;
-} CryptoProvider;
 
 
 // Lib specific
