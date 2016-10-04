@@ -6,6 +6,9 @@
  */
 
 #include <ua_channel.h>
+
+#ifdef OPCUA_HAVE_CLIENTAPI
+
 #include <ua_secure_channel_client_connection.h>
 
 #include <wrappers.h>
@@ -298,9 +301,9 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
            loopCpt * sleepTimeout <= timeout)
     {
         loopCpt++;
-#if OPCUA_MULTITHREADED
+#if UA_MULTITHREADED
         // just wait for callback called
-        //OpcUa_Thread_Sleep (sleepTimeout);
+        //Sleep (sleepTimeout);
         return OpcUa_BadNotImplemented;
 #else
         // TODO: will retrieve any message: is it a problem ?
@@ -308,7 +311,7 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
         status = UA_SocketManager_Loop (UA_NULL, // global socket manager
                                         sleepTimeout,
                                         1);
-#endif //OPCUA_MULTITHREADED
+#endif //UA_MULTITHREADED
         status = Get_InvokeCallbackData(invCallbackData,
                                         response,
                                         responseType);
@@ -332,4 +335,6 @@ StatusCode UA_Channel_Disconnect(UA_Channel channel){
     }
     return status;
 }
+
+#endif // CLIENT_API
 

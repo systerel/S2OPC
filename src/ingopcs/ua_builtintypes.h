@@ -10,8 +10,9 @@
 
 #include <stdint.h>
 
-#include <ua_encodeable.h>
+#include <ua_stack_csts.h>
 #include <ua_base_types.h>
+#include <ua_encodeable.h>
 
 
 typedef enum {

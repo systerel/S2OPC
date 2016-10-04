@@ -1,5 +1,5 @@
 /*
- * opcua_ingopcs_type.c
+ * ua_ingopcs_type.c
  *
  *  Created on: 29 juil. 2016
  *      Author: Vincent

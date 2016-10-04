@@ -7,6 +7,10 @@
 
 #include "stub_client.h"
 #include <ua_clientapi.h>
+#include <ua_stack_config.h>
+#include <wrappers.h>
+
+#include <opcua_pkifactory.h>
 
 int noEvent = 1;
 int noResp = 1;
@@ -15,43 +19,43 @@ int connected = 0;
 
 OpcUa_Handle StubClient_g_pPortLayerHandle = OpcUa_Null;
 
-OpcUa_StatusCode StubClient_ConnectionEvent_Callback(OpcUa_Channel                   hChannel,
-												     OpcUa_Void*                     pCallbackData,
-													 OpcUa_Channel_Event             eEvent,
-													 OpcUa_StatusCode                uStatus){
-													 //OpcUa_Channel_SecurityToken*    pSecurityToken){
-    (void) pCallbackData;
-    (void) hChannel;
-    printf ("\nConnection event: channel event=%d and status=%x\n", eEvent, uStatus);
-	if (uStatus == OpcUa_Good){
+OpcUa_StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
+                                                     void*            callbackData,
+                                                     UA_Channel_Event event,
+                                                     StatusCode       status)
+{
+    (void) callbackData;
+    (void) channel;
+    printf ("\nConnection event: channel event=%d and status=%x\n", event, status);
+	if (status == OpcUa_Good){
 	    connected = 1;
 		noEvent = 0;
 	}
-	if (eEvent == eOpcUa_Channel_Event_Disconnected){
+	if (event == ChannelEvent_Disconnected){
 		disconnect = 1;
 	}
     return 0;
 }
 
-OpcUa_StatusCode StubClient_ResponseEvent_Callback(OpcUa_Channel         hChannel,
-												   OpcUa_Void*           pResponse,
-												   OpcUa_EncodeableType* pResponseType,
-												   OpcUa_Void*           pCallbackData,
-												   OpcUa_StatusCode      uStatus){
-    (void) pCallbackData;
-    (void) hChannel;
-    (void) uStatus;
+OpcUa_StatusCode StubClient_ResponseEvent_Callback(UA_Channel         channel,
+                                                   void*              response,
+                                                   UA_EncodeableType* responseType,
+                                                   void*              callbackData,
+                                                   StatusCode         status){
+    (void) callbackData;
+    (void) channel;
+    (void) status;
     printf ("\nResponse event\n");
 	noResp = 0;
 
     /* check for fault */
-    if (pResponseType->TypeId == OpcUaId_ServiceFault)
+    if (responseType->typeId == OpcUaId_ServiceFault)
     {
     	printf ("\nService fault response\n");
     }
 
     /* check response type */
-    else if (OpcUa_GetEndpointsResponse_EncodeableType.TypeId != pResponseType->TypeId)
+    else if (UA_GetEndpointsResponse_EncodeableType.typeId != responseType->typeId)
     {
     	printf ("\nIncorrect response type !\n");
     }
@@ -59,11 +63,11 @@ OpcUa_StatusCode StubClient_ResponseEvent_Callback(OpcUa_Channel         hChanne
     /* copy parameters from response object into return parameters. */
     else
     {
-    	printf("\n Endpoints response: %d\n",((OpcUa_GetEndpointsResponse*) pResponse)->NoOfEndpoints);
+    	printf("\n Endpoints response: %d\n",((UA_GetEndpointsResponse*) response)->NoOfEndpoints);
     }
 
     // Free the allocated response message
-    OpcUa_Free(pResponse);
+    OpcUa_Free(response);
 
     return 0;
 }
@@ -72,7 +76,7 @@ void OpcUa_ProxyStubConfiguration_InitializeDefault(OpcUa_ProxyStubConfiguration
 {
     /* -1 for integer values means "use stack default" */
     a_pProxyStubConfiguration->bProxyStub_Trace_Enabled              = OpcUa_True;
-    a_pProxyStubConfiguration->uProxyStub_Trace_Level                = OPCUA_TRACE_LEVEL_DEBUG;
+    a_pProxyStubConfiguration->uProxyStub_Trace_Level                = OPCUA_TRACE_OUTPUT_LEVEL_DEBUG;
     //a_pProxyStubConfiguration->uProxyStub_Trace_Output               = OPCUA_TRACE_OUTPUT_CONSOLE;
     a_pProxyStubConfiguration->iSerializer_MaxAlloc                  = -1;
     a_pProxyStubConfiguration->iSerializer_MaxStringLength           = -1;
@@ -96,16 +100,15 @@ void OpcUa_ProxyStubConfiguration_InitializeDefault(OpcUa_ProxyStubConfiguration
 
 
 int main(void){
+
+    OpcUa_InitializeStatus(OpcUa_Module_Server, "StubClient_StartUp");
+
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
     // Loop timeout in milliseconds
     const uint32_t loopTimeout = 10000;
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
-
-	// Init proxy stub configuration with default values
-	OpcUa_ProxyStubConfiguration_InitializeDefault(&OpcUa_ProxyStub_g_Configuration);
-	OpcUa_ProxyStub_g_Configuration.uProxyStub_Trace_Level = OPCUA_TRACE_OUTPUT_LEVEL_DEBUG;
 
     OpcUa_Channel hChannel;
     // Endpoint URL
@@ -160,15 +163,19 @@ int main(void){
     // Message security mode: None
     OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;//OpcUa_MessageSecurityMode_None;
 
-    OpcUa_InitializeStatus(OpcUa_Module_Server, "StubClient_StartUp");
-
     // Init platform dependent code
-	uStatus = OpcUa_P_Initialize(&StubClient_g_pPortLayerHandle);
+	uStatus = UA_P_Initialize(&StubClient_g_pPortLayerHandle);
 	OpcUa_GotoErrorIfBad(uStatus);
 
-	// Init proxystub level configuration
-	uStatus = OpcUa_ProxyStub_Initialize (StubClient_g_pPortLayerHandle,
-									      &OpcUa_ProxyStub_g_Configuration);
+    // TODO: remove
+    // Init proxy stub configuration with default values (only for socket now)
+    OpcUa_ProxyStubConfiguration_InitializeDefault(&OpcUa_ProxyStub_g_Configuration);
+    uStatus = OpcUa_ProxyStub_Initialize(StubClient_g_pPortLayerHandle,
+                                         &OpcUa_ProxyStub_g_Configuration);
+    OpcUa_GotoErrorIfBad(uStatus);
+
+	// Init stack configuration
+	StackConfiguration_Initialize();
 	OpcUa_GotoErrorIfBad(uStatus);
 
     // Create channel object
@@ -181,7 +188,7 @@ int main(void){
 
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
-    uStatus = OpcUa_PKIProvider_Create(&pPKIConfig, &pkiProvider);
+    uStatus = OPCUA_P_PKIFACTORY_CREATEPKIPROVIDER(&pPKIConfig, &pkiProvider);
     OpcUa_GotoErrorIfBad(uStatus);
 
     uStatus = pkiProvider.OpenCertificateStore (&pkiProvider, &hCertificateStore);
@@ -252,9 +259,9 @@ int main(void){
     	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
-    	uStatus = OpcUa_SocketManager_Loop (OpcUa_Null, // global socket manager
-    				                        sleepTimeout,
-											OpcUa_True);
+    	uStatus = UA_SocketManager_Loop (OpcUa_Null, // global socket manager
+    				                     sleepTimeout,
+										 OpcUa_True);
         printf ("ServerLoop status: %d\n", uStatus);
         OpcUa_GotoErrorIfBad(uStatus);
 #endif //OPCUA_MULTITHREADED
@@ -290,9 +297,9 @@ int main(void){
     	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
-    	uStatus = OpcUa_P_SocketManager_ServeLoop (OpcUa_Null, // global socket manager
-    				                               sleepTimeout,
-												   OpcUa_True);
+    	uStatus = UA_SocketManager_Loop (OpcUa_Null, // global socket manager
+    				                     sleepTimeout,
+										 OpcUa_True);
         printf ("ServerLoop status: %d\n", uStatus);
         OpcUa_GotoErrorIfBad(uStatus);
 #endif //OPCUA_MULTITHREADED
@@ -322,22 +329,26 @@ int main(void){
 
     printf ("Final status: %d\n", uStatus);
     pkiProvider.CloseCertificateStore(&pkiProvider, &hCertificateStore);
-    OpcUa_PKIProvider_Delete(&pkiProvider);
+    OPCUA_P_PKIFACTORY_DELETEPKIPROVIDER(&pkiProvider);
     String_Clear(&stEndpointUrl);
     OpcUa_ByteString_Clear(&ClientCertificate);
     OpcUa_ByteString_Clear(&ClientPrivateKey);
     OpcUa_ByteString_Clear(&ServerCertificate);
+    StackConfiguration_Clear();
+    // TODO: only for socket now
     OpcUa_ProxyStub_Clear();
 
     OpcUa_ReturnStatusCode;
 
     OpcUa_BeginErrorHandling;
     pkiProvider.CloseCertificateStore(&pkiProvider, &hCertificateStore);
-    OpcUa_PKIProvider_Delete(&pkiProvider);
+    OPCUA_P_PKIFACTORY_DELETEPKIPROVIDER(&pkiProvider);
     String_Clear(&stEndpointUrl);
     OpcUa_ByteString_Clear(&ClientCertificate);
     OpcUa_ByteString_Clear(&ClientPrivateKey);
     OpcUa_ByteString_Clear(&ServerCertificate);
+    StackConfiguration_Clear();
+    // TODO: only for socket now
     OpcUa_ProxyStub_Clear();
 
     printf ("Error status: %d\n", uStatus);

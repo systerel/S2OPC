@@ -8,6 +8,10 @@
 #ifndef INGOPCS_UA_CHANNEL_H_
 #define INGOPCS_UA_CHANNEL_H_
 
+#include <ua_stack_csts.h>
+
+#ifdef OPCUA_HAVE_CLIENTAPI
+
 #include <ua_types.h>
 
 typedef void* UA_Channel;
@@ -69,5 +73,7 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
                                     UA_EncodeableType** responseType);
 
 StatusCode UA_Channel_Disconnect(UA_Channel channel);
+
+#endif /* CLIENT_API */
 
 #endif /* INGOPCS_UA_CHANNEL_H_ */

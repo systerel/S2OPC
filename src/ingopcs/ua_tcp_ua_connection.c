@@ -67,19 +67,19 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
         connection->state = TCP_Connection_Disconnected;
         connection->protocolVersion = tcpProtocolVersion;
         // TODO: check constraints on connection properties (>8192 bytes ...)
-        connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-        connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-        connection->maxMessageSizeRcv = OPCUA_ENCODER_MAXMESSAGELENGTH;
-        connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
+        connection->sendBufferSize = UA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+        connection->receiveBufferSize = UA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+        connection->maxMessageSizeRcv = UA_ENCODER_MAXMESSAGELENGTH;
+        connection->maxMessageSizeSnd = UA_ENCODER_MAXMESSAGELENGTH;
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
-#if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
+#if UA_MULTITHREADED == UA_FALSE
        status = SocketManager_Create(UA_NULL,
                                      1);
 #else
        status = SocketManager_Create(&(connection->socketManager),
                                      1);
-#endif //OPCUA_MULTITHREADED
+#endif //UA_MULTITHREADED
 
         if(status != STATUS_OK){
             free(connection);
@@ -92,10 +92,10 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
 
 void ResetConnectionState(TCP_UA_Connection* connection){
     connection->state = TCP_Connection_Disconnected;
-    connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-    connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-    connection->maxMessageSizeRcv = OPCUA_ENCODER_MAXMESSAGELENGTH;
-    connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
+    connection->sendBufferSize = UA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+    connection->receiveBufferSize = UA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+    connection->maxMessageSizeRcv = UA_ENCODER_MAXMESSAGELENGTH;
+    connection->maxMessageSizeSnd = UA_ENCODER_MAXMESSAGELENGTH;
     connection->maxChunkCountRcv = 0;
     connection->maxChunkCountSnd = 0;
     MsgBuffer_Delete(&connection->inputMsgBuffer);
@@ -463,7 +463,7 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
                 connection->callback = callback;
                 connection->callbackData = callbackData;
 
-#if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
+#if UA_MULTITHREADED == UA_FALSE
                 status = SocketManager_CreateClientSocket(UA_NULL,
                                               uri,
                                               OnSocketEvent_CB,
@@ -478,7 +478,7 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
                                                   (void*) connection,
                                                   &(connection->socket));
                 }
-#endif //OPCUA_MULTITHREADED
+#endif //UA_MULTITHREADED
 
             }else{
                 status = STATUS_INVALID_PARAMETERS;

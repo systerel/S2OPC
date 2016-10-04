@@ -8,29 +8,21 @@
 #ifndef STUB_SERVER_STUB_CLIENT_H_
 #define STUB_SERVER_STUB_CLIENT_H_
 
-#include <opcua_proxystub.h>
-#include <opcua_channel.h>
-#include <opcua_string.h>
-#include <opcua_core.h>
-#include <opcua.h>
-#include <opcua_p_socket_interface.h>
-#include <unistd.h>
+#include <ua_channel.h>
 
 typedef struct {
-OpcUa_Int Stub;
+    OpcUa_Int stub;
 } StubClient_CallbackData;
 
-OpcUa_StatusCode StubClient_ConnectionEvent_Callback(OpcUa_Channel                   hChannel,
-													 OpcUa_Void*                     pCallbackData,
-													 OpcUa_Channel_Event             eEvent,
-													 OpcUa_StatusCode                uStatus);
-													 //OpcUa_Channel_SecurityToken*    pSecurityToken);
+OpcUa_StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
+													 void*            callbackData,
+													 UA_Channel_Event event,
+													 StatusCode       status);
 
-
-OpcUa_StatusCode StubClient_ResponseEvent_Callback(OpcUa_Channel         hChannel,
-												   OpcUa_Void*           pResponse,
-												   OpcUa_EncodeableType* pResponseType,
-												   OpcUa_Void*           pCallbackData,
-												   OpcUa_StatusCode      uStatus);
+OpcUa_StatusCode StubClient_ResponseEvent_Callback(UA_Channel         channel,
+                                                   void*              response,
+												   UA_EncodeableType* responseType,
+												   void*              callbackData,
+												   StatusCode         status);
 
 #endif /* STUB_SERVER_STUB_CLIENT_H_ */
