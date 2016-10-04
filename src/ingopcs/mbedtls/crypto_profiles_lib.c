@@ -125,7 +125,7 @@ static StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pP
     if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKey) != STATUS_OK)
         return STATUS_NOK;
 
-    if(CryptoProvider_SymmetricSignature_GetLength_Low(pProvider, &lenSig) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_Signature(pProvider, &lenSig) != STATUS_OK)
         return STATUS_NOK;
 
     pCalcSig = malloc(lenSig);

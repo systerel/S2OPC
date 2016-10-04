@@ -88,7 +88,7 @@ void SecretBuffer_Unexpose(ExposedBuffer *buf)
  * CryptoProvider
  * ------------------------------------------------------------------------------------------------
  */
-CryptoProvider *CryptoProvider_Create(const uint8_t *uri)
+CryptoProvider *CryptoProvider_Create(const char *uri)
 {
     CryptoProvider *pCryptoProvider = UA_NULL;
     const CryptoProfile *pProfile = UA_NULL;

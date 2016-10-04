@@ -16,7 +16,7 @@
 
 
 // API
-const CryptoProfile * CryptoProfile_Get(const uint8_t *uri);
+const CryptoProfile * CryptoProfile_Get(const char *uri);
 
 // Crypto profiles uri and ID
 #define SecurityPolicy_Invalid_ID           0

@@ -34,7 +34,7 @@ StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
 StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
 
 // Real API ("_Low" suffix because temporary wrappers already use the shorter names)
-CryptoProvider *CryptoProvider_Create(const uint8_t *uri);
+CryptoProvider *CryptoProvider_Create(const char *uri);
 void CryptoProvider_Delete(CryptoProvider *pCryptoProvider);
 
 StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider,
