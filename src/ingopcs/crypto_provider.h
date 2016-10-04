@@ -11,12 +11,33 @@
 
 
 #include "crypto_profiles.h"
-#include "ua_builtintypes.h"
+//#include "ua_builtintypes.h"  // Asssert l'indépendance à ua_builtintypes
 
 
-typedef uint8_t KeyBuffer;  // TODO: move towards private_key.h + This definition is unclear
+/* ------------------------------------------------------------------------------------------------
+ * SecretBuffer (mangled key) and ExposedKeyBuffer (contiguous deciphered buffered) APIs.
+ * TODO: move these decl secret_buffer.h ?
+ * ------------------------------------------------------------------------------------------------
+ */
+typedef struct SecretBuffer
+{
+    uint32_t len; // Mandatory
+    uint8_t *buf;
+} SecretBuffer;
+typedef uint8_t ExposedBuffer;  // TODO: move towards private_key.h + This definition is unclear
+
+SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len);
+void SecretBuffer_DeleteClear(SecretBuffer *sec);
+uint32_t SecretBuffer_GetLength(SecretBuffer *sec);
+
+ExposedBuffer * SecretBuffer_Expose(SecretBuffer *sec);
+void SecretBuffer_Unexpose(ExposedBuffer *buf);
 
 
+/* ------------------------------------------------------------------------------------------------
+ * CryptoProvider API
+ * ------------------------------------------------------------------------------------------------
+ */
 typedef struct CryptoProvider
 {
     const struct CryptoProfile * const pProfile;
@@ -30,41 +51,48 @@ StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
 
 // Real API ("_Low" suffix because temporary wrappers already use the shorter names)
 // TODO: shorter and unified names
-CryptoProvider *CryptoProvider_Create_Low(const char *uri);
-void CryptoProvider_Delete_Low(CryptoProvider *pCryptoProvider);
-StatusCode CryptoProvider_SymmetricEncrypt_Low(const CryptoProvider *pProvider,
-                                           const uint8_t *pInput,
-                                           uint32_t lenPlainText,
-                                           const KeyBuffer *pKey,
-                                           const uint8_t *pIV,
-                                           uint8_t *pOutput,
-                                           uint32_t lenOutput);
-StatusCode CryptoProvider_SymmetricDecrypt_Low(const CryptoProvider *pProvider,
-                                           const uint8_t *pInput,
-                                           uint32_t lenCipherText,
-                                           const KeyBuffer *pKey,
-                                           const uint8_t *pIV,
-                                           uint8_t *pOutput,
-                                           uint32_t lenOutput);
-StatusCode CryptoProvider_Symmetric_GetKeyLength_Low(const CryptoProvider *pProvider,
+CryptoProvider *CryptoProvider_Create(const uint8_t *uri);
+void CryptoProvider_Delete(CryptoProvider *pCryptoProvider);
+
+StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider,
                                                      uint32_t *length);
-StatusCode CryptoProvider_Symmetric_GetOutputLength_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvider *pProvider,
                                                         uint32_t lengthIn,
                                                         uint32_t *pLengthOut);
-StatusCode CryptoProvider_SymmetricSign_Low(const CryptoProvider *pProvider,
-                                            const uint8_t *pInput,
-                                            uint32_t lenInput,
-                                            const uint8_t *pKey,
-                                            uint8_t *pOutput,
-                                            uint32_t *pLenOutput);
-StatusCode CryptoProvider_SymmetricVerify_Low(const CryptoProvider *pProvider,
-                                              const uint8_t *pInput,
-                                              uint32_t lenInput,
-                                              const uint8_t *pKey,
-                                              const uint8_t *pSignature);
-StatusCode CryptoProvider_SymmetricSignature_GetLength_Low(const CryptoProvider *pProvider,
-                                                           uint32_t *pLength);
-StatusCode CryptoProvider_SymmetricGenerateKey_Low(const CryptoProvider *pProvider,
-                                                   uint8_t *pKey);
+StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pProvider,
+                                                        uint32_t lengthIn,
+                                                        uint32_t *pLengthOut);
+StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pProvider,
+                                                       uint32_t *pLength);
+// TODO: GetLength_Block
+
+StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
+                                           const uint8_t *pInput,
+                                           uint32_t lenPlainText,
+                                           const SecretBuffer *pKey,
+                                           const SecretBuffer *pIV,
+                                           uint8_t *pOutput,
+                                           uint32_t lenOutput);
+StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
+                                           const uint8_t *pInput,
+                                           uint32_t lenCipherText,
+                                           const SecretBuffer *pKey,
+                                           const SecretBuffer *pIV,
+                                           uint8_t *pOutput,
+                                           uint32_t lenOutput);
+StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
+                                        const uint8_t *pInput,
+                                        uint32_t lenInput,
+                                        const SecretBuffer *pKey,
+                                        uint8_t *pOutput,
+                                        uint32_t lenOutput);
+StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
+                                          const uint8_t *pInput,
+                                          uint32_t lenInput,
+                                          const SecretBuffer *pKey,
+                                          const uint8_t *pSignature,
+                                          uint32_t lenOutput);
+StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
+                                               SecretBuffer **ppKeyGenerated);
 
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_
