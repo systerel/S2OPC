@@ -11,23 +11,12 @@
 
 
 #include <inttypes.h>
+#include "secret_buffer.h"
 
 
 struct CryptoProvider;
 struct CryptoProfile;
 struct CryptolibContext;
-
-/* ------------------------------------------------------------------------------------------------
- * SecretBuffer (mangled key) and ExposedKeyBuffer (contiguous deciphered buffered) APIs.
- * ------------------------------------------------------------------------------------------------
- */
-typedef uint8_t ExposedBuffer;
-typedef struct SecretBuffer
-{
-    uint32_t len; // Mandatory
-    uint8_t *buf;
-} SecretBuffer;
-
 
 /* ------------------------------------------------------------------------------------------------
  * CryptoProfile

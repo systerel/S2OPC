@@ -11,32 +11,20 @@
 
 
 #include "ua_builtintypes.h"  // StatusCode
+#include "secret_buffer.h"
 #include "crypto_types.h"
 
-
-// TODO: move API
-SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len);
-void SecretBuffer_DeleteClear(SecretBuffer *sec);
-uint32_t SecretBuffer_GetLength(SecretBuffer *sec);
-
-ExposedBuffer * SecretBuffer_Expose(SecretBuffer *sec);
-void SecretBuffer_Unexpose(ExposedBuffer *buf);
-
-
-/* ------------------------------------------------------------------------------------------------
- * CryptoProvider API
- * ------------------------------------------------------------------------------------------------
- */
 
 
 // Lib specific
 StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
 StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
 
-// Real API ("_Low" suffix because temporary wrappers already use the shorter names)
+// Creation
 CryptoProvider *CryptoProvider_Create(const char *uri);
 void CryptoProvider_Delete(CryptoProvider *pCryptoProvider);
 
+// Lengths
 StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider,
                                                      uint32_t *length);
 StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvider *pProvider,
@@ -51,6 +39,7 @@ StatusCode CryptoProvider_SymmetricGetLength_BlockSizes(const CryptoProvider *pP
                                                         uint32_t *cipherTextBlockSize,
                                                         uint32_t *plainTextBlockSize);
 
+// Symmetric functions
 StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
