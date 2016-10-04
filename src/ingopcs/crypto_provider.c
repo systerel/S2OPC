@@ -16,10 +16,6 @@
 #include "crypto_profiles.h"
 
 
-/* ------------------------------------------------------------------------------------------------
- * CryptoProvider
- * ------------------------------------------------------------------------------------------------
- */
 CryptoProvider *CryptoProvider_Create(const char *uri)
 {
     CryptoProvider *pCryptoProvider = UA_NULL;
@@ -345,6 +341,7 @@ StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
             status = STATUS_NOK;
     }
 
+    memset(pExpKey, 0, lenKeyAPI);
     free(pExpKey);
 
     return status;
