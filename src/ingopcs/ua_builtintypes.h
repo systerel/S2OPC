@@ -10,17 +10,9 @@
 
 #include <stdint.h>
 
-typedef uint32_t StatusCode;
-#define STATUS_OK 0x0 // TODO: change values
-#define STATUS_OK_INCOMPLETE 0x00000001
-#define STATUS_NOK 0x80000000//0x10000000
-#define STATUS_INVALID_PARAMETERS 0x80760001//0x20000000
-#define STATUS_INVALID_STATE 0x80760002//0x30000000
-#define STATUS_INVALID_RCV_PARAMETER 0x80000003//0x40000000
-
 #include <ua_encodeable.h>
+#include <ua_base_types.h>
 
-#define UA_NULL ((void *)0)
 
 typedef enum {
     UA_Null_Id            = 0,
