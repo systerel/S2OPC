@@ -1,5 +1,5 @@
 /*
- * Defines the cryptographic structures: SecretBuffers, ExposedBuffers, CryptoProfiles and CryptoProviders.
+ * Defines the cryptographic structures: CryptoProfiles and CryptoProviders.
  *
  *  Created on: Oct 04, 2016
  *      Author: PAB

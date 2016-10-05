@@ -5,12 +5,12 @@
  *      Author: vincent
  */
 
-#include "ua_secure_channel_client_connection.h"
+#include <assert.h>
+#include <stdlib.h>
 
 #include <wrappers.h>
 
-#include <assert.h>
-#include <stdlib.h>
+#include "ua_secure_channel_client_connection.h"
 
 #include <crypto_provider.h>
 
@@ -24,11 +24,11 @@ PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
                                         uint32_t             startTime,
                                         SC_ResponseEvent_CB* callback,
                                         void*                callbackData){
-    PendingRequest* result = UA_NULL;
+    PendingRequest* result = NULL;
     if(requestId != 0){
         result = malloc(sizeof(PendingRequest));
     }
-    if(result != UA_NULL){
+    if(result != NULL){
         result->requestId = requestId;
         result->responseType = responseType;
         result->timeoutHint = timeoutHint;
@@ -40,19 +40,19 @@ PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
 }
 
 void SC_PendingRequestDelete(PendingRequest* pRequest){
-    if(pRequest != UA_NULL){
+    if(pRequest != NULL){
         free(pRequest);
     }
 }
 
 SC_ClientConnection* SC_Client_Create(){
-    SC_ClientConnection* scClientConnection = UA_NULL;
+    SC_ClientConnection* scClientConnection = NULL;
     SC_Connection* sConnection = SC_Create();
 
-    if(sConnection != UA_NULL){
+    if(sConnection != NULL){
         scClientConnection = (SC_ClientConnection *) malloc (sizeof(SC_ClientConnection));
 
-        if(scClientConnection != UA_NULL){
+        if(scClientConnection != NULL){
             memset (scClientConnection, 0, sizeof(SC_ClientConnection));
             Namespace_Initialize(&scClientConnection->namespaces);
             ByteString_Initialize(&scClientConnection->serverCertificate);
@@ -64,9 +64,9 @@ SC_ClientConnection* SC_Client_Create(){
             scClientConnection->instance = sConnection;
 
             scClientConnection->pendingRequests = SLinkedList_Create();
-            if(scClientConnection->pendingRequests == UA_NULL){
+            if(scClientConnection->pendingRequests == NULL){
                 free(scClientConnection);
-                scClientConnection = UA_NULL;
+                scClientConnection = NULL;
             }
         }
     }else{
@@ -79,7 +79,7 @@ StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
                                UA_NamespaceTable*   namespaceTable,
                                UA_EncodeableType**  encodeableTypes){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(cConnection != UA_NULL && cConnection->instance != UA_NULL){
+    if(cConnection != NULL && cConnection->instance != NULL){
         status = Namespace_AttachTable(&cConnection->namespaces, namespaceTable);
         cConnection->encodeableTypes = encodeableTypes;
     }
@@ -89,7 +89,7 @@ StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
 SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*   namespaceTable,
                                                   UA_EncodeableType**  encodeableTypes)
 {
-    SC_ClientConnection* scClientConnection = UA_NULL;
+    SC_ClientConnection* scClientConnection = NULL;
     StatusCode status = STATUS_OK;
     scClientConnection = SC_Client_Create();
     status = SC_Client_Configure(scClientConnection,
@@ -97,22 +97,22 @@ SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*   namespace
                                  encodeableTypes);
     if(status != STATUS_OK){
         SC_Client_Delete(scClientConnection);
-        scClientConnection = UA_NULL;
+        scClientConnection = NULL;
     }
     return scClientConnection;
 }
 
 void SC_Client_Delete(SC_ClientConnection* scConnection)
 {
-    if(scConnection != UA_NULL){
-        if(scConnection->pkiProvider != UA_NULL){
+    if(scConnection != NULL){
+        if(scConnection->pkiProvider != NULL){
             PKIProvider_Delete(scConnection->pkiProvider);
         }
         ByteString_Clear(&scConnection->serverCertificate);
         ByteString_Clear(&scConnection->clientCertificate);
         SLinkedList_Delete(scConnection->pendingRequests);
         String_Clear(&scConnection->securityPolicy);
-        if(scConnection->instance != UA_NULL){
+        if(scConnection->instance != NULL){
             SC_Delete(scConnection->instance);
         }
         Timer_Delete(&scConnection->watchdogTimer);
@@ -122,7 +122,7 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
 
 uint32_t GetNextRequestId(SC_Connection* scConnection){
     uint32_t requestId = 0;
-    assert(scConnection != UA_NULL);
+    assert(scConnection != NULL);
 
     requestId = scConnection->lastRequestIdSent + 1;
     if(requestId == 0){
@@ -186,13 +186,13 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     // TODO: to remove after complete integration of INGOPCS crypto provider
     CryptoProvider* cProvider = CryptoProvider_Create(String_GetCString(&cConnection->securityPolicy));
 
-    if(status == STATUS_OK && cProvider != UA_NULL){
+    if(status == STATUS_OK && cProvider != NULL){
         status = CryptoProvider_SymmetricGenerateKey(cProvider, //cConnection->instance->currentCryptoProvider,
                                                      &cConnection->instance->currentNonce);
         CryptoProvider_Delete(cProvider);
-        cProvider = UA_NULL;
+        cProvider = NULL;
         if(status == STATUS_OK){
-            uint8_t* bytes = UA_NULL;
+            uint8_t* bytes = NULL;
             bytes = SecretBuffer_Expose(cConnection->instance->currentNonce);
             status = ByteString_AttachFromBytes(&openRequest.ClientNonce,
                                                 bytes,
@@ -221,10 +221,10 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
 StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    CryptoProvider* cProvider = UA_NULL;
+    CryptoProvider* cProvider = NULL;
     uint32_t requestId = 0;
 
-    if(cConnection != UA_NULL){
+    if(cConnection != NULL){
         status = STATUS_OK;
     }
 
@@ -245,7 +245,7 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
         cProvider = malloc(sizeof(OpcUa_CryptoProvider));
         status = OpcUa_CreateCryptoProvider(secuPolC, (OpcUa_CryptoProvider*) cProvider);
         free(secuPolC);
-        if(cProvider == UA_NULL){
+        if(cProvider == NULL){
             status = STATUS_NOK;
         }else{
             cConnection->instance->currentCryptoProvider = cProvider;
@@ -289,8 +289,8 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
                                                            &UA_OpenSecureChannelResponse_EncodeableType,
                                                            0, // Not managed now
                                                            0, // Not managed now
-                                                           UA_NULL, // No callback, specifc message header used (OPN)
-                                                           UA_NULL);
+                                                           NULL, // No callback, specifc message header used (OPN)
+                                                           NULL);
         if(pRequest != SLinkedList_Add(cConnection->pendingRequests, requestId, pRequest)){
             status = STATUS_NOK;
         }
@@ -302,17 +302,17 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
                                          PendingRequest*      pRequest)
 {
-    assert(cConnection != UA_NULL &&
-           pRequest != UA_NULL && pRequest->responseType != UA_NULL);
+    assert(cConnection != NULL &&
+           pRequest != NULL && pRequest->responseType != NULL);
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_OpenSecureChannelResponse* encObj = UA_NULL;
-    UA_EncodeableType* receivedType = UA_NULL;
+    UA_OpenSecureChannelResponse* encObj = NULL;
+    UA_EncodeableType* receivedType = NULL;
 
     status = SC_DecodeMsgBody(cConnection->instance->receptionBuffers,
                               &cConnection->instance->receptionBuffers->nsTable,
-                              UA_NULL,
+                              NULL,
                               pRequest->responseType,
-                              UA_NULL,
+                              NULL,
                               &receivedType,
                               (void**) &encObj);
     if(status == STATUS_OK){
@@ -374,9 +374,9 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     const uint32_t isPrecCryptoDataFalse = UA_FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
     uint32_t requestId = 0;
     uint32_t snPosition = 0;
-    PendingRequest* pRequest = UA_NULL;
+    PendingRequest* pRequest = NULL;
 
-    if(cConnection != UA_NULL && transportMsgBuffer != UA_NULL){
+    if(cConnection != NULL && transportMsgBuffer != NULL){
         status = STATUS_OK;
     }
 
@@ -432,7 +432,7 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     if(status == STATUS_OK){
         // Retrieve associated pending request
         pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
-        if(pRequest == UA_NULL){
+        if(pRequest == NULL){
             status = STATUS_NOK;
         }
     }
@@ -444,7 +444,7 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
 
     if(status == STATUS_OK){
         SC_PendingRequestDelete(pRequest);
-        pRequest = UA_NULL;
+        pRequest = NULL;
         // Reset reception buffers for next messages
         MsgBuffers_Reset(cConnection->instance->receptionBuffers);
     }else{
@@ -453,14 +453,14 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
 
     // TODO: remove only because foundation and ingopcs crypto provider are coexisting
     if(status == STATUS_OK){
-        if(cConnection->instance->currentCryptoProvider != UA_NULL){
+        if(cConnection->instance->currentCryptoProvider != NULL){
             OpcUa_DeleteCryptoProvider((OpcUa_CryptoProvider*)cConnection->instance->currentCryptoProvider);
             free(cConnection->instance->currentCryptoProvider);
-            cConnection->instance->currentCryptoProvider = UA_NULL;
+            cConnection->instance->currentCryptoProvider = NULL;
         }
         cConnection->instance->currentCryptoProvider = CryptoProvider_Create
                                                         (String_GetCString(&cConnection->securityPolicy));
-        if(cConnection->instance->currentCryptoProvider == UA_NULL){
+        if(cConnection->instance->currentCryptoProvider == NULL){
             status = STATUS_NOK;
         }
     }
@@ -481,13 +481,13 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     UA_String reason;
     String_Initialize(&reason);
 
-    PendingRequest* pRequest = UA_NULL;
-    UA_EncodeableType* recEncType = UA_NULL;
-    void* encObj = UA_NULL;
+    PendingRequest* pRequest = NULL;
+    UA_EncodeableType* recEncType = NULL;
+    void* encObj = NULL;
 
     // Message header already managed by transport layer
     // (except secure channel Id)
-    if(cConnection != UA_NULL){
+    if(cConnection != NULL){
         status = SC_DecryptSecureMessage(cConnection->instance,
                                          transportMsgBuffer,
                                          &requestId);
@@ -517,8 +517,8 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
         // Note: status is OK if from a prec chunk or NOK if current chunk is abort chunk
         // Retrieve request id to be aborted and call callback if any
         pRequest = SLinkedList_Remove(cConnection->pendingRequests, abortedRequestId);
-        if(pRequest != UA_NULL){
-            if(pRequest->callback != UA_NULL){
+        if(pRequest != NULL){
+            if(pRequest->callback != NULL){
                 pRequest->callback(cConnection,
                                    encObj,
                                    recEncType,
@@ -534,7 +534,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
             // Retrieve associated pending request for current chunk which is final
             pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
             requestToRemove = 1; // True
-            if(pRequest == UA_NULL){
+            if(pRequest == NULL){
                 status = STATUS_NOK;
             }
         }else if(cConnection->instance->receptionBuffers->isFinal == UA_Msg_Chunk_Intermediate &&
@@ -542,7 +542,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
             // When it is the first chunk and it is intermediate we have to check request id is valid
             //  otherwise request id already validated before and not pending request not necessary
             pRequest = SLinkedList_Find(cConnection->pendingRequests, requestId);
-            if(pRequest == UA_NULL){
+            if(pRequest == NULL){
                 // Error: unknown request id !
                 // TODO: trace + callback for audit ?
                 MsgBuffers_Reset(cConnection->instance->receptionBuffers);
@@ -552,10 +552,10 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     }
 
     if(status == STATUS_OK){
-        if(pRequest == UA_NULL){
+        if(pRequest == NULL){
             status = SC_DecodeChunk(cConnection->instance->receptionBuffers,
                                     requestId,
-                                    UA_NULL,
+                                    NULL,
                                     &UA_ServiceFault_EncodeableType,
                                     &recEncType,
                                     &encObj);
@@ -567,7 +567,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                     &recEncType,
                                     &encObj);
             // TODO: check status before ?
-            if(pRequest->callback != UA_NULL && requestToRemove != UA_FALSE){
+            if(pRequest->callback != NULL && requestToRemove != UA_FALSE){
                 pRequest->callback(cConnection,
                                    encObj,
                                    recEncType,
@@ -688,13 +688,13 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
 {
     StatusCode status = STATUS_NOK;
 
-    if(uri != UA_NULL &&
-       pkiConfig != UA_NULL &&
-       clientCertificate != UA_NULL &&
-       clientKey != UA_NULL &&
-       serverCertificate != UA_NULL &&
+    if(uri != NULL &&
+       pkiConfig != NULL &&
+       clientCertificate != NULL &&
+       clientKey != NULL &&
+       serverCertificate != NULL &&
        securityMode != UA_MessageSecurityMode_Invalid &&
-       securityPolicy != UA_NULL &&
+       securityPolicy != NULL &&
        requestedLifetime > 0)
     {
         if(connection->clientCertificate.length <= 0 &&
@@ -702,8 +702,8 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
            connection->serverCertificate.length <= 0 &&
            connection->securityMode == UA_MessageSecurityMode_Invalid &&
            connection->securityPolicy.length <= 0 &&
-           connection->callback == UA_NULL &&
-           connection->callbackData == UA_NULL)
+           connection->callback == NULL &&
+           connection->callbackData == NULL)
         {
             // Create PKI provider
             connection->pkiProvider = PKIProvider_Create(pkiConfig);
@@ -763,9 +763,9 @@ StatusCode SC_Send_Request(SC_ClientConnection* connection,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t requestId = 0;
-    if(connection != UA_NULL &&
-       requestType != UA_NULL &&
-       request != UA_NULL)
+    if(connection != NULL &&
+       requestType != NULL &&
+       request != NULL)
     {
         requestId = GetNextRequestId(connection->instance);
         status = SC_EncodeSecureMessage(connection->instance,

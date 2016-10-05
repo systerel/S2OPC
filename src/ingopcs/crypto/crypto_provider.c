@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#include "ua_builtintypes.h"
-#include "secret_buffer.h"
+#include <ua_base_types.h>
+#include <secret_buffer.h>
+
 #include "crypto_types.h"
 #include "crypto_provider.h"
 #include "crypto_profiles.h"
@@ -18,20 +19,20 @@
 
 CryptoProvider *CryptoProvider_Create(const char *uri)
 {
-    CryptoProvider *pCryptoProvider = UA_NULL;
-    const CryptoProfile *pProfile = UA_NULL;
+    CryptoProvider *pCryptoProvider = NULL;
+    const CryptoProfile *pProfile = NULL;
 
     pProfile = CryptoProfile_Get(uri);
-    if(UA_NULL != pProfile)
+    if(NULL != pProfile)
     {
         pCryptoProvider = (CryptoProvider *)malloc(sizeof(CryptoProvider));
-        if(UA_NULL != pCryptoProvider)
+        if(NULL != pCryptoProvider)
         {
             *(const CryptoProfile **)(&pCryptoProvider->pProfile) = pProfile; // TODO: this is a side-effect of putting too much const
             if(STATUS_OK != CryptoProvider_LibInit(pCryptoProvider))
             {
                 free(pCryptoProvider);
-                pCryptoProvider = UA_NULL;
+                pCryptoProvider = NULL;
             }
         }
     }
@@ -42,7 +43,7 @@ CryptoProvider *CryptoProvider_Create(const char *uri)
 
 void CryptoProvider_Delete(CryptoProvider* pCryptoProvider)
 {
-    if(UA_NULL != pCryptoProvider)
+    if(NULL != pCryptoProvider)
     {
         CryptoProvider_LibDeinit(pCryptoProvider);
         free(pCryptoProvider);
@@ -59,10 +60,10 @@ StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            uint32_t lenOutput)
 {
     StatusCode status = STATUS_OK;
-    ExposedBuffer* pExpKey = UA_NULL;
-    ExposedBuffer* pExpIV = UA_NULL;
+    ExposedBuffer* pExpKey = NULL;
+    ExposedBuffer* pExpIV = NULL;
 
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pIV || UA_NULL == pOutput)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput)
         return STATUS_INVALID_PARAMETERS;
     if(lenPlainText != lenOutput)
         return STATUS_INVALID_PARAMETERS;
@@ -104,10 +105,10 @@ StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
                                            uint32_t lenOutput)
 {
     StatusCode status = STATUS_OK;
-    ExposedBuffer* pExpKey = UA_NULL;
-    ExposedBuffer* pExpIV = UA_NULL;
+    ExposedBuffer* pExpKey = NULL;
+    ExposedBuffer* pExpIV = NULL;
 
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pIV || UA_NULL == pOutput)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput)
         return STATUS_INVALID_PARAMETERS;
     if(lenCipherText != lenOutput)
         return STATUS_INVALID_PARAMETERS;
@@ -143,7 +144,7 @@ StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
 StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider,
                                                      uint32_t *length)
 {
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == length)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == length)
         return STATUS_INVALID_PARAMETERS;
 
     switch(pProvider->pProfile->SecurityPolicyID)
@@ -168,7 +169,7 @@ StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvider *pP
                                                         uint32_t *pLengthOut)
 {
     (void) pProvider; // Reserved for future use
-    if(UA_NULL == pLengthOut)
+    if(NULL == pLengthOut)
         return STATUS_INVALID_PARAMETERS;
 
     *pLengthOut = lengthIn;
@@ -185,7 +186,7 @@ StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pP
                                                         uint32_t *pLengthOut)
 {
     (void) pProvider; // Reserved for future use
-    if(UA_NULL == pLengthOut)
+    if(NULL == pLengthOut)
         return STATUS_INVALID_PARAMETERS;
 
     *pLengthOut = lengthIn;
@@ -197,7 +198,7 @@ StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pP
 StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pProvider,
                                                        uint32_t *pLength)
 {
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pLength)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pLength)
         return STATUS_INVALID_PARAMETERS;
 
     switch(pProvider->pProfile->SecurityPolicyID)
@@ -218,7 +219,7 @@ StatusCode CryptoProvider_SymmetricGetLength_BlockSizes(const CryptoProvider *pP
                                                         uint32_t *cipherTextBlockSize,
                                                         uint32_t *plainTextBlockSize)
 {
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile)
+    if(NULL == pProvider || NULL == pProvider->pProfile)
         return STATUS_INVALID_PARAMETERS;
 
     switch(pProvider->pProfile->SecurityPolicyID)
@@ -227,9 +228,9 @@ StatusCode CryptoProvider_SymmetricGetLength_BlockSizes(const CryptoProvider *pP
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
-        if(UA_NULL != cipherTextBlockSize)
+        if(NULL != cipherTextBlockSize)
             *cipherTextBlockSize = SecurityPolicy_Basic256Sha256_SymmLen_Block;
-        if(UA_NULL != plainTextBlockSize)
+        if(NULL != plainTextBlockSize)
             *plainTextBlockSize = SecurityPolicy_Basic256Sha256_SymmLen_Block;
         break;
     }
@@ -238,7 +239,7 @@ StatusCode CryptoProvider_SymmetricGetLength_BlockSizes(const CryptoProvider *pP
 }
 
 
-// pLenOutput can be UA_NULL
+// pLenOutput can be NULL
 StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
                                         const uint8_t *pInput,
                                         uint32_t lenInput,
@@ -247,10 +248,10 @@ StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
                                         uint32_t lenOutput)
 {
     StatusCode status = STATUS_OK;
-    ExposedBuffer* pExpKey = UA_NULL;
+    ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pOutput)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput)
         return STATUS_INVALID_PARAMETERS;
 
     // Assert output size
@@ -266,7 +267,7 @@ StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
 
     pExpKey = SecretBuffer_Expose(pKey);
-    if(UA_NULL == pKey)
+    if(NULL == pKey)
         return STATUS_NOK;
 
     status = pProvider->pProfile->pFnSymmSign(pProvider, pInput, lenInput, pExpKey, pOutput);
@@ -284,10 +285,10 @@ StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
                                           uint32_t lenOutput)
 {
     StatusCode status = STATUS_OK;
-    ExposedBuffer* pExpKey = UA_NULL;
+    ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pSignature)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature)
         return STATUS_INVALID_PARAMETERS;
 
     // Assert output size
@@ -303,7 +304,7 @@ StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
 
     pExpKey = SecretBuffer_Expose(pKey);
-    if(UA_NULL == pKey)
+    if(NULL == pKey)
         return STATUS_NOK;
 
     status = pProvider->pProfile->pFnSymmVerif(pProvider, pInput, lenInput, pExpKey, pSignature);
@@ -320,24 +321,24 @@ StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
     ExposedBuffer *pExpKey;
     uint32_t lenKeyAPI;
 
-    if(UA_NULL == pProvider || UA_NULL == ppKeyGenerated)
+    if(NULL == pProvider || NULL == ppKeyGenerated)
         return STATUS_INVALID_PARAMETERS;
 
     // Empties pointer in case an error occurs after that point.
-    *ppKeyGenerated = UA_NULL;
+    *ppKeyGenerated = NULL;
 
     if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKeyAPI) != STATUS_OK)
         return STATUS_NOK;
 
     pExpKey = (ExposedBuffer *)malloc(lenKeyAPI);
-    if(UA_NULL == pExpKey)
+    if(NULL == pExpKey)
         return STATUS_NOK;
 
     status = pProvider->pProfile->pFnSymmGenKey(pProvider, pExpKey);
     if(STATUS_OK == status)
     {
         *ppKeyGenerated = SecretBuffer_NewFromExposedBuffer(pExpKey, lenKeyAPI);
-        if(UA_NULL == *ppKeyGenerated)
+        if(NULL == *ppKeyGenerated)
             status = STATUS_NOK;
     }
 

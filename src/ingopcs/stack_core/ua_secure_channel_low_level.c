@@ -9,9 +9,12 @@
 
 #include <assert.h>
 #include <stdlib.h>
+
+#include "ua_secure_channel_low_level.h"
+
+#include <ua_builtintypes.h>
 #include <ua_encoder.h>
 #include <ua_tcp_ua_low_level.h>
-#include <ua_secure_channel_low_level.h>
 #include <secret_buffer.h>
 #include <crypto_provider.h>
 
@@ -42,10 +45,10 @@ static const UA_String UA_String_Security_Policy_Basic256Sha256 = {
 };
 
 SC_Connection* SC_Create (){
-    SC_Connection* sConnection = UA_NULL;
+    SC_Connection* sConnection = NULL;
     TCP_UA_Connection* connection = TCP_UA_Connection_Create(scProtocolVersion);
 
-    if(connection != UA_NULL){
+    if(connection != NULL){
         sConnection = (SC_Connection *) malloc(sizeof(SC_Connection));
 
         if(sConnection != 0){
@@ -67,24 +70,24 @@ SC_Connection* SC_Create (){
 }
 
 void SC_Delete (SC_Connection* scConnection){
-    if(scConnection != UA_NULL){
+    if(scConnection != NULL){
         // Do not delete runningAppCertificate, runnigAppPrivateKey and otherAppCertificate:
         //  managed by upper level
         ByteString_Clear(&scConnection->runningAppCertificate);
         ByteString_Clear(&scConnection->runningAppPublicKey);
         // Never deallocate private key, provided by upper level (client/server connection)
-        scConnection->runningAppPrivateKey = UA_NULL;
+        scConnection->runningAppPrivateKey = NULL;
         ByteString_Clear(&scConnection->otherAppCertificate);
         ByteString_Clear(&scConnection->otherAppPublicKey);
-        if(scConnection->sendingBuffer != UA_NULL)
+        if(scConnection->sendingBuffer != NULL)
         {
             MsgBuffer_Delete(&scConnection->sendingBuffer);
         }
-        if(scConnection->receptionBuffers != UA_NULL)
+        if(scConnection->receptionBuffers != NULL)
         {
             MsgBuffers_Delete(&scConnection->receptionBuffers);
         }
-        if(scConnection->transportConnection != UA_NULL)
+        if(scConnection->transportConnection != NULL)
         {
             TCP_UA_Connection_Delete(scConnection->transportConnection);
         }
@@ -103,17 +106,17 @@ StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
                                         UA_ByteString* otherAppCertificate){
     StatusCode status = STATUS_OK;
     if(scConnection->runningAppCertificate.length <= 0 &&
-       scConnection->runningAppPrivateKey == UA_NULL &&
+       scConnection->runningAppPrivateKey == NULL &&
        scConnection->otherAppCertificate.length <= 0)
     {
-        if(runningAppCertificate != UA_NULL){
+        if(runningAppCertificate != NULL){
             status = ByteString_AttachFrom(&scConnection->runningAppCertificate,
                                            runningAppCertificate);
         }
         ByteString_Clear(&scConnection->runningAppPublicKey);
         scConnection->runningAppPrivateKey = runningAppPrivateKey;
 
-        if(otherAppCertificate != UA_NULL){
+        if(otherAppCertificate != NULL){
             status = ByteString_AttachFrom(&scConnection->otherAppCertificate,
                                            otherAppCertificate);
         }
@@ -129,7 +132,7 @@ StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
                                        UA_EncodeableType** encodeableTypes)
 {
     StatusCode status = STATUS_INVALID_STATE;
-    if(scConnection->receptionBuffers == UA_NULL){
+    if(scConnection->receptionBuffers == NULL){
         if(scConnection->transportConnection->maxChunkCountRcv != 0)
         {
             scConnection->receptionBuffers = MsgBuffers_Create
@@ -152,7 +155,7 @@ StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
             // Check in init ?
             assert(UA_FALSE);
         }
-        if(scConnection->receptionBuffers == UA_NULL){
+        if(scConnection->receptionBuffers == NULL){
             status = STATUS_NOK;
         }else{
             status = STATUS_OK;
@@ -167,14 +170,14 @@ StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
 {
     StatusCode status = STATUS_NOK;
     UA_MsgBuffer* msgBuffer;
-    if(scConnection->sendingBuffer == UA_NULL){
+    if(scConnection->sendingBuffer == NULL){
         Buffer* buf = Buffer_Create(scConnection->transportConnection->sendBufferSize);
         msgBuffer = MsgBuffer_Create(buf,
                                      scConnection->transportConnection->maxChunkCountSnd,
                                      scConnection,
                                      namespaceTable,
                                      encodeableTypes);
-        if(msgBuffer != UA_NULL){
+        if(msgBuffer != NULL){
             scConnection->sendingBuffer = msgBuffer;
             status = STATUS_OK;
         }
@@ -190,9 +193,9 @@ StatusCode RetrievePublicKeyFromCert(CryptoProvider* cryptoProvider,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t publicKeyLength = 0;
-    if(cryptoProvider != UA_NULL &&
-       publicKey != UA_NULL &&
-       certificate != UA_NULL)
+    if(cryptoProvider != NULL &&
+       publicKey != NULL &&
+       certificate != NULL)
     {
         status = CryptoProvider_GetPublicKeyLengthFromCert(cryptoProvider,
                                                            certificate,
@@ -209,7 +212,7 @@ StatusCode RetrievePublicKeyFromCert(CryptoProvider* cryptoProvider,
             status = STATUS_NOK;
         }
 
-    }else if(publicKey == UA_NULL){
+    }else if(publicKey == NULL){
         status = STATUS_NOK;
     }
 
@@ -222,10 +225,10 @@ StatusCode SC_RetrieveAndSetPublicKeyFromCert(SC_Connection*  scConnection,
                                               UA_ByteString** publicKey)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ByteString* certificate = UA_NULL;
+    UA_ByteString* certificate = NULL;
 
-    if(scConnection != UA_NULL &&
-       publicKey != UA_NULL && *publicKey == UA_NULL)
+    if(scConnection != NULL &&
+       publicKey != NULL && *publicKey == NULL)
     {
         if(runningApp == UA_FALSE)
         {
@@ -315,9 +318,9 @@ StatusCode GetSymmBlocksSizes(UA_String* securityPolicyUri,
                               uint32_t*  plainTextBlockSize){
     StatusCode status = STATUS_INVALID_PARAMETERS;
 
-    if(securityPolicyUri != UA_NULL &&
-       cipherTextBlockSize != UA_NULL &&
-       plainTextBlockSize != UA_NULL){
+    if(securityPolicyUri != NULL &&
+       cipherTextBlockSize != NULL &&
+       plainTextBlockSize != NULL){
         status = STATUS_OK;
     }
 
@@ -395,7 +398,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
 
-    if(scConnection != UA_NULL){
+    if(scConnection != NULL){
         status = STATUS_OK;
     }
 
@@ -404,7 +407,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
            status = STATUS_INVALID_STATE;
         }else{
 
-            UA_ByteString* otherAppPublicKey = UA_NULL;
+            UA_ByteString* otherAppPublicKey = NULL;
 
             // Retrieve other app public key from certificate
             status = SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &otherAppPublicKey);
@@ -419,7 +422,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
             }
         }
     }else if (status == STATUS_OK){
-        if(scConnection->currentSecuKeySets.senderKeySet == UA_NULL){
+        if(scConnection->currentSecuKeySets.senderKeySet == NULL){
             status = STATUS_INVALID_STATE;
         }else{
             // Retrieve cipher length
@@ -509,12 +512,12 @@ uint16_t GetPaddingSize(uint32_t bytesToEncrypt, // called bytesToWrite in spec 
 StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                              uint32_t       isSymmetric){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(scConnection != UA_NULL){
+    if(scConnection != NULL){
         uint32_t cipherBlockSize = 0;
         uint32_t plainBlockSize =0;
         if(isSymmetric == UA_FALSE){
             uint32_t publicKeyModulusLength = 0;
-            UA_ByteString* publicKey = UA_NULL;
+            UA_ByteString* publicKey = NULL;
             SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &publicKey);
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
                                                                    publicKey,
@@ -560,7 +563,7 @@ StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
 {
     StatusCode status = STATUS_NOK;
     UA_Byte fByte = 'F';
-    if(msgBuffer != UA_NULL){
+    if(msgBuffer != NULL){
         status = STATUS_OK;
         switch(smType){
                 case UA_SecureMessage:
@@ -600,7 +603,7 @@ StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
                                    uint32_t      requestId){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t zero = 0;
-    if(msgBuffer != UA_NULL){
+    if(msgBuffer != NULL){
         status = STATUS_OK;
     }
 
@@ -626,10 +629,10 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toEncrypt = 1; // True
     uint32_t toSign = 1; // True
-    if(cryptoProvider != UA_NULL && msgBuffer != UA_NULL &&
-       securityPolicy != UA_NULL &&
-       senderCertificate != UA_NULL &&
-       receiverCertificate != UA_NULL)
+    if(cryptoProvider != NULL && msgBuffer != NULL &&
+       securityPolicy != NULL &&
+       senderCertificate != NULL &&
+       receiverCertificate != NULL)
     {
         toEncrypt = IsMsgEncrypted(secuMode, msgBuffer);
         toSign = IsMsgSigned(secuMode);
@@ -704,7 +707,7 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
                                         UA_ByteString* senderCertificate,
                                         UA_ByteString* receiverCertificate){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(scConnection != UA_NULL)
+    if(scConnection != NULL)
     {
         status = EncodeAsymmSecurityHeader(scConnection->currentCryptoProvider,
                                            scConnection->sendingBuffer,
@@ -725,10 +728,10 @@ StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
     UA_NodeId nodeId;
     NodeId_Initialize(&nodeId);
 
-    if(msgBuffer != UA_NULL && msgBody != UA_NULL &&
-       encType != UA_NULL){
+    if(msgBuffer != NULL && msgBody != NULL &&
+       encType != NULL){
         nodeId.identifierType = IdentifierType_Numeric;
-        if(encType->namespace == UA_NULL){
+        if(encType->namespace == NULL){
             nodeId.namespace = 0;
         }else{
             // TODO: find namespace Id
@@ -746,9 +749,9 @@ StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
 StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
                                    const UA_Byte* data_src,
                                    uint32_t       count){
-    SC_Connection* scConnection = UA_NULL;
+    SC_Connection* scConnection = NULL;
     StatusCode status = STATUS_NOK;
-    if(data_src == UA_NULL || msgBuffer == UA_NULL || msgBuffer->flushData == UA_NULL)
+    if(data_src == NULL || msgBuffer == NULL || msgBuffer->flushData == NULL)
     {
         status = STATUS_INVALID_PARAMETERS;
     }else{
@@ -800,7 +803,7 @@ StatusCode Set_Message_Length(UA_MsgBuffer* msgBuffer,
                               uint32_t      msgLength){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t originPosition = 0;
-    if(msgBuffer != UA_NULL && msgLength < msgBuffer->buffers->max_size){
+    if(msgBuffer != NULL && msgLength < msgBuffer->buffers->max_size){
         originPosition = msgBuffer->buffers->position;
         status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
     }
@@ -819,7 +822,7 @@ StatusCode Set_Message_Chunk_Type(UA_MsgBuffer*    msgBuffer,
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t originPosition = 0;
 
-    if(msgBuffer != UA_NULL){
+    if(msgBuffer != NULL){
         originPosition = msgBuffer->buffers->position;
         status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_ISFINAL_POSITION);
     }
@@ -852,10 +855,10 @@ StatusCode Set_Message_Chunk_Type(UA_MsgBuffer*    msgBuffer,
 
 StatusCode Set_Sequence_Number(UA_MsgBuffer* msgBuffer){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    SC_Connection* scConnection = UA_NULL;
+    SC_Connection* scConnection = NULL;
     uint32_t originPosition = 0;
 
-    if(msgBuffer != UA_NULL && msgBuffer->flushData != UA_NULL){
+    if(msgBuffer != NULL && msgBuffer->flushData != NULL){
        status = STATUS_OK;
        scConnection = (SC_Connection*) msgBuffer->flushData;
        if(scConnection-> lastSeqNumSent > UINT32_MAX - 1024){ // Part 6 §6.7.2 v1.03
@@ -893,13 +896,13 @@ StatusCode EncodePadding(SC_Connection* scConnection,
 
     if(symmetricAlgo == UA_FALSE){
         if(scConnection->runningAppCertificate.length <= 0 ||
-           scConnection->runningAppPrivateKey == UA_NULL ||
+           scConnection->runningAppPrivateKey == NULL ||
            scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
 
             uint32_t publicKeyModulusLength = 0;
-            UA_ByteString* publicKey = UA_NULL;
+            UA_ByteString* publicKey = NULL;
             SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &publicKey);
 
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
@@ -919,8 +922,8 @@ StatusCode EncodePadding(SC_Connection* scConnection,
 
         }
     }else{
-        if(scConnection->currentSecuKeySets.senderKeySet == UA_NULL ||
-           scConnection->currentSecuKeySets.receiverKeySet == UA_NULL){
+        if(scConnection->currentSecuKeySets.senderKeySet == NULL ||
+           scConnection->currentSecuKeySets.receiverKeySet == NULL){
             status = STATUS_INVALID_STATE;
         }else{
             *signatureSize = GetSymmSignatureSize(&scConnection->currentSecuPolicy);
@@ -969,7 +972,7 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
     UA_ByteString signedData;
     if(symmetricAlgo == UA_FALSE){
         if(scConnection->runningAppCertificate.length <= 0 ||
-           scConnection->runningAppPrivateKey == UA_NULL ||
+           scConnection->runningAppPrivateKey == NULL ||
            scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
@@ -993,8 +996,8 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
             ByteString_Clear(&signedData);
         }
     }else{
-        if(scConnection->currentSecuKeySets.senderKeySet == UA_NULL ||
-           scConnection->currentSecuKeySets.receiverKeySet == UA_NULL){
+        if(scConnection->currentSecuKeySets.senderKeySet == NULL ||
+           scConnection->currentSecuKeySets.receiverKeySet == NULL){
             status = STATUS_INVALID_STATE;
         }else{
             status = ByteString_InitializeFixedSize(&signedData, signatureSize);
@@ -1031,19 +1034,19 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
     UA_Byte* dataToEncrypt = &msgBuffer->buffers->data[msgBuffer->sequenceNumberPosition];
     const uint32_t dataToEncryptLength = msgBuffer->buffers->length - msgBuffer->sequenceNumberPosition;
 
-    if(scConnection != UA_NULL && msgBuffer != UA_NULL &&
-       encryptedMsgBuffer != UA_NULL && encryptedMsgBuffer->buffers != UA_NULL){
+    if(scConnection != NULL && msgBuffer != NULL &&
+       encryptedMsgBuffer != NULL && encryptedMsgBuffer->buffers != NULL){
         status = STATUS_OK;
     }
 
     if(status == STATUS_OK && symmetricAlgo == UA_FALSE){
         if(scConnection->runningAppCertificate.length <= 0 ||
-           scConnection->runningAppPrivateKey == UA_NULL ||
+           scConnection->runningAppPrivateKey == NULL ||
            scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
-            UA_ByteString* otherAppPublicKey = UA_NULL;
-            UA_Byte* encryptedData = UA_NULL;
+            UA_ByteString* otherAppPublicKey = NULL;
+            UA_Byte* encryptedData = NULL;
 
             if(status == STATUS_OK){
                 // Retrieve other app public key from certificate
@@ -1059,7 +1062,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
                     status = STATUS_NOK;
                 }
                 encryptedData = encryptedMsgBuffer->buffers->data;
-                if(encryptedData == UA_NULL)
+                if(encryptedData == NULL)
                 {
                     status = STATUS_NOK;
                 }else{
@@ -1092,11 +1095,11 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
 
         } // End valid asymmetric encryption data
     }else if (status == STATUS_OK){
-        if(scConnection->currentSecuKeySets.senderKeySet == UA_NULL ||
-           scConnection->currentSecuKeySets.receiverKeySet == UA_NULL){
+        if(scConnection->currentSecuKeySets.senderKeySet == NULL ||
+           scConnection->currentSecuKeySets.receiverKeySet == NULL){
             status = STATUS_INVALID_STATE;
         }else{
-            UA_Byte* encryptedData = UA_NULL;
+            UA_Byte* encryptedData = NULL;
 
             // Check size of encrypted data array
             if(status == STATUS_OK){
@@ -1105,7 +1108,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
                     status = STATUS_NOK;
                 }
                 encryptedData = encryptedMsgBuffer->buffers->data;
-                if(encryptedData == UA_NULL){
+                if(encryptedData == NULL){
                     status = STATUS_NOK;
                 }else{
                     // Copy non encrypted headers part
@@ -1135,7 +1138,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
 
 StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
                                    UA_MsgFinalChunk  chunkType){
-    SC_Connection* scConnection = UA_NULL;
+    SC_Connection* scConnection = NULL;
     StatusCode status = STATUS_NOK;
     uint8_t toEncrypt = 1; // True
     uint8_t toSign = 1; // True
@@ -1146,7 +1149,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
     uint32_t signatureSize = 0;
     uint32_t encryptedLength = 0;
 
-    if(msgBuffer == UA_NULL || msgBuffer->flushData == UA_NULL ||
+    if(msgBuffer == NULL || msgBuffer->flushData == NULL ||
        (chunkType != UA_Msg_Chunk_Final && msgBuffer->secureType != UA_SecureMessage))
     {
         status = STATUS_INVALID_PARAMETERS;
@@ -1266,8 +1269,8 @@ StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t secureChannelId = 0;
-    if(scConnection != UA_NULL &&
-       transportBuffer != UA_NULL)
+    if(scConnection != NULL &&
+       transportBuffer != NULL)
     {
         status = STATUS_OK;
     }
@@ -1313,8 +1316,8 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     uint32_t validationStatusCode = 0;
 
-    if(scConnection != UA_NULL &&
-       transportBuffer != UA_NULL)
+    if(scConnection != NULL &&
+       transportBuffer != NULL)
     {
         // Asymmetric security header must use current security parameters
         // (TODO: add guarantee we are treating last OPN sent: using pending requests ?)
@@ -1358,9 +1361,9 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                 }
 
                 if(status == STATUS_OK && validateSenderCert != UA_FALSE){
-                    void* certStore = UA_NULL;
+                    void* certStore = NULL;
                     certStore = PKIProvider_Open_Cert_Store(pkiProvider);
-                    if(certStore != UA_NULL){
+                    if(certStore != NULL){
                         status = PKIProvider_Validate_Certificate(pkiProvider,
                                                                   &senderCertificate,
                                                                   certStore,
@@ -1439,7 +1442,7 @@ StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
                                     uint32_t       receivedTokenId,
                                     uint32_t*      isPrecCryptoData){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(scConnection != UA_NULL){
+    if(scConnection != NULL){
         status = STATUS_OK;
         if(scConnection->currentSecuToken.tokenId == receivedTokenId){
             *isPrecCryptoData = UA_FALSE;
@@ -1462,12 +1465,12 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toDecrypt = 1;
     uint32_t decryptedTextLength = 0;
-    CryptoProvider* cryptoProvider = UA_NULL;
+    CryptoProvider* cryptoProvider = NULL;
     UA_MessageSecurityMode securityMode = UA_MessageSecurityMode_Invalid;
-    Buffer* plainBuffer = UA_NULL;
+    Buffer* plainBuffer = NULL;
     uint32_t bufferIdx = 0;
 
-    if(scConnection != UA_NULL && transportBuffer != UA_NULL){
+    if(scConnection != NULL && transportBuffer != NULL){
         status = STATUS_OK;
 
         if(isPrecCryptoData == UA_FALSE){
@@ -1500,7 +1503,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                 if(status == STATUS_OK && decryptedTextLength <= scConnection->receptionBuffers->buffers->max_size){
                     // Retrieve next chunk empty buffer
                     plainBuffer = MsgBuffers_NextChunk(scConnection->receptionBuffers, &bufferIdx);
-                    if(plainBuffer != UA_NULL){
+                    if(plainBuffer != NULL){
                         // Copy non encrypted data from original buffer to plain text buffer
                         // and set position to current read position
                         status = MsgBuffers_CopyBuffer(scConnection->receptionBuffers,
@@ -1527,7 +1530,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                 }
             }else{
 
-                SC_SecurityKeySet* receiverKeySet = UA_NULL;
+                SC_SecurityKeySet* receiverKeySet = NULL;
                 if(isPrecCryptoData == UA_FALSE){
                     receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
                 }else{
@@ -1541,7 +1544,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                     // Retrieve next chunk empty buffer
                     plainBuffer = MsgBuffers_NextChunk(scConnection->receptionBuffers, &bufferIdx);
 
-                    if(plainBuffer != UA_NULL){
+                    if(plainBuffer != NULL){
                         // Copy non encrypted data from original buffer to plain text buffer
                         // and set position to current read position
                         status = MsgBuffers_CopyBuffer(scConnection->receptionBuffers,
@@ -1596,20 +1599,20 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
     const char* nsName;
     uint16_t nsIndex = 0;
     NodeId_Initialize(&nodeId);
-    if(receptionBuffer != UA_NULL && namespaceTable != UA_NULL && encodeableObj != UA_NULL &&
-       (knownTypes != UA_NULL || respEncType != UA_NULL))
+    if(receptionBuffer != NULL && namespaceTable != NULL && encodeableObj != NULL &&
+       (knownTypes != NULL || respEncType != NULL))
     {
         status = NodeId_Read(receptionBuffer, &nodeId);
     }
 
     if(status == STATUS_OK && nodeId.identifierType == UA_IdType_Numeric){
 
-        if(respEncType != UA_NULL){
+        if(respEncType != NULL){
             // Case in which we know the expected type from the request Id
             if (nodeId.numeric == respEncType->typeId || nodeId.numeric == respEncType->binaryTypeId){
     //          || nodeId.numeric == respEncType->xmlTypeId){ => what is the point to accept this type ?
                 *receivedEncType = respEncType;
-            }else if(errEncType != UA_NULL &&
+            }else if(errEncType != NULL &&
                      (nodeId.numeric == errEncType->typeId || nodeId.numeric == errEncType->binaryTypeId)){
     //               || nodeId.numeric == errEncType->xmlTypeId){ => what is the point to accept this type ?
                 *receivedEncType = errEncType;
@@ -1620,9 +1623,9 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
             // Check namespace of received type using index
             if(status == STATUS_OK){
                     recEncType = *receivedEncType;
-                    if(recEncType->namespace == UA_NULL && nodeId.namespace != OPCUA_NAMESPACE_INDEX){
+                    if(recEncType->namespace == NULL && nodeId.namespace != OPCUA_NAMESPACE_INDEX){
                         status = STATUS_INVALID_RCV_PARAMETER;
-                    }else if(recEncType->namespace != UA_NULL){
+                    }else if(recEncType->namespace != NULL){
                         status = Namespace_GetIndex(namespaceTable,
                                                     recEncType->namespace,
                                                     &nsIndex);
@@ -1640,10 +1643,10 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
                 EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.numeric);
             }else{
                 nsName = Namespace_GetName(namespaceTable, nodeId.namespace);
-                if(nsName != UA_NULL){
+                if(nsName != NULL){
                     recEncType = EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.numeric);
                 }
-                if(recEncType == UA_NULL){
+                if(recEncType == NULL){
                     status = STATUS_INVALID_RCV_PARAMETER;
                 }
             }
@@ -1656,7 +1659,7 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
 
     if(status == STATUS_OK){
         *encodeableObj = malloc(recEncType->allocSize);
-        if(*encodeableObj != UA_NULL){
+        if(*encodeableObj != NULL){
             status = recEncType->decodeFunction(receptionBuffer, *encodeableObj);
         }else{
             status = STATUS_NOK;
@@ -1673,15 +1676,15 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toVerify = 1;
 
-    CryptoProvider* cryptoProvider = UA_NULL;
+    CryptoProvider* cryptoProvider = NULL;
     UA_MessageSecurityMode securityMode = UA_MessageSecurityMode_Invalid;
-    UA_String* securityPolicy = UA_NULL;
+    UA_String* securityPolicy = NULL;
     Buffer* receptionBuffer = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
 
     uint32_t signatureSize = 0;
     uint32_t signaturePosition = 0;
 
-    if(scConnection != UA_NULL){
+    if(scConnection != NULL){
         status = STATUS_OK;
 
         if(isPrecCryptoData == UA_FALSE){
@@ -1700,7 +1703,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
     if(toVerify != UA_FALSE){
         if(isSymmetric == UA_FALSE){
             uint32_t publicKeyModulusLength = 0;
-            UA_ByteString* publicKey = UA_NULL;
+            UA_ByteString* publicKey = NULL;
             SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &publicKey);
 
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(cryptoProvider,
@@ -1721,7 +1724,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                                          signatureSize);
             }
         }else{
-            SC_SecurityKeySet* receiverKeySet = UA_NULL;
+            SC_SecurityKeySet* receiverKeySet = NULL;
             if(isPrecCryptoData == UA_FALSE){
                 receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
             }else{
@@ -1748,7 +1751,7 @@ StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection)
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t seqNumber = 0;
 
-    if(scConnection != UA_NULL){
+    if(scConnection != NULL){
         status = STATUS_OK;
         status = UInt32_Read(scConnection->receptionBuffers, &seqNumber);
     }
@@ -1778,7 +1781,7 @@ StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t transportProtocolVersion = 0;
 
-    if(scConnection != UA_NULL){
+    if(scConnection != NULL){
         status = STATUS_OK;
         // use Get_Rcv_Protocol_Version and check it is the same as the one received in SC
         if(TCP_UA_Connection_GetReceiveProtocolVersion(scConnection->transportConnection,
@@ -1800,9 +1803,9 @@ StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_MsgBuffer* msgBuffer = scConnection->sendingBuffer;
-    if(scConnection != UA_NULL &&
-       encType != UA_NULL &&
-       value != UA_NULL)
+    if(scConnection != NULL &&
+       encType != NULL &&
+       value != NULL)
     {
         // Encode secure message header:
         status = SC_EncodeSecureMsgHeader(msgBuffer,
@@ -1832,7 +1835,7 @@ StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
                                        uint32_t*     snPosition)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(transportBuffer != UA_NULL)
+    if(transportBuffer != NULL)
     {
         status = UInt32_Read(transportBuffer, tokenId);
     }
@@ -1847,14 +1850,14 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
 {
     // Only valid for symmetric encryption ! No need for asymm (1 chunk maximum)
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_String* secuPolicy = UA_NULL;
+    UA_String* secuPolicy = NULL;
     uint32_t sigSize = 0;
     uint32_t cipherBlockSize = 0;
     uint32_t plainBlockSize = 0;
     uint16_t padding = 0;
     Buffer* curChunk = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
     uint32_t newBufferLength = curChunk->length;
-    if(scConnection != UA_NULL){
+    if(scConnection != NULL){
         if(isPrecCryptoData == UA_FALSE){
             secuPolicy = &scConnection->currentSecuPolicy;
         }else{
@@ -1906,7 +1909,7 @@ StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
 
     // Message header already managed by transport layer
     // (except secure channel Id)
-    if(scConnection != UA_NULL){
+    if(scConnection != NULL){
         status = SC_DecodeSecureMsgSCid(scConnection,
                                         transportMsgBuffer);
     }
@@ -1965,11 +1968,11 @@ StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
                              uint8_t*       abortReqPresence,
                              uint32_t*      abortReqId)
 {
-    assert(msgBuffer != UA_NULL);
+    assert(msgBuffer != NULL);
     StatusCode status = STATUS_INVALID_PARAMETERS;
 
-    if(msgBuffer != UA_NULL &&
-       abortReqPresence != UA_NULL && abortReqId != UA_NULL)
+    if(msgBuffer != NULL &&
+       abortReqPresence != NULL && abortReqId != NULL)
     {
         // Check if we received a new request id related message before
         //  precedent treatment end
@@ -1991,7 +1994,7 @@ StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
                               UA_String*     reason){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t errorCode = 0;
-    if(msgBuffer != UA_NULL && reason != UA_NULL){
+    if(msgBuffer != NULL && reason != NULL){
         if(msgBuffer->isFinal == UA_Msg_Chunk_Abort){
             status = UInt32_Read(msgBuffer, &errorCode);
             if(status == STATUS_OK){
@@ -2014,13 +2017,13 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                           void**              encObj){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t msgSize = 0;
-    Buffer* tmpBuffer = UA_NULL;
+    Buffer* tmpBuffer = NULL;
     uint32_t idx = 0;
-    UA_MsgBuffer* tmpMsgBuffer = UA_NULL;
-    Buffer* buffer = UA_NULL;
+    UA_MsgBuffer* tmpMsgBuffer = NULL;
+    Buffer* buffer = NULL;
 
-    if(msgBuffers != UA_NULL &&
-       recEncType != UA_NULL && encObj != UA_NULL)
+    if(msgBuffers != NULL &&
+       recEncType != NULL && encObj != NULL)
     {
 
         switch(msgBuffers->isFinal){
@@ -2041,7 +2044,7 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                     }
                     buffer = Buffer_Create(msgSize);
 
-                    if(buffer == UA_NULL){
+                    if(buffer == NULL){
                         status = STATUS_NOK;
                     }
 
@@ -2054,10 +2057,10 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                     if(status == STATUS_OK){
                         tmpMsgBuffer = MsgBuffer_Create(buffer,
                                                         msgBuffers->maxChunks,
-                                                        UA_NULL,
+                                                        NULL,
                                                         &msgBuffers->nsTable,
                                                         msgBuffers->encTypesTable);
-                        if(tmpMsgBuffer != UA_NULL){
+                        if(tmpMsgBuffer != NULL){
                             status = SC_DecodeMsgBody(tmpMsgBuffer,
                                                       &msgBuffers->nsTable,
                                                       msgBuffers->encTypesTable,
@@ -2068,7 +2071,7 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                         }
                     }
 
-                    if(tmpMsgBuffer == UA_NULL){
+                    if(tmpMsgBuffer == NULL){
                         // In any case buffer deallocation guarantee
                         Buffer_Delete(buffer);
                     }else{

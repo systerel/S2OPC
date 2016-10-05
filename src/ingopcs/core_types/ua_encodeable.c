@@ -4,18 +4,22 @@
  *  Created on: Sep 15, 2016
  *      Author: vincent
  */
-#include <ua_builtintypes.h>
+
 #include <string.h>
+
+#include "ua_encodeable.h"
+
+#include <ua_builtintypes.h>
 
 UA_EncodeableType* EncodeableType_GetEncodeableType(UA_EncodeableType** encTypesTable,
                                                     const char*         namespace,
                                                     uint32_t            typeId){
-    UA_EncodeableType* current = UA_NULL;
-    UA_EncodeableType* result = UA_NULL;
+    UA_EncodeableType* current = NULL;
+    UA_EncodeableType* result = NULL;
     uint32_t idx = 0;
-    if(encTypesTable != UA_NULL){
+    if(encTypesTable != NULL){
         current = encTypesTable[idx];
-        while(current != UA_NULL && result == UA_NULL){
+        while(current != NULL && result == NULL){
             if(typeId == result->typeId || typeId == result->binaryTypeId){
                 // || typeId = result->xmlTypeId => should not be the case since we use UA binary !
                 //TODO: max namespace or string size ?
@@ -26,7 +30,7 @@ UA_EncodeableType* EncodeableType_GetEncodeableType(UA_EncodeableType** encTypes
                 idx++;
                 current = encTypesTable[idx];
             }else{
-                current = UA_NULL;
+                current = NULL;
             }
         }
     }

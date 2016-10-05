@@ -8,18 +8,18 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <buffer.h>
+#include "buffer.h"
 
 Buffer* Buffer_Create(uint32_t size)
 {
-    Buffer* buf = UA_NULL;
+    Buffer* buf = NULL;
     if(size > 0){
         buf = (Buffer*) malloc(sizeof(Buffer));
-        if(buf != UA_NULL){
+        if(buf != NULL){
             StatusCode status = Buffer_Init(buf, size);
             if(status != STATUS_OK){
                 Buffer_Delete(buf);
-                buf = UA_NULL;
+                buf = NULL;
             }
         }
     }
@@ -29,25 +29,25 @@ Buffer* Buffer_Create(uint32_t size)
 StatusCode Buffer_Init(Buffer* buffer, uint32_t size)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(buffer != UA_NULL && size > 0){
+    if(buffer != NULL && size > 0){
         status = STATUS_OK;
     }
     if(status == STATUS_OK){
         buffer->position = 0;
         buffer->length = 0;
         buffer->max_size = size;
-        buffer->data = (UA_Byte*) malloc(sizeof(UA_Byte)*size);
-        memset(buffer->data, 0, sizeof(UA_Byte)*size);
+        buffer->data = (uint8_t*) malloc(sizeof(uint8_t)*size);
+        memset(buffer->data, 0, sizeof(uint8_t)*size);
     }
     return status;
 }
 
-Buffer* Buffer_Set_Data(UA_Byte* data, uint32_t position, uint32_t length, uint32_t maxsize)
+Buffer* Buffer_Set_Data(uint8_t* data, uint32_t position, uint32_t length, uint32_t maxsize)
 {
-    Buffer* buf = UA_NULL;
-    if(data != UA_NULL && length > 0){
+    Buffer* buf = NULL;
+    if(data != NULL && length > 0){
         buf = (Buffer*) malloc(sizeof(Buffer));
-        if(buf != UA_NULL){
+        if(buf != NULL){
             buf->length = length;
             buf->data = data;
             buf->position = position;
@@ -59,8 +59,8 @@ Buffer* Buffer_Set_Data(UA_Byte* data, uint32_t position, uint32_t length, uint3
 
 void Buffer_Delete(Buffer* buffer)
 {
-    if(buffer != UA_NULL){
-        if(buffer->data != UA_NULL){
+    if(buffer != NULL){
+        if(buffer->data != NULL){
             free(buffer->data);
         }
         free(buffer);
@@ -94,8 +94,8 @@ StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
 StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_Byte* data = buffer->data;
-    if(buffer != UA_NULL && buffer->max_size >= length){
+    uint8_t* data = buffer->data;
+    if(buffer != NULL && buffer->max_size >= length){
         status = STATUS_OK;
         if(buffer->length > length){
             data = &(buffer->data[length]);
@@ -107,10 +107,10 @@ StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
     return status;
 }
 
-StatusCode Buffer_Write(Buffer* buffer, const UA_Byte* data_src, uint32_t count)
+StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count)
 {
     StatusCode status = STATUS_NOK;
-    if(data_src == UA_NULL || buffer == UA_NULL){
+    if(data_src == NULL || buffer == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         if(buffer->position + count > buffer->max_size){
@@ -133,7 +133,7 @@ StatusCode Buffer_Write(Buffer* buffer, const UA_Byte* data_src, uint32_t count)
     return status;
 }
 
-StatusCode Buffer_Read(UA_Byte* data_dest, Buffer* buffer, uint32_t count)
+StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count)
 {
     StatusCode status = STATUS_NOK;
     if(buffer->position + count > buffer->length){
@@ -152,7 +152,7 @@ StatusCode Buffer_Read(UA_Byte* data_dest, Buffer* buffer, uint32_t count)
 StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLength)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != UA_NULL && src != UA_NULL &&
+    if(dest != NULL && src != NULL &&
        src->length >= limitedLength &&
        src->length <= dest->max_size)
     {
@@ -174,7 +174,7 @@ StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLeng
 StatusCode Buffer_Copy(Buffer* dest, Buffer* src)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(src != UA_NULL)
+    if(src != NULL)
     {
         status = Buffer_CopyWithLength(dest, src, src->length);
     }

@@ -11,7 +11,6 @@
 #define INGOPCS_CRYPTO_PROFILES_H_
 
 
-#include "ua_builtintypes.h"  // StatusCode
 #include "crypto_types.h"
 
 

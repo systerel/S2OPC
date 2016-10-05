@@ -9,6 +9,7 @@
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
+#include <ua_builtintypes.h>
 #include <ua_secure_channel_client_connection.h>
 
 #include <wrappers.h>
@@ -26,7 +27,7 @@ Channel_CallbackData* Create_CallbackData(UA_Channel_PfnConnectionStateChanged* 
                                           void*                                 callbackData)
 {
     Channel_CallbackData* result = malloc(sizeof(Channel_CallbackData));
-    if(result != UA_NULL){
+    if(result != NULL){
         result->callback = callback;
         result->callbackData = callbackData;
     }
@@ -46,8 +47,8 @@ typedef struct {
 
 InvokeCallbackData* Create_InvokeCallbackData(){
     InvokeCallbackData* result = malloc(sizeof(InvokeCallbackData));
-    result->response = UA_NULL;
-    result->responseType = UA_NULL;
+    result->response = NULL;
+    result->responseType = NULL;
     result->status = STATUS_OK;
     return result;
 }
@@ -71,7 +72,7 @@ StatusCode Get_InvokeCallbackData(InvokeCallbackData* invCbData,
 }
 
 void Delete_InvokeCallbackData(InvokeCallbackData* invCbData){
-    if(invCbData != UA_NULL){
+    if(invCbData != NULL){
         free(invCbData);
     }
 }
@@ -80,9 +81,9 @@ void Delete_InvokeCallbackData(InvokeCallbackData* invCbData){
 StatusCode UA_Channel_Create(UA_Channel*               channel,
                              UA_Channel_SerializerType serialType){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(channel != UA_NULL && serialType == ChannelSerializer_Binary){
+    if(channel != NULL && serialType == ChannelSerializer_Binary){
         *channel = SC_Client_Create();
-        if(channel != UA_NULL){
+        if(channel != NULL){
             status = STATUS_OK;
         }else{
             status = STATUS_NOK;
@@ -93,11 +94,11 @@ StatusCode UA_Channel_Create(UA_Channel*               channel,
 
 StatusCode UA_Channel_Delete(UA_Channel* channel){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(channel != UA_NULL){
+    if(channel != NULL){
         // Ensure disconnect called for deallocation
         UA_Channel_Disconnect(*channel);
         SC_Client_Delete((SC_ClientConnection*) *channel);
-        *channel = UA_NULL;
+        *channel = NULL;
         status = STATUS_OK;
     }
     return status;
@@ -148,7 +149,7 @@ StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
             break;
         case ChannelEvent_Connected:
         case ChannelEvent_Disconnected:
-            if(callbackData != UA_NULL && callbackData->callback != UA_NULL)
+            if(callbackData != NULL && callbackData->callback != NULL)
             {
                 retStatus = callbackData->callback(channel,
                                                    callbackData->callback,
@@ -175,16 +176,16 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
-    Channel_CallbackData* internalCbData = UA_NULL;
+    Channel_CallbackData* internalCbData = NULL;
     (void) networkTimeout;
 
-    if(cConnection != UA_NULL && cConnection->instance != UA_NULL &&
-       url != UA_NULL &&
-       clientCertificate != UA_NULL && clientPrivateKey != UA_NULL &&
-       serverCertificate != UA_NULL && pkiConfig != UA_NULL &&
-       reqSecuPolicyUri != UA_NULL &&
+    if(cConnection != NULL && cConnection->instance != NULL &&
+       url != NULL &&
+       clientCertificate != NULL && clientPrivateKey != NULL &&
+       serverCertificate != NULL && pkiConfig != NULL &&
+       reqSecuPolicyUri != NULL &&
        msgSecurityMode != UA_MessageSecurityMode_Invalid &&
-       cb != UA_NULL)
+       cb != NULL)
     {
         if(cConnection->instance->state != SC_Connection_Disconnected){
             status = STATUS_INVALID_STATE;
@@ -194,7 +195,7 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
                                          UA_KnownEncodeableTypes);
             if(status == STATUS_OK){
                 internalCbData = Create_CallbackData(cb, cbData);
-                if(internalCbData == UA_NULL){
+                if(internalCbData == NULL){
                     status = STATUS_NOK;
                 }
             }
@@ -226,11 +227,11 @@ StatusCode UA_Channel_BeginInvokeService(UA_Channel                     channel,
     uint32_t timeout = 0;
     (void) debugName;
 
-    if(cConnection != UA_NULL &&
-       request != UA_NULL && requestType != UA_NULL &&
-       cb != UA_NULL)
+    if(cConnection != NULL &&
+       request != NULL && requestType != NULL &&
+       cb != NULL)
     {
-        if(responseType == UA_NULL){
+        if(responseType == NULL){
             // TODO: warning on efficiency ?
         }
 
@@ -255,7 +256,7 @@ StatusCode InvokeRequestCompleteCallback(UA_Channel         channel,
     StatusCode retStatus = STATUS_INVALID_PARAMETERS;
     (void) channel;
     InvokeCallbackData* invCbData = (InvokeCallbackData*) cbData;
-    if(invCbData != UA_NULL){
+    if(invCbData != NULL){
         retStatus = STATUS_OK;
         Set_InvokeCallbackData(invCbData,
                                response, responseType,
@@ -279,10 +280,10 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
     uint32_t timeout = 0;
     InvokeCallbackData* invCallbackData = Create_InvokeCallbackData();
 
-    if(cConnection != UA_NULL &&
-       request != UA_NULL && requestType != UA_NULL &&
-       response != UA_NULL && responseType != UA_NULL){
-        if(invCallbackData != UA_NULL){
+    if(cConnection != NULL &&
+       request != NULL && requestType != NULL &&
+       response != NULL && responseType != NULL){
+        if(invCallbackData != NULL){
             // There is always a request header as first struct field in a request (safe cast)
             timeout = ((UA_RequestHeader*)request)->TimeoutHint;
             status = UA_Channel_BeginInvokeService(channel,
@@ -308,14 +309,14 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
 #else
         // TODO: will retrieve any message: is it a problem ?
         // Retrieve received messages on socket
-        status = UA_SocketManager_Loop (UA_NULL, // global socket manager
+        status = UA_SocketManager_Loop (NULL, // global socket manager
                                         sleepTimeout,
                                         1);
 #endif //UA_MULTITHREADED
         status = Get_InvokeCallbackData(invCallbackData,
                                         response,
                                         responseType);
-        if(*response != UA_NULL){
+        if(*response != NULL){
             receivedEvent = 1; // True
         }
     }
@@ -329,7 +330,7 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
 
 StatusCode UA_Channel_Disconnect(UA_Channel channel){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(channel != UA_NULL){
+    if(channel != NULL){
         status = STATUS_NOK;
         //status = SC_Client_Disconnect((SC_ClientConnection*) channel);
     }

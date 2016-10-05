@@ -8,7 +8,7 @@
 #ifndef INGOPCS_TCP_UA_LISTENER_H_
 #define INGOPCS_TCP_UA_LISTENER_H_
 
-#include <wrappers.h>
+#include <ua_tcp_ua_connection.h>
 
 typedef struct {
     UA_String                url;

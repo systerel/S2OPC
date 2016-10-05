@@ -28,6 +28,7 @@
  * ======================================================================*/
 
 #include <stdlib.h>
+#include <stddef.h>
 
 /* core */
 #include <opcua_platformdefs.h>
@@ -58,19 +59,19 @@ StatusCode UA_ClientApi_FindServers(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_FindServersRequest cRequest;
-    UA_FindServersResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_FindServersResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_FindServersRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pEndpointUrl != UA_NULL
-       &&  (a_pLocaleIds != UA_NULL || a_nNoOfLocaleIds <= 0)
-       &&  (a_pServerUris != UA_NULL || a_nNoOfServerUris <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfServers != UA_NULL
-       &&  a_pServers != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pEndpointUrl != NULL
+       &&  (a_pLocaleIds != NULL || a_nNoOfLocaleIds <= 0)
+       &&  (a_pServerUris != NULL || a_nNoOfServerUris <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfServers != NULL
+       &&  a_pServers != NULL)
         status = STATUS_OK;
 
 
@@ -144,10 +145,10 @@ StatusCode UA_ClientApi_BeginFindServers(
     UA_FindServersRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pEndpointUrl != UA_NULL
-       &&  (a_pLocaleIds != UA_NULL || a_nNoOfLocaleIds <= 0)
-       &&  (a_pServerUris != UA_NULL || a_nNoOfServerUris <= 0))
+    if( a_pRequestHeader != NULL
+       &&  a_pEndpointUrl != NULL
+       &&  (a_pLocaleIds != NULL || a_nNoOfLocaleIds <= 0)
+       &&  (a_pServerUris != NULL || a_nNoOfServerUris <= 0))
         status = STATUS_OK;
 
 
@@ -193,18 +194,18 @@ StatusCode UA_ClientApi_FindServersOnNetwork(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_FindServersOnNetworkRequest cRequest;
-    UA_FindServersOnNetworkResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_FindServersOnNetworkResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_FindServersOnNetworkRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pServerCapabilityFilter != UA_NULL || a_nNoOfServerCapabilityFilter <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pLastCounterResetTime != UA_NULL
-       &&  a_pNoOfServers != UA_NULL
-       &&  a_pServers != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pServerCapabilityFilter != NULL || a_nNoOfServerCapabilityFilter <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pLastCounterResetTime != NULL
+       &&  a_pNoOfServers != NULL
+       &&  a_pServers != NULL)
         status = STATUS_OK;
 
 
@@ -277,8 +278,8 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
     UA_FindServersOnNetworkRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pServerCapabilityFilter != UA_NULL || a_nNoOfServerCapabilityFilter <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pServerCapabilityFilter != NULL || a_nNoOfServerCapabilityFilter <= 0))
         status = STATUS_OK;
 
 
@@ -323,19 +324,19 @@ StatusCode UA_ClientApi_GetEndpoints(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_GetEndpointsRequest cRequest;
-    UA_GetEndpointsResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_GetEndpointsResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_GetEndpointsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pEndpointUrl != UA_NULL
-       &&  (a_pLocaleIds != UA_NULL || a_nNoOfLocaleIds <= 0)
-       &&  (a_pProfileUris != UA_NULL || a_nNoOfProfileUris <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfEndpoints != UA_NULL
-       &&  a_pEndpoints != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pEndpointUrl != NULL
+       &&  (a_pLocaleIds != NULL || a_nNoOfLocaleIds <= 0)
+       &&  (a_pProfileUris != NULL || a_nNoOfProfileUris <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfEndpoints != NULL
+       &&  a_pEndpoints != NULL)
         status = STATUS_OK;
 
 
@@ -409,10 +410,10 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
     UA_GetEndpointsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pEndpointUrl != UA_NULL
-       &&  (a_pLocaleIds != UA_NULL || a_nNoOfLocaleIds <= 0)
-       &&  (a_pProfileUris != UA_NULL || a_nNoOfProfileUris <= 0))
+    if( a_pRequestHeader != NULL
+       &&  a_pEndpointUrl != NULL
+       &&  (a_pLocaleIds != NULL || a_nNoOfLocaleIds <= 0)
+       &&  (a_pProfileUris != NULL || a_nNoOfProfileUris <= 0))
         status = STATUS_OK;
 
 
@@ -452,15 +453,15 @@ StatusCode UA_ClientApi_RegisterServer(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_RegisterServerRequest cRequest;
-    UA_RegisterServerResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_RegisterServerResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_RegisterServerRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pServer != UA_NULL
-       &&  a_pResponseHeader != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pServer != NULL
+       &&  a_pResponseHeader != NULL)
         status = STATUS_OK;
 
 
@@ -524,8 +525,8 @@ StatusCode UA_ClientApi_BeginRegisterServer(
     UA_RegisterServerRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pServer != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pServer != NULL)
         status = STATUS_OK;
 
 
@@ -567,20 +568,20 @@ StatusCode UA_ClientApi_RegisterServer2(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_RegisterServer2Request cRequest;
-    UA_RegisterServer2Response* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_RegisterServer2Response* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_RegisterServer2Request_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pServer != UA_NULL
-       &&  (a_pDiscoveryConfiguration != UA_NULL || a_nNoOfDiscoveryConfiguration <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfConfigurationResults != UA_NULL
-       &&  a_pConfigurationResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pServer != NULL
+       &&  (a_pDiscoveryConfiguration != NULL || a_nNoOfDiscoveryConfiguration <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfConfigurationResults != NULL
+       &&  a_pConfigurationResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -652,9 +653,9 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
     UA_RegisterServer2Request_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pServer != UA_NULL
-       &&  (a_pDiscoveryConfiguration != UA_NULL || a_nNoOfDiscoveryConfiguration <= 0))
+    if( a_pRequestHeader != NULL
+       &&  a_pServer != NULL
+       &&  (a_pDiscoveryConfiguration != NULL || a_nNoOfDiscoveryConfiguration <= 0))
         status = STATUS_OK;
 
 
@@ -710,31 +711,31 @@ StatusCode UA_ClientApi_CreateSession(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CreateSessionRequest cRequest;
-    UA_CreateSessionResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_CreateSessionResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_CreateSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pClientDescription != UA_NULL
-       &&  a_pServerUri != UA_NULL
-       &&  a_pEndpointUrl != UA_NULL
-       &&  a_pSessionName != UA_NULL
-       &&  a_pClientNonce != UA_NULL
-       &&  a_pClientCertificate != UA_NULL
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pSessionId != UA_NULL
-       &&  a_pAuthenticationToken != UA_NULL
-       &&  a_pRevisedSessionTimeout != UA_NULL
-       &&  a_pServerNonce != UA_NULL
-       &&  a_pServerCertificate != UA_NULL
-       &&  a_pNoOfServerEndpoints != UA_NULL
-       &&  a_pServerEndpoints != UA_NULL
-       &&  a_pNoOfServerSoftwareCertificates != UA_NULL
-       &&  a_pServerSoftwareCertificates != UA_NULL
-       &&  a_pServerSignature != UA_NULL
-       &&  a_pMaxRequestMessageSize != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pClientDescription != NULL
+       &&  a_pServerUri != NULL
+       &&  a_pEndpointUrl != NULL
+       &&  a_pSessionName != NULL
+       &&  a_pClientNonce != NULL
+       &&  a_pClientCertificate != NULL
+       &&  a_pResponseHeader != NULL
+       &&  a_pSessionId != NULL
+       &&  a_pAuthenticationToken != NULL
+       &&  a_pRevisedSessionTimeout != NULL
+       &&  a_pServerNonce != NULL
+       &&  a_pServerCertificate != NULL
+       &&  a_pNoOfServerEndpoints != NULL
+       &&  a_pServerEndpoints != NULL
+       &&  a_pNoOfServerSoftwareCertificates != NULL
+       &&  a_pServerSoftwareCertificates != NULL
+       &&  a_pServerSignature != NULL
+       &&  a_pMaxRequestMessageSize != NULL)
         status = STATUS_OK;
 
 
@@ -823,13 +824,13 @@ StatusCode UA_ClientApi_BeginCreateSession(
     UA_CreateSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pClientDescription != UA_NULL
-       &&  a_pServerUri != UA_NULL
-       &&  a_pEndpointUrl != UA_NULL
-       &&  a_pSessionName != UA_NULL
-       &&  a_pClientNonce != UA_NULL
-       &&  a_pClientCertificate != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pClientDescription != NULL
+       &&  a_pServerUri != NULL
+       &&  a_pEndpointUrl != NULL
+       &&  a_pSessionName != NULL
+       &&  a_pClientNonce != NULL
+       &&  a_pClientCertificate != NULL)
         status = STATUS_OK;
 
 
@@ -883,24 +884,24 @@ StatusCode UA_ClientApi_ActivateSession(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ActivateSessionRequest cRequest;
-    UA_ActivateSessionResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_ActivateSessionResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_ActivateSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pClientSignature != UA_NULL
-       &&  (a_pClientSoftwareCertificates != UA_NULL || a_nNoOfClientSoftwareCertificates <= 0)
-       &&  (a_pLocaleIds != UA_NULL || a_nNoOfLocaleIds <= 0)
-       &&  a_pUserIdentityToken != UA_NULL
-       &&  a_pUserTokenSignature != UA_NULL
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pServerNonce != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pClientSignature != NULL
+       &&  (a_pClientSoftwareCertificates != NULL || a_nNoOfClientSoftwareCertificates <= 0)
+       &&  (a_pLocaleIds != NULL || a_nNoOfLocaleIds <= 0)
+       &&  a_pUserIdentityToken != NULL
+       &&  a_pUserTokenSignature != NULL
+       &&  a_pResponseHeader != NULL
+       &&  a_pServerNonce != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -981,12 +982,12 @@ StatusCode UA_ClientApi_BeginActivateSession(
     UA_ActivateSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pClientSignature != UA_NULL
-       &&  (a_pClientSoftwareCertificates != UA_NULL || a_nNoOfClientSoftwareCertificates <= 0)
-       &&  (a_pLocaleIds != UA_NULL || a_nNoOfLocaleIds <= 0)
-       &&  a_pUserIdentityToken != UA_NULL
-       &&  a_pUserTokenSignature != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pClientSignature != NULL
+       &&  (a_pClientSoftwareCertificates != NULL || a_nNoOfClientSoftwareCertificates <= 0)
+       &&  (a_pLocaleIds != NULL || a_nNoOfLocaleIds <= 0)
+       &&  a_pUserIdentityToken != NULL
+       &&  a_pUserTokenSignature != NULL)
         status = STATUS_OK;
 
 
@@ -1028,14 +1029,14 @@ StatusCode UA_ClientApi_CloseSession(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CloseSessionRequest cRequest;
-    UA_CloseSessionResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_CloseSessionResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_CloseSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pResponseHeader != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pResponseHeader != NULL)
         status = STATUS_OK;
 
 
@@ -1099,7 +1100,7 @@ StatusCode UA_ClientApi_BeginCloseSession(
     UA_CloseSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL)
+    if( a_pRequestHeader != NULL)
         status = STATUS_OK;
 
 
@@ -1136,15 +1137,15 @@ StatusCode UA_ClientApi_Cancel(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CancelRequest cRequest;
-    UA_CancelResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_CancelResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_CancelRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pCancelCount != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pResponseHeader != NULL
+       &&  a_pCancelCount != NULL)
         status = STATUS_OK;
 
 
@@ -1209,7 +1210,7 @@ StatusCode UA_ClientApi_BeginCancel(
     UA_CancelRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL)
+    if( a_pRequestHeader != NULL)
         status = STATUS_OK;
 
 
@@ -1250,19 +1251,19 @@ StatusCode UA_ClientApi_AddNodes(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_AddNodesRequest cRequest;
-    UA_AddNodesResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_AddNodesResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_AddNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToAdd != UA_NULL || a_nNoOfNodesToAdd <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToAdd != NULL || a_nNoOfNodesToAdd <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -1332,8 +1333,8 @@ StatusCode UA_ClientApi_BeginAddNodes(
     UA_AddNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToAdd != UA_NULL || a_nNoOfNodesToAdd <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToAdd != NULL || a_nNoOfNodesToAdd <= 0))
         status = STATUS_OK;
 
 
@@ -1375,19 +1376,19 @@ StatusCode UA_ClientApi_AddReferences(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_AddReferencesRequest cRequest;
-    UA_AddReferencesResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_AddReferencesResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_AddReferencesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pReferencesToAdd != UA_NULL || a_nNoOfReferencesToAdd <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pReferencesToAdd != NULL || a_nNoOfReferencesToAdd <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -1457,8 +1458,8 @@ StatusCode UA_ClientApi_BeginAddReferences(
     UA_AddReferencesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pReferencesToAdd != UA_NULL || a_nNoOfReferencesToAdd <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pReferencesToAdd != NULL || a_nNoOfReferencesToAdd <= 0))
         status = STATUS_OK;
 
 
@@ -1500,19 +1501,19 @@ StatusCode UA_ClientApi_DeleteNodes(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_DeleteNodesRequest cRequest;
-    UA_DeleteNodesResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_DeleteNodesResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_DeleteNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToDelete != UA_NULL || a_nNoOfNodesToDelete <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToDelete != NULL || a_nNoOfNodesToDelete <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -1582,8 +1583,8 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
     UA_DeleteNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToDelete != UA_NULL || a_nNoOfNodesToDelete <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToDelete != NULL || a_nNoOfNodesToDelete <= 0))
         status = STATUS_OK;
 
 
@@ -1625,19 +1626,19 @@ StatusCode UA_ClientApi_DeleteReferences(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_DeleteReferencesRequest cRequest;
-    UA_DeleteReferencesResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_DeleteReferencesResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_DeleteReferencesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pReferencesToDelete != UA_NULL || a_nNoOfReferencesToDelete <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pReferencesToDelete != NULL || a_nNoOfReferencesToDelete <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -1707,8 +1708,8 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
     UA_DeleteReferencesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pReferencesToDelete != UA_NULL || a_nNoOfReferencesToDelete <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pReferencesToDelete != NULL || a_nNoOfReferencesToDelete <= 0))
         status = STATUS_OK;
 
 
@@ -1752,20 +1753,20 @@ StatusCode UA_ClientApi_Browse(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_BrowseRequest cRequest;
-    UA_BrowseResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_BrowseResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_BrowseRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pView != UA_NULL
-       &&  (a_pNodesToBrowse != UA_NULL || a_nNoOfNodesToBrowse <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pView != NULL
+       &&  (a_pNodesToBrowse != NULL || a_nNoOfNodesToBrowse <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -1839,9 +1840,9 @@ StatusCode UA_ClientApi_BeginBrowse(
     UA_BrowseRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pView != UA_NULL
-       &&  (a_pNodesToBrowse != UA_NULL || a_nNoOfNodesToBrowse <= 0))
+    if( a_pRequestHeader != NULL
+       &&  a_pView != NULL
+       &&  (a_pNodesToBrowse != NULL || a_nNoOfNodesToBrowse <= 0))
         status = STATUS_OK;
 
 
@@ -1886,19 +1887,19 @@ StatusCode UA_ClientApi_BrowseNext(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_BrowseNextRequest cRequest;
-    UA_BrowseNextResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_BrowseNextResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_BrowseNextRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pContinuationPoints != UA_NULL || a_nNoOfContinuationPoints <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pContinuationPoints != NULL || a_nNoOfContinuationPoints <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -1970,8 +1971,8 @@ StatusCode UA_ClientApi_BeginBrowseNext(
     UA_BrowseNextRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pContinuationPoints != UA_NULL || a_nNoOfContinuationPoints <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pContinuationPoints != NULL || a_nNoOfContinuationPoints <= 0))
         status = STATUS_OK;
 
 
@@ -2014,19 +2015,19 @@ StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_TranslateBrowsePathsToNodeIdsRequest cRequest;
-    UA_TranslateBrowsePathsToNodeIdsResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_TranslateBrowsePathsToNodeIdsResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_TranslateBrowsePathsToNodeIdsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pBrowsePaths != UA_NULL || a_nNoOfBrowsePaths <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pBrowsePaths != NULL || a_nNoOfBrowsePaths <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -2096,8 +2097,8 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
     UA_TranslateBrowsePathsToNodeIdsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pBrowsePaths != UA_NULL || a_nNoOfBrowsePaths <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pBrowsePaths != NULL || a_nNoOfBrowsePaths <= 0))
         status = STATUS_OK;
 
 
@@ -2137,17 +2138,17 @@ StatusCode UA_ClientApi_RegisterNodes(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_RegisterNodesRequest cRequest;
-    UA_RegisterNodesResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_RegisterNodesResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_RegisterNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToRegister != UA_NULL || a_nNoOfNodesToRegister <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfRegisteredNodeIds != UA_NULL
-       &&  a_pRegisteredNodeIds != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToRegister != NULL || a_nNoOfNodesToRegister <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfRegisteredNodeIds != NULL
+       &&  a_pRegisteredNodeIds != NULL)
         status = STATUS_OK;
 
 
@@ -2215,8 +2216,8 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
     UA_RegisterNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToRegister != UA_NULL || a_nNoOfNodesToRegister <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToRegister != NULL || a_nNoOfNodesToRegister <= 0))
         status = STATUS_OK;
 
 
@@ -2254,15 +2255,15 @@ StatusCode UA_ClientApi_UnregisterNodes(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_UnregisterNodesRequest cRequest;
-    UA_UnregisterNodesResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_UnregisterNodesResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_UnregisterNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToUnregister != UA_NULL || a_nNoOfNodesToUnregister <= 0)
-       &&  a_pResponseHeader != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToUnregister != NULL || a_nNoOfNodesToUnregister <= 0)
+       &&  a_pResponseHeader != NULL)
         status = STATUS_OK;
 
 
@@ -2328,8 +2329,8 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
     UA_UnregisterNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToUnregister != UA_NULL || a_nNoOfNodesToUnregister <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToUnregister != NULL || a_nNoOfNodesToUnregister <= 0))
         status = STATUS_OK;
 
 
@@ -2379,25 +2380,25 @@ StatusCode UA_ClientApi_QueryFirst(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_QueryFirstRequest cRequest;
-    UA_QueryFirstResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_QueryFirstResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_QueryFirstRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pView != UA_NULL
-       &&  (a_pNodeTypes != UA_NULL || a_nNoOfNodeTypes <= 0)
-       &&  a_pFilter != UA_NULL
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfQueryDataSets != UA_NULL
-       &&  a_pQueryDataSets != UA_NULL
-       &&  a_pContinuationPoint != UA_NULL
-       &&  a_pNoOfParsingResults != UA_NULL
-       &&  a_pParsingResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL
-       &&  a_pFilterResult != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pView != NULL
+       &&  (a_pNodeTypes != NULL || a_nNoOfNodeTypes <= 0)
+       &&  a_pFilter != NULL
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfQueryDataSets != NULL
+       &&  a_pQueryDataSets != NULL
+       &&  a_pContinuationPoint != NULL
+       &&  a_pNoOfParsingResults != NULL
+       &&  a_pParsingResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL
+       &&  a_pFilterResult != NULL)
         status = STATUS_OK;
 
 
@@ -2479,10 +2480,10 @@ StatusCode UA_ClientApi_BeginQueryFirst(
     UA_QueryFirstRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pView != UA_NULL
-       &&  (a_pNodeTypes != UA_NULL || a_nNoOfNodeTypes <= 0)
-       &&  a_pFilter != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pView != NULL
+       &&  (a_pNodeTypes != NULL || a_nNoOfNodeTypes <= 0)
+       &&  a_pFilter != NULL)
         status = STATUS_OK;
 
 
@@ -2527,18 +2528,18 @@ StatusCode UA_ClientApi_QueryNext(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_QueryNextRequest cRequest;
-    UA_QueryNextResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_QueryNextResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_QueryNextRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pContinuationPoint != UA_NULL
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfQueryDataSets != UA_NULL
-       &&  a_pQueryDataSets != UA_NULL
-       &&  a_pRevisedContinuationPoint != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pContinuationPoint != NULL
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfQueryDataSets != NULL
+       &&  a_pQueryDataSets != NULL
+       &&  a_pRevisedContinuationPoint != NULL)
         status = STATUS_OK;
 
 
@@ -2607,8 +2608,8 @@ StatusCode UA_ClientApi_BeginQueryNext(
     UA_QueryNextRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pContinuationPoint != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pContinuationPoint != NULL)
         status = STATUS_OK;
 
 
@@ -2652,19 +2653,19 @@ StatusCode UA_ClientApi_Read(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ReadRequest cRequest;
-    UA_ReadResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_ReadResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_ReadRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToRead != UA_NULL || a_nNoOfNodesToRead <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToRead != NULL || a_nNoOfNodesToRead <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -2738,8 +2739,8 @@ StatusCode UA_ClientApi_BeginRead(
     UA_ReadRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToRead != UA_NULL || a_nNoOfNodesToRead <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToRead != NULL || a_nNoOfNodesToRead <= 0))
         status = STATUS_OK;
 
 
@@ -2786,20 +2787,20 @@ StatusCode UA_ClientApi_HistoryRead(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_HistoryReadRequest cRequest;
-    UA_HistoryReadResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_HistoryReadResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_HistoryReadRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pHistoryReadDetails != UA_NULL
-       &&  (a_pNodesToRead != UA_NULL || a_nNoOfNodesToRead <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pHistoryReadDetails != NULL
+       &&  (a_pNodesToRead != NULL || a_nNoOfNodesToRead <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -2875,9 +2876,9 @@ StatusCode UA_ClientApi_BeginHistoryRead(
     UA_HistoryReadRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pHistoryReadDetails != UA_NULL
-       &&  (a_pNodesToRead != UA_NULL || a_nNoOfNodesToRead <= 0))
+    if( a_pRequestHeader != NULL
+       &&  a_pHistoryReadDetails != NULL
+       &&  (a_pNodesToRead != NULL || a_nNoOfNodesToRead <= 0))
         status = STATUS_OK;
 
 
@@ -2922,19 +2923,19 @@ StatusCode UA_ClientApi_Write(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_WriteRequest cRequest;
-    UA_WriteResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_WriteResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_WriteRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToWrite != UA_NULL || a_nNoOfNodesToWrite <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToWrite != NULL || a_nNoOfNodesToWrite <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -3004,8 +3005,8 @@ StatusCode UA_ClientApi_BeginWrite(
     UA_WriteRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pNodesToWrite != UA_NULL || a_nNoOfNodesToWrite <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pNodesToWrite != NULL || a_nNoOfNodesToWrite <= 0))
         status = STATUS_OK;
 
 
@@ -3047,19 +3048,19 @@ StatusCode UA_ClientApi_HistoryUpdate(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_HistoryUpdateRequest cRequest;
-    UA_HistoryUpdateResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_HistoryUpdateResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_HistoryUpdateRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pHistoryUpdateDetails != UA_NULL || a_nNoOfHistoryUpdateDetails <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pHistoryUpdateDetails != NULL || a_nNoOfHistoryUpdateDetails <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -3129,8 +3130,8 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
     UA_HistoryUpdateRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pHistoryUpdateDetails != UA_NULL || a_nNoOfHistoryUpdateDetails <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pHistoryUpdateDetails != NULL || a_nNoOfHistoryUpdateDetails <= 0))
         status = STATUS_OK;
 
 
@@ -3172,19 +3173,19 @@ StatusCode UA_ClientApi_Call(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CallRequest cRequest;
-    UA_CallResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_CallResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_CallRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pMethodsToCall != UA_NULL || a_nNoOfMethodsToCall <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pMethodsToCall != NULL || a_nNoOfMethodsToCall <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -3254,8 +3255,8 @@ StatusCode UA_ClientApi_BeginCall(
     UA_CallRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pMethodsToCall != UA_NULL || a_nNoOfMethodsToCall <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pMethodsToCall != NULL || a_nNoOfMethodsToCall <= 0))
         status = STATUS_OK;
 
 
@@ -3299,19 +3300,19 @@ StatusCode UA_ClientApi_CreateMonitoredItems(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CreateMonitoredItemsRequest cRequest;
-    UA_CreateMonitoredItemsResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_CreateMonitoredItemsResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_CreateMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pItemsToCreate != UA_NULL || a_nNoOfItemsToCreate <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pItemsToCreate != NULL || a_nNoOfItemsToCreate <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -3385,8 +3386,8 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
     UA_CreateMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pItemsToCreate != UA_NULL || a_nNoOfItemsToCreate <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pItemsToCreate != NULL || a_nNoOfItemsToCreate <= 0))
         status = STATUS_OK;
 
 
@@ -3432,19 +3433,19 @@ StatusCode UA_ClientApi_ModifyMonitoredItems(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ModifyMonitoredItemsRequest cRequest;
-    UA_ModifyMonitoredItemsResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_ModifyMonitoredItemsResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_ModifyMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pItemsToModify != UA_NULL || a_nNoOfItemsToModify <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pItemsToModify != NULL || a_nNoOfItemsToModify <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -3518,8 +3519,8 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
     UA_ModifyMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pItemsToModify != UA_NULL || a_nNoOfItemsToModify <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pItemsToModify != NULL || a_nNoOfItemsToModify <= 0))
         status = STATUS_OK;
 
 
@@ -3565,19 +3566,19 @@ StatusCode UA_ClientApi_SetMonitoringMode(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_SetMonitoringModeRequest cRequest;
-    UA_SetMonitoringModeResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_SetMonitoringModeResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_SetMonitoringModeRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pMonitoredItemIds != UA_NULL || a_nNoOfMonitoredItemIds <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pMonitoredItemIds != NULL || a_nNoOfMonitoredItemIds <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -3651,8 +3652,8 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
     UA_SetMonitoringModeRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pMonitoredItemIds != UA_NULL || a_nNoOfMonitoredItemIds <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pMonitoredItemIds != NULL || a_nNoOfMonitoredItemIds <= 0))
         status = STATUS_OK;
 
 
@@ -3704,24 +3705,24 @@ StatusCode UA_ClientApi_SetTriggering(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_SetTriggeringRequest cRequest;
-    UA_SetTriggeringResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_SetTriggeringResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_SetTriggeringRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pLinksToAdd != UA_NULL || a_nNoOfLinksToAdd <= 0)
-       &&  (a_pLinksToRemove != UA_NULL || a_nNoOfLinksToRemove <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfAddResults != UA_NULL
-       &&  a_pAddResults != UA_NULL
-       &&  a_pNoOfAddDiagnosticInfos != UA_NULL
-       &&  a_pAddDiagnosticInfos != UA_NULL
-       &&  a_pNoOfRemoveResults != UA_NULL
-       &&  a_pRemoveResults != UA_NULL
-       &&  a_pNoOfRemoveDiagnosticInfos != UA_NULL
-       &&  a_pRemoveDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pLinksToAdd != NULL || a_nNoOfLinksToAdd <= 0)
+       &&  (a_pLinksToRemove != NULL || a_nNoOfLinksToRemove <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfAddResults != NULL
+       &&  a_pAddResults != NULL
+       &&  a_pNoOfAddDiagnosticInfos != NULL
+       &&  a_pAddDiagnosticInfos != NULL
+       &&  a_pNoOfRemoveResults != NULL
+       &&  a_pRemoveResults != NULL
+       &&  a_pNoOfRemoveDiagnosticInfos != NULL
+       &&  a_pRemoveDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -3803,9 +3804,9 @@ StatusCode UA_ClientApi_BeginSetTriggering(
     UA_SetTriggeringRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pLinksToAdd != UA_NULL || a_nNoOfLinksToAdd <= 0)
-       &&  (a_pLinksToRemove != UA_NULL || a_nNoOfLinksToRemove <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pLinksToAdd != NULL || a_nNoOfLinksToAdd <= 0)
+       &&  (a_pLinksToRemove != NULL || a_nNoOfLinksToRemove <= 0))
         status = STATUS_OK;
 
 
@@ -3852,19 +3853,19 @@ StatusCode UA_ClientApi_DeleteMonitoredItems(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_DeleteMonitoredItemsRequest cRequest;
-    UA_DeleteMonitoredItemsResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_DeleteMonitoredItemsResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_DeleteMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pMonitoredItemIds != UA_NULL || a_nNoOfMonitoredItemIds <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pMonitoredItemIds != NULL || a_nNoOfMonitoredItemIds <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -3936,8 +3937,8 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
     UA_DeleteMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pMonitoredItemIds != UA_NULL || a_nNoOfMonitoredItemIds <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pMonitoredItemIds != NULL || a_nNoOfMonitoredItemIds <= 0))
         status = STATUS_OK;
 
 
@@ -3984,18 +3985,18 @@ StatusCode UA_ClientApi_CreateSubscription(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_CreateSubscriptionRequest cRequest;
-    UA_CreateSubscriptionResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_CreateSubscriptionResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_CreateSubscriptionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pSubscriptionId != UA_NULL
-       &&  a_pRevisedPublishingInterval != UA_NULL
-       &&  a_pRevisedLifetimeCount != UA_NULL
-       &&  a_pRevisedMaxKeepAliveCount != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pResponseHeader != NULL
+       &&  a_pSubscriptionId != NULL
+       &&  a_pRevisedPublishingInterval != NULL
+       &&  a_pRevisedLifetimeCount != NULL
+       &&  a_pRevisedMaxKeepAliveCount != NULL)
         status = STATUS_OK;
 
 
@@ -4073,7 +4074,7 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
     UA_CreateSubscriptionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL)
+    if( a_pRequestHeader != NULL)
         status = STATUS_OK;
 
 
@@ -4122,17 +4123,17 @@ StatusCode UA_ClientApi_ModifySubscription(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ModifySubscriptionRequest cRequest;
-    UA_ModifySubscriptionResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_ModifySubscriptionResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_ModifySubscriptionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pRevisedPublishingInterval != UA_NULL
-       &&  a_pRevisedLifetimeCount != UA_NULL
-       &&  a_pRevisedMaxKeepAliveCount != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pResponseHeader != NULL
+       &&  a_pRevisedPublishingInterval != NULL
+       &&  a_pRevisedLifetimeCount != NULL
+       &&  a_pRevisedMaxKeepAliveCount != NULL)
         status = STATUS_OK;
 
 
@@ -4209,7 +4210,7 @@ StatusCode UA_ClientApi_BeginModifySubscription(
     UA_ModifySubscriptionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL)
+    if( a_pRequestHeader != NULL)
         status = STATUS_OK;
 
 
@@ -4256,19 +4257,19 @@ StatusCode UA_ClientApi_SetPublishingMode(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_SetPublishingModeRequest cRequest;
-    UA_SetPublishingModeResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_SetPublishingModeResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_SetPublishingModeRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pSubscriptionIds != UA_NULL || a_nNoOfSubscriptionIds <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pSubscriptionIds != NULL || a_nNoOfSubscriptionIds <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -4340,8 +4341,8 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
     UA_SetPublishingModeRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pSubscriptionIds != UA_NULL || a_nNoOfSubscriptionIds <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pSubscriptionIds != NULL || a_nNoOfSubscriptionIds <= 0))
         status = STATUS_OK;
 
 
@@ -4389,24 +4390,24 @@ StatusCode UA_ClientApi_Publish(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_PublishRequest cRequest;
-    UA_PublishResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_PublishResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_PublishRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pSubscriptionAcknowledgements != UA_NULL || a_nNoOfSubscriptionAcknowledgements <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pSubscriptionId != UA_NULL
-       &&  a_pNoOfAvailableSequenceNumbers != UA_NULL
-       &&  a_pAvailableSequenceNumbers != UA_NULL
-       &&  a_pMoreNotifications != UA_NULL
-       &&  a_pNotificationMessage != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pSubscriptionAcknowledgements != NULL || a_nNoOfSubscriptionAcknowledgements <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pSubscriptionId != NULL
+       &&  a_pNoOfAvailableSequenceNumbers != NULL
+       &&  a_pAvailableSequenceNumbers != NULL
+       &&  a_pMoreNotifications != NULL
+       &&  a_pNotificationMessage != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -4481,8 +4482,8 @@ StatusCode UA_ClientApi_BeginPublish(
     UA_PublishRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pSubscriptionAcknowledgements != UA_NULL || a_nNoOfSubscriptionAcknowledgements <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pSubscriptionAcknowledgements != NULL || a_nNoOfSubscriptionAcknowledgements <= 0))
         status = STATUS_OK;
 
 
@@ -4521,15 +4522,15 @@ StatusCode UA_ClientApi_Republish(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_RepublishRequest cRequest;
-    UA_RepublishResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_RepublishResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_RepublishRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNotificationMessage != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  a_pResponseHeader != NULL
+       &&  a_pNotificationMessage != NULL)
         status = STATUS_OK;
 
 
@@ -4596,7 +4597,7 @@ StatusCode UA_ClientApi_BeginRepublish(
     UA_RepublishRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL)
+    if( a_pRequestHeader != NULL)
         status = STATUS_OK;
 
 
@@ -4639,19 +4640,19 @@ StatusCode UA_ClientApi_TransferSubscriptions(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_TransferSubscriptionsRequest cRequest;
-    UA_TransferSubscriptionsResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_TransferSubscriptionsResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_TransferSubscriptionsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pSubscriptionIds != UA_NULL || a_nNoOfSubscriptionIds <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pSubscriptionIds != NULL || a_nNoOfSubscriptionIds <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -4723,8 +4724,8 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
     UA_TransferSubscriptionsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pSubscriptionIds != UA_NULL || a_nNoOfSubscriptionIds <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pSubscriptionIds != NULL || a_nNoOfSubscriptionIds <= 0))
         status = STATUS_OK;
 
 
@@ -4767,19 +4768,19 @@ StatusCode UA_ClientApi_DeleteSubscriptions(
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_DeleteSubscriptionsRequest cRequest;
-    UA_DeleteSubscriptionsResponse* pResponse = UA_NULL;
-    UA_EncodeableType* pResponseType = UA_NULL;
+    UA_DeleteSubscriptionsResponse* pResponse = NULL;
+    UA_EncodeableType* pResponseType = NULL;
     
     UA_DeleteSubscriptionsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pSubscriptionIds != UA_NULL || a_nNoOfSubscriptionIds <= 0)
-       &&  a_pResponseHeader != UA_NULL
-       &&  a_pNoOfResults != UA_NULL
-       &&  a_pResults != UA_NULL
-       &&  a_pNoOfDiagnosticInfos != UA_NULL
-       &&  a_pDiagnosticInfos != UA_NULL)
+    if( a_pRequestHeader != NULL
+       &&  (a_pSubscriptionIds != NULL || a_nNoOfSubscriptionIds <= 0)
+       &&  a_pResponseHeader != NULL
+       &&  a_pNoOfResults != NULL
+       &&  a_pResults != NULL
+       &&  a_pNoOfDiagnosticInfos != NULL
+       &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
 
 
@@ -4849,8 +4850,8 @@ StatusCode UA_ClientApi_BeginDeleteSubscriptions(
     UA_DeleteSubscriptionsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
-    if( a_pRequestHeader != UA_NULL
-       &&  (a_pSubscriptionIds != UA_NULL || a_nNoOfSubscriptionIds <= 0))
+    if( a_pRequestHeader != NULL
+       &&  (a_pSubscriptionIds != NULL || a_nNoOfSubscriptionIds <= 0))
         status = STATUS_OK;
 
 

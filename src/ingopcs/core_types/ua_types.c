@@ -29,6 +29,7 @@
 
 /* standard */
 #include <stdlib.h>
+#include <stddef.h>
 #include <assert.h>
 
 /* stack */
@@ -46,7 +47,7 @@
  *===========================================================================*/
 void UA_Node_Initialize(UA_Node* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -65,7 +66,7 @@ void UA_Node_Initialize(UA_Node* a_pValue)
  *===========================================================================*/
 void UA_Node_Clear(UA_Node* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -86,7 +87,7 @@ StatusCode UA_Node_Encode(UA_MsgBuffer* msgBuf, UA_Node* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -110,7 +111,7 @@ StatusCode UA_Node_Decode(UA_MsgBuffer* msgBuf, UA_Node* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -142,11 +143,11 @@ struct UA_EncodeableType UA_Node_EncodeableType =
     OpcUaId_Node,
     OpcUaId_Node_Encoding_DefaultBinary,
     OpcUaId_Node_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_Node),
     (UA_EncodeableObject_PfnInitialize*)UA_Node_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_Node_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_Node_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_Node_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_Node_Decode
@@ -159,7 +160,7 @@ struct UA_EncodeableType UA_Node_EncodeableType =
  *===========================================================================*/
 void UA_InstanceNode_Initialize(UA_InstanceNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -178,7 +179,7 @@ void UA_InstanceNode_Initialize(UA_InstanceNode* a_pValue)
  *===========================================================================*/
 void UA_InstanceNode_Clear(UA_InstanceNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -199,7 +200,7 @@ StatusCode UA_InstanceNode_Encode(UA_MsgBuffer* msgBuf, UA_InstanceNode* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -223,7 +224,7 @@ StatusCode UA_InstanceNode_Decode(UA_MsgBuffer* msgBuf, UA_InstanceNode* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -255,11 +256,11 @@ struct UA_EncodeableType UA_InstanceNode_EncodeableType =
     OpcUaId_InstanceNode,
     OpcUaId_InstanceNode_Encoding_DefaultBinary,
     OpcUaId_InstanceNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_InstanceNode),
     (UA_EncodeableObject_PfnInitialize*)UA_InstanceNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_InstanceNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_InstanceNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_InstanceNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_InstanceNode_Decode
@@ -272,7 +273,7 @@ struct UA_EncodeableType UA_InstanceNode_EncodeableType =
  *===========================================================================*/
 void UA_TypeNode_Initialize(UA_TypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -291,7 +292,7 @@ void UA_TypeNode_Initialize(UA_TypeNode* a_pValue)
  *===========================================================================*/
 void UA_TypeNode_Clear(UA_TypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -312,7 +313,7 @@ StatusCode UA_TypeNode_Encode(UA_MsgBuffer* msgBuf, UA_TypeNode* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -336,7 +337,7 @@ StatusCode UA_TypeNode_Decode(UA_MsgBuffer* msgBuf, UA_TypeNode* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -368,11 +369,11 @@ struct UA_EncodeableType UA_TypeNode_EncodeableType =
     OpcUaId_TypeNode,
     OpcUaId_TypeNode_Encoding_DefaultBinary,
     OpcUaId_TypeNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_TypeNode),
     (UA_EncodeableObject_PfnInitialize*)UA_TypeNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_TypeNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_TypeNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_TypeNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_TypeNode_Decode
@@ -385,7 +386,7 @@ struct UA_EncodeableType UA_TypeNode_EncodeableType =
  *===========================================================================*/
 void UA_ObjectNode_Initialize(UA_ObjectNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -405,7 +406,7 @@ void UA_ObjectNode_Initialize(UA_ObjectNode* a_pValue)
  *===========================================================================*/
 void UA_ObjectNode_Clear(UA_ObjectNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -427,7 +428,7 @@ StatusCode UA_ObjectNode_Encode(UA_MsgBuffer* msgBuf, UA_ObjectNode* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -452,7 +453,7 @@ StatusCode UA_ObjectNode_Decode(UA_MsgBuffer* msgBuf, UA_ObjectNode* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -485,11 +486,11 @@ struct UA_EncodeableType UA_ObjectNode_EncodeableType =
     OpcUaId_ObjectNode,
     OpcUaId_ObjectNode_Encoding_DefaultBinary,
     OpcUaId_ObjectNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ObjectNode),
     (UA_EncodeableObject_PfnInitialize*)UA_ObjectNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ObjectNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ObjectNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ObjectNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ObjectNode_Decode
@@ -502,7 +503,7 @@ struct UA_EncodeableType UA_ObjectNode_EncodeableType =
  *===========================================================================*/
 void UA_ObjectTypeNode_Initialize(UA_ObjectTypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -522,7 +523,7 @@ void UA_ObjectTypeNode_Initialize(UA_ObjectTypeNode* a_pValue)
  *===========================================================================*/
 void UA_ObjectTypeNode_Clear(UA_ObjectTypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -544,7 +545,7 @@ StatusCode UA_ObjectTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_ObjectTypeNode* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -569,7 +570,7 @@ StatusCode UA_ObjectTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_ObjectTypeNode* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -602,11 +603,11 @@ struct UA_EncodeableType UA_ObjectTypeNode_EncodeableType =
     OpcUaId_ObjectTypeNode,
     OpcUaId_ObjectTypeNode_Encoding_DefaultBinary,
     OpcUaId_ObjectTypeNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ObjectTypeNode),
     (UA_EncodeableObject_PfnInitialize*)UA_ObjectTypeNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ObjectTypeNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ObjectTypeNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ObjectTypeNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ObjectTypeNode_Decode
@@ -619,7 +620,7 @@ struct UA_EncodeableType UA_ObjectTypeNode_EncodeableType =
  *===========================================================================*/
 void UA_VariableNode_Initialize(UA_VariableNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -647,7 +648,7 @@ void UA_VariableNode_Initialize(UA_VariableNode* a_pValue)
  *===========================================================================*/
 void UA_VariableNode_Clear(UA_VariableNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -677,7 +678,7 @@ StatusCode UA_VariableNode_Encode(UA_MsgBuffer* msgBuf, UA_VariableNode* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -710,7 +711,7 @@ StatusCode UA_VariableNode_Decode(UA_MsgBuffer* msgBuf, UA_VariableNode* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -751,11 +752,11 @@ struct UA_EncodeableType UA_VariableNode_EncodeableType =
     OpcUaId_VariableNode,
     OpcUaId_VariableNode_Encoding_DefaultBinary,
     OpcUaId_VariableNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_VariableNode),
     (UA_EncodeableObject_PfnInitialize*)UA_VariableNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_VariableNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_VariableNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_VariableNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_VariableNode_Decode
@@ -768,7 +769,7 @@ struct UA_EncodeableType UA_VariableNode_EncodeableType =
  *===========================================================================*/
 void UA_VariableTypeNode_Initialize(UA_VariableTypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -793,7 +794,7 @@ void UA_VariableTypeNode_Initialize(UA_VariableTypeNode* a_pValue)
  *===========================================================================*/
 void UA_VariableTypeNode_Clear(UA_VariableTypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -820,7 +821,7 @@ StatusCode UA_VariableTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_VariableTypeNode*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -850,7 +851,7 @@ StatusCode UA_VariableTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_VariableTypeNode*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -888,11 +889,11 @@ struct UA_EncodeableType UA_VariableTypeNode_EncodeableType =
     OpcUaId_VariableTypeNode,
     OpcUaId_VariableTypeNode_Encoding_DefaultBinary,
     OpcUaId_VariableTypeNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_VariableTypeNode),
     (UA_EncodeableObject_PfnInitialize*)UA_VariableTypeNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_VariableTypeNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_VariableTypeNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_VariableTypeNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_VariableTypeNode_Decode
@@ -905,7 +906,7 @@ struct UA_EncodeableType UA_VariableTypeNode_EncodeableType =
  *===========================================================================*/
 void UA_ReferenceTypeNode_Initialize(UA_ReferenceTypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -927,7 +928,7 @@ void UA_ReferenceTypeNode_Initialize(UA_ReferenceTypeNode* a_pValue)
  *===========================================================================*/
 void UA_ReferenceTypeNode_Clear(UA_ReferenceTypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -951,7 +952,7 @@ StatusCode UA_ReferenceTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceTypeNod
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -978,7 +979,7 @@ StatusCode UA_ReferenceTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceTypeNod
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1013,11 +1014,11 @@ struct UA_EncodeableType UA_ReferenceTypeNode_EncodeableType =
     OpcUaId_ReferenceTypeNode,
     OpcUaId_ReferenceTypeNode_Encoding_DefaultBinary,
     OpcUaId_ReferenceTypeNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReferenceTypeNode),
     (UA_EncodeableObject_PfnInitialize*)UA_ReferenceTypeNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReferenceTypeNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReferenceTypeNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReferenceTypeNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReferenceTypeNode_Decode
@@ -1030,7 +1031,7 @@ struct UA_EncodeableType UA_ReferenceTypeNode_EncodeableType =
  *===========================================================================*/
 void UA_MethodNode_Initialize(UA_MethodNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -1051,7 +1052,7 @@ void UA_MethodNode_Initialize(UA_MethodNode* a_pValue)
  *===========================================================================*/
 void UA_MethodNode_Clear(UA_MethodNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -1074,7 +1075,7 @@ StatusCode UA_MethodNode_Encode(UA_MsgBuffer* msgBuf, UA_MethodNode* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1100,7 +1101,7 @@ StatusCode UA_MethodNode_Decode(UA_MsgBuffer* msgBuf, UA_MethodNode* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1134,11 +1135,11 @@ struct UA_EncodeableType UA_MethodNode_EncodeableType =
     OpcUaId_MethodNode,
     OpcUaId_MethodNode_Encoding_DefaultBinary,
     OpcUaId_MethodNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_MethodNode),
     (UA_EncodeableObject_PfnInitialize*)UA_MethodNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_MethodNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_MethodNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_MethodNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_MethodNode_Decode
@@ -1151,7 +1152,7 @@ struct UA_EncodeableType UA_MethodNode_EncodeableType =
  *===========================================================================*/
 void UA_ViewNode_Initialize(UA_ViewNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -1172,7 +1173,7 @@ void UA_ViewNode_Initialize(UA_ViewNode* a_pValue)
  *===========================================================================*/
 void UA_ViewNode_Clear(UA_ViewNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -1195,7 +1196,7 @@ StatusCode UA_ViewNode_Encode(UA_MsgBuffer* msgBuf, UA_ViewNode* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1221,7 +1222,7 @@ StatusCode UA_ViewNode_Decode(UA_MsgBuffer* msgBuf, UA_ViewNode* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1255,11 +1256,11 @@ struct UA_EncodeableType UA_ViewNode_EncodeableType =
     OpcUaId_ViewNode,
     OpcUaId_ViewNode_Encoding_DefaultBinary,
     OpcUaId_ViewNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ViewNode),
     (UA_EncodeableObject_PfnInitialize*)UA_ViewNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ViewNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ViewNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ViewNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ViewNode_Decode
@@ -1272,7 +1273,7 @@ struct UA_EncodeableType UA_ViewNode_EncodeableType =
  *===========================================================================*/
 void UA_DataTypeNode_Initialize(UA_DataTypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -1292,7 +1293,7 @@ void UA_DataTypeNode_Initialize(UA_DataTypeNode* a_pValue)
  *===========================================================================*/
 void UA_DataTypeNode_Clear(UA_DataTypeNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->NodeClass);
@@ -1314,7 +1315,7 @@ StatusCode UA_DataTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_DataTypeNode* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1339,7 +1340,7 @@ StatusCode UA_DataTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_DataTypeNode* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1372,11 +1373,11 @@ struct UA_EncodeableType UA_DataTypeNode_EncodeableType =
     OpcUaId_DataTypeNode,
     OpcUaId_DataTypeNode_Encoding_DefaultBinary,
     OpcUaId_DataTypeNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DataTypeNode),
     (UA_EncodeableObject_PfnInitialize*)UA_DataTypeNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DataTypeNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DataTypeNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DataTypeNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DataTypeNode_Decode
@@ -1389,7 +1390,7 @@ struct UA_EncodeableType UA_DataTypeNode_EncodeableType =
  *===========================================================================*/
 void UA_ReferenceNode_Initialize(UA_ReferenceNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->ReferenceTypeId);
         Boolean_Initialize(&a_pValue->IsInverse);
@@ -1402,7 +1403,7 @@ void UA_ReferenceNode_Initialize(UA_ReferenceNode* a_pValue)
  *===========================================================================*/
 void UA_ReferenceNode_Clear(UA_ReferenceNode* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->ReferenceTypeId);
         Boolean_Clear(&a_pValue->IsInverse);
@@ -1417,7 +1418,7 @@ StatusCode UA_ReferenceNode_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceNode* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1435,7 +1436,7 @@ StatusCode UA_ReferenceNode_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceNode* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1461,11 +1462,11 @@ struct UA_EncodeableType UA_ReferenceNode_EncodeableType =
     OpcUaId_ReferenceNode,
     OpcUaId_ReferenceNode_Encoding_DefaultBinary,
     OpcUaId_ReferenceNode_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReferenceNode),
     (UA_EncodeableObject_PfnInitialize*)UA_ReferenceNode_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReferenceNode_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReferenceNode_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReferenceNode_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReferenceNode_Decode
@@ -1478,7 +1479,7 @@ struct UA_EncodeableType UA_ReferenceNode_EncodeableType =
  *===========================================================================*/
 void UA_Argument_Initialize(UA_Argument* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->Name);
         NodeId_Initialize(&a_pValue->DataType);
@@ -1494,7 +1495,7 @@ void UA_Argument_Initialize(UA_Argument* a_pValue)
  *===========================================================================*/
 void UA_Argument_Clear(UA_Argument* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->Name);
         NodeId_Clear(&a_pValue->DataType);
@@ -1512,7 +1513,7 @@ StatusCode UA_Argument_Encode(UA_MsgBuffer* msgBuf, UA_Argument* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1533,7 +1534,7 @@ StatusCode UA_Argument_Decode(UA_MsgBuffer* msgBuf, UA_Argument* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1562,11 +1563,11 @@ struct UA_EncodeableType UA_Argument_EncodeableType =
     OpcUaId_Argument,
     OpcUaId_Argument_Encoding_DefaultBinary,
     OpcUaId_Argument_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_Argument),
     (UA_EncodeableObject_PfnInitialize*)UA_Argument_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_Argument_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_Argument_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_Argument_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_Argument_Decode
@@ -1579,7 +1580,7 @@ struct UA_EncodeableType UA_Argument_EncodeableType =
  *===========================================================================*/
 void UA_EnumValueType_Initialize(UA_EnumValueType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Int64_Initialize(&a_pValue->Value);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -1592,7 +1593,7 @@ void UA_EnumValueType_Initialize(UA_EnumValueType* a_pValue)
  *===========================================================================*/
 void UA_EnumValueType_Clear(UA_EnumValueType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Int64_Clear(&a_pValue->Value);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -1607,7 +1608,7 @@ StatusCode UA_EnumValueType_Encode(UA_MsgBuffer* msgBuf, UA_EnumValueType* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1625,7 +1626,7 @@ StatusCode UA_EnumValueType_Decode(UA_MsgBuffer* msgBuf, UA_EnumValueType* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1651,11 +1652,11 @@ struct UA_EncodeableType UA_EnumValueType_EncodeableType =
     OpcUaId_EnumValueType,
     OpcUaId_EnumValueType_Encoding_DefaultBinary,
     OpcUaId_EnumValueType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EnumValueType),
     (UA_EncodeableObject_PfnInitialize*)UA_EnumValueType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EnumValueType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EnumValueType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EnumValueType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EnumValueType_Decode
@@ -1668,7 +1669,7 @@ struct UA_EncodeableType UA_EnumValueType_EncodeableType =
  *===========================================================================*/
 void UA_EnumField_Initialize(UA_EnumField* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Int64_Initialize(&a_pValue->Value);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -1682,7 +1683,7 @@ void UA_EnumField_Initialize(UA_EnumField* a_pValue)
  *===========================================================================*/
 void UA_EnumField_Clear(UA_EnumField* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Int64_Clear(&a_pValue->Value);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -1698,7 +1699,7 @@ StatusCode UA_EnumField_Encode(UA_MsgBuffer* msgBuf, UA_EnumField* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1717,7 +1718,7 @@ StatusCode UA_EnumField_Decode(UA_MsgBuffer* msgBuf, UA_EnumField* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1744,11 +1745,11 @@ struct UA_EncodeableType UA_EnumField_EncodeableType =
     OpcUaId_EnumField,
     OpcUaId_EnumField_Encoding_DefaultBinary,
     OpcUaId_EnumField_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EnumField),
     (UA_EncodeableObject_PfnInitialize*)UA_EnumField_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EnumField_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EnumField_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EnumField_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EnumField_Decode
@@ -1761,7 +1762,7 @@ struct UA_EncodeableType UA_EnumField_EncodeableType =
  *===========================================================================*/
 void UA_OptionSet_Initialize(UA_OptionSet* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ByteString_Initialize(&a_pValue->Value);
         ByteString_Initialize(&a_pValue->ValidBits);
@@ -1773,7 +1774,7 @@ void UA_OptionSet_Initialize(UA_OptionSet* a_pValue)
  *===========================================================================*/
 void UA_OptionSet_Clear(UA_OptionSet* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ByteString_Clear(&a_pValue->Value);
         ByteString_Clear(&a_pValue->ValidBits);
@@ -1787,7 +1788,7 @@ StatusCode UA_OptionSet_Encode(UA_MsgBuffer* msgBuf, UA_OptionSet* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1804,7 +1805,7 @@ StatusCode UA_OptionSet_Decode(UA_MsgBuffer* msgBuf, UA_OptionSet* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1829,11 +1830,11 @@ struct UA_EncodeableType UA_OptionSet_EncodeableType =
     OpcUaId_OptionSet,
     OpcUaId_OptionSet_Encoding_DefaultBinary,
     OpcUaId_OptionSet_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_OptionSet),
     (UA_EncodeableObject_PfnInitialize*)UA_OptionSet_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_OptionSet_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_OptionSet_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_OptionSet_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_OptionSet_Decode
@@ -1846,7 +1847,7 @@ struct UA_EncodeableType UA_OptionSet_EncodeableType =
  *===========================================================================*/
 void UA_TimeZoneDataType_Initialize(UA_TimeZoneDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Int16_Initialize(&a_pValue->Offset);
         Boolean_Initialize(&a_pValue->DaylightSavingInOffset);
@@ -1858,7 +1859,7 @@ void UA_TimeZoneDataType_Initialize(UA_TimeZoneDataType* a_pValue)
  *===========================================================================*/
 void UA_TimeZoneDataType_Clear(UA_TimeZoneDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Int16_Clear(&a_pValue->Offset);
         Boolean_Clear(&a_pValue->DaylightSavingInOffset);
@@ -1872,7 +1873,7 @@ StatusCode UA_TimeZoneDataType_Encode(UA_MsgBuffer* msgBuf, UA_TimeZoneDataType*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1889,7 +1890,7 @@ StatusCode UA_TimeZoneDataType_Decode(UA_MsgBuffer* msgBuf, UA_TimeZoneDataType*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1914,11 +1915,11 @@ struct UA_EncodeableType UA_TimeZoneDataType_EncodeableType =
     OpcUaId_TimeZoneDataType,
     OpcUaId_TimeZoneDataType_Encoding_DefaultBinary,
     OpcUaId_TimeZoneDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_TimeZoneDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_TimeZoneDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_TimeZoneDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_TimeZoneDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_TimeZoneDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_TimeZoneDataType_Decode
@@ -1932,7 +1933,7 @@ struct UA_EncodeableType UA_TimeZoneDataType_EncodeableType =
  *===========================================================================*/
 void UA_ApplicationDescription_Initialize(UA_ApplicationDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->ApplicationUri);
         String_Initialize(&a_pValue->ProductUri);
@@ -1950,7 +1951,7 @@ void UA_ApplicationDescription_Initialize(UA_ApplicationDescription* a_pValue)
  *===========================================================================*/
 void UA_ApplicationDescription_Clear(UA_ApplicationDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->ApplicationUri);
         String_Clear(&a_pValue->ProductUri);
@@ -1970,7 +1971,7 @@ StatusCode UA_ApplicationDescription_Encode(UA_MsgBuffer* msgBuf, UA_Application
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -1993,7 +1994,7 @@ StatusCode UA_ApplicationDescription_Decode(UA_MsgBuffer* msgBuf, UA_Application
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2024,11 +2025,11 @@ struct UA_EncodeableType UA_ApplicationDescription_EncodeableType =
     OpcUaId_ApplicationDescription,
     OpcUaId_ApplicationDescription_Encoding_DefaultBinary,
     OpcUaId_ApplicationDescription_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ApplicationDescription),
     (UA_EncodeableObject_PfnInitialize*)UA_ApplicationDescription_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ApplicationDescription_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ApplicationDescription_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ApplicationDescription_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ApplicationDescription_Decode
@@ -2041,7 +2042,7 @@ struct UA_EncodeableType UA_ApplicationDescription_EncodeableType =
  *===========================================================================*/
 void UA_RequestHeader_Initialize(UA_RequestHeader* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->AuthenticationToken);
         DateTime_Initialize(&a_pValue->Timestamp);
@@ -2058,7 +2059,7 @@ void UA_RequestHeader_Initialize(UA_RequestHeader* a_pValue)
  *===========================================================================*/
 void UA_RequestHeader_Clear(UA_RequestHeader* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->AuthenticationToken);
         DateTime_Clear(&a_pValue->Timestamp);
@@ -2077,7 +2078,7 @@ StatusCode UA_RequestHeader_Encode(UA_MsgBuffer* msgBuf, UA_RequestHeader* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2099,7 +2100,7 @@ StatusCode UA_RequestHeader_Decode(UA_MsgBuffer* msgBuf, UA_RequestHeader* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2129,11 +2130,11 @@ struct UA_EncodeableType UA_RequestHeader_EncodeableType =
     OpcUaId_RequestHeader,
     OpcUaId_RequestHeader_Encoding_DefaultBinary,
     OpcUaId_RequestHeader_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RequestHeader),
     (UA_EncodeableObject_PfnInitialize*)UA_RequestHeader_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RequestHeader_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RequestHeader_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RequestHeader_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RequestHeader_Decode
@@ -2146,7 +2147,7 @@ struct UA_EncodeableType UA_RequestHeader_EncodeableType =
  *===========================================================================*/
 void UA_ResponseHeader_Initialize(UA_ResponseHeader* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Initialize(&a_pValue->Timestamp);
         UInt32_Initialize(&a_pValue->RequestHandle);
@@ -2163,7 +2164,7 @@ void UA_ResponseHeader_Initialize(UA_ResponseHeader* a_pValue)
  *===========================================================================*/
 void UA_ResponseHeader_Clear(UA_ResponseHeader* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Clear(&a_pValue->Timestamp);
         UInt32_Clear(&a_pValue->RequestHandle);
@@ -2182,7 +2183,7 @@ StatusCode UA_ResponseHeader_Encode(UA_MsgBuffer* msgBuf, UA_ResponseHeader* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2204,7 +2205,7 @@ StatusCode UA_ResponseHeader_Decode(UA_MsgBuffer* msgBuf, UA_ResponseHeader* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2234,11 +2235,11 @@ struct UA_EncodeableType UA_ResponseHeader_EncodeableType =
     OpcUaId_ResponseHeader,
     OpcUaId_ResponseHeader_Encoding_DefaultBinary,
     OpcUaId_ResponseHeader_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ResponseHeader),
     (UA_EncodeableObject_PfnInitialize*)UA_ResponseHeader_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ResponseHeader_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ResponseHeader_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ResponseHeader_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ResponseHeader_Decode
@@ -2251,7 +2252,7 @@ struct UA_EncodeableType UA_ResponseHeader_EncodeableType =
  *===========================================================================*/
 void UA_ServiceFault_Initialize(UA_ServiceFault* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
     }
@@ -2262,7 +2263,7 @@ void UA_ServiceFault_Initialize(UA_ServiceFault* a_pValue)
  *===========================================================================*/
 void UA_ServiceFault_Clear(UA_ServiceFault* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
     }
@@ -2275,7 +2276,7 @@ StatusCode UA_ServiceFault_Encode(UA_MsgBuffer* msgBuf, UA_ServiceFault* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2291,7 +2292,7 @@ StatusCode UA_ServiceFault_Decode(UA_MsgBuffer* msgBuf, UA_ServiceFault* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2315,11 +2316,11 @@ struct UA_EncodeableType UA_ServiceFault_EncodeableType =
     OpcUaId_ServiceFault,
     OpcUaId_ServiceFault_Encoding_DefaultBinary,
     OpcUaId_ServiceFault_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ServiceFault),
     (UA_EncodeableObject_PfnInitialize*)UA_ServiceFault_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ServiceFault_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ServiceFault_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ServiceFault_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ServiceFault_Decode
@@ -2333,7 +2334,7 @@ struct UA_EncodeableType UA_ServiceFault_EncodeableType =
  *===========================================================================*/
 void UA_FindServersRequest_Initialize(UA_FindServersRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         String_Initialize(&a_pValue->EndpointUrl);
@@ -2349,7 +2350,7 @@ void UA_FindServersRequest_Initialize(UA_FindServersRequest* a_pValue)
  *===========================================================================*/
 void UA_FindServersRequest_Clear(UA_FindServersRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         String_Clear(&a_pValue->EndpointUrl);
@@ -2367,7 +2368,7 @@ StatusCode UA_FindServersRequest_Encode(UA_MsgBuffer* msgBuf, UA_FindServersRequ
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2388,7 +2389,7 @@ StatusCode UA_FindServersRequest_Decode(UA_MsgBuffer* msgBuf, UA_FindServersRequ
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2417,11 +2418,11 @@ struct UA_EncodeableType UA_FindServersRequest_EncodeableType =
     OpcUaId_FindServersRequest,
     OpcUaId_FindServersRequest_Encoding_DefaultBinary,
     OpcUaId_FindServersRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_FindServersRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_FindServersRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_FindServersRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_FindServersRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_FindServersRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_FindServersRequest_Decode
@@ -2434,7 +2435,7 @@ struct UA_EncodeableType UA_FindServersRequest_EncodeableType =
  *===========================================================================*/
 void UA_FindServersResponse_Initialize(UA_FindServersResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
@@ -2447,7 +2448,7 @@ void UA_FindServersResponse_Initialize(UA_FindServersResponse* a_pValue)
  *===========================================================================*/
 void UA_FindServersResponse_Clear(UA_FindServersResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
@@ -2462,7 +2463,7 @@ StatusCode UA_FindServersResponse_Encode(UA_MsgBuffer* msgBuf, UA_FindServersRes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2480,7 +2481,7 @@ StatusCode UA_FindServersResponse_Decode(UA_MsgBuffer* msgBuf, UA_FindServersRes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2506,11 +2507,11 @@ struct UA_EncodeableType UA_FindServersResponse_EncodeableType =
     OpcUaId_FindServersResponse,
     OpcUaId_FindServersResponse_Encoding_DefaultBinary,
     OpcUaId_FindServersResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_FindServersResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_FindServersResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_FindServersResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_FindServersResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_FindServersResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_FindServersResponse_Decode
@@ -2524,7 +2525,7 @@ struct UA_EncodeableType UA_FindServersResponse_EncodeableType =
  *===========================================================================*/
 void UA_ServerOnNetwork_Initialize(UA_ServerOnNetwork* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->RecordId);
         String_Initialize(&a_pValue->ServerName);
@@ -2539,7 +2540,7 @@ void UA_ServerOnNetwork_Initialize(UA_ServerOnNetwork* a_pValue)
  *===========================================================================*/
 void UA_ServerOnNetwork_Clear(UA_ServerOnNetwork* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->RecordId);
         String_Clear(&a_pValue->ServerName);
@@ -2556,7 +2557,7 @@ StatusCode UA_ServerOnNetwork_Encode(UA_MsgBuffer* msgBuf, UA_ServerOnNetwork* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2576,7 +2577,7 @@ StatusCode UA_ServerOnNetwork_Decode(UA_MsgBuffer* msgBuf, UA_ServerOnNetwork* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2604,11 +2605,11 @@ struct UA_EncodeableType UA_ServerOnNetwork_EncodeableType =
     OpcUaId_ServerOnNetwork,
     OpcUaId_ServerOnNetwork_Encoding_DefaultBinary,
     OpcUaId_ServerOnNetwork_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ServerOnNetwork),
     (UA_EncodeableObject_PfnInitialize*)UA_ServerOnNetwork_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ServerOnNetwork_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ServerOnNetwork_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ServerOnNetwork_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ServerOnNetwork_Decode
@@ -2622,7 +2623,7 @@ struct UA_EncodeableType UA_ServerOnNetwork_EncodeableType =
  *===========================================================================*/
 void UA_FindServersOnNetworkRequest_Initialize(UA_FindServersOnNetworkRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->StartingRecordId);
@@ -2637,7 +2638,7 @@ void UA_FindServersOnNetworkRequest_Initialize(UA_FindServersOnNetworkRequest* a
  *===========================================================================*/
 void UA_FindServersOnNetworkRequest_Clear(UA_FindServersOnNetworkRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->StartingRecordId);
@@ -2654,7 +2655,7 @@ StatusCode UA_FindServersOnNetworkRequest_Encode(UA_MsgBuffer* msgBuf, UA_FindSe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2674,7 +2675,7 @@ StatusCode UA_FindServersOnNetworkRequest_Decode(UA_MsgBuffer* msgBuf, UA_FindSe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2702,11 +2703,11 @@ struct UA_EncodeableType UA_FindServersOnNetworkRequest_EncodeableType =
     OpcUaId_FindServersOnNetworkRequest,
     OpcUaId_FindServersOnNetworkRequest_Encoding_DefaultBinary,
     OpcUaId_FindServersOnNetworkRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_FindServersOnNetworkRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_FindServersOnNetworkRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_FindServersOnNetworkRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_FindServersOnNetworkRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_FindServersOnNetworkRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_FindServersOnNetworkRequest_Decode
@@ -2719,7 +2720,7 @@ struct UA_EncodeableType UA_FindServersOnNetworkRequest_EncodeableType =
  *===========================================================================*/
 void UA_FindServersOnNetworkResponse_Initialize(UA_FindServersOnNetworkResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         DateTime_Initialize(&a_pValue->LastCounterResetTime);
@@ -2733,7 +2734,7 @@ void UA_FindServersOnNetworkResponse_Initialize(UA_FindServersOnNetworkResponse*
  *===========================================================================*/
 void UA_FindServersOnNetworkResponse_Clear(UA_FindServersOnNetworkResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         DateTime_Clear(&a_pValue->LastCounterResetTime);
@@ -2749,7 +2750,7 @@ StatusCode UA_FindServersOnNetworkResponse_Encode(UA_MsgBuffer* msgBuf, UA_FindS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2768,7 +2769,7 @@ StatusCode UA_FindServersOnNetworkResponse_Decode(UA_MsgBuffer* msgBuf, UA_FindS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2795,11 +2796,11 @@ struct UA_EncodeableType UA_FindServersOnNetworkResponse_EncodeableType =
     OpcUaId_FindServersOnNetworkResponse,
     OpcUaId_FindServersOnNetworkResponse_Encoding_DefaultBinary,
     OpcUaId_FindServersOnNetworkResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_FindServersOnNetworkResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_FindServersOnNetworkResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_FindServersOnNetworkResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_FindServersOnNetworkResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_FindServersOnNetworkResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_FindServersOnNetworkResponse_Decode
@@ -2815,7 +2816,7 @@ struct UA_EncodeableType UA_FindServersOnNetworkResponse_EncodeableType =
  *===========================================================================*/
 void UA_UserTokenPolicy_Initialize(UA_UserTokenPolicy* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->PolicyId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->TokenType);
@@ -2830,7 +2831,7 @@ void UA_UserTokenPolicy_Initialize(UA_UserTokenPolicy* a_pValue)
  *===========================================================================*/
 void UA_UserTokenPolicy_Clear(UA_UserTokenPolicy* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->PolicyId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->TokenType);
@@ -2847,7 +2848,7 @@ StatusCode UA_UserTokenPolicy_Encode(UA_MsgBuffer* msgBuf, UA_UserTokenPolicy* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2867,7 +2868,7 @@ StatusCode UA_UserTokenPolicy_Decode(UA_MsgBuffer* msgBuf, UA_UserTokenPolicy* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2895,11 +2896,11 @@ struct UA_EncodeableType UA_UserTokenPolicy_EncodeableType =
     OpcUaId_UserTokenPolicy,
     OpcUaId_UserTokenPolicy_Encoding_DefaultBinary,
     OpcUaId_UserTokenPolicy_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_UserTokenPolicy),
     (UA_EncodeableObject_PfnInitialize*)UA_UserTokenPolicy_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_UserTokenPolicy_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_UserTokenPolicy_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_UserTokenPolicy_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_UserTokenPolicy_Decode
@@ -2912,7 +2913,7 @@ struct UA_EncodeableType UA_UserTokenPolicy_EncodeableType =
  *===========================================================================*/
 void UA_EndpointDescription_Initialize(UA_EndpointDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->EndpointUrl);
         UA_ApplicationDescription_Initialize(&a_pValue->Server);
@@ -2931,7 +2932,7 @@ void UA_EndpointDescription_Initialize(UA_EndpointDescription* a_pValue)
  *===========================================================================*/
 void UA_EndpointDescription_Clear(UA_EndpointDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->EndpointUrl);
         UA_ApplicationDescription_Clear(&a_pValue->Server);
@@ -2952,7 +2953,7 @@ StatusCode UA_EndpointDescription_Encode(UA_MsgBuffer* msgBuf, UA_EndpointDescri
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -2976,7 +2977,7 @@ StatusCode UA_EndpointDescription_Decode(UA_MsgBuffer* msgBuf, UA_EndpointDescri
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3008,11 +3009,11 @@ struct UA_EncodeableType UA_EndpointDescription_EncodeableType =
     OpcUaId_EndpointDescription,
     OpcUaId_EndpointDescription_Encoding_DefaultBinary,
     OpcUaId_EndpointDescription_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EndpointDescription),
     (UA_EncodeableObject_PfnInitialize*)UA_EndpointDescription_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EndpointDescription_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EndpointDescription_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EndpointDescription_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EndpointDescription_Decode
@@ -3026,7 +3027,7 @@ struct UA_EncodeableType UA_EndpointDescription_EncodeableType =
  *===========================================================================*/
 void UA_GetEndpointsRequest_Initialize(UA_GetEndpointsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         String_Initialize(&a_pValue->EndpointUrl);
@@ -3042,7 +3043,7 @@ void UA_GetEndpointsRequest_Initialize(UA_GetEndpointsRequest* a_pValue)
  *===========================================================================*/
 void UA_GetEndpointsRequest_Clear(UA_GetEndpointsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         String_Clear(&a_pValue->EndpointUrl);
@@ -3060,7 +3061,7 @@ StatusCode UA_GetEndpointsRequest_Encode(UA_MsgBuffer* msgBuf, UA_GetEndpointsRe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3081,7 +3082,7 @@ StatusCode UA_GetEndpointsRequest_Decode(UA_MsgBuffer* msgBuf, UA_GetEndpointsRe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3110,11 +3111,11 @@ struct UA_EncodeableType UA_GetEndpointsRequest_EncodeableType =
     OpcUaId_GetEndpointsRequest,
     OpcUaId_GetEndpointsRequest_Encoding_DefaultBinary,
     OpcUaId_GetEndpointsRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_GetEndpointsRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_GetEndpointsRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_GetEndpointsRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_GetEndpointsRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_GetEndpointsRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_GetEndpointsRequest_Decode
@@ -3127,7 +3128,7 @@ struct UA_EncodeableType UA_GetEndpointsRequest_EncodeableType =
  *===========================================================================*/
 void UA_GetEndpointsResponse_Initialize(UA_GetEndpointsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfEndpoints, (void**) &a_pValue->Endpoints, 
@@ -3140,7 +3141,7 @@ void UA_GetEndpointsResponse_Initialize(UA_GetEndpointsResponse* a_pValue)
  *===========================================================================*/
 void UA_GetEndpointsResponse_Clear(UA_GetEndpointsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfEndpoints, (void**) &a_pValue->Endpoints, 
@@ -3155,7 +3156,7 @@ StatusCode UA_GetEndpointsResponse_Encode(UA_MsgBuffer* msgBuf, UA_GetEndpointsR
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3173,7 +3174,7 @@ StatusCode UA_GetEndpointsResponse_Decode(UA_MsgBuffer* msgBuf, UA_GetEndpointsR
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3199,11 +3200,11 @@ struct UA_EncodeableType UA_GetEndpointsResponse_EncodeableType =
     OpcUaId_GetEndpointsResponse,
     OpcUaId_GetEndpointsResponse_Encoding_DefaultBinary,
     OpcUaId_GetEndpointsResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_GetEndpointsResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_GetEndpointsResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_GetEndpointsResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_GetEndpointsResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_GetEndpointsResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_GetEndpointsResponse_Decode
@@ -3217,7 +3218,7 @@ struct UA_EncodeableType UA_GetEndpointsResponse_EncodeableType =
  *===========================================================================*/
 void UA_RegisteredServer_Initialize(UA_RegisteredServer* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->ServerUri);
         String_Initialize(&a_pValue->ProductUri);
@@ -3237,7 +3238,7 @@ void UA_RegisteredServer_Initialize(UA_RegisteredServer* a_pValue)
  *===========================================================================*/
 void UA_RegisteredServer_Clear(UA_RegisteredServer* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->ServerUri);
         String_Clear(&a_pValue->ProductUri);
@@ -3259,7 +3260,7 @@ StatusCode UA_RegisteredServer_Encode(UA_MsgBuffer* msgBuf, UA_RegisteredServer*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3284,7 +3285,7 @@ StatusCode UA_RegisteredServer_Decode(UA_MsgBuffer* msgBuf, UA_RegisteredServer*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3317,11 +3318,11 @@ struct UA_EncodeableType UA_RegisteredServer_EncodeableType =
     OpcUaId_RegisteredServer,
     OpcUaId_RegisteredServer_Encoding_DefaultBinary,
     OpcUaId_RegisteredServer_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RegisteredServer),
     (UA_EncodeableObject_PfnInitialize*)UA_RegisteredServer_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RegisteredServer_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RegisteredServer_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RegisteredServer_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RegisteredServer_Decode
@@ -3335,7 +3336,7 @@ struct UA_EncodeableType UA_RegisteredServer_EncodeableType =
  *===========================================================================*/
 void UA_RegisterServerRequest_Initialize(UA_RegisterServerRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_RegisteredServer_Initialize(&a_pValue->Server);
@@ -3347,7 +3348,7 @@ void UA_RegisterServerRequest_Initialize(UA_RegisterServerRequest* a_pValue)
  *===========================================================================*/
 void UA_RegisterServerRequest_Clear(UA_RegisterServerRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_RegisteredServer_Clear(&a_pValue->Server);
@@ -3361,7 +3362,7 @@ StatusCode UA_RegisterServerRequest_Encode(UA_MsgBuffer* msgBuf, UA_RegisterServ
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3378,7 +3379,7 @@ StatusCode UA_RegisterServerRequest_Decode(UA_MsgBuffer* msgBuf, UA_RegisterServ
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3403,11 +3404,11 @@ struct UA_EncodeableType UA_RegisterServerRequest_EncodeableType =
     OpcUaId_RegisterServerRequest,
     OpcUaId_RegisterServerRequest_Encoding_DefaultBinary,
     OpcUaId_RegisterServerRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RegisterServerRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_RegisterServerRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RegisterServerRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RegisterServerRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RegisterServerRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RegisterServerRequest_Decode
@@ -3420,7 +3421,7 @@ struct UA_EncodeableType UA_RegisterServerRequest_EncodeableType =
  *===========================================================================*/
 void UA_RegisterServerResponse_Initialize(UA_RegisterServerResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
     }
@@ -3431,7 +3432,7 @@ void UA_RegisterServerResponse_Initialize(UA_RegisterServerResponse* a_pValue)
  *===========================================================================*/
 void UA_RegisterServerResponse_Clear(UA_RegisterServerResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
     }
@@ -3444,7 +3445,7 @@ StatusCode UA_RegisterServerResponse_Encode(UA_MsgBuffer* msgBuf, UA_RegisterSer
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3460,7 +3461,7 @@ StatusCode UA_RegisterServerResponse_Decode(UA_MsgBuffer* msgBuf, UA_RegisterSer
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3484,11 +3485,11 @@ struct UA_EncodeableType UA_RegisterServerResponse_EncodeableType =
     OpcUaId_RegisterServerResponse,
     OpcUaId_RegisterServerResponse_Encoding_DefaultBinary,
     OpcUaId_RegisterServerResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RegisterServerResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_RegisterServerResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RegisterServerResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RegisterServerResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RegisterServerResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RegisterServerResponse_Decode
@@ -3502,7 +3503,7 @@ struct UA_EncodeableType UA_RegisterServerResponse_EncodeableType =
  *===========================================================================*/
 void UA_MdnsDiscoveryConfiguration_Initialize(UA_MdnsDiscoveryConfiguration* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->MdnsServerName);
         UA_Initialize_Array(&a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
@@ -3515,7 +3516,7 @@ void UA_MdnsDiscoveryConfiguration_Initialize(UA_MdnsDiscoveryConfiguration* a_p
  *===========================================================================*/
 void UA_MdnsDiscoveryConfiguration_Clear(UA_MdnsDiscoveryConfiguration* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->MdnsServerName);
         UA_Clear_Array(&a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
@@ -3530,7 +3531,7 @@ StatusCode UA_MdnsDiscoveryConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_MdnsDis
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3548,7 +3549,7 @@ StatusCode UA_MdnsDiscoveryConfiguration_Decode(UA_MsgBuffer* msgBuf, UA_MdnsDis
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3574,11 +3575,11 @@ struct UA_EncodeableType UA_MdnsDiscoveryConfiguration_EncodeableType =
     OpcUaId_MdnsDiscoveryConfiguration,
     OpcUaId_MdnsDiscoveryConfiguration_Encoding_DefaultBinary,
     OpcUaId_MdnsDiscoveryConfiguration_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_MdnsDiscoveryConfiguration),
     (UA_EncodeableObject_PfnInitialize*)UA_MdnsDiscoveryConfiguration_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_MdnsDiscoveryConfiguration_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_MdnsDiscoveryConfiguration_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_MdnsDiscoveryConfiguration_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_MdnsDiscoveryConfiguration_Decode
@@ -3592,7 +3593,7 @@ struct UA_EncodeableType UA_MdnsDiscoveryConfiguration_EncodeableType =
  *===========================================================================*/
 void UA_RegisterServer2Request_Initialize(UA_RegisterServer2Request* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_RegisteredServer_Initialize(&a_pValue->Server);
@@ -3606,7 +3607,7 @@ void UA_RegisterServer2Request_Initialize(UA_RegisterServer2Request* a_pValue)
  *===========================================================================*/
 void UA_RegisterServer2Request_Clear(UA_RegisterServer2Request* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_RegisteredServer_Clear(&a_pValue->Server);
@@ -3622,7 +3623,7 @@ StatusCode UA_RegisterServer2Request_Encode(UA_MsgBuffer* msgBuf, UA_RegisterSer
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3641,7 +3642,7 @@ StatusCode UA_RegisterServer2Request_Decode(UA_MsgBuffer* msgBuf, UA_RegisterSer
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3668,11 +3669,11 @@ struct UA_EncodeableType UA_RegisterServer2Request_EncodeableType =
     OpcUaId_RegisterServer2Request,
     OpcUaId_RegisterServer2Request_Encoding_DefaultBinary,
     OpcUaId_RegisterServer2Request_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RegisterServer2Request),
     (UA_EncodeableObject_PfnInitialize*)UA_RegisterServer2Request_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RegisterServer2Request_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RegisterServer2Request_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RegisterServer2Request_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RegisterServer2Request_Decode
@@ -3685,7 +3686,7 @@ struct UA_EncodeableType UA_RegisterServer2Request_EncodeableType =
  *===========================================================================*/
 void UA_RegisterServer2Response_Initialize(UA_RegisterServer2Response* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
@@ -3700,7 +3701,7 @@ void UA_RegisterServer2Response_Initialize(UA_RegisterServer2Response* a_pValue)
  *===========================================================================*/
 void UA_RegisterServer2Response_Clear(UA_RegisterServer2Response* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
@@ -3717,7 +3718,7 @@ StatusCode UA_RegisterServer2Response_Encode(UA_MsgBuffer* msgBuf, UA_RegisterSe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3737,7 +3738,7 @@ StatusCode UA_RegisterServer2Response_Decode(UA_MsgBuffer* msgBuf, UA_RegisterSe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3765,11 +3766,11 @@ struct UA_EncodeableType UA_RegisterServer2Response_EncodeableType =
     OpcUaId_RegisterServer2Response,
     OpcUaId_RegisterServer2Response_Encoding_DefaultBinary,
     OpcUaId_RegisterServer2Response_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RegisterServer2Response),
     (UA_EncodeableObject_PfnInitialize*)UA_RegisterServer2Response_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RegisterServer2Response_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RegisterServer2Response_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RegisterServer2Response_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RegisterServer2Response_Decode
@@ -3784,7 +3785,7 @@ struct UA_EncodeableType UA_RegisterServer2Response_EncodeableType =
  *===========================================================================*/
 void UA_ChannelSecurityToken_Initialize(UA_ChannelSecurityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->ChannelId);
         UInt32_Initialize(&a_pValue->TokenId);
@@ -3798,7 +3799,7 @@ void UA_ChannelSecurityToken_Initialize(UA_ChannelSecurityToken* a_pValue)
  *===========================================================================*/
 void UA_ChannelSecurityToken_Clear(UA_ChannelSecurityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->ChannelId);
         UInt32_Clear(&a_pValue->TokenId);
@@ -3814,7 +3815,7 @@ StatusCode UA_ChannelSecurityToken_Encode(UA_MsgBuffer* msgBuf, UA_ChannelSecuri
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3833,7 +3834,7 @@ StatusCode UA_ChannelSecurityToken_Decode(UA_MsgBuffer* msgBuf, UA_ChannelSecuri
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3860,11 +3861,11 @@ struct UA_EncodeableType UA_ChannelSecurityToken_EncodeableType =
     OpcUaId_ChannelSecurityToken,
     OpcUaId_ChannelSecurityToken_Encoding_DefaultBinary,
     OpcUaId_ChannelSecurityToken_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ChannelSecurityToken),
     (UA_EncodeableObject_PfnInitialize*)UA_ChannelSecurityToken_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ChannelSecurityToken_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ChannelSecurityToken_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ChannelSecurityToken_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ChannelSecurityToken_Decode
@@ -3878,7 +3879,7 @@ struct UA_EncodeableType UA_ChannelSecurityToken_EncodeableType =
  *===========================================================================*/
 void UA_OpenSecureChannelRequest_Initialize(UA_OpenSecureChannelRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->ClientProtocolVersion);
@@ -3894,7 +3895,7 @@ void UA_OpenSecureChannelRequest_Initialize(UA_OpenSecureChannelRequest* a_pValu
  *===========================================================================*/
 void UA_OpenSecureChannelRequest_Clear(UA_OpenSecureChannelRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->ClientProtocolVersion);
@@ -3912,7 +3913,7 @@ StatusCode UA_OpenSecureChannelRequest_Encode(UA_MsgBuffer* msgBuf, UA_OpenSecur
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3933,7 +3934,7 @@ StatusCode UA_OpenSecureChannelRequest_Decode(UA_MsgBuffer* msgBuf, UA_OpenSecur
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -3962,11 +3963,11 @@ struct UA_EncodeableType UA_OpenSecureChannelRequest_EncodeableType =
     OpcUaId_OpenSecureChannelRequest,
     OpcUaId_OpenSecureChannelRequest_Encoding_DefaultBinary,
     OpcUaId_OpenSecureChannelRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_OpenSecureChannelRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_OpenSecureChannelRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_OpenSecureChannelRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_OpenSecureChannelRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_OpenSecureChannelRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_OpenSecureChannelRequest_Decode
@@ -3979,7 +3980,7 @@ struct UA_EncodeableType UA_OpenSecureChannelRequest_EncodeableType =
  *===========================================================================*/
 void UA_OpenSecureChannelResponse_Initialize(UA_OpenSecureChannelResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UInt32_Initialize(&a_pValue->ServerProtocolVersion);
@@ -3993,7 +3994,7 @@ void UA_OpenSecureChannelResponse_Initialize(UA_OpenSecureChannelResponse* a_pVa
  *===========================================================================*/
 void UA_OpenSecureChannelResponse_Clear(UA_OpenSecureChannelResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UInt32_Clear(&a_pValue->ServerProtocolVersion);
@@ -4009,7 +4010,7 @@ StatusCode UA_OpenSecureChannelResponse_Encode(UA_MsgBuffer* msgBuf, UA_OpenSecu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4028,7 +4029,7 @@ StatusCode UA_OpenSecureChannelResponse_Decode(UA_MsgBuffer* msgBuf, UA_OpenSecu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4055,11 +4056,11 @@ struct UA_EncodeableType UA_OpenSecureChannelResponse_EncodeableType =
     OpcUaId_OpenSecureChannelResponse,
     OpcUaId_OpenSecureChannelResponse_Encoding_DefaultBinary,
     OpcUaId_OpenSecureChannelResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_OpenSecureChannelResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_OpenSecureChannelResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_OpenSecureChannelResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_OpenSecureChannelResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_OpenSecureChannelResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_OpenSecureChannelResponse_Decode
@@ -4074,7 +4075,7 @@ struct UA_EncodeableType UA_OpenSecureChannelResponse_EncodeableType =
  *===========================================================================*/
 void UA_CloseSecureChannelRequest_Initialize(UA_CloseSecureChannelRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
     }
@@ -4085,7 +4086,7 @@ void UA_CloseSecureChannelRequest_Initialize(UA_CloseSecureChannelRequest* a_pVa
  *===========================================================================*/
 void UA_CloseSecureChannelRequest_Clear(UA_CloseSecureChannelRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
     }
@@ -4098,7 +4099,7 @@ StatusCode UA_CloseSecureChannelRequest_Encode(UA_MsgBuffer* msgBuf, UA_CloseSec
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4114,7 +4115,7 @@ StatusCode UA_CloseSecureChannelRequest_Decode(UA_MsgBuffer* msgBuf, UA_CloseSec
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4138,11 +4139,11 @@ struct UA_EncodeableType UA_CloseSecureChannelRequest_EncodeableType =
     OpcUaId_CloseSecureChannelRequest,
     OpcUaId_CloseSecureChannelRequest_Encoding_DefaultBinary,
     OpcUaId_CloseSecureChannelRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CloseSecureChannelRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_CloseSecureChannelRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CloseSecureChannelRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CloseSecureChannelRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CloseSecureChannelRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CloseSecureChannelRequest_Decode
@@ -4155,7 +4156,7 @@ struct UA_EncodeableType UA_CloseSecureChannelRequest_EncodeableType =
  *===========================================================================*/
 void UA_CloseSecureChannelResponse_Initialize(UA_CloseSecureChannelResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
     }
@@ -4166,7 +4167,7 @@ void UA_CloseSecureChannelResponse_Initialize(UA_CloseSecureChannelResponse* a_p
  *===========================================================================*/
 void UA_CloseSecureChannelResponse_Clear(UA_CloseSecureChannelResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
     }
@@ -4179,7 +4180,7 @@ StatusCode UA_CloseSecureChannelResponse_Encode(UA_MsgBuffer* msgBuf, UA_CloseSe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4195,7 +4196,7 @@ StatusCode UA_CloseSecureChannelResponse_Decode(UA_MsgBuffer* msgBuf, UA_CloseSe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4219,11 +4220,11 @@ struct UA_EncodeableType UA_CloseSecureChannelResponse_EncodeableType =
     OpcUaId_CloseSecureChannelResponse,
     OpcUaId_CloseSecureChannelResponse_Encoding_DefaultBinary,
     OpcUaId_CloseSecureChannelResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CloseSecureChannelResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_CloseSecureChannelResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CloseSecureChannelResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CloseSecureChannelResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CloseSecureChannelResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CloseSecureChannelResponse_Decode
@@ -4237,7 +4238,7 @@ struct UA_EncodeableType UA_CloseSecureChannelResponse_EncodeableType =
  *===========================================================================*/
 void UA_SignedSoftwareCertificate_Initialize(UA_SignedSoftwareCertificate* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ByteString_Initialize(&a_pValue->CertificateData);
         ByteString_Initialize(&a_pValue->Signature);
@@ -4249,7 +4250,7 @@ void UA_SignedSoftwareCertificate_Initialize(UA_SignedSoftwareCertificate* a_pVa
  *===========================================================================*/
 void UA_SignedSoftwareCertificate_Clear(UA_SignedSoftwareCertificate* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ByteString_Clear(&a_pValue->CertificateData);
         ByteString_Clear(&a_pValue->Signature);
@@ -4263,7 +4264,7 @@ StatusCode UA_SignedSoftwareCertificate_Encode(UA_MsgBuffer* msgBuf, UA_SignedSo
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4280,7 +4281,7 @@ StatusCode UA_SignedSoftwareCertificate_Decode(UA_MsgBuffer* msgBuf, UA_SignedSo
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4305,11 +4306,11 @@ struct UA_EncodeableType UA_SignedSoftwareCertificate_EncodeableType =
     OpcUaId_SignedSoftwareCertificate,
     OpcUaId_SignedSoftwareCertificate_Encoding_DefaultBinary,
     OpcUaId_SignedSoftwareCertificate_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SignedSoftwareCertificate),
     (UA_EncodeableObject_PfnInitialize*)UA_SignedSoftwareCertificate_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SignedSoftwareCertificate_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SignedSoftwareCertificate_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SignedSoftwareCertificate_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SignedSoftwareCertificate_Decode
@@ -4322,7 +4323,7 @@ struct UA_EncodeableType UA_SignedSoftwareCertificate_EncodeableType =
  *===========================================================================*/
 void UA_SignatureData_Initialize(UA_SignatureData* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->Algorithm);
         ByteString_Initialize(&a_pValue->Signature);
@@ -4334,7 +4335,7 @@ void UA_SignatureData_Initialize(UA_SignatureData* a_pValue)
  *===========================================================================*/
 void UA_SignatureData_Clear(UA_SignatureData* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->Algorithm);
         ByteString_Clear(&a_pValue->Signature);
@@ -4348,7 +4349,7 @@ StatusCode UA_SignatureData_Encode(UA_MsgBuffer* msgBuf, UA_SignatureData* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4365,7 +4366,7 @@ StatusCode UA_SignatureData_Decode(UA_MsgBuffer* msgBuf, UA_SignatureData* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4390,11 +4391,11 @@ struct UA_EncodeableType UA_SignatureData_EncodeableType =
     OpcUaId_SignatureData,
     OpcUaId_SignatureData_Encoding_DefaultBinary,
     OpcUaId_SignatureData_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SignatureData),
     (UA_EncodeableObject_PfnInitialize*)UA_SignatureData_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SignatureData_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SignatureData_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SignatureData_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SignatureData_Decode
@@ -4408,7 +4409,7 @@ struct UA_EncodeableType UA_SignatureData_EncodeableType =
  *===========================================================================*/
 void UA_CreateSessionRequest_Initialize(UA_CreateSessionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_ApplicationDescription_Initialize(&a_pValue->ClientDescription);
@@ -4427,7 +4428,7 @@ void UA_CreateSessionRequest_Initialize(UA_CreateSessionRequest* a_pValue)
  *===========================================================================*/
 void UA_CreateSessionRequest_Clear(UA_CreateSessionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_ApplicationDescription_Clear(&a_pValue->ClientDescription);
@@ -4448,7 +4449,7 @@ StatusCode UA_CreateSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CreateSession
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4472,7 +4473,7 @@ StatusCode UA_CreateSessionRequest_Decode(UA_MsgBuffer* msgBuf, UA_CreateSession
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4504,11 +4505,11 @@ struct UA_EncodeableType UA_CreateSessionRequest_EncodeableType =
     OpcUaId_CreateSessionRequest,
     OpcUaId_CreateSessionRequest_Encoding_DefaultBinary,
     OpcUaId_CreateSessionRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CreateSessionRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_CreateSessionRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CreateSessionRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CreateSessionRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CreateSessionRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CreateSessionRequest_Decode
@@ -4521,7 +4522,7 @@ struct UA_EncodeableType UA_CreateSessionRequest_EncodeableType =
  *===========================================================================*/
 void UA_CreateSessionResponse_Initialize(UA_CreateSessionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         NodeId_Initialize(&a_pValue->SessionId);
@@ -4543,7 +4544,7 @@ void UA_CreateSessionResponse_Initialize(UA_CreateSessionResponse* a_pValue)
  *===========================================================================*/
 void UA_CreateSessionResponse_Clear(UA_CreateSessionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         NodeId_Clear(&a_pValue->SessionId);
@@ -4567,7 +4568,7 @@ StatusCode UA_CreateSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CreateSessio
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4594,7 +4595,7 @@ StatusCode UA_CreateSessionResponse_Decode(UA_MsgBuffer* msgBuf, UA_CreateSessio
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4629,11 +4630,11 @@ struct UA_EncodeableType UA_CreateSessionResponse_EncodeableType =
     OpcUaId_CreateSessionResponse,
     OpcUaId_CreateSessionResponse_Encoding_DefaultBinary,
     OpcUaId_CreateSessionResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CreateSessionResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_CreateSessionResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CreateSessionResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CreateSessionResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CreateSessionResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CreateSessionResponse_Decode
@@ -4647,7 +4648,7 @@ struct UA_EncodeableType UA_CreateSessionResponse_EncodeableType =
  *===========================================================================*/
 void UA_UserIdentityToken_Initialize(UA_UserIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->PolicyId);
     }
@@ -4658,7 +4659,7 @@ void UA_UserIdentityToken_Initialize(UA_UserIdentityToken* a_pValue)
  *===========================================================================*/
 void UA_UserIdentityToken_Clear(UA_UserIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->PolicyId);
     }
@@ -4671,7 +4672,7 @@ StatusCode UA_UserIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_UserIdentityToke
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4687,7 +4688,7 @@ StatusCode UA_UserIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_UserIdentityToke
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4711,11 +4712,11 @@ struct UA_EncodeableType UA_UserIdentityToken_EncodeableType =
     OpcUaId_UserIdentityToken,
     OpcUaId_UserIdentityToken_Encoding_DefaultBinary,
     OpcUaId_UserIdentityToken_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_UserIdentityToken),
     (UA_EncodeableObject_PfnInitialize*)UA_UserIdentityToken_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_UserIdentityToken_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_UserIdentityToken_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_UserIdentityToken_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_UserIdentityToken_Decode
@@ -4728,7 +4729,7 @@ struct UA_EncodeableType UA_UserIdentityToken_EncodeableType =
  *===========================================================================*/
 void UA_AnonymousIdentityToken_Initialize(UA_AnonymousIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->PolicyId);
     }
@@ -4739,7 +4740,7 @@ void UA_AnonymousIdentityToken_Initialize(UA_AnonymousIdentityToken* a_pValue)
  *===========================================================================*/
 void UA_AnonymousIdentityToken_Clear(UA_AnonymousIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->PolicyId);
     }
@@ -4752,7 +4753,7 @@ StatusCode UA_AnonymousIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_AnonymousId
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4768,7 +4769,7 @@ StatusCode UA_AnonymousIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_AnonymousId
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4792,11 +4793,11 @@ struct UA_EncodeableType UA_AnonymousIdentityToken_EncodeableType =
     OpcUaId_AnonymousIdentityToken,
     OpcUaId_AnonymousIdentityToken_Encoding_DefaultBinary,
     OpcUaId_AnonymousIdentityToken_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AnonymousIdentityToken),
     (UA_EncodeableObject_PfnInitialize*)UA_AnonymousIdentityToken_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AnonymousIdentityToken_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AnonymousIdentityToken_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AnonymousIdentityToken_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AnonymousIdentityToken_Decode
@@ -4809,7 +4810,7 @@ struct UA_EncodeableType UA_AnonymousIdentityToken_EncodeableType =
  *===========================================================================*/
 void UA_UserNameIdentityToken_Initialize(UA_UserNameIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->PolicyId);
         String_Initialize(&a_pValue->UserName);
@@ -4823,7 +4824,7 @@ void UA_UserNameIdentityToken_Initialize(UA_UserNameIdentityToken* a_pValue)
  *===========================================================================*/
 void UA_UserNameIdentityToken_Clear(UA_UserNameIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->PolicyId);
         String_Clear(&a_pValue->UserName);
@@ -4839,7 +4840,7 @@ StatusCode UA_UserNameIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_UserNameIden
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4858,7 +4859,7 @@ StatusCode UA_UserNameIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_UserNameIden
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4885,11 +4886,11 @@ struct UA_EncodeableType UA_UserNameIdentityToken_EncodeableType =
     OpcUaId_UserNameIdentityToken,
     OpcUaId_UserNameIdentityToken_Encoding_DefaultBinary,
     OpcUaId_UserNameIdentityToken_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_UserNameIdentityToken),
     (UA_EncodeableObject_PfnInitialize*)UA_UserNameIdentityToken_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_UserNameIdentityToken_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_UserNameIdentityToken_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_UserNameIdentityToken_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_UserNameIdentityToken_Decode
@@ -4902,7 +4903,7 @@ struct UA_EncodeableType UA_UserNameIdentityToken_EncodeableType =
  *===========================================================================*/
 void UA_X509IdentityToken_Initialize(UA_X509IdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->PolicyId);
         ByteString_Initialize(&a_pValue->CertificateData);
@@ -4914,7 +4915,7 @@ void UA_X509IdentityToken_Initialize(UA_X509IdentityToken* a_pValue)
  *===========================================================================*/
 void UA_X509IdentityToken_Clear(UA_X509IdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->PolicyId);
         ByteString_Clear(&a_pValue->CertificateData);
@@ -4928,7 +4929,7 @@ StatusCode UA_X509IdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_X509IdentityToke
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4945,7 +4946,7 @@ StatusCode UA_X509IdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_X509IdentityToke
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -4970,11 +4971,11 @@ struct UA_EncodeableType UA_X509IdentityToken_EncodeableType =
     OpcUaId_X509IdentityToken,
     OpcUaId_X509IdentityToken_Encoding_DefaultBinary,
     OpcUaId_X509IdentityToken_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_X509IdentityToken),
     (UA_EncodeableObject_PfnInitialize*)UA_X509IdentityToken_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_X509IdentityToken_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_X509IdentityToken_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_X509IdentityToken_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_X509IdentityToken_Decode
@@ -4987,7 +4988,7 @@ struct UA_EncodeableType UA_X509IdentityToken_EncodeableType =
  *===========================================================================*/
 void UA_KerberosIdentityToken_Initialize(UA_KerberosIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->PolicyId);
         ByteString_Initialize(&a_pValue->TicketData);
@@ -4999,7 +5000,7 @@ void UA_KerberosIdentityToken_Initialize(UA_KerberosIdentityToken* a_pValue)
  *===========================================================================*/
 void UA_KerberosIdentityToken_Clear(UA_KerberosIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->PolicyId);
         ByteString_Clear(&a_pValue->TicketData);
@@ -5013,7 +5014,7 @@ StatusCode UA_KerberosIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_KerberosIden
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5030,7 +5031,7 @@ StatusCode UA_KerberosIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_KerberosIden
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5055,11 +5056,11 @@ struct UA_EncodeableType UA_KerberosIdentityToken_EncodeableType =
     OpcUaId_KerberosIdentityToken,
     OpcUaId_KerberosIdentityToken_Encoding_DefaultBinary,
     OpcUaId_KerberosIdentityToken_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_KerberosIdentityToken),
     (UA_EncodeableObject_PfnInitialize*)UA_KerberosIdentityToken_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_KerberosIdentityToken_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_KerberosIdentityToken_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_KerberosIdentityToken_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_KerberosIdentityToken_Decode
@@ -5072,7 +5073,7 @@ struct UA_EncodeableType UA_KerberosIdentityToken_EncodeableType =
  *===========================================================================*/
 void UA_IssuedIdentityToken_Initialize(UA_IssuedIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->PolicyId);
         ByteString_Initialize(&a_pValue->TokenData);
@@ -5085,7 +5086,7 @@ void UA_IssuedIdentityToken_Initialize(UA_IssuedIdentityToken* a_pValue)
  *===========================================================================*/
 void UA_IssuedIdentityToken_Clear(UA_IssuedIdentityToken* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->PolicyId);
         ByteString_Clear(&a_pValue->TokenData);
@@ -5100,7 +5101,7 @@ StatusCode UA_IssuedIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_IssuedIdentity
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5118,7 +5119,7 @@ StatusCode UA_IssuedIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_IssuedIdentity
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5144,11 +5145,11 @@ struct UA_EncodeableType UA_IssuedIdentityToken_EncodeableType =
     OpcUaId_IssuedIdentityToken,
     OpcUaId_IssuedIdentityToken_Encoding_DefaultBinary,
     OpcUaId_IssuedIdentityToken_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_IssuedIdentityToken),
     (UA_EncodeableObject_PfnInitialize*)UA_IssuedIdentityToken_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_IssuedIdentityToken_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_IssuedIdentityToken_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_IssuedIdentityToken_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_IssuedIdentityToken_Decode
@@ -5162,7 +5163,7 @@ struct UA_EncodeableType UA_IssuedIdentityToken_EncodeableType =
  *===========================================================================*/
 void UA_ActivateSessionRequest_Initialize(UA_ActivateSessionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_SignatureData_Initialize(&a_pValue->ClientSignature);
@@ -5180,7 +5181,7 @@ void UA_ActivateSessionRequest_Initialize(UA_ActivateSessionRequest* a_pValue)
  *===========================================================================*/
 void UA_ActivateSessionRequest_Clear(UA_ActivateSessionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_SignatureData_Clear(&a_pValue->ClientSignature);
@@ -5200,7 +5201,7 @@ StatusCode UA_ActivateSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_ActivateSes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5223,7 +5224,7 @@ StatusCode UA_ActivateSessionRequest_Decode(UA_MsgBuffer* msgBuf, UA_ActivateSes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5254,11 +5255,11 @@ struct UA_EncodeableType UA_ActivateSessionRequest_EncodeableType =
     OpcUaId_ActivateSessionRequest,
     OpcUaId_ActivateSessionRequest_Encoding_DefaultBinary,
     OpcUaId_ActivateSessionRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ActivateSessionRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_ActivateSessionRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ActivateSessionRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ActivateSessionRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ActivateSessionRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ActivateSessionRequest_Decode
@@ -5271,7 +5272,7 @@ struct UA_EncodeableType UA_ActivateSessionRequest_EncodeableType =
  *===========================================================================*/
 void UA_ActivateSessionResponse_Initialize(UA_ActivateSessionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         ByteString_Initialize(&a_pValue->ServerNonce);
@@ -5287,7 +5288,7 @@ void UA_ActivateSessionResponse_Initialize(UA_ActivateSessionResponse* a_pValue)
  *===========================================================================*/
 void UA_ActivateSessionResponse_Clear(UA_ActivateSessionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         ByteString_Clear(&a_pValue->ServerNonce);
@@ -5305,7 +5306,7 @@ StatusCode UA_ActivateSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_ActivateSe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5326,7 +5327,7 @@ StatusCode UA_ActivateSessionResponse_Decode(UA_MsgBuffer* msgBuf, UA_ActivateSe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5355,11 +5356,11 @@ struct UA_EncodeableType UA_ActivateSessionResponse_EncodeableType =
     OpcUaId_ActivateSessionResponse,
     OpcUaId_ActivateSessionResponse_Encoding_DefaultBinary,
     OpcUaId_ActivateSessionResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ActivateSessionResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_ActivateSessionResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ActivateSessionResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ActivateSessionResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ActivateSessionResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ActivateSessionResponse_Decode
@@ -5374,7 +5375,7 @@ struct UA_EncodeableType UA_ActivateSessionResponse_EncodeableType =
  *===========================================================================*/
 void UA_CloseSessionRequest_Initialize(UA_CloseSessionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         Boolean_Initialize(&a_pValue->DeleteSubscriptions);
@@ -5386,7 +5387,7 @@ void UA_CloseSessionRequest_Initialize(UA_CloseSessionRequest* a_pValue)
  *===========================================================================*/
 void UA_CloseSessionRequest_Clear(UA_CloseSessionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         Boolean_Clear(&a_pValue->DeleteSubscriptions);
@@ -5400,7 +5401,7 @@ StatusCode UA_CloseSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CloseSessionRe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5417,7 +5418,7 @@ StatusCode UA_CloseSessionRequest_Decode(UA_MsgBuffer* msgBuf, UA_CloseSessionRe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5442,11 +5443,11 @@ struct UA_EncodeableType UA_CloseSessionRequest_EncodeableType =
     OpcUaId_CloseSessionRequest,
     OpcUaId_CloseSessionRequest_Encoding_DefaultBinary,
     OpcUaId_CloseSessionRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CloseSessionRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_CloseSessionRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CloseSessionRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CloseSessionRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CloseSessionRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CloseSessionRequest_Decode
@@ -5459,7 +5460,7 @@ struct UA_EncodeableType UA_CloseSessionRequest_EncodeableType =
  *===========================================================================*/
 void UA_CloseSessionResponse_Initialize(UA_CloseSessionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
     }
@@ -5470,7 +5471,7 @@ void UA_CloseSessionResponse_Initialize(UA_CloseSessionResponse* a_pValue)
  *===========================================================================*/
 void UA_CloseSessionResponse_Clear(UA_CloseSessionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
     }
@@ -5483,7 +5484,7 @@ StatusCode UA_CloseSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CloseSessionR
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5499,7 +5500,7 @@ StatusCode UA_CloseSessionResponse_Decode(UA_MsgBuffer* msgBuf, UA_CloseSessionR
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5523,11 +5524,11 @@ struct UA_EncodeableType UA_CloseSessionResponse_EncodeableType =
     OpcUaId_CloseSessionResponse,
     OpcUaId_CloseSessionResponse_Encoding_DefaultBinary,
     OpcUaId_CloseSessionResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CloseSessionResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_CloseSessionResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CloseSessionResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CloseSessionResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CloseSessionResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CloseSessionResponse_Decode
@@ -5542,7 +5543,7 @@ struct UA_EncodeableType UA_CloseSessionResponse_EncodeableType =
  *===========================================================================*/
 void UA_CancelRequest_Initialize(UA_CancelRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->RequestHandle);
@@ -5554,7 +5555,7 @@ void UA_CancelRequest_Initialize(UA_CancelRequest* a_pValue)
  *===========================================================================*/
 void UA_CancelRequest_Clear(UA_CancelRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->RequestHandle);
@@ -5568,7 +5569,7 @@ StatusCode UA_CancelRequest_Encode(UA_MsgBuffer* msgBuf, UA_CancelRequest* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5585,7 +5586,7 @@ StatusCode UA_CancelRequest_Decode(UA_MsgBuffer* msgBuf, UA_CancelRequest* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5610,11 +5611,11 @@ struct UA_EncodeableType UA_CancelRequest_EncodeableType =
     OpcUaId_CancelRequest,
     OpcUaId_CancelRequest_Encoding_DefaultBinary,
     OpcUaId_CancelRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CancelRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_CancelRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CancelRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CancelRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CancelRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CancelRequest_Decode
@@ -5627,7 +5628,7 @@ struct UA_EncodeableType UA_CancelRequest_EncodeableType =
  *===========================================================================*/
 void UA_CancelResponse_Initialize(UA_CancelResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UInt32_Initialize(&a_pValue->CancelCount);
@@ -5639,7 +5640,7 @@ void UA_CancelResponse_Initialize(UA_CancelResponse* a_pValue)
  *===========================================================================*/
 void UA_CancelResponse_Clear(UA_CancelResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UInt32_Clear(&a_pValue->CancelCount);
@@ -5653,7 +5654,7 @@ StatusCode UA_CancelResponse_Encode(UA_MsgBuffer* msgBuf, UA_CancelResponse* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5670,7 +5671,7 @@ StatusCode UA_CancelResponse_Decode(UA_MsgBuffer* msgBuf, UA_CancelResponse* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5695,11 +5696,11 @@ struct UA_EncodeableType UA_CancelResponse_EncodeableType =
     OpcUaId_CancelResponse,
     OpcUaId_CancelResponse_Encoding_DefaultBinary,
     OpcUaId_CancelResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CancelResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_CancelResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CancelResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CancelResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CancelResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CancelResponse_Decode
@@ -5714,7 +5715,7 @@ struct UA_EncodeableType UA_CancelResponse_EncodeableType =
  *===========================================================================*/
 void UA_NodeAttributes_Initialize(UA_NodeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SpecifiedAttributes);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -5729,7 +5730,7 @@ void UA_NodeAttributes_Initialize(UA_NodeAttributes* a_pValue)
  *===========================================================================*/
 void UA_NodeAttributes_Clear(UA_NodeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SpecifiedAttributes);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -5746,7 +5747,7 @@ StatusCode UA_NodeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_NodeAttributes* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5766,7 +5767,7 @@ StatusCode UA_NodeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_NodeAttributes* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5794,11 +5795,11 @@ struct UA_EncodeableType UA_NodeAttributes_EncodeableType =
     OpcUaId_NodeAttributes,
     OpcUaId_NodeAttributes_Encoding_DefaultBinary,
     OpcUaId_NodeAttributes_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_NodeAttributes),
     (UA_EncodeableObject_PfnInitialize*)UA_NodeAttributes_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_NodeAttributes_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_NodeAttributes_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_NodeAttributes_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_NodeAttributes_Decode
@@ -5811,7 +5812,7 @@ struct UA_EncodeableType UA_NodeAttributes_EncodeableType =
  *===========================================================================*/
 void UA_ObjectAttributes_Initialize(UA_ObjectAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SpecifiedAttributes);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -5827,7 +5828,7 @@ void UA_ObjectAttributes_Initialize(UA_ObjectAttributes* a_pValue)
  *===========================================================================*/
 void UA_ObjectAttributes_Clear(UA_ObjectAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SpecifiedAttributes);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -5845,7 +5846,7 @@ StatusCode UA_ObjectAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ObjectAttributes*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5866,7 +5867,7 @@ StatusCode UA_ObjectAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ObjectAttributes*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5895,11 +5896,11 @@ struct UA_EncodeableType UA_ObjectAttributes_EncodeableType =
     OpcUaId_ObjectAttributes,
     OpcUaId_ObjectAttributes_Encoding_DefaultBinary,
     OpcUaId_ObjectAttributes_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ObjectAttributes),
     (UA_EncodeableObject_PfnInitialize*)UA_ObjectAttributes_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ObjectAttributes_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ObjectAttributes_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ObjectAttributes_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ObjectAttributes_Decode
@@ -5912,7 +5913,7 @@ struct UA_EncodeableType UA_ObjectAttributes_EncodeableType =
  *===========================================================================*/
 void UA_VariableAttributes_Initialize(UA_VariableAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SpecifiedAttributes);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -5936,7 +5937,7 @@ void UA_VariableAttributes_Initialize(UA_VariableAttributes* a_pValue)
  *===========================================================================*/
 void UA_VariableAttributes_Clear(UA_VariableAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SpecifiedAttributes);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -5962,7 +5963,7 @@ StatusCode UA_VariableAttributes_Encode(UA_MsgBuffer* msgBuf, UA_VariableAttribu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -5991,7 +5992,7 @@ StatusCode UA_VariableAttributes_Decode(UA_MsgBuffer* msgBuf, UA_VariableAttribu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6028,11 +6029,11 @@ struct UA_EncodeableType UA_VariableAttributes_EncodeableType =
     OpcUaId_VariableAttributes,
     OpcUaId_VariableAttributes_Encoding_DefaultBinary,
     OpcUaId_VariableAttributes_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_VariableAttributes),
     (UA_EncodeableObject_PfnInitialize*)UA_VariableAttributes_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_VariableAttributes_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_VariableAttributes_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_VariableAttributes_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_VariableAttributes_Decode
@@ -6045,7 +6046,7 @@ struct UA_EncodeableType UA_VariableAttributes_EncodeableType =
  *===========================================================================*/
 void UA_MethodAttributes_Initialize(UA_MethodAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SpecifiedAttributes);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -6062,7 +6063,7 @@ void UA_MethodAttributes_Initialize(UA_MethodAttributes* a_pValue)
  *===========================================================================*/
 void UA_MethodAttributes_Clear(UA_MethodAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SpecifiedAttributes);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -6081,7 +6082,7 @@ StatusCode UA_MethodAttributes_Encode(UA_MsgBuffer* msgBuf, UA_MethodAttributes*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6103,7 +6104,7 @@ StatusCode UA_MethodAttributes_Decode(UA_MsgBuffer* msgBuf, UA_MethodAttributes*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6133,11 +6134,11 @@ struct UA_EncodeableType UA_MethodAttributes_EncodeableType =
     OpcUaId_MethodAttributes,
     OpcUaId_MethodAttributes_Encoding_DefaultBinary,
     OpcUaId_MethodAttributes_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_MethodAttributes),
     (UA_EncodeableObject_PfnInitialize*)UA_MethodAttributes_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_MethodAttributes_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_MethodAttributes_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_MethodAttributes_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_MethodAttributes_Decode
@@ -6150,7 +6151,7 @@ struct UA_EncodeableType UA_MethodAttributes_EncodeableType =
  *===========================================================================*/
 void UA_ObjectTypeAttributes_Initialize(UA_ObjectTypeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SpecifiedAttributes);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -6166,7 +6167,7 @@ void UA_ObjectTypeAttributes_Initialize(UA_ObjectTypeAttributes* a_pValue)
  *===========================================================================*/
 void UA_ObjectTypeAttributes_Clear(UA_ObjectTypeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SpecifiedAttributes);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -6184,7 +6185,7 @@ StatusCode UA_ObjectTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ObjectTypeAtt
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6205,7 +6206,7 @@ StatusCode UA_ObjectTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ObjectTypeAtt
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6234,11 +6235,11 @@ struct UA_EncodeableType UA_ObjectTypeAttributes_EncodeableType =
     OpcUaId_ObjectTypeAttributes,
     OpcUaId_ObjectTypeAttributes_Encoding_DefaultBinary,
     OpcUaId_ObjectTypeAttributes_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ObjectTypeAttributes),
     (UA_EncodeableObject_PfnInitialize*)UA_ObjectTypeAttributes_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ObjectTypeAttributes_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ObjectTypeAttributes_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ObjectTypeAttributes_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ObjectTypeAttributes_Decode
@@ -6251,7 +6252,7 @@ struct UA_EncodeableType UA_ObjectTypeAttributes_EncodeableType =
  *===========================================================================*/
 void UA_VariableTypeAttributes_Initialize(UA_VariableTypeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SpecifiedAttributes);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -6272,7 +6273,7 @@ void UA_VariableTypeAttributes_Initialize(UA_VariableTypeAttributes* a_pValue)
  *===========================================================================*/
 void UA_VariableTypeAttributes_Clear(UA_VariableTypeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SpecifiedAttributes);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -6295,7 +6296,7 @@ StatusCode UA_VariableTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_VariableTyp
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6321,7 +6322,7 @@ StatusCode UA_VariableTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_VariableTyp
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6355,11 +6356,11 @@ struct UA_EncodeableType UA_VariableTypeAttributes_EncodeableType =
     OpcUaId_VariableTypeAttributes,
     OpcUaId_VariableTypeAttributes_Encoding_DefaultBinary,
     OpcUaId_VariableTypeAttributes_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_VariableTypeAttributes),
     (UA_EncodeableObject_PfnInitialize*)UA_VariableTypeAttributes_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_VariableTypeAttributes_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_VariableTypeAttributes_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_VariableTypeAttributes_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_VariableTypeAttributes_Decode
@@ -6372,7 +6373,7 @@ struct UA_EncodeableType UA_VariableTypeAttributes_EncodeableType =
  *===========================================================================*/
 void UA_ReferenceTypeAttributes_Initialize(UA_ReferenceTypeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SpecifiedAttributes);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -6390,7 +6391,7 @@ void UA_ReferenceTypeAttributes_Initialize(UA_ReferenceTypeAttributes* a_pValue)
  *===========================================================================*/
 void UA_ReferenceTypeAttributes_Clear(UA_ReferenceTypeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SpecifiedAttributes);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -6410,7 +6411,7 @@ StatusCode UA_ReferenceTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceT
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6433,7 +6434,7 @@ StatusCode UA_ReferenceTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceT
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6464,11 +6465,11 @@ struct UA_EncodeableType UA_ReferenceTypeAttributes_EncodeableType =
     OpcUaId_ReferenceTypeAttributes,
     OpcUaId_ReferenceTypeAttributes_Encoding_DefaultBinary,
     OpcUaId_ReferenceTypeAttributes_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReferenceTypeAttributes),
     (UA_EncodeableObject_PfnInitialize*)UA_ReferenceTypeAttributes_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReferenceTypeAttributes_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReferenceTypeAttributes_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReferenceTypeAttributes_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReferenceTypeAttributes_Decode
@@ -6481,7 +6482,7 @@ struct UA_EncodeableType UA_ReferenceTypeAttributes_EncodeableType =
  *===========================================================================*/
 void UA_DataTypeAttributes_Initialize(UA_DataTypeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SpecifiedAttributes);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -6497,7 +6498,7 @@ void UA_DataTypeAttributes_Initialize(UA_DataTypeAttributes* a_pValue)
  *===========================================================================*/
 void UA_DataTypeAttributes_Clear(UA_DataTypeAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SpecifiedAttributes);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -6515,7 +6516,7 @@ StatusCode UA_DataTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_DataTypeAttribu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6536,7 +6537,7 @@ StatusCode UA_DataTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_DataTypeAttribu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6565,11 +6566,11 @@ struct UA_EncodeableType UA_DataTypeAttributes_EncodeableType =
     OpcUaId_DataTypeAttributes,
     OpcUaId_DataTypeAttributes_Encoding_DefaultBinary,
     OpcUaId_DataTypeAttributes_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DataTypeAttributes),
     (UA_EncodeableObject_PfnInitialize*)UA_DataTypeAttributes_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DataTypeAttributes_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DataTypeAttributes_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DataTypeAttributes_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DataTypeAttributes_Decode
@@ -6582,7 +6583,7 @@ struct UA_EncodeableType UA_DataTypeAttributes_EncodeableType =
  *===========================================================================*/
 void UA_ViewAttributes_Initialize(UA_ViewAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SpecifiedAttributes);
         LocalizedText_Initialize(&a_pValue->DisplayName);
@@ -6599,7 +6600,7 @@ void UA_ViewAttributes_Initialize(UA_ViewAttributes* a_pValue)
  *===========================================================================*/
 void UA_ViewAttributes_Clear(UA_ViewAttributes* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SpecifiedAttributes);
         LocalizedText_Clear(&a_pValue->DisplayName);
@@ -6618,7 +6619,7 @@ StatusCode UA_ViewAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ViewAttributes* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6640,7 +6641,7 @@ StatusCode UA_ViewAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ViewAttributes* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6670,11 +6671,11 @@ struct UA_EncodeableType UA_ViewAttributes_EncodeableType =
     OpcUaId_ViewAttributes,
     OpcUaId_ViewAttributes_Encoding_DefaultBinary,
     OpcUaId_ViewAttributes_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ViewAttributes),
     (UA_EncodeableObject_PfnInitialize*)UA_ViewAttributes_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ViewAttributes_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ViewAttributes_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ViewAttributes_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ViewAttributes_Decode
@@ -6687,7 +6688,7 @@ struct UA_EncodeableType UA_ViewAttributes_EncodeableType =
  *===========================================================================*/
 void UA_AddNodesItem_Initialize(UA_AddNodesItem* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ExpandedNodeId_Initialize(&a_pValue->ParentNodeId);
         NodeId_Initialize(&a_pValue->ReferenceTypeId);
@@ -6704,7 +6705,7 @@ void UA_AddNodesItem_Initialize(UA_AddNodesItem* a_pValue)
  *===========================================================================*/
 void UA_AddNodesItem_Clear(UA_AddNodesItem* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ExpandedNodeId_Clear(&a_pValue->ParentNodeId);
         NodeId_Clear(&a_pValue->ReferenceTypeId);
@@ -6723,7 +6724,7 @@ StatusCode UA_AddNodesItem_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesItem* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6745,7 +6746,7 @@ StatusCode UA_AddNodesItem_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesItem* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6775,11 +6776,11 @@ struct UA_EncodeableType UA_AddNodesItem_EncodeableType =
     OpcUaId_AddNodesItem,
     OpcUaId_AddNodesItem_Encoding_DefaultBinary,
     OpcUaId_AddNodesItem_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AddNodesItem),
     (UA_EncodeableObject_PfnInitialize*)UA_AddNodesItem_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AddNodesItem_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AddNodesItem_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AddNodesItem_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AddNodesItem_Decode
@@ -6792,7 +6793,7 @@ struct UA_EncodeableType UA_AddNodesItem_EncodeableType =
  *===========================================================================*/
 void UA_AddNodesResult_Initialize(UA_AddNodesResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         NodeId_Initialize(&a_pValue->AddedNodeId);
@@ -6804,7 +6805,7 @@ void UA_AddNodesResult_Initialize(UA_AddNodesResult* a_pValue)
  *===========================================================================*/
 void UA_AddNodesResult_Clear(UA_AddNodesResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         NodeId_Clear(&a_pValue->AddedNodeId);
@@ -6818,7 +6819,7 @@ StatusCode UA_AddNodesResult_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesResult* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6835,7 +6836,7 @@ StatusCode UA_AddNodesResult_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesResult* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6860,11 +6861,11 @@ struct UA_EncodeableType UA_AddNodesResult_EncodeableType =
     OpcUaId_AddNodesResult,
     OpcUaId_AddNodesResult_Encoding_DefaultBinary,
     OpcUaId_AddNodesResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AddNodesResult),
     (UA_EncodeableObject_PfnInitialize*)UA_AddNodesResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AddNodesResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AddNodesResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AddNodesResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AddNodesResult_Decode
@@ -6878,7 +6879,7 @@ struct UA_EncodeableType UA_AddNodesResult_EncodeableType =
  *===========================================================================*/
 void UA_AddNodesRequest_Initialize(UA_AddNodesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfNodesToAdd, (void**) &a_pValue->NodesToAdd, 
@@ -6891,7 +6892,7 @@ void UA_AddNodesRequest_Initialize(UA_AddNodesRequest* a_pValue)
  *===========================================================================*/
 void UA_AddNodesRequest_Clear(UA_AddNodesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfNodesToAdd, (void**) &a_pValue->NodesToAdd, 
@@ -6906,7 +6907,7 @@ StatusCode UA_AddNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesRequest* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6924,7 +6925,7 @@ StatusCode UA_AddNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesRequest* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -6950,11 +6951,11 @@ struct UA_EncodeableType UA_AddNodesRequest_EncodeableType =
     OpcUaId_AddNodesRequest,
     OpcUaId_AddNodesRequest_Encoding_DefaultBinary,
     OpcUaId_AddNodesRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AddNodesRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_AddNodesRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AddNodesRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AddNodesRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AddNodesRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AddNodesRequest_Decode
@@ -6967,7 +6968,7 @@ struct UA_EncodeableType UA_AddNodesRequest_EncodeableType =
  *===========================================================================*/
 void UA_AddNodesResponse_Initialize(UA_AddNodesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -6982,7 +6983,7 @@ void UA_AddNodesResponse_Initialize(UA_AddNodesResponse* a_pValue)
  *===========================================================================*/
 void UA_AddNodesResponse_Clear(UA_AddNodesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -6999,7 +7000,7 @@ StatusCode UA_AddNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesResponse*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7019,7 +7020,7 @@ StatusCode UA_AddNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesResponse*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7047,11 +7048,11 @@ struct UA_EncodeableType UA_AddNodesResponse_EncodeableType =
     OpcUaId_AddNodesResponse,
     OpcUaId_AddNodesResponse_Encoding_DefaultBinary,
     OpcUaId_AddNodesResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AddNodesResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_AddNodesResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AddNodesResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AddNodesResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AddNodesResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AddNodesResponse_Decode
@@ -7065,7 +7066,7 @@ struct UA_EncodeableType UA_AddNodesResponse_EncodeableType =
  *===========================================================================*/
 void UA_AddReferencesItem_Initialize(UA_AddReferencesItem* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->SourceNodeId);
         NodeId_Initialize(&a_pValue->ReferenceTypeId);
@@ -7081,7 +7082,7 @@ void UA_AddReferencesItem_Initialize(UA_AddReferencesItem* a_pValue)
  *===========================================================================*/
 void UA_AddReferencesItem_Clear(UA_AddReferencesItem* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->SourceNodeId);
         NodeId_Clear(&a_pValue->ReferenceTypeId);
@@ -7099,7 +7100,7 @@ StatusCode UA_AddReferencesItem_Encode(UA_MsgBuffer* msgBuf, UA_AddReferencesIte
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7120,7 +7121,7 @@ StatusCode UA_AddReferencesItem_Decode(UA_MsgBuffer* msgBuf, UA_AddReferencesIte
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7149,11 +7150,11 @@ struct UA_EncodeableType UA_AddReferencesItem_EncodeableType =
     OpcUaId_AddReferencesItem,
     OpcUaId_AddReferencesItem_Encoding_DefaultBinary,
     OpcUaId_AddReferencesItem_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AddReferencesItem),
     (UA_EncodeableObject_PfnInitialize*)UA_AddReferencesItem_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AddReferencesItem_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AddReferencesItem_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AddReferencesItem_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AddReferencesItem_Decode
@@ -7167,7 +7168,7 @@ struct UA_EncodeableType UA_AddReferencesItem_EncodeableType =
  *===========================================================================*/
 void UA_AddReferencesRequest_Initialize(UA_AddReferencesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfReferencesToAdd, (void**) &a_pValue->ReferencesToAdd, 
@@ -7180,7 +7181,7 @@ void UA_AddReferencesRequest_Initialize(UA_AddReferencesRequest* a_pValue)
  *===========================================================================*/
 void UA_AddReferencesRequest_Clear(UA_AddReferencesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfReferencesToAdd, (void**) &a_pValue->ReferencesToAdd, 
@@ -7195,7 +7196,7 @@ StatusCode UA_AddReferencesRequest_Encode(UA_MsgBuffer* msgBuf, UA_AddReferences
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7213,7 +7214,7 @@ StatusCode UA_AddReferencesRequest_Decode(UA_MsgBuffer* msgBuf, UA_AddReferences
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7239,11 +7240,11 @@ struct UA_EncodeableType UA_AddReferencesRequest_EncodeableType =
     OpcUaId_AddReferencesRequest,
     OpcUaId_AddReferencesRequest_Encoding_DefaultBinary,
     OpcUaId_AddReferencesRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AddReferencesRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_AddReferencesRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AddReferencesRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AddReferencesRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AddReferencesRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AddReferencesRequest_Decode
@@ -7256,7 +7257,7 @@ struct UA_EncodeableType UA_AddReferencesRequest_EncodeableType =
  *===========================================================================*/
 void UA_AddReferencesResponse_Initialize(UA_AddReferencesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -7271,7 +7272,7 @@ void UA_AddReferencesResponse_Initialize(UA_AddReferencesResponse* a_pValue)
  *===========================================================================*/
 void UA_AddReferencesResponse_Clear(UA_AddReferencesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -7288,7 +7289,7 @@ StatusCode UA_AddReferencesResponse_Encode(UA_MsgBuffer* msgBuf, UA_AddReference
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7308,7 +7309,7 @@ StatusCode UA_AddReferencesResponse_Decode(UA_MsgBuffer* msgBuf, UA_AddReference
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7336,11 +7337,11 @@ struct UA_EncodeableType UA_AddReferencesResponse_EncodeableType =
     OpcUaId_AddReferencesResponse,
     OpcUaId_AddReferencesResponse_Encoding_DefaultBinary,
     OpcUaId_AddReferencesResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AddReferencesResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_AddReferencesResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AddReferencesResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AddReferencesResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AddReferencesResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AddReferencesResponse_Decode
@@ -7354,7 +7355,7 @@ struct UA_EncodeableType UA_AddReferencesResponse_EncodeableType =
  *===========================================================================*/
 void UA_DeleteNodesItem_Initialize(UA_DeleteNodesItem* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         Boolean_Initialize(&a_pValue->DeleteTargetReferences);
@@ -7366,7 +7367,7 @@ void UA_DeleteNodesItem_Initialize(UA_DeleteNodesItem* a_pValue)
  *===========================================================================*/
 void UA_DeleteNodesItem_Clear(UA_DeleteNodesItem* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         Boolean_Clear(&a_pValue->DeleteTargetReferences);
@@ -7380,7 +7381,7 @@ StatusCode UA_DeleteNodesItem_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesItem* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7397,7 +7398,7 @@ StatusCode UA_DeleteNodesItem_Decode(UA_MsgBuffer* msgBuf, UA_DeleteNodesItem* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7422,11 +7423,11 @@ struct UA_EncodeableType UA_DeleteNodesItem_EncodeableType =
     OpcUaId_DeleteNodesItem,
     OpcUaId_DeleteNodesItem_Encoding_DefaultBinary,
     OpcUaId_DeleteNodesItem_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteNodesItem),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteNodesItem_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteNodesItem_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteNodesItem_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteNodesItem_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteNodesItem_Decode
@@ -7440,7 +7441,7 @@ struct UA_EncodeableType UA_DeleteNodesItem_EncodeableType =
  *===========================================================================*/
 void UA_DeleteNodesRequest_Initialize(UA_DeleteNodesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfNodesToDelete, (void**) &a_pValue->NodesToDelete, 
@@ -7453,7 +7454,7 @@ void UA_DeleteNodesRequest_Initialize(UA_DeleteNodesRequest* a_pValue)
  *===========================================================================*/
 void UA_DeleteNodesRequest_Clear(UA_DeleteNodesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfNodesToDelete, (void**) &a_pValue->NodesToDelete, 
@@ -7468,7 +7469,7 @@ StatusCode UA_DeleteNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRequ
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7486,7 +7487,7 @@ StatusCode UA_DeleteNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRequ
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7512,11 +7513,11 @@ struct UA_EncodeableType UA_DeleteNodesRequest_EncodeableType =
     OpcUaId_DeleteNodesRequest,
     OpcUaId_DeleteNodesRequest_Encoding_DefaultBinary,
     OpcUaId_DeleteNodesRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteNodesRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteNodesRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteNodesRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteNodesRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteNodesRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteNodesRequest_Decode
@@ -7529,7 +7530,7 @@ struct UA_EncodeableType UA_DeleteNodesRequest_EncodeableType =
  *===========================================================================*/
 void UA_DeleteNodesResponse_Initialize(UA_DeleteNodesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -7544,7 +7545,7 @@ void UA_DeleteNodesResponse_Initialize(UA_DeleteNodesResponse* a_pValue)
  *===========================================================================*/
 void UA_DeleteNodesResponse_Clear(UA_DeleteNodesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -7561,7 +7562,7 @@ StatusCode UA_DeleteNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7581,7 +7582,7 @@ StatusCode UA_DeleteNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7609,11 +7610,11 @@ struct UA_EncodeableType UA_DeleteNodesResponse_EncodeableType =
     OpcUaId_DeleteNodesResponse,
     OpcUaId_DeleteNodesResponse_Encoding_DefaultBinary,
     OpcUaId_DeleteNodesResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteNodesResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteNodesResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteNodesResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteNodesResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteNodesResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteNodesResponse_Decode
@@ -7627,7 +7628,7 @@ struct UA_EncodeableType UA_DeleteNodesResponse_EncodeableType =
  *===========================================================================*/
 void UA_DeleteReferencesItem_Initialize(UA_DeleteReferencesItem* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->SourceNodeId);
         NodeId_Initialize(&a_pValue->ReferenceTypeId);
@@ -7642,7 +7643,7 @@ void UA_DeleteReferencesItem_Initialize(UA_DeleteReferencesItem* a_pValue)
  *===========================================================================*/
 void UA_DeleteReferencesItem_Clear(UA_DeleteReferencesItem* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->SourceNodeId);
         NodeId_Clear(&a_pValue->ReferenceTypeId);
@@ -7659,7 +7660,7 @@ StatusCode UA_DeleteReferencesItem_Encode(UA_MsgBuffer* msgBuf, UA_DeleteReferen
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7679,7 +7680,7 @@ StatusCode UA_DeleteReferencesItem_Decode(UA_MsgBuffer* msgBuf, UA_DeleteReferen
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7707,11 +7708,11 @@ struct UA_EncodeableType UA_DeleteReferencesItem_EncodeableType =
     OpcUaId_DeleteReferencesItem,
     OpcUaId_DeleteReferencesItem_Encoding_DefaultBinary,
     OpcUaId_DeleteReferencesItem_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteReferencesItem),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteReferencesItem_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteReferencesItem_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteReferencesItem_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteReferencesItem_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteReferencesItem_Decode
@@ -7725,7 +7726,7 @@ struct UA_EncodeableType UA_DeleteReferencesItem_EncodeableType =
  *===========================================================================*/
 void UA_DeleteReferencesRequest_Initialize(UA_DeleteReferencesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfReferencesToDelete, (void**) &a_pValue->ReferencesToDelete, 
@@ -7738,7 +7739,7 @@ void UA_DeleteReferencesRequest_Initialize(UA_DeleteReferencesRequest* a_pValue)
  *===========================================================================*/
 void UA_DeleteReferencesRequest_Clear(UA_DeleteReferencesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfReferencesToDelete, (void**) &a_pValue->ReferencesToDelete, 
@@ -7753,7 +7754,7 @@ StatusCode UA_DeleteReferencesRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRefe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7771,7 +7772,7 @@ StatusCode UA_DeleteReferencesRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteRefe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7797,11 +7798,11 @@ struct UA_EncodeableType UA_DeleteReferencesRequest_EncodeableType =
     OpcUaId_DeleteReferencesRequest,
     OpcUaId_DeleteReferencesRequest_Encoding_DefaultBinary,
     OpcUaId_DeleteReferencesRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteReferencesRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteReferencesRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteReferencesRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteReferencesRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteReferencesRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteReferencesRequest_Decode
@@ -7814,7 +7815,7 @@ struct UA_EncodeableType UA_DeleteReferencesRequest_EncodeableType =
  *===========================================================================*/
 void UA_DeleteReferencesResponse_Initialize(UA_DeleteReferencesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -7829,7 +7830,7 @@ void UA_DeleteReferencesResponse_Initialize(UA_DeleteReferencesResponse* a_pValu
  *===========================================================================*/
 void UA_DeleteReferencesResponse_Clear(UA_DeleteReferencesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -7846,7 +7847,7 @@ StatusCode UA_DeleteReferencesResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRef
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7866,7 +7867,7 @@ StatusCode UA_DeleteReferencesResponse_Decode(UA_MsgBuffer* msgBuf, UA_DeleteRef
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7894,11 +7895,11 @@ struct UA_EncodeableType UA_DeleteReferencesResponse_EncodeableType =
     OpcUaId_DeleteReferencesResponse,
     OpcUaId_DeleteReferencesResponse_Encoding_DefaultBinary,
     OpcUaId_DeleteReferencesResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteReferencesResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteReferencesResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteReferencesResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteReferencesResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteReferencesResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteReferencesResponse_Decode
@@ -7914,7 +7915,7 @@ struct UA_EncodeableType UA_DeleteReferencesResponse_EncodeableType =
  *===========================================================================*/
 void UA_ViewDescription_Initialize(UA_ViewDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->ViewId);
         DateTime_Initialize(&a_pValue->Timestamp);
@@ -7927,7 +7928,7 @@ void UA_ViewDescription_Initialize(UA_ViewDescription* a_pValue)
  *===========================================================================*/
 void UA_ViewDescription_Clear(UA_ViewDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->ViewId);
         DateTime_Clear(&a_pValue->Timestamp);
@@ -7942,7 +7943,7 @@ StatusCode UA_ViewDescription_Encode(UA_MsgBuffer* msgBuf, UA_ViewDescription* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7960,7 +7961,7 @@ StatusCode UA_ViewDescription_Decode(UA_MsgBuffer* msgBuf, UA_ViewDescription* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -7986,11 +7987,11 @@ struct UA_EncodeableType UA_ViewDescription_EncodeableType =
     OpcUaId_ViewDescription,
     OpcUaId_ViewDescription_Encoding_DefaultBinary,
     OpcUaId_ViewDescription_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ViewDescription),
     (UA_EncodeableObject_PfnInitialize*)UA_ViewDescription_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ViewDescription_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ViewDescription_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ViewDescription_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ViewDescription_Decode
@@ -8003,7 +8004,7 @@ struct UA_EncodeableType UA_ViewDescription_EncodeableType =
  *===========================================================================*/
 void UA_BrowseDescription_Initialize(UA_BrowseDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->BrowseDirection);
@@ -8019,7 +8020,7 @@ void UA_BrowseDescription_Initialize(UA_BrowseDescription* a_pValue)
  *===========================================================================*/
 void UA_BrowseDescription_Clear(UA_BrowseDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->BrowseDirection);
@@ -8037,7 +8038,7 @@ StatusCode UA_BrowseDescription_Encode(UA_MsgBuffer* msgBuf, UA_BrowseDescriptio
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8058,7 +8059,7 @@ StatusCode UA_BrowseDescription_Decode(UA_MsgBuffer* msgBuf, UA_BrowseDescriptio
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8087,11 +8088,11 @@ struct UA_EncodeableType UA_BrowseDescription_EncodeableType =
     OpcUaId_BrowseDescription,
     OpcUaId_BrowseDescription_Encoding_DefaultBinary,
     OpcUaId_BrowseDescription_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BrowseDescription),
     (UA_EncodeableObject_PfnInitialize*)UA_BrowseDescription_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BrowseDescription_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BrowseDescription_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BrowseDescription_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BrowseDescription_Decode
@@ -8105,7 +8106,7 @@ struct UA_EncodeableType UA_BrowseDescription_EncodeableType =
  *===========================================================================*/
 void UA_ReferenceDescription_Initialize(UA_ReferenceDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->ReferenceTypeId);
         Boolean_Initialize(&a_pValue->IsForward);
@@ -8122,7 +8123,7 @@ void UA_ReferenceDescription_Initialize(UA_ReferenceDescription* a_pValue)
  *===========================================================================*/
 void UA_ReferenceDescription_Clear(UA_ReferenceDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->ReferenceTypeId);
         Boolean_Clear(&a_pValue->IsForward);
@@ -8141,7 +8142,7 @@ StatusCode UA_ReferenceDescription_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceDesc
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8163,7 +8164,7 @@ StatusCode UA_ReferenceDescription_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceDesc
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8193,11 +8194,11 @@ struct UA_EncodeableType UA_ReferenceDescription_EncodeableType =
     OpcUaId_ReferenceDescription,
     OpcUaId_ReferenceDescription_Encoding_DefaultBinary,
     OpcUaId_ReferenceDescription_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReferenceDescription),
     (UA_EncodeableObject_PfnInitialize*)UA_ReferenceDescription_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReferenceDescription_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReferenceDescription_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReferenceDescription_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReferenceDescription_Decode
@@ -8210,7 +8211,7 @@ struct UA_EncodeableType UA_ReferenceDescription_EncodeableType =
  *===========================================================================*/
 void UA_BrowseResult_Initialize(UA_BrowseResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         ByteString_Initialize(&a_pValue->ContinuationPoint);
@@ -8224,7 +8225,7 @@ void UA_BrowseResult_Initialize(UA_BrowseResult* a_pValue)
  *===========================================================================*/
 void UA_BrowseResult_Clear(UA_BrowseResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         ByteString_Clear(&a_pValue->ContinuationPoint);
@@ -8240,7 +8241,7 @@ StatusCode UA_BrowseResult_Encode(UA_MsgBuffer* msgBuf, UA_BrowseResult* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8259,7 +8260,7 @@ StatusCode UA_BrowseResult_Decode(UA_MsgBuffer* msgBuf, UA_BrowseResult* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8286,11 +8287,11 @@ struct UA_EncodeableType UA_BrowseResult_EncodeableType =
     OpcUaId_BrowseResult,
     OpcUaId_BrowseResult_Encoding_DefaultBinary,
     OpcUaId_BrowseResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BrowseResult),
     (UA_EncodeableObject_PfnInitialize*)UA_BrowseResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BrowseResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BrowseResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BrowseResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BrowseResult_Decode
@@ -8304,7 +8305,7 @@ struct UA_EncodeableType UA_BrowseResult_EncodeableType =
  *===========================================================================*/
 void UA_BrowseRequest_Initialize(UA_BrowseRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_ViewDescription_Initialize(&a_pValue->View);
@@ -8319,7 +8320,7 @@ void UA_BrowseRequest_Initialize(UA_BrowseRequest* a_pValue)
  *===========================================================================*/
 void UA_BrowseRequest_Clear(UA_BrowseRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_ViewDescription_Clear(&a_pValue->View);
@@ -8336,7 +8337,7 @@ StatusCode UA_BrowseRequest_Encode(UA_MsgBuffer* msgBuf, UA_BrowseRequest* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8356,7 +8357,7 @@ StatusCode UA_BrowseRequest_Decode(UA_MsgBuffer* msgBuf, UA_BrowseRequest* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8384,11 +8385,11 @@ struct UA_EncodeableType UA_BrowseRequest_EncodeableType =
     OpcUaId_BrowseRequest,
     OpcUaId_BrowseRequest_Encoding_DefaultBinary,
     OpcUaId_BrowseRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BrowseRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_BrowseRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BrowseRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BrowseRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BrowseRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BrowseRequest_Decode
@@ -8401,7 +8402,7 @@ struct UA_EncodeableType UA_BrowseRequest_EncodeableType =
  *===========================================================================*/
 void UA_BrowseResponse_Initialize(UA_BrowseResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -8416,7 +8417,7 @@ void UA_BrowseResponse_Initialize(UA_BrowseResponse* a_pValue)
  *===========================================================================*/
 void UA_BrowseResponse_Clear(UA_BrowseResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -8433,7 +8434,7 @@ StatusCode UA_BrowseResponse_Encode(UA_MsgBuffer* msgBuf, UA_BrowseResponse* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8453,7 +8454,7 @@ StatusCode UA_BrowseResponse_Decode(UA_MsgBuffer* msgBuf, UA_BrowseResponse* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8481,11 +8482,11 @@ struct UA_EncodeableType UA_BrowseResponse_EncodeableType =
     OpcUaId_BrowseResponse,
     OpcUaId_BrowseResponse_Encoding_DefaultBinary,
     OpcUaId_BrowseResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BrowseResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_BrowseResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BrowseResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BrowseResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BrowseResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BrowseResponse_Decode
@@ -8500,7 +8501,7 @@ struct UA_EncodeableType UA_BrowseResponse_EncodeableType =
  *===========================================================================*/
 void UA_BrowseNextRequest_Initialize(UA_BrowseNextRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         Boolean_Initialize(&a_pValue->ReleaseContinuationPoints);
@@ -8514,7 +8515,7 @@ void UA_BrowseNextRequest_Initialize(UA_BrowseNextRequest* a_pValue)
  *===========================================================================*/
 void UA_BrowseNextRequest_Clear(UA_BrowseNextRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         Boolean_Clear(&a_pValue->ReleaseContinuationPoints);
@@ -8530,7 +8531,7 @@ StatusCode UA_BrowseNextRequest_Encode(UA_MsgBuffer* msgBuf, UA_BrowseNextReques
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8549,7 +8550,7 @@ StatusCode UA_BrowseNextRequest_Decode(UA_MsgBuffer* msgBuf, UA_BrowseNextReques
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8576,11 +8577,11 @@ struct UA_EncodeableType UA_BrowseNextRequest_EncodeableType =
     OpcUaId_BrowseNextRequest,
     OpcUaId_BrowseNextRequest_Encoding_DefaultBinary,
     OpcUaId_BrowseNextRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BrowseNextRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_BrowseNextRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BrowseNextRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BrowseNextRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BrowseNextRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BrowseNextRequest_Decode
@@ -8593,7 +8594,7 @@ struct UA_EncodeableType UA_BrowseNextRequest_EncodeableType =
  *===========================================================================*/
 void UA_BrowseNextResponse_Initialize(UA_BrowseNextResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -8608,7 +8609,7 @@ void UA_BrowseNextResponse_Initialize(UA_BrowseNextResponse* a_pValue)
  *===========================================================================*/
 void UA_BrowseNextResponse_Clear(UA_BrowseNextResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -8625,7 +8626,7 @@ StatusCode UA_BrowseNextResponse_Encode(UA_MsgBuffer* msgBuf, UA_BrowseNextRespo
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8645,7 +8646,7 @@ StatusCode UA_BrowseNextResponse_Decode(UA_MsgBuffer* msgBuf, UA_BrowseNextRespo
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8673,11 +8674,11 @@ struct UA_EncodeableType UA_BrowseNextResponse_EncodeableType =
     OpcUaId_BrowseNextResponse,
     OpcUaId_BrowseNextResponse_Encoding_DefaultBinary,
     OpcUaId_BrowseNextResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BrowseNextResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_BrowseNextResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BrowseNextResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BrowseNextResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BrowseNextResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BrowseNextResponse_Decode
@@ -8691,7 +8692,7 @@ struct UA_EncodeableType UA_BrowseNextResponse_EncodeableType =
  *===========================================================================*/
 void UA_RelativePathElement_Initialize(UA_RelativePathElement* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->ReferenceTypeId);
         Boolean_Initialize(&a_pValue->IsInverse);
@@ -8705,7 +8706,7 @@ void UA_RelativePathElement_Initialize(UA_RelativePathElement* a_pValue)
  *===========================================================================*/
 void UA_RelativePathElement_Clear(UA_RelativePathElement* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->ReferenceTypeId);
         Boolean_Clear(&a_pValue->IsInverse);
@@ -8721,7 +8722,7 @@ StatusCode UA_RelativePathElement_Encode(UA_MsgBuffer* msgBuf, UA_RelativePathEl
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8740,7 +8741,7 @@ StatusCode UA_RelativePathElement_Decode(UA_MsgBuffer* msgBuf, UA_RelativePathEl
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8767,11 +8768,11 @@ struct UA_EncodeableType UA_RelativePathElement_EncodeableType =
     OpcUaId_RelativePathElement,
     OpcUaId_RelativePathElement_Encoding_DefaultBinary,
     OpcUaId_RelativePathElement_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RelativePathElement),
     (UA_EncodeableObject_PfnInitialize*)UA_RelativePathElement_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RelativePathElement_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RelativePathElement_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RelativePathElement_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RelativePathElement_Decode
@@ -8784,7 +8785,7 @@ struct UA_EncodeableType UA_RelativePathElement_EncodeableType =
  *===========================================================================*/
 void UA_RelativePath_Initialize(UA_RelativePath* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
                             sizeof(UA_RelativePathElement), (UA_EncodeableObject_PfnInitialize*) UA_RelativePathElement_Initialize);
@@ -8796,7 +8797,7 @@ void UA_RelativePath_Initialize(UA_RelativePath* a_pValue)
  *===========================================================================*/
 void UA_RelativePath_Clear(UA_RelativePath* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
                        sizeof(UA_RelativePathElement), (UA_EncodeableObject_PfnClear*) UA_RelativePathElement_Clear);
@@ -8810,7 +8811,7 @@ StatusCode UA_RelativePath_Encode(UA_MsgBuffer* msgBuf, UA_RelativePath* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8827,7 +8828,7 @@ StatusCode UA_RelativePath_Decode(UA_MsgBuffer* msgBuf, UA_RelativePath* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8852,11 +8853,11 @@ struct UA_EncodeableType UA_RelativePath_EncodeableType =
     OpcUaId_RelativePath,
     OpcUaId_RelativePath_Encoding_DefaultBinary,
     OpcUaId_RelativePath_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RelativePath),
     (UA_EncodeableObject_PfnInitialize*)UA_RelativePath_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RelativePath_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RelativePath_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RelativePath_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RelativePath_Decode
@@ -8869,7 +8870,7 @@ struct UA_EncodeableType UA_RelativePath_EncodeableType =
  *===========================================================================*/
 void UA_BrowsePath_Initialize(UA_BrowsePath* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->StartingNode);
         UA_RelativePath_Initialize(&a_pValue->RelativePath);
@@ -8881,7 +8882,7 @@ void UA_BrowsePath_Initialize(UA_BrowsePath* a_pValue)
  *===========================================================================*/
 void UA_BrowsePath_Clear(UA_BrowsePath* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->StartingNode);
         UA_RelativePath_Clear(&a_pValue->RelativePath);
@@ -8895,7 +8896,7 @@ StatusCode UA_BrowsePath_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePath* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8912,7 +8913,7 @@ StatusCode UA_BrowsePath_Decode(UA_MsgBuffer* msgBuf, UA_BrowsePath* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8937,11 +8938,11 @@ struct UA_EncodeableType UA_BrowsePath_EncodeableType =
     OpcUaId_BrowsePath,
     OpcUaId_BrowsePath_Encoding_DefaultBinary,
     OpcUaId_BrowsePath_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BrowsePath),
     (UA_EncodeableObject_PfnInitialize*)UA_BrowsePath_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BrowsePath_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BrowsePath_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BrowsePath_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BrowsePath_Decode
@@ -8954,7 +8955,7 @@ struct UA_EncodeableType UA_BrowsePath_EncodeableType =
  *===========================================================================*/
 void UA_BrowsePathTarget_Initialize(UA_BrowsePathTarget* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ExpandedNodeId_Initialize(&a_pValue->TargetId);
         UInt32_Initialize(&a_pValue->RemainingPathIndex);
@@ -8966,7 +8967,7 @@ void UA_BrowsePathTarget_Initialize(UA_BrowsePathTarget* a_pValue)
  *===========================================================================*/
 void UA_BrowsePathTarget_Clear(UA_BrowsePathTarget* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ExpandedNodeId_Clear(&a_pValue->TargetId);
         UInt32_Clear(&a_pValue->RemainingPathIndex);
@@ -8980,7 +8981,7 @@ StatusCode UA_BrowsePathTarget_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePathTarget*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -8997,7 +8998,7 @@ StatusCode UA_BrowsePathTarget_Decode(UA_MsgBuffer* msgBuf, UA_BrowsePathTarget*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9022,11 +9023,11 @@ struct UA_EncodeableType UA_BrowsePathTarget_EncodeableType =
     OpcUaId_BrowsePathTarget,
     OpcUaId_BrowsePathTarget_Encoding_DefaultBinary,
     OpcUaId_BrowsePathTarget_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BrowsePathTarget),
     (UA_EncodeableObject_PfnInitialize*)UA_BrowsePathTarget_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BrowsePathTarget_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BrowsePathTarget_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BrowsePathTarget_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BrowsePathTarget_Decode
@@ -9039,7 +9040,7 @@ struct UA_EncodeableType UA_BrowsePathTarget_EncodeableType =
  *===========================================================================*/
 void UA_BrowsePathResult_Initialize(UA_BrowsePathResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfTargets, (void**) &a_pValue->Targets, 
@@ -9052,7 +9053,7 @@ void UA_BrowsePathResult_Initialize(UA_BrowsePathResult* a_pValue)
  *===========================================================================*/
 void UA_BrowsePathResult_Clear(UA_BrowsePathResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfTargets, (void**) &a_pValue->Targets, 
@@ -9067,7 +9068,7 @@ StatusCode UA_BrowsePathResult_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePathResult*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9085,7 +9086,7 @@ StatusCode UA_BrowsePathResult_Decode(UA_MsgBuffer* msgBuf, UA_BrowsePathResult*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9111,11 +9112,11 @@ struct UA_EncodeableType UA_BrowsePathResult_EncodeableType =
     OpcUaId_BrowsePathResult,
     OpcUaId_BrowsePathResult_Encoding_DefaultBinary,
     OpcUaId_BrowsePathResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BrowsePathResult),
     (UA_EncodeableObject_PfnInitialize*)UA_BrowsePathResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BrowsePathResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BrowsePathResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BrowsePathResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BrowsePathResult_Decode
@@ -9129,7 +9130,7 @@ struct UA_EncodeableType UA_BrowsePathResult_EncodeableType =
  *===========================================================================*/
 void UA_TranslateBrowsePathsToNodeIdsRequest_Initialize(UA_TranslateBrowsePathsToNodeIdsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfBrowsePaths, (void**) &a_pValue->BrowsePaths, 
@@ -9142,7 +9143,7 @@ void UA_TranslateBrowsePathsToNodeIdsRequest_Initialize(UA_TranslateBrowsePathsT
  *===========================================================================*/
 void UA_TranslateBrowsePathsToNodeIdsRequest_Clear(UA_TranslateBrowsePathsToNodeIdsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfBrowsePaths, (void**) &a_pValue->BrowsePaths, 
@@ -9157,7 +9158,7 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Encode(UA_MsgBuffer* msgBuf, 
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9175,7 +9176,7 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Decode(UA_MsgBuffer* msgBuf, 
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9201,11 +9202,11 @@ struct UA_EncodeableType UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType 
     OpcUaId_TranslateBrowsePathsToNodeIdsRequest,
     OpcUaId_TranslateBrowsePathsToNodeIdsRequest_Encoding_DefaultBinary,
     OpcUaId_TranslateBrowsePathsToNodeIdsRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_TranslateBrowsePathsToNodeIdsRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_TranslateBrowsePathsToNodeIdsRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_TranslateBrowsePathsToNodeIdsRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_TranslateBrowsePathsToNodeIdsRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_TranslateBrowsePathsToNodeIdsRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_TranslateBrowsePathsToNodeIdsRequest_Decode
@@ -9218,7 +9219,7 @@ struct UA_EncodeableType UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType 
  *===========================================================================*/
 void UA_TranslateBrowsePathsToNodeIdsResponse_Initialize(UA_TranslateBrowsePathsToNodeIdsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -9233,7 +9234,7 @@ void UA_TranslateBrowsePathsToNodeIdsResponse_Initialize(UA_TranslateBrowsePaths
  *===========================================================================*/
 void UA_TranslateBrowsePathsToNodeIdsResponse_Clear(UA_TranslateBrowsePathsToNodeIdsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -9250,7 +9251,7 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Encode(UA_MsgBuffer* msgBuf,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9270,7 +9271,7 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Decode(UA_MsgBuffer* msgBuf,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9298,11 +9299,11 @@ struct UA_EncodeableType UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType
     OpcUaId_TranslateBrowsePathsToNodeIdsResponse,
     OpcUaId_TranslateBrowsePathsToNodeIdsResponse_Encoding_DefaultBinary,
     OpcUaId_TranslateBrowsePathsToNodeIdsResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_TranslateBrowsePathsToNodeIdsResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_TranslateBrowsePathsToNodeIdsResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_TranslateBrowsePathsToNodeIdsResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_TranslateBrowsePathsToNodeIdsResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_TranslateBrowsePathsToNodeIdsResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_TranslateBrowsePathsToNodeIdsResponse_Decode
@@ -9317,7 +9318,7 @@ struct UA_EncodeableType UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType
  *===========================================================================*/
 void UA_RegisterNodesRequest_Initialize(UA_RegisterNodesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfNodesToRegister, (void**) &a_pValue->NodesToRegister, 
@@ -9330,7 +9331,7 @@ void UA_RegisterNodesRequest_Initialize(UA_RegisterNodesRequest* a_pValue)
  *===========================================================================*/
 void UA_RegisterNodesRequest_Clear(UA_RegisterNodesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfNodesToRegister, (void**) &a_pValue->NodesToRegister, 
@@ -9345,7 +9346,7 @@ StatusCode UA_RegisterNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_RegisterNodes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9363,7 +9364,7 @@ StatusCode UA_RegisterNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_RegisterNodes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9389,11 +9390,11 @@ struct UA_EncodeableType UA_RegisterNodesRequest_EncodeableType =
     OpcUaId_RegisterNodesRequest,
     OpcUaId_RegisterNodesRequest_Encoding_DefaultBinary,
     OpcUaId_RegisterNodesRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RegisterNodesRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_RegisterNodesRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RegisterNodesRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RegisterNodesRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RegisterNodesRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RegisterNodesRequest_Decode
@@ -9406,7 +9407,7 @@ struct UA_EncodeableType UA_RegisterNodesRequest_EncodeableType =
  *===========================================================================*/
 void UA_RegisterNodesResponse_Initialize(UA_RegisterNodesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfRegisteredNodeIds, (void**) &a_pValue->RegisteredNodeIds, 
@@ -9419,7 +9420,7 @@ void UA_RegisterNodesResponse_Initialize(UA_RegisterNodesResponse* a_pValue)
  *===========================================================================*/
 void UA_RegisterNodesResponse_Clear(UA_RegisterNodesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfRegisteredNodeIds, (void**) &a_pValue->RegisteredNodeIds, 
@@ -9434,7 +9435,7 @@ StatusCode UA_RegisterNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_RegisterNode
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9452,7 +9453,7 @@ StatusCode UA_RegisterNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_RegisterNode
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9478,11 +9479,11 @@ struct UA_EncodeableType UA_RegisterNodesResponse_EncodeableType =
     OpcUaId_RegisterNodesResponse,
     OpcUaId_RegisterNodesResponse_Encoding_DefaultBinary,
     OpcUaId_RegisterNodesResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RegisterNodesResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_RegisterNodesResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RegisterNodesResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RegisterNodesResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RegisterNodesResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RegisterNodesResponse_Decode
@@ -9497,7 +9498,7 @@ struct UA_EncodeableType UA_RegisterNodesResponse_EncodeableType =
  *===========================================================================*/
 void UA_UnregisterNodesRequest_Initialize(UA_UnregisterNodesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfNodesToUnregister, (void**) &a_pValue->NodesToUnregister, 
@@ -9510,7 +9511,7 @@ void UA_UnregisterNodesRequest_Initialize(UA_UnregisterNodesRequest* a_pValue)
  *===========================================================================*/
 void UA_UnregisterNodesRequest_Clear(UA_UnregisterNodesRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfNodesToUnregister, (void**) &a_pValue->NodesToUnregister, 
@@ -9525,7 +9526,7 @@ StatusCode UA_UnregisterNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_UnregisterN
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9543,7 +9544,7 @@ StatusCode UA_UnregisterNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_UnregisterN
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9569,11 +9570,11 @@ struct UA_EncodeableType UA_UnregisterNodesRequest_EncodeableType =
     OpcUaId_UnregisterNodesRequest,
     OpcUaId_UnregisterNodesRequest_Encoding_DefaultBinary,
     OpcUaId_UnregisterNodesRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_UnregisterNodesRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_UnregisterNodesRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_UnregisterNodesRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_UnregisterNodesRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_UnregisterNodesRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_UnregisterNodesRequest_Decode
@@ -9586,7 +9587,7 @@ struct UA_EncodeableType UA_UnregisterNodesRequest_EncodeableType =
  *===========================================================================*/
 void UA_UnregisterNodesResponse_Initialize(UA_UnregisterNodesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
     }
@@ -9597,7 +9598,7 @@ void UA_UnregisterNodesResponse_Initialize(UA_UnregisterNodesResponse* a_pValue)
  *===========================================================================*/
 void UA_UnregisterNodesResponse_Clear(UA_UnregisterNodesResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
     }
@@ -9610,7 +9611,7 @@ StatusCode UA_UnregisterNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_Unregister
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9626,7 +9627,7 @@ StatusCode UA_UnregisterNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_Unregister
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9650,11 +9651,11 @@ struct UA_EncodeableType UA_UnregisterNodesResponse_EncodeableType =
     OpcUaId_UnregisterNodesResponse,
     OpcUaId_UnregisterNodesResponse_Encoding_DefaultBinary,
     OpcUaId_UnregisterNodesResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_UnregisterNodesResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_UnregisterNodesResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_UnregisterNodesResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_UnregisterNodesResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_UnregisterNodesResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_UnregisterNodesResponse_Decode
@@ -9668,7 +9669,7 @@ struct UA_EncodeableType UA_UnregisterNodesResponse_EncodeableType =
  *===========================================================================*/
 void UA_EndpointConfiguration_Initialize(UA_EndpointConfiguration* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Int32_Initialize(&a_pValue->OperationTimeout);
         Boolean_Initialize(&a_pValue->UseBinaryEncoding);
@@ -9687,7 +9688,7 @@ void UA_EndpointConfiguration_Initialize(UA_EndpointConfiguration* a_pValue)
  *===========================================================================*/
 void UA_EndpointConfiguration_Clear(UA_EndpointConfiguration* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Int32_Clear(&a_pValue->OperationTimeout);
         Boolean_Clear(&a_pValue->UseBinaryEncoding);
@@ -9708,7 +9709,7 @@ StatusCode UA_EndpointConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_EndpointConf
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9732,7 +9733,7 @@ StatusCode UA_EndpointConfiguration_Decode(UA_MsgBuffer* msgBuf, UA_EndpointConf
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9764,11 +9765,11 @@ struct UA_EncodeableType UA_EndpointConfiguration_EncodeableType =
     OpcUaId_EndpointConfiguration,
     OpcUaId_EndpointConfiguration_Encoding_DefaultBinary,
     OpcUaId_EndpointConfiguration_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EndpointConfiguration),
     (UA_EncodeableObject_PfnInitialize*)UA_EndpointConfiguration_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EndpointConfiguration_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EndpointConfiguration_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EndpointConfiguration_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EndpointConfiguration_Decode
@@ -9782,7 +9783,7 @@ struct UA_EncodeableType UA_EndpointConfiguration_EncodeableType =
  *===========================================================================*/
 void UA_SupportedProfile_Initialize(UA_SupportedProfile* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->OrganizationUri);
         String_Initialize(&a_pValue->ProfileId);
@@ -9799,7 +9800,7 @@ void UA_SupportedProfile_Initialize(UA_SupportedProfile* a_pValue)
  *===========================================================================*/
 void UA_SupportedProfile_Clear(UA_SupportedProfile* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->OrganizationUri);
         String_Clear(&a_pValue->ProfileId);
@@ -9818,7 +9819,7 @@ StatusCode UA_SupportedProfile_Encode(UA_MsgBuffer* msgBuf, UA_SupportedProfile*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9840,7 +9841,7 @@ StatusCode UA_SupportedProfile_Decode(UA_MsgBuffer* msgBuf, UA_SupportedProfile*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9870,11 +9871,11 @@ struct UA_EncodeableType UA_SupportedProfile_EncodeableType =
     OpcUaId_SupportedProfile,
     OpcUaId_SupportedProfile_Encoding_DefaultBinary,
     OpcUaId_SupportedProfile_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SupportedProfile),
     (UA_EncodeableObject_PfnInitialize*)UA_SupportedProfile_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SupportedProfile_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SupportedProfile_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SupportedProfile_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SupportedProfile_Decode
@@ -9887,7 +9888,7 @@ struct UA_EncodeableType UA_SupportedProfile_EncodeableType =
  *===========================================================================*/
 void UA_SoftwareCertificate_Initialize(UA_SoftwareCertificate* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->ProductName);
         String_Initialize(&a_pValue->ProductUri);
@@ -9908,7 +9909,7 @@ void UA_SoftwareCertificate_Initialize(UA_SoftwareCertificate* a_pValue)
  *===========================================================================*/
 void UA_SoftwareCertificate_Clear(UA_SoftwareCertificate* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->ProductName);
         String_Clear(&a_pValue->ProductUri);
@@ -9931,7 +9932,7 @@ StatusCode UA_SoftwareCertificate_Encode(UA_MsgBuffer* msgBuf, UA_SoftwareCertif
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9957,7 +9958,7 @@ StatusCode UA_SoftwareCertificate_Decode(UA_MsgBuffer* msgBuf, UA_SoftwareCertif
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -9991,11 +9992,11 @@ struct UA_EncodeableType UA_SoftwareCertificate_EncodeableType =
     OpcUaId_SoftwareCertificate,
     OpcUaId_SoftwareCertificate_Encoding_DefaultBinary,
     OpcUaId_SoftwareCertificate_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SoftwareCertificate),
     (UA_EncodeableObject_PfnInitialize*)UA_SoftwareCertificate_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SoftwareCertificate_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SoftwareCertificate_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SoftwareCertificate_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SoftwareCertificate_Decode
@@ -10008,7 +10009,7 @@ struct UA_EncodeableType UA_SoftwareCertificate_EncodeableType =
  *===========================================================================*/
 void UA_QueryDataDescription_Initialize(UA_QueryDataDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RelativePath_Initialize(&a_pValue->RelativePath);
         UInt32_Initialize(&a_pValue->AttributeId);
@@ -10021,7 +10022,7 @@ void UA_QueryDataDescription_Initialize(UA_QueryDataDescription* a_pValue)
  *===========================================================================*/
 void UA_QueryDataDescription_Clear(UA_QueryDataDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RelativePath_Clear(&a_pValue->RelativePath);
         UInt32_Clear(&a_pValue->AttributeId);
@@ -10036,7 +10037,7 @@ StatusCode UA_QueryDataDescription_Encode(UA_MsgBuffer* msgBuf, UA_QueryDataDesc
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10054,7 +10055,7 @@ StatusCode UA_QueryDataDescription_Decode(UA_MsgBuffer* msgBuf, UA_QueryDataDesc
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10080,11 +10081,11 @@ struct UA_EncodeableType UA_QueryDataDescription_EncodeableType =
     OpcUaId_QueryDataDescription,
     OpcUaId_QueryDataDescription_Encoding_DefaultBinary,
     OpcUaId_QueryDataDescription_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_QueryDataDescription),
     (UA_EncodeableObject_PfnInitialize*)UA_QueryDataDescription_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_QueryDataDescription_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_QueryDataDescription_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_QueryDataDescription_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_QueryDataDescription_Decode
@@ -10097,7 +10098,7 @@ struct UA_EncodeableType UA_QueryDataDescription_EncodeableType =
  *===========================================================================*/
 void UA_NodeTypeDescription_Initialize(UA_NodeTypeDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ExpandedNodeId_Initialize(&a_pValue->TypeDefinitionNode);
         Boolean_Initialize(&a_pValue->IncludeSubTypes);
@@ -10111,7 +10112,7 @@ void UA_NodeTypeDescription_Initialize(UA_NodeTypeDescription* a_pValue)
  *===========================================================================*/
 void UA_NodeTypeDescription_Clear(UA_NodeTypeDescription* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ExpandedNodeId_Clear(&a_pValue->TypeDefinitionNode);
         Boolean_Clear(&a_pValue->IncludeSubTypes);
@@ -10127,7 +10128,7 @@ StatusCode UA_NodeTypeDescription_Encode(UA_MsgBuffer* msgBuf, UA_NodeTypeDescri
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10146,7 +10147,7 @@ StatusCode UA_NodeTypeDescription_Decode(UA_MsgBuffer* msgBuf, UA_NodeTypeDescri
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10173,11 +10174,11 @@ struct UA_EncodeableType UA_NodeTypeDescription_EncodeableType =
     OpcUaId_NodeTypeDescription,
     OpcUaId_NodeTypeDescription_Encoding_DefaultBinary,
     OpcUaId_NodeTypeDescription_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_NodeTypeDescription),
     (UA_EncodeableObject_PfnInitialize*)UA_NodeTypeDescription_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_NodeTypeDescription_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_NodeTypeDescription_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_NodeTypeDescription_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_NodeTypeDescription_Decode
@@ -10191,7 +10192,7 @@ struct UA_EncodeableType UA_NodeTypeDescription_EncodeableType =
  *===========================================================================*/
 void UA_QueryDataSet_Initialize(UA_QueryDataSet* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ExpandedNodeId_Initialize(&a_pValue->NodeId);
         ExpandedNodeId_Initialize(&a_pValue->TypeDefinitionNode);
@@ -10205,7 +10206,7 @@ void UA_QueryDataSet_Initialize(UA_QueryDataSet* a_pValue)
  *===========================================================================*/
 void UA_QueryDataSet_Clear(UA_QueryDataSet* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         ExpandedNodeId_Clear(&a_pValue->NodeId);
         ExpandedNodeId_Clear(&a_pValue->TypeDefinitionNode);
@@ -10221,7 +10222,7 @@ StatusCode UA_QueryDataSet_Encode(UA_MsgBuffer* msgBuf, UA_QueryDataSet* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10240,7 +10241,7 @@ StatusCode UA_QueryDataSet_Decode(UA_MsgBuffer* msgBuf, UA_QueryDataSet* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10267,11 +10268,11 @@ struct UA_EncodeableType UA_QueryDataSet_EncodeableType =
     OpcUaId_QueryDataSet,
     OpcUaId_QueryDataSet_Encoding_DefaultBinary,
     OpcUaId_QueryDataSet_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_QueryDataSet),
     (UA_EncodeableObject_PfnInitialize*)UA_QueryDataSet_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_QueryDataSet_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_QueryDataSet_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_QueryDataSet_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_QueryDataSet_Decode
@@ -10284,7 +10285,7 @@ struct UA_EncodeableType UA_QueryDataSet_EncodeableType =
  *===========================================================================*/
 void UA_NodeReference_Initialize(UA_NodeReference* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         NodeId_Initialize(&a_pValue->ReferenceTypeId);
@@ -10299,7 +10300,7 @@ void UA_NodeReference_Initialize(UA_NodeReference* a_pValue)
  *===========================================================================*/
 void UA_NodeReference_Clear(UA_NodeReference* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         NodeId_Clear(&a_pValue->ReferenceTypeId);
@@ -10316,7 +10317,7 @@ StatusCode UA_NodeReference_Encode(UA_MsgBuffer* msgBuf, UA_NodeReference* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10336,7 +10337,7 @@ StatusCode UA_NodeReference_Decode(UA_MsgBuffer* msgBuf, UA_NodeReference* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10364,11 +10365,11 @@ struct UA_EncodeableType UA_NodeReference_EncodeableType =
     OpcUaId_NodeReference,
     OpcUaId_NodeReference_Encoding_DefaultBinary,
     OpcUaId_NodeReference_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_NodeReference),
     (UA_EncodeableObject_PfnInitialize*)UA_NodeReference_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_NodeReference_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_NodeReference_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_NodeReference_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_NodeReference_Decode
@@ -10381,7 +10382,7 @@ struct UA_EncodeableType UA_NodeReference_EncodeableType =
  *===========================================================================*/
 void UA_ContentFilterElement_Initialize(UA_ContentFilterElement* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->FilterOperator);
         UA_Initialize_Array(&a_pValue->NoOfFilterOperands, (void**) &a_pValue->FilterOperands, 
@@ -10394,7 +10395,7 @@ void UA_ContentFilterElement_Initialize(UA_ContentFilterElement* a_pValue)
  *===========================================================================*/
 void UA_ContentFilterElement_Clear(UA_ContentFilterElement* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->FilterOperator);
         UA_Clear_Array(&a_pValue->NoOfFilterOperands, (void**) &a_pValue->FilterOperands, 
@@ -10409,7 +10410,7 @@ StatusCode UA_ContentFilterElement_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilter
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10427,7 +10428,7 @@ StatusCode UA_ContentFilterElement_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilter
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10453,11 +10454,11 @@ struct UA_EncodeableType UA_ContentFilterElement_EncodeableType =
     OpcUaId_ContentFilterElement,
     OpcUaId_ContentFilterElement_Encoding_DefaultBinary,
     OpcUaId_ContentFilterElement_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ContentFilterElement),
     (UA_EncodeableObject_PfnInitialize*)UA_ContentFilterElement_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ContentFilterElement_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ContentFilterElement_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ContentFilterElement_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ContentFilterElement_Decode
@@ -10470,7 +10471,7 @@ struct UA_EncodeableType UA_ContentFilterElement_EncodeableType =
  *===========================================================================*/
 void UA_ContentFilter_Initialize(UA_ContentFilter* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
                             sizeof(UA_ContentFilterElement), (UA_EncodeableObject_PfnInitialize*) UA_ContentFilterElement_Initialize);
@@ -10482,7 +10483,7 @@ void UA_ContentFilter_Initialize(UA_ContentFilter* a_pValue)
  *===========================================================================*/
 void UA_ContentFilter_Clear(UA_ContentFilter* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
                        sizeof(UA_ContentFilterElement), (UA_EncodeableObject_PfnClear*) UA_ContentFilterElement_Clear);
@@ -10496,7 +10497,7 @@ StatusCode UA_ContentFilter_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilter* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10513,7 +10514,7 @@ StatusCode UA_ContentFilter_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilter* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10538,11 +10539,11 @@ struct UA_EncodeableType UA_ContentFilter_EncodeableType =
     OpcUaId_ContentFilter,
     OpcUaId_ContentFilter_Encoding_DefaultBinary,
     OpcUaId_ContentFilter_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ContentFilter),
     (UA_EncodeableObject_PfnInitialize*)UA_ContentFilter_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ContentFilter_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ContentFilter_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ContentFilter_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ContentFilter_Decode
@@ -10555,7 +10556,7 @@ struct UA_EncodeableType UA_ContentFilter_EncodeableType =
  *===========================================================================*/
 void UA_ElementOperand_Initialize(UA_ElementOperand* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->Index);
     }
@@ -10566,7 +10567,7 @@ void UA_ElementOperand_Initialize(UA_ElementOperand* a_pValue)
  *===========================================================================*/
 void UA_ElementOperand_Clear(UA_ElementOperand* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->Index);
     }
@@ -10579,7 +10580,7 @@ StatusCode UA_ElementOperand_Encode(UA_MsgBuffer* msgBuf, UA_ElementOperand* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10595,7 +10596,7 @@ StatusCode UA_ElementOperand_Decode(UA_MsgBuffer* msgBuf, UA_ElementOperand* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10619,11 +10620,11 @@ struct UA_EncodeableType UA_ElementOperand_EncodeableType =
     OpcUaId_ElementOperand,
     OpcUaId_ElementOperand_Encoding_DefaultBinary,
     OpcUaId_ElementOperand_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ElementOperand),
     (UA_EncodeableObject_PfnInitialize*)UA_ElementOperand_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ElementOperand_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ElementOperand_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ElementOperand_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ElementOperand_Decode
@@ -10636,7 +10637,7 @@ struct UA_EncodeableType UA_ElementOperand_EncodeableType =
  *===========================================================================*/
 void UA_LiteralOperand_Initialize(UA_LiteralOperand* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Variant_Initialize(&a_pValue->Value);
     }
@@ -10647,7 +10648,7 @@ void UA_LiteralOperand_Initialize(UA_LiteralOperand* a_pValue)
  *===========================================================================*/
 void UA_LiteralOperand_Clear(UA_LiteralOperand* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Variant_Clear(&a_pValue->Value);
     }
@@ -10660,7 +10661,7 @@ StatusCode UA_LiteralOperand_Encode(UA_MsgBuffer* msgBuf, UA_LiteralOperand* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10676,7 +10677,7 @@ StatusCode UA_LiteralOperand_Decode(UA_MsgBuffer* msgBuf, UA_LiteralOperand* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10700,11 +10701,11 @@ struct UA_EncodeableType UA_LiteralOperand_EncodeableType =
     OpcUaId_LiteralOperand,
     OpcUaId_LiteralOperand_Encoding_DefaultBinary,
     OpcUaId_LiteralOperand_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_LiteralOperand),
     (UA_EncodeableObject_PfnInitialize*)UA_LiteralOperand_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_LiteralOperand_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_LiteralOperand_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_LiteralOperand_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_LiteralOperand_Decode
@@ -10717,7 +10718,7 @@ struct UA_EncodeableType UA_LiteralOperand_EncodeableType =
  *===========================================================================*/
 void UA_AttributeOperand_Initialize(UA_AttributeOperand* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         String_Initialize(&a_pValue->Alias);
@@ -10732,7 +10733,7 @@ void UA_AttributeOperand_Initialize(UA_AttributeOperand* a_pValue)
  *===========================================================================*/
 void UA_AttributeOperand_Clear(UA_AttributeOperand* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         String_Clear(&a_pValue->Alias);
@@ -10749,7 +10750,7 @@ StatusCode UA_AttributeOperand_Encode(UA_MsgBuffer* msgBuf, UA_AttributeOperand*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10769,7 +10770,7 @@ StatusCode UA_AttributeOperand_Decode(UA_MsgBuffer* msgBuf, UA_AttributeOperand*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10797,11 +10798,11 @@ struct UA_EncodeableType UA_AttributeOperand_EncodeableType =
     OpcUaId_AttributeOperand,
     OpcUaId_AttributeOperand_Encoding_DefaultBinary,
     OpcUaId_AttributeOperand_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AttributeOperand),
     (UA_EncodeableObject_PfnInitialize*)UA_AttributeOperand_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AttributeOperand_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AttributeOperand_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AttributeOperand_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AttributeOperand_Decode
@@ -10814,7 +10815,7 @@ struct UA_EncodeableType UA_AttributeOperand_EncodeableType =
  *===========================================================================*/
 void UA_SimpleAttributeOperand_Initialize(UA_SimpleAttributeOperand* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->TypeDefinitionId);
         UA_Initialize_Array(&a_pValue->NoOfBrowsePath, (void**) &a_pValue->BrowsePath, 
@@ -10829,7 +10830,7 @@ void UA_SimpleAttributeOperand_Initialize(UA_SimpleAttributeOperand* a_pValue)
  *===========================================================================*/
 void UA_SimpleAttributeOperand_Clear(UA_SimpleAttributeOperand* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->TypeDefinitionId);
         UA_Clear_Array(&a_pValue->NoOfBrowsePath, (void**) &a_pValue->BrowsePath, 
@@ -10846,7 +10847,7 @@ StatusCode UA_SimpleAttributeOperand_Encode(UA_MsgBuffer* msgBuf, UA_SimpleAttri
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10866,7 +10867,7 @@ StatusCode UA_SimpleAttributeOperand_Decode(UA_MsgBuffer* msgBuf, UA_SimpleAttri
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10894,11 +10895,11 @@ struct UA_EncodeableType UA_SimpleAttributeOperand_EncodeableType =
     OpcUaId_SimpleAttributeOperand,
     OpcUaId_SimpleAttributeOperand_Encoding_DefaultBinary,
     OpcUaId_SimpleAttributeOperand_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SimpleAttributeOperand),
     (UA_EncodeableObject_PfnInitialize*)UA_SimpleAttributeOperand_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SimpleAttributeOperand_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SimpleAttributeOperand_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SimpleAttributeOperand_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SimpleAttributeOperand_Decode
@@ -10911,7 +10912,7 @@ struct UA_EncodeableType UA_SimpleAttributeOperand_EncodeableType =
  *===========================================================================*/
 void UA_ContentFilterElementResult_Initialize(UA_ContentFilterElementResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
@@ -10926,7 +10927,7 @@ void UA_ContentFilterElementResult_Initialize(UA_ContentFilterElementResult* a_p
  *===========================================================================*/
 void UA_ContentFilterElementResult_Clear(UA_ContentFilterElementResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
@@ -10943,7 +10944,7 @@ StatusCode UA_ContentFilterElementResult_Encode(UA_MsgBuffer* msgBuf, UA_Content
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10963,7 +10964,7 @@ StatusCode UA_ContentFilterElementResult_Decode(UA_MsgBuffer* msgBuf, UA_Content
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -10991,11 +10992,11 @@ struct UA_EncodeableType UA_ContentFilterElementResult_EncodeableType =
     OpcUaId_ContentFilterElementResult,
     OpcUaId_ContentFilterElementResult_Encoding_DefaultBinary,
     OpcUaId_ContentFilterElementResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ContentFilterElementResult),
     (UA_EncodeableObject_PfnInitialize*)UA_ContentFilterElementResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ContentFilterElementResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ContentFilterElementResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ContentFilterElementResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ContentFilterElementResult_Decode
@@ -11008,7 +11009,7 @@ struct UA_EncodeableType UA_ContentFilterElementResult_EncodeableType =
  *===========================================================================*/
 void UA_ContentFilterResult_Initialize(UA_ContentFilterResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfElementResults, (void**) &a_pValue->ElementResults, 
                             sizeof(UA_ContentFilterElementResult), (UA_EncodeableObject_PfnInitialize*) UA_ContentFilterElementResult_Initialize);
@@ -11022,7 +11023,7 @@ void UA_ContentFilterResult_Initialize(UA_ContentFilterResult* a_pValue)
  *===========================================================================*/
 void UA_ContentFilterResult_Clear(UA_ContentFilterResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfElementResults, (void**) &a_pValue->ElementResults, 
                        sizeof(UA_ContentFilterElementResult), (UA_EncodeableObject_PfnClear*) UA_ContentFilterElementResult_Clear);
@@ -11038,7 +11039,7 @@ StatusCode UA_ContentFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilterR
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11057,7 +11058,7 @@ StatusCode UA_ContentFilterResult_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilterR
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11084,11 +11085,11 @@ struct UA_EncodeableType UA_ContentFilterResult_EncodeableType =
     OpcUaId_ContentFilterResult,
     OpcUaId_ContentFilterResult_Encoding_DefaultBinary,
     OpcUaId_ContentFilterResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ContentFilterResult),
     (UA_EncodeableObject_PfnInitialize*)UA_ContentFilterResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ContentFilterResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ContentFilterResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ContentFilterResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ContentFilterResult_Decode
@@ -11101,7 +11102,7 @@ struct UA_EncodeableType UA_ContentFilterResult_EncodeableType =
  *===========================================================================*/
 void UA_ParsingResult_Initialize(UA_ParsingResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
@@ -11116,7 +11117,7 @@ void UA_ParsingResult_Initialize(UA_ParsingResult* a_pValue)
  *===========================================================================*/
 void UA_ParsingResult_Clear(UA_ParsingResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
@@ -11133,7 +11134,7 @@ StatusCode UA_ParsingResult_Encode(UA_MsgBuffer* msgBuf, UA_ParsingResult* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11153,7 +11154,7 @@ StatusCode UA_ParsingResult_Decode(UA_MsgBuffer* msgBuf, UA_ParsingResult* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11181,11 +11182,11 @@ struct UA_EncodeableType UA_ParsingResult_EncodeableType =
     OpcUaId_ParsingResult,
     OpcUaId_ParsingResult_Encoding_DefaultBinary,
     OpcUaId_ParsingResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ParsingResult),
     (UA_EncodeableObject_PfnInitialize*)UA_ParsingResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ParsingResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ParsingResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ParsingResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ParsingResult_Decode
@@ -11199,7 +11200,7 @@ struct UA_EncodeableType UA_ParsingResult_EncodeableType =
  *===========================================================================*/
 void UA_QueryFirstRequest_Initialize(UA_QueryFirstRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_ViewDescription_Initialize(&a_pValue->View);
@@ -11216,7 +11217,7 @@ void UA_QueryFirstRequest_Initialize(UA_QueryFirstRequest* a_pValue)
  *===========================================================================*/
 void UA_QueryFirstRequest_Clear(UA_QueryFirstRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_ViewDescription_Clear(&a_pValue->View);
@@ -11235,7 +11236,7 @@ StatusCode UA_QueryFirstRequest_Encode(UA_MsgBuffer* msgBuf, UA_QueryFirstReques
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11257,7 +11258,7 @@ StatusCode UA_QueryFirstRequest_Decode(UA_MsgBuffer* msgBuf, UA_QueryFirstReques
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11287,11 +11288,11 @@ struct UA_EncodeableType UA_QueryFirstRequest_EncodeableType =
     OpcUaId_QueryFirstRequest,
     OpcUaId_QueryFirstRequest_Encoding_DefaultBinary,
     OpcUaId_QueryFirstRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_QueryFirstRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_QueryFirstRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_QueryFirstRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_QueryFirstRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_QueryFirstRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_QueryFirstRequest_Decode
@@ -11304,7 +11305,7 @@ struct UA_EncodeableType UA_QueryFirstRequest_EncodeableType =
  *===========================================================================*/
 void UA_QueryFirstResponse_Initialize(UA_QueryFirstResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
@@ -11323,7 +11324,7 @@ void UA_QueryFirstResponse_Initialize(UA_QueryFirstResponse* a_pValue)
  *===========================================================================*/
 void UA_QueryFirstResponse_Clear(UA_QueryFirstResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
@@ -11344,7 +11345,7 @@ StatusCode UA_QueryFirstResponse_Encode(UA_MsgBuffer* msgBuf, UA_QueryFirstRespo
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11368,7 +11369,7 @@ StatusCode UA_QueryFirstResponse_Decode(UA_MsgBuffer* msgBuf, UA_QueryFirstRespo
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11400,11 +11401,11 @@ struct UA_EncodeableType UA_QueryFirstResponse_EncodeableType =
     OpcUaId_QueryFirstResponse,
     OpcUaId_QueryFirstResponse_Encoding_DefaultBinary,
     OpcUaId_QueryFirstResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_QueryFirstResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_QueryFirstResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_QueryFirstResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_QueryFirstResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_QueryFirstResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_QueryFirstResponse_Decode
@@ -11419,7 +11420,7 @@ struct UA_EncodeableType UA_QueryFirstResponse_EncodeableType =
  *===========================================================================*/
 void UA_QueryNextRequest_Initialize(UA_QueryNextRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         Boolean_Initialize(&a_pValue->ReleaseContinuationPoint);
@@ -11432,7 +11433,7 @@ void UA_QueryNextRequest_Initialize(UA_QueryNextRequest* a_pValue)
  *===========================================================================*/
 void UA_QueryNextRequest_Clear(UA_QueryNextRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         Boolean_Clear(&a_pValue->ReleaseContinuationPoint);
@@ -11447,7 +11448,7 @@ StatusCode UA_QueryNextRequest_Encode(UA_MsgBuffer* msgBuf, UA_QueryNextRequest*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11465,7 +11466,7 @@ StatusCode UA_QueryNextRequest_Decode(UA_MsgBuffer* msgBuf, UA_QueryNextRequest*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11491,11 +11492,11 @@ struct UA_EncodeableType UA_QueryNextRequest_EncodeableType =
     OpcUaId_QueryNextRequest,
     OpcUaId_QueryNextRequest_Encoding_DefaultBinary,
     OpcUaId_QueryNextRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_QueryNextRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_QueryNextRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_QueryNextRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_QueryNextRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_QueryNextRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_QueryNextRequest_Decode
@@ -11508,7 +11509,7 @@ struct UA_EncodeableType UA_QueryNextRequest_EncodeableType =
  *===========================================================================*/
 void UA_QueryNextResponse_Initialize(UA_QueryNextResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
@@ -11522,7 +11523,7 @@ void UA_QueryNextResponse_Initialize(UA_QueryNextResponse* a_pValue)
  *===========================================================================*/
 void UA_QueryNextResponse_Clear(UA_QueryNextResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
@@ -11538,7 +11539,7 @@ StatusCode UA_QueryNextResponse_Encode(UA_MsgBuffer* msgBuf, UA_QueryNextRespons
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11557,7 +11558,7 @@ StatusCode UA_QueryNextResponse_Decode(UA_MsgBuffer* msgBuf, UA_QueryNextRespons
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11584,11 +11585,11 @@ struct UA_EncodeableType UA_QueryNextResponse_EncodeableType =
     OpcUaId_QueryNextResponse,
     OpcUaId_QueryNextResponse_Encoding_DefaultBinary,
     OpcUaId_QueryNextResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_QueryNextResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_QueryNextResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_QueryNextResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_QueryNextResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_QueryNextResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_QueryNextResponse_Decode
@@ -11603,7 +11604,7 @@ struct UA_EncodeableType UA_QueryNextResponse_EncodeableType =
  *===========================================================================*/
 void UA_ReadValueId_Initialize(UA_ReadValueId* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UInt32_Initialize(&a_pValue->AttributeId);
@@ -11617,7 +11618,7 @@ void UA_ReadValueId_Initialize(UA_ReadValueId* a_pValue)
  *===========================================================================*/
 void UA_ReadValueId_Clear(UA_ReadValueId* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UInt32_Clear(&a_pValue->AttributeId);
@@ -11633,7 +11634,7 @@ StatusCode UA_ReadValueId_Encode(UA_MsgBuffer* msgBuf, UA_ReadValueId* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11652,7 +11653,7 @@ StatusCode UA_ReadValueId_Decode(UA_MsgBuffer* msgBuf, UA_ReadValueId* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11679,11 +11680,11 @@ struct UA_EncodeableType UA_ReadValueId_EncodeableType =
     OpcUaId_ReadValueId,
     OpcUaId_ReadValueId_Encoding_DefaultBinary,
     OpcUaId_ReadValueId_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReadValueId),
     (UA_EncodeableObject_PfnInitialize*)UA_ReadValueId_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReadValueId_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReadValueId_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReadValueId_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReadValueId_Decode
@@ -11697,7 +11698,7 @@ struct UA_EncodeableType UA_ReadValueId_EncodeableType =
  *===========================================================================*/
 void UA_ReadRequest_Initialize(UA_ReadRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         Double_Initialize(&a_pValue->MaxAge);
@@ -11712,7 +11713,7 @@ void UA_ReadRequest_Initialize(UA_ReadRequest* a_pValue)
  *===========================================================================*/
 void UA_ReadRequest_Clear(UA_ReadRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         Double_Clear(&a_pValue->MaxAge);
@@ -11729,7 +11730,7 @@ StatusCode UA_ReadRequest_Encode(UA_MsgBuffer* msgBuf, UA_ReadRequest* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11749,7 +11750,7 @@ StatusCode UA_ReadRequest_Decode(UA_MsgBuffer* msgBuf, UA_ReadRequest* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11777,11 +11778,11 @@ struct UA_EncodeableType UA_ReadRequest_EncodeableType =
     OpcUaId_ReadRequest,
     OpcUaId_ReadRequest_Encoding_DefaultBinary,
     OpcUaId_ReadRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReadRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_ReadRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReadRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReadRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReadRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReadRequest_Decode
@@ -11794,7 +11795,7 @@ struct UA_EncodeableType UA_ReadRequest_EncodeableType =
  *===========================================================================*/
 void UA_ReadResponse_Initialize(UA_ReadResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -11809,7 +11810,7 @@ void UA_ReadResponse_Initialize(UA_ReadResponse* a_pValue)
  *===========================================================================*/
 void UA_ReadResponse_Clear(UA_ReadResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -11826,7 +11827,7 @@ StatusCode UA_ReadResponse_Encode(UA_MsgBuffer* msgBuf, UA_ReadResponse* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11846,7 +11847,7 @@ StatusCode UA_ReadResponse_Decode(UA_MsgBuffer* msgBuf, UA_ReadResponse* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11874,11 +11875,11 @@ struct UA_EncodeableType UA_ReadResponse_EncodeableType =
     OpcUaId_ReadResponse,
     OpcUaId_ReadResponse_Encoding_DefaultBinary,
     OpcUaId_ReadResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReadResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_ReadResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReadResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReadResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReadResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReadResponse_Decode
@@ -11892,7 +11893,7 @@ struct UA_EncodeableType UA_ReadResponse_EncodeableType =
  *===========================================================================*/
 void UA_HistoryReadValueId_Initialize(UA_HistoryReadValueId* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         String_Initialize(&a_pValue->IndexRange);
@@ -11906,7 +11907,7 @@ void UA_HistoryReadValueId_Initialize(UA_HistoryReadValueId* a_pValue)
  *===========================================================================*/
 void UA_HistoryReadValueId_Clear(UA_HistoryReadValueId* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         String_Clear(&a_pValue->IndexRange);
@@ -11922,7 +11923,7 @@ StatusCode UA_HistoryReadValueId_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11941,7 +11942,7 @@ StatusCode UA_HistoryReadValueId_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -11968,11 +11969,11 @@ struct UA_EncodeableType UA_HistoryReadValueId_EncodeableType =
     OpcUaId_HistoryReadValueId,
     OpcUaId_HistoryReadValueId_Encoding_DefaultBinary,
     OpcUaId_HistoryReadValueId_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryReadValueId),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryReadValueId_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryReadValueId_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryReadValueId_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryReadValueId_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryReadValueId_Decode
@@ -11985,7 +11986,7 @@ struct UA_EncodeableType UA_HistoryReadValueId_EncodeableType =
  *===========================================================================*/
 void UA_HistoryReadResult_Initialize(UA_HistoryReadResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         ByteString_Initialize(&a_pValue->ContinuationPoint);
@@ -11998,7 +11999,7 @@ void UA_HistoryReadResult_Initialize(UA_HistoryReadResult* a_pValue)
  *===========================================================================*/
 void UA_HistoryReadResult_Clear(UA_HistoryReadResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         ByteString_Clear(&a_pValue->ContinuationPoint);
@@ -12013,7 +12014,7 @@ StatusCode UA_HistoryReadResult_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadResul
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12031,7 +12032,7 @@ StatusCode UA_HistoryReadResult_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadResul
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12057,11 +12058,11 @@ struct UA_EncodeableType UA_HistoryReadResult_EncodeableType =
     OpcUaId_HistoryReadResult,
     OpcUaId_HistoryReadResult_Encoding_DefaultBinary,
     OpcUaId_HistoryReadResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryReadResult),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryReadResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryReadResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryReadResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryReadResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryReadResult_Decode
@@ -12074,7 +12075,7 @@ struct UA_EncodeableType UA_HistoryReadResult_EncodeableType =
  *===========================================================================*/
 void UA_ReadEventDetails_Initialize(UA_ReadEventDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->NumValuesPerNode);
         DateTime_Initialize(&a_pValue->StartTime);
@@ -12088,7 +12089,7 @@ void UA_ReadEventDetails_Initialize(UA_ReadEventDetails* a_pValue)
  *===========================================================================*/
 void UA_ReadEventDetails_Clear(UA_ReadEventDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->NumValuesPerNode);
         DateTime_Clear(&a_pValue->StartTime);
@@ -12104,7 +12105,7 @@ StatusCode UA_ReadEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadEventDetails*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12123,7 +12124,7 @@ StatusCode UA_ReadEventDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadEventDetails*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12150,11 +12151,11 @@ struct UA_EncodeableType UA_ReadEventDetails_EncodeableType =
     OpcUaId_ReadEventDetails,
     OpcUaId_ReadEventDetails_Encoding_DefaultBinary,
     OpcUaId_ReadEventDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReadEventDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_ReadEventDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReadEventDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReadEventDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReadEventDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReadEventDetails_Decode
@@ -12167,7 +12168,7 @@ struct UA_EncodeableType UA_ReadEventDetails_EncodeableType =
  *===========================================================================*/
 void UA_ReadRawModifiedDetails_Initialize(UA_ReadRawModifiedDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Boolean_Initialize(&a_pValue->IsReadModified);
         DateTime_Initialize(&a_pValue->StartTime);
@@ -12182,7 +12183,7 @@ void UA_ReadRawModifiedDetails_Initialize(UA_ReadRawModifiedDetails* a_pValue)
  *===========================================================================*/
 void UA_ReadRawModifiedDetails_Clear(UA_ReadRawModifiedDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Boolean_Clear(&a_pValue->IsReadModified);
         DateTime_Clear(&a_pValue->StartTime);
@@ -12199,7 +12200,7 @@ StatusCode UA_ReadRawModifiedDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadRawModi
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12219,7 +12220,7 @@ StatusCode UA_ReadRawModifiedDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadRawModi
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12247,11 +12248,11 @@ struct UA_EncodeableType UA_ReadRawModifiedDetails_EncodeableType =
     OpcUaId_ReadRawModifiedDetails,
     OpcUaId_ReadRawModifiedDetails_Encoding_DefaultBinary,
     OpcUaId_ReadRawModifiedDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReadRawModifiedDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_ReadRawModifiedDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReadRawModifiedDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReadRawModifiedDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReadRawModifiedDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReadRawModifiedDetails_Decode
@@ -12264,7 +12265,7 @@ struct UA_EncodeableType UA_ReadRawModifiedDetails_EncodeableType =
  *===========================================================================*/
 void UA_ReadProcessedDetails_Initialize(UA_ReadProcessedDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Initialize(&a_pValue->StartTime);
         DateTime_Initialize(&a_pValue->EndTime);
@@ -12280,7 +12281,7 @@ void UA_ReadProcessedDetails_Initialize(UA_ReadProcessedDetails* a_pValue)
  *===========================================================================*/
 void UA_ReadProcessedDetails_Clear(UA_ReadProcessedDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Clear(&a_pValue->StartTime);
         DateTime_Clear(&a_pValue->EndTime);
@@ -12298,7 +12299,7 @@ StatusCode UA_ReadProcessedDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadProcessed
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12319,7 +12320,7 @@ StatusCode UA_ReadProcessedDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadProcessed
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12348,11 +12349,11 @@ struct UA_EncodeableType UA_ReadProcessedDetails_EncodeableType =
     OpcUaId_ReadProcessedDetails,
     OpcUaId_ReadProcessedDetails_Encoding_DefaultBinary,
     OpcUaId_ReadProcessedDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReadProcessedDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_ReadProcessedDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReadProcessedDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReadProcessedDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReadProcessedDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReadProcessedDetails_Decode
@@ -12365,7 +12366,7 @@ struct UA_EncodeableType UA_ReadProcessedDetails_EncodeableType =
  *===========================================================================*/
 void UA_ReadAtTimeDetails_Initialize(UA_ReadAtTimeDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
                             sizeof(UA_DateTime), (UA_EncodeableObject_PfnInitialize*) DateTime_Initialize);
@@ -12378,7 +12379,7 @@ void UA_ReadAtTimeDetails_Initialize(UA_ReadAtTimeDetails* a_pValue)
  *===========================================================================*/
 void UA_ReadAtTimeDetails_Clear(UA_ReadAtTimeDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
                        sizeof(UA_DateTime), (UA_EncodeableObject_PfnClear*) DateTime_Clear);
@@ -12393,7 +12394,7 @@ StatusCode UA_ReadAtTimeDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadAtTimeDetail
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12411,7 +12412,7 @@ StatusCode UA_ReadAtTimeDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadAtTimeDetail
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12437,11 +12438,11 @@ struct UA_EncodeableType UA_ReadAtTimeDetails_EncodeableType =
     OpcUaId_ReadAtTimeDetails,
     OpcUaId_ReadAtTimeDetails_Encoding_DefaultBinary,
     OpcUaId_ReadAtTimeDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ReadAtTimeDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_ReadAtTimeDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ReadAtTimeDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ReadAtTimeDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ReadAtTimeDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ReadAtTimeDetails_Decode
@@ -12454,7 +12455,7 @@ struct UA_EncodeableType UA_ReadAtTimeDetails_EncodeableType =
  *===========================================================================*/
 void UA_HistoryData_Initialize(UA_HistoryData* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
                             sizeof(UA_DataValue), (UA_EncodeableObject_PfnInitialize*) DataValue_Initialize);
@@ -12466,7 +12467,7 @@ void UA_HistoryData_Initialize(UA_HistoryData* a_pValue)
  *===========================================================================*/
 void UA_HistoryData_Clear(UA_HistoryData* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
                        sizeof(UA_DataValue), (UA_EncodeableObject_PfnClear*) DataValue_Clear);
@@ -12480,7 +12481,7 @@ StatusCode UA_HistoryData_Encode(UA_MsgBuffer* msgBuf, UA_HistoryData* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12497,7 +12498,7 @@ StatusCode UA_HistoryData_Decode(UA_MsgBuffer* msgBuf, UA_HistoryData* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12522,11 +12523,11 @@ struct UA_EncodeableType UA_HistoryData_EncodeableType =
     OpcUaId_HistoryData,
     OpcUaId_HistoryData_Encoding_DefaultBinary,
     OpcUaId_HistoryData_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryData),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryData_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryData_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryData_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryData_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryData_Decode
@@ -12539,7 +12540,7 @@ struct UA_EncodeableType UA_HistoryData_EncodeableType =
  *===========================================================================*/
 void UA_ModificationInfo_Initialize(UA_ModificationInfo* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Initialize(&a_pValue->ModificationTime);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->UpdateType);
@@ -12552,7 +12553,7 @@ void UA_ModificationInfo_Initialize(UA_ModificationInfo* a_pValue)
  *===========================================================================*/
 void UA_ModificationInfo_Clear(UA_ModificationInfo* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Clear(&a_pValue->ModificationTime);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->UpdateType);
@@ -12567,7 +12568,7 @@ StatusCode UA_ModificationInfo_Encode(UA_MsgBuffer* msgBuf, UA_ModificationInfo*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12585,7 +12586,7 @@ StatusCode UA_ModificationInfo_Decode(UA_MsgBuffer* msgBuf, UA_ModificationInfo*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12611,11 +12612,11 @@ struct UA_EncodeableType UA_ModificationInfo_EncodeableType =
     OpcUaId_ModificationInfo,
     OpcUaId_ModificationInfo_Encoding_DefaultBinary,
     OpcUaId_ModificationInfo_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ModificationInfo),
     (UA_EncodeableObject_PfnInitialize*)UA_ModificationInfo_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ModificationInfo_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ModificationInfo_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ModificationInfo_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ModificationInfo_Decode
@@ -12628,7 +12629,7 @@ struct UA_EncodeableType UA_ModificationInfo_EncodeableType =
  *===========================================================================*/
 void UA_HistoryModifiedData_Initialize(UA_HistoryModifiedData* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
                             sizeof(UA_DataValue), (UA_EncodeableObject_PfnInitialize*) DataValue_Initialize);
@@ -12642,7 +12643,7 @@ void UA_HistoryModifiedData_Initialize(UA_HistoryModifiedData* a_pValue)
  *===========================================================================*/
 void UA_HistoryModifiedData_Clear(UA_HistoryModifiedData* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
                        sizeof(UA_DataValue), (UA_EncodeableObject_PfnClear*) DataValue_Clear);
@@ -12658,7 +12659,7 @@ StatusCode UA_HistoryModifiedData_Encode(UA_MsgBuffer* msgBuf, UA_HistoryModifie
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12677,7 +12678,7 @@ StatusCode UA_HistoryModifiedData_Decode(UA_MsgBuffer* msgBuf, UA_HistoryModifie
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12704,11 +12705,11 @@ struct UA_EncodeableType UA_HistoryModifiedData_EncodeableType =
     OpcUaId_HistoryModifiedData,
     OpcUaId_HistoryModifiedData_Encoding_DefaultBinary,
     OpcUaId_HistoryModifiedData_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryModifiedData),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryModifiedData_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryModifiedData_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryModifiedData_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryModifiedData_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryModifiedData_Decode
@@ -12721,7 +12722,7 @@ struct UA_EncodeableType UA_HistoryModifiedData_EncodeableType =
  *===========================================================================*/
 void UA_HistoryEvent_Initialize(UA_HistoryEvent* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
                             sizeof(UA_HistoryEventFieldList), (UA_EncodeableObject_PfnInitialize*) UA_HistoryEventFieldList_Initialize);
@@ -12733,7 +12734,7 @@ void UA_HistoryEvent_Initialize(UA_HistoryEvent* a_pValue)
  *===========================================================================*/
 void UA_HistoryEvent_Clear(UA_HistoryEvent* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
                        sizeof(UA_HistoryEventFieldList), (UA_EncodeableObject_PfnClear*) UA_HistoryEventFieldList_Clear);
@@ -12747,7 +12748,7 @@ StatusCode UA_HistoryEvent_Encode(UA_MsgBuffer* msgBuf, UA_HistoryEvent* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12764,7 +12765,7 @@ StatusCode UA_HistoryEvent_Decode(UA_MsgBuffer* msgBuf, UA_HistoryEvent* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12789,11 +12790,11 @@ struct UA_EncodeableType UA_HistoryEvent_EncodeableType =
     OpcUaId_HistoryEvent,
     OpcUaId_HistoryEvent_Encoding_DefaultBinary,
     OpcUaId_HistoryEvent_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryEvent),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryEvent_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryEvent_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryEvent_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryEvent_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryEvent_Decode
@@ -12807,7 +12808,7 @@ struct UA_EncodeableType UA_HistoryEvent_EncodeableType =
  *===========================================================================*/
 void UA_HistoryReadRequest_Initialize(UA_HistoryReadRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         ExtensionObject_Initialize(&a_pValue->HistoryReadDetails);
@@ -12823,7 +12824,7 @@ void UA_HistoryReadRequest_Initialize(UA_HistoryReadRequest* a_pValue)
  *===========================================================================*/
 void UA_HistoryReadRequest_Clear(UA_HistoryReadRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         ExtensionObject_Clear(&a_pValue->HistoryReadDetails);
@@ -12841,7 +12842,7 @@ StatusCode UA_HistoryReadRequest_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadRequ
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12862,7 +12863,7 @@ StatusCode UA_HistoryReadRequest_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadRequ
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12891,11 +12892,11 @@ struct UA_EncodeableType UA_HistoryReadRequest_EncodeableType =
     OpcUaId_HistoryReadRequest,
     OpcUaId_HistoryReadRequest_Encoding_DefaultBinary,
     OpcUaId_HistoryReadRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryReadRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryReadRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryReadRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryReadRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryReadRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryReadRequest_Decode
@@ -12908,7 +12909,7 @@ struct UA_EncodeableType UA_HistoryReadRequest_EncodeableType =
  *===========================================================================*/
 void UA_HistoryReadResponse_Initialize(UA_HistoryReadResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -12923,7 +12924,7 @@ void UA_HistoryReadResponse_Initialize(UA_HistoryReadResponse* a_pValue)
  *===========================================================================*/
 void UA_HistoryReadResponse_Clear(UA_HistoryReadResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -12940,7 +12941,7 @@ StatusCode UA_HistoryReadResponse_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadRes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12960,7 +12961,7 @@ StatusCode UA_HistoryReadResponse_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadRes
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -12988,11 +12989,11 @@ struct UA_EncodeableType UA_HistoryReadResponse_EncodeableType =
     OpcUaId_HistoryReadResponse,
     OpcUaId_HistoryReadResponse_Encoding_DefaultBinary,
     OpcUaId_HistoryReadResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryReadResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryReadResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryReadResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryReadResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryReadResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryReadResponse_Decode
@@ -13006,7 +13007,7 @@ struct UA_EncodeableType UA_HistoryReadResponse_EncodeableType =
  *===========================================================================*/
 void UA_WriteValue_Initialize(UA_WriteValue* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UInt32_Initialize(&a_pValue->AttributeId);
@@ -13020,7 +13021,7 @@ void UA_WriteValue_Initialize(UA_WriteValue* a_pValue)
  *===========================================================================*/
 void UA_WriteValue_Clear(UA_WriteValue* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UInt32_Clear(&a_pValue->AttributeId);
@@ -13036,7 +13037,7 @@ StatusCode UA_WriteValue_Encode(UA_MsgBuffer* msgBuf, UA_WriteValue* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13055,7 +13056,7 @@ StatusCode UA_WriteValue_Decode(UA_MsgBuffer* msgBuf, UA_WriteValue* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13082,11 +13083,11 @@ struct UA_EncodeableType UA_WriteValue_EncodeableType =
     OpcUaId_WriteValue,
     OpcUaId_WriteValue_Encoding_DefaultBinary,
     OpcUaId_WriteValue_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_WriteValue),
     (UA_EncodeableObject_PfnInitialize*)UA_WriteValue_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_WriteValue_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_WriteValue_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_WriteValue_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_WriteValue_Decode
@@ -13100,7 +13101,7 @@ struct UA_EncodeableType UA_WriteValue_EncodeableType =
  *===========================================================================*/
 void UA_WriteRequest_Initialize(UA_WriteRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfNodesToWrite, (void**) &a_pValue->NodesToWrite, 
@@ -13113,7 +13114,7 @@ void UA_WriteRequest_Initialize(UA_WriteRequest* a_pValue)
  *===========================================================================*/
 void UA_WriteRequest_Clear(UA_WriteRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfNodesToWrite, (void**) &a_pValue->NodesToWrite, 
@@ -13128,7 +13129,7 @@ StatusCode UA_WriteRequest_Encode(UA_MsgBuffer* msgBuf, UA_WriteRequest* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13146,7 +13147,7 @@ StatusCode UA_WriteRequest_Decode(UA_MsgBuffer* msgBuf, UA_WriteRequest* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13172,11 +13173,11 @@ struct UA_EncodeableType UA_WriteRequest_EncodeableType =
     OpcUaId_WriteRequest,
     OpcUaId_WriteRequest_Encoding_DefaultBinary,
     OpcUaId_WriteRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_WriteRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_WriteRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_WriteRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_WriteRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_WriteRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_WriteRequest_Decode
@@ -13189,7 +13190,7 @@ struct UA_EncodeableType UA_WriteRequest_EncodeableType =
  *===========================================================================*/
 void UA_WriteResponse_Initialize(UA_WriteResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -13204,7 +13205,7 @@ void UA_WriteResponse_Initialize(UA_WriteResponse* a_pValue)
  *===========================================================================*/
 void UA_WriteResponse_Clear(UA_WriteResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -13221,7 +13222,7 @@ StatusCode UA_WriteResponse_Encode(UA_MsgBuffer* msgBuf, UA_WriteResponse* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13241,7 +13242,7 @@ StatusCode UA_WriteResponse_Decode(UA_MsgBuffer* msgBuf, UA_WriteResponse* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13269,11 +13270,11 @@ struct UA_EncodeableType UA_WriteResponse_EncodeableType =
     OpcUaId_WriteResponse,
     OpcUaId_WriteResponse_Encoding_DefaultBinary,
     OpcUaId_WriteResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_WriteResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_WriteResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_WriteResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_WriteResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_WriteResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_WriteResponse_Decode
@@ -13287,7 +13288,7 @@ struct UA_EncodeableType UA_WriteResponse_EncodeableType =
  *===========================================================================*/
 void UA_HistoryUpdateDetails_Initialize(UA_HistoryUpdateDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
     }
@@ -13298,7 +13299,7 @@ void UA_HistoryUpdateDetails_Initialize(UA_HistoryUpdateDetails* a_pValue)
  *===========================================================================*/
 void UA_HistoryUpdateDetails_Clear(UA_HistoryUpdateDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
     }
@@ -13311,7 +13312,7 @@ StatusCode UA_HistoryUpdateDetails_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13327,7 +13328,7 @@ StatusCode UA_HistoryUpdateDetails_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13351,11 +13352,11 @@ struct UA_EncodeableType UA_HistoryUpdateDetails_EncodeableType =
     OpcUaId_HistoryUpdateDetails,
     OpcUaId_HistoryUpdateDetails_Encoding_DefaultBinary,
     OpcUaId_HistoryUpdateDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryUpdateDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryUpdateDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryUpdateDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryUpdateDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryUpdateDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryUpdateDetails_Decode
@@ -13370,7 +13371,7 @@ struct UA_EncodeableType UA_HistoryUpdateDetails_EncodeableType =
  *===========================================================================*/
 void UA_UpdateDataDetails_Initialize(UA_UpdateDataDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->PerformInsertReplace);
@@ -13384,7 +13385,7 @@ void UA_UpdateDataDetails_Initialize(UA_UpdateDataDetails* a_pValue)
  *===========================================================================*/
 void UA_UpdateDataDetails_Clear(UA_UpdateDataDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->PerformInsertReplace);
@@ -13400,7 +13401,7 @@ StatusCode UA_UpdateDataDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateDataDetail
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13419,7 +13420,7 @@ StatusCode UA_UpdateDataDetails_Decode(UA_MsgBuffer* msgBuf, UA_UpdateDataDetail
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13446,11 +13447,11 @@ struct UA_EncodeableType UA_UpdateDataDetails_EncodeableType =
     OpcUaId_UpdateDataDetails,
     OpcUaId_UpdateDataDetails_Encoding_DefaultBinary,
     OpcUaId_UpdateDataDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_UpdateDataDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_UpdateDataDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_UpdateDataDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_UpdateDataDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_UpdateDataDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_UpdateDataDetails_Decode
@@ -13463,7 +13464,7 @@ struct UA_EncodeableType UA_UpdateDataDetails_EncodeableType =
  *===========================================================================*/
 void UA_UpdateStructureDataDetails_Initialize(UA_UpdateStructureDataDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->PerformInsertReplace);
@@ -13477,7 +13478,7 @@ void UA_UpdateStructureDataDetails_Initialize(UA_UpdateStructureDataDetails* a_p
  *===========================================================================*/
 void UA_UpdateStructureDataDetails_Clear(UA_UpdateStructureDataDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->PerformInsertReplace);
@@ -13493,7 +13494,7 @@ StatusCode UA_UpdateStructureDataDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13512,7 +13513,7 @@ StatusCode UA_UpdateStructureDataDetails_Decode(UA_MsgBuffer* msgBuf, UA_UpdateS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13539,11 +13540,11 @@ struct UA_EncodeableType UA_UpdateStructureDataDetails_EncodeableType =
     OpcUaId_UpdateStructureDataDetails,
     OpcUaId_UpdateStructureDataDetails_Encoding_DefaultBinary,
     OpcUaId_UpdateStructureDataDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_UpdateStructureDataDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_UpdateStructureDataDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_UpdateStructureDataDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_UpdateStructureDataDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_UpdateStructureDataDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_UpdateStructureDataDetails_Decode
@@ -13556,7 +13557,7 @@ struct UA_EncodeableType UA_UpdateStructureDataDetails_EncodeableType =
  *===========================================================================*/
 void UA_UpdateEventDetails_Initialize(UA_UpdateEventDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->PerformInsertReplace);
@@ -13571,7 +13572,7 @@ void UA_UpdateEventDetails_Initialize(UA_UpdateEventDetails* a_pValue)
  *===========================================================================*/
 void UA_UpdateEventDetails_Clear(UA_UpdateEventDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->PerformInsertReplace);
@@ -13588,7 +13589,7 @@ StatusCode UA_UpdateEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateEventDeta
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13608,7 +13609,7 @@ StatusCode UA_UpdateEventDetails_Decode(UA_MsgBuffer* msgBuf, UA_UpdateEventDeta
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13636,11 +13637,11 @@ struct UA_EncodeableType UA_UpdateEventDetails_EncodeableType =
     OpcUaId_UpdateEventDetails,
     OpcUaId_UpdateEventDetails_Encoding_DefaultBinary,
     OpcUaId_UpdateEventDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_UpdateEventDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_UpdateEventDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_UpdateEventDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_UpdateEventDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_UpdateEventDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_UpdateEventDetails_Decode
@@ -13653,7 +13654,7 @@ struct UA_EncodeableType UA_UpdateEventDetails_EncodeableType =
  *===========================================================================*/
 void UA_DeleteRawModifiedDetails_Initialize(UA_DeleteRawModifiedDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         Boolean_Initialize(&a_pValue->IsDeleteModified);
@@ -13667,7 +13668,7 @@ void UA_DeleteRawModifiedDetails_Initialize(UA_DeleteRawModifiedDetails* a_pValu
  *===========================================================================*/
 void UA_DeleteRawModifiedDetails_Clear(UA_DeleteRawModifiedDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         Boolean_Clear(&a_pValue->IsDeleteModified);
@@ -13683,7 +13684,7 @@ StatusCode UA_DeleteRawModifiedDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRaw
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13702,7 +13703,7 @@ StatusCode UA_DeleteRawModifiedDetails_Decode(UA_MsgBuffer* msgBuf, UA_DeleteRaw
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13729,11 +13730,11 @@ struct UA_EncodeableType UA_DeleteRawModifiedDetails_EncodeableType =
     OpcUaId_DeleteRawModifiedDetails,
     OpcUaId_DeleteRawModifiedDetails_Encoding_DefaultBinary,
     OpcUaId_DeleteRawModifiedDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteRawModifiedDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteRawModifiedDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteRawModifiedDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteRawModifiedDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteRawModifiedDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteRawModifiedDetails_Decode
@@ -13746,7 +13747,7 @@ struct UA_EncodeableType UA_DeleteRawModifiedDetails_EncodeableType =
  *===========================================================================*/
 void UA_DeleteAtTimeDetails_Initialize(UA_DeleteAtTimeDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_Array(&a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
@@ -13759,7 +13760,7 @@ void UA_DeleteAtTimeDetails_Initialize(UA_DeleteAtTimeDetails* a_pValue)
  *===========================================================================*/
 void UA_DeleteAtTimeDetails_Clear(UA_DeleteAtTimeDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_Array(&a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
@@ -13774,7 +13775,7 @@ StatusCode UA_DeleteAtTimeDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteAtTimeDe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13792,7 +13793,7 @@ StatusCode UA_DeleteAtTimeDetails_Decode(UA_MsgBuffer* msgBuf, UA_DeleteAtTimeDe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13818,11 +13819,11 @@ struct UA_EncodeableType UA_DeleteAtTimeDetails_EncodeableType =
     OpcUaId_DeleteAtTimeDetails,
     OpcUaId_DeleteAtTimeDetails_Encoding_DefaultBinary,
     OpcUaId_DeleteAtTimeDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteAtTimeDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteAtTimeDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteAtTimeDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteAtTimeDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteAtTimeDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteAtTimeDetails_Decode
@@ -13835,7 +13836,7 @@ struct UA_EncodeableType UA_DeleteAtTimeDetails_EncodeableType =
  *===========================================================================*/
 void UA_DeleteEventDetails_Initialize(UA_DeleteEventDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->NodeId);
         UA_Initialize_Array(&a_pValue->NoOfEventIds, (void**) &a_pValue->EventIds, 
@@ -13848,7 +13849,7 @@ void UA_DeleteEventDetails_Initialize(UA_DeleteEventDetails* a_pValue)
  *===========================================================================*/
 void UA_DeleteEventDetails_Clear(UA_DeleteEventDetails* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->NodeId);
         UA_Clear_Array(&a_pValue->NoOfEventIds, (void**) &a_pValue->EventIds, 
@@ -13863,7 +13864,7 @@ StatusCode UA_DeleteEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteEventDeta
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13881,7 +13882,7 @@ StatusCode UA_DeleteEventDetails_Decode(UA_MsgBuffer* msgBuf, UA_DeleteEventDeta
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13907,11 +13908,11 @@ struct UA_EncodeableType UA_DeleteEventDetails_EncodeableType =
     OpcUaId_DeleteEventDetails,
     OpcUaId_DeleteEventDetails_Encoding_DefaultBinary,
     OpcUaId_DeleteEventDetails_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteEventDetails),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteEventDetails_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteEventDetails_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteEventDetails_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteEventDetails_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteEventDetails_Decode
@@ -13924,7 +13925,7 @@ struct UA_EncodeableType UA_DeleteEventDetails_EncodeableType =
  *===========================================================================*/
 void UA_HistoryUpdateResult_Initialize(UA_HistoryUpdateResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
@@ -13939,7 +13940,7 @@ void UA_HistoryUpdateResult_Initialize(UA_HistoryUpdateResult* a_pValue)
  *===========================================================================*/
 void UA_HistoryUpdateResult_Clear(UA_HistoryUpdateResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
@@ -13956,7 +13957,7 @@ StatusCode UA_HistoryUpdateResult_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateR
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -13976,7 +13977,7 @@ StatusCode UA_HistoryUpdateResult_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateR
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14004,11 +14005,11 @@ struct UA_EncodeableType UA_HistoryUpdateResult_EncodeableType =
     OpcUaId_HistoryUpdateResult,
     OpcUaId_HistoryUpdateResult_Encoding_DefaultBinary,
     OpcUaId_HistoryUpdateResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryUpdateResult),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryUpdateResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryUpdateResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryUpdateResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryUpdateResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryUpdateResult_Decode
@@ -14022,7 +14023,7 @@ struct UA_EncodeableType UA_HistoryUpdateResult_EncodeableType =
  *===========================================================================*/
 void UA_HistoryUpdateRequest_Initialize(UA_HistoryUpdateRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfHistoryUpdateDetails, (void**) &a_pValue->HistoryUpdateDetails, 
@@ -14035,7 +14036,7 @@ void UA_HistoryUpdateRequest_Initialize(UA_HistoryUpdateRequest* a_pValue)
  *===========================================================================*/
 void UA_HistoryUpdateRequest_Clear(UA_HistoryUpdateRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfHistoryUpdateDetails, (void**) &a_pValue->HistoryUpdateDetails, 
@@ -14050,7 +14051,7 @@ StatusCode UA_HistoryUpdateRequest_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14068,7 +14069,7 @@ StatusCode UA_HistoryUpdateRequest_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14094,11 +14095,11 @@ struct UA_EncodeableType UA_HistoryUpdateRequest_EncodeableType =
     OpcUaId_HistoryUpdateRequest,
     OpcUaId_HistoryUpdateRequest_Encoding_DefaultBinary,
     OpcUaId_HistoryUpdateRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryUpdateRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryUpdateRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryUpdateRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryUpdateRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryUpdateRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryUpdateRequest_Decode
@@ -14111,7 +14112,7 @@ struct UA_EncodeableType UA_HistoryUpdateRequest_EncodeableType =
  *===========================================================================*/
 void UA_HistoryUpdateResponse_Initialize(UA_HistoryUpdateResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -14126,7 +14127,7 @@ void UA_HistoryUpdateResponse_Initialize(UA_HistoryUpdateResponse* a_pValue)
  *===========================================================================*/
 void UA_HistoryUpdateResponse_Clear(UA_HistoryUpdateResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -14143,7 +14144,7 @@ StatusCode UA_HistoryUpdateResponse_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdat
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14163,7 +14164,7 @@ StatusCode UA_HistoryUpdateResponse_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdat
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14191,11 +14192,11 @@ struct UA_EncodeableType UA_HistoryUpdateResponse_EncodeableType =
     OpcUaId_HistoryUpdateResponse,
     OpcUaId_HistoryUpdateResponse_Encoding_DefaultBinary,
     OpcUaId_HistoryUpdateResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryUpdateResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryUpdateResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryUpdateResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryUpdateResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryUpdateResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryUpdateResponse_Decode
@@ -14209,7 +14210,7 @@ struct UA_EncodeableType UA_HistoryUpdateResponse_EncodeableType =
  *===========================================================================*/
 void UA_CallMethodRequest_Initialize(UA_CallMethodRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->ObjectId);
         NodeId_Initialize(&a_pValue->MethodId);
@@ -14223,7 +14224,7 @@ void UA_CallMethodRequest_Initialize(UA_CallMethodRequest* a_pValue)
  *===========================================================================*/
 void UA_CallMethodRequest_Clear(UA_CallMethodRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->ObjectId);
         NodeId_Clear(&a_pValue->MethodId);
@@ -14239,7 +14240,7 @@ StatusCode UA_CallMethodRequest_Encode(UA_MsgBuffer* msgBuf, UA_CallMethodReques
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14258,7 +14259,7 @@ StatusCode UA_CallMethodRequest_Decode(UA_MsgBuffer* msgBuf, UA_CallMethodReques
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14285,11 +14286,11 @@ struct UA_EncodeableType UA_CallMethodRequest_EncodeableType =
     OpcUaId_CallMethodRequest,
     OpcUaId_CallMethodRequest_Encoding_DefaultBinary,
     OpcUaId_CallMethodRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CallMethodRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_CallMethodRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CallMethodRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CallMethodRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CallMethodRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CallMethodRequest_Decode
@@ -14302,7 +14303,7 @@ struct UA_EncodeableType UA_CallMethodRequest_EncodeableType =
  *===========================================================================*/
 void UA_CallMethodResult_Initialize(UA_CallMethodResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
@@ -14319,7 +14320,7 @@ void UA_CallMethodResult_Initialize(UA_CallMethodResult* a_pValue)
  *===========================================================================*/
 void UA_CallMethodResult_Clear(UA_CallMethodResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
@@ -14338,7 +14339,7 @@ StatusCode UA_CallMethodResult_Encode(UA_MsgBuffer* msgBuf, UA_CallMethodResult*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14360,7 +14361,7 @@ StatusCode UA_CallMethodResult_Decode(UA_MsgBuffer* msgBuf, UA_CallMethodResult*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14390,11 +14391,11 @@ struct UA_EncodeableType UA_CallMethodResult_EncodeableType =
     OpcUaId_CallMethodResult,
     OpcUaId_CallMethodResult_Encoding_DefaultBinary,
     OpcUaId_CallMethodResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CallMethodResult),
     (UA_EncodeableObject_PfnInitialize*)UA_CallMethodResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CallMethodResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CallMethodResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CallMethodResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CallMethodResult_Decode
@@ -14408,7 +14409,7 @@ struct UA_EncodeableType UA_CallMethodResult_EncodeableType =
  *===========================================================================*/
 void UA_CallRequest_Initialize(UA_CallRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfMethodsToCall, (void**) &a_pValue->MethodsToCall, 
@@ -14421,7 +14422,7 @@ void UA_CallRequest_Initialize(UA_CallRequest* a_pValue)
  *===========================================================================*/
 void UA_CallRequest_Clear(UA_CallRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfMethodsToCall, (void**) &a_pValue->MethodsToCall, 
@@ -14436,7 +14437,7 @@ StatusCode UA_CallRequest_Encode(UA_MsgBuffer* msgBuf, UA_CallRequest* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14454,7 +14455,7 @@ StatusCode UA_CallRequest_Decode(UA_MsgBuffer* msgBuf, UA_CallRequest* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14480,11 +14481,11 @@ struct UA_EncodeableType UA_CallRequest_EncodeableType =
     OpcUaId_CallRequest,
     OpcUaId_CallRequest_Encoding_DefaultBinary,
     OpcUaId_CallRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CallRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_CallRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CallRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CallRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CallRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CallRequest_Decode
@@ -14497,7 +14498,7 @@ struct UA_EncodeableType UA_CallRequest_EncodeableType =
  *===========================================================================*/
 void UA_CallResponse_Initialize(UA_CallResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -14512,7 +14513,7 @@ void UA_CallResponse_Initialize(UA_CallResponse* a_pValue)
  *===========================================================================*/
 void UA_CallResponse_Clear(UA_CallResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -14529,7 +14530,7 @@ StatusCode UA_CallResponse_Encode(UA_MsgBuffer* msgBuf, UA_CallResponse* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14549,7 +14550,7 @@ StatusCode UA_CallResponse_Decode(UA_MsgBuffer* msgBuf, UA_CallResponse* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14577,11 +14578,11 @@ struct UA_EncodeableType UA_CallResponse_EncodeableType =
     OpcUaId_CallResponse,
     OpcUaId_CallResponse_Encoding_DefaultBinary,
     OpcUaId_CallResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CallResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_CallResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CallResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CallResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CallResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CallResponse_Decode
@@ -14598,7 +14599,7 @@ struct UA_EncodeableType UA_CallResponse_EncodeableType =
  *===========================================================================*/
 void UA_DataChangeFilter_Initialize(UA_DataChangeFilter* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->Trigger);
         UInt32_Initialize(&a_pValue->DeadbandType);
@@ -14611,7 +14612,7 @@ void UA_DataChangeFilter_Initialize(UA_DataChangeFilter* a_pValue)
  *===========================================================================*/
 void UA_DataChangeFilter_Clear(UA_DataChangeFilter* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->Trigger);
         UInt32_Clear(&a_pValue->DeadbandType);
@@ -14626,7 +14627,7 @@ StatusCode UA_DataChangeFilter_Encode(UA_MsgBuffer* msgBuf, UA_DataChangeFilter*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14644,7 +14645,7 @@ StatusCode UA_DataChangeFilter_Decode(UA_MsgBuffer* msgBuf, UA_DataChangeFilter*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14670,11 +14671,11 @@ struct UA_EncodeableType UA_DataChangeFilter_EncodeableType =
     OpcUaId_DataChangeFilter,
     OpcUaId_DataChangeFilter_Encoding_DefaultBinary,
     OpcUaId_DataChangeFilter_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DataChangeFilter),
     (UA_EncodeableObject_PfnInitialize*)UA_DataChangeFilter_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DataChangeFilter_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DataChangeFilter_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DataChangeFilter_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DataChangeFilter_Decode
@@ -14687,7 +14688,7 @@ struct UA_EncodeableType UA_DataChangeFilter_EncodeableType =
  *===========================================================================*/
 void UA_EventFilter_Initialize(UA_EventFilter* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfSelectClauses, (void**) &a_pValue->SelectClauses, 
                             sizeof(UA_SimpleAttributeOperand), (UA_EncodeableObject_PfnInitialize*) UA_SimpleAttributeOperand_Initialize);
@@ -14700,7 +14701,7 @@ void UA_EventFilter_Initialize(UA_EventFilter* a_pValue)
  *===========================================================================*/
 void UA_EventFilter_Clear(UA_EventFilter* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfSelectClauses, (void**) &a_pValue->SelectClauses, 
                        sizeof(UA_SimpleAttributeOperand), (UA_EncodeableObject_PfnClear*) UA_SimpleAttributeOperand_Clear);
@@ -14715,7 +14716,7 @@ StatusCode UA_EventFilter_Encode(UA_MsgBuffer* msgBuf, UA_EventFilter* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14733,7 +14734,7 @@ StatusCode UA_EventFilter_Decode(UA_MsgBuffer* msgBuf, UA_EventFilter* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14759,11 +14760,11 @@ struct UA_EncodeableType UA_EventFilter_EncodeableType =
     OpcUaId_EventFilter,
     OpcUaId_EventFilter_Encoding_DefaultBinary,
     OpcUaId_EventFilter_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EventFilter),
     (UA_EncodeableObject_PfnInitialize*)UA_EventFilter_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EventFilter_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EventFilter_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EventFilter_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EventFilter_Decode
@@ -14776,7 +14777,7 @@ struct UA_EncodeableType UA_EventFilter_EncodeableType =
  *===========================================================================*/
 void UA_AggregateConfiguration_Initialize(UA_AggregateConfiguration* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Boolean_Initialize(&a_pValue->UseServerCapabilitiesDefaults);
         Boolean_Initialize(&a_pValue->TreatUncertainAsBad);
@@ -14791,7 +14792,7 @@ void UA_AggregateConfiguration_Initialize(UA_AggregateConfiguration* a_pValue)
  *===========================================================================*/
 void UA_AggregateConfiguration_Clear(UA_AggregateConfiguration* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Boolean_Clear(&a_pValue->UseServerCapabilitiesDefaults);
         Boolean_Clear(&a_pValue->TreatUncertainAsBad);
@@ -14808,7 +14809,7 @@ StatusCode UA_AggregateConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_AggregateCo
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14828,7 +14829,7 @@ StatusCode UA_AggregateConfiguration_Decode(UA_MsgBuffer* msgBuf, UA_AggregateCo
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14856,11 +14857,11 @@ struct UA_EncodeableType UA_AggregateConfiguration_EncodeableType =
     OpcUaId_AggregateConfiguration,
     OpcUaId_AggregateConfiguration_Encoding_DefaultBinary,
     OpcUaId_AggregateConfiguration_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AggregateConfiguration),
     (UA_EncodeableObject_PfnInitialize*)UA_AggregateConfiguration_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AggregateConfiguration_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AggregateConfiguration_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AggregateConfiguration_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AggregateConfiguration_Decode
@@ -14873,7 +14874,7 @@ struct UA_EncodeableType UA_AggregateConfiguration_EncodeableType =
  *===========================================================================*/
 void UA_AggregateFilter_Initialize(UA_AggregateFilter* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Initialize(&a_pValue->StartTime);
         NodeId_Initialize(&a_pValue->AggregateType);
@@ -14887,7 +14888,7 @@ void UA_AggregateFilter_Initialize(UA_AggregateFilter* a_pValue)
  *===========================================================================*/
 void UA_AggregateFilter_Clear(UA_AggregateFilter* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Clear(&a_pValue->StartTime);
         NodeId_Clear(&a_pValue->AggregateType);
@@ -14903,7 +14904,7 @@ StatusCode UA_AggregateFilter_Encode(UA_MsgBuffer* msgBuf, UA_AggregateFilter* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14922,7 +14923,7 @@ StatusCode UA_AggregateFilter_Decode(UA_MsgBuffer* msgBuf, UA_AggregateFilter* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -14949,11 +14950,11 @@ struct UA_EncodeableType UA_AggregateFilter_EncodeableType =
     OpcUaId_AggregateFilter,
     OpcUaId_AggregateFilter_Encoding_DefaultBinary,
     OpcUaId_AggregateFilter_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AggregateFilter),
     (UA_EncodeableObject_PfnInitialize*)UA_AggregateFilter_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AggregateFilter_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AggregateFilter_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AggregateFilter_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AggregateFilter_Decode
@@ -14966,7 +14967,7 @@ struct UA_EncodeableType UA_AggregateFilter_EncodeableType =
  *===========================================================================*/
 void UA_EventFilterResult_Initialize(UA_EventFilterResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
                             sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
@@ -14981,7 +14982,7 @@ void UA_EventFilterResult_Initialize(UA_EventFilterResult* a_pValue)
  *===========================================================================*/
 void UA_EventFilterResult_Clear(UA_EventFilterResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
                        sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
@@ -14998,7 +14999,7 @@ StatusCode UA_EventFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_EventFilterResul
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15018,7 +15019,7 @@ StatusCode UA_EventFilterResult_Decode(UA_MsgBuffer* msgBuf, UA_EventFilterResul
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15046,11 +15047,11 @@ struct UA_EncodeableType UA_EventFilterResult_EncodeableType =
     OpcUaId_EventFilterResult,
     OpcUaId_EventFilterResult_Encoding_DefaultBinary,
     OpcUaId_EventFilterResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EventFilterResult),
     (UA_EncodeableObject_PfnInitialize*)UA_EventFilterResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EventFilterResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EventFilterResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EventFilterResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EventFilterResult_Decode
@@ -15063,7 +15064,7 @@ struct UA_EncodeableType UA_EventFilterResult_EncodeableType =
  *===========================================================================*/
 void UA_AggregateFilterResult_Initialize(UA_AggregateFilterResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Initialize(&a_pValue->RevisedStartTime);
         Double_Initialize(&a_pValue->RevisedProcessingInterval);
@@ -15076,7 +15077,7 @@ void UA_AggregateFilterResult_Initialize(UA_AggregateFilterResult* a_pValue)
  *===========================================================================*/
 void UA_AggregateFilterResult_Clear(UA_AggregateFilterResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Clear(&a_pValue->RevisedStartTime);
         Double_Clear(&a_pValue->RevisedProcessingInterval);
@@ -15091,7 +15092,7 @@ StatusCode UA_AggregateFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_AggregateFil
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15109,7 +15110,7 @@ StatusCode UA_AggregateFilterResult_Decode(UA_MsgBuffer* msgBuf, UA_AggregateFil
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15135,11 +15136,11 @@ struct UA_EncodeableType UA_AggregateFilterResult_EncodeableType =
     OpcUaId_AggregateFilterResult,
     OpcUaId_AggregateFilterResult_Encoding_DefaultBinary,
     OpcUaId_AggregateFilterResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AggregateFilterResult),
     (UA_EncodeableObject_PfnInitialize*)UA_AggregateFilterResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AggregateFilterResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AggregateFilterResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AggregateFilterResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AggregateFilterResult_Decode
@@ -15152,7 +15153,7 @@ struct UA_EncodeableType UA_AggregateFilterResult_EncodeableType =
  *===========================================================================*/
 void UA_MonitoringParameters_Initialize(UA_MonitoringParameters* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->ClientHandle);
         Double_Initialize(&a_pValue->SamplingInterval);
@@ -15167,7 +15168,7 @@ void UA_MonitoringParameters_Initialize(UA_MonitoringParameters* a_pValue)
  *===========================================================================*/
 void UA_MonitoringParameters_Clear(UA_MonitoringParameters* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->ClientHandle);
         Double_Clear(&a_pValue->SamplingInterval);
@@ -15184,7 +15185,7 @@ StatusCode UA_MonitoringParameters_Encode(UA_MsgBuffer* msgBuf, UA_MonitoringPar
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15204,7 +15205,7 @@ StatusCode UA_MonitoringParameters_Decode(UA_MsgBuffer* msgBuf, UA_MonitoringPar
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15232,11 +15233,11 @@ struct UA_EncodeableType UA_MonitoringParameters_EncodeableType =
     OpcUaId_MonitoringParameters,
     OpcUaId_MonitoringParameters_Encoding_DefaultBinary,
     OpcUaId_MonitoringParameters_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_MonitoringParameters),
     (UA_EncodeableObject_PfnInitialize*)UA_MonitoringParameters_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_MonitoringParameters_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_MonitoringParameters_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_MonitoringParameters_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_MonitoringParameters_Decode
@@ -15249,7 +15250,7 @@ struct UA_EncodeableType UA_MonitoringParameters_EncodeableType =
  *===========================================================================*/
 void UA_MonitoredItemCreateRequest_Initialize(UA_MonitoredItemCreateRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ReadValueId_Initialize(&a_pValue->ItemToMonitor);
         UA_Initialize_EnumeratedType((int32_t*) &a_pValue->MonitoringMode);
@@ -15262,7 +15263,7 @@ void UA_MonitoredItemCreateRequest_Initialize(UA_MonitoredItemCreateRequest* a_p
  *===========================================================================*/
 void UA_MonitoredItemCreateRequest_Clear(UA_MonitoredItemCreateRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ReadValueId_Clear(&a_pValue->ItemToMonitor);
         UA_Clear_EnumeratedType((int32_t*) &a_pValue->MonitoringMode);
@@ -15277,7 +15278,7 @@ StatusCode UA_MonitoredItemCreateRequest_Encode(UA_MsgBuffer* msgBuf, UA_Monitor
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15295,7 +15296,7 @@ StatusCode UA_MonitoredItemCreateRequest_Decode(UA_MsgBuffer* msgBuf, UA_Monitor
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15321,11 +15322,11 @@ struct UA_EncodeableType UA_MonitoredItemCreateRequest_EncodeableType =
     OpcUaId_MonitoredItemCreateRequest,
     OpcUaId_MonitoredItemCreateRequest_Encoding_DefaultBinary,
     OpcUaId_MonitoredItemCreateRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_MonitoredItemCreateRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_MonitoredItemCreateRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_MonitoredItemCreateRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_MonitoredItemCreateRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_MonitoredItemCreateRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_MonitoredItemCreateRequest_Decode
@@ -15338,7 +15339,7 @@ struct UA_EncodeableType UA_MonitoredItemCreateRequest_EncodeableType =
  *===========================================================================*/
 void UA_MonitoredItemCreateResult_Initialize(UA_MonitoredItemCreateResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UInt32_Initialize(&a_pValue->MonitoredItemId);
@@ -15353,7 +15354,7 @@ void UA_MonitoredItemCreateResult_Initialize(UA_MonitoredItemCreateResult* a_pVa
  *===========================================================================*/
 void UA_MonitoredItemCreateResult_Clear(UA_MonitoredItemCreateResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UInt32_Clear(&a_pValue->MonitoredItemId);
@@ -15370,7 +15371,7 @@ StatusCode UA_MonitoredItemCreateResult_Encode(UA_MsgBuffer* msgBuf, UA_Monitore
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15390,7 +15391,7 @@ StatusCode UA_MonitoredItemCreateResult_Decode(UA_MsgBuffer* msgBuf, UA_Monitore
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15418,11 +15419,11 @@ struct UA_EncodeableType UA_MonitoredItemCreateResult_EncodeableType =
     OpcUaId_MonitoredItemCreateResult,
     OpcUaId_MonitoredItemCreateResult_Encoding_DefaultBinary,
     OpcUaId_MonitoredItemCreateResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_MonitoredItemCreateResult),
     (UA_EncodeableObject_PfnInitialize*)UA_MonitoredItemCreateResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_MonitoredItemCreateResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_MonitoredItemCreateResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_MonitoredItemCreateResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_MonitoredItemCreateResult_Decode
@@ -15436,7 +15437,7 @@ struct UA_EncodeableType UA_MonitoredItemCreateResult_EncodeableType =
  *===========================================================================*/
 void UA_CreateMonitoredItemsRequest_Initialize(UA_CreateMonitoredItemsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -15451,7 +15452,7 @@ void UA_CreateMonitoredItemsRequest_Initialize(UA_CreateMonitoredItemsRequest* a
  *===========================================================================*/
 void UA_CreateMonitoredItemsRequest_Clear(UA_CreateMonitoredItemsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -15468,7 +15469,7 @@ StatusCode UA_CreateMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Create
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15488,7 +15489,7 @@ StatusCode UA_CreateMonitoredItemsRequest_Decode(UA_MsgBuffer* msgBuf, UA_Create
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15516,11 +15517,11 @@ struct UA_EncodeableType UA_CreateMonitoredItemsRequest_EncodeableType =
     OpcUaId_CreateMonitoredItemsRequest,
     OpcUaId_CreateMonitoredItemsRequest_Encoding_DefaultBinary,
     OpcUaId_CreateMonitoredItemsRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CreateMonitoredItemsRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_CreateMonitoredItemsRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CreateMonitoredItemsRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CreateMonitoredItemsRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CreateMonitoredItemsRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CreateMonitoredItemsRequest_Decode
@@ -15533,7 +15534,7 @@ struct UA_EncodeableType UA_CreateMonitoredItemsRequest_EncodeableType =
  *===========================================================================*/
 void UA_CreateMonitoredItemsResponse_Initialize(UA_CreateMonitoredItemsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -15548,7 +15549,7 @@ void UA_CreateMonitoredItemsResponse_Initialize(UA_CreateMonitoredItemsResponse*
  *===========================================================================*/
 void UA_CreateMonitoredItemsResponse_Clear(UA_CreateMonitoredItemsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -15565,7 +15566,7 @@ StatusCode UA_CreateMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Creat
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15585,7 +15586,7 @@ StatusCode UA_CreateMonitoredItemsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Creat
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15613,11 +15614,11 @@ struct UA_EncodeableType UA_CreateMonitoredItemsResponse_EncodeableType =
     OpcUaId_CreateMonitoredItemsResponse,
     OpcUaId_CreateMonitoredItemsResponse_Encoding_DefaultBinary,
     OpcUaId_CreateMonitoredItemsResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CreateMonitoredItemsResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_CreateMonitoredItemsResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CreateMonitoredItemsResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CreateMonitoredItemsResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CreateMonitoredItemsResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CreateMonitoredItemsResponse_Decode
@@ -15631,7 +15632,7 @@ struct UA_EncodeableType UA_CreateMonitoredItemsResponse_EncodeableType =
  *===========================================================================*/
 void UA_MonitoredItemModifyRequest_Initialize(UA_MonitoredItemModifyRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->MonitoredItemId);
         UA_MonitoringParameters_Initialize(&a_pValue->RequestedParameters);
@@ -15643,7 +15644,7 @@ void UA_MonitoredItemModifyRequest_Initialize(UA_MonitoredItemModifyRequest* a_p
  *===========================================================================*/
 void UA_MonitoredItemModifyRequest_Clear(UA_MonitoredItemModifyRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->MonitoredItemId);
         UA_MonitoringParameters_Clear(&a_pValue->RequestedParameters);
@@ -15657,7 +15658,7 @@ StatusCode UA_MonitoredItemModifyRequest_Encode(UA_MsgBuffer* msgBuf, UA_Monitor
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15674,7 +15675,7 @@ StatusCode UA_MonitoredItemModifyRequest_Decode(UA_MsgBuffer* msgBuf, UA_Monitor
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15699,11 +15700,11 @@ struct UA_EncodeableType UA_MonitoredItemModifyRequest_EncodeableType =
     OpcUaId_MonitoredItemModifyRequest,
     OpcUaId_MonitoredItemModifyRequest_Encoding_DefaultBinary,
     OpcUaId_MonitoredItemModifyRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_MonitoredItemModifyRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_MonitoredItemModifyRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_MonitoredItemModifyRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_MonitoredItemModifyRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_MonitoredItemModifyRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_MonitoredItemModifyRequest_Decode
@@ -15716,7 +15717,7 @@ struct UA_EncodeableType UA_MonitoredItemModifyRequest_EncodeableType =
  *===========================================================================*/
 void UA_MonitoredItemModifyResult_Initialize(UA_MonitoredItemModifyResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         Double_Initialize(&a_pValue->RevisedSamplingInterval);
@@ -15730,7 +15731,7 @@ void UA_MonitoredItemModifyResult_Initialize(UA_MonitoredItemModifyResult* a_pVa
  *===========================================================================*/
 void UA_MonitoredItemModifyResult_Clear(UA_MonitoredItemModifyResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         Double_Clear(&a_pValue->RevisedSamplingInterval);
@@ -15746,7 +15747,7 @@ StatusCode UA_MonitoredItemModifyResult_Encode(UA_MsgBuffer* msgBuf, UA_Monitore
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15765,7 +15766,7 @@ StatusCode UA_MonitoredItemModifyResult_Decode(UA_MsgBuffer* msgBuf, UA_Monitore
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15792,11 +15793,11 @@ struct UA_EncodeableType UA_MonitoredItemModifyResult_EncodeableType =
     OpcUaId_MonitoredItemModifyResult,
     OpcUaId_MonitoredItemModifyResult_Encoding_DefaultBinary,
     OpcUaId_MonitoredItemModifyResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_MonitoredItemModifyResult),
     (UA_EncodeableObject_PfnInitialize*)UA_MonitoredItemModifyResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_MonitoredItemModifyResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_MonitoredItemModifyResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_MonitoredItemModifyResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_MonitoredItemModifyResult_Decode
@@ -15810,7 +15811,7 @@ struct UA_EncodeableType UA_MonitoredItemModifyResult_EncodeableType =
  *===========================================================================*/
 void UA_ModifyMonitoredItemsRequest_Initialize(UA_ModifyMonitoredItemsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -15825,7 +15826,7 @@ void UA_ModifyMonitoredItemsRequest_Initialize(UA_ModifyMonitoredItemsRequest* a
  *===========================================================================*/
 void UA_ModifyMonitoredItemsRequest_Clear(UA_ModifyMonitoredItemsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -15842,7 +15843,7 @@ StatusCode UA_ModifyMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Modify
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15862,7 +15863,7 @@ StatusCode UA_ModifyMonitoredItemsRequest_Decode(UA_MsgBuffer* msgBuf, UA_Modify
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15890,11 +15891,11 @@ struct UA_EncodeableType UA_ModifyMonitoredItemsRequest_EncodeableType =
     OpcUaId_ModifyMonitoredItemsRequest,
     OpcUaId_ModifyMonitoredItemsRequest_Encoding_DefaultBinary,
     OpcUaId_ModifyMonitoredItemsRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ModifyMonitoredItemsRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_ModifyMonitoredItemsRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ModifyMonitoredItemsRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ModifyMonitoredItemsRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ModifyMonitoredItemsRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ModifyMonitoredItemsRequest_Decode
@@ -15907,7 +15908,7 @@ struct UA_EncodeableType UA_ModifyMonitoredItemsRequest_EncodeableType =
  *===========================================================================*/
 void UA_ModifyMonitoredItemsResponse_Initialize(UA_ModifyMonitoredItemsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -15922,7 +15923,7 @@ void UA_ModifyMonitoredItemsResponse_Initialize(UA_ModifyMonitoredItemsResponse*
  *===========================================================================*/
 void UA_ModifyMonitoredItemsResponse_Clear(UA_ModifyMonitoredItemsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -15939,7 +15940,7 @@ StatusCode UA_ModifyMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Modif
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15959,7 +15960,7 @@ StatusCode UA_ModifyMonitoredItemsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Modif
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -15987,11 +15988,11 @@ struct UA_EncodeableType UA_ModifyMonitoredItemsResponse_EncodeableType =
     OpcUaId_ModifyMonitoredItemsResponse,
     OpcUaId_ModifyMonitoredItemsResponse_Encoding_DefaultBinary,
     OpcUaId_ModifyMonitoredItemsResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ModifyMonitoredItemsResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_ModifyMonitoredItemsResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ModifyMonitoredItemsResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ModifyMonitoredItemsResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ModifyMonitoredItemsResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ModifyMonitoredItemsResponse_Decode
@@ -16006,7 +16007,7 @@ struct UA_EncodeableType UA_ModifyMonitoredItemsResponse_EncodeableType =
  *===========================================================================*/
 void UA_SetMonitoringModeRequest_Initialize(UA_SetMonitoringModeRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -16021,7 +16022,7 @@ void UA_SetMonitoringModeRequest_Initialize(UA_SetMonitoringModeRequest* a_pValu
  *===========================================================================*/
 void UA_SetMonitoringModeRequest_Clear(UA_SetMonitoringModeRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -16038,7 +16039,7 @@ StatusCode UA_SetMonitoringModeRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetMonito
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16058,7 +16059,7 @@ StatusCode UA_SetMonitoringModeRequest_Decode(UA_MsgBuffer* msgBuf, UA_SetMonito
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16086,11 +16087,11 @@ struct UA_EncodeableType UA_SetMonitoringModeRequest_EncodeableType =
     OpcUaId_SetMonitoringModeRequest,
     OpcUaId_SetMonitoringModeRequest_Encoding_DefaultBinary,
     OpcUaId_SetMonitoringModeRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SetMonitoringModeRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_SetMonitoringModeRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SetMonitoringModeRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SetMonitoringModeRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SetMonitoringModeRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SetMonitoringModeRequest_Decode
@@ -16103,7 +16104,7 @@ struct UA_EncodeableType UA_SetMonitoringModeRequest_EncodeableType =
  *===========================================================================*/
 void UA_SetMonitoringModeResponse_Initialize(UA_SetMonitoringModeResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -16118,7 +16119,7 @@ void UA_SetMonitoringModeResponse_Initialize(UA_SetMonitoringModeResponse* a_pVa
  *===========================================================================*/
 void UA_SetMonitoringModeResponse_Clear(UA_SetMonitoringModeResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -16135,7 +16136,7 @@ StatusCode UA_SetMonitoringModeResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetMonit
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16155,7 +16156,7 @@ StatusCode UA_SetMonitoringModeResponse_Decode(UA_MsgBuffer* msgBuf, UA_SetMonit
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16183,11 +16184,11 @@ struct UA_EncodeableType UA_SetMonitoringModeResponse_EncodeableType =
     OpcUaId_SetMonitoringModeResponse,
     OpcUaId_SetMonitoringModeResponse_Encoding_DefaultBinary,
     OpcUaId_SetMonitoringModeResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SetMonitoringModeResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_SetMonitoringModeResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SetMonitoringModeResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SetMonitoringModeResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SetMonitoringModeResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SetMonitoringModeResponse_Decode
@@ -16202,7 +16203,7 @@ struct UA_EncodeableType UA_SetMonitoringModeResponse_EncodeableType =
  *===========================================================================*/
 void UA_SetTriggeringRequest_Initialize(UA_SetTriggeringRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -16219,7 +16220,7 @@ void UA_SetTriggeringRequest_Initialize(UA_SetTriggeringRequest* a_pValue)
  *===========================================================================*/
 void UA_SetTriggeringRequest_Clear(UA_SetTriggeringRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -16238,7 +16239,7 @@ StatusCode UA_SetTriggeringRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetTriggering
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16260,7 +16261,7 @@ StatusCode UA_SetTriggeringRequest_Decode(UA_MsgBuffer* msgBuf, UA_SetTriggering
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16290,11 +16291,11 @@ struct UA_EncodeableType UA_SetTriggeringRequest_EncodeableType =
     OpcUaId_SetTriggeringRequest,
     OpcUaId_SetTriggeringRequest_Encoding_DefaultBinary,
     OpcUaId_SetTriggeringRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SetTriggeringRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_SetTriggeringRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SetTriggeringRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SetTriggeringRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SetTriggeringRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SetTriggeringRequest_Decode
@@ -16307,7 +16308,7 @@ struct UA_EncodeableType UA_SetTriggeringRequest_EncodeableType =
  *===========================================================================*/
 void UA_SetTriggeringResponse_Initialize(UA_SetTriggeringResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
@@ -16326,7 +16327,7 @@ void UA_SetTriggeringResponse_Initialize(UA_SetTriggeringResponse* a_pValue)
  *===========================================================================*/
 void UA_SetTriggeringResponse_Clear(UA_SetTriggeringResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
@@ -16347,7 +16348,7 @@ StatusCode UA_SetTriggeringResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetTriggerin
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16371,7 +16372,7 @@ StatusCode UA_SetTriggeringResponse_Decode(UA_MsgBuffer* msgBuf, UA_SetTriggerin
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16403,11 +16404,11 @@ struct UA_EncodeableType UA_SetTriggeringResponse_EncodeableType =
     OpcUaId_SetTriggeringResponse,
     OpcUaId_SetTriggeringResponse_Encoding_DefaultBinary,
     OpcUaId_SetTriggeringResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SetTriggeringResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_SetTriggeringResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SetTriggeringResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SetTriggeringResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SetTriggeringResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SetTriggeringResponse_Decode
@@ -16422,7 +16423,7 @@ struct UA_EncodeableType UA_SetTriggeringResponse_EncodeableType =
  *===========================================================================*/
 void UA_DeleteMonitoredItemsRequest_Initialize(UA_DeleteMonitoredItemsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -16436,7 +16437,7 @@ void UA_DeleteMonitoredItemsRequest_Initialize(UA_DeleteMonitoredItemsRequest* a
  *===========================================================================*/
 void UA_DeleteMonitoredItemsRequest_Clear(UA_DeleteMonitoredItemsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -16452,7 +16453,7 @@ StatusCode UA_DeleteMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Delete
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16471,7 +16472,7 @@ StatusCode UA_DeleteMonitoredItemsRequest_Decode(UA_MsgBuffer* msgBuf, UA_Delete
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16498,11 +16499,11 @@ struct UA_EncodeableType UA_DeleteMonitoredItemsRequest_EncodeableType =
     OpcUaId_DeleteMonitoredItemsRequest,
     OpcUaId_DeleteMonitoredItemsRequest_Encoding_DefaultBinary,
     OpcUaId_DeleteMonitoredItemsRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteMonitoredItemsRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteMonitoredItemsRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteMonitoredItemsRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteMonitoredItemsRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteMonitoredItemsRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteMonitoredItemsRequest_Decode
@@ -16515,7 +16516,7 @@ struct UA_EncodeableType UA_DeleteMonitoredItemsRequest_EncodeableType =
  *===========================================================================*/
 void UA_DeleteMonitoredItemsResponse_Initialize(UA_DeleteMonitoredItemsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -16530,7 +16531,7 @@ void UA_DeleteMonitoredItemsResponse_Initialize(UA_DeleteMonitoredItemsResponse*
  *===========================================================================*/
 void UA_DeleteMonitoredItemsResponse_Clear(UA_DeleteMonitoredItemsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -16547,7 +16548,7 @@ StatusCode UA_DeleteMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Delet
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16567,7 +16568,7 @@ StatusCode UA_DeleteMonitoredItemsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Delet
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16595,11 +16596,11 @@ struct UA_EncodeableType UA_DeleteMonitoredItemsResponse_EncodeableType =
     OpcUaId_DeleteMonitoredItemsResponse,
     OpcUaId_DeleteMonitoredItemsResponse_Encoding_DefaultBinary,
     OpcUaId_DeleteMonitoredItemsResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteMonitoredItemsResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteMonitoredItemsResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteMonitoredItemsResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteMonitoredItemsResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteMonitoredItemsResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteMonitoredItemsResponse_Decode
@@ -16614,7 +16615,7 @@ struct UA_EncodeableType UA_DeleteMonitoredItemsResponse_EncodeableType =
  *===========================================================================*/
 void UA_CreateSubscriptionRequest_Initialize(UA_CreateSubscriptionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         Double_Initialize(&a_pValue->RequestedPublishingInterval);
@@ -16631,7 +16632,7 @@ void UA_CreateSubscriptionRequest_Initialize(UA_CreateSubscriptionRequest* a_pVa
  *===========================================================================*/
 void UA_CreateSubscriptionRequest_Clear(UA_CreateSubscriptionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         Double_Clear(&a_pValue->RequestedPublishingInterval);
@@ -16650,7 +16651,7 @@ StatusCode UA_CreateSubscriptionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CreateSu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16672,7 +16673,7 @@ StatusCode UA_CreateSubscriptionRequest_Decode(UA_MsgBuffer* msgBuf, UA_CreateSu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16702,11 +16703,11 @@ struct UA_EncodeableType UA_CreateSubscriptionRequest_EncodeableType =
     OpcUaId_CreateSubscriptionRequest,
     OpcUaId_CreateSubscriptionRequest_Encoding_DefaultBinary,
     OpcUaId_CreateSubscriptionRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CreateSubscriptionRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_CreateSubscriptionRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CreateSubscriptionRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CreateSubscriptionRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CreateSubscriptionRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CreateSubscriptionRequest_Decode
@@ -16719,7 +16720,7 @@ struct UA_EncodeableType UA_CreateSubscriptionRequest_EncodeableType =
  *===========================================================================*/
 void UA_CreateSubscriptionResponse_Initialize(UA_CreateSubscriptionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -16734,7 +16735,7 @@ void UA_CreateSubscriptionResponse_Initialize(UA_CreateSubscriptionResponse* a_p
  *===========================================================================*/
 void UA_CreateSubscriptionResponse_Clear(UA_CreateSubscriptionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -16751,7 +16752,7 @@ StatusCode UA_CreateSubscriptionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CreateS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16771,7 +16772,7 @@ StatusCode UA_CreateSubscriptionResponse_Decode(UA_MsgBuffer* msgBuf, UA_CreateS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16799,11 +16800,11 @@ struct UA_EncodeableType UA_CreateSubscriptionResponse_EncodeableType =
     OpcUaId_CreateSubscriptionResponse,
     OpcUaId_CreateSubscriptionResponse_Encoding_DefaultBinary,
     OpcUaId_CreateSubscriptionResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_CreateSubscriptionResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_CreateSubscriptionResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_CreateSubscriptionResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_CreateSubscriptionResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_CreateSubscriptionResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_CreateSubscriptionResponse_Decode
@@ -16818,7 +16819,7 @@ struct UA_EncodeableType UA_CreateSubscriptionResponse_EncodeableType =
  *===========================================================================*/
 void UA_ModifySubscriptionRequest_Initialize(UA_ModifySubscriptionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -16835,7 +16836,7 @@ void UA_ModifySubscriptionRequest_Initialize(UA_ModifySubscriptionRequest* a_pVa
  *===========================================================================*/
 void UA_ModifySubscriptionRequest_Clear(UA_ModifySubscriptionRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -16854,7 +16855,7 @@ StatusCode UA_ModifySubscriptionRequest_Encode(UA_MsgBuffer* msgBuf, UA_ModifySu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16876,7 +16877,7 @@ StatusCode UA_ModifySubscriptionRequest_Decode(UA_MsgBuffer* msgBuf, UA_ModifySu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16906,11 +16907,11 @@ struct UA_EncodeableType UA_ModifySubscriptionRequest_EncodeableType =
     OpcUaId_ModifySubscriptionRequest,
     OpcUaId_ModifySubscriptionRequest_Encoding_DefaultBinary,
     OpcUaId_ModifySubscriptionRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ModifySubscriptionRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_ModifySubscriptionRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ModifySubscriptionRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ModifySubscriptionRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ModifySubscriptionRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ModifySubscriptionRequest_Decode
@@ -16923,7 +16924,7 @@ struct UA_EncodeableType UA_ModifySubscriptionRequest_EncodeableType =
  *===========================================================================*/
 void UA_ModifySubscriptionResponse_Initialize(UA_ModifySubscriptionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         Double_Initialize(&a_pValue->RevisedPublishingInterval);
@@ -16937,7 +16938,7 @@ void UA_ModifySubscriptionResponse_Initialize(UA_ModifySubscriptionResponse* a_p
  *===========================================================================*/
 void UA_ModifySubscriptionResponse_Clear(UA_ModifySubscriptionResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         Double_Clear(&a_pValue->RevisedPublishingInterval);
@@ -16953,7 +16954,7 @@ StatusCode UA_ModifySubscriptionResponse_Encode(UA_MsgBuffer* msgBuf, UA_ModifyS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16972,7 +16973,7 @@ StatusCode UA_ModifySubscriptionResponse_Decode(UA_MsgBuffer* msgBuf, UA_ModifyS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -16999,11 +17000,11 @@ struct UA_EncodeableType UA_ModifySubscriptionResponse_EncodeableType =
     OpcUaId_ModifySubscriptionResponse,
     OpcUaId_ModifySubscriptionResponse_Encoding_DefaultBinary,
     OpcUaId_ModifySubscriptionResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ModifySubscriptionResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_ModifySubscriptionResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ModifySubscriptionResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ModifySubscriptionResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ModifySubscriptionResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ModifySubscriptionResponse_Decode
@@ -17018,7 +17019,7 @@ struct UA_EncodeableType UA_ModifySubscriptionResponse_EncodeableType =
  *===========================================================================*/
 void UA_SetPublishingModeRequest_Initialize(UA_SetPublishingModeRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         Boolean_Initialize(&a_pValue->PublishingEnabled);
@@ -17032,7 +17033,7 @@ void UA_SetPublishingModeRequest_Initialize(UA_SetPublishingModeRequest* a_pValu
  *===========================================================================*/
 void UA_SetPublishingModeRequest_Clear(UA_SetPublishingModeRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         Boolean_Clear(&a_pValue->PublishingEnabled);
@@ -17048,7 +17049,7 @@ StatusCode UA_SetPublishingModeRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetPublis
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17067,7 +17068,7 @@ StatusCode UA_SetPublishingModeRequest_Decode(UA_MsgBuffer* msgBuf, UA_SetPublis
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17094,11 +17095,11 @@ struct UA_EncodeableType UA_SetPublishingModeRequest_EncodeableType =
     OpcUaId_SetPublishingModeRequest,
     OpcUaId_SetPublishingModeRequest_Encoding_DefaultBinary,
     OpcUaId_SetPublishingModeRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SetPublishingModeRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_SetPublishingModeRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SetPublishingModeRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SetPublishingModeRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SetPublishingModeRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SetPublishingModeRequest_Decode
@@ -17111,7 +17112,7 @@ struct UA_EncodeableType UA_SetPublishingModeRequest_EncodeableType =
  *===========================================================================*/
 void UA_SetPublishingModeResponse_Initialize(UA_SetPublishingModeResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -17126,7 +17127,7 @@ void UA_SetPublishingModeResponse_Initialize(UA_SetPublishingModeResponse* a_pVa
  *===========================================================================*/
 void UA_SetPublishingModeResponse_Clear(UA_SetPublishingModeResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -17143,7 +17144,7 @@ StatusCode UA_SetPublishingModeResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetPubli
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17163,7 +17164,7 @@ StatusCode UA_SetPublishingModeResponse_Decode(UA_MsgBuffer* msgBuf, UA_SetPubli
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17191,11 +17192,11 @@ struct UA_EncodeableType UA_SetPublishingModeResponse_EncodeableType =
     OpcUaId_SetPublishingModeResponse,
     OpcUaId_SetPublishingModeResponse_Encoding_DefaultBinary,
     OpcUaId_SetPublishingModeResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SetPublishingModeResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_SetPublishingModeResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SetPublishingModeResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SetPublishingModeResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SetPublishingModeResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SetPublishingModeResponse_Decode
@@ -17209,7 +17210,7 @@ struct UA_EncodeableType UA_SetPublishingModeResponse_EncodeableType =
  *===========================================================================*/
 void UA_NotificationMessage_Initialize(UA_NotificationMessage* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SequenceNumber);
         DateTime_Initialize(&a_pValue->PublishTime);
@@ -17223,7 +17224,7 @@ void UA_NotificationMessage_Initialize(UA_NotificationMessage* a_pValue)
  *===========================================================================*/
 void UA_NotificationMessage_Clear(UA_NotificationMessage* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SequenceNumber);
         DateTime_Clear(&a_pValue->PublishTime);
@@ -17239,7 +17240,7 @@ StatusCode UA_NotificationMessage_Encode(UA_MsgBuffer* msgBuf, UA_NotificationMe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17258,7 +17259,7 @@ StatusCode UA_NotificationMessage_Decode(UA_MsgBuffer* msgBuf, UA_NotificationMe
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17285,11 +17286,11 @@ struct UA_EncodeableType UA_NotificationMessage_EncodeableType =
     OpcUaId_NotificationMessage,
     OpcUaId_NotificationMessage_Encoding_DefaultBinary,
     OpcUaId_NotificationMessage_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_NotificationMessage),
     (UA_EncodeableObject_PfnInitialize*)UA_NotificationMessage_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_NotificationMessage_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_NotificationMessage_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_NotificationMessage_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_NotificationMessage_Decode
@@ -17302,7 +17303,7 @@ struct UA_EncodeableType UA_NotificationMessage_EncodeableType =
  *===========================================================================*/
 void UA_DataChangeNotification_Initialize(UA_DataChangeNotification* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfMonitoredItems, (void**) &a_pValue->MonitoredItems, 
                             sizeof(UA_MonitoredItemNotification), (UA_EncodeableObject_PfnInitialize*) UA_MonitoredItemNotification_Initialize);
@@ -17316,7 +17317,7 @@ void UA_DataChangeNotification_Initialize(UA_DataChangeNotification* a_pValue)
  *===========================================================================*/
 void UA_DataChangeNotification_Clear(UA_DataChangeNotification* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfMonitoredItems, (void**) &a_pValue->MonitoredItems, 
                        sizeof(UA_MonitoredItemNotification), (UA_EncodeableObject_PfnClear*) UA_MonitoredItemNotification_Clear);
@@ -17332,7 +17333,7 @@ StatusCode UA_DataChangeNotification_Encode(UA_MsgBuffer* msgBuf, UA_DataChangeN
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17351,7 +17352,7 @@ StatusCode UA_DataChangeNotification_Decode(UA_MsgBuffer* msgBuf, UA_DataChangeN
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17378,11 +17379,11 @@ struct UA_EncodeableType UA_DataChangeNotification_EncodeableType =
     OpcUaId_DataChangeNotification,
     OpcUaId_DataChangeNotification_Encoding_DefaultBinary,
     OpcUaId_DataChangeNotification_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DataChangeNotification),
     (UA_EncodeableObject_PfnInitialize*)UA_DataChangeNotification_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DataChangeNotification_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DataChangeNotification_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DataChangeNotification_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DataChangeNotification_Decode
@@ -17395,7 +17396,7 @@ struct UA_EncodeableType UA_DataChangeNotification_EncodeableType =
  *===========================================================================*/
 void UA_MonitoredItemNotification_Initialize(UA_MonitoredItemNotification* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->ClientHandle);
         DataValue_Initialize(&a_pValue->Value);
@@ -17407,7 +17408,7 @@ void UA_MonitoredItemNotification_Initialize(UA_MonitoredItemNotification* a_pVa
  *===========================================================================*/
 void UA_MonitoredItemNotification_Clear(UA_MonitoredItemNotification* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->ClientHandle);
         DataValue_Clear(&a_pValue->Value);
@@ -17421,7 +17422,7 @@ StatusCode UA_MonitoredItemNotification_Encode(UA_MsgBuffer* msgBuf, UA_Monitore
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17438,7 +17439,7 @@ StatusCode UA_MonitoredItemNotification_Decode(UA_MsgBuffer* msgBuf, UA_Monitore
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17463,11 +17464,11 @@ struct UA_EncodeableType UA_MonitoredItemNotification_EncodeableType =
     OpcUaId_MonitoredItemNotification,
     OpcUaId_MonitoredItemNotification_Encoding_DefaultBinary,
     OpcUaId_MonitoredItemNotification_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_MonitoredItemNotification),
     (UA_EncodeableObject_PfnInitialize*)UA_MonitoredItemNotification_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_MonitoredItemNotification_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_MonitoredItemNotification_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_MonitoredItemNotification_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_MonitoredItemNotification_Decode
@@ -17480,7 +17481,7 @@ struct UA_EncodeableType UA_MonitoredItemNotification_EncodeableType =
  *===========================================================================*/
 void UA_EventNotificationList_Initialize(UA_EventNotificationList* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
                             sizeof(UA_EventFieldList), (UA_EncodeableObject_PfnInitialize*) UA_EventFieldList_Initialize);
@@ -17492,7 +17493,7 @@ void UA_EventNotificationList_Initialize(UA_EventNotificationList* a_pValue)
  *===========================================================================*/
 void UA_EventNotificationList_Clear(UA_EventNotificationList* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
                        sizeof(UA_EventFieldList), (UA_EncodeableObject_PfnClear*) UA_EventFieldList_Clear);
@@ -17506,7 +17507,7 @@ StatusCode UA_EventNotificationList_Encode(UA_MsgBuffer* msgBuf, UA_EventNotific
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17523,7 +17524,7 @@ StatusCode UA_EventNotificationList_Decode(UA_MsgBuffer* msgBuf, UA_EventNotific
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17548,11 +17549,11 @@ struct UA_EncodeableType UA_EventNotificationList_EncodeableType =
     OpcUaId_EventNotificationList,
     OpcUaId_EventNotificationList_Encoding_DefaultBinary,
     OpcUaId_EventNotificationList_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EventNotificationList),
     (UA_EncodeableObject_PfnInitialize*)UA_EventNotificationList_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EventNotificationList_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EventNotificationList_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EventNotificationList_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EventNotificationList_Decode
@@ -17565,7 +17566,7 @@ struct UA_EncodeableType UA_EventNotificationList_EncodeableType =
  *===========================================================================*/
 void UA_EventFieldList_Initialize(UA_EventFieldList* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->ClientHandle);
         UA_Initialize_Array(&a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
@@ -17578,7 +17579,7 @@ void UA_EventFieldList_Initialize(UA_EventFieldList* a_pValue)
  *===========================================================================*/
 void UA_EventFieldList_Clear(UA_EventFieldList* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->ClientHandle);
         UA_Clear_Array(&a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
@@ -17593,7 +17594,7 @@ StatusCode UA_EventFieldList_Encode(UA_MsgBuffer* msgBuf, UA_EventFieldList* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17611,7 +17612,7 @@ StatusCode UA_EventFieldList_Decode(UA_MsgBuffer* msgBuf, UA_EventFieldList* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17637,11 +17638,11 @@ struct UA_EncodeableType UA_EventFieldList_EncodeableType =
     OpcUaId_EventFieldList,
     OpcUaId_EventFieldList_Encoding_DefaultBinary,
     OpcUaId_EventFieldList_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EventFieldList),
     (UA_EncodeableObject_PfnInitialize*)UA_EventFieldList_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EventFieldList_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EventFieldList_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EventFieldList_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EventFieldList_Decode
@@ -17654,7 +17655,7 @@ struct UA_EncodeableType UA_EventFieldList_EncodeableType =
  *===========================================================================*/
 void UA_HistoryEventFieldList_Initialize(UA_HistoryEventFieldList* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
                             sizeof(UA_Variant), (UA_EncodeableObject_PfnInitialize*) Variant_Initialize);
@@ -17666,7 +17667,7 @@ void UA_HistoryEventFieldList_Initialize(UA_HistoryEventFieldList* a_pValue)
  *===========================================================================*/
 void UA_HistoryEventFieldList_Clear(UA_HistoryEventFieldList* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
                        sizeof(UA_Variant), (UA_EncodeableObject_PfnClear*) Variant_Clear);
@@ -17680,7 +17681,7 @@ StatusCode UA_HistoryEventFieldList_Encode(UA_MsgBuffer* msgBuf, UA_HistoryEvent
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17697,7 +17698,7 @@ StatusCode UA_HistoryEventFieldList_Decode(UA_MsgBuffer* msgBuf, UA_HistoryEvent
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17722,11 +17723,11 @@ struct UA_EncodeableType UA_HistoryEventFieldList_EncodeableType =
     OpcUaId_HistoryEventFieldList,
     OpcUaId_HistoryEventFieldList_Encoding_DefaultBinary,
     OpcUaId_HistoryEventFieldList_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_HistoryEventFieldList),
     (UA_EncodeableObject_PfnInitialize*)UA_HistoryEventFieldList_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_HistoryEventFieldList_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_HistoryEventFieldList_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_HistoryEventFieldList_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_HistoryEventFieldList_Decode
@@ -17739,7 +17740,7 @@ struct UA_EncodeableType UA_HistoryEventFieldList_EncodeableType =
  *===========================================================================*/
 void UA_StatusChangeNotification_Initialize(UA_StatusChangeNotification* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->Status);
         DiagnosticInfo_Initialize(&a_pValue->DiagnosticInfo);
@@ -17751,7 +17752,7 @@ void UA_StatusChangeNotification_Initialize(UA_StatusChangeNotification* a_pValu
  *===========================================================================*/
 void UA_StatusChangeNotification_Clear(UA_StatusChangeNotification* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->Status);
         DiagnosticInfo_Clear(&a_pValue->DiagnosticInfo);
@@ -17765,7 +17766,7 @@ StatusCode UA_StatusChangeNotification_Encode(UA_MsgBuffer* msgBuf, UA_StatusCha
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17782,7 +17783,7 @@ StatusCode UA_StatusChangeNotification_Decode(UA_MsgBuffer* msgBuf, UA_StatusCha
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17807,11 +17808,11 @@ struct UA_EncodeableType UA_StatusChangeNotification_EncodeableType =
     OpcUaId_StatusChangeNotification,
     OpcUaId_StatusChangeNotification_Encoding_DefaultBinary,
     OpcUaId_StatusChangeNotification_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_StatusChangeNotification),
     (UA_EncodeableObject_PfnInitialize*)UA_StatusChangeNotification_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_StatusChangeNotification_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_StatusChangeNotification_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_StatusChangeNotification_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_StatusChangeNotification_Decode
@@ -17824,7 +17825,7 @@ struct UA_EncodeableType UA_StatusChangeNotification_EncodeableType =
  *===========================================================================*/
 void UA_SubscriptionAcknowledgement_Initialize(UA_SubscriptionAcknowledgement* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->SubscriptionId);
         UInt32_Initialize(&a_pValue->SequenceNumber);
@@ -17836,7 +17837,7 @@ void UA_SubscriptionAcknowledgement_Initialize(UA_SubscriptionAcknowledgement* a
  *===========================================================================*/
 void UA_SubscriptionAcknowledgement_Clear(UA_SubscriptionAcknowledgement* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->SubscriptionId);
         UInt32_Clear(&a_pValue->SequenceNumber);
@@ -17850,7 +17851,7 @@ StatusCode UA_SubscriptionAcknowledgement_Encode(UA_MsgBuffer* msgBuf, UA_Subscr
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17867,7 +17868,7 @@ StatusCode UA_SubscriptionAcknowledgement_Decode(UA_MsgBuffer* msgBuf, UA_Subscr
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17892,11 +17893,11 @@ struct UA_EncodeableType UA_SubscriptionAcknowledgement_EncodeableType =
     OpcUaId_SubscriptionAcknowledgement,
     OpcUaId_SubscriptionAcknowledgement_Encoding_DefaultBinary,
     OpcUaId_SubscriptionAcknowledgement_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SubscriptionAcknowledgement),
     (UA_EncodeableObject_PfnInitialize*)UA_SubscriptionAcknowledgement_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SubscriptionAcknowledgement_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SubscriptionAcknowledgement_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SubscriptionAcknowledgement_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SubscriptionAcknowledgement_Decode
@@ -17910,7 +17911,7 @@ struct UA_EncodeableType UA_SubscriptionAcknowledgement_EncodeableType =
  *===========================================================================*/
 void UA_PublishRequest_Initialize(UA_PublishRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfSubscriptionAcknowledgements, (void**) &a_pValue->SubscriptionAcknowledgements, 
@@ -17923,7 +17924,7 @@ void UA_PublishRequest_Initialize(UA_PublishRequest* a_pValue)
  *===========================================================================*/
 void UA_PublishRequest_Clear(UA_PublishRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfSubscriptionAcknowledgements, (void**) &a_pValue->SubscriptionAcknowledgements, 
@@ -17938,7 +17939,7 @@ StatusCode UA_PublishRequest_Encode(UA_MsgBuffer* msgBuf, UA_PublishRequest* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17956,7 +17957,7 @@ StatusCode UA_PublishRequest_Decode(UA_MsgBuffer* msgBuf, UA_PublishRequest* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -17982,11 +17983,11 @@ struct UA_EncodeableType UA_PublishRequest_EncodeableType =
     OpcUaId_PublishRequest,
     OpcUaId_PublishRequest_Encoding_DefaultBinary,
     OpcUaId_PublishRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_PublishRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_PublishRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_PublishRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_PublishRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_PublishRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_PublishRequest_Decode
@@ -17999,7 +18000,7 @@ struct UA_EncodeableType UA_PublishRequest_EncodeableType =
  *===========================================================================*/
 void UA_PublishResponse_Initialize(UA_PublishResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -18019,7 +18020,7 @@ void UA_PublishResponse_Initialize(UA_PublishResponse* a_pValue)
  *===========================================================================*/
 void UA_PublishResponse_Clear(UA_PublishResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -18041,7 +18042,7 @@ StatusCode UA_PublishResponse_Encode(UA_MsgBuffer* msgBuf, UA_PublishResponse* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18066,7 +18067,7 @@ StatusCode UA_PublishResponse_Decode(UA_MsgBuffer* msgBuf, UA_PublishResponse* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18099,11 +18100,11 @@ struct UA_EncodeableType UA_PublishResponse_EncodeableType =
     OpcUaId_PublishResponse,
     OpcUaId_PublishResponse_Encoding_DefaultBinary,
     OpcUaId_PublishResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_PublishResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_PublishResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_PublishResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_PublishResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_PublishResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_PublishResponse_Decode
@@ -18118,7 +18119,7 @@ struct UA_EncodeableType UA_PublishResponse_EncodeableType =
  *===========================================================================*/
 void UA_RepublishRequest_Initialize(UA_RepublishRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -18131,7 +18132,7 @@ void UA_RepublishRequest_Initialize(UA_RepublishRequest* a_pValue)
  *===========================================================================*/
 void UA_RepublishRequest_Clear(UA_RepublishRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -18146,7 +18147,7 @@ StatusCode UA_RepublishRequest_Encode(UA_MsgBuffer* msgBuf, UA_RepublishRequest*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18164,7 +18165,7 @@ StatusCode UA_RepublishRequest_Decode(UA_MsgBuffer* msgBuf, UA_RepublishRequest*
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18190,11 +18191,11 @@ struct UA_EncodeableType UA_RepublishRequest_EncodeableType =
     OpcUaId_RepublishRequest,
     OpcUaId_RepublishRequest_Encoding_DefaultBinary,
     OpcUaId_RepublishRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RepublishRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_RepublishRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RepublishRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RepublishRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RepublishRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RepublishRequest_Decode
@@ -18207,7 +18208,7 @@ struct UA_EncodeableType UA_RepublishRequest_EncodeableType =
  *===========================================================================*/
 void UA_RepublishResponse_Initialize(UA_RepublishResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_NotificationMessage_Initialize(&a_pValue->NotificationMessage);
@@ -18219,7 +18220,7 @@ void UA_RepublishResponse_Initialize(UA_RepublishResponse* a_pValue)
  *===========================================================================*/
 void UA_RepublishResponse_Clear(UA_RepublishResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_NotificationMessage_Clear(&a_pValue->NotificationMessage);
@@ -18233,7 +18234,7 @@ StatusCode UA_RepublishResponse_Encode(UA_MsgBuffer* msgBuf, UA_RepublishRespons
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18250,7 +18251,7 @@ StatusCode UA_RepublishResponse_Decode(UA_MsgBuffer* msgBuf, UA_RepublishRespons
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18275,11 +18276,11 @@ struct UA_EncodeableType UA_RepublishResponse_EncodeableType =
     OpcUaId_RepublishResponse,
     OpcUaId_RepublishResponse_Encoding_DefaultBinary,
     OpcUaId_RepublishResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RepublishResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_RepublishResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RepublishResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RepublishResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RepublishResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RepublishResponse_Decode
@@ -18293,7 +18294,7 @@ struct UA_EncodeableType UA_RepublishResponse_EncodeableType =
  *===========================================================================*/
 void UA_TransferResult_Initialize(UA_TransferResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
@@ -18306,7 +18307,7 @@ void UA_TransferResult_Initialize(UA_TransferResult* a_pValue)
  *===========================================================================*/
 void UA_TransferResult_Clear(UA_TransferResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
@@ -18321,7 +18322,7 @@ StatusCode UA_TransferResult_Encode(UA_MsgBuffer* msgBuf, UA_TransferResult* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18339,7 +18340,7 @@ StatusCode UA_TransferResult_Decode(UA_MsgBuffer* msgBuf, UA_TransferResult* a_p
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18365,11 +18366,11 @@ struct UA_EncodeableType UA_TransferResult_EncodeableType =
     OpcUaId_TransferResult,
     OpcUaId_TransferResult_Encoding_DefaultBinary,
     OpcUaId_TransferResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_TransferResult),
     (UA_EncodeableObject_PfnInitialize*)UA_TransferResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_TransferResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_TransferResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_TransferResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_TransferResult_Decode
@@ -18383,7 +18384,7 @@ struct UA_EncodeableType UA_TransferResult_EncodeableType =
  *===========================================================================*/
 void UA_TransferSubscriptionsRequest_Initialize(UA_TransferSubscriptionsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
@@ -18397,7 +18398,7 @@ void UA_TransferSubscriptionsRequest_Initialize(UA_TransferSubscriptionsRequest*
  *===========================================================================*/
 void UA_TransferSubscriptionsRequest_Clear(UA_TransferSubscriptionsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
@@ -18413,7 +18414,7 @@ StatusCode UA_TransferSubscriptionsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Trans
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18432,7 +18433,7 @@ StatusCode UA_TransferSubscriptionsRequest_Decode(UA_MsgBuffer* msgBuf, UA_Trans
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18459,11 +18460,11 @@ struct UA_EncodeableType UA_TransferSubscriptionsRequest_EncodeableType =
     OpcUaId_TransferSubscriptionsRequest,
     OpcUaId_TransferSubscriptionsRequest_Encoding_DefaultBinary,
     OpcUaId_TransferSubscriptionsRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_TransferSubscriptionsRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_TransferSubscriptionsRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_TransferSubscriptionsRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_TransferSubscriptionsRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_TransferSubscriptionsRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_TransferSubscriptionsRequest_Decode
@@ -18476,7 +18477,7 @@ struct UA_EncodeableType UA_TransferSubscriptionsRequest_EncodeableType =
  *===========================================================================*/
 void UA_TransferSubscriptionsResponse_Initialize(UA_TransferSubscriptionsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -18491,7 +18492,7 @@ void UA_TransferSubscriptionsResponse_Initialize(UA_TransferSubscriptionsRespons
  *===========================================================================*/
 void UA_TransferSubscriptionsResponse_Clear(UA_TransferSubscriptionsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -18508,7 +18509,7 @@ StatusCode UA_TransferSubscriptionsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Tran
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18528,7 +18529,7 @@ StatusCode UA_TransferSubscriptionsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Tran
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18556,11 +18557,11 @@ struct UA_EncodeableType UA_TransferSubscriptionsResponse_EncodeableType =
     OpcUaId_TransferSubscriptionsResponse,
     OpcUaId_TransferSubscriptionsResponse_Encoding_DefaultBinary,
     OpcUaId_TransferSubscriptionsResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_TransferSubscriptionsResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_TransferSubscriptionsResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_TransferSubscriptionsResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_TransferSubscriptionsResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_TransferSubscriptionsResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_TransferSubscriptionsResponse_Decode
@@ -18575,7 +18576,7 @@ struct UA_EncodeableType UA_TransferSubscriptionsResponse_EncodeableType =
  *===========================================================================*/
 void UA_DeleteSubscriptionsRequest_Initialize(UA_DeleteSubscriptionsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Initialize(&a_pValue->RequestHeader);
         UA_Initialize_Array(&a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
@@ -18588,7 +18589,7 @@ void UA_DeleteSubscriptionsRequest_Initialize(UA_DeleteSubscriptionsRequest* a_p
  *===========================================================================*/
 void UA_DeleteSubscriptionsRequest_Clear(UA_DeleteSubscriptionsRequest* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_RequestHeader_Clear(&a_pValue->RequestHeader);
         UA_Clear_Array(&a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
@@ -18603,7 +18604,7 @@ StatusCode UA_DeleteSubscriptionsRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18621,7 +18622,7 @@ StatusCode UA_DeleteSubscriptionsRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18647,11 +18648,11 @@ struct UA_EncodeableType UA_DeleteSubscriptionsRequest_EncodeableType =
     OpcUaId_DeleteSubscriptionsRequest,
     OpcUaId_DeleteSubscriptionsRequest_Encoding_DefaultBinary,
     OpcUaId_DeleteSubscriptionsRequest_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteSubscriptionsRequest),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteSubscriptionsRequest_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteSubscriptionsRequest_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteSubscriptionsRequest_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteSubscriptionsRequest_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteSubscriptionsRequest_Decode
@@ -18664,7 +18665,7 @@ struct UA_EncodeableType UA_DeleteSubscriptionsRequest_EncodeableType =
  *===========================================================================*/
 void UA_DeleteSubscriptionsResponse_Initialize(UA_DeleteSubscriptionsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -18679,7 +18680,7 @@ void UA_DeleteSubscriptionsResponse_Initialize(UA_DeleteSubscriptionsResponse* a
  *===========================================================================*/
 void UA_DeleteSubscriptionsResponse_Clear(UA_DeleteSubscriptionsResponse* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
@@ -18696,7 +18697,7 @@ StatusCode UA_DeleteSubscriptionsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Delete
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18716,7 +18717,7 @@ StatusCode UA_DeleteSubscriptionsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Delete
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18744,11 +18745,11 @@ struct UA_EncodeableType UA_DeleteSubscriptionsResponse_EncodeableType =
     OpcUaId_DeleteSubscriptionsResponse,
     OpcUaId_DeleteSubscriptionsResponse_Encoding_DefaultBinary,
     OpcUaId_DeleteSubscriptionsResponse_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DeleteSubscriptionsResponse),
     (UA_EncodeableObject_PfnInitialize*)UA_DeleteSubscriptionsResponse_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DeleteSubscriptionsResponse_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DeleteSubscriptionsResponse_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DeleteSubscriptionsResponse_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DeleteSubscriptionsResponse_Decode
@@ -18763,7 +18764,7 @@ struct UA_EncodeableType UA_DeleteSubscriptionsResponse_EncodeableType =
  *===========================================================================*/
 void UA_BuildInfo_Initialize(UA_BuildInfo* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->ProductUri);
         String_Initialize(&a_pValue->ManufacturerName);
@@ -18779,7 +18780,7 @@ void UA_BuildInfo_Initialize(UA_BuildInfo* a_pValue)
  *===========================================================================*/
 void UA_BuildInfo_Clear(UA_BuildInfo* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->ProductUri);
         String_Clear(&a_pValue->ManufacturerName);
@@ -18797,7 +18798,7 @@ StatusCode UA_BuildInfo_Encode(UA_MsgBuffer* msgBuf, UA_BuildInfo* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18818,7 +18819,7 @@ StatusCode UA_BuildInfo_Decode(UA_MsgBuffer* msgBuf, UA_BuildInfo* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18847,11 +18848,11 @@ struct UA_EncodeableType UA_BuildInfo_EncodeableType =
     OpcUaId_BuildInfo,
     OpcUaId_BuildInfo_Encoding_DefaultBinary,
     OpcUaId_BuildInfo_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_BuildInfo),
     (UA_EncodeableObject_PfnInitialize*)UA_BuildInfo_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_BuildInfo_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_BuildInfo_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_BuildInfo_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_BuildInfo_Decode
@@ -18866,7 +18867,7 @@ struct UA_EncodeableType UA_BuildInfo_EncodeableType =
  *===========================================================================*/
 void UA_RedundantServerDataType_Initialize(UA_RedundantServerDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->ServerId);
         Byte_Initialize(&a_pValue->ServiceLevel);
@@ -18879,7 +18880,7 @@ void UA_RedundantServerDataType_Initialize(UA_RedundantServerDataType* a_pValue)
  *===========================================================================*/
 void UA_RedundantServerDataType_Clear(UA_RedundantServerDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->ServerId);
         Byte_Clear(&a_pValue->ServiceLevel);
@@ -18894,7 +18895,7 @@ StatusCode UA_RedundantServerDataType_Encode(UA_MsgBuffer* msgBuf, UA_RedundantS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18912,7 +18913,7 @@ StatusCode UA_RedundantServerDataType_Decode(UA_MsgBuffer* msgBuf, UA_RedundantS
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18938,11 +18939,11 @@ struct UA_EncodeableType UA_RedundantServerDataType_EncodeableType =
     OpcUaId_RedundantServerDataType,
     OpcUaId_RedundantServerDataType_Encoding_DefaultBinary,
     OpcUaId_RedundantServerDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_RedundantServerDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_RedundantServerDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_RedundantServerDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_RedundantServerDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_RedundantServerDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_RedundantServerDataType_Decode
@@ -18955,7 +18956,7 @@ struct UA_EncodeableType UA_RedundantServerDataType_EncodeableType =
  *===========================================================================*/
 void UA_EndpointUrlListDataType_Initialize(UA_EndpointUrlListDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfEndpointUrlList, (void**) &a_pValue->EndpointUrlList, 
                             sizeof(UA_String), (UA_EncodeableObject_PfnInitialize*) String_Initialize);
@@ -18967,7 +18968,7 @@ void UA_EndpointUrlListDataType_Initialize(UA_EndpointUrlListDataType* a_pValue)
  *===========================================================================*/
 void UA_EndpointUrlListDataType_Clear(UA_EndpointUrlListDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfEndpointUrlList, (void**) &a_pValue->EndpointUrlList, 
                        sizeof(UA_String), (UA_EncodeableObject_PfnClear*) String_Clear);
@@ -18981,7 +18982,7 @@ StatusCode UA_EndpointUrlListDataType_Encode(UA_MsgBuffer* msgBuf, UA_EndpointUr
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -18998,7 +18999,7 @@ StatusCode UA_EndpointUrlListDataType_Decode(UA_MsgBuffer* msgBuf, UA_EndpointUr
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19023,11 +19024,11 @@ struct UA_EncodeableType UA_EndpointUrlListDataType_EncodeableType =
     OpcUaId_EndpointUrlListDataType,
     OpcUaId_EndpointUrlListDataType_Encoding_DefaultBinary,
     OpcUaId_EndpointUrlListDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EndpointUrlListDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_EndpointUrlListDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EndpointUrlListDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EndpointUrlListDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EndpointUrlListDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EndpointUrlListDataType_Decode
@@ -19040,7 +19041,7 @@ struct UA_EncodeableType UA_EndpointUrlListDataType_EncodeableType =
  *===========================================================================*/
 void UA_NetworkGroupDataType_Initialize(UA_NetworkGroupDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->ServerUri);
         UA_Initialize_Array(&a_pValue->NoOfNetworkPaths, (void**) &a_pValue->NetworkPaths, 
@@ -19053,7 +19054,7 @@ void UA_NetworkGroupDataType_Initialize(UA_NetworkGroupDataType* a_pValue)
  *===========================================================================*/
 void UA_NetworkGroupDataType_Clear(UA_NetworkGroupDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->ServerUri);
         UA_Clear_Array(&a_pValue->NoOfNetworkPaths, (void**) &a_pValue->NetworkPaths, 
@@ -19068,7 +19069,7 @@ StatusCode UA_NetworkGroupDataType_Encode(UA_MsgBuffer* msgBuf, UA_NetworkGroupD
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19086,7 +19087,7 @@ StatusCode UA_NetworkGroupDataType_Decode(UA_MsgBuffer* msgBuf, UA_NetworkGroupD
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19112,11 +19113,11 @@ struct UA_EncodeableType UA_NetworkGroupDataType_EncodeableType =
     OpcUaId_NetworkGroupDataType,
     OpcUaId_NetworkGroupDataType_Encoding_DefaultBinary,
     OpcUaId_NetworkGroupDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_NetworkGroupDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_NetworkGroupDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_NetworkGroupDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_NetworkGroupDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_NetworkGroupDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_NetworkGroupDataType_Decode
@@ -19129,7 +19130,7 @@ struct UA_EncodeableType UA_NetworkGroupDataType_EncodeableType =
  *===========================================================================*/
 void UA_SamplingIntervalDiagnosticsDataType_Initialize(UA_SamplingIntervalDiagnosticsDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Double_Initialize(&a_pValue->SamplingInterval);
         UInt32_Initialize(&a_pValue->MonitoredItemCount);
@@ -19143,7 +19144,7 @@ void UA_SamplingIntervalDiagnosticsDataType_Initialize(UA_SamplingIntervalDiagno
  *===========================================================================*/
 void UA_SamplingIntervalDiagnosticsDataType_Clear(UA_SamplingIntervalDiagnosticsDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Double_Clear(&a_pValue->SamplingInterval);
         UInt32_Clear(&a_pValue->MonitoredItemCount);
@@ -19159,7 +19160,7 @@ StatusCode UA_SamplingIntervalDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, U
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19178,7 +19179,7 @@ StatusCode UA_SamplingIntervalDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, U
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19205,11 +19206,11 @@ struct UA_EncodeableType UA_SamplingIntervalDiagnosticsDataType_EncodeableType =
     OpcUaId_SamplingIntervalDiagnosticsDataType,
     OpcUaId_SamplingIntervalDiagnosticsDataType_Encoding_DefaultBinary,
     OpcUaId_SamplingIntervalDiagnosticsDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SamplingIntervalDiagnosticsDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_SamplingIntervalDiagnosticsDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SamplingIntervalDiagnosticsDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SamplingIntervalDiagnosticsDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SamplingIntervalDiagnosticsDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SamplingIntervalDiagnosticsDataType_Decode
@@ -19222,7 +19223,7 @@ struct UA_EncodeableType UA_SamplingIntervalDiagnosticsDataType_EncodeableType =
  *===========================================================================*/
 void UA_ServerDiagnosticsSummaryDataType_Initialize(UA_ServerDiagnosticsSummaryDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->ServerViewCount);
         UInt32_Initialize(&a_pValue->CurrentSessionCount);
@@ -19244,7 +19245,7 @@ void UA_ServerDiagnosticsSummaryDataType_Initialize(UA_ServerDiagnosticsSummaryD
  *===========================================================================*/
 void UA_ServerDiagnosticsSummaryDataType_Clear(UA_ServerDiagnosticsSummaryDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->ServerViewCount);
         UInt32_Clear(&a_pValue->CurrentSessionCount);
@@ -19268,7 +19269,7 @@ StatusCode UA_ServerDiagnosticsSummaryDataType_Encode(UA_MsgBuffer* msgBuf, UA_S
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19295,7 +19296,7 @@ StatusCode UA_ServerDiagnosticsSummaryDataType_Decode(UA_MsgBuffer* msgBuf, UA_S
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19330,11 +19331,11 @@ struct UA_EncodeableType UA_ServerDiagnosticsSummaryDataType_EncodeableType =
     OpcUaId_ServerDiagnosticsSummaryDataType,
     OpcUaId_ServerDiagnosticsSummaryDataType_Encoding_DefaultBinary,
     OpcUaId_ServerDiagnosticsSummaryDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ServerDiagnosticsSummaryDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_ServerDiagnosticsSummaryDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ServerDiagnosticsSummaryDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ServerDiagnosticsSummaryDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ServerDiagnosticsSummaryDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ServerDiagnosticsSummaryDataType_Decode
@@ -19347,7 +19348,7 @@ struct UA_EncodeableType UA_ServerDiagnosticsSummaryDataType_EncodeableType =
  *===========================================================================*/
 void UA_ServerStatusDataType_Initialize(UA_ServerStatusDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Initialize(&a_pValue->StartTime);
         DateTime_Initialize(&a_pValue->CurrentTime);
@@ -19363,7 +19364,7 @@ void UA_ServerStatusDataType_Initialize(UA_ServerStatusDataType* a_pValue)
  *===========================================================================*/
 void UA_ServerStatusDataType_Clear(UA_ServerStatusDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         DateTime_Clear(&a_pValue->StartTime);
         DateTime_Clear(&a_pValue->CurrentTime);
@@ -19381,7 +19382,7 @@ StatusCode UA_ServerStatusDataType_Encode(UA_MsgBuffer* msgBuf, UA_ServerStatusD
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19402,7 +19403,7 @@ StatusCode UA_ServerStatusDataType_Decode(UA_MsgBuffer* msgBuf, UA_ServerStatusD
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19431,11 +19432,11 @@ struct UA_EncodeableType UA_ServerStatusDataType_EncodeableType =
     OpcUaId_ServerStatusDataType,
     OpcUaId_ServerStatusDataType_Encoding_DefaultBinary,
     OpcUaId_ServerStatusDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ServerStatusDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_ServerStatusDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ServerStatusDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ServerStatusDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ServerStatusDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ServerStatusDataType_Decode
@@ -19448,7 +19449,7 @@ struct UA_EncodeableType UA_ServerStatusDataType_EncodeableType =
  *===========================================================================*/
 void UA_SessionDiagnosticsDataType_Initialize(UA_SessionDiagnosticsDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->SessionId);
         String_Initialize(&a_pValue->SessionName);
@@ -19502,7 +19503,7 @@ void UA_SessionDiagnosticsDataType_Initialize(UA_SessionDiagnosticsDataType* a_p
  *===========================================================================*/
 void UA_SessionDiagnosticsDataType_Clear(UA_SessionDiagnosticsDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->SessionId);
         String_Clear(&a_pValue->SessionName);
@@ -19558,7 +19559,7 @@ StatusCode UA_SessionDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_Session
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19617,7 +19618,7 @@ StatusCode UA_SessionDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA_Session
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19684,11 +19685,11 @@ struct UA_EncodeableType UA_SessionDiagnosticsDataType_EncodeableType =
     OpcUaId_SessionDiagnosticsDataType,
     OpcUaId_SessionDiagnosticsDataType_Encoding_DefaultBinary,
     OpcUaId_SessionDiagnosticsDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SessionDiagnosticsDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_SessionDiagnosticsDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SessionDiagnosticsDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SessionDiagnosticsDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SessionDiagnosticsDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SessionDiagnosticsDataType_Decode
@@ -19701,7 +19702,7 @@ struct UA_EncodeableType UA_SessionDiagnosticsDataType_EncodeableType =
  *===========================================================================*/
 void UA_SessionSecurityDiagnosticsDataType_Initialize(UA_SessionSecurityDiagnosticsDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->SessionId);
         String_Initialize(&a_pValue->ClientUserIdOfSession);
@@ -19721,7 +19722,7 @@ void UA_SessionSecurityDiagnosticsDataType_Initialize(UA_SessionSecurityDiagnost
  *===========================================================================*/
 void UA_SessionSecurityDiagnosticsDataType_Clear(UA_SessionSecurityDiagnosticsDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->SessionId);
         String_Clear(&a_pValue->ClientUserIdOfSession);
@@ -19743,7 +19744,7 @@ StatusCode UA_SessionSecurityDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19768,7 +19769,7 @@ StatusCode UA_SessionSecurityDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19801,11 +19802,11 @@ struct UA_EncodeableType UA_SessionSecurityDiagnosticsDataType_EncodeableType =
     OpcUaId_SessionSecurityDiagnosticsDataType,
     OpcUaId_SessionSecurityDiagnosticsDataType_Encoding_DefaultBinary,
     OpcUaId_SessionSecurityDiagnosticsDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SessionSecurityDiagnosticsDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_SessionSecurityDiagnosticsDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SessionSecurityDiagnosticsDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SessionSecurityDiagnosticsDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SessionSecurityDiagnosticsDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SessionSecurityDiagnosticsDataType_Decode
@@ -19818,7 +19819,7 @@ struct UA_EncodeableType UA_SessionSecurityDiagnosticsDataType_EncodeableType =
  *===========================================================================*/
 void UA_ServiceCounterDataType_Initialize(UA_ServiceCounterDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Initialize(&a_pValue->TotalCount);
         UInt32_Initialize(&a_pValue->ErrorCount);
@@ -19830,7 +19831,7 @@ void UA_ServiceCounterDataType_Initialize(UA_ServiceCounterDataType* a_pValue)
  *===========================================================================*/
 void UA_ServiceCounterDataType_Clear(UA_ServiceCounterDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UInt32_Clear(&a_pValue->TotalCount);
         UInt32_Clear(&a_pValue->ErrorCount);
@@ -19844,7 +19845,7 @@ StatusCode UA_ServiceCounterDataType_Encode(UA_MsgBuffer* msgBuf, UA_ServiceCoun
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19861,7 +19862,7 @@ StatusCode UA_ServiceCounterDataType_Decode(UA_MsgBuffer* msgBuf, UA_ServiceCoun
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19886,11 +19887,11 @@ struct UA_EncodeableType UA_ServiceCounterDataType_EncodeableType =
     OpcUaId_ServiceCounterDataType,
     OpcUaId_ServiceCounterDataType_Encoding_DefaultBinary,
     OpcUaId_ServiceCounterDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ServiceCounterDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_ServiceCounterDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ServiceCounterDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ServiceCounterDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ServiceCounterDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ServiceCounterDataType_Decode
@@ -19903,7 +19904,7 @@ struct UA_EncodeableType UA_ServiceCounterDataType_EncodeableType =
  *===========================================================================*/
 void UA_StatusResult_Initialize(UA_StatusResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         DiagnosticInfo_Initialize(&a_pValue->DiagnosticInfo);
@@ -19915,7 +19916,7 @@ void UA_StatusResult_Initialize(UA_StatusResult* a_pValue)
  *===========================================================================*/
 void UA_StatusResult_Clear(UA_StatusResult* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         DiagnosticInfo_Clear(&a_pValue->DiagnosticInfo);
@@ -19929,7 +19930,7 @@ StatusCode UA_StatusResult_Encode(UA_MsgBuffer* msgBuf, UA_StatusResult* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19946,7 +19947,7 @@ StatusCode UA_StatusResult_Decode(UA_MsgBuffer* msgBuf, UA_StatusResult* a_pValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -19971,11 +19972,11 @@ struct UA_EncodeableType UA_StatusResult_EncodeableType =
     OpcUaId_StatusResult,
     OpcUaId_StatusResult_Encoding_DefaultBinary,
     OpcUaId_StatusResult_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_StatusResult),
     (UA_EncodeableObject_PfnInitialize*)UA_StatusResult_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_StatusResult_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_StatusResult_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_StatusResult_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_StatusResult_Decode
@@ -19988,7 +19989,7 @@ struct UA_EncodeableType UA_StatusResult_EncodeableType =
  *===========================================================================*/
 void UA_SubscriptionDiagnosticsDataType_Initialize(UA_SubscriptionDiagnosticsDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->SessionId);
         UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -20029,7 +20030,7 @@ void UA_SubscriptionDiagnosticsDataType_Initialize(UA_SubscriptionDiagnosticsDat
  *===========================================================================*/
 void UA_SubscriptionDiagnosticsDataType_Clear(UA_SubscriptionDiagnosticsDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->SessionId);
         UInt32_Clear(&a_pValue->SubscriptionId);
@@ -20072,7 +20073,7 @@ StatusCode UA_SubscriptionDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_Su
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20118,7 +20119,7 @@ StatusCode UA_SubscriptionDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA_Su
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20172,11 +20173,11 @@ struct UA_EncodeableType UA_SubscriptionDiagnosticsDataType_EncodeableType =
     OpcUaId_SubscriptionDiagnosticsDataType,
     OpcUaId_SubscriptionDiagnosticsDataType_Encoding_DefaultBinary,
     OpcUaId_SubscriptionDiagnosticsDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SubscriptionDiagnosticsDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_SubscriptionDiagnosticsDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SubscriptionDiagnosticsDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SubscriptionDiagnosticsDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SubscriptionDiagnosticsDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SubscriptionDiagnosticsDataType_Decode
@@ -20190,7 +20191,7 @@ struct UA_EncodeableType UA_SubscriptionDiagnosticsDataType_EncodeableType =
  *===========================================================================*/
 void UA_ModelChangeStructureDataType_Initialize(UA_ModelChangeStructureDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->Affected);
         NodeId_Initialize(&a_pValue->AffectedType);
@@ -20203,7 +20204,7 @@ void UA_ModelChangeStructureDataType_Initialize(UA_ModelChangeStructureDataType*
  *===========================================================================*/
 void UA_ModelChangeStructureDataType_Clear(UA_ModelChangeStructureDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->Affected);
         NodeId_Clear(&a_pValue->AffectedType);
@@ -20218,7 +20219,7 @@ StatusCode UA_ModelChangeStructureDataType_Encode(UA_MsgBuffer* msgBuf, UA_Model
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20236,7 +20237,7 @@ StatusCode UA_ModelChangeStructureDataType_Decode(UA_MsgBuffer* msgBuf, UA_Model
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20262,11 +20263,11 @@ struct UA_EncodeableType UA_ModelChangeStructureDataType_EncodeableType =
     OpcUaId_ModelChangeStructureDataType,
     OpcUaId_ModelChangeStructureDataType_Encoding_DefaultBinary,
     OpcUaId_ModelChangeStructureDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ModelChangeStructureDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_ModelChangeStructureDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ModelChangeStructureDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ModelChangeStructureDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ModelChangeStructureDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ModelChangeStructureDataType_Decode
@@ -20279,7 +20280,7 @@ struct UA_EncodeableType UA_ModelChangeStructureDataType_EncodeableType =
  *===========================================================================*/
 void UA_SemanticChangeStructureDataType_Initialize(UA_SemanticChangeStructureDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->Affected);
         NodeId_Initialize(&a_pValue->AffectedType);
@@ -20291,7 +20292,7 @@ void UA_SemanticChangeStructureDataType_Initialize(UA_SemanticChangeStructureDat
  *===========================================================================*/
 void UA_SemanticChangeStructureDataType_Clear(UA_SemanticChangeStructureDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->Affected);
         NodeId_Clear(&a_pValue->AffectedType);
@@ -20305,7 +20306,7 @@ StatusCode UA_SemanticChangeStructureDataType_Encode(UA_MsgBuffer* msgBuf, UA_Se
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20322,7 +20323,7 @@ StatusCode UA_SemanticChangeStructureDataType_Decode(UA_MsgBuffer* msgBuf, UA_Se
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20347,11 +20348,11 @@ struct UA_EncodeableType UA_SemanticChangeStructureDataType_EncodeableType =
     OpcUaId_SemanticChangeStructureDataType,
     OpcUaId_SemanticChangeStructureDataType_Encoding_DefaultBinary,
     OpcUaId_SemanticChangeStructureDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_SemanticChangeStructureDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_SemanticChangeStructureDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_SemanticChangeStructureDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_SemanticChangeStructureDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_SemanticChangeStructureDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_SemanticChangeStructureDataType_Decode
@@ -20364,7 +20365,7 @@ struct UA_EncodeableType UA_SemanticChangeStructureDataType_EncodeableType =
  *===========================================================================*/
 void UA_Range_Initialize(UA_Range* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Double_Initialize(&a_pValue->Low);
         Double_Initialize(&a_pValue->High);
@@ -20376,7 +20377,7 @@ void UA_Range_Initialize(UA_Range* a_pValue)
  *===========================================================================*/
 void UA_Range_Clear(UA_Range* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Double_Clear(&a_pValue->Low);
         Double_Clear(&a_pValue->High);
@@ -20390,7 +20391,7 @@ StatusCode UA_Range_Encode(UA_MsgBuffer* msgBuf, UA_Range* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20407,7 +20408,7 @@ StatusCode UA_Range_Decode(UA_MsgBuffer* msgBuf, UA_Range* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20432,11 +20433,11 @@ struct UA_EncodeableType UA_Range_EncodeableType =
     OpcUaId_Range,
     OpcUaId_Range_Encoding_DefaultBinary,
     OpcUaId_Range_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_Range),
     (UA_EncodeableObject_PfnInitialize*)UA_Range_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_Range_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_Range_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_Range_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_Range_Decode
@@ -20449,7 +20450,7 @@ struct UA_EncodeableType UA_Range_EncodeableType =
  *===========================================================================*/
 void UA_EUInformation_Initialize(UA_EUInformation* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->NamespaceUri);
         Int32_Initialize(&a_pValue->UnitId);
@@ -20463,7 +20464,7 @@ void UA_EUInformation_Initialize(UA_EUInformation* a_pValue)
  *===========================================================================*/
 void UA_EUInformation_Clear(UA_EUInformation* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->NamespaceUri);
         Int32_Clear(&a_pValue->UnitId);
@@ -20479,7 +20480,7 @@ StatusCode UA_EUInformation_Encode(UA_MsgBuffer* msgBuf, UA_EUInformation* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20498,7 +20499,7 @@ StatusCode UA_EUInformation_Decode(UA_MsgBuffer* msgBuf, UA_EUInformation* a_pVa
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20525,11 +20526,11 @@ struct UA_EncodeableType UA_EUInformation_EncodeableType =
     OpcUaId_EUInformation,
     OpcUaId_EUInformation_Encoding_DefaultBinary,
     OpcUaId_EUInformation_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_EUInformation),
     (UA_EncodeableObject_PfnInitialize*)UA_EUInformation_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_EUInformation_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_EUInformation_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_EUInformation_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_EUInformation_Decode
@@ -20543,7 +20544,7 @@ struct UA_EncodeableType UA_EUInformation_EncodeableType =
  *===========================================================================*/
 void UA_ComplexNumberType_Initialize(UA_ComplexNumberType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Float_Initialize(&a_pValue->Real);
         Float_Initialize(&a_pValue->Imaginary);
@@ -20555,7 +20556,7 @@ void UA_ComplexNumberType_Initialize(UA_ComplexNumberType* a_pValue)
  *===========================================================================*/
 void UA_ComplexNumberType_Clear(UA_ComplexNumberType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Float_Clear(&a_pValue->Real);
         Float_Clear(&a_pValue->Imaginary);
@@ -20569,7 +20570,7 @@ StatusCode UA_ComplexNumberType_Encode(UA_MsgBuffer* msgBuf, UA_ComplexNumberTyp
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20586,7 +20587,7 @@ StatusCode UA_ComplexNumberType_Decode(UA_MsgBuffer* msgBuf, UA_ComplexNumberTyp
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20611,11 +20612,11 @@ struct UA_EncodeableType UA_ComplexNumberType_EncodeableType =
     OpcUaId_ComplexNumberType,
     OpcUaId_ComplexNumberType_Encoding_DefaultBinary,
     OpcUaId_ComplexNumberType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ComplexNumberType),
     (UA_EncodeableObject_PfnInitialize*)UA_ComplexNumberType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ComplexNumberType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ComplexNumberType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ComplexNumberType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ComplexNumberType_Decode
@@ -20628,7 +20629,7 @@ struct UA_EncodeableType UA_ComplexNumberType_EncodeableType =
  *===========================================================================*/
 void UA_DoubleComplexNumberType_Initialize(UA_DoubleComplexNumberType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Double_Initialize(&a_pValue->Real);
         Double_Initialize(&a_pValue->Imaginary);
@@ -20640,7 +20641,7 @@ void UA_DoubleComplexNumberType_Initialize(UA_DoubleComplexNumberType* a_pValue)
  *===========================================================================*/
 void UA_DoubleComplexNumberType_Clear(UA_DoubleComplexNumberType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Double_Clear(&a_pValue->Real);
         Double_Clear(&a_pValue->Imaginary);
@@ -20654,7 +20655,7 @@ StatusCode UA_DoubleComplexNumberType_Encode(UA_MsgBuffer* msgBuf, UA_DoubleComp
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20671,7 +20672,7 @@ StatusCode UA_DoubleComplexNumberType_Decode(UA_MsgBuffer* msgBuf, UA_DoubleComp
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20696,11 +20697,11 @@ struct UA_EncodeableType UA_DoubleComplexNumberType_EncodeableType =
     OpcUaId_DoubleComplexNumberType,
     OpcUaId_DoubleComplexNumberType_Encoding_DefaultBinary,
     OpcUaId_DoubleComplexNumberType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_DoubleComplexNumberType),
     (UA_EncodeableObject_PfnInitialize*)UA_DoubleComplexNumberType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_DoubleComplexNumberType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_DoubleComplexNumberType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_DoubleComplexNumberType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_DoubleComplexNumberType_Decode
@@ -20713,7 +20714,7 @@ struct UA_EncodeableType UA_DoubleComplexNumberType_EncodeableType =
  *===========================================================================*/
 void UA_AxisInformation_Initialize(UA_AxisInformation* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_EUInformation_Initialize(&a_pValue->EngineeringUnits);
         UA_Range_Initialize(&a_pValue->EURange);
@@ -20729,7 +20730,7 @@ void UA_AxisInformation_Initialize(UA_AxisInformation* a_pValue)
  *===========================================================================*/
 void UA_AxisInformation_Clear(UA_AxisInformation* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         UA_EUInformation_Clear(&a_pValue->EngineeringUnits);
         UA_Range_Clear(&a_pValue->EURange);
@@ -20747,7 +20748,7 @@ StatusCode UA_AxisInformation_Encode(UA_MsgBuffer* msgBuf, UA_AxisInformation* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20768,7 +20769,7 @@ StatusCode UA_AxisInformation_Decode(UA_MsgBuffer* msgBuf, UA_AxisInformation* a
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20797,11 +20798,11 @@ struct UA_EncodeableType UA_AxisInformation_EncodeableType =
     OpcUaId_AxisInformation,
     OpcUaId_AxisInformation_Encoding_DefaultBinary,
     OpcUaId_AxisInformation_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_AxisInformation),
     (UA_EncodeableObject_PfnInitialize*)UA_AxisInformation_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_AxisInformation_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_AxisInformation_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_AxisInformation_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_AxisInformation_Decode
@@ -20814,7 +20815,7 @@ struct UA_EncodeableType UA_AxisInformation_EncodeableType =
  *===========================================================================*/
 void UA_XVType_Initialize(UA_XVType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Double_Initialize(&a_pValue->X);
         Float_Initialize(&a_pValue->Value);
@@ -20826,7 +20827,7 @@ void UA_XVType_Initialize(UA_XVType* a_pValue)
  *===========================================================================*/
 void UA_XVType_Clear(UA_XVType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         Double_Clear(&a_pValue->X);
         Float_Clear(&a_pValue->Value);
@@ -20840,7 +20841,7 @@ StatusCode UA_XVType_Encode(UA_MsgBuffer* msgBuf, UA_XVType* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20857,7 +20858,7 @@ StatusCode UA_XVType_Decode(UA_MsgBuffer* msgBuf, UA_XVType* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20882,11 +20883,11 @@ struct UA_EncodeableType UA_XVType_EncodeableType =
     OpcUaId_XVType,
     OpcUaId_XVType_Encoding_DefaultBinary,
     OpcUaId_XVType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_XVType),
     (UA_EncodeableObject_PfnInitialize*)UA_XVType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_XVType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_XVType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_XVType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_XVType_Decode
@@ -20899,7 +20900,7 @@ struct UA_EncodeableType UA_XVType_EncodeableType =
  *===========================================================================*/
 void UA_ProgramDiagnosticDataType_Initialize(UA_ProgramDiagnosticDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Initialize(&a_pValue->CreateSessionId);
         String_Initialize(&a_pValue->CreateClientName);
@@ -20921,7 +20922,7 @@ void UA_ProgramDiagnosticDataType_Initialize(UA_ProgramDiagnosticDataType* a_pVa
  *===========================================================================*/
 void UA_ProgramDiagnosticDataType_Clear(UA_ProgramDiagnosticDataType* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         NodeId_Clear(&a_pValue->CreateSessionId);
         String_Clear(&a_pValue->CreateClientName);
@@ -20945,7 +20946,7 @@ StatusCode UA_ProgramDiagnosticDataType_Encode(UA_MsgBuffer* msgBuf, UA_ProgramD
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -20972,7 +20973,7 @@ StatusCode UA_ProgramDiagnosticDataType_Decode(UA_MsgBuffer* msgBuf, UA_ProgramD
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -21007,11 +21008,11 @@ struct UA_EncodeableType UA_ProgramDiagnosticDataType_EncodeableType =
     OpcUaId_ProgramDiagnosticDataType,
     OpcUaId_ProgramDiagnosticDataType_Encoding_DefaultBinary,
     OpcUaId_ProgramDiagnosticDataType_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_ProgramDiagnosticDataType),
     (UA_EncodeableObject_PfnInitialize*)UA_ProgramDiagnosticDataType_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_ProgramDiagnosticDataType_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_ProgramDiagnosticDataType_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_ProgramDiagnosticDataType_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_ProgramDiagnosticDataType_Decode
@@ -21024,7 +21025,7 @@ struct UA_EncodeableType UA_ProgramDiagnosticDataType_EncodeableType =
  *===========================================================================*/
 void UA_Annotation_Initialize(UA_Annotation* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Initialize(&a_pValue->Message);
         String_Initialize(&a_pValue->UserName);
@@ -21037,7 +21038,7 @@ void UA_Annotation_Initialize(UA_Annotation* a_pValue)
  *===========================================================================*/
 void UA_Annotation_Clear(UA_Annotation* a_pValue)
 {
-    if (a_pValue != UA_NULL)
+    if (a_pValue != NULL)
     {
         String_Clear(&a_pValue->Message);
         String_Clear(&a_pValue->UserName);
@@ -21052,7 +21053,7 @@ StatusCode UA_Annotation_Encode(UA_MsgBuffer* msgBuf, UA_Annotation* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -21070,7 +21071,7 @@ StatusCode UA_Annotation_Decode(UA_MsgBuffer* msgBuf, UA_Annotation* a_pValue)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
-    if(a_pValue != UA_NULL){
+    if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
@@ -21096,11 +21097,11 @@ struct UA_EncodeableType UA_Annotation_EncodeableType =
     OpcUaId_Annotation,
     OpcUaId_Annotation_Encoding_DefaultBinary,
     OpcUaId_Annotation_Encoding_DefaultXml,
-    UA_NULL,
+    NULL,
     sizeof(UA_Annotation),
     (UA_EncodeableObject_PfnInitialize*)UA_Annotation_Initialize,
     (UA_EncodeableObject_PfnClear*)UA_Annotation_Clear,
-    (UA_EncodeableObject_PfnGetSize*)UA_NULL,
+    (UA_EncodeableObject_PfnGetSize*)NULL,
 //    (UA_EncodeableObject_PfnGetSize*)UA_Annotation_GetSize,
     (UA_EncodeableObject_PfnEncode*)UA_Annotation_Encode,
     (UA_EncodeableObject_PfnDecode*)UA_Annotation_Decode
@@ -21119,7 +21120,7 @@ void UA_Initialize_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
     (void) initFct;
     (void) sizeOfElt;
     *noOfElts = 0;
-    *eltsArray = UA_NULL;
+    *eltsArray = NULL;
 }
 
 void UA_Clear_EnumeratedType(int32_t* enumerationValue){
@@ -21140,7 +21141,7 @@ void UA_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
     free(*eltsArray);
     
     *noOfElts = 0;
-    *eltsArray = UA_NULL;
+    *eltsArray = NULL;
 }
 
 StatusCode UA_Read_EnumeratedType(UA_MsgBuffer* msgBuffer, int32_t* enumerationValue){
@@ -21150,7 +21151,7 @@ StatusCode UA_Read_EnumeratedType(UA_MsgBuffer* msgBuffer, int32_t* enumerationV
 StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
                          size_t sizeOfElt, UA_EncodeableObject_PfnDecode* decodeFct)
 {
-    assert(msgBuffer != UA_NULL && *eltsArray == UA_NULL && noOfElts != UA_NULL);
+    assert(msgBuffer != NULL && *eltsArray == NULL && noOfElts != NULL);
     StatusCode status = STATUS_OK;
     UA_Byte* byteArray = *eltsArray;
     status = Int32_Read(msgBuffer, noOfElts);
@@ -21158,7 +21159,7 @@ StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** elts
         *eltsArray = malloc (sizeOfElt * *noOfElts);
     }
     
-    if(eltsArray != UA_NULL){
+    if(eltsArray != NULL){
         int32_t idx = 0;
         uint32_t pos = 0;
         for (idx = 0; status == STATUS_OK && idx < *noOfElts; idx ++){
@@ -21168,7 +21169,7 @@ StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** elts
         
         if(status != STATUS_OK){
             free(*eltsArray);
-            *eltsArray = UA_NULL;
+            *eltsArray = NULL;
         }
         
     }else{
@@ -21184,7 +21185,7 @@ StatusCode UA_Write_EnumeratedType(UA_MsgBuffer* msgBuffer, int32_t* enumeration
 
 StatusCode UA_Write_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
                           size_t sizeOfElt, UA_EncodeableObject_PfnEncode* encodeFct){
-    assert(msgBuffer != UA_NULL && *eltsArray != UA_NULL && noOfElts != UA_NULL);
+    assert(msgBuffer != NULL && *eltsArray != NULL && noOfElts != NULL);
     StatusCode status = STATUS_OK;
     UA_Byte* byteArray = *eltsArray;
     
@@ -21775,7 +21776,7 @@ static UA_EncodeableType* g_KnownEncodeableTypes[] =
     #ifndef OPCUA_EXCLUDE_Annotation
     &UA_Annotation_EncodeableType,
     #endif
-    UA_NULL
+    NULL
 };
 
 UA_EncodeableType** UA_KnownEncodeableTypes = g_KnownEncodeableTypes;

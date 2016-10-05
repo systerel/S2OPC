@@ -19,7 +19,7 @@ void StackConfiguration_Initialize(){
 }
 
 void StackConfiguration_Clear(){
-    g_stackConfiguration.nsTable = UA_NULL;
+    g_stackConfiguration.nsTable = NULL;
     g_stackConfiguration.traceLevel = 0;
     initDone = UA_FALSE;
 }
@@ -27,7 +27,7 @@ void StackConfiguration_Clear(){
 StatusCode StackConfiguration_SetNamespaceUris(UA_NamespaceTable* nsTable){
     StatusCode status = STATUS_INVALID_STATE;
     if(initDone != UA_FALSE){
-        if(nsTable == UA_NULL){
+        if(nsTable == NULL){
             status = STATUS_INVALID_PARAMETERS;
         }else{
             g_stackConfiguration.nsTable = nsTable;

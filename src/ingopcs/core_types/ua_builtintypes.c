@@ -96,15 +96,15 @@ void Double_Clear(double* d){
 }
 
 void ByteString_Initialize(UA_ByteString* bstring){
-    if(bstring != UA_NULL){
+    if(bstring != NULL){
         bstring->length = -1;
-        bstring->characters = UA_NULL;
+        bstring->characters = NULL;
         bstring->clearBytes = 1; // True unless characters attached
     }
 }
 
 UA_ByteString* ByteString_Create(){
-    UA_ByteString* bstring = UA_NULL;
+    UA_ByteString* bstring = NULL;
     bstring = (UA_ByteString*) malloc(sizeof(UA_ByteString));
     ByteString_Initialize(bstring);
     return bstring;
@@ -112,12 +112,12 @@ UA_ByteString* ByteString_Create(){
 
 StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(bstring != UA_NULL){
+    if(bstring != NULL){
         status = STATUS_OK;
         ByteString_Initialize(bstring);
         bstring->length = size;
         bstring->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*size);
-        if(bstring->characters != UA_NULL){
+        if(bstring->characters != NULL){
             memset(bstring->characters, 0, size);
         }else{
             status = STATUS_NOK;
@@ -129,7 +129,7 @@ StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size)
 StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != UA_NULL && bytes != UA_NULL
+    if(dest != NULL && bytes != NULL
        && length > 0){
         status = STATUS_OK;
         dest->length = length;
@@ -142,8 +142,8 @@ StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32
 StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != UA_NULL && src != UA_NULL
-       && src->length > 0 && src->characters != UA_NULL){
+    if(dest != NULL && src != NULL
+       && src->length > 0 && src->characters != NULL){
         status = STATUS_OK;
         dest->length = src->length;
         dest->characters = src->characters;
@@ -154,12 +154,12 @@ StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
 
 StatusCode ByteString_Copy(UA_ByteString* dest, UA_ByteString* src){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != UA_NULL && dest->characters == UA_NULL &&
-       src != UA_NULL && src->length > 0){
+    if(dest != NULL && dest->characters == NULL &&
+       src != NULL && src->length > 0){
         status = STATUS_OK;
         dest->length = src->length;
         dest->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->length);
-        if(dest->characters != UA_NULL){
+        if(dest->characters != NULL){
             // No need of secure copy, both have same size here
             memcpy(dest->characters, src->characters, dest->length);
         }else{
@@ -170,8 +170,8 @@ StatusCode ByteString_Copy(UA_ByteString* dest, UA_ByteString* src){
 }
 
 void ByteString_Clear(UA_ByteString* bstring){
-    if(bstring != UA_NULL){
-        if(bstring->characters != UA_NULL &&
+    if(bstring != NULL){
+        if(bstring->characters != NULL &&
            bstring->clearBytes != UA_FALSE){
             free(bstring->characters);
         }
@@ -179,7 +179,7 @@ void ByteString_Clear(UA_ByteString* bstring){
 }
 
 void ByteString_Delete(UA_ByteString* bstring){
-    if(bstring != UA_NULL){
+    if(bstring != NULL){
         ByteString_Clear(bstring);
         free(bstring);
     }
@@ -213,8 +213,8 @@ StatusCode String_CopyFromCString(UA_String* string, char* cString){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     size_t stringLength = 0;
     size_t idx = 0;
-    if(string != UA_NULL && string->characters == UA_NULL
-       && cString != UA_NULL){
+    if(string != NULL && string->characters == NULL
+       && cString != NULL){
         status = STATUS_OK;
     }
     if(status == STATUS_OK){
@@ -224,7 +224,7 @@ StatusCode String_CopyFromCString(UA_String* string, char* cString){
         {
             string->length = stringLength;
             string->characters = (UA_Byte*) malloc(sizeof(UA_Byte)*stringLength);
-            if(string->characters != UA_NULL){
+            if(string->characters != NULL){
                 if(CHAR_BIT == 8){
                     memcpy(string->characters, cString, stringLength);
                 }else{
@@ -247,7 +247,7 @@ StatusCode String_CopyFromCString(UA_String* string, char* cString){
 StatusCode String_InitializeFromCString(UA_String* string, char* cString){
     StatusCode status = STATUS_INVALID_PARAMETERS;
 
-    if(string != UA_NULL){
+    if(string != NULL){
         String_Initialize(string);
         status = String_CopyFromCString(string, cString);
     }
@@ -257,13 +257,13 @@ StatusCode String_InitializeFromCString(UA_String* string, char* cString){
 
 
 char* String_GetCString(UA_String* string){
-    char* cString = UA_NULL;
+    char* cString = NULL;
     int32_t idx = 0;
-    if(string != UA_NULL &&
+    if(string != NULL &&
        string->length > 0)
     {
         cString = (char*) malloc(sizeof(char)* (string->length + 1));
-        if(cString != UA_NULL){
+        if(cString != NULL){
             if(CHAR_BIT == 8){
                 memcpy(cString, string->characters, string->length);
             }else{
@@ -284,7 +284,7 @@ StatusCode ByteString_Compare(const UA_ByteString* left,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
 
-    if(left != UA_NULL && right != UA_NULL){
+    if(left != NULL && right != NULL){
         status = STATUS_OK;
     }
 
@@ -424,21 +424,21 @@ void StatusCode_Clear(StatusCode* status){
 }
 
 void DiagnosticInfo_Initialize(UA_DiagnosticInfo* diagInfo){
-    if(diagInfo != UA_NULL){
+    if(diagInfo != NULL){
         diagInfo->symbolicId = -1;
         diagInfo->namespaceUri = -1;
         diagInfo->locale = -1;
         diagInfo->localizedText = -1;
         String_Initialize(&diagInfo->additionalInfo);
         diagInfo->innerStatusCode = STATUS_OK;
-        diagInfo->innerDiagnosticInfo = UA_NULL;
+        diagInfo->innerDiagnosticInfo = NULL;
     }
 }
 
 void DiagnosticInfo_Clear(UA_DiagnosticInfo* diagInfo){
-    if(diagInfo != UA_NULL){
+    if(diagInfo != NULL){
         String_Clear(&diagInfo->additionalInfo);
-        if(diagInfo->innerDiagnosticInfo != UA_NULL){
+        if(diagInfo->innerDiagnosticInfo != NULL){
             DiagnosticInfo_Clear(diagInfo->innerDiagnosticInfo);
             free(diagInfo->innerDiagnosticInfo);
         }
@@ -447,7 +447,7 @@ void DiagnosticInfo_Clear(UA_DiagnosticInfo* diagInfo){
         diagInfo->locale = -1;
         diagInfo->localizedText = -1;
         diagInfo->innerStatusCode = STATUS_OK;
-        diagInfo->innerDiagnosticInfo = UA_NULL;
+        diagInfo->innerDiagnosticInfo = NULL;
     }
 }
 
@@ -723,7 +723,7 @@ void Variant_Initialize(UA_Variant* variant){
 }
 
 void* GetBuiltInTypeClearFunction(UA_BuiltinId builtInTypeId){
-    void* clearFunction = UA_NULL;
+    void* clearFunction = NULL;
     switch(builtInTypeId){
             case UA_Boolean_Id:
                 clearFunction = Boolean_Clear;

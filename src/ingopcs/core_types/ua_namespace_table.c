@@ -7,28 +7,32 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <ua_namespace_table.h>
+#include <stdint.h>
+
+#include "ua_namespace_table.h"
+
+#include <ua_builtintypes.h>
 
 const char* OPCUA_NAMESPACE_NAME = "http://opcfoundation.org/UA/";
 
 const int32_t OPCUA_NAMESPACE_NAME_MAXLENGTH = INT32_MAX;
 
 void Namespace_Initialize(UA_NamespaceTable* nsTable){
-    if(nsTable != UA_NULL){
+    if(nsTable != NULL){
         nsTable->lastIdx = 0;
-        nsTable->namespaceArray = UA_NULL;
+        nsTable->namespaceArray = NULL;
         nsTable->clearTable = 1; // True
     }
 }
 
 StatusCode Namespace_AllocateTable(UA_NamespaceTable* nsTable, uint32_t length){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(nsTable != UA_NULL){
+    if(nsTable != NULL){
         status = STATUS_OK;
         nsTable->clearTable = 1; // True
         nsTable->lastIdx = length - 1;
         nsTable->namespaceArray = malloc(sizeof(UA_Namespace)*length);
-        if(nsTable->namespaceArray == UA_NULL){
+        if(nsTable->namespaceArray == NULL){
             status = STATUS_NOK;
         }
     }
@@ -36,12 +40,12 @@ StatusCode Namespace_AllocateTable(UA_NamespaceTable* nsTable, uint32_t length){
 }
 
 UA_NamespaceTable* Namespace_CreateTable(uint32_t length){
-    UA_NamespaceTable* result = UA_NULL;
+    UA_NamespaceTable* result = NULL;
     if(length - 1 <= UINT16_MAX){
         result = malloc(sizeof(UA_NamespaceTable));
-        if(Namespace_AllocateTable(result, length) != STATUS_OK && result != UA_NULL){
+        if(Namespace_AllocateTable(result, length) != STATUS_OK && result != NULL){
             free(result);
-            result = UA_NULL;
+            result = NULL;
         }
     }
     return result;
@@ -49,8 +53,8 @@ UA_NamespaceTable* Namespace_CreateTable(uint32_t length){
 
 StatusCode Namespace_AttachTable(UA_NamespaceTable* dst, UA_NamespaceTable* src){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dst != UA_NULL && dst->namespaceArray == UA_NULL &&
-       src != UA_NULL && src->namespaceArray != UA_NULL){
+    if(dst != NULL && dst->namespaceArray == NULL &&
+       src != NULL && src->namespaceArray != NULL){
         status = STATUS_OK;
         dst->clearTable = UA_FALSE;
         dst->lastIdx = src->lastIdx;
@@ -65,7 +69,7 @@ StatusCode Namespace_GetIndex(UA_NamespaceTable* namespaceTable,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Namespace namespaceEntry;
-    if(namespaceTable != UA_NULL){
+    if(namespaceTable != NULL){
         status = STATUS_NOK;
         uint32_t idx = 0;
         for (idx = 0; idx <= namespaceTable->lastIdx; idx++){
@@ -82,8 +86,8 @@ StatusCode Namespace_GetIndex(UA_NamespaceTable* namespaceTable,
 const char* Namespace_GetName(UA_NamespaceTable* namespaceTable,
                               uint16_t index){
     UA_Namespace namespaceEntry;
-    char* result = UA_NULL;
-    if(namespaceTable != UA_NULL){
+    char* result = NULL;
+    if(namespaceTable != NULL){
         uint32_t idx = 0;
         for (idx = 0; idx <= namespaceTable->lastIdx; idx++){
             namespaceEntry = namespaceTable->namespaceArray[idx];
@@ -97,9 +101,9 @@ const char* Namespace_GetName(UA_NamespaceTable* namespaceTable,
 
 void Namespace_Clear(UA_NamespaceTable* namespaceTable)
 {
-    if(namespaceTable != UA_NULL){
+    if(namespaceTable != NULL){
         if(namespaceTable->clearTable != UA_FALSE &&
-           namespaceTable->namespaceArray != UA_NULL)
+           namespaceTable->namespaceArray != NULL)
         {
             free(namespaceTable->namespaceArray);
         }
@@ -108,7 +112,7 @@ void Namespace_Clear(UA_NamespaceTable* namespaceTable)
 
 void Namespace_Delete(UA_NamespaceTable* namespaceTable)
 {
-    if(namespaceTable != UA_NULL){
+    if(namespaceTable != NULL){
         Namespace_Clear(namespaceTable);
         free(namespaceTable);
     }

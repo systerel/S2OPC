@@ -9,6 +9,8 @@
 #define INGOPCS_MSG_BUFFER_H_
 
 #include <wrappers.h>
+
+#include <ua_base_types.h>
 #include <buffer.h>
 #include <ua_encodeable.h>
 #include <ua_namespace_table.h>

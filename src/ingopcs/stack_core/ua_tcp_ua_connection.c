@@ -4,26 +4,26 @@
  *  Created on: Jul 22, 2016
  *      Author: vincent
  */
+#include <stdlib.h>
+#include <stdbool.h>
 
 #include "ua_tcp_ua_connection.h"
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include <assert.h>
 #include <ua_encoder.h>
-#include "ua_tcp_ua_low_level.h"
+#include <ua_tcp_ua_low_level.h>
 
 StatusCode InitSendBuffer(TCP_UA_Connection* connection){
     StatusCode status = STATUS_NOK;
     if(connection->outputMsgBuffer == NULL){
         Buffer* buf = Buffer_Create(connection->sendBufferSize);
-        if(buf != UA_NULL){
+        if(buf != NULL){
             connection->outputMsgBuffer = MsgBuffer_Create(buf,
                                                            connection->maxChunkCountSnd,
                                                            connection->socket,
-                                                           UA_NULL, // no need for namespaces and types for decoding TCP UA headers
-                                                           UA_NULL);
-            if(connection->outputMsgBuffer != UA_NULL){
+                                                           NULL, // no need for namespaces and types for decoding TCP UA headers
+                                                           NULL);
+            if(connection->outputMsgBuffer != NULL){
                 status = STATUS_OK;
             }
         }
@@ -35,15 +35,15 @@ StatusCode InitSendBuffer(TCP_UA_Connection* connection){
 
 StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
     StatusCode status = STATUS_NOK;
-    if(connection->inputMsgBuffer == UA_NULL){
+    if(connection->inputMsgBuffer == NULL){
         Buffer* buf = Buffer_Create(connection->receiveBufferSize);
-        if(buf != UA_NULL){
+        if(buf != NULL){
             connection->inputMsgBuffer = MsgBuffer_Create(buf,
                                                           connection->maxChunkCountRcv,
                                                           connection->socket,
-                                                          UA_NULL, // no need for namespaces and types for decoding TCP UA headers
-                                                          UA_NULL);
-            if(connection->inputMsgBuffer != UA_NULL){
+                                                          NULL, // no need for namespaces and types for decoding TCP UA headers
+                                                          NULL);
+            if(connection->inputMsgBuffer != NULL){
                 status = STATUS_OK;
             }
         }
@@ -54,14 +54,14 @@ StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
 }
 
 TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
-    TCP_UA_Connection* connection = UA_NULL;
+    TCP_UA_Connection* connection = NULL;
     StatusCode status = STATUS_NOK;
 
     if(tcpProtocolVersion == scProtocolVersion){
         connection = (TCP_UA_Connection *) malloc(sizeof(TCP_UA_Connection));
     }
 
-    if(connection != UA_NULL){
+    if(connection != NULL){
         memset (connection, 0, sizeof(TCP_UA_Connection));
         String_Initialize(&connection->url);
         connection->state = TCP_Connection_Disconnected;
@@ -74,7 +74,7 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
 #if UA_MULTITHREADED == UA_FALSE
-       status = SocketManager_Create(UA_NULL,
+       status = SocketManager_Create(NULL,
                                      1);
 #else
        status = SocketManager_Create(&(connection->socketManager),
@@ -83,7 +83,7 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
 
         if(status != STATUS_OK){
             free(connection);
-            connection = UA_NULL;
+            connection = NULL;
         }
     }
 
@@ -104,7 +104,7 @@ void ResetConnectionState(TCP_UA_Connection* connection){
 }
 
 void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
-    if(connection != UA_NULL){
+    if(connection != NULL){
         String_Clear(&connection->url);
         SocketManager_Delete(&connection->socketManager);
         Socket_Close(connection->socket);
@@ -162,8 +162,8 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t tempValue = 0;
     uint32_t modifiedReceiveBuffer = 0;
-    if(connection != UA_NULL
-       && connection->inputMsgBuffer != UA_NULL){
+    if(connection != NULL
+       && connection->inputMsgBuffer != NULL){
         if(connection->inputMsgBuffer->currentChunkSize == TCP_UA_ACK_MSG_LENGTH){
             // Read protocol version of server
             status = UInt32_Read(connection->inputMsgBuffer, &tempValue);
@@ -185,7 +185,7 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
                             connection->sendBufferSize = tempValue;
                             // Adapt send buffer size
                             MsgBuffer_Delete(&connection->outputMsgBuffer);
-                            connection->outputMsgBuffer = UA_NULL;
+                            connection->outputMsgBuffer = NULL;
                             InitSendBuffer(connection);
                         }else{
                             status = STATUS_INVALID_RCV_PARAMETER;
@@ -239,7 +239,7 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
             if(modifiedReceiveBuffer != UA_FALSE && status == STATUS_OK){
                 // Adapt receive buffer size
                 MsgBuffer_Delete(&connection->inputMsgBuffer);
-                connection->inputMsgBuffer = UA_NULL;
+                connection->inputMsgBuffer = NULL;
                 InitReceiveBuffer(connection);
             }
         }else{
@@ -253,8 +253,8 @@ StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     StatusCode tmpStatus = STATUS_NOK;
     uint32_t error = 0;
-    UA_String* reason = UA_NULL;
-    if(connection != UA_NULL && connection->inputMsgBuffer != UA_NULL)
+    UA_String* reason = NULL;
+    if(connection != NULL && connection->inputMsgBuffer != NULL)
     {
         if(connection->inputMsgBuffer->currentChunkSize >= TCP_UA_ERR_MIN_MSG_LENGTH)
         {
@@ -285,21 +285,21 @@ StatusCode OnSocketEvent_CB (Socket        socket,
     switch(socketEvent){
         case SOCKET_ACCEPT_EVENT:
             status = STATUS_INVALID_STATE;
-            if(connection->callback != UA_NULL){
+            if(connection->callback != NULL){
                 connection->callback(connection,
                                      connection->callbackData,
                                      ConnectionEvent_Error,
-                                     UA_NULL,
+                                     NULL,
                                      status);
             }
             break;
         case SOCKET_CLOSE_EVENT:
             status = STATUS_OK;
-            if(connection->callback != UA_NULL){
+            if(connection->callback != NULL){
                 connection->callback(connection,
                                      connection->callbackData,
                                      ConnectionEvent_Disconnected,
-                                     UA_NULL,
+                                     NULL,
                                      status);
             }
             break;
@@ -310,11 +310,11 @@ StatusCode OnSocketEvent_CB (Socket        socket,
             if(status == STATUS_OK){
                 status = InitReceiveBuffer(connection);
             }else{
-                if(connection->callback != UA_NULL){
+                if(connection->callback != NULL){
                     connection->callback(connection,
                                          connection->callbackData,
                                          ConnectionEvent_Error,
-                                         UA_NULL,
+                                         NULL,
                                          status);
                 }
             }
@@ -334,35 +334,35 @@ StatusCode OnSocketEvent_CB (Socket        socket,
                     case(TCP_UA_Message_Acknowledge):
                         status = ReceiveAckMsg(connection);
                         if(status == STATUS_OK){
-                            if(connection->callback != UA_NULL){
+                            if(connection->callback != NULL){
                                 connection->callback(connection,
                                                      connection->callbackData,
                                                      ConnectionEvent_Connected,
-                                                     UA_NULL,
+                                                     NULL,
                                                      status);
                             }
                         }else{
-                            if(connection->callback != UA_NULL){
+                            if(connection->callback != NULL){
                                 connection->callback(connection,
                                                      connection->callbackData,
                                                      ConnectionEvent_Error,
-                                                     UA_NULL,
+                                                     NULL,
                                                      status);
                             }
                         }
                         break;
                     case(TCP_UA_Message_Error):
                         status = ReceiveErrorMsg(connection);
-                        if(connection->callback != UA_NULL){
+                        if(connection->callback != NULL){
                             connection->callback(connection,
                                                  connection->callbackData,
                                                  ConnectionEvent_Disconnected,
-                                                 UA_NULL,
+                                                 NULL,
                                                  status);
                         }
                         break;
                     case(TCP_UA_Message_SecureMessage):
-                        if(connection->callback != UA_NULL){
+                        if(connection->callback != NULL){
                             connection->callback(connection,
                                                  connection->callbackData,
                                                  ConnectionEvent_Message,
@@ -409,7 +409,7 @@ StatusCode CheckURI (char* uri){
     bool isPort = 0;
     bool hasPort = 0;
     bool invalid = 0;
-    if(uri != UA_NULL){
+    if(uri != NULL){
 
         if(strlen(uri) + 4  > 4096){
             // Encoded value shall be less than 4096 bytes
@@ -447,12 +447,12 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
                                       TCP_UA_Connection_Event_CB* callback,
                                       void*                       callbackData){
     StatusCode status = STATUS_NOK;
-    if(connection != UA_NULL &&
-       uri != UA_NULL &&
-       callback != UA_NULL){
+    if(connection != NULL &&
+       uri != NULL &&
+       callback != NULL){
         if(connection->url.length <= 0 &&
-           connection->callback == UA_NULL &&
-           connection->callbackData == UA_NULL &&
+           connection->callback == NULL &&
+           connection->callbackData == NULL &&
            connection->state == TCP_Connection_Disconnected)
         {
             if(CheckURI(uri) == STATUS_OK){
@@ -464,7 +464,7 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
                 connection->callbackData = callbackData;
 
 #if UA_MULTITHREADED == UA_FALSE
-                status = SocketManager_CreateClientSocket(UA_NULL,
+                status = SocketManager_CreateClientSocket(NULL,
                                               uri,
                                               OnSocketEvent_CB,
                                               (void*) connection,
@@ -494,10 +494,10 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
 
 void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
     Socket_Close(connection->socket);
-    connection->socket = UA_NULL;
+    connection->socket = NULL;
     String_Clear(&connection->url);
-    connection->callback = UA_NULL;
-    connection->callbackData = UA_NULL;
+    connection->callback = NULL;
+    connection->callbackData = NULL;
     ResetConnectionState(connection);
 }
 

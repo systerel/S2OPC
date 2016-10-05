@@ -96,7 +96,7 @@ static StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pPro
     const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     uint32_t lenKey;
 
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pOutput)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput)
         return STATUS_INVALID_PARAMETERS;
 
     if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKey) != STATUS_OK)
@@ -120,7 +120,7 @@ static StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pP
     uint8_t *pCalcSig;
     StatusCode status = STATUS_OK;
 
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pInput || UA_NULL == pKey || UA_NULL == pSignature)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature)
         return STATUS_INVALID_PARAMETERS;
 
     if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKey) != STATUS_OK)
@@ -130,7 +130,7 @@ static StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pP
         return STATUS_NOK;
 
     pCalcSig = malloc(lenSig);
-    if(UA_NULL == pCalcSig)
+    if(NULL == pCalcSig)
         return STATUS_NOK;
 
     status = mbedtls_md_hmac(pinfo, pKey, lenKey, pInput, lenInput, pCalcSig) != 0 ? STATUS_NOK : STATUS_OK;
@@ -147,9 +147,9 @@ static StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pP
 StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
                                             ExposedBuffer *pKey)
 {
-    CryptolibContext *pCtx = UA_NULL;
+    CryptolibContext *pCtx = NULL;
 
-    if(UA_NULL == pProvider || UA_NULL == pProvider->pProfile || UA_NULL == pProvider->pCryptolibContext || UA_NULL == pKey)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pProvider->pCryptolibContext || NULL == pKey)
         return STATUS_INVALID_PARAMETERS;
 
     pCtx = pProvider->pCryptolibContext;

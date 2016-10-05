@@ -147,7 +147,7 @@ StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer){
     UA_Byte msgType[3];
     UA_Byte isFinal;
 
-    if(msgBuffer != UA_NULL
+    if(msgBuffer != NULL
        && msgBuffer->buffers->length == UA_HEADER_LENGTH
        && msgBuffer->type == TCP_UA_Message_Unknown)
     {
@@ -232,19 +232,19 @@ StatusCode TCP_UA_ReadMsgBuffer(UA_Byte*      data_dest,
                                 UA_MsgBuffer* msgBuffer,
                                 uint32_t      count){
     StatusCode status = STATUS_OK;
-    Buffer* buffer = UA_NULL;
+    Buffer* buffer = NULL;
     if(msgBuffer->nbBuffers == 1){
         buffer = msgBuffer->buffers;
     }else if(msgBuffer->nbBuffers > 1 && msgBuffer->nbChunks > 0){
         // TCP UA layer never treat chunks
         assert(msgBuffer->nbChunks == 1);
         buffer = MsgBuffers_GetCurrentChunk(msgBuffer);
-        if(buffer == UA_NULL){
+        if(buffer == NULL){
             status = STATUS_NOK;
         }
     }
     if(status == STATUS_OK){
-        if(data_dest == UA_NULL || msgBuffer == UA_NULL
+        if(data_dest == NULL || msgBuffer == NULL
            || size < count
            || buffer->length - buffer->position < count)
         {
@@ -275,7 +275,7 @@ StatusCode TCP_UA_WriteMsgBuffer(UA_MsgBuffer*  msgBuffer,
                                  uint32_t       count)
 {
     StatusCode status = STATUS_NOK;
-    if(data_src == UA_NULL || msgBuffer == UA_NULL)
+    if(data_src == NULL || msgBuffer == NULL)
     {
             status = STATUS_INVALID_PARAMETERS;
     }else{

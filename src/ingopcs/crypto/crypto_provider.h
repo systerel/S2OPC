@@ -10,10 +10,9 @@
 #define INGOPCS_CRYPTO_PROVIDER_H_
 
 
-#include "ua_builtintypes.h"  // StatusCode
-#include "secret_buffer.h"
+#include <ua_base_types.h>
+#include <secret_buffer.h>
 #include "crypto_types.h"
-
 
 
 // Lib specific

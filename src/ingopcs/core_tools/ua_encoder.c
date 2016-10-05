@@ -7,7 +7,8 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include <ua_encoder.h>
+
+#include "ua_encoder.h"
 #include <ua_encodeable.h>
 #include <ua_tcp_ua_low_level.h>
 
@@ -81,7 +82,7 @@ void EncodeDecode_Double(double* doublev){
 
 StatusCode Byte_Write(UA_MsgBuffer* msgBuffer, const UA_Byte* value)
 {
-    if(value == UA_NULL){
+    if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
     return TCP_UA_WriteMsgBuffer(msgBuffer, value, 1);
@@ -89,7 +90,7 @@ StatusCode Byte_Write(UA_MsgBuffer* msgBuffer, const UA_Byte* value)
 
 StatusCode Byte_Read(UA_MsgBuffer* msgBuffer, UA_Byte* value)
 {
-    if(value == UA_NULL){
+    if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
 
@@ -99,7 +100,7 @@ StatusCode Byte_Read(UA_MsgBuffer* msgBuffer, UA_Byte* value)
 StatusCode Boolean_Write(UA_MsgBuffer* msgBuffer, const UA_Boolean* value)
 {
     UA_Byte encodedValue;
-    if(value == UA_NULL){
+    if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
 
@@ -116,7 +117,7 @@ StatusCode Boolean_Write(UA_MsgBuffer* msgBuffer, const UA_Boolean* value)
 StatusCode Boolean_Read(UA_MsgBuffer* msgBuffer, UA_Boolean* value)
 {
     StatusCode status = STATUS_NOK;
-    if(value == UA_NULL){
+    if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = Byte_Read(msgBuffer, (UA_Byte*) value);
@@ -132,7 +133,7 @@ StatusCode Boolean_Read(UA_MsgBuffer* msgBuffer, UA_Boolean* value)
 
 StatusCode SByte_Write(UA_MsgBuffer* msgBuffer, const UA_SByte* value)
 {
-    if(value == UA_NULL){
+    if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
     return TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) value, 1);
@@ -140,7 +141,7 @@ StatusCode SByte_Write(UA_MsgBuffer* msgBuffer, const UA_SByte* value)
 
 StatusCode SByte_Read(UA_MsgBuffer* msgBuffer, UA_SByte* value)
 {
-    if(value == UA_NULL){
+    if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
 
@@ -160,7 +161,7 @@ StatusCode Int16_Read(UA_MsgBuffer* msgBuffer, int16_t* value)
 {
     StatusCode status = STATUS_NOK;
     int16_t readValue;
-    if(value == UA_NULL){
+    if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)&readValue, 2, msgBuffer, 2);
@@ -184,7 +185,7 @@ StatusCode UInt16_Write(UA_MsgBuffer* msgBuffer, const uint16_t* value)
 StatusCode UInt16_Read(UA_MsgBuffer* msgBuffer, uint16_t* value)
 {
     StatusCode status = STATUS_NOK;
-    if(value == UA_NULL){
+    if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 2, msgBuffer, 2);
@@ -199,7 +200,7 @@ StatusCode Int32_Write(UA_MsgBuffer* msgBuffer, const int32_t* value)
 {
     StatusCode status = STATUS_NOK;
     int32_t encodedValue = *value;
-    if(value == UA_NULL){
+    if(value == NULL){
             status = STATUS_INVALID_PARAMETERS;
     }else{
         EncodeDecode_Int32(&encodedValue);
@@ -211,7 +212,7 @@ StatusCode Int32_Write(UA_MsgBuffer* msgBuffer, const int32_t* value)
 StatusCode Int32_Read(UA_MsgBuffer* msgBuffer, int32_t* value)
 {
     StatusCode status = STATUS_NOK;
-    if(value == UA_NULL){
+    if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
@@ -234,7 +235,7 @@ StatusCode UInt32_Write(UA_MsgBuffer* msgBuffer, const uint32_t* value)
 StatusCode UInt32_Read(UA_MsgBuffer* msgBuffer, uint32_t* value)
 {
     StatusCode status = STATUS_NOK;
-    if(value == UA_NULL){
+    if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
@@ -249,7 +250,7 @@ StatusCode Int64_Write(UA_MsgBuffer* msgBuffer, const int64_t* value)
 {
     StatusCode status = STATUS_NOK;
     int64_t encodedValue = *value;
-    if(value == UA_NULL){
+    if(value == NULL){
             status = STATUS_INVALID_PARAMETERS;
     }else{
         EncodeDecode_Int64(&encodedValue);
@@ -261,7 +262,7 @@ StatusCode Int64_Write(UA_MsgBuffer* msgBuffer, const int64_t* value)
 StatusCode Int64_Read(UA_MsgBuffer* msgBuffer, int64_t* value)
 {
     StatusCode status = STATUS_NOK;
-    if(value == UA_NULL){
+    if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = TCP_UA_ReadMsgBuffer((UA_Byte*) value, 8, msgBuffer, 8);
@@ -276,7 +277,7 @@ StatusCode UInt64_Write(UA_MsgBuffer* msgBuffer, const uint64_t* value)
 {
     StatusCode status = STATUS_NOK;
     uint64_t encodedValue = *value;
-    if(value == UA_NULL){
+    if(value == NULL){
             status = STATUS_INVALID_PARAMETERS;
     }else{
         EncodeDecode_UInt64(&encodedValue);
@@ -288,7 +289,7 @@ StatusCode UInt64_Write(UA_MsgBuffer* msgBuffer, const uint64_t* value)
 StatusCode UInt64_Read(UA_MsgBuffer* msgBuffer, uint64_t* value)
 {
     StatusCode status = STATUS_NOK;
-    if(value == UA_NULL){
+    if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = TCP_UA_ReadMsgBuffer((UA_Byte*) value, 8, msgBuffer, 8);
@@ -311,7 +312,7 @@ StatusCode Float_Write(UA_MsgBuffer* msgBuffer, const float* value)
 StatusCode Float_Read(UA_MsgBuffer* msgBuffer, float* value)
 {
     StatusCode status = STATUS_NOK;
-    if(value == UA_NULL){
+    if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
@@ -334,7 +335,7 @@ StatusCode Double_Write(UA_MsgBuffer* msgBuffer, const double* value)
 StatusCode Double_Read(UA_MsgBuffer* msgBuffer, double* value)
 {
     StatusCode status = STATUS_NOK;
-    if(value == UA_NULL){
+    if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
@@ -348,7 +349,7 @@ StatusCode Double_Read(UA_MsgBuffer* msgBuffer, double* value)
 StatusCode ByteString_Write(UA_MsgBuffer* msgBuffer, const UA_ByteString* str)
 {
     StatusCode status = STATUS_NOK;
-    if(str == UA_NULL){
+    if(str == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         int32_t length;
@@ -371,7 +372,7 @@ StatusCode ByteString_Read(UA_MsgBuffer* msgBuffer, UA_ByteString* str)
 {
     StatusCode status = STATUS_NOK;
     int32_t length;
-    if(str == UA_NULL || (str != UA_NULL && str->characters != UA_NULL)){
+    if(str == NULL || (str != NULL && str->characters != NULL)){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)&length, 4, msgBuffer, 4);
@@ -380,12 +381,12 @@ StatusCode ByteString_Read(UA_MsgBuffer* msgBuffer, UA_ByteString* str)
             if(length > 0){
                 str->length = length;
                 str->characters = malloc(sizeof(UA_Byte) * length);
-                if(str->characters != UA_NULL){
+                if(str->characters != NULL){
                     status = TCP_UA_ReadMsgBuffer(str->characters, length, msgBuffer, length);
                     if(status != STATUS_OK){
                         status = STATUS_INVALID_STATE;
                         free(str->characters);
-                        str->characters = UA_NULL;
+                        str->characters = NULL;
                         str->length = -1;
                     }
                 }
@@ -433,7 +434,7 @@ StatusCode DateTime_Read(UA_MsgBuffer* msgBuffer, UA_DateTime* date)
 StatusCode Guid_Write(UA_MsgBuffer* msgBuffer, const UA_Guid* guid)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(guid != UA_NULL){
+    if(guid != NULL){
         status = UInt32_Write(msgBuffer, &guid->data1);
     }
     if(status == STATUS_OK){
@@ -451,7 +452,7 @@ StatusCode Guid_Write(UA_MsgBuffer* msgBuffer, const UA_Guid* guid)
 StatusCode Guid_Read(UA_MsgBuffer* msgBuffer, UA_Guid* guid)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(guid != UA_NULL){
+    if(guid != NULL){
         status = UInt32_Read(msgBuffer, &guid->data1);
     }
     if(status == STATUS_OK){
@@ -495,7 +496,7 @@ StatusCode Internal_NodeId_Write(UA_MsgBuffer* msgBuffer,
                                  UA_Byte encodingByte,
                                  const UA_NodeId* nodeId)
 {
-    assert(nodeId != UA_NULL);
+    assert(nodeId != NULL);
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_NodeId_DataEncoding encodingType = 0x0F & encodingByte; // Eliminate flags
 
@@ -559,7 +560,7 @@ StatusCode Internal_NodeId_Write(UA_MsgBuffer* msgBuffer,
 StatusCode NodeId_Write(UA_MsgBuffer* msgBuffer, const UA_NodeId* nodeId)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(nodeId != UA_NULL){
+    if(nodeId != NULL){
         status = Internal_NodeId_Write(msgBuffer, GetNodeIdDataEncoding(nodeId), nodeId);
     }
     return status;
@@ -569,7 +570,7 @@ StatusCode Internal_NodeId_Read(UA_MsgBuffer* msgBuffer,
                                 UA_NodeId* nodeId,
                                 UA_Byte* encodingByte)
 {
-    assert(nodeId != UA_NULL);
+    assert(nodeId != NULL);
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_NodeId_DataEncoding encodingType = 0x0F;
 
@@ -639,7 +640,7 @@ StatusCode NodeId_Read(UA_MsgBuffer* msgBuffer, UA_NodeId* nodeId)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
-    if(nodeId != UA_NULL){
+    if(nodeId != NULL){
         status = Internal_NodeId_Read(msgBuffer, nodeId, &encodingByte);
     }
     return status;
@@ -648,7 +649,7 @@ StatusCode NodeId_Read(UA_MsgBuffer* msgBuffer, UA_NodeId* nodeId)
 StatusCode ExpandedNodeId_Write(UA_MsgBuffer* msgBuffer, const UA_ExpandedNodeId* expNodeId){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0xFF;
-    if(expNodeId != UA_NULL){
+    if(expNodeId != NULL){
         encodingByte = GetNodeIdDataEncoding(&expNodeId->nodeId);
         if(expNodeId->namespaceUri.length > 0){
             encodingByte |= NodeIdEncoding_NamespaceUriFlag;
@@ -673,7 +674,7 @@ StatusCode ExpandedNodeId_Write(UA_MsgBuffer* msgBuffer, const UA_ExpandedNodeId
 StatusCode ExpandedNodeId_Read(UA_MsgBuffer* msgBuffer, UA_ExpandedNodeId* expNodeId){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
-    if(expNodeId != UA_NULL){
+    if(expNodeId != NULL){
         status = Internal_NodeId_Read(msgBuffer, &expNodeId->nodeId, &encodingByte);
     }
     if(status == STATUS_OK &&
@@ -702,7 +703,7 @@ StatusCode StatusCode_Read(UA_MsgBuffer* msgBuffer, StatusCode* status){
 }
 
 UA_Byte GetDiagInfoEncodingByte(const UA_DiagnosticInfo* diagInfo){
-    assert(diagInfo != UA_NULL);
+    assert(diagInfo != NULL);
     UA_Byte encodingByte = 0x00;
     if(diagInfo->symbolicId > -1){
         encodingByte |= DiagInfoEncoding_SymbolicId;
@@ -722,7 +723,7 @@ UA_Byte GetDiagInfoEncodingByte(const UA_DiagnosticInfo* diagInfo){
     if(diagInfo->innerStatusCode > 0){ // OK status code does not provide information
         encodingByte |= DiagInfoEncoding_InnerStatusCode;
     }
-    if(diagInfo->innerDiagnosticInfo != UA_NULL){
+    if(diagInfo->innerDiagnosticInfo != NULL){
         encodingByte |= DiagInfoEncoding_InnerDianosticInfo;
     }
     return encodingByte;
@@ -731,7 +732,7 @@ UA_Byte GetDiagInfoEncodingByte(const UA_DiagnosticInfo* diagInfo){
 StatusCode DiagnosticInfo_Write(UA_MsgBuffer* msgBuffer, const UA_DiagnosticInfo* diagInfo){
     UA_Byte encodingByte = 0x00;
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(diagInfo != UA_NULL){
+    if(diagInfo != NULL){
         status = STATUS_OK;
         encodingByte = GetDiagInfoEncodingByte(diagInfo);
     }
@@ -769,7 +770,7 @@ StatusCode DiagnosticInfo_Write(UA_MsgBuffer* msgBuffer, const UA_DiagnosticInfo
 StatusCode DiagnosticInfo_Read(UA_MsgBuffer* msgBuffer, UA_DiagnosticInfo* diagInfo){
     UA_Byte encodingByte = 0x00;
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(diagInfo != UA_NULL){
+    if(diagInfo != NULL){
         status  = Byte_Read(msgBuffer, &encodingByte);
     }
     if(status == STATUS_OK &&
@@ -805,7 +806,7 @@ StatusCode DiagnosticInfo_Read(UA_MsgBuffer* msgBuffer, UA_DiagnosticInfo* diagI
 
 StatusCode QualifiedName_Write(UA_MsgBuffer* msgBuffer, const UA_QualifiedName* qname){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(qname != UA_NULL){
+    if(qname != NULL){
         status = UInt16_Write(msgBuffer, &qname->namespaceIndex);
     }
     if(status == STATUS_OK){
@@ -816,7 +817,7 @@ StatusCode QualifiedName_Write(UA_MsgBuffer* msgBuffer, const UA_QualifiedName* 
 
 StatusCode QualifiedName_Read(UA_MsgBuffer* msgBuffer, UA_QualifiedName* qname){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(qname != UA_NULL){
+    if(qname != NULL){
         status = UInt16_Read(msgBuffer, &qname->namespaceIndex);
     }
     if(status == STATUS_OK){
@@ -827,7 +828,7 @@ StatusCode QualifiedName_Read(UA_MsgBuffer* msgBuffer, UA_QualifiedName* qname){
 
 
 UA_Byte GetLocalizedTextEncodingByte(const UA_LocalizedText* ltext){
-    assert(ltext != UA_NULL);
+    assert(ltext != NULL);
     UA_Byte encodingByte = 0;
     if(ltext->locale.length > 0){
         encodingByte |= LocalizedText_Locale;
@@ -841,7 +842,7 @@ UA_Byte GetLocalizedTextEncodingByte(const UA_LocalizedText* ltext){
 StatusCode LocalizedText_Write(UA_MsgBuffer* msgBuffer, const UA_LocalizedText* localizedText){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
-    if(localizedText != UA_NULL){
+    if(localizedText != NULL){
         encodingByte = GetLocalizedTextEncodingByte(localizedText);
     }
     if(status == STATUS_OK && (encodingByte & LocalizedText_Locale) != 0){
@@ -856,7 +857,7 @@ StatusCode LocalizedText_Write(UA_MsgBuffer* msgBuffer, const UA_LocalizedText* 
 StatusCode LocalizedText_Read(UA_MsgBuffer* msgBuffer, UA_LocalizedText* localizedText){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
-    if(localizedText != UA_NULL){
+    if(localizedText != NULL){
         status = Byte_Read(msgBuffer, &encodingByte);
     }
     if(status == STATUS_OK && (encodingByte & LocalizedText_Locale) != 0){
@@ -877,7 +878,7 @@ StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObje
     uint16_t nsIndex = OPCUA_NAMESPACE_INDEX;
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
-    if(extObj != UA_NULL){
+    if(extObj != NULL){
         encodingByte = extObj->encoding;
         status = STATUS_OK;
     }
@@ -886,7 +887,7 @@ StatusCode ExtensionObject_Write(UA_MsgBuffer* msgBuffer, const UA_ExtensionObje
        encodingByte == UA_ExtObjBodyEncoding_Object)
     {
         encodingByte = UA_ExtObjBodyEncoding_ByteString;
-        if(extObj->body.object.objType == UA_NULL){
+        if(extObj->body.object.objType == NULL){
             status = STATUS_INVALID_PARAMETERS;
         }else{
             if(strncmp(extObj->body.object.objType->namespace,
@@ -947,7 +948,7 @@ StatusCode ExtensionObject_Read(UA_MsgBuffer* msgBuffer, UA_ExtensionObject* ext
     UA_EncodeableType* encType;
     const char* nsName;
     UA_Byte encodingByte = 0;
-    if(extObj != UA_NULL){
+    if(extObj != NULL){
         status = NodeId_Read(msgBuffer, &extObj->typeId);
     }
     if(status == STATUS_OK){
@@ -962,12 +963,12 @@ StatusCode ExtensionObject_Read(UA_MsgBuffer* msgBuffer, UA_ExtensionObject* ext
             }else{
                 nsName = OPCUA_NAMESPACE_NAME;
             }
-            if(nsName != UA_NULL){
+            if(nsName != NULL){
                 encType = EncodeableType_GetEncodeableType(msgBuffer->encTypesTable,
                                                            nsName,
                                                            extObj->typeId.numeric);
             }
-            if(nsName == UA_NULL || encType == UA_NULL){
+            if(nsName == NULL || encType == NULL){
                 status = STATUS_NOK;
             }else{
                 encodingByte = UA_ExtObjBodyEncoding_Object;
@@ -1009,7 +1010,7 @@ StatusCode ExtensionObject_Read(UA_MsgBuffer* msgBuffer, UA_ExtensionObject* ext
 }
 
 UA_Byte GetVariantEncodingMask(const UA_Variant* variant){
-    assert(variant != UA_NULL);
+    assert(variant != NULL);
     UA_Byte encodingByte = variant->builtInTypeMask;
     if((variant->arrayTypeMask & UA_VariantArrayMatrixFlag) != 0){
         encodingByte |= UA_VariantArrayMatrixFlag;
@@ -1249,7 +1250,7 @@ StatusCode Variant_Write(UA_MsgBuffer* msgBuffer, const UA_Variant* variant){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     int32_t arrayLength = 0;
-    if(variant != UA_NULL){
+    if(variant != NULL){
         encodingByte = GetVariantEncodingMask(variant);
         status = Byte_Write(msgBuffer, &encodingByte);
     }
@@ -1349,7 +1350,7 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_Guid_Id:
             val->guid = malloc(sizeof(UA_Guid));
-            if(val->guid != UA_NULL){
+            if(val->guid != NULL){
                 status = Guid_Read(msgBuffer, val->guid);
             }else{
                 status = STATUS_NOK;
@@ -1363,7 +1364,7 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_NodeId_Id:
             val->nodeId = malloc(sizeof(UA_NodeId));
-            if(val->nodeId != UA_NULL){
+            if(val->nodeId != NULL){
                 status = NodeId_Read(msgBuffer, val->nodeId);
             }else{
                 status = STATUS_NOK;
@@ -1371,7 +1372,7 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_ExpandedNodeId_Id:
             val->expNodeId = malloc(sizeof(UA_ExpandedNodeId));
-            if(val->expNodeId != UA_NULL){
+            if(val->expNodeId != NULL){
                 status = ExpandedNodeId_Read(msgBuffer, val->expNodeId);
             }else{
                 status = STATUS_NOK;
@@ -1382,7 +1383,7 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_QualifiedName_Id:
             val->qname = malloc(sizeof(UA_QualifiedName));
-            if(val->qname != UA_NULL){
+            if(val->qname != NULL){
                 status = QualifiedName_Read(msgBuffer, val->qname);
             }else{
                 status = STATUS_NOK;
@@ -1390,7 +1391,7 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_LocalizedText_Id:
             val->localizedText = malloc(sizeof(UA_LocalizedText));
-            if(val->localizedText != UA_NULL){
+            if(val->localizedText != NULL){
                 status = LocalizedText_Read(msgBuffer, val->localizedText);
             }else{
                 status = STATUS_NOK;
@@ -1398,7 +1399,7 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_ExtensionObject_Id:
             val->extObject = malloc(sizeof(UA_ExtensionObject));
-            if(val->extObject != UA_NULL){
+            if(val->extObject != NULL){
                 status = ExtensionObject_Read(msgBuffer, val->extObject);
             }else{
                 status = STATUS_NOK;
@@ -1406,7 +1407,7 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_DataValue_Id:
             val->dataValue = malloc(sizeof(UA_DataValue));
-            if(val->dataValue != UA_NULL){
+            if(val->dataValue != NULL){
                 status = DataValue_Read(msgBuffer, val->dataValue);
             }else{
                 status = STATUS_NOK;
@@ -1417,7 +1418,7 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_DiagnosticInfo_Id:
             val->diagInfo = malloc(sizeof(UA_DiagnosticInfo));
-            if(val->diagInfo != UA_NULL){
+            if(val->diagInfo != NULL){
                 status = DiagnosticInfo_Read(msgBuffer, val->diagInfo);
             }else{
                 status = STATUS_NOK;
@@ -1439,7 +1440,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
     switch(builtInTypeId){
         case UA_Boolean_Id:
             array->booleanArr = malloc(sizeof(UA_Boolean) * length);
-            if(array->booleanArr == UA_NULL){
+            if(array->booleanArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1449,7 +1450,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_SByte_Id:
             array->sbyteArr = malloc(sizeof(UA_SByte) * length);
-            if(array->sbyteArr == UA_NULL){
+            if(array->sbyteArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1459,7 +1460,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_Byte_Id:
             array->byteArr = malloc(sizeof(UA_Byte) * length);
-            if(array->byteArr == UA_NULL){
+            if(array->byteArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1469,7 +1470,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_Int16_Id:
             array->int16Arr = malloc(sizeof(int16_t) * length);
-            if(array->int16Arr == UA_NULL){
+            if(array->int16Arr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1479,7 +1480,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_UInt16_Id:
             array->sbyteArr = malloc(sizeof(uint16_t) * length);
-            if(array->sbyteArr == UA_NULL){
+            if(array->sbyteArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1489,7 +1490,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_Int32_Id:
             array->int32Arr = malloc(sizeof(int32_t) * length);
-            if(array->int32Arr == UA_NULL){
+            if(array->int32Arr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1499,7 +1500,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_UInt32_Id:
             array->uint32Arr = malloc(sizeof(uint32_t) * length);
-            if(array->uint32Arr == UA_NULL){
+            if(array->uint32Arr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1509,7 +1510,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_Int64_Id:
             array->int64Arr = malloc(sizeof(int64_t) * length);
-            if(array->int64Arr == UA_NULL){
+            if(array->int64Arr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1519,7 +1520,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_UInt64_Id:
             array->uint64Arr = malloc(sizeof(uint64_t) * length);
-            if(array->uint64Arr == UA_NULL){
+            if(array->uint64Arr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1529,7 +1530,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_Float_Id:
             array->floatvArr = malloc(sizeof(float) * length);
-            if(array->floatvArr == UA_NULL){
+            if(array->floatvArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1539,7 +1540,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_Double_Id:
             array->doublevArr = malloc(sizeof(double) * length);
-            if(array->doublevArr == UA_NULL){
+            if(array->doublevArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1549,7 +1550,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_String_Id:
             array->stringArr = malloc(sizeof(UA_String) * length);
-            if(array->stringArr == UA_NULL){
+            if(array->stringArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1559,7 +1560,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_DateTime_Id:
             array->dateArr = malloc(sizeof(UA_DateTime) * length);
-            if(array->dateArr == UA_NULL){
+            if(array->dateArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1569,7 +1570,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_Guid_Id:
             array->guidArr = malloc(sizeof(UA_Guid) * length);
-            if(array->guidArr == UA_NULL){
+            if(array->guidArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1579,7 +1580,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_ByteString_Id:
             array->bstringArr = malloc(sizeof(UA_ByteString) * length);
-            if(array->bstringArr == UA_NULL){
+            if(array->bstringArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1589,7 +1590,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_XmlElement_Id:
             array->xmlEltArr = malloc(sizeof(UA_XmlElement) * length);
-            if(array->xmlEltArr == UA_NULL){
+            if(array->xmlEltArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1599,7 +1600,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_NodeId_Id:
             array->nodeIdArr = malloc(sizeof(UA_NodeId) * length);
-            if(array->nodeIdArr == UA_NULL){
+            if(array->nodeIdArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1609,7 +1610,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_ExpandedNodeId_Id:
             array->expNodeIdArr = malloc(sizeof(UA_ExpandedNodeId) * length);
-            if(array->expNodeIdArr == UA_NULL){
+            if(array->expNodeIdArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1619,7 +1620,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_StatusCode_Id:
             array->statusArr = malloc(sizeof(StatusCode) * length);
-            if(array->statusArr == UA_NULL){
+            if(array->statusArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1629,7 +1630,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_QualifiedName_Id:
             array->qnameArr = malloc(sizeof(UA_QualifiedName) * length);
-            if(array->qnameArr == UA_NULL){
+            if(array->qnameArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1639,7 +1640,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_LocalizedText_Id:
             array->localizedTextArr = malloc(sizeof(UA_LocalizedText) * length);
-            if(array->localizedTextArr == UA_NULL){
+            if(array->localizedTextArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1649,7 +1650,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_ExtensionObject_Id:
             array->extObjectArr = malloc(sizeof(UA_ExtensionObject) * length);
-            if(array->extObjectArr == UA_NULL){
+            if(array->extObjectArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1659,7 +1660,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_DataValue_Id:
             array->dataValueArr = malloc(sizeof(UA_DataValue) * length);
-            if(array->dataValueArr == UA_NULL){
+            if(array->dataValueArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1669,7 +1670,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_Variant_Id:
             array->variantArr = malloc(sizeof(UA_Variant) * length);
-            if(array->variantArr == UA_NULL){
+            if(array->variantArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1679,7 +1680,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             break;
         case UA_DiagnosticInfo_Id:
             array->diagInfoArr = malloc(sizeof(UA_DiagnosticInfo) * length);
-            if(array->diagInfoArr == UA_NULL){
+            if(array->diagInfoArr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
@@ -1697,7 +1698,7 @@ StatusCode Variant_Read(UA_MsgBuffer* msgBuffer, UA_Variant* variant){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     int32_t arrayLength = 0;
-    if(variant != UA_NULL){
+    if(variant != NULL){
         status = Byte_Read(msgBuffer, &encodingByte);
     }
     if(status == STATUS_OK){
@@ -1731,7 +1732,7 @@ StatusCode Variant_Read(UA_MsgBuffer* msgBuffer, UA_Variant* variant){
                 if(status == STATUS_OK){
                     // array
                     variant->value.matrix.arrayDimensions = malloc(sizeof(int32_t) * variant->value.matrix.dimensions);
-                    if(variant->value.matrix.arrayDimensions != UA_NULL){
+                    if(variant->value.matrix.arrayDimensions != NULL){
                         int32_t idx = 0;
                         for(idx = 0; idx < variant->value.matrix.dimensions; idx ++){
                             status = Int32_Read(msgBuffer, &variant->value.matrix.arrayDimensions[idx]);
@@ -1757,7 +1758,7 @@ StatusCode Variant_Read(UA_MsgBuffer* msgBuffer, UA_Variant* variant){
 }
 
 UA_Byte GetDataValueEncodingMask(const UA_DataValue* dataValue){
-    assert(dataValue != UA_NULL);
+    assert(dataValue != NULL);
     UA_Byte mask = 0;
     if(dataValue->value.builtInTypeMask != UA_Null_Id && dataValue->value.builtInTypeMask <= UA_BUILTINID_MAX){
         mask |= DataValue_NotNullValue;
@@ -1784,7 +1785,7 @@ StatusCode DataValue_Write(UA_MsgBuffer* msgBuffer, const UA_DataValue* dataValu
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingMask = 0;
-    if(dataValue != UA_NULL){
+    if(dataValue != NULL){
         encodingMask = GetDataValueEncodingMask(dataValue);
         status = Byte_Write(msgBuffer, &encodingMask);
     }
@@ -1812,7 +1813,7 @@ StatusCode DataValue_Write(UA_MsgBuffer* msgBuffer, const UA_DataValue* dataValu
 StatusCode DataValue_Read(UA_MsgBuffer* msgBuffer, UA_DataValue* dataValue){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingMask = 0;
-    if(dataValue != UA_NULL){
+    if(dataValue != NULL){
         status = Byte_Read(msgBuffer, &encodingMask);
     }
     if(status == STATUS_OK && (encodingMask & DataValue_NotNullValue) != 0){
