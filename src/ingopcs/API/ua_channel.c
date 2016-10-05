@@ -104,16 +104,6 @@ StatusCode UA_Channel_Delete(UA_Channel* channel){
     return status;
 }
 
-//StatusCode ChannelCB (SC_ClientConnection* connection,
-//                      void*                response,
-//                      UA_EncodeableType*   responseType,
-//                      void*                callbackData,
-//                      StatusCode           status)
-//{
-//    UA_Channel channel = (UA_Channel) connection;
-//    Channel_CallbackData cbData = callbackData;
-//}
-
 StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
                                void*                cbData,
                                SC_ConnectionEvent   event,
