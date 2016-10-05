@@ -11,6 +11,7 @@
 
 #include <ua_builtintypes.h>
 #include <ua_secure_channel_client_connection.h>
+#include <ua_stack_config.h>
 
 #include <wrappers.h>
 
@@ -180,9 +181,10 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
         if(cConnection->instance->state != SC_Connection_Disconnected){
             status = STATUS_INVALID_STATE;
         }else{
+            StackConfiguration_Locked();
             status = SC_Client_Configure(cConnection,
                                          g_namespaceTable,
-                                         UA_KnownEncodeableTypes);
+                                         StackConfiguration_GetEncodeableTypes());
             if(status == STATUS_OK){
                 internalCbData = Create_CallbackData(cb, cbData);
                 if(internalCbData == NULL){
@@ -322,6 +324,7 @@ StatusCode UA_Channel_Disconnect(UA_Channel channel){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(channel != NULL){
         status = STATUS_NOK;
+        StackConfiguration_Unlocked();
         //status = SC_Client_Disconnect((SC_ClientConnection*) channel);
     }
     return status;

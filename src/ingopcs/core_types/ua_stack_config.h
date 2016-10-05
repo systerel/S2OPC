@@ -16,14 +16,19 @@ typedef struct {
     // TBD: lengths configurable
     UA_NamespaceTable*  nsTable;
     UA_EncodeableType** encTypesTable;
+    uint32_t            nbEncTypesTable;
 } UA_StackConfiguration;
 
 extern UA_StackConfiguration g_stackConfiguration;
 
 void StackConfiguration_Initialize();
+void StackConfiguration_Locked();
+void StackConfiguration_Unlocked();
 void StackConfiguration_Clear();
 
 StatusCode StackConfiguration_SetNamespaceUris(UA_NamespaceTable* nsTable);
-StatusCode StackConfiguration_AddTypes(UA_EncodeableType** encTypesTable);
+StatusCode StackConfiguration_AddTypes(UA_EncodeableType** encTypesTable,
+                                       uint32_t            nbTypes);
+UA_EncodeableType** StackConfiguration_GetEncodeableTypes();
 
 #endif /* INGOPCS_UA_STACK_CONFIG_H_ */
