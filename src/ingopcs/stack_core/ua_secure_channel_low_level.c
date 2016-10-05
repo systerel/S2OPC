@@ -274,16 +274,16 @@ StatusCode GetAsymmBlocksSizes(UA_String* securityPolicyUri,
         *cipherTextBlockSize = 1;
         *plainTextBlockSize = 1;
     }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
-        // RSA 1.5: RSA spec 7.2.1 (https://www.ietf.org/rfc/rfc2437.txt)
+        // RSA 1.5: RSA spec 7.2.1 (https://tools.ietf.org/html/rfc3447)
         *cipherTextBlockSize = keySize;
         *plainTextBlockSize = keySize - 11;
     }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
-        // RSA OAEP: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
+        // RSA OAEP: RSA spec 7.1.1 (https://tools.ietf.org/html/rfc3447)
         // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
         *cipherTextBlockSize = keySize;
         *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
-       // RSA OAEP: RSA spec 7.1.1 (https://www.ietf.org/rfc/rfc2437.txt)
+       // RSA OAEP: RSA spec 7.1.1 (https://tools.ietf.org/html/rfc3447)
        // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
        *cipherTextBlockSize = keySize;
        *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
@@ -301,13 +301,13 @@ uint32_t GetAsymmSignatureSize(UA_String* securityPolicyUri,
     {
         signatureSize = 0;
     }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
-        // Regarding RSA spec 5.2 (https://www.ietf.org/rfc/rfc2437.txt), signature size = key size
+        // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
         signatureSize = privateKeySize;
     }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
-        // Regarding RSA spec 5.2 (https://www.ietf.org/rfc/rfc2437.txt), signature size = key size
+        // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
         signatureSize = privateKeySize;
     }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
-        // Regarding RSA spec 5.2 (https://www.ietf.org/rfc/rfc2437.txt), signature size = key size
+        // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
         signatureSize = privateKeySize;
     }
     return signatureSize;
