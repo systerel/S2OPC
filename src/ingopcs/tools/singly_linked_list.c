@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 
 typedef struct SLinkedList_Elt{
@@ -24,32 +25,32 @@ typedef struct SLinkedList {
 SLinkedList* SLinkedList_Create(size_t sizeMax){
     SLinkedList* result = malloc(sizeof(SLinkedList));
     memset(result, 0, sizeof(SLinkedList));
-    if(result != 0){
+    if(result != NULL){
         result->maxLength = sizeMax;
     }
     return result;
 }
 
 void* SLinkedList_Add(SLinkedList* list, uint32_t id, void* value){
-    SLinkedList_Elt* elt = 0;
+    SLinkedList_Elt* elt = NULL;
     if(list->length < list->maxLength){
         elt = malloc(sizeof(SLinkedList_Elt));
     }
-    if(elt != 0){
+    if(elt != NULL){
         elt->id = id;
         elt->value = value;
         elt->next = list->first;
         list->first = elt;
         list->length = list->length + 1;
     }else{
-        return 0;
+        return NULL;
     }
     return value;
 }
 
 SLinkedList_Elt* SLinkedList_InternalFind(SLinkedList* list, uint32_t id){
-    SLinkedList_Elt* elt = 0;
-    if(list != 0){
+    SLinkedList_Elt* elt = NULL;
+    if(list != NULL){
         elt = list->first;
         while(elt != 0 && elt->id != id){
             elt = elt->next;
@@ -59,10 +60,10 @@ SLinkedList_Elt* SLinkedList_InternalFind(SLinkedList* list, uint32_t id){
 }
 
 SLinkedList_Elt* SLinkedList_InternalFindPrec(SLinkedList* list, uint32_t id){
-    SLinkedList_Elt* elt = 0;
-    if(list != 0 && list->first != 0){
+    SLinkedList_Elt* elt = NULL;
+    if(list != NULL && list->first != NULL){
         elt = list->first;
-        while(elt->next != 0 && elt->next->id != id){
+        while(elt->next != NULL && elt->next->id != id){
             elt = elt->next;
         }
     }
@@ -72,8 +73,8 @@ SLinkedList_Elt* SLinkedList_InternalFindPrec(SLinkedList* list, uint32_t id){
 // Returns null => Not found, otherwise => elt pointer
 void* SLinkedList_Find(SLinkedList* list, uint32_t id){
     SLinkedList_Elt* elt = SLinkedList_InternalFind(list, id);
-    void* result = 0;
-    if(elt != 0){
+    void* result = NULL;
+    if(elt != NULL){
         result = elt->value;
     }
     return result;
@@ -81,10 +82,10 @@ void* SLinkedList_Find(SLinkedList* list, uint32_t id){
 
 // Returns null => Not found, otherwise => elt pointer
 void* SLinkedList_Remove(SLinkedList* list, uint32_t id){
-    SLinkedList_Elt* elt = 0;
-    SLinkedList_Elt* nextElt = 0;
-    void* result = 0;
-    if(list != 0 && list->first != 0){
+    SLinkedList_Elt* elt = NULL;
+    SLinkedList_Elt* nextElt = NULL;
+    void* result = NULL;
+    if(list != NULL && list->first != NULL){
         // Not NULL nor empty list
         if(list->first->id == id){
             // First element is researched element
@@ -96,10 +97,10 @@ void* SLinkedList_Remove(SLinkedList* list, uint32_t id){
         }else{
             // Search element in rest of list
             elt = list->first;
-            while(elt->next != 0 && elt->next->id != id){
+            while(elt->next != NULL && elt->next->id != id){
                 elt = elt->next;
             }
-            if(elt->next != 0){
+            if(elt->next != NULL){
                 list->length = list->length - 1;
                 result = elt->next->value;
                 nextElt = elt->next->next;
@@ -112,11 +113,11 @@ void* SLinkedList_Remove(SLinkedList* list, uint32_t id){
 }
 
 void SLinkedList_Delete(SLinkedList* list){
-    SLinkedList_Elt* elt = 0;
-    SLinkedList_Elt* nextElt = 0;
-    if(list != 0){
+    SLinkedList_Elt* elt = NULL;
+    SLinkedList_Elt* nextElt = NULL;
+    if(list != NULL){
         elt = list->first;
-        while(elt != 0){
+        while(elt != NULL){
             nextElt = elt->next;
             free(elt);
             elt = nextElt;

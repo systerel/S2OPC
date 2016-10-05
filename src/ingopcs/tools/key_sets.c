@@ -7,6 +7,7 @@
 
 #include <key_sets.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 SC_SecurityKeySet* KeySet_Create(){
     SC_SecurityKeySet* keySet = malloc(sizeof(SC_SecurityKeySet));
@@ -14,7 +15,7 @@ SC_SecurityKeySet* KeySet_Create(){
 }
 
 void KeySet_Delete(SC_SecurityKeySet* keySet){
-    if(keySet != 0){
+    if(keySet != NULL){
         SecretBuffer_DeleteClear(keySet->encryptKey);
         SecretBuffer_DeleteClear(keySet->initVector);
         SecretBuffer_DeleteClear(keySet->signKey);

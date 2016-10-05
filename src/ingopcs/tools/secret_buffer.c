@@ -8,6 +8,7 @@
 
 #include "secret_buffer.h"
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 
 /* Creates a new SecretBuffer from an exposed buffer and a length. Copies the buffer, so ExposedBuffer
@@ -16,21 +17,21 @@
  */
 SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len)
 {
-    SecretBuffer *sec = 0;
+    SecretBuffer *sec = NULL;
 
-    if(0 != buf && 0 != len)
+    if(NULL != buf && NULL != len)
     {
         sec = malloc(sizeof(SecretBuffer));
-        if(0 != sec)
+        if(NULL != sec)
         {
             sec->len = len;
             sec->buf = malloc(len);
-            if(0 != sec->buf)
+            if(NULL != sec->buf)
                 memcpy(sec->buf, buf, len);
             else
             {
                 free(sec->buf);
-                sec = 0;
+                sec = NULL;
             }
         }
     }
@@ -39,7 +40,7 @@ SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len
 }
 void SecretBuffer_DeleteClear(SecretBuffer *sec)
 {
-    if(0 != sec)
+    if(NULL != sec)
     {
         if(sec->buf)
         {
@@ -52,7 +53,7 @@ void SecretBuffer_DeleteClear(SecretBuffer *sec)
 
 uint32_t SecretBuffer_GetLength(const SecretBuffer *sec)
 {
-    if(0 == sec)
+    if(NULL == sec)
         return 0;
     return sec->len;
 }
@@ -63,9 +64,9 @@ uint32_t SecretBuffer_GetLength(const SecretBuffer *sec)
  */
 ExposedBuffer *SecretBuffer_Expose(const SecretBuffer *sec)
 {
-    if(0 != sec)
+    if(NULL != sec)
         return sec->buf;
-    return 0;
+    return NULL;
 }
 
 void SecretBuffer_Unexpose(ExposedBuffer *buf)
