@@ -19,7 +19,7 @@ SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len
 {
     SecretBuffer *sec = NULL;
 
-    if(NULL != buf && NULL != len)
+    if(NULL != buf && 0 != len)
     {
         sec = malloc(sizeof(SecretBuffer));
         if(NULL != sec)
