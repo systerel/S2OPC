@@ -83,7 +83,7 @@ void UA_Node_Clear(UA_Node* a_pValue)
 /*============================================================================
  * UA_Node_Encode
  *===========================================================================*/
-StatusCode UA_Node_Encode(UA_MsgBuffer* msgBuf, UA_Node* a_pValue)
+StatusCode UA_Node_Encode(UA_Node* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -91,15 +91,19 @@ StatusCode UA_Node_Encode(UA_MsgBuffer* msgBuf, UA_Node* a_pValue)
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -107,7 +111,7 @@ StatusCode UA_Node_Encode(UA_MsgBuffer* msgBuf, UA_Node* a_pValue)
 /*============================================================================
  * UA_Node_Decode
  *===========================================================================*/
-StatusCode UA_Node_Decode(UA_MsgBuffer* msgBuf, UA_Node* a_pValue)
+StatusCode UA_Node_Decode(UA_Node* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -117,14 +121,14 @@ StatusCode UA_Node_Decode(UA_MsgBuffer* msgBuf, UA_Node* a_pValue)
 
     UA_Node_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
 
     if(status != STATUS_OK){
@@ -196,7 +200,7 @@ void UA_InstanceNode_Clear(UA_InstanceNode* a_pValue)
 /*============================================================================
  * UA_InstanceNode_Encode
  *===========================================================================*/
-StatusCode UA_InstanceNode_Encode(UA_MsgBuffer* msgBuf, UA_InstanceNode* a_pValue)
+StatusCode UA_InstanceNode_Encode(UA_InstanceNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -204,15 +208,19 @@ StatusCode UA_InstanceNode_Encode(UA_MsgBuffer* msgBuf, UA_InstanceNode* a_pValu
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -220,7 +228,7 @@ StatusCode UA_InstanceNode_Encode(UA_MsgBuffer* msgBuf, UA_InstanceNode* a_pValu
 /*============================================================================
  * UA_InstanceNode_Decode
  *===========================================================================*/
-StatusCode UA_InstanceNode_Decode(UA_MsgBuffer* msgBuf, UA_InstanceNode* a_pValue)
+StatusCode UA_InstanceNode_Decode(UA_InstanceNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -230,14 +238,14 @@ StatusCode UA_InstanceNode_Decode(UA_MsgBuffer* msgBuf, UA_InstanceNode* a_pValu
 
     UA_InstanceNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
 
     if(status != STATUS_OK){
@@ -309,7 +317,7 @@ void UA_TypeNode_Clear(UA_TypeNode* a_pValue)
 /*============================================================================
  * UA_TypeNode_Encode
  *===========================================================================*/
-StatusCode UA_TypeNode_Encode(UA_MsgBuffer* msgBuf, UA_TypeNode* a_pValue)
+StatusCode UA_TypeNode_Encode(UA_TypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -317,15 +325,19 @@ StatusCode UA_TypeNode_Encode(UA_MsgBuffer* msgBuf, UA_TypeNode* a_pValue)
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -333,7 +345,7 @@ StatusCode UA_TypeNode_Encode(UA_MsgBuffer* msgBuf, UA_TypeNode* a_pValue)
 /*============================================================================
  * UA_TypeNode_Decode
  *===========================================================================*/
-StatusCode UA_TypeNode_Decode(UA_MsgBuffer* msgBuf, UA_TypeNode* a_pValue)
+StatusCode UA_TypeNode_Decode(UA_TypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -343,14 +355,14 @@ StatusCode UA_TypeNode_Decode(UA_MsgBuffer* msgBuf, UA_TypeNode* a_pValue)
 
     UA_TypeNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
 
     if(status != STATUS_OK){
@@ -424,7 +436,7 @@ void UA_ObjectNode_Clear(UA_ObjectNode* a_pValue)
 /*============================================================================
  * UA_ObjectNode_Encode
  *===========================================================================*/
-StatusCode UA_ObjectNode_Encode(UA_MsgBuffer* msgBuf, UA_ObjectNode* a_pValue)
+StatusCode UA_ObjectNode_Encode(UA_ObjectNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -432,16 +444,20 @@ StatusCode UA_ObjectNode_Encode(UA_MsgBuffer* msgBuf, UA_ObjectNode* a_pValue)
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
-    Byte_Write(msgBuf, &a_pValue->EventNotifier);
+    status &= Byte_Write(&a_pValue->EventNotifier, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -449,7 +465,7 @@ StatusCode UA_ObjectNode_Encode(UA_MsgBuffer* msgBuf, UA_ObjectNode* a_pValue)
 /*============================================================================
  * UA_ObjectNode_Decode
  *===========================================================================*/
-StatusCode UA_ObjectNode_Decode(UA_MsgBuffer* msgBuf, UA_ObjectNode* a_pValue)
+StatusCode UA_ObjectNode_Decode(UA_ObjectNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -459,16 +475,16 @@ StatusCode UA_ObjectNode_Decode(UA_MsgBuffer* msgBuf, UA_ObjectNode* a_pValue)
 
     UA_ObjectNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
-    Byte_Read(msgBuf, &a_pValue->EventNotifier);
+    status &= Byte_Read(&a_pValue->EventNotifier, msgBuf);
 
     if(status != STATUS_OK){
         UA_ObjectNode_Clear(a_pValue);
@@ -541,7 +557,7 @@ void UA_ObjectTypeNode_Clear(UA_ObjectTypeNode* a_pValue)
 /*============================================================================
  * UA_ObjectTypeNode_Encode
  *===========================================================================*/
-StatusCode UA_ObjectTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_ObjectTypeNode* a_pValue)
+StatusCode UA_ObjectTypeNode_Encode(UA_ObjectTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -549,16 +565,20 @@ StatusCode UA_ObjectTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_ObjectTypeNode* a_p
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
-    Boolean_Write(msgBuf, &a_pValue->IsAbstract);
+    status &= Boolean_Write(&a_pValue->IsAbstract, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -566,7 +586,7 @@ StatusCode UA_ObjectTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_ObjectTypeNode* a_p
 /*============================================================================
  * UA_ObjectTypeNode_Decode
  *===========================================================================*/
-StatusCode UA_ObjectTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_ObjectTypeNode* a_pValue)
+StatusCode UA_ObjectTypeNode_Decode(UA_ObjectTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -576,16 +596,16 @@ StatusCode UA_ObjectTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_ObjectTypeNode* a_p
 
     UA_ObjectTypeNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
-    Boolean_Read(msgBuf, &a_pValue->IsAbstract);
+    status &= Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
     if(status != STATUS_OK){
         UA_ObjectTypeNode_Clear(a_pValue);
@@ -674,7 +694,7 @@ void UA_VariableNode_Clear(UA_VariableNode* a_pValue)
 /*============================================================================
  * UA_VariableNode_Encode
  *===========================================================================*/
-StatusCode UA_VariableNode_Encode(UA_MsgBuffer* msgBuf, UA_VariableNode* a_pValue)
+StatusCode UA_VariableNode_Encode(UA_VariableNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -682,24 +702,28 @@ StatusCode UA_VariableNode_Encode(UA_MsgBuffer* msgBuf, UA_VariableNode* a_pValu
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
-    Variant_Write(msgBuf, &a_pValue->Value);
-    NodeId_Write(msgBuf, &a_pValue->DataType);
-    Int32_Write(msgBuf, &a_pValue->ValueRank);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= Variant_Write(&a_pValue->Value, msgBuf);
+    status &= NodeId_Write(&a_pValue->DataType, msgBuf);
+    status &= Int32_Write(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
-    Byte_Write(msgBuf, &a_pValue->AccessLevel);
-    Byte_Write(msgBuf, &a_pValue->UserAccessLevel);
-    Double_Write(msgBuf, &a_pValue->MinimumSamplingInterval);
-    Boolean_Write(msgBuf, &a_pValue->Historizing);
+    status &= Byte_Write(&a_pValue->AccessLevel, msgBuf);
+    status &= Byte_Write(&a_pValue->UserAccessLevel, msgBuf);
+    status &= Double_Write(&a_pValue->MinimumSamplingInterval, msgBuf);
+    status &= Boolean_Write(&a_pValue->Historizing, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -707,7 +731,7 @@ StatusCode UA_VariableNode_Encode(UA_MsgBuffer* msgBuf, UA_VariableNode* a_pValu
 /*============================================================================
  * UA_VariableNode_Decode
  *===========================================================================*/
-StatusCode UA_VariableNode_Decode(UA_MsgBuffer* msgBuf, UA_VariableNode* a_pValue)
+StatusCode UA_VariableNode_Decode(UA_VariableNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -717,24 +741,24 @@ StatusCode UA_VariableNode_Decode(UA_MsgBuffer* msgBuf, UA_VariableNode* a_pValu
 
     UA_VariableNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
-    Variant_Read(msgBuf, &a_pValue->Value);
-    NodeId_Read(msgBuf, &a_pValue->DataType);
-    Int32_Read(msgBuf, &a_pValue->ValueRank);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= Variant_Read(&a_pValue->Value, msgBuf);
+    status &= NodeId_Read(&a_pValue->DataType, msgBuf);
+    status &= Int32_Read(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
-    Byte_Read(msgBuf, &a_pValue->AccessLevel);
-    Byte_Read(msgBuf, &a_pValue->UserAccessLevel);
-    Double_Read(msgBuf, &a_pValue->MinimumSamplingInterval);
-    Boolean_Read(msgBuf, &a_pValue->Historizing);
+    status &= Byte_Read(&a_pValue->AccessLevel, msgBuf);
+    status &= Byte_Read(&a_pValue->UserAccessLevel, msgBuf);
+    status &= Double_Read(&a_pValue->MinimumSamplingInterval, msgBuf);
+    status &= Boolean_Read(&a_pValue->Historizing, msgBuf);
 
     if(status != STATUS_OK){
         UA_VariableNode_Clear(a_pValue);
@@ -817,7 +841,7 @@ void UA_VariableTypeNode_Clear(UA_VariableTypeNode* a_pValue)
 /*============================================================================
  * UA_VariableTypeNode_Encode
  *===========================================================================*/
-StatusCode UA_VariableTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_VariableTypeNode* a_pValue)
+StatusCode UA_VariableTypeNode_Encode(UA_VariableTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -825,21 +849,25 @@ StatusCode UA_VariableTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_VariableTypeNode*
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
-    Variant_Write(msgBuf, &a_pValue->Value);
-    NodeId_Write(msgBuf, &a_pValue->DataType);
-    Int32_Write(msgBuf, &a_pValue->ValueRank);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= Variant_Write(&a_pValue->Value, msgBuf);
+    status &= NodeId_Write(&a_pValue->DataType, msgBuf);
+    status &= Int32_Write(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
-    Boolean_Write(msgBuf, &a_pValue->IsAbstract);
+    status &= Boolean_Write(&a_pValue->IsAbstract, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -847,7 +875,7 @@ StatusCode UA_VariableTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_VariableTypeNode*
 /*============================================================================
  * UA_VariableTypeNode_Decode
  *===========================================================================*/
-StatusCode UA_VariableTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_VariableTypeNode* a_pValue)
+StatusCode UA_VariableTypeNode_Decode(UA_VariableTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -857,21 +885,21 @@ StatusCode UA_VariableTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_VariableTypeNode*
 
     UA_VariableTypeNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
-    Variant_Read(msgBuf, &a_pValue->Value);
-    NodeId_Read(msgBuf, &a_pValue->DataType);
-    Int32_Read(msgBuf, &a_pValue->ValueRank);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= Variant_Read(&a_pValue->Value, msgBuf);
+    status &= NodeId_Read(&a_pValue->DataType, msgBuf);
+    status &= Int32_Read(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
-    Boolean_Read(msgBuf, &a_pValue->IsAbstract);
+    status &= Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
     if(status != STATUS_OK){
         UA_VariableTypeNode_Clear(a_pValue);
@@ -948,7 +976,7 @@ void UA_ReferenceTypeNode_Clear(UA_ReferenceTypeNode* a_pValue)
 /*============================================================================
  * UA_ReferenceTypeNode_Encode
  *===========================================================================*/
-StatusCode UA_ReferenceTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceTypeNode* a_pValue)
+StatusCode UA_ReferenceTypeNode_Encode(UA_ReferenceTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -956,18 +984,22 @@ StatusCode UA_ReferenceTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceTypeNod
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
-    Boolean_Write(msgBuf, &a_pValue->IsAbstract);
-    Boolean_Write(msgBuf, &a_pValue->Symmetric);
-    LocalizedText_Write(msgBuf, &a_pValue->InverseName);
+    status &= Boolean_Write(&a_pValue->IsAbstract, msgBuf);
+    status &= Boolean_Write(&a_pValue->Symmetric, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->InverseName, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -975,7 +1007,7 @@ StatusCode UA_ReferenceTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceTypeNod
 /*============================================================================
  * UA_ReferenceTypeNode_Decode
  *===========================================================================*/
-StatusCode UA_ReferenceTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceTypeNode* a_pValue)
+StatusCode UA_ReferenceTypeNode_Decode(UA_ReferenceTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -985,18 +1017,18 @@ StatusCode UA_ReferenceTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceTypeNod
 
     UA_ReferenceTypeNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
-    Boolean_Read(msgBuf, &a_pValue->IsAbstract);
-    Boolean_Read(msgBuf, &a_pValue->Symmetric);
-    LocalizedText_Read(msgBuf, &a_pValue->InverseName);
+    status &= Boolean_Read(&a_pValue->IsAbstract, msgBuf);
+    status &= Boolean_Read(&a_pValue->Symmetric, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->InverseName, msgBuf);
 
     if(status != STATUS_OK){
         UA_ReferenceTypeNode_Clear(a_pValue);
@@ -1071,7 +1103,7 @@ void UA_MethodNode_Clear(UA_MethodNode* a_pValue)
 /*============================================================================
  * UA_MethodNode_Encode
  *===========================================================================*/
-StatusCode UA_MethodNode_Encode(UA_MsgBuffer* msgBuf, UA_MethodNode* a_pValue)
+StatusCode UA_MethodNode_Encode(UA_MethodNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1079,17 +1111,21 @@ StatusCode UA_MethodNode_Encode(UA_MsgBuffer* msgBuf, UA_MethodNode* a_pValue)
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
-    Boolean_Write(msgBuf, &a_pValue->Executable);
-    Boolean_Write(msgBuf, &a_pValue->UserExecutable);
+    status &= Boolean_Write(&a_pValue->Executable, msgBuf);
+    status &= Boolean_Write(&a_pValue->UserExecutable, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1097,7 +1133,7 @@ StatusCode UA_MethodNode_Encode(UA_MsgBuffer* msgBuf, UA_MethodNode* a_pValue)
 /*============================================================================
  * UA_MethodNode_Decode
  *===========================================================================*/
-StatusCode UA_MethodNode_Decode(UA_MsgBuffer* msgBuf, UA_MethodNode* a_pValue)
+StatusCode UA_MethodNode_Decode(UA_MethodNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1107,17 +1143,17 @@ StatusCode UA_MethodNode_Decode(UA_MsgBuffer* msgBuf, UA_MethodNode* a_pValue)
 
     UA_MethodNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
-    Boolean_Read(msgBuf, &a_pValue->Executable);
-    Boolean_Read(msgBuf, &a_pValue->UserExecutable);
+    status &= Boolean_Read(&a_pValue->Executable, msgBuf);
+    status &= Boolean_Read(&a_pValue->UserExecutable, msgBuf);
 
     if(status != STATUS_OK){
         UA_MethodNode_Clear(a_pValue);
@@ -1192,7 +1228,7 @@ void UA_ViewNode_Clear(UA_ViewNode* a_pValue)
 /*============================================================================
  * UA_ViewNode_Encode
  *===========================================================================*/
-StatusCode UA_ViewNode_Encode(UA_MsgBuffer* msgBuf, UA_ViewNode* a_pValue)
+StatusCode UA_ViewNode_Encode(UA_ViewNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1200,17 +1236,21 @@ StatusCode UA_ViewNode_Encode(UA_MsgBuffer* msgBuf, UA_ViewNode* a_pValue)
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
-    Boolean_Write(msgBuf, &a_pValue->ContainsNoLoops);
-    Byte_Write(msgBuf, &a_pValue->EventNotifier);
+    status &= Boolean_Write(&a_pValue->ContainsNoLoops, msgBuf);
+    status &= Byte_Write(&a_pValue->EventNotifier, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1218,7 +1258,7 @@ StatusCode UA_ViewNode_Encode(UA_MsgBuffer* msgBuf, UA_ViewNode* a_pValue)
 /*============================================================================
  * UA_ViewNode_Decode
  *===========================================================================*/
-StatusCode UA_ViewNode_Decode(UA_MsgBuffer* msgBuf, UA_ViewNode* a_pValue)
+StatusCode UA_ViewNode_Decode(UA_ViewNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1228,17 +1268,17 @@ StatusCode UA_ViewNode_Decode(UA_MsgBuffer* msgBuf, UA_ViewNode* a_pValue)
 
     UA_ViewNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
-    Boolean_Read(msgBuf, &a_pValue->ContainsNoLoops);
-    Byte_Read(msgBuf, &a_pValue->EventNotifier);
+    status &= Boolean_Read(&a_pValue->ContainsNoLoops, msgBuf);
+    status &= Byte_Read(&a_pValue->EventNotifier, msgBuf);
 
     if(status != STATUS_OK){
         UA_ViewNode_Clear(a_pValue);
@@ -1311,7 +1351,7 @@ void UA_DataTypeNode_Clear(UA_DataTypeNode* a_pValue)
 /*============================================================================
  * UA_DataTypeNode_Encode
  *===========================================================================*/
-StatusCode UA_DataTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_DataTypeNode* a_pValue)
+StatusCode UA_DataTypeNode_Encode(UA_DataTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1319,16 +1359,20 @@ StatusCode UA_DataTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_DataTypeNode* a_pValu
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnEncode*) UA_ReferenceNode_Encode);
-    Boolean_Write(msgBuf, &a_pValue->IsAbstract);
+    status &= Boolean_Write(&a_pValue->IsAbstract, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1336,7 +1380,7 @@ StatusCode UA_DataTypeNode_Encode(UA_MsgBuffer* msgBuf, UA_DataTypeNode* a_pValu
 /*============================================================================
  * UA_DataTypeNode_Decode
  *===========================================================================*/
-StatusCode UA_DataTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_DataTypeNode* a_pValue)
+StatusCode UA_DataTypeNode_Decode(UA_DataTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1346,16 +1390,16 @@ StatusCode UA_DataTypeNode_Decode(UA_MsgBuffer* msgBuf, UA_DataTypeNode* a_pValu
 
     UA_DataTypeNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceNode), (UA_EncodeableObject_PfnDecode*) UA_ReferenceNode_Decode);
-    Boolean_Read(msgBuf, &a_pValue->IsAbstract);
+    status &= Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
     if(status != STATUS_OK){
         UA_DataTypeNode_Clear(a_pValue);
@@ -1414,7 +1458,7 @@ void UA_ReferenceNode_Clear(UA_ReferenceNode* a_pValue)
 /*============================================================================
  * UA_ReferenceNode_Encode
  *===========================================================================*/
-StatusCode UA_ReferenceNode_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceNode* a_pValue)
+StatusCode UA_ReferenceNode_Encode(UA_ReferenceNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1422,9 +1466,13 @@ StatusCode UA_ReferenceNode_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceNode* a_pVa
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Write(msgBuf, &a_pValue->IsInverse);
-    ExpandedNodeId_Write(msgBuf, &a_pValue->TargetId);
+    status &= NodeId_Write(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsInverse, msgBuf);
+    status &= ExpandedNodeId_Write(&a_pValue->TargetId, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1432,7 +1480,7 @@ StatusCode UA_ReferenceNode_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceNode* a_pVa
 /*============================================================================
  * UA_ReferenceNode_Decode
  *===========================================================================*/
-StatusCode UA_ReferenceNode_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceNode* a_pValue)
+StatusCode UA_ReferenceNode_Decode(UA_ReferenceNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1442,9 +1490,9 @@ StatusCode UA_ReferenceNode_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceNode* a_pVa
 
     UA_ReferenceNode_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Read(msgBuf, &a_pValue->IsInverse);
-    ExpandedNodeId_Read(msgBuf, &a_pValue->TargetId);
+    status &= NodeId_Read(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsInverse, msgBuf);
+    status &= ExpandedNodeId_Read(&a_pValue->TargetId, msgBuf);
 
     if(status != STATUS_OK){
         UA_ReferenceNode_Clear(a_pValue);
@@ -1509,7 +1557,7 @@ void UA_Argument_Clear(UA_Argument* a_pValue)
 /*============================================================================
  * UA_Argument_Encode
  *===========================================================================*/
-StatusCode UA_Argument_Encode(UA_MsgBuffer* msgBuf, UA_Argument* a_pValue)
+StatusCode UA_Argument_Encode(UA_Argument* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1517,12 +1565,16 @@ StatusCode UA_Argument_Encode(UA_MsgBuffer* msgBuf, UA_Argument* a_pValue)
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->Name);
-    NodeId_Write(msgBuf, &a_pValue->DataType);
-    Int32_Write(msgBuf, &a_pValue->ValueRank);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= String_Write(&a_pValue->Name, msgBuf);
+    status &= NodeId_Write(&a_pValue->DataType, msgBuf);
+    status &= Int32_Write(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1530,7 +1582,7 @@ StatusCode UA_Argument_Encode(UA_MsgBuffer* msgBuf, UA_Argument* a_pValue)
 /*============================================================================
  * UA_Argument_Decode
  *===========================================================================*/
-StatusCode UA_Argument_Decode(UA_MsgBuffer* msgBuf, UA_Argument* a_pValue)
+StatusCode UA_Argument_Decode(UA_Argument* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1540,12 +1592,12 @@ StatusCode UA_Argument_Decode(UA_MsgBuffer* msgBuf, UA_Argument* a_pValue)
 
     UA_Argument_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->Name);
-    NodeId_Read(msgBuf, &a_pValue->DataType);
-    Int32_Read(msgBuf, &a_pValue->ValueRank);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= String_Read(&a_pValue->Name, msgBuf);
+    status &= NodeId_Read(&a_pValue->DataType, msgBuf);
+    status &= Int32_Read(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
 
     if(status != STATUS_OK){
         UA_Argument_Clear(a_pValue);
@@ -1604,7 +1656,7 @@ void UA_EnumValueType_Clear(UA_EnumValueType* a_pValue)
 /*============================================================================
  * UA_EnumValueType_Encode
  *===========================================================================*/
-StatusCode UA_EnumValueType_Encode(UA_MsgBuffer* msgBuf, UA_EnumValueType* a_pValue)
+StatusCode UA_EnumValueType_Encode(UA_EnumValueType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1612,9 +1664,13 @@ StatusCode UA_EnumValueType_Encode(UA_MsgBuffer* msgBuf, UA_EnumValueType* a_pVa
         status = STATUS_OK;
     }
 
-    Int64_Write(msgBuf, &a_pValue->Value);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
+    status &= Int64_Write(&a_pValue->Value, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1622,7 +1678,7 @@ StatusCode UA_EnumValueType_Encode(UA_MsgBuffer* msgBuf, UA_EnumValueType* a_pVa
 /*============================================================================
  * UA_EnumValueType_Decode
  *===========================================================================*/
-StatusCode UA_EnumValueType_Decode(UA_MsgBuffer* msgBuf, UA_EnumValueType* a_pValue)
+StatusCode UA_EnumValueType_Decode(UA_EnumValueType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1632,9 +1688,9 @@ StatusCode UA_EnumValueType_Decode(UA_MsgBuffer* msgBuf, UA_EnumValueType* a_pVa
 
     UA_EnumValueType_Initialize(a_pValue);
 
-    Int64_Read(msgBuf, &a_pValue->Value);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
+    status &= Int64_Read(&a_pValue->Value, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
 
     if(status != STATUS_OK){
         UA_EnumValueType_Clear(a_pValue);
@@ -1695,7 +1751,7 @@ void UA_EnumField_Clear(UA_EnumField* a_pValue)
 /*============================================================================
  * UA_EnumField_Encode
  *===========================================================================*/
-StatusCode UA_EnumField_Encode(UA_MsgBuffer* msgBuf, UA_EnumField* a_pValue)
+StatusCode UA_EnumField_Encode(UA_EnumField* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1703,10 +1759,14 @@ StatusCode UA_EnumField_Encode(UA_MsgBuffer* msgBuf, UA_EnumField* a_pValue)
         status = STATUS_OK;
     }
 
-    Int64_Write(msgBuf, &a_pValue->Value);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    String_Write(msgBuf, &a_pValue->Name);
+    status &= Int64_Write(&a_pValue->Value, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= String_Write(&a_pValue->Name, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1714,7 +1774,7 @@ StatusCode UA_EnumField_Encode(UA_MsgBuffer* msgBuf, UA_EnumField* a_pValue)
 /*============================================================================
  * UA_EnumField_Decode
  *===========================================================================*/
-StatusCode UA_EnumField_Decode(UA_MsgBuffer* msgBuf, UA_EnumField* a_pValue)
+StatusCode UA_EnumField_Decode(UA_EnumField* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1724,10 +1784,10 @@ StatusCode UA_EnumField_Decode(UA_MsgBuffer* msgBuf, UA_EnumField* a_pValue)
 
     UA_EnumField_Initialize(a_pValue);
 
-    Int64_Read(msgBuf, &a_pValue->Value);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    String_Read(msgBuf, &a_pValue->Name);
+    status &= Int64_Read(&a_pValue->Value, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= String_Read(&a_pValue->Name, msgBuf);
 
     if(status != STATUS_OK){
         UA_EnumField_Clear(a_pValue);
@@ -1784,7 +1844,7 @@ void UA_OptionSet_Clear(UA_OptionSet* a_pValue)
 /*============================================================================
  * UA_OptionSet_Encode
  *===========================================================================*/
-StatusCode UA_OptionSet_Encode(UA_MsgBuffer* msgBuf, UA_OptionSet* a_pValue)
+StatusCode UA_OptionSet_Encode(UA_OptionSet* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1792,8 +1852,12 @@ StatusCode UA_OptionSet_Encode(UA_MsgBuffer* msgBuf, UA_OptionSet* a_pValue)
         status = STATUS_OK;
     }
 
-    ByteString_Write(msgBuf, &a_pValue->Value);
-    ByteString_Write(msgBuf, &a_pValue->ValidBits);
+    status &= ByteString_Write(&a_pValue->Value, msgBuf);
+    status &= ByteString_Write(&a_pValue->ValidBits, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1801,7 +1865,7 @@ StatusCode UA_OptionSet_Encode(UA_MsgBuffer* msgBuf, UA_OptionSet* a_pValue)
 /*============================================================================
  * UA_OptionSet_Decode
  *===========================================================================*/
-StatusCode UA_OptionSet_Decode(UA_MsgBuffer* msgBuf, UA_OptionSet* a_pValue)
+StatusCode UA_OptionSet_Decode(UA_OptionSet* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1811,8 +1875,8 @@ StatusCode UA_OptionSet_Decode(UA_MsgBuffer* msgBuf, UA_OptionSet* a_pValue)
 
     UA_OptionSet_Initialize(a_pValue);
 
-    ByteString_Read(msgBuf, &a_pValue->Value);
-    ByteString_Read(msgBuf, &a_pValue->ValidBits);
+    status &= ByteString_Read(&a_pValue->Value, msgBuf);
+    status &= ByteString_Read(&a_pValue->ValidBits, msgBuf);
 
     if(status != STATUS_OK){
         UA_OptionSet_Clear(a_pValue);
@@ -1869,7 +1933,7 @@ void UA_TimeZoneDataType_Clear(UA_TimeZoneDataType* a_pValue)
 /*============================================================================
  * UA_TimeZoneDataType_Encode
  *===========================================================================*/
-StatusCode UA_TimeZoneDataType_Encode(UA_MsgBuffer* msgBuf, UA_TimeZoneDataType* a_pValue)
+StatusCode UA_TimeZoneDataType_Encode(UA_TimeZoneDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1877,8 +1941,12 @@ StatusCode UA_TimeZoneDataType_Encode(UA_MsgBuffer* msgBuf, UA_TimeZoneDataType*
         status = STATUS_OK;
     }
 
-    Int16_Write(msgBuf, &a_pValue->Offset);
-    Boolean_Write(msgBuf, &a_pValue->DaylightSavingInOffset);
+    status &= Int16_Write(&a_pValue->Offset, msgBuf);
+    status &= Boolean_Write(&a_pValue->DaylightSavingInOffset, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1886,7 +1954,7 @@ StatusCode UA_TimeZoneDataType_Encode(UA_MsgBuffer* msgBuf, UA_TimeZoneDataType*
 /*============================================================================
  * UA_TimeZoneDataType_Decode
  *===========================================================================*/
-StatusCode UA_TimeZoneDataType_Decode(UA_MsgBuffer* msgBuf, UA_TimeZoneDataType* a_pValue)
+StatusCode UA_TimeZoneDataType_Decode(UA_TimeZoneDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1896,8 +1964,8 @@ StatusCode UA_TimeZoneDataType_Decode(UA_MsgBuffer* msgBuf, UA_TimeZoneDataType*
 
     UA_TimeZoneDataType_Initialize(a_pValue);
 
-    Int16_Read(msgBuf, &a_pValue->Offset);
-    Boolean_Read(msgBuf, &a_pValue->DaylightSavingInOffset);
+    status &= Int16_Read(&a_pValue->Offset, msgBuf);
+    status &= Boolean_Read(&a_pValue->DaylightSavingInOffset, msgBuf);
 
     if(status != STATUS_OK){
         UA_TimeZoneDataType_Clear(a_pValue);
@@ -1967,7 +2035,7 @@ void UA_ApplicationDescription_Clear(UA_ApplicationDescription* a_pValue)
 /*============================================================================
  * UA_ApplicationDescription_Encode
  *===========================================================================*/
-StatusCode UA_ApplicationDescription_Encode(UA_MsgBuffer* msgBuf, UA_ApplicationDescription* a_pValue)
+StatusCode UA_ApplicationDescription_Encode(UA_ApplicationDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -1975,14 +2043,18 @@ StatusCode UA_ApplicationDescription_Encode(UA_MsgBuffer* msgBuf, UA_Application
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->ApplicationUri);
-    String_Write(msgBuf, &a_pValue->ProductUri);
-    LocalizedText_Write(msgBuf, &a_pValue->ApplicationName);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ApplicationType);
-    String_Write(msgBuf, &a_pValue->GatewayServerUri);
-    String_Write(msgBuf, &a_pValue->DiscoveryProfileUri);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiscoveryUrls, (void**) &a_pValue->DiscoveryUrls, 
+    status &= String_Write(&a_pValue->ApplicationUri, msgBuf);
+    status &= String_Write(&a_pValue->ProductUri, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->ApplicationName, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ApplicationType);
+    status &= String_Write(&a_pValue->GatewayServerUri, msgBuf);
+    status &= String_Write(&a_pValue->DiscoveryProfileUri, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiscoveryUrls, (void**) &a_pValue->DiscoveryUrls, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -1990,7 +2062,7 @@ StatusCode UA_ApplicationDescription_Encode(UA_MsgBuffer* msgBuf, UA_Application
 /*============================================================================
  * UA_ApplicationDescription_Decode
  *===========================================================================*/
-StatusCode UA_ApplicationDescription_Decode(UA_MsgBuffer* msgBuf, UA_ApplicationDescription* a_pValue)
+StatusCode UA_ApplicationDescription_Decode(UA_ApplicationDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2000,13 +2072,13 @@ StatusCode UA_ApplicationDescription_Decode(UA_MsgBuffer* msgBuf, UA_Application
 
     UA_ApplicationDescription_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->ApplicationUri);
-    String_Read(msgBuf, &a_pValue->ProductUri);
-    LocalizedText_Read(msgBuf, &a_pValue->ApplicationName);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ApplicationType);
-    String_Read(msgBuf, &a_pValue->GatewayServerUri);
-    String_Read(msgBuf, &a_pValue->DiscoveryProfileUri);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiscoveryUrls, (void**) &a_pValue->DiscoveryUrls, 
+    status &= String_Read(&a_pValue->ApplicationUri, msgBuf);
+    status &= String_Read(&a_pValue->ProductUri, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->ApplicationName, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ApplicationType);
+    status &= String_Read(&a_pValue->GatewayServerUri, msgBuf);
+    status &= String_Read(&a_pValue->DiscoveryProfileUri, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiscoveryUrls, (void**) &a_pValue->DiscoveryUrls, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
 
     if(status != STATUS_OK){
@@ -2074,7 +2146,7 @@ void UA_RequestHeader_Clear(UA_RequestHeader* a_pValue)
 /*============================================================================
  * UA_RequestHeader_Encode
  *===========================================================================*/
-StatusCode UA_RequestHeader_Encode(UA_MsgBuffer* msgBuf, UA_RequestHeader* a_pValue)
+StatusCode UA_RequestHeader_Encode(UA_RequestHeader* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2082,13 +2154,17 @@ StatusCode UA_RequestHeader_Encode(UA_MsgBuffer* msgBuf, UA_RequestHeader* a_pVa
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->AuthenticationToken);
-    DateTime_Write(msgBuf, &a_pValue->Timestamp);
-    UInt32_Write(msgBuf, &a_pValue->RequestHandle);
-    UInt32_Write(msgBuf, &a_pValue->ReturnDiagnostics);
-    String_Write(msgBuf, &a_pValue->AuditEntryId);
-    UInt32_Write(msgBuf, &a_pValue->TimeoutHint);
-    ExtensionObject_Write(msgBuf, &a_pValue->AdditionalHeader);
+    status &= NodeId_Write(&a_pValue->AuthenticationToken, msgBuf);
+    status &= DateTime_Write(&a_pValue->Timestamp, msgBuf);
+    status &= UInt32_Write(&a_pValue->RequestHandle, msgBuf);
+    status &= UInt32_Write(&a_pValue->ReturnDiagnostics, msgBuf);
+    status &= String_Write(&a_pValue->AuditEntryId, msgBuf);
+    status &= UInt32_Write(&a_pValue->TimeoutHint, msgBuf);
+    status &= ExtensionObject_Write(&a_pValue->AdditionalHeader, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2096,7 +2172,7 @@ StatusCode UA_RequestHeader_Encode(UA_MsgBuffer* msgBuf, UA_RequestHeader* a_pVa
 /*============================================================================
  * UA_RequestHeader_Decode
  *===========================================================================*/
-StatusCode UA_RequestHeader_Decode(UA_MsgBuffer* msgBuf, UA_RequestHeader* a_pValue)
+StatusCode UA_RequestHeader_Decode(UA_RequestHeader* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2106,13 +2182,13 @@ StatusCode UA_RequestHeader_Decode(UA_MsgBuffer* msgBuf, UA_RequestHeader* a_pVa
 
     UA_RequestHeader_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->AuthenticationToken);
-    DateTime_Read(msgBuf, &a_pValue->Timestamp);
-    UInt32_Read(msgBuf, &a_pValue->RequestHandle);
-    UInt32_Read(msgBuf, &a_pValue->ReturnDiagnostics);
-    String_Read(msgBuf, &a_pValue->AuditEntryId);
-    UInt32_Read(msgBuf, &a_pValue->TimeoutHint);
-    ExtensionObject_Read(msgBuf, &a_pValue->AdditionalHeader);
+    status &= NodeId_Read(&a_pValue->AuthenticationToken, msgBuf);
+    status &= DateTime_Read(&a_pValue->Timestamp, msgBuf);
+    status &= UInt32_Read(&a_pValue->RequestHandle, msgBuf);
+    status &= UInt32_Read(&a_pValue->ReturnDiagnostics, msgBuf);
+    status &= String_Read(&a_pValue->AuditEntryId, msgBuf);
+    status &= UInt32_Read(&a_pValue->TimeoutHint, msgBuf);
+    status &= ExtensionObject_Read(&a_pValue->AdditionalHeader, msgBuf);
 
     if(status != STATUS_OK){
         UA_RequestHeader_Clear(a_pValue);
@@ -2179,7 +2255,7 @@ void UA_ResponseHeader_Clear(UA_ResponseHeader* a_pValue)
 /*============================================================================
  * UA_ResponseHeader_Encode
  *===========================================================================*/
-StatusCode UA_ResponseHeader_Encode(UA_MsgBuffer* msgBuf, UA_ResponseHeader* a_pValue)
+StatusCode UA_ResponseHeader_Encode(UA_ResponseHeader* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2187,13 +2263,17 @@ StatusCode UA_ResponseHeader_Encode(UA_MsgBuffer* msgBuf, UA_ResponseHeader* a_p
         status = STATUS_OK;
     }
 
-    DateTime_Write(msgBuf, &a_pValue->Timestamp);
-    UInt32_Write(msgBuf, &a_pValue->RequestHandle);
-    StatusCode_Write(msgBuf, &a_pValue->ServiceResult);
-    DiagnosticInfo_Write(msgBuf, &a_pValue->ServiceDiagnostics);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfStringTable, (void**) &a_pValue->StringTable, 
+    status &= DateTime_Write(&a_pValue->Timestamp, msgBuf);
+    status &= UInt32_Write(&a_pValue->RequestHandle, msgBuf);
+    status &= StatusCode_Write(&a_pValue->ServiceResult, msgBuf);
+    status &= DiagnosticInfo_Write(&a_pValue->ServiceDiagnostics, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfStringTable, (void**) &a_pValue->StringTable, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
-    ExtensionObject_Write(msgBuf, &a_pValue->AdditionalHeader);
+    status &= ExtensionObject_Write(&a_pValue->AdditionalHeader, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2201,7 +2281,7 @@ StatusCode UA_ResponseHeader_Encode(UA_MsgBuffer* msgBuf, UA_ResponseHeader* a_p
 /*============================================================================
  * UA_ResponseHeader_Decode
  *===========================================================================*/
-StatusCode UA_ResponseHeader_Decode(UA_MsgBuffer* msgBuf, UA_ResponseHeader* a_pValue)
+StatusCode UA_ResponseHeader_Decode(UA_ResponseHeader* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2211,13 +2291,13 @@ StatusCode UA_ResponseHeader_Decode(UA_MsgBuffer* msgBuf, UA_ResponseHeader* a_p
 
     UA_ResponseHeader_Initialize(a_pValue);
 
-    DateTime_Read(msgBuf, &a_pValue->Timestamp);
-    UInt32_Read(msgBuf, &a_pValue->RequestHandle);
-    StatusCode_Read(msgBuf, &a_pValue->ServiceResult);
-    DiagnosticInfo_Read(msgBuf, &a_pValue->ServiceDiagnostics);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfStringTable, (void**) &a_pValue->StringTable, 
+    status &= DateTime_Read(&a_pValue->Timestamp, msgBuf);
+    status &= UInt32_Read(&a_pValue->RequestHandle, msgBuf);
+    status &= StatusCode_Read(&a_pValue->ServiceResult, msgBuf);
+    status &= DiagnosticInfo_Read(&a_pValue->ServiceDiagnostics, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfStringTable, (void**) &a_pValue->StringTable, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
-    ExtensionObject_Read(msgBuf, &a_pValue->AdditionalHeader);
+    status &= ExtensionObject_Read(&a_pValue->AdditionalHeader, msgBuf);
 
     if(status != STATUS_OK){
         UA_ResponseHeader_Clear(a_pValue);
@@ -2272,7 +2352,7 @@ void UA_ServiceFault_Clear(UA_ServiceFault* a_pValue)
 /*============================================================================
  * UA_ServiceFault_Encode
  *===========================================================================*/
-StatusCode UA_ServiceFault_Encode(UA_MsgBuffer* msgBuf, UA_ServiceFault* a_pValue)
+StatusCode UA_ServiceFault_Encode(UA_ServiceFault* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2280,7 +2360,11 @@ StatusCode UA_ServiceFault_Encode(UA_MsgBuffer* msgBuf, UA_ServiceFault* a_pValu
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2288,7 +2372,7 @@ StatusCode UA_ServiceFault_Encode(UA_MsgBuffer* msgBuf, UA_ServiceFault* a_pValu
 /*============================================================================
  * UA_ServiceFault_Decode
  *===========================================================================*/
-StatusCode UA_ServiceFault_Decode(UA_MsgBuffer* msgBuf, UA_ServiceFault* a_pValue)
+StatusCode UA_ServiceFault_Decode(UA_ServiceFault* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2298,7 +2382,7 @@ StatusCode UA_ServiceFault_Decode(UA_MsgBuffer* msgBuf, UA_ServiceFault* a_pValu
 
     UA_ServiceFault_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
     if(status != STATUS_OK){
         UA_ServiceFault_Clear(a_pValue);
@@ -2364,7 +2448,7 @@ void UA_FindServersRequest_Clear(UA_FindServersRequest* a_pValue)
 /*============================================================================
  * UA_FindServersRequest_Encode
  *===========================================================================*/
-StatusCode UA_FindServersRequest_Encode(UA_MsgBuffer* msgBuf, UA_FindServersRequest* a_pValue)
+StatusCode UA_FindServersRequest_Encode(UA_FindServersRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2372,12 +2456,16 @@ StatusCode UA_FindServersRequest_Encode(UA_MsgBuffer* msgBuf, UA_FindServersRequ
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    String_Write(msgBuf, &a_pValue->EndpointUrl);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= String_Write(&a_pValue->EndpointUrl, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfServerUris, (void**) &a_pValue->ServerUris, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfServerUris, (void**) &a_pValue->ServerUris, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2385,7 +2473,7 @@ StatusCode UA_FindServersRequest_Encode(UA_MsgBuffer* msgBuf, UA_FindServersRequ
 /*============================================================================
  * UA_FindServersRequest_Decode
  *===========================================================================*/
-StatusCode UA_FindServersRequest_Decode(UA_MsgBuffer* msgBuf, UA_FindServersRequest* a_pValue)
+StatusCode UA_FindServersRequest_Decode(UA_FindServersRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2395,11 +2483,11 @@ StatusCode UA_FindServersRequest_Decode(UA_MsgBuffer* msgBuf, UA_FindServersRequ
 
     UA_FindServersRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    String_Read(msgBuf, &a_pValue->EndpointUrl);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= String_Read(&a_pValue->EndpointUrl, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfServerUris, (void**) &a_pValue->ServerUris, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfServerUris, (void**) &a_pValue->ServerUris, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
 
     if(status != STATUS_OK){
@@ -2459,7 +2547,7 @@ void UA_FindServersResponse_Clear(UA_FindServersResponse* a_pValue)
 /*============================================================================
  * UA_FindServersResponse_Encode
  *===========================================================================*/
-StatusCode UA_FindServersResponse_Encode(UA_MsgBuffer* msgBuf, UA_FindServersResponse* a_pValue)
+StatusCode UA_FindServersResponse_Encode(UA_FindServersResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2467,9 +2555,13 @@ StatusCode UA_FindServersResponse_Encode(UA_MsgBuffer* msgBuf, UA_FindServersRes
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
                    sizeof(UA_ApplicationDescription), (UA_EncodeableObject_PfnEncode*) UA_ApplicationDescription_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2477,7 +2569,7 @@ StatusCode UA_FindServersResponse_Encode(UA_MsgBuffer* msgBuf, UA_FindServersRes
 /*============================================================================
  * UA_FindServersResponse_Decode
  *===========================================================================*/
-StatusCode UA_FindServersResponse_Decode(UA_MsgBuffer* msgBuf, UA_FindServersResponse* a_pValue)
+StatusCode UA_FindServersResponse_Decode(UA_FindServersResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2487,8 +2579,8 @@ StatusCode UA_FindServersResponse_Decode(UA_MsgBuffer* msgBuf, UA_FindServersRes
 
     UA_FindServersResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
                   sizeof(UA_ApplicationDescription), (UA_EncodeableObject_PfnDecode*) UA_ApplicationDescription_Decode);
 
     if(status != STATUS_OK){
@@ -2553,7 +2645,7 @@ void UA_ServerOnNetwork_Clear(UA_ServerOnNetwork* a_pValue)
 /*============================================================================
  * UA_ServerOnNetwork_Encode
  *===========================================================================*/
-StatusCode UA_ServerOnNetwork_Encode(UA_MsgBuffer* msgBuf, UA_ServerOnNetwork* a_pValue)
+StatusCode UA_ServerOnNetwork_Encode(UA_ServerOnNetwork* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2561,11 +2653,15 @@ StatusCode UA_ServerOnNetwork_Encode(UA_MsgBuffer* msgBuf, UA_ServerOnNetwork* a
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->RecordId);
-    String_Write(msgBuf, &a_pValue->ServerName);
-    String_Write(msgBuf, &a_pValue->DiscoveryUrl);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
+    status &= UInt32_Write(&a_pValue->RecordId, msgBuf);
+    status &= String_Write(&a_pValue->ServerName, msgBuf);
+    status &= String_Write(&a_pValue->DiscoveryUrl, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2573,7 +2669,7 @@ StatusCode UA_ServerOnNetwork_Encode(UA_MsgBuffer* msgBuf, UA_ServerOnNetwork* a
 /*============================================================================
  * UA_ServerOnNetwork_Decode
  *===========================================================================*/
-StatusCode UA_ServerOnNetwork_Decode(UA_MsgBuffer* msgBuf, UA_ServerOnNetwork* a_pValue)
+StatusCode UA_ServerOnNetwork_Decode(UA_ServerOnNetwork* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2583,10 +2679,10 @@ StatusCode UA_ServerOnNetwork_Decode(UA_MsgBuffer* msgBuf, UA_ServerOnNetwork* a
 
     UA_ServerOnNetwork_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->RecordId);
-    String_Read(msgBuf, &a_pValue->ServerName);
-    String_Read(msgBuf, &a_pValue->DiscoveryUrl);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
+    status &= UInt32_Read(&a_pValue->RecordId, msgBuf);
+    status &= String_Read(&a_pValue->ServerName, msgBuf);
+    status &= String_Read(&a_pValue->DiscoveryUrl, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
 
     if(status != STATUS_OK){
@@ -2651,7 +2747,7 @@ void UA_FindServersOnNetworkRequest_Clear(UA_FindServersOnNetworkRequest* a_pVal
 /*============================================================================
  * UA_FindServersOnNetworkRequest_Encode
  *===========================================================================*/
-StatusCode UA_FindServersOnNetworkRequest_Encode(UA_MsgBuffer* msgBuf, UA_FindServersOnNetworkRequest* a_pValue)
+StatusCode UA_FindServersOnNetworkRequest_Encode(UA_FindServersOnNetworkRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2659,11 +2755,15 @@ StatusCode UA_FindServersOnNetworkRequest_Encode(UA_MsgBuffer* msgBuf, UA_FindSe
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->StartingRecordId);
-    UInt32_Write(msgBuf, &a_pValue->MaxRecordsToReturn);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfServerCapabilityFilter, (void**) &a_pValue->ServerCapabilityFilter, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->StartingRecordId, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxRecordsToReturn, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfServerCapabilityFilter, (void**) &a_pValue->ServerCapabilityFilter, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2671,7 +2771,7 @@ StatusCode UA_FindServersOnNetworkRequest_Encode(UA_MsgBuffer* msgBuf, UA_FindSe
 /*============================================================================
  * UA_FindServersOnNetworkRequest_Decode
  *===========================================================================*/
-StatusCode UA_FindServersOnNetworkRequest_Decode(UA_MsgBuffer* msgBuf, UA_FindServersOnNetworkRequest* a_pValue)
+StatusCode UA_FindServersOnNetworkRequest_Decode(UA_FindServersOnNetworkRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2681,10 +2781,10 @@ StatusCode UA_FindServersOnNetworkRequest_Decode(UA_MsgBuffer* msgBuf, UA_FindSe
 
     UA_FindServersOnNetworkRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->StartingRecordId);
-    UInt32_Read(msgBuf, &a_pValue->MaxRecordsToReturn);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfServerCapabilityFilter, (void**) &a_pValue->ServerCapabilityFilter, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->StartingRecordId, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxRecordsToReturn, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfServerCapabilityFilter, (void**) &a_pValue->ServerCapabilityFilter, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
 
     if(status != STATUS_OK){
@@ -2746,7 +2846,7 @@ void UA_FindServersOnNetworkResponse_Clear(UA_FindServersOnNetworkResponse* a_pV
 /*============================================================================
  * UA_FindServersOnNetworkResponse_Encode
  *===========================================================================*/
-StatusCode UA_FindServersOnNetworkResponse_Encode(UA_MsgBuffer* msgBuf, UA_FindServersOnNetworkResponse* a_pValue)
+StatusCode UA_FindServersOnNetworkResponse_Encode(UA_FindServersOnNetworkResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2754,10 +2854,14 @@ StatusCode UA_FindServersOnNetworkResponse_Encode(UA_MsgBuffer* msgBuf, UA_FindS
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    DateTime_Write(msgBuf, &a_pValue->LastCounterResetTime);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= DateTime_Write(&a_pValue->LastCounterResetTime, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
                    sizeof(UA_ServerOnNetwork), (UA_EncodeableObject_PfnEncode*) UA_ServerOnNetwork_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2765,7 +2869,7 @@ StatusCode UA_FindServersOnNetworkResponse_Encode(UA_MsgBuffer* msgBuf, UA_FindS
 /*============================================================================
  * UA_FindServersOnNetworkResponse_Decode
  *===========================================================================*/
-StatusCode UA_FindServersOnNetworkResponse_Decode(UA_MsgBuffer* msgBuf, UA_FindServersOnNetworkResponse* a_pValue)
+StatusCode UA_FindServersOnNetworkResponse_Decode(UA_FindServersOnNetworkResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2775,9 +2879,9 @@ StatusCode UA_FindServersOnNetworkResponse_Decode(UA_MsgBuffer* msgBuf, UA_FindS
 
     UA_FindServersOnNetworkResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    DateTime_Read(msgBuf, &a_pValue->LastCounterResetTime);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= DateTime_Read(&a_pValue->LastCounterResetTime, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfServers, (void**) &a_pValue->Servers, 
                   sizeof(UA_ServerOnNetwork), (UA_EncodeableObject_PfnDecode*) UA_ServerOnNetwork_Decode);
 
     if(status != STATUS_OK){
@@ -2844,7 +2948,7 @@ void UA_UserTokenPolicy_Clear(UA_UserTokenPolicy* a_pValue)
 /*============================================================================
  * UA_UserTokenPolicy_Encode
  *===========================================================================*/
-StatusCode UA_UserTokenPolicy_Encode(UA_MsgBuffer* msgBuf, UA_UserTokenPolicy* a_pValue)
+StatusCode UA_UserTokenPolicy_Encode(UA_UserTokenPolicy* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2852,11 +2956,15 @@ StatusCode UA_UserTokenPolicy_Encode(UA_MsgBuffer* msgBuf, UA_UserTokenPolicy* a
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->PolicyId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TokenType);
-    String_Write(msgBuf, &a_pValue->IssuedTokenType);
-    String_Write(msgBuf, &a_pValue->IssuerEndpointUrl);
-    String_Write(msgBuf, &a_pValue->SecurityPolicyUri);
+    status &= String_Write(&a_pValue->PolicyId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TokenType);
+    status &= String_Write(&a_pValue->IssuedTokenType, msgBuf);
+    status &= String_Write(&a_pValue->IssuerEndpointUrl, msgBuf);
+    status &= String_Write(&a_pValue->SecurityPolicyUri, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2864,7 +2972,7 @@ StatusCode UA_UserTokenPolicy_Encode(UA_MsgBuffer* msgBuf, UA_UserTokenPolicy* a
 /*============================================================================
  * UA_UserTokenPolicy_Decode
  *===========================================================================*/
-StatusCode UA_UserTokenPolicy_Decode(UA_MsgBuffer* msgBuf, UA_UserTokenPolicy* a_pValue)
+StatusCode UA_UserTokenPolicy_Decode(UA_UserTokenPolicy* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2874,11 +2982,11 @@ StatusCode UA_UserTokenPolicy_Decode(UA_MsgBuffer* msgBuf, UA_UserTokenPolicy* a
 
     UA_UserTokenPolicy_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->PolicyId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TokenType);
-    String_Read(msgBuf, &a_pValue->IssuedTokenType);
-    String_Read(msgBuf, &a_pValue->IssuerEndpointUrl);
-    String_Read(msgBuf, &a_pValue->SecurityPolicyUri);
+    status &= String_Read(&a_pValue->PolicyId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TokenType);
+    status &= String_Read(&a_pValue->IssuedTokenType, msgBuf);
+    status &= String_Read(&a_pValue->IssuerEndpointUrl, msgBuf);
+    status &= String_Read(&a_pValue->SecurityPolicyUri, msgBuf);
 
     if(status != STATUS_OK){
         UA_UserTokenPolicy_Clear(a_pValue);
@@ -2949,7 +3057,7 @@ void UA_EndpointDescription_Clear(UA_EndpointDescription* a_pValue)
 /*============================================================================
  * UA_EndpointDescription_Encode
  *===========================================================================*/
-StatusCode UA_EndpointDescription_Encode(UA_MsgBuffer* msgBuf, UA_EndpointDescription* a_pValue)
+StatusCode UA_EndpointDescription_Encode(UA_EndpointDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2957,15 +3065,19 @@ StatusCode UA_EndpointDescription_Encode(UA_MsgBuffer* msgBuf, UA_EndpointDescri
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->EndpointUrl);
-    UA_ApplicationDescription_Encode(msgBuf, &a_pValue->Server);
-    ByteString_Write(msgBuf, &a_pValue->ServerCertificate);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
-    String_Write(msgBuf, &a_pValue->SecurityPolicyUri);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfUserIdentityTokens, (void**) &a_pValue->UserIdentityTokens, 
+    status &= String_Write(&a_pValue->EndpointUrl, msgBuf);
+    status &= UA_ApplicationDescription_Encode(&a_pValue->Server, msgBuf);
+    status &= ByteString_Write(&a_pValue->ServerCertificate, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
+    status &= String_Write(&a_pValue->SecurityPolicyUri, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfUserIdentityTokens, (void**) &a_pValue->UserIdentityTokens, 
                    sizeof(UA_UserTokenPolicy), (UA_EncodeableObject_PfnEncode*) UA_UserTokenPolicy_Encode);
-    String_Write(msgBuf, &a_pValue->TransportProfileUri);
-    Byte_Write(msgBuf, &a_pValue->SecurityLevel);
+    status &= String_Write(&a_pValue->TransportProfileUri, msgBuf);
+    status &= Byte_Write(&a_pValue->SecurityLevel, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -2973,7 +3085,7 @@ StatusCode UA_EndpointDescription_Encode(UA_MsgBuffer* msgBuf, UA_EndpointDescri
 /*============================================================================
  * UA_EndpointDescription_Decode
  *===========================================================================*/
-StatusCode UA_EndpointDescription_Decode(UA_MsgBuffer* msgBuf, UA_EndpointDescription* a_pValue)
+StatusCode UA_EndpointDescription_Decode(UA_EndpointDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -2983,15 +3095,15 @@ StatusCode UA_EndpointDescription_Decode(UA_MsgBuffer* msgBuf, UA_EndpointDescri
 
     UA_EndpointDescription_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->EndpointUrl);
-    UA_ApplicationDescription_Decode(msgBuf, &a_pValue->Server);
-    ByteString_Read(msgBuf, &a_pValue->ServerCertificate);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
-    String_Read(msgBuf, &a_pValue->SecurityPolicyUri);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfUserIdentityTokens, (void**) &a_pValue->UserIdentityTokens, 
+    status &= String_Read(&a_pValue->EndpointUrl, msgBuf);
+    status &= UA_ApplicationDescription_Decode(&a_pValue->Server, msgBuf);
+    status &= ByteString_Read(&a_pValue->ServerCertificate, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
+    status &= String_Read(&a_pValue->SecurityPolicyUri, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfUserIdentityTokens, (void**) &a_pValue->UserIdentityTokens, 
                   sizeof(UA_UserTokenPolicy), (UA_EncodeableObject_PfnDecode*) UA_UserTokenPolicy_Decode);
-    String_Read(msgBuf, &a_pValue->TransportProfileUri);
-    Byte_Read(msgBuf, &a_pValue->SecurityLevel);
+    status &= String_Read(&a_pValue->TransportProfileUri, msgBuf);
+    status &= Byte_Read(&a_pValue->SecurityLevel, msgBuf);
 
     if(status != STATUS_OK){
         UA_EndpointDescription_Clear(a_pValue);
@@ -3057,7 +3169,7 @@ void UA_GetEndpointsRequest_Clear(UA_GetEndpointsRequest* a_pValue)
 /*============================================================================
  * UA_GetEndpointsRequest_Encode
  *===========================================================================*/
-StatusCode UA_GetEndpointsRequest_Encode(UA_MsgBuffer* msgBuf, UA_GetEndpointsRequest* a_pValue)
+StatusCode UA_GetEndpointsRequest_Encode(UA_GetEndpointsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3065,12 +3177,16 @@ StatusCode UA_GetEndpointsRequest_Encode(UA_MsgBuffer* msgBuf, UA_GetEndpointsRe
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    String_Write(msgBuf, &a_pValue->EndpointUrl);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= String_Write(&a_pValue->EndpointUrl, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfProfileUris, (void**) &a_pValue->ProfileUris, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfProfileUris, (void**) &a_pValue->ProfileUris, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3078,7 +3194,7 @@ StatusCode UA_GetEndpointsRequest_Encode(UA_MsgBuffer* msgBuf, UA_GetEndpointsRe
 /*============================================================================
  * UA_GetEndpointsRequest_Decode
  *===========================================================================*/
-StatusCode UA_GetEndpointsRequest_Decode(UA_MsgBuffer* msgBuf, UA_GetEndpointsRequest* a_pValue)
+StatusCode UA_GetEndpointsRequest_Decode(UA_GetEndpointsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3088,11 +3204,11 @@ StatusCode UA_GetEndpointsRequest_Decode(UA_MsgBuffer* msgBuf, UA_GetEndpointsRe
 
     UA_GetEndpointsRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    String_Read(msgBuf, &a_pValue->EndpointUrl);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= String_Read(&a_pValue->EndpointUrl, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfProfileUris, (void**) &a_pValue->ProfileUris, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfProfileUris, (void**) &a_pValue->ProfileUris, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
 
     if(status != STATUS_OK){
@@ -3152,7 +3268,7 @@ void UA_GetEndpointsResponse_Clear(UA_GetEndpointsResponse* a_pValue)
 /*============================================================================
  * UA_GetEndpointsResponse_Encode
  *===========================================================================*/
-StatusCode UA_GetEndpointsResponse_Encode(UA_MsgBuffer* msgBuf, UA_GetEndpointsResponse* a_pValue)
+StatusCode UA_GetEndpointsResponse_Encode(UA_GetEndpointsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3160,9 +3276,13 @@ StatusCode UA_GetEndpointsResponse_Encode(UA_MsgBuffer* msgBuf, UA_GetEndpointsR
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfEndpoints, (void**) &a_pValue->Endpoints, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfEndpoints, (void**) &a_pValue->Endpoints, 
                    sizeof(UA_EndpointDescription), (UA_EncodeableObject_PfnEncode*) UA_EndpointDescription_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3170,7 +3290,7 @@ StatusCode UA_GetEndpointsResponse_Encode(UA_MsgBuffer* msgBuf, UA_GetEndpointsR
 /*============================================================================
  * UA_GetEndpointsResponse_Decode
  *===========================================================================*/
-StatusCode UA_GetEndpointsResponse_Decode(UA_MsgBuffer* msgBuf, UA_GetEndpointsResponse* a_pValue)
+StatusCode UA_GetEndpointsResponse_Decode(UA_GetEndpointsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3180,8 +3300,8 @@ StatusCode UA_GetEndpointsResponse_Decode(UA_MsgBuffer* msgBuf, UA_GetEndpointsR
 
     UA_GetEndpointsResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfEndpoints, (void**) &a_pValue->Endpoints, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfEndpoints, (void**) &a_pValue->Endpoints, 
                   sizeof(UA_EndpointDescription), (UA_EncodeableObject_PfnDecode*) UA_EndpointDescription_Decode);
 
     if(status != STATUS_OK){
@@ -3256,7 +3376,7 @@ void UA_RegisteredServer_Clear(UA_RegisteredServer* a_pValue)
 /*============================================================================
  * UA_RegisteredServer_Encode
  *===========================================================================*/
-StatusCode UA_RegisteredServer_Encode(UA_MsgBuffer* msgBuf, UA_RegisteredServer* a_pValue)
+StatusCode UA_RegisteredServer_Encode(UA_RegisteredServer* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3264,16 +3384,20 @@ StatusCode UA_RegisteredServer_Encode(UA_MsgBuffer* msgBuf, UA_RegisteredServer*
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->ServerUri);
-    String_Write(msgBuf, &a_pValue->ProductUri);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfServerNames, (void**) &a_pValue->ServerNames, 
+    status &= String_Write(&a_pValue->ServerUri, msgBuf);
+    status &= String_Write(&a_pValue->ProductUri, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfServerNames, (void**) &a_pValue->ServerNames, 
                    sizeof(UA_LocalizedText), (UA_EncodeableObject_PfnEncode*) LocalizedText_Write);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ServerType);
-    String_Write(msgBuf, &a_pValue->GatewayServerUri);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiscoveryUrls, (void**) &a_pValue->DiscoveryUrls, 
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ServerType);
+    status &= String_Write(&a_pValue->GatewayServerUri, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiscoveryUrls, (void**) &a_pValue->DiscoveryUrls, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
-    String_Write(msgBuf, &a_pValue->SemaphoreFilePath);
-    Boolean_Write(msgBuf, &a_pValue->IsOnline);
+    status &= String_Write(&a_pValue->SemaphoreFilePath, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsOnline, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3281,7 +3405,7 @@ StatusCode UA_RegisteredServer_Encode(UA_MsgBuffer* msgBuf, UA_RegisteredServer*
 /*============================================================================
  * UA_RegisteredServer_Decode
  *===========================================================================*/
-StatusCode UA_RegisteredServer_Decode(UA_MsgBuffer* msgBuf, UA_RegisteredServer* a_pValue)
+StatusCode UA_RegisteredServer_Decode(UA_RegisteredServer* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3291,16 +3415,16 @@ StatusCode UA_RegisteredServer_Decode(UA_MsgBuffer* msgBuf, UA_RegisteredServer*
 
     UA_RegisteredServer_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->ServerUri);
-    String_Read(msgBuf, &a_pValue->ProductUri);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfServerNames, (void**) &a_pValue->ServerNames, 
+    status &= String_Read(&a_pValue->ServerUri, msgBuf);
+    status &= String_Read(&a_pValue->ProductUri, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfServerNames, (void**) &a_pValue->ServerNames, 
                   sizeof(UA_LocalizedText), (UA_EncodeableObject_PfnDecode*) LocalizedText_Read);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ServerType);
-    String_Read(msgBuf, &a_pValue->GatewayServerUri);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiscoveryUrls, (void**) &a_pValue->DiscoveryUrls, 
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ServerType);
+    status &= String_Read(&a_pValue->GatewayServerUri, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiscoveryUrls, (void**) &a_pValue->DiscoveryUrls, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
-    String_Read(msgBuf, &a_pValue->SemaphoreFilePath);
-    Boolean_Read(msgBuf, &a_pValue->IsOnline);
+    status &= String_Read(&a_pValue->SemaphoreFilePath, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsOnline, msgBuf);
 
     if(status != STATUS_OK){
         UA_RegisteredServer_Clear(a_pValue);
@@ -3358,7 +3482,7 @@ void UA_RegisterServerRequest_Clear(UA_RegisterServerRequest* a_pValue)
 /*============================================================================
  * UA_RegisterServerRequest_Encode
  *===========================================================================*/
-StatusCode UA_RegisterServerRequest_Encode(UA_MsgBuffer* msgBuf, UA_RegisterServerRequest* a_pValue)
+StatusCode UA_RegisterServerRequest_Encode(UA_RegisterServerRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3366,8 +3490,12 @@ StatusCode UA_RegisterServerRequest_Encode(UA_MsgBuffer* msgBuf, UA_RegisterServ
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_RegisteredServer_Encode(msgBuf, &a_pValue->Server);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_RegisteredServer_Encode(&a_pValue->Server, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3375,7 +3503,7 @@ StatusCode UA_RegisterServerRequest_Encode(UA_MsgBuffer* msgBuf, UA_RegisterServ
 /*============================================================================
  * UA_RegisterServerRequest_Decode
  *===========================================================================*/
-StatusCode UA_RegisterServerRequest_Decode(UA_MsgBuffer* msgBuf, UA_RegisterServerRequest* a_pValue)
+StatusCode UA_RegisterServerRequest_Decode(UA_RegisterServerRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3385,8 +3513,8 @@ StatusCode UA_RegisterServerRequest_Decode(UA_MsgBuffer* msgBuf, UA_RegisterServ
 
     UA_RegisterServerRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_RegisteredServer_Decode(msgBuf, &a_pValue->Server);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_RegisteredServer_Decode(&a_pValue->Server, msgBuf);
 
     if(status != STATUS_OK){
         UA_RegisterServerRequest_Clear(a_pValue);
@@ -3441,7 +3569,7 @@ void UA_RegisterServerResponse_Clear(UA_RegisterServerResponse* a_pValue)
 /*============================================================================
  * UA_RegisterServerResponse_Encode
  *===========================================================================*/
-StatusCode UA_RegisterServerResponse_Encode(UA_MsgBuffer* msgBuf, UA_RegisterServerResponse* a_pValue)
+StatusCode UA_RegisterServerResponse_Encode(UA_RegisterServerResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3449,7 +3577,11 @@ StatusCode UA_RegisterServerResponse_Encode(UA_MsgBuffer* msgBuf, UA_RegisterSer
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3457,7 +3589,7 @@ StatusCode UA_RegisterServerResponse_Encode(UA_MsgBuffer* msgBuf, UA_RegisterSer
 /*============================================================================
  * UA_RegisterServerResponse_Decode
  *===========================================================================*/
-StatusCode UA_RegisterServerResponse_Decode(UA_MsgBuffer* msgBuf, UA_RegisterServerResponse* a_pValue)
+StatusCode UA_RegisterServerResponse_Decode(UA_RegisterServerResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3467,7 +3599,7 @@ StatusCode UA_RegisterServerResponse_Decode(UA_MsgBuffer* msgBuf, UA_RegisterSer
 
     UA_RegisterServerResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
     if(status != STATUS_OK){
         UA_RegisterServerResponse_Clear(a_pValue);
@@ -3527,7 +3659,7 @@ void UA_MdnsDiscoveryConfiguration_Clear(UA_MdnsDiscoveryConfiguration* a_pValue
 /*============================================================================
  * UA_MdnsDiscoveryConfiguration_Encode
  *===========================================================================*/
-StatusCode UA_MdnsDiscoveryConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_MdnsDiscoveryConfiguration* a_pValue)
+StatusCode UA_MdnsDiscoveryConfiguration_Encode(UA_MdnsDiscoveryConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3535,9 +3667,13 @@ StatusCode UA_MdnsDiscoveryConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_MdnsDis
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->MdnsServerName);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
+    status &= String_Write(&a_pValue->MdnsServerName, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3545,7 +3681,7 @@ StatusCode UA_MdnsDiscoveryConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_MdnsDis
 /*============================================================================
  * UA_MdnsDiscoveryConfiguration_Decode
  *===========================================================================*/
-StatusCode UA_MdnsDiscoveryConfiguration_Decode(UA_MsgBuffer* msgBuf, UA_MdnsDiscoveryConfiguration* a_pValue)
+StatusCode UA_MdnsDiscoveryConfiguration_Decode(UA_MdnsDiscoveryConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3555,8 +3691,8 @@ StatusCode UA_MdnsDiscoveryConfiguration_Decode(UA_MsgBuffer* msgBuf, UA_MdnsDis
 
     UA_MdnsDiscoveryConfiguration_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->MdnsServerName);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
+    status &= String_Read(&a_pValue->MdnsServerName, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfServerCapabilities, (void**) &a_pValue->ServerCapabilities, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
 
     if(status != STATUS_OK){
@@ -3619,7 +3755,7 @@ void UA_RegisterServer2Request_Clear(UA_RegisterServer2Request* a_pValue)
 /*============================================================================
  * UA_RegisterServer2Request_Encode
  *===========================================================================*/
-StatusCode UA_RegisterServer2Request_Encode(UA_MsgBuffer* msgBuf, UA_RegisterServer2Request* a_pValue)
+StatusCode UA_RegisterServer2Request_Encode(UA_RegisterServer2Request* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3627,10 +3763,14 @@ StatusCode UA_RegisterServer2Request_Encode(UA_MsgBuffer* msgBuf, UA_RegisterSer
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_RegisteredServer_Encode(msgBuf, &a_pValue->Server);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiscoveryConfiguration, (void**) &a_pValue->DiscoveryConfiguration, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_RegisteredServer_Encode(&a_pValue->Server, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiscoveryConfiguration, (void**) &a_pValue->DiscoveryConfiguration, 
                    sizeof(UA_ExtensionObject), (UA_EncodeableObject_PfnEncode*) ExtensionObject_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3638,7 +3778,7 @@ StatusCode UA_RegisterServer2Request_Encode(UA_MsgBuffer* msgBuf, UA_RegisterSer
 /*============================================================================
  * UA_RegisterServer2Request_Decode
  *===========================================================================*/
-StatusCode UA_RegisterServer2Request_Decode(UA_MsgBuffer* msgBuf, UA_RegisterServer2Request* a_pValue)
+StatusCode UA_RegisterServer2Request_Decode(UA_RegisterServer2Request* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3648,9 +3788,9 @@ StatusCode UA_RegisterServer2Request_Decode(UA_MsgBuffer* msgBuf, UA_RegisterSer
 
     UA_RegisterServer2Request_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_RegisteredServer_Decode(msgBuf, &a_pValue->Server);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiscoveryConfiguration, (void**) &a_pValue->DiscoveryConfiguration, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_RegisteredServer_Decode(&a_pValue->Server, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiscoveryConfiguration, (void**) &a_pValue->DiscoveryConfiguration, 
                   sizeof(UA_ExtensionObject), (UA_EncodeableObject_PfnDecode*) ExtensionObject_Read);
 
     if(status != STATUS_OK){
@@ -3714,7 +3854,7 @@ void UA_RegisterServer2Response_Clear(UA_RegisterServer2Response* a_pValue)
 /*============================================================================
  * UA_RegisterServer2Response_Encode
  *===========================================================================*/
-StatusCode UA_RegisterServer2Response_Encode(UA_MsgBuffer* msgBuf, UA_RegisterServer2Response* a_pValue)
+StatusCode UA_RegisterServer2Response_Encode(UA_RegisterServer2Response* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3722,11 +3862,15 @@ StatusCode UA_RegisterServer2Response_Encode(UA_MsgBuffer* msgBuf, UA_RegisterSe
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3734,7 +3878,7 @@ StatusCode UA_RegisterServer2Response_Encode(UA_MsgBuffer* msgBuf, UA_RegisterSe
 /*============================================================================
  * UA_RegisterServer2Response_Decode
  *===========================================================================*/
-StatusCode UA_RegisterServer2Response_Decode(UA_MsgBuffer* msgBuf, UA_RegisterServer2Response* a_pValue)
+StatusCode UA_RegisterServer2Response_Decode(UA_RegisterServer2Response* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3744,10 +3888,10 @@ StatusCode UA_RegisterServer2Response_Decode(UA_MsgBuffer* msgBuf, UA_RegisterSe
 
     UA_RegisterServer2Response_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -3811,7 +3955,7 @@ void UA_ChannelSecurityToken_Clear(UA_ChannelSecurityToken* a_pValue)
 /*============================================================================
  * UA_ChannelSecurityToken_Encode
  *===========================================================================*/
-StatusCode UA_ChannelSecurityToken_Encode(UA_MsgBuffer* msgBuf, UA_ChannelSecurityToken* a_pValue)
+StatusCode UA_ChannelSecurityToken_Encode(UA_ChannelSecurityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3819,10 +3963,14 @@ StatusCode UA_ChannelSecurityToken_Encode(UA_MsgBuffer* msgBuf, UA_ChannelSecuri
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->ChannelId);
-    UInt32_Write(msgBuf, &a_pValue->TokenId);
-    DateTime_Write(msgBuf, &a_pValue->CreatedAt);
-    UInt32_Write(msgBuf, &a_pValue->RevisedLifetime);
+    status &= UInt32_Write(&a_pValue->ChannelId, msgBuf);
+    status &= UInt32_Write(&a_pValue->TokenId, msgBuf);
+    status &= DateTime_Write(&a_pValue->CreatedAt, msgBuf);
+    status &= UInt32_Write(&a_pValue->RevisedLifetime, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3830,7 +3978,7 @@ StatusCode UA_ChannelSecurityToken_Encode(UA_MsgBuffer* msgBuf, UA_ChannelSecuri
 /*============================================================================
  * UA_ChannelSecurityToken_Decode
  *===========================================================================*/
-StatusCode UA_ChannelSecurityToken_Decode(UA_MsgBuffer* msgBuf, UA_ChannelSecurityToken* a_pValue)
+StatusCode UA_ChannelSecurityToken_Decode(UA_ChannelSecurityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3840,10 +3988,10 @@ StatusCode UA_ChannelSecurityToken_Decode(UA_MsgBuffer* msgBuf, UA_ChannelSecuri
 
     UA_ChannelSecurityToken_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->ChannelId);
-    UInt32_Read(msgBuf, &a_pValue->TokenId);
-    DateTime_Read(msgBuf, &a_pValue->CreatedAt);
-    UInt32_Read(msgBuf, &a_pValue->RevisedLifetime);
+    status &= UInt32_Read(&a_pValue->ChannelId, msgBuf);
+    status &= UInt32_Read(&a_pValue->TokenId, msgBuf);
+    status &= DateTime_Read(&a_pValue->CreatedAt, msgBuf);
+    status &= UInt32_Read(&a_pValue->RevisedLifetime, msgBuf);
 
     if(status != STATUS_OK){
         UA_ChannelSecurityToken_Clear(a_pValue);
@@ -3909,7 +4057,7 @@ void UA_OpenSecureChannelRequest_Clear(UA_OpenSecureChannelRequest* a_pValue)
 /*============================================================================
  * UA_OpenSecureChannelRequest_Encode
  *===========================================================================*/
-StatusCode UA_OpenSecureChannelRequest_Encode(UA_MsgBuffer* msgBuf, UA_OpenSecureChannelRequest* a_pValue)
+StatusCode UA_OpenSecureChannelRequest_Encode(UA_OpenSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3917,12 +4065,16 @@ StatusCode UA_OpenSecureChannelRequest_Encode(UA_MsgBuffer* msgBuf, UA_OpenSecur
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->ClientProtocolVersion);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->RequestType);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
-    ByteString_Write(msgBuf, &a_pValue->ClientNonce);
-    UInt32_Write(msgBuf, &a_pValue->RequestedLifetime);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->ClientProtocolVersion, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->RequestType);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
+    status &= ByteString_Write(&a_pValue->ClientNonce, msgBuf);
+    status &= UInt32_Write(&a_pValue->RequestedLifetime, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -3930,7 +4082,7 @@ StatusCode UA_OpenSecureChannelRequest_Encode(UA_MsgBuffer* msgBuf, UA_OpenSecur
 /*============================================================================
  * UA_OpenSecureChannelRequest_Decode
  *===========================================================================*/
-StatusCode UA_OpenSecureChannelRequest_Decode(UA_MsgBuffer* msgBuf, UA_OpenSecureChannelRequest* a_pValue)
+StatusCode UA_OpenSecureChannelRequest_Decode(UA_OpenSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -3940,12 +4092,12 @@ StatusCode UA_OpenSecureChannelRequest_Decode(UA_MsgBuffer* msgBuf, UA_OpenSecur
 
     UA_OpenSecureChannelRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->ClientProtocolVersion);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->RequestType);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
-    ByteString_Read(msgBuf, &a_pValue->ClientNonce);
-    UInt32_Read(msgBuf, &a_pValue->RequestedLifetime);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->ClientProtocolVersion, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->RequestType);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
+    status &= ByteString_Read(&a_pValue->ClientNonce, msgBuf);
+    status &= UInt32_Read(&a_pValue->RequestedLifetime, msgBuf);
 
     if(status != STATUS_OK){
         UA_OpenSecureChannelRequest_Clear(a_pValue);
@@ -4006,7 +4158,7 @@ void UA_OpenSecureChannelResponse_Clear(UA_OpenSecureChannelResponse* a_pValue)
 /*============================================================================
  * UA_OpenSecureChannelResponse_Encode
  *===========================================================================*/
-StatusCode UA_OpenSecureChannelResponse_Encode(UA_MsgBuffer* msgBuf, UA_OpenSecureChannelResponse* a_pValue)
+StatusCode UA_OpenSecureChannelResponse_Encode(UA_OpenSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4014,10 +4166,14 @@ StatusCode UA_OpenSecureChannelResponse_Encode(UA_MsgBuffer* msgBuf, UA_OpenSecu
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UInt32_Write(msgBuf, &a_pValue->ServerProtocolVersion);
-    UA_ChannelSecurityToken_Encode(msgBuf, &a_pValue->SecurityToken);
-    ByteString_Write(msgBuf, &a_pValue->ServerNonce);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->ServerProtocolVersion, msgBuf);
+    status &= UA_ChannelSecurityToken_Encode(&a_pValue->SecurityToken, msgBuf);
+    status &= ByteString_Write(&a_pValue->ServerNonce, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4025,7 +4181,7 @@ StatusCode UA_OpenSecureChannelResponse_Encode(UA_MsgBuffer* msgBuf, UA_OpenSecu
 /*============================================================================
  * UA_OpenSecureChannelResponse_Decode
  *===========================================================================*/
-StatusCode UA_OpenSecureChannelResponse_Decode(UA_MsgBuffer* msgBuf, UA_OpenSecureChannelResponse* a_pValue)
+StatusCode UA_OpenSecureChannelResponse_Decode(UA_OpenSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4035,10 +4191,10 @@ StatusCode UA_OpenSecureChannelResponse_Decode(UA_MsgBuffer* msgBuf, UA_OpenSecu
 
     UA_OpenSecureChannelResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UInt32_Read(msgBuf, &a_pValue->ServerProtocolVersion);
-    UA_ChannelSecurityToken_Decode(msgBuf, &a_pValue->SecurityToken);
-    ByteString_Read(msgBuf, &a_pValue->ServerNonce);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->ServerProtocolVersion, msgBuf);
+    status &= UA_ChannelSecurityToken_Decode(&a_pValue->SecurityToken, msgBuf);
+    status &= ByteString_Read(&a_pValue->ServerNonce, msgBuf);
 
     if(status != STATUS_OK){
         UA_OpenSecureChannelResponse_Clear(a_pValue);
@@ -4095,7 +4251,7 @@ void UA_CloseSecureChannelRequest_Clear(UA_CloseSecureChannelRequest* a_pValue)
 /*============================================================================
  * UA_CloseSecureChannelRequest_Encode
  *===========================================================================*/
-StatusCode UA_CloseSecureChannelRequest_Encode(UA_MsgBuffer* msgBuf, UA_CloseSecureChannelRequest* a_pValue)
+StatusCode UA_CloseSecureChannelRequest_Encode(UA_CloseSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4103,7 +4259,11 @@ StatusCode UA_CloseSecureChannelRequest_Encode(UA_MsgBuffer* msgBuf, UA_CloseSec
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4111,7 +4271,7 @@ StatusCode UA_CloseSecureChannelRequest_Encode(UA_MsgBuffer* msgBuf, UA_CloseSec
 /*============================================================================
  * UA_CloseSecureChannelRequest_Decode
  *===========================================================================*/
-StatusCode UA_CloseSecureChannelRequest_Decode(UA_MsgBuffer* msgBuf, UA_CloseSecureChannelRequest* a_pValue)
+StatusCode UA_CloseSecureChannelRequest_Decode(UA_CloseSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4121,7 +4281,7 @@ StatusCode UA_CloseSecureChannelRequest_Decode(UA_MsgBuffer* msgBuf, UA_CloseSec
 
     UA_CloseSecureChannelRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
 
     if(status != STATUS_OK){
         UA_CloseSecureChannelRequest_Clear(a_pValue);
@@ -4176,7 +4336,7 @@ void UA_CloseSecureChannelResponse_Clear(UA_CloseSecureChannelResponse* a_pValue
 /*============================================================================
  * UA_CloseSecureChannelResponse_Encode
  *===========================================================================*/
-StatusCode UA_CloseSecureChannelResponse_Encode(UA_MsgBuffer* msgBuf, UA_CloseSecureChannelResponse* a_pValue)
+StatusCode UA_CloseSecureChannelResponse_Encode(UA_CloseSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4184,7 +4344,11 @@ StatusCode UA_CloseSecureChannelResponse_Encode(UA_MsgBuffer* msgBuf, UA_CloseSe
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4192,7 +4356,7 @@ StatusCode UA_CloseSecureChannelResponse_Encode(UA_MsgBuffer* msgBuf, UA_CloseSe
 /*============================================================================
  * UA_CloseSecureChannelResponse_Decode
  *===========================================================================*/
-StatusCode UA_CloseSecureChannelResponse_Decode(UA_MsgBuffer* msgBuf, UA_CloseSecureChannelResponse* a_pValue)
+StatusCode UA_CloseSecureChannelResponse_Decode(UA_CloseSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4202,7 +4366,7 @@ StatusCode UA_CloseSecureChannelResponse_Decode(UA_MsgBuffer* msgBuf, UA_CloseSe
 
     UA_CloseSecureChannelResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
     if(status != STATUS_OK){
         UA_CloseSecureChannelResponse_Clear(a_pValue);
@@ -4260,7 +4424,7 @@ void UA_SignedSoftwareCertificate_Clear(UA_SignedSoftwareCertificate* a_pValue)
 /*============================================================================
  * UA_SignedSoftwareCertificate_Encode
  *===========================================================================*/
-StatusCode UA_SignedSoftwareCertificate_Encode(UA_MsgBuffer* msgBuf, UA_SignedSoftwareCertificate* a_pValue)
+StatusCode UA_SignedSoftwareCertificate_Encode(UA_SignedSoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4268,8 +4432,12 @@ StatusCode UA_SignedSoftwareCertificate_Encode(UA_MsgBuffer* msgBuf, UA_SignedSo
         status = STATUS_OK;
     }
 
-    ByteString_Write(msgBuf, &a_pValue->CertificateData);
-    ByteString_Write(msgBuf, &a_pValue->Signature);
+    status &= ByteString_Write(&a_pValue->CertificateData, msgBuf);
+    status &= ByteString_Write(&a_pValue->Signature, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4277,7 +4445,7 @@ StatusCode UA_SignedSoftwareCertificate_Encode(UA_MsgBuffer* msgBuf, UA_SignedSo
 /*============================================================================
  * UA_SignedSoftwareCertificate_Decode
  *===========================================================================*/
-StatusCode UA_SignedSoftwareCertificate_Decode(UA_MsgBuffer* msgBuf, UA_SignedSoftwareCertificate* a_pValue)
+StatusCode UA_SignedSoftwareCertificate_Decode(UA_SignedSoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4287,8 +4455,8 @@ StatusCode UA_SignedSoftwareCertificate_Decode(UA_MsgBuffer* msgBuf, UA_SignedSo
 
     UA_SignedSoftwareCertificate_Initialize(a_pValue);
 
-    ByteString_Read(msgBuf, &a_pValue->CertificateData);
-    ByteString_Read(msgBuf, &a_pValue->Signature);
+    status &= ByteString_Read(&a_pValue->CertificateData, msgBuf);
+    status &= ByteString_Read(&a_pValue->Signature, msgBuf);
 
     if(status != STATUS_OK){
         UA_SignedSoftwareCertificate_Clear(a_pValue);
@@ -4345,7 +4513,7 @@ void UA_SignatureData_Clear(UA_SignatureData* a_pValue)
 /*============================================================================
  * UA_SignatureData_Encode
  *===========================================================================*/
-StatusCode UA_SignatureData_Encode(UA_MsgBuffer* msgBuf, UA_SignatureData* a_pValue)
+StatusCode UA_SignatureData_Encode(UA_SignatureData* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4353,8 +4521,12 @@ StatusCode UA_SignatureData_Encode(UA_MsgBuffer* msgBuf, UA_SignatureData* a_pVa
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->Algorithm);
-    ByteString_Write(msgBuf, &a_pValue->Signature);
+    status &= String_Write(&a_pValue->Algorithm, msgBuf);
+    status &= ByteString_Write(&a_pValue->Signature, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4362,7 +4534,7 @@ StatusCode UA_SignatureData_Encode(UA_MsgBuffer* msgBuf, UA_SignatureData* a_pVa
 /*============================================================================
  * UA_SignatureData_Decode
  *===========================================================================*/
-StatusCode UA_SignatureData_Decode(UA_MsgBuffer* msgBuf, UA_SignatureData* a_pValue)
+StatusCode UA_SignatureData_Decode(UA_SignatureData* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4372,8 +4544,8 @@ StatusCode UA_SignatureData_Decode(UA_MsgBuffer* msgBuf, UA_SignatureData* a_pVa
 
     UA_SignatureData_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->Algorithm);
-    ByteString_Read(msgBuf, &a_pValue->Signature);
+    status &= String_Read(&a_pValue->Algorithm, msgBuf);
+    status &= ByteString_Read(&a_pValue->Signature, msgBuf);
 
     if(status != STATUS_OK){
         UA_SignatureData_Clear(a_pValue);
@@ -4445,7 +4617,7 @@ void UA_CreateSessionRequest_Clear(UA_CreateSessionRequest* a_pValue)
 /*============================================================================
  * UA_CreateSessionRequest_Encode
  *===========================================================================*/
-StatusCode UA_CreateSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CreateSessionRequest* a_pValue)
+StatusCode UA_CreateSessionRequest_Encode(UA_CreateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4453,15 +4625,19 @@ StatusCode UA_CreateSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CreateSession
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_ApplicationDescription_Encode(msgBuf, &a_pValue->ClientDescription);
-    String_Write(msgBuf, &a_pValue->ServerUri);
-    String_Write(msgBuf, &a_pValue->EndpointUrl);
-    String_Write(msgBuf, &a_pValue->SessionName);
-    ByteString_Write(msgBuf, &a_pValue->ClientNonce);
-    ByteString_Write(msgBuf, &a_pValue->ClientCertificate);
-    Double_Write(msgBuf, &a_pValue->RequestedSessionTimeout);
-    UInt32_Write(msgBuf, &a_pValue->MaxResponseMessageSize);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_ApplicationDescription_Encode(&a_pValue->ClientDescription, msgBuf);
+    status &= String_Write(&a_pValue->ServerUri, msgBuf);
+    status &= String_Write(&a_pValue->EndpointUrl, msgBuf);
+    status &= String_Write(&a_pValue->SessionName, msgBuf);
+    status &= ByteString_Write(&a_pValue->ClientNonce, msgBuf);
+    status &= ByteString_Write(&a_pValue->ClientCertificate, msgBuf);
+    status &= Double_Write(&a_pValue->RequestedSessionTimeout, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxResponseMessageSize, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4469,7 +4645,7 @@ StatusCode UA_CreateSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CreateSession
 /*============================================================================
  * UA_CreateSessionRequest_Decode
  *===========================================================================*/
-StatusCode UA_CreateSessionRequest_Decode(UA_MsgBuffer* msgBuf, UA_CreateSessionRequest* a_pValue)
+StatusCode UA_CreateSessionRequest_Decode(UA_CreateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4479,15 +4655,15 @@ StatusCode UA_CreateSessionRequest_Decode(UA_MsgBuffer* msgBuf, UA_CreateSession
 
     UA_CreateSessionRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_ApplicationDescription_Decode(msgBuf, &a_pValue->ClientDescription);
-    String_Read(msgBuf, &a_pValue->ServerUri);
-    String_Read(msgBuf, &a_pValue->EndpointUrl);
-    String_Read(msgBuf, &a_pValue->SessionName);
-    ByteString_Read(msgBuf, &a_pValue->ClientNonce);
-    ByteString_Read(msgBuf, &a_pValue->ClientCertificate);
-    Double_Read(msgBuf, &a_pValue->RequestedSessionTimeout);
-    UInt32_Read(msgBuf, &a_pValue->MaxResponseMessageSize);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_ApplicationDescription_Decode(&a_pValue->ClientDescription, msgBuf);
+    status &= String_Read(&a_pValue->ServerUri, msgBuf);
+    status &= String_Read(&a_pValue->EndpointUrl, msgBuf);
+    status &= String_Read(&a_pValue->SessionName, msgBuf);
+    status &= ByteString_Read(&a_pValue->ClientNonce, msgBuf);
+    status &= ByteString_Read(&a_pValue->ClientCertificate, msgBuf);
+    status &= Double_Read(&a_pValue->RequestedSessionTimeout, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxResponseMessageSize, msgBuf);
 
     if(status != STATUS_OK){
         UA_CreateSessionRequest_Clear(a_pValue);
@@ -4564,7 +4740,7 @@ void UA_CreateSessionResponse_Clear(UA_CreateSessionResponse* a_pValue)
 /*============================================================================
  * UA_CreateSessionResponse_Encode
  *===========================================================================*/
-StatusCode UA_CreateSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CreateSessionResponse* a_pValue)
+StatusCode UA_CreateSessionResponse_Encode(UA_CreateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4572,18 +4748,22 @@ StatusCode UA_CreateSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CreateSessio
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    NodeId_Write(msgBuf, &a_pValue->SessionId);
-    NodeId_Write(msgBuf, &a_pValue->AuthenticationToken);
-    Double_Write(msgBuf, &a_pValue->RevisedSessionTimeout);
-    ByteString_Write(msgBuf, &a_pValue->ServerNonce);
-    ByteString_Write(msgBuf, &a_pValue->ServerCertificate);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfServerEndpoints, (void**) &a_pValue->ServerEndpoints, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= NodeId_Write(&a_pValue->SessionId, msgBuf);
+    status &= NodeId_Write(&a_pValue->AuthenticationToken, msgBuf);
+    status &= Double_Write(&a_pValue->RevisedSessionTimeout, msgBuf);
+    status &= ByteString_Write(&a_pValue->ServerNonce, msgBuf);
+    status &= ByteString_Write(&a_pValue->ServerCertificate, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfServerEndpoints, (void**) &a_pValue->ServerEndpoints, 
                    sizeof(UA_EndpointDescription), (UA_EncodeableObject_PfnEncode*) UA_EndpointDescription_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfServerSoftwareCertificates, (void**) &a_pValue->ServerSoftwareCertificates, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfServerSoftwareCertificates, (void**) &a_pValue->ServerSoftwareCertificates, 
                    sizeof(UA_SignedSoftwareCertificate), (UA_EncodeableObject_PfnEncode*) UA_SignedSoftwareCertificate_Encode);
-    UA_SignatureData_Encode(msgBuf, &a_pValue->ServerSignature);
-    UInt32_Write(msgBuf, &a_pValue->MaxRequestMessageSize);
+    status &= UA_SignatureData_Encode(&a_pValue->ServerSignature, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxRequestMessageSize, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4591,7 +4771,7 @@ StatusCode UA_CreateSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CreateSessio
 /*============================================================================
  * UA_CreateSessionResponse_Decode
  *===========================================================================*/
-StatusCode UA_CreateSessionResponse_Decode(UA_MsgBuffer* msgBuf, UA_CreateSessionResponse* a_pValue)
+StatusCode UA_CreateSessionResponse_Decode(UA_CreateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4601,18 +4781,18 @@ StatusCode UA_CreateSessionResponse_Decode(UA_MsgBuffer* msgBuf, UA_CreateSessio
 
     UA_CreateSessionResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    NodeId_Read(msgBuf, &a_pValue->SessionId);
-    NodeId_Read(msgBuf, &a_pValue->AuthenticationToken);
-    Double_Read(msgBuf, &a_pValue->RevisedSessionTimeout);
-    ByteString_Read(msgBuf, &a_pValue->ServerNonce);
-    ByteString_Read(msgBuf, &a_pValue->ServerCertificate);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfServerEndpoints, (void**) &a_pValue->ServerEndpoints, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= NodeId_Read(&a_pValue->SessionId, msgBuf);
+    status &= NodeId_Read(&a_pValue->AuthenticationToken, msgBuf);
+    status &= Double_Read(&a_pValue->RevisedSessionTimeout, msgBuf);
+    status &= ByteString_Read(&a_pValue->ServerNonce, msgBuf);
+    status &= ByteString_Read(&a_pValue->ServerCertificate, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfServerEndpoints, (void**) &a_pValue->ServerEndpoints, 
                   sizeof(UA_EndpointDescription), (UA_EncodeableObject_PfnDecode*) UA_EndpointDescription_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfServerSoftwareCertificates, (void**) &a_pValue->ServerSoftwareCertificates, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfServerSoftwareCertificates, (void**) &a_pValue->ServerSoftwareCertificates, 
                   sizeof(UA_SignedSoftwareCertificate), (UA_EncodeableObject_PfnDecode*) UA_SignedSoftwareCertificate_Decode);
-    UA_SignatureData_Decode(msgBuf, &a_pValue->ServerSignature);
-    UInt32_Read(msgBuf, &a_pValue->MaxRequestMessageSize);
+    status &= UA_SignatureData_Decode(&a_pValue->ServerSignature, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxRequestMessageSize, msgBuf);
 
     if(status != STATUS_OK){
         UA_CreateSessionResponse_Clear(a_pValue);
@@ -4668,7 +4848,7 @@ void UA_UserIdentityToken_Clear(UA_UserIdentityToken* a_pValue)
 /*============================================================================
  * UA_UserIdentityToken_Encode
  *===========================================================================*/
-StatusCode UA_UserIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_UserIdentityToken* a_pValue)
+StatusCode UA_UserIdentityToken_Encode(UA_UserIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4676,7 +4856,11 @@ StatusCode UA_UserIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_UserIdentityToke
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->PolicyId);
+    status &= String_Write(&a_pValue->PolicyId, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4684,7 +4868,7 @@ StatusCode UA_UserIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_UserIdentityToke
 /*============================================================================
  * UA_UserIdentityToken_Decode
  *===========================================================================*/
-StatusCode UA_UserIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_UserIdentityToken* a_pValue)
+StatusCode UA_UserIdentityToken_Decode(UA_UserIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4694,7 +4878,7 @@ StatusCode UA_UserIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_UserIdentityToke
 
     UA_UserIdentityToken_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->PolicyId);
+    status &= String_Read(&a_pValue->PolicyId, msgBuf);
 
     if(status != STATUS_OK){
         UA_UserIdentityToken_Clear(a_pValue);
@@ -4749,7 +4933,7 @@ void UA_AnonymousIdentityToken_Clear(UA_AnonymousIdentityToken* a_pValue)
 /*============================================================================
  * UA_AnonymousIdentityToken_Encode
  *===========================================================================*/
-StatusCode UA_AnonymousIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_AnonymousIdentityToken* a_pValue)
+StatusCode UA_AnonymousIdentityToken_Encode(UA_AnonymousIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4757,7 +4941,11 @@ StatusCode UA_AnonymousIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_AnonymousId
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->PolicyId);
+    status &= String_Write(&a_pValue->PolicyId, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4765,7 +4953,7 @@ StatusCode UA_AnonymousIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_AnonymousId
 /*============================================================================
  * UA_AnonymousIdentityToken_Decode
  *===========================================================================*/
-StatusCode UA_AnonymousIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_AnonymousIdentityToken* a_pValue)
+StatusCode UA_AnonymousIdentityToken_Decode(UA_AnonymousIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4775,7 +4963,7 @@ StatusCode UA_AnonymousIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_AnonymousId
 
     UA_AnonymousIdentityToken_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->PolicyId);
+    status &= String_Read(&a_pValue->PolicyId, msgBuf);
 
     if(status != STATUS_OK){
         UA_AnonymousIdentityToken_Clear(a_pValue);
@@ -4836,7 +5024,7 @@ void UA_UserNameIdentityToken_Clear(UA_UserNameIdentityToken* a_pValue)
 /*============================================================================
  * UA_UserNameIdentityToken_Encode
  *===========================================================================*/
-StatusCode UA_UserNameIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_UserNameIdentityToken* a_pValue)
+StatusCode UA_UserNameIdentityToken_Encode(UA_UserNameIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4844,10 +5032,14 @@ StatusCode UA_UserNameIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_UserNameIden
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->PolicyId);
-    String_Write(msgBuf, &a_pValue->UserName);
-    ByteString_Write(msgBuf, &a_pValue->Password);
-    String_Write(msgBuf, &a_pValue->EncryptionAlgorithm);
+    status &= String_Write(&a_pValue->PolicyId, msgBuf);
+    status &= String_Write(&a_pValue->UserName, msgBuf);
+    status &= ByteString_Write(&a_pValue->Password, msgBuf);
+    status &= String_Write(&a_pValue->EncryptionAlgorithm, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4855,7 +5047,7 @@ StatusCode UA_UserNameIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_UserNameIden
 /*============================================================================
  * UA_UserNameIdentityToken_Decode
  *===========================================================================*/
-StatusCode UA_UserNameIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_UserNameIdentityToken* a_pValue)
+StatusCode UA_UserNameIdentityToken_Decode(UA_UserNameIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4865,10 +5057,10 @@ StatusCode UA_UserNameIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_UserNameIden
 
     UA_UserNameIdentityToken_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->PolicyId);
-    String_Read(msgBuf, &a_pValue->UserName);
-    ByteString_Read(msgBuf, &a_pValue->Password);
-    String_Read(msgBuf, &a_pValue->EncryptionAlgorithm);
+    status &= String_Read(&a_pValue->PolicyId, msgBuf);
+    status &= String_Read(&a_pValue->UserName, msgBuf);
+    status &= ByteString_Read(&a_pValue->Password, msgBuf);
+    status &= String_Read(&a_pValue->EncryptionAlgorithm, msgBuf);
 
     if(status != STATUS_OK){
         UA_UserNameIdentityToken_Clear(a_pValue);
@@ -4925,7 +5117,7 @@ void UA_X509IdentityToken_Clear(UA_X509IdentityToken* a_pValue)
 /*============================================================================
  * UA_X509IdentityToken_Encode
  *===========================================================================*/
-StatusCode UA_X509IdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_X509IdentityToken* a_pValue)
+StatusCode UA_X509IdentityToken_Encode(UA_X509IdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4933,8 +5125,12 @@ StatusCode UA_X509IdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_X509IdentityToke
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->PolicyId);
-    ByteString_Write(msgBuf, &a_pValue->CertificateData);
+    status &= String_Write(&a_pValue->PolicyId, msgBuf);
+    status &= ByteString_Write(&a_pValue->CertificateData, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -4942,7 +5138,7 @@ StatusCode UA_X509IdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_X509IdentityToke
 /*============================================================================
  * UA_X509IdentityToken_Decode
  *===========================================================================*/
-StatusCode UA_X509IdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_X509IdentityToken* a_pValue)
+StatusCode UA_X509IdentityToken_Decode(UA_X509IdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -4952,8 +5148,8 @@ StatusCode UA_X509IdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_X509IdentityToke
 
     UA_X509IdentityToken_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->PolicyId);
-    ByteString_Read(msgBuf, &a_pValue->CertificateData);
+    status &= String_Read(&a_pValue->PolicyId, msgBuf);
+    status &= ByteString_Read(&a_pValue->CertificateData, msgBuf);
 
     if(status != STATUS_OK){
         UA_X509IdentityToken_Clear(a_pValue);
@@ -5010,7 +5206,7 @@ void UA_KerberosIdentityToken_Clear(UA_KerberosIdentityToken* a_pValue)
 /*============================================================================
  * UA_KerberosIdentityToken_Encode
  *===========================================================================*/
-StatusCode UA_KerberosIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_KerberosIdentityToken* a_pValue)
+StatusCode UA_KerberosIdentityToken_Encode(UA_KerberosIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5018,8 +5214,12 @@ StatusCode UA_KerberosIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_KerberosIden
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->PolicyId);
-    ByteString_Write(msgBuf, &a_pValue->TicketData);
+    status &= String_Write(&a_pValue->PolicyId, msgBuf);
+    status &= ByteString_Write(&a_pValue->TicketData, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5027,7 +5227,7 @@ StatusCode UA_KerberosIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_KerberosIden
 /*============================================================================
  * UA_KerberosIdentityToken_Decode
  *===========================================================================*/
-StatusCode UA_KerberosIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_KerberosIdentityToken* a_pValue)
+StatusCode UA_KerberosIdentityToken_Decode(UA_KerberosIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5037,8 +5237,8 @@ StatusCode UA_KerberosIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_KerberosIden
 
     UA_KerberosIdentityToken_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->PolicyId);
-    ByteString_Read(msgBuf, &a_pValue->TicketData);
+    status &= String_Read(&a_pValue->PolicyId, msgBuf);
+    status &= ByteString_Read(&a_pValue->TicketData, msgBuf);
 
     if(status != STATUS_OK){
         UA_KerberosIdentityToken_Clear(a_pValue);
@@ -5097,7 +5297,7 @@ void UA_IssuedIdentityToken_Clear(UA_IssuedIdentityToken* a_pValue)
 /*============================================================================
  * UA_IssuedIdentityToken_Encode
  *===========================================================================*/
-StatusCode UA_IssuedIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_IssuedIdentityToken* a_pValue)
+StatusCode UA_IssuedIdentityToken_Encode(UA_IssuedIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5105,9 +5305,13 @@ StatusCode UA_IssuedIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_IssuedIdentity
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->PolicyId);
-    ByteString_Write(msgBuf, &a_pValue->TokenData);
-    String_Write(msgBuf, &a_pValue->EncryptionAlgorithm);
+    status &= String_Write(&a_pValue->PolicyId, msgBuf);
+    status &= ByteString_Write(&a_pValue->TokenData, msgBuf);
+    status &= String_Write(&a_pValue->EncryptionAlgorithm, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5115,7 +5319,7 @@ StatusCode UA_IssuedIdentityToken_Encode(UA_MsgBuffer* msgBuf, UA_IssuedIdentity
 /*============================================================================
  * UA_IssuedIdentityToken_Decode
  *===========================================================================*/
-StatusCode UA_IssuedIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_IssuedIdentityToken* a_pValue)
+StatusCode UA_IssuedIdentityToken_Decode(UA_IssuedIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5125,9 +5329,9 @@ StatusCode UA_IssuedIdentityToken_Decode(UA_MsgBuffer* msgBuf, UA_IssuedIdentity
 
     UA_IssuedIdentityToken_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->PolicyId);
-    ByteString_Read(msgBuf, &a_pValue->TokenData);
-    String_Read(msgBuf, &a_pValue->EncryptionAlgorithm);
+    status &= String_Read(&a_pValue->PolicyId, msgBuf);
+    status &= ByteString_Read(&a_pValue->TokenData, msgBuf);
+    status &= String_Read(&a_pValue->EncryptionAlgorithm, msgBuf);
 
     if(status != STATUS_OK){
         UA_IssuedIdentityToken_Clear(a_pValue);
@@ -5197,7 +5401,7 @@ void UA_ActivateSessionRequest_Clear(UA_ActivateSessionRequest* a_pValue)
 /*============================================================================
  * UA_ActivateSessionRequest_Encode
  *===========================================================================*/
-StatusCode UA_ActivateSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_ActivateSessionRequest* a_pValue)
+StatusCode UA_ActivateSessionRequest_Encode(UA_ActivateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5205,14 +5409,18 @@ StatusCode UA_ActivateSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_ActivateSes
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_SignatureData_Encode(msgBuf, &a_pValue->ClientSignature);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfClientSoftwareCertificates, (void**) &a_pValue->ClientSoftwareCertificates, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_SignatureData_Encode(&a_pValue->ClientSignature, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfClientSoftwareCertificates, (void**) &a_pValue->ClientSoftwareCertificates, 
                    sizeof(UA_SignedSoftwareCertificate), (UA_EncodeableObject_PfnEncode*) UA_SignedSoftwareCertificate_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
-    ExtensionObject_Write(msgBuf, &a_pValue->UserIdentityToken);
-    UA_SignatureData_Encode(msgBuf, &a_pValue->UserTokenSignature);
+    status &= ExtensionObject_Write(&a_pValue->UserIdentityToken, msgBuf);
+    status &= UA_SignatureData_Encode(&a_pValue->UserTokenSignature, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5220,7 +5428,7 @@ StatusCode UA_ActivateSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_ActivateSes
 /*============================================================================
  * UA_ActivateSessionRequest_Decode
  *===========================================================================*/
-StatusCode UA_ActivateSessionRequest_Decode(UA_MsgBuffer* msgBuf, UA_ActivateSessionRequest* a_pValue)
+StatusCode UA_ActivateSessionRequest_Decode(UA_ActivateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5230,14 +5438,14 @@ StatusCode UA_ActivateSessionRequest_Decode(UA_MsgBuffer* msgBuf, UA_ActivateSes
 
     UA_ActivateSessionRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_SignatureData_Decode(msgBuf, &a_pValue->ClientSignature);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfClientSoftwareCertificates, (void**) &a_pValue->ClientSoftwareCertificates, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_SignatureData_Decode(&a_pValue->ClientSignature, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfClientSoftwareCertificates, (void**) &a_pValue->ClientSoftwareCertificates, 
                   sizeof(UA_SignedSoftwareCertificate), (UA_EncodeableObject_PfnDecode*) UA_SignedSoftwareCertificate_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
-    ExtensionObject_Read(msgBuf, &a_pValue->UserIdentityToken);
-    UA_SignatureData_Decode(msgBuf, &a_pValue->UserTokenSignature);
+    status &= ExtensionObject_Read(&a_pValue->UserIdentityToken, msgBuf);
+    status &= UA_SignatureData_Decode(&a_pValue->UserTokenSignature, msgBuf);
 
     if(status != STATUS_OK){
         UA_ActivateSessionRequest_Clear(a_pValue);
@@ -5302,7 +5510,7 @@ void UA_ActivateSessionResponse_Clear(UA_ActivateSessionResponse* a_pValue)
 /*============================================================================
  * UA_ActivateSessionResponse_Encode
  *===========================================================================*/
-StatusCode UA_ActivateSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_ActivateSessionResponse* a_pValue)
+StatusCode UA_ActivateSessionResponse_Encode(UA_ActivateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5310,12 +5518,16 @@ StatusCode UA_ActivateSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_ActivateSe
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    ByteString_Write(msgBuf, &a_pValue->ServerNonce);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= ByteString_Write(&a_pValue->ServerNonce, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5323,7 +5535,7 @@ StatusCode UA_ActivateSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_ActivateSe
 /*============================================================================
  * UA_ActivateSessionResponse_Decode
  *===========================================================================*/
-StatusCode UA_ActivateSessionResponse_Decode(UA_MsgBuffer* msgBuf, UA_ActivateSessionResponse* a_pValue)
+StatusCode UA_ActivateSessionResponse_Decode(UA_ActivateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5333,11 +5545,11 @@ StatusCode UA_ActivateSessionResponse_Decode(UA_MsgBuffer* msgBuf, UA_ActivateSe
 
     UA_ActivateSessionResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    ByteString_Read(msgBuf, &a_pValue->ServerNonce);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= ByteString_Read(&a_pValue->ServerNonce, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -5397,7 +5609,7 @@ void UA_CloseSessionRequest_Clear(UA_CloseSessionRequest* a_pValue)
 /*============================================================================
  * UA_CloseSessionRequest_Encode
  *===========================================================================*/
-StatusCode UA_CloseSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CloseSessionRequest* a_pValue)
+StatusCode UA_CloseSessionRequest_Encode(UA_CloseSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5405,8 +5617,12 @@ StatusCode UA_CloseSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CloseSessionRe
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    Boolean_Write(msgBuf, &a_pValue->DeleteSubscriptions);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= Boolean_Write(&a_pValue->DeleteSubscriptions, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5414,7 +5630,7 @@ StatusCode UA_CloseSessionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CloseSessionRe
 /*============================================================================
  * UA_CloseSessionRequest_Decode
  *===========================================================================*/
-StatusCode UA_CloseSessionRequest_Decode(UA_MsgBuffer* msgBuf, UA_CloseSessionRequest* a_pValue)
+StatusCode UA_CloseSessionRequest_Decode(UA_CloseSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5424,8 +5640,8 @@ StatusCode UA_CloseSessionRequest_Decode(UA_MsgBuffer* msgBuf, UA_CloseSessionRe
 
     UA_CloseSessionRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    Boolean_Read(msgBuf, &a_pValue->DeleteSubscriptions);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= Boolean_Read(&a_pValue->DeleteSubscriptions, msgBuf);
 
     if(status != STATUS_OK){
         UA_CloseSessionRequest_Clear(a_pValue);
@@ -5480,7 +5696,7 @@ void UA_CloseSessionResponse_Clear(UA_CloseSessionResponse* a_pValue)
 /*============================================================================
  * UA_CloseSessionResponse_Encode
  *===========================================================================*/
-StatusCode UA_CloseSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CloseSessionResponse* a_pValue)
+StatusCode UA_CloseSessionResponse_Encode(UA_CloseSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5488,7 +5704,11 @@ StatusCode UA_CloseSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CloseSessionR
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5496,7 +5716,7 @@ StatusCode UA_CloseSessionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CloseSessionR
 /*============================================================================
  * UA_CloseSessionResponse_Decode
  *===========================================================================*/
-StatusCode UA_CloseSessionResponse_Decode(UA_MsgBuffer* msgBuf, UA_CloseSessionResponse* a_pValue)
+StatusCode UA_CloseSessionResponse_Decode(UA_CloseSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5506,7 +5726,7 @@ StatusCode UA_CloseSessionResponse_Decode(UA_MsgBuffer* msgBuf, UA_CloseSessionR
 
     UA_CloseSessionResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
     if(status != STATUS_OK){
         UA_CloseSessionResponse_Clear(a_pValue);
@@ -5565,7 +5785,7 @@ void UA_CancelRequest_Clear(UA_CancelRequest* a_pValue)
 /*============================================================================
  * UA_CancelRequest_Encode
  *===========================================================================*/
-StatusCode UA_CancelRequest_Encode(UA_MsgBuffer* msgBuf, UA_CancelRequest* a_pValue)
+StatusCode UA_CancelRequest_Encode(UA_CancelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5573,8 +5793,12 @@ StatusCode UA_CancelRequest_Encode(UA_MsgBuffer* msgBuf, UA_CancelRequest* a_pVa
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->RequestHandle);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->RequestHandle, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5582,7 +5806,7 @@ StatusCode UA_CancelRequest_Encode(UA_MsgBuffer* msgBuf, UA_CancelRequest* a_pVa
 /*============================================================================
  * UA_CancelRequest_Decode
  *===========================================================================*/
-StatusCode UA_CancelRequest_Decode(UA_MsgBuffer* msgBuf, UA_CancelRequest* a_pValue)
+StatusCode UA_CancelRequest_Decode(UA_CancelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5592,8 +5816,8 @@ StatusCode UA_CancelRequest_Decode(UA_MsgBuffer* msgBuf, UA_CancelRequest* a_pVa
 
     UA_CancelRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->RequestHandle);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->RequestHandle, msgBuf);
 
     if(status != STATUS_OK){
         UA_CancelRequest_Clear(a_pValue);
@@ -5650,7 +5874,7 @@ void UA_CancelResponse_Clear(UA_CancelResponse* a_pValue)
 /*============================================================================
  * UA_CancelResponse_Encode
  *===========================================================================*/
-StatusCode UA_CancelResponse_Encode(UA_MsgBuffer* msgBuf, UA_CancelResponse* a_pValue)
+StatusCode UA_CancelResponse_Encode(UA_CancelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5658,8 +5882,12 @@ StatusCode UA_CancelResponse_Encode(UA_MsgBuffer* msgBuf, UA_CancelResponse* a_p
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UInt32_Write(msgBuf, &a_pValue->CancelCount);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->CancelCount, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5667,7 +5895,7 @@ StatusCode UA_CancelResponse_Encode(UA_MsgBuffer* msgBuf, UA_CancelResponse* a_p
 /*============================================================================
  * UA_CancelResponse_Decode
  *===========================================================================*/
-StatusCode UA_CancelResponse_Decode(UA_MsgBuffer* msgBuf, UA_CancelResponse* a_pValue)
+StatusCode UA_CancelResponse_Decode(UA_CancelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5677,8 +5905,8 @@ StatusCode UA_CancelResponse_Decode(UA_MsgBuffer* msgBuf, UA_CancelResponse* a_p
 
     UA_CancelResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UInt32_Read(msgBuf, &a_pValue->CancelCount);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->CancelCount, msgBuf);
 
     if(status != STATUS_OK){
         UA_CancelResponse_Clear(a_pValue);
@@ -5743,7 +5971,7 @@ void UA_NodeAttributes_Clear(UA_NodeAttributes* a_pValue)
 /*============================================================================
  * UA_NodeAttributes_Encode
  *===========================================================================*/
-StatusCode UA_NodeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_NodeAttributes* a_pValue)
+StatusCode UA_NodeAttributes_Encode(UA_NodeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5751,11 +5979,15 @@ StatusCode UA_NodeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_NodeAttributes* a_p
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
+    status &= UInt32_Write(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5763,7 +5995,7 @@ StatusCode UA_NodeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_NodeAttributes* a_p
 /*============================================================================
  * UA_NodeAttributes_Decode
  *===========================================================================*/
-StatusCode UA_NodeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_NodeAttributes* a_pValue)
+StatusCode UA_NodeAttributes_Decode(UA_NodeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5773,11 +6005,11 @@ StatusCode UA_NodeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_NodeAttributes* a_p
 
     UA_NodeAttributes_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
+    status &= UInt32_Read(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
 
     if(status != STATUS_OK){
         UA_NodeAttributes_Clear(a_pValue);
@@ -5842,7 +6074,7 @@ void UA_ObjectAttributes_Clear(UA_ObjectAttributes* a_pValue)
 /*============================================================================
  * UA_ObjectAttributes_Encode
  *===========================================================================*/
-StatusCode UA_ObjectAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ObjectAttributes* a_pValue)
+StatusCode UA_ObjectAttributes_Encode(UA_ObjectAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5850,12 +6082,16 @@ StatusCode UA_ObjectAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ObjectAttributes*
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    Byte_Write(msgBuf, &a_pValue->EventNotifier);
+    status &= UInt32_Write(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= Byte_Write(&a_pValue->EventNotifier, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5863,7 +6099,7 @@ StatusCode UA_ObjectAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ObjectAttributes*
 /*============================================================================
  * UA_ObjectAttributes_Decode
  *===========================================================================*/
-StatusCode UA_ObjectAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ObjectAttributes* a_pValue)
+StatusCode UA_ObjectAttributes_Decode(UA_ObjectAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5873,12 +6109,12 @@ StatusCode UA_ObjectAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ObjectAttributes*
 
     UA_ObjectAttributes_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    Byte_Read(msgBuf, &a_pValue->EventNotifier);
+    status &= UInt32_Read(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= Byte_Read(&a_pValue->EventNotifier, msgBuf);
 
     if(status != STATUS_OK){
         UA_ObjectAttributes_Clear(a_pValue);
@@ -5959,7 +6195,7 @@ void UA_VariableAttributes_Clear(UA_VariableAttributes* a_pValue)
 /*============================================================================
  * UA_VariableAttributes_Encode
  *===========================================================================*/
-StatusCode UA_VariableAttributes_Encode(UA_MsgBuffer* msgBuf, UA_VariableAttributes* a_pValue)
+StatusCode UA_VariableAttributes_Encode(UA_VariableAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5967,20 +6203,24 @@ StatusCode UA_VariableAttributes_Encode(UA_MsgBuffer* msgBuf, UA_VariableAttribu
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    Variant_Write(msgBuf, &a_pValue->Value);
-    NodeId_Write(msgBuf, &a_pValue->DataType);
-    Int32_Write(msgBuf, &a_pValue->ValueRank);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= UInt32_Write(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= Variant_Write(&a_pValue->Value, msgBuf);
+    status &= NodeId_Write(&a_pValue->DataType, msgBuf);
+    status &= Int32_Write(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
-    Byte_Write(msgBuf, &a_pValue->AccessLevel);
-    Byte_Write(msgBuf, &a_pValue->UserAccessLevel);
-    Double_Write(msgBuf, &a_pValue->MinimumSamplingInterval);
-    Boolean_Write(msgBuf, &a_pValue->Historizing);
+    status &= Byte_Write(&a_pValue->AccessLevel, msgBuf);
+    status &= Byte_Write(&a_pValue->UserAccessLevel, msgBuf);
+    status &= Double_Write(&a_pValue->MinimumSamplingInterval, msgBuf);
+    status &= Boolean_Write(&a_pValue->Historizing, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -5988,7 +6228,7 @@ StatusCode UA_VariableAttributes_Encode(UA_MsgBuffer* msgBuf, UA_VariableAttribu
 /*============================================================================
  * UA_VariableAttributes_Decode
  *===========================================================================*/
-StatusCode UA_VariableAttributes_Decode(UA_MsgBuffer* msgBuf, UA_VariableAttributes* a_pValue)
+StatusCode UA_VariableAttributes_Decode(UA_VariableAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -5998,20 +6238,20 @@ StatusCode UA_VariableAttributes_Decode(UA_MsgBuffer* msgBuf, UA_VariableAttribu
 
     UA_VariableAttributes_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    Variant_Read(msgBuf, &a_pValue->Value);
-    NodeId_Read(msgBuf, &a_pValue->DataType);
-    Int32_Read(msgBuf, &a_pValue->ValueRank);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= UInt32_Read(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= Variant_Read(&a_pValue->Value, msgBuf);
+    status &= NodeId_Read(&a_pValue->DataType, msgBuf);
+    status &= Int32_Read(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
-    Byte_Read(msgBuf, &a_pValue->AccessLevel);
-    Byte_Read(msgBuf, &a_pValue->UserAccessLevel);
-    Double_Read(msgBuf, &a_pValue->MinimumSamplingInterval);
-    Boolean_Read(msgBuf, &a_pValue->Historizing);
+    status &= Byte_Read(&a_pValue->AccessLevel, msgBuf);
+    status &= Byte_Read(&a_pValue->UserAccessLevel, msgBuf);
+    status &= Double_Read(&a_pValue->MinimumSamplingInterval, msgBuf);
+    status &= Boolean_Read(&a_pValue->Historizing, msgBuf);
 
     if(status != STATUS_OK){
         UA_VariableAttributes_Clear(a_pValue);
@@ -6078,7 +6318,7 @@ void UA_MethodAttributes_Clear(UA_MethodAttributes* a_pValue)
 /*============================================================================
  * UA_MethodAttributes_Encode
  *===========================================================================*/
-StatusCode UA_MethodAttributes_Encode(UA_MsgBuffer* msgBuf, UA_MethodAttributes* a_pValue)
+StatusCode UA_MethodAttributes_Encode(UA_MethodAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6086,13 +6326,17 @@ StatusCode UA_MethodAttributes_Encode(UA_MsgBuffer* msgBuf, UA_MethodAttributes*
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Write(msgBuf, &a_pValue->Executable);
-    Boolean_Write(msgBuf, &a_pValue->UserExecutable);
+    status &= UInt32_Write(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Write(&a_pValue->Executable, msgBuf);
+    status &= Boolean_Write(&a_pValue->UserExecutable, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -6100,7 +6344,7 @@ StatusCode UA_MethodAttributes_Encode(UA_MsgBuffer* msgBuf, UA_MethodAttributes*
 /*============================================================================
  * UA_MethodAttributes_Decode
  *===========================================================================*/
-StatusCode UA_MethodAttributes_Decode(UA_MsgBuffer* msgBuf, UA_MethodAttributes* a_pValue)
+StatusCode UA_MethodAttributes_Decode(UA_MethodAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6110,13 +6354,13 @@ StatusCode UA_MethodAttributes_Decode(UA_MsgBuffer* msgBuf, UA_MethodAttributes*
 
     UA_MethodAttributes_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Read(msgBuf, &a_pValue->Executable);
-    Boolean_Read(msgBuf, &a_pValue->UserExecutable);
+    status &= UInt32_Read(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Read(&a_pValue->Executable, msgBuf);
+    status &= Boolean_Read(&a_pValue->UserExecutable, msgBuf);
 
     if(status != STATUS_OK){
         UA_MethodAttributes_Clear(a_pValue);
@@ -6181,7 +6425,7 @@ void UA_ObjectTypeAttributes_Clear(UA_ObjectTypeAttributes* a_pValue)
 /*============================================================================
  * UA_ObjectTypeAttributes_Encode
  *===========================================================================*/
-StatusCode UA_ObjectTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ObjectTypeAttributes* a_pValue)
+StatusCode UA_ObjectTypeAttributes_Encode(UA_ObjectTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6189,12 +6433,16 @@ StatusCode UA_ObjectTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ObjectTypeAtt
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Write(msgBuf, &a_pValue->IsAbstract);
+    status &= UInt32_Write(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsAbstract, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -6202,7 +6450,7 @@ StatusCode UA_ObjectTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ObjectTypeAtt
 /*============================================================================
  * UA_ObjectTypeAttributes_Decode
  *===========================================================================*/
-StatusCode UA_ObjectTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ObjectTypeAttributes* a_pValue)
+StatusCode UA_ObjectTypeAttributes_Decode(UA_ObjectTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6212,12 +6460,12 @@ StatusCode UA_ObjectTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ObjectTypeAtt
 
     UA_ObjectTypeAttributes_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Read(msgBuf, &a_pValue->IsAbstract);
+    status &= UInt32_Read(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
     if(status != STATUS_OK){
         UA_ObjectTypeAttributes_Clear(a_pValue);
@@ -6292,7 +6540,7 @@ void UA_VariableTypeAttributes_Clear(UA_VariableTypeAttributes* a_pValue)
 /*============================================================================
  * UA_VariableTypeAttributes_Encode
  *===========================================================================*/
-StatusCode UA_VariableTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_VariableTypeAttributes* a_pValue)
+StatusCode UA_VariableTypeAttributes_Encode(UA_VariableTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6300,17 +6548,21 @@ StatusCode UA_VariableTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_VariableTyp
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    Variant_Write(msgBuf, &a_pValue->Value);
-    NodeId_Write(msgBuf, &a_pValue->DataType);
-    Int32_Write(msgBuf, &a_pValue->ValueRank);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= UInt32_Write(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= Variant_Write(&a_pValue->Value, msgBuf);
+    status &= NodeId_Write(&a_pValue->DataType, msgBuf);
+    status &= Int32_Write(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
-    Boolean_Write(msgBuf, &a_pValue->IsAbstract);
+    status &= Boolean_Write(&a_pValue->IsAbstract, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -6318,7 +6570,7 @@ StatusCode UA_VariableTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_VariableTyp
 /*============================================================================
  * UA_VariableTypeAttributes_Decode
  *===========================================================================*/
-StatusCode UA_VariableTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_VariableTypeAttributes* a_pValue)
+StatusCode UA_VariableTypeAttributes_Decode(UA_VariableTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6328,17 +6580,17 @@ StatusCode UA_VariableTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_VariableTyp
 
     UA_VariableTypeAttributes_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    Variant_Read(msgBuf, &a_pValue->Value);
-    NodeId_Read(msgBuf, &a_pValue->DataType);
-    Int32_Read(msgBuf, &a_pValue->ValueRank);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
+    status &= UInt32_Read(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= Variant_Read(&a_pValue->Value, msgBuf);
+    status &= NodeId_Read(&a_pValue->DataType, msgBuf);
+    status &= Int32_Read(&a_pValue->ValueRank, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfArrayDimensions, (void**) &a_pValue->ArrayDimensions, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
-    Boolean_Read(msgBuf, &a_pValue->IsAbstract);
+    status &= Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
     if(status != STATUS_OK){
         UA_VariableTypeAttributes_Clear(a_pValue);
@@ -6407,7 +6659,7 @@ void UA_ReferenceTypeAttributes_Clear(UA_ReferenceTypeAttributes* a_pValue)
 /*============================================================================
  * UA_ReferenceTypeAttributes_Encode
  *===========================================================================*/
-StatusCode UA_ReferenceTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceTypeAttributes* a_pValue)
+StatusCode UA_ReferenceTypeAttributes_Encode(UA_ReferenceTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6415,14 +6667,18 @@ StatusCode UA_ReferenceTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceT
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Write(msgBuf, &a_pValue->IsAbstract);
-    Boolean_Write(msgBuf, &a_pValue->Symmetric);
-    LocalizedText_Write(msgBuf, &a_pValue->InverseName);
+    status &= UInt32_Write(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsAbstract, msgBuf);
+    status &= Boolean_Write(&a_pValue->Symmetric, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->InverseName, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -6430,7 +6686,7 @@ StatusCode UA_ReferenceTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceT
 /*============================================================================
  * UA_ReferenceTypeAttributes_Decode
  *===========================================================================*/
-StatusCode UA_ReferenceTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceTypeAttributes* a_pValue)
+StatusCode UA_ReferenceTypeAttributes_Decode(UA_ReferenceTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6440,14 +6696,14 @@ StatusCode UA_ReferenceTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceT
 
     UA_ReferenceTypeAttributes_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Read(msgBuf, &a_pValue->IsAbstract);
-    Boolean_Read(msgBuf, &a_pValue->Symmetric);
-    LocalizedText_Read(msgBuf, &a_pValue->InverseName);
+    status &= UInt32_Read(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsAbstract, msgBuf);
+    status &= Boolean_Read(&a_pValue->Symmetric, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->InverseName, msgBuf);
 
     if(status != STATUS_OK){
         UA_ReferenceTypeAttributes_Clear(a_pValue);
@@ -6512,7 +6768,7 @@ void UA_DataTypeAttributes_Clear(UA_DataTypeAttributes* a_pValue)
 /*============================================================================
  * UA_DataTypeAttributes_Encode
  *===========================================================================*/
-StatusCode UA_DataTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_DataTypeAttributes* a_pValue)
+StatusCode UA_DataTypeAttributes_Encode(UA_DataTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6520,12 +6776,16 @@ StatusCode UA_DataTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_DataTypeAttribu
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Write(msgBuf, &a_pValue->IsAbstract);
+    status &= UInt32_Write(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsAbstract, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -6533,7 +6793,7 @@ StatusCode UA_DataTypeAttributes_Encode(UA_MsgBuffer* msgBuf, UA_DataTypeAttribu
 /*============================================================================
  * UA_DataTypeAttributes_Decode
  *===========================================================================*/
-StatusCode UA_DataTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_DataTypeAttributes* a_pValue)
+StatusCode UA_DataTypeAttributes_Decode(UA_DataTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6543,12 +6803,12 @@ StatusCode UA_DataTypeAttributes_Decode(UA_MsgBuffer* msgBuf, UA_DataTypeAttribu
 
     UA_DataTypeAttributes_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Read(msgBuf, &a_pValue->IsAbstract);
+    status &= UInt32_Read(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
     if(status != STATUS_OK){
         UA_DataTypeAttributes_Clear(a_pValue);
@@ -6615,7 +6875,7 @@ void UA_ViewAttributes_Clear(UA_ViewAttributes* a_pValue)
 /*============================================================================
  * UA_ViewAttributes_Encode
  *===========================================================================*/
-StatusCode UA_ViewAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ViewAttributes* a_pValue)
+StatusCode UA_ViewAttributes_Encode(UA_ViewAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6623,13 +6883,17 @@ StatusCode UA_ViewAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ViewAttributes* a_p
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
-    UInt32_Write(msgBuf, &a_pValue->WriteMask);
-    UInt32_Write(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Write(msgBuf, &a_pValue->ContainsNoLoops);
-    Byte_Write(msgBuf, &a_pValue->EventNotifier);
+    status &= UInt32_Write(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+    status &= UInt32_Write(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Write(&a_pValue->ContainsNoLoops, msgBuf);
+    status &= Byte_Write(&a_pValue->EventNotifier, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -6637,7 +6901,7 @@ StatusCode UA_ViewAttributes_Encode(UA_MsgBuffer* msgBuf, UA_ViewAttributes* a_p
 /*============================================================================
  * UA_ViewAttributes_Decode
  *===========================================================================*/
-StatusCode UA_ViewAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ViewAttributes* a_pValue)
+StatusCode UA_ViewAttributes_Decode(UA_ViewAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6647,13 +6911,13 @@ StatusCode UA_ViewAttributes_Decode(UA_MsgBuffer* msgBuf, UA_ViewAttributes* a_p
 
     UA_ViewAttributes_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SpecifiedAttributes);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
-    UInt32_Read(msgBuf, &a_pValue->WriteMask);
-    UInt32_Read(msgBuf, &a_pValue->UserWriteMask);
-    Boolean_Read(msgBuf, &a_pValue->ContainsNoLoops);
-    Byte_Read(msgBuf, &a_pValue->EventNotifier);
+    status &= UInt32_Read(&a_pValue->SpecifiedAttributes, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
+    status &= UInt32_Read(&a_pValue->WriteMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
+    status &= Boolean_Read(&a_pValue->ContainsNoLoops, msgBuf);
+    status &= Byte_Read(&a_pValue->EventNotifier, msgBuf);
 
     if(status != STATUS_OK){
         UA_ViewAttributes_Clear(a_pValue);
@@ -6720,7 +6984,7 @@ void UA_AddNodesItem_Clear(UA_AddNodesItem* a_pValue)
 /*============================================================================
  * UA_AddNodesItem_Encode
  *===========================================================================*/
-StatusCode UA_AddNodesItem_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesItem* a_pValue)
+StatusCode UA_AddNodesItem_Encode(UA_AddNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6728,13 +6992,17 @@ StatusCode UA_AddNodesItem_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesItem* a_pValu
         status = STATUS_OK;
     }
 
-    ExpandedNodeId_Write(msgBuf, &a_pValue->ParentNodeId);
-    NodeId_Write(msgBuf, &a_pValue->ReferenceTypeId);
-    ExpandedNodeId_Write(msgBuf, &a_pValue->RequestedNewNodeId);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    ExtensionObject_Write(msgBuf, &a_pValue->NodeAttributes);
-    ExpandedNodeId_Write(msgBuf, &a_pValue->TypeDefinition);
+    status &= ExpandedNodeId_Write(&a_pValue->ParentNodeId, msgBuf);
+    status &= NodeId_Write(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= ExpandedNodeId_Write(&a_pValue->RequestedNewNodeId, msgBuf);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= ExtensionObject_Write(&a_pValue->NodeAttributes, msgBuf);
+    status &= ExpandedNodeId_Write(&a_pValue->TypeDefinition, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -6742,7 +7010,7 @@ StatusCode UA_AddNodesItem_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesItem* a_pValu
 /*============================================================================
  * UA_AddNodesItem_Decode
  *===========================================================================*/
-StatusCode UA_AddNodesItem_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesItem* a_pValue)
+StatusCode UA_AddNodesItem_Decode(UA_AddNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6752,13 +7020,13 @@ StatusCode UA_AddNodesItem_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesItem* a_pValu
 
     UA_AddNodesItem_Initialize(a_pValue);
 
-    ExpandedNodeId_Read(msgBuf, &a_pValue->ParentNodeId);
-    NodeId_Read(msgBuf, &a_pValue->ReferenceTypeId);
-    ExpandedNodeId_Read(msgBuf, &a_pValue->RequestedNewNodeId);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    ExtensionObject_Read(msgBuf, &a_pValue->NodeAttributes);
-    ExpandedNodeId_Read(msgBuf, &a_pValue->TypeDefinition);
+    status &= ExpandedNodeId_Read(&a_pValue->ParentNodeId, msgBuf);
+    status &= NodeId_Read(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= ExpandedNodeId_Read(&a_pValue->RequestedNewNodeId, msgBuf);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= ExtensionObject_Read(&a_pValue->NodeAttributes, msgBuf);
+    status &= ExpandedNodeId_Read(&a_pValue->TypeDefinition, msgBuf);
 
     if(status != STATUS_OK){
         UA_AddNodesItem_Clear(a_pValue);
@@ -6815,7 +7083,7 @@ void UA_AddNodesResult_Clear(UA_AddNodesResult* a_pValue)
 /*============================================================================
  * UA_AddNodesResult_Encode
  *===========================================================================*/
-StatusCode UA_AddNodesResult_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesResult* a_pValue)
+StatusCode UA_AddNodesResult_Encode(UA_AddNodesResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6823,8 +7091,12 @@ StatusCode UA_AddNodesResult_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesResult* a_p
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    NodeId_Write(msgBuf, &a_pValue->AddedNodeId);
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= NodeId_Write(&a_pValue->AddedNodeId, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -6832,7 +7104,7 @@ StatusCode UA_AddNodesResult_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesResult* a_p
 /*============================================================================
  * UA_AddNodesResult_Decode
  *===========================================================================*/
-StatusCode UA_AddNodesResult_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesResult* a_pValue)
+StatusCode UA_AddNodesResult_Decode(UA_AddNodesResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6842,8 +7114,8 @@ StatusCode UA_AddNodesResult_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesResult* a_p
 
     UA_AddNodesResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    NodeId_Read(msgBuf, &a_pValue->AddedNodeId);
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= NodeId_Read(&a_pValue->AddedNodeId, msgBuf);
 
     if(status != STATUS_OK){
         UA_AddNodesResult_Clear(a_pValue);
@@ -6903,7 +7175,7 @@ void UA_AddNodesRequest_Clear(UA_AddNodesRequest* a_pValue)
 /*============================================================================
  * UA_AddNodesRequest_Encode
  *===========================================================================*/
-StatusCode UA_AddNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesRequest* a_pValue)
+StatusCode UA_AddNodesRequest_Encode(UA_AddNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6911,9 +7183,13 @@ StatusCode UA_AddNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesRequest* a
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToAdd, (void**) &a_pValue->NodesToAdd, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToAdd, (void**) &a_pValue->NodesToAdd, 
                    sizeof(UA_AddNodesItem), (UA_EncodeableObject_PfnEncode*) UA_AddNodesItem_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -6921,7 +7197,7 @@ StatusCode UA_AddNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesRequest* a
 /*============================================================================
  * UA_AddNodesRequest_Decode
  *===========================================================================*/
-StatusCode UA_AddNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesRequest* a_pValue)
+StatusCode UA_AddNodesRequest_Decode(UA_AddNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -6931,8 +7207,8 @@ StatusCode UA_AddNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesRequest* a
 
     UA_AddNodesRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToAdd, (void**) &a_pValue->NodesToAdd, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToAdd, (void**) &a_pValue->NodesToAdd, 
                   sizeof(UA_AddNodesItem), (UA_EncodeableObject_PfnDecode*) UA_AddNodesItem_Decode);
 
     if(status != STATUS_OK){
@@ -6996,7 +7272,7 @@ void UA_AddNodesResponse_Clear(UA_AddNodesResponse* a_pValue)
 /*============================================================================
  * UA_AddNodesResponse_Encode
  *===========================================================================*/
-StatusCode UA_AddNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesResponse* a_pValue)
+StatusCode UA_AddNodesResponse_Encode(UA_AddNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7004,11 +7280,15 @@ StatusCode UA_AddNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesResponse*
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_AddNodesResult), (UA_EncodeableObject_PfnEncode*) UA_AddNodesResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7016,7 +7296,7 @@ StatusCode UA_AddNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_AddNodesResponse*
 /*============================================================================
  * UA_AddNodesResponse_Decode
  *===========================================================================*/
-StatusCode UA_AddNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesResponse* a_pValue)
+StatusCode UA_AddNodesResponse_Decode(UA_AddNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7026,10 +7306,10 @@ StatusCode UA_AddNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_AddNodesResponse*
 
     UA_AddNodesResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_AddNodesResult), (UA_EncodeableObject_PfnDecode*) UA_AddNodesResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -7096,7 +7376,7 @@ void UA_AddReferencesItem_Clear(UA_AddReferencesItem* a_pValue)
 /*============================================================================
  * UA_AddReferencesItem_Encode
  *===========================================================================*/
-StatusCode UA_AddReferencesItem_Encode(UA_MsgBuffer* msgBuf, UA_AddReferencesItem* a_pValue)
+StatusCode UA_AddReferencesItem_Encode(UA_AddReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7104,12 +7384,16 @@ StatusCode UA_AddReferencesItem_Encode(UA_MsgBuffer* msgBuf, UA_AddReferencesIte
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->SourceNodeId);
-    NodeId_Write(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Write(msgBuf, &a_pValue->IsForward);
-    String_Write(msgBuf, &a_pValue->TargetServerUri);
-    ExpandedNodeId_Write(msgBuf, &a_pValue->TargetNodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TargetNodeClass);
+    status &= NodeId_Write(&a_pValue->SourceNodeId, msgBuf);
+    status &= NodeId_Write(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsForward, msgBuf);
+    status &= String_Write(&a_pValue->TargetServerUri, msgBuf);
+    status &= ExpandedNodeId_Write(&a_pValue->TargetNodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TargetNodeClass);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7117,7 +7401,7 @@ StatusCode UA_AddReferencesItem_Encode(UA_MsgBuffer* msgBuf, UA_AddReferencesIte
 /*============================================================================
  * UA_AddReferencesItem_Decode
  *===========================================================================*/
-StatusCode UA_AddReferencesItem_Decode(UA_MsgBuffer* msgBuf, UA_AddReferencesItem* a_pValue)
+StatusCode UA_AddReferencesItem_Decode(UA_AddReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7127,12 +7411,12 @@ StatusCode UA_AddReferencesItem_Decode(UA_MsgBuffer* msgBuf, UA_AddReferencesIte
 
     UA_AddReferencesItem_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->SourceNodeId);
-    NodeId_Read(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Read(msgBuf, &a_pValue->IsForward);
-    String_Read(msgBuf, &a_pValue->TargetServerUri);
-    ExpandedNodeId_Read(msgBuf, &a_pValue->TargetNodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TargetNodeClass);
+    status &= NodeId_Read(&a_pValue->SourceNodeId, msgBuf);
+    status &= NodeId_Read(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsForward, msgBuf);
+    status &= String_Read(&a_pValue->TargetServerUri, msgBuf);
+    status &= ExpandedNodeId_Read(&a_pValue->TargetNodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TargetNodeClass);
 
     if(status != STATUS_OK){
         UA_AddReferencesItem_Clear(a_pValue);
@@ -7192,7 +7476,7 @@ void UA_AddReferencesRequest_Clear(UA_AddReferencesRequest* a_pValue)
 /*============================================================================
  * UA_AddReferencesRequest_Encode
  *===========================================================================*/
-StatusCode UA_AddReferencesRequest_Encode(UA_MsgBuffer* msgBuf, UA_AddReferencesRequest* a_pValue)
+StatusCode UA_AddReferencesRequest_Encode(UA_AddReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7200,9 +7484,13 @@ StatusCode UA_AddReferencesRequest_Encode(UA_MsgBuffer* msgBuf, UA_AddReferences
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferencesToAdd, (void**) &a_pValue->ReferencesToAdd, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferencesToAdd, (void**) &a_pValue->ReferencesToAdd, 
                    sizeof(UA_AddReferencesItem), (UA_EncodeableObject_PfnEncode*) UA_AddReferencesItem_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7210,7 +7498,7 @@ StatusCode UA_AddReferencesRequest_Encode(UA_MsgBuffer* msgBuf, UA_AddReferences
 /*============================================================================
  * UA_AddReferencesRequest_Decode
  *===========================================================================*/
-StatusCode UA_AddReferencesRequest_Decode(UA_MsgBuffer* msgBuf, UA_AddReferencesRequest* a_pValue)
+StatusCode UA_AddReferencesRequest_Decode(UA_AddReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7220,8 +7508,8 @@ StatusCode UA_AddReferencesRequest_Decode(UA_MsgBuffer* msgBuf, UA_AddReferences
 
     UA_AddReferencesRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferencesToAdd, (void**) &a_pValue->ReferencesToAdd, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferencesToAdd, (void**) &a_pValue->ReferencesToAdd, 
                   sizeof(UA_AddReferencesItem), (UA_EncodeableObject_PfnDecode*) UA_AddReferencesItem_Decode);
 
     if(status != STATUS_OK){
@@ -7285,7 +7573,7 @@ void UA_AddReferencesResponse_Clear(UA_AddReferencesResponse* a_pValue)
 /*============================================================================
  * UA_AddReferencesResponse_Encode
  *===========================================================================*/
-StatusCode UA_AddReferencesResponse_Encode(UA_MsgBuffer* msgBuf, UA_AddReferencesResponse* a_pValue)
+StatusCode UA_AddReferencesResponse_Encode(UA_AddReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7293,11 +7581,15 @@ StatusCode UA_AddReferencesResponse_Encode(UA_MsgBuffer* msgBuf, UA_AddReference
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7305,7 +7597,7 @@ StatusCode UA_AddReferencesResponse_Encode(UA_MsgBuffer* msgBuf, UA_AddReference
 /*============================================================================
  * UA_AddReferencesResponse_Decode
  *===========================================================================*/
-StatusCode UA_AddReferencesResponse_Decode(UA_MsgBuffer* msgBuf, UA_AddReferencesResponse* a_pValue)
+StatusCode UA_AddReferencesResponse_Decode(UA_AddReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7315,10 +7607,10 @@ StatusCode UA_AddReferencesResponse_Decode(UA_MsgBuffer* msgBuf, UA_AddReference
 
     UA_AddReferencesResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -7377,7 +7669,7 @@ void UA_DeleteNodesItem_Clear(UA_DeleteNodesItem* a_pValue)
 /*============================================================================
  * UA_DeleteNodesItem_Encode
  *===========================================================================*/
-StatusCode UA_DeleteNodesItem_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesItem* a_pValue)
+StatusCode UA_DeleteNodesItem_Encode(UA_DeleteNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7385,8 +7677,12 @@ StatusCode UA_DeleteNodesItem_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesItem* a
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    Boolean_Write(msgBuf, &a_pValue->DeleteTargetReferences);
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->DeleteTargetReferences, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7394,7 +7690,7 @@ StatusCode UA_DeleteNodesItem_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesItem* a
 /*============================================================================
  * UA_DeleteNodesItem_Decode
  *===========================================================================*/
-StatusCode UA_DeleteNodesItem_Decode(UA_MsgBuffer* msgBuf, UA_DeleteNodesItem* a_pValue)
+StatusCode UA_DeleteNodesItem_Decode(UA_DeleteNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7404,8 +7700,8 @@ StatusCode UA_DeleteNodesItem_Decode(UA_MsgBuffer* msgBuf, UA_DeleteNodesItem* a
 
     UA_DeleteNodesItem_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    Boolean_Read(msgBuf, &a_pValue->DeleteTargetReferences);
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->DeleteTargetReferences, msgBuf);
 
     if(status != STATUS_OK){
         UA_DeleteNodesItem_Clear(a_pValue);
@@ -7465,7 +7761,7 @@ void UA_DeleteNodesRequest_Clear(UA_DeleteNodesRequest* a_pValue)
 /*============================================================================
  * UA_DeleteNodesRequest_Encode
  *===========================================================================*/
-StatusCode UA_DeleteNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRequest* a_pValue)
+StatusCode UA_DeleteNodesRequest_Encode(UA_DeleteNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7473,9 +7769,13 @@ StatusCode UA_DeleteNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRequ
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToDelete, (void**) &a_pValue->NodesToDelete, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToDelete, (void**) &a_pValue->NodesToDelete, 
                    sizeof(UA_DeleteNodesItem), (UA_EncodeableObject_PfnEncode*) UA_DeleteNodesItem_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7483,7 +7783,7 @@ StatusCode UA_DeleteNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRequ
 /*============================================================================
  * UA_DeleteNodesRequest_Decode
  *===========================================================================*/
-StatusCode UA_DeleteNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRequest* a_pValue)
+StatusCode UA_DeleteNodesRequest_Decode(UA_DeleteNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7493,8 +7793,8 @@ StatusCode UA_DeleteNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRequ
 
     UA_DeleteNodesRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToDelete, (void**) &a_pValue->NodesToDelete, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToDelete, (void**) &a_pValue->NodesToDelete, 
                   sizeof(UA_DeleteNodesItem), (UA_EncodeableObject_PfnDecode*) UA_DeleteNodesItem_Decode);
 
     if(status != STATUS_OK){
@@ -7558,7 +7858,7 @@ void UA_DeleteNodesResponse_Clear(UA_DeleteNodesResponse* a_pValue)
 /*============================================================================
  * UA_DeleteNodesResponse_Encode
  *===========================================================================*/
-StatusCode UA_DeleteNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesResponse* a_pValue)
+StatusCode UA_DeleteNodesResponse_Encode(UA_DeleteNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7566,11 +7866,15 @@ StatusCode UA_DeleteNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRes
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7578,7 +7882,7 @@ StatusCode UA_DeleteNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRes
 /*============================================================================
  * UA_DeleteNodesResponse_Decode
  *===========================================================================*/
-StatusCode UA_DeleteNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_DeleteNodesResponse* a_pValue)
+StatusCode UA_DeleteNodesResponse_Decode(UA_DeleteNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7588,10 +7892,10 @@ StatusCode UA_DeleteNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_DeleteNodesRes
 
     UA_DeleteNodesResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -7656,7 +7960,7 @@ void UA_DeleteReferencesItem_Clear(UA_DeleteReferencesItem* a_pValue)
 /*============================================================================
  * UA_DeleteReferencesItem_Encode
  *===========================================================================*/
-StatusCode UA_DeleteReferencesItem_Encode(UA_MsgBuffer* msgBuf, UA_DeleteReferencesItem* a_pValue)
+StatusCode UA_DeleteReferencesItem_Encode(UA_DeleteReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7664,11 +7968,15 @@ StatusCode UA_DeleteReferencesItem_Encode(UA_MsgBuffer* msgBuf, UA_DeleteReferen
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->SourceNodeId);
-    NodeId_Write(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Write(msgBuf, &a_pValue->IsForward);
-    ExpandedNodeId_Write(msgBuf, &a_pValue->TargetNodeId);
-    Boolean_Write(msgBuf, &a_pValue->DeleteBidirectional);
+    status &= NodeId_Write(&a_pValue->SourceNodeId, msgBuf);
+    status &= NodeId_Write(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsForward, msgBuf);
+    status &= ExpandedNodeId_Write(&a_pValue->TargetNodeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->DeleteBidirectional, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7676,7 +7984,7 @@ StatusCode UA_DeleteReferencesItem_Encode(UA_MsgBuffer* msgBuf, UA_DeleteReferen
 /*============================================================================
  * UA_DeleteReferencesItem_Decode
  *===========================================================================*/
-StatusCode UA_DeleteReferencesItem_Decode(UA_MsgBuffer* msgBuf, UA_DeleteReferencesItem* a_pValue)
+StatusCode UA_DeleteReferencesItem_Decode(UA_DeleteReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7686,11 +7994,11 @@ StatusCode UA_DeleteReferencesItem_Decode(UA_MsgBuffer* msgBuf, UA_DeleteReferen
 
     UA_DeleteReferencesItem_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->SourceNodeId);
-    NodeId_Read(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Read(msgBuf, &a_pValue->IsForward);
-    ExpandedNodeId_Read(msgBuf, &a_pValue->TargetNodeId);
-    Boolean_Read(msgBuf, &a_pValue->DeleteBidirectional);
+    status &= NodeId_Read(&a_pValue->SourceNodeId, msgBuf);
+    status &= NodeId_Read(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsForward, msgBuf);
+    status &= ExpandedNodeId_Read(&a_pValue->TargetNodeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->DeleteBidirectional, msgBuf);
 
     if(status != STATUS_OK){
         UA_DeleteReferencesItem_Clear(a_pValue);
@@ -7750,7 +8058,7 @@ void UA_DeleteReferencesRequest_Clear(UA_DeleteReferencesRequest* a_pValue)
 /*============================================================================
  * UA_DeleteReferencesRequest_Encode
  *===========================================================================*/
-StatusCode UA_DeleteReferencesRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteReferencesRequest* a_pValue)
+StatusCode UA_DeleteReferencesRequest_Encode(UA_DeleteReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7758,9 +8066,13 @@ StatusCode UA_DeleteReferencesRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRefe
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferencesToDelete, (void**) &a_pValue->ReferencesToDelete, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferencesToDelete, (void**) &a_pValue->ReferencesToDelete, 
                    sizeof(UA_DeleteReferencesItem), (UA_EncodeableObject_PfnEncode*) UA_DeleteReferencesItem_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7768,7 +8080,7 @@ StatusCode UA_DeleteReferencesRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRefe
 /*============================================================================
  * UA_DeleteReferencesRequest_Decode
  *===========================================================================*/
-StatusCode UA_DeleteReferencesRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteReferencesRequest* a_pValue)
+StatusCode UA_DeleteReferencesRequest_Decode(UA_DeleteReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7778,8 +8090,8 @@ StatusCode UA_DeleteReferencesRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteRefe
 
     UA_DeleteReferencesRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferencesToDelete, (void**) &a_pValue->ReferencesToDelete, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferencesToDelete, (void**) &a_pValue->ReferencesToDelete, 
                   sizeof(UA_DeleteReferencesItem), (UA_EncodeableObject_PfnDecode*) UA_DeleteReferencesItem_Decode);
 
     if(status != STATUS_OK){
@@ -7843,7 +8155,7 @@ void UA_DeleteReferencesResponse_Clear(UA_DeleteReferencesResponse* a_pValue)
 /*============================================================================
  * UA_DeleteReferencesResponse_Encode
  *===========================================================================*/
-StatusCode UA_DeleteReferencesResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteReferencesResponse* a_pValue)
+StatusCode UA_DeleteReferencesResponse_Encode(UA_DeleteReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7851,11 +8163,15 @@ StatusCode UA_DeleteReferencesResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRef
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7863,7 +8179,7 @@ StatusCode UA_DeleteReferencesResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRef
 /*============================================================================
  * UA_DeleteReferencesResponse_Decode
  *===========================================================================*/
-StatusCode UA_DeleteReferencesResponse_Decode(UA_MsgBuffer* msgBuf, UA_DeleteReferencesResponse* a_pValue)
+StatusCode UA_DeleteReferencesResponse_Decode(UA_DeleteReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7873,10 +8189,10 @@ StatusCode UA_DeleteReferencesResponse_Decode(UA_MsgBuffer* msgBuf, UA_DeleteRef
 
     UA_DeleteReferencesResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -7939,7 +8255,7 @@ void UA_ViewDescription_Clear(UA_ViewDescription* a_pValue)
 /*============================================================================
  * UA_ViewDescription_Encode
  *===========================================================================*/
-StatusCode UA_ViewDescription_Encode(UA_MsgBuffer* msgBuf, UA_ViewDescription* a_pValue)
+StatusCode UA_ViewDescription_Encode(UA_ViewDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7947,9 +8263,13 @@ StatusCode UA_ViewDescription_Encode(UA_MsgBuffer* msgBuf, UA_ViewDescription* a
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->ViewId);
-    DateTime_Write(msgBuf, &a_pValue->Timestamp);
-    UInt32_Write(msgBuf, &a_pValue->ViewVersion);
+    status &= NodeId_Write(&a_pValue->ViewId, msgBuf);
+    status &= DateTime_Write(&a_pValue->Timestamp, msgBuf);
+    status &= UInt32_Write(&a_pValue->ViewVersion, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -7957,7 +8277,7 @@ StatusCode UA_ViewDescription_Encode(UA_MsgBuffer* msgBuf, UA_ViewDescription* a
 /*============================================================================
  * UA_ViewDescription_Decode
  *===========================================================================*/
-StatusCode UA_ViewDescription_Decode(UA_MsgBuffer* msgBuf, UA_ViewDescription* a_pValue)
+StatusCode UA_ViewDescription_Decode(UA_ViewDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -7967,9 +8287,9 @@ StatusCode UA_ViewDescription_Decode(UA_MsgBuffer* msgBuf, UA_ViewDescription* a
 
     UA_ViewDescription_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->ViewId);
-    DateTime_Read(msgBuf, &a_pValue->Timestamp);
-    UInt32_Read(msgBuf, &a_pValue->ViewVersion);
+    status &= NodeId_Read(&a_pValue->ViewId, msgBuf);
+    status &= DateTime_Read(&a_pValue->Timestamp, msgBuf);
+    status &= UInt32_Read(&a_pValue->ViewVersion, msgBuf);
 
     if(status != STATUS_OK){
         UA_ViewDescription_Clear(a_pValue);
@@ -8034,7 +8354,7 @@ void UA_BrowseDescription_Clear(UA_BrowseDescription* a_pValue)
 /*============================================================================
  * UA_BrowseDescription_Encode
  *===========================================================================*/
-StatusCode UA_BrowseDescription_Encode(UA_MsgBuffer* msgBuf, UA_BrowseDescription* a_pValue)
+StatusCode UA_BrowseDescription_Encode(UA_BrowseDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8042,12 +8362,16 @@ StatusCode UA_BrowseDescription_Encode(UA_MsgBuffer* msgBuf, UA_BrowseDescriptio
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->BrowseDirection);
-    NodeId_Write(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Write(msgBuf, &a_pValue->IncludeSubtypes);
-    UInt32_Write(msgBuf, &a_pValue->NodeClassMask);
-    UInt32_Write(msgBuf, &a_pValue->ResultMask);
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->BrowseDirection);
+    status &= NodeId_Write(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->IncludeSubtypes, msgBuf);
+    status &= UInt32_Write(&a_pValue->NodeClassMask, msgBuf);
+    status &= UInt32_Write(&a_pValue->ResultMask, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8055,7 +8379,7 @@ StatusCode UA_BrowseDescription_Encode(UA_MsgBuffer* msgBuf, UA_BrowseDescriptio
 /*============================================================================
  * UA_BrowseDescription_Decode
  *===========================================================================*/
-StatusCode UA_BrowseDescription_Decode(UA_MsgBuffer* msgBuf, UA_BrowseDescription* a_pValue)
+StatusCode UA_BrowseDescription_Decode(UA_BrowseDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8065,12 +8389,12 @@ StatusCode UA_BrowseDescription_Decode(UA_MsgBuffer* msgBuf, UA_BrowseDescriptio
 
     UA_BrowseDescription_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->BrowseDirection);
-    NodeId_Read(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Read(msgBuf, &a_pValue->IncludeSubtypes);
-    UInt32_Read(msgBuf, &a_pValue->NodeClassMask);
-    UInt32_Read(msgBuf, &a_pValue->ResultMask);
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->BrowseDirection);
+    status &= NodeId_Read(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->IncludeSubtypes, msgBuf);
+    status &= UInt32_Read(&a_pValue->NodeClassMask, msgBuf);
+    status &= UInt32_Read(&a_pValue->ResultMask, msgBuf);
 
     if(status != STATUS_OK){
         UA_BrowseDescription_Clear(a_pValue);
@@ -8138,7 +8462,7 @@ void UA_ReferenceDescription_Clear(UA_ReferenceDescription* a_pValue)
 /*============================================================================
  * UA_ReferenceDescription_Encode
  *===========================================================================*/
-StatusCode UA_ReferenceDescription_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceDescription* a_pValue)
+StatusCode UA_ReferenceDescription_Encode(UA_ReferenceDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8146,13 +8470,17 @@ StatusCode UA_ReferenceDescription_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceDesc
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Write(msgBuf, &a_pValue->IsForward);
-    ExpandedNodeId_Write(msgBuf, &a_pValue->NodeId);
-    QualifiedName_Write(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    ExpandedNodeId_Write(msgBuf, &a_pValue->TypeDefinition);
+    status &= NodeId_Write(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsForward, msgBuf);
+    status &= ExpandedNodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= QualifiedName_Write(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= ExpandedNodeId_Write(&a_pValue->TypeDefinition, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8160,7 +8488,7 @@ StatusCode UA_ReferenceDescription_Encode(UA_MsgBuffer* msgBuf, UA_ReferenceDesc
 /*============================================================================
  * UA_ReferenceDescription_Decode
  *===========================================================================*/
-StatusCode UA_ReferenceDescription_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceDescription* a_pValue)
+StatusCode UA_ReferenceDescription_Decode(UA_ReferenceDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8170,13 +8498,13 @@ StatusCode UA_ReferenceDescription_Decode(UA_MsgBuffer* msgBuf, UA_ReferenceDesc
 
     UA_ReferenceDescription_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Read(msgBuf, &a_pValue->IsForward);
-    ExpandedNodeId_Read(msgBuf, &a_pValue->NodeId);
-    QualifiedName_Read(msgBuf, &a_pValue->BrowseName);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
-    ExpandedNodeId_Read(msgBuf, &a_pValue->TypeDefinition);
+    status &= NodeId_Read(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsForward, msgBuf);
+    status &= ExpandedNodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= QualifiedName_Read(&a_pValue->BrowseName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->NodeClass);
+    status &= ExpandedNodeId_Read(&a_pValue->TypeDefinition, msgBuf);
 
     if(status != STATUS_OK){
         UA_ReferenceDescription_Clear(a_pValue);
@@ -8237,7 +8565,7 @@ void UA_BrowseResult_Clear(UA_BrowseResult* a_pValue)
 /*============================================================================
  * UA_BrowseResult_Encode
  *===========================================================================*/
-StatusCode UA_BrowseResult_Encode(UA_MsgBuffer* msgBuf, UA_BrowseResult* a_pValue)
+StatusCode UA_BrowseResult_Encode(UA_BrowseResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8245,10 +8573,14 @@ StatusCode UA_BrowseResult_Encode(UA_MsgBuffer* msgBuf, UA_BrowseResult* a_pValu
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    ByteString_Write(msgBuf, &a_pValue->ContinuationPoint);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= ByteString_Write(&a_pValue->ContinuationPoint, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                    sizeof(UA_ReferenceDescription), (UA_EncodeableObject_PfnEncode*) UA_ReferenceDescription_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8256,7 +8588,7 @@ StatusCode UA_BrowseResult_Encode(UA_MsgBuffer* msgBuf, UA_BrowseResult* a_pValu
 /*============================================================================
  * UA_BrowseResult_Decode
  *===========================================================================*/
-StatusCode UA_BrowseResult_Decode(UA_MsgBuffer* msgBuf, UA_BrowseResult* a_pValue)
+StatusCode UA_BrowseResult_Decode(UA_BrowseResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8266,9 +8598,9 @@ StatusCode UA_BrowseResult_Decode(UA_MsgBuffer* msgBuf, UA_BrowseResult* a_pValu
 
     UA_BrowseResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    ByteString_Read(msgBuf, &a_pValue->ContinuationPoint);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= ByteString_Read(&a_pValue->ContinuationPoint, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferences, (void**) &a_pValue->References, 
                   sizeof(UA_ReferenceDescription), (UA_EncodeableObject_PfnDecode*) UA_ReferenceDescription_Decode);
 
     if(status != STATUS_OK){
@@ -8333,7 +8665,7 @@ void UA_BrowseRequest_Clear(UA_BrowseRequest* a_pValue)
 /*============================================================================
  * UA_BrowseRequest_Encode
  *===========================================================================*/
-StatusCode UA_BrowseRequest_Encode(UA_MsgBuffer* msgBuf, UA_BrowseRequest* a_pValue)
+StatusCode UA_BrowseRequest_Encode(UA_BrowseRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8341,11 +8673,15 @@ StatusCode UA_BrowseRequest_Encode(UA_MsgBuffer* msgBuf, UA_BrowseRequest* a_pVa
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_ViewDescription_Encode(msgBuf, &a_pValue->View);
-    UInt32_Write(msgBuf, &a_pValue->RequestedMaxReferencesPerNode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToBrowse, (void**) &a_pValue->NodesToBrowse, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_ViewDescription_Encode(&a_pValue->View, msgBuf);
+    status &= UInt32_Write(&a_pValue->RequestedMaxReferencesPerNode, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToBrowse, (void**) &a_pValue->NodesToBrowse, 
                    sizeof(UA_BrowseDescription), (UA_EncodeableObject_PfnEncode*) UA_BrowseDescription_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8353,7 +8689,7 @@ StatusCode UA_BrowseRequest_Encode(UA_MsgBuffer* msgBuf, UA_BrowseRequest* a_pVa
 /*============================================================================
  * UA_BrowseRequest_Decode
  *===========================================================================*/
-StatusCode UA_BrowseRequest_Decode(UA_MsgBuffer* msgBuf, UA_BrowseRequest* a_pValue)
+StatusCode UA_BrowseRequest_Decode(UA_BrowseRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8363,10 +8699,10 @@ StatusCode UA_BrowseRequest_Decode(UA_MsgBuffer* msgBuf, UA_BrowseRequest* a_pVa
 
     UA_BrowseRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_ViewDescription_Decode(msgBuf, &a_pValue->View);
-    UInt32_Read(msgBuf, &a_pValue->RequestedMaxReferencesPerNode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToBrowse, (void**) &a_pValue->NodesToBrowse, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_ViewDescription_Decode(&a_pValue->View, msgBuf);
+    status &= UInt32_Read(&a_pValue->RequestedMaxReferencesPerNode, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToBrowse, (void**) &a_pValue->NodesToBrowse, 
                   sizeof(UA_BrowseDescription), (UA_EncodeableObject_PfnDecode*) UA_BrowseDescription_Decode);
 
     if(status != STATUS_OK){
@@ -8430,7 +8766,7 @@ void UA_BrowseResponse_Clear(UA_BrowseResponse* a_pValue)
 /*============================================================================
  * UA_BrowseResponse_Encode
  *===========================================================================*/
-StatusCode UA_BrowseResponse_Encode(UA_MsgBuffer* msgBuf, UA_BrowseResponse* a_pValue)
+StatusCode UA_BrowseResponse_Encode(UA_BrowseResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8438,11 +8774,15 @@ StatusCode UA_BrowseResponse_Encode(UA_MsgBuffer* msgBuf, UA_BrowseResponse* a_p
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_BrowseResult), (UA_EncodeableObject_PfnEncode*) UA_BrowseResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8450,7 +8790,7 @@ StatusCode UA_BrowseResponse_Encode(UA_MsgBuffer* msgBuf, UA_BrowseResponse* a_p
 /*============================================================================
  * UA_BrowseResponse_Decode
  *===========================================================================*/
-StatusCode UA_BrowseResponse_Decode(UA_MsgBuffer* msgBuf, UA_BrowseResponse* a_pValue)
+StatusCode UA_BrowseResponse_Decode(UA_BrowseResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8460,10 +8800,10 @@ StatusCode UA_BrowseResponse_Decode(UA_MsgBuffer* msgBuf, UA_BrowseResponse* a_p
 
     UA_BrowseResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_BrowseResult), (UA_EncodeableObject_PfnDecode*) UA_BrowseResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -8527,7 +8867,7 @@ void UA_BrowseNextRequest_Clear(UA_BrowseNextRequest* a_pValue)
 /*============================================================================
  * UA_BrowseNextRequest_Encode
  *===========================================================================*/
-StatusCode UA_BrowseNextRequest_Encode(UA_MsgBuffer* msgBuf, UA_BrowseNextRequest* a_pValue)
+StatusCode UA_BrowseNextRequest_Encode(UA_BrowseNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8535,10 +8875,14 @@ StatusCode UA_BrowseNextRequest_Encode(UA_MsgBuffer* msgBuf, UA_BrowseNextReques
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    Boolean_Write(msgBuf, &a_pValue->ReleaseContinuationPoints);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfContinuationPoints, (void**) &a_pValue->ContinuationPoints, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= Boolean_Write(&a_pValue->ReleaseContinuationPoints, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfContinuationPoints, (void**) &a_pValue->ContinuationPoints, 
                    sizeof(UA_ByteString), (UA_EncodeableObject_PfnEncode*) ByteString_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8546,7 +8890,7 @@ StatusCode UA_BrowseNextRequest_Encode(UA_MsgBuffer* msgBuf, UA_BrowseNextReques
 /*============================================================================
  * UA_BrowseNextRequest_Decode
  *===========================================================================*/
-StatusCode UA_BrowseNextRequest_Decode(UA_MsgBuffer* msgBuf, UA_BrowseNextRequest* a_pValue)
+StatusCode UA_BrowseNextRequest_Decode(UA_BrowseNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8556,9 +8900,9 @@ StatusCode UA_BrowseNextRequest_Decode(UA_MsgBuffer* msgBuf, UA_BrowseNextReques
 
     UA_BrowseNextRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    Boolean_Read(msgBuf, &a_pValue->ReleaseContinuationPoints);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfContinuationPoints, (void**) &a_pValue->ContinuationPoints, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= Boolean_Read(&a_pValue->ReleaseContinuationPoints, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfContinuationPoints, (void**) &a_pValue->ContinuationPoints, 
                   sizeof(UA_ByteString), (UA_EncodeableObject_PfnDecode*) ByteString_Read);
 
     if(status != STATUS_OK){
@@ -8622,7 +8966,7 @@ void UA_BrowseNextResponse_Clear(UA_BrowseNextResponse* a_pValue)
 /*============================================================================
  * UA_BrowseNextResponse_Encode
  *===========================================================================*/
-StatusCode UA_BrowseNextResponse_Encode(UA_MsgBuffer* msgBuf, UA_BrowseNextResponse* a_pValue)
+StatusCode UA_BrowseNextResponse_Encode(UA_BrowseNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8630,11 +8974,15 @@ StatusCode UA_BrowseNextResponse_Encode(UA_MsgBuffer* msgBuf, UA_BrowseNextRespo
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_BrowseResult), (UA_EncodeableObject_PfnEncode*) UA_BrowseResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8642,7 +8990,7 @@ StatusCode UA_BrowseNextResponse_Encode(UA_MsgBuffer* msgBuf, UA_BrowseNextRespo
 /*============================================================================
  * UA_BrowseNextResponse_Decode
  *===========================================================================*/
-StatusCode UA_BrowseNextResponse_Decode(UA_MsgBuffer* msgBuf, UA_BrowseNextResponse* a_pValue)
+StatusCode UA_BrowseNextResponse_Decode(UA_BrowseNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8652,10 +9000,10 @@ StatusCode UA_BrowseNextResponse_Decode(UA_MsgBuffer* msgBuf, UA_BrowseNextRespo
 
     UA_BrowseNextResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_BrowseResult), (UA_EncodeableObject_PfnDecode*) UA_BrowseResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -8718,7 +9066,7 @@ void UA_RelativePathElement_Clear(UA_RelativePathElement* a_pValue)
 /*============================================================================
  * UA_RelativePathElement_Encode
  *===========================================================================*/
-StatusCode UA_RelativePathElement_Encode(UA_MsgBuffer* msgBuf, UA_RelativePathElement* a_pValue)
+StatusCode UA_RelativePathElement_Encode(UA_RelativePathElement* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8726,10 +9074,14 @@ StatusCode UA_RelativePathElement_Encode(UA_MsgBuffer* msgBuf, UA_RelativePathEl
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Write(msgBuf, &a_pValue->IsInverse);
-    Boolean_Write(msgBuf, &a_pValue->IncludeSubtypes);
-    QualifiedName_Write(msgBuf, &a_pValue->TargetName);
+    status &= NodeId_Write(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsInverse, msgBuf);
+    status &= Boolean_Write(&a_pValue->IncludeSubtypes, msgBuf);
+    status &= QualifiedName_Write(&a_pValue->TargetName, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8737,7 +9089,7 @@ StatusCode UA_RelativePathElement_Encode(UA_MsgBuffer* msgBuf, UA_RelativePathEl
 /*============================================================================
  * UA_RelativePathElement_Decode
  *===========================================================================*/
-StatusCode UA_RelativePathElement_Decode(UA_MsgBuffer* msgBuf, UA_RelativePathElement* a_pValue)
+StatusCode UA_RelativePathElement_Decode(UA_RelativePathElement* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8747,10 +9099,10 @@ StatusCode UA_RelativePathElement_Decode(UA_MsgBuffer* msgBuf, UA_RelativePathEl
 
     UA_RelativePathElement_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Read(msgBuf, &a_pValue->IsInverse);
-    Boolean_Read(msgBuf, &a_pValue->IncludeSubtypes);
-    QualifiedName_Read(msgBuf, &a_pValue->TargetName);
+    status &= NodeId_Read(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsInverse, msgBuf);
+    status &= Boolean_Read(&a_pValue->IncludeSubtypes, msgBuf);
+    status &= QualifiedName_Read(&a_pValue->TargetName, msgBuf);
 
     if(status != STATUS_OK){
         UA_RelativePathElement_Clear(a_pValue);
@@ -8807,7 +9159,7 @@ void UA_RelativePath_Clear(UA_RelativePath* a_pValue)
 /*============================================================================
  * UA_RelativePath_Encode
  *===========================================================================*/
-StatusCode UA_RelativePath_Encode(UA_MsgBuffer* msgBuf, UA_RelativePath* a_pValue)
+StatusCode UA_RelativePath_Encode(UA_RelativePath* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8815,8 +9167,12 @@ StatusCode UA_RelativePath_Encode(UA_MsgBuffer* msgBuf, UA_RelativePath* a_pValu
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
                    sizeof(UA_RelativePathElement), (UA_EncodeableObject_PfnEncode*) UA_RelativePathElement_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8824,7 +9180,7 @@ StatusCode UA_RelativePath_Encode(UA_MsgBuffer* msgBuf, UA_RelativePath* a_pValu
 /*============================================================================
  * UA_RelativePath_Decode
  *===========================================================================*/
-StatusCode UA_RelativePath_Decode(UA_MsgBuffer* msgBuf, UA_RelativePath* a_pValue)
+StatusCode UA_RelativePath_Decode(UA_RelativePath* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8834,7 +9190,7 @@ StatusCode UA_RelativePath_Decode(UA_MsgBuffer* msgBuf, UA_RelativePath* a_pValu
 
     UA_RelativePath_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
                   sizeof(UA_RelativePathElement), (UA_EncodeableObject_PfnDecode*) UA_RelativePathElement_Decode);
 
     if(status != STATUS_OK){
@@ -8892,7 +9248,7 @@ void UA_BrowsePath_Clear(UA_BrowsePath* a_pValue)
 /*============================================================================
  * UA_BrowsePath_Encode
  *===========================================================================*/
-StatusCode UA_BrowsePath_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePath* a_pValue)
+StatusCode UA_BrowsePath_Encode(UA_BrowsePath* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8900,8 +9256,12 @@ StatusCode UA_BrowsePath_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePath* a_pValue)
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->StartingNode);
-    UA_RelativePath_Encode(msgBuf, &a_pValue->RelativePath);
+    status &= NodeId_Write(&a_pValue->StartingNode, msgBuf);
+    status &= UA_RelativePath_Encode(&a_pValue->RelativePath, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8909,7 +9269,7 @@ StatusCode UA_BrowsePath_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePath* a_pValue)
 /*============================================================================
  * UA_BrowsePath_Decode
  *===========================================================================*/
-StatusCode UA_BrowsePath_Decode(UA_MsgBuffer* msgBuf, UA_BrowsePath* a_pValue)
+StatusCode UA_BrowsePath_Decode(UA_BrowsePath* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8919,8 +9279,8 @@ StatusCode UA_BrowsePath_Decode(UA_MsgBuffer* msgBuf, UA_BrowsePath* a_pValue)
 
     UA_BrowsePath_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->StartingNode);
-    UA_RelativePath_Decode(msgBuf, &a_pValue->RelativePath);
+    status &= NodeId_Read(&a_pValue->StartingNode, msgBuf);
+    status &= UA_RelativePath_Decode(&a_pValue->RelativePath, msgBuf);
 
     if(status != STATUS_OK){
         UA_BrowsePath_Clear(a_pValue);
@@ -8977,7 +9337,7 @@ void UA_BrowsePathTarget_Clear(UA_BrowsePathTarget* a_pValue)
 /*============================================================================
  * UA_BrowsePathTarget_Encode
  *===========================================================================*/
-StatusCode UA_BrowsePathTarget_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePathTarget* a_pValue)
+StatusCode UA_BrowsePathTarget_Encode(UA_BrowsePathTarget* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -8985,8 +9345,12 @@ StatusCode UA_BrowsePathTarget_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePathTarget*
         status = STATUS_OK;
     }
 
-    ExpandedNodeId_Write(msgBuf, &a_pValue->TargetId);
-    UInt32_Write(msgBuf, &a_pValue->RemainingPathIndex);
+    status &= ExpandedNodeId_Write(&a_pValue->TargetId, msgBuf);
+    status &= UInt32_Write(&a_pValue->RemainingPathIndex, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -8994,7 +9358,7 @@ StatusCode UA_BrowsePathTarget_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePathTarget*
 /*============================================================================
  * UA_BrowsePathTarget_Decode
  *===========================================================================*/
-StatusCode UA_BrowsePathTarget_Decode(UA_MsgBuffer* msgBuf, UA_BrowsePathTarget* a_pValue)
+StatusCode UA_BrowsePathTarget_Decode(UA_BrowsePathTarget* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9004,8 +9368,8 @@ StatusCode UA_BrowsePathTarget_Decode(UA_MsgBuffer* msgBuf, UA_BrowsePathTarget*
 
     UA_BrowsePathTarget_Initialize(a_pValue);
 
-    ExpandedNodeId_Read(msgBuf, &a_pValue->TargetId);
-    UInt32_Read(msgBuf, &a_pValue->RemainingPathIndex);
+    status &= ExpandedNodeId_Read(&a_pValue->TargetId, msgBuf);
+    status &= UInt32_Read(&a_pValue->RemainingPathIndex, msgBuf);
 
     if(status != STATUS_OK){
         UA_BrowsePathTarget_Clear(a_pValue);
@@ -9064,7 +9428,7 @@ void UA_BrowsePathResult_Clear(UA_BrowsePathResult* a_pValue)
 /*============================================================================
  * UA_BrowsePathResult_Encode
  *===========================================================================*/
-StatusCode UA_BrowsePathResult_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePathResult* a_pValue)
+StatusCode UA_BrowsePathResult_Encode(UA_BrowsePathResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9072,9 +9436,13 @@ StatusCode UA_BrowsePathResult_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePathResult*
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfTargets, (void**) &a_pValue->Targets, 
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfTargets, (void**) &a_pValue->Targets, 
                    sizeof(UA_BrowsePathTarget), (UA_EncodeableObject_PfnEncode*) UA_BrowsePathTarget_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9082,7 +9450,7 @@ StatusCode UA_BrowsePathResult_Encode(UA_MsgBuffer* msgBuf, UA_BrowsePathResult*
 /*============================================================================
  * UA_BrowsePathResult_Decode
  *===========================================================================*/
-StatusCode UA_BrowsePathResult_Decode(UA_MsgBuffer* msgBuf, UA_BrowsePathResult* a_pValue)
+StatusCode UA_BrowsePathResult_Decode(UA_BrowsePathResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9092,8 +9460,8 @@ StatusCode UA_BrowsePathResult_Decode(UA_MsgBuffer* msgBuf, UA_BrowsePathResult*
 
     UA_BrowsePathResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfTargets, (void**) &a_pValue->Targets, 
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfTargets, (void**) &a_pValue->Targets, 
                   sizeof(UA_BrowsePathTarget), (UA_EncodeableObject_PfnDecode*) UA_BrowsePathTarget_Decode);
 
     if(status != STATUS_OK){
@@ -9154,7 +9522,7 @@ void UA_TranslateBrowsePathsToNodeIdsRequest_Clear(UA_TranslateBrowsePathsToNode
 /*============================================================================
  * UA_TranslateBrowsePathsToNodeIdsRequest_Encode
  *===========================================================================*/
-StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Encode(UA_MsgBuffer* msgBuf, UA_TranslateBrowsePathsToNodeIdsRequest* a_pValue)
+StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Encode(UA_TranslateBrowsePathsToNodeIdsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9162,9 +9530,13 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Encode(UA_MsgBuffer* msgBuf, 
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfBrowsePaths, (void**) &a_pValue->BrowsePaths, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfBrowsePaths, (void**) &a_pValue->BrowsePaths, 
                    sizeof(UA_BrowsePath), (UA_EncodeableObject_PfnEncode*) UA_BrowsePath_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9172,7 +9544,7 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Encode(UA_MsgBuffer* msgBuf, 
 /*============================================================================
  * UA_TranslateBrowsePathsToNodeIdsRequest_Decode
  *===========================================================================*/
-StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Decode(UA_MsgBuffer* msgBuf, UA_TranslateBrowsePathsToNodeIdsRequest* a_pValue)
+StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Decode(UA_TranslateBrowsePathsToNodeIdsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9182,8 +9554,8 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Decode(UA_MsgBuffer* msgBuf, 
 
     UA_TranslateBrowsePathsToNodeIdsRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfBrowsePaths, (void**) &a_pValue->BrowsePaths, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfBrowsePaths, (void**) &a_pValue->BrowsePaths, 
                   sizeof(UA_BrowsePath), (UA_EncodeableObject_PfnDecode*) UA_BrowsePath_Decode);
 
     if(status != STATUS_OK){
@@ -9247,7 +9619,7 @@ void UA_TranslateBrowsePathsToNodeIdsResponse_Clear(UA_TranslateBrowsePathsToNod
 /*============================================================================
  * UA_TranslateBrowsePathsToNodeIdsResponse_Encode
  *===========================================================================*/
-StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Encode(UA_MsgBuffer* msgBuf, UA_TranslateBrowsePathsToNodeIdsResponse* a_pValue)
+StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Encode(UA_TranslateBrowsePathsToNodeIdsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9255,11 +9627,15 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Encode(UA_MsgBuffer* msgBuf,
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_BrowsePathResult), (UA_EncodeableObject_PfnEncode*) UA_BrowsePathResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9267,7 +9643,7 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Encode(UA_MsgBuffer* msgBuf,
 /*============================================================================
  * UA_TranslateBrowsePathsToNodeIdsResponse_Decode
  *===========================================================================*/
-StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Decode(UA_MsgBuffer* msgBuf, UA_TranslateBrowsePathsToNodeIdsResponse* a_pValue)
+StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Decode(UA_TranslateBrowsePathsToNodeIdsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9277,10 +9653,10 @@ StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Decode(UA_MsgBuffer* msgBuf,
 
     UA_TranslateBrowsePathsToNodeIdsResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_BrowsePathResult), (UA_EncodeableObject_PfnDecode*) UA_BrowsePathResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -9342,7 +9718,7 @@ void UA_RegisterNodesRequest_Clear(UA_RegisterNodesRequest* a_pValue)
 /*============================================================================
  * UA_RegisterNodesRequest_Encode
  *===========================================================================*/
-StatusCode UA_RegisterNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_RegisterNodesRequest* a_pValue)
+StatusCode UA_RegisterNodesRequest_Encode(UA_RegisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9350,9 +9726,13 @@ StatusCode UA_RegisterNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_RegisterNodes
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToRegister, (void**) &a_pValue->NodesToRegister, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToRegister, (void**) &a_pValue->NodesToRegister, 
                    sizeof(UA_NodeId), (UA_EncodeableObject_PfnEncode*) NodeId_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9360,7 +9740,7 @@ StatusCode UA_RegisterNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_RegisterNodes
 /*============================================================================
  * UA_RegisterNodesRequest_Decode
  *===========================================================================*/
-StatusCode UA_RegisterNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_RegisterNodesRequest* a_pValue)
+StatusCode UA_RegisterNodesRequest_Decode(UA_RegisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9370,8 +9750,8 @@ StatusCode UA_RegisterNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_RegisterNodes
 
     UA_RegisterNodesRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToRegister, (void**) &a_pValue->NodesToRegister, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToRegister, (void**) &a_pValue->NodesToRegister, 
                   sizeof(UA_NodeId), (UA_EncodeableObject_PfnDecode*) NodeId_Read);
 
     if(status != STATUS_OK){
@@ -9431,7 +9811,7 @@ void UA_RegisterNodesResponse_Clear(UA_RegisterNodesResponse* a_pValue)
 /*============================================================================
  * UA_RegisterNodesResponse_Encode
  *===========================================================================*/
-StatusCode UA_RegisterNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_RegisterNodesResponse* a_pValue)
+StatusCode UA_RegisterNodesResponse_Encode(UA_RegisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9439,9 +9819,13 @@ StatusCode UA_RegisterNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_RegisterNode
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfRegisteredNodeIds, (void**) &a_pValue->RegisteredNodeIds, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfRegisteredNodeIds, (void**) &a_pValue->RegisteredNodeIds, 
                    sizeof(UA_NodeId), (UA_EncodeableObject_PfnEncode*) NodeId_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9449,7 +9833,7 @@ StatusCode UA_RegisterNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_RegisterNode
 /*============================================================================
  * UA_RegisterNodesResponse_Decode
  *===========================================================================*/
-StatusCode UA_RegisterNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_RegisterNodesResponse* a_pValue)
+StatusCode UA_RegisterNodesResponse_Decode(UA_RegisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9459,8 +9843,8 @@ StatusCode UA_RegisterNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_RegisterNode
 
     UA_RegisterNodesResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfRegisteredNodeIds, (void**) &a_pValue->RegisteredNodeIds, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfRegisteredNodeIds, (void**) &a_pValue->RegisteredNodeIds, 
                   sizeof(UA_NodeId), (UA_EncodeableObject_PfnDecode*) NodeId_Read);
 
     if(status != STATUS_OK){
@@ -9522,7 +9906,7 @@ void UA_UnregisterNodesRequest_Clear(UA_UnregisterNodesRequest* a_pValue)
 /*============================================================================
  * UA_UnregisterNodesRequest_Encode
  *===========================================================================*/
-StatusCode UA_UnregisterNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_UnregisterNodesRequest* a_pValue)
+StatusCode UA_UnregisterNodesRequest_Encode(UA_UnregisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9530,9 +9914,13 @@ StatusCode UA_UnregisterNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_UnregisterN
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToUnregister, (void**) &a_pValue->NodesToUnregister, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToUnregister, (void**) &a_pValue->NodesToUnregister, 
                    sizeof(UA_NodeId), (UA_EncodeableObject_PfnEncode*) NodeId_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9540,7 +9928,7 @@ StatusCode UA_UnregisterNodesRequest_Encode(UA_MsgBuffer* msgBuf, UA_UnregisterN
 /*============================================================================
  * UA_UnregisterNodesRequest_Decode
  *===========================================================================*/
-StatusCode UA_UnregisterNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_UnregisterNodesRequest* a_pValue)
+StatusCode UA_UnregisterNodesRequest_Decode(UA_UnregisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9550,8 +9938,8 @@ StatusCode UA_UnregisterNodesRequest_Decode(UA_MsgBuffer* msgBuf, UA_UnregisterN
 
     UA_UnregisterNodesRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToUnregister, (void**) &a_pValue->NodesToUnregister, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToUnregister, (void**) &a_pValue->NodesToUnregister, 
                   sizeof(UA_NodeId), (UA_EncodeableObject_PfnDecode*) NodeId_Read);
 
     if(status != STATUS_OK){
@@ -9607,7 +9995,7 @@ void UA_UnregisterNodesResponse_Clear(UA_UnregisterNodesResponse* a_pValue)
 /*============================================================================
  * UA_UnregisterNodesResponse_Encode
  *===========================================================================*/
-StatusCode UA_UnregisterNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_UnregisterNodesResponse* a_pValue)
+StatusCode UA_UnregisterNodesResponse_Encode(UA_UnregisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9615,7 +10003,11 @@ StatusCode UA_UnregisterNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_Unregister
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9623,7 +10015,7 @@ StatusCode UA_UnregisterNodesResponse_Encode(UA_MsgBuffer* msgBuf, UA_Unregister
 /*============================================================================
  * UA_UnregisterNodesResponse_Decode
  *===========================================================================*/
-StatusCode UA_UnregisterNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_UnregisterNodesResponse* a_pValue)
+StatusCode UA_UnregisterNodesResponse_Decode(UA_UnregisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9633,7 +10025,7 @@ StatusCode UA_UnregisterNodesResponse_Decode(UA_MsgBuffer* msgBuf, UA_Unregister
 
     UA_UnregisterNodesResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
     if(status != STATUS_OK){
         UA_UnregisterNodesResponse_Clear(a_pValue);
@@ -9705,7 +10097,7 @@ void UA_EndpointConfiguration_Clear(UA_EndpointConfiguration* a_pValue)
 /*============================================================================
  * UA_EndpointConfiguration_Encode
  *===========================================================================*/
-StatusCode UA_EndpointConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_EndpointConfiguration* a_pValue)
+StatusCode UA_EndpointConfiguration_Encode(UA_EndpointConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9713,15 +10105,19 @@ StatusCode UA_EndpointConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_EndpointConf
         status = STATUS_OK;
     }
 
-    Int32_Write(msgBuf, &a_pValue->OperationTimeout);
-    Boolean_Write(msgBuf, &a_pValue->UseBinaryEncoding);
-    Int32_Write(msgBuf, &a_pValue->MaxStringLength);
-    Int32_Write(msgBuf, &a_pValue->MaxByteStringLength);
-    Int32_Write(msgBuf, &a_pValue->MaxArrayLength);
-    Int32_Write(msgBuf, &a_pValue->MaxMessageSize);
-    Int32_Write(msgBuf, &a_pValue->MaxBufferSize);
-    Int32_Write(msgBuf, &a_pValue->ChannelLifetime);
-    Int32_Write(msgBuf, &a_pValue->SecurityTokenLifetime);
+    status &= Int32_Write(&a_pValue->OperationTimeout, msgBuf);
+    status &= Boolean_Write(&a_pValue->UseBinaryEncoding, msgBuf);
+    status &= Int32_Write(&a_pValue->MaxStringLength, msgBuf);
+    status &= Int32_Write(&a_pValue->MaxByteStringLength, msgBuf);
+    status &= Int32_Write(&a_pValue->MaxArrayLength, msgBuf);
+    status &= Int32_Write(&a_pValue->MaxMessageSize, msgBuf);
+    status &= Int32_Write(&a_pValue->MaxBufferSize, msgBuf);
+    status &= Int32_Write(&a_pValue->ChannelLifetime, msgBuf);
+    status &= Int32_Write(&a_pValue->SecurityTokenLifetime, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9729,7 +10125,7 @@ StatusCode UA_EndpointConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_EndpointConf
 /*============================================================================
  * UA_EndpointConfiguration_Decode
  *===========================================================================*/
-StatusCode UA_EndpointConfiguration_Decode(UA_MsgBuffer* msgBuf, UA_EndpointConfiguration* a_pValue)
+StatusCode UA_EndpointConfiguration_Decode(UA_EndpointConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9739,15 +10135,15 @@ StatusCode UA_EndpointConfiguration_Decode(UA_MsgBuffer* msgBuf, UA_EndpointConf
 
     UA_EndpointConfiguration_Initialize(a_pValue);
 
-    Int32_Read(msgBuf, &a_pValue->OperationTimeout);
-    Boolean_Read(msgBuf, &a_pValue->UseBinaryEncoding);
-    Int32_Read(msgBuf, &a_pValue->MaxStringLength);
-    Int32_Read(msgBuf, &a_pValue->MaxByteStringLength);
-    Int32_Read(msgBuf, &a_pValue->MaxArrayLength);
-    Int32_Read(msgBuf, &a_pValue->MaxMessageSize);
-    Int32_Read(msgBuf, &a_pValue->MaxBufferSize);
-    Int32_Read(msgBuf, &a_pValue->ChannelLifetime);
-    Int32_Read(msgBuf, &a_pValue->SecurityTokenLifetime);
+    status &= Int32_Read(&a_pValue->OperationTimeout, msgBuf);
+    status &= Boolean_Read(&a_pValue->UseBinaryEncoding, msgBuf);
+    status &= Int32_Read(&a_pValue->MaxStringLength, msgBuf);
+    status &= Int32_Read(&a_pValue->MaxByteStringLength, msgBuf);
+    status &= Int32_Read(&a_pValue->MaxArrayLength, msgBuf);
+    status &= Int32_Read(&a_pValue->MaxMessageSize, msgBuf);
+    status &= Int32_Read(&a_pValue->MaxBufferSize, msgBuf);
+    status &= Int32_Read(&a_pValue->ChannelLifetime, msgBuf);
+    status &= Int32_Read(&a_pValue->SecurityTokenLifetime, msgBuf);
 
     if(status != STATUS_OK){
         UA_EndpointConfiguration_Clear(a_pValue);
@@ -9815,7 +10211,7 @@ void UA_SupportedProfile_Clear(UA_SupportedProfile* a_pValue)
 /*============================================================================
  * UA_SupportedProfile_Encode
  *===========================================================================*/
-StatusCode UA_SupportedProfile_Encode(UA_MsgBuffer* msgBuf, UA_SupportedProfile* a_pValue)
+StatusCode UA_SupportedProfile_Encode(UA_SupportedProfile* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9823,13 +10219,17 @@ StatusCode UA_SupportedProfile_Encode(UA_MsgBuffer* msgBuf, UA_SupportedProfile*
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->OrganizationUri);
-    String_Write(msgBuf, &a_pValue->ProfileId);
-    String_Write(msgBuf, &a_pValue->ComplianceTool);
-    DateTime_Write(msgBuf, &a_pValue->ComplianceDate);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ComplianceLevel);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfUnsupportedUnitIds, (void**) &a_pValue->UnsupportedUnitIds, 
+    status &= String_Write(&a_pValue->OrganizationUri, msgBuf);
+    status &= String_Write(&a_pValue->ProfileId, msgBuf);
+    status &= String_Write(&a_pValue->ComplianceTool, msgBuf);
+    status &= DateTime_Write(&a_pValue->ComplianceDate, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ComplianceLevel);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfUnsupportedUnitIds, (void**) &a_pValue->UnsupportedUnitIds, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9837,7 +10237,7 @@ StatusCode UA_SupportedProfile_Encode(UA_MsgBuffer* msgBuf, UA_SupportedProfile*
 /*============================================================================
  * UA_SupportedProfile_Decode
  *===========================================================================*/
-StatusCode UA_SupportedProfile_Decode(UA_MsgBuffer* msgBuf, UA_SupportedProfile* a_pValue)
+StatusCode UA_SupportedProfile_Decode(UA_SupportedProfile* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9847,12 +10247,12 @@ StatusCode UA_SupportedProfile_Decode(UA_MsgBuffer* msgBuf, UA_SupportedProfile*
 
     UA_SupportedProfile_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->OrganizationUri);
-    String_Read(msgBuf, &a_pValue->ProfileId);
-    String_Read(msgBuf, &a_pValue->ComplianceTool);
-    DateTime_Read(msgBuf, &a_pValue->ComplianceDate);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ComplianceLevel);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfUnsupportedUnitIds, (void**) &a_pValue->UnsupportedUnitIds, 
+    status &= String_Read(&a_pValue->OrganizationUri, msgBuf);
+    status &= String_Read(&a_pValue->ProfileId, msgBuf);
+    status &= String_Read(&a_pValue->ComplianceTool, msgBuf);
+    status &= DateTime_Read(&a_pValue->ComplianceDate, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ComplianceLevel);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfUnsupportedUnitIds, (void**) &a_pValue->UnsupportedUnitIds, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
 
     if(status != STATUS_OK){
@@ -9928,7 +10328,7 @@ void UA_SoftwareCertificate_Clear(UA_SoftwareCertificate* a_pValue)
 /*============================================================================
  * UA_SoftwareCertificate_Encode
  *===========================================================================*/
-StatusCode UA_SoftwareCertificate_Encode(UA_MsgBuffer* msgBuf, UA_SoftwareCertificate* a_pValue)
+StatusCode UA_SoftwareCertificate_Encode(UA_SoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9936,17 +10336,21 @@ StatusCode UA_SoftwareCertificate_Encode(UA_MsgBuffer* msgBuf, UA_SoftwareCertif
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->ProductName);
-    String_Write(msgBuf, &a_pValue->ProductUri);
-    String_Write(msgBuf, &a_pValue->VendorName);
-    ByteString_Write(msgBuf, &a_pValue->VendorProductCertificate);
-    String_Write(msgBuf, &a_pValue->SoftwareVersion);
-    String_Write(msgBuf, &a_pValue->BuildNumber);
-    DateTime_Write(msgBuf, &a_pValue->BuildDate);
-    String_Write(msgBuf, &a_pValue->IssuedBy);
-    DateTime_Write(msgBuf, &a_pValue->IssueDate);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfSupportedProfiles, (void**) &a_pValue->SupportedProfiles, 
+    status &= String_Write(&a_pValue->ProductName, msgBuf);
+    status &= String_Write(&a_pValue->ProductUri, msgBuf);
+    status &= String_Write(&a_pValue->VendorName, msgBuf);
+    status &= ByteString_Write(&a_pValue->VendorProductCertificate, msgBuf);
+    status &= String_Write(&a_pValue->SoftwareVersion, msgBuf);
+    status &= String_Write(&a_pValue->BuildNumber, msgBuf);
+    status &= DateTime_Write(&a_pValue->BuildDate, msgBuf);
+    status &= String_Write(&a_pValue->IssuedBy, msgBuf);
+    status &= DateTime_Write(&a_pValue->IssueDate, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSupportedProfiles, (void**) &a_pValue->SupportedProfiles, 
                    sizeof(UA_SupportedProfile), (UA_EncodeableObject_PfnEncode*) UA_SupportedProfile_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -9954,7 +10358,7 @@ StatusCode UA_SoftwareCertificate_Encode(UA_MsgBuffer* msgBuf, UA_SoftwareCertif
 /*============================================================================
  * UA_SoftwareCertificate_Decode
  *===========================================================================*/
-StatusCode UA_SoftwareCertificate_Decode(UA_MsgBuffer* msgBuf, UA_SoftwareCertificate* a_pValue)
+StatusCode UA_SoftwareCertificate_Decode(UA_SoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -9964,16 +10368,16 @@ StatusCode UA_SoftwareCertificate_Decode(UA_MsgBuffer* msgBuf, UA_SoftwareCertif
 
     UA_SoftwareCertificate_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->ProductName);
-    String_Read(msgBuf, &a_pValue->ProductUri);
-    String_Read(msgBuf, &a_pValue->VendorName);
-    ByteString_Read(msgBuf, &a_pValue->VendorProductCertificate);
-    String_Read(msgBuf, &a_pValue->SoftwareVersion);
-    String_Read(msgBuf, &a_pValue->BuildNumber);
-    DateTime_Read(msgBuf, &a_pValue->BuildDate);
-    String_Read(msgBuf, &a_pValue->IssuedBy);
-    DateTime_Read(msgBuf, &a_pValue->IssueDate);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfSupportedProfiles, (void**) &a_pValue->SupportedProfiles, 
+    status &= String_Read(&a_pValue->ProductName, msgBuf);
+    status &= String_Read(&a_pValue->ProductUri, msgBuf);
+    status &= String_Read(&a_pValue->VendorName, msgBuf);
+    status &= ByteString_Read(&a_pValue->VendorProductCertificate, msgBuf);
+    status &= String_Read(&a_pValue->SoftwareVersion, msgBuf);
+    status &= String_Read(&a_pValue->BuildNumber, msgBuf);
+    status &= DateTime_Read(&a_pValue->BuildDate, msgBuf);
+    status &= String_Read(&a_pValue->IssuedBy, msgBuf);
+    status &= DateTime_Read(&a_pValue->IssueDate, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSupportedProfiles, (void**) &a_pValue->SupportedProfiles, 
                   sizeof(UA_SupportedProfile), (UA_EncodeableObject_PfnDecode*) UA_SupportedProfile_Decode);
 
     if(status != STATUS_OK){
@@ -10033,7 +10437,7 @@ void UA_QueryDataDescription_Clear(UA_QueryDataDescription* a_pValue)
 /*============================================================================
  * UA_QueryDataDescription_Encode
  *===========================================================================*/
-StatusCode UA_QueryDataDescription_Encode(UA_MsgBuffer* msgBuf, UA_QueryDataDescription* a_pValue)
+StatusCode UA_QueryDataDescription_Encode(UA_QueryDataDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10041,9 +10445,13 @@ StatusCode UA_QueryDataDescription_Encode(UA_MsgBuffer* msgBuf, UA_QueryDataDesc
         status = STATUS_OK;
     }
 
-    UA_RelativePath_Encode(msgBuf, &a_pValue->RelativePath);
-    UInt32_Write(msgBuf, &a_pValue->AttributeId);
-    String_Write(msgBuf, &a_pValue->IndexRange);
+    status &= UA_RelativePath_Encode(&a_pValue->RelativePath, msgBuf);
+    status &= UInt32_Write(&a_pValue->AttributeId, msgBuf);
+    status &= String_Write(&a_pValue->IndexRange, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10051,7 +10459,7 @@ StatusCode UA_QueryDataDescription_Encode(UA_MsgBuffer* msgBuf, UA_QueryDataDesc
 /*============================================================================
  * UA_QueryDataDescription_Decode
  *===========================================================================*/
-StatusCode UA_QueryDataDescription_Decode(UA_MsgBuffer* msgBuf, UA_QueryDataDescription* a_pValue)
+StatusCode UA_QueryDataDescription_Decode(UA_QueryDataDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10061,9 +10469,9 @@ StatusCode UA_QueryDataDescription_Decode(UA_MsgBuffer* msgBuf, UA_QueryDataDesc
 
     UA_QueryDataDescription_Initialize(a_pValue);
 
-    UA_RelativePath_Decode(msgBuf, &a_pValue->RelativePath);
-    UInt32_Read(msgBuf, &a_pValue->AttributeId);
-    String_Read(msgBuf, &a_pValue->IndexRange);
+    status &= UA_RelativePath_Decode(&a_pValue->RelativePath, msgBuf);
+    status &= UInt32_Read(&a_pValue->AttributeId, msgBuf);
+    status &= String_Read(&a_pValue->IndexRange, msgBuf);
 
     if(status != STATUS_OK){
         UA_QueryDataDescription_Clear(a_pValue);
@@ -10124,7 +10532,7 @@ void UA_NodeTypeDescription_Clear(UA_NodeTypeDescription* a_pValue)
 /*============================================================================
  * UA_NodeTypeDescription_Encode
  *===========================================================================*/
-StatusCode UA_NodeTypeDescription_Encode(UA_MsgBuffer* msgBuf, UA_NodeTypeDescription* a_pValue)
+StatusCode UA_NodeTypeDescription_Encode(UA_NodeTypeDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10132,10 +10540,14 @@ StatusCode UA_NodeTypeDescription_Encode(UA_MsgBuffer* msgBuf, UA_NodeTypeDescri
         status = STATUS_OK;
     }
 
-    ExpandedNodeId_Write(msgBuf, &a_pValue->TypeDefinitionNode);
-    Boolean_Write(msgBuf, &a_pValue->IncludeSubTypes);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDataToReturn, (void**) &a_pValue->DataToReturn, 
+    status &= ExpandedNodeId_Write(&a_pValue->TypeDefinitionNode, msgBuf);
+    status &= Boolean_Write(&a_pValue->IncludeSubTypes, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDataToReturn, (void**) &a_pValue->DataToReturn, 
                    sizeof(UA_QueryDataDescription), (UA_EncodeableObject_PfnEncode*) UA_QueryDataDescription_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10143,7 +10555,7 @@ StatusCode UA_NodeTypeDescription_Encode(UA_MsgBuffer* msgBuf, UA_NodeTypeDescri
 /*============================================================================
  * UA_NodeTypeDescription_Decode
  *===========================================================================*/
-StatusCode UA_NodeTypeDescription_Decode(UA_MsgBuffer* msgBuf, UA_NodeTypeDescription* a_pValue)
+StatusCode UA_NodeTypeDescription_Decode(UA_NodeTypeDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10153,9 +10565,9 @@ StatusCode UA_NodeTypeDescription_Decode(UA_MsgBuffer* msgBuf, UA_NodeTypeDescri
 
     UA_NodeTypeDescription_Initialize(a_pValue);
 
-    ExpandedNodeId_Read(msgBuf, &a_pValue->TypeDefinitionNode);
-    Boolean_Read(msgBuf, &a_pValue->IncludeSubTypes);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDataToReturn, (void**) &a_pValue->DataToReturn, 
+    status &= ExpandedNodeId_Read(&a_pValue->TypeDefinitionNode, msgBuf);
+    status &= Boolean_Read(&a_pValue->IncludeSubTypes, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDataToReturn, (void**) &a_pValue->DataToReturn, 
                   sizeof(UA_QueryDataDescription), (UA_EncodeableObject_PfnDecode*) UA_QueryDataDescription_Decode);
 
     if(status != STATUS_OK){
@@ -10218,7 +10630,7 @@ void UA_QueryDataSet_Clear(UA_QueryDataSet* a_pValue)
 /*============================================================================
  * UA_QueryDataSet_Encode
  *===========================================================================*/
-StatusCode UA_QueryDataSet_Encode(UA_MsgBuffer* msgBuf, UA_QueryDataSet* a_pValue)
+StatusCode UA_QueryDataSet_Encode(UA_QueryDataSet* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10226,10 +10638,14 @@ StatusCode UA_QueryDataSet_Encode(UA_MsgBuffer* msgBuf, UA_QueryDataSet* a_pValu
         status = STATUS_OK;
     }
 
-    ExpandedNodeId_Write(msgBuf, &a_pValue->NodeId);
-    ExpandedNodeId_Write(msgBuf, &a_pValue->TypeDefinitionNode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfValues, (void**) &a_pValue->Values, 
+    status &= ExpandedNodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= ExpandedNodeId_Write(&a_pValue->TypeDefinitionNode, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfValues, (void**) &a_pValue->Values, 
                    sizeof(UA_Variant), (UA_EncodeableObject_PfnEncode*) Variant_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10237,7 +10653,7 @@ StatusCode UA_QueryDataSet_Encode(UA_MsgBuffer* msgBuf, UA_QueryDataSet* a_pValu
 /*============================================================================
  * UA_QueryDataSet_Decode
  *===========================================================================*/
-StatusCode UA_QueryDataSet_Decode(UA_MsgBuffer* msgBuf, UA_QueryDataSet* a_pValue)
+StatusCode UA_QueryDataSet_Decode(UA_QueryDataSet* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10247,9 +10663,9 @@ StatusCode UA_QueryDataSet_Decode(UA_MsgBuffer* msgBuf, UA_QueryDataSet* a_pValu
 
     UA_QueryDataSet_Initialize(a_pValue);
 
-    ExpandedNodeId_Read(msgBuf, &a_pValue->NodeId);
-    ExpandedNodeId_Read(msgBuf, &a_pValue->TypeDefinitionNode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfValues, (void**) &a_pValue->Values, 
+    status &= ExpandedNodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= ExpandedNodeId_Read(&a_pValue->TypeDefinitionNode, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfValues, (void**) &a_pValue->Values, 
                   sizeof(UA_Variant), (UA_EncodeableObject_PfnDecode*) Variant_Read);
 
     if(status != STATUS_OK){
@@ -10313,7 +10729,7 @@ void UA_NodeReference_Clear(UA_NodeReference* a_pValue)
 /*============================================================================
  * UA_NodeReference_Encode
  *===========================================================================*/
-StatusCode UA_NodeReference_Encode(UA_MsgBuffer* msgBuf, UA_NodeReference* a_pValue)
+StatusCode UA_NodeReference_Encode(UA_NodeReference* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10321,11 +10737,15 @@ StatusCode UA_NodeReference_Encode(UA_MsgBuffer* msgBuf, UA_NodeReference* a_pVa
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    NodeId_Write(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Write(msgBuf, &a_pValue->IsForward);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReferencedNodeIds, (void**) &a_pValue->ReferencedNodeIds, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= NodeId_Write(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsForward, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReferencedNodeIds, (void**) &a_pValue->ReferencedNodeIds, 
                    sizeof(UA_NodeId), (UA_EncodeableObject_PfnEncode*) NodeId_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10333,7 +10753,7 @@ StatusCode UA_NodeReference_Encode(UA_MsgBuffer* msgBuf, UA_NodeReference* a_pVa
 /*============================================================================
  * UA_NodeReference_Decode
  *===========================================================================*/
-StatusCode UA_NodeReference_Decode(UA_MsgBuffer* msgBuf, UA_NodeReference* a_pValue)
+StatusCode UA_NodeReference_Decode(UA_NodeReference* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10343,10 +10763,10 @@ StatusCode UA_NodeReference_Decode(UA_MsgBuffer* msgBuf, UA_NodeReference* a_pVa
 
     UA_NodeReference_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    NodeId_Read(msgBuf, &a_pValue->ReferenceTypeId);
-    Boolean_Read(msgBuf, &a_pValue->IsForward);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReferencedNodeIds, (void**) &a_pValue->ReferencedNodeIds, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= NodeId_Read(&a_pValue->ReferenceTypeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsForward, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReferencedNodeIds, (void**) &a_pValue->ReferencedNodeIds, 
                   sizeof(UA_NodeId), (UA_EncodeableObject_PfnDecode*) NodeId_Read);
 
     if(status != STATUS_OK){
@@ -10406,7 +10826,7 @@ void UA_ContentFilterElement_Clear(UA_ContentFilterElement* a_pValue)
 /*============================================================================
  * UA_ContentFilterElement_Encode
  *===========================================================================*/
-StatusCode UA_ContentFilterElement_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilterElement* a_pValue)
+StatusCode UA_ContentFilterElement_Encode(UA_ContentFilterElement* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10414,9 +10834,13 @@ StatusCode UA_ContentFilterElement_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilter
         status = STATUS_OK;
     }
 
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->FilterOperator);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfFilterOperands, (void**) &a_pValue->FilterOperands, 
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->FilterOperator);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfFilterOperands, (void**) &a_pValue->FilterOperands, 
                    sizeof(UA_ExtensionObject), (UA_EncodeableObject_PfnEncode*) ExtensionObject_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10424,7 +10848,7 @@ StatusCode UA_ContentFilterElement_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilter
 /*============================================================================
  * UA_ContentFilterElement_Decode
  *===========================================================================*/
-StatusCode UA_ContentFilterElement_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilterElement* a_pValue)
+StatusCode UA_ContentFilterElement_Decode(UA_ContentFilterElement* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10434,8 +10858,8 @@ StatusCode UA_ContentFilterElement_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilter
 
     UA_ContentFilterElement_Initialize(a_pValue);
 
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->FilterOperator);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfFilterOperands, (void**) &a_pValue->FilterOperands, 
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->FilterOperator);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfFilterOperands, (void**) &a_pValue->FilterOperands, 
                   sizeof(UA_ExtensionObject), (UA_EncodeableObject_PfnDecode*) ExtensionObject_Read);
 
     if(status != STATUS_OK){
@@ -10493,7 +10917,7 @@ void UA_ContentFilter_Clear(UA_ContentFilter* a_pValue)
 /*============================================================================
  * UA_ContentFilter_Encode
  *===========================================================================*/
-StatusCode UA_ContentFilter_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilter* a_pValue)
+StatusCode UA_ContentFilter_Encode(UA_ContentFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10501,8 +10925,12 @@ StatusCode UA_ContentFilter_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilter* a_pVa
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
                    sizeof(UA_ContentFilterElement), (UA_EncodeableObject_PfnEncode*) UA_ContentFilterElement_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10510,7 +10938,7 @@ StatusCode UA_ContentFilter_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilter* a_pVa
 /*============================================================================
  * UA_ContentFilter_Decode
  *===========================================================================*/
-StatusCode UA_ContentFilter_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilter* a_pValue)
+StatusCode UA_ContentFilter_Decode(UA_ContentFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10520,7 +10948,7 @@ StatusCode UA_ContentFilter_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilter* a_pVa
 
     UA_ContentFilter_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
                   sizeof(UA_ContentFilterElement), (UA_EncodeableObject_PfnDecode*) UA_ContentFilterElement_Decode);
 
     if(status != STATUS_OK){
@@ -10576,7 +11004,7 @@ void UA_ElementOperand_Clear(UA_ElementOperand* a_pValue)
 /*============================================================================
  * UA_ElementOperand_Encode
  *===========================================================================*/
-StatusCode UA_ElementOperand_Encode(UA_MsgBuffer* msgBuf, UA_ElementOperand* a_pValue)
+StatusCode UA_ElementOperand_Encode(UA_ElementOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10584,7 +11012,11 @@ StatusCode UA_ElementOperand_Encode(UA_MsgBuffer* msgBuf, UA_ElementOperand* a_p
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->Index);
+    status &= UInt32_Write(&a_pValue->Index, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10592,7 +11024,7 @@ StatusCode UA_ElementOperand_Encode(UA_MsgBuffer* msgBuf, UA_ElementOperand* a_p
 /*============================================================================
  * UA_ElementOperand_Decode
  *===========================================================================*/
-StatusCode UA_ElementOperand_Decode(UA_MsgBuffer* msgBuf, UA_ElementOperand* a_pValue)
+StatusCode UA_ElementOperand_Decode(UA_ElementOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10602,7 +11034,7 @@ StatusCode UA_ElementOperand_Decode(UA_MsgBuffer* msgBuf, UA_ElementOperand* a_p
 
     UA_ElementOperand_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->Index);
+    status &= UInt32_Read(&a_pValue->Index, msgBuf);
 
     if(status != STATUS_OK){
         UA_ElementOperand_Clear(a_pValue);
@@ -10657,7 +11089,7 @@ void UA_LiteralOperand_Clear(UA_LiteralOperand* a_pValue)
 /*============================================================================
  * UA_LiteralOperand_Encode
  *===========================================================================*/
-StatusCode UA_LiteralOperand_Encode(UA_MsgBuffer* msgBuf, UA_LiteralOperand* a_pValue)
+StatusCode UA_LiteralOperand_Encode(UA_LiteralOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10665,7 +11097,11 @@ StatusCode UA_LiteralOperand_Encode(UA_MsgBuffer* msgBuf, UA_LiteralOperand* a_p
         status = STATUS_OK;
     }
 
-    Variant_Write(msgBuf, &a_pValue->Value);
+    status &= Variant_Write(&a_pValue->Value, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10673,7 +11109,7 @@ StatusCode UA_LiteralOperand_Encode(UA_MsgBuffer* msgBuf, UA_LiteralOperand* a_p
 /*============================================================================
  * UA_LiteralOperand_Decode
  *===========================================================================*/
-StatusCode UA_LiteralOperand_Decode(UA_MsgBuffer* msgBuf, UA_LiteralOperand* a_pValue)
+StatusCode UA_LiteralOperand_Decode(UA_LiteralOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10683,7 +11119,7 @@ StatusCode UA_LiteralOperand_Decode(UA_MsgBuffer* msgBuf, UA_LiteralOperand* a_p
 
     UA_LiteralOperand_Initialize(a_pValue);
 
-    Variant_Read(msgBuf, &a_pValue->Value);
+    status &= Variant_Read(&a_pValue->Value, msgBuf);
 
     if(status != STATUS_OK){
         UA_LiteralOperand_Clear(a_pValue);
@@ -10746,7 +11182,7 @@ void UA_AttributeOperand_Clear(UA_AttributeOperand* a_pValue)
 /*============================================================================
  * UA_AttributeOperand_Encode
  *===========================================================================*/
-StatusCode UA_AttributeOperand_Encode(UA_MsgBuffer* msgBuf, UA_AttributeOperand* a_pValue)
+StatusCode UA_AttributeOperand_Encode(UA_AttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10754,11 +11190,15 @@ StatusCode UA_AttributeOperand_Encode(UA_MsgBuffer* msgBuf, UA_AttributeOperand*
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    String_Write(msgBuf, &a_pValue->Alias);
-    UA_RelativePath_Encode(msgBuf, &a_pValue->BrowsePath);
-    UInt32_Write(msgBuf, &a_pValue->AttributeId);
-    String_Write(msgBuf, &a_pValue->IndexRange);
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= String_Write(&a_pValue->Alias, msgBuf);
+    status &= UA_RelativePath_Encode(&a_pValue->BrowsePath, msgBuf);
+    status &= UInt32_Write(&a_pValue->AttributeId, msgBuf);
+    status &= String_Write(&a_pValue->IndexRange, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10766,7 +11206,7 @@ StatusCode UA_AttributeOperand_Encode(UA_MsgBuffer* msgBuf, UA_AttributeOperand*
 /*============================================================================
  * UA_AttributeOperand_Decode
  *===========================================================================*/
-StatusCode UA_AttributeOperand_Decode(UA_MsgBuffer* msgBuf, UA_AttributeOperand* a_pValue)
+StatusCode UA_AttributeOperand_Decode(UA_AttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10776,11 +11216,11 @@ StatusCode UA_AttributeOperand_Decode(UA_MsgBuffer* msgBuf, UA_AttributeOperand*
 
     UA_AttributeOperand_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    String_Read(msgBuf, &a_pValue->Alias);
-    UA_RelativePath_Decode(msgBuf, &a_pValue->BrowsePath);
-    UInt32_Read(msgBuf, &a_pValue->AttributeId);
-    String_Read(msgBuf, &a_pValue->IndexRange);
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= String_Read(&a_pValue->Alias, msgBuf);
+    status &= UA_RelativePath_Decode(&a_pValue->BrowsePath, msgBuf);
+    status &= UInt32_Read(&a_pValue->AttributeId, msgBuf);
+    status &= String_Read(&a_pValue->IndexRange, msgBuf);
 
     if(status != STATUS_OK){
         UA_AttributeOperand_Clear(a_pValue);
@@ -10843,7 +11283,7 @@ void UA_SimpleAttributeOperand_Clear(UA_SimpleAttributeOperand* a_pValue)
 /*============================================================================
  * UA_SimpleAttributeOperand_Encode
  *===========================================================================*/
-StatusCode UA_SimpleAttributeOperand_Encode(UA_MsgBuffer* msgBuf, UA_SimpleAttributeOperand* a_pValue)
+StatusCode UA_SimpleAttributeOperand_Encode(UA_SimpleAttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10851,11 +11291,15 @@ StatusCode UA_SimpleAttributeOperand_Encode(UA_MsgBuffer* msgBuf, UA_SimpleAttri
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->TypeDefinitionId);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfBrowsePath, (void**) &a_pValue->BrowsePath, 
+    status &= NodeId_Write(&a_pValue->TypeDefinitionId, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfBrowsePath, (void**) &a_pValue->BrowsePath, 
                    sizeof(UA_QualifiedName), (UA_EncodeableObject_PfnEncode*) QualifiedName_Write);
-    UInt32_Write(msgBuf, &a_pValue->AttributeId);
-    String_Write(msgBuf, &a_pValue->IndexRange);
+    status &= UInt32_Write(&a_pValue->AttributeId, msgBuf);
+    status &= String_Write(&a_pValue->IndexRange, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10863,7 +11307,7 @@ StatusCode UA_SimpleAttributeOperand_Encode(UA_MsgBuffer* msgBuf, UA_SimpleAttri
 /*============================================================================
  * UA_SimpleAttributeOperand_Decode
  *===========================================================================*/
-StatusCode UA_SimpleAttributeOperand_Decode(UA_MsgBuffer* msgBuf, UA_SimpleAttributeOperand* a_pValue)
+StatusCode UA_SimpleAttributeOperand_Decode(UA_SimpleAttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10873,11 +11317,11 @@ StatusCode UA_SimpleAttributeOperand_Decode(UA_MsgBuffer* msgBuf, UA_SimpleAttri
 
     UA_SimpleAttributeOperand_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->TypeDefinitionId);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfBrowsePath, (void**) &a_pValue->BrowsePath, 
+    status &= NodeId_Read(&a_pValue->TypeDefinitionId, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfBrowsePath, (void**) &a_pValue->BrowsePath, 
                   sizeof(UA_QualifiedName), (UA_EncodeableObject_PfnDecode*) QualifiedName_Read);
-    UInt32_Read(msgBuf, &a_pValue->AttributeId);
-    String_Read(msgBuf, &a_pValue->IndexRange);
+    status &= UInt32_Read(&a_pValue->AttributeId, msgBuf);
+    status &= String_Read(&a_pValue->IndexRange, msgBuf);
 
     if(status != STATUS_OK){
         UA_SimpleAttributeOperand_Clear(a_pValue);
@@ -10940,7 +11384,7 @@ void UA_ContentFilterElementResult_Clear(UA_ContentFilterElementResult* a_pValue
 /*============================================================================
  * UA_ContentFilterElementResult_Encode
  *===========================================================================*/
-StatusCode UA_ContentFilterElementResult_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilterElementResult* a_pValue)
+StatusCode UA_ContentFilterElementResult_Encode(UA_ContentFilterElementResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10948,11 +11392,15 @@ StatusCode UA_ContentFilterElementResult_Encode(UA_MsgBuffer* msgBuf, UA_Content
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfOperandDiagnosticInfos, (void**) &a_pValue->OperandDiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfOperandDiagnosticInfos, (void**) &a_pValue->OperandDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -10960,7 +11408,7 @@ StatusCode UA_ContentFilterElementResult_Encode(UA_MsgBuffer* msgBuf, UA_Content
 /*============================================================================
  * UA_ContentFilterElementResult_Decode
  *===========================================================================*/
-StatusCode UA_ContentFilterElementResult_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilterElementResult* a_pValue)
+StatusCode UA_ContentFilterElementResult_Decode(UA_ContentFilterElementResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -10970,10 +11418,10 @@ StatusCode UA_ContentFilterElementResult_Decode(UA_MsgBuffer* msgBuf, UA_Content
 
     UA_ContentFilterElementResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfOperandDiagnosticInfos, (void**) &a_pValue->OperandDiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfOperandDiagnosticInfos, (void**) &a_pValue->OperandDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -11035,7 +11483,7 @@ void UA_ContentFilterResult_Clear(UA_ContentFilterResult* a_pValue)
 /*============================================================================
  * UA_ContentFilterResult_Encode
  *===========================================================================*/
-StatusCode UA_ContentFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilterResult* a_pValue)
+StatusCode UA_ContentFilterResult_Encode(UA_ContentFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11043,10 +11491,14 @@ StatusCode UA_ContentFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilterR
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfElementResults, (void**) &a_pValue->ElementResults, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfElementResults, (void**) &a_pValue->ElementResults, 
                    sizeof(UA_ContentFilterElementResult), (UA_EncodeableObject_PfnEncode*) UA_ContentFilterElementResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfElementDiagnosticInfos, (void**) &a_pValue->ElementDiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfElementDiagnosticInfos, (void**) &a_pValue->ElementDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11054,7 +11506,7 @@ StatusCode UA_ContentFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_ContentFilterR
 /*============================================================================
  * UA_ContentFilterResult_Decode
  *===========================================================================*/
-StatusCode UA_ContentFilterResult_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilterResult* a_pValue)
+StatusCode UA_ContentFilterResult_Decode(UA_ContentFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11064,9 +11516,9 @@ StatusCode UA_ContentFilterResult_Decode(UA_MsgBuffer* msgBuf, UA_ContentFilterR
 
     UA_ContentFilterResult_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfElementResults, (void**) &a_pValue->ElementResults, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfElementResults, (void**) &a_pValue->ElementResults, 
                   sizeof(UA_ContentFilterElementResult), (UA_EncodeableObject_PfnDecode*) UA_ContentFilterElementResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfElementDiagnosticInfos, (void**) &a_pValue->ElementDiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfElementDiagnosticInfos, (void**) &a_pValue->ElementDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -11130,7 +11582,7 @@ void UA_ParsingResult_Clear(UA_ParsingResult* a_pValue)
 /*============================================================================
  * UA_ParsingResult_Encode
  *===========================================================================*/
-StatusCode UA_ParsingResult_Encode(UA_MsgBuffer* msgBuf, UA_ParsingResult* a_pValue)
+StatusCode UA_ParsingResult_Encode(UA_ParsingResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11138,11 +11590,15 @@ StatusCode UA_ParsingResult_Encode(UA_MsgBuffer* msgBuf, UA_ParsingResult* a_pVa
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDataDiagnosticInfos, (void**) &a_pValue->DataDiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDataDiagnosticInfos, (void**) &a_pValue->DataDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11150,7 +11606,7 @@ StatusCode UA_ParsingResult_Encode(UA_MsgBuffer* msgBuf, UA_ParsingResult* a_pVa
 /*============================================================================
  * UA_ParsingResult_Decode
  *===========================================================================*/
-StatusCode UA_ParsingResult_Decode(UA_MsgBuffer* msgBuf, UA_ParsingResult* a_pValue)
+StatusCode UA_ParsingResult_Decode(UA_ParsingResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11160,10 +11616,10 @@ StatusCode UA_ParsingResult_Decode(UA_MsgBuffer* msgBuf, UA_ParsingResult* a_pVa
 
     UA_ParsingResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDataDiagnosticInfos, (void**) &a_pValue->DataDiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDataDiagnosticInfos, (void**) &a_pValue->DataDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -11232,7 +11688,7 @@ void UA_QueryFirstRequest_Clear(UA_QueryFirstRequest* a_pValue)
 /*============================================================================
  * UA_QueryFirstRequest_Encode
  *===========================================================================*/
-StatusCode UA_QueryFirstRequest_Encode(UA_MsgBuffer* msgBuf, UA_QueryFirstRequest* a_pValue)
+StatusCode UA_QueryFirstRequest_Encode(UA_QueryFirstRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11240,13 +11696,17 @@ StatusCode UA_QueryFirstRequest_Encode(UA_MsgBuffer* msgBuf, UA_QueryFirstReques
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_ViewDescription_Encode(msgBuf, &a_pValue->View);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNodeTypes, (void**) &a_pValue->NodeTypes, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_ViewDescription_Encode(&a_pValue->View, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNodeTypes, (void**) &a_pValue->NodeTypes, 
                    sizeof(UA_NodeTypeDescription), (UA_EncodeableObject_PfnEncode*) UA_NodeTypeDescription_Encode);
-    UA_ContentFilter_Encode(msgBuf, &a_pValue->Filter);
-    UInt32_Write(msgBuf, &a_pValue->MaxDataSetsToReturn);
-    UInt32_Write(msgBuf, &a_pValue->MaxReferencesToReturn);
+    status &= UA_ContentFilter_Encode(&a_pValue->Filter, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxDataSetsToReturn, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxReferencesToReturn, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11254,7 +11714,7 @@ StatusCode UA_QueryFirstRequest_Encode(UA_MsgBuffer* msgBuf, UA_QueryFirstReques
 /*============================================================================
  * UA_QueryFirstRequest_Decode
  *===========================================================================*/
-StatusCode UA_QueryFirstRequest_Decode(UA_MsgBuffer* msgBuf, UA_QueryFirstRequest* a_pValue)
+StatusCode UA_QueryFirstRequest_Decode(UA_QueryFirstRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11264,13 +11724,13 @@ StatusCode UA_QueryFirstRequest_Decode(UA_MsgBuffer* msgBuf, UA_QueryFirstReques
 
     UA_QueryFirstRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_ViewDescription_Decode(msgBuf, &a_pValue->View);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNodeTypes, (void**) &a_pValue->NodeTypes, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_ViewDescription_Decode(&a_pValue->View, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNodeTypes, (void**) &a_pValue->NodeTypes, 
                   sizeof(UA_NodeTypeDescription), (UA_EncodeableObject_PfnDecode*) UA_NodeTypeDescription_Decode);
-    UA_ContentFilter_Decode(msgBuf, &a_pValue->Filter);
-    UInt32_Read(msgBuf, &a_pValue->MaxDataSetsToReturn);
-    UInt32_Read(msgBuf, &a_pValue->MaxReferencesToReturn);
+    status &= UA_ContentFilter_Decode(&a_pValue->Filter, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxDataSetsToReturn, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxReferencesToReturn, msgBuf);
 
     if(status != STATUS_OK){
         UA_QueryFirstRequest_Clear(a_pValue);
@@ -11341,7 +11801,7 @@ void UA_QueryFirstResponse_Clear(UA_QueryFirstResponse* a_pValue)
 /*============================================================================
  * UA_QueryFirstResponse_Encode
  *===========================================================================*/
-StatusCode UA_QueryFirstResponse_Encode(UA_MsgBuffer* msgBuf, UA_QueryFirstResponse* a_pValue)
+StatusCode UA_QueryFirstResponse_Encode(UA_QueryFirstResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11349,15 +11809,19 @@ StatusCode UA_QueryFirstResponse_Encode(UA_MsgBuffer* msgBuf, UA_QueryFirstRespo
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
                    sizeof(UA_QueryDataSet), (UA_EncodeableObject_PfnEncode*) UA_QueryDataSet_Encode);
-    ByteString_Write(msgBuf, &a_pValue->ContinuationPoint);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfParsingResults, (void**) &a_pValue->ParsingResults, 
+    status &= ByteString_Write(&a_pValue->ContinuationPoint, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfParsingResults, (void**) &a_pValue->ParsingResults, 
                    sizeof(UA_ParsingResult), (UA_EncodeableObject_PfnEncode*) UA_ParsingResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
-    UA_ContentFilterResult_Encode(msgBuf, &a_pValue->FilterResult);
+    status &= UA_ContentFilterResult_Encode(&a_pValue->FilterResult, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11365,7 +11829,7 @@ StatusCode UA_QueryFirstResponse_Encode(UA_MsgBuffer* msgBuf, UA_QueryFirstRespo
 /*============================================================================
  * UA_QueryFirstResponse_Decode
  *===========================================================================*/
-StatusCode UA_QueryFirstResponse_Decode(UA_MsgBuffer* msgBuf, UA_QueryFirstResponse* a_pValue)
+StatusCode UA_QueryFirstResponse_Decode(UA_QueryFirstResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11375,15 +11839,15 @@ StatusCode UA_QueryFirstResponse_Decode(UA_MsgBuffer* msgBuf, UA_QueryFirstRespo
 
     UA_QueryFirstResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
                   sizeof(UA_QueryDataSet), (UA_EncodeableObject_PfnDecode*) UA_QueryDataSet_Decode);
-    ByteString_Read(msgBuf, &a_pValue->ContinuationPoint);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfParsingResults, (void**) &a_pValue->ParsingResults, 
+    status &= ByteString_Read(&a_pValue->ContinuationPoint, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfParsingResults, (void**) &a_pValue->ParsingResults, 
                   sizeof(UA_ParsingResult), (UA_EncodeableObject_PfnDecode*) UA_ParsingResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
-    UA_ContentFilterResult_Decode(msgBuf, &a_pValue->FilterResult);
+    status &= UA_ContentFilterResult_Decode(&a_pValue->FilterResult, msgBuf);
 
     if(status != STATUS_OK){
         UA_QueryFirstResponse_Clear(a_pValue);
@@ -11444,7 +11908,7 @@ void UA_QueryNextRequest_Clear(UA_QueryNextRequest* a_pValue)
 /*============================================================================
  * UA_QueryNextRequest_Encode
  *===========================================================================*/
-StatusCode UA_QueryNextRequest_Encode(UA_MsgBuffer* msgBuf, UA_QueryNextRequest* a_pValue)
+StatusCode UA_QueryNextRequest_Encode(UA_QueryNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11452,9 +11916,13 @@ StatusCode UA_QueryNextRequest_Encode(UA_MsgBuffer* msgBuf, UA_QueryNextRequest*
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    Boolean_Write(msgBuf, &a_pValue->ReleaseContinuationPoint);
-    ByteString_Write(msgBuf, &a_pValue->ContinuationPoint);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= Boolean_Write(&a_pValue->ReleaseContinuationPoint, msgBuf);
+    status &= ByteString_Write(&a_pValue->ContinuationPoint, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11462,7 +11930,7 @@ StatusCode UA_QueryNextRequest_Encode(UA_MsgBuffer* msgBuf, UA_QueryNextRequest*
 /*============================================================================
  * UA_QueryNextRequest_Decode
  *===========================================================================*/
-StatusCode UA_QueryNextRequest_Decode(UA_MsgBuffer* msgBuf, UA_QueryNextRequest* a_pValue)
+StatusCode UA_QueryNextRequest_Decode(UA_QueryNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11472,9 +11940,9 @@ StatusCode UA_QueryNextRequest_Decode(UA_MsgBuffer* msgBuf, UA_QueryNextRequest*
 
     UA_QueryNextRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    Boolean_Read(msgBuf, &a_pValue->ReleaseContinuationPoint);
-    ByteString_Read(msgBuf, &a_pValue->ContinuationPoint);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= Boolean_Read(&a_pValue->ReleaseContinuationPoint, msgBuf);
+    status &= ByteString_Read(&a_pValue->ContinuationPoint, msgBuf);
 
     if(status != STATUS_OK){
         UA_QueryNextRequest_Clear(a_pValue);
@@ -11535,7 +12003,7 @@ void UA_QueryNextResponse_Clear(UA_QueryNextResponse* a_pValue)
 /*============================================================================
  * UA_QueryNextResponse_Encode
  *===========================================================================*/
-StatusCode UA_QueryNextResponse_Encode(UA_MsgBuffer* msgBuf, UA_QueryNextResponse* a_pValue)
+StatusCode UA_QueryNextResponse_Encode(UA_QueryNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11543,10 +12011,14 @@ StatusCode UA_QueryNextResponse_Encode(UA_MsgBuffer* msgBuf, UA_QueryNextRespons
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
                    sizeof(UA_QueryDataSet), (UA_EncodeableObject_PfnEncode*) UA_QueryDataSet_Encode);
-    ByteString_Write(msgBuf, &a_pValue->RevisedContinuationPoint);
+    status &= ByteString_Write(&a_pValue->RevisedContinuationPoint, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11554,7 +12026,7 @@ StatusCode UA_QueryNextResponse_Encode(UA_MsgBuffer* msgBuf, UA_QueryNextRespons
 /*============================================================================
  * UA_QueryNextResponse_Decode
  *===========================================================================*/
-StatusCode UA_QueryNextResponse_Decode(UA_MsgBuffer* msgBuf, UA_QueryNextResponse* a_pValue)
+StatusCode UA_QueryNextResponse_Decode(UA_QueryNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11564,10 +12036,10 @@ StatusCode UA_QueryNextResponse_Decode(UA_MsgBuffer* msgBuf, UA_QueryNextRespons
 
     UA_QueryNextResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfQueryDataSets, (void**) &a_pValue->QueryDataSets, 
                   sizeof(UA_QueryDataSet), (UA_EncodeableObject_PfnDecode*) UA_QueryDataSet_Decode);
-    ByteString_Read(msgBuf, &a_pValue->RevisedContinuationPoint);
+    status &= ByteString_Read(&a_pValue->RevisedContinuationPoint, msgBuf);
 
     if(status != STATUS_OK){
         UA_QueryNextResponse_Clear(a_pValue);
@@ -11630,7 +12102,7 @@ void UA_ReadValueId_Clear(UA_ReadValueId* a_pValue)
 /*============================================================================
  * UA_ReadValueId_Encode
  *===========================================================================*/
-StatusCode UA_ReadValueId_Encode(UA_MsgBuffer* msgBuf, UA_ReadValueId* a_pValue)
+StatusCode UA_ReadValueId_Encode(UA_ReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11638,10 +12110,14 @@ StatusCode UA_ReadValueId_Encode(UA_MsgBuffer* msgBuf, UA_ReadValueId* a_pValue)
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UInt32_Write(msgBuf, &a_pValue->AttributeId);
-    String_Write(msgBuf, &a_pValue->IndexRange);
-    QualifiedName_Write(msgBuf, &a_pValue->DataEncoding);
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UInt32_Write(&a_pValue->AttributeId, msgBuf);
+    status &= String_Write(&a_pValue->IndexRange, msgBuf);
+    status &= QualifiedName_Write(&a_pValue->DataEncoding, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11649,7 +12125,7 @@ StatusCode UA_ReadValueId_Encode(UA_MsgBuffer* msgBuf, UA_ReadValueId* a_pValue)
 /*============================================================================
  * UA_ReadValueId_Decode
  *===========================================================================*/
-StatusCode UA_ReadValueId_Decode(UA_MsgBuffer* msgBuf, UA_ReadValueId* a_pValue)
+StatusCode UA_ReadValueId_Decode(UA_ReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11659,10 +12135,10 @@ StatusCode UA_ReadValueId_Decode(UA_MsgBuffer* msgBuf, UA_ReadValueId* a_pValue)
 
     UA_ReadValueId_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UInt32_Read(msgBuf, &a_pValue->AttributeId);
-    String_Read(msgBuf, &a_pValue->IndexRange);
-    QualifiedName_Read(msgBuf, &a_pValue->DataEncoding);
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UInt32_Read(&a_pValue->AttributeId, msgBuf);
+    status &= String_Read(&a_pValue->IndexRange, msgBuf);
+    status &= QualifiedName_Read(&a_pValue->DataEncoding, msgBuf);
 
     if(status != STATUS_OK){
         UA_ReadValueId_Clear(a_pValue);
@@ -11726,7 +12202,7 @@ void UA_ReadRequest_Clear(UA_ReadRequest* a_pValue)
 /*============================================================================
  * UA_ReadRequest_Encode
  *===========================================================================*/
-StatusCode UA_ReadRequest_Encode(UA_MsgBuffer* msgBuf, UA_ReadRequest* a_pValue)
+StatusCode UA_ReadRequest_Encode(UA_ReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11734,11 +12210,15 @@ StatusCode UA_ReadRequest_Encode(UA_MsgBuffer* msgBuf, UA_ReadRequest* a_pValue)
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    Double_Write(msgBuf, &a_pValue->MaxAge);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToRead, (void**) &a_pValue->NodesToRead, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= Double_Write(&a_pValue->MaxAge, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToRead, (void**) &a_pValue->NodesToRead, 
                    sizeof(UA_ReadValueId), (UA_EncodeableObject_PfnEncode*) UA_ReadValueId_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11746,7 +12226,7 @@ StatusCode UA_ReadRequest_Encode(UA_MsgBuffer* msgBuf, UA_ReadRequest* a_pValue)
 /*============================================================================
  * UA_ReadRequest_Decode
  *===========================================================================*/
-StatusCode UA_ReadRequest_Decode(UA_MsgBuffer* msgBuf, UA_ReadRequest* a_pValue)
+StatusCode UA_ReadRequest_Decode(UA_ReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11756,10 +12236,10 @@ StatusCode UA_ReadRequest_Decode(UA_MsgBuffer* msgBuf, UA_ReadRequest* a_pValue)
 
     UA_ReadRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    Double_Read(msgBuf, &a_pValue->MaxAge);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToRead, (void**) &a_pValue->NodesToRead, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= Double_Read(&a_pValue->MaxAge, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToRead, (void**) &a_pValue->NodesToRead, 
                   sizeof(UA_ReadValueId), (UA_EncodeableObject_PfnDecode*) UA_ReadValueId_Decode);
 
     if(status != STATUS_OK){
@@ -11823,7 +12303,7 @@ void UA_ReadResponse_Clear(UA_ReadResponse* a_pValue)
 /*============================================================================
  * UA_ReadResponse_Encode
  *===========================================================================*/
-StatusCode UA_ReadResponse_Encode(UA_MsgBuffer* msgBuf, UA_ReadResponse* a_pValue)
+StatusCode UA_ReadResponse_Encode(UA_ReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11831,11 +12311,15 @@ StatusCode UA_ReadResponse_Encode(UA_MsgBuffer* msgBuf, UA_ReadResponse* a_pValu
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_DataValue), (UA_EncodeableObject_PfnEncode*) DataValue_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11843,7 +12327,7 @@ StatusCode UA_ReadResponse_Encode(UA_MsgBuffer* msgBuf, UA_ReadResponse* a_pValu
 /*============================================================================
  * UA_ReadResponse_Decode
  *===========================================================================*/
-StatusCode UA_ReadResponse_Decode(UA_MsgBuffer* msgBuf, UA_ReadResponse* a_pValue)
+StatusCode UA_ReadResponse_Decode(UA_ReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11853,10 +12337,10 @@ StatusCode UA_ReadResponse_Decode(UA_MsgBuffer* msgBuf, UA_ReadResponse* a_pValu
 
     UA_ReadResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_DataValue), (UA_EncodeableObject_PfnDecode*) DataValue_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -11919,7 +12403,7 @@ void UA_HistoryReadValueId_Clear(UA_HistoryReadValueId* a_pValue)
 /*============================================================================
  * UA_HistoryReadValueId_Encode
  *===========================================================================*/
-StatusCode UA_HistoryReadValueId_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadValueId* a_pValue)
+StatusCode UA_HistoryReadValueId_Encode(UA_HistoryReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11927,10 +12411,14 @@ StatusCode UA_HistoryReadValueId_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadValu
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    String_Write(msgBuf, &a_pValue->IndexRange);
-    QualifiedName_Write(msgBuf, &a_pValue->DataEncoding);
-    ByteString_Write(msgBuf, &a_pValue->ContinuationPoint);
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= String_Write(&a_pValue->IndexRange, msgBuf);
+    status &= QualifiedName_Write(&a_pValue->DataEncoding, msgBuf);
+    status &= ByteString_Write(&a_pValue->ContinuationPoint, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -11938,7 +12426,7 @@ StatusCode UA_HistoryReadValueId_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadValu
 /*============================================================================
  * UA_HistoryReadValueId_Decode
  *===========================================================================*/
-StatusCode UA_HistoryReadValueId_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadValueId* a_pValue)
+StatusCode UA_HistoryReadValueId_Decode(UA_HistoryReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -11948,10 +12436,10 @@ StatusCode UA_HistoryReadValueId_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadValu
 
     UA_HistoryReadValueId_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    String_Read(msgBuf, &a_pValue->IndexRange);
-    QualifiedName_Read(msgBuf, &a_pValue->DataEncoding);
-    ByteString_Read(msgBuf, &a_pValue->ContinuationPoint);
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= String_Read(&a_pValue->IndexRange, msgBuf);
+    status &= QualifiedName_Read(&a_pValue->DataEncoding, msgBuf);
+    status &= ByteString_Read(&a_pValue->ContinuationPoint, msgBuf);
 
     if(status != STATUS_OK){
         UA_HistoryReadValueId_Clear(a_pValue);
@@ -12010,7 +12498,7 @@ void UA_HistoryReadResult_Clear(UA_HistoryReadResult* a_pValue)
 /*============================================================================
  * UA_HistoryReadResult_Encode
  *===========================================================================*/
-StatusCode UA_HistoryReadResult_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadResult* a_pValue)
+StatusCode UA_HistoryReadResult_Encode(UA_HistoryReadResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12018,9 +12506,13 @@ StatusCode UA_HistoryReadResult_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadResul
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    ByteString_Write(msgBuf, &a_pValue->ContinuationPoint);
-    ExtensionObject_Write(msgBuf, &a_pValue->HistoryData);
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= ByteString_Write(&a_pValue->ContinuationPoint, msgBuf);
+    status &= ExtensionObject_Write(&a_pValue->HistoryData, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12028,7 +12520,7 @@ StatusCode UA_HistoryReadResult_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadResul
 /*============================================================================
  * UA_HistoryReadResult_Decode
  *===========================================================================*/
-StatusCode UA_HistoryReadResult_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadResult* a_pValue)
+StatusCode UA_HistoryReadResult_Decode(UA_HistoryReadResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12038,9 +12530,9 @@ StatusCode UA_HistoryReadResult_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadResul
 
     UA_HistoryReadResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    ByteString_Read(msgBuf, &a_pValue->ContinuationPoint);
-    ExtensionObject_Read(msgBuf, &a_pValue->HistoryData);
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= ByteString_Read(&a_pValue->ContinuationPoint, msgBuf);
+    status &= ExtensionObject_Read(&a_pValue->HistoryData, msgBuf);
 
     if(status != STATUS_OK){
         UA_HistoryReadResult_Clear(a_pValue);
@@ -12101,7 +12593,7 @@ void UA_ReadEventDetails_Clear(UA_ReadEventDetails* a_pValue)
 /*============================================================================
  * UA_ReadEventDetails_Encode
  *===========================================================================*/
-StatusCode UA_ReadEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadEventDetails* a_pValue)
+StatusCode UA_ReadEventDetails_Encode(UA_ReadEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12109,10 +12601,14 @@ StatusCode UA_ReadEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadEventDetails*
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->NumValuesPerNode);
-    DateTime_Write(msgBuf, &a_pValue->StartTime);
-    DateTime_Write(msgBuf, &a_pValue->EndTime);
-    UA_EventFilter_Encode(msgBuf, &a_pValue->Filter);
+    status &= UInt32_Write(&a_pValue->NumValuesPerNode, msgBuf);
+    status &= DateTime_Write(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Write(&a_pValue->EndTime, msgBuf);
+    status &= UA_EventFilter_Encode(&a_pValue->Filter, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12120,7 +12616,7 @@ StatusCode UA_ReadEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadEventDetails*
 /*============================================================================
  * UA_ReadEventDetails_Decode
  *===========================================================================*/
-StatusCode UA_ReadEventDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadEventDetails* a_pValue)
+StatusCode UA_ReadEventDetails_Decode(UA_ReadEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12130,10 +12626,10 @@ StatusCode UA_ReadEventDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadEventDetails*
 
     UA_ReadEventDetails_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->NumValuesPerNode);
-    DateTime_Read(msgBuf, &a_pValue->StartTime);
-    DateTime_Read(msgBuf, &a_pValue->EndTime);
-    UA_EventFilter_Decode(msgBuf, &a_pValue->Filter);
+    status &= UInt32_Read(&a_pValue->NumValuesPerNode, msgBuf);
+    status &= DateTime_Read(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Read(&a_pValue->EndTime, msgBuf);
+    status &= UA_EventFilter_Decode(&a_pValue->Filter, msgBuf);
 
     if(status != STATUS_OK){
         UA_ReadEventDetails_Clear(a_pValue);
@@ -12196,7 +12692,7 @@ void UA_ReadRawModifiedDetails_Clear(UA_ReadRawModifiedDetails* a_pValue)
 /*============================================================================
  * UA_ReadRawModifiedDetails_Encode
  *===========================================================================*/
-StatusCode UA_ReadRawModifiedDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadRawModifiedDetails* a_pValue)
+StatusCode UA_ReadRawModifiedDetails_Encode(UA_ReadRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12204,11 +12700,15 @@ StatusCode UA_ReadRawModifiedDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadRawModi
         status = STATUS_OK;
     }
 
-    Boolean_Write(msgBuf, &a_pValue->IsReadModified);
-    DateTime_Write(msgBuf, &a_pValue->StartTime);
-    DateTime_Write(msgBuf, &a_pValue->EndTime);
-    UInt32_Write(msgBuf, &a_pValue->NumValuesPerNode);
-    Boolean_Write(msgBuf, &a_pValue->ReturnBounds);
+    status &= Boolean_Write(&a_pValue->IsReadModified, msgBuf);
+    status &= DateTime_Write(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Write(&a_pValue->EndTime, msgBuf);
+    status &= UInt32_Write(&a_pValue->NumValuesPerNode, msgBuf);
+    status &= Boolean_Write(&a_pValue->ReturnBounds, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12216,7 +12716,7 @@ StatusCode UA_ReadRawModifiedDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadRawModi
 /*============================================================================
  * UA_ReadRawModifiedDetails_Decode
  *===========================================================================*/
-StatusCode UA_ReadRawModifiedDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadRawModifiedDetails* a_pValue)
+StatusCode UA_ReadRawModifiedDetails_Decode(UA_ReadRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12226,11 +12726,11 @@ StatusCode UA_ReadRawModifiedDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadRawModi
 
     UA_ReadRawModifiedDetails_Initialize(a_pValue);
 
-    Boolean_Read(msgBuf, &a_pValue->IsReadModified);
-    DateTime_Read(msgBuf, &a_pValue->StartTime);
-    DateTime_Read(msgBuf, &a_pValue->EndTime);
-    UInt32_Read(msgBuf, &a_pValue->NumValuesPerNode);
-    Boolean_Read(msgBuf, &a_pValue->ReturnBounds);
+    status &= Boolean_Read(&a_pValue->IsReadModified, msgBuf);
+    status &= DateTime_Read(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Read(&a_pValue->EndTime, msgBuf);
+    status &= UInt32_Read(&a_pValue->NumValuesPerNode, msgBuf);
+    status &= Boolean_Read(&a_pValue->ReturnBounds, msgBuf);
 
     if(status != STATUS_OK){
         UA_ReadRawModifiedDetails_Clear(a_pValue);
@@ -12295,7 +12795,7 @@ void UA_ReadProcessedDetails_Clear(UA_ReadProcessedDetails* a_pValue)
 /*============================================================================
  * UA_ReadProcessedDetails_Encode
  *===========================================================================*/
-StatusCode UA_ReadProcessedDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadProcessedDetails* a_pValue)
+StatusCode UA_ReadProcessedDetails_Encode(UA_ReadProcessedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12303,12 +12803,16 @@ StatusCode UA_ReadProcessedDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadProcessed
         status = STATUS_OK;
     }
 
-    DateTime_Write(msgBuf, &a_pValue->StartTime);
-    DateTime_Write(msgBuf, &a_pValue->EndTime);
-    Double_Write(msgBuf, &a_pValue->ProcessingInterval);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfAggregateType, (void**) &a_pValue->AggregateType, 
+    status &= DateTime_Write(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Write(&a_pValue->EndTime, msgBuf);
+    status &= Double_Write(&a_pValue->ProcessingInterval, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfAggregateType, (void**) &a_pValue->AggregateType, 
                    sizeof(UA_NodeId), (UA_EncodeableObject_PfnEncode*) NodeId_Write);
-    UA_AggregateConfiguration_Encode(msgBuf, &a_pValue->AggregateConfiguration);
+    status &= UA_AggregateConfiguration_Encode(&a_pValue->AggregateConfiguration, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12316,7 +12820,7 @@ StatusCode UA_ReadProcessedDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadProcessed
 /*============================================================================
  * UA_ReadProcessedDetails_Decode
  *===========================================================================*/
-StatusCode UA_ReadProcessedDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadProcessedDetails* a_pValue)
+StatusCode UA_ReadProcessedDetails_Decode(UA_ReadProcessedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12326,12 +12830,12 @@ StatusCode UA_ReadProcessedDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadProcessed
 
     UA_ReadProcessedDetails_Initialize(a_pValue);
 
-    DateTime_Read(msgBuf, &a_pValue->StartTime);
-    DateTime_Read(msgBuf, &a_pValue->EndTime);
-    Double_Read(msgBuf, &a_pValue->ProcessingInterval);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfAggregateType, (void**) &a_pValue->AggregateType, 
+    status &= DateTime_Read(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Read(&a_pValue->EndTime, msgBuf);
+    status &= Double_Read(&a_pValue->ProcessingInterval, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfAggregateType, (void**) &a_pValue->AggregateType, 
                   sizeof(UA_NodeId), (UA_EncodeableObject_PfnDecode*) NodeId_Read);
-    UA_AggregateConfiguration_Decode(msgBuf, &a_pValue->AggregateConfiguration);
+    status &= UA_AggregateConfiguration_Decode(&a_pValue->AggregateConfiguration, msgBuf);
 
     if(status != STATUS_OK){
         UA_ReadProcessedDetails_Clear(a_pValue);
@@ -12390,7 +12894,7 @@ void UA_ReadAtTimeDetails_Clear(UA_ReadAtTimeDetails* a_pValue)
 /*============================================================================
  * UA_ReadAtTimeDetails_Encode
  *===========================================================================*/
-StatusCode UA_ReadAtTimeDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadAtTimeDetails* a_pValue)
+StatusCode UA_ReadAtTimeDetails_Encode(UA_ReadAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12398,9 +12902,13 @@ StatusCode UA_ReadAtTimeDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadAtTimeDetail
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
                    sizeof(UA_DateTime), (UA_EncodeableObject_PfnEncode*) DateTime_Write);
-    Boolean_Write(msgBuf, &a_pValue->UseSimpleBounds);
+    status &= Boolean_Write(&a_pValue->UseSimpleBounds, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12408,7 +12916,7 @@ StatusCode UA_ReadAtTimeDetails_Encode(UA_MsgBuffer* msgBuf, UA_ReadAtTimeDetail
 /*============================================================================
  * UA_ReadAtTimeDetails_Decode
  *===========================================================================*/
-StatusCode UA_ReadAtTimeDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadAtTimeDetails* a_pValue)
+StatusCode UA_ReadAtTimeDetails_Decode(UA_ReadAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12418,9 +12926,9 @@ StatusCode UA_ReadAtTimeDetails_Decode(UA_MsgBuffer* msgBuf, UA_ReadAtTimeDetail
 
     UA_ReadAtTimeDetails_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
                   sizeof(UA_DateTime), (UA_EncodeableObject_PfnDecode*) DateTime_Read);
-    Boolean_Read(msgBuf, &a_pValue->UseSimpleBounds);
+    status &= Boolean_Read(&a_pValue->UseSimpleBounds, msgBuf);
 
     if(status != STATUS_OK){
         UA_ReadAtTimeDetails_Clear(a_pValue);
@@ -12477,7 +12985,7 @@ void UA_HistoryData_Clear(UA_HistoryData* a_pValue)
 /*============================================================================
  * UA_HistoryData_Encode
  *===========================================================================*/
-StatusCode UA_HistoryData_Encode(UA_MsgBuffer* msgBuf, UA_HistoryData* a_pValue)
+StatusCode UA_HistoryData_Encode(UA_HistoryData* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12485,8 +12993,12 @@ StatusCode UA_HistoryData_Encode(UA_MsgBuffer* msgBuf, UA_HistoryData* a_pValue)
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
                    sizeof(UA_DataValue), (UA_EncodeableObject_PfnEncode*) DataValue_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12494,7 +13006,7 @@ StatusCode UA_HistoryData_Encode(UA_MsgBuffer* msgBuf, UA_HistoryData* a_pValue)
 /*============================================================================
  * UA_HistoryData_Decode
  *===========================================================================*/
-StatusCode UA_HistoryData_Decode(UA_MsgBuffer* msgBuf, UA_HistoryData* a_pValue)
+StatusCode UA_HistoryData_Decode(UA_HistoryData* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12504,7 +13016,7 @@ StatusCode UA_HistoryData_Decode(UA_MsgBuffer* msgBuf, UA_HistoryData* a_pValue)
 
     UA_HistoryData_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
                   sizeof(UA_DataValue), (UA_EncodeableObject_PfnDecode*) DataValue_Read);
 
     if(status != STATUS_OK){
@@ -12564,7 +13076,7 @@ void UA_ModificationInfo_Clear(UA_ModificationInfo* a_pValue)
 /*============================================================================
  * UA_ModificationInfo_Encode
  *===========================================================================*/
-StatusCode UA_ModificationInfo_Encode(UA_MsgBuffer* msgBuf, UA_ModificationInfo* a_pValue)
+StatusCode UA_ModificationInfo_Encode(UA_ModificationInfo* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12572,9 +13084,13 @@ StatusCode UA_ModificationInfo_Encode(UA_MsgBuffer* msgBuf, UA_ModificationInfo*
         status = STATUS_OK;
     }
 
-    DateTime_Write(msgBuf, &a_pValue->ModificationTime);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->UpdateType);
-    String_Write(msgBuf, &a_pValue->UserName);
+    status &= DateTime_Write(&a_pValue->ModificationTime, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->UpdateType);
+    status &= String_Write(&a_pValue->UserName, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12582,7 +13098,7 @@ StatusCode UA_ModificationInfo_Encode(UA_MsgBuffer* msgBuf, UA_ModificationInfo*
 /*============================================================================
  * UA_ModificationInfo_Decode
  *===========================================================================*/
-StatusCode UA_ModificationInfo_Decode(UA_MsgBuffer* msgBuf, UA_ModificationInfo* a_pValue)
+StatusCode UA_ModificationInfo_Decode(UA_ModificationInfo* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12592,9 +13108,9 @@ StatusCode UA_ModificationInfo_Decode(UA_MsgBuffer* msgBuf, UA_ModificationInfo*
 
     UA_ModificationInfo_Initialize(a_pValue);
 
-    DateTime_Read(msgBuf, &a_pValue->ModificationTime);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->UpdateType);
-    String_Read(msgBuf, &a_pValue->UserName);
+    status &= DateTime_Read(&a_pValue->ModificationTime, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->UpdateType);
+    status &= String_Read(&a_pValue->UserName, msgBuf);
 
     if(status != STATUS_OK){
         UA_ModificationInfo_Clear(a_pValue);
@@ -12655,7 +13171,7 @@ void UA_HistoryModifiedData_Clear(UA_HistoryModifiedData* a_pValue)
 /*============================================================================
  * UA_HistoryModifiedData_Encode
  *===========================================================================*/
-StatusCode UA_HistoryModifiedData_Encode(UA_MsgBuffer* msgBuf, UA_HistoryModifiedData* a_pValue)
+StatusCode UA_HistoryModifiedData_Encode(UA_HistoryModifiedData* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12663,10 +13179,14 @@ StatusCode UA_HistoryModifiedData_Encode(UA_MsgBuffer* msgBuf, UA_HistoryModifie
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
                    sizeof(UA_DataValue), (UA_EncodeableObject_PfnEncode*) DataValue_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfModificationInfos, (void**) &a_pValue->ModificationInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfModificationInfos, (void**) &a_pValue->ModificationInfos, 
                    sizeof(UA_ModificationInfo), (UA_EncodeableObject_PfnEncode*) UA_ModificationInfo_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12674,7 +13194,7 @@ StatusCode UA_HistoryModifiedData_Encode(UA_MsgBuffer* msgBuf, UA_HistoryModifie
 /*============================================================================
  * UA_HistoryModifiedData_Decode
  *===========================================================================*/
-StatusCode UA_HistoryModifiedData_Decode(UA_MsgBuffer* msgBuf, UA_HistoryModifiedData* a_pValue)
+StatusCode UA_HistoryModifiedData_Decode(UA_HistoryModifiedData* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12684,9 +13204,9 @@ StatusCode UA_HistoryModifiedData_Decode(UA_MsgBuffer* msgBuf, UA_HistoryModifie
 
     UA_HistoryModifiedData_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
                   sizeof(UA_DataValue), (UA_EncodeableObject_PfnDecode*) DataValue_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfModificationInfos, (void**) &a_pValue->ModificationInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfModificationInfos, (void**) &a_pValue->ModificationInfos, 
                   sizeof(UA_ModificationInfo), (UA_EncodeableObject_PfnDecode*) UA_ModificationInfo_Decode);
 
     if(status != STATUS_OK){
@@ -12744,7 +13264,7 @@ void UA_HistoryEvent_Clear(UA_HistoryEvent* a_pValue)
 /*============================================================================
  * UA_HistoryEvent_Encode
  *===========================================================================*/
-StatusCode UA_HistoryEvent_Encode(UA_MsgBuffer* msgBuf, UA_HistoryEvent* a_pValue)
+StatusCode UA_HistoryEvent_Encode(UA_HistoryEvent* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12752,8 +13272,12 @@ StatusCode UA_HistoryEvent_Encode(UA_MsgBuffer* msgBuf, UA_HistoryEvent* a_pValu
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
                    sizeof(UA_HistoryEventFieldList), (UA_EncodeableObject_PfnEncode*) UA_HistoryEventFieldList_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12761,7 +13285,7 @@ StatusCode UA_HistoryEvent_Encode(UA_MsgBuffer* msgBuf, UA_HistoryEvent* a_pValu
 /*============================================================================
  * UA_HistoryEvent_Decode
  *===========================================================================*/
-StatusCode UA_HistoryEvent_Decode(UA_MsgBuffer* msgBuf, UA_HistoryEvent* a_pValue)
+StatusCode UA_HistoryEvent_Decode(UA_HistoryEvent* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12771,7 +13295,7 @@ StatusCode UA_HistoryEvent_Decode(UA_MsgBuffer* msgBuf, UA_HistoryEvent* a_pValu
 
     UA_HistoryEvent_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
                   sizeof(UA_HistoryEventFieldList), (UA_EncodeableObject_PfnDecode*) UA_HistoryEventFieldList_Decode);
 
     if(status != STATUS_OK){
@@ -12838,7 +13362,7 @@ void UA_HistoryReadRequest_Clear(UA_HistoryReadRequest* a_pValue)
 /*============================================================================
  * UA_HistoryReadRequest_Encode
  *===========================================================================*/
-StatusCode UA_HistoryReadRequest_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadRequest* a_pValue)
+StatusCode UA_HistoryReadRequest_Encode(UA_HistoryReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12846,12 +13370,16 @@ StatusCode UA_HistoryReadRequest_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadRequ
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    ExtensionObject_Write(msgBuf, &a_pValue->HistoryReadDetails);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
-    Boolean_Write(msgBuf, &a_pValue->ReleaseContinuationPoints);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToRead, (void**) &a_pValue->NodesToRead, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= ExtensionObject_Write(&a_pValue->HistoryReadDetails, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
+    status &= Boolean_Write(&a_pValue->ReleaseContinuationPoints, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToRead, (void**) &a_pValue->NodesToRead, 
                    sizeof(UA_HistoryReadValueId), (UA_EncodeableObject_PfnEncode*) UA_HistoryReadValueId_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12859,7 +13387,7 @@ StatusCode UA_HistoryReadRequest_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadRequ
 /*============================================================================
  * UA_HistoryReadRequest_Decode
  *===========================================================================*/
-StatusCode UA_HistoryReadRequest_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadRequest* a_pValue)
+StatusCode UA_HistoryReadRequest_Decode(UA_HistoryReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12869,11 +13397,11 @@ StatusCode UA_HistoryReadRequest_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadRequ
 
     UA_HistoryReadRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    ExtensionObject_Read(msgBuf, &a_pValue->HistoryReadDetails);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
-    Boolean_Read(msgBuf, &a_pValue->ReleaseContinuationPoints);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToRead, (void**) &a_pValue->NodesToRead, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= ExtensionObject_Read(&a_pValue->HistoryReadDetails, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
+    status &= Boolean_Read(&a_pValue->ReleaseContinuationPoints, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToRead, (void**) &a_pValue->NodesToRead, 
                   sizeof(UA_HistoryReadValueId), (UA_EncodeableObject_PfnDecode*) UA_HistoryReadValueId_Decode);
 
     if(status != STATUS_OK){
@@ -12937,7 +13465,7 @@ void UA_HistoryReadResponse_Clear(UA_HistoryReadResponse* a_pValue)
 /*============================================================================
  * UA_HistoryReadResponse_Encode
  *===========================================================================*/
-StatusCode UA_HistoryReadResponse_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadResponse* a_pValue)
+StatusCode UA_HistoryReadResponse_Encode(UA_HistoryReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12945,11 +13473,15 @@ StatusCode UA_HistoryReadResponse_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadRes
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_HistoryReadResult), (UA_EncodeableObject_PfnEncode*) UA_HistoryReadResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -12957,7 +13489,7 @@ StatusCode UA_HistoryReadResponse_Encode(UA_MsgBuffer* msgBuf, UA_HistoryReadRes
 /*============================================================================
  * UA_HistoryReadResponse_Decode
  *===========================================================================*/
-StatusCode UA_HistoryReadResponse_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadResponse* a_pValue)
+StatusCode UA_HistoryReadResponse_Decode(UA_HistoryReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -12967,10 +13499,10 @@ StatusCode UA_HistoryReadResponse_Decode(UA_MsgBuffer* msgBuf, UA_HistoryReadRes
 
     UA_HistoryReadResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_HistoryReadResult), (UA_EncodeableObject_PfnDecode*) UA_HistoryReadResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -13033,7 +13565,7 @@ void UA_WriteValue_Clear(UA_WriteValue* a_pValue)
 /*============================================================================
  * UA_WriteValue_Encode
  *===========================================================================*/
-StatusCode UA_WriteValue_Encode(UA_MsgBuffer* msgBuf, UA_WriteValue* a_pValue)
+StatusCode UA_WriteValue_Encode(UA_WriteValue* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13041,10 +13573,14 @@ StatusCode UA_WriteValue_Encode(UA_MsgBuffer* msgBuf, UA_WriteValue* a_pValue)
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UInt32_Write(msgBuf, &a_pValue->AttributeId);
-    String_Write(msgBuf, &a_pValue->IndexRange);
-    DataValue_Write(msgBuf, &a_pValue->Value);
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UInt32_Write(&a_pValue->AttributeId, msgBuf);
+    status &= String_Write(&a_pValue->IndexRange, msgBuf);
+    status &= DataValue_Write(&a_pValue->Value, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13052,7 +13588,7 @@ StatusCode UA_WriteValue_Encode(UA_MsgBuffer* msgBuf, UA_WriteValue* a_pValue)
 /*============================================================================
  * UA_WriteValue_Decode
  *===========================================================================*/
-StatusCode UA_WriteValue_Decode(UA_MsgBuffer* msgBuf, UA_WriteValue* a_pValue)
+StatusCode UA_WriteValue_Decode(UA_WriteValue* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13062,10 +13598,10 @@ StatusCode UA_WriteValue_Decode(UA_MsgBuffer* msgBuf, UA_WriteValue* a_pValue)
 
     UA_WriteValue_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UInt32_Read(msgBuf, &a_pValue->AttributeId);
-    String_Read(msgBuf, &a_pValue->IndexRange);
-    DataValue_Read(msgBuf, &a_pValue->Value);
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UInt32_Read(&a_pValue->AttributeId, msgBuf);
+    status &= String_Read(&a_pValue->IndexRange, msgBuf);
+    status &= DataValue_Read(&a_pValue->Value, msgBuf);
 
     if(status != STATUS_OK){
         UA_WriteValue_Clear(a_pValue);
@@ -13125,7 +13661,7 @@ void UA_WriteRequest_Clear(UA_WriteRequest* a_pValue)
 /*============================================================================
  * UA_WriteRequest_Encode
  *===========================================================================*/
-StatusCode UA_WriteRequest_Encode(UA_MsgBuffer* msgBuf, UA_WriteRequest* a_pValue)
+StatusCode UA_WriteRequest_Encode(UA_WriteRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13133,9 +13669,13 @@ StatusCode UA_WriteRequest_Encode(UA_MsgBuffer* msgBuf, UA_WriteRequest* a_pValu
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToWrite, (void**) &a_pValue->NodesToWrite, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNodesToWrite, (void**) &a_pValue->NodesToWrite, 
                    sizeof(UA_WriteValue), (UA_EncodeableObject_PfnEncode*) UA_WriteValue_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13143,7 +13683,7 @@ StatusCode UA_WriteRequest_Encode(UA_MsgBuffer* msgBuf, UA_WriteRequest* a_pValu
 /*============================================================================
  * UA_WriteRequest_Decode
  *===========================================================================*/
-StatusCode UA_WriteRequest_Decode(UA_MsgBuffer* msgBuf, UA_WriteRequest* a_pValue)
+StatusCode UA_WriteRequest_Decode(UA_WriteRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13153,8 +13693,8 @@ StatusCode UA_WriteRequest_Decode(UA_MsgBuffer* msgBuf, UA_WriteRequest* a_pValu
 
     UA_WriteRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToWrite, (void**) &a_pValue->NodesToWrite, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNodesToWrite, (void**) &a_pValue->NodesToWrite, 
                   sizeof(UA_WriteValue), (UA_EncodeableObject_PfnDecode*) UA_WriteValue_Decode);
 
     if(status != STATUS_OK){
@@ -13218,7 +13758,7 @@ void UA_WriteResponse_Clear(UA_WriteResponse* a_pValue)
 /*============================================================================
  * UA_WriteResponse_Encode
  *===========================================================================*/
-StatusCode UA_WriteResponse_Encode(UA_MsgBuffer* msgBuf, UA_WriteResponse* a_pValue)
+StatusCode UA_WriteResponse_Encode(UA_WriteResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13226,11 +13766,15 @@ StatusCode UA_WriteResponse_Encode(UA_MsgBuffer* msgBuf, UA_WriteResponse* a_pVa
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13238,7 +13782,7 @@ StatusCode UA_WriteResponse_Encode(UA_MsgBuffer* msgBuf, UA_WriteResponse* a_pVa
 /*============================================================================
  * UA_WriteResponse_Decode
  *===========================================================================*/
-StatusCode UA_WriteResponse_Decode(UA_MsgBuffer* msgBuf, UA_WriteResponse* a_pValue)
+StatusCode UA_WriteResponse_Decode(UA_WriteResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13248,10 +13792,10 @@ StatusCode UA_WriteResponse_Decode(UA_MsgBuffer* msgBuf, UA_WriteResponse* a_pVa
 
     UA_WriteResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -13308,7 +13852,7 @@ void UA_HistoryUpdateDetails_Clear(UA_HistoryUpdateDetails* a_pValue)
 /*============================================================================
  * UA_HistoryUpdateDetails_Encode
  *===========================================================================*/
-StatusCode UA_HistoryUpdateDetails_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateDetails* a_pValue)
+StatusCode UA_HistoryUpdateDetails_Encode(UA_HistoryUpdateDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13316,7 +13860,11 @@ StatusCode UA_HistoryUpdateDetails_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13324,7 +13872,7 @@ StatusCode UA_HistoryUpdateDetails_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
 /*============================================================================
  * UA_HistoryUpdateDetails_Decode
  *===========================================================================*/
-StatusCode UA_HistoryUpdateDetails_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateDetails* a_pValue)
+StatusCode UA_HistoryUpdateDetails_Decode(UA_HistoryUpdateDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13334,7 +13882,7 @@ StatusCode UA_HistoryUpdateDetails_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
 
     UA_HistoryUpdateDetails_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
 
     if(status != STATUS_OK){
         UA_HistoryUpdateDetails_Clear(a_pValue);
@@ -13397,7 +13945,7 @@ void UA_UpdateDataDetails_Clear(UA_UpdateDataDetails* a_pValue)
 /*============================================================================
  * UA_UpdateDataDetails_Encode
  *===========================================================================*/
-StatusCode UA_UpdateDataDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateDataDetails* a_pValue)
+StatusCode UA_UpdateDataDetails_Encode(UA_UpdateDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13405,10 +13953,14 @@ StatusCode UA_UpdateDataDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateDataDetail
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfUpdateValues, (void**) &a_pValue->UpdateValues, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfUpdateValues, (void**) &a_pValue->UpdateValues, 
                    sizeof(UA_DataValue), (UA_EncodeableObject_PfnEncode*) DataValue_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13416,7 +13968,7 @@ StatusCode UA_UpdateDataDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateDataDetail
 /*============================================================================
  * UA_UpdateDataDetails_Decode
  *===========================================================================*/
-StatusCode UA_UpdateDataDetails_Decode(UA_MsgBuffer* msgBuf, UA_UpdateDataDetails* a_pValue)
+StatusCode UA_UpdateDataDetails_Decode(UA_UpdateDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13426,9 +13978,9 @@ StatusCode UA_UpdateDataDetails_Decode(UA_MsgBuffer* msgBuf, UA_UpdateDataDetail
 
     UA_UpdateDataDetails_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfUpdateValues, (void**) &a_pValue->UpdateValues, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfUpdateValues, (void**) &a_pValue->UpdateValues, 
                   sizeof(UA_DataValue), (UA_EncodeableObject_PfnDecode*) DataValue_Read);
 
     if(status != STATUS_OK){
@@ -13490,7 +14042,7 @@ void UA_UpdateStructureDataDetails_Clear(UA_UpdateStructureDataDetails* a_pValue
 /*============================================================================
  * UA_UpdateStructureDataDetails_Encode
  *===========================================================================*/
-StatusCode UA_UpdateStructureDataDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateStructureDataDetails* a_pValue)
+StatusCode UA_UpdateStructureDataDetails_Encode(UA_UpdateStructureDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13498,10 +14050,14 @@ StatusCode UA_UpdateStructureDataDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateS
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfUpdateValues, (void**) &a_pValue->UpdateValues, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfUpdateValues, (void**) &a_pValue->UpdateValues, 
                    sizeof(UA_DataValue), (UA_EncodeableObject_PfnEncode*) DataValue_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13509,7 +14065,7 @@ StatusCode UA_UpdateStructureDataDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateS
 /*============================================================================
  * UA_UpdateStructureDataDetails_Decode
  *===========================================================================*/
-StatusCode UA_UpdateStructureDataDetails_Decode(UA_MsgBuffer* msgBuf, UA_UpdateStructureDataDetails* a_pValue)
+StatusCode UA_UpdateStructureDataDetails_Decode(UA_UpdateStructureDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13519,9 +14075,9 @@ StatusCode UA_UpdateStructureDataDetails_Decode(UA_MsgBuffer* msgBuf, UA_UpdateS
 
     UA_UpdateStructureDataDetails_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfUpdateValues, (void**) &a_pValue->UpdateValues, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfUpdateValues, (void**) &a_pValue->UpdateValues, 
                   sizeof(UA_DataValue), (UA_EncodeableObject_PfnDecode*) DataValue_Read);
 
     if(status != STATUS_OK){
@@ -13585,7 +14141,7 @@ void UA_UpdateEventDetails_Clear(UA_UpdateEventDetails* a_pValue)
 /*============================================================================
  * UA_UpdateEventDetails_Encode
  *===========================================================================*/
-StatusCode UA_UpdateEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateEventDetails* a_pValue)
+StatusCode UA_UpdateEventDetails_Encode(UA_UpdateEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13593,11 +14149,15 @@ StatusCode UA_UpdateEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateEventDeta
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
-    UA_EventFilter_Encode(msgBuf, &a_pValue->Filter);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfEventData, (void**) &a_pValue->EventData, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
+    status &= UA_EventFilter_Encode(&a_pValue->Filter, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfEventData, (void**) &a_pValue->EventData, 
                    sizeof(UA_HistoryEventFieldList), (UA_EncodeableObject_PfnEncode*) UA_HistoryEventFieldList_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13605,7 +14165,7 @@ StatusCode UA_UpdateEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_UpdateEventDeta
 /*============================================================================
  * UA_UpdateEventDetails_Decode
  *===========================================================================*/
-StatusCode UA_UpdateEventDetails_Decode(UA_MsgBuffer* msgBuf, UA_UpdateEventDetails* a_pValue)
+StatusCode UA_UpdateEventDetails_Decode(UA_UpdateEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13615,10 +14175,10 @@ StatusCode UA_UpdateEventDetails_Decode(UA_MsgBuffer* msgBuf, UA_UpdateEventDeta
 
     UA_UpdateEventDetails_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
-    UA_EventFilter_Decode(msgBuf, &a_pValue->Filter);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfEventData, (void**) &a_pValue->EventData, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->PerformInsertReplace);
+    status &= UA_EventFilter_Decode(&a_pValue->Filter, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfEventData, (void**) &a_pValue->EventData, 
                   sizeof(UA_HistoryEventFieldList), (UA_EncodeableObject_PfnDecode*) UA_HistoryEventFieldList_Decode);
 
     if(status != STATUS_OK){
@@ -13680,7 +14240,7 @@ void UA_DeleteRawModifiedDetails_Clear(UA_DeleteRawModifiedDetails* a_pValue)
 /*============================================================================
  * UA_DeleteRawModifiedDetails_Encode
  *===========================================================================*/
-StatusCode UA_DeleteRawModifiedDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRawModifiedDetails* a_pValue)
+StatusCode UA_DeleteRawModifiedDetails_Encode(UA_DeleteRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13688,10 +14248,14 @@ StatusCode UA_DeleteRawModifiedDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRaw
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    Boolean_Write(msgBuf, &a_pValue->IsDeleteModified);
-    DateTime_Write(msgBuf, &a_pValue->StartTime);
-    DateTime_Write(msgBuf, &a_pValue->EndTime);
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= Boolean_Write(&a_pValue->IsDeleteModified, msgBuf);
+    status &= DateTime_Write(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Write(&a_pValue->EndTime, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13699,7 +14263,7 @@ StatusCode UA_DeleteRawModifiedDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteRaw
 /*============================================================================
  * UA_DeleteRawModifiedDetails_Decode
  *===========================================================================*/
-StatusCode UA_DeleteRawModifiedDetails_Decode(UA_MsgBuffer* msgBuf, UA_DeleteRawModifiedDetails* a_pValue)
+StatusCode UA_DeleteRawModifiedDetails_Decode(UA_DeleteRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13709,10 +14273,10 @@ StatusCode UA_DeleteRawModifiedDetails_Decode(UA_MsgBuffer* msgBuf, UA_DeleteRaw
 
     UA_DeleteRawModifiedDetails_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    Boolean_Read(msgBuf, &a_pValue->IsDeleteModified);
-    DateTime_Read(msgBuf, &a_pValue->StartTime);
-    DateTime_Read(msgBuf, &a_pValue->EndTime);
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= Boolean_Read(&a_pValue->IsDeleteModified, msgBuf);
+    status &= DateTime_Read(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Read(&a_pValue->EndTime, msgBuf);
 
     if(status != STATUS_OK){
         UA_DeleteRawModifiedDetails_Clear(a_pValue);
@@ -13771,7 +14335,7 @@ void UA_DeleteAtTimeDetails_Clear(UA_DeleteAtTimeDetails* a_pValue)
 /*============================================================================
  * UA_DeleteAtTimeDetails_Encode
  *===========================================================================*/
-StatusCode UA_DeleteAtTimeDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteAtTimeDetails* a_pValue)
+StatusCode UA_DeleteAtTimeDetails_Encode(UA_DeleteAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13779,9 +14343,13 @@ StatusCode UA_DeleteAtTimeDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteAtTimeDe
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
                    sizeof(UA_DateTime), (UA_EncodeableObject_PfnEncode*) DateTime_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13789,7 +14357,7 @@ StatusCode UA_DeleteAtTimeDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteAtTimeDe
 /*============================================================================
  * UA_DeleteAtTimeDetails_Decode
  *===========================================================================*/
-StatusCode UA_DeleteAtTimeDetails_Decode(UA_MsgBuffer* msgBuf, UA_DeleteAtTimeDetails* a_pValue)
+StatusCode UA_DeleteAtTimeDetails_Decode(UA_DeleteAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13799,8 +14367,8 @@ StatusCode UA_DeleteAtTimeDetails_Decode(UA_MsgBuffer* msgBuf, UA_DeleteAtTimeDe
 
     UA_DeleteAtTimeDetails_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
                   sizeof(UA_DateTime), (UA_EncodeableObject_PfnDecode*) DateTime_Read);
 
     if(status != STATUS_OK){
@@ -13860,7 +14428,7 @@ void UA_DeleteEventDetails_Clear(UA_DeleteEventDetails* a_pValue)
 /*============================================================================
  * UA_DeleteEventDetails_Encode
  *===========================================================================*/
-StatusCode UA_DeleteEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteEventDetails* a_pValue)
+StatusCode UA_DeleteEventDetails_Encode(UA_DeleteEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13868,9 +14436,13 @@ StatusCode UA_DeleteEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteEventDeta
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->NodeId);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfEventIds, (void**) &a_pValue->EventIds, 
+    status &= NodeId_Write(&a_pValue->NodeId, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfEventIds, (void**) &a_pValue->EventIds, 
                    sizeof(UA_ByteString), (UA_EncodeableObject_PfnEncode*) ByteString_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13878,7 +14450,7 @@ StatusCode UA_DeleteEventDetails_Encode(UA_MsgBuffer* msgBuf, UA_DeleteEventDeta
 /*============================================================================
  * UA_DeleteEventDetails_Decode
  *===========================================================================*/
-StatusCode UA_DeleteEventDetails_Decode(UA_MsgBuffer* msgBuf, UA_DeleteEventDetails* a_pValue)
+StatusCode UA_DeleteEventDetails_Decode(UA_DeleteEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13888,8 +14460,8 @@ StatusCode UA_DeleteEventDetails_Decode(UA_MsgBuffer* msgBuf, UA_DeleteEventDeta
 
     UA_DeleteEventDetails_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->NodeId);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfEventIds, (void**) &a_pValue->EventIds, 
+    status &= NodeId_Read(&a_pValue->NodeId, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfEventIds, (void**) &a_pValue->EventIds, 
                   sizeof(UA_ByteString), (UA_EncodeableObject_PfnDecode*) ByteString_Read);
 
     if(status != STATUS_OK){
@@ -13953,7 +14525,7 @@ void UA_HistoryUpdateResult_Clear(UA_HistoryUpdateResult* a_pValue)
 /*============================================================================
  * UA_HistoryUpdateResult_Encode
  *===========================================================================*/
-StatusCode UA_HistoryUpdateResult_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateResult* a_pValue)
+StatusCode UA_HistoryUpdateResult_Encode(UA_HistoryUpdateResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13961,11 +14533,15 @@ StatusCode UA_HistoryUpdateResult_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateR
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -13973,7 +14549,7 @@ StatusCode UA_HistoryUpdateResult_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateR
 /*============================================================================
  * UA_HistoryUpdateResult_Decode
  *===========================================================================*/
-StatusCode UA_HistoryUpdateResult_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateResult* a_pValue)
+StatusCode UA_HistoryUpdateResult_Decode(UA_HistoryUpdateResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -13983,10 +14559,10 @@ StatusCode UA_HistoryUpdateResult_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateR
 
     UA_HistoryUpdateResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -14047,7 +14623,7 @@ void UA_HistoryUpdateRequest_Clear(UA_HistoryUpdateRequest* a_pValue)
 /*============================================================================
  * UA_HistoryUpdateRequest_Encode
  *===========================================================================*/
-StatusCode UA_HistoryUpdateRequest_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateRequest* a_pValue)
+StatusCode UA_HistoryUpdateRequest_Encode(UA_HistoryUpdateRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14055,9 +14631,13 @@ StatusCode UA_HistoryUpdateRequest_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfHistoryUpdateDetails, (void**) &a_pValue->HistoryUpdateDetails, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfHistoryUpdateDetails, (void**) &a_pValue->HistoryUpdateDetails, 
                    sizeof(UA_ExtensionObject), (UA_EncodeableObject_PfnEncode*) ExtensionObject_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14065,7 +14645,7 @@ StatusCode UA_HistoryUpdateRequest_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
 /*============================================================================
  * UA_HistoryUpdateRequest_Decode
  *===========================================================================*/
-StatusCode UA_HistoryUpdateRequest_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateRequest* a_pValue)
+StatusCode UA_HistoryUpdateRequest_Decode(UA_HistoryUpdateRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14075,8 +14655,8 @@ StatusCode UA_HistoryUpdateRequest_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdate
 
     UA_HistoryUpdateRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfHistoryUpdateDetails, (void**) &a_pValue->HistoryUpdateDetails, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfHistoryUpdateDetails, (void**) &a_pValue->HistoryUpdateDetails, 
                   sizeof(UA_ExtensionObject), (UA_EncodeableObject_PfnDecode*) ExtensionObject_Read);
 
     if(status != STATUS_OK){
@@ -14140,7 +14720,7 @@ void UA_HistoryUpdateResponse_Clear(UA_HistoryUpdateResponse* a_pValue)
 /*============================================================================
  * UA_HistoryUpdateResponse_Encode
  *===========================================================================*/
-StatusCode UA_HistoryUpdateResponse_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateResponse* a_pValue)
+StatusCode UA_HistoryUpdateResponse_Encode(UA_HistoryUpdateResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14148,11 +14728,15 @@ StatusCode UA_HistoryUpdateResponse_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdat
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_HistoryUpdateResult), (UA_EncodeableObject_PfnEncode*) UA_HistoryUpdateResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14160,7 +14744,7 @@ StatusCode UA_HistoryUpdateResponse_Encode(UA_MsgBuffer* msgBuf, UA_HistoryUpdat
 /*============================================================================
  * UA_HistoryUpdateResponse_Decode
  *===========================================================================*/
-StatusCode UA_HistoryUpdateResponse_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdateResponse* a_pValue)
+StatusCode UA_HistoryUpdateResponse_Decode(UA_HistoryUpdateResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14170,10 +14754,10 @@ StatusCode UA_HistoryUpdateResponse_Decode(UA_MsgBuffer* msgBuf, UA_HistoryUpdat
 
     UA_HistoryUpdateResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_HistoryUpdateResult), (UA_EncodeableObject_PfnDecode*) UA_HistoryUpdateResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -14236,7 +14820,7 @@ void UA_CallMethodRequest_Clear(UA_CallMethodRequest* a_pValue)
 /*============================================================================
  * UA_CallMethodRequest_Encode
  *===========================================================================*/
-StatusCode UA_CallMethodRequest_Encode(UA_MsgBuffer* msgBuf, UA_CallMethodRequest* a_pValue)
+StatusCode UA_CallMethodRequest_Encode(UA_CallMethodRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14244,10 +14828,14 @@ StatusCode UA_CallMethodRequest_Encode(UA_MsgBuffer* msgBuf, UA_CallMethodReques
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->ObjectId);
-    NodeId_Write(msgBuf, &a_pValue->MethodId);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfInputArguments, (void**) &a_pValue->InputArguments, 
+    status &= NodeId_Write(&a_pValue->ObjectId, msgBuf);
+    status &= NodeId_Write(&a_pValue->MethodId, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfInputArguments, (void**) &a_pValue->InputArguments, 
                    sizeof(UA_Variant), (UA_EncodeableObject_PfnEncode*) Variant_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14255,7 +14843,7 @@ StatusCode UA_CallMethodRequest_Encode(UA_MsgBuffer* msgBuf, UA_CallMethodReques
 /*============================================================================
  * UA_CallMethodRequest_Decode
  *===========================================================================*/
-StatusCode UA_CallMethodRequest_Decode(UA_MsgBuffer* msgBuf, UA_CallMethodRequest* a_pValue)
+StatusCode UA_CallMethodRequest_Decode(UA_CallMethodRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14265,9 +14853,9 @@ StatusCode UA_CallMethodRequest_Decode(UA_MsgBuffer* msgBuf, UA_CallMethodReques
 
     UA_CallMethodRequest_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->ObjectId);
-    NodeId_Read(msgBuf, &a_pValue->MethodId);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfInputArguments, (void**) &a_pValue->InputArguments, 
+    status &= NodeId_Read(&a_pValue->ObjectId, msgBuf);
+    status &= NodeId_Read(&a_pValue->MethodId, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfInputArguments, (void**) &a_pValue->InputArguments, 
                   sizeof(UA_Variant), (UA_EncodeableObject_PfnDecode*) Variant_Read);
 
     if(status != STATUS_OK){
@@ -14335,7 +14923,7 @@ void UA_CallMethodResult_Clear(UA_CallMethodResult* a_pValue)
 /*============================================================================
  * UA_CallMethodResult_Encode
  *===========================================================================*/
-StatusCode UA_CallMethodResult_Encode(UA_MsgBuffer* msgBuf, UA_CallMethodResult* a_pValue)
+StatusCode UA_CallMethodResult_Encode(UA_CallMethodResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14343,13 +14931,17 @@ StatusCode UA_CallMethodResult_Encode(UA_MsgBuffer* msgBuf, UA_CallMethodResult*
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfInputArgumentDiagnosticInfos, (void**) &a_pValue->InputArgumentDiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfInputArgumentDiagnosticInfos, (void**) &a_pValue->InputArgumentDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfOutputArguments, (void**) &a_pValue->OutputArguments, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfOutputArguments, (void**) &a_pValue->OutputArguments, 
                    sizeof(UA_Variant), (UA_EncodeableObject_PfnEncode*) Variant_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14357,7 +14949,7 @@ StatusCode UA_CallMethodResult_Encode(UA_MsgBuffer* msgBuf, UA_CallMethodResult*
 /*============================================================================
  * UA_CallMethodResult_Decode
  *===========================================================================*/
-StatusCode UA_CallMethodResult_Decode(UA_MsgBuffer* msgBuf, UA_CallMethodResult* a_pValue)
+StatusCode UA_CallMethodResult_Decode(UA_CallMethodResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14367,12 +14959,12 @@ StatusCode UA_CallMethodResult_Decode(UA_MsgBuffer* msgBuf, UA_CallMethodResult*
 
     UA_CallMethodResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfInputArgumentDiagnosticInfos, (void**) &a_pValue->InputArgumentDiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfInputArgumentDiagnosticInfos, (void**) &a_pValue->InputArgumentDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfOutputArguments, (void**) &a_pValue->OutputArguments, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfOutputArguments, (void**) &a_pValue->OutputArguments, 
                   sizeof(UA_Variant), (UA_EncodeableObject_PfnDecode*) Variant_Read);
 
     if(status != STATUS_OK){
@@ -14433,7 +15025,7 @@ void UA_CallRequest_Clear(UA_CallRequest* a_pValue)
 /*============================================================================
  * UA_CallRequest_Encode
  *===========================================================================*/
-StatusCode UA_CallRequest_Encode(UA_MsgBuffer* msgBuf, UA_CallRequest* a_pValue)
+StatusCode UA_CallRequest_Encode(UA_CallRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14441,9 +15033,13 @@ StatusCode UA_CallRequest_Encode(UA_MsgBuffer* msgBuf, UA_CallRequest* a_pValue)
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfMethodsToCall, (void**) &a_pValue->MethodsToCall, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfMethodsToCall, (void**) &a_pValue->MethodsToCall, 
                    sizeof(UA_CallMethodRequest), (UA_EncodeableObject_PfnEncode*) UA_CallMethodRequest_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14451,7 +15047,7 @@ StatusCode UA_CallRequest_Encode(UA_MsgBuffer* msgBuf, UA_CallRequest* a_pValue)
 /*============================================================================
  * UA_CallRequest_Decode
  *===========================================================================*/
-StatusCode UA_CallRequest_Decode(UA_MsgBuffer* msgBuf, UA_CallRequest* a_pValue)
+StatusCode UA_CallRequest_Decode(UA_CallRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14461,8 +15057,8 @@ StatusCode UA_CallRequest_Decode(UA_MsgBuffer* msgBuf, UA_CallRequest* a_pValue)
 
     UA_CallRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfMethodsToCall, (void**) &a_pValue->MethodsToCall, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfMethodsToCall, (void**) &a_pValue->MethodsToCall, 
                   sizeof(UA_CallMethodRequest), (UA_EncodeableObject_PfnDecode*) UA_CallMethodRequest_Decode);
 
     if(status != STATUS_OK){
@@ -14526,7 +15122,7 @@ void UA_CallResponse_Clear(UA_CallResponse* a_pValue)
 /*============================================================================
  * UA_CallResponse_Encode
  *===========================================================================*/
-StatusCode UA_CallResponse_Encode(UA_MsgBuffer* msgBuf, UA_CallResponse* a_pValue)
+StatusCode UA_CallResponse_Encode(UA_CallResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14534,11 +15130,15 @@ StatusCode UA_CallResponse_Encode(UA_MsgBuffer* msgBuf, UA_CallResponse* a_pValu
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_CallMethodResult), (UA_EncodeableObject_PfnEncode*) UA_CallMethodResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14546,7 +15146,7 @@ StatusCode UA_CallResponse_Encode(UA_MsgBuffer* msgBuf, UA_CallResponse* a_pValu
 /*============================================================================
  * UA_CallResponse_Decode
  *===========================================================================*/
-StatusCode UA_CallResponse_Decode(UA_MsgBuffer* msgBuf, UA_CallResponse* a_pValue)
+StatusCode UA_CallResponse_Decode(UA_CallResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14556,10 +15156,10 @@ StatusCode UA_CallResponse_Decode(UA_MsgBuffer* msgBuf, UA_CallResponse* a_pValu
 
     UA_CallResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_CallMethodResult), (UA_EncodeableObject_PfnDecode*) UA_CallMethodResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -14623,7 +15223,7 @@ void UA_DataChangeFilter_Clear(UA_DataChangeFilter* a_pValue)
 /*============================================================================
  * UA_DataChangeFilter_Encode
  *===========================================================================*/
-StatusCode UA_DataChangeFilter_Encode(UA_MsgBuffer* msgBuf, UA_DataChangeFilter* a_pValue)
+StatusCode UA_DataChangeFilter_Encode(UA_DataChangeFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14631,9 +15231,13 @@ StatusCode UA_DataChangeFilter_Encode(UA_MsgBuffer* msgBuf, UA_DataChangeFilter*
         status = STATUS_OK;
     }
 
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->Trigger);
-    UInt32_Write(msgBuf, &a_pValue->DeadbandType);
-    Double_Write(msgBuf, &a_pValue->DeadbandValue);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->Trigger);
+    status &= UInt32_Write(&a_pValue->DeadbandType, msgBuf);
+    status &= Double_Write(&a_pValue->DeadbandValue, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14641,7 +15245,7 @@ StatusCode UA_DataChangeFilter_Encode(UA_MsgBuffer* msgBuf, UA_DataChangeFilter*
 /*============================================================================
  * UA_DataChangeFilter_Decode
  *===========================================================================*/
-StatusCode UA_DataChangeFilter_Decode(UA_MsgBuffer* msgBuf, UA_DataChangeFilter* a_pValue)
+StatusCode UA_DataChangeFilter_Decode(UA_DataChangeFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14651,9 +15255,9 @@ StatusCode UA_DataChangeFilter_Decode(UA_MsgBuffer* msgBuf, UA_DataChangeFilter*
 
     UA_DataChangeFilter_Initialize(a_pValue);
 
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->Trigger);
-    UInt32_Read(msgBuf, &a_pValue->DeadbandType);
-    Double_Read(msgBuf, &a_pValue->DeadbandValue);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->Trigger);
+    status &= UInt32_Read(&a_pValue->DeadbandType, msgBuf);
+    status &= Double_Read(&a_pValue->DeadbandValue, msgBuf);
 
     if(status != STATUS_OK){
         UA_DataChangeFilter_Clear(a_pValue);
@@ -14712,7 +15316,7 @@ void UA_EventFilter_Clear(UA_EventFilter* a_pValue)
 /*============================================================================
  * UA_EventFilter_Encode
  *===========================================================================*/
-StatusCode UA_EventFilter_Encode(UA_MsgBuffer* msgBuf, UA_EventFilter* a_pValue)
+StatusCode UA_EventFilter_Encode(UA_EventFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14720,9 +15324,13 @@ StatusCode UA_EventFilter_Encode(UA_MsgBuffer* msgBuf, UA_EventFilter* a_pValue)
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfSelectClauses, (void**) &a_pValue->SelectClauses, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSelectClauses, (void**) &a_pValue->SelectClauses, 
                    sizeof(UA_SimpleAttributeOperand), (UA_EncodeableObject_PfnEncode*) UA_SimpleAttributeOperand_Encode);
-    UA_ContentFilter_Encode(msgBuf, &a_pValue->WhereClause);
+    status &= UA_ContentFilter_Encode(&a_pValue->WhereClause, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14730,7 +15338,7 @@ StatusCode UA_EventFilter_Encode(UA_MsgBuffer* msgBuf, UA_EventFilter* a_pValue)
 /*============================================================================
  * UA_EventFilter_Decode
  *===========================================================================*/
-StatusCode UA_EventFilter_Decode(UA_MsgBuffer* msgBuf, UA_EventFilter* a_pValue)
+StatusCode UA_EventFilter_Decode(UA_EventFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14740,9 +15348,9 @@ StatusCode UA_EventFilter_Decode(UA_MsgBuffer* msgBuf, UA_EventFilter* a_pValue)
 
     UA_EventFilter_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfSelectClauses, (void**) &a_pValue->SelectClauses, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSelectClauses, (void**) &a_pValue->SelectClauses, 
                   sizeof(UA_SimpleAttributeOperand), (UA_EncodeableObject_PfnDecode*) UA_SimpleAttributeOperand_Decode);
-    UA_ContentFilter_Decode(msgBuf, &a_pValue->WhereClause);
+    status &= UA_ContentFilter_Decode(&a_pValue->WhereClause, msgBuf);
 
     if(status != STATUS_OK){
         UA_EventFilter_Clear(a_pValue);
@@ -14805,7 +15413,7 @@ void UA_AggregateConfiguration_Clear(UA_AggregateConfiguration* a_pValue)
 /*============================================================================
  * UA_AggregateConfiguration_Encode
  *===========================================================================*/
-StatusCode UA_AggregateConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_AggregateConfiguration* a_pValue)
+StatusCode UA_AggregateConfiguration_Encode(UA_AggregateConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14813,11 +15421,15 @@ StatusCode UA_AggregateConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_AggregateCo
         status = STATUS_OK;
     }
 
-    Boolean_Write(msgBuf, &a_pValue->UseServerCapabilitiesDefaults);
-    Boolean_Write(msgBuf, &a_pValue->TreatUncertainAsBad);
-    Byte_Write(msgBuf, &a_pValue->PercentDataBad);
-    Byte_Write(msgBuf, &a_pValue->PercentDataGood);
-    Boolean_Write(msgBuf, &a_pValue->UseSlopedExtrapolation);
+    status &= Boolean_Write(&a_pValue->UseServerCapabilitiesDefaults, msgBuf);
+    status &= Boolean_Write(&a_pValue->TreatUncertainAsBad, msgBuf);
+    status &= Byte_Write(&a_pValue->PercentDataBad, msgBuf);
+    status &= Byte_Write(&a_pValue->PercentDataGood, msgBuf);
+    status &= Boolean_Write(&a_pValue->UseSlopedExtrapolation, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14825,7 +15437,7 @@ StatusCode UA_AggregateConfiguration_Encode(UA_MsgBuffer* msgBuf, UA_AggregateCo
 /*============================================================================
  * UA_AggregateConfiguration_Decode
  *===========================================================================*/
-StatusCode UA_AggregateConfiguration_Decode(UA_MsgBuffer* msgBuf, UA_AggregateConfiguration* a_pValue)
+StatusCode UA_AggregateConfiguration_Decode(UA_AggregateConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14835,11 +15447,11 @@ StatusCode UA_AggregateConfiguration_Decode(UA_MsgBuffer* msgBuf, UA_AggregateCo
 
     UA_AggregateConfiguration_Initialize(a_pValue);
 
-    Boolean_Read(msgBuf, &a_pValue->UseServerCapabilitiesDefaults);
-    Boolean_Read(msgBuf, &a_pValue->TreatUncertainAsBad);
-    Byte_Read(msgBuf, &a_pValue->PercentDataBad);
-    Byte_Read(msgBuf, &a_pValue->PercentDataGood);
-    Boolean_Read(msgBuf, &a_pValue->UseSlopedExtrapolation);
+    status &= Boolean_Read(&a_pValue->UseServerCapabilitiesDefaults, msgBuf);
+    status &= Boolean_Read(&a_pValue->TreatUncertainAsBad, msgBuf);
+    status &= Byte_Read(&a_pValue->PercentDataBad, msgBuf);
+    status &= Byte_Read(&a_pValue->PercentDataGood, msgBuf);
+    status &= Boolean_Read(&a_pValue->UseSlopedExtrapolation, msgBuf);
 
     if(status != STATUS_OK){
         UA_AggregateConfiguration_Clear(a_pValue);
@@ -14900,7 +15512,7 @@ void UA_AggregateFilter_Clear(UA_AggregateFilter* a_pValue)
 /*============================================================================
  * UA_AggregateFilter_Encode
  *===========================================================================*/
-StatusCode UA_AggregateFilter_Encode(UA_MsgBuffer* msgBuf, UA_AggregateFilter* a_pValue)
+StatusCode UA_AggregateFilter_Encode(UA_AggregateFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14908,10 +15520,14 @@ StatusCode UA_AggregateFilter_Encode(UA_MsgBuffer* msgBuf, UA_AggregateFilter* a
         status = STATUS_OK;
     }
 
-    DateTime_Write(msgBuf, &a_pValue->StartTime);
-    NodeId_Write(msgBuf, &a_pValue->AggregateType);
-    Double_Write(msgBuf, &a_pValue->ProcessingInterval);
-    UA_AggregateConfiguration_Encode(msgBuf, &a_pValue->AggregateConfiguration);
+    status &= DateTime_Write(&a_pValue->StartTime, msgBuf);
+    status &= NodeId_Write(&a_pValue->AggregateType, msgBuf);
+    status &= Double_Write(&a_pValue->ProcessingInterval, msgBuf);
+    status &= UA_AggregateConfiguration_Encode(&a_pValue->AggregateConfiguration, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -14919,7 +15535,7 @@ StatusCode UA_AggregateFilter_Encode(UA_MsgBuffer* msgBuf, UA_AggregateFilter* a
 /*============================================================================
  * UA_AggregateFilter_Decode
  *===========================================================================*/
-StatusCode UA_AggregateFilter_Decode(UA_MsgBuffer* msgBuf, UA_AggregateFilter* a_pValue)
+StatusCode UA_AggregateFilter_Decode(UA_AggregateFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -14929,10 +15545,10 @@ StatusCode UA_AggregateFilter_Decode(UA_MsgBuffer* msgBuf, UA_AggregateFilter* a
 
     UA_AggregateFilter_Initialize(a_pValue);
 
-    DateTime_Read(msgBuf, &a_pValue->StartTime);
-    NodeId_Read(msgBuf, &a_pValue->AggregateType);
-    Double_Read(msgBuf, &a_pValue->ProcessingInterval);
-    UA_AggregateConfiguration_Decode(msgBuf, &a_pValue->AggregateConfiguration);
+    status &= DateTime_Read(&a_pValue->StartTime, msgBuf);
+    status &= NodeId_Read(&a_pValue->AggregateType, msgBuf);
+    status &= Double_Read(&a_pValue->ProcessingInterval, msgBuf);
+    status &= UA_AggregateConfiguration_Decode(&a_pValue->AggregateConfiguration, msgBuf);
 
     if(status != STATUS_OK){
         UA_AggregateFilter_Clear(a_pValue);
@@ -14995,7 +15611,7 @@ void UA_EventFilterResult_Clear(UA_EventFilterResult* a_pValue)
 /*============================================================================
  * UA_EventFilterResult_Encode
  *===========================================================================*/
-StatusCode UA_EventFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_EventFilterResult* a_pValue)
+StatusCode UA_EventFilterResult_Encode(UA_EventFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15003,11 +15619,15 @@ StatusCode UA_EventFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_EventFilterResul
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfSelectClauseDiagnosticInfos, (void**) &a_pValue->SelectClauseDiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSelectClauseDiagnosticInfos, (void**) &a_pValue->SelectClauseDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
-    UA_ContentFilterResult_Encode(msgBuf, &a_pValue->WhereClauseResult);
+    status &= UA_ContentFilterResult_Encode(&a_pValue->WhereClauseResult, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15015,7 +15635,7 @@ StatusCode UA_EventFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_EventFilterResul
 /*============================================================================
  * UA_EventFilterResult_Decode
  *===========================================================================*/
-StatusCode UA_EventFilterResult_Decode(UA_MsgBuffer* msgBuf, UA_EventFilterResult* a_pValue)
+StatusCode UA_EventFilterResult_Decode(UA_EventFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15025,11 +15645,11 @@ StatusCode UA_EventFilterResult_Decode(UA_MsgBuffer* msgBuf, UA_EventFilterResul
 
     UA_EventFilterResult_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfSelectClauseDiagnosticInfos, (void**) &a_pValue->SelectClauseDiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSelectClauseDiagnosticInfos, (void**) &a_pValue->SelectClauseDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
-    UA_ContentFilterResult_Decode(msgBuf, &a_pValue->WhereClauseResult);
+    status &= UA_ContentFilterResult_Decode(&a_pValue->WhereClauseResult, msgBuf);
 
     if(status != STATUS_OK){
         UA_EventFilterResult_Clear(a_pValue);
@@ -15088,7 +15708,7 @@ void UA_AggregateFilterResult_Clear(UA_AggregateFilterResult* a_pValue)
 /*============================================================================
  * UA_AggregateFilterResult_Encode
  *===========================================================================*/
-StatusCode UA_AggregateFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_AggregateFilterResult* a_pValue)
+StatusCode UA_AggregateFilterResult_Encode(UA_AggregateFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15096,9 +15716,13 @@ StatusCode UA_AggregateFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_AggregateFil
         status = STATUS_OK;
     }
 
-    DateTime_Write(msgBuf, &a_pValue->RevisedStartTime);
-    Double_Write(msgBuf, &a_pValue->RevisedProcessingInterval);
-    UA_AggregateConfiguration_Encode(msgBuf, &a_pValue->RevisedAggregateConfiguration);
+    status &= DateTime_Write(&a_pValue->RevisedStartTime, msgBuf);
+    status &= Double_Write(&a_pValue->RevisedProcessingInterval, msgBuf);
+    status &= UA_AggregateConfiguration_Encode(&a_pValue->RevisedAggregateConfiguration, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15106,7 +15730,7 @@ StatusCode UA_AggregateFilterResult_Encode(UA_MsgBuffer* msgBuf, UA_AggregateFil
 /*============================================================================
  * UA_AggregateFilterResult_Decode
  *===========================================================================*/
-StatusCode UA_AggregateFilterResult_Decode(UA_MsgBuffer* msgBuf, UA_AggregateFilterResult* a_pValue)
+StatusCode UA_AggregateFilterResult_Decode(UA_AggregateFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15116,9 +15740,9 @@ StatusCode UA_AggregateFilterResult_Decode(UA_MsgBuffer* msgBuf, UA_AggregateFil
 
     UA_AggregateFilterResult_Initialize(a_pValue);
 
-    DateTime_Read(msgBuf, &a_pValue->RevisedStartTime);
-    Double_Read(msgBuf, &a_pValue->RevisedProcessingInterval);
-    UA_AggregateConfiguration_Decode(msgBuf, &a_pValue->RevisedAggregateConfiguration);
+    status &= DateTime_Read(&a_pValue->RevisedStartTime, msgBuf);
+    status &= Double_Read(&a_pValue->RevisedProcessingInterval, msgBuf);
+    status &= UA_AggregateConfiguration_Decode(&a_pValue->RevisedAggregateConfiguration, msgBuf);
 
     if(status != STATUS_OK){
         UA_AggregateFilterResult_Clear(a_pValue);
@@ -15181,7 +15805,7 @@ void UA_MonitoringParameters_Clear(UA_MonitoringParameters* a_pValue)
 /*============================================================================
  * UA_MonitoringParameters_Encode
  *===========================================================================*/
-StatusCode UA_MonitoringParameters_Encode(UA_MsgBuffer* msgBuf, UA_MonitoringParameters* a_pValue)
+StatusCode UA_MonitoringParameters_Encode(UA_MonitoringParameters* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15189,11 +15813,15 @@ StatusCode UA_MonitoringParameters_Encode(UA_MsgBuffer* msgBuf, UA_MonitoringPar
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->ClientHandle);
-    Double_Write(msgBuf, &a_pValue->SamplingInterval);
-    ExtensionObject_Write(msgBuf, &a_pValue->Filter);
-    UInt32_Write(msgBuf, &a_pValue->QueueSize);
-    Boolean_Write(msgBuf, &a_pValue->DiscardOldest);
+    status &= UInt32_Write(&a_pValue->ClientHandle, msgBuf);
+    status &= Double_Write(&a_pValue->SamplingInterval, msgBuf);
+    status &= ExtensionObject_Write(&a_pValue->Filter, msgBuf);
+    status &= UInt32_Write(&a_pValue->QueueSize, msgBuf);
+    status &= Boolean_Write(&a_pValue->DiscardOldest, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15201,7 +15829,7 @@ StatusCode UA_MonitoringParameters_Encode(UA_MsgBuffer* msgBuf, UA_MonitoringPar
 /*============================================================================
  * UA_MonitoringParameters_Decode
  *===========================================================================*/
-StatusCode UA_MonitoringParameters_Decode(UA_MsgBuffer* msgBuf, UA_MonitoringParameters* a_pValue)
+StatusCode UA_MonitoringParameters_Decode(UA_MonitoringParameters* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15211,11 +15839,11 @@ StatusCode UA_MonitoringParameters_Decode(UA_MsgBuffer* msgBuf, UA_MonitoringPar
 
     UA_MonitoringParameters_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->ClientHandle);
-    Double_Read(msgBuf, &a_pValue->SamplingInterval);
-    ExtensionObject_Read(msgBuf, &a_pValue->Filter);
-    UInt32_Read(msgBuf, &a_pValue->QueueSize);
-    Boolean_Read(msgBuf, &a_pValue->DiscardOldest);
+    status &= UInt32_Read(&a_pValue->ClientHandle, msgBuf);
+    status &= Double_Read(&a_pValue->SamplingInterval, msgBuf);
+    status &= ExtensionObject_Read(&a_pValue->Filter, msgBuf);
+    status &= UInt32_Read(&a_pValue->QueueSize, msgBuf);
+    status &= Boolean_Read(&a_pValue->DiscardOldest, msgBuf);
 
     if(status != STATUS_OK){
         UA_MonitoringParameters_Clear(a_pValue);
@@ -15274,7 +15902,7 @@ void UA_MonitoredItemCreateRequest_Clear(UA_MonitoredItemCreateRequest* a_pValue
 /*============================================================================
  * UA_MonitoredItemCreateRequest_Encode
  *===========================================================================*/
-StatusCode UA_MonitoredItemCreateRequest_Encode(UA_MsgBuffer* msgBuf, UA_MonitoredItemCreateRequest* a_pValue)
+StatusCode UA_MonitoredItemCreateRequest_Encode(UA_MonitoredItemCreateRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15282,9 +15910,13 @@ StatusCode UA_MonitoredItemCreateRequest_Encode(UA_MsgBuffer* msgBuf, UA_Monitor
         status = STATUS_OK;
     }
 
-    UA_ReadValueId_Encode(msgBuf, &a_pValue->ItemToMonitor);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->MonitoringMode);
-    UA_MonitoringParameters_Encode(msgBuf, &a_pValue->RequestedParameters);
+    status &= UA_ReadValueId_Encode(&a_pValue->ItemToMonitor, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->MonitoringMode);
+    status &= UA_MonitoringParameters_Encode(&a_pValue->RequestedParameters, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15292,7 +15924,7 @@ StatusCode UA_MonitoredItemCreateRequest_Encode(UA_MsgBuffer* msgBuf, UA_Monitor
 /*============================================================================
  * UA_MonitoredItemCreateRequest_Decode
  *===========================================================================*/
-StatusCode UA_MonitoredItemCreateRequest_Decode(UA_MsgBuffer* msgBuf, UA_MonitoredItemCreateRequest* a_pValue)
+StatusCode UA_MonitoredItemCreateRequest_Decode(UA_MonitoredItemCreateRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15302,9 +15934,9 @@ StatusCode UA_MonitoredItemCreateRequest_Decode(UA_MsgBuffer* msgBuf, UA_Monitor
 
     UA_MonitoredItemCreateRequest_Initialize(a_pValue);
 
-    UA_ReadValueId_Decode(msgBuf, &a_pValue->ItemToMonitor);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->MonitoringMode);
-    UA_MonitoringParameters_Decode(msgBuf, &a_pValue->RequestedParameters);
+    status &= UA_ReadValueId_Decode(&a_pValue->ItemToMonitor, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->MonitoringMode);
+    status &= UA_MonitoringParameters_Decode(&a_pValue->RequestedParameters, msgBuf);
 
     if(status != STATUS_OK){
         UA_MonitoredItemCreateRequest_Clear(a_pValue);
@@ -15367,7 +15999,7 @@ void UA_MonitoredItemCreateResult_Clear(UA_MonitoredItemCreateResult* a_pValue)
 /*============================================================================
  * UA_MonitoredItemCreateResult_Encode
  *===========================================================================*/
-StatusCode UA_MonitoredItemCreateResult_Encode(UA_MsgBuffer* msgBuf, UA_MonitoredItemCreateResult* a_pValue)
+StatusCode UA_MonitoredItemCreateResult_Encode(UA_MonitoredItemCreateResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15375,11 +16007,15 @@ StatusCode UA_MonitoredItemCreateResult_Encode(UA_MsgBuffer* msgBuf, UA_Monitore
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    UInt32_Write(msgBuf, &a_pValue->MonitoredItemId);
-    Double_Write(msgBuf, &a_pValue->RevisedSamplingInterval);
-    UInt32_Write(msgBuf, &a_pValue->RevisedQueueSize);
-    ExtensionObject_Write(msgBuf, &a_pValue->FilterResult);
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= UInt32_Write(&a_pValue->MonitoredItemId, msgBuf);
+    status &= Double_Write(&a_pValue->RevisedSamplingInterval, msgBuf);
+    status &= UInt32_Write(&a_pValue->RevisedQueueSize, msgBuf);
+    status &= ExtensionObject_Write(&a_pValue->FilterResult, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15387,7 +16023,7 @@ StatusCode UA_MonitoredItemCreateResult_Encode(UA_MsgBuffer* msgBuf, UA_Monitore
 /*============================================================================
  * UA_MonitoredItemCreateResult_Decode
  *===========================================================================*/
-StatusCode UA_MonitoredItemCreateResult_Decode(UA_MsgBuffer* msgBuf, UA_MonitoredItemCreateResult* a_pValue)
+StatusCode UA_MonitoredItemCreateResult_Decode(UA_MonitoredItemCreateResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15397,11 +16033,11 @@ StatusCode UA_MonitoredItemCreateResult_Decode(UA_MsgBuffer* msgBuf, UA_Monitore
 
     UA_MonitoredItemCreateResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    UInt32_Read(msgBuf, &a_pValue->MonitoredItemId);
-    Double_Read(msgBuf, &a_pValue->RevisedSamplingInterval);
-    UInt32_Read(msgBuf, &a_pValue->RevisedQueueSize);
-    ExtensionObject_Read(msgBuf, &a_pValue->FilterResult);
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= UInt32_Read(&a_pValue->MonitoredItemId, msgBuf);
+    status &= Double_Read(&a_pValue->RevisedSamplingInterval, msgBuf);
+    status &= UInt32_Read(&a_pValue->RevisedQueueSize, msgBuf);
+    status &= ExtensionObject_Read(&a_pValue->FilterResult, msgBuf);
 
     if(status != STATUS_OK){
         UA_MonitoredItemCreateResult_Clear(a_pValue);
@@ -15465,7 +16101,7 @@ void UA_CreateMonitoredItemsRequest_Clear(UA_CreateMonitoredItemsRequest* a_pVal
 /*============================================================================
  * UA_CreateMonitoredItemsRequest_Encode
  *===========================================================================*/
-StatusCode UA_CreateMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_CreateMonitoredItemsRequest* a_pValue)
+StatusCode UA_CreateMonitoredItemsRequest_Encode(UA_CreateMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15473,11 +16109,15 @@ StatusCode UA_CreateMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Create
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfItemsToCreate, (void**) &a_pValue->ItemsToCreate, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfItemsToCreate, (void**) &a_pValue->ItemsToCreate, 
                    sizeof(UA_MonitoredItemCreateRequest), (UA_EncodeableObject_PfnEncode*) UA_MonitoredItemCreateRequest_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15485,7 +16125,7 @@ StatusCode UA_CreateMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Create
 /*============================================================================
  * UA_CreateMonitoredItemsRequest_Decode
  *===========================================================================*/
-StatusCode UA_CreateMonitoredItemsRequest_Decode(UA_MsgBuffer* msgBuf, UA_CreateMonitoredItemsRequest* a_pValue)
+StatusCode UA_CreateMonitoredItemsRequest_Decode(UA_CreateMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15495,10 +16135,10 @@ StatusCode UA_CreateMonitoredItemsRequest_Decode(UA_MsgBuffer* msgBuf, UA_Create
 
     UA_CreateMonitoredItemsRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfItemsToCreate, (void**) &a_pValue->ItemsToCreate, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfItemsToCreate, (void**) &a_pValue->ItemsToCreate, 
                   sizeof(UA_MonitoredItemCreateRequest), (UA_EncodeableObject_PfnDecode*) UA_MonitoredItemCreateRequest_Decode);
 
     if(status != STATUS_OK){
@@ -15562,7 +16202,7 @@ void UA_CreateMonitoredItemsResponse_Clear(UA_CreateMonitoredItemsResponse* a_pV
 /*============================================================================
  * UA_CreateMonitoredItemsResponse_Encode
  *===========================================================================*/
-StatusCode UA_CreateMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_CreateMonitoredItemsResponse* a_pValue)
+StatusCode UA_CreateMonitoredItemsResponse_Encode(UA_CreateMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15570,11 +16210,15 @@ StatusCode UA_CreateMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Creat
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_MonitoredItemCreateResult), (UA_EncodeableObject_PfnEncode*) UA_MonitoredItemCreateResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15582,7 +16226,7 @@ StatusCode UA_CreateMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Creat
 /*============================================================================
  * UA_CreateMonitoredItemsResponse_Decode
  *===========================================================================*/
-StatusCode UA_CreateMonitoredItemsResponse_Decode(UA_MsgBuffer* msgBuf, UA_CreateMonitoredItemsResponse* a_pValue)
+StatusCode UA_CreateMonitoredItemsResponse_Decode(UA_CreateMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15592,10 +16236,10 @@ StatusCode UA_CreateMonitoredItemsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Creat
 
     UA_CreateMonitoredItemsResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_MonitoredItemCreateResult), (UA_EncodeableObject_PfnDecode*) UA_MonitoredItemCreateResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -15654,7 +16298,7 @@ void UA_MonitoredItemModifyRequest_Clear(UA_MonitoredItemModifyRequest* a_pValue
 /*============================================================================
  * UA_MonitoredItemModifyRequest_Encode
  *===========================================================================*/
-StatusCode UA_MonitoredItemModifyRequest_Encode(UA_MsgBuffer* msgBuf, UA_MonitoredItemModifyRequest* a_pValue)
+StatusCode UA_MonitoredItemModifyRequest_Encode(UA_MonitoredItemModifyRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15662,8 +16306,12 @@ StatusCode UA_MonitoredItemModifyRequest_Encode(UA_MsgBuffer* msgBuf, UA_Monitor
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->MonitoredItemId);
-    UA_MonitoringParameters_Encode(msgBuf, &a_pValue->RequestedParameters);
+    status &= UInt32_Write(&a_pValue->MonitoredItemId, msgBuf);
+    status &= UA_MonitoringParameters_Encode(&a_pValue->RequestedParameters, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15671,7 +16319,7 @@ StatusCode UA_MonitoredItemModifyRequest_Encode(UA_MsgBuffer* msgBuf, UA_Monitor
 /*============================================================================
  * UA_MonitoredItemModifyRequest_Decode
  *===========================================================================*/
-StatusCode UA_MonitoredItemModifyRequest_Decode(UA_MsgBuffer* msgBuf, UA_MonitoredItemModifyRequest* a_pValue)
+StatusCode UA_MonitoredItemModifyRequest_Decode(UA_MonitoredItemModifyRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15681,8 +16329,8 @@ StatusCode UA_MonitoredItemModifyRequest_Decode(UA_MsgBuffer* msgBuf, UA_Monitor
 
     UA_MonitoredItemModifyRequest_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->MonitoredItemId);
-    UA_MonitoringParameters_Decode(msgBuf, &a_pValue->RequestedParameters);
+    status &= UInt32_Read(&a_pValue->MonitoredItemId, msgBuf);
+    status &= UA_MonitoringParameters_Decode(&a_pValue->RequestedParameters, msgBuf);
 
     if(status != STATUS_OK){
         UA_MonitoredItemModifyRequest_Clear(a_pValue);
@@ -15743,7 +16391,7 @@ void UA_MonitoredItemModifyResult_Clear(UA_MonitoredItemModifyResult* a_pValue)
 /*============================================================================
  * UA_MonitoredItemModifyResult_Encode
  *===========================================================================*/
-StatusCode UA_MonitoredItemModifyResult_Encode(UA_MsgBuffer* msgBuf, UA_MonitoredItemModifyResult* a_pValue)
+StatusCode UA_MonitoredItemModifyResult_Encode(UA_MonitoredItemModifyResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15751,10 +16399,14 @@ StatusCode UA_MonitoredItemModifyResult_Encode(UA_MsgBuffer* msgBuf, UA_Monitore
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    Double_Write(msgBuf, &a_pValue->RevisedSamplingInterval);
-    UInt32_Write(msgBuf, &a_pValue->RevisedQueueSize);
-    ExtensionObject_Write(msgBuf, &a_pValue->FilterResult);
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= Double_Write(&a_pValue->RevisedSamplingInterval, msgBuf);
+    status &= UInt32_Write(&a_pValue->RevisedQueueSize, msgBuf);
+    status &= ExtensionObject_Write(&a_pValue->FilterResult, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15762,7 +16414,7 @@ StatusCode UA_MonitoredItemModifyResult_Encode(UA_MsgBuffer* msgBuf, UA_Monitore
 /*============================================================================
  * UA_MonitoredItemModifyResult_Decode
  *===========================================================================*/
-StatusCode UA_MonitoredItemModifyResult_Decode(UA_MsgBuffer* msgBuf, UA_MonitoredItemModifyResult* a_pValue)
+StatusCode UA_MonitoredItemModifyResult_Decode(UA_MonitoredItemModifyResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15772,10 +16424,10 @@ StatusCode UA_MonitoredItemModifyResult_Decode(UA_MsgBuffer* msgBuf, UA_Monitore
 
     UA_MonitoredItemModifyResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    Double_Read(msgBuf, &a_pValue->RevisedSamplingInterval);
-    UInt32_Read(msgBuf, &a_pValue->RevisedQueueSize);
-    ExtensionObject_Read(msgBuf, &a_pValue->FilterResult);
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= Double_Read(&a_pValue->RevisedSamplingInterval, msgBuf);
+    status &= UInt32_Read(&a_pValue->RevisedQueueSize, msgBuf);
+    status &= ExtensionObject_Read(&a_pValue->FilterResult, msgBuf);
 
     if(status != STATUS_OK){
         UA_MonitoredItemModifyResult_Clear(a_pValue);
@@ -15839,7 +16491,7 @@ void UA_ModifyMonitoredItemsRequest_Clear(UA_ModifyMonitoredItemsRequest* a_pVal
 /*============================================================================
  * UA_ModifyMonitoredItemsRequest_Encode
  *===========================================================================*/
-StatusCode UA_ModifyMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_ModifyMonitoredItemsRequest* a_pValue)
+StatusCode UA_ModifyMonitoredItemsRequest_Encode(UA_ModifyMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15847,11 +16499,15 @@ StatusCode UA_ModifyMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Modify
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfItemsToModify, (void**) &a_pValue->ItemsToModify, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfItemsToModify, (void**) &a_pValue->ItemsToModify, 
                    sizeof(UA_MonitoredItemModifyRequest), (UA_EncodeableObject_PfnEncode*) UA_MonitoredItemModifyRequest_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15859,7 +16515,7 @@ StatusCode UA_ModifyMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Modify
 /*============================================================================
  * UA_ModifyMonitoredItemsRequest_Decode
  *===========================================================================*/
-StatusCode UA_ModifyMonitoredItemsRequest_Decode(UA_MsgBuffer* msgBuf, UA_ModifyMonitoredItemsRequest* a_pValue)
+StatusCode UA_ModifyMonitoredItemsRequest_Decode(UA_ModifyMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15869,10 +16525,10 @@ StatusCode UA_ModifyMonitoredItemsRequest_Decode(UA_MsgBuffer* msgBuf, UA_Modify
 
     UA_ModifyMonitoredItemsRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfItemsToModify, (void**) &a_pValue->ItemsToModify, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TimestampsToReturn);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfItemsToModify, (void**) &a_pValue->ItemsToModify, 
                   sizeof(UA_MonitoredItemModifyRequest), (UA_EncodeableObject_PfnDecode*) UA_MonitoredItemModifyRequest_Decode);
 
     if(status != STATUS_OK){
@@ -15936,7 +16592,7 @@ void UA_ModifyMonitoredItemsResponse_Clear(UA_ModifyMonitoredItemsResponse* a_pV
 /*============================================================================
  * UA_ModifyMonitoredItemsResponse_Encode
  *===========================================================================*/
-StatusCode UA_ModifyMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_ModifyMonitoredItemsResponse* a_pValue)
+StatusCode UA_ModifyMonitoredItemsResponse_Encode(UA_ModifyMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15944,11 +16600,15 @@ StatusCode UA_ModifyMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Modif
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_MonitoredItemModifyResult), (UA_EncodeableObject_PfnEncode*) UA_MonitoredItemModifyResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -15956,7 +16616,7 @@ StatusCode UA_ModifyMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Modif
 /*============================================================================
  * UA_ModifyMonitoredItemsResponse_Decode
  *===========================================================================*/
-StatusCode UA_ModifyMonitoredItemsResponse_Decode(UA_MsgBuffer* msgBuf, UA_ModifyMonitoredItemsResponse* a_pValue)
+StatusCode UA_ModifyMonitoredItemsResponse_Decode(UA_ModifyMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -15966,10 +16626,10 @@ StatusCode UA_ModifyMonitoredItemsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Modif
 
     UA_ModifyMonitoredItemsResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_MonitoredItemModifyResult), (UA_EncodeableObject_PfnDecode*) UA_MonitoredItemModifyResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -16035,7 +16695,7 @@ void UA_SetMonitoringModeRequest_Clear(UA_SetMonitoringModeRequest* a_pValue)
 /*============================================================================
  * UA_SetMonitoringModeRequest_Encode
  *===========================================================================*/
-StatusCode UA_SetMonitoringModeRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetMonitoringModeRequest* a_pValue)
+StatusCode UA_SetMonitoringModeRequest_Encode(UA_SetMonitoringModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16043,11 +16703,15 @@ StatusCode UA_SetMonitoringModeRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetMonito
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->MonitoringMode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfMonitoredItemIds, (void**) &a_pValue->MonitoredItemIds, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->MonitoringMode);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfMonitoredItemIds, (void**) &a_pValue->MonitoredItemIds, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16055,7 +16719,7 @@ StatusCode UA_SetMonitoringModeRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetMonito
 /*============================================================================
  * UA_SetMonitoringModeRequest_Decode
  *===========================================================================*/
-StatusCode UA_SetMonitoringModeRequest_Decode(UA_MsgBuffer* msgBuf, UA_SetMonitoringModeRequest* a_pValue)
+StatusCode UA_SetMonitoringModeRequest_Decode(UA_SetMonitoringModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16065,10 +16729,10 @@ StatusCode UA_SetMonitoringModeRequest_Decode(UA_MsgBuffer* msgBuf, UA_SetMonito
 
     UA_SetMonitoringModeRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->MonitoringMode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfMonitoredItemIds, (void**) &a_pValue->MonitoredItemIds, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->MonitoringMode);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfMonitoredItemIds, (void**) &a_pValue->MonitoredItemIds, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
 
     if(status != STATUS_OK){
@@ -16132,7 +16796,7 @@ void UA_SetMonitoringModeResponse_Clear(UA_SetMonitoringModeResponse* a_pValue)
 /*============================================================================
  * UA_SetMonitoringModeResponse_Encode
  *===========================================================================*/
-StatusCode UA_SetMonitoringModeResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetMonitoringModeResponse* a_pValue)
+StatusCode UA_SetMonitoringModeResponse_Encode(UA_SetMonitoringModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16140,11 +16804,15 @@ StatusCode UA_SetMonitoringModeResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetMonit
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16152,7 +16820,7 @@ StatusCode UA_SetMonitoringModeResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetMonit
 /*============================================================================
  * UA_SetMonitoringModeResponse_Decode
  *===========================================================================*/
-StatusCode UA_SetMonitoringModeResponse_Decode(UA_MsgBuffer* msgBuf, UA_SetMonitoringModeResponse* a_pValue)
+StatusCode UA_SetMonitoringModeResponse_Decode(UA_SetMonitoringModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16162,10 +16830,10 @@ StatusCode UA_SetMonitoringModeResponse_Decode(UA_MsgBuffer* msgBuf, UA_SetMonit
 
     UA_SetMonitoringModeResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -16235,7 +16903,7 @@ void UA_SetTriggeringRequest_Clear(UA_SetTriggeringRequest* a_pValue)
 /*============================================================================
  * UA_SetTriggeringRequest_Encode
  *===========================================================================*/
-StatusCode UA_SetTriggeringRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetTriggeringRequest* a_pValue)
+StatusCode UA_SetTriggeringRequest_Encode(UA_SetTriggeringRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16243,13 +16911,17 @@ StatusCode UA_SetTriggeringRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetTriggering
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    UInt32_Write(msgBuf, &a_pValue->TriggeringItemId);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfLinksToAdd, (void**) &a_pValue->LinksToAdd, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= UInt32_Write(&a_pValue->TriggeringItemId, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfLinksToAdd, (void**) &a_pValue->LinksToAdd, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfLinksToRemove, (void**) &a_pValue->LinksToRemove, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfLinksToRemove, (void**) &a_pValue->LinksToRemove, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16257,7 +16929,7 @@ StatusCode UA_SetTriggeringRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetTriggering
 /*============================================================================
  * UA_SetTriggeringRequest_Decode
  *===========================================================================*/
-StatusCode UA_SetTriggeringRequest_Decode(UA_MsgBuffer* msgBuf, UA_SetTriggeringRequest* a_pValue)
+StatusCode UA_SetTriggeringRequest_Decode(UA_SetTriggeringRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16267,12 +16939,12 @@ StatusCode UA_SetTriggeringRequest_Decode(UA_MsgBuffer* msgBuf, UA_SetTriggering
 
     UA_SetTriggeringRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    UInt32_Read(msgBuf, &a_pValue->TriggeringItemId);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfLinksToAdd, (void**) &a_pValue->LinksToAdd, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= UInt32_Read(&a_pValue->TriggeringItemId, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfLinksToAdd, (void**) &a_pValue->LinksToAdd, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfLinksToRemove, (void**) &a_pValue->LinksToRemove, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfLinksToRemove, (void**) &a_pValue->LinksToRemove, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
 
     if(status != STATUS_OK){
@@ -16344,7 +17016,7 @@ void UA_SetTriggeringResponse_Clear(UA_SetTriggeringResponse* a_pValue)
 /*============================================================================
  * UA_SetTriggeringResponse_Encode
  *===========================================================================*/
-StatusCode UA_SetTriggeringResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetTriggeringResponse* a_pValue)
+StatusCode UA_SetTriggeringResponse_Encode(UA_SetTriggeringResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16352,15 +17024,19 @@ StatusCode UA_SetTriggeringResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetTriggerin
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfAddDiagnosticInfos, (void**) &a_pValue->AddDiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfAddDiagnosticInfos, (void**) &a_pValue->AddDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfRemoveResults, (void**) &a_pValue->RemoveResults, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfRemoveResults, (void**) &a_pValue->RemoveResults, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfRemoveDiagnosticInfos, (void**) &a_pValue->RemoveDiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfRemoveDiagnosticInfos, (void**) &a_pValue->RemoveDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16368,7 +17044,7 @@ StatusCode UA_SetTriggeringResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetTriggerin
 /*============================================================================
  * UA_SetTriggeringResponse_Decode
  *===========================================================================*/
-StatusCode UA_SetTriggeringResponse_Decode(UA_MsgBuffer* msgBuf, UA_SetTriggeringResponse* a_pValue)
+StatusCode UA_SetTriggeringResponse_Decode(UA_SetTriggeringResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16378,14 +17054,14 @@ StatusCode UA_SetTriggeringResponse_Decode(UA_MsgBuffer* msgBuf, UA_SetTriggerin
 
     UA_SetTriggeringResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfAddDiagnosticInfos, (void**) &a_pValue->AddDiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfAddDiagnosticInfos, (void**) &a_pValue->AddDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfRemoveResults, (void**) &a_pValue->RemoveResults, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfRemoveResults, (void**) &a_pValue->RemoveResults, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfRemoveDiagnosticInfos, (void**) &a_pValue->RemoveDiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfRemoveDiagnosticInfos, (void**) &a_pValue->RemoveDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -16449,7 +17125,7 @@ void UA_DeleteMonitoredItemsRequest_Clear(UA_DeleteMonitoredItemsRequest* a_pVal
 /*============================================================================
  * UA_DeleteMonitoredItemsRequest_Encode
  *===========================================================================*/
-StatusCode UA_DeleteMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteMonitoredItemsRequest* a_pValue)
+StatusCode UA_DeleteMonitoredItemsRequest_Encode(UA_DeleteMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16457,10 +17133,14 @@ StatusCode UA_DeleteMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Delete
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfMonitoredItemIds, (void**) &a_pValue->MonitoredItemIds, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfMonitoredItemIds, (void**) &a_pValue->MonitoredItemIds, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16468,7 +17148,7 @@ StatusCode UA_DeleteMonitoredItemsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Delete
 /*============================================================================
  * UA_DeleteMonitoredItemsRequest_Decode
  *===========================================================================*/
-StatusCode UA_DeleteMonitoredItemsRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteMonitoredItemsRequest* a_pValue)
+StatusCode UA_DeleteMonitoredItemsRequest_Decode(UA_DeleteMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16478,9 +17158,9 @@ StatusCode UA_DeleteMonitoredItemsRequest_Decode(UA_MsgBuffer* msgBuf, UA_Delete
 
     UA_DeleteMonitoredItemsRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfMonitoredItemIds, (void**) &a_pValue->MonitoredItemIds, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfMonitoredItemIds, (void**) &a_pValue->MonitoredItemIds, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
 
     if(status != STATUS_OK){
@@ -16544,7 +17224,7 @@ void UA_DeleteMonitoredItemsResponse_Clear(UA_DeleteMonitoredItemsResponse* a_pV
 /*============================================================================
  * UA_DeleteMonitoredItemsResponse_Encode
  *===========================================================================*/
-StatusCode UA_DeleteMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteMonitoredItemsResponse* a_pValue)
+StatusCode UA_DeleteMonitoredItemsResponse_Encode(UA_DeleteMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16552,11 +17232,15 @@ StatusCode UA_DeleteMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Delet
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16564,7 +17248,7 @@ StatusCode UA_DeleteMonitoredItemsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Delet
 /*============================================================================
  * UA_DeleteMonitoredItemsResponse_Decode
  *===========================================================================*/
-StatusCode UA_DeleteMonitoredItemsResponse_Decode(UA_MsgBuffer* msgBuf, UA_DeleteMonitoredItemsResponse* a_pValue)
+StatusCode UA_DeleteMonitoredItemsResponse_Decode(UA_DeleteMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16574,10 +17258,10 @@ StatusCode UA_DeleteMonitoredItemsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Delet
 
     UA_DeleteMonitoredItemsResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -16647,7 +17331,7 @@ void UA_CreateSubscriptionRequest_Clear(UA_CreateSubscriptionRequest* a_pValue)
 /*============================================================================
  * UA_CreateSubscriptionRequest_Encode
  *===========================================================================*/
-StatusCode UA_CreateSubscriptionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CreateSubscriptionRequest* a_pValue)
+StatusCode UA_CreateSubscriptionRequest_Encode(UA_CreateSubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16655,13 +17339,17 @@ StatusCode UA_CreateSubscriptionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CreateSu
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    Double_Write(msgBuf, &a_pValue->RequestedPublishingInterval);
-    UInt32_Write(msgBuf, &a_pValue->RequestedLifetimeCount);
-    UInt32_Write(msgBuf, &a_pValue->RequestedMaxKeepAliveCount);
-    UInt32_Write(msgBuf, &a_pValue->MaxNotificationsPerPublish);
-    Boolean_Write(msgBuf, &a_pValue->PublishingEnabled);
-    Byte_Write(msgBuf, &a_pValue->Priority);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= Double_Write(&a_pValue->RequestedPublishingInterval, msgBuf);
+    status &= UInt32_Write(&a_pValue->RequestedLifetimeCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->RequestedMaxKeepAliveCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxNotificationsPerPublish, msgBuf);
+    status &= Boolean_Write(&a_pValue->PublishingEnabled, msgBuf);
+    status &= Byte_Write(&a_pValue->Priority, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16669,7 +17357,7 @@ StatusCode UA_CreateSubscriptionRequest_Encode(UA_MsgBuffer* msgBuf, UA_CreateSu
 /*============================================================================
  * UA_CreateSubscriptionRequest_Decode
  *===========================================================================*/
-StatusCode UA_CreateSubscriptionRequest_Decode(UA_MsgBuffer* msgBuf, UA_CreateSubscriptionRequest* a_pValue)
+StatusCode UA_CreateSubscriptionRequest_Decode(UA_CreateSubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16679,13 +17367,13 @@ StatusCode UA_CreateSubscriptionRequest_Decode(UA_MsgBuffer* msgBuf, UA_CreateSu
 
     UA_CreateSubscriptionRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    Double_Read(msgBuf, &a_pValue->RequestedPublishingInterval);
-    UInt32_Read(msgBuf, &a_pValue->RequestedLifetimeCount);
-    UInt32_Read(msgBuf, &a_pValue->RequestedMaxKeepAliveCount);
-    UInt32_Read(msgBuf, &a_pValue->MaxNotificationsPerPublish);
-    Boolean_Read(msgBuf, &a_pValue->PublishingEnabled);
-    Byte_Read(msgBuf, &a_pValue->Priority);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= Double_Read(&a_pValue->RequestedPublishingInterval, msgBuf);
+    status &= UInt32_Read(&a_pValue->RequestedLifetimeCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->RequestedMaxKeepAliveCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxNotificationsPerPublish, msgBuf);
+    status &= Boolean_Read(&a_pValue->PublishingEnabled, msgBuf);
+    status &= Byte_Read(&a_pValue->Priority, msgBuf);
 
     if(status != STATUS_OK){
         UA_CreateSubscriptionRequest_Clear(a_pValue);
@@ -16748,7 +17436,7 @@ void UA_CreateSubscriptionResponse_Clear(UA_CreateSubscriptionResponse* a_pValue
 /*============================================================================
  * UA_CreateSubscriptionResponse_Encode
  *===========================================================================*/
-StatusCode UA_CreateSubscriptionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CreateSubscriptionResponse* a_pValue)
+StatusCode UA_CreateSubscriptionResponse_Encode(UA_CreateSubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16756,11 +17444,15 @@ StatusCode UA_CreateSubscriptionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CreateS
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    Double_Write(msgBuf, &a_pValue->RevisedPublishingInterval);
-    UInt32_Write(msgBuf, &a_pValue->RevisedLifetimeCount);
-    UInt32_Write(msgBuf, &a_pValue->RevisedMaxKeepAliveCount);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= Double_Write(&a_pValue->RevisedPublishingInterval, msgBuf);
+    status &= UInt32_Write(&a_pValue->RevisedLifetimeCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->RevisedMaxKeepAliveCount, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16768,7 +17460,7 @@ StatusCode UA_CreateSubscriptionResponse_Encode(UA_MsgBuffer* msgBuf, UA_CreateS
 /*============================================================================
  * UA_CreateSubscriptionResponse_Decode
  *===========================================================================*/
-StatusCode UA_CreateSubscriptionResponse_Decode(UA_MsgBuffer* msgBuf, UA_CreateSubscriptionResponse* a_pValue)
+StatusCode UA_CreateSubscriptionResponse_Decode(UA_CreateSubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16778,11 +17470,11 @@ StatusCode UA_CreateSubscriptionResponse_Decode(UA_MsgBuffer* msgBuf, UA_CreateS
 
     UA_CreateSubscriptionResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    Double_Read(msgBuf, &a_pValue->RevisedPublishingInterval);
-    UInt32_Read(msgBuf, &a_pValue->RevisedLifetimeCount);
-    UInt32_Read(msgBuf, &a_pValue->RevisedMaxKeepAliveCount);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= Double_Read(&a_pValue->RevisedPublishingInterval, msgBuf);
+    status &= UInt32_Read(&a_pValue->RevisedLifetimeCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->RevisedMaxKeepAliveCount, msgBuf);
 
     if(status != STATUS_OK){
         UA_CreateSubscriptionResponse_Clear(a_pValue);
@@ -16851,7 +17543,7 @@ void UA_ModifySubscriptionRequest_Clear(UA_ModifySubscriptionRequest* a_pValue)
 /*============================================================================
  * UA_ModifySubscriptionRequest_Encode
  *===========================================================================*/
-StatusCode UA_ModifySubscriptionRequest_Encode(UA_MsgBuffer* msgBuf, UA_ModifySubscriptionRequest* a_pValue)
+StatusCode UA_ModifySubscriptionRequest_Encode(UA_ModifySubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16859,13 +17551,17 @@ StatusCode UA_ModifySubscriptionRequest_Encode(UA_MsgBuffer* msgBuf, UA_ModifySu
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    Double_Write(msgBuf, &a_pValue->RequestedPublishingInterval);
-    UInt32_Write(msgBuf, &a_pValue->RequestedLifetimeCount);
-    UInt32_Write(msgBuf, &a_pValue->RequestedMaxKeepAliveCount);
-    UInt32_Write(msgBuf, &a_pValue->MaxNotificationsPerPublish);
-    Byte_Write(msgBuf, &a_pValue->Priority);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= Double_Write(&a_pValue->RequestedPublishingInterval, msgBuf);
+    status &= UInt32_Write(&a_pValue->RequestedLifetimeCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->RequestedMaxKeepAliveCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxNotificationsPerPublish, msgBuf);
+    status &= Byte_Write(&a_pValue->Priority, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16873,7 +17569,7 @@ StatusCode UA_ModifySubscriptionRequest_Encode(UA_MsgBuffer* msgBuf, UA_ModifySu
 /*============================================================================
  * UA_ModifySubscriptionRequest_Decode
  *===========================================================================*/
-StatusCode UA_ModifySubscriptionRequest_Decode(UA_MsgBuffer* msgBuf, UA_ModifySubscriptionRequest* a_pValue)
+StatusCode UA_ModifySubscriptionRequest_Decode(UA_ModifySubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16883,13 +17579,13 @@ StatusCode UA_ModifySubscriptionRequest_Decode(UA_MsgBuffer* msgBuf, UA_ModifySu
 
     UA_ModifySubscriptionRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    Double_Read(msgBuf, &a_pValue->RequestedPublishingInterval);
-    UInt32_Read(msgBuf, &a_pValue->RequestedLifetimeCount);
-    UInt32_Read(msgBuf, &a_pValue->RequestedMaxKeepAliveCount);
-    UInt32_Read(msgBuf, &a_pValue->MaxNotificationsPerPublish);
-    Byte_Read(msgBuf, &a_pValue->Priority);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= Double_Read(&a_pValue->RequestedPublishingInterval, msgBuf);
+    status &= UInt32_Read(&a_pValue->RequestedLifetimeCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->RequestedMaxKeepAliveCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxNotificationsPerPublish, msgBuf);
+    status &= Byte_Read(&a_pValue->Priority, msgBuf);
 
     if(status != STATUS_OK){
         UA_ModifySubscriptionRequest_Clear(a_pValue);
@@ -16950,7 +17646,7 @@ void UA_ModifySubscriptionResponse_Clear(UA_ModifySubscriptionResponse* a_pValue
 /*============================================================================
  * UA_ModifySubscriptionResponse_Encode
  *===========================================================================*/
-StatusCode UA_ModifySubscriptionResponse_Encode(UA_MsgBuffer* msgBuf, UA_ModifySubscriptionResponse* a_pValue)
+StatusCode UA_ModifySubscriptionResponse_Encode(UA_ModifySubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16958,10 +17654,14 @@ StatusCode UA_ModifySubscriptionResponse_Encode(UA_MsgBuffer* msgBuf, UA_ModifyS
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    Double_Write(msgBuf, &a_pValue->RevisedPublishingInterval);
-    UInt32_Write(msgBuf, &a_pValue->RevisedLifetimeCount);
-    UInt32_Write(msgBuf, &a_pValue->RevisedMaxKeepAliveCount);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= Double_Write(&a_pValue->RevisedPublishingInterval, msgBuf);
+    status &= UInt32_Write(&a_pValue->RevisedLifetimeCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->RevisedMaxKeepAliveCount, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -16969,7 +17669,7 @@ StatusCode UA_ModifySubscriptionResponse_Encode(UA_MsgBuffer* msgBuf, UA_ModifyS
 /*============================================================================
  * UA_ModifySubscriptionResponse_Decode
  *===========================================================================*/
-StatusCode UA_ModifySubscriptionResponse_Decode(UA_MsgBuffer* msgBuf, UA_ModifySubscriptionResponse* a_pValue)
+StatusCode UA_ModifySubscriptionResponse_Decode(UA_ModifySubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -16979,10 +17679,10 @@ StatusCode UA_ModifySubscriptionResponse_Decode(UA_MsgBuffer* msgBuf, UA_ModifyS
 
     UA_ModifySubscriptionResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    Double_Read(msgBuf, &a_pValue->RevisedPublishingInterval);
-    UInt32_Read(msgBuf, &a_pValue->RevisedLifetimeCount);
-    UInt32_Read(msgBuf, &a_pValue->RevisedMaxKeepAliveCount);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= Double_Read(&a_pValue->RevisedPublishingInterval, msgBuf);
+    status &= UInt32_Read(&a_pValue->RevisedLifetimeCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->RevisedMaxKeepAliveCount, msgBuf);
 
     if(status != STATUS_OK){
         UA_ModifySubscriptionResponse_Clear(a_pValue);
@@ -17045,7 +17745,7 @@ void UA_SetPublishingModeRequest_Clear(UA_SetPublishingModeRequest* a_pValue)
 /*============================================================================
  * UA_SetPublishingModeRequest_Encode
  *===========================================================================*/
-StatusCode UA_SetPublishingModeRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetPublishingModeRequest* a_pValue)
+StatusCode UA_SetPublishingModeRequest_Encode(UA_SetPublishingModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17053,10 +17753,14 @@ StatusCode UA_SetPublishingModeRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetPublis
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    Boolean_Write(msgBuf, &a_pValue->PublishingEnabled);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= Boolean_Write(&a_pValue->PublishingEnabled, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17064,7 +17768,7 @@ StatusCode UA_SetPublishingModeRequest_Encode(UA_MsgBuffer* msgBuf, UA_SetPublis
 /*============================================================================
  * UA_SetPublishingModeRequest_Decode
  *===========================================================================*/
-StatusCode UA_SetPublishingModeRequest_Decode(UA_MsgBuffer* msgBuf, UA_SetPublishingModeRequest* a_pValue)
+StatusCode UA_SetPublishingModeRequest_Decode(UA_SetPublishingModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17074,9 +17778,9 @@ StatusCode UA_SetPublishingModeRequest_Decode(UA_MsgBuffer* msgBuf, UA_SetPublis
 
     UA_SetPublishingModeRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    Boolean_Read(msgBuf, &a_pValue->PublishingEnabled);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= Boolean_Read(&a_pValue->PublishingEnabled, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
 
     if(status != STATUS_OK){
@@ -17140,7 +17844,7 @@ void UA_SetPublishingModeResponse_Clear(UA_SetPublishingModeResponse* a_pValue)
 /*============================================================================
  * UA_SetPublishingModeResponse_Encode
  *===========================================================================*/
-StatusCode UA_SetPublishingModeResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetPublishingModeResponse* a_pValue)
+StatusCode UA_SetPublishingModeResponse_Encode(UA_SetPublishingModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17148,11 +17852,15 @@ StatusCode UA_SetPublishingModeResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetPubli
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17160,7 +17868,7 @@ StatusCode UA_SetPublishingModeResponse_Encode(UA_MsgBuffer* msgBuf, UA_SetPubli
 /*============================================================================
  * UA_SetPublishingModeResponse_Decode
  *===========================================================================*/
-StatusCode UA_SetPublishingModeResponse_Decode(UA_MsgBuffer* msgBuf, UA_SetPublishingModeResponse* a_pValue)
+StatusCode UA_SetPublishingModeResponse_Decode(UA_SetPublishingModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17170,10 +17878,10 @@ StatusCode UA_SetPublishingModeResponse_Decode(UA_MsgBuffer* msgBuf, UA_SetPubli
 
     UA_SetPublishingModeResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -17236,7 +17944,7 @@ void UA_NotificationMessage_Clear(UA_NotificationMessage* a_pValue)
 /*============================================================================
  * UA_NotificationMessage_Encode
  *===========================================================================*/
-StatusCode UA_NotificationMessage_Encode(UA_MsgBuffer* msgBuf, UA_NotificationMessage* a_pValue)
+StatusCode UA_NotificationMessage_Encode(UA_NotificationMessage* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17244,10 +17952,14 @@ StatusCode UA_NotificationMessage_Encode(UA_MsgBuffer* msgBuf, UA_NotificationMe
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SequenceNumber);
-    DateTime_Write(msgBuf, &a_pValue->PublishTime);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNotificationData, (void**) &a_pValue->NotificationData, 
+    status &= UInt32_Write(&a_pValue->SequenceNumber, msgBuf);
+    status &= DateTime_Write(&a_pValue->PublishTime, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNotificationData, (void**) &a_pValue->NotificationData, 
                    sizeof(UA_ExtensionObject), (UA_EncodeableObject_PfnEncode*) ExtensionObject_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17255,7 +17967,7 @@ StatusCode UA_NotificationMessage_Encode(UA_MsgBuffer* msgBuf, UA_NotificationMe
 /*============================================================================
  * UA_NotificationMessage_Decode
  *===========================================================================*/
-StatusCode UA_NotificationMessage_Decode(UA_MsgBuffer* msgBuf, UA_NotificationMessage* a_pValue)
+StatusCode UA_NotificationMessage_Decode(UA_NotificationMessage* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17265,9 +17977,9 @@ StatusCode UA_NotificationMessage_Decode(UA_MsgBuffer* msgBuf, UA_NotificationMe
 
     UA_NotificationMessage_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SequenceNumber);
-    DateTime_Read(msgBuf, &a_pValue->PublishTime);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNotificationData, (void**) &a_pValue->NotificationData, 
+    status &= UInt32_Read(&a_pValue->SequenceNumber, msgBuf);
+    status &= DateTime_Read(&a_pValue->PublishTime, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNotificationData, (void**) &a_pValue->NotificationData, 
                   sizeof(UA_ExtensionObject), (UA_EncodeableObject_PfnDecode*) ExtensionObject_Read);
 
     if(status != STATUS_OK){
@@ -17329,7 +18041,7 @@ void UA_DataChangeNotification_Clear(UA_DataChangeNotification* a_pValue)
 /*============================================================================
  * UA_DataChangeNotification_Encode
  *===========================================================================*/
-StatusCode UA_DataChangeNotification_Encode(UA_MsgBuffer* msgBuf, UA_DataChangeNotification* a_pValue)
+StatusCode UA_DataChangeNotification_Encode(UA_DataChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17337,10 +18049,14 @@ StatusCode UA_DataChangeNotification_Encode(UA_MsgBuffer* msgBuf, UA_DataChangeN
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfMonitoredItems, (void**) &a_pValue->MonitoredItems, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfMonitoredItems, (void**) &a_pValue->MonitoredItems, 
                    sizeof(UA_MonitoredItemNotification), (UA_EncodeableObject_PfnEncode*) UA_MonitoredItemNotification_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17348,7 +18064,7 @@ StatusCode UA_DataChangeNotification_Encode(UA_MsgBuffer* msgBuf, UA_DataChangeN
 /*============================================================================
  * UA_DataChangeNotification_Decode
  *===========================================================================*/
-StatusCode UA_DataChangeNotification_Decode(UA_MsgBuffer* msgBuf, UA_DataChangeNotification* a_pValue)
+StatusCode UA_DataChangeNotification_Decode(UA_DataChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17358,9 +18074,9 @@ StatusCode UA_DataChangeNotification_Decode(UA_MsgBuffer* msgBuf, UA_DataChangeN
 
     UA_DataChangeNotification_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfMonitoredItems, (void**) &a_pValue->MonitoredItems, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfMonitoredItems, (void**) &a_pValue->MonitoredItems, 
                   sizeof(UA_MonitoredItemNotification), (UA_EncodeableObject_PfnDecode*) UA_MonitoredItemNotification_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -17418,7 +18134,7 @@ void UA_MonitoredItemNotification_Clear(UA_MonitoredItemNotification* a_pValue)
 /*============================================================================
  * UA_MonitoredItemNotification_Encode
  *===========================================================================*/
-StatusCode UA_MonitoredItemNotification_Encode(UA_MsgBuffer* msgBuf, UA_MonitoredItemNotification* a_pValue)
+StatusCode UA_MonitoredItemNotification_Encode(UA_MonitoredItemNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17426,8 +18142,12 @@ StatusCode UA_MonitoredItemNotification_Encode(UA_MsgBuffer* msgBuf, UA_Monitore
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->ClientHandle);
-    DataValue_Write(msgBuf, &a_pValue->Value);
+    status &= UInt32_Write(&a_pValue->ClientHandle, msgBuf);
+    status &= DataValue_Write(&a_pValue->Value, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17435,7 +18155,7 @@ StatusCode UA_MonitoredItemNotification_Encode(UA_MsgBuffer* msgBuf, UA_Monitore
 /*============================================================================
  * UA_MonitoredItemNotification_Decode
  *===========================================================================*/
-StatusCode UA_MonitoredItemNotification_Decode(UA_MsgBuffer* msgBuf, UA_MonitoredItemNotification* a_pValue)
+StatusCode UA_MonitoredItemNotification_Decode(UA_MonitoredItemNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17445,8 +18165,8 @@ StatusCode UA_MonitoredItemNotification_Decode(UA_MsgBuffer* msgBuf, UA_Monitore
 
     UA_MonitoredItemNotification_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->ClientHandle);
-    DataValue_Read(msgBuf, &a_pValue->Value);
+    status &= UInt32_Read(&a_pValue->ClientHandle, msgBuf);
+    status &= DataValue_Read(&a_pValue->Value, msgBuf);
 
     if(status != STATUS_OK){
         UA_MonitoredItemNotification_Clear(a_pValue);
@@ -17503,7 +18223,7 @@ void UA_EventNotificationList_Clear(UA_EventNotificationList* a_pValue)
 /*============================================================================
  * UA_EventNotificationList_Encode
  *===========================================================================*/
-StatusCode UA_EventNotificationList_Encode(UA_MsgBuffer* msgBuf, UA_EventNotificationList* a_pValue)
+StatusCode UA_EventNotificationList_Encode(UA_EventNotificationList* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17511,8 +18231,12 @@ StatusCode UA_EventNotificationList_Encode(UA_MsgBuffer* msgBuf, UA_EventNotific
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
                    sizeof(UA_EventFieldList), (UA_EncodeableObject_PfnEncode*) UA_EventFieldList_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17520,7 +18244,7 @@ StatusCode UA_EventNotificationList_Encode(UA_MsgBuffer* msgBuf, UA_EventNotific
 /*============================================================================
  * UA_EventNotificationList_Decode
  *===========================================================================*/
-StatusCode UA_EventNotificationList_Decode(UA_MsgBuffer* msgBuf, UA_EventNotificationList* a_pValue)
+StatusCode UA_EventNotificationList_Decode(UA_EventNotificationList* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17530,7 +18254,7 @@ StatusCode UA_EventNotificationList_Decode(UA_MsgBuffer* msgBuf, UA_EventNotific
 
     UA_EventNotificationList_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
                   sizeof(UA_EventFieldList), (UA_EncodeableObject_PfnDecode*) UA_EventFieldList_Decode);
 
     if(status != STATUS_OK){
@@ -17590,7 +18314,7 @@ void UA_EventFieldList_Clear(UA_EventFieldList* a_pValue)
 /*============================================================================
  * UA_EventFieldList_Encode
  *===========================================================================*/
-StatusCode UA_EventFieldList_Encode(UA_MsgBuffer* msgBuf, UA_EventFieldList* a_pValue)
+StatusCode UA_EventFieldList_Encode(UA_EventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17598,9 +18322,13 @@ StatusCode UA_EventFieldList_Encode(UA_MsgBuffer* msgBuf, UA_EventFieldList* a_p
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->ClientHandle);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
+    status &= UInt32_Write(&a_pValue->ClientHandle, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
                    sizeof(UA_Variant), (UA_EncodeableObject_PfnEncode*) Variant_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17608,7 +18336,7 @@ StatusCode UA_EventFieldList_Encode(UA_MsgBuffer* msgBuf, UA_EventFieldList* a_p
 /*============================================================================
  * UA_EventFieldList_Decode
  *===========================================================================*/
-StatusCode UA_EventFieldList_Decode(UA_MsgBuffer* msgBuf, UA_EventFieldList* a_pValue)
+StatusCode UA_EventFieldList_Decode(UA_EventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17618,8 +18346,8 @@ StatusCode UA_EventFieldList_Decode(UA_MsgBuffer* msgBuf, UA_EventFieldList* a_p
 
     UA_EventFieldList_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->ClientHandle);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
+    status &= UInt32_Read(&a_pValue->ClientHandle, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
                   sizeof(UA_Variant), (UA_EncodeableObject_PfnDecode*) Variant_Read);
 
     if(status != STATUS_OK){
@@ -17677,7 +18405,7 @@ void UA_HistoryEventFieldList_Clear(UA_HistoryEventFieldList* a_pValue)
 /*============================================================================
  * UA_HistoryEventFieldList_Encode
  *===========================================================================*/
-StatusCode UA_HistoryEventFieldList_Encode(UA_MsgBuffer* msgBuf, UA_HistoryEventFieldList* a_pValue)
+StatusCode UA_HistoryEventFieldList_Encode(UA_HistoryEventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17685,8 +18413,12 @@ StatusCode UA_HistoryEventFieldList_Encode(UA_MsgBuffer* msgBuf, UA_HistoryEvent
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
                    sizeof(UA_Variant), (UA_EncodeableObject_PfnEncode*) Variant_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17694,7 +18426,7 @@ StatusCode UA_HistoryEventFieldList_Encode(UA_MsgBuffer* msgBuf, UA_HistoryEvent
 /*============================================================================
  * UA_HistoryEventFieldList_Decode
  *===========================================================================*/
-StatusCode UA_HistoryEventFieldList_Decode(UA_MsgBuffer* msgBuf, UA_HistoryEventFieldList* a_pValue)
+StatusCode UA_HistoryEventFieldList_Decode(UA_HistoryEventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17704,7 +18436,7 @@ StatusCode UA_HistoryEventFieldList_Decode(UA_MsgBuffer* msgBuf, UA_HistoryEvent
 
     UA_HistoryEventFieldList_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
                   sizeof(UA_Variant), (UA_EncodeableObject_PfnDecode*) Variant_Read);
 
     if(status != STATUS_OK){
@@ -17762,7 +18494,7 @@ void UA_StatusChangeNotification_Clear(UA_StatusChangeNotification* a_pValue)
 /*============================================================================
  * UA_StatusChangeNotification_Encode
  *===========================================================================*/
-StatusCode UA_StatusChangeNotification_Encode(UA_MsgBuffer* msgBuf, UA_StatusChangeNotification* a_pValue)
+StatusCode UA_StatusChangeNotification_Encode(UA_StatusChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17770,8 +18502,12 @@ StatusCode UA_StatusChangeNotification_Encode(UA_MsgBuffer* msgBuf, UA_StatusCha
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->Status);
-    DiagnosticInfo_Write(msgBuf, &a_pValue->DiagnosticInfo);
+    status &= StatusCode_Write(&a_pValue->Status, msgBuf);
+    status &= DiagnosticInfo_Write(&a_pValue->DiagnosticInfo, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17779,7 +18515,7 @@ StatusCode UA_StatusChangeNotification_Encode(UA_MsgBuffer* msgBuf, UA_StatusCha
 /*============================================================================
  * UA_StatusChangeNotification_Decode
  *===========================================================================*/
-StatusCode UA_StatusChangeNotification_Decode(UA_MsgBuffer* msgBuf, UA_StatusChangeNotification* a_pValue)
+StatusCode UA_StatusChangeNotification_Decode(UA_StatusChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17789,8 +18525,8 @@ StatusCode UA_StatusChangeNotification_Decode(UA_MsgBuffer* msgBuf, UA_StatusCha
 
     UA_StatusChangeNotification_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->Status);
-    DiagnosticInfo_Read(msgBuf, &a_pValue->DiagnosticInfo);
+    status &= StatusCode_Read(&a_pValue->Status, msgBuf);
+    status &= DiagnosticInfo_Read(&a_pValue->DiagnosticInfo, msgBuf);
 
     if(status != STATUS_OK){
         UA_StatusChangeNotification_Clear(a_pValue);
@@ -17847,7 +18583,7 @@ void UA_SubscriptionAcknowledgement_Clear(UA_SubscriptionAcknowledgement* a_pVal
 /*============================================================================
  * UA_SubscriptionAcknowledgement_Encode
  *===========================================================================*/
-StatusCode UA_SubscriptionAcknowledgement_Encode(UA_MsgBuffer* msgBuf, UA_SubscriptionAcknowledgement* a_pValue)
+StatusCode UA_SubscriptionAcknowledgement_Encode(UA_SubscriptionAcknowledgement* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17855,8 +18591,12 @@ StatusCode UA_SubscriptionAcknowledgement_Encode(UA_MsgBuffer* msgBuf, UA_Subscr
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    UInt32_Write(msgBuf, &a_pValue->SequenceNumber);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= UInt32_Write(&a_pValue->SequenceNumber, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17864,7 +18604,7 @@ StatusCode UA_SubscriptionAcknowledgement_Encode(UA_MsgBuffer* msgBuf, UA_Subscr
 /*============================================================================
  * UA_SubscriptionAcknowledgement_Decode
  *===========================================================================*/
-StatusCode UA_SubscriptionAcknowledgement_Decode(UA_MsgBuffer* msgBuf, UA_SubscriptionAcknowledgement* a_pValue)
+StatusCode UA_SubscriptionAcknowledgement_Decode(UA_SubscriptionAcknowledgement* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17874,8 +18614,8 @@ StatusCode UA_SubscriptionAcknowledgement_Decode(UA_MsgBuffer* msgBuf, UA_Subscr
 
     UA_SubscriptionAcknowledgement_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    UInt32_Read(msgBuf, &a_pValue->SequenceNumber);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= UInt32_Read(&a_pValue->SequenceNumber, msgBuf);
 
     if(status != STATUS_OK){
         UA_SubscriptionAcknowledgement_Clear(a_pValue);
@@ -17935,7 +18675,7 @@ void UA_PublishRequest_Clear(UA_PublishRequest* a_pValue)
 /*============================================================================
  * UA_PublishRequest_Encode
  *===========================================================================*/
-StatusCode UA_PublishRequest_Encode(UA_MsgBuffer* msgBuf, UA_PublishRequest* a_pValue)
+StatusCode UA_PublishRequest_Encode(UA_PublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17943,9 +18683,13 @@ StatusCode UA_PublishRequest_Encode(UA_MsgBuffer* msgBuf, UA_PublishRequest* a_p
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfSubscriptionAcknowledgements, (void**) &a_pValue->SubscriptionAcknowledgements, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSubscriptionAcknowledgements, (void**) &a_pValue->SubscriptionAcknowledgements, 
                    sizeof(UA_SubscriptionAcknowledgement), (UA_EncodeableObject_PfnEncode*) UA_SubscriptionAcknowledgement_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -17953,7 +18697,7 @@ StatusCode UA_PublishRequest_Encode(UA_MsgBuffer* msgBuf, UA_PublishRequest* a_p
 /*============================================================================
  * UA_PublishRequest_Decode
  *===========================================================================*/
-StatusCode UA_PublishRequest_Decode(UA_MsgBuffer* msgBuf, UA_PublishRequest* a_pValue)
+StatusCode UA_PublishRequest_Decode(UA_PublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -17963,8 +18707,8 @@ StatusCode UA_PublishRequest_Decode(UA_MsgBuffer* msgBuf, UA_PublishRequest* a_p
 
     UA_PublishRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfSubscriptionAcknowledgements, (void**) &a_pValue->SubscriptionAcknowledgements, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSubscriptionAcknowledgements, (void**) &a_pValue->SubscriptionAcknowledgements, 
                   sizeof(UA_SubscriptionAcknowledgement), (UA_EncodeableObject_PfnDecode*) UA_SubscriptionAcknowledgement_Decode);
 
     if(status != STATUS_OK){
@@ -18038,7 +18782,7 @@ void UA_PublishResponse_Clear(UA_PublishResponse* a_pValue)
 /*============================================================================
  * UA_PublishResponse_Encode
  *===========================================================================*/
-StatusCode UA_PublishResponse_Encode(UA_MsgBuffer* msgBuf, UA_PublishResponse* a_pValue)
+StatusCode UA_PublishResponse_Encode(UA_PublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18046,16 +18790,20 @@ StatusCode UA_PublishResponse_Encode(UA_MsgBuffer* msgBuf, UA_PublishResponse* a
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
-    Boolean_Write(msgBuf, &a_pValue->MoreNotifications);
-    UA_NotificationMessage_Encode(msgBuf, &a_pValue->NotificationMessage);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= Boolean_Write(&a_pValue->MoreNotifications, msgBuf);
+    status &= UA_NotificationMessage_Encode(&a_pValue->NotificationMessage, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18063,7 +18811,7 @@ StatusCode UA_PublishResponse_Encode(UA_MsgBuffer* msgBuf, UA_PublishResponse* a
 /*============================================================================
  * UA_PublishResponse_Decode
  *===========================================================================*/
-StatusCode UA_PublishResponse_Decode(UA_MsgBuffer* msgBuf, UA_PublishResponse* a_pValue)
+StatusCode UA_PublishResponse_Decode(UA_PublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18073,15 +18821,15 @@ StatusCode UA_PublishResponse_Decode(UA_MsgBuffer* msgBuf, UA_PublishResponse* a
 
     UA_PublishResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
-    Boolean_Read(msgBuf, &a_pValue->MoreNotifications);
-    UA_NotificationMessage_Decode(msgBuf, &a_pValue->NotificationMessage);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= Boolean_Read(&a_pValue->MoreNotifications, msgBuf);
+    status &= UA_NotificationMessage_Decode(&a_pValue->NotificationMessage, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -18143,7 +18891,7 @@ void UA_RepublishRequest_Clear(UA_RepublishRequest* a_pValue)
 /*============================================================================
  * UA_RepublishRequest_Encode
  *===========================================================================*/
-StatusCode UA_RepublishRequest_Encode(UA_MsgBuffer* msgBuf, UA_RepublishRequest* a_pValue)
+StatusCode UA_RepublishRequest_Encode(UA_RepublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18151,9 +18899,13 @@ StatusCode UA_RepublishRequest_Encode(UA_MsgBuffer* msgBuf, UA_RepublishRequest*
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    UInt32_Write(msgBuf, &a_pValue->RetransmitSequenceNumber);
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= UInt32_Write(&a_pValue->RetransmitSequenceNumber, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18161,7 +18913,7 @@ StatusCode UA_RepublishRequest_Encode(UA_MsgBuffer* msgBuf, UA_RepublishRequest*
 /*============================================================================
  * UA_RepublishRequest_Decode
  *===========================================================================*/
-StatusCode UA_RepublishRequest_Decode(UA_MsgBuffer* msgBuf, UA_RepublishRequest* a_pValue)
+StatusCode UA_RepublishRequest_Decode(UA_RepublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18171,9 +18923,9 @@ StatusCode UA_RepublishRequest_Decode(UA_MsgBuffer* msgBuf, UA_RepublishRequest*
 
     UA_RepublishRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    UInt32_Read(msgBuf, &a_pValue->RetransmitSequenceNumber);
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= UInt32_Read(&a_pValue->RetransmitSequenceNumber, msgBuf);
 
     if(status != STATUS_OK){
         UA_RepublishRequest_Clear(a_pValue);
@@ -18230,7 +18982,7 @@ void UA_RepublishResponse_Clear(UA_RepublishResponse* a_pValue)
 /*============================================================================
  * UA_RepublishResponse_Encode
  *===========================================================================*/
-StatusCode UA_RepublishResponse_Encode(UA_MsgBuffer* msgBuf, UA_RepublishResponse* a_pValue)
+StatusCode UA_RepublishResponse_Encode(UA_RepublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18238,8 +18990,12 @@ StatusCode UA_RepublishResponse_Encode(UA_MsgBuffer* msgBuf, UA_RepublishRespons
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_NotificationMessage_Encode(msgBuf, &a_pValue->NotificationMessage);
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_NotificationMessage_Encode(&a_pValue->NotificationMessage, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18247,7 +19003,7 @@ StatusCode UA_RepublishResponse_Encode(UA_MsgBuffer* msgBuf, UA_RepublishRespons
 /*============================================================================
  * UA_RepublishResponse_Decode
  *===========================================================================*/
-StatusCode UA_RepublishResponse_Decode(UA_MsgBuffer* msgBuf, UA_RepublishResponse* a_pValue)
+StatusCode UA_RepublishResponse_Decode(UA_RepublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18257,8 +19013,8 @@ StatusCode UA_RepublishResponse_Decode(UA_MsgBuffer* msgBuf, UA_RepublishRespons
 
     UA_RepublishResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_NotificationMessage_Decode(msgBuf, &a_pValue->NotificationMessage);
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_NotificationMessage_Decode(&a_pValue->NotificationMessage, msgBuf);
 
     if(status != STATUS_OK){
         UA_RepublishResponse_Clear(a_pValue);
@@ -18318,7 +19074,7 @@ void UA_TransferResult_Clear(UA_TransferResult* a_pValue)
 /*============================================================================
  * UA_TransferResult_Encode
  *===========================================================================*/
-StatusCode UA_TransferResult_Encode(UA_MsgBuffer* msgBuf, UA_TransferResult* a_pValue)
+StatusCode UA_TransferResult_Encode(UA_TransferResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18326,9 +19082,13 @@ StatusCode UA_TransferResult_Encode(UA_MsgBuffer* msgBuf, UA_TransferResult* a_p
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18336,7 +19096,7 @@ StatusCode UA_TransferResult_Encode(UA_MsgBuffer* msgBuf, UA_TransferResult* a_p
 /*============================================================================
  * UA_TransferResult_Decode
  *===========================================================================*/
-StatusCode UA_TransferResult_Decode(UA_MsgBuffer* msgBuf, UA_TransferResult* a_pValue)
+StatusCode UA_TransferResult_Decode(UA_TransferResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18346,8 +19106,8 @@ StatusCode UA_TransferResult_Decode(UA_MsgBuffer* msgBuf, UA_TransferResult* a_p
 
     UA_TransferResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfAvailableSequenceNumbers, (void**) &a_pValue->AvailableSequenceNumbers, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
 
     if(status != STATUS_OK){
@@ -18410,7 +19170,7 @@ void UA_TransferSubscriptionsRequest_Clear(UA_TransferSubscriptionsRequest* a_pV
 /*============================================================================
  * UA_TransferSubscriptionsRequest_Encode
  *===========================================================================*/
-StatusCode UA_TransferSubscriptionsRequest_Encode(UA_MsgBuffer* msgBuf, UA_TransferSubscriptionsRequest* a_pValue)
+StatusCode UA_TransferSubscriptionsRequest_Encode(UA_TransferSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18418,10 +19178,14 @@ StatusCode UA_TransferSubscriptionsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Trans
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
-    Boolean_Write(msgBuf, &a_pValue->SendInitialValues);
+    status &= Boolean_Write(&a_pValue->SendInitialValues, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18429,7 +19193,7 @@ StatusCode UA_TransferSubscriptionsRequest_Encode(UA_MsgBuffer* msgBuf, UA_Trans
 /*============================================================================
  * UA_TransferSubscriptionsRequest_Decode
  *===========================================================================*/
-StatusCode UA_TransferSubscriptionsRequest_Decode(UA_MsgBuffer* msgBuf, UA_TransferSubscriptionsRequest* a_pValue)
+StatusCode UA_TransferSubscriptionsRequest_Decode(UA_TransferSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18439,10 +19203,10 @@ StatusCode UA_TransferSubscriptionsRequest_Decode(UA_MsgBuffer* msgBuf, UA_Trans
 
     UA_TransferSubscriptionsRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
-    Boolean_Read(msgBuf, &a_pValue->SendInitialValues);
+    status &= Boolean_Read(&a_pValue->SendInitialValues, msgBuf);
 
     if(status != STATUS_OK){
         UA_TransferSubscriptionsRequest_Clear(a_pValue);
@@ -18505,7 +19269,7 @@ void UA_TransferSubscriptionsResponse_Clear(UA_TransferSubscriptionsResponse* a_
 /*============================================================================
  * UA_TransferSubscriptionsResponse_Encode
  *===========================================================================*/
-StatusCode UA_TransferSubscriptionsResponse_Encode(UA_MsgBuffer* msgBuf, UA_TransferSubscriptionsResponse* a_pValue)
+StatusCode UA_TransferSubscriptionsResponse_Encode(UA_TransferSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18513,11 +19277,15 @@ StatusCode UA_TransferSubscriptionsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Tran
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(UA_TransferResult), (UA_EncodeableObject_PfnEncode*) UA_TransferResult_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18525,7 +19293,7 @@ StatusCode UA_TransferSubscriptionsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Tran
 /*============================================================================
  * UA_TransferSubscriptionsResponse_Decode
  *===========================================================================*/
-StatusCode UA_TransferSubscriptionsResponse_Decode(UA_MsgBuffer* msgBuf, UA_TransferSubscriptionsResponse* a_pValue)
+StatusCode UA_TransferSubscriptionsResponse_Decode(UA_TransferSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18535,10 +19303,10 @@ StatusCode UA_TransferSubscriptionsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Tran
 
     UA_TransferSubscriptionsResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(UA_TransferResult), (UA_EncodeableObject_PfnDecode*) UA_TransferResult_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -18600,7 +19368,7 @@ void UA_DeleteSubscriptionsRequest_Clear(UA_DeleteSubscriptionsRequest* a_pValue
 /*============================================================================
  * UA_DeleteSubscriptionsRequest_Encode
  *===========================================================================*/
-StatusCode UA_DeleteSubscriptionsRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteSubscriptionsRequest* a_pValue)
+StatusCode UA_DeleteSubscriptionsRequest_Encode(UA_DeleteSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18608,9 +19376,13 @@ StatusCode UA_DeleteSubscriptionsRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteS
         status = STATUS_OK;
     }
 
-    UA_RequestHeader_Encode(msgBuf, &a_pValue->RequestHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
+    status &= UA_RequestHeader_Encode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
                    sizeof(uint32_t), (UA_EncodeableObject_PfnEncode*) UInt32_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18618,7 +19390,7 @@ StatusCode UA_DeleteSubscriptionsRequest_Encode(UA_MsgBuffer* msgBuf, UA_DeleteS
 /*============================================================================
  * UA_DeleteSubscriptionsRequest_Decode
  *===========================================================================*/
-StatusCode UA_DeleteSubscriptionsRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteSubscriptionsRequest* a_pValue)
+StatusCode UA_DeleteSubscriptionsRequest_Decode(UA_DeleteSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18628,8 +19400,8 @@ StatusCode UA_DeleteSubscriptionsRequest_Decode(UA_MsgBuffer* msgBuf, UA_DeleteS
 
     UA_DeleteSubscriptionsRequest_Initialize(a_pValue);
 
-    UA_RequestHeader_Decode(msgBuf, &a_pValue->RequestHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
+    status &= UA_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSubscriptionIds, (void**) &a_pValue->SubscriptionIds, 
                   sizeof(uint32_t), (UA_EncodeableObject_PfnDecode*) UInt32_Read);
 
     if(status != STATUS_OK){
@@ -18693,7 +19465,7 @@ void UA_DeleteSubscriptionsResponse_Clear(UA_DeleteSubscriptionsResponse* a_pVal
 /*============================================================================
  * UA_DeleteSubscriptionsResponse_Encode
  *===========================================================================*/
-StatusCode UA_DeleteSubscriptionsResponse_Encode(UA_MsgBuffer* msgBuf, UA_DeleteSubscriptionsResponse* a_pValue)
+StatusCode UA_DeleteSubscriptionsResponse_Encode(UA_DeleteSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18701,11 +19473,15 @@ StatusCode UA_DeleteSubscriptionsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Delete
         status = STATUS_OK;
     }
 
-    UA_ResponseHeader_Encode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                    sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18713,7 +19489,7 @@ StatusCode UA_DeleteSubscriptionsResponse_Encode(UA_MsgBuffer* msgBuf, UA_Delete
 /*============================================================================
  * UA_DeleteSubscriptionsResponse_Decode
  *===========================================================================*/
-StatusCode UA_DeleteSubscriptionsResponse_Decode(UA_MsgBuffer* msgBuf, UA_DeleteSubscriptionsResponse* a_pValue)
+StatusCode UA_DeleteSubscriptionsResponse_Decode(UA_DeleteSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18723,10 +19499,10 @@ StatusCode UA_DeleteSubscriptionsResponse_Decode(UA_MsgBuffer* msgBuf, UA_Delete
 
     UA_DeleteSubscriptionsResponse_Initialize(a_pValue);
 
-    UA_ResponseHeader_Decode(msgBuf, &a_pValue->ResponseHeader);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
+    status &= UA_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
                   sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
     if(status != STATUS_OK){
@@ -18794,7 +19570,7 @@ void UA_BuildInfo_Clear(UA_BuildInfo* a_pValue)
 /*============================================================================
  * UA_BuildInfo_Encode
  *===========================================================================*/
-StatusCode UA_BuildInfo_Encode(UA_MsgBuffer* msgBuf, UA_BuildInfo* a_pValue)
+StatusCode UA_BuildInfo_Encode(UA_BuildInfo* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18802,12 +19578,16 @@ StatusCode UA_BuildInfo_Encode(UA_MsgBuffer* msgBuf, UA_BuildInfo* a_pValue)
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->ProductUri);
-    String_Write(msgBuf, &a_pValue->ManufacturerName);
-    String_Write(msgBuf, &a_pValue->ProductName);
-    String_Write(msgBuf, &a_pValue->SoftwareVersion);
-    String_Write(msgBuf, &a_pValue->BuildNumber);
-    DateTime_Write(msgBuf, &a_pValue->BuildDate);
+    status &= String_Write(&a_pValue->ProductUri, msgBuf);
+    status &= String_Write(&a_pValue->ManufacturerName, msgBuf);
+    status &= String_Write(&a_pValue->ProductName, msgBuf);
+    status &= String_Write(&a_pValue->SoftwareVersion, msgBuf);
+    status &= String_Write(&a_pValue->BuildNumber, msgBuf);
+    status &= DateTime_Write(&a_pValue->BuildDate, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18815,7 +19595,7 @@ StatusCode UA_BuildInfo_Encode(UA_MsgBuffer* msgBuf, UA_BuildInfo* a_pValue)
 /*============================================================================
  * UA_BuildInfo_Decode
  *===========================================================================*/
-StatusCode UA_BuildInfo_Decode(UA_MsgBuffer* msgBuf, UA_BuildInfo* a_pValue)
+StatusCode UA_BuildInfo_Decode(UA_BuildInfo* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18825,12 +19605,12 @@ StatusCode UA_BuildInfo_Decode(UA_MsgBuffer* msgBuf, UA_BuildInfo* a_pValue)
 
     UA_BuildInfo_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->ProductUri);
-    String_Read(msgBuf, &a_pValue->ManufacturerName);
-    String_Read(msgBuf, &a_pValue->ProductName);
-    String_Read(msgBuf, &a_pValue->SoftwareVersion);
-    String_Read(msgBuf, &a_pValue->BuildNumber);
-    DateTime_Read(msgBuf, &a_pValue->BuildDate);
+    status &= String_Read(&a_pValue->ProductUri, msgBuf);
+    status &= String_Read(&a_pValue->ManufacturerName, msgBuf);
+    status &= String_Read(&a_pValue->ProductName, msgBuf);
+    status &= String_Read(&a_pValue->SoftwareVersion, msgBuf);
+    status &= String_Read(&a_pValue->BuildNumber, msgBuf);
+    status &= DateTime_Read(&a_pValue->BuildDate, msgBuf);
 
     if(status != STATUS_OK){
         UA_BuildInfo_Clear(a_pValue);
@@ -18891,7 +19671,7 @@ void UA_RedundantServerDataType_Clear(UA_RedundantServerDataType* a_pValue)
 /*============================================================================
  * UA_RedundantServerDataType_Encode
  *===========================================================================*/
-StatusCode UA_RedundantServerDataType_Encode(UA_MsgBuffer* msgBuf, UA_RedundantServerDataType* a_pValue)
+StatusCode UA_RedundantServerDataType_Encode(UA_RedundantServerDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18899,9 +19679,13 @@ StatusCode UA_RedundantServerDataType_Encode(UA_MsgBuffer* msgBuf, UA_RedundantS
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->ServerId);
-    Byte_Write(msgBuf, &a_pValue->ServiceLevel);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ServerState);
+    status &= String_Write(&a_pValue->ServerId, msgBuf);
+    status &= Byte_Write(&a_pValue->ServiceLevel, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ServerState);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18909,7 +19693,7 @@ StatusCode UA_RedundantServerDataType_Encode(UA_MsgBuffer* msgBuf, UA_RedundantS
 /*============================================================================
  * UA_RedundantServerDataType_Decode
  *===========================================================================*/
-StatusCode UA_RedundantServerDataType_Decode(UA_MsgBuffer* msgBuf, UA_RedundantServerDataType* a_pValue)
+StatusCode UA_RedundantServerDataType_Decode(UA_RedundantServerDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18919,9 +19703,9 @@ StatusCode UA_RedundantServerDataType_Decode(UA_MsgBuffer* msgBuf, UA_RedundantS
 
     UA_RedundantServerDataType_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->ServerId);
-    Byte_Read(msgBuf, &a_pValue->ServiceLevel);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ServerState);
+    status &= String_Read(&a_pValue->ServerId, msgBuf);
+    status &= Byte_Read(&a_pValue->ServiceLevel, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ServerState);
 
     if(status != STATUS_OK){
         UA_RedundantServerDataType_Clear(a_pValue);
@@ -18978,7 +19762,7 @@ void UA_EndpointUrlListDataType_Clear(UA_EndpointUrlListDataType* a_pValue)
 /*============================================================================
  * UA_EndpointUrlListDataType_Encode
  *===========================================================================*/
-StatusCode UA_EndpointUrlListDataType_Encode(UA_MsgBuffer* msgBuf, UA_EndpointUrlListDataType* a_pValue)
+StatusCode UA_EndpointUrlListDataType_Encode(UA_EndpointUrlListDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -18986,8 +19770,12 @@ StatusCode UA_EndpointUrlListDataType_Encode(UA_MsgBuffer* msgBuf, UA_EndpointUr
         status = STATUS_OK;
     }
 
-    UA_Write_Array(msgBuf, &a_pValue->NoOfEndpointUrlList, (void**) &a_pValue->EndpointUrlList, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfEndpointUrlList, (void**) &a_pValue->EndpointUrlList, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -18995,7 +19783,7 @@ StatusCode UA_EndpointUrlListDataType_Encode(UA_MsgBuffer* msgBuf, UA_EndpointUr
 /*============================================================================
  * UA_EndpointUrlListDataType_Decode
  *===========================================================================*/
-StatusCode UA_EndpointUrlListDataType_Decode(UA_MsgBuffer* msgBuf, UA_EndpointUrlListDataType* a_pValue)
+StatusCode UA_EndpointUrlListDataType_Decode(UA_EndpointUrlListDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19005,7 +19793,7 @@ StatusCode UA_EndpointUrlListDataType_Decode(UA_MsgBuffer* msgBuf, UA_EndpointUr
 
     UA_EndpointUrlListDataType_Initialize(a_pValue);
 
-    UA_Read_Array(msgBuf, &a_pValue->NoOfEndpointUrlList, (void**) &a_pValue->EndpointUrlList, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfEndpointUrlList, (void**) &a_pValue->EndpointUrlList, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
 
     if(status != STATUS_OK){
@@ -19065,7 +19853,7 @@ void UA_NetworkGroupDataType_Clear(UA_NetworkGroupDataType* a_pValue)
 /*============================================================================
  * UA_NetworkGroupDataType_Encode
  *===========================================================================*/
-StatusCode UA_NetworkGroupDataType_Encode(UA_MsgBuffer* msgBuf, UA_NetworkGroupDataType* a_pValue)
+StatusCode UA_NetworkGroupDataType_Encode(UA_NetworkGroupDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19073,9 +19861,13 @@ StatusCode UA_NetworkGroupDataType_Encode(UA_MsgBuffer* msgBuf, UA_NetworkGroupD
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->ServerUri);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfNetworkPaths, (void**) &a_pValue->NetworkPaths, 
+    status &= String_Write(&a_pValue->ServerUri, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfNetworkPaths, (void**) &a_pValue->NetworkPaths, 
                    sizeof(UA_EndpointUrlListDataType), (UA_EncodeableObject_PfnEncode*) UA_EndpointUrlListDataType_Encode);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -19083,7 +19875,7 @@ StatusCode UA_NetworkGroupDataType_Encode(UA_MsgBuffer* msgBuf, UA_NetworkGroupD
 /*============================================================================
  * UA_NetworkGroupDataType_Decode
  *===========================================================================*/
-StatusCode UA_NetworkGroupDataType_Decode(UA_MsgBuffer* msgBuf, UA_NetworkGroupDataType* a_pValue)
+StatusCode UA_NetworkGroupDataType_Decode(UA_NetworkGroupDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19093,8 +19885,8 @@ StatusCode UA_NetworkGroupDataType_Decode(UA_MsgBuffer* msgBuf, UA_NetworkGroupD
 
     UA_NetworkGroupDataType_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->ServerUri);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfNetworkPaths, (void**) &a_pValue->NetworkPaths, 
+    status &= String_Read(&a_pValue->ServerUri, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfNetworkPaths, (void**) &a_pValue->NetworkPaths, 
                   sizeof(UA_EndpointUrlListDataType), (UA_EncodeableObject_PfnDecode*) UA_EndpointUrlListDataType_Decode);
 
     if(status != STATUS_OK){
@@ -19156,7 +19948,7 @@ void UA_SamplingIntervalDiagnosticsDataType_Clear(UA_SamplingIntervalDiagnostics
 /*============================================================================
  * UA_SamplingIntervalDiagnosticsDataType_Encode
  *===========================================================================*/
-StatusCode UA_SamplingIntervalDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_SamplingIntervalDiagnosticsDataType* a_pValue)
+StatusCode UA_SamplingIntervalDiagnosticsDataType_Encode(UA_SamplingIntervalDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19164,10 +19956,14 @@ StatusCode UA_SamplingIntervalDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, U
         status = STATUS_OK;
     }
 
-    Double_Write(msgBuf, &a_pValue->SamplingInterval);
-    UInt32_Write(msgBuf, &a_pValue->MonitoredItemCount);
-    UInt32_Write(msgBuf, &a_pValue->MaxMonitoredItemCount);
-    UInt32_Write(msgBuf, &a_pValue->DisabledMonitoredItemCount);
+    status &= Double_Write(&a_pValue->SamplingInterval, msgBuf);
+    status &= UInt32_Write(&a_pValue->MonitoredItemCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxMonitoredItemCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->DisabledMonitoredItemCount, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -19175,7 +19971,7 @@ StatusCode UA_SamplingIntervalDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, U
 /*============================================================================
  * UA_SamplingIntervalDiagnosticsDataType_Decode
  *===========================================================================*/
-StatusCode UA_SamplingIntervalDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA_SamplingIntervalDiagnosticsDataType* a_pValue)
+StatusCode UA_SamplingIntervalDiagnosticsDataType_Decode(UA_SamplingIntervalDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19185,10 +19981,10 @@ StatusCode UA_SamplingIntervalDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, U
 
     UA_SamplingIntervalDiagnosticsDataType_Initialize(a_pValue);
 
-    Double_Read(msgBuf, &a_pValue->SamplingInterval);
-    UInt32_Read(msgBuf, &a_pValue->MonitoredItemCount);
-    UInt32_Read(msgBuf, &a_pValue->MaxMonitoredItemCount);
-    UInt32_Read(msgBuf, &a_pValue->DisabledMonitoredItemCount);
+    status &= Double_Read(&a_pValue->SamplingInterval, msgBuf);
+    status &= UInt32_Read(&a_pValue->MonitoredItemCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxMonitoredItemCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->DisabledMonitoredItemCount, msgBuf);
 
     if(status != STATUS_OK){
         UA_SamplingIntervalDiagnosticsDataType_Clear(a_pValue);
@@ -19265,7 +20061,7 @@ void UA_ServerDiagnosticsSummaryDataType_Clear(UA_ServerDiagnosticsSummaryDataTy
 /*============================================================================
  * UA_ServerDiagnosticsSummaryDataType_Encode
  *===========================================================================*/
-StatusCode UA_ServerDiagnosticsSummaryDataType_Encode(UA_MsgBuffer* msgBuf, UA_ServerDiagnosticsSummaryDataType* a_pValue)
+StatusCode UA_ServerDiagnosticsSummaryDataType_Encode(UA_ServerDiagnosticsSummaryDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19273,18 +20069,22 @@ StatusCode UA_ServerDiagnosticsSummaryDataType_Encode(UA_MsgBuffer* msgBuf, UA_S
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->ServerViewCount);
-    UInt32_Write(msgBuf, &a_pValue->CurrentSessionCount);
-    UInt32_Write(msgBuf, &a_pValue->CumulatedSessionCount);
-    UInt32_Write(msgBuf, &a_pValue->SecurityRejectedSessionCount);
-    UInt32_Write(msgBuf, &a_pValue->RejectedSessionCount);
-    UInt32_Write(msgBuf, &a_pValue->SessionTimeoutCount);
-    UInt32_Write(msgBuf, &a_pValue->SessionAbortCount);
-    UInt32_Write(msgBuf, &a_pValue->CurrentSubscriptionCount);
-    UInt32_Write(msgBuf, &a_pValue->CumulatedSubscriptionCount);
-    UInt32_Write(msgBuf, &a_pValue->PublishingIntervalCount);
-    UInt32_Write(msgBuf, &a_pValue->SecurityRejectedRequestsCount);
-    UInt32_Write(msgBuf, &a_pValue->RejectedRequestsCount);
+    status &= UInt32_Write(&a_pValue->ServerViewCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->CurrentSessionCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->CumulatedSessionCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->SecurityRejectedSessionCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->RejectedSessionCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->SessionTimeoutCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->SessionAbortCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->CurrentSubscriptionCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->CumulatedSubscriptionCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->PublishingIntervalCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->SecurityRejectedRequestsCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->RejectedRequestsCount, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -19292,7 +20092,7 @@ StatusCode UA_ServerDiagnosticsSummaryDataType_Encode(UA_MsgBuffer* msgBuf, UA_S
 /*============================================================================
  * UA_ServerDiagnosticsSummaryDataType_Decode
  *===========================================================================*/
-StatusCode UA_ServerDiagnosticsSummaryDataType_Decode(UA_MsgBuffer* msgBuf, UA_ServerDiagnosticsSummaryDataType* a_pValue)
+StatusCode UA_ServerDiagnosticsSummaryDataType_Decode(UA_ServerDiagnosticsSummaryDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19302,18 +20102,18 @@ StatusCode UA_ServerDiagnosticsSummaryDataType_Decode(UA_MsgBuffer* msgBuf, UA_S
 
     UA_ServerDiagnosticsSummaryDataType_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->ServerViewCount);
-    UInt32_Read(msgBuf, &a_pValue->CurrentSessionCount);
-    UInt32_Read(msgBuf, &a_pValue->CumulatedSessionCount);
-    UInt32_Read(msgBuf, &a_pValue->SecurityRejectedSessionCount);
-    UInt32_Read(msgBuf, &a_pValue->RejectedSessionCount);
-    UInt32_Read(msgBuf, &a_pValue->SessionTimeoutCount);
-    UInt32_Read(msgBuf, &a_pValue->SessionAbortCount);
-    UInt32_Read(msgBuf, &a_pValue->CurrentSubscriptionCount);
-    UInt32_Read(msgBuf, &a_pValue->CumulatedSubscriptionCount);
-    UInt32_Read(msgBuf, &a_pValue->PublishingIntervalCount);
-    UInt32_Read(msgBuf, &a_pValue->SecurityRejectedRequestsCount);
-    UInt32_Read(msgBuf, &a_pValue->RejectedRequestsCount);
+    status &= UInt32_Read(&a_pValue->ServerViewCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->CurrentSessionCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->CumulatedSessionCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->SecurityRejectedSessionCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->RejectedSessionCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->SessionTimeoutCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->SessionAbortCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->CurrentSubscriptionCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->CumulatedSubscriptionCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->PublishingIntervalCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->SecurityRejectedRequestsCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->RejectedRequestsCount, msgBuf);
 
     if(status != STATUS_OK){
         UA_ServerDiagnosticsSummaryDataType_Clear(a_pValue);
@@ -19378,7 +20178,7 @@ void UA_ServerStatusDataType_Clear(UA_ServerStatusDataType* a_pValue)
 /*============================================================================
  * UA_ServerStatusDataType_Encode
  *===========================================================================*/
-StatusCode UA_ServerStatusDataType_Encode(UA_MsgBuffer* msgBuf, UA_ServerStatusDataType* a_pValue)
+StatusCode UA_ServerStatusDataType_Encode(UA_ServerStatusDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19386,12 +20186,16 @@ StatusCode UA_ServerStatusDataType_Encode(UA_MsgBuffer* msgBuf, UA_ServerStatusD
         status = STATUS_OK;
     }
 
-    DateTime_Write(msgBuf, &a_pValue->StartTime);
-    DateTime_Write(msgBuf, &a_pValue->CurrentTime);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->State);
-    UA_BuildInfo_Encode(msgBuf, &a_pValue->BuildInfo);
-    UInt32_Write(msgBuf, &a_pValue->SecondsTillShutdown);
-    LocalizedText_Write(msgBuf, &a_pValue->ShutdownReason);
+    status &= DateTime_Write(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Write(&a_pValue->CurrentTime, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->State);
+    status &= UA_BuildInfo_Encode(&a_pValue->BuildInfo, msgBuf);
+    status &= UInt32_Write(&a_pValue->SecondsTillShutdown, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->ShutdownReason, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -19399,7 +20203,7 @@ StatusCode UA_ServerStatusDataType_Encode(UA_MsgBuffer* msgBuf, UA_ServerStatusD
 /*============================================================================
  * UA_ServerStatusDataType_Decode
  *===========================================================================*/
-StatusCode UA_ServerStatusDataType_Decode(UA_MsgBuffer* msgBuf, UA_ServerStatusDataType* a_pValue)
+StatusCode UA_ServerStatusDataType_Decode(UA_ServerStatusDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19409,12 +20213,12 @@ StatusCode UA_ServerStatusDataType_Decode(UA_MsgBuffer* msgBuf, UA_ServerStatusD
 
     UA_ServerStatusDataType_Initialize(a_pValue);
 
-    DateTime_Read(msgBuf, &a_pValue->StartTime);
-    DateTime_Read(msgBuf, &a_pValue->CurrentTime);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->State);
-    UA_BuildInfo_Decode(msgBuf, &a_pValue->BuildInfo);
-    UInt32_Read(msgBuf, &a_pValue->SecondsTillShutdown);
-    LocalizedText_Read(msgBuf, &a_pValue->ShutdownReason);
+    status &= DateTime_Read(&a_pValue->StartTime, msgBuf);
+    status &= DateTime_Read(&a_pValue->CurrentTime, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->State);
+    status &= UA_BuildInfo_Decode(&a_pValue->BuildInfo, msgBuf);
+    status &= UInt32_Read(&a_pValue->SecondsTillShutdown, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->ShutdownReason, msgBuf);
 
     if(status != STATUS_OK){
         UA_ServerStatusDataType_Clear(a_pValue);
@@ -19555,7 +20359,7 @@ void UA_SessionDiagnosticsDataType_Clear(UA_SessionDiagnosticsDataType* a_pValue
 /*============================================================================
  * UA_SessionDiagnosticsDataType_Encode
  *===========================================================================*/
-StatusCode UA_SessionDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_SessionDiagnosticsDataType* a_pValue)
+StatusCode UA_SessionDiagnosticsDataType_Encode(UA_SessionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19563,50 +20367,54 @@ StatusCode UA_SessionDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_Session
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->SessionId);
-    String_Write(msgBuf, &a_pValue->SessionName);
-    UA_ApplicationDescription_Encode(msgBuf, &a_pValue->ClientDescription);
-    String_Write(msgBuf, &a_pValue->ServerUri);
-    String_Write(msgBuf, &a_pValue->EndpointUrl);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
+    status &= NodeId_Write(&a_pValue->SessionId, msgBuf);
+    status &= String_Write(&a_pValue->SessionName, msgBuf);
+    status &= UA_ApplicationDescription_Encode(&a_pValue->ClientDescription, msgBuf);
+    status &= String_Write(&a_pValue->ServerUri, msgBuf);
+    status &= String_Write(&a_pValue->EndpointUrl, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
-    Double_Write(msgBuf, &a_pValue->ActualSessionTimeout);
-    UInt32_Write(msgBuf, &a_pValue->MaxResponseMessageSize);
-    DateTime_Write(msgBuf, &a_pValue->ClientConnectionTime);
-    DateTime_Write(msgBuf, &a_pValue->ClientLastContactTime);
-    UInt32_Write(msgBuf, &a_pValue->CurrentSubscriptionsCount);
-    UInt32_Write(msgBuf, &a_pValue->CurrentMonitoredItemsCount);
-    UInt32_Write(msgBuf, &a_pValue->CurrentPublishRequestsInQueue);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->TotalRequestCount);
-    UInt32_Write(msgBuf, &a_pValue->UnauthorizedRequestCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->ReadCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->HistoryReadCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->WriteCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->HistoryUpdateCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->CallCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->CreateMonitoredItemsCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->ModifyMonitoredItemsCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->SetMonitoringModeCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->SetTriggeringCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->DeleteMonitoredItemsCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->CreateSubscriptionCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->ModifySubscriptionCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->SetPublishingModeCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->PublishCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->RepublishCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->TransferSubscriptionsCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->DeleteSubscriptionsCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->AddNodesCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->AddReferencesCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->DeleteNodesCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->DeleteReferencesCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->BrowseCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->BrowseNextCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->TranslateBrowsePathsToNodeIdsCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->QueryFirstCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->QueryNextCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->RegisterNodesCount);
-    UA_ServiceCounterDataType_Encode(msgBuf, &a_pValue->UnregisterNodesCount);
+    status &= Double_Write(&a_pValue->ActualSessionTimeout, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxResponseMessageSize, msgBuf);
+    status &= DateTime_Write(&a_pValue->ClientConnectionTime, msgBuf);
+    status &= DateTime_Write(&a_pValue->ClientLastContactTime, msgBuf);
+    status &= UInt32_Write(&a_pValue->CurrentSubscriptionsCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->CurrentMonitoredItemsCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->CurrentPublishRequestsInQueue, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->TotalRequestCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->UnauthorizedRequestCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->ReadCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->HistoryReadCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->WriteCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->HistoryUpdateCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->CallCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->CreateMonitoredItemsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->ModifyMonitoredItemsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->SetMonitoringModeCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->SetTriggeringCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->DeleteMonitoredItemsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->CreateSubscriptionCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->ModifySubscriptionCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->SetPublishingModeCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->PublishCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->RepublishCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->TransferSubscriptionsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->DeleteSubscriptionsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->AddNodesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->AddReferencesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->DeleteNodesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->DeleteReferencesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->BrowseCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->BrowseNextCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->TranslateBrowsePathsToNodeIdsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->QueryFirstCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->QueryNextCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->RegisterNodesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Encode(&a_pValue->UnregisterNodesCount, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -19614,7 +20422,7 @@ StatusCode UA_SessionDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_Session
 /*============================================================================
  * UA_SessionDiagnosticsDataType_Decode
  *===========================================================================*/
-StatusCode UA_SessionDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA_SessionDiagnosticsDataType* a_pValue)
+StatusCode UA_SessionDiagnosticsDataType_Decode(UA_SessionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19624,50 +20432,50 @@ StatusCode UA_SessionDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA_Session
 
     UA_SessionDiagnosticsDataType_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->SessionId);
-    String_Read(msgBuf, &a_pValue->SessionName);
-    UA_ApplicationDescription_Decode(msgBuf, &a_pValue->ClientDescription);
-    String_Read(msgBuf, &a_pValue->ServerUri);
-    String_Read(msgBuf, &a_pValue->EndpointUrl);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
+    status &= NodeId_Read(&a_pValue->SessionId, msgBuf);
+    status &= String_Read(&a_pValue->SessionName, msgBuf);
+    status &= UA_ApplicationDescription_Decode(&a_pValue->ClientDescription, msgBuf);
+    status &= String_Read(&a_pValue->ServerUri, msgBuf);
+    status &= String_Read(&a_pValue->EndpointUrl, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfLocaleIds, (void**) &a_pValue->LocaleIds, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
-    Double_Read(msgBuf, &a_pValue->ActualSessionTimeout);
-    UInt32_Read(msgBuf, &a_pValue->MaxResponseMessageSize);
-    DateTime_Read(msgBuf, &a_pValue->ClientConnectionTime);
-    DateTime_Read(msgBuf, &a_pValue->ClientLastContactTime);
-    UInt32_Read(msgBuf, &a_pValue->CurrentSubscriptionsCount);
-    UInt32_Read(msgBuf, &a_pValue->CurrentMonitoredItemsCount);
-    UInt32_Read(msgBuf, &a_pValue->CurrentPublishRequestsInQueue);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->TotalRequestCount);
-    UInt32_Read(msgBuf, &a_pValue->UnauthorizedRequestCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->ReadCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->HistoryReadCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->WriteCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->HistoryUpdateCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->CallCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->CreateMonitoredItemsCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->ModifyMonitoredItemsCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->SetMonitoringModeCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->SetTriggeringCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->DeleteMonitoredItemsCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->CreateSubscriptionCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->ModifySubscriptionCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->SetPublishingModeCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->PublishCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->RepublishCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->TransferSubscriptionsCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->DeleteSubscriptionsCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->AddNodesCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->AddReferencesCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->DeleteNodesCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->DeleteReferencesCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->BrowseCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->BrowseNextCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->TranslateBrowsePathsToNodeIdsCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->QueryFirstCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->QueryNextCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->RegisterNodesCount);
-    UA_ServiceCounterDataType_Decode(msgBuf, &a_pValue->UnregisterNodesCount);
+    status &= Double_Read(&a_pValue->ActualSessionTimeout, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxResponseMessageSize, msgBuf);
+    status &= DateTime_Read(&a_pValue->ClientConnectionTime, msgBuf);
+    status &= DateTime_Read(&a_pValue->ClientLastContactTime, msgBuf);
+    status &= UInt32_Read(&a_pValue->CurrentSubscriptionsCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->CurrentMonitoredItemsCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->CurrentPublishRequestsInQueue, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->TotalRequestCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->UnauthorizedRequestCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->ReadCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->HistoryReadCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->WriteCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->HistoryUpdateCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->CallCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->CreateMonitoredItemsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->ModifyMonitoredItemsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->SetMonitoringModeCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->SetTriggeringCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->DeleteMonitoredItemsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->CreateSubscriptionCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->ModifySubscriptionCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->SetPublishingModeCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->PublishCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->RepublishCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->TransferSubscriptionsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->DeleteSubscriptionsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->AddNodesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->AddReferencesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->DeleteNodesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->DeleteReferencesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->BrowseCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->BrowseNextCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->TranslateBrowsePathsToNodeIdsCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->QueryFirstCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->QueryNextCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->RegisterNodesCount, msgBuf);
+    status &= UA_ServiceCounterDataType_Decode(&a_pValue->UnregisterNodesCount, msgBuf);
 
     if(status != STATUS_OK){
         UA_SessionDiagnosticsDataType_Clear(a_pValue);
@@ -19740,7 +20548,7 @@ void UA_SessionSecurityDiagnosticsDataType_Clear(UA_SessionSecurityDiagnosticsDa
 /*============================================================================
  * UA_SessionSecurityDiagnosticsDataType_Encode
  *===========================================================================*/
-StatusCode UA_SessionSecurityDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_SessionSecurityDiagnosticsDataType* a_pValue)
+StatusCode UA_SessionSecurityDiagnosticsDataType_Encode(UA_SessionSecurityDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19748,16 +20556,20 @@ StatusCode UA_SessionSecurityDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->SessionId);
-    String_Write(msgBuf, &a_pValue->ClientUserIdOfSession);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfClientUserIdHistory, (void**) &a_pValue->ClientUserIdHistory, 
+    status &= NodeId_Write(&a_pValue->SessionId, msgBuf);
+    status &= String_Write(&a_pValue->ClientUserIdOfSession, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfClientUserIdHistory, (void**) &a_pValue->ClientUserIdHistory, 
                    sizeof(UA_String), (UA_EncodeableObject_PfnEncode*) String_Write);
-    String_Write(msgBuf, &a_pValue->AuthenticationMechanism);
-    String_Write(msgBuf, &a_pValue->Encoding);
-    String_Write(msgBuf, &a_pValue->TransportProtocol);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
-    String_Write(msgBuf, &a_pValue->SecurityPolicyUri);
-    ByteString_Write(msgBuf, &a_pValue->ClientCertificate);
+    status &= String_Write(&a_pValue->AuthenticationMechanism, msgBuf);
+    status &= String_Write(&a_pValue->Encoding, msgBuf);
+    status &= String_Write(&a_pValue->TransportProtocol, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
+    status &= String_Write(&a_pValue->SecurityPolicyUri, msgBuf);
+    status &= ByteString_Write(&a_pValue->ClientCertificate, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -19765,7 +20577,7 @@ StatusCode UA_SessionSecurityDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA
 /*============================================================================
  * UA_SessionSecurityDiagnosticsDataType_Decode
  *===========================================================================*/
-StatusCode UA_SessionSecurityDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA_SessionSecurityDiagnosticsDataType* a_pValue)
+StatusCode UA_SessionSecurityDiagnosticsDataType_Decode(UA_SessionSecurityDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19775,16 +20587,16 @@ StatusCode UA_SessionSecurityDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA
 
     UA_SessionSecurityDiagnosticsDataType_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->SessionId);
-    String_Read(msgBuf, &a_pValue->ClientUserIdOfSession);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfClientUserIdHistory, (void**) &a_pValue->ClientUserIdHistory, 
+    status &= NodeId_Read(&a_pValue->SessionId, msgBuf);
+    status &= String_Read(&a_pValue->ClientUserIdOfSession, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfClientUserIdHistory, (void**) &a_pValue->ClientUserIdHistory, 
                   sizeof(UA_String), (UA_EncodeableObject_PfnDecode*) String_Read);
-    String_Read(msgBuf, &a_pValue->AuthenticationMechanism);
-    String_Read(msgBuf, &a_pValue->Encoding);
-    String_Read(msgBuf, &a_pValue->TransportProtocol);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
-    String_Read(msgBuf, &a_pValue->SecurityPolicyUri);
-    ByteString_Read(msgBuf, &a_pValue->ClientCertificate);
+    status &= String_Read(&a_pValue->AuthenticationMechanism, msgBuf);
+    status &= String_Read(&a_pValue->Encoding, msgBuf);
+    status &= String_Read(&a_pValue->TransportProtocol, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->SecurityMode);
+    status &= String_Read(&a_pValue->SecurityPolicyUri, msgBuf);
+    status &= ByteString_Read(&a_pValue->ClientCertificate, msgBuf);
 
     if(status != STATUS_OK){
         UA_SessionSecurityDiagnosticsDataType_Clear(a_pValue);
@@ -19841,7 +20653,7 @@ void UA_ServiceCounterDataType_Clear(UA_ServiceCounterDataType* a_pValue)
 /*============================================================================
  * UA_ServiceCounterDataType_Encode
  *===========================================================================*/
-StatusCode UA_ServiceCounterDataType_Encode(UA_MsgBuffer* msgBuf, UA_ServiceCounterDataType* a_pValue)
+StatusCode UA_ServiceCounterDataType_Encode(UA_ServiceCounterDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19849,8 +20661,12 @@ StatusCode UA_ServiceCounterDataType_Encode(UA_MsgBuffer* msgBuf, UA_ServiceCoun
         status = STATUS_OK;
     }
 
-    UInt32_Write(msgBuf, &a_pValue->TotalCount);
-    UInt32_Write(msgBuf, &a_pValue->ErrorCount);
+    status &= UInt32_Write(&a_pValue->TotalCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->ErrorCount, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -19858,7 +20674,7 @@ StatusCode UA_ServiceCounterDataType_Encode(UA_MsgBuffer* msgBuf, UA_ServiceCoun
 /*============================================================================
  * UA_ServiceCounterDataType_Decode
  *===========================================================================*/
-StatusCode UA_ServiceCounterDataType_Decode(UA_MsgBuffer* msgBuf, UA_ServiceCounterDataType* a_pValue)
+StatusCode UA_ServiceCounterDataType_Decode(UA_ServiceCounterDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19868,8 +20684,8 @@ StatusCode UA_ServiceCounterDataType_Decode(UA_MsgBuffer* msgBuf, UA_ServiceCoun
 
     UA_ServiceCounterDataType_Initialize(a_pValue);
 
-    UInt32_Read(msgBuf, &a_pValue->TotalCount);
-    UInt32_Read(msgBuf, &a_pValue->ErrorCount);
+    status &= UInt32_Read(&a_pValue->TotalCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->ErrorCount, msgBuf);
 
     if(status != STATUS_OK){
         UA_ServiceCounterDataType_Clear(a_pValue);
@@ -19926,7 +20742,7 @@ void UA_StatusResult_Clear(UA_StatusResult* a_pValue)
 /*============================================================================
  * UA_StatusResult_Encode
  *===========================================================================*/
-StatusCode UA_StatusResult_Encode(UA_MsgBuffer* msgBuf, UA_StatusResult* a_pValue)
+StatusCode UA_StatusResult_Encode(UA_StatusResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19934,8 +20750,12 @@ StatusCode UA_StatusResult_Encode(UA_MsgBuffer* msgBuf, UA_StatusResult* a_pValu
         status = STATUS_OK;
     }
 
-    StatusCode_Write(msgBuf, &a_pValue->StatusCode);
-    DiagnosticInfo_Write(msgBuf, &a_pValue->DiagnosticInfo);
+    status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
+    status &= DiagnosticInfo_Write(&a_pValue->DiagnosticInfo, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -19943,7 +20763,7 @@ StatusCode UA_StatusResult_Encode(UA_MsgBuffer* msgBuf, UA_StatusResult* a_pValu
 /*============================================================================
  * UA_StatusResult_Decode
  *===========================================================================*/
-StatusCode UA_StatusResult_Decode(UA_MsgBuffer* msgBuf, UA_StatusResult* a_pValue)
+StatusCode UA_StatusResult_Decode(UA_StatusResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -19953,8 +20773,8 @@ StatusCode UA_StatusResult_Decode(UA_MsgBuffer* msgBuf, UA_StatusResult* a_pValu
 
     UA_StatusResult_Initialize(a_pValue);
 
-    StatusCode_Read(msgBuf, &a_pValue->StatusCode);
-    DiagnosticInfo_Read(msgBuf, &a_pValue->DiagnosticInfo);
+    status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
+    status &= DiagnosticInfo_Read(&a_pValue->DiagnosticInfo, msgBuf);
 
     if(status != STATUS_OK){
         UA_StatusResult_Clear(a_pValue);
@@ -20069,7 +20889,7 @@ void UA_SubscriptionDiagnosticsDataType_Clear(UA_SubscriptionDiagnosticsDataType
 /*============================================================================
  * UA_SubscriptionDiagnosticsDataType_Encode
  *===========================================================================*/
-StatusCode UA_SubscriptionDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_SubscriptionDiagnosticsDataType* a_pValue)
+StatusCode UA_SubscriptionDiagnosticsDataType_Encode(UA_SubscriptionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20077,37 +20897,41 @@ StatusCode UA_SubscriptionDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_Su
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->SessionId);
-    UInt32_Write(msgBuf, &a_pValue->SubscriptionId);
-    Byte_Write(msgBuf, &a_pValue->Priority);
-    Double_Write(msgBuf, &a_pValue->PublishingInterval);
-    UInt32_Write(msgBuf, &a_pValue->MaxKeepAliveCount);
-    UInt32_Write(msgBuf, &a_pValue->MaxLifetimeCount);
-    UInt32_Write(msgBuf, &a_pValue->MaxNotificationsPerPublish);
-    Boolean_Write(msgBuf, &a_pValue->PublishingEnabled);
-    UInt32_Write(msgBuf, &a_pValue->ModifyCount);
-    UInt32_Write(msgBuf, &a_pValue->EnableCount);
-    UInt32_Write(msgBuf, &a_pValue->DisableCount);
-    UInt32_Write(msgBuf, &a_pValue->RepublishRequestCount);
-    UInt32_Write(msgBuf, &a_pValue->RepublishMessageRequestCount);
-    UInt32_Write(msgBuf, &a_pValue->RepublishMessageCount);
-    UInt32_Write(msgBuf, &a_pValue->TransferRequestCount);
-    UInt32_Write(msgBuf, &a_pValue->TransferredToAltClientCount);
-    UInt32_Write(msgBuf, &a_pValue->TransferredToSameClientCount);
-    UInt32_Write(msgBuf, &a_pValue->PublishRequestCount);
-    UInt32_Write(msgBuf, &a_pValue->DataChangeNotificationsCount);
-    UInt32_Write(msgBuf, &a_pValue->EventNotificationsCount);
-    UInt32_Write(msgBuf, &a_pValue->NotificationsCount);
-    UInt32_Write(msgBuf, &a_pValue->LatePublishRequestCount);
-    UInt32_Write(msgBuf, &a_pValue->CurrentKeepAliveCount);
-    UInt32_Write(msgBuf, &a_pValue->CurrentLifetimeCount);
-    UInt32_Write(msgBuf, &a_pValue->UnacknowledgedMessageCount);
-    UInt32_Write(msgBuf, &a_pValue->DiscardedMessageCount);
-    UInt32_Write(msgBuf, &a_pValue->MonitoredItemCount);
-    UInt32_Write(msgBuf, &a_pValue->DisabledMonitoredItemCount);
-    UInt32_Write(msgBuf, &a_pValue->MonitoringQueueOverflowCount);
-    UInt32_Write(msgBuf, &a_pValue->NextSequenceNumber);
-    UInt32_Write(msgBuf, &a_pValue->EventQueueOverFlowCount);
+    status &= NodeId_Write(&a_pValue->SessionId, msgBuf);
+    status &= UInt32_Write(&a_pValue->SubscriptionId, msgBuf);
+    status &= Byte_Write(&a_pValue->Priority, msgBuf);
+    status &= Double_Write(&a_pValue->PublishingInterval, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxKeepAliveCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxLifetimeCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->MaxNotificationsPerPublish, msgBuf);
+    status &= Boolean_Write(&a_pValue->PublishingEnabled, msgBuf);
+    status &= UInt32_Write(&a_pValue->ModifyCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->EnableCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->DisableCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->RepublishRequestCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->RepublishMessageRequestCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->RepublishMessageCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->TransferRequestCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->TransferredToAltClientCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->TransferredToSameClientCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->PublishRequestCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->DataChangeNotificationsCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->EventNotificationsCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->NotificationsCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->LatePublishRequestCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->CurrentKeepAliveCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->CurrentLifetimeCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->UnacknowledgedMessageCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->DiscardedMessageCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->MonitoredItemCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->DisabledMonitoredItemCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->MonitoringQueueOverflowCount, msgBuf);
+    status &= UInt32_Write(&a_pValue->NextSequenceNumber, msgBuf);
+    status &= UInt32_Write(&a_pValue->EventQueueOverFlowCount, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20115,7 +20939,7 @@ StatusCode UA_SubscriptionDiagnosticsDataType_Encode(UA_MsgBuffer* msgBuf, UA_Su
 /*============================================================================
  * UA_SubscriptionDiagnosticsDataType_Decode
  *===========================================================================*/
-StatusCode UA_SubscriptionDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA_SubscriptionDiagnosticsDataType* a_pValue)
+StatusCode UA_SubscriptionDiagnosticsDataType_Decode(UA_SubscriptionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20125,37 +20949,37 @@ StatusCode UA_SubscriptionDiagnosticsDataType_Decode(UA_MsgBuffer* msgBuf, UA_Su
 
     UA_SubscriptionDiagnosticsDataType_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->SessionId);
-    UInt32_Read(msgBuf, &a_pValue->SubscriptionId);
-    Byte_Read(msgBuf, &a_pValue->Priority);
-    Double_Read(msgBuf, &a_pValue->PublishingInterval);
-    UInt32_Read(msgBuf, &a_pValue->MaxKeepAliveCount);
-    UInt32_Read(msgBuf, &a_pValue->MaxLifetimeCount);
-    UInt32_Read(msgBuf, &a_pValue->MaxNotificationsPerPublish);
-    Boolean_Read(msgBuf, &a_pValue->PublishingEnabled);
-    UInt32_Read(msgBuf, &a_pValue->ModifyCount);
-    UInt32_Read(msgBuf, &a_pValue->EnableCount);
-    UInt32_Read(msgBuf, &a_pValue->DisableCount);
-    UInt32_Read(msgBuf, &a_pValue->RepublishRequestCount);
-    UInt32_Read(msgBuf, &a_pValue->RepublishMessageRequestCount);
-    UInt32_Read(msgBuf, &a_pValue->RepublishMessageCount);
-    UInt32_Read(msgBuf, &a_pValue->TransferRequestCount);
-    UInt32_Read(msgBuf, &a_pValue->TransferredToAltClientCount);
-    UInt32_Read(msgBuf, &a_pValue->TransferredToSameClientCount);
-    UInt32_Read(msgBuf, &a_pValue->PublishRequestCount);
-    UInt32_Read(msgBuf, &a_pValue->DataChangeNotificationsCount);
-    UInt32_Read(msgBuf, &a_pValue->EventNotificationsCount);
-    UInt32_Read(msgBuf, &a_pValue->NotificationsCount);
-    UInt32_Read(msgBuf, &a_pValue->LatePublishRequestCount);
-    UInt32_Read(msgBuf, &a_pValue->CurrentKeepAliveCount);
-    UInt32_Read(msgBuf, &a_pValue->CurrentLifetimeCount);
-    UInt32_Read(msgBuf, &a_pValue->UnacknowledgedMessageCount);
-    UInt32_Read(msgBuf, &a_pValue->DiscardedMessageCount);
-    UInt32_Read(msgBuf, &a_pValue->MonitoredItemCount);
-    UInt32_Read(msgBuf, &a_pValue->DisabledMonitoredItemCount);
-    UInt32_Read(msgBuf, &a_pValue->MonitoringQueueOverflowCount);
-    UInt32_Read(msgBuf, &a_pValue->NextSequenceNumber);
-    UInt32_Read(msgBuf, &a_pValue->EventQueueOverFlowCount);
+    status &= NodeId_Read(&a_pValue->SessionId, msgBuf);
+    status &= UInt32_Read(&a_pValue->SubscriptionId, msgBuf);
+    status &= Byte_Read(&a_pValue->Priority, msgBuf);
+    status &= Double_Read(&a_pValue->PublishingInterval, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxKeepAliveCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxLifetimeCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->MaxNotificationsPerPublish, msgBuf);
+    status &= Boolean_Read(&a_pValue->PublishingEnabled, msgBuf);
+    status &= UInt32_Read(&a_pValue->ModifyCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->EnableCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->DisableCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->RepublishRequestCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->RepublishMessageRequestCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->RepublishMessageCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->TransferRequestCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->TransferredToAltClientCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->TransferredToSameClientCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->PublishRequestCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->DataChangeNotificationsCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->EventNotificationsCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->NotificationsCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->LatePublishRequestCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->CurrentKeepAliveCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->CurrentLifetimeCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->UnacknowledgedMessageCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->DiscardedMessageCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->MonitoredItemCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->DisabledMonitoredItemCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->MonitoringQueueOverflowCount, msgBuf);
+    status &= UInt32_Read(&a_pValue->NextSequenceNumber, msgBuf);
+    status &= UInt32_Read(&a_pValue->EventQueueOverFlowCount, msgBuf);
 
     if(status != STATUS_OK){
         UA_SubscriptionDiagnosticsDataType_Clear(a_pValue);
@@ -20215,7 +21039,7 @@ void UA_ModelChangeStructureDataType_Clear(UA_ModelChangeStructureDataType* a_pV
 /*============================================================================
  * UA_ModelChangeStructureDataType_Encode
  *===========================================================================*/
-StatusCode UA_ModelChangeStructureDataType_Encode(UA_MsgBuffer* msgBuf, UA_ModelChangeStructureDataType* a_pValue)
+StatusCode UA_ModelChangeStructureDataType_Encode(UA_ModelChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20223,9 +21047,13 @@ StatusCode UA_ModelChangeStructureDataType_Encode(UA_MsgBuffer* msgBuf, UA_Model
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->Affected);
-    NodeId_Write(msgBuf, &a_pValue->AffectedType);
-    Byte_Write(msgBuf, &a_pValue->Verb);
+    status &= NodeId_Write(&a_pValue->Affected, msgBuf);
+    status &= NodeId_Write(&a_pValue->AffectedType, msgBuf);
+    status &= Byte_Write(&a_pValue->Verb, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20233,7 +21061,7 @@ StatusCode UA_ModelChangeStructureDataType_Encode(UA_MsgBuffer* msgBuf, UA_Model
 /*============================================================================
  * UA_ModelChangeStructureDataType_Decode
  *===========================================================================*/
-StatusCode UA_ModelChangeStructureDataType_Decode(UA_MsgBuffer* msgBuf, UA_ModelChangeStructureDataType* a_pValue)
+StatusCode UA_ModelChangeStructureDataType_Decode(UA_ModelChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20243,9 +21071,9 @@ StatusCode UA_ModelChangeStructureDataType_Decode(UA_MsgBuffer* msgBuf, UA_Model
 
     UA_ModelChangeStructureDataType_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->Affected);
-    NodeId_Read(msgBuf, &a_pValue->AffectedType);
-    Byte_Read(msgBuf, &a_pValue->Verb);
+    status &= NodeId_Read(&a_pValue->Affected, msgBuf);
+    status &= NodeId_Read(&a_pValue->AffectedType, msgBuf);
+    status &= Byte_Read(&a_pValue->Verb, msgBuf);
 
     if(status != STATUS_OK){
         UA_ModelChangeStructureDataType_Clear(a_pValue);
@@ -20302,7 +21130,7 @@ void UA_SemanticChangeStructureDataType_Clear(UA_SemanticChangeStructureDataType
 /*============================================================================
  * UA_SemanticChangeStructureDataType_Encode
  *===========================================================================*/
-StatusCode UA_SemanticChangeStructureDataType_Encode(UA_MsgBuffer* msgBuf, UA_SemanticChangeStructureDataType* a_pValue)
+StatusCode UA_SemanticChangeStructureDataType_Encode(UA_SemanticChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20310,8 +21138,12 @@ StatusCode UA_SemanticChangeStructureDataType_Encode(UA_MsgBuffer* msgBuf, UA_Se
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->Affected);
-    NodeId_Write(msgBuf, &a_pValue->AffectedType);
+    status &= NodeId_Write(&a_pValue->Affected, msgBuf);
+    status &= NodeId_Write(&a_pValue->AffectedType, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20319,7 +21151,7 @@ StatusCode UA_SemanticChangeStructureDataType_Encode(UA_MsgBuffer* msgBuf, UA_Se
 /*============================================================================
  * UA_SemanticChangeStructureDataType_Decode
  *===========================================================================*/
-StatusCode UA_SemanticChangeStructureDataType_Decode(UA_MsgBuffer* msgBuf, UA_SemanticChangeStructureDataType* a_pValue)
+StatusCode UA_SemanticChangeStructureDataType_Decode(UA_SemanticChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20329,8 +21161,8 @@ StatusCode UA_SemanticChangeStructureDataType_Decode(UA_MsgBuffer* msgBuf, UA_Se
 
     UA_SemanticChangeStructureDataType_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->Affected);
-    NodeId_Read(msgBuf, &a_pValue->AffectedType);
+    status &= NodeId_Read(&a_pValue->Affected, msgBuf);
+    status &= NodeId_Read(&a_pValue->AffectedType, msgBuf);
 
     if(status != STATUS_OK){
         UA_SemanticChangeStructureDataType_Clear(a_pValue);
@@ -20387,7 +21219,7 @@ void UA_Range_Clear(UA_Range* a_pValue)
 /*============================================================================
  * UA_Range_Encode
  *===========================================================================*/
-StatusCode UA_Range_Encode(UA_MsgBuffer* msgBuf, UA_Range* a_pValue)
+StatusCode UA_Range_Encode(UA_Range* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20395,8 +21227,12 @@ StatusCode UA_Range_Encode(UA_MsgBuffer* msgBuf, UA_Range* a_pValue)
         status = STATUS_OK;
     }
 
-    Double_Write(msgBuf, &a_pValue->Low);
-    Double_Write(msgBuf, &a_pValue->High);
+    status &= Double_Write(&a_pValue->Low, msgBuf);
+    status &= Double_Write(&a_pValue->High, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20404,7 +21240,7 @@ StatusCode UA_Range_Encode(UA_MsgBuffer* msgBuf, UA_Range* a_pValue)
 /*============================================================================
  * UA_Range_Decode
  *===========================================================================*/
-StatusCode UA_Range_Decode(UA_MsgBuffer* msgBuf, UA_Range* a_pValue)
+StatusCode UA_Range_Decode(UA_Range* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20414,8 +21250,8 @@ StatusCode UA_Range_Decode(UA_MsgBuffer* msgBuf, UA_Range* a_pValue)
 
     UA_Range_Initialize(a_pValue);
 
-    Double_Read(msgBuf, &a_pValue->Low);
-    Double_Read(msgBuf, &a_pValue->High);
+    status &= Double_Read(&a_pValue->Low, msgBuf);
+    status &= Double_Read(&a_pValue->High, msgBuf);
 
     if(status != STATUS_OK){
         UA_Range_Clear(a_pValue);
@@ -20476,7 +21312,7 @@ void UA_EUInformation_Clear(UA_EUInformation* a_pValue)
 /*============================================================================
  * UA_EUInformation_Encode
  *===========================================================================*/
-StatusCode UA_EUInformation_Encode(UA_MsgBuffer* msgBuf, UA_EUInformation* a_pValue)
+StatusCode UA_EUInformation_Encode(UA_EUInformation* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20484,10 +21320,14 @@ StatusCode UA_EUInformation_Encode(UA_MsgBuffer* msgBuf, UA_EUInformation* a_pVa
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->NamespaceUri);
-    Int32_Write(msgBuf, &a_pValue->UnitId);
-    LocalizedText_Write(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Write(msgBuf, &a_pValue->Description);
+    status &= String_Write(&a_pValue->NamespaceUri, msgBuf);
+    status &= Int32_Write(&a_pValue->UnitId, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Description, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20495,7 +21335,7 @@ StatusCode UA_EUInformation_Encode(UA_MsgBuffer* msgBuf, UA_EUInformation* a_pVa
 /*============================================================================
  * UA_EUInformation_Decode
  *===========================================================================*/
-StatusCode UA_EUInformation_Decode(UA_MsgBuffer* msgBuf, UA_EUInformation* a_pValue)
+StatusCode UA_EUInformation_Decode(UA_EUInformation* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20505,10 +21345,10 @@ StatusCode UA_EUInformation_Decode(UA_MsgBuffer* msgBuf, UA_EUInformation* a_pVa
 
     UA_EUInformation_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->NamespaceUri);
-    Int32_Read(msgBuf, &a_pValue->UnitId);
-    LocalizedText_Read(msgBuf, &a_pValue->DisplayName);
-    LocalizedText_Read(msgBuf, &a_pValue->Description);
+    status &= String_Read(&a_pValue->NamespaceUri, msgBuf);
+    status &= Int32_Read(&a_pValue->UnitId, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->DisplayName, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Description, msgBuf);
 
     if(status != STATUS_OK){
         UA_EUInformation_Clear(a_pValue);
@@ -20566,7 +21406,7 @@ void UA_ComplexNumberType_Clear(UA_ComplexNumberType* a_pValue)
 /*============================================================================
  * UA_ComplexNumberType_Encode
  *===========================================================================*/
-StatusCode UA_ComplexNumberType_Encode(UA_MsgBuffer* msgBuf, UA_ComplexNumberType* a_pValue)
+StatusCode UA_ComplexNumberType_Encode(UA_ComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20574,8 +21414,12 @@ StatusCode UA_ComplexNumberType_Encode(UA_MsgBuffer* msgBuf, UA_ComplexNumberTyp
         status = STATUS_OK;
     }
 
-    Float_Write(msgBuf, &a_pValue->Real);
-    Float_Write(msgBuf, &a_pValue->Imaginary);
+    status &= Float_Write(&a_pValue->Real, msgBuf);
+    status &= Float_Write(&a_pValue->Imaginary, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20583,7 +21427,7 @@ StatusCode UA_ComplexNumberType_Encode(UA_MsgBuffer* msgBuf, UA_ComplexNumberTyp
 /*============================================================================
  * UA_ComplexNumberType_Decode
  *===========================================================================*/
-StatusCode UA_ComplexNumberType_Decode(UA_MsgBuffer* msgBuf, UA_ComplexNumberType* a_pValue)
+StatusCode UA_ComplexNumberType_Decode(UA_ComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20593,8 +21437,8 @@ StatusCode UA_ComplexNumberType_Decode(UA_MsgBuffer* msgBuf, UA_ComplexNumberTyp
 
     UA_ComplexNumberType_Initialize(a_pValue);
 
-    Float_Read(msgBuf, &a_pValue->Real);
-    Float_Read(msgBuf, &a_pValue->Imaginary);
+    status &= Float_Read(&a_pValue->Real, msgBuf);
+    status &= Float_Read(&a_pValue->Imaginary, msgBuf);
 
     if(status != STATUS_OK){
         UA_ComplexNumberType_Clear(a_pValue);
@@ -20651,7 +21495,7 @@ void UA_DoubleComplexNumberType_Clear(UA_DoubleComplexNumberType* a_pValue)
 /*============================================================================
  * UA_DoubleComplexNumberType_Encode
  *===========================================================================*/
-StatusCode UA_DoubleComplexNumberType_Encode(UA_MsgBuffer* msgBuf, UA_DoubleComplexNumberType* a_pValue)
+StatusCode UA_DoubleComplexNumberType_Encode(UA_DoubleComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20659,8 +21503,12 @@ StatusCode UA_DoubleComplexNumberType_Encode(UA_MsgBuffer* msgBuf, UA_DoubleComp
         status = STATUS_OK;
     }
 
-    Double_Write(msgBuf, &a_pValue->Real);
-    Double_Write(msgBuf, &a_pValue->Imaginary);
+    status &= Double_Write(&a_pValue->Real, msgBuf);
+    status &= Double_Write(&a_pValue->Imaginary, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20668,7 +21516,7 @@ StatusCode UA_DoubleComplexNumberType_Encode(UA_MsgBuffer* msgBuf, UA_DoubleComp
 /*============================================================================
  * UA_DoubleComplexNumberType_Decode
  *===========================================================================*/
-StatusCode UA_DoubleComplexNumberType_Decode(UA_MsgBuffer* msgBuf, UA_DoubleComplexNumberType* a_pValue)
+StatusCode UA_DoubleComplexNumberType_Decode(UA_DoubleComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20678,8 +21526,8 @@ StatusCode UA_DoubleComplexNumberType_Decode(UA_MsgBuffer* msgBuf, UA_DoubleComp
 
     UA_DoubleComplexNumberType_Initialize(a_pValue);
 
-    Double_Read(msgBuf, &a_pValue->Real);
-    Double_Read(msgBuf, &a_pValue->Imaginary);
+    status &= Double_Read(&a_pValue->Real, msgBuf);
+    status &= Double_Read(&a_pValue->Imaginary, msgBuf);
 
     if(status != STATUS_OK){
         UA_DoubleComplexNumberType_Clear(a_pValue);
@@ -20744,7 +21592,7 @@ void UA_AxisInformation_Clear(UA_AxisInformation* a_pValue)
 /*============================================================================
  * UA_AxisInformation_Encode
  *===========================================================================*/
-StatusCode UA_AxisInformation_Encode(UA_MsgBuffer* msgBuf, UA_AxisInformation* a_pValue)
+StatusCode UA_AxisInformation_Encode(UA_AxisInformation* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20752,12 +21600,16 @@ StatusCode UA_AxisInformation_Encode(UA_MsgBuffer* msgBuf, UA_AxisInformation* a
         status = STATUS_OK;
     }
 
-    UA_EUInformation_Encode(msgBuf, &a_pValue->EngineeringUnits);
-    UA_Range_Encode(msgBuf, &a_pValue->EURange);
-    LocalizedText_Write(msgBuf, &a_pValue->Title);
-    UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->AxisScaleType);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfAxisSteps, (void**) &a_pValue->AxisSteps, 
+    status &= UA_EUInformation_Encode(&a_pValue->EngineeringUnits, msgBuf);
+    status &= UA_Range_Encode(&a_pValue->EURange, msgBuf);
+    status &= LocalizedText_Write(&a_pValue->Title, msgBuf);
+    status &= UA_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->AxisScaleType);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfAxisSteps, (void**) &a_pValue->AxisSteps, 
                    sizeof(double), (UA_EncodeableObject_PfnEncode*) Double_Write);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20765,7 +21617,7 @@ StatusCode UA_AxisInformation_Encode(UA_MsgBuffer* msgBuf, UA_AxisInformation* a
 /*============================================================================
  * UA_AxisInformation_Decode
  *===========================================================================*/
-StatusCode UA_AxisInformation_Decode(UA_MsgBuffer* msgBuf, UA_AxisInformation* a_pValue)
+StatusCode UA_AxisInformation_Decode(UA_AxisInformation* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20775,11 +21627,11 @@ StatusCode UA_AxisInformation_Decode(UA_MsgBuffer* msgBuf, UA_AxisInformation* a
 
     UA_AxisInformation_Initialize(a_pValue);
 
-    UA_EUInformation_Decode(msgBuf, &a_pValue->EngineeringUnits);
-    UA_Range_Decode(msgBuf, &a_pValue->EURange);
-    LocalizedText_Read(msgBuf, &a_pValue->Title);
-    UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->AxisScaleType);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfAxisSteps, (void**) &a_pValue->AxisSteps, 
+    status &= UA_EUInformation_Decode(&a_pValue->EngineeringUnits, msgBuf);
+    status &= UA_Range_Decode(&a_pValue->EURange, msgBuf);
+    status &= LocalizedText_Read(&a_pValue->Title, msgBuf);
+    status &= UA_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->AxisScaleType);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfAxisSteps, (void**) &a_pValue->AxisSteps, 
                   sizeof(double), (UA_EncodeableObject_PfnDecode*) Double_Read);
 
     if(status != STATUS_OK){
@@ -20837,7 +21689,7 @@ void UA_XVType_Clear(UA_XVType* a_pValue)
 /*============================================================================
  * UA_XVType_Encode
  *===========================================================================*/
-StatusCode UA_XVType_Encode(UA_MsgBuffer* msgBuf, UA_XVType* a_pValue)
+StatusCode UA_XVType_Encode(UA_XVType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20845,8 +21697,12 @@ StatusCode UA_XVType_Encode(UA_MsgBuffer* msgBuf, UA_XVType* a_pValue)
         status = STATUS_OK;
     }
 
-    Double_Write(msgBuf, &a_pValue->X);
-    Float_Write(msgBuf, &a_pValue->Value);
+    status &= Double_Write(&a_pValue->X, msgBuf);
+    status &= Float_Write(&a_pValue->Value, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20854,7 +21710,7 @@ StatusCode UA_XVType_Encode(UA_MsgBuffer* msgBuf, UA_XVType* a_pValue)
 /*============================================================================
  * UA_XVType_Decode
  *===========================================================================*/
-StatusCode UA_XVType_Decode(UA_MsgBuffer* msgBuf, UA_XVType* a_pValue)
+StatusCode UA_XVType_Decode(UA_XVType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20864,8 +21720,8 @@ StatusCode UA_XVType_Decode(UA_MsgBuffer* msgBuf, UA_XVType* a_pValue)
 
     UA_XVType_Initialize(a_pValue);
 
-    Double_Read(msgBuf, &a_pValue->X);
-    Float_Read(msgBuf, &a_pValue->Value);
+    status &= Double_Read(&a_pValue->X, msgBuf);
+    status &= Float_Read(&a_pValue->Value, msgBuf);
 
     if(status != STATUS_OK){
         UA_XVType_Clear(a_pValue);
@@ -20942,7 +21798,7 @@ void UA_ProgramDiagnosticDataType_Clear(UA_ProgramDiagnosticDataType* a_pValue)
 /*============================================================================
  * UA_ProgramDiagnosticDataType_Encode
  *===========================================================================*/
-StatusCode UA_ProgramDiagnosticDataType_Encode(UA_MsgBuffer* msgBuf, UA_ProgramDiagnosticDataType* a_pValue)
+StatusCode UA_ProgramDiagnosticDataType_Encode(UA_ProgramDiagnosticDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20950,18 +21806,22 @@ StatusCode UA_ProgramDiagnosticDataType_Encode(UA_MsgBuffer* msgBuf, UA_ProgramD
         status = STATUS_OK;
     }
 
-    NodeId_Write(msgBuf, &a_pValue->CreateSessionId);
-    String_Write(msgBuf, &a_pValue->CreateClientName);
-    DateTime_Write(msgBuf, &a_pValue->InvocationCreationTime);
-    DateTime_Write(msgBuf, &a_pValue->LastTransitionTime);
-    String_Write(msgBuf, &a_pValue->LastMethodCall);
-    NodeId_Write(msgBuf, &a_pValue->LastMethodSessionId);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfLastMethodInputArguments, (void**) &a_pValue->LastMethodInputArguments, 
+    status &= NodeId_Write(&a_pValue->CreateSessionId, msgBuf);
+    status &= String_Write(&a_pValue->CreateClientName, msgBuf);
+    status &= DateTime_Write(&a_pValue->InvocationCreationTime, msgBuf);
+    status &= DateTime_Write(&a_pValue->LastTransitionTime, msgBuf);
+    status &= String_Write(&a_pValue->LastMethodCall, msgBuf);
+    status &= NodeId_Write(&a_pValue->LastMethodSessionId, msgBuf);
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfLastMethodInputArguments, (void**) &a_pValue->LastMethodInputArguments, 
                    sizeof(UA_Argument), (UA_EncodeableObject_PfnEncode*) UA_Argument_Encode);
-    UA_Write_Array(msgBuf, &a_pValue->NoOfLastMethodOutputArguments, (void**) &a_pValue->LastMethodOutputArguments, 
+    status &= UA_Write_Array(msgBuf, &a_pValue->NoOfLastMethodOutputArguments, (void**) &a_pValue->LastMethodOutputArguments, 
                    sizeof(UA_Argument), (UA_EncodeableObject_PfnEncode*) UA_Argument_Encode);
-    DateTime_Write(msgBuf, &a_pValue->LastMethodCallTime);
-    UA_StatusResult_Encode(msgBuf, &a_pValue->LastMethodReturnStatus);
+    status &= DateTime_Write(&a_pValue->LastMethodCallTime, msgBuf);
+    status &= UA_StatusResult_Encode(&a_pValue->LastMethodReturnStatus, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -20969,7 +21829,7 @@ StatusCode UA_ProgramDiagnosticDataType_Encode(UA_MsgBuffer* msgBuf, UA_ProgramD
 /*============================================================================
  * UA_ProgramDiagnosticDataType_Decode
  *===========================================================================*/
-StatusCode UA_ProgramDiagnosticDataType_Decode(UA_MsgBuffer* msgBuf, UA_ProgramDiagnosticDataType* a_pValue)
+StatusCode UA_ProgramDiagnosticDataType_Decode(UA_ProgramDiagnosticDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -20979,18 +21839,18 @@ StatusCode UA_ProgramDiagnosticDataType_Decode(UA_MsgBuffer* msgBuf, UA_ProgramD
 
     UA_ProgramDiagnosticDataType_Initialize(a_pValue);
 
-    NodeId_Read(msgBuf, &a_pValue->CreateSessionId);
-    String_Read(msgBuf, &a_pValue->CreateClientName);
-    DateTime_Read(msgBuf, &a_pValue->InvocationCreationTime);
-    DateTime_Read(msgBuf, &a_pValue->LastTransitionTime);
-    String_Read(msgBuf, &a_pValue->LastMethodCall);
-    NodeId_Read(msgBuf, &a_pValue->LastMethodSessionId);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfLastMethodInputArguments, (void**) &a_pValue->LastMethodInputArguments, 
+    status &= NodeId_Read(&a_pValue->CreateSessionId, msgBuf);
+    status &= String_Read(&a_pValue->CreateClientName, msgBuf);
+    status &= DateTime_Read(&a_pValue->InvocationCreationTime, msgBuf);
+    status &= DateTime_Read(&a_pValue->LastTransitionTime, msgBuf);
+    status &= String_Read(&a_pValue->LastMethodCall, msgBuf);
+    status &= NodeId_Read(&a_pValue->LastMethodSessionId, msgBuf);
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfLastMethodInputArguments, (void**) &a_pValue->LastMethodInputArguments, 
                   sizeof(UA_Argument), (UA_EncodeableObject_PfnDecode*) UA_Argument_Decode);
-    UA_Read_Array(msgBuf, &a_pValue->NoOfLastMethodOutputArguments, (void**) &a_pValue->LastMethodOutputArguments, 
+    status &= UA_Read_Array(msgBuf, &a_pValue->NoOfLastMethodOutputArguments, (void**) &a_pValue->LastMethodOutputArguments, 
                   sizeof(UA_Argument), (UA_EncodeableObject_PfnDecode*) UA_Argument_Decode);
-    DateTime_Read(msgBuf, &a_pValue->LastMethodCallTime);
-    UA_StatusResult_Decode(msgBuf, &a_pValue->LastMethodReturnStatus);
+    status &= DateTime_Read(&a_pValue->LastMethodCallTime, msgBuf);
+    status &= UA_StatusResult_Decode(&a_pValue->LastMethodReturnStatus, msgBuf);
 
     if(status != STATUS_OK){
         UA_ProgramDiagnosticDataType_Clear(a_pValue);
@@ -21049,7 +21909,7 @@ void UA_Annotation_Clear(UA_Annotation* a_pValue)
 /*============================================================================
  * UA_Annotation_Encode
  *===========================================================================*/
-StatusCode UA_Annotation_Encode(UA_MsgBuffer* msgBuf, UA_Annotation* a_pValue)
+StatusCode UA_Annotation_Encode(UA_Annotation* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -21057,9 +21917,13 @@ StatusCode UA_Annotation_Encode(UA_MsgBuffer* msgBuf, UA_Annotation* a_pValue)
         status = STATUS_OK;
     }
 
-    String_Write(msgBuf, &a_pValue->Message);
-    String_Write(msgBuf, &a_pValue->UserName);
-    DateTime_Write(msgBuf, &a_pValue->AnnotationTime);
+    status &= String_Write(&a_pValue->Message, msgBuf);
+    status &= String_Write(&a_pValue->UserName, msgBuf);
+    status &= DateTime_Write(&a_pValue->AnnotationTime, msgBuf);
+
+    if((status & STATUS_NOK) != 0){
+        status = STATUS_NOK;
+    }
 
     return status;
 }
@@ -21067,7 +21931,7 @@ StatusCode UA_Annotation_Encode(UA_MsgBuffer* msgBuf, UA_Annotation* a_pValue)
 /*============================================================================
  * UA_Annotation_Decode
  *===========================================================================*/
-StatusCode UA_Annotation_Decode(UA_MsgBuffer* msgBuf, UA_Annotation* a_pValue)
+StatusCode UA_Annotation_Decode(UA_Annotation* a_pValue, UA_MsgBuffer* msgBuf)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     
@@ -21077,9 +21941,9 @@ StatusCode UA_Annotation_Decode(UA_MsgBuffer* msgBuf, UA_Annotation* a_pValue)
 
     UA_Annotation_Initialize(a_pValue);
 
-    String_Read(msgBuf, &a_pValue->Message);
-    String_Read(msgBuf, &a_pValue->UserName);
-    DateTime_Read(msgBuf, &a_pValue->AnnotationTime);
+    status &= String_Read(&a_pValue->Message, msgBuf);
+    status &= String_Read(&a_pValue->UserName, msgBuf);
+    status &= DateTime_Read(&a_pValue->AnnotationTime, msgBuf);
 
     if(status != STATUS_OK){
         UA_Annotation_Clear(a_pValue);
@@ -21145,7 +22009,7 @@ void UA_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
 }
 
 StatusCode UA_Read_EnumeratedType(UA_MsgBuffer* msgBuffer, int32_t* enumerationValue){
-    return Int32_Read(msgBuffer, enumerationValue);
+    return Int32_Read(enumerationValue, msgBuffer);
 }
 
 StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
@@ -21154,7 +22018,7 @@ StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** elts
     assert(msgBuffer != NULL && *eltsArray == NULL && noOfElts != NULL);
     StatusCode status = STATUS_OK;
     UA_Byte* byteArray = *eltsArray;
-    status = Int32_Read(msgBuffer, noOfElts);
+    status = Int32_Read(noOfElts, msgBuffer);
     if(status == STATUS_OK && *noOfElts > 0){
         *eltsArray = malloc (sizeOfElt * *noOfElts);
     }
@@ -21164,7 +22028,7 @@ StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** elts
         uint32_t pos = 0;
         for (idx = 0; status == STATUS_OK && idx < *noOfElts; idx ++){
             pos = idx * sizeOfElt;
-            status = decodeFct(msgBuffer, &(byteArray[pos]));
+            status = decodeFct(&(byteArray[pos]), msgBuffer);
         }
         
         if(status != STATUS_OK){
@@ -21180,7 +22044,7 @@ StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** elts
 }
                     
 StatusCode UA_Write_EnumeratedType(UA_MsgBuffer* msgBuffer, int32_t* enumerationValue){
-    return Int32_Write(msgBuffer, enumerationValue);
+    return Int32_Write(enumerationValue, msgBuffer);
 }
 
 StatusCode UA_Write_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
@@ -21189,13 +22053,13 @@ StatusCode UA_Write_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** elt
     StatusCode status = STATUS_OK;
     UA_Byte* byteArray = *eltsArray;
     
-    status = Int32_Write(msgBuffer, noOfElts);
+    status = Int32_Write(noOfElts, msgBuffer);
     if(status == STATUS_OK && *noOfElts > 0){
         int32_t idx = 0;
         uint32_t pos = 0;
         for (idx = 0; status == STATUS_OK && idx < *noOfElts; idx ++){
             pos = idx * sizeOfElt;
-            status = encodeFct(msgBuffer, &(byteArray[pos]));
+            status = encodeFct(&(byteArray[pos]), msgBuffer);
         }
     }
     return status;

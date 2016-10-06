@@ -16,8 +16,8 @@ typedef void (UA_EncodeableObject_PfnInitialize) (void* value);
 typedef void (UA_EncodeableObject_PfnClear) (void* value);
 typedef void (UA_EncodeableObject_PfnGetSize) (void); // Deactivated
 // TODO: replace by status code => need to be separated from builtin types to avoid mutal dep
-typedef uint32_t (UA_EncodeableObject_PfnEncode) (struct UA_MsgBuffer* msgBuffer, void* value);
-typedef uint32_t (UA_EncodeableObject_PfnDecode) (struct UA_MsgBuffer* msgBuffer, void* value);
+typedef uint32_t (UA_EncodeableObject_PfnEncode) (void* value, struct UA_MsgBuffer* msgBuffer);
+typedef uint32_t (UA_EncodeableObject_PfnDecode) (void* value, struct UA_MsgBuffer* msgBuffer);
 
 typedef struct UA_EncodeableType {
     char*                              name;

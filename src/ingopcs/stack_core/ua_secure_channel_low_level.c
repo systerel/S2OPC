@@ -585,11 +585,11 @@ StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
             msgBuffer->isFinal = UA_Msg_Chunk_Final;
             // Temporary message size
             const uint32_t msgHeaderLength = UA_SECURE_MESSAGE_HEADER_LENGTH;
-            status = UInt32_Write(msgBuffer, &msgHeaderLength);
+            status = UInt32_Write(&msgHeaderLength, msgBuffer);
         }
         if(status == STATUS_OK){
             // Secure channel Id
-            status = UInt32_Write(msgBuffer, &secureChannelId);
+            status = UInt32_Write(&secureChannelId, msgBuffer);
         }
 
     }else{
@@ -610,11 +610,11 @@ StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
     // Set temporary SN value: to be set on message sending (ensure contiguous SNs)
     if(status == STATUS_OK){
         msgBuffer->sequenceNumberPosition = msgBuffer->buffers->position;
-        UInt32_Write(msgBuffer, &zero);
+        UInt32_Write(&zero, msgBuffer);
     }
 
     if(status == STATUS_OK){
-        UInt32_Write(msgBuffer, &requestId);
+        UInt32_Write(&requestId, msgBuffer);
     }
 
     return status;
@@ -642,7 +642,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
     // Security Policy:
     if(status == STATUS_OK){
         if(securityPolicy->length>0){
-            status = String_Write(msgBuffer, securityPolicy);
+            status = String_Write(securityPolicy, msgBuffer);
         }else{
             // Null security policy is invalid parameter since unspecified
             status = STATUS_INVALID_PARAMETERS;
@@ -651,14 +651,14 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
     // Sender Certificate:
     if(status == STATUS_OK){
         if(toSign != UA_FALSE && senderCertificate->length>0){ // Field shall be null if message not signed
-            status = String_Write(msgBuffer, senderCertificate);
+            status = String_Write(senderCertificate, msgBuffer);
         }else{
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
             // status = Write_Int32(msgBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
             const int32_t minusOne = -1;
-            status = Int32_Write(msgBuffer, &minusOne);
+            status = Int32_Write(&minusOne, msgBuffer);
             // NULL string: nothing to write
         }
     }
@@ -683,14 +683,14 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
                 }
             }
 
-            status = String_Write(msgBuffer, &recCertThumbprint);
+            status = String_Write(&recCertThumbprint, msgBuffer);
         }else{
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
             //status = Write_Int32(msgBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
             const int32_t minusOne = -1;
-            status = Int32_Write(msgBuffer, &minusOne);
+            status = Int32_Write(&minusOne, msgBuffer);
             // NULL string: nothing to write
         }
 
@@ -738,10 +738,10 @@ StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
         }
         nodeId.numeric = encType->binaryTypeId;
 
-        status = NodeId_Write(msgBuffer, &nodeId);
+        status = NodeId_Write(&nodeId, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = encType->encodeFunction(msgBuffer, msgBody);
+        status = encType->encodeFunction(msgBody, msgBuffer);
     }
     return status;
 }
@@ -808,7 +808,7 @@ StatusCode Set_Message_Length(UA_MsgBuffer* msgBuffer,
         status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
     }
     if(status == STATUS_OK){
-        status = UInt32_Write(msgBuffer, &msgLength);
+        status = UInt32_Write(&msgLength, msgBuffer);
     }
     if(status == STATUS_OK){
         status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
@@ -869,7 +869,7 @@ StatusCode Set_Sequence_Number(UA_MsgBuffer* msgBuffer){
        originPosition = msgBuffer->buffers->position;
        status = Buffer_SetPosition(msgBuffer->buffers, msgBuffer->sequenceNumberPosition);
        if(status == STATUS_OK){
-           UInt32_Write(msgBuffer, &scConnection->lastSeqNumSent);
+           UInt32_Write(&scConnection->lastSeqNumSent, msgBuffer);
        }
 
        if(status == STATUS_OK){
@@ -1277,7 +1277,7 @@ StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
 
     if(status == STATUS_OK){
         //TODO: on server side, randomize secure channel ids (table 26 part 6)!
-        status = UInt32_Read(transportBuffer, &secureChannelId);
+        status = UInt32_Read(&secureChannelId, transportBuffer);
     }
 
     if(status == STATUS_OK){
@@ -1329,7 +1329,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     // Security Policy:
     if(status == STATUS_OK){
-        status = ByteString_Read(transportBuffer, &securityPolicy);
+        status = ByteString_Read(&securityPolicy, transportBuffer);
 
         if(status == STATUS_OK){
             uint32_t secuPolicyComparison = 0;
@@ -1344,7 +1344,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     // Sender Certificate:
     if(status == STATUS_OK){
-        status = ByteString_Read(transportBuffer, &senderCertificate);
+        status = ByteString_Read(&senderCertificate, transportBuffer);
         if(status == STATUS_OK){
             if (toSign == UA_FALSE && senderCertificate.length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not signed"
@@ -1380,7 +1380,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
 
     // Receiver Certificate Thumbprint:
     if(status == STATUS_OK){
-        status = ByteString_Read(transportBuffer, &receiverCertThumb);
+        status = ByteString_Read(&receiverCertThumb, transportBuffer);
 
         if(status == STATUS_OK){
             if(toEncrypt == UA_FALSE && receiverCertThumb.length > 0){
@@ -1602,7 +1602,7 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
     if(receptionBuffer != NULL && namespaceTable != NULL && encodeableObj != NULL &&
        (knownTypes != NULL || respEncType != NULL))
     {
-        status = NodeId_Read(receptionBuffer, &nodeId);
+        status = NodeId_Read(&nodeId, receptionBuffer);
     }
 
     if(status == STATUS_OK && nodeId.identifierType == UA_IdType_Numeric){
@@ -1660,7 +1660,7 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
     if(status == STATUS_OK){
         *encodeableObj = malloc(recEncType->allocSize);
         if(*encodeableObj != NULL){
-            status = recEncType->decodeFunction(receptionBuffer, *encodeableObj);
+            status = recEncType->decodeFunction(*encodeableObj, receptionBuffer);
         }else{
             status = STATUS_NOK;
         }
@@ -1753,7 +1753,7 @@ StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection)
 
     if(scConnection != NULL){
         status = STATUS_OK;
-        status = UInt32_Read(scConnection->receptionBuffers, &seqNumber);
+        status = UInt32_Read(&seqNumber, scConnection->receptionBuffers);
     }
 
     if(status == STATUS_OK){
@@ -1815,7 +1815,7 @@ StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
 
     if(status == STATUS_OK){
         // Encode symmetric security header
-        status = UInt32_Write(msgBuffer, &scConnection->currentSecuToken.tokenId);
+        status = UInt32_Write(&scConnection->currentSecuToken.tokenId, msgBuffer);
     }
 
     if(status == STATUS_OK){
@@ -1837,7 +1837,7 @@ StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(transportBuffer != NULL)
     {
-        status = UInt32_Read(transportBuffer, tokenId);
+        status = UInt32_Read(tokenId, transportBuffer);
     }
     if(status == STATUS_OK){
         *snPosition = transportBuffer->buffers->position;
@@ -1952,7 +1952,7 @@ StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
 
     if(status == STATUS_OK){
         // Retrieve request id
-        status = UInt32_Read(scConnection->receptionBuffers, requestId);
+        status = UInt32_Read(requestId, scConnection->receptionBuffers);
     }
 
     if(status == STATUS_OK){
@@ -1996,10 +1996,10 @@ StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
     uint32_t errorCode = 0;
     if(msgBuffer != NULL && reason != NULL){
         if(msgBuffer->isFinal == UA_Msg_Chunk_Abort){
-            status = UInt32_Read(msgBuffer, &errorCode);
+            status = UInt32_Read(&errorCode, msgBuffer);
             if(status == STATUS_OK){
                 status = errorCode;
-                String_Read(msgBuffer, reason);
+                String_Read(reason, msgBuffer);
             }
 
         }else{

@@ -426,7 +426,7 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
 
     if(status == STATUS_OK){
         // Retrieve request id
-        status = UInt32_Read(cConnection->instance->receptionBuffers, &requestId);
+        status = UInt32_Read(&requestId, cConnection->instance->receptionBuffers);
     }
 
     if(status == STATUS_OK){
