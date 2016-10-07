@@ -12,5 +12,7 @@
 
 Suite *tests_make_suite_crypto(void);
 
+Suite *tests_make_suite_tools(void);
+
 
 #endif  // CHECK_STACK_H
