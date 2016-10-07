@@ -6,6 +6,9 @@
  */
 
 #include "stub_client.h"
+
+#include <stdlib.h>
+
 #include <ua_clientapi.h>
 #include <ua_stack_config.h>
 #include <wrappers.h>
@@ -18,6 +21,8 @@ int disconnect = 0;
 int connected = 0;
 
 OpcUa_Handle StubClient_g_pPortLayerHandle = OpcUa_Null;
+
+UA_EncodeableType* newEncType;
 
 OpcUa_StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
                                                      void*            callbackData,
@@ -177,6 +182,14 @@ int main(void){
 	// Init stack configuration
 	StackConfiguration_Initialize();
 	OpcUa_GotoErrorIfBad(uStatus);
+
+	// Add types
+	newEncType = malloc(sizeof(UA_EncodeableType));
+	if(newEncType == NULL){
+	    return STATUS_NOK;
+	}
+	memset(newEncType, 0, sizeof(UA_EncodeableType));
+	StackConfiguration_AddTypes(&newEncType, 1);
 
     // Create channel object
     uStatus = UA_Channel_Create(&hChannel, OpcUa_Channel_SerializerType_Binary);
