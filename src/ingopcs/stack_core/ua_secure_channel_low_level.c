@@ -540,15 +540,19 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                 status = STATUS_NOK;
             }
         }else{
-            status = GetSymmBlocksSizes(&scConnection->currentSecuPolicy,
-                                        &cipherBlockSize,
-                                        &plainBlockSize);
+            status = CryptoProvider_SymmetricGetLength_BlockSizes(scConnection->currentCryptoProvider,
+                                                                  &cipherBlockSize,
+                                                                  &plainBlockSize);
              if(status == STATUS_OK){
-                 scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
-                                                                   cipherBlockSize,
-                                                                   plainBlockSize,
-                                                                   GetSymmSignatureSize
-                                                                    (&scConnection->currentSecuPolicy));
+                 uint32_t signatureSize = 0;
+                 status = CryptoProvider_SymmetricGetLength_Signature(scConnection->currentCryptoProvider,
+                                                                      &signatureSize);
+                 if(status == STATUS_OK){
+                     scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
+                                                                       cipherBlockSize,
+                                                                       plainBlockSize,
+                                                                       signatureSize);
+                 }
              }
         }
     }
@@ -926,10 +930,13 @@ StatusCode EncodePadding(SC_Connection* scConnection,
            scConnection->currentSecuKeySets.receiverKeySet == NULL){
             status = STATUS_INVALID_STATE;
         }else{
-            *signatureSize = GetSymmSignatureSize(&scConnection->currentSecuPolicy);
-            status = GetSymmBlocksSizes(&scConnection->currentSecuPolicy,
-                                        &cipherBlockSize,
-                                        &plainBlockSize);
+            status = CryptoProvider_SymmetricGetLength_Signature(scConnection->currentCryptoProvider,
+                                                                 signatureSize);
+            if(status == STATUS_OK){
+                status = CryptoProvider_SymmetricGetLength_BlockSizes(scConnection->currentCryptoProvider,
+                                                                      &cipherBlockSize,
+                                                                      &plainBlockSize);
+            }
         }
     }
 
@@ -1731,15 +1738,18 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                 receiverKeySet = scConnection->precSecuKeySets.receiverKeySet;
             }
 
-            signatureSize = GetSymmSignatureSize(securityPolicy);
-            signaturePosition = receptionBuffer->length - signatureSize;
+            status = CryptoProvider_SymmetricGetLength_Signature(cryptoProvider,
+                                                                 &signatureSize);
 
-            status = CryptoProvider_SymmetricVerify(cryptoProvider,
-                                                    receptionBuffer->data,
-                                                    signaturePosition,
-                                                    receiverKeySet->signKey,
-                                                    &(receptionBuffer->data[signaturePosition]),
-                                                    signatureSize);
+            if(status == STATUS_OK){
+                signaturePosition = receptionBuffer->length - signatureSize;
+                status = CryptoProvider_SymmetricVerify(cryptoProvider,
+                                                        receptionBuffer->data,
+                                                        signaturePosition,
+                                                        receiverKeySet->signKey,
+                                                        &(receptionBuffer->data[signaturePosition]),
+                                                        signatureSize);
+            }
         }
     }
 
@@ -1850,7 +1860,7 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
 {
     // Only valid for symmetric encryption ! No need for asymm (1 chunk maximum)
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_String* secuPolicy = NULL;
+    CryptoProvider* cProvider = NULL;
     uint32_t sigSize = 0;
     uint32_t cipherBlockSize = 0;
     uint32_t plainBlockSize = 0;
@@ -1859,17 +1869,19 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
     uint32_t newBufferLength = curChunk->length;
     if(scConnection != NULL){
         if(isPrecCryptoData == UA_FALSE){
-            secuPolicy = &scConnection->currentSecuPolicy;
+            cProvider = scConnection->currentCryptoProvider;
         }else{
-            secuPolicy = &scConnection->precSecuPolicy;
+            cProvider = scConnection->precCryptoProvider;
         }
         // Compute signature size and remove from buffer length
-        sigSize = GetSymmSignatureSize(secuPolicy);
-        newBufferLength = newBufferLength - sigSize;
-
-        status = GetSymmBlocksSizes(secuPolicy,
-                                    &cipherBlockSize,
-                                    &plainBlockSize);
+        status = CryptoProvider_SymmetricGetLength_Signature(cProvider,
+                                                             &sigSize);
+        if(status == STATUS_OK){
+            newBufferLength = newBufferLength - sigSize;
+            status = CryptoProvider_SymmetricGetLength_BlockSizes(cProvider,
+                                                                  &cipherBlockSize,
+                                                                  &plainBlockSize);
+        }
     }
 
     if(status == STATUS_OK){
