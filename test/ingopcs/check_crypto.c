@@ -16,10 +16,11 @@
 
 #include "check_stack.h"
 #include "crypto_provider.h"
-#include "ua_builtintypes.h" // StatusCode
+#include "ua_base_types.h"
 #include "crypto_profiles.h"
 #include "crypto_types.h"
 #include "secret_buffer.h"
+#include "crypto_provider_lib.h"
 
 
 // Helper
@@ -371,6 +372,119 @@ START_TEST(test_crypto_symm_gen)
 END_TEST
 
 
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
+#include "mbedtls/pk.h"
+#include "mbedtls/x509.h"
+#include "mbedtls/x509_crt.h"
+#include "mbedtls/rsa.h"
+#include "mbedtls/md.h"
+
+START_TEST(test_pk_x509)
+{
+    CryptoProvider *crypto = NULL;
+    CryptolibContext *pCtx = NULL;
+    uint32_t i, j;
+
+    // Context init
+    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(UA_NULL != crypto);
+    pCtx = crypto->pCryptolibContext;
+    ck_assert(UA_NULL != pCtx);
+
+    // This is the PKI:
+    // Reads a public/private key pair
+    mbedtls_x509_crt crt; // Client/Server certificate, which contains the pk struct
+    mbedtls_pk_context pk_priv;
+    mbedtls_x509_crt_init(&crt);
+    mbedtls_pk_init(&pk_priv);
+    ck_assert(mbedtls_x509_crt_parse_file(&crt, "client_public/client.der") == 0);
+    ck_assert(mbedtls_pk_parse_keyfile(&pk_priv, "client_private/client.key", 0) == 0);
+    // Get bits number
+    i = mbedtls_pk_get_bitlen(&crt.pk);
+    j = mbedtls_pk_get_bitlen(&pk_priv);
+    // Assert len is enough but not too much
+    printf("Bitlenghts: %u %u\n", i, j);
+    // TODO: Assert can do
+    // Ciphering
+    mbedtls_rsa_context *prsa_pub, *prsa_priv;
+    ck_assert(mbedtls_pk_get_type(&crt.pk) == MBEDTLS_PK_RSA);
+    ck_assert(mbedtls_pk_get_type(&pk_priv) == MBEDTLS_PK_RSA);
+    prsa_pub = mbedtls_pk_rsa(crt.pk);
+    prsa_priv = mbedtls_pk_rsa(pk_priv);
+    ck_assert(mbedtls_rsa_check_pub_priv(prsa_pub, prsa_priv) == 0);
+    mbedtls_rsa_set_padding(prsa_pub, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
+    mbedtls_rsa_set_padding(prsa_priv, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
+    // Calculate max payload
+    //printf("Output buffer lengths: %u %u\n", prsa_pub->N, prsa_priv->N); // Mauvaise interprétation de N, qui n'est pas un type de base...
+    // Faut repasser par pk get_len, ou prsa->len
+    printf("Hash IDs: %i %i\n", prsa_pub->hash_id, prsa_priv->hash_id);
+    mbedtls_md_info_t *pmdinfo = mbedtls_md_info_from_type(prsa_pub->hash_id);
+    printf("prsa_pub->len: %i %i\n", prsa_pub->len, prsa_priv->len);
+    uint32_t len_hash = mbedtls_md_get_size(pmdinfo), len_max = prsa_pub->len - 2*len_hash - 2;
+    printf("len_hash, len_max: %i %i\n", len_hash, len_max);
+    // Alice is sending something to Bob
+    // Encrypt with pk (Bob-pk)
+    // Encrypt with priv: non sense
+    unsigned char input[256], output[256], input_bis[256];
+    char hexoutput[512];
+    uint32_t len = 0;
+    memset(input, 0, 256);
+    memset(output, 0, 256);
+    strncpy(input, "Test INGOPCS Test", 32); // 17 should be enough but we want to verify padding
+    ck_assert(mbedtls_rsa_rsaes_oaep_encrypt(prsa_pub, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PUBLIC, NULL, 0, 32, input, output) == 0);
+    // Decrypt with priv (Bob-priv)
+    // Decrypt with pk: why would you do that
+    memset(input_bis, 0xFF, 256);
+    ck_assert(mbedtls_rsa_rsaes_oaep_decrypt(prsa_priv, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE, NULL, 0, &len, output, input_bis, 256) == 0);
+    ck_assert(len == 32);
+    ck_assert(memcmp(input, input_bis, 32) == 0);
+    // En/decrypt unpaddable message
+    memset(input_bis, 0xFF, 256);
+    ck_assert(mbedtls_rsa_rsaes_oaep_encrypt(prsa_pub, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PUBLIC, NULL, 0, len_max, input, output) == 0);
+    ck_assert(mbedtls_rsa_rsaes_oaep_decrypt(prsa_priv, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE, NULL, 0, &len, output, input_bis, 256) == 0);
+    ck_assert(len == len_max);
+    ck_assert(memcmp(input, input_bis, len_max) == 0);
+    // Sign with priv (Alice-priv)
+    pmdinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    // It should be specified that the content to sign is only hashed with a SHA-256, and then sent to pss_sign, which should be done with SHA-256 too.
+    mbedtls_rsa_set_padding(prsa_priv, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256); // Don't forget that, bro!
+    unsigned char hashed[32]; // Assert md_get_len(pmdinfo)
+    mbedtls_md(pmdinfo, input, 32, hashed); // No prefixed-padding, no salt, but hashed
+    ck_assert(mbedtls_rsa_rsassa_pss_sign(prsa_priv, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE,
+                                          MBEDTLS_MD_SHA256, 32, // hashlen is optionnal, as md_alg is not MD_NONE
+                                          hashed, output) == 0); // signature is as long as the key
+    ck_assert(hexlify(hashed, hexoutput, 32) == 32);
+    printf("Hash: %64s\n", hexoutput);
+    ck_assert(hexlify(output, hexoutput, 256) == 256);
+    hexoutput[128] = 0;
+    printf("Sig: %128s...\n", hexoutput);
+    // Verify with pk (Alice-pk)
+    mbedtls_rsa_set_padding(prsa_pub, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
+    ck_assert(mbedtls_rsa_rsassa_pss_verify(prsa_pub, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PUBLIC, // Random functions are optionnal for verification
+                                            MBEDTLS_MD_SHA256, 32,
+                                            hashed, output) == 0);
+
+    // This is the X509 part of the PKI:
+    // Reads a CA
+    mbedtls_x509_crt ca;
+    mbedtls_x509_crt_init(&ca);
+    ck_assert(mbedtls_x509_crt_parse_file(&ca, "trusted/cacert.der") == 0);
+    // Reads the public key (signed with the CA)
+    // (reads a revocation list)
+    // Verify the certificate signature
+    uint32_t flags;
+    ck_assert(mbedtls_x509_crt_verify(&crt, &ca, NULL, NULL, &flags, NULL, 0) == 0);
+
+    // We should use the NIST Sign Verification test vectors, but they are not easy to use.
+
+    // TODO: free the contexts & look at code to see if the aes contexts are correctly freed
+
+    CryptoProvider_Delete(crypto);
+}
+END_TEST
+
+
 Suite *tests_make_suite_crypto()
 {
     Suite *s;
@@ -388,6 +502,7 @@ Suite *tests_make_suite_crypto()
     tcase_add_test(tc_ciphers, test_crypto_symm_crypt);
     tcase_add_test(tc_ciphers, test_crypto_symm_sign);
     tcase_add_test(tc_ciphers, test_crypto_symm_gen);
+    tcase_add_test(tc_ciphers, test_pk_x509);
 
     suite_add_tcase(s, tc_providers);
 
