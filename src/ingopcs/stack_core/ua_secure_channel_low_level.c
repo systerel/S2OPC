@@ -489,9 +489,9 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                 status = STATUS_NOK;
             }
         }else{
-            status = CryptoProvider_SymmetricGetLength_BlockSizes(scConnection->currentCryptoProvider,
-                                                                  &cipherBlockSize,
-                                                                  &plainBlockSize);
+            status = CryptoProvider_SymmetricGetLength_Blocks(scConnection->currentCryptoProvider,
+                                                              &cipherBlockSize,
+                                                              &plainBlockSize);
              if(status == STATUS_OK){
                  uint32_t signatureSize = 0;
                  status = CryptoProvider_SymmetricGetLength_Signature(scConnection->currentCryptoProvider,
@@ -882,9 +882,9 @@ StatusCode EncodePadding(SC_Connection* scConnection,
             status = CryptoProvider_SymmetricGetLength_Signature(scConnection->currentCryptoProvider,
                                                                  signatureSize);
             if(status == STATUS_OK){
-                status = CryptoProvider_SymmetricGetLength_BlockSizes(scConnection->currentCryptoProvider,
-                                                                      &cipherBlockSize,
-                                                                      &plainBlockSize);
+                status = CryptoProvider_SymmetricGetLength_Blocks(scConnection->currentCryptoProvider,
+                                                                  &cipherBlockSize,
+                                                                  &plainBlockSize);
             }
         }
     }
@@ -1827,9 +1827,9 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
                                                              &sigSize);
         if(status == STATUS_OK){
             newBufferLength = newBufferLength - sigSize;
-            status = CryptoProvider_SymmetricGetLength_BlockSizes(cProvider,
-                                                                  &cipherBlockSize,
-                                                                  &plainBlockSize);
+            status = CryptoProvider_SymmetricGetLength_Blocks(cProvider,
+                                                              &cipherBlockSize,
+                                                              &plainBlockSize);
         }
     }
 

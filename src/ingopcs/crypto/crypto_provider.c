@@ -215,9 +215,9 @@ StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pPr
 }
 
 
-StatusCode CryptoProvider_SymmetricGetLength_BlockSizes(const CryptoProvider *pProvider,
-                                                        uint32_t *cipherTextBlockSize,
-                                                        uint32_t *plainTextBlockSize)
+StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *pProvider,
+                                                    uint32_t *cipherTextBlockSize,
+                                                    uint32_t *plainTextBlockSize)
 {
     if(NULL == pProvider || NULL == pProvider->pProfile)
         return STATUS_INVALID_PARAMETERS;

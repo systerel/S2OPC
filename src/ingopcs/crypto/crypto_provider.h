@@ -34,9 +34,9 @@ StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pP
                                                         uint32_t *pLengthOut);
 StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pProvider,
                                                        uint32_t *pLength);
-StatusCode CryptoProvider_SymmetricGetLength_BlockSizes(const CryptoProvider *pProvider,
-                                                        uint32_t *cipherTextBlockSize,
-                                                        uint32_t *plainTextBlockSize);
+StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *pProvider,
+                                                    uint32_t *cipherTextBlockSize,
+                                                    uint32_t *plainTextBlockSize);
 
 // Symmetric functions
 StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
