@@ -1,7 +1,8 @@
 /*
- * Defines constants fot the cryptographic profiles. CryptoProfiles are defined in crypto_types and
- *  are defined as struct of pointers. These immutable struct are extern and const, so that a profile
- *  should only be accessible through CryptoProfile_Get.
+ * Defines constants for the cryptographic profiles. CryptoProfiles are defined in crypto_types and
+ *  are defined as struct of pointers. These immutable struct are extern and const, because they are
+ *  lib-specific (hence CryptoProfile_Get and these variables are in different translation units).
+ * The CryptoProfiles should be accessed through CryptoProfile_Get ONLY.
  *
  *  Created on: Sep 9, 2016
  *      Author: PAB
