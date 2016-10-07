@@ -79,13 +79,13 @@ SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*  namespaceT
 void SC_Client_Delete(SC_ClientConnection* scConnection);
 
 StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
-                             char*                  uri,
+                             const char*            uri,
                              void*                  pkiConfig,
-                             UA_ByteString*         clientCertificate,
-                             UA_ByteString*         clientKey,
-                             UA_ByteString*         serverCertificate,
+                             const UA_ByteString*   clientCertificate,
+                             const UA_ByteString*   clientKey,
+                             const UA_ByteString*   serverCertificate,
                              UA_MessageSecurityMode securityMode,
-                             char*                  securityPolicy,
+                             const char*            securityPolicy,
                              uint32_t               requestedLifetime,
                              SC_ConnectionEvent_CB* callback,
                              void*                  callbackData);

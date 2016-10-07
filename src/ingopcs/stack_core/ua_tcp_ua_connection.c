@@ -403,7 +403,7 @@ StatusCode OnSocketEvent_CB (Socket        socket,
     return status;
 }
 
-StatusCode CheckURI (char* uri){
+StatusCode CheckURI (const char* uri){
     StatusCode status = STATUS_NOK;
     size_t idx = 0;
     bool isPort = 0;
@@ -443,7 +443,7 @@ StatusCode CheckURI (char* uri){
 }
 
 StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
-                                      char*                       uri,
+                                      const char*                 uri,
                                       TCP_UA_Connection_Event_CB* callback,
                                       void*                       callbackData){
     StatusCode status = STATUS_NOK;
@@ -465,10 +465,10 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
 
 #if UA_MULTITHREADED == UA_FALSE
                 status = SocketManager_CreateClientSocket(NULL,
-                                              uri,
-                                              OnSocketEvent_CB,
-                                              (void*) connection,
-                                              &(connection->socket));
+                                                          uri,
+                                                          OnSocketEvent_CB,
+                                                          (void*) connection,
+                                                          &(connection->socket));
 #else
 
                 if(status == STATUS_OK){

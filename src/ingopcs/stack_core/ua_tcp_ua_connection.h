@@ -67,7 +67,7 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion);
 void TCP_UA_Connection_Delete(TCP_UA_Connection* connection);
 
 StatusCode TCP_UA_Connection_Connect(TCP_UA_Connection*          connection,
-                                     char*                       uri,
+                                     const char*                 uri,
                                      TCP_UA_Connection_Event_CB* callback,
                                      void*                       callbackData);
 void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection);
