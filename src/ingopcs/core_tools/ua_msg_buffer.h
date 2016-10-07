@@ -1,8 +1,10 @@
 /*
- * msg_buffer.h
+ *  \file msg_buffer.h
+ *
+ *  \brief A binary UA message representation with one or several chunks
  *
  *  Created on: Jul 22, 2016
- *      Author: vincent
+ *      Author: VMO
  */
 
 #ifndef INGOPCS_MSG_BUFFER_H_

@@ -45,7 +45,7 @@ StatusCode Buffer_Init(Buffer* buffer, uint32_t size)
 Buffer* Buffer_Set_Data(uint8_t* data, uint32_t position, uint32_t length, uint32_t maxsize)
 {
     Buffer* buf = NULL;
-    if(data != NULL && length > 0){
+    if(data != NULL && length > 0 && position < length && length <= maxsize){
         buf = (Buffer*) malloc(sizeof(Buffer));
         if(buf != NULL){
             buf->length = length;
@@ -69,22 +69,31 @@ void Buffer_Delete(Buffer* buffer)
 
 void Buffer_Reset(Buffer* buffer)
 {
-    buffer->position = 0;
-    buffer->length = 0;
-    memset(buffer->data, 0, buffer->max_size);
+    if(buffer != NULL && buffer->data != NULL){
+        buffer->position = 0;
+        buffer->length = 0;
+        memset(buffer->data, 0, buffer->max_size);
+    }
 }
 
-void Buffer_ResetAfterPosition(Buffer*  buffer,
-                               uint32_t position)
+StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
+                                     uint32_t position)
 {
-    buffer->position = position;
-    buffer->length = position;
-    memset(&(buffer->data[buffer->position]), 0, buffer->max_size);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(buffer != NULL && buffer->data != NULL &&
+       position <= buffer->max_size)
+    {
+        status = STATUS_OK;
+        buffer->position = position;
+        buffer->length = position;
+        memset(&(buffer->data[buffer->position]), 0, buffer->max_size);
+    }
+    return status;
 }
 
 StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(buffer->max_size >= position){
+    if(buffer->length >= position){
         status = STATUS_OK;
         buffer->position = position;
     }
@@ -95,7 +104,9 @@ StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint8_t* data = buffer->data;
-    if(buffer != NULL && buffer->max_size >= length){
+    if(buffer != NULL && buffer->data != NULL &&
+       buffer->max_size >= length &&
+       buffer->position <= length){
         status = STATUS_OK;
         if(buffer->length > length){
             data = &(buffer->data[length]);
@@ -110,7 +121,7 @@ StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
 StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count)
 {
     StatusCode status = STATUS_NOK;
-    if(data_src == NULL || buffer == NULL){
+    if(data_src == NULL || buffer == NULL || buffer->data == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
         if(buffer->position + count > buffer->max_size){
@@ -135,10 +146,10 @@ StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count)
 
 StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count)
 {
-    StatusCode status = STATUS_NOK;
-    if(buffer->position + count > buffer->length){
-        status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if( buffer != NULL && buffer->data != NULL &&
+        buffer->position + count <= buffer->length)
+    {
         if(memcpy(data_dest, &(buffer->data[buffer->position]), count) == data_dest){
             buffer->position = buffer->position + count;
             status = STATUS_OK;
@@ -153,14 +164,13 @@ StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLeng
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && src != NULL &&
-       src->length >= limitedLength &&
-       src->length <= dest->max_size)
+       dest->data != NULL && src->data != NULL &&
+       src->length >= limitedLength && src->position <= limitedLength &&
+       limitedLength <= dest->max_size)
     {
         assert(src->position <= src->length);
         status = STATUS_OK;
-    }
 
-    if(status == STATUS_OK){
         memcpy(dest->data, src->data, limitedLength);
         status = Buffer_SetDataLength(dest, limitedLength);
         if(status == STATUS_OK){

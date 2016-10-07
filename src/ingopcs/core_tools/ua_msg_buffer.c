@@ -75,9 +75,10 @@ StatusCode MsgBuffer_ResetNextChunk(UA_MsgBuffer* mBuffer,
     if(mBuffer != NULL){
         assert(mBuffer->nbBuffers == 1);
         mBuffer->currentChunkSize = bodyPosition;
-        Buffer_ResetAfterPosition(mBuffer->buffers, bodyPosition);
-        if(mBuffer->maxChunks == 0
-           || mBuffer->nbChunks < mBuffer->maxChunks)
+        status = Buffer_ResetAfterPosition(mBuffer->buffers, bodyPosition);
+        if(status == STATUS_OK &&
+           (mBuffer->maxChunks == 0
+            || mBuffer->nbChunks < mBuffer->maxChunks))
         {
             mBuffer->nbChunks = mBuffer->nbChunks + 1;
         }else{
