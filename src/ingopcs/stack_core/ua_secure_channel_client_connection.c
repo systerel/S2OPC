@@ -184,7 +184,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     }
 
     // TODO: to remove after complete integration of INGOPCS crypto provider
-    CryptoProvider* cProvider = CryptoProvider_Create(String_GetCString(&cConnection->securityPolicy));
+    CryptoProvider* cProvider = CryptoProvider_Create(String_GetRawCString(&cConnection->securityPolicy));
 
     if(status == STATUS_OK && cProvider != NULL){
         status = CryptoProvider_SymmetricGenerateKey(cProvider, //cConnection->instance->currentCryptoProvider,
@@ -459,7 +459,7 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
             cConnection->instance->currentCryptoProvider = NULL;
         }
         cConnection->instance->currentCryptoProvider = CryptoProvider_Create
-                                                        (String_GetCString(&cConnection->securityPolicy));
+                                                        (String_GetRawCString(&cConnection->securityPolicy));
         if(cConnection->instance->currentCryptoProvider == NULL){
             status = STATUS_NOK;
         }

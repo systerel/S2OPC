@@ -118,6 +118,7 @@ int main(void){
     OpcUa_Channel hChannel;
     // Endpoint URL
     UA_String stEndpointUrl;
+    String_Initialize(&stEndpointUrl);
     OpcUa_CharA *sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
     // Transport profile
     //const OpcUa_CharA *sTransportProfileUri = OpcUa_TransportProfile_UaTcp;
@@ -162,8 +163,8 @@ int main(void){
     StubClient_CallbackData Callback_Data;
 
     // Policy security: None
-    OpcUa_String* pRequestedSecurityPolicyUri = OpcUa_String_FromCString(OpcUa_SecurityPolicy_Basic256Sha256); //OpcUa_String_FromCString(OpcUa_SecurityPolicy_None);
-
+    char* pRequestedSecurityPolicyUri = OpcUa_SecurityPolicy_Basic256Sha256;
+    OpcUa_GotoErrorIfBad(uStatus);
 
     // Message security mode: None
     OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;//OpcUa_MessageSecurityMode_None;
@@ -237,7 +238,7 @@ int main(void){
                                       (UA_ByteString*) &ClientPrivateKey,            /* Private Key              */
                                       (UA_ByteString*) &ServerCertificate,           /* Server Certificate       */
                                       &pPKIConfig,                  /* PKI Config               */
-                                      (char*) pRequestedSecurityPolicyUri, /* Request secu policy */
+                                      pRequestedSecurityPolicyUri, /* Request secu policy */
                                       5,                            /* Request lifetime */
                                       messageSecurityMode,          /* Message secu mode */
                                       10,                           /* Network timeout */
@@ -258,7 +259,7 @@ int main(void){
     // Endpoint URL in OPC UA string format
     // TODO: wrappers for managing OpcUa_String
     //const OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
-    uStatus = String_InitializeFromCString(&stEndpointUrl, sEndpointUrl);
+    uStatus = String_AttachFromCstring(&stEndpointUrl, sEndpointUrl);
     OpcUa_GotoErrorIfBad(uStatus);
 
     // Empty callback data
