@@ -313,57 +313,6 @@ uint32_t GetAsymmSignatureSize(UA_String* securityPolicyUri,
     return signatureSize;
 }
 
-StatusCode GetSymmBlocksSizes(UA_String* securityPolicyUri,
-                              uint32_t*  cipherTextBlockSize,
-                              uint32_t*  plainTextBlockSize){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
-
-    if(securityPolicyUri != NULL &&
-       cipherTextBlockSize != NULL &&
-       plainTextBlockSize != NULL){
-        status = STATUS_OK;
-    }
-
-    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != UA_FALSE)
-    {
-        *cipherTextBlockSize = 1;
-        *plainTextBlockSize = 1;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
-        // AES: 128 bits block size
-        *cipherTextBlockSize = 16;
-        *plainTextBlockSize = 16;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
-        // AES: 128 bits block size
-        *cipherTextBlockSize = 16;
-        *plainTextBlockSize = 16;
-   }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
-       // AES: 128 bits block size
-       *cipherTextBlockSize = 16;
-       *plainTextBlockSize = 16;
-   }else{
-       status = STATUS_INVALID_PARAMETERS;
-   }
-   return status;
-}
-
-uint32_t GetSymmSignatureSize(UA_String* securityPolicyUri){
-    uint32_t signatureSize = 0;
-    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != UA_FALSE)
-    {
-        signatureSize = 0;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
-        // Symmetric signature algo is Sha1 => output size is 160 bits = 20 bytes
-        signatureSize = 20;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
-        // Symmetric signature algo is Sha1 => output size is 160 bits = 20 bytes
-        signatureSize = 20;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
-        // Symmetric signature algo is Sha256 => output size is 256 bits = 32 bytes
-        signatureSize = 32;
-    }
-    return signatureSize;
-}
-
 uint32_t GetMaxBodySize(UA_MsgBuffer* msgBuffer,
                         uint32_t     cipherBlockSize,
                         uint32_t     plainBlockSize,
