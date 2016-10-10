@@ -33,9 +33,14 @@ SLinkedList* SLinkedList_Create(size_t sizeMax){
 
 void* SLinkedList_Add(SLinkedList* list, uint32_t id, void* value){
     SLinkedList_Elt* elt = NULL;
+    if(list == NULL){
+        return NULL;
+    }
+
     if(list->length < list->maxLength){
         elt = malloc(sizeof(SLinkedList_Elt));
     }
+
     if(elt != NULL){
         elt->id = id;
         elt->value = value;
@@ -45,6 +50,7 @@ void* SLinkedList_Add(SLinkedList* list, uint32_t id, void* value){
     }else{
         return NULL;
     }
+
     return value;
 }
 

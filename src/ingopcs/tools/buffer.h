@@ -4,7 +4,7 @@
  *  \brief A buffer of bytes with a maximum size, length and position.
  *
  *  Created on: Jul 22, 2016
- *      Author: VMO
+ *      Author: VMO (Systerel)
  */
 
 #ifndef INGOPCS_BUFFER_H_
@@ -16,10 +16,10 @@
  *  \brief Bytes buffer structure
  */
 typedef struct {
-    uint32_t max_size; /*< maximum size (allocated bytes) */
-    uint32_t position; /*< read/write position */
-    uint32_t length;   /*< data length */
-    uint8_t* data;     /*< data bytes */
+    uint32_t max_size; /**< maximum size (allocated bytes) */
+    uint32_t position; /**< read/write position */
+    uint32_t length;   /**< data length */
+    uint8_t* data;     /**< data bytes */
 } Buffer;
 
 /**

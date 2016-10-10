@@ -63,7 +63,8 @@ SC_ClientConnection* SC_Client_Create(){
             sConnection->state = SC_Connection_Disconnected;
             scClientConnection->instance = sConnection;
 
-            scClientConnection->pendingRequests = SLinkedList_Create();
+            // TODO: limit set by configuration in ua_stacks_csts ?
+            scClientConnection->pendingRequests = SLinkedList_Create(255);
             if(scClientConnection->pendingRequests == NULL){
                 free(scClientConnection);
                 scClientConnection = NULL;
