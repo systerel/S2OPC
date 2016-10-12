@@ -10,9 +10,10 @@
 #define INGOPCS_CRYPTO_PROVIDER_H_
 
 
-#include <ua_base_types.h>
-#include <secret_buffer.h>
+#include "ua_base_types.h"
+#include "secret_buffer.h"
 #include "crypto_types.h"
+#include "key_sets.h"
 
 
 // Lib specific
@@ -37,6 +38,10 @@ StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pPr
 StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *pProvider,
                                                     uint32_t *cipherTextBlockSize,
                                                     uint32_t *plainTextBlockSize);
+StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
+                                           uint32_t *pSymmCryptoKeyLength,
+                                           uint32_t *pSymmSignKeyLength,
+                                           uint32_t *pSymmInitVectorLength);
 
 // Symmetric functions
 StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
@@ -67,5 +72,6 @@ StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
                                           uint32_t lenOutput);
 StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
                                                SecretBuffer **ppKeyGenerated);
+
 
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_

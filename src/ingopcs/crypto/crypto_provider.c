@@ -239,6 +239,31 @@ StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *pProvi
 }
 
 
+StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
+                                           uint32_t *pSymmCryptoKeyLength,
+                                           uint32_t *pSymmSignKeyLength,
+                                           uint32_t *pSymmInitVectorLength)
+{
+    StatusCode status;
+
+    if(NULL == pProvider || NULL == pSymmCryptoKeyLength || NULL == pSymmSignKeyLength || NULL == pSymmInitVectorLength)
+        return STATUS_INVALID_PARAMETERS;
+
+    *pSymmCryptoKeyLength = 0;
+    *pSymmSignKeyLength = 0;
+    *pSymmInitVectorLength = 0;
+
+    status = CryptoProvider_SymmetricGetLength_Key(pProvider, pSymmCryptoKeyLength);
+    if(status == STATUS_OK)
+    {
+        *pSymmSignKeyLength = pSymmCryptoKeyLength;
+        status = CryptoProvider_SymmetricGetLength_BlockSizes(pProvider, pSymmInitVectorLength, NULL);
+    }
+
+    return status;
+}
+
+
 // pLenOutput can be NULL
 StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
                                         const uint8_t *pInput,

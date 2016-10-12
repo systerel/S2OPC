@@ -30,7 +30,7 @@
  * DerivedSignatureKeyLength – 256
  * MinAsymmetricKeyLength – 2048                    OK
  * MaxAsymmetricKeyLength – 4096                    OK
- * CertificateSignatureAlgorithm – Sha256           OK
+ * CertificateSignatureAlgorithm – Sha256           OK, not verified
  */
 
 

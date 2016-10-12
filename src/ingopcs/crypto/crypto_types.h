@@ -10,15 +10,15 @@
 #define INGOPCS_CRYPTO_TYPES_H_
 
 
-#include <secret_buffer.h>
-#include <ua_base_types.h>
+#include "ua_base_types.h"
+#include "secret_buffer.h"
 
 struct CryptoProvider;
 struct CryptoProfile;
 struct CryptolibContext;
 
 /* ------------------------------------------------------------------------------------------------
- * CryptoProfile
+ * CryptoProfile, internal API
  * ------------------------------------------------------------------------------------------------
  */
 typedef StatusCode (*FnSymmetricEncrypt) (const struct CryptoProvider *pProvider,
