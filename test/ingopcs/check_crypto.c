@@ -372,6 +372,40 @@ START_TEST(test_crypto_symm_gen)
 END_TEST
 
 
+START_TEST(test_crypto_derive_data)
+{
+    // TODO: these tests test only Basic256Sha256
+    CryptoProvider *crypto = NULL;
+    ExposedBuffer secret[32], seed[32], output[100];
+    char hexoutput[200];
+    uint32_t lenKey, lenKeyBis, lenIV, lenSecr, lenSeed, lenOutp;
+
+    // Context init
+    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(NULL != crypto);
+    ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
+    ck_assert(lenKey == 32);
+    ck_assert(lenKeyBis == 32);
+    ck_assert(lenIV == 16);
+    lenOutp = lenKey+lenKeyBis+lenIV;
+    ck_assert(lenOutp < 100);
+    ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &lenSecr) == STATUS_OK);
+    ck_assert(lenSecr == 32);
+    lenSeed = lenSecr;
+
+    // Test vectors are unofficial, taken from https://www.ietf.org/mail-archive/web/tls/current/msg03416.html
+    ck_assert(unhexlify("9bbe436ba940f017b17652849a71db35", secret, 16) == 16);
+    memcpy(seed, "test label", 10); // We don't use labels in DerivePseudoRandomData, but RFC 5246 specifies that label is prepend to seed
+    ck_assert(unhexlify("a0ba9f936cda311827a6f796ffd5198c", seed+10, 16) == 16);
+    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, secret, 16, seed, 26, output, 100) == 0);
+    ck_assert(hexlify(output, hexoutput, 100) == 100);
+    ck_assert(memcmp(hexoutput, "e3f229ba727be17b8d122620557cd453c2aab21d07c3d495329b52d4e61edb5a6b301791e90d35c9c9a46b4e14baf9af0fa022f7077def17abfd3797c0564bab4fbc91666e9def9b97fce34f796789baa48082d122ee42c5a72e5a5110fff70187347b66", 200) == 0);
+
+    CryptoProvider_Delete(crypto);
+}
+END_TEST
+
+
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/pk.h"
@@ -388,9 +422,9 @@ START_TEST(test_pk_x509)
 
     // Context init
     crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(UA_NULL != crypto);
+    ck_assert(NULL != crypto);
     pCtx = crypto->pCryptolibContext;
-    ck_assert(UA_NULL != pCtx);
+    ck_assert(NULL != pCtx);
 
     // This is the PKI:
     // Reads a public/private key pair
@@ -493,7 +527,7 @@ Suite *tests_make_suite_crypto()
     s = suite_create("Crypto lib");
     tc_ciphers = tcase_create("Ciphers");
     tc_providers = tcase_create("Crypto Provider");
-    tc_misc = tcase_create("Misc");
+    tc_misc = tcase_create("Crypto Misc");
 
     suite_add_tcase(s, tc_misc);
     tcase_add_test(tc_misc, test_hexlify);
@@ -503,6 +537,7 @@ Suite *tests_make_suite_crypto()
     tcase_add_test(tc_ciphers, test_crypto_symm_sign);
     tcase_add_test(tc_ciphers, test_crypto_symm_gen);
     tcase_add_test(tc_ciphers, test_pk_x509);
+    tcase_add_test(tc_misc, test_crypto_derive_data);
 
     suite_add_tcase(s, tc_providers);
 
