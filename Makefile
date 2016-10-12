@@ -69,7 +69,7 @@ DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=
 
 default: all
 
-all: config mbedtls $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_server $(EXEC_DIR)/check_stack
+all: config $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_server $(EXEC_DIR)/check_stack
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
@@ -77,7 +77,7 @@ ifneq ($(MAKECMDGOALS),cleanall)
 endif
 endif
 
-config:
+config: mbedtls
 	@echo "Configuring build dirs..."
 	@\mkdir -p $(BUILD_DIR) $(EXEC_DIR)
 	@\mkdir -p $(EXEC_DIR)/revoked $(EXEC_DIR)/untrusted $(EXEC_DIR)/trusted \
