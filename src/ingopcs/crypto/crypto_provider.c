@@ -372,3 +372,42 @@ StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
 
     return status;
 }
+
+
+StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider,
+                                                 const ExposedBuffer *pSecret,
+                                                 uint32_t lenSecret,
+                                                 const ExposedBuffer *pSeed,
+                                                 uint32_t lenSeed,
+                                                 ExposedBuffer *pOutput,
+                                                 uint32_t lenOutput)
+{
+    if(NULL == pProvider || NULL == pProvider->pCryptolibContext || NULL == pProvider->pProfile ||
+       NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
+        return STATUS_INVALID_PARAMETERS;
+
+    return pProvider->pProfile->pFnDeriveData(pProvider,
+                                              pSecret, lenSecret,
+                                              pSeed, lenSeed,
+                                              pOutput, lenOutput);
+}
+
+
+/*StatusCode CryptoProvider_DeriveClientKeySets(const CryptoProvider *pProvider,
+                                              const SecretBuffer *pClientNonce,
+                                              const UA_ByteString *pServerNonce,
+                                              SC_SecurityKeySets *pKeySets)
+{
+    return STATUS_OK;
+}
+
+
+StatusCode CryptoProvider_DeriveServerKeySets(const CryptoProvider *pProvider,
+                                              const UA_ByteString *pClientNonce,
+                                              const SecretBuffer *pServerNonce,
+                                              SC_SecurityKeySets *pKeySets)
+{
+    return STATUS_OK;
+}*/
+
+

@@ -74,4 +74,21 @@ StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
                                                SecretBuffer **ppKeyGenerated);
 
 
+// Key derivation
+StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider,
+                                                 const ExposedBuffer *pSecret,
+                                                 uint32_t lenSecret,
+                                                 const ExposedBuffer *pSeed,
+                                                 uint32_t lenSeed,
+                                                 ExposedBuffer *pOutput,
+                                                 uint32_t lenOutput);
+/*StatusCode CryptoProvider_DeriveClientKeySets(const CryptoProvider *pProvider,
+                                              const SecretBuffer *pClientNonce,
+                                              const UA_ByteString *pServerNonce,
+                                              SC_SecurityKeySets *pKeySets);
+StatusCode CryptoProvider_DeriveServerKeySets(const CryptoProvider *pProvider,
+                                              const UA_ByteString *pClientNonce,
+                                              const SecretBuffer *pServerNonce,
+                                              SC_SecurityKeySets *pKeySets);*/
+
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_

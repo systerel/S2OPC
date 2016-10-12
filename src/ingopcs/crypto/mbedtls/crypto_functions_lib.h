@@ -43,4 +43,10 @@ StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider
                                                         const uint8_t *pSignature);
 StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
                                             ExposedBuffer *pKey);
-
+StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
+                                                const ExposedBuffer *pSecret,
+                                                uint32_t lenSecret,
+                                                const ExposedBuffer *pSeed,
+                                                uint32_t lenSeed,
+                                                const ExposedBuffer *pOutput,
+                                                uint32_t lenOutput);

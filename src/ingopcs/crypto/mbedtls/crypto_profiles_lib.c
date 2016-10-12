@@ -35,5 +35,6 @@ const CryptoProfile g_cpBasic256Sha256 = {
         .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,
         .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
         .pFnSymmGenKey = &CryptoProvider_SymmGenKey_AES256,
+        .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
 };
 

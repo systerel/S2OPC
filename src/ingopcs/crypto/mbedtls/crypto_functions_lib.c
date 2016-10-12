@@ -144,3 +144,100 @@ StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
 
     return STATUS_OK;
 }
+
+
+// PRF with SHA256 as defined in RFC 5246 (TLS v1.2), §5, without label.
+// Based on a HMAC with SHA-256.
+StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
+                                                const ExposedBuffer *pSecret,
+                                                uint32_t lenSecret,
+                                                const ExposedBuffer *pSeed,
+                                                uint32_t lenSeed,
+                                                ExposedBuffer *pOutput,
+                                                uint32_t lenOutput)
+{
+    StatusCode status = STATUS_OK;
+    mbedtls_md_context_t md_ctx;
+    uint8_t *bufA = NULL;
+    uint32_t lenBufA = 0; // Stores A(i) + seed except for i = 0
+    uint32_t lenHash = 0;
+    uint32_t offsetOutput = 0;
+    //uint32_t i = 0;
+
+    if(NULL == pProvider || NULL == pProvider->pCryptolibContext || NULL == pProvider->pProfile ||
+       NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
+        return STATUS_INVALID_PARAMETERS;
+
+    const mbedtls_md_info_t *pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+
+    if(NULL == pmd_info)
+        return STATUS_NOK;
+
+    lenHash = mbedtls_md_get_size(pmd_info);
+    lenBufA = lenHash + lenSeed;
+    if(lenHash == 0 || lenBufA <= lenSeed) // Test uint overflow
+        return STATUS_NOK;
+
+    bufA = malloc(lenBufA);
+    if(NULL == bufA)
+        return STATUS_NOK;
+    // Hash has a constant length, so the seed is concatenated only once. The beginning of bufA is initialized later.
+    memcpy(bufA + lenHash, pSeed, lenSeed);
+
+    // Prepares context for HMAC operations
+    mbedtls_md_init(&md_ctx);
+    status = mbedtls_md_setup(&md_ctx, pmd_info, 1) == 0 ? STATUS_OK : STATUS_NOK;
+
+    if(STATUS_OK == status)
+    {
+        // A(0) is seed, A(1) = HMAC_SHA256(secret, A(0))
+        status = mbedtls_md_hmac_starts(&md_ctx, pSecret, lenSecret) == 0 ? STATUS_OK : STATUS_NOK;
+        if(STATUS_OK == status)
+            status = mbedtls_md_hmac_update(&md_ctx, pSeed, lenSeed) == 0 ? STATUS_OK : STATUS_NOK;
+        if(STATUS_OK == status)
+            status = mbedtls_md_hmac_finish(&md_ctx, bufA) == 0 ? STATUS_OK : STATUS_NOK;
+
+        // Iterates and produces output
+        while(offsetOutput < lenOutput && STATUS_OK == status)
+        {
+            // P_SHA256(i) = HMAC_SHA256(secret, A(i+1)+seed)
+            if(STATUS_OK == status)
+                status = mbedtls_md_hmac_reset(&md_ctx) == 0 ? STATUS_OK : STATUS_NOK;
+            if(STATUS_OK == status)
+                status = mbedtls_md_hmac_update(&md_ctx, bufA, lenBufA) == 0 ? STATUS_OK : STATUS_NOK;
+            // We did not generate enough data yet
+            if(offsetOutput + lenHash < lenOutput)
+            {
+                if(STATUS_OK == status)
+                    status = mbedtls_md_hmac_finish(&md_ctx, &pOutput[offsetOutput]) == 0 ? STATUS_OK : STATUS_NOK;
+                offsetOutput += lenHash;
+
+                // A(i+2) = HMAC_SHA256(secret, A(i+1))
+                if(STATUS_OK == status)
+                    status = mbedtls_md_hmac_reset(&md_ctx) == 0 ? STATUS_OK : STATUS_NOK;
+                if(STATUS_OK == status)
+                    status = mbedtls_md_hmac_update(&md_ctx, bufA, lenHash) == 0 ? STATUS_OK : STATUS_NOK;
+                if(STATUS_OK == status)
+                    status = mbedtls_md_hmac_finish(&md_ctx, bufA) == 0 ? STATUS_OK : STATUS_NOK;
+            }
+            // We did generate enough data
+            else
+            {
+                // Copies P_SHA256 to A because we are not using A again afterwards
+                if(STATUS_OK == status)
+                    status = mbedtls_md_hmac_finish(&md_ctx, bufA) == 0 ? STATUS_OK : STATUS_NOK;
+                memcpy(&pOutput[offsetOutput], bufA, lenOutput-offsetOutput);
+                offsetOutput = lenOutput;
+            }
+        }
+        // Free the context
+        mbedtls_md_free(&md_ctx);
+    }
+
+    // Clear and release A
+    memset(bufA, 0, lenBufA);
+    free(bufA);
+
+    return STATUS_OK;
+}
+
