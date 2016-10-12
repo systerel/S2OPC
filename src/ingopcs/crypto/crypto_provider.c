@@ -256,7 +256,7 @@ StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
     status = CryptoProvider_SymmetricGetLength_Key(pProvider, pSymmCryptoKeyLength);
     if(status == STATUS_OK)
     {
-        *pSymmSignKeyLength = pSymmCryptoKeyLength;
+        *pSymmSignKeyLength = *pSymmCryptoKeyLength;
         status = CryptoProvider_SymmetricGetLength_BlockSizes(pProvider, pSymmInitVectorLength, NULL);
     }
 
