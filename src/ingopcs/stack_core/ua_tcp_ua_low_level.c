@@ -16,7 +16,7 @@ StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
                                TCP_UA_MsgType type){
     StatusCode status = STATUS_OK;
     UA_Byte fByte = 'F';
-    assert(msgBuffer->buffers->max_size > UA_HEADER_LENGTH);
+    assert(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH);
     switch(type){
         case TCP_UA_Message_Hello:
             status = Buffer_Write(msgBuffer->buffers, HEL, 3);
@@ -39,11 +39,11 @@ StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
         status = TCP_UA_WriteMsgBuffer(msgBuffer, &fByte, 1);
     }
     if(status == STATUS_OK){
-        const uint32_t headerLength = UA_HEADER_LENGTH;
+        const uint32_t headerLength = TCP_UA_HEADER_LENGTH;
         status = UInt32_Write(&headerLength, msgBuffer);
         if(status == STATUS_OK){
             msgBuffer->type = type;
-            msgBuffer->currentChunkSize = UA_HEADER_LENGTH;
+            msgBuffer->currentChunkSize = TCP_UA_HEADER_LENGTH;
             msgBuffer->nbChunks = 1;
         }
     }
@@ -75,7 +75,7 @@ StatusCode TCP_UA_ReadData(Socket        socket,
     StatusCode status = STATUS_NOK;
     uint32_t readBytes;
 
-    if(msgBuffer->buffers->length >= UA_HEADER_LENGTH){
+    if(msgBuffer->buffers->length >= TCP_UA_HEADER_LENGTH){
         assert(msgBuffer->currentChunkSize > 0);
 
         if(msgBuffer->buffers->length < msgBuffer->currentChunkSize){
@@ -94,18 +94,18 @@ StatusCode TCP_UA_ReadData(Socket        socket,
         }
     }
 
-    if(msgBuffer->buffers->length < UA_HEADER_LENGTH){
+    if(msgBuffer->buffers->length < TCP_UA_HEADER_LENGTH){
 
         // Attempt to read header
-        if(msgBuffer->buffers->max_size > UA_HEADER_LENGTH){
-            readBytes = UA_HEADER_LENGTH - msgBuffer->buffers->length;
+        if(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH){
+            readBytes = TCP_UA_HEADER_LENGTH - msgBuffer->buffers->length;
             status = Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
             if(status == STATUS_OK && readBytes > 0){
                 Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
             }
-            if(msgBuffer->buffers->length == UA_HEADER_LENGTH){
+            if(msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH){
                 status = TCP_UA_ReadHeader(msgBuffer);
-            }else if(msgBuffer->buffers->length > UA_HEADER_LENGTH){
+            }else if(msgBuffer->buffers->length > TCP_UA_HEADER_LENGTH){
                 status = STATUS_INVALID_STATE;
             }else{
                 // Incomplete header: Wait for new read event !
@@ -148,7 +148,7 @@ StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer){
     UA_Byte isFinal;
 
     if(msgBuffer != NULL
-       && msgBuffer->buffers->length == UA_HEADER_LENGTH
+       && msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH
        && msgBuffer->type == TCP_UA_Message_Unknown)
     {
         // READ message type
@@ -170,7 +170,7 @@ StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer){
                 }else if(memcmp(msgType, OPN, 3) == 0){
                     msgBuffer->type = TCP_UA_Message_SecureMessage;
                     msgBuffer->secureType = UA_OpenSecureChannel;
-                }else if(memcmp(msgType, ERR, 3) == 0){
+                }else if(memcmp(msgType, CLO, 3) == 0){
                     msgBuffer->type = TCP_UA_Message_SecureMessage;
                     msgBuffer->secureType = UA_CloseSecureChannel;
                 }else{

@@ -92,9 +92,11 @@ StatusCode MsgBuffer_ResetNextChunk(UA_MsgBuffer* mBuffer,
 StatusCode MsgBuffer_SetSecureMsgType(UA_MsgBuffer*        mBuffer,
                                       UA_SecureMessageType sType){
     StatusCode status = STATUS_INVALID_STATE;
-    if(mBuffer != NULL && mBuffer->type == TCP_UA_Message_Unknown){
+    if(mBuffer != NULL &&
+        (mBuffer->type == TCP_UA_Message_Unknown || mBuffer->type == TCP_UA_Message_SecureMessage)){
         assert(mBuffer->nbBuffers == 1);
         mBuffer->secureType = sType;
+        mBuffer->type = TCP_UA_Message_SecureMessage;
         status = STATUS_OK;
     }
     return status;
