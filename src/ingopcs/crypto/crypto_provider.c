@@ -398,21 +398,175 @@ StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider
 }
 
 
-/*StatusCode CryptoProvider_DeriveClientKeySets(const CryptoProvider *pProvider,
-                                              const SecretBuffer *pClientNonce,
-                                              const UA_ByteString *pServerNonce,
-                                              SC_SecurityKeySets *pKeySets)
+static inline StatusCode DeriveKS(const CryptoProvider *pProvider,
+                                  const ExposedBuffer *pSecret, uint32_t lenSecret,
+                                  const ExposedBuffer *pSeed, uint32_t lenSeed,
+                                  SC_SecurityKeySet *pks,
+                                  uint8_t *genData, uint32_t lenData,
+                                  uint32_t lenKeySign, uint32_t lenKeyEncr, uint32_t lenIV);
+StatusCode CryptoProvider_DeriveKeySets_Low(const CryptoProvider *pProvider,
+                                        const ExposedBuffer *pClientNonce,
+                                        uint32_t lenClientNonce,
+                                        const ExposedBuffer *pServerNonce,
+                                        uint32_t lenServerNonce,
+                                        SC_SecurityKeySet *pClientKeySet,
+                                        SC_SecurityKeySet *pServerKeySet)
 {
-    return STATUS_OK;
+    StatusCode status = STATUS_OK;
+    uint8_t *genData = NULL;
+    uint32_t lenData = 0;
+    uint32_t lenKeyEncr = 0, lenKeySign = 0, lenIV = 0;
+
+    // Verify pointers
+    if(NULL == pProvider || NULL == pClientNonce || NULL == pServerNonce || NULL == pClientKeySet || NULL == pServerKeySet)
+        return STATUS_INVALID_PARAMETERS;
+
+    if(NULL == pClientKeySet->signKey || NULL == pClientKeySet->encryptKey || NULL == pClientKeySet->initVector)
+        return STATUS_INVALID_PARAMETERS;
+
+    if(NULL == pServerKeySet->signKey || NULL == pServerKeySet->encryptKey || NULL == pServerKeySet->initVector)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Calculate expected lengths
+    if(CryptoProvider_DeriveGetLengths(pProvider, &lenKeyEncr, &lenKeySign, &lenIV) != STATUS_OK)
+        return STATUS_NOK;
+
+    // Verify lengths
+    if(SecretBuffer_GetLength(pClientKeySet->signKey) != lenKeySign ||
+       SecretBuffer_GetLength(pClientKeySet->encryptKey) != lenKeyEncr ||
+       SecretBuffer_GetLength(pClientKeySet->initVector) != lenIV)
+        return STATUS_INVALID_PARAMETERS;
+
+    if(SecretBuffer_GetLength(pServerKeySet->signKey) != lenKeySign ||
+       SecretBuffer_GetLength(pServerKeySet->encryptKey) != lenKeyEncr ||
+       SecretBuffer_GetLength(pServerKeySet->initVector) != lenIV)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Allocate buffer for PRF generated data
+    lenData = lenKeySign+lenKeyEncr+lenIV;
+    genData = malloc(lenData);
+    if(NULL == genData)
+        return STATUS_NOK;
+
+    // Derives keyset for the client
+    status = DeriveKS(pProvider, pServerNonce, lenServerNonce, pClientNonce, lenClientNonce,
+                      pClientKeySet, genData, lenData,
+                      lenKeySign, lenKeyEncr, lenIV);
+    // Derives keyset for the server
+    if(STATUS_OK == status)
+        status = DeriveKS(pProvider, pClientNonce, lenClientNonce, pServerNonce, lenServerNonce,
+                          pServerKeySet, genData, lenData,
+                          lenKeySign, lenKeyEncr, lenIV);
+
+    // Clears and delete
+    memset(genData, 0, lenData);
+    free(genData);
+
+    return status;
+}
+
+static inline StatusCode DeriveKS(const CryptoProvider *pProvider,
+                                  const ExposedBuffer *pSecret, uint32_t lenSecret,
+                                  const ExposedBuffer *pSeed, uint32_t lenSeed,
+                                  SC_SecurityKeySet *pks,
+                                  uint8_t *genData, uint32_t lenData,
+                                  uint32_t lenKeySign, uint32_t lenKeyEncr, uint32_t lenIV)
+{
+    StatusCode status = STATUS_OK;
+    ExposedBuffer *pExpEncr = NULL, *pExpSign = NULL, *pExpIV = NULL;
+
+    // Exposes SecretBuffers
+    pExpEncr = SecretBuffer_Expose(pks->encryptKey);
+    pExpSign = SecretBuffer_Expose(pks->signKey);
+    pExpIV = SecretBuffer_Expose(pks->initVector);
+
+    // Verifies exposures
+    if(NULL == pExpEncr || NULL == pExpSign || NULL == pExpIV)
+        return STATUS_NOK;
+
+    // Generates KeySet
+    status = CryptoProvider_DerivePseudoRandomData(pProvider, pSecret, lenSecret, pSeed, lenSeed, genData, lenData);
+    if(status == STATUS_OK)
+    {
+        memcpy(pExpSign, genData, lenKeySign);
+        memcpy(pExpEncr, genData+lenKeySign, lenKeyEncr);
+        memcpy(pExpIV, genData+lenKeySign+lenKeyEncr, lenIV);
+    }
+
+    // Release ExposedBuffers
+    SecretBuffer_Unexpose(pExpEncr);
+    SecretBuffer_Unexpose(pExpSign);
+    SecretBuffer_Unexpose(pExpIV);
+
+    return status;
 }
 
 
-StatusCode CryptoProvider_DeriveServerKeySets(const CryptoProvider *pProvider,
-                                              const UA_ByteString *pClientNonce,
-                                              const SecretBuffer *pServerNonce,
-                                              SC_SecurityKeySets *pKeySets)
+StatusCode CryptoProvider_DeriveClientKeySets_Low(const CryptoProvider *pProvider,
+                                              const SecretBuffer *pClientNonce,
+                                              const ExposedBuffer *pServerNonce,
+                                              uint32_t lenServerNonce,
+                                              SC_SecurityKeySet *pClientKeySet,
+                                              SC_SecurityKeySet *pServerKeySet)
 {
-    return STATUS_OK;
-}*/
+    StatusCode status = STATUS_OK;
+    ExposedBuffer *pExpCli = NULL;
+
+    if(NULL == pProvider || NULL == pClientNonce || NULL == pServerNonce || NULL == pClientKeySet || NULL == pServerKeySet)
+        return STATUS_INVALID_PARAMETERS;
+
+    pExpCli = SecretBuffer_Expose(pClientNonce);
+    if(NULL == pExpCli)
+        status = STATUS_INVALID_PARAMETERS;
+
+    if(STATUS_OK == status)
+    {
+        status = CryptoProvider_DeriveKeySets_Low(pProvider,
+                                                  pExpCli,
+                                                  SecretBuffer_GetLength(pClientNonce),
+                                                  pServerNonce,
+                                                  lenServerNonce,
+                                                  pClientKeySet,
+                                                  pServerKeySet);
+    }
+
+    SecretBuffer_Unexpose(pExpCli);
+
+    return status;
+}
+
+
+StatusCode CryptoProvider_DeriveServerKeySets_Low(const CryptoProvider *pProvider,
+                                              const ExposedBuffer *pClientNonce,
+                                              uint32_t lenClientNonce,
+                                              const SecretBuffer *pServerNonce,
+                                              SC_SecurityKeySet *pClientKeySet,
+                                              SC_SecurityKeySet *pServerKeySet)
+{
+    StatusCode status = STATUS_OK;
+    ExposedBuffer *pExpSer = NULL;
+
+    if(NULL == pProvider || NULL == pClientNonce || NULL == pServerNonce || NULL == pClientKeySet || NULL == pServerKeySet)
+        return STATUS_INVALID_PARAMETERS;
+
+    pExpSer = SecretBuffer_Expose(pServerNonce);
+    if(NULL == pExpSer)
+        status = STATUS_INVALID_PARAMETERS;
+
+    if(STATUS_OK == status)
+    {
+        status = CryptoProvider_DeriveKeySets_Low(pProvider,
+                                                  pClientNonce,
+                                                  lenClientNonce,
+                                                  pExpSer,
+                                                  SecretBuffer_GetLength(pServerNonce),
+                                                  pClientKeySet,
+                                                  pServerKeySet);
+    }
+
+    SecretBuffer_Unexpose(pExpSer);
+
+    return status;
+}
 
 

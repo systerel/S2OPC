@@ -82,13 +82,24 @@ StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider
                                                  uint32_t lenSeed,
                                                  ExposedBuffer *pOutput,
                                                  uint32_t lenOutput);
-/*StatusCode CryptoProvider_DeriveClientKeySets(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_DeriveKeySets_Low(const CryptoProvider *pProvider,
+                                        const ExposedBuffer *pClientNonce,
+                                        uint32_t lenClientNonce,
+                                        const ExposedBuffer *pServerNonce,
+                                        uint32_t lenServerNonce,
+                                        SC_SecurityKeySet *pClientKeySet,
+                                        SC_SecurityKeySet *pServerKeySet);
+StatusCode CryptoProvider_DeriveClientKeySets_Low(const CryptoProvider *pProvider,
                                               const SecretBuffer *pClientNonce,
-                                              const UA_ByteString *pServerNonce,
-                                              SC_SecurityKeySets *pKeySets);
-StatusCode CryptoProvider_DeriveServerKeySets(const CryptoProvider *pProvider,
-                                              const UA_ByteString *pClientNonce,
+                                              const ExposedBuffer *pServerNonce,
+                                              uint32_t lenServerNonce,
+                                              SC_SecurityKeySet *pClientKeySet,
+                                              SC_SecurityKeySet *pServerKeySet);
+StatusCode CryptoProvider_DeriveServerKeySets_Low(const CryptoProvider *pProvider,
+                                              const ExposedBuffer *pClientNonce,
+                                              uint32_t lenClientNonce,
                                               const SecretBuffer *pServerNonce,
-                                              SC_SecurityKeySets *pKeySets);*/
+                                              SC_SecurityKeySet *pClientKeySet,
+                                              SC_SecurityKeySet *pServerKeySet);
 
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_
