@@ -63,7 +63,8 @@ StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
     ExposedBuffer* pExpKey = NULL;
     ExposedBuffer* pExpIV = NULL;
 
-    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput ||
+       NULL == pProvider->pProfile->pFnSymmEncrypt)
         return STATUS_INVALID_PARAMETERS;
     if(lenPlainText != lenOutput)
         return STATUS_INVALID_PARAMETERS;
@@ -108,7 +109,8 @@ StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
     ExposedBuffer* pExpKey = NULL;
     ExposedBuffer* pExpIV = NULL;
 
-    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput ||
+       NULL == pProvider->pProfile->pFnSymmDecrypt)
         return STATUS_INVALID_PARAMETERS;
     if(lenCipherText != lenOutput)
         return STATUS_INVALID_PARAMETERS;
@@ -276,7 +278,8 @@ StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
     ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
-    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput ||
+       NULL == pProvider->pProfile->pFnSymmSign)
         return STATUS_INVALID_PARAMETERS;
 
     // Assert output size
@@ -313,7 +316,8 @@ StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
     ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
-    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature ||
+       NULL == pProvider->pProfile->pFnSymmVerif)
         return STATUS_INVALID_PARAMETERS;
 
     // Assert output size
@@ -346,7 +350,7 @@ StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
     ExposedBuffer *pExpKey;
     uint32_t lenKeyAPI;
 
-    if(NULL == pProvider || NULL == ppKeyGenerated)
+    if(NULL == pProvider || NULL == ppKeyGenerated || NULL == pProvider->pProfile->pFnSymmGenKey)
         return STATUS_INVALID_PARAMETERS;
 
     // Empties pointer in case an error occurs after that point.
@@ -383,7 +387,8 @@ StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider
                                                  uint32_t lenOutput)
 {
     if(NULL == pProvider || NULL == pProvider->pCryptolibContext || NULL == pProvider->pProfile ||
-       NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
+       NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput ||
+       NULL == pProvider->pProfile->pFnDeriveData)
         return STATUS_INVALID_PARAMETERS;
 
     return pProvider->pProfile->pFnDeriveData(pProvider,
