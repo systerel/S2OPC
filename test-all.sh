@@ -13,7 +13,7 @@ ISLOCAL=$1
 
 mid() {
 if [[ -z $ISLOCAL || $ISLOCAL != "LOCAL" ]]; then
-    sudo /etc/scripts/make-in-docker $DOCKER_IMAGE "$@"
+    sudo /etc/scripts/make-in-docker $DOCKER_IMAGE CC=gcc "$@"
 else
     make "$@"
 fi
@@ -22,7 +22,7 @@ fi
 # Build and run tests
 mid cleanall all
 # run unit tests
-mid check CC=gcc CK_TAP_LOG_FILE_NAME=results.tap
+mid check CK_TAP_LOG_FILE_NAME=results.tap
 # run client server tests
 ./run_client_server_test.sh
 
