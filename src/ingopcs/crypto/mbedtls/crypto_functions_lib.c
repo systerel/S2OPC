@@ -29,19 +29,23 @@ StatusCode CryptoProvider_SymmEncrypt_AES256(const CryptoProvider *pProvider,
                                                     uint8_t *pOutput,
                                                     uint32_t lenOutput)
 {
-    (void) pProvider;
     mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation initialize a new context.
-    unsigned char iv_cpy[16]; // Performance note: IV is modified during the operation, so it should be copied first
+    unsigned char iv_cpy[SecurityPolicy_Basic256Sha256_SymmLen_Block]; // IV is modified during the operation, so it must be copied first
+
+    (void) pProvider;
 
     if(lenOutput < lenPlainText)
         return STATUS_INVALID_PARAMETERS;
 
-    memcpy(iv_cpy, pIV, 16);
+    memcpy(iv_cpy, pIV, SecurityPolicy_Basic256Sha256_SymmLen_Block);
 
     if(mbedtls_aes_setkey_enc(&aes, (unsigned char *)pKey, 256) != 0)
         return STATUS_INVALID_PARAMETERS;
     if(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, lenPlainText, iv_cpy, (unsigned char *)pInput, (unsigned char *)pOutput) != 0)
         return STATUS_INVALID_PARAMETERS;
+
+    memset(iv_cpy, 0, SecurityPolicy_Basic256Sha256_SymmLen_Block);
+    mbedtls_aes_free(&aes);
 
     return STATUS_OK;
 }
@@ -55,19 +59,24 @@ StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvider,
                                        uint8_t *pOutput,
                                        uint32_t lenOutput)
 {
-    (void) pProvider;
     mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation initialize a new context.
-    unsigned char iv_cpy[16]; // Performance note: IV is modified during the operation, so it should be copied first
+    unsigned char iv_cpy[SecurityPolicy_Basic256Sha256_SymmLen_Block]; // IV is modified during the operation, so it must be copied first
+
+    (void) pProvider;
 
     if(lenOutput < lenCipherText)
         return STATUS_INVALID_PARAMETERS;
 
-    memcpy(iv_cpy, pIV, 16);
+    memcpy(iv_cpy, pIV, SecurityPolicy_Basic256Sha256_SymmLen_Block);
+    mbedtls_aes_init(&aes);
 
     if(mbedtls_aes_setkey_dec(&aes, (unsigned char *)pKey, SecurityPolicy_Basic256Sha256_SymmLen_Key*8) != 0)
         return STATUS_INVALID_PARAMETERS;
     if(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (unsigned char *)pInput, (unsigned char *)pOutput) != 0)
         return STATUS_INVALID_PARAMETERS;
+
+    memset(iv_cpy, 0, SecurityPolicy_Basic256Sha256_SymmLen_Block);
+    mbedtls_aes_free(&aes);
 
     return STATUS_OK;
 }
@@ -79,7 +88,6 @@ StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pProvider,
                                                       const ExposedBuffer *pKey,
                                                       uint8_t *pOutput)
 {
-    const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     uint32_t lenKey;
 
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput)
@@ -88,6 +96,7 @@ StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pProvider,
     if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKey) != STATUS_OK)
         return STATUS_NOK;
 
+    const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     if(mbedtls_md_hmac(pinfo, pKey, lenKey, pInput, lenInput, pOutput) != 0)
         return STATUS_NOK;
 
@@ -101,7 +110,6 @@ StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider
                                                         const ExposedBuffer *pKey,
                                                         const uint8_t *pSignature)
 {
-    const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     uint32_t lenKey, lenSig;
     uint8_t *pCalcSig;
     StatusCode status = STATUS_OK;
@@ -119,7 +127,9 @@ StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider
     if(NULL == pCalcSig)
         return STATUS_NOK;
 
+    const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
     status = mbedtls_md_hmac(pinfo, pKey, lenKey, pInput, lenInput, pCalcSig) != 0 ? STATUS_NOK : STATUS_OK;
+
     if(STATUS_OK == status)
         status = memcmp(pSignature, pCalcSig, lenSig) != 0 ? STATUS_NOK : STATUS_OK;
 
