@@ -112,11 +112,14 @@ $(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/ch
 	@echo "Linking $@..."
 	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
+client_server_test: $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_server
+	./run_client_server_test.sh
+
 mbedtls:
 	@echo "Building mbedtls..."
 	@$(MAKE) -C $(MBEDTLS_DIR)
 
-check: config $(EXEC_DIR)/check_stack
+check: $(EXEC_DIR)/check_stack
 	@echo "Executing tests..."
 	@\cd $(EXEC_DIR) && ./check_stack
 

@@ -24,5 +24,5 @@ mid cleanall all
 # run unit tests
 mid check CK_TAP_LOG_FILE_NAME=results.tap
 # run client server tests
-./run_client_server_test.sh
+mid client_server_test
 
