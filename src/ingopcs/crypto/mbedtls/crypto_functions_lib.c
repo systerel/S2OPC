@@ -148,6 +148,14 @@ StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
 
 // PRF with SHA256 as defined in RFC 5246 (TLS v1.2), §5, without label.
 // Based on a HMAC with SHA-256.
+static inline StatusCode PSHA_outer(const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
+                                    const ExposedBuffer *pSecret, uint32_t lenSecret,
+                                    const ExposedBuffer *pSeed, uint32_t lenSeed,
+                                    ExposedBuffer *pOutput, uint32_t lenOutput);
+static inline StatusCode PSHA(mbedtls_md_context_t *pmd, const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
+                              const ExposedBuffer *pSecret, uint32_t lenSecret,
+                              const ExposedBuffer *pSeed, uint32_t lenSeed,
+                              ExposedBuffer *pOutput, uint32_t lenOutput);
 StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
                                                 const ExposedBuffer *pSecret,
                                                 uint32_t lenSecret,
@@ -157,15 +165,13 @@ StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
                                                 uint32_t lenOutput)
 {
     StatusCode status = STATUS_OK;
-    mbedtls_md_context_t md_ctx;
     uint8_t *bufA = NULL;
     uint32_t lenBufA = 0; // Stores A(i) + seed except for i = 0
     uint32_t lenHash = 0;
-    uint32_t offsetOutput = 0;
-    //uint32_t i = 0;
 
-    if(NULL == pProvider || NULL == pProvider->pCryptolibContext || NULL == pProvider->pProfile ||
-       NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
+    (void)(pProvider);
+
+    if(NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
         return STATUS_INVALID_PARAMETERS;
 
     const mbedtls_md_info_t *pmd_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
@@ -181,62 +187,96 @@ StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
     bufA = malloc(lenBufA);
     if(NULL == bufA)
         return STATUS_NOK;
-    // Hash has a constant length, so the seed is concatenated only once. The beginning of bufA is initialized later.
+
+    // bufA contains A(i) + seed where + is the concatenation.
+    // length(A(i)) and the content of seed do not change, so seed is written only once. The beginning of bufA is initialized later.
     memcpy(bufA + lenHash, pSeed, lenSeed);
 
-    // Prepares context for HMAC operations
-    mbedtls_md_init(&md_ctx);
-    status = mbedtls_md_setup(&md_ctx, pmd_info, 1) == 0 ? STATUS_OK : STATUS_NOK;
-
-    if(STATUS_OK == status)
-    {
-        // A(0) is seed, A(1) = HMAC_SHA256(secret, A(0))
-        status = mbedtls_md_hmac_starts(&md_ctx, pSecret, lenSecret) == 0 ? STATUS_OK : STATUS_NOK;
-        if(STATUS_OK == status)
-            status = mbedtls_md_hmac_update(&md_ctx, pSeed, lenSeed) == 0 ? STATUS_OK : STATUS_NOK;
-        if(STATUS_OK == status)
-            status = mbedtls_md_hmac_finish(&md_ctx, bufA) == 0 ? STATUS_OK : STATUS_NOK;
-
-        // Iterates and produces output
-        while(offsetOutput < lenOutput && STATUS_OK == status)
-        {
-            // P_SHA256(i) = HMAC_SHA256(secret, A(i+1)+seed)
-            if(STATUS_OK == status)
-                status = mbedtls_md_hmac_reset(&md_ctx) == 0 ? STATUS_OK : STATUS_NOK;
-            if(STATUS_OK == status)
-                status = mbedtls_md_hmac_update(&md_ctx, bufA, lenBufA) == 0 ? STATUS_OK : STATUS_NOK;
-            // We did not generate enough data yet
-            if(offsetOutput + lenHash < lenOutput)
-            {
-                if(STATUS_OK == status)
-                    status = mbedtls_md_hmac_finish(&md_ctx, &pOutput[offsetOutput]) == 0 ? STATUS_OK : STATUS_NOK;
-                offsetOutput += lenHash;
-
-                // A(i+2) = HMAC_SHA256(secret, A(i+1))
-                if(STATUS_OK == status)
-                    status = mbedtls_md_hmac_reset(&md_ctx) == 0 ? STATUS_OK : STATUS_NOK;
-                if(STATUS_OK == status)
-                    status = mbedtls_md_hmac_update(&md_ctx, bufA, lenHash) == 0 ? STATUS_OK : STATUS_NOK;
-                if(STATUS_OK == status)
-                    status = mbedtls_md_hmac_finish(&md_ctx, bufA) == 0 ? STATUS_OK : STATUS_NOK;
-            }
-            // We did generate enough data
-            else
-            {
-                // Copies P_SHA256 to A because we are not using A again afterwards
-                if(STATUS_OK == status)
-                    status = mbedtls_md_hmac_finish(&md_ctx, bufA) == 0 ? STATUS_OK : STATUS_NOK;
-                memcpy(&pOutput[offsetOutput], bufA, lenOutput-offsetOutput);
-                offsetOutput = lenOutput;
-            }
-        }
-        // Free the context
-        mbedtls_md_free(&md_ctx);
-    }
+    // Next stage generates a context for the PSHA
+    status = PSHA_outer(pmd_info, bufA, lenBufA, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
 
     // Clear and release A
     memset(bufA, 0, lenBufA);
     free(bufA);
+
+    return status;
+}
+
+static inline StatusCode PSHA_outer(const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
+                                    const ExposedBuffer *pSecret, uint32_t lenSecret,
+                                    const ExposedBuffer *pSeed, uint32_t lenSeed,
+                                    ExposedBuffer *pOutput, uint32_t lenOutput)
+{
+    StatusCode status = STATUS_OK;
+    mbedtls_md_context_t md_ctx;
+
+    // Prepares context for HMAC operations
+    mbedtls_md_init(&md_ctx);
+    if(mbedtls_md_setup(&md_ctx, pmd_info, 1) != 0)
+        return STATUS_NOK;
+
+    // Effectively does the PSHA with the correctly prepared context
+    status = PSHA(&md_ctx, pmd_info, bufA, lenBufA, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
+
+    // Free the context
+    mbedtls_md_free(&md_ctx);
+
+    return status;
+}
+
+static inline StatusCode PSHA(mbedtls_md_context_t *pmd, const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
+                              const ExposedBuffer *pSecret, uint32_t lenSecret,
+                              const ExposedBuffer *pSeed, uint32_t lenSeed,
+                              ExposedBuffer *pOutput, uint32_t lenOutput)
+{
+    uint32_t lenHash = 0;
+    uint32_t offsetOutput = 0;
+
+    lenHash = mbedtls_md_get_size(pmd_info); // This has already been verified, and works fine.
+
+    // A(0) is seed, A(1) = HMAC_SHA256(secret, A(0))
+    if(mbedtls_md_hmac_starts(pmd, pSecret, lenSecret) != 0)
+        return STATUS_NOK;
+    if(mbedtls_md_hmac_update(pmd, pSeed, lenSeed) != 0)
+        return STATUS_NOK;
+    if(mbedtls_md_hmac_finish(pmd, bufA) != 0)
+        return STATUS_NOK;
+
+    // Iterates and produces output
+    while(offsetOutput < lenOutput)
+    {
+        // P_SHA256(i) = HMAC_SHA256(secret, A(i+1)+seed)
+        if(mbedtls_md_hmac_reset(pmd) != 0)
+            return STATUS_NOK;
+        if(mbedtls_md_hmac_update(pmd, bufA, lenBufA) != 0)
+            return STATUS_NOK;
+
+        // Did we generate enough data yet?
+        if(offsetOutput + lenHash < lenOutput) // Not yet
+        {
+            if(mbedtls_md_hmac_finish(pmd, pOutput + offsetOutput) != 0)
+                return STATUS_NOK;
+            offsetOutput += lenHash;
+
+            // A(i+2) = HMAC_SHA256(secret, A(i+1))
+            if(mbedtls_md_hmac_reset(pmd) != 0)
+                return STATUS_NOK;
+            if(mbedtls_md_hmac_update(pmd, bufA, lenHash) != 0)
+                return STATUS_NOK;
+            if(mbedtls_md_hmac_finish(pmd, bufA) != 0)
+                return STATUS_NOK;
+        }
+        // We did generate enough data
+        else
+        {
+            // We can't use pOUtput in hmac_finish anymore, we would overflow pOutput.
+            // Copies P_SHA256 to A because we are not using A again afterwards.
+            if(mbedtls_md_hmac_finish(pmd, bufA) != 0)
+                return STATUS_NOK;
+            memcpy(pOutput + offsetOutput, bufA, lenOutput - offsetOutput);
+            offsetOutput = lenOutput;
+        }
+    }
 
     return STATUS_OK;
 }

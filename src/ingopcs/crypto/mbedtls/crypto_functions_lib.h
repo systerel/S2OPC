@@ -48,5 +48,5 @@ StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
                                                 uint32_t lenSecret,
                                                 const ExposedBuffer *pSeed,
                                                 uint32_t lenSeed,
-                                                const ExposedBuffer *pOutput,
+                                                ExposedBuffer *pOutput,
                                                 uint32_t lenOutput);
