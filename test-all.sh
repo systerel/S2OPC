@@ -20,7 +20,11 @@ fi
 }
 
 # Build and run tests
-mid cleanall all
+if [[ -z $ISLOCAL || $ISLOCAL != "LOCAL" ]]; then
+    mid cleanall all
+else
+    mid clean all
+fi
 # run unit tests
 mid check CK_TAP_LOG_FILE_NAME=results.tap
 # run client server tests
