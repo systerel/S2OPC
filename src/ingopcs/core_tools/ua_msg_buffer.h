@@ -17,15 +17,22 @@
 #include <ua_encodeable.h>
 #include <ua_namespace_table.h>
 
-#define TCP_UA_HEADER_LENGTH 8        /**< Length of a TCP UA message Header */
-#define TCP_UA_ACK_MSG_LENGTH 28      /**< Length of a TCP UA ACK message */
-#define TCP_UA_ERR_MIN_MSG_LENGTH 16  /**< Minimum length of a TCP UA ERROR message */
+/** Length of a TCP UA message Header */
+#define TCP_UA_HEADER_LENGTH 8
+/** Length of a TCP UA ACK message */
+#define TCP_UA_ACK_MSG_LENGTH 28
+/** Minimum length of a TCP UA ERROR message */
+#define TCP_UA_ERR_MIN_MSG_LENGTH 16
 
-#define UA_HEADER_LENGTH_POSITION 4   /**< Position of MessageSize header field in a UA message chunk*/
-#define UA_HEADER_ISFINAL_POSITION 3  /**< Position of IsFinal header field in a UA message chunk*/
+/** Position of MessageSize header field in a UA message chunk*/
+#define UA_HEADER_LENGTH_POSITION 4
+/** Position of IsFinal header field in a UA message chunk*/
+#define UA_HEADER_ISFINAL_POSITION 3
 
-#define UA_SECURE_MESSAGE_HEADER_LENGTH 12  /**< Length of an UA secure message chunk header */
-#define UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8 /**< Length of an UA secure message chunk sequence header */
+/** Length of an UA secure message chunk header */
+#define UA_SECURE_MESSAGE_HEADER_LENGTH 12
+/** Length of an UA secure message chunk sequence header */
+#define UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
 
 extern const UA_Byte HEL[3]; /**< TCP UA Hello Message type constant */
 extern const UA_Byte ACK[3]; /**< TCP UA Ack Message type constant */
@@ -197,6 +204,7 @@ Buffer* MsgBuffers_GetCurrentChunk(UA_MsgBuffers* mBuffer);
  *  \brief Set the next (empty) chunk buffer of UA Message buffers as current one and returns it
  *
  *  \param mBuffer    Pointer to the UA Message buffers
+ *  \param bufferIdx  Index of the new current chunk buffer
  *  \return           Pointer to the next chunk buffer which became current, NULL if argument was NULL or incoherent
  */
 Buffer* MsgBuffers_NextChunk(UA_MsgBuffers* mBuffer,
