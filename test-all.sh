@@ -3,7 +3,7 @@
 #  Builds INGOPCS OPC UA stack and run tests
 #
 #  Binary files are generated in out/
-#  
+#  Use "LOCAL" as first argument to run tests locally
 #
 
 set -e
