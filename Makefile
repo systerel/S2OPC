@@ -57,7 +57,7 @@ INCLUDES_MBEDTLS=-I$(MBEDTLS_DIR)/include
 LIBS_MBEDTLS=-L$(MBEDTLS_DIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
 
 # C COMPILER CONFIG
-CCFLAGS=-c -g -Wall -Wextra -O0 #-pedantic -std=c99
+CFLAGS=-c -g -Wall -Wextra -O0 #-pedantic -std=c99
 LFLAGS=-g
 INCLUDES=$(INCLUDES_MBEDTLS) $(INCLUDES_SSL) $(addprefix -I, $(INCLUDES_UASTACK))
 DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=1 #-DOPCUA_HAVE_SERVERAPI=1 -DOPCUA_HAVE_OPENSSL=1
@@ -91,11 +91,11 @@ config: mbedtls
 
 $(BUILD_DIR)/%.o:
 	@echo "  CC $@"
-	@$(CC) $(CCFLAGS) $(INCLUDES) $< -o $@ $(DEFS)
+	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@ $(DEFS)
 
 .depend: $(C_SRC_PATHS) #$(H_SRC_PATHS)
 	@echo "Building dependencies..."
-	@$(CC) $(CCFLAGS) $(DEFS) $(INCLUDES) -MM $(C_SRC_PATHS) > .depend
+	@$(CC) $(CFLAGS) $(DEFS) $(INCLUDES) -MM $(C_SRC_PATHS) > .depend
 	@sed 's/^\(.*\)\.o:/$(BUILD_DIR_SED)\/\1.o:/g' -i .depend
 
 $(EXEC_DIR)/stub_server: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server.o
