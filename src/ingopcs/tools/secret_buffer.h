@@ -22,6 +22,7 @@ typedef uint8_t ExposedBuffer;
 
 // API
 SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len);
+SecretBuffer *SecretBuffer_New(uint32_t len);
 void SecretBuffer_DeleteClear(SecretBuffer *sec);
 uint32_t SecretBuffer_GetLength(const SecretBuffer *sec);
 

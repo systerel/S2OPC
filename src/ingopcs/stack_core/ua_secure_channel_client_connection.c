@@ -341,20 +341,31 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
     }
 
     if(status == STATUS_OK){
-        int32_t encryptKeyLength, signKeyLength, initVectorLength;
-        status = CryptoProvider_DeriveKeyLengths(cConnection->instance->currentCryptoProvider,
+        uint32_t encryptKeyLength = 0, signKeyLength = 0, initVectorLength = 0;
+        SC_SecurityKeySet *pks = NULL;
+        status = CryptoProvider_DeriveGetLengths(cConnection->instance->currentCryptoProvider,
                                                  &encryptKeyLength,
                                                  &signKeyLength,
                                                  &initVectorLength);
         if(status == STATUS_OK && encObj->ServerNonce.length > 0){
             cConnection->instance->currentSecuKeySets.receiverKeySet = KeySet_Create();
             cConnection->instance->currentSecuKeySets.senderKeySet = KeySet_Create();
-            status = CryptoProvider_ClientDeriveKeySets(cConnection->instance->currentCryptoProvider,
+            pks = cConnection->instance->currentSecuKeySets.receiverKeySet;
+            if(NULL != pks) {
+                pks->signKey = SecretBuffer_New(signKeyLength);
+                pks->encryptKey = SecretBuffer_New(encryptKeyLength);
+                pks->initVector = SecretBuffer_New(initVectorLength);
+            }
+            pks = cConnection->instance->currentSecuKeySets.senderKeySet;
+            if(NULL != pks) {
+                pks->signKey = SecretBuffer_New(signKeyLength);
+                pks->encryptKey = SecretBuffer_New(encryptKeyLength);
+                pks->initVector = SecretBuffer_New(initVectorLength);
+            }
+            status = CryptoProvider_DeriveKeySetsClient(cConnection->instance->currentCryptoProvider,
                                                         cConnection->instance->currentNonce,
-                                                        &encObj->ServerNonce,
-                                                        encryptKeyLength,
-                                                        signKeyLength,
-                                                        initVectorLength,
+                                                        encObj->ServerNonce.characters,
+                                                        encObj->ServerNonce.length,
                                                         cConnection->instance->currentSecuKeySets.senderKeySet,
                                                         cConnection->instance->currentSecuKeySets.receiverKeySet);
         }

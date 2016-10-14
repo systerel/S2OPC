@@ -19,16 +19,27 @@ SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len
 {
     SecretBuffer *sec = NULL;
 
-    if(NULL != buf && 0 != len)
+    if(NULL != buf)
+    {
+        sec = SecretBuffer_New(len);
+        if(NULL != sec && NULL != sec->buf)
+            memcpy(sec->buf, buf, len);
+    }
+
+    return sec;
+}
+SecretBuffer *SecretBuffer_New(uint32_t len)
+{
+    SecretBuffer *sec = NULL;
+
+    if(0 != len)
     {
         sec = malloc(sizeof(SecretBuffer));
         if(NULL != sec)
         {
             sec->len = len;
             sec->buf = malloc(len);
-            if(NULL != sec->buf)
-                memcpy(sec->buf, buf, len);
-            else
+            if(NULL == sec->buf)
             {
                 free(sec->buf);
                 sec = NULL;
@@ -38,6 +49,7 @@ SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len
 
     return sec;
 }
+
 void SecretBuffer_DeleteClear(SecretBuffer *sec)
 {
     if(NULL != sec)

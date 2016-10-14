@@ -82,20 +82,20 @@ StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider
                                                  uint32_t lenSeed,
                                                  ExposedBuffer *pOutput,
                                                  uint32_t lenOutput);
-StatusCode CryptoProvider_DeriveKeySets_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_DeriveKeySets(const CryptoProvider *pProvider,
                                         const ExposedBuffer *pClientNonce,
                                         uint32_t lenClientNonce,
                                         const ExposedBuffer *pServerNonce,
                                         uint32_t lenServerNonce,
                                         SC_SecurityKeySet *pClientKeySet,
                                         SC_SecurityKeySet *pServerKeySet);
-StatusCode CryptoProvider_DeriveClientKeySets_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvider, // DeriveKeySets
                                               const SecretBuffer *pClientNonce,
                                               const ExposedBuffer *pServerNonce,
                                               uint32_t lenServerNonce,
                                               SC_SecurityKeySet *pClientKeySet,
                                               SC_SecurityKeySet *pServerKeySet);
-StatusCode CryptoProvider_DeriveServerKeySets_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
                                               const ExposedBuffer *pClientNonce,
                                               uint32_t lenClientNonce,
                                               const SecretBuffer *pServerNonce,

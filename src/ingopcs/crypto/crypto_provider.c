@@ -404,7 +404,7 @@ static inline StatusCode DeriveKS(const CryptoProvider *pProvider,
                                   SC_SecurityKeySet *pks,
                                   uint8_t *genData, uint32_t lenData,
                                   uint32_t lenKeySign, uint32_t lenKeyEncr, uint32_t lenIV);
-StatusCode CryptoProvider_DeriveKeySets_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_DeriveKeySets(const CryptoProvider *pProvider,
                                         const ExposedBuffer *pClientNonce,
                                         uint32_t lenClientNonce,
                                         const ExposedBuffer *pServerNonce,
@@ -502,7 +502,7 @@ static inline StatusCode DeriveKS(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_DeriveClientKeySets_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvider,
                                               const SecretBuffer *pClientNonce,
                                               const ExposedBuffer *pServerNonce,
                                               uint32_t lenServerNonce,
@@ -521,7 +521,7 @@ StatusCode CryptoProvider_DeriveClientKeySets_Low(const CryptoProvider *pProvide
 
     if(STATUS_OK == status)
     {
-        status = CryptoProvider_DeriveKeySets_Low(pProvider,
+        status = CryptoProvider_DeriveKeySets(pProvider,
                                                   pExpCli,
                                                   SecretBuffer_GetLength(pClientNonce),
                                                   pServerNonce,
@@ -536,7 +536,7 @@ StatusCode CryptoProvider_DeriveClientKeySets_Low(const CryptoProvider *pProvide
 }
 
 
-StatusCode CryptoProvider_DeriveServerKeySets_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
                                               const ExposedBuffer *pClientNonce,
                                               uint32_t lenClientNonce,
                                               const SecretBuffer *pServerNonce,
@@ -555,7 +555,7 @@ StatusCode CryptoProvider_DeriveServerKeySets_Low(const CryptoProvider *pProvide
 
     if(STATUS_OK == status)
     {
-        status = CryptoProvider_DeriveKeySets_Low(pProvider,
+        status = CryptoProvider_DeriveKeySets(pProvider,
                                                   pClientNonce,
                                                   lenClientNonce,
                                                   pExpSer,

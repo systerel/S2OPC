@@ -487,7 +487,7 @@ START_TEST(test_crypto_derive_keysets)
     // These come from a stub_client working with OPC foundation code (e.g. commit 0fbccc98472c781a7f44ac09c1d36d2b4a0c3fb0)
     ck_assert(unhexlify("3d3b4768f275d5023c2145cbe3a4a592fb843643d791f7bd7fce75ff25128b68", clientNonce, lenCliNonce) == (int32_t)lenCliNonce);
     ck_assert(unhexlify("ccee418cbc77c2ebb38d5ffac9d2a9d0a6821fa211798e71b2d65b3abb6aec8f", serverNonce, lenSerNonce) == (int32_t)lenSerNonce);
-    ck_assert(CryptoProvider_DeriveKeySets_Low(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS, &serKS) == STATUS_OK);
+    ck_assert(CryptoProvider_DeriveKeySets(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS, &serKS) == STATUS_OK);
     // 4 lines for each assert
     ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
@@ -517,7 +517,7 @@ START_TEST(test_crypto_derive_keysets)
     // Another run, just to be sure...
     ck_assert(unhexlify("d821ea93a6a48a4ef49b36c5e7d1bae6c49ccb2b2ddb07c99dcf046e2225617f", clientNonce, lenCliNonce) == (int32_t)lenCliNonce);
     ck_assert(unhexlify("00a8cb99446410a70bf221d5c498d0d0b3e968a306f1a4dc5d1acbe7a37644da", serverNonce, lenSerNonce) == (int32_t)lenSerNonce);
-    ck_assert(CryptoProvider_DeriveKeySets_Low(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS, &serKS) == STATUS_OK);
+    ck_assert(CryptoProvider_DeriveKeySets(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS, &serKS) == STATUS_OK);
     // 4 lines for each assert
     ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
