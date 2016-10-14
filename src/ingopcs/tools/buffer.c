@@ -42,21 +42,6 @@ StatusCode Buffer_Init(Buffer* buffer, uint32_t size)
     return status;
 }
 
-Buffer* Buffer_Set_Data(uint8_t* data, uint32_t position, uint32_t length, uint32_t maxsize)
-{
-    Buffer* buf = NULL;
-    if(data != NULL && length > 0 && position < length && length <= maxsize){
-        buf = (Buffer*) malloc(sizeof(Buffer));
-        if(buf != NULL){
-            buf->length = length;
-            buf->data = data;
-            buf->position = position;
-            buf->max_size = maxsize;
-        }
-    }
-    return buf;
-}
-
 void Buffer_Delete(Buffer* buffer)
 {
     if(buffer != NULL){
@@ -81,7 +66,7 @@ StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(buffer != NULL && buffer->data != NULL &&
-       position <= buffer->max_size)
+       position <= buffer->length)
     {
         status = STATUS_OK;
         buffer->position = position;
@@ -93,7 +78,8 @@ StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
 
 StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(buffer->length >= position){
+    if(buffer != NULL && buffer->data != NULL &&
+       buffer->length >= position){
         status = STATUS_OK;
         buffer->position = position;
     }
@@ -103,10 +89,11 @@ StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
 StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    uint8_t* data = buffer->data;
+    uint8_t* data = NULL;
     if(buffer != NULL && buffer->data != NULL &&
        buffer->max_size >= length &&
        buffer->position <= length){
+        data = buffer->data;
         status = STATUS_OK;
         if(buffer->length > length){
             data = &(buffer->data[length]);
@@ -172,7 +159,10 @@ StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLeng
         status = STATUS_OK;
 
         memcpy(dest->data, src->data, limitedLength);
-        status = Buffer_SetDataLength(dest, limitedLength);
+        status = Buffer_SetPosition(dest, 0);
+        if(status == STATUS_OK){
+            status = Buffer_SetDataLength(dest, limitedLength);
+        }
         if(status == STATUS_OK){
             status = Buffer_SetPosition(dest, src->position);
         }

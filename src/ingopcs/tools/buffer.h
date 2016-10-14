@@ -40,17 +40,6 @@ Buffer* Buffer_Create(uint32_t size);
 StatusCode Buffer_Init(Buffer* buffer, uint32_t size);
 
 /**
- *  \brief            Allocate a buffer pointing to the given data bytes with given properties
- *
- *  \param data       Pointer to data bytes on which buffer must point to
- *  \param position   Position for next read/write operation to be performed on buffer (<= length)
- *  \param length     Length of valid data bytes in the buffer (<= maxsize)
- *  \param maxsize    The maximum size of buffer (allocated data bytes)
- *  \return           The allocated buffer if succeeded, NULL otherwise
- */
-Buffer* Buffer_Set_Data(uint8_t* data, uint32_t position, uint32_t length, uint32_t maxsize);
-
-/**
  *  \brief          Deallocate buffer and its data bytes content
  *
  *  \param buffer   Pointer to the buffer to deallocate (pointer must not be used anymore after operation)
@@ -69,7 +58,7 @@ void Buffer_Reset(Buffer* buffer);
  *  \brief          reset data bytes after position (>=) to zero and set buffer position and length to given position
  *
  *  \param buffer   Pointer to the buffer to reset to the given position
- *  \param position New position of the reset buffer (<= buffer->maxsize)
+ *  \param position New position of the reset buffer (position <= buffer->length)
  *
  *  \return         0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid position)
  */
