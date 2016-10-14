@@ -438,20 +438,6 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
         }
     }
 
-    if(status == STATUS_OK){
-        // Decode message body content
-        status = Read_OpenSecureChannelReponse(cConnection, pRequest);
-    }
-
-    if(status == STATUS_OK){
-        SC_PendingRequestDelete(pRequest);
-        pRequest = NULL;
-        // Reset reception buffers for next messages
-        MsgBuffers_Reset(cConnection->instance->receptionBuffers);
-    }else{
-        // Trace / channel CB
-    }
-
     // TODO: remove only because foundation and ingopcs crypto provider are coexisting
     if(status == STATUS_OK){
         if(cConnection->instance->currentCryptoProvider != NULL){
@@ -466,6 +452,19 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
         }
     }
 
+    if(status == STATUS_OK){
+        // Decode message body content
+        status = Read_OpenSecureChannelReponse(cConnection, pRequest);
+    }
+
+    if(status == STATUS_OK){
+        SC_PendingRequestDelete(pRequest);
+        pRequest = NULL;
+        // Reset reception buffers for next messages
+        MsgBuffers_Reset(cConnection->instance->receptionBuffers);
+    }else{
+        // Trace / channel CB
+    }
 
     return status;
 }
