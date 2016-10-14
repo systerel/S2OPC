@@ -557,7 +557,7 @@ START_TEST(test_crypto_derive_keysets)
 END_TEST
 
 
-#include "mbedtls/entropy.h"
+/*#include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
@@ -667,7 +667,7 @@ START_TEST(test_pk_x509)
 
     CryptoProvider_Delete(crypto);
 }
-END_TEST
+END_TEST*/
 
 
 Suite *tests_make_suite_crypto()
@@ -688,7 +688,7 @@ Suite *tests_make_suite_crypto()
     tcase_add_test(tc_ciphers, test_crypto_symm_crypt);
     tcase_add_test(tc_ciphers, test_crypto_symm_sign);
     tcase_add_test(tc_ciphers, test_crypto_symm_gen);
-    tcase_add_test(tc_ciphers, test_pk_x509);
+    //tcase_add_test(tc_ciphers, test_pk_x509);
 
     suite_add_tcase(s, tc_providers);
 
