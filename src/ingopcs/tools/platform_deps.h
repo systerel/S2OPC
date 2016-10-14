@@ -10,6 +10,9 @@
 
 #include <stdint.h>
 
+#define OPCUA_BEGIN_EXTERN_C
+#define OPCUA_END_EXTERN_C
+
 typedef enum {
     P_Endianess_Undefined,
     P_Endianess_LittleEndian,

@@ -10,8 +10,6 @@
 #ifndef INGOPCS_MSG_BUFFER_H_
 #define INGOPCS_MSG_BUFFER_H_
 
-#include <wrappers.h>
-
 #include <ua_base_types.h>
 #include <buffer.h>
 #include <ua_encodeable.h>

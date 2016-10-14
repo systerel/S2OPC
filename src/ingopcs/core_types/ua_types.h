@@ -35,6 +35,7 @@
 //# error OPCUA_FORCE_INT32_ENUMS must be defined!
 //#endif /* OPCUA_FORCE_INT32_ENUMS */
 
+#include <platform_deps.h>
 #include <ua_msg_buffer.h>
 #include <ua_builtintypes.h>
 #include <ua_encodeable.h>

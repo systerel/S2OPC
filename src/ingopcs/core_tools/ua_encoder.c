@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "ua_encoder.h"
 #include <ua_encodeable.h>

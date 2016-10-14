@@ -8,7 +8,7 @@
 #include "ua_stack_config.h"
 
 #include <stdlib.h>
-
+#include <string.h>
 #include <ua_types.h>
 
 UA_StackConfiguration g_stackConfiguration;
