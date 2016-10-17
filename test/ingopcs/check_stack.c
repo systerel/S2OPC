@@ -44,6 +44,7 @@ int main(void)
     sr = srunner_create(tests_make_suite_stack());
     srunner_add_suite(sr, tests_make_suite_crypto());
     srunner_add_suite(sr, tests_make_suite_tools());
+    srunner_add_suite(sr, tests_make_suite_core_tools());
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);
