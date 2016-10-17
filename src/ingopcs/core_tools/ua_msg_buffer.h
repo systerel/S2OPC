@@ -1,7 +1,8 @@
 /*
  *  \file msg_buffer.h
  *
- *  \brief Binary UA (and TCP UA) message representation with one or several chunks
+ *  \brief Binary UA (and TCP UA) message representation with one or several chunks.
+ *  It is used for TCP UA messages layer and UA secure messages layer (write/read operations are layer dependent).
  *
  *  Created on: Jul 22, 2016
  *      Author: VMO (Systerel)
@@ -72,7 +73,9 @@ typedef enum {
 } UA_MsgFinalChunk;
 
 /**
- *  \brief UA Message buffer (with one or several chunks)
+ *  \brief UA Message buffer (with one or several chunks).
+ *  Note: UA_MsgBuffer type must be used to store only one chunk at same time
+ *  and UA_MsgBuffers type to store several chunks at same time.
  */
 typedef struct UA_MsgBuffer {
     uint32_t             nbBuffers;              /**< Number of buffers allocated (one per chunk) */
@@ -99,7 +102,7 @@ typedef struct UA_MsgBuffer {
  *  \param nsTable           Namespace table to be used for encoding / decoding UA messages (optional)
  *  \param encTypesTable     EncodeableType table to be used for encoding / decoding UA messages (optional)
  *
- *  \return                  NULL if buffer creation failed (NULL buffer, invalid maxChunks), allocated UA Message Buffer otherwise.
+ *  \return                  NULL if buffer creation failed (NULL buffer), allocated UA Message Buffer otherwise.
  */
 UA_MsgBuffer* MsgBuffer_Create(Buffer*             buffer,
                                uint32_t            maxChunks,
@@ -118,6 +121,7 @@ void MsgBuffer_Delete(UA_MsgBuffer** mBuffer);
 /**
  *  \brief Reset the UA Message buffer state (buffer content, type, number of chunks, etc.)
  *   in order it could be use to receive / send a new UA message.
+ *   Note: properties maxChunks, flushData, namespaces and encodeable types are not modified.
  *
  *  \param mBuffer    Pointer to UA Message buffer to reset
  */
@@ -128,7 +132,7 @@ void MsgBuffer_Reset(UA_MsgBuffer* mBuffer);
  *   (precedent not kept since only 1 buffer available)
  *
  *  \param mBuffer         Pointer to UA Message buffer to reset for next chunk
- *  \param bodyPosition    Position the buffer must be reset. Data before position is kept, data after is erased
+ *  \param bodyPosition    Position to which the buffer must be reset. Data before position is kept, data after is erased
  *  (0 or SN position to keep the same UA Secure Message header values for sending next chunk)
  *  \return                GOOD if operation succeeded, BAD otherwise (NULL pointer)
  */
@@ -146,7 +150,8 @@ StatusCode MsgBuffer_SetSecureMsgType(UA_MsgBuffer* mBuffer,
                                       UA_SecureMessageType sType);
 
 /**
- *  \brief Copy source UA Message buffer content into destination one
+ *  \brief Copy source UA Message buffer content into destination one.
+ *  Note: properties maxChunks, flushData, namespaces and encodeable types are not concerned by the copy.
  *
  *  \param destMsgBuffer    Pointer to destination UA Message buffer
  *  \param srcMsgBuffer     Pointer to source UA Message buffer
