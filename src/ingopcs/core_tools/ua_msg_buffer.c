@@ -136,46 +136,51 @@ UA_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
                                  UA_NamespaceTable*  nsTable,
                                  UA_EncodeableType** encTypesTable)
 {
-    assert(maxChunks > 0);
-    StatusCode status = STATUS_OK;
+    StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_MsgBuffers* mBuffers = NULL;
     uint32_t idx = 0;
-    mBuffers = (UA_MsgBuffer*) malloc(sizeof(UA_MsgBuffer));
-    if(mBuffers != NULL && nsTable != NULL && encTypesTable != NULL){
-        mBuffers->nbBuffers = maxChunks;
-        mBuffers->buffers = (Buffer*) malloc(sizeof(Buffer) * maxChunks);
+    if(maxChunks > 0 && bufferSize > 0 &&
+       nsTable != NULL && encTypesTable != NULL)
+    {
+        status = STATUS_NOK;
+        mBuffers = (UA_MsgBuffer*) malloc(sizeof(UA_MsgBuffer));
+        if(mBuffers != NULL){
+            status = STATUS_OK;
+            mBuffers->nbBuffers = maxChunks;
+            mBuffers->buffers = (Buffer*) malloc(sizeof(Buffer) * maxChunks);
 
-        if(mBuffers->buffers != NULL){
-            while(status == STATUS_OK && idx < maxChunks){
-                status = Buffer_Init(&(mBuffers->buffers[idx]), bufferSize);
-                idx++;
+            if(mBuffers->buffers != NULL){
+                while(status == STATUS_OK && idx < maxChunks){
+                    status = Buffer_Init(&(mBuffers->buffers[idx]), bufferSize);
+                    idx++;
+                }
+
+                if(status != STATUS_OK){
+                    // To could deallocate correctly
+                    mBuffers->nbBuffers = idx + 1;
+                }
+
+            }else{
+               status = STATUS_NOK;
+               mBuffers->nbBuffers = 0;
             }
 
-            if(status != STATUS_OK){
-                // To could deallocate correctly
-                mBuffers->nbBuffers = idx + 1;
+            if(status == STATUS_OK){
+                mBuffers->type = TCP_UA_Message_Unknown;
+                mBuffers->secureType = UA_SecureMessage;
+                mBuffers->currentChunkSize = 0;
+                mBuffers->nbChunks = 0;
+                mBuffers->maxChunks = maxChunks;
+                mBuffers->sequenceNumberPosition = 0;
+                mBuffers->isFinal = UA_Msg_Chunk_Unknown;
+                mBuffers->receivedReqId = 0;
+                mBuffers->flushData = NULL;
+                Namespace_Initialize(&mBuffers->nsTable);
+                Namespace_AttachTable(&mBuffers->nsTable, nsTable);
+                mBuffers->encTypesTable = encTypesTable;
+            }else{
+                MsgBuffers_Delete(&mBuffers);
             }
-
-        }else{
-           status = STATUS_NOK;
-           mBuffers->nbBuffers = 0;
-        }
-
-        if(status == STATUS_OK){
-            mBuffers->type = TCP_UA_Message_Unknown;
-            mBuffers->secureType = UA_SecureMessage;
-            mBuffers->currentChunkSize = 0;
-            mBuffers->nbChunks = 0;
-            mBuffers->maxChunks = maxChunks;
-            mBuffers->sequenceNumberPosition = 0;
-            mBuffers->isFinal = UA_Msg_Chunk_Unknown;
-            mBuffers->receivedReqId = 0;
-            mBuffers->flushData = NULL;
-            Namespace_Initialize(&mBuffers->nsTable);
-            Namespace_AttachTable(&mBuffers->nsTable, nsTable);
-            mBuffers->encTypesTable = encTypesTable;
-        }else{
-            MsgBuffers_Delete(&mBuffers);
         }
     }
     return mBuffers;
@@ -199,11 +204,13 @@ void MsgBuffers_Reset(UA_MsgBuffers* mBuffer){
 
 void MsgBuffers_Delete(UA_MsgBuffers** ptBuffers){
     uint32_t idx = 0;
-    if(ptBuffers != NULL && *ptBuffers != NULL){
-        if((*ptBuffers)->buffers != NULL){
-            for(idx = 0; idx < (*ptBuffers)->nbBuffers; idx++){
-                Buffer_Delete (&((*ptBuffers)->buffers[idx]));
+    UA_MsgBuffers* msgBuffers = *ptBuffers;
+    if(ptBuffers != NULL && msgBuffers != NULL){
+        if(msgBuffers->buffers != NULL){
+            for(idx = 0; idx < msgBuffers->nbBuffers; idx++){
+                Buffer_Clear (&(msgBuffers->buffers[idx]));
             }
+            free(msgBuffers->buffers);
         }
         free(*ptBuffers);
         *ptBuffers = NULL;
@@ -245,7 +252,7 @@ StatusCode MsgBuffers_SetCurrentChunkFirst(UA_MsgBuffers* mBuffer){
             for(idx = 1; idx < mBuffer->nbChunks; idx++){
                 Buffer_Reset(&mBuffer->buffers[idx]);
             }
-            mBuffer->nbChunks = 0;
+            mBuffer->nbChunks = 1;
         }
     }
     return status;
@@ -261,7 +268,10 @@ StatusCode MsgBuffers_CopyBuffer(UA_MsgBuffers* destMsgBuffer,
                                  UA_MsgBuffer*  srcMsgBuffer,
                                  uint32_t       limitedLength){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(destMsgBuffer != NULL && srcMsgBuffer != NULL){
+    if(destMsgBuffer != NULL && srcMsgBuffer != NULL &&
+       bufferIdx < destMsgBuffer->maxChunks &&
+       srcMsgBuffer->buffers->length >= limitedLength &&
+       destMsgBuffer->buffers[bufferIdx].max_size >= limitedLength){
         assert(srcMsgBuffer->nbBuffers == 1);
         status = STATUS_OK;
         // Copy everything except the flush data which can be used for a different flush level

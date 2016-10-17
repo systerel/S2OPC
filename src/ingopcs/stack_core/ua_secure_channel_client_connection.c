@@ -471,11 +471,12 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     if(status == STATUS_OK){
         SC_PendingRequestDelete(pRequest);
         pRequest = NULL;
-        // Reset reception buffers for next messages
-        MsgBuffers_Reset(cConnection->instance->receptionBuffers);
     }else{
         // Trace / channel CB
     }
+
+    // Reset reception buffers for next messages
+    MsgBuffers_Reset(cConnection->instance->receptionBuffers);
 
     return status;
 }
@@ -556,6 +557,8 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
             if(pRequest == NULL){
                 // Error: unknown request id !
                 // TODO: trace + callback for audit ?
+
+                // Reset since we will not decode the chunk in this case
                 MsgBuffers_Reset(cConnection->instance->receptionBuffers);
                 status = STATUS_NOK;
             }

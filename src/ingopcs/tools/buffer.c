@@ -42,12 +42,19 @@ StatusCode Buffer_Init(Buffer* buffer, uint32_t size)
     return status;
 }
 
-void Buffer_Delete(Buffer* buffer)
+void Buffer_Clear(Buffer* buffer)
 {
     if(buffer != NULL){
         if(buffer->data != NULL){
             free(buffer->data);
         }
+    }
+}
+
+void Buffer_Delete(Buffer* buffer)
+{
+    if(buffer != NULL){
+        Buffer_Clear(buffer);
         free(buffer);
     }
 }

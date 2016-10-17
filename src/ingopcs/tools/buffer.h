@@ -40,7 +40,14 @@ Buffer* Buffer_Create(uint32_t size);
 StatusCode Buffer_Init(Buffer* buffer, uint32_t size);
 
 /**
- *  \brief          Deallocate buffer and its data bytes content
+ *  \brief          Deallocate buffer data bytes content
+ *
+ *  \param buffer   Pointer to the buffer in which data bytes content must be deallocated.
+ */
+void Buffer_Clear(Buffer* buffer);
+
+/**
+ *  \brief          Deallocate buffer and its data bytes content (Clear + deallocate pointer)
  *
  *  \param buffer   Pointer to the buffer to deallocate (pointer must not be used anymore after operation)
  */

@@ -167,13 +167,14 @@ typedef struct UA_MsgBuffer UA_MsgBuffers;
 
 /**
  *  \brief Creation of an UA Message buffer with several buffers (to store several chunks) and allocate the buffers
+ *  Note: nbChunks set to 0 after creation, MsgBuffers_NextChunk must be called before storing data for first chunk.
  *
- *  \param maxChunks         Maximum number of chunks for an UA Message (determined by connection configuration)
+ *  \param maxChunks         Maximum number of chunks for an UA Message (determined by connection configuration).
  *  \param bufferSize        Size of the buffers to allocate
  *  \param nsTable           Namespace table to be used for encoding / decoding UA messages (optional)
  *  \param encTypesTable     EncodeableType table to be used for encoding / decoding UA messages (optional)
  *
- *  \return                  NULL if buffer creation failed (NULL buffer, invalid maxChunks), allocated UA Message Buffer otherwise.
+ *  \return                  NULL if buffer creation failed (maxChunks == 0, bufferSize == 0, NULL namespaces, NULL encodeable types), allocated UA Message Buffer otherwise.
  */
 UA_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
                                  uint32_t            bufferSize,
@@ -226,9 +227,9 @@ StatusCode MsgBuffers_SetCurrentChunkFirst(UA_MsgBuffers* mBuffer);
  *  \brief Copy source UA Message buffer content into destination UA Message buffers in buffer corresponding to index
  *
  *  \param destMsgBuffer    Pointer to destination UA Message buffers
- *  \param bufferIdx        Index of the buffer to be copied into
+ *  \param bufferIdx        Index of the buffer to be copied into (< srcMsgBuffer->nbChunks)
  *  \param srcMsgBuffer     Pointer to source UA Message buffer
- *  \param limitedLength    Length to be copied from the source buffer
+ *  \param limitedLength    Length to be copied from the source buffer (<= srcMsgBuffer->buffers->length && <= destMsgBuffer->buffers[bufferIdx].max_size)
  *  \return                 GOOD if operation succeeded, BAD otherwise
  */
 StatusCode MsgBuffers_CopyBuffer(UA_MsgBuffers* destMsgBuffer,
