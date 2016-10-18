@@ -77,7 +77,7 @@ void EncodeDecode_Double(double* doublev){
     assert(floatEndianess != P_Endianess_Undefined);
     uint64_t* eightBytes = (uint64_t*) doublev;
     if(floatEndianess == P_Endianess_BigEndian){
-        *eightBytes = SWAP_4_BYTES(*eightBytes);
+        *eightBytes = SWAP_8_BYTES(*eightBytes);
     }
 }
 

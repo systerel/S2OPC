@@ -12,11 +12,11 @@
 #include <ua_builtintypes.h>
 #include <ua_msg_buffer.h>
 
-#define SWAP_2_BYTES(x) (x & 0x00FF << 8) | (x & 0xFF00 >> 8)
-#define SWAP_3_BYTES(x) (x & 0x0000FF << 16) | (x & 0x00FF00) \
-| (x & 0xFF0000 >> 16)
-#define SWAP_4_BYTES(x) (x & 0x000000FF << 24) | (x & 0x0000FF00) << 8 \
-| (x & 0xFF000000 >> 24) | (x & 0x00FF0000 >> 8)
+#define SWAP_2_BYTES(x) (x & 0x00FF) << 8 | (x & 0xFF00) >> 8
+#define SWAP_3_BYTES(x) (x & 0x0000FF) << 16 | (x & 0x00FF00) \
+| (x & 0xFF0000) >> 16
+#define SWAP_4_BYTES(x) (x & 0x000000FF) << 24 | (x & 0x0000FF00) << 8 \
+| (x & 0xFF000000) >> 24 | (x & 0x00FF0000) >> 8
 #define SWAP_8_BYTES(x) \
 (x & 0x00000000000000FF) << 56 \
 | (x & 0x000000000000FF00) << 40 \
@@ -63,13 +63,84 @@ typedef enum {
     DataValue_NotZeroServerPico = 0x20
 } UA_DataValue_EncodingFlag;
 
+/**
+ *  \brief Encode an signed 16 bits integer from machine endianess representation to binary UA encoding endianess representation.
+ *  And respectively integer from UA binary to machine endianess representation.
+ *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
+ *  (platform dependency module providing endianess information is used to determine the current case)
+ *
+ *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
+ */
 void EncodeDecode_Int16(int16_t* intv);
+
+/**
+ *  \brief Encode a unsigned 16 bits integer from machine endianess representation to binary UA encoding endianess representation.
+ *  And respectively integer from UA binary to machine endianess representation.
+ *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
+ *  (platform dependency module providing endianess information is used to determine the current case)
+ *
+ *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
+ */
 void EncodeDecode_UInt16(uint16_t* uintv);
+
+/**
+ *  \brief Encode a signed 32 bits integer from machine endianess representation to binary UA encoding endianess representation.
+ *  And respectively decode integer from UA binary to machine endianess representation.
+ *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
+ *  (platform dependency module providing endianess information is used to determine the current case)
+ *
+ *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
+ */
 void EncodeDecode_Int32(int32_t* intv);
+
+/**
+ *  \brief Encode an unsigned 32 bits integer from machine endianess representation to binary UA encoding endianess representation.
+ *  And respectively integer from UA binary to machine endianess representation.
+ *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
+ *  (platform dependency module providing endianess information is used to determine the current case)
+ *
+ *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
+ */
 void EncodeDecode_UInt32(uint32_t* uintv);
+
+/**
+ *  \brief Encode a signed 64 bits integer from machine endianess representation to binary UA encoding endianess representation.
+ *  And respectively integer from UA binary to machine endianess representation.
+ *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
+ *  (platform dependency module providing endianess information is used to determine the current case)
+ *
+ *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
+ */
 void EncodeDecode_Int64(int64_t* intv);
+
+/**
+ *  \brief Encode an unsigned 64 bits integer from machine endianess representation to binary UA encoding endianess representation.
+ *  And respectively integer from UA binary to machine endianess representation.
+ *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
+ *  (platform dependency module providing endianess information is used to determine the current case)
+ *
+ *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
+ */
 void EncodeDecode_UInt64(uint64_t* uintv);
+
+/**
+ *  \brief Encode a float from machine endianess representation to binary UA encoding endianess representation.
+ *  And respectively float from UA binary to machine endianess representation.
+ *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
+ *  (platform dependency module providing endianess information is used to determine the current case)
+ *
+ *  \param floatv     Pointer to the integer value to encode or decode with correct endianess in place
+ */
 void EncodeDecode_Float(float* floatv);
+
+/**
+ *  \brief Encode a double from machine endianess representation to binary UA encoding endianess representation.
+ *  And respectively decode a double from UA binary to machine endianess representation.
+ *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
+ *  (platform dependency module providing endianess information is used to determine the current case)
+ *
+ *  \param doublev     Pointer to the integer value to encode or decode with correct endianess in place
+ */
 void EncodeDecode_Double(double* doublev);
 
 StatusCode Byte_Write(const UA_Byte* value, UA_MsgBuffer* msgBuffer);
