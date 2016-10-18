@@ -10,8 +10,10 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <check.h>
 #include <ua_msg_buffer.h>
+#include <ua_encoder.h>
 #include "check_stack.h"
 
 
@@ -455,10 +457,202 @@ START_TEST(test_ua_msg_buffers_copy)
 }
 END_TEST
 
+
+START_TEST(test_ua_encoder_endianess_mgt)
+{
+    int16_t v16 = 0;
+    uint16_t vu16 = 0;
+    int32_t v32 = 0;
+    uint32_t vu32 = 0;
+    int64_t v64 = 0;
+    uint64_t vu64 = 0;
+    float vfloat = 0.0;
+    double vdouble = 0.0;
+
+    uint8_t* bytes = NULL;
+
+    // Test encoding with same endianess in machine and UA binary
+    endianess = P_Endianess_LittleEndian;
+    bytes = (uint8_t*) &v16;
+    bytes[0] = 0xAB;
+    bytes[1] = 0xBC;
+    EncodeDecode_Int16(&v16);
+    ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC);
+
+    bytes = (uint8_t*) &vu16;
+    bytes[0] = 0xAB;
+    bytes[1] = 0xBC;
+    EncodeDecode_UInt16(&vu16);
+    ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC);
+
+    bytes = (uint8_t*) &v32;
+    bytes[0] = 0xAB;
+    bytes[1] = 0xBC;
+    bytes[2] = 0xCD;
+    bytes[3] = 0xDE;
+    EncodeDecode_Int32(&v32);
+    ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC &&
+              bytes[2] == 0xCD && bytes[3] == 0xDE);
+
+    bytes = (uint8_t*) &vu32;
+    bytes[0] = 0xAB;
+    bytes[1] = 0xBC;
+    bytes[2] = 0xCD;
+    bytes[3] = 0xDE;
+    EncodeDecode_UInt32(&vu32);
+    ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC &&
+              bytes[2] == 0xCD && bytes[3] == 0xDE);
+
+    bytes = (uint8_t*) &v64;
+    bytes[0] = 0x00;
+    bytes[1] = 0x11;
+    bytes[2] = 0x22;
+    bytes[3] = 0x33;
+    bytes[4] = 0xAB;
+    bytes[5] = 0xBC;
+    bytes[6] = 0xCD;
+    bytes[7] = 0xDE;
+    EncodeDecode_Int64(&v64);
+    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x11 &&
+              bytes[2] == 0x22 && bytes[3] == 0x33 &&
+              bytes[4] == 0xAB && bytes[5] == 0xBC &&
+              bytes[6] == 0xCD && bytes[7] == 0xDE);
+
+    bytes = (uint8_t*) &vu64;
+    bytes[0] = 0x00;
+    bytes[1] = 0x11;
+    bytes[2] = 0x22;
+    bytes[3] = 0x33;
+    bytes[4] = 0xAB;
+    bytes[5] = 0xBC;
+    bytes[6] = 0xCD;
+    bytes[7] = 0xDE;
+    EncodeDecode_UInt64(&vu64);
+    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x11 &&
+              bytes[2] == 0x22 && bytes[3] == 0x33 &&
+              bytes[4] == 0xAB && bytes[5] == 0xBC &&
+              bytes[6] == 0xCD && bytes[7] == 0xDE);
+
+    floatEndianess = P_Endianess_LittleEndian;
+    bytes = (uint8_t*) &vfloat;
+    bytes[0] = 0x00;
+    bytes[1] = 0x00;
+    bytes[2] = 0xD0;
+    bytes[3] = 0xC0;
+    EncodeDecode_Float(&vfloat);
+    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 &&
+              bytes[2] == 0xD0 && bytes[3] == 0xC0);
+
+    bytes = (uint8_t*) &vdouble;
+    bytes[0] = 0x00;
+    bytes[1] = 0x00;
+    bytes[2] = 0x00;
+    bytes[3] = 0x00;
+    bytes[4] = 0x00;
+    bytes[5] = 0x00;
+    bytes[6] = 0x1A;
+    bytes[7] = 0xC0;
+    EncodeDecode_Double(&vdouble);
+    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 &&
+              bytes[2] == 0x00 && bytes[3] == 0x00 &&
+              bytes[4] == 0x00 && bytes[5] == 0x00 &&
+              bytes[6] == 0x1A && bytes[7] == 0xC0);
+
+
+    // Test encoding with different endianess in machine and UA binary
+    endianess = P_Endianess_BigEndian;
+    bytes = (uint8_t*) &v16;
+    bytes[0] = 0xAB;
+    bytes[1] = 0xBC;
+    EncodeDecode_Int16(&v16);
+    ck_assert(bytes[1] == 0xAB && bytes[0] == 0xBC);
+
+    bytes = (uint8_t*) &vu16;
+    bytes[0] = 0xAB;
+    bytes[1] = 0xBC;
+    EncodeDecode_UInt16(&vu16);
+    ck_assert(bytes[1] == 0xAB && bytes[0] == 0xBC);
+
+    bytes = (uint8_t*) &v32;
+    bytes[0] = 0xAB;
+    bytes[1] = 0xBC;
+    bytes[2] = 0xCD;
+    bytes[3] = 0xDE;
+    EncodeDecode_Int32(&v32);
+    ck_assert(bytes[3] == 0xAB && bytes[2] == 0xBC &&
+              bytes[1] == 0xCD && bytes[0] == 0xDE);
+
+    bytes = (uint8_t*) &vu32;
+    bytes[0] = 0xAB;
+    bytes[1] = 0xBC;
+    bytes[2] = 0xCD;
+    bytes[3] = 0xDE;
+    EncodeDecode_UInt32(&vu32);
+    ck_assert(bytes[3] == 0xAB && bytes[2] == 0xBC &&
+              bytes[1] == 0xCD && bytes[0] == 0xDE);
+
+    bytes = (uint8_t*) &v64;
+    bytes[0] = 0x00;
+    bytes[1] = 0x11;
+    bytes[2] = 0x22;
+    bytes[3] = 0x33;
+    bytes[4] = 0xAB;
+    bytes[5] = 0xBC;
+    bytes[6] = 0xCD;
+    bytes[7] = 0xDE;
+    EncodeDecode_Int64(&v64);
+    ck_assert(bytes[7] == 0x00 && bytes[6] == 0x11 &&
+              bytes[5] == 0x22 && bytes[4] == 0x33 &&
+              bytes[3] == 0xAB && bytes[2] == 0xBC &&
+              bytes[1] == 0xCD && bytes[0] == 0xDE);
+
+    bytes = (uint8_t*) &vu64;
+    bytes[0] = 0x00;
+    bytes[1] = 0x11;
+    bytes[2] = 0x22;
+    bytes[3] = 0x33;
+    bytes[4] = 0xAB;
+    bytes[5] = 0xBC;
+    bytes[6] = 0xCD;
+    bytes[7] = 0xDE;
+    EncodeDecode_UInt64(&vu64);
+    ck_assert(bytes[7] == 0x00 && bytes[6] == 0x11 &&
+              bytes[5] == 0x22 && bytes[4] == 0x33 &&
+              bytes[3] == 0xAB && bytes[2] == 0xBC &&
+              bytes[1] == 0xCD && bytes[0] == 0xDE);
+
+    floatEndianess = P_Endianess_BigEndian;
+    bytes = (uint8_t*) &vfloat;
+    bytes[0] = 0xC0;
+    bytes[1] = 0xD0;
+    bytes[2] = 0x00;
+    bytes[3] = 0x00;
+    EncodeDecode_Float(&vfloat);
+    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 &&
+              bytes[2] == 0xD0 && bytes[3] == 0xC0);
+
+    bytes = (uint8_t*) &vdouble;
+    bytes[0] = 0xC0;
+    bytes[1] = 0x1A;
+    bytes[2] = 0x00;
+    bytes[3] = 0x00;
+    bytes[4] = 0x00;
+    bytes[5] = 0x00;
+    bytes[6] = 0x00;
+    bytes[7] = 0x00;
+    EncodeDecode_Double(&vdouble);
+    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 &&
+              bytes[2] == 0x00 && bytes[3] == 0x00 &&
+              bytes[4] == 0x00 && bytes[5] == 0x00 &&
+              bytes[6] == 0x1A && bytes[7] == 0xC0);
+
+}
+END_TEST
+
 Suite *tests_make_suite_core_tools(void)
 {
     Suite *s;
-    TCase *tc_msgbuffer;
+    TCase *tc_msgbuffer, *tc_encoder;
 
     s = suite_create("Core Tools");
     tc_msgbuffer = tcase_create("UA Message Buffer");
@@ -468,8 +662,10 @@ Suite *tests_make_suite_core_tools(void)
     tcase_add_test(tc_msgbuffer, test_ua_msg_buffers_create);
     tcase_add_test(tc_msgbuffer, test_ua_msg_buffers_chunk_mgr);
     tcase_add_test(tc_msgbuffer, test_ua_msg_buffers_copy);
-
     suite_add_tcase(s, tc_msgbuffer);
+    tc_encoder = tcase_create("UA Encoder");
+    tcase_add_test(tc_encoder, test_ua_encoder_endianess_mgt);
+    suite_add_tcase(s, tc_encoder);
 
     return s;
 }
