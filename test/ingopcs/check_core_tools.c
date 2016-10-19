@@ -1111,6 +1111,7 @@ START_TEST(test_ua_encoder_other_types)
     Buffer* buffer2 = Buffer_Create(8);
     UA_MsgBuffer* msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
 
+    //////////////////////////////////////////////
     // Test ByteString nominal and degraded cases
     //// Nominal write
     UA_ByteString* bs = ByteString_Create();
@@ -1231,6 +1232,7 @@ START_TEST(test_ua_encoder_other_types)
     bs2 = NULL;
 
 
+    /////////////////////////////////////////
     // Test String nominal and degraded cases
     //// Nominal write
     MsgBuffer_Reset(msgBuffer);
@@ -1346,6 +1348,203 @@ START_TEST(test_ua_encoder_other_types)
 
     String_Clear(&str);
     String_Clear(&str2);
+
+    //////////////////////////////////////////
+    // Test XmlElement nominal and degraded cases
+    //// Nominal write
+    MsgBuffer_Reset(msgBuffer);
+    UA_XmlElement xmlElt;
+    XmlElement_Initialize(&xmlElt);
+    UA_XmlElement xmlElt2;
+    XmlElement_Initialize(&xmlElt2);
+    uint8_t balA[3] = {0x3C, 0x41, 0x3E}; // <A>
+
+    ////// Empty string
+    xmlElt.length = 0;
+    status = XmlElement_Write(&xmlElt, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// -1 length must be encoded for null string
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[1] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[2] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[3] == 0xFF);
+
+    MsgBuffer_Reset(msgBuffer);
+    xmlElt.length = -1;
+    status = XmlElement_Write(&xmlElt, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// -1 length must be encoded for null string
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[1] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[2] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[3] == 0xFF);
+
+    MsgBuffer_Reset(msgBuffer);
+    xmlElt.length = -10;
+    status = XmlElement_Write(&xmlElt, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// -1 length must be encoded for null string
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[1] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[2] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[3] == 0xFF);
+
+    /////// Non empty bytestring
+    MsgBuffer_Reset(msgBuffer);
+    xmlElt.characters = malloc(sizeof(UA_Byte) * 3);
+    ck_assert(xmlElt.characters != NULL);
+    ck_assert(memcpy(xmlElt.characters, balA, 3) == xmlElt.characters);
+    xmlElt.length = 3;
+    status = XmlElement_Write(&xmlElt, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[0] == 0x03);
+    ck_assert(msgBuffer->buffers->data[1] == 0x00);
+    ck_assert(msgBuffer->buffers->data[2] == 0x00);
+    ck_assert(msgBuffer->buffers->data[3] == 0x00);
+    ck_assert(msgBuffer->buffers->data[4] == 0x3C);
+    ck_assert(msgBuffer->buffers->data[5] == 0x41);
+    ck_assert(msgBuffer->buffers->data[6] == 0x3E);
+
+
+    //// Degraded write
+    status = XmlElement_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = XmlElement_Write(&xmlElt, NULL);
+    ck_assert(status != STATUS_OK);
+    msgBufferFull->buffers->position = 2; // Set buffer almost full (6 byte left)
+    status = XmlElement_Write(&xmlElt, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    XmlElement_Clear(&xmlElt2);
+    XmlElement_Initialize(&xmlElt2);
+    status = XmlElement_Read(&xmlElt2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(memcmp(xmlElt.characters, xmlElt2.characters, 3) == 00);
+    ck_assert(xmlElt2.length == 3);
+    ck_assert(xmlElt2.characters[0] == 0x3C);
+    ck_assert(xmlElt2.characters[1] == 0x41);
+    ck_assert(xmlElt2.characters[2] == 0x3E);
+
+    ////// Read 0 length bytestring
+    msgBuffer->buffers->data[0] = 0x00;
+    msgBuffer->buffers->data[1] = 0x00;
+    msgBuffer->buffers->data[2] = 0x00;
+    msgBuffer->buffers->data[3] = 0x00;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    XmlElement_Clear(&xmlElt2);
+    XmlElement_Initialize(&xmlElt2);
+    status = XmlElement_Read(&xmlElt2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(xmlElt2.length == -1); // Null bytestring always decoded -1
+
+    ////// Read negative length bytestring
+    msgBuffer->buffers->data[0] = 0xFF;
+    msgBuffer->buffers->data[1] = 0x00;
+    msgBuffer->buffers->data[2] = 0x00;
+    msgBuffer->buffers->data[3] = 0xFF;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    XmlElement_Clear(&xmlElt2);
+    XmlElement_Initialize(&xmlElt2);
+    status = XmlElement_Read(&xmlElt2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(xmlElt2.length == -1); // Null bytestring always decoded -1
+
+    ////// Read -1 length bytestring
+    msgBuffer->buffers->data[0] = 0xFF;
+    msgBuffer->buffers->data[1] = 0xFF;
+    msgBuffer->buffers->data[2] = 0xFF;
+    msgBuffer->buffers->data[3] = 0xFF;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    XmlElement_Clear(&xmlElt2);
+    XmlElement_Initialize(&xmlElt2);
+    status = XmlElement_Read(&xmlElt2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(xmlElt2.length == -1); // Null bytestring always decoded -1
+    //// Degraded read
+    status = XmlElement_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = XmlElement_Read(&xmlElt, NULL);
+    ck_assert(status != STATUS_OK);
+    status = XmlElement_Read(&xmlElt, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    XmlElement_Clear(&xmlElt);
+    XmlElement_Clear(&xmlElt2);
+
+    // Resize "full" msg buffer
+    /////////////////////////////////////////
+    MsgBuffer_Delete(&msgBufferFull);
+    buffer2 = Buffer_Create(32);
+    msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
+    /////////////////////////////////////////
+    // Test GUID nominal and degraded cases
+    //// Nominal write
+    MsgBuffer_Reset(msgBuffer);
+    UA_Guid guid;
+    Guid_Initialize(&guid);
+    UA_Guid guid2;
+    Guid_Initialize(&guid2);
+    guid.data1 = 0x72962B91;
+    guid.data2 = 0xFA75;
+    guid.data3 = 0x4ae6;
+    guid.data4[0] = 0x8D;
+    guid.data4[1] = 0x28;
+    guid.data4[2] = 0xB4;
+    guid.data4[3] = 0x04;
+    guid.data4[4] = 0xDC;
+    guid.data4[5] = 0x7D;
+    guid.data4[6] = 0xAF;
+    guid.data4[7] = 0x63;
+
+    status = Guid_Write(&guid, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[0] == 0x91);
+    ck_assert(msgBuffer->buffers->data[1] == 0x2B);
+    ck_assert(msgBuffer->buffers->data[2] == 0x96);
+    ck_assert(msgBuffer->buffers->data[3] == 0x72);
+    ck_assert(msgBuffer->buffers->data[4] == 0x75);
+    ck_assert(msgBuffer->buffers->data[5] == 0xFA);
+    ck_assert(msgBuffer->buffers->data[6] == 0xE6);
+    ck_assert(msgBuffer->buffers->data[7] == 0x4A);
+    ck_assert(msgBuffer->buffers->data[8] == 0x8D);
+    ck_assert(msgBuffer->buffers->data[9] == 0x28);
+    ck_assert(msgBuffer->buffers->data[10] == 0xB4);
+    ck_assert(msgBuffer->buffers->data[11] == 0x04);
+    ck_assert(msgBuffer->buffers->data[12] == 0xDC);
+    ck_assert(msgBuffer->buffers->data[13] == 0x7D);
+    ck_assert(msgBuffer->buffers->data[14] == 0xAF);
+    ck_assert(msgBuffer->buffers->data[15] == 0x63);
+
+
+    //// Degraded write
+    status = Guid_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Guid_Write(&guid, NULL);
+    ck_assert(status != STATUS_OK);
+    msgBufferFull->buffers->position = 17; // Set buffer almost full (15 byte left)
+    status = Guid_Write(&guid, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    Guid_Initialize(&guid2);
+    status = Guid_Read(&guid2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(memcmp(&guid, &guid2, sizeof(UA_Guid)) == 0);
+
+    //// Degraded read
+    status = Guid_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Guid_Read(&guid, NULL);
+    ck_assert(status != STATUS_OK);
+    status = Guid_Read(&guid, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    Guid_Clear(&guid);
+    Guid_Clear(&guid2);
+
 
     MsgBuffer_Delete(&msgBuffer);
     MsgBuffer_Delete(&msgBufferFull);
