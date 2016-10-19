@@ -174,6 +174,7 @@ void ByteString_Clear(UA_ByteString* bstring){
         if(bstring->characters != NULL &&
            bstring->clearBytes != UA_FALSE){
             free(bstring->characters);
+            bstring->characters = NULL;
         }
     }
 }
