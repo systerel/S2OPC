@@ -399,7 +399,37 @@ StatusCode String_Write(const UA_String* str, UA_MsgBuffer* msgBuffer)
 
 StatusCode String_Read(UA_String* str, UA_MsgBuffer* msgBuffer)
 {
-    return ByteString_Read((UA_ByteString*) str, msgBuffer);
+    StatusCode status = STATUS_NOK;
+    int32_t length;
+    if(str == NULL || (str != NULL && str->characters != NULL)){
+        status = STATUS_INVALID_PARAMETERS;
+    }else{
+        status = TCP_UA_ReadMsgBuffer((UA_Byte*)&length, 4, msgBuffer, 4);
+        if(status == STATUS_OK){
+            EncodeDecode_Int32(&length);
+            if(length > 0){
+                str->length = length;
+                // +1 to add '\0' character for CString compatibility
+                str->characters = malloc(sizeof(UA_Byte) * (length + 1));
+                if(str->characters != NULL){
+                    status = TCP_UA_ReadMsgBuffer(str->characters, length, msgBuffer, length);
+                    if(status != STATUS_OK){
+                        status = STATUS_INVALID_STATE;
+                        free(str->characters);
+                        str->characters = NULL;
+                        str->length = -1;
+                    }else{
+                        // Add '\0' character for CString compatibility
+                        str->characters[str->length] = '\0';
+                    }
+                }
+            }else{
+                str->length = -1;
+            }
+        }
+
+    }
+    return status;
 }
 
 StatusCode XmlElement_Write(const UA_XmlElement* xml, UA_MsgBuffer* msgBuffer)
