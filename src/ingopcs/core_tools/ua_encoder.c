@@ -151,10 +151,12 @@ StatusCode SByte_Read(UA_SByte* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode Int16_Write(const int16_t* value, UA_MsgBuffer* msgBuffer)
 {
-    int16_t encodedValue = *value;
-    StatusCode status = STATUS_NOK;
-    EncodeDecode_Int16(&encodedValue);
-    status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 2);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
+        int16_t encodedValue = *value;
+        EncodeDecode_Int16(&encodedValue);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 2);
+    }
     return status;
 }
 
@@ -176,10 +178,12 @@ StatusCode Int16_Read(int16_t* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode UInt16_Write(const uint16_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    uint16_t encodedValue = *value;
-    EncodeDecode_UInt16(&encodedValue);
-    status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 2);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
+        uint16_t encodedValue = *value;
+        EncodeDecode_UInt16(&encodedValue);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 2);
+    }
     return status;
 }
 
@@ -199,11 +203,9 @@ StatusCode UInt16_Read(uint16_t* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode Int32_Write(const int32_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    int32_t encodedValue = *value;
-    if(value == NULL){
-            status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
+        int32_t encodedValue = *value;
         EncodeDecode_Int32(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
     }
@@ -212,10 +214,8 @@ StatusCode Int32_Write(const int32_t* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode Int32_Read(int32_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    if(value == NULL){
-        status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
             EncodeDecode_Int32(value);
@@ -226,19 +226,19 @@ StatusCode Int32_Read(int32_t* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode UInt32_Write(const uint32_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    uint32_t encodedValue = *value;
-    EncodeDecode_UInt32(&encodedValue);
-    status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
+        uint32_t encodedValue = *value;
+        EncodeDecode_UInt32(&encodedValue);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
+    }
     return status;
 }
 
 StatusCode UInt32_Read(uint32_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    if(value == NULL){
-        status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
             EncodeDecode_UInt32(value);
@@ -249,11 +249,9 @@ StatusCode UInt32_Read(uint32_t* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode Int64_Write(const int64_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    int64_t encodedValue = *value;
-    if(value == NULL){
-            status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
+        int64_t encodedValue = *value;
         EncodeDecode_Int64(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 8);
     }
@@ -262,10 +260,8 @@ StatusCode Int64_Write(const int64_t* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode Int64_Read(int64_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    if(value == NULL){
-        status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*) value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
             EncodeDecode_Int64(value);
@@ -276,11 +272,9 @@ StatusCode Int64_Read(int64_t* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode UInt64_Write(const uint64_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    uint64_t encodedValue = *value;
-    if(value == NULL){
-            status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
+        uint64_t encodedValue = *value;
         EncodeDecode_UInt64(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 8);
     }
@@ -289,10 +283,8 @@ StatusCode UInt64_Write(const uint64_t* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode UInt64_Read(uint64_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    if(value == NULL){
-        status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*) value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
             EncodeDecode_UInt64(value);
@@ -303,19 +295,19 @@ StatusCode UInt64_Read(uint64_t* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode Float_Write(const float* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    float encodedValue = *value;
-    EncodeDecode_Float(&encodedValue);
-    status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
+        float encodedValue = *value;
+        EncodeDecode_Float(&encodedValue);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
+    }
     return status;
 }
 
 StatusCode Float_Read(float* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    if(value == NULL){
-        status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
             EncodeDecode_Float(value);
@@ -326,19 +318,19 @@ StatusCode Float_Read(float* value, UA_MsgBuffer* msgBuffer)
 
 StatusCode Double_Write(const double* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    double encodedValue = *value;
-    EncodeDecode_Double(&encodedValue);
-    status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
+        double encodedValue = *value;
+        EncodeDecode_Double(&encodedValue);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
+    }
     return status;
 }
 
 StatusCode Double_Read(double* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
-    if(value == NULL){
-        status = STATUS_INVALID_PARAMETERS;
-    }else{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
             EncodeDecode_Double(value);

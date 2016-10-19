@@ -231,28 +231,32 @@ StatusCode TCP_UA_ReadMsgBuffer(UA_Byte*      data_dest,
                                 uint32_t      size,
                                 UA_MsgBuffer* msgBuffer,
                                 uint32_t      count){
-    StatusCode status = STATUS_OK;
+    StatusCode status = STATUS_INVALID_PARAMETERS;
     Buffer* buffer = NULL;
-    if(msgBuffer->nbBuffers == 1){
-        buffer = msgBuffer->buffers;
-    }else if(msgBuffer->nbBuffers > 1 && msgBuffer->nbChunks > 0){
-        // TCP UA layer never treat chunks
-        assert(msgBuffer->nbChunks == 1);
-        buffer = MsgBuffers_GetCurrentChunk(msgBuffer);
-        if(buffer == NULL){
-            status = STATUS_NOK;
+    if(data_dest != NULL && size > 0 && msgBuffer != NULL && count > 0){
+        // Treat single buffer messages and multiple buffers message (UA_MsgBuffers)
+        if(msgBuffer->nbBuffers == 1){
+            buffer = msgBuffer->buffers;
+        }else if(msgBuffer->nbBuffers > 1 && msgBuffer->nbChunks > 0){
+            // TCP UA layer never treat chunks
+            assert(msgBuffer->nbChunks == 1);
+            buffer = MsgBuffers_GetCurrentChunk(msgBuffer);
+            if(buffer == NULL){
+                status = STATUS_NOK;
+            }
         }
-    }
-    if(status == STATUS_OK){
+
+        // Check for size and count values
         if(data_dest == NULL || msgBuffer == NULL
            || size < count
            || buffer->length - buffer->position < count)
         {
-                status = STATUS_INVALID_PARAMETERS;
+            status = STATUS_INVALID_PARAMETERS;
         }else{
             status = Buffer_Read(data_dest, buffer, count);
         }
     }
+
     return status;
 }
 
@@ -274,11 +278,9 @@ StatusCode TCP_UA_WriteMsgBuffer(UA_MsgBuffer*  msgBuffer,
                                  const UA_Byte* data_src,
                                  uint32_t       count)
 {
-    StatusCode status = STATUS_NOK;
-    if(data_src == NULL || msgBuffer == NULL)
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(data_src != NULL && msgBuffer != NULL && count > 0)
     {
-            status = STATUS_INVALID_PARAMETERS;
-    }else{
         if(msgBuffer->buffers->position + count > msgBuffer->buffers->max_size){
             // Error message should be managed at secure channel level:
             //  no possible message chunks except for MSG type !
