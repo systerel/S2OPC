@@ -1529,7 +1529,6 @@ START_TEST(test_ua_encoder_other_types)
 
     //// Nominal read
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    Guid_Initialize(&guid2);
     status = Guid_Read(&guid2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(memcmp(&guid, &guid2, sizeof(UA_Guid)) == 0);
@@ -1544,6 +1543,94 @@ START_TEST(test_ua_encoder_other_types)
 
     Guid_Clear(&guid);
     Guid_Clear(&guid2);
+
+    /////////////////////////////////////////
+    // Test NodeId nominal and degraded cases
+    //// Nominal write
+    MsgBuffer_Reset(msgBuffer);
+    UA_NodeId nodeId;
+    NodeId_Initialize(&nodeId);
+    UA_NodeId nodeId2;
+    NodeId_Initialize(&nodeId2);
+
+    // Two bytes node id
+    nodeId.identifierType = IdentifierType_Numeric;
+    nodeId.numeric = 114;
+    status = NodeId_Write(&nodeId, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[0] == 0x00);
+    ck_assert(msgBuffer->buffers->data[1] == 0x72);
+
+    // Four bytes node id
+    nodeId.identifierType = IdentifierType_Numeric;
+    nodeId.namespace = 5;
+    nodeId.numeric = 1025;
+    status = NodeId_Write(&nodeId, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[2] == 0x01);
+    ck_assert(msgBuffer->buffers->data[3] == 0x05);
+    ck_assert(msgBuffer->buffers->data[4] == 0x01);
+    ck_assert(msgBuffer->buffers->data[5] == 0x04);
+
+    // Numeric node id
+    nodeId.identifierType = IdentifierType_Numeric;
+    nodeId.namespace = 5;
+    nodeId.numeric = 0x1FFFF;
+    status = NodeId_Write(&nodeId, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[6] == 0x02);
+    ck_assert(msgBuffer->buffers->data[7] == 0x05);
+    ck_assert(msgBuffer->buffers->data[8] == 0x00);
+    ck_assert(msgBuffer->buffers->data[9] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[10] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[11] == 0x01);
+    ck_assert(msgBuffer->buffers->data[12] == 0x00);
+
+    // TODO: write all other types possibles !
+
+    //// Degraded write
+    status = NodeId_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = NodeId_Write(&nodeId, NULL);
+    ck_assert(status != STATUS_OK);
+    msgBufferFull->buffers->position = 26; // Set buffer almost full (6 byte left)
+    status = NodeId_Write(&nodeId, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    ////// Two bytes NodeId
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = NodeId_Read(&nodeId2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(nodeId2.namespace == 0);
+    ck_assert(nodeId2.numeric == 114);
+
+    ////// Four bytes NodeId
+    NodeId_Clear(&nodeId2);
+    status = NodeId_Read(&nodeId2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(nodeId2.namespace == 5);
+    ck_assert(nodeId2.numeric == 1025);
+
+    ////// Numeric NodeId
+    NodeId_Clear(&nodeId2);
+    status = NodeId_Read(&nodeId2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(nodeId2.namespace == 5);
+    ck_assert(nodeId2.numeric == 0x1FFFF);
+
+    // TODO: read all other types possibles !
+
+    //// Degraded read
+    status = NodeId_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = NodeId_Read(&nodeId, NULL);
+    ck_assert(status != STATUS_OK);
+    status = NodeId_Read(&nodeId, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    NodeId_Clear(&nodeId);
+    NodeId_Clear(&nodeId2);
 
 
     MsgBuffer_Delete(&msgBuffer);
