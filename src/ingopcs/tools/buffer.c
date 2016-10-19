@@ -78,7 +78,7 @@ StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
         status = STATUS_OK;
         buffer->position = position;
         buffer->length = position;
-        memset(&(buffer->data[buffer->position]), 0, buffer->max_size);
+        memset(&(buffer->data[buffer->position]), 0, buffer->max_size - buffer->position);
     }
     return status;
 }
