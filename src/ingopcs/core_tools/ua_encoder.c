@@ -322,7 +322,7 @@ StatusCode Double_Write(const double* value, UA_MsgBuffer* msgBuffer)
     if(value != NULL){
         double encodedValue = *value;
         EncodeDecode_Double(&encodedValue);
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 4);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) &encodedValue, 8);
     }
     return status;
 }
@@ -331,7 +331,7 @@ StatusCode Double_Read(double* value, UA_MsgBuffer* msgBuffer)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
-        status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
+        status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
             EncodeDecode_Double(value);
         }
