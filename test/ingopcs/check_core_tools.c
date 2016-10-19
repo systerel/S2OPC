@@ -22,12 +22,14 @@ START_TEST(test_ua_msg_buffer_create_set_type)
     StatusCode status = 0;
     int flushData = 3;
     UA_NamespaceTable table;
-    UA_EncodeableType* encTypes;
+    Namespace_Initialize(&table);
+    UA_EncodeableType* encTypes[0];
+
 
     // Test creation / set type
     //// Test nominal case
     Buffer* buf = Buffer_Create(10);
-    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, &encTypes);
+    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ck_assert(msgBuf != NULL);
     ck_assert(msgBuf->nbBuffers == 1);
     ck_assert(msgBuf->buffers == buf);
@@ -41,7 +43,7 @@ START_TEST(test_ua_msg_buffer_create_set_type)
     ck_assert(msgBuf->receivedReqId == 0);
     ck_assert(msgBuf->flushData == &flushData);
     ck_assert(msgBuf->nsTable.namespaceArray == table.namespaceArray);
-    ck_assert(msgBuf->encTypesTable == &encTypes);
+    ck_assert(msgBuf->encTypesTable == encTypes);
 
     status = MsgBuffer_SetSecureMsgType(msgBuf, UA_OpenSecureChannel);
     ck_assert(status == STATUS_OK);
@@ -75,7 +77,7 @@ START_TEST(test_ua_msg_buffer_create_set_type)
     MsgBuffer_Delete(&msgBuf);
 
     //// Test buffer creation degraded cases
-    msgBuf = MsgBuffer_Create(NULL, 1, &flushData, &table, &encTypes);
+    msgBuf = MsgBuffer_Create(NULL, 1, &flushData, &table, encTypes);
     ck_assert(msgBuf == NULL);
 
 
@@ -87,12 +89,13 @@ START_TEST(test_ua_msg_buffer_reset)
     StatusCode status = 0;
     uint8_t flushData = 3;
     UA_NamespaceTable table;
-    UA_EncodeableType* encTypes;
+    Namespace_Initialize(&table);
+    UA_EncodeableType* encTypes[0];
 
     // Test reset
     //// Test nominal case
     Buffer* buf = Buffer_Create(10);
-    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, &encTypes);
+    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
     Buffer_Write(buf, &flushData, 1);
     msgBuf->type = TCP_UA_Message_SecureMessage;
@@ -133,7 +136,7 @@ START_TEST(test_ua_msg_buffer_reset)
 
     ////// Modify properties
     buf = Buffer_Create(10);
-    msgBuf = MsgBuffer_Create(buf, 2, &flushData, &table, &encTypes);
+    msgBuf = MsgBuffer_Create(buf, 2, &flushData, &table, encTypes);
     Buffer_Write(buf, &flushData, 1);
     Buffer_Write(buf, &flushData, 1);
     msgBuf->type = TCP_UA_Message_SecureMessage;
@@ -182,12 +185,13 @@ START_TEST(test_ua_msg_buffer_copy)
     StatusCode status = 0;
     uint8_t flushData = 3;
     UA_NamespaceTable table;
-    UA_EncodeableType* encTypes;
+    Namespace_Initialize(&table);
+    UA_EncodeableType* encTypes[0];
 
     // Test reset
     //// Test nominal case
     Buffer* buf = Buffer_Create(10);
-    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, &encTypes);
+    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
     Buffer_Write(buf, &flushData, 1);
     msgBuf->type = TCP_UA_Message_SecureMessage;
@@ -248,11 +252,12 @@ END_TEST
 START_TEST(test_ua_msg_buffers_create)
 {
     UA_NamespaceTable table;
-    UA_EncodeableType* encTypes;
+    Namespace_Initialize(&table);
+    UA_EncodeableType* encTypes[0];
 
     // Test creation
     //// Test nominal case
-    UA_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, &encTypes);
+    UA_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
     ck_assert(msgBuf != NULL);
     ck_assert(msgBuf->nbBuffers == 3);
     ck_assert(msgBuf->buffers[0].data != NULL);
@@ -267,15 +272,15 @@ START_TEST(test_ua_msg_buffers_create)
     ck_assert(msgBuf->isFinal == UA_Msg_Chunk_Unknown);
     ck_assert(msgBuf->receivedReqId == 0);
     ck_assert(msgBuf->nsTable.namespaceArray == table.namespaceArray);
-    ck_assert(msgBuf->encTypesTable == &encTypes);
+    ck_assert(msgBuf->encTypesTable == encTypes);
     MsgBuffers_Delete(&msgBuf);
 
     //// Test buffer creation degraded cases
-    msgBuf = MsgBuffers_Create(0, 10, &table, &encTypes);
+    msgBuf = MsgBuffers_Create(0, 10, &table, encTypes);
     ck_assert(msgBuf == NULL);
-    msgBuf = MsgBuffers_Create(3, 0, &table, &encTypes);
+    msgBuf = MsgBuffers_Create(3, 0, &table, encTypes);
     ck_assert(msgBuf == NULL);
-    msgBuf = MsgBuffers_Create(3, 10, NULL, &encTypes);
+    msgBuf = MsgBuffers_Create(3, 10, NULL, encTypes);
     ck_assert(msgBuf == NULL);
     msgBuf = MsgBuffers_Create(3, 10, &table, NULL);
     ck_assert(msgBuf == NULL);
@@ -286,7 +291,8 @@ END_TEST
 START_TEST(test_ua_msg_buffers_chunk_mgr)
 {
     UA_NamespaceTable table;
-    UA_EncodeableType* encTypes;
+    Namespace_Initialize(&table);
+    UA_EncodeableType* encTypes[0];
     Buffer* buf = NULL;
     Buffer* buf2 = NULL;
     uint32_t bufIdx = 0;
@@ -294,7 +300,7 @@ START_TEST(test_ua_msg_buffers_chunk_mgr)
 
     // Test chunks management
     //// Test nominal case
-    UA_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, &encTypes);
+    UA_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
 
     ////// No current chunk before NextChunk called
     buf2 = MsgBuffers_GetCurrentChunk(msgBuf);
@@ -359,7 +365,7 @@ START_TEST(test_ua_msg_buffers_chunk_mgr)
     status = MsgBuffers_SetCurrentChunkFirst(msgBuf);
     ck_assert(status != STATUS_OK);
     MsgBuffers_Delete(&msgBuf);
-    msgBuf = MsgBuffers_Create(3, 10, &table, &encTypes);
+    msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
     ////// Set current chunk first with only 0 chunk
     status = MsgBuffers_SetCurrentChunkFirst(msgBuf);
     ck_assert(status != STATUS_OK);
@@ -372,12 +378,13 @@ START_TEST(test_ua_msg_buffers_copy)
     StatusCode status = 0;
     uint8_t flushData = 3;
     UA_NamespaceTable table;
-    UA_EncodeableType* encTypes;
+    Namespace_Initialize(&table);
+    UA_EncodeableType* encTypes[0];
 
     // Test reset
     //// Test nominal case
     Buffer* buf = Buffer_Create(10);
-    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, &encTypes);
+    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
     Buffer_Write(buf, &flushData, 1);
     msgBuf->type = TCP_UA_Message_SecureMessage;
@@ -393,7 +400,7 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBuf->buffers->length == 1);
     ck_assert(msgBuf->secureType == UA_CloseSecureChannel);
 
-    UA_MsgBuffer* msgBufsDest = MsgBuffers_Create(3, 5, &table, &encTypes);
+    UA_MsgBuffer* msgBufsDest = MsgBuffers_Create(3, 5, &table, encTypes);
     ////// Copy msg buffer
     status = MsgBuffers_CopyBuffer(msgBufsDest, 0,
                                    msgBuf, 1);
@@ -413,7 +420,7 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBufsDest->maxChunks == 3);
     ck_assert(msgBufsDest->flushData == NULL);
     ck_assert(msgBufsDest->nsTable.namespaceArray == table.namespaceArray);
-    ck_assert(msgBufsDest->encTypesTable == &encTypes);
+    ck_assert(msgBufsDest->encTypesTable == encTypes);
 
     status = MsgBuffers_CopyBuffer(msgBufsDest, 1,
                                    msgBuf, 1);
@@ -433,7 +440,7 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBufsDest->maxChunks == 3);
     ck_assert(msgBufsDest->flushData == NULL);
     ck_assert(msgBufsDest->nsTable.namespaceArray == table.namespaceArray);
-    ck_assert(msgBufsDest->encTypesTable == &encTypes);
+    ck_assert(msgBufsDest->encTypesTable == encTypes);
 
 
     //// Test degraded case
@@ -649,6 +656,451 @@ START_TEST(test_ua_encoder_endianess_mgt)
 }
 END_TEST
 
+START_TEST(test_ua_encoder_basic_types)
+{
+    InitPlatformDependencies(); // Necessary to initialize endianess configuration
+    StatusCode status = STATUS_OK;
+    Buffer* buffer = Buffer_Create(100);
+    UA_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
+
+    Buffer* buffer2 = Buffer_Create(8);
+    UA_MsgBuffer* msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
+
+    // Test Byte nominal and degraded cases
+    //// Nominal write
+    UA_Byte byte = 0xAE;
+    status = Byte_Write(&byte, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[0] == 0xAE);
+    //// Degraded write
+    status = Byte_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Byte_Write(&byte, NULL);
+    ck_assert(status != STATUS_OK);
+    msgBufferFull->buffers->position = 8; // Set buffer full
+    status = Byte_Write(&byte, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    byte = 0x00;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = Byte_Read(&byte, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(byte == 0xAE);
+    //// Degraded read
+    status = Byte_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Byte_Read(&byte, NULL);
+    ck_assert(status != STATUS_OK);
+    status = Byte_Read(&byte, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test Boolean nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    UA_Boolean bool = UA_FALSE;
+    status = Boolean_Write(&bool, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[0] == UA_FALSE);
+    bool = 1; // not UA_FALSE
+    status = Boolean_Write(&bool, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[1] == 1);
+    bool = 2; // not UA_FALSE
+    status = Boolean_Write(&bool, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[2] == 1); // True value always encoded as 1
+
+    //// Degraded write
+    status = Boolean_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Boolean_Write(&bool, NULL);
+    ck_assert(status != STATUS_OK);
+    status = Boolean_Write(&bool, msgBufferFull); // Test with full buffer
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    bool = 4;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    msgBuffer->buffers->data[2] = 2; // Simulates a true value received as 2
+    status = Boolean_Read(&bool, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(bool == UA_FALSE);
+    status = Boolean_Read(&bool, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(bool == 1);
+    status = Boolean_Read(&bool, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(bool == 1); // True value always decoded as 1
+    //// Degraded read
+    status = Boolean_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Boolean_Read(&bool, NULL);
+    ck_assert(status != STATUS_OK);
+    status = Boolean_Read(&bool, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test SByteuv16nal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    UA_SByte sbyte = -1;
+    status = SByte_Write(&sbyte, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    //// Degraded write
+    status = SByte_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = SByte_Write(&sbyte, NULL);
+    ck_assert(status != STATUS_OK);
+    status = SByte_Write(&sbyte, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    sbyte = 0x00;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = SByte_Read(&sbyte, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(sbyte == -1);
+    //// Degraded read
+    status = SByte_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = SByte_Read(&sbyte, NULL);
+    ck_assert(status != STATUS_OK);
+    status = SByte_Read(&sbyte, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test Int16 nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    int16_t v16 = -2;
+
+    status = Int16_Write(&v16, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// Little endian encoded
+    ck_assert(msgBuffer->buffers->data[0] == 0xFE &&
+              msgBuffer->buffers->data[1] == 0xFF);
+    //// Degraded write
+    status = Int16_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Int16_Write(&v16, NULL);
+    ck_assert(status != STATUS_OK);
+    status = msgBufferFull->buffers->position = 7; // Set buffer almost full (1 byte left)
+    status = Int16_Write(&v16, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    v16 = 0;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = Int16_Read(&v16, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(v16 == -2);
+    //// Degraded read
+    status = Int16_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Int16_Read(&v16, NULL);
+    ck_assert(status != STATUS_OK);
+    status = Int16_Read(&v16, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test UInt16 nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    uint16_t vu16 = 2;
+
+    status = UInt16_Write(&vu16, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// Little endian encoded
+    ck_assert(msgBuffer->buffers->data[0] == 0x02 &&
+              msgBuffer->buffers->data[1] == 0x00);
+    //// Degraded write
+    status = UInt16_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = UInt16_Write(&vu16, NULL);
+    ck_assert(status != STATUS_OK);
+    status = msgBufferFull->buffers->position = 7; // Set buffer almost full (1 byte left)
+    status = UInt16_Write(&vu16, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    vu16 = 0;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = UInt16_Read(&vu16, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(vu16 == 2);
+    //// Degraded read
+    status = UInt16_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = UInt16_Read(&vu16, NULL);
+    ck_assert(status != STATUS_OK);
+    status = UInt16_Read(&vu16, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test Int32 nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    int32_t v32 = -2;
+
+    status = Int32_Write(&v32, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// Little endian encoded
+    ck_assert(msgBuffer->buffers->data[0] == 0xFE &&
+              msgBuffer->buffers->data[1] == 0xFF &&
+              msgBuffer->buffers->data[2] == 0xFF &&
+              msgBuffer->buffers->data[3] == 0xFF);
+    //// Degraded write
+    status = Int32_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Int32_Write(&v32, NULL);
+    ck_assert(status != STATUS_OK);
+    status = msgBufferFull->buffers->position = 5; // Set buffer almost full (3 byte left)
+    status = Int32_Write(&v32, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    v32 = 0;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = Int32_Read(&v32, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(v32 == -2);
+    //// Degraded read
+    status = Int32_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Int32_Read(&v32, NULL);
+    ck_assert(status != STATUS_OK);
+    status = Int32_Read(&v32, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test UInt32 nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    uint32_t vu32 = 1048578;
+
+    status = UInt32_Write(&vu32, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// Little endian encoded
+    ck_assert(msgBuffer->buffers->data[0] == 0x02 &&
+              msgBuffer->buffers->data[1] == 0x00 &&
+              msgBuffer->buffers->data[2] == 0x10 &&
+              msgBuffer->buffers->data[3] == 0x00);
+    //// Degraded write
+    status = UInt32_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = UInt32_Write(&vu32, NULL);
+    ck_assert(status != STATUS_OK);
+    status = msgBufferFull->buffers->position = 5; // Set buffer almost full (3 byte left)
+    status = UInt32_Write(&vu32, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    vu32 = 0;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = UInt32_Read(&vu32, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(vu32 == 1048578);
+    //// Degraded read
+    status = UInt32_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = UInt32_Read(&vu32, NULL);
+    ck_assert(status != STATUS_OK);
+    status = UInt32_Read(&vu32, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test Int64 nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    int64_t v64 = -2;
+
+    status = Int64_Write(&v64, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// Little endian encoded
+    ck_assert(msgBuffer->buffers->data[0] == 0xFE &&
+              msgBuffer->buffers->data[1] == 0xFF &&
+              msgBuffer->buffers->data[2] == 0xFF &&
+              msgBuffer->buffers->data[3] == 0xFF &&
+              msgBuffer->buffers->data[4] == 0xFF &&
+              msgBuffer->buffers->data[5] == 0xFF &&
+              msgBuffer->buffers->data[6] == 0xFF &&
+              msgBuffer->buffers->data[7] == 0xFF);
+    //// Degraded write
+    status = Int64_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Int64_Write(&v64, NULL);
+    ck_assert(status != STATUS_OK);
+    status = msgBufferFull->buffers->position = 1; // Set buffer almost full (7 byte left)
+    status = Int64_Write(&v64, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    v64 = 0;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = Int64_Read(&v64, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(v64 == -2);
+    //// Degraded read
+    status = Int64_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Int64_Read(&v64, NULL);
+    ck_assert(status != STATUS_OK);
+    status = Int64_Read(&v64, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test UInt64 nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    uint64_t vu64 = 0x100000000000002;
+
+    status = UInt64_Write(&vu64, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// Little endian encoded
+    ck_assert(msgBuffer->buffers->data[0] == 0x02 &&
+              msgBuffer->buffers->data[1] == 0x00 &&
+              msgBuffer->buffers->data[2] == 0x00 &&
+              msgBuffer->buffers->data[3] == 0x00 &&
+              msgBuffer->buffers->data[4] == 0x00 &&
+              msgBuffer->buffers->data[5] == 0x00 &&
+              msgBuffer->buffers->data[6] == 0x00 &&
+              msgBuffer->buffers->data[7] == 0x01);
+    //// Degraded write
+    status = UInt64_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = UInt64_Write(&vu64, NULL);
+    ck_assert(status != STATUS_OK);
+    status = msgBufferFull->buffers->position = 1; // Set buffer almost full (7 byte left)
+    status = UInt64_Write(&vu64, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    vu64 = 0;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = UInt64_Read(&vu64, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(vu64 == 0x100000000000002);
+    //// Degraded read
+    status = UInt64_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = UInt64_Read(&vu64, NULL);
+    ck_assert(status != STATUS_OK);
+    status = UInt64_Read(&vu64, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test Float nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    float vfloat = -6.5;
+
+    status = Float_Write(&vfloat, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// Little endian encoded
+    ck_assert(msgBuffer->buffers->data[0] == 0x00 &&
+              msgBuffer->buffers->data[1] == 0x00 &&
+              msgBuffer->buffers->data[2] == 0xD0 &&
+              msgBuffer->buffers->data[3] == 0xC0);
+    //// Degraded write
+    status = Float_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Float_Write(&vfloat, NULL);
+    ck_assert(status != STATUS_OK);
+    status = msgBufferFull->buffers->position = 5; // Set buffer almost full (3 byte left)
+    status = Float_Write(&vfloat, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    vfloat = 0;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = Float_Read(&vfloat, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(vfloat == -6.5);
+    //// Degraded read
+    status = Float_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Float_Read(&vfloat, NULL);
+    ck_assert(status != STATUS_OK);
+    status = Float_Read(&vfloat, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test Double nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    double vdouble = -6.5;
+
+    status = Double_Write(&vdouble, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// Little endian encoded
+    ck_assert(msgBuffer->buffers->data[0] == 0x00 &&
+              msgBuffer->buffers->data[1] == 0x00 &&
+              msgBuffer->buffers->data[2] == 0x00 &&
+              msgBuffer->buffers->data[3] == 0x00 &&
+              msgBuffer->buffers->data[4] == 0x00 &&
+              msgBuffer->buffers->data[5] == 0x00 &&
+              msgBuffer->buffers->data[6] == 0x1A &&
+              msgBuffer->buffers->data[7] == 0xC0);
+    //// Degraded write
+    status = Double_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Double_Write(&vdouble, NULL);
+    ck_assert(status != STATUS_OK);
+    status = msgBufferFull->buffers->position = 1; // Set buffer almost full (7 byte left)
+    status = Double_Write(&vdouble, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    vdouble = 0;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = Double_Read(&vdouble, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(vdouble == -6.5);
+    //// Degraded read
+    status = Double_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = Double_Read(&vdouble, NULL);
+    ck_assert(status != STATUS_OK);
+    status = Double_Read(&vdouble, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    // Test DateTime nominal and degraded cases
+    MsgBuffer_Reset(msgBuffer);
+    //// Nominal write
+    UA_DateTime vDate = -2;
+
+    status = DateTime_Write(&vDate, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// Little endian encoded
+    ck_assert(msgBuffer->buffers->data[0] == 0xFE &&
+              msgBuffer->buffers->data[1] == 0xFF &&
+              msgBuffer->buffers->data[2] == 0xFF &&
+              msgBuffer->buffers->data[3] == 0xFF &&
+              msgBuffer->buffers->data[4] == 0xFF &&
+              msgBuffer->buffers->data[5] == 0xFF &&
+              msgBuffer->buffers->data[6] == 0xFF &&
+              msgBuffer->buffers->data[7] == 0xFF);
+    //// Degraded write
+    status = DateTime_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = DateTime_Write(&vDate, NULL);
+    ck_assert(status != STATUS_OK);
+    status = msgBufferFull->buffers->position = 1; // Set buffer almost full (7 byte left)
+    status = DateTime_Write(&vDate, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    vDate = 0;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    status = DateTime_Read(&vDate, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(vDate == -2);
+    //// Degraded read
+    status = DateTime_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = DateTime_Read(&vDate, NULL);
+    ck_assert(status != STATUS_OK);
+    status = DateTime_Read(&vDate, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    MsgBuffer_Delete(&msgBuffer);
+    MsgBuffer_Delete(&msgBufferFull);
+}
+END_TEST
+
 Suite *tests_make_suite_core_tools(void)
 {
     Suite *s;
@@ -665,6 +1117,7 @@ Suite *tests_make_suite_core_tools(void)
     suite_add_tcase(s, tc_msgbuffer);
     tc_encoder = tcase_create("UA Encoder");
     tcase_add_test(tc_encoder, test_ua_encoder_endianess_mgt);
+    tcase_add_test(tc_encoder, test_ua_encoder_basic_types);
     suite_add_tcase(s, tc_encoder);
 
     return s;
