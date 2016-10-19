@@ -1101,6 +1101,257 @@ START_TEST(test_ua_encoder_basic_types)
 }
 END_TEST
 
+START_TEST(test_ua_encoder_other_types)
+{
+    InitPlatformDependencies(); // Necessary to initialize endianess configuration
+    StatusCode status = STATUS_OK;
+    Buffer* buffer = Buffer_Create(100);
+    UA_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
+
+    Buffer* buffer2 = Buffer_Create(8);
+    UA_MsgBuffer* msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
+
+    // Test ByteString nominal and degraded cases
+    //// Nominal write
+    UA_ByteString* bs = ByteString_Create();
+    UA_ByteString* bs2 = ByteString_Create();
+    uint8_t boyString[3] = {0x42, 0x6F, 0x79}; // Boy
+
+    ////// Empty string
+    bs->length = 0;
+    status = ByteString_Write(bs, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// -1 length must be encoded for null string
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[1] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[2] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[3] == 0xFF);
+
+    MsgBuffer_Reset(msgBuffer);
+    bs->length = -1;
+    status = ByteString_Write(bs, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// -1 length must be encoded for null string
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[1] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[2] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[3] == 0xFF);
+
+    MsgBuffer_Reset(msgBuffer);
+    bs->length = -10;
+    status = ByteString_Write(bs, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// -1 length must be encoded for null string
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[1] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[2] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[3] == 0xFF);
+
+    /////// Non empty bytestring
+    MsgBuffer_Reset(msgBuffer);
+    status = ByteString_AttachFromBytes(bs, boyString, 3);
+    ck_assert(status == STATUS_OK);
+    status = ByteString_Write(bs, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[0] == 0x03);
+    ck_assert(msgBuffer->buffers->data[1] == 0x00);
+    ck_assert(msgBuffer->buffers->data[2] == 0x00);
+    ck_assert(msgBuffer->buffers->data[3] == 0x00);
+    ck_assert(msgBuffer->buffers->data[4] == 0x42);
+    ck_assert(msgBuffer->buffers->data[5] == 0x6F);
+    ck_assert(msgBuffer->buffers->data[6] == 0x79);
+
+
+    //// Degraded write
+    status = ByteString_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = ByteString_Write(bs, NULL);
+    ck_assert(status != STATUS_OK);
+    msgBufferFull->buffers->position = 2; // Set buffer almost full (6 byte left)
+    status = ByteString_Write(bs, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    ByteString_Clear(bs2);
+    ByteString_Initialize(bs2);
+    status = ByteString_Read(bs2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(ByteString_Equal(bs, bs2) != UA_FALSE);
+    ck_assert(bs2->length == 3);
+    ck_assert(bs2->characters[0] == 0x42);
+    ck_assert(bs2->characters[1] == 0x6F);
+    ck_assert(bs2->characters[2] == 0x79);
+
+    ////// Read 0 length bytestring
+    msgBuffer->buffers->data[0] = 0x00;
+    msgBuffer->buffers->data[1] = 0x00;
+    msgBuffer->buffers->data[2] = 0x00;
+    msgBuffer->buffers->data[3] = 0x00;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    ByteString_Clear(bs2);
+    ByteString_Initialize(bs2);status = ByteString_Read(bs2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(bs2->length == -1); // Null bytestring always decoded -1
+
+    ////// Read negative length bytestring
+    msgBuffer->buffers->data[0] = 0xFF;
+    msgBuffer->buffers->data[1] = 0x00;
+    msgBuffer->buffers->data[2] = 0x00;
+    msgBuffer->buffers->data[3] = 0xFF;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    ByteString_Clear(bs2);
+    ByteString_Initialize(bs2);
+    status = ByteString_Read(bs2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(bs2->length == -1); // Null bytestring always decoded -1
+
+    ////// Read -1 length bytestring
+    msgBuffer->buffers->data[0] = 0xFF;
+    msgBuffer->buffers->data[1] = 0xFF;
+    msgBuffer->buffers->data[2] = 0xFF;
+    msgBuffer->buffers->data[3] = 0xFF;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    ByteString_Clear(bs2);
+    ByteString_Initialize(bs2);
+    status = ByteString_Read(bs2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(bs2->length == -1); // Null bytestring always decoded -1
+    //// Degraded read
+    status = ByteString_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = ByteString_Read(bs, NULL);
+    ck_assert(status != STATUS_OK);
+    status = ByteString_Read(bs, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    ByteString_Delete(bs);
+    ByteString_Delete(bs2);
+    bs = NULL;
+    bs2 = NULL;
+
+
+    // Test String nominal and degraded cases
+    //// Nominal write
+    MsgBuffer_Reset(msgBuffer);
+    UA_String str;
+    String_Initialize(&str);
+    UA_String str2;
+    String_Initialize(&str2);
+
+    ////// Empty string
+    str.length = 0;
+    status = String_Write(&str, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// -1 length must be encoded for null string
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[1] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[2] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[3] == 0xFF);
+
+    MsgBuffer_Reset(msgBuffer);
+    str.length = -1;
+    status = String_Write(&str, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// -1 length must be encoded for null string
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[1] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[2] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[3] == 0xFF);
+
+    MsgBuffer_Reset(msgBuffer);
+    str.length = -10;
+    status = String_Write(&str, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ////// -1 length must be encoded for null string
+    ck_assert(msgBuffer->buffers->data[0] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[1] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[2] == 0xFF);
+    ck_assert(msgBuffer->buffers->data[3] == 0xFF);
+
+    /////// Non empty bytestring
+    MsgBuffer_Reset(msgBuffer);
+    status = String_AttachFromCstring(&str, "Boy");
+    ck_assert(status == STATUS_OK);
+    status = String_Write(&str, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(msgBuffer->buffers->data[0] == 0x03);
+    ck_assert(msgBuffer->buffers->data[1] == 0x00);
+    ck_assert(msgBuffer->buffers->data[2] == 0x00);
+    ck_assert(msgBuffer->buffers->data[3] == 0x00);
+    ck_assert(msgBuffer->buffers->data[4] == 0x42);
+    ck_assert(msgBuffer->buffers->data[5] == 0x6F);
+    ck_assert(msgBuffer->buffers->data[6] == 0x79);
+
+
+    //// Degraded write
+    status = String_Write(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = String_Write(&str, NULL);
+    ck_assert(status != STATUS_OK);
+    msgBufferFull->buffers->position = 2; // Set buffer almost full (6 byte left)
+    status = String_Write(&str, msgBufferFull);
+    ck_assert(status != STATUS_OK);
+
+    //// Nominal read
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    String_Clear(&str2);
+    String_Initialize(&str2);
+    status = String_Read(&str2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(String_Equal(&str, &str2) != UA_FALSE);
+    ck_assert(memcmp(String_GetRawCString(&str2), "Boy", 3) == 0);
+
+    ////// Read 0 length bytestring
+    msgBuffer->buffers->data[0] = 0x00;
+    msgBuffer->buffers->data[1] = 0x00;
+    msgBuffer->buffers->data[2] = 0x00;
+    msgBuffer->buffers->data[3] = 0x00;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    String_Clear(&str2);
+    String_Initialize(&str2);status = String_Read(&str2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(str2.length == -1); // Null bytestring always decoded -1
+
+    ////// Read negative length bytestring
+    msgBuffer->buffers->data[0] = 0xFF;
+    msgBuffer->buffers->data[1] = 0x00;
+    msgBuffer->buffers->data[2] = 0x00;
+    msgBuffer->buffers->data[3] = 0xFF;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    String_Clear(&str2);
+    String_Initialize(&str2);
+    status = String_Read(&str2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(str2.length == -1); // Null bytestring always decoded -1
+
+    ////// Read -1 length bytestring
+    msgBuffer->buffers->data[0] = 0xFF;
+    msgBuffer->buffers->data[1] = 0xFF;
+    msgBuffer->buffers->data[2] = 0xFF;
+    msgBuffer->buffers->data[3] = 0xFF;
+    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    String_Clear(&str2);
+    String_Initialize(&str2);
+    status = String_Read(&str2, msgBuffer);
+    ck_assert(status == STATUS_OK);
+    ck_assert(str2.length == -1); // Null bytestring always decoded -1
+    //// Degraded read
+    status = String_Read(NULL, msgBuffer);
+    ck_assert(status != STATUS_OK);
+    status = String_Read(&str, NULL);
+    ck_assert(status != STATUS_OK);
+    status = String_Read(&str, msgBuffer); // Nothing to read anymore
+    ck_assert(status != STATUS_OK);
+
+    String_Clear(&str);
+    String_Clear(&str2);
+
+    MsgBuffer_Delete(&msgBuffer);
+    MsgBuffer_Delete(&msgBufferFull);
+}
+END_TEST
+
 Suite *tests_make_suite_core_tools(void)
 {
     Suite *s;
@@ -1118,6 +1369,7 @@ Suite *tests_make_suite_core_tools(void)
     tc_encoder = tcase_create("UA Encoder");
     tcase_add_test(tc_encoder, test_ua_encoder_endianess_mgt);
     tcase_add_test(tc_encoder, test_ua_encoder_basic_types);
+    tcase_add_test(tc_encoder, test_ua_encoder_other_types);
     suite_add_tcase(s, tc_encoder);
 
     return s;
