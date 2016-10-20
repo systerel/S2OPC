@@ -21,6 +21,7 @@
 #include "crypto_types.h"
 #include "secret_buffer.h"
 #include "crypto_provider_lib.h"
+#include "key_manager.h"
 
 
 // Helper
@@ -670,16 +671,65 @@ START_TEST(test_pk_x509)
 END_TEST*/
 
 
+START_TEST(test_cert_load)
+{
+    CryptoProvider *crypto = NULL;
+    KeyManager *keyman = NULL;
+    Certificate crt_pub;
+    uint8_t thumb[20];
+    char hexoutput[40];
+    uint8_t der_cert[1215];
+
+    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(NULL != crypto);
+    keyman = KeyManager_Create(crypto,
+                               (int8_t *)"./trusted/", 10,
+                               (int8_t *)"./revoked/", 10);
+    ck_assert(NULL != keyman);
+
+    //ck_assert(KeyManager_Certificate_LoadFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) == STATUS_OK);
+    ck_assert(unhexlify("308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a06035504080c03494446310e30"
+                        "0c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f5043533113301106035504030c0a494e474f"
+                        "5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d3136313030333038313333385a170d313731"
+                        "3030333038313333385a3057310b3009060355040613024652310c300a06035504080c03494446310e300c06035504070c0550415249533111300f060355040a"
+                        "0c08535953544552454c3117301506035504030c0e494e474f5043535f53455256455230820122300d06092a864886f70d01010105000382010f003082010a02"
+                        "82010100ad9921f924639e125c0cde520755f44028d65eaecaf16867823be446b977e0631d64509953b7fe467d1afc449bca6edfe11e1e6d71207c33e2250f3c"
+                        "66875d369a1cda02efc661e73bdf01c517470f2a09ea500b56842fcb125779917b8deb58dc6f2f9511e66c29ba57a69435bc3aab1a23982f531ec763f494ef8b"
+                        "6c6360ea194d7ca2efd777b9a32c295809cf39d2c2ed0dbfc4bfd6fbd24bf782f8d83795cb51964e1dd0a8cdd8f2a0ef2fd0d2b126eb8fc00f00411f362cd4e3"
+                        "0a0a20cde108efa69faede8d9f756838306569c6ea27f1ba5aefac790ff18bcbcc81d7acaa1fac2acede3acd2a61d7b62f202c7bab7df08ee2241a0f08dffdb6"
+                        "2914cf210203010001a360305e301d0603551d0e04160414a3f8e031d1f6f412bace4ddf0eeb62da209d3c79301f0603551d23041830168014db180c557814e7"
+                        "cffd868827b7b00d28f572abb2300f0603551d130101ff040530030101ff300b0603551d0f040403020106300d06092a864886f70d01010b0500038202010039"
+                        "ce25d423f265c38a6df573c1027c6997cc4e5d44db3135ac782180253c6bbdc5017464630d8b17853b214a7866f092a25316f296d342df15ccb443392fa914d5"
+                        "513a91ddc6112cdb70806e9f89898e911c1928ff5ce9139649a8ae11cef04ec645f2f4aef6187c1f044de6ae8845373f9eea33d9148125815ac472f4ab1fe601"
+                        "b99ca01cb683005728ef2f588339f33d433db7afbf1e0695ca5fa5ee5fcd5324a41eadf1ef717c90f2920be83615176df11d347a1e291602a66b248578c2648b"
+                        "f77009f28c3e0bfdceb7acf2f248939bcb260357db378de10eabcf30432952fb9c5a717fcf75884c697253ff6dca2365fcda670921180939e011b195f1190565"
+                        "efa25daefe393d8a67261abe881e98264258fef473423d15c3fc5fa87bce0b8c22dff409017842e0c60dfeb5c88ccc8005080c803c4935a82d762877b9513584"
+                        "6dfd407d49fc3faa523169bfdbbeb5fc5880fed2fa518ee017e42edfa872e781052a47e294c8d82c9858877496dfb76f6bd1c4ab1f0eaa71f48296d88a9950ce"
+                        "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f26f71264fd7962eb513030d14b5262b220b"
+                        "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5be2bf893c1299380675e82455cbef6ccc", der_cert, 1215) == 1215);
+    ck_assert(KeyManager_Certificate_Load(keyman, der_cert, 1215, &crt_pub) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_GetThumbprint(keyman, &crt_pub, thumb, 20) == STATUS_OK);
+    ck_assert(hexlify(thumb, hexoutput, 20) == 20);
+    // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
+    ck_assert(memcmp(hexoutput, "af17d03e1605277489815ab88bc4760655b3e2cd") == 0);
+
+    KeyManager_Delete(keyman);
+    CryptoProvider_Delete(crypto);
+}
+END_TEST
+
+
 Suite *tests_make_suite_crypto()
 {
     Suite *s;
-    TCase *tc_ciphers, *tc_providers, *tc_derives, *tc_misc;
+    TCase *tc_ciphers, *tc_providers, *tc_derives, *tc_misc, *tc_km;
 
     s = suite_create("Crypto lib");
     tc_ciphers = tcase_create("Ciphers");
     tc_providers = tcase_create("Crypto Provider");
     tc_derives = tcase_create("Crypto Data Derivation");
     tc_misc = tcase_create("Crypto Misc");
+    tc_km = tcase_create("Key Management");
 
     suite_add_tcase(s, tc_misc);
     tcase_add_test(tc_misc, test_hexlify);
@@ -695,6 +745,9 @@ Suite *tests_make_suite_crypto()
     suite_add_tcase(s, tc_derives);
     tcase_add_test(tc_derives, test_crypto_derive_data);
     tcase_add_test(tc_derives, test_crypto_derive_keysets);
+
+    suite_add_tcase(s, tc_km);
+    tcase_add_test(tc_km, test_cert_load);
 
     return s;
 }
