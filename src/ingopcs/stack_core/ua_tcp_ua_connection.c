@@ -406,9 +406,9 @@ StatusCode OnSocketEvent_CB (Socket        socket,
 StatusCode CheckURI (const char* uri){
     StatusCode status = STATUS_NOK;
     size_t idx = 0;
-    bool isPort = 0;
-    bool hasPort = 0;
-    bool invalid = 0;
+    uint8_t isPort = 0;
+    uint8_t hasPort = 0;
+    uint8_t invalid = 0;
     if(uri != NULL){
 
         if(strlen(uri) + 4  > 4096){
