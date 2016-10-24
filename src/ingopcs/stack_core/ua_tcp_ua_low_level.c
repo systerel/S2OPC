@@ -102,14 +102,17 @@ StatusCode TCP_UA_ReadData(Socket        socket,
             status = Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
             if(status == STATUS_OK && readBytes > 0){
                 Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
-            }
-            if(msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH){
-                status = TCP_UA_ReadHeader(msgBuffer);
-            }else if(msgBuffer->buffers->length > TCP_UA_HEADER_LENGTH){
-                status = STATUS_INVALID_STATE;
+
+                if(msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH){
+                    status = TCP_UA_ReadHeader(msgBuffer);
+                }else if(msgBuffer->buffers->length > TCP_UA_HEADER_LENGTH){
+                    status = STATUS_INVALID_STATE;
+                }else{
+                    // Incomplete header: Wait for new read event !
+                    status = STATUS_OK_INCOMPLETE;
+                }
             }else{
-                // Incomplete header: Wait for new read event !
-                status = STATUS_OK_INCOMPLETE;
+                // TODO: manage other statuses disconnect, etc.
             }
         }
     }

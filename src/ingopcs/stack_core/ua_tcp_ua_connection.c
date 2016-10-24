@@ -396,7 +396,7 @@ StatusCode OnSocketEvent_CB (Socket        socket,
             ResetConnectionState(connection);
             break;
         case SOCKET_TIMEOUT_EVENT:
-        case SOCKET_WRITE_EVENT:
+        //case SOCKET_WRITE_EVENT:
         default:
             break;
     }
@@ -473,10 +473,10 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
 
                 if(status == STATUS_OK){
                     status = SocketManager_CreateClientSocket(connection->socketManager,
-                                                  uri,
-                                                  OnSocketEvent_CB,
-                                                  (void*) connection,
-                                                  &(connection->socket));
+                                                              uri,
+                                                              OnSocketEvent_CB,
+                                                              (void*) connection,
+                                                              &(connection->socket));
                 }
 #endif //UA_MULTITHREADED
 
