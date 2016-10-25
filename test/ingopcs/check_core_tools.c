@@ -698,10 +698,10 @@ START_TEST(test_ua_encoder_basic_types)
     // Test Boolean nominal and degraded cases
     MsgBuffer_Reset(msgBuffer);
     //// Nominal write
-    UA_Boolean bool = UA_FALSE;
+    UA_Boolean bool = FALSE;
     status = Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(msgBuffer->buffers->data[0] == UA_FALSE);
+    ck_assert(msgBuffer->buffers->data[0] == FALSE);
     bool = 1; // not UA_FALSE
     status = Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
@@ -725,7 +725,7 @@ START_TEST(test_ua_encoder_basic_types)
     msgBuffer->buffers->data[2] = 2; // Simulates a true value received as 2
     status = Boolean_Read(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(bool == UA_FALSE);
+    ck_assert(bool == FALSE);
     status = Boolean_Read(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(bool == 1);
@@ -1178,7 +1178,7 @@ START_TEST(test_ua_encoder_other_types)
     ByteString_Initialize(bs2);
     status = ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(ByteString_Equal(bs, bs2) != UA_FALSE);
+    ck_assert(ByteString_Equal(bs, bs2) != FALSE);
     ck_assert(bs2->length == 3);
     ck_assert(bs2->characters[0] == 0x42);
     ck_assert(bs2->characters[1] == 0x6F);
@@ -1301,7 +1301,7 @@ START_TEST(test_ua_encoder_other_types)
     String_Initialize(&str2);
     status = String_Read(&str2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(String_Equal(&str, &str2) != UA_FALSE);
+    ck_assert(String_Equal(&str, &str2) != FALSE);
     ck_assert(memcmp(String_GetRawCString(&str2), "Boy", 3) == 0);
 
     ////// Read 0 length bytestring

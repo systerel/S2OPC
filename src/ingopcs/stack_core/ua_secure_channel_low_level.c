@@ -23,25 +23,25 @@ const uint32_t scProtocolVersion = 0;
 static const UA_String UA_String_Security_Policy_None = {
         .length = 47,
         .characters = (UA_Byte*) SECURITY_POLICY_NONE,
-        .clearBytes = UA_FALSE
+        .clearBytes = FALSE
 };
 
 static const UA_String UA_String_Security_Policy_Basic128Rsa15 = {
         .length = 56,
         .characters = (UA_Byte*) SECURITY_POLICY_BASIC128RSA15,
-        .clearBytes = UA_FALSE
+        .clearBytes = FALSE
 };
 
 static const UA_String UA_String_Security_Policy_Basic256 = {
         .length = 51,
         .characters = (UA_Byte*) SECURITY_POLICY_BASIC256,
-        .clearBytes = UA_FALSE
+        .clearBytes = FALSE
 };
 
 static const UA_String UA_String_Security_Policy_Basic256Sha256 = {
         .length = 57,
         .characters = (UA_Byte*) SECURITY_POLICY_BASIC256SHA256,
-        .clearBytes = UA_FALSE
+        .clearBytes = FALSE
 };
 
 SC_Connection* SC_Create (){
@@ -153,7 +153,7 @@ StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
         }else{
             // We need to know either nbChunks or max message size to could limit the number of buffers:
             // Check in init ?
-            assert(UA_FALSE);
+            assert(FALSE);
         }
         if(scConnection->receptionBuffers == NULL){
             status = STATUS_NOK;
@@ -230,7 +230,7 @@ StatusCode SC_RetrieveAndSetPublicKeyFromCert(SC_Connection*  scConnection,
     if(scConnection != NULL &&
        publicKey != NULL && *publicKey == NULL)
     {
-        if(runningApp == UA_FALSE)
+        if(runningApp == FALSE)
         {
             certificate = &scConnection->otherAppCertificate;
             *publicKey = &scConnection->otherAppPublicKey;
@@ -269,20 +269,20 @@ StatusCode GetAsymmBlocksSizes(UA_String* securityPolicyUri,
     StatusCode status = STATUS_OK;
     const uint32_t sha1outputLength = 20; // bytes (160 bits)
 
-    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != UA_FALSE)
+    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != FALSE)
     {
         *cipherTextBlockSize = 1;
         *plainTextBlockSize = 1;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != FALSE){
         // RSA 1.5: RSA spec 7.2.1 (https://tools.ietf.org/html/rfc3447)
         *cipherTextBlockSize = keySize;
         *plainTextBlockSize = keySize - 11;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != FALSE){
         // RSA OAEP: RSA spec 7.1.1 (https://tools.ietf.org/html/rfc3447)
         // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
         *cipherTextBlockSize = keySize;
         *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
-   }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
+   }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != FALSE){
        // RSA OAEP: RSA spec 7.1.1 (https://tools.ietf.org/html/rfc3447)
        // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
        *cipherTextBlockSize = keySize;
@@ -297,16 +297,16 @@ uint32_t GetAsymmSignatureSize(UA_String* securityPolicyUri,
                                uint32_t   privateKeySize)
 {
     uint32_t signatureSize = 0;
-    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != UA_FALSE)
+    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != FALSE)
     {
         signatureSize = 0;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != FALSE){
         // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
         signatureSize = privateKeySize;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != FALSE){
         // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
         signatureSize = privateKeySize;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != UA_FALSE){
+    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != FALSE){
         // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
         signatureSize = privateKeySize;
     }
@@ -330,7 +330,7 @@ uint32_t GetMaxBodySize(UA_MsgBuffer* msgBuffer,
     // Spec 1.03 part 6 incoherent
     const uint32_t maxBlocks = bodyChunkSize / cipherBlockSize;
 
-    if(Is_ExtraPaddingSizePresent(plainBlockSize) != UA_FALSE){
+    if(Is_ExtraPaddingSizePresent(plainBlockSize) != FALSE){
         paddingSizeFields += 1;
     }
 
@@ -351,7 +351,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
         status = STATUS_OK;
     }
 
-    if(status == STATUS_OK && symmetricAlgo == UA_FALSE){
+    if(status == STATUS_OK && symmetricAlgo == FALSE){
         if(scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
@@ -359,7 +359,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
             UA_ByteString* otherAppPublicKey = NULL;
 
             // Retrieve other app public key from certificate
-            status = SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &otherAppPublicKey);
+            status = SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &otherAppPublicKey);
 
             // Retrieve cipher length
             if(status == STATUS_OK){
@@ -397,7 +397,7 @@ uint32_t IsMsgEncrypted(UA_MessageSecurityMode securityMode,
        (securityMode == UA_MessageSecurityMode_Sign &&
         msgBuffer->secureType != UA_OpenSecureChannel))
     {
-        toEncrypt = UA_FALSE;
+        toEncrypt = FALSE;
     }
 
     return toEncrypt;
@@ -409,7 +409,7 @@ uint32_t IsMsgSigned(UA_MessageSecurityMode securityMode)
     // Determine if the message must be signed
     if(securityMode == UA_MessageSecurityMode_None)
     {
-        toSign = UA_FALSE;
+        toSign = FALSE;
     }
     return toSign;
 }
@@ -431,7 +431,7 @@ StatusCode CheckMaxSenderCertificateSize(UA_ByteString*  senderCertificate,
      4 - // Receiver certificate thumbprint length field
      20 - // Receiver certificate thumbprint length
      8; // Sequence header size
-    if(hasPadding != UA_FALSE){
+    if(hasPadding != FALSE){
         maxSize =
          maxSize -
          1 - // padding length field size
@@ -464,10 +464,10 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
     if(scConnection != NULL){
         uint32_t cipherBlockSize = 0;
         uint32_t plainBlockSize =0;
-        if(isSymmetric == UA_FALSE){
+        if(isSymmetric == FALSE){
             uint32_t publicKeyModulusLength = 0;
             UA_ByteString* publicKey = NULL;
-            SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &publicKey);
+            SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
                                                                    publicKey,
                                                                    &publicKeyModulusLength);
@@ -603,7 +603,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
     }
     // Sender Certificate:
     if(status == STATUS_OK){
-        if(toSign != UA_FALSE && senderCertificate->length>0){ // Field shall be null if message not signed
+        if(toSign != FALSE && senderCertificate->length>0){ // Field shall be null if message not signed
             status = String_Write(senderCertificate, msgBuffer);
         }else{
             // TODO:
@@ -620,7 +620,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
     if(status == STATUS_OK){
 
         UA_ByteString recCertThumbprint;
-        if(toEncrypt != UA_FALSE){
+        if(toEncrypt != FALSE){
             int32_t thumbprintLength = 0;
             status = CryptoProvider_GetCertThumbprintLength(cryptoProvider,
                                                             receiverCertificate,
@@ -847,7 +847,7 @@ StatusCode EncodePadding(SC_Connection* scConnection,
     uint32_t cipherBlockSize = 0;
     *hasPadding = 1; // True
 
-    if(symmetricAlgo == UA_FALSE){
+    if(symmetricAlgo == FALSE){
         if(scConnection->runningAppCertificate.length <= 0 ||
            scConnection->runningAppPrivateKey == NULL ||
            scConnection->otherAppCertificate.length <= 0){
@@ -856,7 +856,7 @@ StatusCode EncodePadding(SC_Connection* scConnection,
 
             uint32_t publicKeyModulusLength = 0;
             UA_ByteString* publicKey = NULL;
-            SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &publicKey);
+            SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
 
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
                                                                    publicKey,
@@ -908,7 +908,7 @@ StatusCode EncodePadding(SC_Connection* scConnection,
         }
 
         // Extra-padding necessary if padding could be greater 256 bytes
-        if(status == STATUS_OK && Is_ExtraPaddingSizePresent(plainBlockSize) != UA_FALSE){
+        if(status == STATUS_OK && Is_ExtraPaddingSizePresent(plainBlockSize) != FALSE){
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
             UA_Byte extraPadding = 0x00FF & *realPaddingLength;
@@ -926,7 +926,7 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
 {
     StatusCode status = STATUS_OK;
     UA_ByteString signedData;
-    if(symmetricAlgo == UA_FALSE){
+    if(symmetricAlgo == FALSE){
         if(scConnection->runningAppCertificate.length <= 0 ||
            scConnection->runningAppPrivateKey == NULL ||
            scConnection->otherAppCertificate.length <= 0){
@@ -995,7 +995,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
         status = STATUS_OK;
     }
 
-    if(status == STATUS_OK && symmetricAlgo == UA_FALSE){
+    if(status == STATUS_OK && symmetricAlgo == FALSE){
         if(scConnection->runningAppCertificate.length <= 0 ||
            scConnection->runningAppPrivateKey == NULL ||
            scConnection->otherAppCertificate.length <= 0){
@@ -1006,7 +1006,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
 
             if(status == STATUS_OK){
                 // Retrieve other app public key from certificate
-                status = SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &otherAppPublicKey);
+                status = SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &otherAppPublicKey);
             }
 
             // Check size of encrypted data array
@@ -1119,11 +1119,11 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
 
         // Determine if the asymmetric algorithms must be used
         if(msgBuffer->secureType == UA_OpenSecureChannel){
-            symmetricAlgo = UA_FALSE;
+            symmetricAlgo = FALSE;
         }
 
         //// Encode padding if encrypted message
-        if(toEncrypt == UA_FALSE){
+        if(toEncrypt == FALSE){
             // No padding fields
         }else{
             status = EncodePadding(scConnection,
@@ -1159,7 +1159,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
         }
 
         //// Encode signature if message signed
-        if(toSign == UA_FALSE){
+        if(toSign == FALSE){
             // No signature field
         }else if(status == STATUS_OK){
             status = EncodeSignature(scConnection,
@@ -1167,7 +1167,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
                                      symmetricAlgo,
                                      signatureSize);
 
-            if(symmetricAlgo != UA_FALSE){
+            if(symmetricAlgo != FALSE){
                 status = CryptoProvider_SymmetricVerify(scConnection->currentCryptoProvider,
                                                         scConnection->sendingBuffer->buffers->data,
                                                         scConnection->sendingBuffer->buffers->length - signatureSize,
@@ -1181,7 +1181,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
         //// Check sender certificate size is not bigger than maximum size to be sent
         if(status == STATUS_OK &&
            msgBuffer->secureType == UA_OpenSecureChannel &&
-           toSign != UA_FALSE)
+           toSign != FALSE)
         {
             status = CheckMaxSenderCertificateSize(&scConnection->runningAppCertificate,
                                                    msgBuffer->buffers->max_size,
@@ -1193,7 +1193,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
         }
 
         if(status == STATUS_OK){
-            if(toEncrypt == UA_FALSE){
+            if(toEncrypt == FALSE){
                 // No encryption necessary but we need to attach buffer as transport buffer (done during encryption otherwise)
                 status = MsgBuffer_CopyBuffer(scConnection->transportConnection->outputMsgBuffer,
                                               scConnection->sendingBuffer);
@@ -1302,10 +1302,10 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
     if(status == STATUS_OK){
         status = ByteString_Read(&senderCertificate, transportBuffer);
         if(status == STATUS_OK){
-            if (toSign == UA_FALSE && senderCertificate.length > 0){
+            if (toSign == FALSE && senderCertificate.length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not signed"
                 status = STATUS_INVALID_RCV_PARAMETER;
-            }else if(toSign != UA_FALSE){
+            }else if(toSign != FALSE){
                 // Check certificate is the same as the one in memory
                 uint32_t otherAppCertComparison = 0;
                 status = ByteString_Compare(&scConnection->otherAppCertificate,
@@ -1316,7 +1316,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                     status = STATUS_INVALID_RCV_PARAMETER;
                 }
 
-                if(status == STATUS_OK && validateSenderCert != UA_FALSE){
+                if(status == STATUS_OK && validateSenderCert != FALSE){
                     void* certStore = NULL;
                     certStore = PKIProvider_Open_Cert_Store(pkiProvider);
                     if(certStore != NULL){
@@ -1339,10 +1339,10 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
         status = ByteString_Read(&receiverCertThumb, transportBuffer);
 
         if(status == STATUS_OK){
-            if(toEncrypt == UA_FALSE && receiverCertThumb.length > 0){
+            if(toEncrypt == FALSE && receiverCertThumb.length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not encrypted"
                 status =STATUS_INVALID_RCV_PARAMETER;
-            }else if(toEncrypt != UA_FALSE){
+            }else if(toEncrypt != FALSE){
                 // Check thumbprint matches current app certificate thumbprint
 
                 UA_ByteString curAppCertThumbprint;
@@ -1401,7 +1401,7 @@ StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
     if(scConnection != NULL){
         status = STATUS_OK;
         if(scConnection->currentSecuToken.tokenId == receivedTokenId){
-            *isPrecCryptoData = UA_FALSE;
+            *isPrecCryptoData = FALSE;
         }else if(scConnection->precSecuToken.tokenId == receivedTokenId){
            *isPrecCryptoData = 1; // TRUE
             // TODO: check validity timeout of prec crypto data
@@ -1429,7 +1429,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     if(scConnection != NULL && transportBuffer != NULL){
         status = STATUS_OK;
 
-        if(isPrecCryptoData == UA_FALSE){
+        if(isPrecCryptoData == FALSE){
             cryptoProvider = scConnection->currentCryptoProvider;
             securityMode = scConnection->currentSecuMode;
         }else{
@@ -1443,13 +1443,13 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     }
 
     // TODO: factorize common code between length retrieved and decrypt ...
-    if(toDecrypt != UA_FALSE){
+    if(toDecrypt != FALSE){
         // Message is encrypted
         UA_Byte* dataToDecrypt = &(transportBuffer->buffers->data[sequenceNumberPosition]);
         uint32_t lengthToDecrypt = transportBuffer->buffers->length - sequenceNumberPosition;
 
         if(status == STATUS_OK){
-            if(isSymmetric == UA_FALSE){
+            if(isSymmetric == FALSE){
                 status = CryptoProvider_AsymmetricDecryptLength(cryptoProvider,
                                                                 dataToDecrypt,
                                                                 lengthToDecrypt,
@@ -1487,7 +1487,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
             }else{
 
                 SC_SecurityKeySet* receiverKeySet = NULL;
-                if(isPrecCryptoData == UA_FALSE){
+                if(isPrecCryptoData == FALSE){
                     receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
                 }else{
                     receiverKeySet = scConnection->precSecuKeySets.receiverKeySet;
@@ -1643,7 +1643,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
     if(scConnection != NULL){
         status = STATUS_OK;
 
-        if(isPrecCryptoData == UA_FALSE){
+        if(isPrecCryptoData == FALSE){
             cryptoProvider = scConnection->currentCryptoProvider;
             securityMode = scConnection->currentSecuMode;
             securityPolicy = &scConnection->currentSecuPolicy;
@@ -1656,11 +1656,11 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
         toVerify = IsMsgSigned(securityMode);
     }
 
-    if(toVerify != UA_FALSE){
-        if(isSymmetric == UA_FALSE){
+    if(toVerify != FALSE){
+        if(isSymmetric == FALSE){
             uint32_t publicKeyModulusLength = 0;
             UA_ByteString* publicKey = NULL;
-            SC_RetrieveAndSetPublicKeyFromCert(scConnection, UA_FALSE, &publicKey);
+            SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
 
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(cryptoProvider,
                                                                    publicKey,
@@ -1681,7 +1681,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
             }
         }else{
             SC_SecurityKeySet* receiverKeySet = NULL;
-            if(isPrecCryptoData == UA_FALSE){
+            if(isPrecCryptoData == FALSE){
                 receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
             }else{
                 receiverKeySet = scConnection->precSecuKeySets.receiverKeySet;
@@ -1745,7 +1745,7 @@ StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
         // use Get_Rcv_Protocol_Version and check it is the same as the one received in SC
         if(TCP_UA_Connection_GetReceiveProtocolVersion(scConnection->transportConnection,
                                                        &transportProtocolVersion)
-                   != UA_FALSE)
+                   != FALSE)
         {
             if(scProtocolVersion != transportProtocolVersion){
                 status = STATUS_INVALID_RCV_PARAMETER;
@@ -1817,7 +1817,7 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
     Buffer* curChunk = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
     uint32_t newBufferLength = curChunk->length;
     if(scConnection != NULL){
-        if(isPrecCryptoData == UA_FALSE){
+        if(isPrecCryptoData == FALSE){
             cProvider = scConnection->currentCryptoProvider;
         }else{
             cProvider = scConnection->precCryptoProvider;
@@ -1836,7 +1836,7 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
     if(status == STATUS_OK){
         // Extra padding management: possible if block size greater than:
         // UINT8_MAX (1 byte representation max)+ 1 (padding size field byte))
-        if(Is_ExtraPaddingSizePresent(plainBlockSize) != UA_FALSE){
+        if(Is_ExtraPaddingSizePresent(plainBlockSize) != FALSE){
             // compute most significant byte value
             padding = curChunk->data[newBufferLength-1] << 8;
             // remove extra padding size field
@@ -1864,7 +1864,7 @@ StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t isSymmetricTrue = 1; // TRUE
-    uint32_t isPrecCryptoDataFalse = UA_FALSE;
+    uint32_t isPrecCryptoDataFalse = FALSE;
     uint32_t tokenId = 0;
     uint32_t snPosition = 0;
 
@@ -1944,7 +1944,7 @@ StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
             *abortReqId = msgBuffer->receivedReqId;
             status = MsgBuffers_SetCurrentChunkFirst(msgBuffer);
         }else{
-            *abortReqPresence = UA_FALSE;
+            *abortReqPresence = FALSE;
             status = STATUS_OK;
         }
     }
@@ -2049,17 +2049,17 @@ StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                     msgBuffers->receivedReqId = requestId;
                 }else if(msgBuffers->receivedReqId != requestId){
                     status = STATUS_NOK;
-                    assert(UA_FALSE);
+                    assert(FALSE);
                 }
                 break;
             case UA_Msg_Chunk_Abort:
                 status = STATUS_NOK;
-                assert(UA_FALSE);
+                assert(FALSE);
                 break;
             case UA_Msg_Chunk_Unknown:
             case UA_Msg_Chunk_Invalid:
                 status = STATUS_NOK;
-                assert(UA_FALSE);
+                assert(FALSE);
         }
     }
 

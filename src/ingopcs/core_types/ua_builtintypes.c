@@ -13,11 +13,11 @@
 #include "ua_builtintypes.h"
 
 void Boolean_Initialize(UA_Boolean* b){
-    *b = UA_FALSE;
+    *b = FALSE;
 }
 
 void Boolean_Clear(UA_Boolean* b){
-    *b = UA_FALSE;
+    *b = FALSE;
 }
 
 void SByte_Initialize(UA_SByte* sbyte){
@@ -134,7 +134,7 @@ StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32
         status = STATUS_OK;
         dest->length = length;
         dest->characters = bytes;
-        dest->clearBytes = UA_FALSE; // dest->characters will not be freed on clear
+        dest->clearBytes = FALSE; // dest->characters will not be freed on clear
     }
     return status;
 }
@@ -147,7 +147,7 @@ StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
         status = STATUS_OK;
         dest->length = src->length;
         dest->characters = src->characters;
-        dest->clearBytes = UA_FALSE; // dest->characters will not be freed on clear
+        dest->clearBytes = FALSE; // dest->characters will not be freed on clear
     }
     return status;
 }
@@ -172,7 +172,7 @@ StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src){
 void ByteString_Clear(UA_ByteString* bstring){
     if(bstring != NULL){
         if(bstring->characters != NULL &&
-           bstring->clearBytes != UA_FALSE){
+           bstring->clearBytes != FALSE){
             free(bstring->characters);
             bstring->characters = NULL;
         }
@@ -205,9 +205,9 @@ StatusCode String_AttachFromCstring(UA_String* dest, char* src){
         if(CHAR_BIT == 8){
             dest->length = strlen(src);
             dest->characters = (uint8_t*) src;
-            dest->clearBytes = UA_FALSE; // dest->characters will not be freed on clear
+            dest->clearBytes = FALSE; // dest->characters will not be freed on clear
         }else{
-            assert(UA_FALSE);
+            assert(FALSE);
         }
     }
     return status;
@@ -318,7 +318,7 @@ const char* String_GetRawCString(const UA_String* string){
             cString = (char*) string->characters;
             assert(string->characters[string->length] == '\0');
         }else{
-            assert(UA_FALSE);
+            assert(FALSE);
         }
     }
     return cString;
@@ -357,7 +357,7 @@ uint32_t ByteString_Equal(const UA_ByteString* left,
                           const UA_ByteString* right)
 {
     uint32_t compare = 0;
-    uint32_t result = UA_FALSE;
+    uint32_t result = FALSE;
 
     if(ByteString_Compare(left, right, &compare) == STATUS_OK){
         result = compare == 0;
@@ -618,7 +618,7 @@ void ApplyToVariantNonArrayBuiltInType(UA_BuiltinId builtInTypeId,
             builtInFunction(val.dataValue);
             break;
         case UA_Variant_Id:
-            assert(UA_FALSE);
+            assert(FALSE);
             break;
         case UA_DiagnosticInfo_Id:
             builtInFunction(val.diagInfo);

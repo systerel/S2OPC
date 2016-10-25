@@ -256,7 +256,7 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
     // MaxBodySize to be computed prior any write in sending buffer
     if(status == STATUS_OK){
-        status = SC_SetMaxBodySize(cConnection->instance, UA_FALSE);
+        status = SC_SetMaxBodySize(cConnection->instance, FALSE);
     }
 
     if(status == STATUS_OK){
@@ -382,8 +382,8 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t validateSenderCertificateTrue = 1; // True: always activated as indicated in API
-    const uint32_t isSymmetricFalse = UA_FALSE;
-    const uint32_t isPrecCryptoDataFalse = UA_FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
+    const uint32_t isSymmetricFalse = FALSE;
+    const uint32_t isPrecCryptoDataFalse = FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
     uint32_t requestId = 0;
     uint32_t snPosition = 0;
     PendingRequest* pRequest = NULL;
@@ -489,7 +489,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     uint32_t abortedRequestId = 0;
     StatusCode abortReqStatus = STATUS_NOK;
     uint32_t requestId = 0;
-    uint8_t requestToRemove = UA_FALSE;
+    uint8_t requestToRemove = FALSE;
     UA_String reason;
     String_Initialize(&reason);
 
@@ -525,7 +525,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                    &abortedRequestId);
     }
 
-    if(abortReqPresence != UA_FALSE){
+    if(abortReqPresence != FALSE){
         // Note: status is OK if from a prec chunk or NOK if current chunk is abort chunk
         // Retrieve request id to be aborted and call callback if any
         pRequest = SLinkedList_Remove(cConnection->pendingRequests, abortedRequestId);
@@ -581,7 +581,7 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                     &recEncType,
                                     &encObj);
             // TODO: check status before ?
-            if(pRequest->callback != NULL && requestToRemove != UA_FALSE){
+            if(pRequest->callback != NULL && requestToRemove != FALSE){
                 pRequest->callback(cConnection,
                                    encObj,
                                    recEncType,
@@ -662,7 +662,7 @@ StatusCode OnTransportEvent_CB(void*           connection,
                     break;
                 case UA_CloseSecureChannel:
                     if(cConnection->instance->state == SC_Connection_Connected){
-                        assert(UA_FALSE);
+                        assert(FALSE);
                     }else{
                         retStatus = STATUS_INVALID_RCV_PARAMETER;
                     }
@@ -683,7 +683,7 @@ StatusCode OnTransportEvent_CB(void*           connection,
             //scConnection->callback: TODO: incompatible types to modify in foundation code
             break;
         default:
-            assert(UA_FALSE);
+            assert(FALSE);
     }
     return retStatus;
 }

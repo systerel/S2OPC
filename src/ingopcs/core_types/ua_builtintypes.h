@@ -48,7 +48,6 @@ typedef enum {
 typedef uint8_t UA_Byte;
 
 typedef UA_Byte UA_Boolean;
-#define UA_FALSE 0
 
 typedef int8_t UA_SByte;
 

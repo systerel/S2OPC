@@ -56,7 +56,7 @@ StatusCode Namespace_AttachTable(UA_NamespaceTable* dst, UA_NamespaceTable* src)
     if(dst != NULL && dst->namespaceArray == NULL &&
        src != NULL && src->namespaceArray != NULL){
         status = STATUS_OK;
-        dst->clearTable = UA_FALSE;
+        dst->clearTable = FALSE;
         dst->lastIdx = src->lastIdx;
         dst->namespaceArray = src->namespaceArray;
     }
@@ -102,7 +102,7 @@ const char* Namespace_GetName(UA_NamespaceTable* namespaceTable,
 void Namespace_Clear(UA_NamespaceTable* namespaceTable)
 {
     if(namespaceTable != NULL){
-        if(namespaceTable->clearTable != UA_FALSE &&
+        if(namespaceTable->clearTable != FALSE &&
            namespaceTable->namespaceArray != NULL)
         {
             free(namespaceTable->namespaceArray);

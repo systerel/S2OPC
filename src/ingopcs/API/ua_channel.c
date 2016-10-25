@@ -266,7 +266,7 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
                                     UA_EncodeableType** responseType){
     const uint32_t sleepTimeout = 500;
     uint32_t loopCpt = 0;
-    uint8_t receivedEvent = UA_FALSE;
+    uint8_t receivedEvent = FALSE;
     StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     uint32_t timeout = 0;
@@ -290,7 +290,7 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
     }
 
     while (status == STATUS_OK &&
-           receivedEvent == UA_FALSE &&
+           receivedEvent == FALSE &&
            loopCpt * sleepTimeout <= timeout)
     {
         loopCpt++;

@@ -236,7 +236,7 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
             }
 
             // After end of decoding: modify receive buffer if needed
-            if(modifiedReceiveBuffer != UA_FALSE && status == STATUS_OK){
+            if(modifiedReceiveBuffer != FALSE && status == STATUS_OK){
                 // Adapt receive buffer size
                 MsgBuffer_Delete(&connection->inputMsgBuffer);
                 connection->inputMsgBuffer = NULL;

@@ -105,7 +105,7 @@ StatusCode Boolean_Write(const UA_Boolean* value, UA_MsgBuffer* msgBuffer)
         return STATUS_INVALID_PARAMETERS;
     }
 
-    if(*value == UA_FALSE){
+    if(*value == FALSE){
         encodedValue = *value;
     }else{
         // Encoder should use 1 as True value
@@ -123,7 +123,7 @@ StatusCode Boolean_Read(UA_Boolean* value, UA_MsgBuffer* msgBuffer)
     }else{
         status = Byte_Read((UA_Byte*) value, msgBuffer);
         if(status == STATUS_OK){
-            if(*value != UA_FALSE){
+            if(*value != FALSE){
                 // Decoder should use 1 as True value
                 *value = 1;
             }
@@ -1119,7 +1119,7 @@ StatusCode WriteVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             status = DataValue_Write(val->dataValue, msgBuffer);
             break;
         case UA_Variant_Id:
-            assert(UA_FALSE);
+            assert(FALSE);
             break;
         case UA_DiagnosticInfo_Id:
             status = DiagnosticInfo_Write(val->diagInfo, msgBuffer);
@@ -1437,7 +1437,7 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             }
             break;
         case UA_Variant_Id:
-            assert(UA_FALSE);
+            assert(FALSE);
             break;
         case UA_DiagnosticInfo_Id:
             val->diagInfo = malloc(sizeof(UA_DiagnosticInfo));

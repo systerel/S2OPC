@@ -12,12 +12,12 @@
 #include <ua_types.h>
 
 UA_StackConfiguration g_stackConfiguration;
-uint8_t g_lockedConfig = UA_FALSE;
+uint8_t g_lockedConfig = FALSE;
 
-static uint8_t initDone = UA_FALSE;
+static uint8_t initDone = FALSE;
 
 void StackConfiguration_Initialize(){
-    if(initDone == UA_FALSE){
+    if(initDone == FALSE){
         StackConfiguration_Clear();
         initDone = 1;
     }
@@ -28,7 +28,7 @@ void StackConfiguration_Locked(){
 }
 
 void StackConfiguration_Unlocked(){
-    g_lockedConfig = UA_FALSE;
+    g_lockedConfig = FALSE;
 }
 
 void StackConfiguration_Clear(){
@@ -40,12 +40,12 @@ void StackConfiguration_Clear(){
     g_stackConfiguration.nbEncTypesTable = 0;
     g_stackConfiguration.traceLevel = 0;
     StackConfiguration_Unlocked();
-    initDone = UA_FALSE;
+    initDone = FALSE;
 }
 
 StatusCode StackConfiguration_SetNamespaceUris(UA_NamespaceTable* nsTable){
     StatusCode status = STATUS_INVALID_STATE;
-    if(initDone != UA_FALSE && g_lockedConfig == UA_FALSE){
+    if(initDone != FALSE && g_lockedConfig == FALSE){
         if(nsTable == NULL){
             status = STATUS_INVALID_PARAMETERS;
         }else{
@@ -68,7 +68,7 @@ StatusCode StackConfiguration_AddTypes(UA_EncodeableType** encTypesTable,
     uint32_t nbKnownTypes = 0;
     UA_EncodeableType** additionalTypes = NULL;
 
-    if(initDone == UA_FALSE  || g_lockedConfig != UA_FALSE){
+    if(initDone == FALSE  || g_lockedConfig != FALSE){
         return STATUS_INVALID_STATE;
     }
 
