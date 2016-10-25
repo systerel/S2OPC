@@ -15,11 +15,11 @@
 #include "mbedtls/x509_crt.h"
 
 /**
- * The asymetric key structure is mainly lib-dependent. Its content can be enriched for future uses.
+ * The asymmetric key structure is mainly lib-dependent. Its content can be enriched for future uses.
  */
-typedef struct AsymetricKey {
+typedef struct AsymmetricKey {
     mbedtls_pk_context pk;
-} AsymetricKey;
+} AsymmetricKey;
 
 
 /**

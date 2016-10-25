@@ -19,7 +19,7 @@
 
 typedef struct KeyManager {
     CryptoProvider *pProvider; /**< Crypto provider associated to the key manager. Should not be modified nor replaced outside KeyManager API */
-    AsymetricKey *pkPriv; /**< The current private key associated to the KeyManager. */
+    AsymmetricKey *pkPriv; /**< The current private key associated to the KeyManager. */
     int8_t *pathTrusted;
     int8_t *pathRevoked;
 } KeyManager;
@@ -39,7 +39,7 @@ void KeyManager_Delete(KeyManager *pManager);
  * ------------------------------------------------------------------------------------------------
  */
 StatusCode KeyManager_AsymetricKey_ToNewDER(const KeyManager *pManager,
-                                            const AsymetricKey *pKey,
+                                            const AsymmetricKey *pKey,
                                             uint8_t **ppDest, uint32_t *lenAllocated);
 
 
