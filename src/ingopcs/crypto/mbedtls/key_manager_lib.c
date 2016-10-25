@@ -134,3 +134,9 @@ StatusCode KeyManager_Certificate_GetThumbprint(const KeyManager *pManager,
 }
 
 
+/*StatusCode KeyManager_Certificate_GetPublicKey(const KeyManager *pManager,
+                                               const Certificate *pCert,
+                                               AsymetricKey *pKey)
+{
+    return STATUS_OK;
+}*/
