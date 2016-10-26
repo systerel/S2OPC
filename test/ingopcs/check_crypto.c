@@ -711,7 +711,7 @@ START_TEST(test_cert_load)
     ck_assert(KeyManager_Certificate_GetThumbprint(keyman, &crt_pub, thumb, 20) == STATUS_OK);
     ck_assert(hexlify(thumb, hexoutput, 20) == 20);
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
-    ck_assert(memcmp(hexoutput, "af17d03e1605277489815ab88bc4760655b3e2cd") == 0);
+    ck_assert(memcmp(hexoutput, "af17d03e1605277489815ab88bc4760655b3e2cd", 40) == 0);
 
     KeyManager_Delete(keyman);
     CryptoProvider_Delete(crypto);
