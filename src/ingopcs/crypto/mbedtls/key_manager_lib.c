@@ -89,6 +89,75 @@ StatusCode KeyManager_AsymmetricKeyGetLength_MsgCipherText(const CryptoProvider 
 }
 
 
+/**
+ * Creates an asymmetric key from a \p buffer, in DER or PEM format.
+ */
+StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const KeyManager *pManager,
+                                                     const uint8_t *buffer, uint32_t lenBuf,
+                                                     AsymmetricKey **ppKey)
+{
+    AsymmetricKey *key = NULL;
+
+    if(NULL == pManager || NULL == buffer || 0 == lenBuf || NULL == ppKey)
+        return STATUS_INVALID_PARAMETERS;
+
+    key = malloc(sizeof(AsymmetricKey));
+    if(NULL == key)
+        return STATUS_NOK;
+    mbedtls_pk_init(&key->pk);
+
+    if(mbedtls_pk_parse_key(&key->pk, buffer, lenBuf, NULL, 0) != 0) // This should also parse PEM keys.
+    {
+        free(key);
+        return STATUS_NOK;
+    }
+
+    *ppKey = key;
+
+    return STATUS_OK;
+}
+
+
+StatusCode KeyManager_AsymmetricKey_CreateFromFile(const KeyManager *pManager,
+                                                   const char *szPath,
+                                                   AsymmetricKey **ppKey)
+{
+    AsymmetricKey *key = NULL;
+
+    if(NULL == pManager || NULL == szPath || NULL == ppKey)
+        return STATUS_INVALID_PARAMETERS;
+
+    key = malloc(sizeof(AsymmetricKey));
+    if(NULL == key)
+        return STATUS_NOK;
+    mbedtls_pk_init(&key->pk);
+
+    if(mbedtls_pk_parse_keyfile(&key->pk, szPath, NULL) != 0)
+    {
+        free(key);
+        return STATUS_NOK;
+    }
+
+    *ppKey = key;
+
+    return STATUS_OK;
+}
+
+
+/**
+ * Frees an asymmetric key created with KeyManager_AsymmetricKey_Create*().
+ *
+ * \warning     Only keys created with KeyManager_AsymmetricKey_Create*() should be freed that way.
+ */
+void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey)
+{
+    if(NULL == pKey)
+        return;
+
+    mbedtls_pk_free(&pKey->pk);
+    free(pKey);
+}
+
 /* ------------------------------------------------------------------------------------------------
  * Cert API
  * ------------------------------------------------------------------------------------------------
@@ -180,6 +249,7 @@ void KeyManager_Certificate_Free(Certificate *cert)
     mbedtls_x509_crt_free(&cert->crt);
     cert->crt_der = NULL;
     cert->len_der = 0;
+    free(cert);
 }
 
 
@@ -232,7 +302,7 @@ StatusCode KeyManager_Certificate_GetThumbprint(const KeyManager *pManager,
 
 
 /**
- * \brief       Retrieves the public key from a Certificate.
+ * \brief       Fills \p pKey with public key information retrieved from \p pCert.
  * \warning     \p pKey is not valid anymore when \p pCert is freed.
  */
 StatusCode KeyManager_Certificate_GetPublicKey(const KeyManager *pManager,
@@ -242,7 +312,7 @@ StatusCode KeyManager_Certificate_GetPublicKey(const KeyManager *pManager,
     if(NULL == pManager || NULL == pCert || NULL == pKey)
         return STATUS_INVALID_PARAMETERS;
 
-    pKey = &pCert->crt.pk;
+    memcpy(pKey, &pCert->crt.pk, sizeof(mbedtls_pk_context));
 
     return STATUS_OK;
 }

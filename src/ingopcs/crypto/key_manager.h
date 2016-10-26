@@ -49,6 +49,15 @@ StatusCode KeyManager_AsymmetricKeyGetLength_MsgCipherText(const CryptoProvider 
                                                            uint32_t *lenMsg);
 
 
+StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const KeyManager *pManager,
+                                                     const uint8_t *buffer, uint32_t lenBuf,
+                                                     AsymmetricKey **ppKey);
+StatusCode KeyManager_AsymmetricKey_CreateFromFile(const KeyManager *pManager,
+                                                   const char *szPath,
+                                                   AsymmetricKey **ppKey);
+void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey);
+
+
 /* ------------------------------------------------------------------------------------------------
  * Cert API
  * ------------------------------------------------------------------------------------------------
