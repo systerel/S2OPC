@@ -57,12 +57,13 @@ StatusCode KeyManager_CertificateGetLength_Thumbprint(const KeyManager *,
                                                       uint32_t *);
 
 
-StatusCode KeyManager_Certificate_Load(const KeyManager *pManager,
-                                       const uint8_t *bufferDER, uint32_t lenDER,
-                                       Certificate *pCert);
-StatusCode KeyManager_Certificate_LoadFromFile(const KeyManager *pManager,
-                                               const int8_t *szPath,
-                                               Certificate *cert);
+StatusCode KeyManager_Certificate_CreateFromDER(const KeyManager *pManager,
+                                                const uint8_t *bufferDER, uint32_t lenDER,
+                                                Certificate **ppCert);
+StatusCode KeyManager_Certificate_CreateFromFile(const KeyManager *pManager,
+                                                 const int8_t *szPath,
+                                                 Certificate **ppCert);
+void KeyManager_Certificate_Free(Certificate *cert);
 StatusCode KeyManager_Certificate_ToNewDER(const KeyManager *pManager,
                                            const Certificate *pCert,
                                            uint8_t **ppDest, uint32_t *lenAllocated);

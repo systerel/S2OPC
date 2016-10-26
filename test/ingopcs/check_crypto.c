@@ -677,7 +677,7 @@ START_TEST(test_cert_load)
 {
     CryptoProvider *crypto = NULL;
     KeyManager *keyman = NULL;
-    Certificate crt_pub;
+    Certificate *crt_pub;
     uint8_t thumb[20];
     char hexoutput[40];
     uint8_t der_cert[1215];
@@ -689,7 +689,7 @@ START_TEST(test_cert_load)
                                (int8_t *)"./revoked/", 10);
     ck_assert(NULL != keyman);
 
-    //ck_assert(KeyManager_Certificate_LoadFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) == STATUS_OK);
+    //ck_assert(KeyManager_Certificate_CreateFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) == STATUS_OK);
     ck_assert(unhexlify("308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a06035504080c03494446310e30"
                         "0c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f5043533113301106035504030c0a494e474f"
                         "5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d3136313030333038313333385a170d313731"
@@ -709,12 +709,13 @@ START_TEST(test_cert_load)
                         "6dfd407d49fc3faa523169bfdbbeb5fc5880fed2fa518ee017e42edfa872e781052a47e294c8d82c9858877496dfb76f6bd1c4ab1f0eaa71f48296d88a9950ce"
                         "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f26f71264fd7962eb513030d14b5262b220b"
                         "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5be2bf893c1299380675e82455cbef6ccc", der_cert, 1215) == 1215);
-    ck_assert(KeyManager_Certificate_Load(keyman, der_cert, 1215, &crt_pub) == STATUS_OK);
-    ck_assert(KeyManager_Certificate_GetThumbprint(keyman, &crt_pub, thumb, 20) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_cert, 1215, &crt_pub) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_GetThumbprint(keyman, crt_pub, thumb, 20) == STATUS_OK);
     ck_assert(hexlify(thumb, hexoutput, 20) == 20);
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
     ck_assert(memcmp(hexoutput, "af17d03e1605277489815ab88bc4760655b3e2cd", 40) == 0);
 
+    KeyManager_Certificate_Free(crt_pub);
     KeyManager_Delete(keyman);
     CryptoProvider_Delete(crypto);
 }

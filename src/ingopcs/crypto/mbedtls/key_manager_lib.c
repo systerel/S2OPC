@@ -10,6 +10,7 @@
  */
 
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -90,41 +91,103 @@ StatusCode KeyManager_AsymmetricKeyGetLength_MsgCipherText(const CryptoProvider 
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode KeyManager_Certificate_Load(const KeyManager *pManager,
-                                       const uint8_t *bufferDER, uint32_t lenDER,
-                                       Certificate *pCert)
+StatusCode KeyManager_Certificate_CreateFromDER(const KeyManager *pManager,
+                                                const uint8_t *bufferDER, uint32_t lenDER,
+                                                Certificate **ppCert)
 {
     mbedtls_x509_crt *crt = NULL;
+    Certificate *certif = NULL;
 
-    if(NULL == pManager || NULL == bufferDER || 0 == lenDER || NULL == pCert)
+    if(NULL == pManager || NULL == bufferDER || 0 == lenDER || NULL == ppCert)
         return STATUS_INVALID_PARAMETERS;
 
-    crt = &pCert->crt;
-    mbedtls_x509_crt_init(crt);
-
-    if(mbedtls_x509_crt_parse(crt, bufferDER, lenDER) != 0)
+    // Mem allocs
+    certif = malloc(sizeof(Certificate));
+    if(NULL == certif)
         return STATUS_NOK;
 
-    return STATUS_OK;
+    certif->crt_der = malloc(lenDER);
+    if(NULL == certif->crt_der)
+    {
+        free(certif);
+        return STATUS_NOK;
+    }
+
+    // Allocations ok, pursuing
+    crt = &certif->crt;
+    mbedtls_x509_crt_init(crt);
+
+    // Parsing and finishing
+    if(mbedtls_x509_crt_parse(crt, bufferDER, lenDER) == 0)
+    {
+        memcpy(certif->crt_der, bufferDER, lenDER);
+        *ppCert = certif;
+        return STATUS_OK;
+    }
+    else
+    {
+        KeyManager_Certificate_Free(certif);
+        return STATUS_NOK;
+    }
 }
 
 
-StatusCode KeyManager_Certificate_LoadFromFile(const KeyManager *pManager,
-                                               const int8_t *szPath,
-                                               Certificate *pCert)
+/** \Note   Tested but not in tests.
+ *
+ */
+StatusCode KeyManager_Certificate_CreateFromFile(const KeyManager *pManager,
+                                                 const int8_t *szPath,
+                                                 Certificate **ppCert)
 {
-    mbedtls_x509_crt *crt = NULL;
+    FILE *f = NULL;
+    uint8_t *buf = NULL;
+    size_t lenBuf = 0, nRead = 0;
 
-    if(NULL == pManager || NULL == szPath || NULL == pCert)
+    if(NULL == pManager || NULL == szPath || NULL == ppCert)
         return STATUS_INVALID_PARAMETERS;
 
-    crt = &pCert->crt;
-    mbedtls_x509_crt_init(crt);
-
-    if(mbedtls_x509_crt_parse_file(crt, (const char *)szPath) != 0)
+    f = fopen((const char *)szPath, "rb");
+    if(NULL == f)
         return STATUS_NOK;
 
-    return STATUS_OK;
+    // Compute size
+    fseek(f, 0, SEEK_END);
+    lenBuf = ftell(f);
+    if(lenBuf <= 0)
+    {
+        fclose(f);
+        return STATUS_NOK;
+    }
+    fseek(f, 0, SEEK_SET);
+
+    // Allocates
+    buf = malloc(lenBuf);
+    if(NULL == buf)
+    {
+        fclose(f);
+        return STATUS_NOK;
+    }
+
+    // Reads
+    nRead = fread(buf, 1, lenBuf, f);
+    fclose(f);
+    if(nRead != lenBuf)
+        return STATUS_NOK;
+
+    // Now, create from DER
+    return KeyManager_Certificate_CreateFromDER(pManager, buf, lenBuf, ppCert);
+}
+
+
+void KeyManager_Certificate_Free(Certificate *cert)
+{
+    if(NULL == cert)
+        return;
+
+    mbedtls_x509_crt_free(&cert->crt);
+    if(NULL != cert->crt_der)
+        free(cert->crt_der);
+    cert->len_der = 0;
 }
 
 

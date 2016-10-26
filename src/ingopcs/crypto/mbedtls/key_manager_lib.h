@@ -28,8 +28,9 @@ typedef struct AsymmetricKey {
  *  the top-level-root-self-signed and trusted public-key.
  */
 typedef struct Certificate {
-    mbedtls_x509_crt crt;
-    // TODO: DER should be stored alongside the certificate
+    mbedtls_x509_crt crt;   /**> Certificate as a lib-dependent format */
+    uint8_t *crt_der;       /**> Certificate in the DER format. Should be canonical.*/
+    uint32_t len_der;       /**> Length of crt_der. */
 } Certificate;
 
 
