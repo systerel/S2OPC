@@ -578,6 +578,8 @@ START_TEST(test_pk_x509)
     pCtx = crypto->pCryptolibContext;
     ck_assert(NULL != pCtx);
 
+    // TODO: assert lengths CryptoProvider_AsymetricGetLength_*
+
     // This is the PKI:
     // Reads a public/private key pair
     mbedtls_x509_crt crt; // Client/Server certificate, which contains the pk struct

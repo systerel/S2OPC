@@ -28,6 +28,7 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 #define SecurityPolicy_Basic256Sha256_SymmLen_Key           32
 #define SecurityPolicy_Basic256Sha256_SymmLen_Signature     32
 #define SecurityPolicy_Basic256Sha256_CertLen_Thumbprint    20
+#define SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash     20 /**> RSA OAEP uses SHA-1 */
 
 // CryptoProfiles instances
 extern const CryptoProfile g_cpBasic256Sha256;

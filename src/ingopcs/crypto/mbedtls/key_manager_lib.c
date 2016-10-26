@@ -16,11 +16,80 @@
 #include "ua_base_types.h"
 #include "crypto_types.h"
 #include "crypto_profiles.h"
+#include "crypto_provider.h"
 #include "key_manager.h"
 
+#include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
 
 
+/* ------------------------------------------------------------------------------------------------
+ * AsymmetricKey API
+ * ------------------------------------------------------------------------------------------------
+ */
+
+/**
+ * \brief   Computes the maximal size of a buffer to be encrypted in a single pass.
+ *          RFC 3447 provides the formula used with OAEPadding.
+ *          A message shorter than or as long as this size is treated as a single message. A longer message
+ *          is cut into pieces of this size before treatment.
+ */
+StatusCode KeyManager_AsymmetricKeyGetLength_MsgPlainText(const CryptoProvider *pProvider,
+                                                          const AsymmetricKey *pKey,
+                                                          uint32_t *lenMsg)
+{
+    uint32_t lenHash = 0;
+
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == lenMsg)
+        return STATUS_INVALID_PARAMETERS;
+    if(SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
+        return STATUS_INVALID_PARAMETERS;
+
+    *lenMsg = mbedtls_pk_get_len(&pKey->pk);
+    if(lenMsg == 0)
+        return STATUS_NOK;
+
+    switch(pProvider->pProfile->SecurityPolicyID) // TODO: should we build some API to fetch the SecurityPolicyID, or avoid to switch on it at all?
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_NOK;
+    case SecurityPolicy_Basic256Sha256_ID: // TODO: this seems overkill to fetch the size of the chosen OAEP hash function...
+        if(CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != STATUS_OK)
+            return STATUS_NOK;
+        *lenMsg -= 2*lenHash + 2; // TODO: check for underflow?
+        break;
+    }
+
+    return STATUS_OK;
+}
+
+
+/**
+ * \brief   Computes the size of an encrypted buffer unit.
+ *          This is the length of the public key modulus.
+ */
+StatusCode KeyManager_AsymmetricKeyGetLength_MsgCipherText(const CryptoProvider *pProvider,
+                                                           const AsymmetricKey *pKey,
+                                                           uint32_t *lenMsg)
+{
+    (void)(pProvider);
+
+    if(NULL == pKey || NULL == lenMsg)
+        return STATUS_INVALID_PARAMETERS;
+
+    *lenMsg = mbedtls_pk_get_len(&pKey->pk);
+    if(lenMsg == 0)
+        return STATUS_NOK;
+
+    return STATUS_OK;
+}
+
+
+/* ------------------------------------------------------------------------------------------------
+ * Cert API
+ * ------------------------------------------------------------------------------------------------
+ */
 StatusCode KeyManager_Certificate_Load(const KeyManager *pManager,
                                        const uint8_t *bufferDER, uint32_t lenDER,
                                        Certificate *pCert)

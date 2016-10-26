@@ -35,12 +35,18 @@ void KeyManager_Delete(KeyManager *pManager);
 
 
 /* ------------------------------------------------------------------------------------------------
- * AsymetricKey API
+ * AsymmetricKey API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode KeyManager_AsymetricKey_ToNewDER(const KeyManager *pManager,
+/*StatusCode KeyManager_AsymmetricKey_ToNewDER(const KeyManager *pManager,
                                             const AsymmetricKey *pKey,
-                                            uint8_t **ppDest, uint32_t *lenAllocated);
+                                            uint8_t **ppDest, uint32_t *lenAllocated);*/
+StatusCode KeyManager_AsymmetricKeyGetLength_MsgPlainText(const CryptoProvider *pProvider,
+                                                          const AsymmetricKey *pKey,
+                                                          uint32_t *lenMsg);
+StatusCode KeyManager_AsymmetricKeyGetLength_MsgCipherText(const CryptoProvider *pProvider,
+                                                           const AsymmetricKey *pKey,
+                                                           uint32_t *lenMsg);
 
 
 /* ------------------------------------------------------------------------------------------------

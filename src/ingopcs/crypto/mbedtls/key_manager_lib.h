@@ -29,6 +29,7 @@ typedef struct AsymmetricKey {
  */
 typedef struct Certificate {
     mbedtls_x509_crt crt;
+    // TODO: DER should be stored alongside the certificate
 } Certificate;
 
 

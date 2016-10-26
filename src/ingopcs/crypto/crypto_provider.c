@@ -50,7 +50,10 @@ void CryptoProvider_Delete(CryptoProvider* pCryptoProvider)
     }
 }
 
-
+/* ------------------------------------------------------------------------------------------------
+ * Symmetric API
+ * ------------------------------------------------------------------------------------------------
+ */
 StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
@@ -569,4 +572,140 @@ StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
     return status;
 }
 
+
+/* ------------------------------------------------------------------------------------------------
+ * Asymmetric API
+ * ------------------------------------------------------------------------------------------------
+ */
+StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvider *pProvider,
+                                                             uint32_t *length)
+{
+    if(NULL == pProvider || NULL == pProvider->pProfile || SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID || NULL == length)
+        return STATUS_INVALID_PARAMETERS;
+
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_INVALID_PARAMETERS;
+    case SecurityPolicy_Basic256Sha256_ID:
+        *length = SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash;
+        break;
+    }
+
+    return STATUS_OK;
+}
+
+
+StatusCode CryptoProvider_AsymmetricGetLength_Msgs(const CryptoProvider *pProvider,
+                                                   const AsymmetricKey *pKey,
+                                                   uint32_t *cipherTextBlockSize,
+                                                   uint32_t *plainTextBlockSize)
+{
+    StatusCode statusA = STATUS_OK, statusB = STATUS_OK;
+
+    if(NULL == pProvider || NULL == pKey)
+        return STATUS_INVALID_PARAMETERS;
+
+    if(NULL != cipherTextBlockSize)
+    {
+        *cipherTextBlockSize = 0;
+        statusA = KeyManager_AsymmetricKeyGetLength_MsgCipherText(pProvider, pKey, cipherTextBlockSize);
+    }
+    if(NULL != plainTextBlockSize)
+    {
+        *plainTextBlockSize = 0;
+        statusB = KeyManager_AsymmetricKeyGetLength_MsgPlainText(pProvider, pKey, plainTextBlockSize);
+    }
+
+    if(STATUS_OK != statusA || STATUS_OK != statusB)
+        return STATUS_NOK;
+
+    return STATUS_OK;
+}
+
+
+/** \brief  Calculates the size of the required output buffer to cipher lengthIn bytes through Asymmetric encryption.
+ *          Hence, does not include any signature length.
+ */
+StatusCode CryptoProvider_AsymmetricGetLength_Encryption(const CryptoProvider *pProvider,
+                                                         const AsymmetricKey *pKey,
+                                                         uint32_t lengthIn,
+                                                         uint32_t *pLengthOut)
+{
+    uint32_t lenCiph = 0, lenPlain = 0;
+    uint32_t nMsgs = 0;
+
+    if(NULL == pProvider || NULL == pKey || NULL == pLengthOut)
+        return STATUS_INVALID_PARAMETERS;
+
+    if(0 == lengthIn)
+    {
+        *pLengthOut = 0;
+        return STATUS_OK;
+    }
+
+    if(STATUS_OK != CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenCiph, &lenPlain))
+        return STATUS_NOK;
+
+    // Calculates the number of messages
+    nMsgs = lengthIn/lenPlain;
+    if((lengthIn%lenPlain) > 0)
+        ++nMsgs;
+
+    // Deduces the output length
+    *pLengthOut = nMsgs*lenCiph;
+
+    return STATUS_OK;
+}
+
+
+/** \brief  Calculates the size of the required output buffer to decipher lengthIn bytes through Asymmetric decryption.
+ *          Hence, does not include any signature length.
+ */
+StatusCode CryptoProvider_AsymmetricGetLength_Decryption(const CryptoProvider *pProvider,
+                                                         const AsymmetricKey *pKey,
+                                                         uint32_t lengthIn,
+                                                         uint32_t *pLengthOut)
+{
+    uint32_t lenCiph = 0, lenPlain = 0;
+    uint32_t nMsgs = 0;
+
+    if(NULL == pProvider || NULL == pKey || NULL == pLengthOut)
+        return STATUS_INVALID_PARAMETERS;
+
+    if(0 == lengthIn)
+    {
+        *pLengthOut = 0;
+        return STATUS_OK;
+    }
+
+    if(STATUS_OK != CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenCiph, &lenPlain))
+        return STATUS_NOK;
+
+    // Calculates the number of messages
+    nMsgs = lengthIn/lenCiph;
+    if((lengthIn%lenCiph) > 0)
+        ++nMsgs;
+
+    // Deduces the output length
+    *pLengthOut = nMsgs*lenPlain;
+
+    return STATUS_OK;
+}
+
+
+/** \brief  Calculates the size of the required output buffer to contain the Asymmetric signature.
+ *          It is a single ciphered-message long.
+ */
+StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvider *pProvider,
+                                                        const AsymmetricKey *pKey,
+                                                        uint32_t *pLength)
+{
+    if(NULL == pProvider || NULL == pKey || NULL == pLength)
+        return STATUS_INVALID_PARAMETERS;
+
+    // The signature is a message long.
+    return CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, pLength, NULL);
+}
 

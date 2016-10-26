@@ -14,6 +14,8 @@
 #include "secret_buffer.h"
 #include "crypto_types.h"
 #include "key_sets.h"
+#include "key_manager.h"
+
 
 
 // Lib specific
@@ -42,6 +44,23 @@ StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
                                            uint32_t *pSymmCryptoKeyLength,
                                            uint32_t *pSymmSignKeyLength,
                                            uint32_t *pSymmInitVectorLength);
+StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvider *pProvider,
+                                                             uint32_t *length);
+StatusCode CryptoProvider_AsymmetricGetLength_Msgs(const CryptoProvider *pProvider,
+                                                   const AsymmetricKey *pKey,
+                                                   uint32_t *cipherTextBlockSize,
+                                                   uint32_t *plainTextBlockSize);
+StatusCode CryptoProvider_AsymmetricGetLength_Encryption(const CryptoProvider *pProvider,
+                                                         const AsymmetricKey *pKey,
+                                                         uint32_t lengthIn,
+                                                         uint32_t *pLengthOut);
+StatusCode CryptoProvider_AsymmetricGetLength_Decryption(const CryptoProvider *pProvider,
+                                                         const AsymmetricKey *pKey,
+                                                         uint32_t lengthIn,
+                                                         uint32_t *pLengthOut);
+StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvider *pProvider,
+                                                        const AsymmetricKey *pKey,
+                                                        uint32_t *pLength);
 
 // Symmetric functions
 StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
@@ -101,5 +120,33 @@ StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
                                               const SecretBuffer *pServerNonce,
                                               SC_SecurityKeySet *pClientKeySet,
                                               SC_SecurityKeySet *pServerKeySet);
+
+
+// Asymmetric functions
+StatusCode CryptoProvider_AsymmetricEncrypt_Low(const CryptoProvider *pProvider,
+                                            const uint8_t *pInput,
+                                            uint32_t lenInput,
+                                            const AsymmetricKey *pKey,
+                                            uint8_t *pOutput,
+                                            uint32_t lenOutput);
+StatusCode CryptoProvider_AsymmetricDecrypt_Low(const CryptoProvider *pProvider,
+                                            const uint8_t *pInput,
+                                            uint32_t lenInput,
+                                            const AsymmetricKey *pKey,
+                                            uint8_t *pOutput,
+                                            uint32_t lenOutput);
+StatusCode CryptoProvider_AsymmetricSign_Low(const CryptoProvider *pProvider,
+                                         const uint8_t *pInput,
+                                         uint32_t lenInput,
+                                         const AsymmetricKey *pKey,
+                                         uint8_t *pSignature,
+                                         uint32_t lenSignature);
+StatusCode CryptoProvider_AsymmetricVerify_Low(const CryptoProvider *pProvider,
+                                           const uint8_t *pInput,
+                                           uint32_t lenInput,
+                                           const AsymmetricKey *pKey,
+                                           const uint8_t *pSignature,
+                                           uint32_t lenSignature);
+
 
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_
