@@ -101,26 +101,22 @@ StatusCode KeyManager_Certificate_CreateFromDER(const KeyManager *pManager,
     if(NULL == pManager || NULL == bufferDER || 0 == lenDER || NULL == ppCert)
         return STATUS_INVALID_PARAMETERS;
 
-    // Mem allocs
+    // Mem alloc
     certif = malloc(sizeof(Certificate));
     if(NULL == certif)
         return STATUS_NOK;
 
-    certif->crt_der = malloc(lenDER);
-    if(NULL == certif->crt_der)
-    {
-        free(certif);
-        return STATUS_NOK;
-    }
-
-    // Allocations ok, pursuing
+    // Init
     crt = &certif->crt;
     mbedtls_x509_crt_init(crt);
+    certif->crt_der = NULL;
+    certif->len_der = 0;
 
-    // Parsing and finishing
+    // Parsing
     if(mbedtls_x509_crt_parse(crt, bufferDER, lenDER) == 0)
     {
-        memcpy(certif->crt_der, bufferDER, lenDER);
+        certif->crt_der = certif->crt.raw.p;
+        certif->len_der = certif->crt.raw.len;
         *ppCert = certif;
         return STATUS_OK;
     }
@@ -132,50 +128,44 @@ StatusCode KeyManager_Certificate_CreateFromDER(const KeyManager *pManager,
 }
 
 
-/** \Note   Tested but not in tests.
+/** \Note   Tested but not part of the test suites.
+ * \Note    Same as CreateFromDER, except for a single call, can we refactor?
  *
  */
 StatusCode KeyManager_Certificate_CreateFromFile(const KeyManager *pManager,
                                                  const int8_t *szPath,
                                                  Certificate **ppCert)
 {
-    FILE *f = NULL;
-    uint8_t *buf = NULL;
-    size_t lenBuf = 0, nRead = 0;
+    mbedtls_x509_crt *crt = NULL;
+    Certificate *certif = NULL;
 
     if(NULL == pManager || NULL == szPath || NULL == ppCert)
         return STATUS_INVALID_PARAMETERS;
 
-    f = fopen((const char *)szPath, "rb");
-    if(NULL == f)
+    // Mem alloc
+    certif = malloc(sizeof(Certificate));
+    if(NULL == certif)
         return STATUS_NOK;
 
-    // Compute size
-    fseek(f, 0, SEEK_END);
-    lenBuf = ftell(f);
-    if(lenBuf <= 0)
+    // Init
+    crt = &certif->crt;
+    mbedtls_x509_crt_init(crt);
+    certif->crt_der = NULL;
+    certif->len_der = 0;
+
+    // Parsing
+    if(mbedtls_x509_crt_parse_file(crt, (const char *)szPath) == 0)
     {
-        fclose(f);
+        certif->crt_der = certif->crt.raw.p;
+        certif->len_der = certif->crt.raw.len;
+        *ppCert = certif;
+        return STATUS_OK;
+    }
+    else
+    {
+        KeyManager_Certificate_Free(certif);
         return STATUS_NOK;
     }
-    fseek(f, 0, SEEK_SET);
-
-    // Allocates
-    buf = malloc(lenBuf);
-    if(NULL == buf)
-    {
-        fclose(f);
-        return STATUS_NOK;
-    }
-
-    // Reads
-    nRead = fread(buf, 1, lenBuf, f);
-    fclose(f);
-    if(nRead != lenBuf)
-        return STATUS_NOK;
-
-    // Now, create from DER
-    return KeyManager_Certificate_CreateFromDER(pManager, buf, lenBuf, ppCert);
 }
 
 
@@ -185,36 +175,8 @@ void KeyManager_Certificate_Free(Certificate *cert)
         return;
 
     mbedtls_x509_crt_free(&cert->crt);
-    if(NULL != cert->crt_der)
-        free(cert->crt_der);
+    cert->crt_der = NULL;
     cert->len_der = 0;
-}
-
-
-StatusCode KeyManager_Certificate_ToNewDER(const KeyManager *pManager,
-                                           const Certificate *pCert,
-                                           uint8_t **ppDest, uint32_t *lenAllocated)
-{
-    uint32_t lenToAllocate = 0;
-
-    (void)(pManager);
-    if(NULL == pCert || ppDest == NULL || NULL == lenAllocated)
-        return STATUS_INVALID_PARAMETERS;
-
-    // Allocation
-    lenToAllocate = pCert->crt.raw.len;
-    if(lenToAllocate == 0)
-        return STATUS_NOK;
-
-    (*ppDest) = (uint8_t *)malloc(lenToAllocate);
-    if(NULL == *ppDest)
-        return STATUS_NOK;
-
-    // Copy
-    memcpy((void *)(*ppDest), (void *)(pCert->crt.raw.p), lenToAllocate);
-    *lenAllocated = lenToAllocate;
-
-    return STATUS_OK;
 }
 
 
@@ -238,7 +200,7 @@ StatusCode KeyManager_Certificate_GetThumbprint(const KeyManager *pManager,
         return STATUS_INVALID_PARAMETERS;
 
     // Get DER
-    if(KeyManager_Certificate_ToNewDER(pManager, pCert, &pDER, &lenDER) != STATUS_OK)
+    if(KeyManager_Certificate_CopyDER(pManager, pCert, &pDER, &lenDER) != STATUS_OK)
         return STATUS_NOK;
 
     // Hash DER with SHA-1

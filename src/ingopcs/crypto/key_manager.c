@@ -100,5 +100,32 @@ StatusCode KeyManager_CertificateGetLength_Thumbprint(const KeyManager *pManager
 }
 
 
+StatusCode KeyManager_Certificate_CopyDER(const KeyManager *pManager,
+                                          const Certificate *pCert,
+                                          uint8_t **ppDest, uint32_t *lenAllocated)
+{
+    uint32_t lenToAllocate = 0;
+
+    (void)(pManager);
+    if(NULL == pCert || ppDest == NULL || 0 == lenAllocated)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Allocation
+    lenToAllocate = pCert->len_der;
+    if(lenToAllocate == 0)
+        return STATUS_NOK;
+
+    (*ppDest) = (uint8_t *)malloc(lenToAllocate);
+    if(NULL == *ppDest)
+        return STATUS_NOK;
+
+    // Copy
+    memcpy((void *)(*ppDest), (void *)(pCert->crt_der), lenToAllocate);
+    *lenAllocated = lenToAllocate;
+
+    return STATUS_OK;
+}
+
+
 
 

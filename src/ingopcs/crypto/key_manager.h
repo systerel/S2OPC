@@ -64,9 +64,9 @@ StatusCode KeyManager_Certificate_CreateFromFile(const KeyManager *pManager,
                                                  const int8_t *szPath,
                                                  Certificate **ppCert);
 void KeyManager_Certificate_Free(Certificate *cert);
-StatusCode KeyManager_Certificate_ToNewDER(const KeyManager *pManager,
-                                           const Certificate *pCert,
-                                           uint8_t **ppDest, uint32_t *lenAllocated);
+StatusCode KeyManager_Certificate_CopyDER(const KeyManager *pManager,
+                                          const Certificate *pCert,
+                                          uint8_t **ppDest, uint32_t *lenAllocated);
 StatusCode KeyManager_Certificate_GetThumbprint(const KeyManager *pManager,
                                                 const Certificate *pCert,
                                                 uint8_t *pDest, uint32_t lenDest);
