@@ -8,13 +8,11 @@
 #ifndef INGOPCS_TCP_UA_LISTENER_H_
 #define INGOPCS_TCP_UA_LISTENER_H_
 
-#include <ua_tcp_ua_connection.h>
-
 typedef struct {
     UA_String                url;
     uint32_t                 protocolVersion;
-    SocketManager            socketManager;
-    Socket                   socket;
+    UA_SocketManager*        socketManager;
+    UA_Socket*               socket;
     TCP_UA_Connection*       clientConnections;
     UA_MsgBuffer*            pendingMsgBuffer;
     TCP_UA_ListenerEvent_CB* eventCB;
