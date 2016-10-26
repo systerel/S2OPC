@@ -70,9 +70,9 @@ StatusCode KeyManager_Certificate_CopyDER(const KeyManager *pManager,
 StatusCode KeyManager_Certificate_GetThumbprint(const KeyManager *pManager,
                                                 const Certificate *pCert,
                                                 uint8_t *pDest, uint32_t lenDest);
-/*StatusCode KeyManager_Certificate_GetPublicKey(const KeyManager *pManager,
+StatusCode KeyManager_Certificate_GetPublicKey(const KeyManager *pManager,
                                                const Certificate *pCert,
-                                               AsymetricKey *pKey);*/
+                                               AsymmetricKey *pKey);
 
 
 #endif /* INGOPCS_KEY_MANAGER_H_ */

@@ -1,4 +1,5 @@
-/*
+/**
+ * \file
  * KeyManager provides functions for Asymmetric Key Management such as loading a signed public key,
  *  the corresponding private key, and provides the ability to verify signatures with x509 certificates.
  * KeyManager replaces the old concept of PKIProvider. PrivateKey should not be in the PublicKeyInfrastructure...
@@ -31,6 +32,7 @@
 
 /**
  * \brief   Computes the maximal size of a buffer to be encrypted in a single pass.
+ *
  *          RFC 3447 provides the formula used with OAEPadding.
  *          A message shorter than or as long as this size is treated as a single message. A longer message
  *          is cut into pieces of this size before treatment.
@@ -128,8 +130,9 @@ StatusCode KeyManager_Certificate_CreateFromDER(const KeyManager *pManager,
 }
 
 
-/** \Note   Tested but not part of the test suites.
- * \Note    Same as CreateFromDER, except for a single call, can we refactor?
+/**
+ * \note    Tested but not part of the test suites.
+ * \note    Same as CreateFromDER, except for a single call, can we refactor?
  *
  */
 StatusCode KeyManager_Certificate_CreateFromFile(const KeyManager *pManager,
@@ -228,9 +231,19 @@ StatusCode KeyManager_Certificate_GetThumbprint(const KeyManager *pManager,
 }
 
 
-/*StatusCode KeyManager_Certificate_GetPublicKey(const KeyManager *pManager,
+/**
+ * \brief       Retrieves the public key from a Certificate.
+ * \warning     \p pKey is not valid anymore when \p pCert is freed.
+ */
+StatusCode KeyManager_Certificate_GetPublicKey(const KeyManager *pManager,
                                                const Certificate *pCert,
-                                               AsymetricKey *pKey)
+                                               AsymmetricKey *pKey)
 {
+    if(NULL == pManager || NULL == pCert || NULL == pKey)
+        return STATUS_INVALID_PARAMETERS;
+
+    pKey = &pCert->crt.pk;
+
     return STATUS_OK;
-}*/
+}
+
