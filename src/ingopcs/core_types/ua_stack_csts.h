@@ -54,4 +54,7 @@
 // Maximum number of pending messages before the server starts to block.
 #define UA_SECURECONNECTION_MAXPENDINGMESSAGES 0// Not implemented
 
+// Maximum number of simultaneous connections managed by stack
+#define UA_MAXCONNECTIONS 150
+
 #endif /* INGOPCS_UA_STACK_CSTS_H_ */

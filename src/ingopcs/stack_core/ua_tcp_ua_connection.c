@@ -74,7 +74,7 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
         connection->maxChunkCountSnd = 0;
 #if UA_MULTITHREADED == UA_FALSE
         connection->socketManager = NULL;
-        UA_SocketManager_Initialize(UA_SocketManager_GetGlobal(), 1);
+        UA_SocketManager_Initialize(UA_SocketManager_GetGlobal(), UA_MAXCONNECTIONS);
 #else
         connection->socketManager = UA_SocketManager_Create(1);
 #endif //UA_MULTITHREADED

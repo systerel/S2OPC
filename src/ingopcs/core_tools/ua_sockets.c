@@ -8,8 +8,14 @@
 #include "ua_sockets.h"
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+
+#include <ua_stack_csts.h>
 
 UA_SocketManager globalSocketMgr;
+
+// Counter to check <= UA_MAXCONNECTIONS
+static uint32_t globalNbSockets = 0;
 
 StatusCode ParseURI (const char* uri, char** hostname, char** port){
     StatusCode status = STATUS_NOK;
@@ -116,6 +122,9 @@ StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
                                        uint32_t          nbSockets){
     uint32_t idx = 0;
     StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(globalNbSockets + nbSockets > UA_MAXCONNECTIONS)
+        return STATUS_NOK;
+
     // TODO: set lower limit for nbSockets: INT32_MAX just to ensure select returns value <= INT32_MAX (3 sets)
     if(socketMgr != NULL && socketMgr->nbSockets == 0 && nbSockets <= INT32_MAX/3){
         socketMgr->sockets = malloc(sizeof(UA_Socket) * nbSockets);
@@ -126,6 +135,7 @@ StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
             for(idx = 0; idx < nbSockets; idx++){
                 Socket_Clear(&(socketMgr->sockets[idx].sock));
             }
+            globalNbSockets += nbSockets;
         }
     }
     return status;
@@ -135,6 +145,8 @@ void UA_SocketManager_Clear(UA_SocketManager* socketMgr){
     if(socketMgr != NULL &&
        socketMgr->nbSockets > 0 &&
        socketMgr->sockets != NULL){
+        assert(globalNbSockets >= socketMgr->nbSockets);
+        globalNbSockets -= socketMgr->nbSockets;
         free(socketMgr->sockets);
         socketMgr->sockets = NULL;
         socketMgr->nbSockets = 0;
