@@ -8,13 +8,6 @@
 #include "ua_sockets.h"
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <fcntl.h>
-#include <errno.h>
 
 UA_SocketManager globalSocketMgr;
 
@@ -121,14 +114,18 @@ UA_SocketManager* UA_SocketManager_Create(uint32_t nbSockets){
 
 StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
                                        uint32_t          nbSockets){
+    uint32_t idx = 0;
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    // TODO: set lower limit for nbSockets: INT32_MAX just to ensure select returns value <= INT32_MAX
-    if(socketMgr != NULL && socketMgr->nbSockets == 0 && nbSockets <= INT32_MAX){
+    // TODO: set lower limit for nbSockets: INT32_MAX just to ensure select returns value <= INT32_MAX (3 sets)
+    if(socketMgr != NULL && socketMgr->nbSockets == 0 && nbSockets <= INT32_MAX/3){
         socketMgr->sockets = malloc(sizeof(UA_Socket) * nbSockets);
         if(socketMgr->sockets != NULL){
             status = STATUS_OK;
             memset(socketMgr->sockets, 0, sizeof(UA_Socket) * nbSockets);
             socketMgr->nbSockets = nbSockets;
+            for(idx = 0; idx < nbSockets; idx++){
+                Socket_Clear(&(socketMgr->sockets[idx].sock));
+            }
         }
     }
     return status;
@@ -170,18 +167,12 @@ StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketManager,
                                                void*              callbackData,
                                                UA_Socket**        clientSocket)
 {
-    int true = 1;
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    struct addrinfo hints, *res, *p;
+    Socket_AddressInfo *res, *p;
     UA_Socket* freeSocket;
-    int addrStatus;
-    int connectStatus = -1;
-    int setOptStatus = -1;
+    StatusCode connectStatus = STATUS_NOK;
     char *hostname = NULL;
     char *port = NULL;
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6  can be use to force IPV4 or IPV6
-    hints.ai_socktype = SOCK_STREAM;
 
     if(socketManager != NULL && uri != NULL && clientSocket != NULL){
         status = ParseURI(uri, &hostname, &port);
@@ -192,80 +183,50 @@ StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketManager,
             }
         }
 
-        if (status == STATUS_OK && (addrStatus = getaddrinfo(hostname, port, &hints, &res)) != 0) {
-            //fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(addrStatus));
-            status = STATUS_NOK;
+        if(status == STATUS_OK){
+            status = Socket_AddrInfo_Get(hostname, port, &res);
         }
 
         if(status == STATUS_OK){
-//            void *addr;
-//            char *ipver;
-//            char ipstr[INET6_ADDRSTRLEN];
             // Try to connect on IP addresses provided (IPV4 and IPV6)
-            for(p = res;p != NULL && connectStatus < 0; p = p->ai_next) {
-//                if (p->ai_family == AF_INET) { // IPv4
-//                    struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
-//                    addr = &(ipv4->sin_addr);
-//                    ipver = "IPv4";
-//                } else { // IPv6
-//                    struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
-//                    addr = &(ipv6->sin6_addr);
-//                    ipver = "IPv6";
-//                }
-//
-//                // convert the IP to a string and print it:
-//                inet_ntop(p->ai_family, addr, ipstr, sizeof ipstr);
-//                printf("  %s: %s\n", ipver, ipstr);
+            for(p = res;p != NULL && connectStatus != STATUS_OK; p = Socket_AddrInfo_IterNext(p)) {
 
-                freeSocket->sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 
-                if (freeSocket->sock != -1)
-                {
+                status = Socket_CreateNew(p,
+                                          FALSE, // Do not reuse
+                                          1,     // Non blocking socket
+                                          &freeSocket->sock);
 
-                    setOptStatus = setsockopt(freeSocket->sock, IPPROTO_TCP, TCP_NODELAY, &true, sizeof(int));
-
-                    //TODO: Set sock opt: buffers sizes
-
-                    if(setOptStatus != -1){
-                        setOptStatus = fcntl(freeSocket->sock, F_SETFL, O_NONBLOCK);
-                    }
-
-                    if(setOptStatus != -1){
-                        connectStatus = connect(freeSocket->sock, p->ai_addr, sizeof(struct sockaddr));
-                        if(connectStatus < 0){
-                            if(errno == EINPROGRESS){
-                                // Non blocking connection started
-                                connectStatus = 0;
-                            }
-                        }
-                        if(connectStatus == 0){
-                            freeSocket->state = SOCKET_CONNECTING;
-                        }
-                    }
+                if (status == STATUS_OK){
+                    connectStatus = Socket_Connect(freeSocket->sock, p);
                 }
 
-                if(freeSocket->sock != -1 && connectStatus < 0){
-                    close(freeSocket->sock);
-                    freeSocket->sock = 0;
+                if(connectStatus == STATUS_OK){
+                    freeSocket->state = SOCKET_CONNECTING;
+                }
+
+                if(connectStatus != STATUS_OK){
+                    UA_Socket_Close(freeSocket);
                 }
             }
-            if(connectStatus < 0){
-                status = STATUS_NOK;
-            }
-            if(port != NULL){
-                free(port);
-            }
-            if(hostname != NULL){
-                free(hostname);
-            }
+            status = connectStatus;
+        }
+        if(port != NULL){
+            free(port);
+        }
+        if(hostname != NULL){
+            free(hostname);
         }
     }
+
     if(status == STATUS_OK){
         freeSocket->isUsed = 1;
         freeSocket->eventCallback = socketCallback;
         freeSocket->cbData = callbackData;
         *clientSocket = freeSocket;
     }
+
+    Socket_AddrInfoDelete(&res);
 
     return status;
 }
@@ -275,22 +236,16 @@ StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
                                                uint8_t            listenAllItfs,
                                                UA_Socket_EventCB  socketCallback,
                                                void*              callbackData,
-                                               UA_Socket**        listenerSocket){
-    int true = 1;
+                                               UA_Socket**        clientSocket)
+{
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    struct addrinfo hints, *res, *p;
+    Socket_AddressInfo *res, *p;
     UA_Socket* freeSocket;
-    int addrStatus;
-    int bindListenStatus = -1;
-    int setOptStatus = -1;
+    StatusCode listenStatus = STATUS_NOK;
     char *hostname = NULL;
     char *port = NULL;
-    memset(&hints, 0, sizeof(struct addrinfo));
-    hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6  can be use to force IPV4 or IPV6
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
 
-    if(socketManager != NULL && uri != NULL && listenerSocket != NULL){
+    if(socketManager != NULL && uri != NULL && clientSocket != NULL){
         status = ParseURI(uri, &hostname, &port);
         if(status == STATUS_OK){
             freeSocket = GetFreeSocket(socketManager);
@@ -298,56 +253,36 @@ StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
                 status = STATUS_NOK;
             }
         }
+
         if(status == STATUS_OK){
-            if(listenAllItfs != 0){
+            if(listenAllItfs != FALSE){
                 free(hostname);
                 hostname = NULL;
             }
-            if ((addrStatus = getaddrinfo(NULL, port, &hints, &res)) != 0) {
-                //fprintf(stderr, "selectserver: %s\n", gai_strerror(rv));
-                status = STATUS_NOK;
-            }
+            status = Socket_AddrInfo_Get(hostname, port, &res);
         }
+
         if(status == STATUS_OK){
-            for(p = res;p != NULL && bindListenStatus < 0; p = p->ai_next) {
+            // Try to connect on IP addresses provided (IPV4 and IPV6)
+            for(p = res;p != NULL && listenStatus != STATUS_OK; p = Socket_AddrInfo_IterNext(p)) {
 
-                freeSocket->sock = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
 
-                if (freeSocket->sock != -1)
-                {
-                    setOptStatus = setsockopt(freeSocket->sock, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(int));
+                status = Socket_CreateNew(p,
+                                          1, // Reuse
+                                          1, // Non blocking socket
+                                          &freeSocket->sock);
 
-                    if (setOptStatus != -1) {
-                        setOptStatus = setsockopt(freeSocket->sock, IPPROTO_TCP, TCP_NODELAY, &true, sizeof(int));
-                    }
-                    //TODO: Set sock opt: buffers sizes
-
-                    if(setOptStatus != -1){
-                        setOptStatus = fcntl(freeSocket->sock, F_SETFL, O_NONBLOCK);
-                    }
-
-                    if(setOptStatus != -1){
-                        bindListenStatus = bind(freeSocket->sock, p->ai_addr, p->ai_addrlen);
-                    }
-
-                    if(bindListenStatus != -1){
-                        bindListenStatus = listen(freeSocket->sock, SOMAXCONN);
-                    }
-
-                    if(bindListenStatus < 0){
-                        close(freeSocket->sock);
-                        freeSocket->sock = 0;
-                    }
+                if (status == STATUS_OK){
+                    status = Socket_Listen(freeSocket->sock, p);
                 }
-            }
-            if(bindListenStatus < 0){
-                status = STATUS_NOK;
-            }else{
-                freeSocket->isUsed = 1;
-                freeSocket->state = SOCKET_LISTENING;
-                freeSocket->eventCallback = socketCallback;
-                freeSocket->cbData = callbackData;
-                *listenerSocket = freeSocket;
+
+                if(status == STATUS_OK){
+                    freeSocket->state = SOCKET_LISTENING;
+                }
+
+                if(status != STATUS_OK){
+                    UA_Socket_Close(freeSocket);
+                }
             }
         }
         if(port != NULL){
@@ -357,56 +292,55 @@ StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
             free(hostname);
         }
     }
+
+    if(status == STATUS_OK){
+        freeSocket->isUsed = 1;
+        freeSocket->eventCallback = socketCallback;
+        freeSocket->cbData = callbackData;
+        *clientSocket = freeSocket;
+    }
+
+    Socket_AddrInfoDelete(&res);
+
     return status;
 }
 
 StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
-                                 uint32_t          msecTimeout,
-                                 uint8_t           runOnce){
+                                 uint32_t          msecTimeout){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
     int32_t nbReady = 0;
     UA_Socket* uaSock = NULL;
     UA_Socket* acceptSock = NULL;
     UA_Socket_EventCB*  callback = NULL;
-    fd_set read_fds, write_fds, except_fds;
-    struct sockaddr remoteaddr;
-    socklen_t addrlen = 0;
-    //char remoteIP[INET6_ADDRSTRLEN];
-    struct timeval timeout;
-    int fdmax = 0;
-    int error = 0;
-    socklen_t len = 0;
+    SocketSet readSet, writeSet, exceptSet;
 
-    timeout.tv_sec = (msecTimeout / 1000);
-    timeout.tv_usec = 1000 * (msecTimeout % 1000);
-    FD_ZERO(&read_fds);
-    FD_ZERO(&write_fds);
-    FD_ZERO(&except_fds);
+    SocketSet_Clear(&readSet);
+    SocketSet_Clear(&writeSet);
+    SocketSet_Clear(&exceptSet);
 
-    if(socketManager != NULL && runOnce != FALSE){
+    if(socketManager != NULL){
         status = STATUS_OK;
     }
 
     if(status == STATUS_OK){
 
+        // Add used sockets in the correct socket sets
         for(idx = 0; idx < socketManager->nbSockets; idx++){
             uaSock = &(socketManager->sockets[idx]);
             if(uaSock->isUsed != FALSE){
                if(uaSock->state == SOCKET_CONNECTING){
-                   FD_SET(uaSock->sock, &write_fds);
+                   SocketSet_Add(uaSock->sock, &writeSet);
                }else{
-                   FD_SET(uaSock->sock, &read_fds);
+                   SocketSet_Add(uaSock->sock, &readSet);
                }
-               FD_SET(uaSock->sock, &except_fds);
-               if(uaSock->sock > fdmax){
-                   fdmax = uaSock->sock;
-               }
+               SocketSet_Add(uaSock->sock, &exceptSet);
             }
         }
 
         // Returns number of ready descriptor or -1 in case of error
-        nbReady = select(fdmax+1, &read_fds, &write_fds, &except_fds, &timeout);
+        nbReady = Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, msecTimeout);
+
         if(nbReady < 0){
             status =  STATUS_NOK;
         }else if(nbReady > 0){
@@ -415,20 +349,15 @@ StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
                 if(uaSock->isUsed != FALSE){
                     callback = (UA_Socket_EventCB*) uaSock->eventCallback;
                     if(uaSock->state == SOCKET_CONNECTING){
-                        if(FD_ISSET(uaSock->sock, &write_fds)){
+                        if(SocketSet_IsPresent(uaSock->sock, &writeSet) != FALSE){
                             // Check connection erros: mandatory when non blocking connection
-                            len = sizeof(int);
-                            if (getsockopt(uaSock->sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0 ||
-                                error != 0){
+                            if(STATUS_OK != Socket_CheckAckConnect(uaSock->sock)){
                                 callback(uaSock,
                                          SOCKET_CLOSE_EVENT,
                                          uaSock->cbData,
                                          0,
                                          0);
-                                close(uaSock->sock);
-                                uaSock->sock = 0;
-                                uaSock->isUsed = FALSE;
-                                uaSock->state = SOCKET_DISCONNECTED;
+                                UA_Socket_Close(uaSock);
                             }else{
                                 callback(uaSock,
                                          SOCKET_CONNECT_EVENT,
@@ -436,11 +365,10 @@ StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
                                          0,
                                          0);
                                 uaSock->state = SOCKET_CONNECTED;
-
                             }
                         }
                     }else{
-                        if(FD_ISSET(uaSock->sock, &read_fds)){
+                        if(SocketSet_IsPresent(uaSock->sock, &readSet) != FALSE){
                             if(uaSock->state == SOCKET_CONNECTED){
                                 callback(uaSock,
                                          SOCKET_READ_EVENT,
@@ -453,15 +381,9 @@ StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
                                     // TODO: No more free sockets
                                     status = STATUS_NOK;
                                 }else{
-                                    acceptSock->sock = accept(uaSock->sock,
-                                                              &remoteaddr,
-                                                              &addrlen);
-                                    if(acceptSock->sock != -1){
-//                                        printf("selectserver: new connection from %s on socket %d\n",
-//                                                inet_ntop(remoteaddr.sa_family,
-//                                                    get_in_addr((struct sockaddr*)&remoteaddr),
-//                                                    remoteIP, INET6_ADDRSTRLEN),
-//                                                acceptSock);
+                                    status = Socket_Accept(uaSock->sock,
+                                                           &acceptSock->sock);
+                                    if(status == STATUS_OK){
                                         acceptSock->isUsed = 1;
                                         acceptSock->state = SOCKET_CONNECTED;
                                         acceptSock->eventCallback = uaSock->eventCallback;
@@ -474,7 +396,7 @@ StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
                         }
                     }
 
-                    if(FD_ISSET(uaSock->sock, &except_fds)){
+                    if(SocketSet_IsPresent(uaSock->sock, &exceptSet) != FALSE){
                         callback(uaSock,
                                  SOCKET_EXCEPT_EVENT,
                                  uaSock->cbData,
@@ -492,52 +414,23 @@ StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
 int32_t UA_Socket_Write (UA_Socket* socket,
                          uint8_t*   data,
                          uint32_t   count){
-    uint32_t sentBytes = 0;
-    int res = 0;
-    if(socket != NULL &&
-       data != NULL &&
-       count <= INT32_MAX)
-    {
-        // TODO: Use write event to write later ?
-        while(res >=0 && sentBytes < count){
-            if(res != 0){
-                //TODO: sleep
-            }
-            res = send(socket->sock, data, count, 0);
-            if(res > 0){
-                sentBytes += res;
-            }
-        }
-        return sentBytes;
-    }else{
-        return -1;
-    }
+    return Socket_Write(socket->sock, data, count);
 }
 
 StatusCode UA_Socket_Read (UA_Socket* socket,
                            uint8_t*   data,
                            uint32_t   dataSize,
                            uint32_t*  readCount){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(socket != NULL && data != NULL && dataSize > 0){
-        *readCount = recv(socket->sock, data, dataSize, 0);
-        if(*readCount > 0){
-            status = STATUS_OK;
-        }else if(*readCount == 0){
-            status = STATUS_NOK;//OpcUa_BadDisconnect;
-        }else{
-            status = STATUS_NOK;
-            //TODO: OpcUa_BadWouldBlock, etc.
-        }
-    }
-    return status;
+    return Socket_Read(socket->sock, data, dataSize, readCount);
 }
 
 void UA_Socket_Close(UA_Socket* socket){
-    close(socket->sock);
-    socket->sock = -1;
-    socket->state = SOCKET_DISCONNECTED;
-    socket->eventCallback = NULL;
-    socket->cbData = NULL;
+    if(socket != NULL){
+        Socket_Close(&socket->sock);
+        socket->isUsed = FALSE;
+        socket->state = SOCKET_DISCONNECTED;
+        socket->eventCallback = NULL;
+        socket->cbData = NULL;
+    }
 }
 

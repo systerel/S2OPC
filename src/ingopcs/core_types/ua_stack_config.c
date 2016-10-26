@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ua_types.h>
+#include <p_sockets.h>
 
 UA_StackConfiguration g_stackConfiguration;
 uint8_t g_lockedConfig = FALSE;
@@ -21,6 +22,7 @@ void StackConfiguration_Initialize(){
         StackConfiguration_Clear();
         initDone = 1;
     }
+    Socket_Network_Initialize();
 }
 
 void StackConfiguration_Locked(){
@@ -39,6 +41,7 @@ void StackConfiguration_Clear(){
     g_stackConfiguration.encTypesTable = NULL;
     g_stackConfiguration.nbEncTypesTable = 0;
     g_stackConfiguration.traceLevel = 0;
+    Socket_Network_Clear();
     StackConfiguration_Unlocked();
     initDone = FALSE;
 }

@@ -302,8 +302,7 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
         // TODO: will retrieve any message: is it a problem ?
         // Retrieve received messages on socket
         status = UA_SocketManager_Loop (UA_SocketManager_GetGlobal(),
-                                        sleepTimeout,
-                                        1);
+                                        sleepTimeout);
 #endif //UA_MULTITHREADED
         status = Get_InvokeCallbackData(invCallbackData,
                                         response,

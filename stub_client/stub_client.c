@@ -274,8 +274,7 @@ int main(void){
 #else
     	// Retrieve received messages on socket
     	uStatus = UA_SocketManager_Loop (UA_SocketManager_GetGlobal(),
-    				                     sleepTimeout,
-										 OpcUa_True);
+    				                     sleepTimeout);
         printf ("ServerLoop status: %d\n", uStatus);
         OpcUa_GotoErrorIfBad(uStatus);
 #endif //OPCUA_MULTITHREADED
@@ -312,8 +311,7 @@ int main(void){
 #else
     	// Retrieve received messages on socket
     	uStatus = UA_SocketManager_Loop (UA_SocketManager_GetGlobal(),
-    				                     sleepTimeout,
-										 OpcUa_True);
+    				                     sleepTimeout);
         printf ("ServerLoop status: %d\n", uStatus);
         OpcUa_GotoErrorIfBad(uStatus);
 #endif //OPCUA_MULTITHREADED

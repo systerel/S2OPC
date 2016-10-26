@@ -6,6 +6,7 @@
  */
 #include <stdint.h>
 #include <ua_base_types.h>
+#include <p_sockets.h>
 
 #ifndef INGOPCS_SOCKETS_UA_SOCKETS_H_
 #define INGOPCS_SOCKETS_UA_SOCKETS_H_
@@ -29,7 +30,7 @@ typedef enum {
 } UA_Socket_State;
 
 typedef struct {
-    int              sock;
+    Socket           sock;
     uint8_t          isUsed;
     UA_Socket_State  state;
     void*            eventCallback; // UA_Socket_EventCB Type
@@ -73,8 +74,7 @@ StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
                                                UA_Socket**        listenerSocket);
 
 StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
-                                 uint32_t          msecTimeout,
-                                 uint8_t           runOnce);
+                                 uint32_t          msecTimeout);
 
 int32_t UA_Socket_Write (UA_Socket* socket,
                          uint8_t*   data,
