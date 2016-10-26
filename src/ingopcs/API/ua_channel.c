@@ -301,7 +301,7 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
 #else
         // TODO: will retrieve any message: is it a problem ?
         // Retrieve received messages on socket
-        status = UA_SocketManager_Loop (NULL, // global socket manager
+        status = UA_SocketManager_Loop (UA_SocketManager_GetGlobal(),
                                         sleepTimeout,
                                         1);
 #endif //UA_MULTITHREADED

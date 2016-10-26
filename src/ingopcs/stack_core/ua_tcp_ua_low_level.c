@@ -70,7 +70,7 @@ StatusCode TCP_UA_FinalizeHeader(UA_MsgBuffer* msgBuffer){
 }
 
 
-StatusCode TCP_UA_ReadData(Socket        socket,
+StatusCode TCP_UA_ReadData(UA_Socket*    socket,
                            UA_MsgBuffer* msgBuffer){
     StatusCode status = STATUS_NOK;
     uint32_t readBytes;
@@ -99,7 +99,7 @@ StatusCode TCP_UA_ReadData(Socket        socket,
         // Attempt to read header
         if(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH){
             readBytes = TCP_UA_HEADER_LENGTH - msgBuffer->buffers->length;
-            status = Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
+            status = UA_Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
             if(status == STATUS_OK && readBytes > 0){
                 Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
 
@@ -121,10 +121,10 @@ StatusCode TCP_UA_ReadData(Socket        socket,
         if(msgBuffer->buffers->max_size >= msgBuffer->currentChunkSize){
 
             readBytes = msgBuffer->currentChunkSize - msgBuffer->buffers->length;
-            status = Socket_Read(socket,
-                                 &(msgBuffer->buffers->data[msgBuffer->buffers->length]),
-                                 readBytes,
-                                 &readBytes);
+            status = UA_Socket_Read(socket,
+                                    &(msgBuffer->buffers->data[msgBuffer->buffers->length]),
+                                    readBytes,
+                                    &readBytes);
             if(status == STATUS_OK && readBytes > 0){
                 Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
             }
@@ -266,9 +266,9 @@ StatusCode TCP_UA_ReadMsgBuffer(UA_Byte*      data_dest,
 StatusCode TCP_UA_FlushMsgBuffer(UA_MsgBuffer* msgBuffer){
     StatusCode status = STATUS_NOK;
     uint32_t writtenBytes = 0;
-    writtenBytes = Socket_Write((Socket) msgBuffer->flushData,
-                                msgBuffer->buffers->data,
-                                msgBuffer->buffers->length);
+    writtenBytes = UA_Socket_Write((UA_Socket*) msgBuffer->flushData,
+                                   msgBuffer->buffers->data,
+                                   msgBuffer->buffers->length);
     if(writtenBytes == msgBuffer->buffers->length){
         status = STATUS_OK;
     }

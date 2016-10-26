@@ -55,7 +55,6 @@ StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
 
 TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
     TCP_UA_Connection* connection = NULL;
-    StatusCode status = STATUS_NOK;
 
     if(tcpProtocolVersion == scProtocolVersion){
         connection = (TCP_UA_Connection *) malloc(sizeof(TCP_UA_Connection));
@@ -74,14 +73,13 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
 #if UA_MULTITHREADED == UA_FALSE
-       status = SocketManager_Create(NULL,
-                                     1);
+        connection->socketManager = NULL;
+        UA_SocketManager_Initialize(UA_SocketManager_GetGlobal(), 1);
 #else
-       status = SocketManager_Create(&(connection->socketManager),
-                                     1);
+        connection->socketManager = UA_SocketManager_Create(1);
 #endif //UA_MULTITHREADED
 
-        if(status != STATUS_OK){
+        if(connection->socketManager != NULL){
             free(connection);
             connection = NULL;
         }
@@ -106,8 +104,8 @@ void ResetConnectionState(TCP_UA_Connection* connection){
 void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
     if(connection != NULL){
         String_Clear(&connection->url);
-        SocketManager_Delete(&connection->socketManager);
-        Socket_Close(connection->socket);
+        UA_SocketManager_Delete(&connection->socketManager);
+        UA_Socket_Close(connection->socket);
         MsgBuffer_Delete(&connection->inputMsgBuffer);
         MsgBuffer_Delete(&connection->outputMsgBuffer);
         MsgBuffer_Delete(&connection->sendingQueue);
@@ -273,7 +271,7 @@ StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
     return status;
 }
 
-StatusCode OnSocketEvent_CB (Socket        socket,
+StatusCode OnSocketEvent_CB (UA_Socket*    socket,
                              uint32_t      socketEvent,
                              void*         callbackData,
                              uint16_t      usPortNumber,
@@ -321,7 +319,7 @@ StatusCode OnSocketEvent_CB (Socket        socket,
             break;
         case SOCKET_EXCEPT_EVENT:
             status = STATUS_INVALID_STATE;
-            Socket_Close(connection->socket);
+            UA_Socket_Close(connection->socket);
             break;
         case SOCKET_READ_EVENT:
             // Manage message reception
@@ -464,19 +462,19 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
                 connection->callbackData = callbackData;
 
 #if UA_MULTITHREADED == UA_FALSE
-                status = SocketManager_CreateClientSocket(NULL,
-                                                          uri,
-                                                          OnSocketEvent_CB,
-                                                          (void*) connection,
-                                                          &(connection->socket));
+                status = UA_SocketManager_CreateClientSocket(UA_SocketManager_GetGlobal(),
+                                                             uri,
+                                                             OnSocketEvent_CB,
+                                                             (void*) connection,
+                                                             &(connection->socket));
 #else
 
                 if(status == STATUS_OK){
-                    status = SocketManager_CreateClientSocket(connection->socketManager,
-                                                              uri,
-                                                              OnSocketEvent_CB,
-                                                              (void*) connection,
-                                                              &(connection->socket));
+                    status = UA_SocketManager_CreateClientSocket(connection->socketManager,
+                                                                 uri,
+                                                                 OnSocketEvent_CB,
+                                                                 (void*) connection,
+                                                                 &(connection->socket));
                 }
 #endif //UA_MULTITHREADED
 
@@ -493,8 +491,7 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
 }
 
 void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
-    Socket_Close(connection->socket);
-    connection->socket = NULL;
+    UA_Socket_Close(connection->socket);
     String_Clear(&connection->url);
     connection->callback = NULL;
     connection->callbackData = NULL;

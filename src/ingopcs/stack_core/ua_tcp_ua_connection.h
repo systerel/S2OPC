@@ -8,10 +8,9 @@
 #ifndef INGOPCS_TCP_UA_CONNECTION_H_
 #define INGOPCS_TCP_UA_CONNECTION_H_
 
-#include <wrappers.h>
 #include <ua_builtintypes.h>
-
 #include <ua_msg_buffer.h>
+#include <ua_sockets.h>
 
 #define TCP_UA_MIN_BUFFER_SIZE 8192
 #define TCP_UA_MAX_URL_LENGTH 4096
@@ -53,8 +52,8 @@ typedef struct {
     uint32_t                    maxMessageSizeSnd;
     uint32_t                    maxChunkCountSnd;
     TCP_ConnectionState         state;
-    SocketManager               socketManager;
-    Socket                      socket;
+    UA_SocketManager*           socketManager;
+    UA_Socket*                  socket;
     UA_MsgBuffer*               inputMsgBuffer;
     UA_MsgBuffer*               outputMsgBuffer;
     UA_MsgBuffer*               sendingQueue;

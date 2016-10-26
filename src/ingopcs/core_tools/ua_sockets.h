@@ -72,9 +72,9 @@ StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
                                                void*              callbackData,
                                                UA_Socket**        listenerSocket);
 
-StatusCode SocketManager_Loop(UA_SocketManager* socketManager,
-                              uint32_t          msecTimeout,
-                              uint8_t           runOnce);
+StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
+                                 uint32_t          msecTimeout,
+                                 uint8_t           runOnce);
 
 int32_t UA_Socket_Write (UA_Socket* socket,
                          uint8_t*   data,

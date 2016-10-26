@@ -30,7 +30,7 @@ StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
 
 StatusCode TCP_UA_FinalizeHeader(UA_MsgBuffer* msgBuffer);
 
-StatusCode TCP_UA_ReadData(Socket        socket,
+StatusCode TCP_UA_ReadData(UA_Socket*    socket,
                            UA_MsgBuffer* msgBuffer);
 
 StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer);

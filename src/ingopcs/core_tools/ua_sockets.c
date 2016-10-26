@@ -360,9 +360,9 @@ StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
     return status;
 }
 
-StatusCode SocketManager_Loop(UA_SocketManager* socketManager,
-                              uint32_t          msecTimeout,
-                              uint8_t           runOnce){
+StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
+                                 uint32_t          msecTimeout,
+                                 uint8_t           runOnce){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
     int32_t nbReady = 0;
@@ -535,5 +535,9 @@ StatusCode UA_Socket_Read (UA_Socket* socket,
 
 void UA_Socket_Close(UA_Socket* socket){
     close(socket->sock);
+    socket->sock = -1;
+    socket->state = SOCKET_DISCONNECTED;
+    socket->eventCallback = NULL;
+    socket->cbData = NULL;
 }
 

@@ -273,7 +273,7 @@ int main(void){
     	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
-    	uStatus = UA_SocketManager_Loop (OpcUa_Null, // global socket manager
+    	uStatus = UA_SocketManager_Loop (UA_SocketManager_GetGlobal(),
     				                     sleepTimeout,
 										 OpcUa_True);
         printf ("ServerLoop status: %d\n", uStatus);
@@ -311,7 +311,7 @@ int main(void){
     	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
-    	uStatus = UA_SocketManager_Loop (OpcUa_Null, // global socket manager
+    	uStatus = UA_SocketManager_Loop (UA_SocketManager_GetGlobal(),
     				                     sleepTimeout,
 										 OpcUa_True);
         printf ("ServerLoop status: %d\n", uStatus);
