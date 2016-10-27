@@ -10,6 +10,7 @@
 #include <string.h>
 #include <check.h>
 #include <stddef.h> // NULL
+#include <stdlib.h> // malloc, free
 
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
@@ -653,6 +654,7 @@ START_TEST(test_pk_x509)
                                             MBEDTLS_MD_SHA256, 32,
                                             hashed, output) == 0);
 
+
     // This is the X509 part of the PKI:
     // Reads a CA
     mbedtls_x509_crt ca;
@@ -667,21 +669,26 @@ START_TEST(test_pk_x509)
     // We should use the NIST Sign Verification test vectors, but they are not easy to use.
 
     // TODO: free the contexts & look at code to see if the aes contexts are correctly freed
+    //mbedtls_rsa_free(prsa_pub);
+    //mbedtls_rsa_free(prsa_priv);
+    mbedtls_x509_crt_free(&crt);
+    mbedtls_pk_free(&pk_priv);
 
     CryptoProvider_Delete(crypto);
 }
-END_TEST*/
+END_TEST //*/
 
 
 START_TEST(test_cert_load)
 {
     CryptoProvider *crypto = NULL;
     KeyManager *keyman = NULL;
-    Certificate *crt_pub;
+    Certificate *crt_pub = NULL;
     uint8_t thumb[20];
     char hexoutput[40];
     uint8_t der_cert[1215];
 
+    // Init
     crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
     ck_assert(NULL != crypto);
     keyman = KeyManager_Create(crypto,
@@ -689,6 +696,7 @@ START_TEST(test_cert_load)
                                (int8_t *)"./revoked/", 10);
     ck_assert(NULL != keyman);
 
+    // Loads a certificate
     //ck_assert(KeyManager_Certificate_CreateFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) == STATUS_OK);
     ck_assert(unhexlify("308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a06035504080c03494446310e30"
                         "0c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f5043533113301106035504030c0a494e474f"
@@ -710,12 +718,128 @@ START_TEST(test_cert_load)
                         "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f26f71264fd7962eb513030d14b5262b220b"
                         "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5be2bf893c1299380675e82455cbef6ccc", der_cert, 1215) == 1215);
     ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_cert, 1215, &crt_pub) == STATUS_OK);
+
+    // Compute thumbprint
     ck_assert(KeyManager_Certificate_GetThumbprint(keyman, crt_pub, thumb, 20) == STATUS_OK);
     ck_assert(hexlify(thumb, hexoutput, 20) == 20);
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
     ck_assert(memcmp(hexoutput, "af17d03e1605277489815ab88bc4760655b3e2cd", 40) == 0);
 
+    // Cleaning
     KeyManager_Certificate_Free(crt_pub);
+    KeyManager_Delete(keyman);
+    CryptoProvider_Delete(crypto);
+}
+END_TEST
+
+
+START_TEST(test_crypto_asym_crypt)
+{
+    CryptoProvider *crypto = NULL;
+    KeyManager *keyman = NULL;
+    Certificate *crt_pub = NULL;
+    AsymmetricKey *key_pub = NULL, *key_priv = NULL;
+    uint8_t der_cert[911], der_priv[1192];
+    uint8_t input[1024], output[1024], input_bis[1024];
+    uint32_t lenPlain = 0, lenCiph = 0, len = 0;
+    ExposedBuffer clientNonce[32], serverNonce[32];
+
+    // Init
+    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(NULL != crypto);
+    keyman = KeyManager_Create(crypto,
+                               (int8_t *)"./trusted/", 10,
+                               (int8_t *)"./revoked/", 10);
+    ck_assert(NULL != keyman);
+
+    // Loads a certificate (self signed test certificate)
+    ck_assert(unhexlify("3082038b30820273a003020102020900cf163f0b5124ff4c300d06092a864886f70d01010b0500305c310b3009060355040613024652310f300d06035504080c"
+                        "064672616e6365310c300a06035504070c034169783111300f060355040a0c08537973746572656c311b301906035504030c12494e474f504353205465737420"
+                        "7375697465301e170d3136313032363136333035345a170d3137303230333136333035345a305c310b3009060355040613024652310f300d06035504080c0646"
+                        "72616e6365310c300a06035504070c034169783111300f060355040a0c08537973746572656c311b301906035504030c12494e474f5043532054657374207375"
+                        "69746530820122300d06092a864886f70d01010105000382010f003082010a0282010100cbe0cd29bbcdd824999fc5571122e7540405ac94d0a9b3ab3630ce2c"
+                        "f361d50d9e737ce3f7746959003cbe90fc1019dce4797f4a87a05cd83521531e1391cf11f2e49ce6b0f68db31fb91675be4bbd4380920fccf46518ac2bff4208"
+                        "5ebc6ca107ecef53964e14617aecd75e1f27035c326f1757273047ca4d623bc5b08d278e3a320b964b11116df912bf91e99d3fdb78989e3daa144570647efc4c"
+                        "983c4159aecbf99aeb8bdfbf242ac5c43f0092a28aecddb8bdabf4aad7af68ae6bfe6d5cf6cb6e3a6a0c2d33ad3d592514703578d1cead67aa2c497600e0b983"
+                        "0ee8671f59f25262d596e4dbfe60ec6f5acb0c4f1cedf6b138fa12fd661b65e537c3539b0203010001a350304e301d0603551d0e041604147d33f73c22b315aa"
+                        "bd26ecb5a6db8a0bb511fbd0301f0603551d230418301680147d33f73c22b315aabd26ecb5a6db8a0bb511fbd0300c0603551d13040530030101ff300d06092a"
+                        "864886f70d01010b05000382010100550cb4f83c4b3567dc7aed66698056a034f38685e8227c0c0f00de0d7bd267f728d3b05c6f0fc089163e5654a833fd84cb"
+                        "6e5cc71853483cf09c4804ff862a01e920234578f2d6c8cd89008d017dce5d15be8a52396a101d32434d34aef346387216f550b1f932c94072168cdc68ad460d"
+                        "100bce4792c57b87f1a431d2b456698dd3c248fc6e2644d446f952255f98e3dcb7e5cd200b46f769d581833c21b08d07c4343973e93bed9a2d66ece5b6083e6e"
+                        "42b3378987339ab01aab362890dbf57dc22e9d86c0cd4edfa43f489d250bc4244542368c8682125645bd610fbf1c60ec5f94bc697284bde3915e9e051bb255ae"
+                        "e1685265a487bd1d72c5f49ef621e0", der_cert, 911) == 911);
+    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_cert, 911, &crt_pub) == STATUS_OK);
+
+    // Loads the public key from cert
+    key_pub = malloc(sizeof(AsymmetricKey));
+    ck_assert(NULL != key_pub);
+    ck_assert(KeyManager_Certificate_GetPublicKey(keyman, crt_pub, key_pub) == STATUS_OK);
+
+    // Loads a private key
+    ck_assert(unhexlify("308204a40201000282010100cbe0cd29bbcdd824999fc5571122e7540405ac94d0a9b3ab3630ce2cf361d50d9e737ce3f7746959003cbe90fc1019dce4797f4a"
+                        "87a05cd83521531e1391cf11f2e49ce6b0f68db31fb91675be4bbd4380920fccf46518ac2bff42085ebc6ca107ecef53964e14617aecd75e1f27035c326f1757"
+                        "273047ca4d623bc5b08d278e3a320b964b11116df912bf91e99d3fdb78989e3daa144570647efc4c983c4159aecbf99aeb8bdfbf242ac5c43f0092a28aecddb8"
+                        "bdabf4aad7af68ae6bfe6d5cf6cb6e3a6a0c2d33ad3d592514703578d1cead67aa2c497600e0b9830ee8671f59f25262d596e4dbfe60ec6f5acb0c4f1cedf6b1"
+                        "38fa12fd661b65e537c3539b020301000102820101009c87cb5d2868e1733053bfc29a508f052d5561ec9bcc3f3acb8f6b2c8dec66145fbc517e01866a3fbff3"
+                        "e368136f153c485a940597dde28ac937fdc5d0c6991231c79e436c48d0005ff1ce31b65a1644d658ce32d0cd31c536be736753bd1d36018cc32f0cee83ad5820"
+                        "b135fd7b099466d06e3e26c365cb07e0ccfd7a10d5f57879f21648083e9997cb1f78a3bd934dd472bafd852458e4fc843e14959d46cc2252e7bb12c0cfaee462"
+                        "3196595ce587921c600908e10c2e7257ea99a83c6df5b392220b88a11e3dcaf88c55a1a3ce8222037e19585cf644ccca65c188e7d109c447773c9e06cf15e2e2"
+                        "b745b0195d042cb264184d3b711d3e9e7e89858aa96102818100f2c690168005c536c5958a45ada4c1cad84203f961c560d996158d2b184d93f48934a0d46ec0"
+                        "512ee0670c2e49fda8b5de29fad03c3e5da406885a6d9775af2dfd5e61357997f2dbcaa087f79e076e95606904cfeab68185bbb4d2854d8f835e1eb38da5614b"
+                        "944970e8b5e4130262219f69394ede5c16e78112cfb3512b10b102818100d6fbd2ed02d9529b4e3a04a27da4659b2968d082cf660c0c4520cb1909084ff77ec3"
+                        "8dccc74f924a0db25869855ea95e6c61990837c9a46658ce233104b1bd2b9d1c16221561f41116926bd963406f789cea1b730c326bd0e4cf01ebc6e2d047f2bb"
+                        "c591a5bfff19512186fbfcbfe1fa32776163a11bef64a8cd1316ba0a5c0b0281803b53787c771671e5fb8c9a7882816375fd38cc9dd15d9958328bdbae6f46ed"
+                        "e3f0ef7269d7129a04198434fecec7f4c5549fef919957282ce007cc0941dcd94d24c03e8301ceb6e32cf5e3a407f30afbe7ce6205a8f6a65a16cf8e2e5310c1"
+                        "ea6b183781f56fb1b1ecac815e55a2dc7618ed6ebaae2dd4cf07c4a00ad2c7f25102818100c22e052f75024c9de0c380ca30081c8a5095ceb8489298d1406345"
+                        "6f207c74964cd65f2f16dba57be3f131f065b9c1eb7aa390f11e4ab0868d31ec116b770b31e89fa4d236541a7a90d3c23c416cc302c360a5587e2cd0bb86dfff"
+                        "91323c4dfa9ea1c1eb33363f3963d18fb5ed6e77b3607ff9e45e71f8020881eafafd213c4f02818004fbb2f7ca0e8e7f644f40939f9743f8996439a926244282"
+                        "1981268f36fba3e4656fc6e9c69bab8b5f56c7b033bed95eeca96952b3d62edd935b80d5187649683196702a0b304e802de7841d6bab06e6877b74bdf2b5e7f2"
+                        "673ac6939c1427fb899a4cb26f656b5621914592f61b10d4ff50a4bb360d134d224a780db10f0f97", der_priv, 1192) == 1192);
+    ck_assert(KeyManager_AsymmetricKey_CreateFromBuffer(keyman, der_priv, 1192, &key_priv) == STATUS_OK);
+
+    // Assert lengths
+    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_pub, &len) == STATUS_OK);
+    ck_assert(len == 2048);
+    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_priv, &len) == STATUS_OK);
+    ck_assert(len == 2048);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_pub, &lenCiph, &lenPlain) == STATUS_OK);
+    ck_assert(lenCiph == 256);
+    ck_assert(lenPlain == 214); // 256 - 2*20 - 2
+    ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_priv, &lenCiph, &lenPlain) == STATUS_OK);
+    ck_assert(lenCiph == 256);
+    ck_assert(lenPlain == 214); // 256 - 2*20 - 2
+    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 32, &len) == STATUS_OK);
+    ck_assert(len == 256);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 256, &len) == STATUS_OK);
+    ck_assert(len == 214);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 856, &len) == STATUS_OK);
+    ck_assert(len == 1024);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 1024, &len) == STATUS_OK);
+    ck_assert(len == 856);
+
+    // Encryption/Decryption
+    // a) Single message (< 214)
+    memset(input, 0, 1024);
+    memset(output, 0, 1024);
+    strncpy((char *)input, "Test INGOPCS Test", 32); // And test padding btw...
+    ck_assert(CryptoProvider_AsymmetricEncrypt_Low(crypto, input, 32, key_pub, output, 256) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricDecrypt_Low(crypto, output, 256, key_priv, input_bis, 214, &len) == STATUS_OK);
+    ck_assert(len == 32);
+    ck_assert(memcmp(input, input_bis, 32) == 0);
+    // b) Multiple messages (> 214, and as output is 1024, < 856)
+    //  Using previously generated nonce, to fill input[32:856]
+    ck_assert(unhexlify("3d3b4768f275d5023c2145cbe3a4a592fb843643d791f7bd7fce75ff25128b68", clientNonce, 32) == 32);
+    ck_assert(unhexlify("ccee418cbc77c2ebb38d5ffac9d2a9d0a6821fa211798e71b2d65b3abb6aec8f", serverNonce, 32) == 32);
+    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 856-32) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricEncrypt_Low(crypto, input, 856, key_pub, output, 1024) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricDecrypt_Low(crypto, output, 1024, key_priv, input_bis, 856, &len) == STATUS_OK);
+    ck_assert(len == 856);
+    ck_assert(memcmp(input, input_bis, 856) == 0);
+
+    // Cleaning
+    KeyManager_Certificate_Free(crt_pub);
+    KeyManager_AsymmetricKey_Free(key_priv);
+    free(key_pub);
     KeyManager_Delete(keyman);
     CryptoProvider_Delete(crypto);
 }
@@ -725,23 +849,23 @@ END_TEST
 Suite *tests_make_suite_crypto()
 {
     Suite *s;
-    TCase *tc_ciphers, *tc_providers, *tc_derives, *tc_misc, *tc_km;
+    TCase *tc_crypto_symm, *tc_providers, *tc_derives, *tc_misc, *tc_km, *tc_crypto_asym;
 
     s = suite_create("Crypto lib");
-    tc_ciphers = tcase_create("Ciphers");
+    tc_crypto_symm = tcase_create("Symmetric Crypto");
     tc_providers = tcase_create("Crypto Provider");
     tc_derives = tcase_create("Crypto Data Derivation");
     tc_misc = tcase_create("Crypto Misc");
     tc_km = tcase_create("Key Management");
+    tc_crypto_asym = tcase_create("Asymmetric Crypto");
 
     suite_add_tcase(s, tc_misc);
     tcase_add_test(tc_misc, test_hexlify);
 
-    suite_add_tcase(s, tc_ciphers);
-    tcase_add_test(tc_ciphers, test_crypto_symm_crypt);
-    tcase_add_test(tc_ciphers, test_crypto_symm_sign);
-    tcase_add_test(tc_ciphers, test_crypto_symm_gen);
-    //tcase_add_test(tc_ciphers, test_pk_x509);
+    suite_add_tcase(s, tc_crypto_symm);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_crypt);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_sign);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_gen);
 
     suite_add_tcase(s, tc_providers);
 
@@ -751,6 +875,10 @@ Suite *tests_make_suite_crypto()
 
     suite_add_tcase(s, tc_km);
     tcase_add_test(tc_km, test_cert_load);
+
+    suite_add_tcase(s, tc_crypto_asym);
+    //tcase_add_test(tc_crypto_asym, test_pk_x509);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt);
 
     return s;
 }
