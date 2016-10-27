@@ -55,6 +55,13 @@ void* SLinkedList_Find(SLinkedList* list, uint32_t id);
 void* SLinkedList_Remove(SLinkedList* list, uint32_t id);
 
 /**
+ *  \brief         Delete all elements of the given linked list
+ *
+ *  \param list    Pointer to the list of elements to be deleted
+ */
+void SLinkedList_Clear(SLinkedList* list);
+
+/**
  *  \brief         Delete and deallocate the given linked list
  *
  *  \param list    Pointer to the list to deallocate (pointer must not be used anymore after operation)

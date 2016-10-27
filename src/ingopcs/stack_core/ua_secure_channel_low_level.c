@@ -412,50 +412,72 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                              uint32_t       isSymmetric){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(scConnection != NULL){
+        status = STATUS_OK;
         uint32_t cipherBlockSize = 0;
         uint32_t plainBlockSize =0;
         uint32_t signatureSize = 0;
         if(isSymmetric == FALSE){
-            AsymmetricKey publicKey;
 
-            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
-                                                         &publicKey);
+            if(scConnection->currentSecuMode != UA_MessageSecurityMode_None){
+                AsymmetricKey publicKey;
+                status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
+                                                             &publicKey);
 
-            if(status == STATUS_OK){
-                status = CryptoProvider_AsymmetricGetLength_Msgs(scConnection->currentCryptoProvider,
-                                                                 &publicKey,
-                                                                 &cipherBlockSize,
-                                                                 &plainBlockSize);
-                 if(status == STATUS_OK){
-                     status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
-                                                                           &publicKey,
-                                                                           &signatureSize);
-                 }
+                if(status == STATUS_OK){
+                    status = CryptoProvider_AsymmetricGetLength_Msgs(scConnection->currentCryptoProvider,
+                                                                     &publicKey,
+                                                                     &cipherBlockSize,
+                                                                     &plainBlockSize);
+                     if(status == STATUS_OK){
+                         status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
+                                                                               &publicKey,
+                                                                               &signatureSize);
+                     }
 
-                 if(status == STATUS_OK){
-                     scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
-                                                                       cipherBlockSize,
-                                                                       plainBlockSize,
-                                                                       signatureSize);
-                 }
+                     if(status == STATUS_OK){
+                         scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
+                                                                           cipherBlockSize,
+                                                                           plainBlockSize,
+                                                                           signatureSize);
+                     }
+                }
             }else{
-                status = STATUS_NOK;
+                // No signature or encryption
+                scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
+                                                                  1, 1, // No data encryption => 1 byte = 1 byte
+                                                                  0); // No signature => 0 bytes of signature
             }
         }else{
-            status = CryptoProvider_SymmetricGetLength_Blocks(scConnection->currentCryptoProvider,
-                                                              &cipherBlockSize,
-                                                              &plainBlockSize);
-             if(status == STATUS_OK){
-                 uint32_t signatureSize = 0;
-                 status = CryptoProvider_SymmetricGetLength_Signature(scConnection->currentCryptoProvider,
-                                                                      &signatureSize);
-                 if(status == STATUS_OK){
-                     scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
-                                                                       cipherBlockSize,
-                                                                       plainBlockSize,
-                                                                       signatureSize);
-                 }
-             }
+            if(scConnection->currentSecuMode != UA_MessageSecurityMode_None){
+                if(scConnection->currentSecuMode == UA_MessageSecurityMode_SignAndEncrypt){
+                    // Signature and Encryption
+                    status = CryptoProvider_SymmetricGetLength_Blocks(scConnection->currentCryptoProvider,
+                                                                      &cipherBlockSize,
+                                                                      &plainBlockSize);
+                }else{
+                    // No data encryption: 1 byte = 1 byte
+                    cipherBlockSize = 1;
+                    plainBlockSize = 1;
+                }
+
+                if(status == STATUS_OK){
+                    // Signature
+                    uint32_t signatureSize = 0;
+                    status = CryptoProvider_SymmetricGetLength_Signature(scConnection->currentCryptoProvider,
+                                                                          &signatureSize);
+                    if(status == STATUS_OK){
+                        scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
+                                                                          cipherBlockSize,
+                                                                          plainBlockSize,
+                                                                          signatureSize);
+                    }
+                }
+            }else{
+                // No signature or encryption
+                scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
+                                                                  1, 1, // No data encryption => 1 byte = 1 byte
+                                                                  0); // No signature => 0 bytes of signature
+            }
         }
     }
     return status;
@@ -557,7 +579,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
     if(status == STATUS_OK){
         if(toSign != FALSE && senderCertificate->length>0){ // Field shall be null if message not signed
             status = String_Write(senderCertificate, msgBuffer);
-        }else{
+        }else if(toSign == FALSE){
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
             // status = Write_Int32(msgBuffer, 0);
@@ -565,14 +587,15 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
             const int32_t minusOne = -1;
             status = Int32_Write(&minusOne, msgBuffer);
             // NULL string: nothing to write
+        }else{
+            status = STATUS_INVALID_PARAMETERS;
         }
     }
 
     // Receiver Certificate Thumbprint:
     if(status == STATUS_OK){
-
-        UA_ByteString recCertThumbprint;
-        if(toEncrypt != FALSE){
+        if(toEncrypt != FALSE && receiverCertCrypto != NULL){
+            UA_ByteString recCertThumbprint;
             uint32_t thumbprintLength = 0;
             status = CryptoProvider_CertificateGetLength_Thumbprint(cryptoProvider, &thumbprintLength);
 
@@ -593,7 +616,8 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
             if(STATUS_OK == status){
                 status = String_Write(&recCertThumbprint, msgBuffer);
             }
-        }else{
+            ByteString_Clear(&recCertThumbprint);
+        }else if(toEncrypt == FALSE){
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
             //status = Write_Int32(msgBuffer, 0);
@@ -601,9 +625,9 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
             const int32_t minusOne = -1;
             status = Int32_Write(&minusOne, msgBuffer);
             // NULL string: nothing to write
+        }else{
+            status = STATUS_INVALID_PARAMETERS;
         }
-
-        ByteString_Clear(&recCertThumbprint);
     }else{
         status = STATUS_NOK;
     }
@@ -1095,7 +1119,13 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
         if(status == STATUS_OK){
             const uint32_t plainDataToEncryptLength = // Already encoded message from encryption start + signature size
              msgBuffer->buffers->length - msgBuffer->sequenceNumberPosition + signatureSize;
-            status = GetEncryptedDataLength(scConnection, plainDataToEncryptLength, symmetricAlgo, &encryptedLength);
+            if(toEncrypt == FALSE){
+                // No encryption same data length
+                encryptedLength = plainDataToEncryptLength;
+            }else{
+                status = GetEncryptedDataLength(scConnection, plainDataToEncryptLength,
+                                                symmetricAlgo, &encryptedLength);
+            }
         }
         // Set final message length
         if(status == STATUS_OK){
@@ -1757,46 +1787,69 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
     // Only valid for symmetric encryption ! No need for asymm (1 chunk maximum)
     StatusCode status = STATUS_INVALID_PARAMETERS;
     CryptoProvider* cProvider = NULL;
+    UA_MessageSecurityMode securityMode = UA_MessageSecurityMode_Invalid;
     uint32_t sigSize = 0;
     uint32_t cipherBlockSize = 0;
     uint32_t plainBlockSize = 0;
     uint16_t padding = 0;
     Buffer* curChunk = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
     uint32_t newBufferLength = curChunk->length;
+    uint8_t isEncrypted = 1;
+    uint8_t isSigned = 1;
+
     if(scConnection != NULL){
+        status = STATUS_OK;
         if(isPrecCryptoData == FALSE){
             cProvider = scConnection->currentCryptoProvider;
+            securityMode = scConnection->currentSecuMode;
         }else{
             cProvider = scConnection->precCryptoProvider;
+            securityMode = scConnection->precSecuMode;
         }
-        // Compute signature size and remove from buffer length
-        status = CryptoProvider_SymmetricGetLength_Signature(cProvider,
-                                                             &sigSize);
+
+        isEncrypted = IsMsgEncrypted(securityMode, scConnection->receptionBuffers);
+        isSigned = IsMsgSigned(securityMode);
+    }
+
+    if(status == STATUS_OK){
+
+        if(isSigned == FALSE){
+            sigSize = 0;
+        }else{
+            // Compute signature size and remove from buffer length
+            status = CryptoProvider_SymmetricGetLength_Signature(cProvider,
+                                                                 &sigSize);
+        }
+
         if(status == STATUS_OK){
             newBufferLength = newBufferLength - sigSize;
-            status = CryptoProvider_SymmetricGetLength_Blocks(cProvider,
-                                                              &cipherBlockSize,
-                                                              &plainBlockSize);
+            if(isEncrypted != FALSE){
+                status = CryptoProvider_SymmetricGetLength_Blocks(cProvider,
+                                                                  &cipherBlockSize,
+                                                                  &plainBlockSize);
+            }
         }
     }
 
     if(status == STATUS_OK){
-        // Extra padding management: possible if block size greater than:
-        // UINT8_MAX (1 byte representation max)+ 1 (padding size field byte))
-        if(Is_ExtraPaddingSizePresent(plainBlockSize) != FALSE){
-            // compute most significant byte value
-            padding = curChunk->data[newBufferLength-1] << 8;
-            // remove extra padding size field
+        // No padding to handle if there is no encryption
+        if(isEncrypted != FALSE){
+            // Extra padding management: possible if block size greater than:
+            // UINT8_MAX (1 byte representation max)+ 1 (padding size field byte))
+            if(Is_ExtraPaddingSizePresent(plainBlockSize) != FALSE){
+                // compute most significant byte value
+                padding = curChunk->data[newBufferLength-1] << 8;
+                // remove extra padding size field
+                newBufferLength -= 1;
+            }
+
+            // Pading bytes are containing the (low byte) of padding length (<=> paddingSize value)
+            padding += curChunk->data[newBufferLength-1];
+            // Remove padding bytes (including extra if existing)
+            newBufferLength -= padding;
+            // Remove padding field
             newBufferLength -= 1;
         }
-
-        // Pading bytes are containing the (low byte) of padding length (<=> paddingSize value)
-        padding += curChunk->data[newBufferLength-1];
-        // Remove padding bytes (including extra if existing)
-        newBufferLength -= padding;
-        // Remove padding field
-        newBufferLength -= 1;
-
         // Set new buffer length without padding and signature
         status = Buffer_SetDataLength(curChunk, newBufferLength);
     }

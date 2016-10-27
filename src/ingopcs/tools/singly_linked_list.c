@@ -118,7 +118,7 @@ void* SLinkedList_Remove(SLinkedList* list, uint32_t id){
     return result;
 }
 
-void SLinkedList_Delete(SLinkedList* list){
+void SLinkedList_Clear(SLinkedList* list){
     SLinkedList_Elt* elt = NULL;
     SLinkedList_Elt* nextElt = NULL;
     if(list != NULL){
@@ -128,6 +128,14 @@ void SLinkedList_Delete(SLinkedList* list){
             free(elt);
             elt = nextElt;
         }
+        list->first = NULL;
+        list->length = 0;
+    }
+}
+
+void SLinkedList_Delete(SLinkedList* list){
+    if(list != NULL){
+        SLinkedList_Clear(list);
         free(list);
     }
 }

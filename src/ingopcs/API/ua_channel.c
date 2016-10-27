@@ -174,8 +174,9 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
 
     if(cConnection != NULL && cConnection->instance != NULL &&
        url != NULL &&
-       crt_cli != NULL && key_priv_cli != NULL &&
-       crt_srv != NULL && pki != NULL &&
+       ((crt_cli != NULL && key_priv_cli != NULL &&
+         crt_srv != NULL && pki != NULL)
+        || msgSecurityMode == UA_MessageSecurityMode_None) &&
        reqSecuPolicyUri != NULL &&
        msgSecurityMode != UA_MessageSecurityMode_Invalid &&
        cb != NULL)

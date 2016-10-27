@@ -469,6 +469,11 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
         // Trace / channel CB
     }
 
+    if(status == STATUS_OK){
+        // Compute max body size for next messages (symmetric encryption)
+        status = SC_SetMaxBodySize(cConnection->instance, 1);
+    }
+
     // Reset reception buffers for next messages
     MsgBuffers_Reset(cConnection->instance->receptionBuffers);
 
@@ -704,13 +709,14 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
        connection->instance != NULL &&
        connection->instance->state == SC_Connection_Disconnected &&
        uri != NULL &&
-       pki != NULL &&
-       crt_cli != NULL &&
-       key_priv_cli != NULL &&
-       crt_srv != NULL &&
        securityMode != UA_MessageSecurityMode_Invalid &&
        securityPolicy != NULL &&
-       requestedLifetime > 0)
+       requestedLifetime > 0 &&
+       ((crt_cli != NULL &&
+         key_priv_cli != NULL &&
+         crt_srv != NULL &&
+         pki != NULL)
+       || securityMode == UA_MessageSecurityMode_None))
     {
         if(connection->clientCertificate == NULL &&
            connection->clientKey == NULL &&
@@ -790,7 +796,8 @@ StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
         ByteString_Clear(&cConnection->serverCertificate);
         ByteString_Clear(&cConnection->clientCertificate);
         SecretBuffer_DeleteClear(cConnection->clientKey);
-        SLinkedList_Delete(cConnection->pendingRequests);
+        cConnection->clientKey = NULL;
+        SLinkedList_Clear(cConnection->pendingRequests);
         String_Clear(&cConnection->securityPolicy);
         TCP_UA_Connection_Disconnect(cConnection->instance->transportConnection);
     }
