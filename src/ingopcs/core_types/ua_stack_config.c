@@ -23,6 +23,7 @@ void StackConfiguration_Initialize(){
         initDone = 1;
     }
     Socket_Network_Initialize();
+    InitPlatformDependencies();
 }
 
 void StackConfiguration_Locked(){

@@ -21,7 +21,7 @@ typedef struct {
 
 extern UA_StackConfiguration g_stackConfiguration;
 
-void StackConfiguration_Initialize();
+void StackConfiguration_Initialize(); // Init stack configuration and platform dependent code
 void StackConfiguration_Locked();
 void StackConfiguration_Unlocked();
 void StackConfiguration_Clear();
