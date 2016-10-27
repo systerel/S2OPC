@@ -92,6 +92,8 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                              SC_ConnectionEvent_CB* callback,
                              void*                  callbackData);
 
+StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection);
+
 StatusCode SC_Send_Request(SC_ClientConnection* connection,
                            UA_EncodeableType*   requestType,
                            void*                request,

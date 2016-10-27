@@ -698,7 +698,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                              SC_ConnectionEvent_CB* callback,
                              void*                  callbackData)
 {
-    StatusCode status = STATUS_NOK;
+    StatusCode status = STATUS_INVALID_PARAMETERS;
 
     if(connection != NULL &&
        connection->instance != NULL &&
@@ -720,7 +720,6 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
            connection->callback == NULL &&
            connection->callbackData == NULL)
         {
-
             connection->pkiProvider = pki;
 
             status = String_InitializeFromCString(&connection->securityPolicy, securityPolicy);
@@ -769,8 +768,31 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
         }else{
             status = STATUS_INVALID_STATE;
         }
-    }else{
-        status = STATUS_INVALID_PARAMETERS;
+    }
+    return status;
+}
+
+StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
+{
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(cConnection != NULL && cConnection->instance != NULL &&
+       cConnection->instance->transportConnection != NULL)
+    {
+        status = STATUS_OK;
+        cConnection->instance->state = SC_Connection_Disconnected;
+        cConnection->securityMode = UA_MessageSecurityMode_Invalid;
+        cConnection->callback = NULL;
+        cConnection->callbackData = NULL;
+        if(cConnection->pkiProvider != NULL){
+            PKIProvider_Delete(cConnection->pkiProvider);
+            cConnection->pkiProvider = NULL;
+        }
+        ByteString_Clear(&cConnection->serverCertificate);
+        ByteString_Clear(&cConnection->clientCertificate);
+        SecretBuffer_DeleteClear(cConnection->clientKey);
+        SLinkedList_Delete(cConnection->pendingRequests);
+        String_Clear(&cConnection->securityPolicy);
+        TCP_UA_Connection_Disconnect(cConnection->instance->transportConnection);
     }
     return status;
 }

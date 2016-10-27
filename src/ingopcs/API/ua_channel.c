@@ -325,8 +325,8 @@ StatusCode UA_Channel_Disconnect(UA_Channel channel){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(channel != NULL){
         status = STATUS_NOK;
+        status = SC_Client_Disconnect((SC_ClientConnection*) channel);
         StackConfiguration_Unlocked();
-        //status = SC_Client_Disconnect((SC_ClientConnection*) channel);
     }
     return status;
 }
