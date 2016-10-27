@@ -579,81 +579,6 @@ START_TEST(test_pk_x509)
     pCtx = crypto->pCryptolibContext;
     ck_assert(NULL != pCtx);
 
-    // TODO: assert lengths CryptoProvider_AsymetricGetLength_*
-
-    // This is the PKI:
-    // Reads a public/private key pair
-    mbedtls_x509_crt crt; // Client/Server certificate, which contains the pk struct
-    mbedtls_pk_context pk_priv;
-    mbedtls_x509_crt_init(&crt);
-    mbedtls_pk_init(&pk_priv);
-    ck_assert(mbedtls_x509_crt_parse_file(&crt, "client_public/client.der") == 0);
-    ck_assert(mbedtls_pk_parse_keyfile(&pk_priv, "client_private/client.key", 0) == 0);
-    // Get bits number
-    i = mbedtls_pk_get_bitlen(&crt.pk);
-    j = mbedtls_pk_get_bitlen(&pk_priv);
-    // Assert len is enough but not too much
-    printf("Bitlenghts: %u %u\n", i, j);
-    // TODO: Assert can do
-    // Ciphering
-    mbedtls_rsa_context *prsa_pub, *prsa_priv;
-    ck_assert(mbedtls_pk_get_type(&crt.pk) == MBEDTLS_PK_RSA);
-    ck_assert(mbedtls_pk_get_type(&pk_priv) == MBEDTLS_PK_RSA);
-    prsa_pub = mbedtls_pk_rsa(crt.pk);
-    prsa_priv = mbedtls_pk_rsa(pk_priv);
-    ck_assert(mbedtls_rsa_check_pub_priv(prsa_pub, prsa_priv) == 0);
-    mbedtls_rsa_set_padding(prsa_pub, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
-    mbedtls_rsa_set_padding(prsa_priv, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
-    // Calculate max payload
-    //printf("Output buffer lengths: %u %u\n", prsa_pub->N, prsa_priv->N); // Mauvaise interprétation de N, qui n'est pas un type de base...
-    // Faut repasser par pk get_len, ou prsa->len
-    printf("Hash IDs: %i %i\n", prsa_pub->hash_id, prsa_priv->hash_id);
-    mbedtls_md_info_t *pmdinfo = mbedtls_md_info_from_type(prsa_pub->hash_id);
-    printf("prsa_pub->len: %i %i\n", prsa_pub->len, prsa_priv->len);
-    uint32_t len_hash = mbedtls_md_get_size(pmdinfo), len_max = prsa_pub->len - 2*len_hash - 2;
-    printf("len_hash, len_max: %i %i\n", len_hash, len_max);
-    // Alice is sending something to Bob
-    // Encrypt with pk (Bob-pk)
-    // Encrypt with priv: non sense
-    unsigned char input[256], output[256], input_bis[256];
-    char hexoutput[512];
-    uint32_t len = 0;
-    memset(input, 0, 256);
-    memset(output, 0, 256);
-    strncpy(input, "Test INGOPCS Test", 32); // 17 should be enough but we want to verify padding
-    ck_assert(mbedtls_rsa_rsaes_oaep_encrypt(prsa_pub, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PUBLIC, NULL, 0, 32, input, output) == 0);
-    // Decrypt with priv (Bob-priv)
-    // Decrypt with pk: why would you do that
-    memset(input_bis, 0xFF, 256);
-    ck_assert(mbedtls_rsa_rsaes_oaep_decrypt(prsa_priv, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE, NULL, 0, &len, output, input_bis, 256) == 0);
-    ck_assert(len == 32);
-    ck_assert(memcmp(input, input_bis, 32) == 0);
-    // En/decrypt unpaddable message
-    memset(input_bis, 0xFF, 256);
-    ck_assert(mbedtls_rsa_rsaes_oaep_encrypt(prsa_pub, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PUBLIC, NULL, 0, len_max, input, output) == 0);
-    ck_assert(mbedtls_rsa_rsaes_oaep_decrypt(prsa_priv, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE, NULL, 0, &len, output, input_bis, 256) == 0);
-    ck_assert(len == len_max);
-    ck_assert(memcmp(input, input_bis, len_max) == 0);
-    // Sign with priv (Alice-priv)
-    pmdinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    // It should be specified that the content to sign is only hashed with a SHA-256, and then sent to pss_sign, which should be done with SHA-256 too.
-    mbedtls_rsa_set_padding(prsa_priv, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256); // Don't forget that, bro!
-    unsigned char hashed[32]; // Assert md_get_len(pmdinfo)
-    mbedtls_md(pmdinfo, input, 32, hashed); // No prefixed-padding, no salt, but hashed
-    ck_assert(mbedtls_rsa_rsassa_pss_sign(prsa_priv, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE,
-                                          MBEDTLS_MD_SHA256, 32, // hashlen is optionnal, as md_alg is not MD_NONE
-                                          hashed, output) == 0); // signature is as long as the key
-    ck_assert(hexlify(hashed, hexoutput, 32) == 32);
-    printf("Hash: %64s\n", hexoutput);
-    ck_assert(hexlify(output, hexoutput, 256) == 256);
-    hexoutput[128] = 0;
-    printf("Sig: %128s...\n", hexoutput);
-    // Verify with pk (Alice-pk)
-    mbedtls_rsa_set_padding(prsa_pub, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-    ck_assert(mbedtls_rsa_rsassa_pss_verify(prsa_pub, mbedtls_ctr_drbg_random, &crypto->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PUBLIC, // Random functions are optionnal for verification
-                                            MBEDTLS_MD_SHA256, 32,
-                                            hashed, output) == 0);
-
 
     // This is the X509 part of the PKI:
     // Reads a CA
@@ -733,24 +658,10 @@ START_TEST(test_cert_load)
 END_TEST
 
 
-START_TEST(test_crypto_asym_crypt)
+void get_test_keys(KeyManager *keyman, Certificate **ppcrt, AsymmetricKey **ppkpub, AsymmetricKey **ppkpriv)
 {
-    CryptoProvider *crypto = NULL;
-    KeyManager *keyman = NULL;
-    Certificate *crt_pub = NULL;
-    AsymmetricKey *key_pub = NULL, *key_priv = NULL;
     uint8_t der_cert[911], der_priv[1192];
-    uint8_t input[1024], output[1024], input_bis[1024];
-    uint32_t lenPlain = 0, lenCiph = 0, len = 0;
-    ExposedBuffer clientNonce[32], serverNonce[32];
-
-    // Init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
-    keyman = KeyManager_Create(crypto,
-                               (int8_t *)"./trusted/", 10,
-                               (int8_t *)"./revoked/", 10);
-    ck_assert(NULL != keyman);
+    AsymmetricKey *key_pub = NULL;
 
     // Loads a certificate (self signed test certificate)
     ck_assert(unhexlify("3082038b30820273a003020102020900cf163f0b5124ff4c300d06092a864886f70d01010b0500305c310b3009060355040613024652310f300d06035504080c"
@@ -768,12 +679,13 @@ START_TEST(test_crypto_asym_crypt)
                         "100bce4792c57b87f1a431d2b456698dd3c248fc6e2644d446f952255f98e3dcb7e5cd200b46f769d581833c21b08d07c4343973e93bed9a2d66ece5b6083e6e"
                         "42b3378987339ab01aab362890dbf57dc22e9d86c0cd4edfa43f489d250bc4244542368c8682125645bd610fbf1c60ec5f94bc697284bde3915e9e051bb255ae"
                         "e1685265a487bd1d72c5f49ef621e0", der_cert, 911) == 911);
-    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_cert, 911, &crt_pub) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_cert, 911, ppcrt) == STATUS_OK);
 
     // Loads the public key from cert
     key_pub = malloc(sizeof(AsymmetricKey));
     ck_assert(NULL != key_pub);
-    ck_assert(KeyManager_Certificate_GetPublicKey(keyman, crt_pub, key_pub) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_GetPublicKey(keyman, *ppcrt, key_pub) == STATUS_OK);
+    *ppkpub = key_pub;
 
     // Loads a private key
     ck_assert(unhexlify("308204a40201000282010100cbe0cd29bbcdd824999fc5571122e7540405ac94d0a9b3ab3630ce2cf361d50d9e737ce3f7746959003cbe90fc1019dce4797f4a"
@@ -795,7 +707,30 @@ START_TEST(test_crypto_asym_crypt)
                         "91323c4dfa9ea1c1eb33363f3963d18fb5ed6e77b3607ff9e45e71f8020881eafafd213c4f02818004fbb2f7ca0e8e7f644f40939f9743f8996439a926244282"
                         "1981268f36fba3e4656fc6e9c69bab8b5f56c7b033bed95eeca96952b3d62edd935b80d5187649683196702a0b304e802de7841d6bab06e6877b74bdf2b5e7f2"
                         "673ac6939c1427fb899a4cb26f656b5621914592f61b10d4ff50a4bb360d134d224a780db10f0f97", der_priv, 1192) == 1192);
-    ck_assert(KeyManager_AsymmetricKey_CreateFromBuffer(keyman, der_priv, 1192, &key_priv) == STATUS_OK);
+    ck_assert(KeyManager_AsymmetricKey_CreateFromBuffer(keyman, der_priv, 1192, ppkpriv) == STATUS_OK);
+}
+
+
+START_TEST(test_crypto_asym_crypt)
+{
+    CryptoProvider *crypto = NULL;
+    KeyManager *keyman = NULL;
+    Certificate *crt_pub = NULL;
+    AsymmetricKey *key_pub = NULL, *key_priv = NULL;
+    uint8_t input[856], output[1024], input_bis[856];
+    uint32_t lenPlain = 0, lenCiph = 0, len = 0;
+    ExposedBuffer clientNonce[32], serverNonce[32];
+
+    // Init
+    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(NULL != crypto);
+    keyman = KeyManager_Create(crypto,
+                               (int8_t *)"./trusted/", 10,
+                               (int8_t *)"./revoked/", 10);
+    ck_assert(NULL != keyman);
+
+    // Load keys
+    get_test_keys(keyman, &crt_pub, &key_pub, &key_priv);
 
     // Assert lengths
     ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_pub, &len) == STATUS_OK);
@@ -819,7 +754,7 @@ START_TEST(test_crypto_asym_crypt)
 
     // Encryption/Decryption
     // a) Single message (< 214)
-    memset(input, 0, 1024);
+    memset(input, 0, 856);
     memset(output, 0, 1024);
     strncpy((char *)input, "Test INGOPCS Test", 32); // And test padding btw...
     ck_assert(CryptoProvider_AsymmetricEncrypt_Low(crypto, input, 32, key_pub, output, 256) == STATUS_OK);
@@ -835,6 +770,60 @@ START_TEST(test_crypto_asym_crypt)
     ck_assert(CryptoProvider_AsymmetricDecrypt_Low(crypto, output, 1024, key_priv, input_bis, 856, &len) == STATUS_OK);
     ck_assert(len == 856);
     ck_assert(memcmp(input, input_bis, 856) == 0);
+
+    // Cleaning
+    KeyManager_Certificate_Free(crt_pub);
+    KeyManager_AsymmetricKey_Free(key_priv);
+    free(key_pub);
+    KeyManager_Delete(keyman);
+    CryptoProvider_Delete(crypto);
+}
+END_TEST
+
+
+START_TEST(test_crypto_asym_sign)
+{
+    CryptoProvider *crypto = NULL;
+    KeyManager *keyman = NULL;
+    Certificate *crt_pub = NULL;
+    AsymmetricKey *key_pub = NULL, *key_priv = NULL;
+    uint8_t input[856], sig[256];
+    uint32_t len = 0;
+    ExposedBuffer clientNonce[32], serverNonce[32];
+
+    // Init
+    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(NULL != crypto);
+    keyman = KeyManager_Create(crypto,
+                               (int8_t *)"./trusted/", 10,
+                               (int8_t *)"./revoked/", 10);
+    ck_assert(NULL != keyman);
+
+    // Load keys
+    get_test_keys(keyman, &crt_pub, &key_pub, &key_priv);
+
+    // Assert lengths
+    ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_pub, &len) == STATUS_OK);
+    ck_assert(len == 256);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_priv, &len) == STATUS_OK);
+    ck_assert(len == 256);
+    ck_assert(CryptoProvider_AsymmetricGetLength_PSSHashLength(crypto, &len) == STATUS_OK);
+    ck_assert(len == 32);
+
+    // Signature
+    // a) Single message (< 214)
+    memset(input, 0, 856);
+    memset(sig, 0, 256);
+    strncpy((char *)input, "Test INGOPCS Test", 32); // And test padding btw...
+    ck_assert(CryptoProvider_AsymmetricSign_Low(crypto, input, 32, key_priv, sig, 256) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricVerify_Low(crypto, input, 32, key_pub, sig, 256) == STATUS_OK);
+    // b) Multiple messages (> 214, and as output is 1024, < 856)
+    //  Using previously generated nonce, to fill input[32:856]
+    ck_assert(unhexlify("3d3b4768f275d5023c2145cbe3a4a592fb843643d791f7bd7fce75ff25128b68", clientNonce, 32) == 32);
+    ck_assert(unhexlify("ccee418cbc77c2ebb38d5ffac9d2a9d0a6821fa211798e71b2d65b3abb6aec8f", serverNonce, 32) == 32);
+    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 856-32) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricSign_Low(crypto, input, 856, key_priv, sig, 256) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricVerify_Low(crypto, input, 856, key_pub, sig, 256) == STATUS_OK);
 
     // Cleaning
     KeyManager_Certificate_Free(crt_pub);
@@ -879,6 +868,7 @@ Suite *tests_make_suite_crypto()
     suite_add_tcase(s, tc_crypto_asym);
     //tcase_add_test(tc_crypto_asym, test_pk_x509);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_sign);
 
     return s;
 }
