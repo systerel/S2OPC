@@ -18,18 +18,15 @@
  * AsymmetricKeyWrapAlgorithm – KwRsaOaep
  * AsymmetricEncryptionAlgorithm – Rsa_Oaep
  * KeyDerivationAlgorithm – PSHA256
- * DerivedSignatureKeyLength – 256
+ * DerivedSignatureKeyLength – 256                  ??? AES256 implies this
  * MinAsymmetricKeyLength – 2048                    OK
  * MaxAsymmetricKeyLength – 4096                    OK
- * CertificateSignatureAlgorithm – Sha256           OK, not verified
+ * CertificateSignatureAlgorithm – Sha256
  */
 
 
 const CryptoProfile g_cpBasic256Sha256 = {
         .SecurityPolicyID = SecurityPolicy_Basic256Sha256_ID,
-        .DerivedSignatureKeyBitLength = 256,
-        .MinAsymmetricKeyBitLength = 2048,
-        .MaxAsymmetricKeyBitLength = 4096,
         .pFnSymmEncrypt = &CryptoProvider_SymmEncrypt_AES256,
         .pFnSymmDecrypt = &CryptoProvider_SymmDecrypt_AES256,
         .pFnSymmSign = &CryptoProvider_SymmSign_HMAC_SHA256,

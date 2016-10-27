@@ -58,9 +58,6 @@ typedef StatusCode (*FnDerivePseudoRandomData) (const struct CryptoProvider *pPr
 typedef struct CryptoProfile
 {
     const uint32_t      SecurityPolicyID;
-    const uint32_t      DerivedSignatureKeyBitLength; // TODO: ces trois constantes devraient disparaître dans des define de provider.h
-    const uint32_t      MinAsymmetricKeyBitLength;
-    const uint32_t      MaxAsymmetricKeyBitLength;
     const FnSymmetricEncrypt    pFnSymmEncrypt;
     const FnSymmetricDecrypt    pFnSymmDecrypt;
     const FnSymmetricSign       pFnSymmSign;
