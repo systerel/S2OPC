@@ -81,7 +81,7 @@ StatusCode StackConfiguration_AddTypes(UA_EncodeableType** encTypesTable,
             // known types to be added
             nbKnownTypes = GetKnownEncodeableTypesLength();
             // +1 for null value termination
-            g_stackConfiguration.encTypesTable = malloc(sizeof(UA_EncodeableType*) * nbKnownTypes + nbTypes + 1);
+            g_stackConfiguration.encTypesTable = malloc(sizeof(UA_EncodeableType*) * (nbKnownTypes + nbTypes + 1));
             if(g_stackConfiguration.encTypesTable == NULL ||
                g_stackConfiguration.encTypesTable != memcpy(g_stackConfiguration.encTypesTable,
                                                             UA_KnownEncodeableTypes,

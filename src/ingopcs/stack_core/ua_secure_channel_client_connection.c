@@ -111,6 +111,7 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
         }
         ByteString_Clear(&scConnection->serverCertificate);
         ByteString_Clear(&scConnection->clientCertificate);
+        SecretBuffer_DeleteClear(scConnection->clientKey);
         SLinkedList_Delete(scConnection->pendingRequests);
         String_Clear(&scConnection->securityPolicy);
         if(scConnection->instance != NULL){

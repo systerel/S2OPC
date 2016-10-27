@@ -95,10 +95,12 @@ StatusCode UA_Channel_Create(UA_Channel*               channel,
 
 StatusCode UA_Channel_Delete(UA_Channel* channel){
     StatusCode status = STATUS_INVALID_PARAMETERS;
+    SC_ClientConnection* cConnection = (SC_ClientConnection*) *channel;
     if(channel != NULL){
         // Ensure disconnect called for deallocation
         UA_Channel_Disconnect(*channel);
-        SC_Client_Delete((SC_ClientConnection*) *channel);
+        Delete_InvokeCallbackData(cConnection->callbackData);
+        SC_Client_Delete(cConnection);
         *channel = NULL;
         status = STATUS_OK;
     }

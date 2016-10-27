@@ -346,6 +346,7 @@ int main(void){
     OpcUa_ByteString_Clear(&ClientCertificate);
     OpcUa_ByteString_Clear(&ClientPrivateKey);
     OpcUa_ByteString_Clear(&ServerCertificate);
+    UA_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
     // TODO: only for socket now
     OpcUa_ProxyStub_Clear();
@@ -359,6 +360,7 @@ int main(void){
     OpcUa_ByteString_Clear(&ClientCertificate);
     OpcUa_ByteString_Clear(&ClientPrivateKey);
     OpcUa_ByteString_Clear(&ServerCertificate);
+    UA_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
     // TODO: only for socket now
     OpcUa_ProxyStub_Clear();

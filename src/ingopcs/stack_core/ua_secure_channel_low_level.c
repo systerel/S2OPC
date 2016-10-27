@@ -94,6 +94,10 @@ void SC_Delete (SC_Connection* scConnection){
         String_Clear(&scConnection->currentSecuPolicy);
         ByteString_Clear(&scConnection->precSecuPolicy);
         SecretBuffer_DeleteClear(scConnection->currentNonce);
+        KeySet_Delete(scConnection->currentSecuKeySets.receiverKeySet);
+        KeySet_Delete(scConnection->currentSecuKeySets.senderKeySet);
+        KeySet_Delete(scConnection->precSecuKeySets.receiverKeySet);
+        KeySet_Delete(scConnection->precSecuKeySets.senderKeySet);
         CryptoProvider_Delete(scConnection->currentCryptoProvider);
         CryptoProvider_Delete(scConnection->precCryptoProvider);
         free(scConnection);
