@@ -29,7 +29,7 @@ CryptoProvider *CryptoProvider_Create(const char *uri)
         if(NULL != pCryptoProvider)
         {
             *(const CryptoProfile **)(&pCryptoProvider->pProfile) = pProfile; // TODO: this is a side-effect of putting too much const
-            if(STATUS_OK != CryptoProvider_LibInit(pCryptoProvider))
+            if(STATUS_OK != CryptoProvider_Init(pCryptoProvider))
             {
                 free(pCryptoProvider);
                 pCryptoProvider = NULL;
@@ -45,7 +45,7 @@ void CryptoProvider_Delete(CryptoProvider* pCryptoProvider)
 {
     if(NULL != pCryptoProvider)
     {
-        CryptoProvider_LibDeinit(pCryptoProvider);
+        CryptoProvider_Deinit(pCryptoProvider);
         free(pCryptoProvider);
     }
 }

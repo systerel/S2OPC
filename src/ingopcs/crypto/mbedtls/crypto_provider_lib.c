@@ -14,7 +14,7 @@
 #include "key_manager.h"
 
 
-StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider)
+StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider)
 {
     CryptolibContext *pctx = NULL;
 
@@ -36,7 +36,7 @@ StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider)
 }
 
 
-StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider)
+StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider)
 {
     CryptolibContext *pCtx = NULL;
 
@@ -63,8 +63,8 @@ StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider)
  *          is cut into pieces of this size before treatment.
  */
 StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProvider *pProvider,
-                                                          const AsymmetricKey *pKey,
-                                                          uint32_t *lenMsg)
+                                                           const AsymmetricKey *pKey,
+                                                           uint32_t *lenMsg)
 {
     uint32_t lenHash = 0;
 
@@ -98,8 +98,8 @@ StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProvider 
  *          This is the length of the public key modulus.
  */
 StatusCode CryptoProvider_AsymmetricGetLength_MsgCipherText(const CryptoProvider *pProvider,
-                                                           const AsymmetricKey *pKey,
-                                                           uint32_t *lenMsg)
+                                                            const AsymmetricKey *pKey,
+                                                            uint32_t *lenMsg)
 {
     (void)(pProvider);
 

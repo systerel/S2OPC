@@ -17,14 +17,11 @@
 #include "key_manager.h"
 
 
-
-// Lib specific: TODO, wrong name, should remove "Lib"
-StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
-StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
-
 // Creation
 CryptoProvider *CryptoProvider_Create(const char *uri);
 void CryptoProvider_Delete(CryptoProvider *pCryptoProvider);
+StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider);
+StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider);
 
 // Lengths
 StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider,
