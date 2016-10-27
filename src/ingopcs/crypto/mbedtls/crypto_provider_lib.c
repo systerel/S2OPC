@@ -56,6 +56,26 @@ StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider)
 
 
 /**
+ * \brief   Compute the length of the key in bits.
+ *
+ *          The main purpose of this function is to verify the length of the asymmetric key \p pKey with respect to the security policy.
+ */
+StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider *pProvider,
+                                                      const AsymmetricKey *pKey,
+                                                      uint32_t *lenKeyBits)
+{
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == lenKeyBits)
+        return STATUS_INVALID_PARAMETERS;
+    if(SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
+        return STATUS_INVALID_PARAMETERS;
+
+    *lenKeyBits = mbedtls_pk_get_bitlen(&pKey->pk);
+
+    return STATUS_OK;
+}
+
+
+/**
  * \brief   Computes the maximal size of a buffer to be encrypted in a single pass.
  *
  *          RFC 3447 provides the formula used with OAEPadding.
