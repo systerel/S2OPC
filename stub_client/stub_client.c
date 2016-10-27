@@ -129,6 +129,7 @@ int main(void){
 
     // The PKI provider
     // Default directory for certificates
+
     //char* revoked = "./revoked";
     //char* untrusted = "./untrusted";
     //char* trusted = "./trusted";
@@ -169,7 +170,7 @@ int main(void){
     OpcUa_GotoErrorIfBad(uStatus);
 
     // Message security mode: None
-    OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;//OpcUa_MessageSecurityMode_None;
+    OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_None;//OpcUa_MessageSecurityMode_SignAndEncrypt;
 
     // Init platform dependent code
 	uStatus = UA_P_Initialize(&StubClient_g_pPortLayerHandle);
@@ -207,6 +208,7 @@ int main(void){
     PKIProvider *pki = NULL;
     if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki))
         printf("Failed to create PKI\n");
+
 
 #if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
     //uStatus = OpcUa_SocketManager_Create (OpcUa_Null, 0, OPCUA_SOCKET_NO_FLAG);
