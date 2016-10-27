@@ -10,6 +10,7 @@
 
 #include "crypto_types.h"
 #include "crypto_profiles.h"
+#include "crypto_provider.h"
 #include "crypto_provider_lib.h"
 #include "key_manager.h"
 

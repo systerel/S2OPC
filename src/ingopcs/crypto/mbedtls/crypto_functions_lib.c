@@ -3,6 +3,9 @@
  * Should be split in the future to provide finer grained linking options
  *  (https://www.ingopcs.net/trac/ingopcs.projects/ticket/187).
  *
+ * \warning     These functions should only be called through the stack API, as they don't verify
+ *              nor sanitize their arguments.
+ *
  *  Created on: Oct 12, 2016
  *      Author: PAB
  */
@@ -19,8 +22,10 @@
 #include "mbedtls/md.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
+#include "mbedtls/rsa.h"
 
 
+// TODO: think about the necessity of lenOutput and pInput might be an ExposedBuffer? Clean Symm + Asym
 StatusCode CryptoProvider_SymmEncrypt_AES256(const CryptoProvider *pProvider,
                                                     const uint8_t *pInput,
                                                     uint32_t lenPlainText,
@@ -34,7 +39,7 @@ StatusCode CryptoProvider_SymmEncrypt_AES256(const CryptoProvider *pProvider,
 
     (void) pProvider;
 
-    if(lenOutput < lenPlainText)
+    if(lenOutput < lenPlainText) // TODO: we are in our own lib, arguments have already been verified.
         return STATUS_INVALID_PARAMETERS;
 
     memcpy(iv_cpy, pIV, SecurityPolicy_Basic256Sha256_SymmLen_Block);
@@ -289,5 +294,106 @@ static inline StatusCode PSHA(mbedtls_md_context_t *pmd, const mbedtls_md_info_t
     }
 
     return STATUS_OK;
+}
+
+
+StatusCode CryptoProvider_AsymEncrypt_RSA_OAEP(const CryptoProvider *pProvider,
+                                               const uint8_t *pInput,
+                                               uint32_t lenPlainText,
+                                               const AsymmetricKey *pKey,
+                                               uint8_t *pOutput)
+{
+    StatusCode status = STATUS_OK;
+    uint32_t lenMsgPlain = 0, lenMsgCiph = 0, lenToCiph = 0;
+    mbedtls_rsa_context *prsa = NULL;
+
+    // Verify the type of the key (this is done here because it is more convenient (lib-specific))
+    if(mbedtls_pk_get_type(&pKey->pk) != MBEDTLS_PK_RSA) // TODO: maybe we should accept RSASSA_PSS... Undocumented.
+        return STATUS_INVALID_PARAMETERS;
+
+    prsa = mbedtls_pk_rsa(pKey->pk);
+
+    // Sets the correct padding mode
+    mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
+
+    // Input must be split into pieces that can be eaten by a single pass of rsa_*_encrypt
+    if(CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenMsgCiph, &lenMsgPlain) != STATUS_OK)
+        return STATUS_NOK;
+
+    while(lenPlainText > 0 && STATUS_OK == status)
+    {
+        if(lenPlainText > lenMsgPlain)
+            lenToCiph = lenMsgPlain; // A single pass of encrypt takes at most a message
+        else
+            lenToCiph = lenPlainText;
+
+        if(mbedtls_rsa_rsaes_oaep_encrypt(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PUBLIC, NULL, 0,
+                                          lenToCiph, (unsigned char *)pInput, (unsigned char *)pOutput) != 0)
+        {
+            status = STATUS_NOK;
+            break;
+        }
+
+        // Advance pointers
+        lenPlainText -= lenToCiph;
+        if(0 == lenPlainText)
+            break;
+        pInput += lenMsgPlain;
+        pOutput += lenMsgCiph;
+    }
+
+    return status;
+}
+
+
+StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
+                                               const uint8_t *pInput,
+                                               uint32_t lenCipherText,
+                                               const AsymmetricKey *pKey,
+                                               uint8_t *pOutput,
+                                               uint32_t *lenWritten)
+{
+    StatusCode status = STATUS_OK;
+    uint32_t lenMsgPlain = 0, lenMsgCiph = 0, lenDeciphed = 0;
+    mbedtls_rsa_context *prsa = NULL;
+
+    if(NULL != lenWritten)
+        *lenWritten = 0;
+
+    // Verify the type of the key (this is done here because it is more convenient (lib-specific))
+    if(mbedtls_pk_get_type(&pKey->pk) != MBEDTLS_PK_RSA) // TODO: maybe we should accept RSASSA_PSS... Undocumented.
+        return STATUS_INVALID_PARAMETERS;
+
+    prsa = mbedtls_pk_rsa(pKey->pk);
+
+    // Sets the correct padding mode
+    mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
+
+    // Input must be split into pieces that can be eaten by a single pass of rsa_*_decrypt
+    if(CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenMsgCiph, &lenMsgPlain) != STATUS_OK)
+        return STATUS_NOK;
+
+    while(lenCipherText > 0 && STATUS_OK == status)
+    {
+        // TODO: this might fail because of lenMsgPlain (doc recommend that it is at least sizeof(modulus), but here it is the length of the content)
+        if(mbedtls_rsa_rsaes_oaep_decrypt(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE, NULL, 0,
+                                          (size_t *)&lenDeciphed, (unsigned char *)pInput, (unsigned char *)pOutput, lenMsgPlain) != 0)
+        {
+            status = STATUS_NOK;
+            break;
+        }
+
+        if(NULL != lenWritten)
+            *lenWritten += lenDeciphed;
+
+        // Advance pointers
+        lenCipherText -= lenMsgCiph;
+        if(0 == lenCipherText)
+            break;
+        pInput += lenMsgCiph;
+        pOutput += lenDeciphed;
+    }
+
+    return status;
 }
 

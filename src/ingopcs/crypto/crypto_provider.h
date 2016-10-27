@@ -140,7 +140,8 @@ StatusCode CryptoProvider_AsymmetricDecrypt_Low(const CryptoProvider *pProvider,
                                             uint32_t lenInput,
                                             const AsymmetricKey *pKey,
                                             uint8_t *pOutput,
-                                            uint32_t lenOutput);
+                                            uint32_t lenOutput,
+                                            uint32_t *lenWritten);
 StatusCode CryptoProvider_AsymmetricSign_Low(const CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,

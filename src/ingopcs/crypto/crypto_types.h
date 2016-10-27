@@ -16,6 +16,7 @@
 struct CryptoProvider;
 struct CryptoProfile;
 struct CryptolibContext;
+struct AsymmetricKey;
 
 /* ------------------------------------------------------------------------------------------------
  * CryptoProfile, internal API
@@ -54,6 +55,29 @@ typedef StatusCode (*FnDerivePseudoRandomData) (const struct CryptoProvider *pPr
                                                 uint32_t lenSeed,
                                                 ExposedBuffer *pOutput,
                                                 uint32_t lenOutput);
+typedef StatusCode (*FnAsymmetricEncrypt) (const struct CryptoProvider *pProvider,
+                                           const uint8_t *pInput,
+                                           uint32_t lenPlainText,
+                                           const struct AsymmetricKey *pKey,
+                                           uint8_t *pOutput);
+typedef StatusCode (*FnAsymmetricDecrypt) (const struct CryptoProvider *pProvider,
+                                           const uint8_t *pInput,
+                                           uint32_t lenCipherText,
+                                           const struct AsymmetricKey *pKey,
+                                           uint8_t *pOutput,
+                                           uint32_t *lenWritten);
+typedef StatusCode (*FnAsymmetricSign) (const struct CryptoProvider *pProvider,
+                                        const uint8_t *pInput,
+                                        uint32_t lenInput,
+                                        const struct AsymmetricKey *pKey,
+                                        uint8_t *pSignature,
+                                        uint32_t lenSignature);
+typedef StatusCode (*FnAsymmetricVerify) (const struct CryptoProvider *pProvider,
+                                          const uint8_t *pInput,
+                                          uint32_t lenInput,
+                                          const struct AsymmetricKey *pKey,
+                                          const uint8_t *pSignature,
+                                          uint32_t lenSignature);
 
 typedef struct CryptoProfile
 {
@@ -64,6 +88,10 @@ typedef struct CryptoProfile
     const FnSymmetricVerify     pFnSymmVerif;
     const FnSymmetricGenKey     pFnSymmGenKey;
     const FnDerivePseudoRandomData  pFnDeriveData;
+    const FnAsymmetricEncrypt   pFnAsymEncrypt;
+    const FnAsymmetricDecrypt   pFnAsymDecrypt;
+    const FnAsymmetricSign      pFnAsymSign;
+    const FnAsymmetricVerify    pFnAsymVerify;
 } CryptoProfile;
 
 

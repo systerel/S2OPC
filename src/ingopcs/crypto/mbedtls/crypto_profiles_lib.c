@@ -15,9 +15,9 @@
  * SymmetricSignatureAlgorithm – Hmac_Sha256        OK
  * SymmetricEncryptionAlgorithm – Aes256_CBC        OK
  * AsymmetricSignatureAlgorithm – Rsa_Sha256
- * AsymmetricKeyWrapAlgorithm – KwRsaOaep
+ * AsymmetricKeyWrapAlgorithm – KwRsaOaep           unused
  * AsymmetricEncryptionAlgorithm – Rsa_Oaep
- * KeyDerivationAlgorithm – PSHA256
+ * KeyDerivationAlgorithm – PSHA256                 OK
  * DerivedSignatureKeyLength – 256                  ??? AES256 implies this
  * MinAsymmetricKeyLength – 2048                    OK
  * MaxAsymmetricKeyLength – 4096                    OK
@@ -33,5 +33,7 @@ const CryptoProfile g_cpBasic256Sha256 = {
         .pFnSymmVerif = &CryptoProvider_SymmVerify_HMAC_SHA256,
         .pFnSymmGenKey = &CryptoProvider_SymmGenKey_AES256,
         .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
+        .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
+        .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
 };
 

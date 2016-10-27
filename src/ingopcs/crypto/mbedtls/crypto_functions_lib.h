@@ -11,6 +11,7 @@
 #include "ua_base_types.h"
 #include "secret_buffer.h"
 #include "crypto_types.h"
+#include "key_manager.h"
 
 
 /* ------------------------------------------------------------------------------------------------
@@ -50,3 +51,15 @@ StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
                                                 uint32_t lenSeed,
                                                 ExposedBuffer *pOutput,
                                                 uint32_t lenOutput);
+
+StatusCode CryptoProvider_AsymEncrypt_RSA_OAEP(const CryptoProvider *pProvider,
+                                               const uint8_t *pInput,
+                                               uint32_t lenPlainText,
+                                               const AsymmetricKey *pKey,
+                                               uint8_t *pOutput);
+StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
+                                               const uint8_t *pInput,
+                                               uint32_t lenPlainText,
+                                               const AsymmetricKey *pKey,
+                                               uint8_t *pOutput,
+                                               uint32_t *lenWritten);

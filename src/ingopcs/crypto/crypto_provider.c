@@ -69,7 +69,7 @@ StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput ||
        NULL == pProvider->pProfile->pFnSymmEncrypt)
         return STATUS_INVALID_PARAMETERS;
-    if(lenPlainText != lenOutput)
+    if(lenPlainText != lenOutput) // TODO: use CryptoProvider API to check this length.
         return STATUS_INVALID_PARAMETERS;
 
     // TODO: unit-test these watchdogs
@@ -707,5 +707,108 @@ StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvider *pP
 
     // The signature is a message long.
     return CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, pLength, NULL);
+}
+
+
+StatusCode CryptoProvider_AsymmetricEncrypt_Low(const CryptoProvider *pProvider,
+                                            const uint8_t *pInput,
+                                            uint32_t lenInput,
+                                            const AsymmetricKey *pKey,
+                                            uint8_t *pOutput,
+                                            uint32_t lenOutput)
+{
+    uint32_t lenOutCalc = 0;
+    uint32_t lenKey = 0;
+
+    if(NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKey || NULL == pOutput || 0 == lenOutput)
+        return STATUS_INVALID_PARAMETERS;
+    if(NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymEncrypt)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Check buffer length
+    if(CryptoProvider_AsymmetricGetLength_Encryption(pProvider, pKey, lenInput, &lenOutCalc) != STATUS_OK)
+        return STATUS_INVALID_PARAMETERS;
+    if(lenOutput < lenOutCalc)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Check key length
+    if(CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKey, &lenKey) != STATUS_OK)
+        return STATUS_INVALID_PARAMETERS;
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_INVALID_PARAMETERS;
+    case SecurityPolicy_Basic256Sha256_ID:
+        if(lenKey < SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+            return STATUS_INVALID_PARAMETERS;
+        break;
+    }
+
+    // We can now proceed
+    return pProvider->pProfile->pFnAsymEncrypt(pProvider, pInput, lenInput, pKey, pOutput);
+}
+
+
+StatusCode CryptoProvider_AsymmetricDecrypt_Low(const CryptoProvider *pProvider,
+                                            const uint8_t *pInput,
+                                            uint32_t lenInput,
+                                            const AsymmetricKey *pKey,
+                                            uint8_t *pOutput,
+                                            uint32_t lenOutput,
+                                            uint32_t *lenWritten /**> lenWritten can be NULL */)
+{
+    uint32_t lenOutCalc = 0;
+    uint32_t lenKey = 0;
+
+    if(NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKey || NULL == pOutput || 0 == lenOutput)
+        return STATUS_INVALID_PARAMETERS;
+    if(NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymEncrypt)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Check buffer length
+    if(CryptoProvider_AsymmetricGetLength_Decryption(pProvider, pKey, lenInput, &lenOutCalc) != STATUS_OK)
+        return STATUS_INVALID_PARAMETERS;
+    if(lenOutput < lenOutCalc)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Check key length
+    if(CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKey, &lenKey) != STATUS_OK)
+        return STATUS_INVALID_PARAMETERS;
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_INVALID_PARAMETERS;
+    case SecurityPolicy_Basic256Sha256_ID:
+        if(lenKey < SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+            return STATUS_INVALID_PARAMETERS;
+        break;
+    }
+
+    // We can now proceed
+    return pProvider->pProfile->pFnAsymDecrypt(pProvider, pInput, lenInput, pKey, pOutput, lenWritten);
+}
+
+
+StatusCode CryptoProvider_AsymmetricSign_Low(const CryptoProvider *pProvider,
+                                         const uint8_t *pInput,
+                                         uint32_t lenInput,
+                                         const AsymmetricKey *pKey,
+                                         uint8_t *pSignature,
+                                         uint32_t lenSignature)
+{
+    return STATUS_OK;
+}
+
+
+StatusCode CryptoProvider_AsymmetricVerify_Low(const CryptoProvider *pProvider,
+                                           const uint8_t *pInput,
+                                           uint32_t lenInput,
+                                           const AsymmetricKey *pKey,
+                                           const uint8_t *pSignature,
+                                           uint32_t lenSignature)
+{
+    return STATUS_OK;
 }
 
