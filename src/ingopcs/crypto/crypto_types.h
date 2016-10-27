@@ -70,14 +70,12 @@ typedef StatusCode (*FnAsymmetricSign) (const struct CryptoProvider *pProvider,
                                         const uint8_t *pInput,
                                         uint32_t lenInput,
                                         const struct AsymmetricKey *pKey,
-                                        uint8_t *pSignature,
-                                        uint32_t lenSignature);
+                                        uint8_t *pSignature);
 typedef StatusCode (*FnAsymmetricVerify) (const struct CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenInput,
                                           const struct AsymmetricKey *pKey,
-                                          const uint8_t *pSignature,
-                                          uint32_t lenSignature);
+                                          const uint8_t *pSignature);
 
 typedef struct CryptoProfile
 {

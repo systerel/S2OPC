@@ -37,7 +37,7 @@ StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pProvider,
                                                       uint32_t lenInput,
                                                       const ExposedBuffer *pKey,
                                                       uint8_t *pOutput);
-StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider, // TODO: delete, useless
                                                         const uint8_t *pInput,
                                                         uint32_t lenInput,
                                                         const ExposedBuffer *pKey,
@@ -63,3 +63,14 @@ StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
                                                const AsymmetricKey *pKey,
                                                uint8_t *pOutput,
                                                uint32_t *lenWritten);
+StatusCode CryptoProvider_AsymSign_RSASSA_PSS(const CryptoProvider *pProvider,
+                                              const uint8_t *pInput,
+                                              uint32_t lenInput,
+                                              const AsymmetricKey *pKey,
+                                              uint8_t *pSignature);
+StatusCode CryptoProvider_AsymVerify_RSASSA_PSS(const CryptoProvider *pProvider,
+                                                const uint8_t *pInput,
+                                                uint32_t lenInput,
+                                                const AsymmetricKey *pKey,
+                                                const uint8_t *pSignature);
+

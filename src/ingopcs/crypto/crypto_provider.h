@@ -46,6 +46,8 @@ StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider *pPro
                                                       uint32_t *lenKeyBits);
 StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvider *pProvider,
                                                              uint32_t *length);
+StatusCode CryptoProvider_AsymmetricGetLength_PSSHashLength(const CryptoProvider *pProvider,
+                                                            uint32_t *length);
 StatusCode CryptoProvider_AsymmetricGetLength_Msgs(const CryptoProvider *pProvider,
                                                    const AsymmetricKey *pKey,
                                                    uint32_t *cipherTextBlockSize,
@@ -145,13 +147,13 @@ StatusCode CryptoProvider_AsymmetricDecrypt_Low(const CryptoProvider *pProvider,
 StatusCode CryptoProvider_AsymmetricSign_Low(const CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,
-                                         const AsymmetricKey *pKey,
+                                         const AsymmetricKey *pKeyPrivateLocal,
                                          uint8_t *pSignature,
                                          uint32_t lenSignature);
 StatusCode CryptoProvider_AsymmetricVerify_Low(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenInput,
-                                           const AsymmetricKey *pKey,
+                                           const AsymmetricKey *pKeyRemotePublic,
                                            const uint8_t *pSignature,
                                            uint32_t lenSignature);
 

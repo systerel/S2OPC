@@ -1,4 +1,4 @@
-/*
+/** \file
  * Defines the cryptographic providers: structure r/w data alongside a read-only cryptoprofile.
  *
  *  Created on: Sep 28, 2016
@@ -577,6 +577,10 @@ StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
  * Asymmetric API
  * ------------------------------------------------------------------------------------------------
  */
+
+/**
+ * Calculate the length of the hash used for OAEP encryption/decryption.
+ */
 StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvider *pProvider,
                                                              uint32_t *length)
 {
@@ -590,6 +594,29 @@ StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvide
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
         *length = SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash;
+        break;
+    }
+
+    return STATUS_OK;
+}
+
+
+/**
+ * Calculate the length of the hash used for PSS signature/verification.
+ */
+StatusCode CryptoProvider_AsymmetricGetLength_PSSHashLength(const CryptoProvider *pProvider,
+                                                            uint32_t *length)
+{
+    if(NULL == pProvider || NULL == pProvider->pProfile || SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID || NULL == length)
+        return STATUS_INVALID_PARAMETERS;
+
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_INVALID_PARAMETERS;
+    case SecurityPolicy_Basic256Sha256_ID:
+        *length = SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash;
         break;
     }
 
@@ -763,7 +790,7 @@ StatusCode CryptoProvider_AsymmetricDecrypt_Low(const CryptoProvider *pProvider,
 
     if(NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKey || NULL == pOutput || 0 == lenOutput)
         return STATUS_INVALID_PARAMETERS;
-    if(NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymEncrypt)
+    if(NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymDecrypt)
         return STATUS_INVALID_PARAMETERS;
 
     // Check buffer length
@@ -791,24 +818,81 @@ StatusCode CryptoProvider_AsymmetricDecrypt_Low(const CryptoProvider *pProvider,
 }
 
 
+/**
+ * Asymmetric signature works with asymmetric keys. \p pKey is the local private key.
+ * A hash of \p pInput is computed then encrypted with the \p pKey. To verify the signature,
+ * one decrypts the \p pSignature with the corresponding public key, computes the hash of \p pInput,
+ * and verify that both hashes are the same. Everyone can decrypt the signature,
+ * but only the private key could have forged it.
+ */
 StatusCode CryptoProvider_AsymmetricSign_Low(const CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,
-                                         const AsymmetricKey *pKey,
+                                         const AsymmetricKey *pKeyPrivateLocal,
                                          uint8_t *pSignature,
                                          uint32_t lenSignature)
 {
-    return STATUS_OK;
+    uint32_t lenSigCalc = 0, lenKey = 0;
+
+    if(NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKeyPrivateLocal || NULL == pSignature || 0 == lenSignature)
+        return STATUS_INVALID_PARAMETERS;
+    if(NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymSign)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Check lengths
+    if(CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKeyPrivateLocal, &lenSigCalc) != STATUS_OK)
+        return STATUS_INVALID_PARAMETERS;
+    if(lenSignature < lenSigCalc)
+        return STATUS_INVALID_PARAMETERS;
+    if(CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKeyPrivateLocal, &lenKey) != STATUS_OK)
+        return STATUS_INVALID_PARAMETERS;
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_INVALID_PARAMETERS;
+    case SecurityPolicy_Basic256Sha256_ID:
+        if(lenKey < SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+            return STATUS_INVALID_PARAMETERS;
+        break;
+    }
+
+    return pProvider->pProfile->pFnAsymSign(pProvider, pInput, lenInput, pKeyPrivateLocal, pSignature);
 }
 
 
 StatusCode CryptoProvider_AsymmetricVerify_Low(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenInput,
-                                           const AsymmetricKey *pKey,
+                                           const AsymmetricKey *pKeyRemotePublic,
                                            const uint8_t *pSignature,
                                            uint32_t lenSignature)
 {
-    return STATUS_OK;
+    uint32_t lenSigCalc = 0, lenKey = 0;
+
+    if(NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKeyRemotePublic || NULL == pSignature || 0 == lenSignature)
+        return STATUS_INVALID_PARAMETERS;
+    if(NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymSign)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Check lengths
+    if(CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKeyRemotePublic, &lenSigCalc) != STATUS_OK)
+        return STATUS_INVALID_PARAMETERS;
+    if(lenSignature < lenSigCalc)
+        return STATUS_INVALID_PARAMETERS;
+    if(CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKeyRemotePublic, &lenKey) != STATUS_OK)
+        return STATUS_INVALID_PARAMETERS;
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_INVALID_PARAMETERS;
+    case SecurityPolicy_Basic256Sha256_ID:
+        if(lenKey < SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+            return STATUS_INVALID_PARAMETERS;
+        break;
+    }
+
+    return pProvider->pProfile->pFnAsymVerify(pProvider, pInput, lenInput, pKeyRemotePublic, pSignature);
 }
 

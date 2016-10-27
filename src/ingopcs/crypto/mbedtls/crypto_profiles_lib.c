@@ -14,9 +14,9 @@
 /* Security policy "Basic256Sha256", as of 09/09/2016:
  * SymmetricSignatureAlgorithm – Hmac_Sha256        OK
  * SymmetricEncryptionAlgorithm – Aes256_CBC        OK
- * AsymmetricSignatureAlgorithm – Rsa_Sha256
+ * AsymmetricSignatureAlgorithm – Rsa_Sha256        OK
  * AsymmetricKeyWrapAlgorithm – KwRsaOaep           unused
- * AsymmetricEncryptionAlgorithm – Rsa_Oaep
+ * AsymmetricEncryptionAlgorithm – Rsa_Oaep         OK
  * KeyDerivationAlgorithm – PSHA256                 OK
  * DerivedSignatureKeyLength – 256                  ??? AES256 implies this
  * MinAsymmetricKeyLength – 2048                    OK
@@ -35,5 +35,7 @@ const CryptoProfile g_cpBasic256Sha256 = {
         .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
         .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
         .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
+        .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PSS,
+        .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PSS,
 };
 

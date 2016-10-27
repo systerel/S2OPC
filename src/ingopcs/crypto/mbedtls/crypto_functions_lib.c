@@ -313,7 +313,7 @@ StatusCode CryptoProvider_AsymEncrypt_RSA_OAEP(const CryptoProvider *pProvider,
 
     prsa = mbedtls_pk_rsa(pKey->pk);
 
-    // Sets the correct padding mode
+    // Sets the appropriate padding mode (SHA-1 for encryption/decryption but SHA-256 for signing/verifying)
     mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
 
     // Input must be split into pieces that can be eaten by a single pass of rsa_*_encrypt
@@ -366,7 +366,7 @@ StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
 
     prsa = mbedtls_pk_rsa(pKey->pk);
 
-    // Sets the correct padding mode
+    // Sets the appropriate padding mode (SHA-1 for encryption/decryption but SHA-256 for signing/verifying)
     mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA1);
 
     // Input must be split into pieces that can be eaten by a single pass of rsa_*_decrypt
@@ -397,3 +397,96 @@ StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
     return status;
 }
 
+
+/**
+ * (Internal) Allocates and compute SHA-256 of \p pInput. You must free it.
+ */
+static inline StatusCode RSASSA_PSS_hash(const uint8_t *pInput, uint32_t lenInput,
+                                         uint8_t **ppHash);
+
+StatusCode CryptoProvider_AsymSign_RSASSA_PSS(const CryptoProvider *pProvider,
+                                              const uint8_t *pInput,
+                                              uint32_t lenInput,
+                                              const AsymmetricKey *pKey,
+                                              uint8_t *pSignature)
+{
+    StatusCode status = STATUS_OK;
+    uint8_t *hash = NULL;
+    mbedtls_rsa_context *prsa = NULL;
+
+    if(RSASSA_PSS_hash(pInput, lenInput, &hash) == STATUS_OK)
+    {
+        // Sets the appropriate padding mode (SHA-1 for encryption/decryption but SHA-256 for signing/verifying)
+        prsa = mbedtls_pk_rsa(pKey->pk);
+        mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
+
+        if(mbedtls_rsa_rsassa_pss_sign(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE,
+                                       MBEDTLS_MD_SHA256, 32, // hashlen is optional, as md_alg is not MD_NONE
+                                       hash, pSignature) != 0) // signature is as long as the key
+            status = STATUS_NOK;
+        else
+            status = STATUS_OK;
+    }
+
+    if(NULL != hash)
+        free(hash);
+    return status;
+}
+
+
+StatusCode CryptoProvider_AsymVerify_RSASSA_PSS(const CryptoProvider *pProvider,
+                                                const uint8_t *pInput,
+                                                uint32_t lenInput,
+                                                const AsymmetricKey *pKey,
+                                                const uint8_t *pSignature)
+{
+    (void)(pProvider);
+    StatusCode status = STATUS_OK;
+    uint8_t *hash = NULL;
+    mbedtls_rsa_context *prsa = NULL;
+
+    if(RSASSA_PSS_hash(pInput, lenInput, &hash) == STATUS_OK)
+    {
+        // Sets the appropriate padding mode (SHA-1 for encryption/decryption but SHA-256 for signing/verifying)
+        prsa = mbedtls_pk_rsa(pKey->pk);
+        mbedtls_rsa_set_padding(prsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
+
+        if(mbedtls_rsa_rsassa_pss_verify(prsa, NULL, NULL, MBEDTLS_RSA_PUBLIC, // Random functions are optional for verification
+                                         MBEDTLS_MD_SHA256, 32, // hashlen is optional, as md_alg is not MD_NONE
+                                         hash, pSignature) != 0) // signature is as long as the key
+            status = STATUS_NOK;
+        else
+            status = STATUS_OK;
+    }
+
+    if(NULL != hash)
+        free(hash);
+    return status;
+}
+
+
+static inline StatusCode RSASSA_PSS_hash(const uint8_t *pInput, uint32_t lenInput,
+                                         uint8_t **ppHash)
+{
+    uint8_t *hash = NULL;
+    uint32_t lenHash = 0;
+
+    if(NULL == ppHash)
+        return STATUS_INVALID_PARAMETERS;
+    *ppHash = NULL;
+
+    const mbedtls_md_info_t *pmdinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
+    if(NULL == pmdinfo)
+        return STATUS_NOK;
+
+    lenHash = mbedtls_md_get_size(pmdinfo);
+    hash = malloc(lenHash);
+    if(NULL == hash)
+        return STATUS_NOK;
+    *ppHash = hash;
+
+    // It should be specified that the content to sign is only hashed with a SHA-256, and then sent to pss_sign, which should be done with SHA-256 too.
+    if(mbedtls_md(pmdinfo, pInput, lenInput, hash) != 0)
+        return STATUS_NOK;
+    return STATUS_OK;
+}
