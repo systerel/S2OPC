@@ -41,14 +41,6 @@ void KeyManager_Delete(KeyManager *pManager);
 /*StatusCode KeyManager_AsymmetricKey_ToNewDER(const KeyManager *pManager,
                                             const AsymmetricKey *pKey,
                                             uint8_t **ppDest, uint32_t *lenAllocated);*/
-StatusCode KeyManager_AsymmetricKeyGetLength_MsgPlainText(const CryptoProvider *pProvider,
-                                                          const AsymmetricKey *pKey,
-                                                          uint32_t *lenMsg);
-StatusCode KeyManager_AsymmetricKeyGetLength_MsgCipherText(const CryptoProvider *pProvider,
-                                                           const AsymmetricKey *pKey,
-                                                           uint32_t *lenMsg);
-
-
 StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const KeyManager *pManager,
                                                      const uint8_t *buffer, uint32_t lenBuf,
                                                      AsymmetricKey **ppKey);
@@ -73,6 +65,7 @@ StatusCode KeyManager_Certificate_CreateFromFile(const KeyManager *pManager,
                                                  const int8_t *szPath,
                                                  Certificate **ppCert);
 void KeyManager_Certificate_Free(Certificate *cert);
+
 StatusCode KeyManager_Certificate_CopyDER(const KeyManager *pManager,
                                           const Certificate *pCert,
                                           uint8_t **ppDest, uint32_t *lenAllocated);

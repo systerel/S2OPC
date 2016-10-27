@@ -610,12 +610,12 @@ StatusCode CryptoProvider_AsymmetricGetLength_Msgs(const CryptoProvider *pProvid
     if(NULL != cipherTextBlockSize)
     {
         *cipherTextBlockSize = 0;
-        statusA = KeyManager_AsymmetricKeyGetLength_MsgCipherText(pProvider, pKey, cipherTextBlockSize);
+        statusA = CryptoProvider_AsymmetricGetLength_MsgCipherText(pProvider, pKey, cipherTextBlockSize);
     }
     if(NULL != plainTextBlockSize)
     {
         *plainTextBlockSize = 0;
-        statusB = KeyManager_AsymmetricKeyGetLength_MsgPlainText(pProvider, pKey, plainTextBlockSize);
+        statusB = CryptoProvider_AsymmetricGetLength_MsgPlainText(pProvider, pKey, plainTextBlockSize);
     }
 
     if(STATUS_OK != statusA || STATUS_OK != statusB)

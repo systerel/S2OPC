@@ -1,4 +1,4 @@
-/*
+/** \file
  * Gathers the sources of the lib-specific and crypto-related functions.
  * Should be split in the future to provide finer grained linking options
  *  (https://www.ingopcs.net/trac/ingopcs.projects/ticket/187).

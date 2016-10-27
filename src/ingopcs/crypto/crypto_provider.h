@@ -18,7 +18,7 @@
 
 
 
-// Lib specific
+// Lib specific: TODO, wrong name, should remove "Lib"
 StatusCode CryptoProvider_LibInit(CryptoProvider *pCryptoProvider);
 StatusCode CryptoProvider_LibDeinit(CryptoProvider *pCryptoProvider);
 
@@ -50,6 +50,12 @@ StatusCode CryptoProvider_AsymmetricGetLength_Msgs(const CryptoProvider *pProvid
                                                    const AsymmetricKey *pKey,
                                                    uint32_t *cipherTextBlockSize,
                                                    uint32_t *plainTextBlockSize);
+StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProvider *pProvider,
+                                                           const AsymmetricKey *pKey,
+                                                           uint32_t *lenMsg);
+StatusCode CryptoProvider_AsymmetricGetLength_MsgCipherText(const CryptoProvider *pProvider,
+                                                            const AsymmetricKey *pKey,
+                                                            uint32_t *lenMsg);
 StatusCode CryptoProvider_AsymmetricGetLength_Encryption(const CryptoProvider *pProvider,
                                                          const AsymmetricKey *pKey,
                                                          uint32_t lengthIn,
