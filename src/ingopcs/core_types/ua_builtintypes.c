@@ -326,7 +326,7 @@ const char* String_GetRawCString(const UA_String* string){
 
 StatusCode ByteString_Compare(const UA_ByteString* left,
                               const UA_ByteString* right,
-                              uint32_t*            comparison)
+                              int32_t*             comparison)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
 
@@ -356,7 +356,7 @@ StatusCode ByteString_Compare(const UA_ByteString* left,
 uint32_t ByteString_Equal(const UA_ByteString* left,
                           const UA_ByteString* right)
 {
-    uint32_t compare = 0;
+    int32_t compare = 0;
     uint32_t result = FALSE;
 
     if(ByteString_Compare(left, right, &compare) == STATUS_OK){
@@ -368,7 +368,7 @@ uint32_t ByteString_Equal(const UA_ByteString* left,
 
 StatusCode String_Compare(const UA_String* left,
                           const UA_String* right,
-                          uint32_t*        comparison)
+                          int32_t*         comparison)
 {
 
     return ByteString_Compare((UA_ByteString*) left,
@@ -536,7 +536,7 @@ void ExtensionObject_Clear(UA_ExtensionObject* extObj){
             XmlElement_Clear(&extObj->body.xml);
             break;
         case UA_ExtObjBodyEncoding_Object:
-            extObj->body.object.objType->clearFunction(extObj->body.object.value);
+            extObj->body.object.objType->Clear(extObj->body.object.value);
             break;
     }
     extObj->length = -1;

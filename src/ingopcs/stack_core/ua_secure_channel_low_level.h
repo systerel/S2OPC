@@ -48,32 +48,32 @@ typedef enum {
 
 
 typedef struct {
-    TCP_UA_Connection*     transportConnection;
-    SC_ConnectionState     state;
-    uint32_t               startTime;
-    UA_ByteString          runningAppCertificate;
-    const Certificate*     runningAppPublicKeyCert;
-    const AsymmetricKey*   runningAppPrivateKey; // Pointer on running app private key: do not manage allocation on it
-    UA_ByteString          otherAppCertificate;
-    const Certificate*     otherAppPublicKeyCert;
-    UA_MsgBuffer*          sendingBuffer;
-    uint32_t               sendingMaxBodySize;
-    UA_MsgBuffers*         receptionBuffers;
-    UA_MessageSecurityMode currentSecuMode;
-    UA_String              currentSecuPolicy;
-    SC_SecurityToken       currentSecuToken;
-    SC_SecurityKeySets     currentSecuKeySets;
-    CryptoProvider*        currentCryptoProvider;
-    UA_MessageSecurityMode precSecuMode;
-    UA_String              precSecuPolicy;
-    SC_SecurityToken       precSecuToken;
-    SC_SecurityKeySets     precSecuKeySets;
-    CryptoProvider*        precCryptoProvider;
-    SecretBuffer*          currentNonce;
-    uint32_t               lastSeqNumSent;
-    uint32_t               lastSeqNumReceived;
-    uint32_t               lastRequestIdSent;
-    uint32_t               secureChannelId;
+    TCP_UA_Connection*        transportConnection;
+    SC_ConnectionState        state;
+    uint32_t                  startTime;
+    UA_ByteString             runningAppCertificate;
+    const Certificate*        runningAppPublicKeyCert; // Pointer on upper level param: do not manage allocation on it
+    const AsymmetricKey*      runningAppPrivateKey; // Pointer on upper level param: do not manage allocation on it
+    UA_ByteString             otherAppCertificate;
+    const Certificate*        otherAppPublicKeyCert; // Pointer on upper level param: do not manage allocation on it
+    UA_MsgBuffer*             sendingBuffer;
+    uint32_t                  sendingMaxBodySize;
+    UA_MsgBuffers*            receptionBuffers;
+    OpcUa_MessageSecurityMode currentSecuMode;
+    UA_String                 currentSecuPolicy;
+    SC_SecurityToken          currentSecuToken;
+    SC_SecurityKeySets        currentSecuKeySets;
+    CryptoProvider*           currentCryptoProvider;
+    OpcUa_MessageSecurityMode precSecuMode;
+    UA_String                 precSecuPolicy;
+    SC_SecurityToken          precSecuToken;
+    SC_SecurityKeySets        precSecuKeySets;
+    CryptoProvider*           precCryptoProvider;
+    SecretBuffer*             currentNonce;
+    uint32_t                  lastSeqNumSent;
+    uint32_t                  lastSeqNumReceived;
+    uint32_t                  lastRequestIdSent;
+    uint32_t                  secureChannelId;
 
 } SC_Connection;
 

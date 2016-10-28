@@ -43,6 +43,7 @@ typedef StatusCode (UA_Channel_PfnRequestComplete)(UA_Channel         channel,
 //TODO: API indicates namespace too but it is not the case in 1.03 foundation stack
 StatusCode UA_Channel_Create(UA_Channel*               channel,
                              UA_Channel_SerializerType serialType);
+StatusCode UA_Channel_Clear(UA_Channel channel);
 StatusCode UA_Channel_Delete(UA_Channel* channel);
 
 StatusCode UA_Channel_BeginConnect(UA_Channel                            channel,
@@ -53,7 +54,7 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
                                    const PKIProvider*                    pki,
                                    const char*                           reqSecuPolicyUri,
                                    int32_t                               requestedLifetime,
-                                   UA_MessageSecurityMode                msgSecurityMode,
+                                   OpcUa_MessageSecurityMode             msgSecurityMode,
                                    uint32_t                              networkTimeout,
                                    UA_Channel_PfnConnectionStateChanged* cb,
                                    void*                                 cbData);

@@ -9,6 +9,8 @@
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
+#include <opcua_statuscodes.h>
+
 #include <ua_builtintypes.h>
 #include <ua_secure_channel_client_connection.h>
 #include <ua_stack_config.h>
@@ -16,8 +18,6 @@
 #include <wrappers.h>
 
 #include <stdlib.h>
-
-extern UA_NamespaceTable* g_namespaceTable;
 
 typedef struct {
     UA_Channel_PfnConnectionStateChanged* callback;
@@ -93,16 +93,20 @@ StatusCode UA_Channel_Create(UA_Channel*               channel,
     return status;
 }
 
+StatusCode UA_Channel_Clear(UA_Channel channel){
+    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
+    // Ensure disconnect called for deallocation
+    status = UA_Channel_Disconnect(channel);
+    Delete_InvokeCallbackData(cConnection->callbackData);
+    SC_Client_Delete(cConnection);
+    return status;
+}
+
 StatusCode UA_Channel_Delete(UA_Channel* channel){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    SC_ClientConnection* cConnection = (SC_ClientConnection*) *channel;
     if(channel != NULL){
-        // Ensure disconnect called for deallocation
-        UA_Channel_Disconnect(*channel);
-        Delete_InvokeCallbackData(cConnection->callbackData);
-        SC_Client_Delete(cConnection);
-        *channel = NULL;
-        status = STATUS_OK;
+        status = UA_Channel_Clear(*channel);
     }
     return status;
 }
@@ -162,7 +166,7 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
                                    const PKIProvider*                    pki,
                                    const char*                           reqSecuPolicyUri,
                                    int32_t                               requestedLifetime,
-                                   UA_MessageSecurityMode                msgSecurityMode,
+                                   OpcUa_MessageSecurityMode             msgSecurityMode,
                                    uint32_t                              networkTimeout,
                                    UA_Channel_PfnConnectionStateChanged* cb,
                                    void*                                 cbData)
@@ -176,9 +180,9 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
        url != NULL &&
        ((crt_cli != NULL && key_priv_cli != NULL &&
          crt_srv != NULL && pki != NULL)
-        || msgSecurityMode == UA_MessageSecurityMode_None) &&
+        || msgSecurityMode == OpcUa_MessageSecurityMode_None) &&
        reqSecuPolicyUri != NULL &&
-       msgSecurityMode != UA_MessageSecurityMode_Invalid &&
+       msgSecurityMode != OpcUa_MessageSecurityMode_Invalid &&
        cb != NULL)
     {
         if(cConnection->instance->state != SC_Connection_Disconnected){
@@ -186,7 +190,7 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
         }else{
             StackConfiguration_Locked();
             status = SC_Client_Configure(cConnection,
-                                         g_namespaceTable,
+                                         StackConfiguration_GetNamespaces(),
                                          StackConfiguration_GetEncodeableTypes());
             if(status == STATUS_OK){
                 internalCbData = Create_CallbackData(cb, cbData);
@@ -231,7 +235,7 @@ StatusCode UA_Channel_BeginInvokeService(UA_Channel                     channel,
         }
 
         // There is always a request header as first struct field in a request (safe cast)
-        timeout = ((UA_RequestHeader*)request)->TimeoutHint;
+        timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
         SC_Send_Request(cConnection,
                         requestType,
                         request,
@@ -280,7 +284,7 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
        response != NULL && responseType != NULL){
         if(invCallbackData != NULL){
             // There is always a request header as first struct field in a request (safe cast)
-            timeout = ((UA_RequestHeader*)request)->TimeoutHint;
+            timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
             status = UA_Channel_BeginInvokeService(channel,
                                                    debugName,
                                                    request, requestType,

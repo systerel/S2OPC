@@ -288,7 +288,7 @@ void ByteString_Delete(UA_ByteString* bstring);
 
 StatusCode ByteString_Compare(const UA_ByteString* left,
                               const UA_ByteString* right,
-                              uint32_t*            comparison);
+                              int32_t*             comparison);
 
 // Returns 0 if false
 uint32_t ByteString_Equal(const UA_ByteString* left,
@@ -310,7 +310,7 @@ void String_Delete(UA_String* bstring);
 
 StatusCode String_Compare(const UA_String* left,
                           const UA_String* right,
-                          uint32_t*        comparison);
+                          int32_t*         comparison);
 
 uint32_t String_Equal(const UA_String* left,
                       const UA_String* right);

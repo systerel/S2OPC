@@ -20,10 +20,10 @@ UA_EncodeableType* EncodeableType_GetEncodeableType(UA_EncodeableType** encTypes
     if(encTypesTable != NULL){
         current = encTypesTable[idx];
         while(current != NULL && result == NULL){
-            if(typeId == result->typeId || typeId == result->binaryTypeId){
+            if(typeId == result->TypeId || typeId == result->BinaryEncodingTypeId){
                 // || typeId = result->xmlTypeId => should not be the case since we use UA binary !
                 //TODO: max namespace or string size ?
-                if(strncmp(namespace, current->namespace, INT32_MAX) == 0){ // Use maximum UA_String size representation size
+                if(strncmp(namespace, current->NamespaceUri, INT32_MAX) == 0){ // Use maximum UA_String size representation size
                     result = current;
                 }
             }else if(idx < UINT32_MAX){

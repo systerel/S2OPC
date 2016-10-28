@@ -20,17 +20,17 @@ typedef uint32_t (UA_EncodeableObject_PfnEncode) (void* value, struct UA_MsgBuff
 typedef uint32_t (UA_EncodeableObject_PfnDecode) (void* value, struct UA_MsgBuffer* msgBuffer);
 
 typedef struct UA_EncodeableType {
-    char*                              name;
-    uint32_t                           typeId;
-    uint32_t                           binaryTypeId;
-    uint32_t                           xmlTypeId;
-    char*                              namespace;
-    uint32_t                           allocSize;
-    UA_EncodeableObject_PfnInitialize* initFunction;
-    UA_EncodeableObject_PfnClear*      clearFunction;
-    UA_EncodeableObject_PfnGetSize*    getSizeFunction;
-    UA_EncodeableObject_PfnEncode*     encodeFunction;
-    UA_EncodeableObject_PfnDecode*     decodeFunction;
+    char*                              TypeName;
+    uint32_t                           TypeId;
+    uint32_t                           BinaryEncodingTypeId;
+    uint32_t                           XmlEncodingTypeId;
+    char*                              NamespaceUri;
+    uint32_t                           AllocationSize;
+    UA_EncodeableObject_PfnInitialize* Initialize;
+    UA_EncodeableObject_PfnClear*      Clear;
+    UA_EncodeableObject_PfnGetSize*    GetSize;
+    UA_EncodeableObject_PfnEncode*     Encode;
+    UA_EncodeableObject_PfnDecode*     Decode;
 } UA_EncodeableType;
 
 

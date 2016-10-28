@@ -17,13 +17,16 @@ uint8_t g_lockedConfig = FALSE;
 
 static uint8_t initDone = FALSE;
 
-void StackConfiguration_Initialize(){
+StatusCode StackConfiguration_Initialize(){
+    StatusCode status = STATUS_OK;
     if(initDone == FALSE){
         StackConfiguration_Clear();
         initDone = 1;
     }
-    Socket_Network_Initialize();
+    Namespace_Initialize(g_stackConfiguration.nsTable);
+    status = Socket_Network_Initialize();
     InitPlatformDependencies();
+    return status;
 }
 
 void StackConfiguration_Locked(){
@@ -124,4 +127,9 @@ UA_EncodeableType** StackConfiguration_GetEncodeableTypes()
         // No additional types: return static known types
         return UA_KnownEncodeableTypes;
     }
+}
+
+UA_NamespaceTable* StackConfiguration_GetNamespaces()
+{
+    return g_stackConfiguration.nsTable;
 }

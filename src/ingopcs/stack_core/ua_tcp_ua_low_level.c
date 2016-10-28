@@ -8,7 +8,10 @@
 #include "ua_tcp_ua_low_level.h"
 
 #include <assert.h>
+#include <string.h>
+
 #include <ua_encoder.h>
+#include <opcua_statuscodes.h>
 
 const uint32_t tcpProtocolVersion = 0;
 

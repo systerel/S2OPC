@@ -11,6 +11,14 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+# define BEGIN_EXTERN_C extern "C" {
+# define END_EXTERN_C }
+#else
+# define BEGIN_EXTERN_C
+# define END_EXTERN_C
+#endif
+
 typedef uint32_t StatusCode;
 #define STATUS_OK 0x0 // TODO: change values
 #define STATUS_OK_INCOMPLETE 0x00000001

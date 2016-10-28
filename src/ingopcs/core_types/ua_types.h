@@ -40,23 +40,23 @@
 #include <ua_builtintypes.h>
 #include <ua_encodeable.h>
 
-OPCUA_BEGIN_EXTERN_C
+BEGIN_EXTERN_C
 
 #ifndef OPCUA_EXCLUDE_IdType
 /*============================================================================
  * The IdType enumeration.
  *===========================================================================*/
-typedef enum _UA_IdType
+typedef enum _OpcUa_IdType
 {
-    UA_IdType_Numeric = 0,
-    UA_IdType_String  = 1,
-    UA_IdType_Guid    = 2,
-    UA_IdType_Opaque  = 3
+    OpcUa_IdType_Numeric = 0,
+    OpcUa_IdType_String  = 1,
+    OpcUa_IdType_Guid    = 2,
+    OpcUa_IdType_Opaque  = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_IdType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_IdType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_IdType;
+OpcUa_IdType;
 
 #endif
 
@@ -64,22 +64,22 @@ UA_IdType;
 /*============================================================================
  * The NodeClass enumeration.
  *===========================================================================*/
-typedef enum _UA_NodeClass
+typedef enum _OpcUa_NodeClass
 {
-    UA_NodeClass_Unspecified   = 0,
-    UA_NodeClass_Object        = 1,
-    UA_NodeClass_Variable      = 2,
-    UA_NodeClass_Method        = 4,
-    UA_NodeClass_ObjectType    = 8,
-    UA_NodeClass_VariableType  = 16,
-    UA_NodeClass_ReferenceType = 32,
-    UA_NodeClass_DataType      = 64,
-    UA_NodeClass_View          = 128
+    OpcUa_NodeClass_Unspecified   = 0,
+    OpcUa_NodeClass_Object        = 1,
+    OpcUa_NodeClass_Variable      = 2,
+    OpcUa_NodeClass_Method        = 4,
+    OpcUa_NodeClass_ObjectType    = 8,
+    OpcUa_NodeClass_VariableType  = 16,
+    OpcUa_NodeClass_ReferenceType = 32,
+    OpcUa_NodeClass_DataType      = 64,
+    OpcUa_NodeClass_View          = 128
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_NodeClass_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_NodeClass_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_NodeClass;
+OpcUa_NodeClass;
 
 #endif
 
@@ -87,398 +87,398 @@ UA_NodeClass;
 /*============================================================================
  * The ReferenceNode structure.
  *===========================================================================*/
-typedef struct _UA_ReferenceNode
+typedef struct _OpcUa_ReferenceNode
 {
     UA_NodeId         ReferenceTypeId;
     UA_Boolean        IsInverse;
     UA_ExpandedNodeId TargetId;
 }
-UA_ReferenceNode;
+OpcUa_ReferenceNode;
 
-void UA_ReferenceNode_Initialize(UA_ReferenceNode* pValue);
+void OpcUa_ReferenceNode_Initialize(OpcUa_ReferenceNode* pValue);
 
-void UA_ReferenceNode_Clear(UA_ReferenceNode* pValue);
+void OpcUa_ReferenceNode_Clear(OpcUa_ReferenceNode* pValue);
 
-//StatusCode UA_ReferenceNode_GetSize(UA_ReferenceNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReferenceNode_GetSize(OpcUa_ReferenceNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReferenceNode_Encode(UA_ReferenceNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReferenceNode_Encode(OpcUa_ReferenceNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReferenceNode_Decode(UA_ReferenceNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReferenceNode_Decode(OpcUa_ReferenceNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReferenceNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReferenceNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_Node
 /*============================================================================
  * The Node structure.
  *===========================================================================*/
-typedef struct _UA_Node
+typedef struct _OpcUa_Node
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
 }
-UA_Node;
+OpcUa_Node;
 
-void UA_Node_Initialize(UA_Node* pValue);
+void OpcUa_Node_Initialize(OpcUa_Node* pValue);
 
-void UA_Node_Clear(UA_Node* pValue);
+void OpcUa_Node_Clear(OpcUa_Node* pValue);
 
-//StatusCode UA_Node_GetSize(UA_Node* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_Node_GetSize(OpcUa_Node* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_Node_Encode(UA_Node* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_Node_Encode(OpcUa_Node* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_Node_Decode(UA_Node* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_Node_Decode(OpcUa_Node* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_Node_EncodeableType;
+extern struct UA_EncodeableType OpcUa_Node_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_InstanceNode
 /*============================================================================
  * The InstanceNode structure.
  *===========================================================================*/
-typedef struct _UA_InstanceNode
+typedef struct _OpcUa_InstanceNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
 }
-UA_InstanceNode;
+OpcUa_InstanceNode;
 
-void UA_InstanceNode_Initialize(UA_InstanceNode* pValue);
+void OpcUa_InstanceNode_Initialize(OpcUa_InstanceNode* pValue);
 
-void UA_InstanceNode_Clear(UA_InstanceNode* pValue);
+void OpcUa_InstanceNode_Clear(OpcUa_InstanceNode* pValue);
 
-//StatusCode UA_InstanceNode_GetSize(UA_InstanceNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_InstanceNode_GetSize(OpcUa_InstanceNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_InstanceNode_Encode(UA_InstanceNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_InstanceNode_Encode(OpcUa_InstanceNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_InstanceNode_Decode(UA_InstanceNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_InstanceNode_Decode(OpcUa_InstanceNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_InstanceNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_InstanceNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_TypeNode
 /*============================================================================
  * The TypeNode structure.
  *===========================================================================*/
-typedef struct _UA_TypeNode
+typedef struct _OpcUa_TypeNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
 }
-UA_TypeNode;
+OpcUa_TypeNode;
 
-void UA_TypeNode_Initialize(UA_TypeNode* pValue);
+void OpcUa_TypeNode_Initialize(OpcUa_TypeNode* pValue);
 
-void UA_TypeNode_Clear(UA_TypeNode* pValue);
+void OpcUa_TypeNode_Clear(OpcUa_TypeNode* pValue);
 
-//StatusCode UA_TypeNode_GetSize(UA_TypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_TypeNode_GetSize(OpcUa_TypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_TypeNode_Encode(UA_TypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TypeNode_Encode(OpcUa_TypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_TypeNode_Decode(UA_TypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TypeNode_Decode(OpcUa_TypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_TypeNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_TypeNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectNode
 /*============================================================================
  * The ObjectNode structure.
  *===========================================================================*/
-typedef struct _UA_ObjectNode
+typedef struct _OpcUa_ObjectNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
-    UA_Byte           EventNotifier;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
+    UA_Byte              EventNotifier;
 }
-UA_ObjectNode;
+OpcUa_ObjectNode;
 
-void UA_ObjectNode_Initialize(UA_ObjectNode* pValue);
+void OpcUa_ObjectNode_Initialize(OpcUa_ObjectNode* pValue);
 
-void UA_ObjectNode_Clear(UA_ObjectNode* pValue);
+void OpcUa_ObjectNode_Clear(OpcUa_ObjectNode* pValue);
 
-//StatusCode UA_ObjectNode_GetSize(UA_ObjectNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ObjectNode_GetSize(OpcUa_ObjectNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ObjectNode_Encode(UA_ObjectNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ObjectNode_Encode(OpcUa_ObjectNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ObjectNode_Decode(UA_ObjectNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ObjectNode_Decode(OpcUa_ObjectNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ObjectNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ObjectNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectTypeNode
 /*============================================================================
  * The ObjectTypeNode structure.
  *===========================================================================*/
-typedef struct _UA_ObjectTypeNode
+typedef struct _OpcUa_ObjectTypeNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
-    UA_Boolean        IsAbstract;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
+    UA_Boolean           IsAbstract;
 }
-UA_ObjectTypeNode;
+OpcUa_ObjectTypeNode;
 
-void UA_ObjectTypeNode_Initialize(UA_ObjectTypeNode* pValue);
+void OpcUa_ObjectTypeNode_Initialize(OpcUa_ObjectTypeNode* pValue);
 
-void UA_ObjectTypeNode_Clear(UA_ObjectTypeNode* pValue);
+void OpcUa_ObjectTypeNode_Clear(OpcUa_ObjectTypeNode* pValue);
 
-//StatusCode UA_ObjectTypeNode_GetSize(UA_ObjectTypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ObjectTypeNode_GetSize(OpcUa_ObjectTypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ObjectTypeNode_Encode(UA_ObjectTypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ObjectTypeNode_Encode(OpcUa_ObjectTypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ObjectTypeNode_Decode(UA_ObjectTypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ObjectTypeNode_Decode(OpcUa_ObjectTypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ObjectTypeNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ObjectTypeNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableNode
 /*============================================================================
  * The VariableNode structure.
  *===========================================================================*/
-typedef struct _UA_VariableNode
+typedef struct _OpcUa_VariableNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
-    UA_Variant        Value;
-    UA_NodeId         DataType;
-    int32_t           ValueRank;
-    int32_t           NoOfArrayDimensions;
-    uint32_t*         ArrayDimensions;
-    UA_Byte           AccessLevel;
-    UA_Byte           UserAccessLevel;
-    double            MinimumSamplingInterval;
-    UA_Boolean        Historizing;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
+    UA_Variant           Value;
+    UA_NodeId            DataType;
+    int32_t              ValueRank;
+    int32_t              NoOfArrayDimensions;
+    uint32_t*            ArrayDimensions;
+    UA_Byte              AccessLevel;
+    UA_Byte              UserAccessLevel;
+    double               MinimumSamplingInterval;
+    UA_Boolean           Historizing;
 }
-UA_VariableNode;
+OpcUa_VariableNode;
 
-void UA_VariableNode_Initialize(UA_VariableNode* pValue);
+void OpcUa_VariableNode_Initialize(OpcUa_VariableNode* pValue);
 
-void UA_VariableNode_Clear(UA_VariableNode* pValue);
+void OpcUa_VariableNode_Clear(OpcUa_VariableNode* pValue);
 
-//StatusCode UA_VariableNode_GetSize(UA_VariableNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_VariableNode_GetSize(OpcUa_VariableNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_VariableNode_Encode(UA_VariableNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_VariableNode_Encode(OpcUa_VariableNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_VariableNode_Decode(UA_VariableNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_VariableNode_Decode(OpcUa_VariableNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_VariableNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_VariableNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableTypeNode
 /*============================================================================
  * The VariableTypeNode structure.
  *===========================================================================*/
-typedef struct _UA_VariableTypeNode
+typedef struct _OpcUa_VariableTypeNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
-    UA_Variant        Value;
-    UA_NodeId         DataType;
-    int32_t           ValueRank;
-    int32_t           NoOfArrayDimensions;
-    uint32_t*         ArrayDimensions;
-    UA_Boolean        IsAbstract;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
+    UA_Variant           Value;
+    UA_NodeId            DataType;
+    int32_t              ValueRank;
+    int32_t              NoOfArrayDimensions;
+    uint32_t*            ArrayDimensions;
+    UA_Boolean           IsAbstract;
 }
-UA_VariableTypeNode;
+OpcUa_VariableTypeNode;
 
-void UA_VariableTypeNode_Initialize(UA_VariableTypeNode* pValue);
+void OpcUa_VariableTypeNode_Initialize(OpcUa_VariableTypeNode* pValue);
 
-void UA_VariableTypeNode_Clear(UA_VariableTypeNode* pValue);
+void OpcUa_VariableTypeNode_Clear(OpcUa_VariableTypeNode* pValue);
 
-//StatusCode UA_VariableTypeNode_GetSize(UA_VariableTypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_VariableTypeNode_GetSize(OpcUa_VariableTypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_VariableTypeNode_Encode(UA_VariableTypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_VariableTypeNode_Encode(OpcUa_VariableTypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_VariableTypeNode_Decode(UA_VariableTypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_VariableTypeNode_Decode(OpcUa_VariableTypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_VariableTypeNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_VariableTypeNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReferenceTypeNode
 /*============================================================================
  * The ReferenceTypeNode structure.
  *===========================================================================*/
-typedef struct _UA_ReferenceTypeNode
+typedef struct _OpcUa_ReferenceTypeNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
-    UA_Boolean        IsAbstract;
-    UA_Boolean        Symmetric;
-    UA_LocalizedText  InverseName;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
+    UA_Boolean           IsAbstract;
+    UA_Boolean           Symmetric;
+    UA_LocalizedText     InverseName;
 }
-UA_ReferenceTypeNode;
+OpcUa_ReferenceTypeNode;
 
-void UA_ReferenceTypeNode_Initialize(UA_ReferenceTypeNode* pValue);
+void OpcUa_ReferenceTypeNode_Initialize(OpcUa_ReferenceTypeNode* pValue);
 
-void UA_ReferenceTypeNode_Clear(UA_ReferenceTypeNode* pValue);
+void OpcUa_ReferenceTypeNode_Clear(OpcUa_ReferenceTypeNode* pValue);
 
-//StatusCode UA_ReferenceTypeNode_GetSize(UA_ReferenceTypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReferenceTypeNode_GetSize(OpcUa_ReferenceTypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReferenceTypeNode_Encode(UA_ReferenceTypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReferenceTypeNode_Encode(OpcUa_ReferenceTypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReferenceTypeNode_Decode(UA_ReferenceTypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReferenceTypeNode_Decode(OpcUa_ReferenceTypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReferenceTypeNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_MethodNode
 /*============================================================================
  * The MethodNode structure.
  *===========================================================================*/
-typedef struct _UA_MethodNode
+typedef struct _OpcUa_MethodNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
-    UA_Boolean        Executable;
-    UA_Boolean        UserExecutable;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
+    UA_Boolean           Executable;
+    UA_Boolean           UserExecutable;
 }
-UA_MethodNode;
+OpcUa_MethodNode;
 
-void UA_MethodNode_Initialize(UA_MethodNode* pValue);
+void OpcUa_MethodNode_Initialize(OpcUa_MethodNode* pValue);
 
-void UA_MethodNode_Clear(UA_MethodNode* pValue);
+void OpcUa_MethodNode_Clear(OpcUa_MethodNode* pValue);
 
-//StatusCode UA_MethodNode_GetSize(UA_MethodNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_MethodNode_GetSize(OpcUa_MethodNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_MethodNode_Encode(UA_MethodNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MethodNode_Encode(OpcUa_MethodNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_MethodNode_Decode(UA_MethodNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MethodNode_Decode(OpcUa_MethodNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_MethodNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_MethodNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ViewNode
 /*============================================================================
  * The ViewNode structure.
  *===========================================================================*/
-typedef struct _UA_ViewNode
+typedef struct _OpcUa_ViewNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
-    UA_Boolean        ContainsNoLoops;
-    UA_Byte           EventNotifier;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
+    UA_Boolean           ContainsNoLoops;
+    UA_Byte              EventNotifier;
 }
-UA_ViewNode;
+OpcUa_ViewNode;
 
-void UA_ViewNode_Initialize(UA_ViewNode* pValue);
+void OpcUa_ViewNode_Initialize(OpcUa_ViewNode* pValue);
 
-void UA_ViewNode_Clear(UA_ViewNode* pValue);
+void OpcUa_ViewNode_Clear(OpcUa_ViewNode* pValue);
 
-//StatusCode UA_ViewNode_GetSize(UA_ViewNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ViewNode_GetSize(OpcUa_ViewNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ViewNode_Encode(UA_ViewNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ViewNode_Encode(OpcUa_ViewNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ViewNode_Decode(UA_ViewNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ViewNode_Decode(OpcUa_ViewNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ViewNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ViewNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DataTypeNode
 /*============================================================================
  * The DataTypeNode structure.
  *===========================================================================*/
-typedef struct _UA_DataTypeNode
+typedef struct _OpcUa_DataTypeNode
 {
-    UA_NodeId         NodeId;
-    UA_NodeClass      NodeClass;
-    UA_QualifiedName  BrowseName;
-    UA_LocalizedText  DisplayName;
-    UA_LocalizedText  Description;
-    uint32_t          WriteMask;
-    uint32_t          UserWriteMask;
-    int32_t           NoOfReferences;
-    UA_ReferenceNode* References;
-    UA_Boolean        IsAbstract;
+    UA_NodeId            NodeId;
+    OpcUa_NodeClass      NodeClass;
+    UA_QualifiedName     BrowseName;
+    UA_LocalizedText     DisplayName;
+    UA_LocalizedText     Description;
+    uint32_t             WriteMask;
+    uint32_t             UserWriteMask;
+    int32_t              NoOfReferences;
+    OpcUa_ReferenceNode* References;
+    UA_Boolean           IsAbstract;
 }
-UA_DataTypeNode;
+OpcUa_DataTypeNode;
 
-void UA_DataTypeNode_Initialize(UA_DataTypeNode* pValue);
+void OpcUa_DataTypeNode_Initialize(OpcUa_DataTypeNode* pValue);
 
-void UA_DataTypeNode_Clear(UA_DataTypeNode* pValue);
+void OpcUa_DataTypeNode_Clear(OpcUa_DataTypeNode* pValue);
 
-//StatusCode UA_DataTypeNode_GetSize(UA_DataTypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DataTypeNode_GetSize(OpcUa_DataTypeNode* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DataTypeNode_Encode(UA_DataTypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DataTypeNode_Encode(OpcUa_DataTypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DataTypeNode_Decode(UA_DataTypeNode* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DataTypeNode_Decode(OpcUa_DataTypeNode* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DataTypeNode_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DataTypeNode_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_Argument
 /*============================================================================
  * The Argument structure.
  *===========================================================================*/
-typedef struct _UA_Argument
+typedef struct _OpcUa_Argument
 {
     UA_String        Name;
     UA_NodeId        DataType;
@@ -487,135 +487,135 @@ typedef struct _UA_Argument
     uint32_t*        ArrayDimensions;
     UA_LocalizedText Description;
 }
-UA_Argument;
+OpcUa_Argument;
 
-void UA_Argument_Initialize(UA_Argument* pValue);
+void OpcUa_Argument_Initialize(OpcUa_Argument* pValue);
 
-void UA_Argument_Clear(UA_Argument* pValue);
+void OpcUa_Argument_Clear(OpcUa_Argument* pValue);
 
-//StatusCode UA_Argument_GetSize(UA_Argument* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_Argument_GetSize(OpcUa_Argument* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_Argument_Encode(UA_Argument* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_Argument_Encode(OpcUa_Argument* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_Argument_Decode(UA_Argument* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_Argument_Decode(OpcUa_Argument* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_Argument_EncodeableType;
+extern struct UA_EncodeableType OpcUa_Argument_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_EnumValueType
 /*============================================================================
  * The EnumValueType structure.
  *===========================================================================*/
-typedef struct _UA_EnumValueType
+typedef struct _OpcUa_EnumValueType
 {
     int64_t          Value;
     UA_LocalizedText DisplayName;
     UA_LocalizedText Description;
 }
-UA_EnumValueType;
+OpcUa_EnumValueType;
 
-void UA_EnumValueType_Initialize(UA_EnumValueType* pValue);
+void OpcUa_EnumValueType_Initialize(OpcUa_EnumValueType* pValue);
 
-void UA_EnumValueType_Clear(UA_EnumValueType* pValue);
+void OpcUa_EnumValueType_Clear(OpcUa_EnumValueType* pValue);
 
-//StatusCode UA_EnumValueType_GetSize(UA_EnumValueType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EnumValueType_GetSize(OpcUa_EnumValueType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EnumValueType_Encode(UA_EnumValueType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EnumValueType_Encode(OpcUa_EnumValueType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EnumValueType_Decode(UA_EnumValueType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EnumValueType_Decode(OpcUa_EnumValueType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EnumValueType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EnumValueType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_EnumField
 /*============================================================================
  * The EnumField structure.
  *===========================================================================*/
-typedef struct _UA_EnumField
+typedef struct _OpcUa_EnumField
 {
     int64_t          Value;
     UA_LocalizedText DisplayName;
     UA_LocalizedText Description;
     UA_String        Name;
 }
-UA_EnumField;
+OpcUa_EnumField;
 
-void UA_EnumField_Initialize(UA_EnumField* pValue);
+void OpcUa_EnumField_Initialize(OpcUa_EnumField* pValue);
 
-void UA_EnumField_Clear(UA_EnumField* pValue);
+void OpcUa_EnumField_Clear(OpcUa_EnumField* pValue);
 
-//StatusCode UA_EnumField_GetSize(UA_EnumField* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EnumField_GetSize(OpcUa_EnumField* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EnumField_Encode(UA_EnumField* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EnumField_Encode(OpcUa_EnumField* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EnumField_Decode(UA_EnumField* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EnumField_Decode(OpcUa_EnumField* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EnumField_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EnumField_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_OptionSet
 /*============================================================================
  * The OptionSet structure.
  *===========================================================================*/
-typedef struct _UA_OptionSet
+typedef struct _OpcUa_OptionSet
 {
     UA_ByteString Value;
     UA_ByteString ValidBits;
 }
-UA_OptionSet;
+OpcUa_OptionSet;
 
-void UA_OptionSet_Initialize(UA_OptionSet* pValue);
+void OpcUa_OptionSet_Initialize(OpcUa_OptionSet* pValue);
 
-void UA_OptionSet_Clear(UA_OptionSet* pValue);
+void OpcUa_OptionSet_Clear(OpcUa_OptionSet* pValue);
 
-//StatusCode UA_OptionSet_GetSize(UA_OptionSet* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_OptionSet_GetSize(OpcUa_OptionSet* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_OptionSet_Encode(UA_OptionSet* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_OptionSet_Encode(OpcUa_OptionSet* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_OptionSet_Decode(UA_OptionSet* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_OptionSet_Decode(OpcUa_OptionSet* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_OptionSet_EncodeableType;
+extern struct UA_EncodeableType OpcUa_OptionSet_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_TimeZoneDataType
 /*============================================================================
  * The TimeZoneDataType structure.
  *===========================================================================*/
-typedef struct _UA_TimeZoneDataType
+typedef struct _OpcUa_TimeZoneDataType
 {
     int16_t    Offset;
     UA_Boolean DaylightSavingInOffset;
 }
-UA_TimeZoneDataType;
+OpcUa_TimeZoneDataType;
 
-void UA_TimeZoneDataType_Initialize(UA_TimeZoneDataType* pValue);
+void OpcUa_TimeZoneDataType_Initialize(OpcUa_TimeZoneDataType* pValue);
 
-void UA_TimeZoneDataType_Clear(UA_TimeZoneDataType* pValue);
+void OpcUa_TimeZoneDataType_Clear(OpcUa_TimeZoneDataType* pValue);
 
-//StatusCode UA_TimeZoneDataType_GetSize(UA_TimeZoneDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_TimeZoneDataType_GetSize(OpcUa_TimeZoneDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_TimeZoneDataType_Encode(UA_TimeZoneDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TimeZoneDataType_Encode(OpcUa_TimeZoneDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_TimeZoneDataType_Decode(UA_TimeZoneDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TimeZoneDataType_Decode(OpcUa_TimeZoneDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_TimeZoneDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_TimeZoneDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ApplicationType
 /*============================================================================
  * The ApplicationType enumeration.
  *===========================================================================*/
-typedef enum _UA_ApplicationType
+typedef enum _OpcUa_ApplicationType
 {
-    UA_ApplicationType_Server          = 0,
-    UA_ApplicationType_Client          = 1,
-    UA_ApplicationType_ClientAndServer = 2,
-    UA_ApplicationType_DiscoveryServer = 3
+    OpcUa_ApplicationType_Server          = 0,
+    OpcUa_ApplicationType_Client          = 1,
+    OpcUa_ApplicationType_ClientAndServer = 2,
+    OpcUa_ApplicationType_DiscoveryServer = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_ApplicationType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_ApplicationType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_ApplicationType;
+OpcUa_ApplicationType;
 
 #endif
 
@@ -623,37 +623,37 @@ UA_ApplicationType;
 /*============================================================================
  * The ApplicationDescription structure.
  *===========================================================================*/
-typedef struct _UA_ApplicationDescription
+typedef struct _OpcUa_ApplicationDescription
 {
-    UA_String          ApplicationUri;
-    UA_String          ProductUri;
-    UA_LocalizedText   ApplicationName;
-    UA_ApplicationType ApplicationType;
-    UA_String          GatewayServerUri;
-    UA_String          DiscoveryProfileUri;
-    int32_t            NoOfDiscoveryUrls;
-    UA_String*         DiscoveryUrls;
+    UA_String             ApplicationUri;
+    UA_String             ProductUri;
+    UA_LocalizedText      ApplicationName;
+    OpcUa_ApplicationType ApplicationType;
+    UA_String             GatewayServerUri;
+    UA_String             DiscoveryProfileUri;
+    int32_t               NoOfDiscoveryUrls;
+    UA_String*            DiscoveryUrls;
 }
-UA_ApplicationDescription;
+OpcUa_ApplicationDescription;
 
-void UA_ApplicationDescription_Initialize(UA_ApplicationDescription* pValue);
+void OpcUa_ApplicationDescription_Initialize(OpcUa_ApplicationDescription* pValue);
 
-void UA_ApplicationDescription_Clear(UA_ApplicationDescription* pValue);
+void OpcUa_ApplicationDescription_Clear(OpcUa_ApplicationDescription* pValue);
 
-//StatusCode UA_ApplicationDescription_GetSize(UA_ApplicationDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ApplicationDescription_GetSize(OpcUa_ApplicationDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ApplicationDescription_Encode(UA_ApplicationDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ApplicationDescription_Encode(OpcUa_ApplicationDescription* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ApplicationDescription_Decode(UA_ApplicationDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ApplicationDescription_Decode(OpcUa_ApplicationDescription* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ApplicationDescription_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ApplicationDescription_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_RequestHeader
 /*============================================================================
  * The RequestHeader structure.
  *===========================================================================*/
-typedef struct _UA_RequestHeader
+typedef struct _OpcUa_RequestHeader
 {
     UA_NodeId          AuthenticationToken;
     UA_DateTime        Timestamp;
@@ -663,26 +663,26 @@ typedef struct _UA_RequestHeader
     uint32_t           TimeoutHint;
     UA_ExtensionObject AdditionalHeader;
 }
-UA_RequestHeader;
+OpcUa_RequestHeader;
 
-void UA_RequestHeader_Initialize(UA_RequestHeader* pValue);
+void OpcUa_RequestHeader_Initialize(OpcUa_RequestHeader* pValue);
 
-void UA_RequestHeader_Clear(UA_RequestHeader* pValue);
+void OpcUa_RequestHeader_Clear(OpcUa_RequestHeader* pValue);
 
-//StatusCode UA_RequestHeader_GetSize(UA_RequestHeader* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RequestHeader_GetSize(OpcUa_RequestHeader* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RequestHeader_Encode(UA_RequestHeader* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RequestHeader_Encode(OpcUa_RequestHeader* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RequestHeader_Decode(UA_RequestHeader* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RequestHeader_Decode(OpcUa_RequestHeader* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RequestHeader_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RequestHeader_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ResponseHeader
 /*============================================================================
  * The ResponseHeader structure.
  *===========================================================================*/
-typedef struct _UA_ResponseHeader
+typedef struct _OpcUa_ResponseHeader
 {
     UA_DateTime        Timestamp;
     uint32_t           RequestHandle;
@@ -692,42 +692,42 @@ typedef struct _UA_ResponseHeader
     UA_String*         StringTable;
     UA_ExtensionObject AdditionalHeader;
 }
-UA_ResponseHeader;
+OpcUa_ResponseHeader;
 
-void UA_ResponseHeader_Initialize(UA_ResponseHeader* pValue);
+void OpcUa_ResponseHeader_Initialize(OpcUa_ResponseHeader* pValue);
 
-void UA_ResponseHeader_Clear(UA_ResponseHeader* pValue);
+void OpcUa_ResponseHeader_Clear(OpcUa_ResponseHeader* pValue);
 
-//StatusCode UA_ResponseHeader_GetSize(UA_ResponseHeader* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ResponseHeader_GetSize(OpcUa_ResponseHeader* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ResponseHeader_Encode(UA_ResponseHeader* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ResponseHeader_Encode(OpcUa_ResponseHeader* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ResponseHeader_Decode(UA_ResponseHeader* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ResponseHeader_Decode(OpcUa_ResponseHeader* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ResponseHeader_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ResponseHeader_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServiceFault
 /*============================================================================
  * The ServiceFault structure.
  *===========================================================================*/
-typedef struct _UA_ServiceFault
+typedef struct _OpcUa_ServiceFault
 {
-    UA_ResponseHeader ResponseHeader;
+    OpcUa_ResponseHeader ResponseHeader;
 }
-UA_ServiceFault;
+OpcUa_ServiceFault;
 
-void UA_ServiceFault_Initialize(UA_ServiceFault* pValue);
+void OpcUa_ServiceFault_Initialize(OpcUa_ServiceFault* pValue);
 
-void UA_ServiceFault_Clear(UA_ServiceFault* pValue);
+void OpcUa_ServiceFault_Clear(OpcUa_ServiceFault* pValue);
 
-//StatusCode UA_ServiceFault_GetSize(UA_ServiceFault* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ServiceFault_GetSize(OpcUa_ServiceFault* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ServiceFault_Encode(UA_ServiceFault* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServiceFault_Encode(OpcUa_ServiceFault* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ServiceFault_Decode(UA_ServiceFault* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServiceFault_Decode(OpcUa_ServiceFault* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ServiceFault_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ServiceFault_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServers
@@ -735,53 +735,53 @@ extern struct UA_EncodeableType UA_ServiceFault_EncodeableType;
 /*============================================================================
  * The FindServersRequest structure.
  *===========================================================================*/
-typedef struct _UA_FindServersRequest
+typedef struct _OpcUa_FindServersRequest
 {
-    UA_RequestHeader RequestHeader;
-    UA_String        EndpointUrl;
-    int32_t          NoOfLocaleIds;
-    UA_String*       LocaleIds;
-    int32_t          NoOfServerUris;
-    UA_String*       ServerUris;
+    OpcUa_RequestHeader RequestHeader;
+    UA_String           EndpointUrl;
+    int32_t             NoOfLocaleIds;
+    UA_String*          LocaleIds;
+    int32_t             NoOfServerUris;
+    UA_String*          ServerUris;
 }
-UA_FindServersRequest;
+OpcUa_FindServersRequest;
 
-void UA_FindServersRequest_Initialize(UA_FindServersRequest* pValue);
+void OpcUa_FindServersRequest_Initialize(OpcUa_FindServersRequest* pValue);
 
-void UA_FindServersRequest_Clear(UA_FindServersRequest* pValue);
+void OpcUa_FindServersRequest_Clear(OpcUa_FindServersRequest* pValue);
 
-//StatusCode UA_FindServersRequest_GetSize(UA_FindServersRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_FindServersRequest_GetSize(OpcUa_FindServersRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_FindServersRequest_Encode(UA_FindServersRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_FindServersRequest_Encode(OpcUa_FindServersRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_FindServersRequest_Decode(UA_FindServersRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_FindServersRequest_Decode(OpcUa_FindServersRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_FindServersRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_FindServersRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersResponse
 /*============================================================================
  * The FindServersResponse structure.
  *===========================================================================*/
-typedef struct _UA_FindServersResponse
+typedef struct _OpcUa_FindServersResponse
 {
-    UA_ResponseHeader          ResponseHeader;
-    int32_t                    NoOfServers;
-    UA_ApplicationDescription* Servers;
+    OpcUa_ResponseHeader          ResponseHeader;
+    int32_t                       NoOfServers;
+    OpcUa_ApplicationDescription* Servers;
 }
-UA_FindServersResponse;
+OpcUa_FindServersResponse;
 
-void UA_FindServersResponse_Initialize(UA_FindServersResponse* pValue);
+void OpcUa_FindServersResponse_Initialize(OpcUa_FindServersResponse* pValue);
 
-void UA_FindServersResponse_Clear(UA_FindServersResponse* pValue);
+void OpcUa_FindServersResponse_Clear(OpcUa_FindServersResponse* pValue);
 
-//StatusCode UA_FindServersResponse_GetSize(UA_FindServersResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_FindServersResponse_GetSize(OpcUa_FindServersResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_FindServersResponse_Encode(UA_FindServersResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_FindServersResponse_Encode(OpcUa_FindServersResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_FindServersResponse_Decode(UA_FindServersResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_FindServersResponse_Decode(OpcUa_FindServersResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_FindServersResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_FindServersResponse_EncodeableType;
 #endif
 #endif
 
@@ -789,7 +789,7 @@ extern struct UA_EncodeableType UA_FindServersResponse_EncodeableType;
 /*============================================================================
  * The ServerOnNetwork structure.
  *===========================================================================*/
-typedef struct _UA_ServerOnNetwork
+typedef struct _OpcUa_ServerOnNetwork
 {
     uint32_t   RecordId;
     UA_String  ServerName;
@@ -797,19 +797,19 @@ typedef struct _UA_ServerOnNetwork
     int32_t    NoOfServerCapabilities;
     UA_String* ServerCapabilities;
 }
-UA_ServerOnNetwork;
+OpcUa_ServerOnNetwork;
 
-void UA_ServerOnNetwork_Initialize(UA_ServerOnNetwork* pValue);
+void OpcUa_ServerOnNetwork_Initialize(OpcUa_ServerOnNetwork* pValue);
 
-void UA_ServerOnNetwork_Clear(UA_ServerOnNetwork* pValue);
+void OpcUa_ServerOnNetwork_Clear(OpcUa_ServerOnNetwork* pValue);
 
-//StatusCode UA_ServerOnNetwork_GetSize(UA_ServerOnNetwork* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ServerOnNetwork_GetSize(OpcUa_ServerOnNetwork* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ServerOnNetwork_Encode(UA_ServerOnNetwork* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServerOnNetwork_Encode(OpcUa_ServerOnNetwork* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ServerOnNetwork_Decode(UA_ServerOnNetwork* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServerOnNetwork_Decode(OpcUa_ServerOnNetwork* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ServerOnNetwork_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ServerOnNetwork_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersOnNetwork
@@ -817,53 +817,53 @@ extern struct UA_EncodeableType UA_ServerOnNetwork_EncodeableType;
 /*============================================================================
  * The FindServersOnNetworkRequest structure.
  *===========================================================================*/
-typedef struct _UA_FindServersOnNetworkRequest
+typedef struct _OpcUa_FindServersOnNetworkRequest
 {
-    UA_RequestHeader RequestHeader;
-    uint32_t         StartingRecordId;
-    uint32_t         MaxRecordsToReturn;
-    int32_t          NoOfServerCapabilityFilter;
-    UA_String*       ServerCapabilityFilter;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t            StartingRecordId;
+    uint32_t            MaxRecordsToReturn;
+    int32_t             NoOfServerCapabilityFilter;
+    UA_String*          ServerCapabilityFilter;
 }
-UA_FindServersOnNetworkRequest;
+OpcUa_FindServersOnNetworkRequest;
 
-void UA_FindServersOnNetworkRequest_Initialize(UA_FindServersOnNetworkRequest* pValue);
+void OpcUa_FindServersOnNetworkRequest_Initialize(OpcUa_FindServersOnNetworkRequest* pValue);
 
-void UA_FindServersOnNetworkRequest_Clear(UA_FindServersOnNetworkRequest* pValue);
+void OpcUa_FindServersOnNetworkRequest_Clear(OpcUa_FindServersOnNetworkRequest* pValue);
 
-//StatusCode UA_FindServersOnNetworkRequest_GetSize(UA_FindServersOnNetworkRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_FindServersOnNetworkRequest_GetSize(OpcUa_FindServersOnNetworkRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_FindServersOnNetworkRequest_Encode(UA_FindServersOnNetworkRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_FindServersOnNetworkRequest_Encode(OpcUa_FindServersOnNetworkRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_FindServersOnNetworkRequest_Decode(UA_FindServersOnNetworkRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_FindServersOnNetworkRequest_Decode(OpcUa_FindServersOnNetworkRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_FindServersOnNetworkRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersOnNetworkResponse
 /*============================================================================
  * The FindServersOnNetworkResponse structure.
  *===========================================================================*/
-typedef struct _UA_FindServersOnNetworkResponse
+typedef struct _OpcUa_FindServersOnNetworkResponse
 {
-    UA_ResponseHeader   ResponseHeader;
-    UA_DateTime         LastCounterResetTime;
-    int32_t             NoOfServers;
-    UA_ServerOnNetwork* Servers;
+    OpcUa_ResponseHeader   ResponseHeader;
+    UA_DateTime            LastCounterResetTime;
+    int32_t                NoOfServers;
+    OpcUa_ServerOnNetwork* Servers;
 }
-UA_FindServersOnNetworkResponse;
+OpcUa_FindServersOnNetworkResponse;
 
-void UA_FindServersOnNetworkResponse_Initialize(UA_FindServersOnNetworkResponse* pValue);
+void OpcUa_FindServersOnNetworkResponse_Initialize(OpcUa_FindServersOnNetworkResponse* pValue);
 
-void UA_FindServersOnNetworkResponse_Clear(UA_FindServersOnNetworkResponse* pValue);
+void OpcUa_FindServersOnNetworkResponse_Clear(OpcUa_FindServersOnNetworkResponse* pValue);
 
-//StatusCode UA_FindServersOnNetworkResponse_GetSize(UA_FindServersOnNetworkResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_FindServersOnNetworkResponse_GetSize(OpcUa_FindServersOnNetworkResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_FindServersOnNetworkResponse_Encode(UA_FindServersOnNetworkResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_FindServersOnNetworkResponse_Encode(OpcUa_FindServersOnNetworkResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_FindServersOnNetworkResponse_Decode(UA_FindServersOnNetworkResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_FindServersOnNetworkResponse_Decode(OpcUa_FindServersOnNetworkResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_FindServersOnNetworkResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType;
 #endif
 #endif
 
@@ -871,17 +871,17 @@ extern struct UA_EncodeableType UA_FindServersOnNetworkResponse_EncodeableType;
 /*============================================================================
  * The MessageSecurityMode enumeration.
  *===========================================================================*/
-typedef enum _UA_MessageSecurityMode
+typedef enum _OpcUa_MessageSecurityMode
 {
-    UA_MessageSecurityMode_Invalid        = 0,
-    UA_MessageSecurityMode_None           = 1,
-    UA_MessageSecurityMode_Sign           = 2,
-    UA_MessageSecurityMode_SignAndEncrypt = 3
+    OpcUa_MessageSecurityMode_Invalid        = 0,
+    OpcUa_MessageSecurityMode_None           = 1,
+    OpcUa_MessageSecurityMode_Sign           = 2,
+    OpcUa_MessageSecurityMode_SignAndEncrypt = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_MessageSecurityMode_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_MessageSecurityMode_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_MessageSecurityMode;
+OpcUa_MessageSecurityMode;
 
 #endif
 
@@ -889,18 +889,18 @@ UA_MessageSecurityMode;
 /*============================================================================
  * The UserTokenType enumeration.
  *===========================================================================*/
-typedef enum _UA_UserTokenType
+typedef enum _OpcUa_UserTokenType
 {
-    UA_UserTokenType_Anonymous   = 0,
-    UA_UserTokenType_UserName    = 1,
-    UA_UserTokenType_Certificate = 2,
-    UA_UserTokenType_IssuedToken = 3,
-    UA_UserTokenType_Kerberos    = 4
+    OpcUa_UserTokenType_Anonymous   = 0,
+    OpcUa_UserTokenType_UserName    = 1,
+    OpcUa_UserTokenType_Certificate = 2,
+    OpcUa_UserTokenType_IssuedToken = 3,
+    OpcUa_UserTokenType_Kerberos    = 4
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_UserTokenType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_UserTokenType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_UserTokenType;
+OpcUa_UserTokenType;
 
 #endif
 
@@ -908,58 +908,58 @@ UA_UserTokenType;
 /*============================================================================
  * The UserTokenPolicy structure.
  *===========================================================================*/
-typedef struct _UA_UserTokenPolicy
+typedef struct _OpcUa_UserTokenPolicy
 {
-    UA_String        PolicyId;
-    UA_UserTokenType TokenType;
-    UA_String        IssuedTokenType;
-    UA_String        IssuerEndpointUrl;
-    UA_String        SecurityPolicyUri;
+    UA_String           PolicyId;
+    OpcUa_UserTokenType TokenType;
+    UA_String           IssuedTokenType;
+    UA_String           IssuerEndpointUrl;
+    UA_String           SecurityPolicyUri;
 }
-UA_UserTokenPolicy;
+OpcUa_UserTokenPolicy;
 
-void UA_UserTokenPolicy_Initialize(UA_UserTokenPolicy* pValue);
+void OpcUa_UserTokenPolicy_Initialize(OpcUa_UserTokenPolicy* pValue);
 
-void UA_UserTokenPolicy_Clear(UA_UserTokenPolicy* pValue);
+void OpcUa_UserTokenPolicy_Clear(OpcUa_UserTokenPolicy* pValue);
 
-//StatusCode UA_UserTokenPolicy_GetSize(UA_UserTokenPolicy* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_UserTokenPolicy_GetSize(OpcUa_UserTokenPolicy* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_UserTokenPolicy_Encode(UA_UserTokenPolicy* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UserTokenPolicy_Encode(OpcUa_UserTokenPolicy* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_UserTokenPolicy_Decode(UA_UserTokenPolicy* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UserTokenPolicy_Decode(OpcUa_UserTokenPolicy* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_UserTokenPolicy_EncodeableType;
+extern struct UA_EncodeableType OpcUa_UserTokenPolicy_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_EndpointDescription
 /*============================================================================
  * The EndpointDescription structure.
  *===========================================================================*/
-typedef struct _UA_EndpointDescription
+typedef struct _OpcUa_EndpointDescription
 {
-    UA_String                 EndpointUrl;
-    UA_ApplicationDescription Server;
-    UA_ByteString             ServerCertificate;
-    UA_MessageSecurityMode    SecurityMode;
-    UA_String                 SecurityPolicyUri;
-    int32_t                   NoOfUserIdentityTokens;
-    UA_UserTokenPolicy*       UserIdentityTokens;
-    UA_String                 TransportProfileUri;
-    UA_Byte                   SecurityLevel;
+    UA_String                    EndpointUrl;
+    OpcUa_ApplicationDescription Server;
+    UA_ByteString                ServerCertificate;
+    OpcUa_MessageSecurityMode    SecurityMode;
+    UA_String                    SecurityPolicyUri;
+    int32_t                      NoOfUserIdentityTokens;
+    OpcUa_UserTokenPolicy*       UserIdentityTokens;
+    UA_String                    TransportProfileUri;
+    UA_Byte                      SecurityLevel;
 }
-UA_EndpointDescription;
+OpcUa_EndpointDescription;
 
-void UA_EndpointDescription_Initialize(UA_EndpointDescription* pValue);
+void OpcUa_EndpointDescription_Initialize(OpcUa_EndpointDescription* pValue);
 
-void UA_EndpointDescription_Clear(UA_EndpointDescription* pValue);
+void OpcUa_EndpointDescription_Clear(OpcUa_EndpointDescription* pValue);
 
-//StatusCode UA_EndpointDescription_GetSize(UA_EndpointDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EndpointDescription_GetSize(OpcUa_EndpointDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EndpointDescription_Encode(UA_EndpointDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EndpointDescription_Encode(OpcUa_EndpointDescription* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EndpointDescription_Decode(UA_EndpointDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EndpointDescription_Decode(OpcUa_EndpointDescription* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EndpointDescription_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EndpointDescription_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_GetEndpoints
@@ -967,53 +967,53 @@ extern struct UA_EncodeableType UA_EndpointDescription_EncodeableType;
 /*============================================================================
  * The GetEndpointsRequest structure.
  *===========================================================================*/
-typedef struct _UA_GetEndpointsRequest
+typedef struct _OpcUa_GetEndpointsRequest
 {
-    UA_RequestHeader RequestHeader;
-    UA_String        EndpointUrl;
-    int32_t          NoOfLocaleIds;
-    UA_String*       LocaleIds;
-    int32_t          NoOfProfileUris;
-    UA_String*       ProfileUris;
+    OpcUa_RequestHeader RequestHeader;
+    UA_String           EndpointUrl;
+    int32_t             NoOfLocaleIds;
+    UA_String*          LocaleIds;
+    int32_t             NoOfProfileUris;
+    UA_String*          ProfileUris;
 }
-UA_GetEndpointsRequest;
+OpcUa_GetEndpointsRequest;
 
-void UA_GetEndpointsRequest_Initialize(UA_GetEndpointsRequest* pValue);
+void OpcUa_GetEndpointsRequest_Initialize(OpcUa_GetEndpointsRequest* pValue);
 
-void UA_GetEndpointsRequest_Clear(UA_GetEndpointsRequest* pValue);
+void OpcUa_GetEndpointsRequest_Clear(OpcUa_GetEndpointsRequest* pValue);
 
-//StatusCode UA_GetEndpointsRequest_GetSize(UA_GetEndpointsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_GetEndpointsRequest_GetSize(OpcUa_GetEndpointsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_GetEndpointsRequest_Encode(UA_GetEndpointsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_GetEndpointsRequest_Encode(OpcUa_GetEndpointsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_GetEndpointsRequest_Decode(UA_GetEndpointsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_GetEndpointsRequest_Decode(OpcUa_GetEndpointsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_GetEndpointsRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_GetEndpointsResponse
 /*============================================================================
  * The GetEndpointsResponse structure.
  *===========================================================================*/
-typedef struct _UA_GetEndpointsResponse
+typedef struct _OpcUa_GetEndpointsResponse
 {
-    UA_ResponseHeader       ResponseHeader;
-    int32_t                 NoOfEndpoints;
-    UA_EndpointDescription* Endpoints;
+    OpcUa_ResponseHeader       ResponseHeader;
+    int32_t                    NoOfEndpoints;
+    OpcUa_EndpointDescription* Endpoints;
 }
-UA_GetEndpointsResponse;
+OpcUa_GetEndpointsResponse;
 
-void UA_GetEndpointsResponse_Initialize(UA_GetEndpointsResponse* pValue);
+void OpcUa_GetEndpointsResponse_Initialize(OpcUa_GetEndpointsResponse* pValue);
 
-void UA_GetEndpointsResponse_Clear(UA_GetEndpointsResponse* pValue);
+void OpcUa_GetEndpointsResponse_Clear(OpcUa_GetEndpointsResponse* pValue);
 
-//StatusCode UA_GetEndpointsResponse_GetSize(UA_GetEndpointsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_GetEndpointsResponse_GetSize(OpcUa_GetEndpointsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_GetEndpointsResponse_Encode(UA_GetEndpointsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_GetEndpointsResponse_Encode(OpcUa_GetEndpointsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_GetEndpointsResponse_Decode(UA_GetEndpointsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_GetEndpointsResponse_Decode(OpcUa_GetEndpointsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_GetEndpointsResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType;
 #endif
 #endif
 
@@ -1021,32 +1021,32 @@ extern struct UA_EncodeableType UA_GetEndpointsResponse_EncodeableType;
 /*============================================================================
  * The RegisteredServer structure.
  *===========================================================================*/
-typedef struct _UA_RegisteredServer
+typedef struct _OpcUa_RegisteredServer
 {
-    UA_String          ServerUri;
-    UA_String          ProductUri;
-    int32_t            NoOfServerNames;
-    UA_LocalizedText*  ServerNames;
-    UA_ApplicationType ServerType;
-    UA_String          GatewayServerUri;
-    int32_t            NoOfDiscoveryUrls;
-    UA_String*         DiscoveryUrls;
-    UA_String          SemaphoreFilePath;
-    UA_Boolean         IsOnline;
+    UA_String             ServerUri;
+    UA_String             ProductUri;
+    int32_t               NoOfServerNames;
+    UA_LocalizedText*     ServerNames;
+    OpcUa_ApplicationType ServerType;
+    UA_String             GatewayServerUri;
+    int32_t               NoOfDiscoveryUrls;
+    UA_String*            DiscoveryUrls;
+    UA_String             SemaphoreFilePath;
+    UA_Boolean            IsOnline;
 }
-UA_RegisteredServer;
+OpcUa_RegisteredServer;
 
-void UA_RegisteredServer_Initialize(UA_RegisteredServer* pValue);
+void OpcUa_RegisteredServer_Initialize(OpcUa_RegisteredServer* pValue);
 
-void UA_RegisteredServer_Clear(UA_RegisteredServer* pValue);
+void OpcUa_RegisteredServer_Clear(OpcUa_RegisteredServer* pValue);
 
-//StatusCode UA_RegisteredServer_GetSize(UA_RegisteredServer* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RegisteredServer_GetSize(OpcUa_RegisteredServer* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RegisteredServer_Encode(UA_RegisteredServer* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisteredServer_Encode(OpcUa_RegisteredServer* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RegisteredServer_Decode(UA_RegisteredServer* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisteredServer_Decode(OpcUa_RegisteredServer* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RegisteredServer_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RegisteredServer_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer
@@ -1054,47 +1054,47 @@ extern struct UA_EncodeableType UA_RegisteredServer_EncodeableType;
 /*============================================================================
  * The RegisterServerRequest structure.
  *===========================================================================*/
-typedef struct _UA_RegisterServerRequest
+typedef struct _OpcUa_RegisterServerRequest
 {
-    UA_RequestHeader    RequestHeader;
-    UA_RegisteredServer Server;
+    OpcUa_RequestHeader    RequestHeader;
+    OpcUa_RegisteredServer Server;
 }
-UA_RegisterServerRequest;
+OpcUa_RegisterServerRequest;
 
-void UA_RegisterServerRequest_Initialize(UA_RegisterServerRequest* pValue);
+void OpcUa_RegisterServerRequest_Initialize(OpcUa_RegisterServerRequest* pValue);
 
-void UA_RegisterServerRequest_Clear(UA_RegisterServerRequest* pValue);
+void OpcUa_RegisterServerRequest_Clear(OpcUa_RegisterServerRequest* pValue);
 
-//StatusCode UA_RegisterServerRequest_GetSize(UA_RegisterServerRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RegisterServerRequest_GetSize(OpcUa_RegisterServerRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RegisterServerRequest_Encode(UA_RegisterServerRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterServerRequest_Encode(OpcUa_RegisterServerRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RegisterServerRequest_Decode(UA_RegisterServerRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterServerRequest_Decode(OpcUa_RegisterServerRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RegisterServerRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RegisterServerRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServerResponse
 /*============================================================================
  * The RegisterServerResponse structure.
  *===========================================================================*/
-typedef struct _UA_RegisterServerResponse
+typedef struct _OpcUa_RegisterServerResponse
 {
-    UA_ResponseHeader ResponseHeader;
+    OpcUa_ResponseHeader ResponseHeader;
 }
-UA_RegisterServerResponse;
+OpcUa_RegisterServerResponse;
 
-void UA_RegisterServerResponse_Initialize(UA_RegisterServerResponse* pValue);
+void OpcUa_RegisterServerResponse_Initialize(OpcUa_RegisterServerResponse* pValue);
 
-void UA_RegisterServerResponse_Clear(UA_RegisterServerResponse* pValue);
+void OpcUa_RegisterServerResponse_Clear(OpcUa_RegisterServerResponse* pValue);
 
-//StatusCode UA_RegisterServerResponse_GetSize(UA_RegisterServerResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RegisterServerResponse_GetSize(OpcUa_RegisterServerResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RegisterServerResponse_Encode(UA_RegisterServerResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterServerResponse_Encode(OpcUa_RegisterServerResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RegisterServerResponse_Decode(UA_RegisterServerResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterServerResponse_Decode(OpcUa_RegisterServerResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RegisterServerResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RegisterServerResponse_EncodeableType;
 #endif
 #endif
 
@@ -1102,25 +1102,25 @@ extern struct UA_EncodeableType UA_RegisterServerResponse_EncodeableType;
 /*============================================================================
  * The MdnsDiscoveryConfiguration structure.
  *===========================================================================*/
-typedef struct _UA_MdnsDiscoveryConfiguration
+typedef struct _OpcUa_MdnsDiscoveryConfiguration
 {
     UA_String  MdnsServerName;
     int32_t    NoOfServerCapabilities;
     UA_String* ServerCapabilities;
 }
-UA_MdnsDiscoveryConfiguration;
+OpcUa_MdnsDiscoveryConfiguration;
 
-void UA_MdnsDiscoveryConfiguration_Initialize(UA_MdnsDiscoveryConfiguration* pValue);
+void OpcUa_MdnsDiscoveryConfiguration_Initialize(OpcUa_MdnsDiscoveryConfiguration* pValue);
 
-void UA_MdnsDiscoveryConfiguration_Clear(UA_MdnsDiscoveryConfiguration* pValue);
+void OpcUa_MdnsDiscoveryConfiguration_Clear(OpcUa_MdnsDiscoveryConfiguration* pValue);
 
-//StatusCode UA_MdnsDiscoveryConfiguration_GetSize(UA_MdnsDiscoveryConfiguration* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_MdnsDiscoveryConfiguration_GetSize(OpcUa_MdnsDiscoveryConfiguration* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_MdnsDiscoveryConfiguration_Encode(UA_MdnsDiscoveryConfiguration* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MdnsDiscoveryConfiguration_Encode(OpcUa_MdnsDiscoveryConfiguration* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_MdnsDiscoveryConfiguration_Decode(UA_MdnsDiscoveryConfiguration* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MdnsDiscoveryConfiguration_Decode(OpcUa_MdnsDiscoveryConfiguration* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_MdnsDiscoveryConfiguration_EncodeableType;
+extern struct UA_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer2
@@ -1128,53 +1128,53 @@ extern struct UA_EncodeableType UA_MdnsDiscoveryConfiguration_EncodeableType;
 /*============================================================================
  * The RegisterServer2Request structure.
  *===========================================================================*/
-typedef struct _UA_RegisterServer2Request
+typedef struct _OpcUa_RegisterServer2Request
 {
-    UA_RequestHeader    RequestHeader;
-    UA_RegisteredServer Server;
-    int32_t             NoOfDiscoveryConfiguration;
-    UA_ExtensionObject* DiscoveryConfiguration;
+    OpcUa_RequestHeader    RequestHeader;
+    OpcUa_RegisteredServer Server;
+    int32_t                NoOfDiscoveryConfiguration;
+    UA_ExtensionObject*    DiscoveryConfiguration;
 }
-UA_RegisterServer2Request;
+OpcUa_RegisterServer2Request;
 
-void UA_RegisterServer2Request_Initialize(UA_RegisterServer2Request* pValue);
+void OpcUa_RegisterServer2Request_Initialize(OpcUa_RegisterServer2Request* pValue);
 
-void UA_RegisterServer2Request_Clear(UA_RegisterServer2Request* pValue);
+void OpcUa_RegisterServer2Request_Clear(OpcUa_RegisterServer2Request* pValue);
 
-//StatusCode UA_RegisterServer2Request_GetSize(UA_RegisterServer2Request* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RegisterServer2Request_GetSize(OpcUa_RegisterServer2Request* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RegisterServer2Request_Encode(UA_RegisterServer2Request* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterServer2Request_Encode(OpcUa_RegisterServer2Request* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RegisterServer2Request_Decode(UA_RegisterServer2Request* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterServer2Request_Decode(OpcUa_RegisterServer2Request* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RegisterServer2Request_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RegisterServer2Request_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer2Response
 /*============================================================================
  * The RegisterServer2Response structure.
  *===========================================================================*/
-typedef struct _UA_RegisterServer2Response
+typedef struct _OpcUa_RegisterServer2Response
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfConfigurationResults;
-    StatusCode*        ConfigurationResults;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfConfigurationResults;
+    StatusCode*          ConfigurationResults;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_RegisterServer2Response;
+OpcUa_RegisterServer2Response;
 
-void UA_RegisterServer2Response_Initialize(UA_RegisterServer2Response* pValue);
+void OpcUa_RegisterServer2Response_Initialize(OpcUa_RegisterServer2Response* pValue);
 
-void UA_RegisterServer2Response_Clear(UA_RegisterServer2Response* pValue);
+void OpcUa_RegisterServer2Response_Clear(OpcUa_RegisterServer2Response* pValue);
 
-//StatusCode UA_RegisterServer2Response_GetSize(UA_RegisterServer2Response* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RegisterServer2Response_GetSize(OpcUa_RegisterServer2Response* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RegisterServer2Response_Encode(UA_RegisterServer2Response* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterServer2Response_Encode(OpcUa_RegisterServer2Response* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RegisterServer2Response_Decode(UA_RegisterServer2Response* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterServer2Response_Decode(OpcUa_RegisterServer2Response* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RegisterServer2Response_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RegisterServer2Response_EncodeableType;
 #endif
 #endif
 
@@ -1182,15 +1182,15 @@ extern struct UA_EncodeableType UA_RegisterServer2Response_EncodeableType;
 /*============================================================================
  * The SecurityTokenRequestType enumeration.
  *===========================================================================*/
-typedef enum _UA_SecurityTokenRequestType
+typedef enum _OpcUa_SecurityTokenRequestType
 {
-    UA_SecurityTokenRequestType_Issue = 0,
-    UA_SecurityTokenRequestType_Renew = 1
+    OpcUa_SecurityTokenRequestType_Issue = 0,
+    OpcUa_SecurityTokenRequestType_Renew = 1
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_SecurityTokenRequestType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_SecurityTokenRequestType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_SecurityTokenRequestType;
+OpcUa_SecurityTokenRequestType;
 
 #endif
 
@@ -1198,26 +1198,26 @@ UA_SecurityTokenRequestType;
 /*============================================================================
  * The ChannelSecurityToken structure.
  *===========================================================================*/
-typedef struct _UA_ChannelSecurityToken
+typedef struct _OpcUa_ChannelSecurityToken
 {
     uint32_t    ChannelId;
     uint32_t    TokenId;
     UA_DateTime CreatedAt;
     uint32_t    RevisedLifetime;
 }
-UA_ChannelSecurityToken;
+OpcUa_ChannelSecurityToken;
 
-void UA_ChannelSecurityToken_Initialize(UA_ChannelSecurityToken* pValue);
+void OpcUa_ChannelSecurityToken_Initialize(OpcUa_ChannelSecurityToken* pValue);
 
-void UA_ChannelSecurityToken_Clear(UA_ChannelSecurityToken* pValue);
+void OpcUa_ChannelSecurityToken_Clear(OpcUa_ChannelSecurityToken* pValue);
 
-//StatusCode UA_ChannelSecurityToken_GetSize(UA_ChannelSecurityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ChannelSecurityToken_GetSize(OpcUa_ChannelSecurityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ChannelSecurityToken_Encode(UA_ChannelSecurityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ChannelSecurityToken_Encode(OpcUa_ChannelSecurityToken* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ChannelSecurityToken_Decode(UA_ChannelSecurityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ChannelSecurityToken_Decode(OpcUa_ChannelSecurityToken* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ChannelSecurityToken_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_OpenSecureChannel
@@ -1225,54 +1225,54 @@ extern struct UA_EncodeableType UA_ChannelSecurityToken_EncodeableType;
 /*============================================================================
  * The OpenSecureChannelRequest structure.
  *===========================================================================*/
-typedef struct _UA_OpenSecureChannelRequest
+typedef struct _OpcUa_OpenSecureChannelRequest
 {
-    UA_RequestHeader            RequestHeader;
-    uint32_t                    ClientProtocolVersion;
-    UA_SecurityTokenRequestType RequestType;
-    UA_MessageSecurityMode      SecurityMode;
-    UA_ByteString               ClientNonce;
-    uint32_t                    RequestedLifetime;
+    OpcUa_RequestHeader            RequestHeader;
+    uint32_t                       ClientProtocolVersion;
+    OpcUa_SecurityTokenRequestType RequestType;
+    OpcUa_MessageSecurityMode      SecurityMode;
+    UA_ByteString                  ClientNonce;
+    uint32_t                       RequestedLifetime;
 }
-UA_OpenSecureChannelRequest;
+OpcUa_OpenSecureChannelRequest;
 
-void UA_OpenSecureChannelRequest_Initialize(UA_OpenSecureChannelRequest* pValue);
+void OpcUa_OpenSecureChannelRequest_Initialize(OpcUa_OpenSecureChannelRequest* pValue);
 
-void UA_OpenSecureChannelRequest_Clear(UA_OpenSecureChannelRequest* pValue);
+void OpcUa_OpenSecureChannelRequest_Clear(OpcUa_OpenSecureChannelRequest* pValue);
 
-//StatusCode UA_OpenSecureChannelRequest_GetSize(UA_OpenSecureChannelRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_OpenSecureChannelRequest_GetSize(OpcUa_OpenSecureChannelRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_OpenSecureChannelRequest_Encode(UA_OpenSecureChannelRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_OpenSecureChannelRequest_Encode(OpcUa_OpenSecureChannelRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_OpenSecureChannelRequest_Decode(UA_OpenSecureChannelRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_OpenSecureChannelRequest_Decode(OpcUa_OpenSecureChannelRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_OpenSecureChannelRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_OpenSecureChannelResponse
 /*============================================================================
  * The OpenSecureChannelResponse structure.
  *===========================================================================*/
-typedef struct _UA_OpenSecureChannelResponse
+typedef struct _OpcUa_OpenSecureChannelResponse
 {
-    UA_ResponseHeader       ResponseHeader;
-    uint32_t                ServerProtocolVersion;
-    UA_ChannelSecurityToken SecurityToken;
-    UA_ByteString           ServerNonce;
+    OpcUa_ResponseHeader       ResponseHeader;
+    uint32_t                   ServerProtocolVersion;
+    OpcUa_ChannelSecurityToken SecurityToken;
+    UA_ByteString              ServerNonce;
 }
-UA_OpenSecureChannelResponse;
+OpcUa_OpenSecureChannelResponse;
 
-void UA_OpenSecureChannelResponse_Initialize(UA_OpenSecureChannelResponse* pValue);
+void OpcUa_OpenSecureChannelResponse_Initialize(OpcUa_OpenSecureChannelResponse* pValue);
 
-void UA_OpenSecureChannelResponse_Clear(UA_OpenSecureChannelResponse* pValue);
+void OpcUa_OpenSecureChannelResponse_Clear(OpcUa_OpenSecureChannelResponse* pValue);
 
-//StatusCode UA_OpenSecureChannelResponse_GetSize(UA_OpenSecureChannelResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_OpenSecureChannelResponse_GetSize(OpcUa_OpenSecureChannelResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_OpenSecureChannelResponse_Encode(UA_OpenSecureChannelResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_OpenSecureChannelResponse_Encode(OpcUa_OpenSecureChannelResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_OpenSecureChannelResponse_Decode(UA_OpenSecureChannelResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_OpenSecureChannelResponse_Decode(OpcUa_OpenSecureChannelResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_OpenSecureChannelResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType;
 #endif
 #endif
 
@@ -1281,46 +1281,46 @@ extern struct UA_EncodeableType UA_OpenSecureChannelResponse_EncodeableType;
 /*============================================================================
  * The CloseSecureChannelRequest structure.
  *===========================================================================*/
-typedef struct _UA_CloseSecureChannelRequest
+typedef struct _OpcUa_CloseSecureChannelRequest
 {
-    UA_RequestHeader RequestHeader;
+    OpcUa_RequestHeader RequestHeader;
 }
-UA_CloseSecureChannelRequest;
+OpcUa_CloseSecureChannelRequest;
 
-void UA_CloseSecureChannelRequest_Initialize(UA_CloseSecureChannelRequest* pValue);
+void OpcUa_CloseSecureChannelRequest_Initialize(OpcUa_CloseSecureChannelRequest* pValue);
 
-void UA_CloseSecureChannelRequest_Clear(UA_CloseSecureChannelRequest* pValue);
+void OpcUa_CloseSecureChannelRequest_Clear(OpcUa_CloseSecureChannelRequest* pValue);
 
-//StatusCode UA_CloseSecureChannelRequest_GetSize(UA_CloseSecureChannelRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CloseSecureChannelRequest_GetSize(OpcUa_CloseSecureChannelRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CloseSecureChannelRequest_Encode(UA_CloseSecureChannelRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CloseSecureChannelRequest_Encode(OpcUa_CloseSecureChannelRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CloseSecureChannelRequest_Decode(UA_CloseSecureChannelRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CloseSecureChannelRequest_Decode(OpcUa_CloseSecureChannelRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CloseSecureChannelRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CloseSecureChannelResponse
 /*============================================================================
  * The CloseSecureChannelResponse structure.
  *===========================================================================*/
-typedef struct _UA_CloseSecureChannelResponse
+typedef struct _OpcUa_CloseSecureChannelResponse
 {
-    UA_ResponseHeader ResponseHeader;
+    OpcUa_ResponseHeader ResponseHeader;
 }
-UA_CloseSecureChannelResponse;
+OpcUa_CloseSecureChannelResponse;
 
-void UA_CloseSecureChannelResponse_Initialize(UA_CloseSecureChannelResponse* pValue);
+void OpcUa_CloseSecureChannelResponse_Initialize(OpcUa_CloseSecureChannelResponse* pValue);
 
-void UA_CloseSecureChannelResponse_Clear(UA_CloseSecureChannelResponse* pValue);
+void OpcUa_CloseSecureChannelResponse_Clear(OpcUa_CloseSecureChannelResponse* pValue);
 
-//StatusCode UA_CloseSecureChannelResponse_GetSize(UA_CloseSecureChannelResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CloseSecureChannelResponse_GetSize(OpcUa_CloseSecureChannelResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CloseSecureChannelResponse_Encode(UA_CloseSecureChannelResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CloseSecureChannelResponse_Encode(OpcUa_CloseSecureChannelResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CloseSecureChannelResponse_Decode(UA_CloseSecureChannelResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CloseSecureChannelResponse_Decode(OpcUa_CloseSecureChannelResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CloseSecureChannelResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType;
 #endif
 #endif
 
@@ -1328,48 +1328,48 @@ extern struct UA_EncodeableType UA_CloseSecureChannelResponse_EncodeableType;
 /*============================================================================
  * The SignedSoftwareCertificate structure.
  *===========================================================================*/
-typedef struct _UA_SignedSoftwareCertificate
+typedef struct _OpcUa_SignedSoftwareCertificate
 {
     UA_ByteString CertificateData;
     UA_ByteString Signature;
 }
-UA_SignedSoftwareCertificate;
+OpcUa_SignedSoftwareCertificate;
 
-void UA_SignedSoftwareCertificate_Initialize(UA_SignedSoftwareCertificate* pValue);
+void OpcUa_SignedSoftwareCertificate_Initialize(OpcUa_SignedSoftwareCertificate* pValue);
 
-void UA_SignedSoftwareCertificate_Clear(UA_SignedSoftwareCertificate* pValue);
+void OpcUa_SignedSoftwareCertificate_Clear(OpcUa_SignedSoftwareCertificate* pValue);
 
-//StatusCode UA_SignedSoftwareCertificate_GetSize(UA_SignedSoftwareCertificate* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SignedSoftwareCertificate_GetSize(OpcUa_SignedSoftwareCertificate* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SignedSoftwareCertificate_Encode(UA_SignedSoftwareCertificate* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SignedSoftwareCertificate_Encode(OpcUa_SignedSoftwareCertificate* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SignedSoftwareCertificate_Decode(UA_SignedSoftwareCertificate* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SignedSoftwareCertificate_Decode(OpcUa_SignedSoftwareCertificate* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SignedSoftwareCertificate_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SignatureData
 /*============================================================================
  * The SignatureData structure.
  *===========================================================================*/
-typedef struct _UA_SignatureData
+typedef struct _OpcUa_SignatureData
 {
     UA_String     Algorithm;
     UA_ByteString Signature;
 }
-UA_SignatureData;
+OpcUa_SignatureData;
 
-void UA_SignatureData_Initialize(UA_SignatureData* pValue);
+void OpcUa_SignatureData_Initialize(OpcUa_SignatureData* pValue);
 
-void UA_SignatureData_Clear(UA_SignatureData* pValue);
+void OpcUa_SignatureData_Clear(OpcUa_SignatureData* pValue);
 
-//StatusCode UA_SignatureData_GetSize(UA_SignatureData* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SignatureData_GetSize(OpcUa_SignatureData* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SignatureData_Encode(UA_SignatureData* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SignatureData_Encode(OpcUa_SignatureData* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SignatureData_Decode(UA_SignatureData* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SignatureData_Decode(OpcUa_SignatureData* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SignatureData_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SignatureData_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSession
@@ -1377,65 +1377,65 @@ extern struct UA_EncodeableType UA_SignatureData_EncodeableType;
 /*============================================================================
  * The CreateSessionRequest structure.
  *===========================================================================*/
-typedef struct _UA_CreateSessionRequest
+typedef struct _OpcUa_CreateSessionRequest
 {
-    UA_RequestHeader          RequestHeader;
-    UA_ApplicationDescription ClientDescription;
-    UA_String                 ServerUri;
-    UA_String                 EndpointUrl;
-    UA_String                 SessionName;
-    UA_ByteString             ClientNonce;
-    UA_ByteString             ClientCertificate;
-    double                    RequestedSessionTimeout;
-    uint32_t                  MaxResponseMessageSize;
+    OpcUa_RequestHeader          RequestHeader;
+    OpcUa_ApplicationDescription ClientDescription;
+    UA_String                    ServerUri;
+    UA_String                    EndpointUrl;
+    UA_String                    SessionName;
+    UA_ByteString                ClientNonce;
+    UA_ByteString                ClientCertificate;
+    double                       RequestedSessionTimeout;
+    uint32_t                     MaxResponseMessageSize;
 }
-UA_CreateSessionRequest;
+OpcUa_CreateSessionRequest;
 
-void UA_CreateSessionRequest_Initialize(UA_CreateSessionRequest* pValue);
+void OpcUa_CreateSessionRequest_Initialize(OpcUa_CreateSessionRequest* pValue);
 
-void UA_CreateSessionRequest_Clear(UA_CreateSessionRequest* pValue);
+void OpcUa_CreateSessionRequest_Clear(OpcUa_CreateSessionRequest* pValue);
 
-//StatusCode UA_CreateSessionRequest_GetSize(UA_CreateSessionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CreateSessionRequest_GetSize(OpcUa_CreateSessionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CreateSessionRequest_Encode(UA_CreateSessionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateSessionRequest_Encode(OpcUa_CreateSessionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CreateSessionRequest_Decode(UA_CreateSessionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateSessionRequest_Decode(OpcUa_CreateSessionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CreateSessionRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CreateSessionRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSessionResponse
 /*============================================================================
  * The CreateSessionResponse structure.
  *===========================================================================*/
-typedef struct _UA_CreateSessionResponse
+typedef struct _OpcUa_CreateSessionResponse
 {
-    UA_ResponseHeader             ResponseHeader;
-    UA_NodeId                     SessionId;
-    UA_NodeId                     AuthenticationToken;
-    double                        RevisedSessionTimeout;
-    UA_ByteString                 ServerNonce;
-    UA_ByteString                 ServerCertificate;
-    int32_t                       NoOfServerEndpoints;
-    UA_EndpointDescription*       ServerEndpoints;
-    int32_t                       NoOfServerSoftwareCertificates;
-    UA_SignedSoftwareCertificate* ServerSoftwareCertificates;
-    UA_SignatureData              ServerSignature;
-    uint32_t                      MaxRequestMessageSize;
+    OpcUa_ResponseHeader             ResponseHeader;
+    UA_NodeId                        SessionId;
+    UA_NodeId                        AuthenticationToken;
+    double                           RevisedSessionTimeout;
+    UA_ByteString                    ServerNonce;
+    UA_ByteString                    ServerCertificate;
+    int32_t                          NoOfServerEndpoints;
+    OpcUa_EndpointDescription*       ServerEndpoints;
+    int32_t                          NoOfServerSoftwareCertificates;
+    OpcUa_SignedSoftwareCertificate* ServerSoftwareCertificates;
+    OpcUa_SignatureData              ServerSignature;
+    uint32_t                         MaxRequestMessageSize;
 }
-UA_CreateSessionResponse;
+OpcUa_CreateSessionResponse;
 
-void UA_CreateSessionResponse_Initialize(UA_CreateSessionResponse* pValue);
+void OpcUa_CreateSessionResponse_Initialize(OpcUa_CreateSessionResponse* pValue);
 
-void UA_CreateSessionResponse_Clear(UA_CreateSessionResponse* pValue);
+void OpcUa_CreateSessionResponse_Clear(OpcUa_CreateSessionResponse* pValue);
 
-//StatusCode UA_CreateSessionResponse_GetSize(UA_CreateSessionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CreateSessionResponse_GetSize(OpcUa_CreateSessionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CreateSessionResponse_Encode(UA_CreateSessionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateSessionResponse_Encode(OpcUa_CreateSessionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CreateSessionResponse_Decode(UA_CreateSessionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateSessionResponse_Decode(OpcUa_CreateSessionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CreateSessionResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CreateSessionResponse_EncodeableType;
 #endif
 #endif
 
@@ -1443,145 +1443,145 @@ extern struct UA_EncodeableType UA_CreateSessionResponse_EncodeableType;
 /*============================================================================
  * The UserIdentityToken structure.
  *===========================================================================*/
-typedef struct _UA_UserIdentityToken
+typedef struct _OpcUa_UserIdentityToken
 {
     UA_String PolicyId;
 }
-UA_UserIdentityToken;
+OpcUa_UserIdentityToken;
 
-void UA_UserIdentityToken_Initialize(UA_UserIdentityToken* pValue);
+void OpcUa_UserIdentityToken_Initialize(OpcUa_UserIdentityToken* pValue);
 
-void UA_UserIdentityToken_Clear(UA_UserIdentityToken* pValue);
+void OpcUa_UserIdentityToken_Clear(OpcUa_UserIdentityToken* pValue);
 
-//StatusCode UA_UserIdentityToken_GetSize(UA_UserIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_UserIdentityToken_GetSize(OpcUa_UserIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_UserIdentityToken_Encode(UA_UserIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UserIdentityToken_Encode(OpcUa_UserIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_UserIdentityToken_Decode(UA_UserIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UserIdentityToken_Decode(OpcUa_UserIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_UserIdentityToken_EncodeableType;
+extern struct UA_EncodeableType OpcUa_UserIdentityToken_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AnonymousIdentityToken
 /*============================================================================
  * The AnonymousIdentityToken structure.
  *===========================================================================*/
-typedef struct _UA_AnonymousIdentityToken
+typedef struct _OpcUa_AnonymousIdentityToken
 {
     UA_String PolicyId;
 }
-UA_AnonymousIdentityToken;
+OpcUa_AnonymousIdentityToken;
 
-void UA_AnonymousIdentityToken_Initialize(UA_AnonymousIdentityToken* pValue);
+void OpcUa_AnonymousIdentityToken_Initialize(OpcUa_AnonymousIdentityToken* pValue);
 
-void UA_AnonymousIdentityToken_Clear(UA_AnonymousIdentityToken* pValue);
+void OpcUa_AnonymousIdentityToken_Clear(OpcUa_AnonymousIdentityToken* pValue);
 
-//StatusCode UA_AnonymousIdentityToken_GetSize(UA_AnonymousIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AnonymousIdentityToken_GetSize(OpcUa_AnonymousIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AnonymousIdentityToken_Encode(UA_AnonymousIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AnonymousIdentityToken_Encode(OpcUa_AnonymousIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AnonymousIdentityToken_Decode(UA_AnonymousIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AnonymousIdentityToken_Decode(OpcUa_AnonymousIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AnonymousIdentityToken_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_UserNameIdentityToken
 /*============================================================================
  * The UserNameIdentityToken structure.
  *===========================================================================*/
-typedef struct _UA_UserNameIdentityToken
+typedef struct _OpcUa_UserNameIdentityToken
 {
     UA_String     PolicyId;
     UA_String     UserName;
     UA_ByteString Password;
     UA_String     EncryptionAlgorithm;
 }
-UA_UserNameIdentityToken;
+OpcUa_UserNameIdentityToken;
 
-void UA_UserNameIdentityToken_Initialize(UA_UserNameIdentityToken* pValue);
+void OpcUa_UserNameIdentityToken_Initialize(OpcUa_UserNameIdentityToken* pValue);
 
-void UA_UserNameIdentityToken_Clear(UA_UserNameIdentityToken* pValue);
+void OpcUa_UserNameIdentityToken_Clear(OpcUa_UserNameIdentityToken* pValue);
 
-//StatusCode UA_UserNameIdentityToken_GetSize(UA_UserNameIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_UserNameIdentityToken_GetSize(OpcUa_UserNameIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_UserNameIdentityToken_Encode(UA_UserNameIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UserNameIdentityToken_Encode(OpcUa_UserNameIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_UserNameIdentityToken_Decode(UA_UserNameIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UserNameIdentityToken_Decode(OpcUa_UserNameIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_UserNameIdentityToken_EncodeableType;
+extern struct UA_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_X509IdentityToken
 /*============================================================================
  * The X509IdentityToken structure.
  *===========================================================================*/
-typedef struct _UA_X509IdentityToken
+typedef struct _OpcUa_X509IdentityToken
 {
     UA_String     PolicyId;
     UA_ByteString CertificateData;
 }
-UA_X509IdentityToken;
+OpcUa_X509IdentityToken;
 
-void UA_X509IdentityToken_Initialize(UA_X509IdentityToken* pValue);
+void OpcUa_X509IdentityToken_Initialize(OpcUa_X509IdentityToken* pValue);
 
-void UA_X509IdentityToken_Clear(UA_X509IdentityToken* pValue);
+void OpcUa_X509IdentityToken_Clear(OpcUa_X509IdentityToken* pValue);
 
-//StatusCode UA_X509IdentityToken_GetSize(UA_X509IdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_X509IdentityToken_GetSize(OpcUa_X509IdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_X509IdentityToken_Encode(UA_X509IdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_X509IdentityToken_Encode(OpcUa_X509IdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_X509IdentityToken_Decode(UA_X509IdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_X509IdentityToken_Decode(OpcUa_X509IdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_X509IdentityToken_EncodeableType;
+extern struct UA_EncodeableType OpcUa_X509IdentityToken_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_KerberosIdentityToken
 /*============================================================================
  * The KerberosIdentityToken structure.
  *===========================================================================*/
-typedef struct _UA_KerberosIdentityToken
+typedef struct _OpcUa_KerberosIdentityToken
 {
     UA_String     PolicyId;
     UA_ByteString TicketData;
 }
-UA_KerberosIdentityToken;
+OpcUa_KerberosIdentityToken;
 
-void UA_KerberosIdentityToken_Initialize(UA_KerberosIdentityToken* pValue);
+void OpcUa_KerberosIdentityToken_Initialize(OpcUa_KerberosIdentityToken* pValue);
 
-void UA_KerberosIdentityToken_Clear(UA_KerberosIdentityToken* pValue);
+void OpcUa_KerberosIdentityToken_Clear(OpcUa_KerberosIdentityToken* pValue);
 
-//StatusCode UA_KerberosIdentityToken_GetSize(UA_KerberosIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_KerberosIdentityToken_GetSize(OpcUa_KerberosIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_KerberosIdentityToken_Encode(UA_KerberosIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_KerberosIdentityToken_Encode(OpcUa_KerberosIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_KerberosIdentityToken_Decode(UA_KerberosIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_KerberosIdentityToken_Decode(OpcUa_KerberosIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_KerberosIdentityToken_EncodeableType;
+extern struct UA_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_IssuedIdentityToken
 /*============================================================================
  * The IssuedIdentityToken structure.
  *===========================================================================*/
-typedef struct _UA_IssuedIdentityToken
+typedef struct _OpcUa_IssuedIdentityToken
 {
     UA_String     PolicyId;
     UA_ByteString TokenData;
     UA_String     EncryptionAlgorithm;
 }
-UA_IssuedIdentityToken;
+OpcUa_IssuedIdentityToken;
 
-void UA_IssuedIdentityToken_Initialize(UA_IssuedIdentityToken* pValue);
+void OpcUa_IssuedIdentityToken_Initialize(OpcUa_IssuedIdentityToken* pValue);
 
-void UA_IssuedIdentityToken_Clear(UA_IssuedIdentityToken* pValue);
+void OpcUa_IssuedIdentityToken_Clear(OpcUa_IssuedIdentityToken* pValue);
 
-//StatusCode UA_IssuedIdentityToken_GetSize(UA_IssuedIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_IssuedIdentityToken_GetSize(OpcUa_IssuedIdentityToken* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_IssuedIdentityToken_Encode(UA_IssuedIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_IssuedIdentityToken_Encode(OpcUa_IssuedIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_IssuedIdentityToken_Decode(UA_IssuedIdentityToken* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_IssuedIdentityToken_Decode(OpcUa_IssuedIdentityToken* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_IssuedIdentityToken_EncodeableType;
+extern struct UA_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ActivateSession
@@ -1589,58 +1589,58 @@ extern struct UA_EncodeableType UA_IssuedIdentityToken_EncodeableType;
 /*============================================================================
  * The ActivateSessionRequest structure.
  *===========================================================================*/
-typedef struct _UA_ActivateSessionRequest
+typedef struct _OpcUa_ActivateSessionRequest
 {
-    UA_RequestHeader              RequestHeader;
-    UA_SignatureData              ClientSignature;
-    int32_t                       NoOfClientSoftwareCertificates;
-    UA_SignedSoftwareCertificate* ClientSoftwareCertificates;
-    int32_t                       NoOfLocaleIds;
-    UA_String*                    LocaleIds;
-    UA_ExtensionObject            UserIdentityToken;
-    UA_SignatureData              UserTokenSignature;
+    OpcUa_RequestHeader              RequestHeader;
+    OpcUa_SignatureData              ClientSignature;
+    int32_t                          NoOfClientSoftwareCertificates;
+    OpcUa_SignedSoftwareCertificate* ClientSoftwareCertificates;
+    int32_t                          NoOfLocaleIds;
+    UA_String*                       LocaleIds;
+    UA_ExtensionObject               UserIdentityToken;
+    OpcUa_SignatureData              UserTokenSignature;
 }
-UA_ActivateSessionRequest;
+OpcUa_ActivateSessionRequest;
 
-void UA_ActivateSessionRequest_Initialize(UA_ActivateSessionRequest* pValue);
+void OpcUa_ActivateSessionRequest_Initialize(OpcUa_ActivateSessionRequest* pValue);
 
-void UA_ActivateSessionRequest_Clear(UA_ActivateSessionRequest* pValue);
+void OpcUa_ActivateSessionRequest_Clear(OpcUa_ActivateSessionRequest* pValue);
 
-//StatusCode UA_ActivateSessionRequest_GetSize(UA_ActivateSessionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ActivateSessionRequest_GetSize(OpcUa_ActivateSessionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ActivateSessionRequest_Encode(UA_ActivateSessionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ActivateSessionRequest_Encode(OpcUa_ActivateSessionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ActivateSessionRequest_Decode(UA_ActivateSessionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ActivateSessionRequest_Decode(OpcUa_ActivateSessionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ActivateSessionRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ActivateSessionResponse
 /*============================================================================
  * The ActivateSessionResponse structure.
  *===========================================================================*/
-typedef struct _UA_ActivateSessionResponse
+typedef struct _OpcUa_ActivateSessionResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    UA_ByteString      ServerNonce;
-    int32_t            NoOfResults;
-    StatusCode*        Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    UA_ByteString        ServerNonce;
+    int32_t              NoOfResults;
+    StatusCode*          Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_ActivateSessionResponse;
+OpcUa_ActivateSessionResponse;
 
-void UA_ActivateSessionResponse_Initialize(UA_ActivateSessionResponse* pValue);
+void OpcUa_ActivateSessionResponse_Initialize(OpcUa_ActivateSessionResponse* pValue);
 
-void UA_ActivateSessionResponse_Clear(UA_ActivateSessionResponse* pValue);
+void OpcUa_ActivateSessionResponse_Clear(OpcUa_ActivateSessionResponse* pValue);
 
-//StatusCode UA_ActivateSessionResponse_GetSize(UA_ActivateSessionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ActivateSessionResponse_GetSize(OpcUa_ActivateSessionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ActivateSessionResponse_Encode(UA_ActivateSessionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ActivateSessionResponse_Encode(OpcUa_ActivateSessionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ActivateSessionResponse_Decode(UA_ActivateSessionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ActivateSessionResponse_Decode(OpcUa_ActivateSessionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ActivateSessionResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType;
 #endif
 #endif
 
@@ -1649,47 +1649,47 @@ extern struct UA_EncodeableType UA_ActivateSessionResponse_EncodeableType;
 /*============================================================================
  * The CloseSessionRequest structure.
  *===========================================================================*/
-typedef struct _UA_CloseSessionRequest
+typedef struct _OpcUa_CloseSessionRequest
 {
-    UA_RequestHeader RequestHeader;
-    UA_Boolean       DeleteSubscriptions;
+    OpcUa_RequestHeader RequestHeader;
+    UA_Boolean          DeleteSubscriptions;
 }
-UA_CloseSessionRequest;
+OpcUa_CloseSessionRequest;
 
-void UA_CloseSessionRequest_Initialize(UA_CloseSessionRequest* pValue);
+void OpcUa_CloseSessionRequest_Initialize(OpcUa_CloseSessionRequest* pValue);
 
-void UA_CloseSessionRequest_Clear(UA_CloseSessionRequest* pValue);
+void OpcUa_CloseSessionRequest_Clear(OpcUa_CloseSessionRequest* pValue);
 
-//StatusCode UA_CloseSessionRequest_GetSize(UA_CloseSessionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CloseSessionRequest_GetSize(OpcUa_CloseSessionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CloseSessionRequest_Encode(UA_CloseSessionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CloseSessionRequest_Encode(OpcUa_CloseSessionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CloseSessionRequest_Decode(UA_CloseSessionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CloseSessionRequest_Decode(OpcUa_CloseSessionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CloseSessionRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CloseSessionRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CloseSessionResponse
 /*============================================================================
  * The CloseSessionResponse structure.
  *===========================================================================*/
-typedef struct _UA_CloseSessionResponse
+typedef struct _OpcUa_CloseSessionResponse
 {
-    UA_ResponseHeader ResponseHeader;
+    OpcUa_ResponseHeader ResponseHeader;
 }
-UA_CloseSessionResponse;
+OpcUa_CloseSessionResponse;
 
-void UA_CloseSessionResponse_Initialize(UA_CloseSessionResponse* pValue);
+void OpcUa_CloseSessionResponse_Initialize(OpcUa_CloseSessionResponse* pValue);
 
-void UA_CloseSessionResponse_Clear(UA_CloseSessionResponse* pValue);
+void OpcUa_CloseSessionResponse_Clear(OpcUa_CloseSessionResponse* pValue);
 
-//StatusCode UA_CloseSessionResponse_GetSize(UA_CloseSessionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CloseSessionResponse_GetSize(OpcUa_CloseSessionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CloseSessionResponse_Encode(UA_CloseSessionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CloseSessionResponse_Encode(OpcUa_CloseSessionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CloseSessionResponse_Decode(UA_CloseSessionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CloseSessionResponse_Decode(OpcUa_CloseSessionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CloseSessionResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CloseSessionResponse_EncodeableType;
 #endif
 #endif
 
@@ -1698,48 +1698,48 @@ extern struct UA_EncodeableType UA_CloseSessionResponse_EncodeableType;
 /*============================================================================
  * The CancelRequest structure.
  *===========================================================================*/
-typedef struct _UA_CancelRequest
+typedef struct _OpcUa_CancelRequest
 {
-    UA_RequestHeader RequestHeader;
-    uint32_t         RequestHandle;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t            RequestHandle;
 }
-UA_CancelRequest;
+OpcUa_CancelRequest;
 
-void UA_CancelRequest_Initialize(UA_CancelRequest* pValue);
+void OpcUa_CancelRequest_Initialize(OpcUa_CancelRequest* pValue);
 
-void UA_CancelRequest_Clear(UA_CancelRequest* pValue);
+void OpcUa_CancelRequest_Clear(OpcUa_CancelRequest* pValue);
 
-//StatusCode UA_CancelRequest_GetSize(UA_CancelRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CancelRequest_GetSize(OpcUa_CancelRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CancelRequest_Encode(UA_CancelRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CancelRequest_Encode(OpcUa_CancelRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CancelRequest_Decode(UA_CancelRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CancelRequest_Decode(OpcUa_CancelRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CancelRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CancelRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CancelResponse
 /*============================================================================
  * The CancelResponse structure.
  *===========================================================================*/
-typedef struct _UA_CancelResponse
+typedef struct _OpcUa_CancelResponse
 {
-    UA_ResponseHeader ResponseHeader;
-    uint32_t          CancelCount;
+    OpcUa_ResponseHeader ResponseHeader;
+    uint32_t             CancelCount;
 }
-UA_CancelResponse;
+OpcUa_CancelResponse;
 
-void UA_CancelResponse_Initialize(UA_CancelResponse* pValue);
+void OpcUa_CancelResponse_Initialize(OpcUa_CancelResponse* pValue);
 
-void UA_CancelResponse_Clear(UA_CancelResponse* pValue);
+void OpcUa_CancelResponse_Clear(OpcUa_CancelResponse* pValue);
 
-//StatusCode UA_CancelResponse_GetSize(UA_CancelResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CancelResponse_GetSize(OpcUa_CancelResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CancelResponse_Encode(UA_CancelResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CancelResponse_Encode(OpcUa_CancelResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CancelResponse_Decode(UA_CancelResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CancelResponse_Decode(OpcUa_CancelResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CancelResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CancelResponse_EncodeableType;
 #endif
 #endif
 
@@ -1747,45 +1747,45 @@ extern struct UA_EncodeableType UA_CancelResponse_EncodeableType;
 /*============================================================================
  * The NodeAttributesMask enumeration.
  *===========================================================================*/
-typedef enum _UA_NodeAttributesMask
+typedef enum _OpcUa_NodeAttributesMask
 {
-    UA_NodeAttributesMask_None                    = 0,
-    UA_NodeAttributesMask_AccessLevel             = 1,
-    UA_NodeAttributesMask_ArrayDimensions         = 2,
-    UA_NodeAttributesMask_BrowseName              = 4,
-    UA_NodeAttributesMask_ContainsNoLoops         = 8,
-    UA_NodeAttributesMask_DataType                = 16,
-    UA_NodeAttributesMask_Description             = 32,
-    UA_NodeAttributesMask_DisplayName             = 64,
-    UA_NodeAttributesMask_EventNotifier           = 128,
-    UA_NodeAttributesMask_Executable              = 256,
-    UA_NodeAttributesMask_Historizing             = 512,
-    UA_NodeAttributesMask_InverseName             = 1024,
-    UA_NodeAttributesMask_IsAbstract              = 2048,
-    UA_NodeAttributesMask_MinimumSamplingInterval = 4096,
-    UA_NodeAttributesMask_NodeClass               = 8192,
-    UA_NodeAttributesMask_NodeId                  = 16384,
-    UA_NodeAttributesMask_Symmetric               = 32768,
-    UA_NodeAttributesMask_UserAccessLevel         = 65536,
-    UA_NodeAttributesMask_UserExecutable          = 131072,
-    UA_NodeAttributesMask_UserWriteMask           = 262144,
-    UA_NodeAttributesMask_ValueRank               = 524288,
-    UA_NodeAttributesMask_WriteMask               = 1048576,
-    UA_NodeAttributesMask_Value                   = 2097152,
-    UA_NodeAttributesMask_All                     = 4194303,
-    UA_NodeAttributesMask_BaseNode                = 1335396,
-    UA_NodeAttributesMask_Object                  = 1335524,
-    UA_NodeAttributesMask_ObjectTypeOrDataType    = 1337444,
-    UA_NodeAttributesMask_Variable                = 4026999,
-    UA_NodeAttributesMask_VariableType            = 3958902,
-    UA_NodeAttributesMask_Method                  = 1466724,
-    UA_NodeAttributesMask_ReferenceType           = 1371236,
-    UA_NodeAttributesMask_View                    = 1335532
+    OpcUa_NodeAttributesMask_None                    = 0,
+    OpcUa_NodeAttributesMask_AccessLevel             = 1,
+    OpcUa_NodeAttributesMask_ArrayDimensions         = 2,
+    OpcUa_NodeAttributesMask_BrowseName              = 4,
+    OpcUa_NodeAttributesMask_ContainsNoLoops         = 8,
+    OpcUa_NodeAttributesMask_DataType                = 16,
+    OpcUa_NodeAttributesMask_Description             = 32,
+    OpcUa_NodeAttributesMask_DisplayName             = 64,
+    OpcUa_NodeAttributesMask_EventNotifier           = 128,
+    OpcUa_NodeAttributesMask_Executable              = 256,
+    OpcUa_NodeAttributesMask_Historizing             = 512,
+    OpcUa_NodeAttributesMask_InverseName             = 1024,
+    OpcUa_NodeAttributesMask_IsAbstract              = 2048,
+    OpcUa_NodeAttributesMask_MinimumSamplingInterval = 4096,
+    OpcUa_NodeAttributesMask_NodeClass               = 8192,
+    OpcUa_NodeAttributesMask_NodeId                  = 16384,
+    OpcUa_NodeAttributesMask_Symmetric               = 32768,
+    OpcUa_NodeAttributesMask_UserAccessLevel         = 65536,
+    OpcUa_NodeAttributesMask_UserExecutable          = 131072,
+    OpcUa_NodeAttributesMask_UserWriteMask           = 262144,
+    OpcUa_NodeAttributesMask_ValueRank               = 524288,
+    OpcUa_NodeAttributesMask_WriteMask               = 1048576,
+    OpcUa_NodeAttributesMask_Value                   = 2097152,
+    OpcUa_NodeAttributesMask_All                     = 4194303,
+    OpcUa_NodeAttributesMask_BaseNode                = 1335396,
+    OpcUa_NodeAttributesMask_Object                  = 1335524,
+    OpcUa_NodeAttributesMask_ObjectTypeOrDataType    = 1337444,
+    OpcUa_NodeAttributesMask_Variable                = 4026999,
+    OpcUa_NodeAttributesMask_VariableType            = 3958902,
+    OpcUa_NodeAttributesMask_Method                  = 1466724,
+    OpcUa_NodeAttributesMask_ReferenceType           = 1371236,
+    OpcUa_NodeAttributesMask_View                    = 1335532
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_NodeAttributesMask_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_NodeAttributesMask_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_NodeAttributesMask;
+OpcUa_NodeAttributesMask;
 
 #endif
 
@@ -1793,7 +1793,7 @@ UA_NodeAttributesMask;
 /*============================================================================
  * The NodeAttributes structure.
  *===========================================================================*/
-typedef struct _UA_NodeAttributes
+typedef struct _OpcUa_NodeAttributes
 {
     uint32_t         SpecifiedAttributes;
     UA_LocalizedText DisplayName;
@@ -1801,26 +1801,26 @@ typedef struct _UA_NodeAttributes
     uint32_t         WriteMask;
     uint32_t         UserWriteMask;
 }
-UA_NodeAttributes;
+OpcUa_NodeAttributes;
 
-void UA_NodeAttributes_Initialize(UA_NodeAttributes* pValue);
+void OpcUa_NodeAttributes_Initialize(OpcUa_NodeAttributes* pValue);
 
-void UA_NodeAttributes_Clear(UA_NodeAttributes* pValue);
+void OpcUa_NodeAttributes_Clear(OpcUa_NodeAttributes* pValue);
 
-//StatusCode UA_NodeAttributes_GetSize(UA_NodeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_NodeAttributes_GetSize(OpcUa_NodeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_NodeAttributes_Encode(UA_NodeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NodeAttributes_Encode(OpcUa_NodeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_NodeAttributes_Decode(UA_NodeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NodeAttributes_Decode(OpcUa_NodeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_NodeAttributes_EncodeableType;
+extern struct UA_EncodeableType OpcUa_NodeAttributes_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectAttributes
 /*============================================================================
  * The ObjectAttributes structure.
  *===========================================================================*/
-typedef struct _UA_ObjectAttributes
+typedef struct _OpcUa_ObjectAttributes
 {
     uint32_t         SpecifiedAttributes;
     UA_LocalizedText DisplayName;
@@ -1829,26 +1829,26 @@ typedef struct _UA_ObjectAttributes
     uint32_t         UserWriteMask;
     UA_Byte          EventNotifier;
 }
-UA_ObjectAttributes;
+OpcUa_ObjectAttributes;
 
-void UA_ObjectAttributes_Initialize(UA_ObjectAttributes* pValue);
+void OpcUa_ObjectAttributes_Initialize(OpcUa_ObjectAttributes* pValue);
 
-void UA_ObjectAttributes_Clear(UA_ObjectAttributes* pValue);
+void OpcUa_ObjectAttributes_Clear(OpcUa_ObjectAttributes* pValue);
 
-//StatusCode UA_ObjectAttributes_GetSize(UA_ObjectAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ObjectAttributes_GetSize(OpcUa_ObjectAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ObjectAttributes_Encode(UA_ObjectAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ObjectAttributes_Encode(OpcUa_ObjectAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ObjectAttributes_Decode(UA_ObjectAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ObjectAttributes_Decode(OpcUa_ObjectAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ObjectAttributes_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ObjectAttributes_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableAttributes
 /*============================================================================
  * The VariableAttributes structure.
  *===========================================================================*/
-typedef struct _UA_VariableAttributes
+typedef struct _OpcUa_VariableAttributes
 {
     uint32_t         SpecifiedAttributes;
     UA_LocalizedText DisplayName;
@@ -1865,26 +1865,26 @@ typedef struct _UA_VariableAttributes
     double           MinimumSamplingInterval;
     UA_Boolean       Historizing;
 }
-UA_VariableAttributes;
+OpcUa_VariableAttributes;
 
-void UA_VariableAttributes_Initialize(UA_VariableAttributes* pValue);
+void OpcUa_VariableAttributes_Initialize(OpcUa_VariableAttributes* pValue);
 
-void UA_VariableAttributes_Clear(UA_VariableAttributes* pValue);
+void OpcUa_VariableAttributes_Clear(OpcUa_VariableAttributes* pValue);
 
-//StatusCode UA_VariableAttributes_GetSize(UA_VariableAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_VariableAttributes_GetSize(OpcUa_VariableAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_VariableAttributes_Encode(UA_VariableAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_VariableAttributes_Encode(OpcUa_VariableAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_VariableAttributes_Decode(UA_VariableAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_VariableAttributes_Decode(OpcUa_VariableAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_VariableAttributes_EncodeableType;
+extern struct UA_EncodeableType OpcUa_VariableAttributes_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_MethodAttributes
 /*============================================================================
  * The MethodAttributes structure.
  *===========================================================================*/
-typedef struct _UA_MethodAttributes
+typedef struct _OpcUa_MethodAttributes
 {
     uint32_t         SpecifiedAttributes;
     UA_LocalizedText DisplayName;
@@ -1894,26 +1894,26 @@ typedef struct _UA_MethodAttributes
     UA_Boolean       Executable;
     UA_Boolean       UserExecutable;
 }
-UA_MethodAttributes;
+OpcUa_MethodAttributes;
 
-void UA_MethodAttributes_Initialize(UA_MethodAttributes* pValue);
+void OpcUa_MethodAttributes_Initialize(OpcUa_MethodAttributes* pValue);
 
-void UA_MethodAttributes_Clear(UA_MethodAttributes* pValue);
+void OpcUa_MethodAttributes_Clear(OpcUa_MethodAttributes* pValue);
 
-//StatusCode UA_MethodAttributes_GetSize(UA_MethodAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_MethodAttributes_GetSize(OpcUa_MethodAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_MethodAttributes_Encode(UA_MethodAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MethodAttributes_Encode(OpcUa_MethodAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_MethodAttributes_Decode(UA_MethodAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MethodAttributes_Decode(OpcUa_MethodAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_MethodAttributes_EncodeableType;
+extern struct UA_EncodeableType OpcUa_MethodAttributes_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ObjectTypeAttributes
 /*============================================================================
  * The ObjectTypeAttributes structure.
  *===========================================================================*/
-typedef struct _UA_ObjectTypeAttributes
+typedef struct _OpcUa_ObjectTypeAttributes
 {
     uint32_t         SpecifiedAttributes;
     UA_LocalizedText DisplayName;
@@ -1922,26 +1922,26 @@ typedef struct _UA_ObjectTypeAttributes
     uint32_t         UserWriteMask;
     UA_Boolean       IsAbstract;
 }
-UA_ObjectTypeAttributes;
+OpcUa_ObjectTypeAttributes;
 
-void UA_ObjectTypeAttributes_Initialize(UA_ObjectTypeAttributes* pValue);
+void OpcUa_ObjectTypeAttributes_Initialize(OpcUa_ObjectTypeAttributes* pValue);
 
-void UA_ObjectTypeAttributes_Clear(UA_ObjectTypeAttributes* pValue);
+void OpcUa_ObjectTypeAttributes_Clear(OpcUa_ObjectTypeAttributes* pValue);
 
-//StatusCode UA_ObjectTypeAttributes_GetSize(UA_ObjectTypeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ObjectTypeAttributes_GetSize(OpcUa_ObjectTypeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ObjectTypeAttributes_Encode(UA_ObjectTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ObjectTypeAttributes_Encode(OpcUa_ObjectTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ObjectTypeAttributes_Decode(UA_ObjectTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ObjectTypeAttributes_Decode(OpcUa_ObjectTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ObjectTypeAttributes_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_VariableTypeAttributes
 /*============================================================================
  * The VariableTypeAttributes structure.
  *===========================================================================*/
-typedef struct _UA_VariableTypeAttributes
+typedef struct _OpcUa_VariableTypeAttributes
 {
     uint32_t         SpecifiedAttributes;
     UA_LocalizedText DisplayName;
@@ -1955,26 +1955,26 @@ typedef struct _UA_VariableTypeAttributes
     uint32_t*        ArrayDimensions;
     UA_Boolean       IsAbstract;
 }
-UA_VariableTypeAttributes;
+OpcUa_VariableTypeAttributes;
 
-void UA_VariableTypeAttributes_Initialize(UA_VariableTypeAttributes* pValue);
+void OpcUa_VariableTypeAttributes_Initialize(OpcUa_VariableTypeAttributes* pValue);
 
-void UA_VariableTypeAttributes_Clear(UA_VariableTypeAttributes* pValue);
+void OpcUa_VariableTypeAttributes_Clear(OpcUa_VariableTypeAttributes* pValue);
 
-//StatusCode UA_VariableTypeAttributes_GetSize(UA_VariableTypeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_VariableTypeAttributes_GetSize(OpcUa_VariableTypeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_VariableTypeAttributes_Encode(UA_VariableTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_VariableTypeAttributes_Encode(OpcUa_VariableTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_VariableTypeAttributes_Decode(UA_VariableTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_VariableTypeAttributes_Decode(OpcUa_VariableTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_VariableTypeAttributes_EncodeableType;
+extern struct UA_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReferenceTypeAttributes
 /*============================================================================
  * The ReferenceTypeAttributes structure.
  *===========================================================================*/
-typedef struct _UA_ReferenceTypeAttributes
+typedef struct _OpcUa_ReferenceTypeAttributes
 {
     uint32_t         SpecifiedAttributes;
     UA_LocalizedText DisplayName;
@@ -1985,26 +1985,26 @@ typedef struct _UA_ReferenceTypeAttributes
     UA_Boolean       Symmetric;
     UA_LocalizedText InverseName;
 }
-UA_ReferenceTypeAttributes;
+OpcUa_ReferenceTypeAttributes;
 
-void UA_ReferenceTypeAttributes_Initialize(UA_ReferenceTypeAttributes* pValue);
+void OpcUa_ReferenceTypeAttributes_Initialize(OpcUa_ReferenceTypeAttributes* pValue);
 
-void UA_ReferenceTypeAttributes_Clear(UA_ReferenceTypeAttributes* pValue);
+void OpcUa_ReferenceTypeAttributes_Clear(OpcUa_ReferenceTypeAttributes* pValue);
 
-//StatusCode UA_ReferenceTypeAttributes_GetSize(UA_ReferenceTypeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReferenceTypeAttributes_GetSize(OpcUa_ReferenceTypeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReferenceTypeAttributes_Encode(UA_ReferenceTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReferenceTypeAttributes_Encode(OpcUa_ReferenceTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReferenceTypeAttributes_Decode(UA_ReferenceTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReferenceTypeAttributes_Decode(OpcUa_ReferenceTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReferenceTypeAttributes_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DataTypeAttributes
 /*============================================================================
  * The DataTypeAttributes structure.
  *===========================================================================*/
-typedef struct _UA_DataTypeAttributes
+typedef struct _OpcUa_DataTypeAttributes
 {
     uint32_t         SpecifiedAttributes;
     UA_LocalizedText DisplayName;
@@ -2013,26 +2013,26 @@ typedef struct _UA_DataTypeAttributes
     uint32_t         UserWriteMask;
     UA_Boolean       IsAbstract;
 }
-UA_DataTypeAttributes;
+OpcUa_DataTypeAttributes;
 
-void UA_DataTypeAttributes_Initialize(UA_DataTypeAttributes* pValue);
+void OpcUa_DataTypeAttributes_Initialize(OpcUa_DataTypeAttributes* pValue);
 
-void UA_DataTypeAttributes_Clear(UA_DataTypeAttributes* pValue);
+void OpcUa_DataTypeAttributes_Clear(OpcUa_DataTypeAttributes* pValue);
 
-//StatusCode UA_DataTypeAttributes_GetSize(UA_DataTypeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DataTypeAttributes_GetSize(OpcUa_DataTypeAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DataTypeAttributes_Encode(UA_DataTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DataTypeAttributes_Encode(OpcUa_DataTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DataTypeAttributes_Decode(UA_DataTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DataTypeAttributes_Decode(OpcUa_DataTypeAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DataTypeAttributes_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DataTypeAttributes_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ViewAttributes
 /*============================================================================
  * The ViewAttributes structure.
  *===========================================================================*/
-typedef struct _UA_ViewAttributes
+typedef struct _OpcUa_ViewAttributes
 {
     uint32_t         SpecifiedAttributes;
     UA_LocalizedText DisplayName;
@@ -2042,72 +2042,72 @@ typedef struct _UA_ViewAttributes
     UA_Boolean       ContainsNoLoops;
     UA_Byte          EventNotifier;
 }
-UA_ViewAttributes;
+OpcUa_ViewAttributes;
 
-void UA_ViewAttributes_Initialize(UA_ViewAttributes* pValue);
+void OpcUa_ViewAttributes_Initialize(OpcUa_ViewAttributes* pValue);
 
-void UA_ViewAttributes_Clear(UA_ViewAttributes* pValue);
+void OpcUa_ViewAttributes_Clear(OpcUa_ViewAttributes* pValue);
 
-//StatusCode UA_ViewAttributes_GetSize(UA_ViewAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ViewAttributes_GetSize(OpcUa_ViewAttributes* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ViewAttributes_Encode(UA_ViewAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ViewAttributes_Encode(OpcUa_ViewAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ViewAttributes_Decode(UA_ViewAttributes* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ViewAttributes_Decode(OpcUa_ViewAttributes* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ViewAttributes_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ViewAttributes_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodesItem
 /*============================================================================
  * The AddNodesItem structure.
  *===========================================================================*/
-typedef struct _UA_AddNodesItem
+typedef struct _OpcUa_AddNodesItem
 {
     UA_ExpandedNodeId  ParentNodeId;
     UA_NodeId          ReferenceTypeId;
     UA_ExpandedNodeId  RequestedNewNodeId;
     UA_QualifiedName   BrowseName;
-    UA_NodeClass       NodeClass;
+    OpcUa_NodeClass    NodeClass;
     UA_ExtensionObject NodeAttributes;
     UA_ExpandedNodeId  TypeDefinition;
 }
-UA_AddNodesItem;
+OpcUa_AddNodesItem;
 
-void UA_AddNodesItem_Initialize(UA_AddNodesItem* pValue);
+void OpcUa_AddNodesItem_Initialize(OpcUa_AddNodesItem* pValue);
 
-void UA_AddNodesItem_Clear(UA_AddNodesItem* pValue);
+void OpcUa_AddNodesItem_Clear(OpcUa_AddNodesItem* pValue);
 
-//StatusCode UA_AddNodesItem_GetSize(UA_AddNodesItem* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AddNodesItem_GetSize(OpcUa_AddNodesItem* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AddNodesItem_Encode(UA_AddNodesItem* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddNodesItem_Encode(OpcUa_AddNodesItem* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AddNodesItem_Decode(UA_AddNodesItem* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddNodesItem_Decode(OpcUa_AddNodesItem* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AddNodesItem_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AddNodesItem_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodesResult
 /*============================================================================
  * The AddNodesResult structure.
  *===========================================================================*/
-typedef struct _UA_AddNodesResult
+typedef struct _OpcUa_AddNodesResult
 {
     StatusCode StatusCode;
     UA_NodeId  AddedNodeId;
 }
-UA_AddNodesResult;
+OpcUa_AddNodesResult;
 
-void UA_AddNodesResult_Initialize(UA_AddNodesResult* pValue);
+void OpcUa_AddNodesResult_Initialize(OpcUa_AddNodesResult* pValue);
 
-void UA_AddNodesResult_Clear(UA_AddNodesResult* pValue);
+void OpcUa_AddNodesResult_Clear(OpcUa_AddNodesResult* pValue);
 
-//StatusCode UA_AddNodesResult_GetSize(UA_AddNodesResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AddNodesResult_GetSize(OpcUa_AddNodesResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AddNodesResult_Encode(UA_AddNodesResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddNodesResult_Encode(OpcUa_AddNodesResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AddNodesResult_Decode(UA_AddNodesResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddNodesResult_Decode(OpcUa_AddNodesResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AddNodesResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AddNodesResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodes
@@ -2115,52 +2115,52 @@ extern struct UA_EncodeableType UA_AddNodesResult_EncodeableType;
 /*============================================================================
  * The AddNodesRequest structure.
  *===========================================================================*/
-typedef struct _UA_AddNodesRequest
+typedef struct _OpcUa_AddNodesRequest
 {
-    UA_RequestHeader RequestHeader;
-    int32_t          NoOfNodesToAdd;
-    UA_AddNodesItem* NodesToAdd;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t             NoOfNodesToAdd;
+    OpcUa_AddNodesItem* NodesToAdd;
 }
-UA_AddNodesRequest;
+OpcUa_AddNodesRequest;
 
-void UA_AddNodesRequest_Initialize(UA_AddNodesRequest* pValue);
+void OpcUa_AddNodesRequest_Initialize(OpcUa_AddNodesRequest* pValue);
 
-void UA_AddNodesRequest_Clear(UA_AddNodesRequest* pValue);
+void OpcUa_AddNodesRequest_Clear(OpcUa_AddNodesRequest* pValue);
 
-//StatusCode UA_AddNodesRequest_GetSize(UA_AddNodesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AddNodesRequest_GetSize(OpcUa_AddNodesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AddNodesRequest_Encode(UA_AddNodesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddNodesRequest_Encode(OpcUa_AddNodesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AddNodesRequest_Decode(UA_AddNodesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddNodesRequest_Decode(OpcUa_AddNodesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AddNodesRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AddNodesRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodesResponse
 /*============================================================================
  * The AddNodesResponse structure.
  *===========================================================================*/
-typedef struct _UA_AddNodesResponse
+typedef struct _OpcUa_AddNodesResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    UA_AddNodesResult* Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader  ResponseHeader;
+    int32_t               NoOfResults;
+    OpcUa_AddNodesResult* Results;
+    int32_t               NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*    DiagnosticInfos;
 }
-UA_AddNodesResponse;
+OpcUa_AddNodesResponse;
 
-void UA_AddNodesResponse_Initialize(UA_AddNodesResponse* pValue);
+void OpcUa_AddNodesResponse_Initialize(OpcUa_AddNodesResponse* pValue);
 
-void UA_AddNodesResponse_Clear(UA_AddNodesResponse* pValue);
+void OpcUa_AddNodesResponse_Clear(OpcUa_AddNodesResponse* pValue);
 
-//StatusCode UA_AddNodesResponse_GetSize(UA_AddNodesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AddNodesResponse_GetSize(OpcUa_AddNodesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AddNodesResponse_Encode(UA_AddNodesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddNodesResponse_Encode(OpcUa_AddNodesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AddNodesResponse_Decode(UA_AddNodesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddNodesResponse_Decode(OpcUa_AddNodesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AddNodesResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AddNodesResponse_EncodeableType;
 #endif
 #endif
 
@@ -2168,28 +2168,28 @@ extern struct UA_EncodeableType UA_AddNodesResponse_EncodeableType;
 /*============================================================================
  * The AddReferencesItem structure.
  *===========================================================================*/
-typedef struct _UA_AddReferencesItem
+typedef struct _OpcUa_AddReferencesItem
 {
     UA_NodeId         SourceNodeId;
     UA_NodeId         ReferenceTypeId;
     UA_Boolean        IsForward;
     UA_String         TargetServerUri;
     UA_ExpandedNodeId TargetNodeId;
-    UA_NodeClass      TargetNodeClass;
+    OpcUa_NodeClass   TargetNodeClass;
 }
-UA_AddReferencesItem;
+OpcUa_AddReferencesItem;
 
-void UA_AddReferencesItem_Initialize(UA_AddReferencesItem* pValue);
+void OpcUa_AddReferencesItem_Initialize(OpcUa_AddReferencesItem* pValue);
 
-void UA_AddReferencesItem_Clear(UA_AddReferencesItem* pValue);
+void OpcUa_AddReferencesItem_Clear(OpcUa_AddReferencesItem* pValue);
 
-//StatusCode UA_AddReferencesItem_GetSize(UA_AddReferencesItem* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AddReferencesItem_GetSize(OpcUa_AddReferencesItem* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AddReferencesItem_Encode(UA_AddReferencesItem* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddReferencesItem_Encode(OpcUa_AddReferencesItem* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AddReferencesItem_Decode(UA_AddReferencesItem* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddReferencesItem_Decode(OpcUa_AddReferencesItem* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AddReferencesItem_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AddReferencesItem_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddReferences
@@ -2197,52 +2197,52 @@ extern struct UA_EncodeableType UA_AddReferencesItem_EncodeableType;
 /*============================================================================
  * The AddReferencesRequest structure.
  *===========================================================================*/
-typedef struct _UA_AddReferencesRequest
+typedef struct _OpcUa_AddReferencesRequest
 {
-    UA_RequestHeader      RequestHeader;
-    int32_t               NoOfReferencesToAdd;
-    UA_AddReferencesItem* ReferencesToAdd;
+    OpcUa_RequestHeader      RequestHeader;
+    int32_t                  NoOfReferencesToAdd;
+    OpcUa_AddReferencesItem* ReferencesToAdd;
 }
-UA_AddReferencesRequest;
+OpcUa_AddReferencesRequest;
 
-void UA_AddReferencesRequest_Initialize(UA_AddReferencesRequest* pValue);
+void OpcUa_AddReferencesRequest_Initialize(OpcUa_AddReferencesRequest* pValue);
 
-void UA_AddReferencesRequest_Clear(UA_AddReferencesRequest* pValue);
+void OpcUa_AddReferencesRequest_Clear(OpcUa_AddReferencesRequest* pValue);
 
-//StatusCode UA_AddReferencesRequest_GetSize(UA_AddReferencesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AddReferencesRequest_GetSize(OpcUa_AddReferencesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AddReferencesRequest_Encode(UA_AddReferencesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddReferencesRequest_Encode(OpcUa_AddReferencesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AddReferencesRequest_Decode(UA_AddReferencesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddReferencesRequest_Decode(OpcUa_AddReferencesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AddReferencesRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AddReferencesRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddReferencesResponse
 /*============================================================================
  * The AddReferencesResponse structure.
  *===========================================================================*/
-typedef struct _UA_AddReferencesResponse
+typedef struct _OpcUa_AddReferencesResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    StatusCode*        Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    StatusCode*          Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_AddReferencesResponse;
+OpcUa_AddReferencesResponse;
 
-void UA_AddReferencesResponse_Initialize(UA_AddReferencesResponse* pValue);
+void OpcUa_AddReferencesResponse_Initialize(OpcUa_AddReferencesResponse* pValue);
 
-void UA_AddReferencesResponse_Clear(UA_AddReferencesResponse* pValue);
+void OpcUa_AddReferencesResponse_Clear(OpcUa_AddReferencesResponse* pValue);
 
-//StatusCode UA_AddReferencesResponse_GetSize(UA_AddReferencesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AddReferencesResponse_GetSize(OpcUa_AddReferencesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AddReferencesResponse_Encode(UA_AddReferencesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddReferencesResponse_Encode(OpcUa_AddReferencesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AddReferencesResponse_Decode(UA_AddReferencesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AddReferencesResponse_Decode(OpcUa_AddReferencesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AddReferencesResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AddReferencesResponse_EncodeableType;
 #endif
 #endif
 
@@ -2250,24 +2250,24 @@ extern struct UA_EncodeableType UA_AddReferencesResponse_EncodeableType;
 /*============================================================================
  * The DeleteNodesItem structure.
  *===========================================================================*/
-typedef struct _UA_DeleteNodesItem
+typedef struct _OpcUa_DeleteNodesItem
 {
     UA_NodeId  NodeId;
     UA_Boolean DeleteTargetReferences;
 }
-UA_DeleteNodesItem;
+OpcUa_DeleteNodesItem;
 
-void UA_DeleteNodesItem_Initialize(UA_DeleteNodesItem* pValue);
+void OpcUa_DeleteNodesItem_Initialize(OpcUa_DeleteNodesItem* pValue);
 
-void UA_DeleteNodesItem_Clear(UA_DeleteNodesItem* pValue);
+void OpcUa_DeleteNodesItem_Clear(OpcUa_DeleteNodesItem* pValue);
 
-//StatusCode UA_DeleteNodesItem_GetSize(UA_DeleteNodesItem* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteNodesItem_GetSize(OpcUa_DeleteNodesItem* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteNodesItem_Encode(UA_DeleteNodesItem* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteNodesItem_Encode(OpcUa_DeleteNodesItem* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteNodesItem_Decode(UA_DeleteNodesItem* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteNodesItem_Decode(OpcUa_DeleteNodesItem* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteNodesItem_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteNodesItem_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteNodes
@@ -2275,52 +2275,52 @@ extern struct UA_EncodeableType UA_DeleteNodesItem_EncodeableType;
 /*============================================================================
  * The DeleteNodesRequest structure.
  *===========================================================================*/
-typedef struct _UA_DeleteNodesRequest
+typedef struct _OpcUa_DeleteNodesRequest
 {
-    UA_RequestHeader    RequestHeader;
-    int32_t             NoOfNodesToDelete;
-    UA_DeleteNodesItem* NodesToDelete;
+    OpcUa_RequestHeader    RequestHeader;
+    int32_t                NoOfNodesToDelete;
+    OpcUa_DeleteNodesItem* NodesToDelete;
 }
-UA_DeleteNodesRequest;
+OpcUa_DeleteNodesRequest;
 
-void UA_DeleteNodesRequest_Initialize(UA_DeleteNodesRequest* pValue);
+void OpcUa_DeleteNodesRequest_Initialize(OpcUa_DeleteNodesRequest* pValue);
 
-void UA_DeleteNodesRequest_Clear(UA_DeleteNodesRequest* pValue);
+void OpcUa_DeleteNodesRequest_Clear(OpcUa_DeleteNodesRequest* pValue);
 
-//StatusCode UA_DeleteNodesRequest_GetSize(UA_DeleteNodesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteNodesRequest_GetSize(OpcUa_DeleteNodesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteNodesRequest_Encode(UA_DeleteNodesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteNodesRequest_Encode(OpcUa_DeleteNodesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteNodesRequest_Decode(UA_DeleteNodesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteNodesRequest_Decode(OpcUa_DeleteNodesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteNodesRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteNodesResponse
 /*============================================================================
  * The DeleteNodesResponse structure.
  *===========================================================================*/
-typedef struct _UA_DeleteNodesResponse
+typedef struct _OpcUa_DeleteNodesResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    StatusCode*        Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    StatusCode*          Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_DeleteNodesResponse;
+OpcUa_DeleteNodesResponse;
 
-void UA_DeleteNodesResponse_Initialize(UA_DeleteNodesResponse* pValue);
+void OpcUa_DeleteNodesResponse_Initialize(OpcUa_DeleteNodesResponse* pValue);
 
-void UA_DeleteNodesResponse_Clear(UA_DeleteNodesResponse* pValue);
+void OpcUa_DeleteNodesResponse_Clear(OpcUa_DeleteNodesResponse* pValue);
 
-//StatusCode UA_DeleteNodesResponse_GetSize(UA_DeleteNodesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteNodesResponse_GetSize(OpcUa_DeleteNodesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteNodesResponse_Encode(UA_DeleteNodesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteNodesResponse_Encode(OpcUa_DeleteNodesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteNodesResponse_Decode(UA_DeleteNodesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteNodesResponse_Decode(OpcUa_DeleteNodesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteNodesResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType;
 #endif
 #endif
 
@@ -2328,7 +2328,7 @@ extern struct UA_EncodeableType UA_DeleteNodesResponse_EncodeableType;
 /*============================================================================
  * The DeleteReferencesItem structure.
  *===========================================================================*/
-typedef struct _UA_DeleteReferencesItem
+typedef struct _OpcUa_DeleteReferencesItem
 {
     UA_NodeId         SourceNodeId;
     UA_NodeId         ReferenceTypeId;
@@ -2336,19 +2336,19 @@ typedef struct _UA_DeleteReferencesItem
     UA_ExpandedNodeId TargetNodeId;
     UA_Boolean        DeleteBidirectional;
 }
-UA_DeleteReferencesItem;
+OpcUa_DeleteReferencesItem;
 
-void UA_DeleteReferencesItem_Initialize(UA_DeleteReferencesItem* pValue);
+void OpcUa_DeleteReferencesItem_Initialize(OpcUa_DeleteReferencesItem* pValue);
 
-void UA_DeleteReferencesItem_Clear(UA_DeleteReferencesItem* pValue);
+void OpcUa_DeleteReferencesItem_Clear(OpcUa_DeleteReferencesItem* pValue);
 
-//StatusCode UA_DeleteReferencesItem_GetSize(UA_DeleteReferencesItem* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteReferencesItem_GetSize(OpcUa_DeleteReferencesItem* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteReferencesItem_Encode(UA_DeleteReferencesItem* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteReferencesItem_Encode(OpcUa_DeleteReferencesItem* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteReferencesItem_Decode(UA_DeleteReferencesItem* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteReferencesItem_Decode(OpcUa_DeleteReferencesItem* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteReferencesItem_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteReferences
@@ -2356,52 +2356,52 @@ extern struct UA_EncodeableType UA_DeleteReferencesItem_EncodeableType;
 /*============================================================================
  * The DeleteReferencesRequest structure.
  *===========================================================================*/
-typedef struct _UA_DeleteReferencesRequest
+typedef struct _OpcUa_DeleteReferencesRequest
 {
-    UA_RequestHeader         RequestHeader;
-    int32_t                  NoOfReferencesToDelete;
-    UA_DeleteReferencesItem* ReferencesToDelete;
+    OpcUa_RequestHeader         RequestHeader;
+    int32_t                     NoOfReferencesToDelete;
+    OpcUa_DeleteReferencesItem* ReferencesToDelete;
 }
-UA_DeleteReferencesRequest;
+OpcUa_DeleteReferencesRequest;
 
-void UA_DeleteReferencesRequest_Initialize(UA_DeleteReferencesRequest* pValue);
+void OpcUa_DeleteReferencesRequest_Initialize(OpcUa_DeleteReferencesRequest* pValue);
 
-void UA_DeleteReferencesRequest_Clear(UA_DeleteReferencesRequest* pValue);
+void OpcUa_DeleteReferencesRequest_Clear(OpcUa_DeleteReferencesRequest* pValue);
 
-//StatusCode UA_DeleteReferencesRequest_GetSize(UA_DeleteReferencesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteReferencesRequest_GetSize(OpcUa_DeleteReferencesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteReferencesRequest_Encode(UA_DeleteReferencesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteReferencesRequest_Encode(OpcUa_DeleteReferencesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteReferencesRequest_Decode(UA_DeleteReferencesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteReferencesRequest_Decode(OpcUa_DeleteReferencesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteReferencesRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteReferencesResponse
 /*============================================================================
  * The DeleteReferencesResponse structure.
  *===========================================================================*/
-typedef struct _UA_DeleteReferencesResponse
+typedef struct _OpcUa_DeleteReferencesResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    StatusCode*        Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    StatusCode*          Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_DeleteReferencesResponse;
+OpcUa_DeleteReferencesResponse;
 
-void UA_DeleteReferencesResponse_Initialize(UA_DeleteReferencesResponse* pValue);
+void OpcUa_DeleteReferencesResponse_Initialize(OpcUa_DeleteReferencesResponse* pValue);
 
-void UA_DeleteReferencesResponse_Clear(UA_DeleteReferencesResponse* pValue);
+void OpcUa_DeleteReferencesResponse_Clear(OpcUa_DeleteReferencesResponse* pValue);
 
-//StatusCode UA_DeleteReferencesResponse_GetSize(UA_DeleteReferencesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteReferencesResponse_GetSize(OpcUa_DeleteReferencesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteReferencesResponse_Encode(UA_DeleteReferencesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteReferencesResponse_Encode(OpcUa_DeleteReferencesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteReferencesResponse_Decode(UA_DeleteReferencesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteReferencesResponse_Decode(OpcUa_DeleteReferencesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteReferencesResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType;
 #endif
 #endif
 
@@ -2409,36 +2409,36 @@ extern struct UA_EncodeableType UA_DeleteReferencesResponse_EncodeableType;
 /*============================================================================
  * The AttributeWriteMask enumeration.
  *===========================================================================*/
-typedef enum _UA_AttributeWriteMask
+typedef enum _OpcUa_AttributeWriteMask
 {
-    UA_AttributeWriteMask_None                    = 0,
-    UA_AttributeWriteMask_AccessLevel             = 1,
-    UA_AttributeWriteMask_ArrayDimensions         = 2,
-    UA_AttributeWriteMask_BrowseName              = 4,
-    UA_AttributeWriteMask_ContainsNoLoops         = 8,
-    UA_AttributeWriteMask_DataType                = 16,
-    UA_AttributeWriteMask_Description             = 32,
-    UA_AttributeWriteMask_DisplayName             = 64,
-    UA_AttributeWriteMask_EventNotifier           = 128,
-    UA_AttributeWriteMask_Executable              = 256,
-    UA_AttributeWriteMask_Historizing             = 512,
-    UA_AttributeWriteMask_InverseName             = 1024,
-    UA_AttributeWriteMask_IsAbstract              = 2048,
-    UA_AttributeWriteMask_MinimumSamplingInterval = 4096,
-    UA_AttributeWriteMask_NodeClass               = 8192,
-    UA_AttributeWriteMask_NodeId                  = 16384,
-    UA_AttributeWriteMask_Symmetric               = 32768,
-    UA_AttributeWriteMask_UserAccessLevel         = 65536,
-    UA_AttributeWriteMask_UserExecutable          = 131072,
-    UA_AttributeWriteMask_UserWriteMask           = 262144,
-    UA_AttributeWriteMask_ValueRank               = 524288,
-    UA_AttributeWriteMask_WriteMask               = 1048576,
-    UA_AttributeWriteMask_ValueForVariableType    = 2097152
+    OpcUa_AttributeWriteMask_None                    = 0,
+    OpcUa_AttributeWriteMask_AccessLevel             = 1,
+    OpcUa_AttributeWriteMask_ArrayDimensions         = 2,
+    OpcUa_AttributeWriteMask_BrowseName              = 4,
+    OpcUa_AttributeWriteMask_ContainsNoLoops         = 8,
+    OpcUa_AttributeWriteMask_DataType                = 16,
+    OpcUa_AttributeWriteMask_Description             = 32,
+    OpcUa_AttributeWriteMask_DisplayName             = 64,
+    OpcUa_AttributeWriteMask_EventNotifier           = 128,
+    OpcUa_AttributeWriteMask_Executable              = 256,
+    OpcUa_AttributeWriteMask_Historizing             = 512,
+    OpcUa_AttributeWriteMask_InverseName             = 1024,
+    OpcUa_AttributeWriteMask_IsAbstract              = 2048,
+    OpcUa_AttributeWriteMask_MinimumSamplingInterval = 4096,
+    OpcUa_AttributeWriteMask_NodeClass               = 8192,
+    OpcUa_AttributeWriteMask_NodeId                  = 16384,
+    OpcUa_AttributeWriteMask_Symmetric               = 32768,
+    OpcUa_AttributeWriteMask_UserAccessLevel         = 65536,
+    OpcUa_AttributeWriteMask_UserExecutable          = 131072,
+    OpcUa_AttributeWriteMask_UserWriteMask           = 262144,
+    OpcUa_AttributeWriteMask_ValueRank               = 524288,
+    OpcUa_AttributeWriteMask_WriteMask               = 1048576,
+    OpcUa_AttributeWriteMask_ValueForVariableType    = 2097152
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_AttributeWriteMask_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_AttributeWriteMask_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_AttributeWriteMask;
+OpcUa_AttributeWriteMask;
 
 #endif
 
@@ -2446,16 +2446,16 @@ UA_AttributeWriteMask;
 /*============================================================================
  * The BrowseDirection enumeration.
  *===========================================================================*/
-typedef enum _UA_BrowseDirection
+typedef enum _OpcUa_BrowseDirection
 {
-    UA_BrowseDirection_Forward = 0,
-    UA_BrowseDirection_Inverse = 1,
-    UA_BrowseDirection_Both    = 2
+    OpcUa_BrowseDirection_Forward = 0,
+    OpcUa_BrowseDirection_Inverse = 1,
+    OpcUa_BrowseDirection_Both    = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_BrowseDirection_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_BrowseDirection_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_BrowseDirection;
+OpcUa_BrowseDirection;
 
 #endif
 
@@ -2463,76 +2463,76 @@ UA_BrowseDirection;
 /*============================================================================
  * The ViewDescription structure.
  *===========================================================================*/
-typedef struct _UA_ViewDescription
+typedef struct _OpcUa_ViewDescription
 {
     UA_NodeId   ViewId;
     UA_DateTime Timestamp;
     uint32_t    ViewVersion;
 }
-UA_ViewDescription;
+OpcUa_ViewDescription;
 
-void UA_ViewDescription_Initialize(UA_ViewDescription* pValue);
+void OpcUa_ViewDescription_Initialize(OpcUa_ViewDescription* pValue);
 
-void UA_ViewDescription_Clear(UA_ViewDescription* pValue);
+void OpcUa_ViewDescription_Clear(OpcUa_ViewDescription* pValue);
 
-//StatusCode UA_ViewDescription_GetSize(UA_ViewDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ViewDescription_GetSize(OpcUa_ViewDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ViewDescription_Encode(UA_ViewDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ViewDescription_Encode(OpcUa_ViewDescription* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ViewDescription_Decode(UA_ViewDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ViewDescription_Decode(OpcUa_ViewDescription* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ViewDescription_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ViewDescription_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseDescription
 /*============================================================================
  * The BrowseDescription structure.
  *===========================================================================*/
-typedef struct _UA_BrowseDescription
+typedef struct _OpcUa_BrowseDescription
 {
-    UA_NodeId          NodeId;
-    UA_BrowseDirection BrowseDirection;
-    UA_NodeId          ReferenceTypeId;
-    UA_Boolean         IncludeSubtypes;
-    uint32_t           NodeClassMask;
-    uint32_t           ResultMask;
+    UA_NodeId             NodeId;
+    OpcUa_BrowseDirection BrowseDirection;
+    UA_NodeId             ReferenceTypeId;
+    UA_Boolean            IncludeSubtypes;
+    uint32_t              NodeClassMask;
+    uint32_t              ResultMask;
 }
-UA_BrowseDescription;
+OpcUa_BrowseDescription;
 
-void UA_BrowseDescription_Initialize(UA_BrowseDescription* pValue);
+void OpcUa_BrowseDescription_Initialize(OpcUa_BrowseDescription* pValue);
 
-void UA_BrowseDescription_Clear(UA_BrowseDescription* pValue);
+void OpcUa_BrowseDescription_Clear(OpcUa_BrowseDescription* pValue);
 
-//StatusCode UA_BrowseDescription_GetSize(UA_BrowseDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BrowseDescription_GetSize(OpcUa_BrowseDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BrowseDescription_Encode(UA_BrowseDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseDescription_Encode(OpcUa_BrowseDescription* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BrowseDescription_Decode(UA_BrowseDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseDescription_Decode(OpcUa_BrowseDescription* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BrowseDescription_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BrowseDescription_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseResultMask
 /*============================================================================
  * The BrowseResultMask enumeration.
  *===========================================================================*/
-typedef enum _UA_BrowseResultMask
+typedef enum _OpcUa_BrowseResultMask
 {
-    UA_BrowseResultMask_None              = 0,
-    UA_BrowseResultMask_ReferenceTypeId   = 1,
-    UA_BrowseResultMask_IsForward         = 2,
-    UA_BrowseResultMask_NodeClass         = 4,
-    UA_BrowseResultMask_BrowseName        = 8,
-    UA_BrowseResultMask_DisplayName       = 16,
-    UA_BrowseResultMask_TypeDefinition    = 32,
-    UA_BrowseResultMask_All               = 63,
-    UA_BrowseResultMask_ReferenceTypeInfo = 3,
-    UA_BrowseResultMask_TargetInfo        = 60
+    OpcUa_BrowseResultMask_None              = 0,
+    OpcUa_BrowseResultMask_ReferenceTypeId   = 1,
+    OpcUa_BrowseResultMask_IsForward         = 2,
+    OpcUa_BrowseResultMask_NodeClass         = 4,
+    OpcUa_BrowseResultMask_BrowseName        = 8,
+    OpcUa_BrowseResultMask_DisplayName       = 16,
+    OpcUa_BrowseResultMask_TypeDefinition    = 32,
+    OpcUa_BrowseResultMask_All               = 63,
+    OpcUa_BrowseResultMask_ReferenceTypeInfo = 3,
+    OpcUa_BrowseResultMask_TargetInfo        = 60
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_BrowseResultMask_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_BrowseResultMask_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_BrowseResultMask;
+OpcUa_BrowseResultMask;
 
 #endif
 
@@ -2540,55 +2540,55 @@ UA_BrowseResultMask;
 /*============================================================================
  * The ReferenceDescription structure.
  *===========================================================================*/
-typedef struct _UA_ReferenceDescription
+typedef struct _OpcUa_ReferenceDescription
 {
     UA_NodeId         ReferenceTypeId;
     UA_Boolean        IsForward;
     UA_ExpandedNodeId NodeId;
     UA_QualifiedName  BrowseName;
     UA_LocalizedText  DisplayName;
-    UA_NodeClass      NodeClass;
+    OpcUa_NodeClass   NodeClass;
     UA_ExpandedNodeId TypeDefinition;
 }
-UA_ReferenceDescription;
+OpcUa_ReferenceDescription;
 
-void UA_ReferenceDescription_Initialize(UA_ReferenceDescription* pValue);
+void OpcUa_ReferenceDescription_Initialize(OpcUa_ReferenceDescription* pValue);
 
-void UA_ReferenceDescription_Clear(UA_ReferenceDescription* pValue);
+void OpcUa_ReferenceDescription_Clear(OpcUa_ReferenceDescription* pValue);
 
-//StatusCode UA_ReferenceDescription_GetSize(UA_ReferenceDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReferenceDescription_GetSize(OpcUa_ReferenceDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReferenceDescription_Encode(UA_ReferenceDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReferenceDescription_Encode(OpcUa_ReferenceDescription* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReferenceDescription_Decode(UA_ReferenceDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReferenceDescription_Decode(OpcUa_ReferenceDescription* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReferenceDescription_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReferenceDescription_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseResult
 /*============================================================================
  * The BrowseResult structure.
  *===========================================================================*/
-typedef struct _UA_BrowseResult
+typedef struct _OpcUa_BrowseResult
 {
-    StatusCode               StatusCode;
-    UA_ByteString            ContinuationPoint;
-    int32_t                  NoOfReferences;
-    UA_ReferenceDescription* References;
+    StatusCode                  StatusCode;
+    UA_ByteString               ContinuationPoint;
+    int32_t                     NoOfReferences;
+    OpcUa_ReferenceDescription* References;
 }
-UA_BrowseResult;
+OpcUa_BrowseResult;
 
-void UA_BrowseResult_Initialize(UA_BrowseResult* pValue);
+void OpcUa_BrowseResult_Initialize(OpcUa_BrowseResult* pValue);
 
-void UA_BrowseResult_Clear(UA_BrowseResult* pValue);
+void OpcUa_BrowseResult_Clear(OpcUa_BrowseResult* pValue);
 
-//StatusCode UA_BrowseResult_GetSize(UA_BrowseResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BrowseResult_GetSize(OpcUa_BrowseResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BrowseResult_Encode(UA_BrowseResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseResult_Encode(OpcUa_BrowseResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BrowseResult_Decode(UA_BrowseResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseResult_Decode(OpcUa_BrowseResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BrowseResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BrowseResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_Browse
@@ -2596,54 +2596,54 @@ extern struct UA_EncodeableType UA_BrowseResult_EncodeableType;
 /*============================================================================
  * The BrowseRequest structure.
  *===========================================================================*/
-typedef struct _UA_BrowseRequest
+typedef struct _OpcUa_BrowseRequest
 {
-    UA_RequestHeader      RequestHeader;
-    UA_ViewDescription    View;
-    uint32_t              RequestedMaxReferencesPerNode;
-    int32_t               NoOfNodesToBrowse;
-    UA_BrowseDescription* NodesToBrowse;
+    OpcUa_RequestHeader      RequestHeader;
+    OpcUa_ViewDescription    View;
+    uint32_t                 RequestedMaxReferencesPerNode;
+    int32_t                  NoOfNodesToBrowse;
+    OpcUa_BrowseDescription* NodesToBrowse;
 }
-UA_BrowseRequest;
+OpcUa_BrowseRequest;
 
-void UA_BrowseRequest_Initialize(UA_BrowseRequest* pValue);
+void OpcUa_BrowseRequest_Initialize(OpcUa_BrowseRequest* pValue);
 
-void UA_BrowseRequest_Clear(UA_BrowseRequest* pValue);
+void OpcUa_BrowseRequest_Clear(OpcUa_BrowseRequest* pValue);
 
-//StatusCode UA_BrowseRequest_GetSize(UA_BrowseRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BrowseRequest_GetSize(OpcUa_BrowseRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BrowseRequest_Encode(UA_BrowseRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseRequest_Encode(OpcUa_BrowseRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BrowseRequest_Decode(UA_BrowseRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseRequest_Decode(OpcUa_BrowseRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BrowseRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BrowseRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseResponse
 /*============================================================================
  * The BrowseResponse structure.
  *===========================================================================*/
-typedef struct _UA_BrowseResponse
+typedef struct _OpcUa_BrowseResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    UA_BrowseResult*   Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    OpcUa_BrowseResult*  Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_BrowseResponse;
+OpcUa_BrowseResponse;
 
-void UA_BrowseResponse_Initialize(UA_BrowseResponse* pValue);
+void OpcUa_BrowseResponse_Initialize(OpcUa_BrowseResponse* pValue);
 
-void UA_BrowseResponse_Clear(UA_BrowseResponse* pValue);
+void OpcUa_BrowseResponse_Clear(OpcUa_BrowseResponse* pValue);
 
-//StatusCode UA_BrowseResponse_GetSize(UA_BrowseResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BrowseResponse_GetSize(OpcUa_BrowseResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BrowseResponse_Encode(UA_BrowseResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseResponse_Encode(OpcUa_BrowseResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BrowseResponse_Decode(UA_BrowseResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseResponse_Decode(OpcUa_BrowseResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BrowseResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BrowseResponse_EncodeableType;
 #endif
 #endif
 
@@ -2652,53 +2652,53 @@ extern struct UA_EncodeableType UA_BrowseResponse_EncodeableType;
 /*============================================================================
  * The BrowseNextRequest structure.
  *===========================================================================*/
-typedef struct _UA_BrowseNextRequest
+typedef struct _OpcUa_BrowseNextRequest
 {
-    UA_RequestHeader RequestHeader;
-    UA_Boolean       ReleaseContinuationPoints;
-    int32_t          NoOfContinuationPoints;
-    UA_ByteString*   ContinuationPoints;
+    OpcUa_RequestHeader RequestHeader;
+    UA_Boolean          ReleaseContinuationPoints;
+    int32_t             NoOfContinuationPoints;
+    UA_ByteString*      ContinuationPoints;
 }
-UA_BrowseNextRequest;
+OpcUa_BrowseNextRequest;
 
-void UA_BrowseNextRequest_Initialize(UA_BrowseNextRequest* pValue);
+void OpcUa_BrowseNextRequest_Initialize(OpcUa_BrowseNextRequest* pValue);
 
-void UA_BrowseNextRequest_Clear(UA_BrowseNextRequest* pValue);
+void OpcUa_BrowseNextRequest_Clear(OpcUa_BrowseNextRequest* pValue);
 
-//StatusCode UA_BrowseNextRequest_GetSize(UA_BrowseNextRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BrowseNextRequest_GetSize(OpcUa_BrowseNextRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BrowseNextRequest_Encode(UA_BrowseNextRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseNextRequest_Encode(OpcUa_BrowseNextRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BrowseNextRequest_Decode(UA_BrowseNextRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseNextRequest_Decode(OpcUa_BrowseNextRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BrowseNextRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BrowseNextRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseNextResponse
 /*============================================================================
  * The BrowseNextResponse structure.
  *===========================================================================*/
-typedef struct _UA_BrowseNextResponse
+typedef struct _OpcUa_BrowseNextResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    UA_BrowseResult*   Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    OpcUa_BrowseResult*  Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_BrowseNextResponse;
+OpcUa_BrowseNextResponse;
 
-void UA_BrowseNextResponse_Initialize(UA_BrowseNextResponse* pValue);
+void OpcUa_BrowseNextResponse_Initialize(OpcUa_BrowseNextResponse* pValue);
 
-void UA_BrowseNextResponse_Clear(UA_BrowseNextResponse* pValue);
+void OpcUa_BrowseNextResponse_Clear(OpcUa_BrowseNextResponse* pValue);
 
-//StatusCode UA_BrowseNextResponse_GetSize(UA_BrowseNextResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BrowseNextResponse_GetSize(OpcUa_BrowseNextResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BrowseNextResponse_Encode(UA_BrowseNextResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseNextResponse_Encode(OpcUa_BrowseNextResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BrowseNextResponse_Decode(UA_BrowseNextResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowseNextResponse_Decode(OpcUa_BrowseNextResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BrowseNextResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BrowseNextResponse_EncodeableType;
 #endif
 #endif
 
@@ -2706,123 +2706,123 @@ extern struct UA_EncodeableType UA_BrowseNextResponse_EncodeableType;
 /*============================================================================
  * The RelativePathElement structure.
  *===========================================================================*/
-typedef struct _UA_RelativePathElement
+typedef struct _OpcUa_RelativePathElement
 {
     UA_NodeId        ReferenceTypeId;
     UA_Boolean       IsInverse;
     UA_Boolean       IncludeSubtypes;
     UA_QualifiedName TargetName;
 }
-UA_RelativePathElement;
+OpcUa_RelativePathElement;
 
-void UA_RelativePathElement_Initialize(UA_RelativePathElement* pValue);
+void OpcUa_RelativePathElement_Initialize(OpcUa_RelativePathElement* pValue);
 
-void UA_RelativePathElement_Clear(UA_RelativePathElement* pValue);
+void OpcUa_RelativePathElement_Clear(OpcUa_RelativePathElement* pValue);
 
-//StatusCode UA_RelativePathElement_GetSize(UA_RelativePathElement* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RelativePathElement_GetSize(OpcUa_RelativePathElement* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RelativePathElement_Encode(UA_RelativePathElement* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RelativePathElement_Encode(OpcUa_RelativePathElement* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RelativePathElement_Decode(UA_RelativePathElement* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RelativePathElement_Decode(OpcUa_RelativePathElement* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RelativePathElement_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RelativePathElement_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_RelativePath
 /*============================================================================
  * The RelativePath structure.
  *===========================================================================*/
-typedef struct _UA_RelativePath
+typedef struct _OpcUa_RelativePath
 {
-    int32_t                 NoOfElements;
-    UA_RelativePathElement* Elements;
+    int32_t                    NoOfElements;
+    OpcUa_RelativePathElement* Elements;
 }
-UA_RelativePath;
+OpcUa_RelativePath;
 
-void UA_RelativePath_Initialize(UA_RelativePath* pValue);
+void OpcUa_RelativePath_Initialize(OpcUa_RelativePath* pValue);
 
-void UA_RelativePath_Clear(UA_RelativePath* pValue);
+void OpcUa_RelativePath_Clear(OpcUa_RelativePath* pValue);
 
-//StatusCode UA_RelativePath_GetSize(UA_RelativePath* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RelativePath_GetSize(OpcUa_RelativePath* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RelativePath_Encode(UA_RelativePath* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RelativePath_Encode(OpcUa_RelativePath* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RelativePath_Decode(UA_RelativePath* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RelativePath_Decode(OpcUa_RelativePath* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RelativePath_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RelativePath_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowsePath
 /*============================================================================
  * The BrowsePath structure.
  *===========================================================================*/
-typedef struct _UA_BrowsePath
+typedef struct _OpcUa_BrowsePath
 {
-    UA_NodeId       StartingNode;
-    UA_RelativePath RelativePath;
+    UA_NodeId          StartingNode;
+    OpcUa_RelativePath RelativePath;
 }
-UA_BrowsePath;
+OpcUa_BrowsePath;
 
-void UA_BrowsePath_Initialize(UA_BrowsePath* pValue);
+void OpcUa_BrowsePath_Initialize(OpcUa_BrowsePath* pValue);
 
-void UA_BrowsePath_Clear(UA_BrowsePath* pValue);
+void OpcUa_BrowsePath_Clear(OpcUa_BrowsePath* pValue);
 
-//StatusCode UA_BrowsePath_GetSize(UA_BrowsePath* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BrowsePath_GetSize(OpcUa_BrowsePath* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BrowsePath_Encode(UA_BrowsePath* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowsePath_Encode(OpcUa_BrowsePath* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BrowsePath_Decode(UA_BrowsePath* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowsePath_Decode(OpcUa_BrowsePath* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BrowsePath_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BrowsePath_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowsePathTarget
 /*============================================================================
  * The BrowsePathTarget structure.
  *===========================================================================*/
-typedef struct _UA_BrowsePathTarget
+typedef struct _OpcUa_BrowsePathTarget
 {
     UA_ExpandedNodeId TargetId;
     uint32_t          RemainingPathIndex;
 }
-UA_BrowsePathTarget;
+OpcUa_BrowsePathTarget;
 
-void UA_BrowsePathTarget_Initialize(UA_BrowsePathTarget* pValue);
+void OpcUa_BrowsePathTarget_Initialize(OpcUa_BrowsePathTarget* pValue);
 
-void UA_BrowsePathTarget_Clear(UA_BrowsePathTarget* pValue);
+void OpcUa_BrowsePathTarget_Clear(OpcUa_BrowsePathTarget* pValue);
 
-//StatusCode UA_BrowsePathTarget_GetSize(UA_BrowsePathTarget* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BrowsePathTarget_GetSize(OpcUa_BrowsePathTarget* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BrowsePathTarget_Encode(UA_BrowsePathTarget* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowsePathTarget_Encode(OpcUa_BrowsePathTarget* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BrowsePathTarget_Decode(UA_BrowsePathTarget* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowsePathTarget_Decode(OpcUa_BrowsePathTarget* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BrowsePathTarget_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BrowsePathTarget_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowsePathResult
 /*============================================================================
  * The BrowsePathResult structure.
  *===========================================================================*/
-typedef struct _UA_BrowsePathResult
+typedef struct _OpcUa_BrowsePathResult
 {
-    StatusCode           StatusCode;
-    int32_t              NoOfTargets;
-    UA_BrowsePathTarget* Targets;
+    StatusCode              StatusCode;
+    int32_t                 NoOfTargets;
+    OpcUa_BrowsePathTarget* Targets;
 }
-UA_BrowsePathResult;
+OpcUa_BrowsePathResult;
 
-void UA_BrowsePathResult_Initialize(UA_BrowsePathResult* pValue);
+void OpcUa_BrowsePathResult_Initialize(OpcUa_BrowsePathResult* pValue);
 
-void UA_BrowsePathResult_Clear(UA_BrowsePathResult* pValue);
+void OpcUa_BrowsePathResult_Clear(OpcUa_BrowsePathResult* pValue);
 
-//StatusCode UA_BrowsePathResult_GetSize(UA_BrowsePathResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BrowsePathResult_GetSize(OpcUa_BrowsePathResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BrowsePathResult_Encode(UA_BrowsePathResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowsePathResult_Encode(OpcUa_BrowsePathResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BrowsePathResult_Decode(UA_BrowsePathResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BrowsePathResult_Decode(OpcUa_BrowsePathResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BrowsePathResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BrowsePathResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIds
@@ -2830,52 +2830,52 @@ extern struct UA_EncodeableType UA_BrowsePathResult_EncodeableType;
 /*============================================================================
  * The TranslateBrowsePathsToNodeIdsRequest structure.
  *===========================================================================*/
-typedef struct _UA_TranslateBrowsePathsToNodeIdsRequest
+typedef struct _OpcUa_TranslateBrowsePathsToNodeIdsRequest
 {
-    UA_RequestHeader RequestHeader;
-    int32_t          NoOfBrowsePaths;
-    UA_BrowsePath*   BrowsePaths;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t             NoOfBrowsePaths;
+    OpcUa_BrowsePath*   BrowsePaths;
 }
-UA_TranslateBrowsePathsToNodeIdsRequest;
+OpcUa_TranslateBrowsePathsToNodeIdsRequest;
 
-void UA_TranslateBrowsePathsToNodeIdsRequest_Initialize(UA_TranslateBrowsePathsToNodeIdsRequest* pValue);
+void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(OpcUa_TranslateBrowsePathsToNodeIdsRequest* pValue);
 
-void UA_TranslateBrowsePathsToNodeIdsRequest_Clear(UA_TranslateBrowsePathsToNodeIdsRequest* pValue);
+void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(OpcUa_TranslateBrowsePathsToNodeIdsRequest* pValue);
 
-//StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_GetSize(UA_TranslateBrowsePathsToNodeIdsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_GetSize(OpcUa_TranslateBrowsePathsToNodeIdsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Encode(UA_TranslateBrowsePathsToNodeIdsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(OpcUa_TranslateBrowsePathsToNodeIdsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_TranslateBrowsePathsToNodeIdsRequest_Decode(UA_TranslateBrowsePathsToNodeIdsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(OpcUa_TranslateBrowsePathsToNodeIdsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIdsResponse
 /*============================================================================
  * The TranslateBrowsePathsToNodeIdsResponse structure.
  *===========================================================================*/
-typedef struct _UA_TranslateBrowsePathsToNodeIdsResponse
+typedef struct _OpcUa_TranslateBrowsePathsToNodeIdsResponse
 {
-    UA_ResponseHeader    ResponseHeader;
-    int32_t              NoOfResults;
-    UA_BrowsePathResult* Results;
-    int32_t              NoOfDiagnosticInfos;
-    UA_DiagnosticInfo*   DiagnosticInfos;
+    OpcUa_ResponseHeader    ResponseHeader;
+    int32_t                 NoOfResults;
+    OpcUa_BrowsePathResult* Results;
+    int32_t                 NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*      DiagnosticInfos;
 }
-UA_TranslateBrowsePathsToNodeIdsResponse;
+OpcUa_TranslateBrowsePathsToNodeIdsResponse;
 
-void UA_TranslateBrowsePathsToNodeIdsResponse_Initialize(UA_TranslateBrowsePathsToNodeIdsResponse* pValue);
+void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize(OpcUa_TranslateBrowsePathsToNodeIdsResponse* pValue);
 
-void UA_TranslateBrowsePathsToNodeIdsResponse_Clear(UA_TranslateBrowsePathsToNodeIdsResponse* pValue);
+void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(OpcUa_TranslateBrowsePathsToNodeIdsResponse* pValue);
 
-//StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_GetSize(UA_TranslateBrowsePathsToNodeIdsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_GetSize(OpcUa_TranslateBrowsePathsToNodeIdsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Encode(UA_TranslateBrowsePathsToNodeIdsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(OpcUa_TranslateBrowsePathsToNodeIdsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_TranslateBrowsePathsToNodeIdsResponse_Decode(UA_TranslateBrowsePathsToNodeIdsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(OpcUa_TranslateBrowsePathsToNodeIdsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType;
 #endif
 #endif
 
@@ -2884,50 +2884,50 @@ extern struct UA_EncodeableType UA_TranslateBrowsePathsToNodeIdsResponse_Encodea
 /*============================================================================
  * The RegisterNodesRequest structure.
  *===========================================================================*/
-typedef struct _UA_RegisterNodesRequest
+typedef struct _OpcUa_RegisterNodesRequest
 {
-    UA_RequestHeader RequestHeader;
-    int32_t          NoOfNodesToRegister;
-    UA_NodeId*       NodesToRegister;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t             NoOfNodesToRegister;
+    UA_NodeId*          NodesToRegister;
 }
-UA_RegisterNodesRequest;
+OpcUa_RegisterNodesRequest;
 
-void UA_RegisterNodesRequest_Initialize(UA_RegisterNodesRequest* pValue);
+void OpcUa_RegisterNodesRequest_Initialize(OpcUa_RegisterNodesRequest* pValue);
 
-void UA_RegisterNodesRequest_Clear(UA_RegisterNodesRequest* pValue);
+void OpcUa_RegisterNodesRequest_Clear(OpcUa_RegisterNodesRequest* pValue);
 
-//StatusCode UA_RegisterNodesRequest_GetSize(UA_RegisterNodesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RegisterNodesRequest_GetSize(OpcUa_RegisterNodesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RegisterNodesRequest_Encode(UA_RegisterNodesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterNodesRequest_Encode(OpcUa_RegisterNodesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RegisterNodesRequest_Decode(UA_RegisterNodesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterNodesRequest_Decode(OpcUa_RegisterNodesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RegisterNodesRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterNodesResponse
 /*============================================================================
  * The RegisterNodesResponse structure.
  *===========================================================================*/
-typedef struct _UA_RegisterNodesResponse
+typedef struct _OpcUa_RegisterNodesResponse
 {
-    UA_ResponseHeader ResponseHeader;
-    int32_t           NoOfRegisteredNodeIds;
-    UA_NodeId*        RegisteredNodeIds;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfRegisteredNodeIds;
+    UA_NodeId*           RegisteredNodeIds;
 }
-UA_RegisterNodesResponse;
+OpcUa_RegisterNodesResponse;
 
-void UA_RegisterNodesResponse_Initialize(UA_RegisterNodesResponse* pValue);
+void OpcUa_RegisterNodesResponse_Initialize(OpcUa_RegisterNodesResponse* pValue);
 
-void UA_RegisterNodesResponse_Clear(UA_RegisterNodesResponse* pValue);
+void OpcUa_RegisterNodesResponse_Clear(OpcUa_RegisterNodesResponse* pValue);
 
-//StatusCode UA_RegisterNodesResponse_GetSize(UA_RegisterNodesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RegisterNodesResponse_GetSize(OpcUa_RegisterNodesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RegisterNodesResponse_Encode(UA_RegisterNodesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterNodesResponse_Encode(OpcUa_RegisterNodesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RegisterNodesResponse_Decode(UA_RegisterNodesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RegisterNodesResponse_Decode(OpcUa_RegisterNodesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RegisterNodesResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType;
 #endif
 #endif
 
@@ -2936,48 +2936,48 @@ extern struct UA_EncodeableType UA_RegisterNodesResponse_EncodeableType;
 /*============================================================================
  * The UnregisterNodesRequest structure.
  *===========================================================================*/
-typedef struct _UA_UnregisterNodesRequest
+typedef struct _OpcUa_UnregisterNodesRequest
 {
-    UA_RequestHeader RequestHeader;
-    int32_t          NoOfNodesToUnregister;
-    UA_NodeId*       NodesToUnregister;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t             NoOfNodesToUnregister;
+    UA_NodeId*          NodesToUnregister;
 }
-UA_UnregisterNodesRequest;
+OpcUa_UnregisterNodesRequest;
 
-void UA_UnregisterNodesRequest_Initialize(UA_UnregisterNodesRequest* pValue);
+void OpcUa_UnregisterNodesRequest_Initialize(OpcUa_UnregisterNodesRequest* pValue);
 
-void UA_UnregisterNodesRequest_Clear(UA_UnregisterNodesRequest* pValue);
+void OpcUa_UnregisterNodesRequest_Clear(OpcUa_UnregisterNodesRequest* pValue);
 
-//StatusCode UA_UnregisterNodesRequest_GetSize(UA_UnregisterNodesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_UnregisterNodesRequest_GetSize(OpcUa_UnregisterNodesRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_UnregisterNodesRequest_Encode(UA_UnregisterNodesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UnregisterNodesRequest_Encode(OpcUa_UnregisterNodesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_UnregisterNodesRequest_Decode(UA_UnregisterNodesRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UnregisterNodesRequest_Decode(OpcUa_UnregisterNodesRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_UnregisterNodesRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_UnregisterNodesResponse
 /*============================================================================
  * The UnregisterNodesResponse structure.
  *===========================================================================*/
-typedef struct _UA_UnregisterNodesResponse
+typedef struct _OpcUa_UnregisterNodesResponse
 {
-    UA_ResponseHeader ResponseHeader;
+    OpcUa_ResponseHeader ResponseHeader;
 }
-UA_UnregisterNodesResponse;
+OpcUa_UnregisterNodesResponse;
 
-void UA_UnregisterNodesResponse_Initialize(UA_UnregisterNodesResponse* pValue);
+void OpcUa_UnregisterNodesResponse_Initialize(OpcUa_UnregisterNodesResponse* pValue);
 
-void UA_UnregisterNodesResponse_Clear(UA_UnregisterNodesResponse* pValue);
+void OpcUa_UnregisterNodesResponse_Clear(OpcUa_UnregisterNodesResponse* pValue);
 
-//StatusCode UA_UnregisterNodesResponse_GetSize(UA_UnregisterNodesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_UnregisterNodesResponse_GetSize(OpcUa_UnregisterNodesResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_UnregisterNodesResponse_Encode(UA_UnregisterNodesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UnregisterNodesResponse_Encode(OpcUa_UnregisterNodesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_UnregisterNodesResponse_Decode(UA_UnregisterNodesResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UnregisterNodesResponse_Decode(OpcUa_UnregisterNodesResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_UnregisterNodesResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType;
 #endif
 #endif
 
@@ -2985,7 +2985,7 @@ extern struct UA_EncodeableType UA_UnregisterNodesResponse_EncodeableType;
 /*============================================================================
  * The EndpointConfiguration structure.
  *===========================================================================*/
-typedef struct _UA_EndpointConfiguration
+typedef struct _OpcUa_EndpointConfiguration
 {
     int32_t    OperationTimeout;
     UA_Boolean UseBinaryEncoding;
@@ -2997,36 +2997,36 @@ typedef struct _UA_EndpointConfiguration
     int32_t    ChannelLifetime;
     int32_t    SecurityTokenLifetime;
 }
-UA_EndpointConfiguration;
+OpcUa_EndpointConfiguration;
 
-void UA_EndpointConfiguration_Initialize(UA_EndpointConfiguration* pValue);
+void OpcUa_EndpointConfiguration_Initialize(OpcUa_EndpointConfiguration* pValue);
 
-void UA_EndpointConfiguration_Clear(UA_EndpointConfiguration* pValue);
+void OpcUa_EndpointConfiguration_Clear(OpcUa_EndpointConfiguration* pValue);
 
-//StatusCode UA_EndpointConfiguration_GetSize(UA_EndpointConfiguration* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EndpointConfiguration_GetSize(OpcUa_EndpointConfiguration* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EndpointConfiguration_Encode(UA_EndpointConfiguration* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EndpointConfiguration_Encode(OpcUa_EndpointConfiguration* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EndpointConfiguration_Decode(UA_EndpointConfiguration* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EndpointConfiguration_Decode(OpcUa_EndpointConfiguration* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EndpointConfiguration_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EndpointConfiguration_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ComplianceLevel
 /*============================================================================
  * The ComplianceLevel enumeration.
  *===========================================================================*/
-typedef enum _UA_ComplianceLevel
+typedef enum _OpcUa_ComplianceLevel
 {
-    UA_ComplianceLevel_Untested   = 0,
-    UA_ComplianceLevel_Partial    = 1,
-    UA_ComplianceLevel_SelfTested = 2,
-    UA_ComplianceLevel_Certified  = 3
+    OpcUa_ComplianceLevel_Untested   = 0,
+    OpcUa_ComplianceLevel_Partial    = 1,
+    OpcUa_ComplianceLevel_SelfTested = 2,
+    OpcUa_ComplianceLevel_Certified  = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_ComplianceLevel_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_ComplianceLevel_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_ComplianceLevel;
+OpcUa_ComplianceLevel;
 
 #endif
 
@@ -3034,144 +3034,144 @@ UA_ComplianceLevel;
 /*============================================================================
  * The SupportedProfile structure.
  *===========================================================================*/
-typedef struct _UA_SupportedProfile
+typedef struct _OpcUa_SupportedProfile
 {
-    UA_String          OrganizationUri;
-    UA_String          ProfileId;
-    UA_String          ComplianceTool;
-    UA_DateTime        ComplianceDate;
-    UA_ComplianceLevel ComplianceLevel;
-    int32_t            NoOfUnsupportedUnitIds;
-    UA_String*         UnsupportedUnitIds;
+    UA_String             OrganizationUri;
+    UA_String             ProfileId;
+    UA_String             ComplianceTool;
+    UA_DateTime           ComplianceDate;
+    OpcUa_ComplianceLevel ComplianceLevel;
+    int32_t               NoOfUnsupportedUnitIds;
+    UA_String*            UnsupportedUnitIds;
 }
-UA_SupportedProfile;
+OpcUa_SupportedProfile;
 
-void UA_SupportedProfile_Initialize(UA_SupportedProfile* pValue);
+void OpcUa_SupportedProfile_Initialize(OpcUa_SupportedProfile* pValue);
 
-void UA_SupportedProfile_Clear(UA_SupportedProfile* pValue);
+void OpcUa_SupportedProfile_Clear(OpcUa_SupportedProfile* pValue);
 
-//StatusCode UA_SupportedProfile_GetSize(UA_SupportedProfile* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SupportedProfile_GetSize(OpcUa_SupportedProfile* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SupportedProfile_Encode(UA_SupportedProfile* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SupportedProfile_Encode(OpcUa_SupportedProfile* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SupportedProfile_Decode(UA_SupportedProfile* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SupportedProfile_Decode(OpcUa_SupportedProfile* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SupportedProfile_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SupportedProfile_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SoftwareCertificate
 /*============================================================================
  * The SoftwareCertificate structure.
  *===========================================================================*/
-typedef struct _UA_SoftwareCertificate
+typedef struct _OpcUa_SoftwareCertificate
 {
-    UA_String            ProductName;
-    UA_String            ProductUri;
-    UA_String            VendorName;
-    UA_ByteString        VendorProductCertificate;
-    UA_String            SoftwareVersion;
-    UA_String            BuildNumber;
-    UA_DateTime          BuildDate;
-    UA_String            IssuedBy;
-    UA_DateTime          IssueDate;
-    int32_t              NoOfSupportedProfiles;
-    UA_SupportedProfile* SupportedProfiles;
+    UA_String               ProductName;
+    UA_String               ProductUri;
+    UA_String               VendorName;
+    UA_ByteString           VendorProductCertificate;
+    UA_String               SoftwareVersion;
+    UA_String               BuildNumber;
+    UA_DateTime             BuildDate;
+    UA_String               IssuedBy;
+    UA_DateTime             IssueDate;
+    int32_t                 NoOfSupportedProfiles;
+    OpcUa_SupportedProfile* SupportedProfiles;
 }
-UA_SoftwareCertificate;
+OpcUa_SoftwareCertificate;
 
-void UA_SoftwareCertificate_Initialize(UA_SoftwareCertificate* pValue);
+void OpcUa_SoftwareCertificate_Initialize(OpcUa_SoftwareCertificate* pValue);
 
-void UA_SoftwareCertificate_Clear(UA_SoftwareCertificate* pValue);
+void OpcUa_SoftwareCertificate_Clear(OpcUa_SoftwareCertificate* pValue);
 
-//StatusCode UA_SoftwareCertificate_GetSize(UA_SoftwareCertificate* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SoftwareCertificate_GetSize(OpcUa_SoftwareCertificate* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SoftwareCertificate_Encode(UA_SoftwareCertificate* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SoftwareCertificate_Encode(OpcUa_SoftwareCertificate* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SoftwareCertificate_Decode(UA_SoftwareCertificate* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SoftwareCertificate_Decode(OpcUa_SoftwareCertificate* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SoftwareCertificate_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SoftwareCertificate_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryDataDescription
 /*============================================================================
  * The QueryDataDescription structure.
  *===========================================================================*/
-typedef struct _UA_QueryDataDescription
+typedef struct _OpcUa_QueryDataDescription
 {
-    UA_RelativePath RelativePath;
-    uint32_t        AttributeId;
-    UA_String       IndexRange;
+    OpcUa_RelativePath RelativePath;
+    uint32_t           AttributeId;
+    UA_String          IndexRange;
 }
-UA_QueryDataDescription;
+OpcUa_QueryDataDescription;
 
-void UA_QueryDataDescription_Initialize(UA_QueryDataDescription* pValue);
+void OpcUa_QueryDataDescription_Initialize(OpcUa_QueryDataDescription* pValue);
 
-void UA_QueryDataDescription_Clear(UA_QueryDataDescription* pValue);
+void OpcUa_QueryDataDescription_Clear(OpcUa_QueryDataDescription* pValue);
 
-//StatusCode UA_QueryDataDescription_GetSize(UA_QueryDataDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_QueryDataDescription_GetSize(OpcUa_QueryDataDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_QueryDataDescription_Encode(UA_QueryDataDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryDataDescription_Encode(OpcUa_QueryDataDescription* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_QueryDataDescription_Decode(UA_QueryDataDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryDataDescription_Decode(OpcUa_QueryDataDescription* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_QueryDataDescription_EncodeableType;
+extern struct UA_EncodeableType OpcUa_QueryDataDescription_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_NodeTypeDescription
 /*============================================================================
  * The NodeTypeDescription structure.
  *===========================================================================*/
-typedef struct _UA_NodeTypeDescription
+typedef struct _OpcUa_NodeTypeDescription
 {
-    UA_ExpandedNodeId        TypeDefinitionNode;
-    UA_Boolean               IncludeSubTypes;
-    int32_t                  NoOfDataToReturn;
-    UA_QueryDataDescription* DataToReturn;
+    UA_ExpandedNodeId           TypeDefinitionNode;
+    UA_Boolean                  IncludeSubTypes;
+    int32_t                     NoOfDataToReturn;
+    OpcUa_QueryDataDescription* DataToReturn;
 }
-UA_NodeTypeDescription;
+OpcUa_NodeTypeDescription;
 
-void UA_NodeTypeDescription_Initialize(UA_NodeTypeDescription* pValue);
+void OpcUa_NodeTypeDescription_Initialize(OpcUa_NodeTypeDescription* pValue);
 
-void UA_NodeTypeDescription_Clear(UA_NodeTypeDescription* pValue);
+void OpcUa_NodeTypeDescription_Clear(OpcUa_NodeTypeDescription* pValue);
 
-//StatusCode UA_NodeTypeDescription_GetSize(UA_NodeTypeDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_NodeTypeDescription_GetSize(OpcUa_NodeTypeDescription* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_NodeTypeDescription_Encode(UA_NodeTypeDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NodeTypeDescription_Encode(OpcUa_NodeTypeDescription* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_NodeTypeDescription_Decode(UA_NodeTypeDescription* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NodeTypeDescription_Decode(OpcUa_NodeTypeDescription* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_NodeTypeDescription_EncodeableType;
+extern struct UA_EncodeableType OpcUa_NodeTypeDescription_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_FilterOperator
 /*============================================================================
  * The FilterOperator enumeration.
  *===========================================================================*/
-typedef enum _UA_FilterOperator
+typedef enum _OpcUa_FilterOperator
 {
-    UA_FilterOperator_Equals             = 0,
-    UA_FilterOperator_IsNull             = 1,
-    UA_FilterOperator_GreaterThan        = 2,
-    UA_FilterOperator_LessThan           = 3,
-    UA_FilterOperator_GreaterThanOrEqual = 4,
-    UA_FilterOperator_LessThanOrEqual    = 5,
-    UA_FilterOperator_Like               = 6,
-    UA_FilterOperator_Not                = 7,
-    UA_FilterOperator_Between            = 8,
-    UA_FilterOperator_InList             = 9,
-    UA_FilterOperator_And                = 10,
-    UA_FilterOperator_Or                 = 11,
-    UA_FilterOperator_Cast               = 12,
-    UA_FilterOperator_InView             = 13,
-    UA_FilterOperator_OfType             = 14,
-    UA_FilterOperator_RelatedTo          = 15,
-    UA_FilterOperator_BitwiseAnd         = 16,
-    UA_FilterOperator_BitwiseOr          = 17
+    OpcUa_FilterOperator_Equals             = 0,
+    OpcUa_FilterOperator_IsNull             = 1,
+    OpcUa_FilterOperator_GreaterThan        = 2,
+    OpcUa_FilterOperator_LessThan           = 3,
+    OpcUa_FilterOperator_GreaterThanOrEqual = 4,
+    OpcUa_FilterOperator_LessThanOrEqual    = 5,
+    OpcUa_FilterOperator_Like               = 6,
+    OpcUa_FilterOperator_Not                = 7,
+    OpcUa_FilterOperator_Between            = 8,
+    OpcUa_FilterOperator_InList             = 9,
+    OpcUa_FilterOperator_And                = 10,
+    OpcUa_FilterOperator_Or                 = 11,
+    OpcUa_FilterOperator_Cast               = 12,
+    OpcUa_FilterOperator_InView             = 13,
+    OpcUa_FilterOperator_OfType             = 14,
+    OpcUa_FilterOperator_RelatedTo          = 15,
+    OpcUa_FilterOperator_BitwiseAnd         = 16,
+    OpcUa_FilterOperator_BitwiseOr          = 17
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_FilterOperator_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_FilterOperator_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_FilterOperator;
+OpcUa_FilterOperator;
 
 #endif
 
@@ -3179,33 +3179,33 @@ UA_FilterOperator;
 /*============================================================================
  * The QueryDataSet structure.
  *===========================================================================*/
-typedef struct _UA_QueryDataSet
+typedef struct _OpcUa_QueryDataSet
 {
     UA_ExpandedNodeId NodeId;
     UA_ExpandedNodeId TypeDefinitionNode;
     int32_t           NoOfValues;
     UA_Variant*       Values;
 }
-UA_QueryDataSet;
+OpcUa_QueryDataSet;
 
-void UA_QueryDataSet_Initialize(UA_QueryDataSet* pValue);
+void OpcUa_QueryDataSet_Initialize(OpcUa_QueryDataSet* pValue);
 
-void UA_QueryDataSet_Clear(UA_QueryDataSet* pValue);
+void OpcUa_QueryDataSet_Clear(OpcUa_QueryDataSet* pValue);
 
-//StatusCode UA_QueryDataSet_GetSize(UA_QueryDataSet* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_QueryDataSet_GetSize(OpcUa_QueryDataSet* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_QueryDataSet_Encode(UA_QueryDataSet* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryDataSet_Encode(OpcUa_QueryDataSet* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_QueryDataSet_Decode(UA_QueryDataSet* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryDataSet_Decode(OpcUa_QueryDataSet* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_QueryDataSet_EncodeableType;
+extern struct UA_EncodeableType OpcUa_QueryDataSet_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_NodeReference
 /*============================================================================
  * The NodeReference structure.
  *===========================================================================*/
-typedef struct _UA_NodeReference
+typedef struct _OpcUa_NodeReference
 {
     UA_NodeId  NodeId;
     UA_NodeId  ReferenceTypeId;
@@ -3213,148 +3213,148 @@ typedef struct _UA_NodeReference
     int32_t    NoOfReferencedNodeIds;
     UA_NodeId* ReferencedNodeIds;
 }
-UA_NodeReference;
+OpcUa_NodeReference;
 
-void UA_NodeReference_Initialize(UA_NodeReference* pValue);
+void OpcUa_NodeReference_Initialize(OpcUa_NodeReference* pValue);
 
-void UA_NodeReference_Clear(UA_NodeReference* pValue);
+void OpcUa_NodeReference_Clear(OpcUa_NodeReference* pValue);
 
-//StatusCode UA_NodeReference_GetSize(UA_NodeReference* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_NodeReference_GetSize(OpcUa_NodeReference* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_NodeReference_Encode(UA_NodeReference* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NodeReference_Encode(OpcUa_NodeReference* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_NodeReference_Decode(UA_NodeReference* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NodeReference_Decode(OpcUa_NodeReference* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_NodeReference_EncodeableType;
+extern struct UA_EncodeableType OpcUa_NodeReference_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilterElement
 /*============================================================================
  * The ContentFilterElement structure.
  *===========================================================================*/
-typedef struct _UA_ContentFilterElement
+typedef struct _OpcUa_ContentFilterElement
 {
-    UA_FilterOperator   FilterOperator;
-    int32_t             NoOfFilterOperands;
-    UA_ExtensionObject* FilterOperands;
+    OpcUa_FilterOperator FilterOperator;
+    int32_t              NoOfFilterOperands;
+    UA_ExtensionObject*  FilterOperands;
 }
-UA_ContentFilterElement;
+OpcUa_ContentFilterElement;
 
-void UA_ContentFilterElement_Initialize(UA_ContentFilterElement* pValue);
+void OpcUa_ContentFilterElement_Initialize(OpcUa_ContentFilterElement* pValue);
 
-void UA_ContentFilterElement_Clear(UA_ContentFilterElement* pValue);
+void OpcUa_ContentFilterElement_Clear(OpcUa_ContentFilterElement* pValue);
 
-//StatusCode UA_ContentFilterElement_GetSize(UA_ContentFilterElement* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ContentFilterElement_GetSize(OpcUa_ContentFilterElement* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ContentFilterElement_Encode(UA_ContentFilterElement* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ContentFilterElement_Encode(OpcUa_ContentFilterElement* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ContentFilterElement_Decode(UA_ContentFilterElement* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ContentFilterElement_Decode(OpcUa_ContentFilterElement* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ContentFilterElement_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ContentFilterElement_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilter
 /*============================================================================
  * The ContentFilter structure.
  *===========================================================================*/
-typedef struct _UA_ContentFilter
+typedef struct _OpcUa_ContentFilter
 {
-    int32_t                  NoOfElements;
-    UA_ContentFilterElement* Elements;
+    int32_t                     NoOfElements;
+    OpcUa_ContentFilterElement* Elements;
 }
-UA_ContentFilter;
+OpcUa_ContentFilter;
 
-void UA_ContentFilter_Initialize(UA_ContentFilter* pValue);
+void OpcUa_ContentFilter_Initialize(OpcUa_ContentFilter* pValue);
 
-void UA_ContentFilter_Clear(UA_ContentFilter* pValue);
+void OpcUa_ContentFilter_Clear(OpcUa_ContentFilter* pValue);
 
-//StatusCode UA_ContentFilter_GetSize(UA_ContentFilter* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ContentFilter_GetSize(OpcUa_ContentFilter* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ContentFilter_Encode(UA_ContentFilter* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ContentFilter_Encode(OpcUa_ContentFilter* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ContentFilter_Decode(UA_ContentFilter* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ContentFilter_Decode(OpcUa_ContentFilter* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ContentFilter_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ContentFilter_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ElementOperand
 /*============================================================================
  * The ElementOperand structure.
  *===========================================================================*/
-typedef struct _UA_ElementOperand
+typedef struct _OpcUa_ElementOperand
 {
     uint32_t Index;
 }
-UA_ElementOperand;
+OpcUa_ElementOperand;
 
-void UA_ElementOperand_Initialize(UA_ElementOperand* pValue);
+void OpcUa_ElementOperand_Initialize(OpcUa_ElementOperand* pValue);
 
-void UA_ElementOperand_Clear(UA_ElementOperand* pValue);
+void OpcUa_ElementOperand_Clear(OpcUa_ElementOperand* pValue);
 
-//StatusCode UA_ElementOperand_GetSize(UA_ElementOperand* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ElementOperand_GetSize(OpcUa_ElementOperand* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ElementOperand_Encode(UA_ElementOperand* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ElementOperand_Encode(OpcUa_ElementOperand* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ElementOperand_Decode(UA_ElementOperand* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ElementOperand_Decode(OpcUa_ElementOperand* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ElementOperand_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ElementOperand_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_LiteralOperand
 /*============================================================================
  * The LiteralOperand structure.
  *===========================================================================*/
-typedef struct _UA_LiteralOperand
+typedef struct _OpcUa_LiteralOperand
 {
     UA_Variant Value;
 }
-UA_LiteralOperand;
+OpcUa_LiteralOperand;
 
-void UA_LiteralOperand_Initialize(UA_LiteralOperand* pValue);
+void OpcUa_LiteralOperand_Initialize(OpcUa_LiteralOperand* pValue);
 
-void UA_LiteralOperand_Clear(UA_LiteralOperand* pValue);
+void OpcUa_LiteralOperand_Clear(OpcUa_LiteralOperand* pValue);
 
-//StatusCode UA_LiteralOperand_GetSize(UA_LiteralOperand* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_LiteralOperand_GetSize(OpcUa_LiteralOperand* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_LiteralOperand_Encode(UA_LiteralOperand* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_LiteralOperand_Encode(OpcUa_LiteralOperand* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_LiteralOperand_Decode(UA_LiteralOperand* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_LiteralOperand_Decode(OpcUa_LiteralOperand* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_LiteralOperand_EncodeableType;
+extern struct UA_EncodeableType OpcUa_LiteralOperand_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AttributeOperand
 /*============================================================================
  * The AttributeOperand structure.
  *===========================================================================*/
-typedef struct _UA_AttributeOperand
+typedef struct _OpcUa_AttributeOperand
 {
-    UA_NodeId       NodeId;
-    UA_String       Alias;
-    UA_RelativePath BrowsePath;
-    uint32_t        AttributeId;
-    UA_String       IndexRange;
+    UA_NodeId          NodeId;
+    UA_String          Alias;
+    OpcUa_RelativePath BrowsePath;
+    uint32_t           AttributeId;
+    UA_String          IndexRange;
 }
-UA_AttributeOperand;
+OpcUa_AttributeOperand;
 
-void UA_AttributeOperand_Initialize(UA_AttributeOperand* pValue);
+void OpcUa_AttributeOperand_Initialize(OpcUa_AttributeOperand* pValue);
 
-void UA_AttributeOperand_Clear(UA_AttributeOperand* pValue);
+void OpcUa_AttributeOperand_Clear(OpcUa_AttributeOperand* pValue);
 
-//StatusCode UA_AttributeOperand_GetSize(UA_AttributeOperand* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AttributeOperand_GetSize(OpcUa_AttributeOperand* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AttributeOperand_Encode(UA_AttributeOperand* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AttributeOperand_Encode(OpcUa_AttributeOperand* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AttributeOperand_Decode(UA_AttributeOperand* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AttributeOperand_Decode(OpcUa_AttributeOperand* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AttributeOperand_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AttributeOperand_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SimpleAttributeOperand
 /*============================================================================
  * The SimpleAttributeOperand structure.
  *===========================================================================*/
-typedef struct _UA_SimpleAttributeOperand
+typedef struct _OpcUa_SimpleAttributeOperand
 {
     UA_NodeId         TypeDefinitionId;
     int32_t           NoOfBrowsePath;
@@ -3362,26 +3362,26 @@ typedef struct _UA_SimpleAttributeOperand
     uint32_t          AttributeId;
     UA_String         IndexRange;
 }
-UA_SimpleAttributeOperand;
+OpcUa_SimpleAttributeOperand;
 
-void UA_SimpleAttributeOperand_Initialize(UA_SimpleAttributeOperand* pValue);
+void OpcUa_SimpleAttributeOperand_Initialize(OpcUa_SimpleAttributeOperand* pValue);
 
-void UA_SimpleAttributeOperand_Clear(UA_SimpleAttributeOperand* pValue);
+void OpcUa_SimpleAttributeOperand_Clear(OpcUa_SimpleAttributeOperand* pValue);
 
-//StatusCode UA_SimpleAttributeOperand_GetSize(UA_SimpleAttributeOperand* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SimpleAttributeOperand_GetSize(OpcUa_SimpleAttributeOperand* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SimpleAttributeOperand_Encode(UA_SimpleAttributeOperand* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SimpleAttributeOperand_Encode(OpcUa_SimpleAttributeOperand* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SimpleAttributeOperand_Decode(UA_SimpleAttributeOperand* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SimpleAttributeOperand_Decode(OpcUa_SimpleAttributeOperand* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SimpleAttributeOperand_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilterElementResult
 /*============================================================================
  * The ContentFilterElementResult structure.
  *===========================================================================*/
-typedef struct _UA_ContentFilterElementResult
+typedef struct _OpcUa_ContentFilterElementResult
 {
     StatusCode         StatusCode;
     int32_t            NoOfOperandStatusCodes;
@@ -3389,52 +3389,52 @@ typedef struct _UA_ContentFilterElementResult
     int32_t            NoOfOperandDiagnosticInfos;
     UA_DiagnosticInfo* OperandDiagnosticInfos;
 }
-UA_ContentFilterElementResult;
+OpcUa_ContentFilterElementResult;
 
-void UA_ContentFilterElementResult_Initialize(UA_ContentFilterElementResult* pValue);
+void OpcUa_ContentFilterElementResult_Initialize(OpcUa_ContentFilterElementResult* pValue);
 
-void UA_ContentFilterElementResult_Clear(UA_ContentFilterElementResult* pValue);
+void OpcUa_ContentFilterElementResult_Clear(OpcUa_ContentFilterElementResult* pValue);
 
-//StatusCode UA_ContentFilterElementResult_GetSize(UA_ContentFilterElementResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ContentFilterElementResult_GetSize(OpcUa_ContentFilterElementResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ContentFilterElementResult_Encode(UA_ContentFilterElementResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ContentFilterElementResult_Encode(OpcUa_ContentFilterElementResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ContentFilterElementResult_Decode(UA_ContentFilterElementResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ContentFilterElementResult_Decode(OpcUa_ContentFilterElementResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ContentFilterElementResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ContentFilterResult
 /*============================================================================
  * The ContentFilterResult structure.
  *===========================================================================*/
-typedef struct _UA_ContentFilterResult
+typedef struct _OpcUa_ContentFilterResult
 {
-    int32_t                        NoOfElementResults;
-    UA_ContentFilterElementResult* ElementResults;
-    int32_t                        NoOfElementDiagnosticInfos;
-    UA_DiagnosticInfo*             ElementDiagnosticInfos;
+    int32_t                           NoOfElementResults;
+    OpcUa_ContentFilterElementResult* ElementResults;
+    int32_t                           NoOfElementDiagnosticInfos;
+    UA_DiagnosticInfo*                ElementDiagnosticInfos;
 }
-UA_ContentFilterResult;
+OpcUa_ContentFilterResult;
 
-void UA_ContentFilterResult_Initialize(UA_ContentFilterResult* pValue);
+void OpcUa_ContentFilterResult_Initialize(OpcUa_ContentFilterResult* pValue);
 
-void UA_ContentFilterResult_Clear(UA_ContentFilterResult* pValue);
+void OpcUa_ContentFilterResult_Clear(OpcUa_ContentFilterResult* pValue);
 
-//StatusCode UA_ContentFilterResult_GetSize(UA_ContentFilterResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ContentFilterResult_GetSize(OpcUa_ContentFilterResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ContentFilterResult_Encode(UA_ContentFilterResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ContentFilterResult_Encode(OpcUa_ContentFilterResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ContentFilterResult_Decode(UA_ContentFilterResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ContentFilterResult_Decode(OpcUa_ContentFilterResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ContentFilterResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ContentFilterResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ParsingResult
 /*============================================================================
  * The ParsingResult structure.
  *===========================================================================*/
-typedef struct _UA_ParsingResult
+typedef struct _OpcUa_ParsingResult
 {
     StatusCode         StatusCode;
     int32_t            NoOfDataStatusCodes;
@@ -3442,19 +3442,19 @@ typedef struct _UA_ParsingResult
     int32_t            NoOfDataDiagnosticInfos;
     UA_DiagnosticInfo* DataDiagnosticInfos;
 }
-UA_ParsingResult;
+OpcUa_ParsingResult;
 
-void UA_ParsingResult_Initialize(UA_ParsingResult* pValue);
+void OpcUa_ParsingResult_Initialize(OpcUa_ParsingResult* pValue);
 
-void UA_ParsingResult_Clear(UA_ParsingResult* pValue);
+void OpcUa_ParsingResult_Clear(OpcUa_ParsingResult* pValue);
 
-//StatusCode UA_ParsingResult_GetSize(UA_ParsingResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ParsingResult_GetSize(OpcUa_ParsingResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ParsingResult_Encode(UA_ParsingResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ParsingResult_Encode(OpcUa_ParsingResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ParsingResult_Decode(UA_ParsingResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ParsingResult_Decode(OpcUa_ParsingResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ParsingResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ParsingResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryFirst
@@ -3462,60 +3462,60 @@ extern struct UA_EncodeableType UA_ParsingResult_EncodeableType;
 /*============================================================================
  * The QueryFirstRequest structure.
  *===========================================================================*/
-typedef struct _UA_QueryFirstRequest
+typedef struct _OpcUa_QueryFirstRequest
 {
-    UA_RequestHeader        RequestHeader;
-    UA_ViewDescription      View;
-    int32_t                 NoOfNodeTypes;
-    UA_NodeTypeDescription* NodeTypes;
-    UA_ContentFilter        Filter;
-    uint32_t                MaxDataSetsToReturn;
-    uint32_t                MaxReferencesToReturn;
+    OpcUa_RequestHeader        RequestHeader;
+    OpcUa_ViewDescription      View;
+    int32_t                    NoOfNodeTypes;
+    OpcUa_NodeTypeDescription* NodeTypes;
+    OpcUa_ContentFilter        Filter;
+    uint32_t                   MaxDataSetsToReturn;
+    uint32_t                   MaxReferencesToReturn;
 }
-UA_QueryFirstRequest;
+OpcUa_QueryFirstRequest;
 
-void UA_QueryFirstRequest_Initialize(UA_QueryFirstRequest* pValue);
+void OpcUa_QueryFirstRequest_Initialize(OpcUa_QueryFirstRequest* pValue);
 
-void UA_QueryFirstRequest_Clear(UA_QueryFirstRequest* pValue);
+void OpcUa_QueryFirstRequest_Clear(OpcUa_QueryFirstRequest* pValue);
 
-//StatusCode UA_QueryFirstRequest_GetSize(UA_QueryFirstRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_QueryFirstRequest_GetSize(OpcUa_QueryFirstRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_QueryFirstRequest_Encode(UA_QueryFirstRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryFirstRequest_Encode(OpcUa_QueryFirstRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_QueryFirstRequest_Decode(UA_QueryFirstRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryFirstRequest_Decode(OpcUa_QueryFirstRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_QueryFirstRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_QueryFirstRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryFirstResponse
 /*============================================================================
  * The QueryFirstResponse structure.
  *===========================================================================*/
-typedef struct _UA_QueryFirstResponse
+typedef struct _OpcUa_QueryFirstResponse
 {
-    UA_ResponseHeader      ResponseHeader;
-    int32_t                NoOfQueryDataSets;
-    UA_QueryDataSet*       QueryDataSets;
-    UA_ByteString          ContinuationPoint;
-    int32_t                NoOfParsingResults;
-    UA_ParsingResult*      ParsingResults;
-    int32_t                NoOfDiagnosticInfos;
-    UA_DiagnosticInfo*     DiagnosticInfos;
-    UA_ContentFilterResult FilterResult;
+    OpcUa_ResponseHeader      ResponseHeader;
+    int32_t                   NoOfQueryDataSets;
+    OpcUa_QueryDataSet*       QueryDataSets;
+    UA_ByteString             ContinuationPoint;
+    int32_t                   NoOfParsingResults;
+    OpcUa_ParsingResult*      ParsingResults;
+    int32_t                   NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*        DiagnosticInfos;
+    OpcUa_ContentFilterResult FilterResult;
 }
-UA_QueryFirstResponse;
+OpcUa_QueryFirstResponse;
 
-void UA_QueryFirstResponse_Initialize(UA_QueryFirstResponse* pValue);
+void OpcUa_QueryFirstResponse_Initialize(OpcUa_QueryFirstResponse* pValue);
 
-void UA_QueryFirstResponse_Clear(UA_QueryFirstResponse* pValue);
+void OpcUa_QueryFirstResponse_Clear(OpcUa_QueryFirstResponse* pValue);
 
-//StatusCode UA_QueryFirstResponse_GetSize(UA_QueryFirstResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_QueryFirstResponse_GetSize(OpcUa_QueryFirstResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_QueryFirstResponse_Encode(UA_QueryFirstResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryFirstResponse_Encode(OpcUa_QueryFirstResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_QueryFirstResponse_Decode(UA_QueryFirstResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryFirstResponse_Decode(OpcUa_QueryFirstResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_QueryFirstResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_QueryFirstResponse_EncodeableType;
 #endif
 #endif
 
@@ -3524,51 +3524,51 @@ extern struct UA_EncodeableType UA_QueryFirstResponse_EncodeableType;
 /*============================================================================
  * The QueryNextRequest structure.
  *===========================================================================*/
-typedef struct _UA_QueryNextRequest
+typedef struct _OpcUa_QueryNextRequest
 {
-    UA_RequestHeader RequestHeader;
-    UA_Boolean       ReleaseContinuationPoint;
-    UA_ByteString    ContinuationPoint;
+    OpcUa_RequestHeader RequestHeader;
+    UA_Boolean          ReleaseContinuationPoint;
+    UA_ByteString       ContinuationPoint;
 }
-UA_QueryNextRequest;
+OpcUa_QueryNextRequest;
 
-void UA_QueryNextRequest_Initialize(UA_QueryNextRequest* pValue);
+void OpcUa_QueryNextRequest_Initialize(OpcUa_QueryNextRequest* pValue);
 
-void UA_QueryNextRequest_Clear(UA_QueryNextRequest* pValue);
+void OpcUa_QueryNextRequest_Clear(OpcUa_QueryNextRequest* pValue);
 
-//StatusCode UA_QueryNextRequest_GetSize(UA_QueryNextRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_QueryNextRequest_GetSize(OpcUa_QueryNextRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_QueryNextRequest_Encode(UA_QueryNextRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryNextRequest_Encode(OpcUa_QueryNextRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_QueryNextRequest_Decode(UA_QueryNextRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryNextRequest_Decode(OpcUa_QueryNextRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_QueryNextRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_QueryNextRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryNextResponse
 /*============================================================================
  * The QueryNextResponse structure.
  *===========================================================================*/
-typedef struct _UA_QueryNextResponse
+typedef struct _OpcUa_QueryNextResponse
 {
-    UA_ResponseHeader ResponseHeader;
-    int32_t           NoOfQueryDataSets;
-    UA_QueryDataSet*  QueryDataSets;
-    UA_ByteString     RevisedContinuationPoint;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfQueryDataSets;
+    OpcUa_QueryDataSet*  QueryDataSets;
+    UA_ByteString        RevisedContinuationPoint;
 }
-UA_QueryNextResponse;
+OpcUa_QueryNextResponse;
 
-void UA_QueryNextResponse_Initialize(UA_QueryNextResponse* pValue);
+void OpcUa_QueryNextResponse_Initialize(OpcUa_QueryNextResponse* pValue);
 
-void UA_QueryNextResponse_Clear(UA_QueryNextResponse* pValue);
+void OpcUa_QueryNextResponse_Clear(OpcUa_QueryNextResponse* pValue);
 
-//StatusCode UA_QueryNextResponse_GetSize(UA_QueryNextResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_QueryNextResponse_GetSize(OpcUa_QueryNextResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_QueryNextResponse_Encode(UA_QueryNextResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryNextResponse_Encode(OpcUa_QueryNextResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_QueryNextResponse_Decode(UA_QueryNextResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_QueryNextResponse_Decode(OpcUa_QueryNextResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_QueryNextResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_QueryNextResponse_EncodeableType;
 #endif
 #endif
 
@@ -3576,17 +3576,17 @@ extern struct UA_EncodeableType UA_QueryNextResponse_EncodeableType;
 /*============================================================================
  * The TimestampsToReturn enumeration.
  *===========================================================================*/
-typedef enum _UA_TimestampsToReturn
+typedef enum _OpcUa_TimestampsToReturn
 {
-    UA_TimestampsToReturn_Source  = 0,
-    UA_TimestampsToReturn_Server  = 1,
-    UA_TimestampsToReturn_Both    = 2,
-    UA_TimestampsToReturn_Neither = 3
+    OpcUa_TimestampsToReturn_Source  = 0,
+    OpcUa_TimestampsToReturn_Server  = 1,
+    OpcUa_TimestampsToReturn_Both    = 2,
+    OpcUa_TimestampsToReturn_Neither = 3
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_TimestampsToReturn_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_TimestampsToReturn_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_TimestampsToReturn;
+OpcUa_TimestampsToReturn;
 
 #endif
 
@@ -3594,26 +3594,26 @@ UA_TimestampsToReturn;
 /*============================================================================
  * The ReadValueId structure.
  *===========================================================================*/
-typedef struct _UA_ReadValueId
+typedef struct _OpcUa_ReadValueId
 {
     UA_NodeId        NodeId;
     uint32_t         AttributeId;
     UA_String        IndexRange;
     UA_QualifiedName DataEncoding;
 }
-UA_ReadValueId;
+OpcUa_ReadValueId;
 
-void UA_ReadValueId_Initialize(UA_ReadValueId* pValue);
+void OpcUa_ReadValueId_Initialize(OpcUa_ReadValueId* pValue);
 
-void UA_ReadValueId_Clear(UA_ReadValueId* pValue);
+void OpcUa_ReadValueId_Clear(OpcUa_ReadValueId* pValue);
 
-//StatusCode UA_ReadValueId_GetSize(UA_ReadValueId* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReadValueId_GetSize(OpcUa_ReadValueId* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReadValueId_Encode(UA_ReadValueId* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadValueId_Encode(OpcUa_ReadValueId* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReadValueId_Decode(UA_ReadValueId* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadValueId_Decode(OpcUa_ReadValueId* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReadValueId_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReadValueId_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_Read
@@ -3621,54 +3621,54 @@ extern struct UA_EncodeableType UA_ReadValueId_EncodeableType;
 /*============================================================================
  * The ReadRequest structure.
  *===========================================================================*/
-typedef struct _UA_ReadRequest
+typedef struct _OpcUa_ReadRequest
 {
-    UA_RequestHeader      RequestHeader;
-    double                MaxAge;
-    UA_TimestampsToReturn TimestampsToReturn;
-    int32_t               NoOfNodesToRead;
-    UA_ReadValueId*       NodesToRead;
+    OpcUa_RequestHeader      RequestHeader;
+    double                   MaxAge;
+    OpcUa_TimestampsToReturn TimestampsToReturn;
+    int32_t                  NoOfNodesToRead;
+    OpcUa_ReadValueId*       NodesToRead;
 }
-UA_ReadRequest;
+OpcUa_ReadRequest;
 
-void UA_ReadRequest_Initialize(UA_ReadRequest* pValue);
+void OpcUa_ReadRequest_Initialize(OpcUa_ReadRequest* pValue);
 
-void UA_ReadRequest_Clear(UA_ReadRequest* pValue);
+void OpcUa_ReadRequest_Clear(OpcUa_ReadRequest* pValue);
 
-//StatusCode UA_ReadRequest_GetSize(UA_ReadRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReadRequest_GetSize(OpcUa_ReadRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReadRequest_Encode(UA_ReadRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadRequest_Encode(OpcUa_ReadRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReadRequest_Decode(UA_ReadRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadRequest_Decode(OpcUa_ReadRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReadRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReadRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadResponse
 /*============================================================================
  * The ReadResponse structure.
  *===========================================================================*/
-typedef struct _UA_ReadResponse
+typedef struct _OpcUa_ReadResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    UA_DataValue*      Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    UA_DataValue*        Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_ReadResponse;
+OpcUa_ReadResponse;
 
-void UA_ReadResponse_Initialize(UA_ReadResponse* pValue);
+void OpcUa_ReadResponse_Initialize(OpcUa_ReadResponse* pValue);
 
-void UA_ReadResponse_Clear(UA_ReadResponse* pValue);
+void OpcUa_ReadResponse_Clear(OpcUa_ReadResponse* pValue);
 
-//StatusCode UA_ReadResponse_GetSize(UA_ReadResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReadResponse_GetSize(OpcUa_ReadResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReadResponse_Encode(UA_ReadResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadResponse_Encode(OpcUa_ReadResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReadResponse_Decode(UA_ReadResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadResponse_Decode(OpcUa_ReadResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReadResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReadResponse_EncodeableType;
 #endif
 #endif
 
@@ -3676,109 +3676,109 @@ extern struct UA_EncodeableType UA_ReadResponse_EncodeableType;
 /*============================================================================
  * The HistoryReadValueId structure.
  *===========================================================================*/
-typedef struct _UA_HistoryReadValueId
+typedef struct _OpcUa_HistoryReadValueId
 {
     UA_NodeId        NodeId;
     UA_String        IndexRange;
     UA_QualifiedName DataEncoding;
     UA_ByteString    ContinuationPoint;
 }
-UA_HistoryReadValueId;
+OpcUa_HistoryReadValueId;
 
-void UA_HistoryReadValueId_Initialize(UA_HistoryReadValueId* pValue);
+void OpcUa_HistoryReadValueId_Initialize(OpcUa_HistoryReadValueId* pValue);
 
-void UA_HistoryReadValueId_Clear(UA_HistoryReadValueId* pValue);
+void OpcUa_HistoryReadValueId_Clear(OpcUa_HistoryReadValueId* pValue);
 
-//StatusCode UA_HistoryReadValueId_GetSize(UA_HistoryReadValueId* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryReadValueId_GetSize(OpcUa_HistoryReadValueId* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryReadValueId_Encode(UA_HistoryReadValueId* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryReadValueId_Encode(OpcUa_HistoryReadValueId* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryReadValueId_Decode(UA_HistoryReadValueId* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryReadValueId_Decode(OpcUa_HistoryReadValueId* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryReadValueId_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryReadValueId_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryReadResult
 /*============================================================================
  * The HistoryReadResult structure.
  *===========================================================================*/
-typedef struct _UA_HistoryReadResult
+typedef struct _OpcUa_HistoryReadResult
 {
     StatusCode         StatusCode;
     UA_ByteString      ContinuationPoint;
     UA_ExtensionObject HistoryData;
 }
-UA_HistoryReadResult;
+OpcUa_HistoryReadResult;
 
-void UA_HistoryReadResult_Initialize(UA_HistoryReadResult* pValue);
+void OpcUa_HistoryReadResult_Initialize(OpcUa_HistoryReadResult* pValue);
 
-void UA_HistoryReadResult_Clear(UA_HistoryReadResult* pValue);
+void OpcUa_HistoryReadResult_Clear(OpcUa_HistoryReadResult* pValue);
 
-//StatusCode UA_HistoryReadResult_GetSize(UA_HistoryReadResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryReadResult_GetSize(OpcUa_HistoryReadResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryReadResult_Encode(UA_HistoryReadResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryReadResult_Encode(OpcUa_HistoryReadResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryReadResult_Decode(UA_HistoryReadResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryReadResult_Decode(OpcUa_HistoryReadResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryReadResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryReadResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventFilter
 /*============================================================================
  * The EventFilter structure.
  *===========================================================================*/
-typedef struct _UA_EventFilter
+typedef struct _OpcUa_EventFilter
 {
-    int32_t                    NoOfSelectClauses;
-    UA_SimpleAttributeOperand* SelectClauses;
-    UA_ContentFilter           WhereClause;
+    int32_t                       NoOfSelectClauses;
+    OpcUa_SimpleAttributeOperand* SelectClauses;
+    OpcUa_ContentFilter           WhereClause;
 }
-UA_EventFilter;
+OpcUa_EventFilter;
 
-void UA_EventFilter_Initialize(UA_EventFilter* pValue);
+void OpcUa_EventFilter_Initialize(OpcUa_EventFilter* pValue);
 
-void UA_EventFilter_Clear(UA_EventFilter* pValue);
+void OpcUa_EventFilter_Clear(OpcUa_EventFilter* pValue);
 
-//StatusCode UA_EventFilter_GetSize(UA_EventFilter* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EventFilter_GetSize(OpcUa_EventFilter* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EventFilter_Encode(UA_EventFilter* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EventFilter_Encode(OpcUa_EventFilter* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EventFilter_Decode(UA_EventFilter* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EventFilter_Decode(OpcUa_EventFilter* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EventFilter_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EventFilter_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadEventDetails
 /*============================================================================
  * The ReadEventDetails structure.
  *===========================================================================*/
-typedef struct _UA_ReadEventDetails
+typedef struct _OpcUa_ReadEventDetails
 {
-    uint32_t       NumValuesPerNode;
-    UA_DateTime    StartTime;
-    UA_DateTime    EndTime;
-    UA_EventFilter Filter;
+    uint32_t          NumValuesPerNode;
+    UA_DateTime       StartTime;
+    UA_DateTime       EndTime;
+    OpcUa_EventFilter Filter;
 }
-UA_ReadEventDetails;
+OpcUa_ReadEventDetails;
 
-void UA_ReadEventDetails_Initialize(UA_ReadEventDetails* pValue);
+void OpcUa_ReadEventDetails_Initialize(OpcUa_ReadEventDetails* pValue);
 
-void UA_ReadEventDetails_Clear(UA_ReadEventDetails* pValue);
+void OpcUa_ReadEventDetails_Clear(OpcUa_ReadEventDetails* pValue);
 
-//StatusCode UA_ReadEventDetails_GetSize(UA_ReadEventDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReadEventDetails_GetSize(OpcUa_ReadEventDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReadEventDetails_Encode(UA_ReadEventDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadEventDetails_Encode(OpcUa_ReadEventDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReadEventDetails_Decode(UA_ReadEventDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadEventDetails_Decode(OpcUa_ReadEventDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReadEventDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReadEventDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadRawModifiedDetails
 /*============================================================================
  * The ReadRawModifiedDetails structure.
  *===========================================================================*/
-typedef struct _UA_ReadRawModifiedDetails
+typedef struct _OpcUa_ReadRawModifiedDetails
 {
     UA_Boolean  IsReadModified;
     UA_DateTime StartTime;
@@ -3786,26 +3786,26 @@ typedef struct _UA_ReadRawModifiedDetails
     uint32_t    NumValuesPerNode;
     UA_Boolean  ReturnBounds;
 }
-UA_ReadRawModifiedDetails;
+OpcUa_ReadRawModifiedDetails;
 
-void UA_ReadRawModifiedDetails_Initialize(UA_ReadRawModifiedDetails* pValue);
+void OpcUa_ReadRawModifiedDetails_Initialize(OpcUa_ReadRawModifiedDetails* pValue);
 
-void UA_ReadRawModifiedDetails_Clear(UA_ReadRawModifiedDetails* pValue);
+void OpcUa_ReadRawModifiedDetails_Clear(OpcUa_ReadRawModifiedDetails* pValue);
 
-//StatusCode UA_ReadRawModifiedDetails_GetSize(UA_ReadRawModifiedDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReadRawModifiedDetails_GetSize(OpcUa_ReadRawModifiedDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReadRawModifiedDetails_Encode(UA_ReadRawModifiedDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadRawModifiedDetails_Encode(OpcUa_ReadRawModifiedDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReadRawModifiedDetails_Decode(UA_ReadRawModifiedDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadRawModifiedDetails_Decode(OpcUa_ReadRawModifiedDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReadRawModifiedDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AggregateConfiguration
 /*============================================================================
  * The AggregateConfiguration structure.
  *===========================================================================*/
-typedef struct _UA_AggregateConfiguration
+typedef struct _OpcUa_AggregateConfiguration
 {
     UA_Boolean UseServerCapabilitiesDefaults;
     UA_Boolean TreatUncertainAsBad;
@@ -3813,113 +3813,113 @@ typedef struct _UA_AggregateConfiguration
     UA_Byte    PercentDataGood;
     UA_Boolean UseSlopedExtrapolation;
 }
-UA_AggregateConfiguration;
+OpcUa_AggregateConfiguration;
 
-void UA_AggregateConfiguration_Initialize(UA_AggregateConfiguration* pValue);
+void OpcUa_AggregateConfiguration_Initialize(OpcUa_AggregateConfiguration* pValue);
 
-void UA_AggregateConfiguration_Clear(UA_AggregateConfiguration* pValue);
+void OpcUa_AggregateConfiguration_Clear(OpcUa_AggregateConfiguration* pValue);
 
-//StatusCode UA_AggregateConfiguration_GetSize(UA_AggregateConfiguration* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AggregateConfiguration_GetSize(OpcUa_AggregateConfiguration* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AggregateConfiguration_Encode(UA_AggregateConfiguration* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AggregateConfiguration_Encode(OpcUa_AggregateConfiguration* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AggregateConfiguration_Decode(UA_AggregateConfiguration* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AggregateConfiguration_Decode(OpcUa_AggregateConfiguration* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AggregateConfiguration_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AggregateConfiguration_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadProcessedDetails
 /*============================================================================
  * The ReadProcessedDetails structure.
  *===========================================================================*/
-typedef struct _UA_ReadProcessedDetails
+typedef struct _OpcUa_ReadProcessedDetails
 {
-    UA_DateTime               StartTime;
-    UA_DateTime               EndTime;
-    double                    ProcessingInterval;
-    int32_t                   NoOfAggregateType;
-    UA_NodeId*                AggregateType;
-    UA_AggregateConfiguration AggregateConfiguration;
+    UA_DateTime                  StartTime;
+    UA_DateTime                  EndTime;
+    double                       ProcessingInterval;
+    int32_t                      NoOfAggregateType;
+    UA_NodeId*                   AggregateType;
+    OpcUa_AggregateConfiguration AggregateConfiguration;
 }
-UA_ReadProcessedDetails;
+OpcUa_ReadProcessedDetails;
 
-void UA_ReadProcessedDetails_Initialize(UA_ReadProcessedDetails* pValue);
+void OpcUa_ReadProcessedDetails_Initialize(OpcUa_ReadProcessedDetails* pValue);
 
-void UA_ReadProcessedDetails_Clear(UA_ReadProcessedDetails* pValue);
+void OpcUa_ReadProcessedDetails_Clear(OpcUa_ReadProcessedDetails* pValue);
 
-//StatusCode UA_ReadProcessedDetails_GetSize(UA_ReadProcessedDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReadProcessedDetails_GetSize(OpcUa_ReadProcessedDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReadProcessedDetails_Encode(UA_ReadProcessedDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadProcessedDetails_Encode(OpcUa_ReadProcessedDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReadProcessedDetails_Decode(UA_ReadProcessedDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadProcessedDetails_Decode(OpcUa_ReadProcessedDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReadProcessedDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ReadAtTimeDetails
 /*============================================================================
  * The ReadAtTimeDetails structure.
  *===========================================================================*/
-typedef struct _UA_ReadAtTimeDetails
+typedef struct _OpcUa_ReadAtTimeDetails
 {
     int32_t      NoOfReqTimes;
     UA_DateTime* ReqTimes;
     UA_Boolean   UseSimpleBounds;
 }
-UA_ReadAtTimeDetails;
+OpcUa_ReadAtTimeDetails;
 
-void UA_ReadAtTimeDetails_Initialize(UA_ReadAtTimeDetails* pValue);
+void OpcUa_ReadAtTimeDetails_Initialize(OpcUa_ReadAtTimeDetails* pValue);
 
-void UA_ReadAtTimeDetails_Clear(UA_ReadAtTimeDetails* pValue);
+void OpcUa_ReadAtTimeDetails_Clear(OpcUa_ReadAtTimeDetails* pValue);
 
-//StatusCode UA_ReadAtTimeDetails_GetSize(UA_ReadAtTimeDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ReadAtTimeDetails_GetSize(OpcUa_ReadAtTimeDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ReadAtTimeDetails_Encode(UA_ReadAtTimeDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadAtTimeDetails_Encode(OpcUa_ReadAtTimeDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ReadAtTimeDetails_Decode(UA_ReadAtTimeDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ReadAtTimeDetails_Decode(OpcUa_ReadAtTimeDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ReadAtTimeDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryData
 /*============================================================================
  * The HistoryData structure.
  *===========================================================================*/
-typedef struct _UA_HistoryData
+typedef struct _OpcUa_HistoryData
 {
     int32_t       NoOfDataValues;
     UA_DataValue* DataValues;
 }
-UA_HistoryData;
+OpcUa_HistoryData;
 
-void UA_HistoryData_Initialize(UA_HistoryData* pValue);
+void OpcUa_HistoryData_Initialize(OpcUa_HistoryData* pValue);
 
-void UA_HistoryData_Clear(UA_HistoryData* pValue);
+void OpcUa_HistoryData_Clear(OpcUa_HistoryData* pValue);
 
-//StatusCode UA_HistoryData_GetSize(UA_HistoryData* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryData_GetSize(OpcUa_HistoryData* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryData_Encode(UA_HistoryData* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryData_Encode(OpcUa_HistoryData* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryData_Decode(UA_HistoryData* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryData_Decode(OpcUa_HistoryData* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryData_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryData_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdateType
 /*============================================================================
  * The HistoryUpdateType enumeration.
  *===========================================================================*/
-typedef enum _UA_HistoryUpdateType
+typedef enum _OpcUa_HistoryUpdateType
 {
-    UA_HistoryUpdateType_Insert  = 1,
-    UA_HistoryUpdateType_Replace = 2,
-    UA_HistoryUpdateType_Update  = 3,
-    UA_HistoryUpdateType_Delete  = 4
+    OpcUa_HistoryUpdateType_Insert  = 1,
+    OpcUa_HistoryUpdateType_Replace = 2,
+    OpcUa_HistoryUpdateType_Update  = 3,
+    OpcUa_HistoryUpdateType_Delete  = 4
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_HistoryUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_HistoryUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_HistoryUpdateType;
+OpcUa_HistoryUpdateType;
 
 #endif
 
@@ -3927,99 +3927,99 @@ UA_HistoryUpdateType;
 /*============================================================================
  * The ModificationInfo structure.
  *===========================================================================*/
-typedef struct _UA_ModificationInfo
+typedef struct _OpcUa_ModificationInfo
 {
-    UA_DateTime          ModificationTime;
-    UA_HistoryUpdateType UpdateType;
-    UA_String            UserName;
+    UA_DateTime             ModificationTime;
+    OpcUa_HistoryUpdateType UpdateType;
+    UA_String               UserName;
 }
-UA_ModificationInfo;
+OpcUa_ModificationInfo;
 
-void UA_ModificationInfo_Initialize(UA_ModificationInfo* pValue);
+void OpcUa_ModificationInfo_Initialize(OpcUa_ModificationInfo* pValue);
 
-void UA_ModificationInfo_Clear(UA_ModificationInfo* pValue);
+void OpcUa_ModificationInfo_Clear(OpcUa_ModificationInfo* pValue);
 
-//StatusCode UA_ModificationInfo_GetSize(UA_ModificationInfo* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ModificationInfo_GetSize(OpcUa_ModificationInfo* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ModificationInfo_Encode(UA_ModificationInfo* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModificationInfo_Encode(OpcUa_ModificationInfo* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ModificationInfo_Decode(UA_ModificationInfo* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModificationInfo_Decode(OpcUa_ModificationInfo* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ModificationInfo_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ModificationInfo_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryModifiedData
 /*============================================================================
  * The HistoryModifiedData structure.
  *===========================================================================*/
-typedef struct _UA_HistoryModifiedData
+typedef struct _OpcUa_HistoryModifiedData
 {
-    int32_t              NoOfDataValues;
-    UA_DataValue*        DataValues;
-    int32_t              NoOfModificationInfos;
-    UA_ModificationInfo* ModificationInfos;
+    int32_t                 NoOfDataValues;
+    UA_DataValue*           DataValues;
+    int32_t                 NoOfModificationInfos;
+    OpcUa_ModificationInfo* ModificationInfos;
 }
-UA_HistoryModifiedData;
+OpcUa_HistoryModifiedData;
 
-void UA_HistoryModifiedData_Initialize(UA_HistoryModifiedData* pValue);
+void OpcUa_HistoryModifiedData_Initialize(OpcUa_HistoryModifiedData* pValue);
 
-void UA_HistoryModifiedData_Clear(UA_HistoryModifiedData* pValue);
+void OpcUa_HistoryModifiedData_Clear(OpcUa_HistoryModifiedData* pValue);
 
-//StatusCode UA_HistoryModifiedData_GetSize(UA_HistoryModifiedData* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryModifiedData_GetSize(OpcUa_HistoryModifiedData* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryModifiedData_Encode(UA_HistoryModifiedData* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryModifiedData_Encode(OpcUa_HistoryModifiedData* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryModifiedData_Decode(UA_HistoryModifiedData* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryModifiedData_Decode(OpcUa_HistoryModifiedData* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryModifiedData_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryModifiedData_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryEventFieldList
 /*============================================================================
  * The HistoryEventFieldList structure.
  *===========================================================================*/
-typedef struct _UA_HistoryEventFieldList
+typedef struct _OpcUa_HistoryEventFieldList
 {
     int32_t     NoOfEventFields;
     UA_Variant* EventFields;
 }
-UA_HistoryEventFieldList;
+OpcUa_HistoryEventFieldList;
 
-void UA_HistoryEventFieldList_Initialize(UA_HistoryEventFieldList* pValue);
+void OpcUa_HistoryEventFieldList_Initialize(OpcUa_HistoryEventFieldList* pValue);
 
-void UA_HistoryEventFieldList_Clear(UA_HistoryEventFieldList* pValue);
+void OpcUa_HistoryEventFieldList_Clear(OpcUa_HistoryEventFieldList* pValue);
 
-//StatusCode UA_HistoryEventFieldList_GetSize(UA_HistoryEventFieldList* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryEventFieldList_GetSize(OpcUa_HistoryEventFieldList* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryEventFieldList_Encode(UA_HistoryEventFieldList* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryEventFieldList_Encode(OpcUa_HistoryEventFieldList* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryEventFieldList_Decode(UA_HistoryEventFieldList* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryEventFieldList_Decode(OpcUa_HistoryEventFieldList* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryEventFieldList_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryEvent
 /*============================================================================
  * The HistoryEvent structure.
  *===========================================================================*/
-typedef struct _UA_HistoryEvent
+typedef struct _OpcUa_HistoryEvent
 {
-    int32_t                   NoOfEvents;
-    UA_HistoryEventFieldList* Events;
+    int32_t                      NoOfEvents;
+    OpcUa_HistoryEventFieldList* Events;
 }
-UA_HistoryEvent;
+OpcUa_HistoryEvent;
 
-void UA_HistoryEvent_Initialize(UA_HistoryEvent* pValue);
+void OpcUa_HistoryEvent_Initialize(OpcUa_HistoryEvent* pValue);
 
-void UA_HistoryEvent_Clear(UA_HistoryEvent* pValue);
+void OpcUa_HistoryEvent_Clear(OpcUa_HistoryEvent* pValue);
 
-//StatusCode UA_HistoryEvent_GetSize(UA_HistoryEvent* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryEvent_GetSize(OpcUa_HistoryEvent* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryEvent_Encode(UA_HistoryEvent* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryEvent_Encode(OpcUa_HistoryEvent* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryEvent_Decode(UA_HistoryEvent* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryEvent_Decode(OpcUa_HistoryEvent* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryEvent_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryEvent_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryRead
@@ -4027,55 +4027,55 @@ extern struct UA_EncodeableType UA_HistoryEvent_EncodeableType;
 /*============================================================================
  * The HistoryReadRequest structure.
  *===========================================================================*/
-typedef struct _UA_HistoryReadRequest
+typedef struct _OpcUa_HistoryReadRequest
 {
-    UA_RequestHeader       RequestHeader;
-    UA_ExtensionObject     HistoryReadDetails;
-    UA_TimestampsToReturn  TimestampsToReturn;
-    UA_Boolean             ReleaseContinuationPoints;
-    int32_t                NoOfNodesToRead;
-    UA_HistoryReadValueId* NodesToRead;
+    OpcUa_RequestHeader       RequestHeader;
+    UA_ExtensionObject        HistoryReadDetails;
+    OpcUa_TimestampsToReturn  TimestampsToReturn;
+    UA_Boolean                ReleaseContinuationPoints;
+    int32_t                   NoOfNodesToRead;
+    OpcUa_HistoryReadValueId* NodesToRead;
 }
-UA_HistoryReadRequest;
+OpcUa_HistoryReadRequest;
 
-void UA_HistoryReadRequest_Initialize(UA_HistoryReadRequest* pValue);
+void OpcUa_HistoryReadRequest_Initialize(OpcUa_HistoryReadRequest* pValue);
 
-void UA_HistoryReadRequest_Clear(UA_HistoryReadRequest* pValue);
+void OpcUa_HistoryReadRequest_Clear(OpcUa_HistoryReadRequest* pValue);
 
-//StatusCode UA_HistoryReadRequest_GetSize(UA_HistoryReadRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryReadRequest_GetSize(OpcUa_HistoryReadRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryReadRequest_Encode(UA_HistoryReadRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryReadRequest_Encode(OpcUa_HistoryReadRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryReadRequest_Decode(UA_HistoryReadRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryReadRequest_Decode(OpcUa_HistoryReadRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryReadRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryReadRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryReadResponse
 /*============================================================================
  * The HistoryReadResponse structure.
  *===========================================================================*/
-typedef struct _UA_HistoryReadResponse
+typedef struct _OpcUa_HistoryReadResponse
 {
-    UA_ResponseHeader     ResponseHeader;
-    int32_t               NoOfResults;
-    UA_HistoryReadResult* Results;
-    int32_t               NoOfDiagnosticInfos;
-    UA_DiagnosticInfo*    DiagnosticInfos;
+    OpcUa_ResponseHeader     ResponseHeader;
+    int32_t                  NoOfResults;
+    OpcUa_HistoryReadResult* Results;
+    int32_t                  NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*       DiagnosticInfos;
 }
-UA_HistoryReadResponse;
+OpcUa_HistoryReadResponse;
 
-void UA_HistoryReadResponse_Initialize(UA_HistoryReadResponse* pValue);
+void OpcUa_HistoryReadResponse_Initialize(OpcUa_HistoryReadResponse* pValue);
 
-void UA_HistoryReadResponse_Clear(UA_HistoryReadResponse* pValue);
+void OpcUa_HistoryReadResponse_Clear(OpcUa_HistoryReadResponse* pValue);
 
-//StatusCode UA_HistoryReadResponse_GetSize(UA_HistoryReadResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryReadResponse_GetSize(OpcUa_HistoryReadResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryReadResponse_Encode(UA_HistoryReadResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryReadResponse_Encode(OpcUa_HistoryReadResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryReadResponse_Decode(UA_HistoryReadResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryReadResponse_Decode(OpcUa_HistoryReadResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryReadResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryReadResponse_EncodeableType;
 #endif
 #endif
 
@@ -4083,26 +4083,26 @@ extern struct UA_EncodeableType UA_HistoryReadResponse_EncodeableType;
 /*============================================================================
  * The WriteValue structure.
  *===========================================================================*/
-typedef struct _UA_WriteValue
+typedef struct _OpcUa_WriteValue
 {
     UA_NodeId    NodeId;
     uint32_t     AttributeId;
     UA_String    IndexRange;
     UA_DataValue Value;
 }
-UA_WriteValue;
+OpcUa_WriteValue;
 
-void UA_WriteValue_Initialize(UA_WriteValue* pValue);
+void OpcUa_WriteValue_Initialize(OpcUa_WriteValue* pValue);
 
-void UA_WriteValue_Clear(UA_WriteValue* pValue);
+void OpcUa_WriteValue_Clear(OpcUa_WriteValue* pValue);
 
-//StatusCode UA_WriteValue_GetSize(UA_WriteValue* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_WriteValue_GetSize(OpcUa_WriteValue* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_WriteValue_Encode(UA_WriteValue* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_WriteValue_Encode(OpcUa_WriteValue* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_WriteValue_Decode(UA_WriteValue* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_WriteValue_Decode(OpcUa_WriteValue* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_WriteValue_EncodeableType;
+extern struct UA_EncodeableType OpcUa_WriteValue_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_Write
@@ -4110,52 +4110,52 @@ extern struct UA_EncodeableType UA_WriteValue_EncodeableType;
 /*============================================================================
  * The WriteRequest structure.
  *===========================================================================*/
-typedef struct _UA_WriteRequest
+typedef struct _OpcUa_WriteRequest
 {
-    UA_RequestHeader RequestHeader;
-    int32_t          NoOfNodesToWrite;
-    UA_WriteValue*   NodesToWrite;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t             NoOfNodesToWrite;
+    OpcUa_WriteValue*   NodesToWrite;
 }
-UA_WriteRequest;
+OpcUa_WriteRequest;
 
-void UA_WriteRequest_Initialize(UA_WriteRequest* pValue);
+void OpcUa_WriteRequest_Initialize(OpcUa_WriteRequest* pValue);
 
-void UA_WriteRequest_Clear(UA_WriteRequest* pValue);
+void OpcUa_WriteRequest_Clear(OpcUa_WriteRequest* pValue);
 
-//StatusCode UA_WriteRequest_GetSize(UA_WriteRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_WriteRequest_GetSize(OpcUa_WriteRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_WriteRequest_Encode(UA_WriteRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_WriteRequest_Encode(OpcUa_WriteRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_WriteRequest_Decode(UA_WriteRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_WriteRequest_Decode(OpcUa_WriteRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_WriteRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_WriteRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_WriteResponse
 /*============================================================================
  * The WriteResponse structure.
  *===========================================================================*/
-typedef struct _UA_WriteResponse
+typedef struct _OpcUa_WriteResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    StatusCode*        Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    StatusCode*          Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_WriteResponse;
+OpcUa_WriteResponse;
 
-void UA_WriteResponse_Initialize(UA_WriteResponse* pValue);
+void OpcUa_WriteResponse_Initialize(OpcUa_WriteResponse* pValue);
 
-void UA_WriteResponse_Clear(UA_WriteResponse* pValue);
+void OpcUa_WriteResponse_Clear(OpcUa_WriteResponse* pValue);
 
-//StatusCode UA_WriteResponse_GetSize(UA_WriteResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_WriteResponse_GetSize(OpcUa_WriteResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_WriteResponse_Encode(UA_WriteResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_WriteResponse_Encode(OpcUa_WriteResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_WriteResponse_Decode(UA_WriteResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_WriteResponse_Decode(OpcUa_WriteResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_WriteResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_WriteResponse_EncodeableType;
 #endif
 #endif
 
@@ -4163,40 +4163,40 @@ extern struct UA_EncodeableType UA_WriteResponse_EncodeableType;
 /*============================================================================
  * The HistoryUpdateDetails structure.
  *===========================================================================*/
-typedef struct _UA_HistoryUpdateDetails
+typedef struct _OpcUa_HistoryUpdateDetails
 {
     UA_NodeId NodeId;
 }
-UA_HistoryUpdateDetails;
+OpcUa_HistoryUpdateDetails;
 
-void UA_HistoryUpdateDetails_Initialize(UA_HistoryUpdateDetails* pValue);
+void OpcUa_HistoryUpdateDetails_Initialize(OpcUa_HistoryUpdateDetails* pValue);
 
-void UA_HistoryUpdateDetails_Clear(UA_HistoryUpdateDetails* pValue);
+void OpcUa_HistoryUpdateDetails_Clear(OpcUa_HistoryUpdateDetails* pValue);
 
-//StatusCode UA_HistoryUpdateDetails_GetSize(UA_HistoryUpdateDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryUpdateDetails_GetSize(OpcUa_HistoryUpdateDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryUpdateDetails_Encode(UA_HistoryUpdateDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryUpdateDetails_Encode(OpcUa_HistoryUpdateDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryUpdateDetails_Decode(UA_HistoryUpdateDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryUpdateDetails_Decode(OpcUa_HistoryUpdateDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryUpdateDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_PerformUpdateType
 /*============================================================================
  * The PerformUpdateType enumeration.
  *===========================================================================*/
-typedef enum _UA_PerformUpdateType
+typedef enum _OpcUa_PerformUpdateType
 {
-    UA_PerformUpdateType_Insert  = 1,
-    UA_PerformUpdateType_Replace = 2,
-    UA_PerformUpdateType_Update  = 3,
-    UA_PerformUpdateType_Remove  = 4
+    OpcUa_PerformUpdateType_Insert  = 1,
+    OpcUa_PerformUpdateType_Replace = 2,
+    OpcUa_PerformUpdateType_Update  = 3,
+    OpcUa_PerformUpdateType_Remove  = 4
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_PerformUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_PerformUpdateType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_PerformUpdateType;
+OpcUa_PerformUpdateType;
 
 #endif
 
@@ -4204,162 +4204,162 @@ UA_PerformUpdateType;
 /*============================================================================
  * The UpdateDataDetails structure.
  *===========================================================================*/
-typedef struct _UA_UpdateDataDetails
+typedef struct _OpcUa_UpdateDataDetails
 {
-    UA_NodeId            NodeId;
-    UA_PerformUpdateType PerformInsertReplace;
-    int32_t              NoOfUpdateValues;
-    UA_DataValue*        UpdateValues;
+    UA_NodeId               NodeId;
+    OpcUa_PerformUpdateType PerformInsertReplace;
+    int32_t                 NoOfUpdateValues;
+    UA_DataValue*           UpdateValues;
 }
-UA_UpdateDataDetails;
+OpcUa_UpdateDataDetails;
 
-void UA_UpdateDataDetails_Initialize(UA_UpdateDataDetails* pValue);
+void OpcUa_UpdateDataDetails_Initialize(OpcUa_UpdateDataDetails* pValue);
 
-void UA_UpdateDataDetails_Clear(UA_UpdateDataDetails* pValue);
+void OpcUa_UpdateDataDetails_Clear(OpcUa_UpdateDataDetails* pValue);
 
-//StatusCode UA_UpdateDataDetails_GetSize(UA_UpdateDataDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_UpdateDataDetails_GetSize(OpcUa_UpdateDataDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_UpdateDataDetails_Encode(UA_UpdateDataDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UpdateDataDetails_Encode(OpcUa_UpdateDataDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_UpdateDataDetails_Decode(UA_UpdateDataDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UpdateDataDetails_Decode(OpcUa_UpdateDataDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_UpdateDataDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_UpdateDataDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_UpdateStructureDataDetails
 /*============================================================================
  * The UpdateStructureDataDetails structure.
  *===========================================================================*/
-typedef struct _UA_UpdateStructureDataDetails
+typedef struct _OpcUa_UpdateStructureDataDetails
 {
-    UA_NodeId            NodeId;
-    UA_PerformUpdateType PerformInsertReplace;
-    int32_t              NoOfUpdateValues;
-    UA_DataValue*        UpdateValues;
+    UA_NodeId               NodeId;
+    OpcUa_PerformUpdateType PerformInsertReplace;
+    int32_t                 NoOfUpdateValues;
+    UA_DataValue*           UpdateValues;
 }
-UA_UpdateStructureDataDetails;
+OpcUa_UpdateStructureDataDetails;
 
-void UA_UpdateStructureDataDetails_Initialize(UA_UpdateStructureDataDetails* pValue);
+void OpcUa_UpdateStructureDataDetails_Initialize(OpcUa_UpdateStructureDataDetails* pValue);
 
-void UA_UpdateStructureDataDetails_Clear(UA_UpdateStructureDataDetails* pValue);
+void OpcUa_UpdateStructureDataDetails_Clear(OpcUa_UpdateStructureDataDetails* pValue);
 
-//StatusCode UA_UpdateStructureDataDetails_GetSize(UA_UpdateStructureDataDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_UpdateStructureDataDetails_GetSize(OpcUa_UpdateStructureDataDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_UpdateStructureDataDetails_Encode(UA_UpdateStructureDataDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UpdateStructureDataDetails_Encode(OpcUa_UpdateStructureDataDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_UpdateStructureDataDetails_Decode(UA_UpdateStructureDataDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UpdateStructureDataDetails_Decode(OpcUa_UpdateStructureDataDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_UpdateStructureDataDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_UpdateEventDetails
 /*============================================================================
  * The UpdateEventDetails structure.
  *===========================================================================*/
-typedef struct _UA_UpdateEventDetails
+typedef struct _OpcUa_UpdateEventDetails
 {
-    UA_NodeId                 NodeId;
-    UA_PerformUpdateType      PerformInsertReplace;
-    UA_EventFilter            Filter;
-    int32_t                   NoOfEventData;
-    UA_HistoryEventFieldList* EventData;
+    UA_NodeId                    NodeId;
+    OpcUa_PerformUpdateType      PerformInsertReplace;
+    OpcUa_EventFilter            Filter;
+    int32_t                      NoOfEventData;
+    OpcUa_HistoryEventFieldList* EventData;
 }
-UA_UpdateEventDetails;
+OpcUa_UpdateEventDetails;
 
-void UA_UpdateEventDetails_Initialize(UA_UpdateEventDetails* pValue);
+void OpcUa_UpdateEventDetails_Initialize(OpcUa_UpdateEventDetails* pValue);
 
-void UA_UpdateEventDetails_Clear(UA_UpdateEventDetails* pValue);
+void OpcUa_UpdateEventDetails_Clear(OpcUa_UpdateEventDetails* pValue);
 
-//StatusCode UA_UpdateEventDetails_GetSize(UA_UpdateEventDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_UpdateEventDetails_GetSize(OpcUa_UpdateEventDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_UpdateEventDetails_Encode(UA_UpdateEventDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UpdateEventDetails_Encode(OpcUa_UpdateEventDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_UpdateEventDetails_Decode(UA_UpdateEventDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_UpdateEventDetails_Decode(OpcUa_UpdateEventDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_UpdateEventDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_UpdateEventDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteRawModifiedDetails
 /*============================================================================
  * The DeleteRawModifiedDetails structure.
  *===========================================================================*/
-typedef struct _UA_DeleteRawModifiedDetails
+typedef struct _OpcUa_DeleteRawModifiedDetails
 {
     UA_NodeId   NodeId;
     UA_Boolean  IsDeleteModified;
     UA_DateTime StartTime;
     UA_DateTime EndTime;
 }
-UA_DeleteRawModifiedDetails;
+OpcUa_DeleteRawModifiedDetails;
 
-void UA_DeleteRawModifiedDetails_Initialize(UA_DeleteRawModifiedDetails* pValue);
+void OpcUa_DeleteRawModifiedDetails_Initialize(OpcUa_DeleteRawModifiedDetails* pValue);
 
-void UA_DeleteRawModifiedDetails_Clear(UA_DeleteRawModifiedDetails* pValue);
+void OpcUa_DeleteRawModifiedDetails_Clear(OpcUa_DeleteRawModifiedDetails* pValue);
 
-//StatusCode UA_DeleteRawModifiedDetails_GetSize(UA_DeleteRawModifiedDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteRawModifiedDetails_GetSize(OpcUa_DeleteRawModifiedDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteRawModifiedDetails_Encode(UA_DeleteRawModifiedDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteRawModifiedDetails_Encode(OpcUa_DeleteRawModifiedDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteRawModifiedDetails_Decode(UA_DeleteRawModifiedDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteRawModifiedDetails_Decode(OpcUa_DeleteRawModifiedDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteRawModifiedDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteAtTimeDetails
 /*============================================================================
  * The DeleteAtTimeDetails structure.
  *===========================================================================*/
-typedef struct _UA_DeleteAtTimeDetails
+typedef struct _OpcUa_DeleteAtTimeDetails
 {
     UA_NodeId    NodeId;
     int32_t      NoOfReqTimes;
     UA_DateTime* ReqTimes;
 }
-UA_DeleteAtTimeDetails;
+OpcUa_DeleteAtTimeDetails;
 
-void UA_DeleteAtTimeDetails_Initialize(UA_DeleteAtTimeDetails* pValue);
+void OpcUa_DeleteAtTimeDetails_Initialize(OpcUa_DeleteAtTimeDetails* pValue);
 
-void UA_DeleteAtTimeDetails_Clear(UA_DeleteAtTimeDetails* pValue);
+void OpcUa_DeleteAtTimeDetails_Clear(OpcUa_DeleteAtTimeDetails* pValue);
 
-//StatusCode UA_DeleteAtTimeDetails_GetSize(UA_DeleteAtTimeDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteAtTimeDetails_GetSize(OpcUa_DeleteAtTimeDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteAtTimeDetails_Encode(UA_DeleteAtTimeDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteAtTimeDetails_Encode(OpcUa_DeleteAtTimeDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteAtTimeDetails_Decode(UA_DeleteAtTimeDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteAtTimeDetails_Decode(OpcUa_DeleteAtTimeDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteAtTimeDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteEventDetails
 /*============================================================================
  * The DeleteEventDetails structure.
  *===========================================================================*/
-typedef struct _UA_DeleteEventDetails
+typedef struct _OpcUa_DeleteEventDetails
 {
     UA_NodeId      NodeId;
     int32_t        NoOfEventIds;
     UA_ByteString* EventIds;
 }
-UA_DeleteEventDetails;
+OpcUa_DeleteEventDetails;
 
-void UA_DeleteEventDetails_Initialize(UA_DeleteEventDetails* pValue);
+void OpcUa_DeleteEventDetails_Initialize(OpcUa_DeleteEventDetails* pValue);
 
-void UA_DeleteEventDetails_Clear(UA_DeleteEventDetails* pValue);
+void OpcUa_DeleteEventDetails_Clear(OpcUa_DeleteEventDetails* pValue);
 
-//StatusCode UA_DeleteEventDetails_GetSize(UA_DeleteEventDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteEventDetails_GetSize(OpcUa_DeleteEventDetails* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteEventDetails_Encode(UA_DeleteEventDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteEventDetails_Encode(OpcUa_DeleteEventDetails* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteEventDetails_Decode(UA_DeleteEventDetails* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteEventDetails_Decode(OpcUa_DeleteEventDetails* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteEventDetails_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteEventDetails_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdateResult
 /*============================================================================
  * The HistoryUpdateResult structure.
  *===========================================================================*/
-typedef struct _UA_HistoryUpdateResult
+typedef struct _OpcUa_HistoryUpdateResult
 {
     StatusCode         StatusCode;
     int32_t            NoOfOperationResults;
@@ -4367,19 +4367,19 @@ typedef struct _UA_HistoryUpdateResult
     int32_t            NoOfDiagnosticInfos;
     UA_DiagnosticInfo* DiagnosticInfos;
 }
-UA_HistoryUpdateResult;
+OpcUa_HistoryUpdateResult;
 
-void UA_HistoryUpdateResult_Initialize(UA_HistoryUpdateResult* pValue);
+void OpcUa_HistoryUpdateResult_Initialize(OpcUa_HistoryUpdateResult* pValue);
 
-void UA_HistoryUpdateResult_Clear(UA_HistoryUpdateResult* pValue);
+void OpcUa_HistoryUpdateResult_Clear(OpcUa_HistoryUpdateResult* pValue);
 
-//StatusCode UA_HistoryUpdateResult_GetSize(UA_HistoryUpdateResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryUpdateResult_GetSize(OpcUa_HistoryUpdateResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryUpdateResult_Encode(UA_HistoryUpdateResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryUpdateResult_Encode(OpcUa_HistoryUpdateResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryUpdateResult_Decode(UA_HistoryUpdateResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryUpdateResult_Decode(OpcUa_HistoryUpdateResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryUpdateResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdate
@@ -4387,52 +4387,52 @@ extern struct UA_EncodeableType UA_HistoryUpdateResult_EncodeableType;
 /*============================================================================
  * The HistoryUpdateRequest structure.
  *===========================================================================*/
-typedef struct _UA_HistoryUpdateRequest
+typedef struct _OpcUa_HistoryUpdateRequest
 {
-    UA_RequestHeader    RequestHeader;
+    OpcUa_RequestHeader RequestHeader;
     int32_t             NoOfHistoryUpdateDetails;
     UA_ExtensionObject* HistoryUpdateDetails;
 }
-UA_HistoryUpdateRequest;
+OpcUa_HistoryUpdateRequest;
 
-void UA_HistoryUpdateRequest_Initialize(UA_HistoryUpdateRequest* pValue);
+void OpcUa_HistoryUpdateRequest_Initialize(OpcUa_HistoryUpdateRequest* pValue);
 
-void UA_HistoryUpdateRequest_Clear(UA_HistoryUpdateRequest* pValue);
+void OpcUa_HistoryUpdateRequest_Clear(OpcUa_HistoryUpdateRequest* pValue);
 
-//StatusCode UA_HistoryUpdateRequest_GetSize(UA_HistoryUpdateRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryUpdateRequest_GetSize(OpcUa_HistoryUpdateRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryUpdateRequest_Encode(UA_HistoryUpdateRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryUpdateRequest_Encode(OpcUa_HistoryUpdateRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryUpdateRequest_Decode(UA_HistoryUpdateRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryUpdateRequest_Decode(OpcUa_HistoryUpdateRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryUpdateRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdateResponse
 /*============================================================================
  * The HistoryUpdateResponse structure.
  *===========================================================================*/
-typedef struct _UA_HistoryUpdateResponse
+typedef struct _OpcUa_HistoryUpdateResponse
 {
-    UA_ResponseHeader       ResponseHeader;
-    int32_t                 NoOfResults;
-    UA_HistoryUpdateResult* Results;
-    int32_t                 NoOfDiagnosticInfos;
-    UA_DiagnosticInfo*      DiagnosticInfos;
+    OpcUa_ResponseHeader       ResponseHeader;
+    int32_t                    NoOfResults;
+    OpcUa_HistoryUpdateResult* Results;
+    int32_t                    NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*         DiagnosticInfos;
 }
-UA_HistoryUpdateResponse;
+OpcUa_HistoryUpdateResponse;
 
-void UA_HistoryUpdateResponse_Initialize(UA_HistoryUpdateResponse* pValue);
+void OpcUa_HistoryUpdateResponse_Initialize(OpcUa_HistoryUpdateResponse* pValue);
 
-void UA_HistoryUpdateResponse_Clear(UA_HistoryUpdateResponse* pValue);
+void OpcUa_HistoryUpdateResponse_Clear(OpcUa_HistoryUpdateResponse* pValue);
 
-//StatusCode UA_HistoryUpdateResponse_GetSize(UA_HistoryUpdateResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_HistoryUpdateResponse_GetSize(OpcUa_HistoryUpdateResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_HistoryUpdateResponse_Encode(UA_HistoryUpdateResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryUpdateResponse_Encode(OpcUa_HistoryUpdateResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_HistoryUpdateResponse_Decode(UA_HistoryUpdateResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_HistoryUpdateResponse_Decode(OpcUa_HistoryUpdateResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_HistoryUpdateResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType;
 #endif
 #endif
 
@@ -4440,33 +4440,33 @@ extern struct UA_EncodeableType UA_HistoryUpdateResponse_EncodeableType;
 /*============================================================================
  * The CallMethodRequest structure.
  *===========================================================================*/
-typedef struct _UA_CallMethodRequest
+typedef struct _OpcUa_CallMethodRequest
 {
     UA_NodeId   ObjectId;
     UA_NodeId   MethodId;
     int32_t     NoOfInputArguments;
     UA_Variant* InputArguments;
 }
-UA_CallMethodRequest;
+OpcUa_CallMethodRequest;
 
-void UA_CallMethodRequest_Initialize(UA_CallMethodRequest* pValue);
+void OpcUa_CallMethodRequest_Initialize(OpcUa_CallMethodRequest* pValue);
 
-void UA_CallMethodRequest_Clear(UA_CallMethodRequest* pValue);
+void OpcUa_CallMethodRequest_Clear(OpcUa_CallMethodRequest* pValue);
 
-//StatusCode UA_CallMethodRequest_GetSize(UA_CallMethodRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CallMethodRequest_GetSize(OpcUa_CallMethodRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CallMethodRequest_Encode(UA_CallMethodRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CallMethodRequest_Encode(OpcUa_CallMethodRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CallMethodRequest_Decode(UA_CallMethodRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CallMethodRequest_Decode(OpcUa_CallMethodRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CallMethodRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CallMethodRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CallMethodResult
 /*============================================================================
  * The CallMethodResult structure.
  *===========================================================================*/
-typedef struct _UA_CallMethodResult
+typedef struct _OpcUa_CallMethodResult
 {
     StatusCode         StatusCode;
     int32_t            NoOfInputArgumentResults;
@@ -4476,19 +4476,19 @@ typedef struct _UA_CallMethodResult
     int32_t            NoOfOutputArguments;
     UA_Variant*        OutputArguments;
 }
-UA_CallMethodResult;
+OpcUa_CallMethodResult;
 
-void UA_CallMethodResult_Initialize(UA_CallMethodResult* pValue);
+void OpcUa_CallMethodResult_Initialize(OpcUa_CallMethodResult* pValue);
 
-void UA_CallMethodResult_Clear(UA_CallMethodResult* pValue);
+void OpcUa_CallMethodResult_Clear(OpcUa_CallMethodResult* pValue);
 
-//StatusCode UA_CallMethodResult_GetSize(UA_CallMethodResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CallMethodResult_GetSize(OpcUa_CallMethodResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CallMethodResult_Encode(UA_CallMethodResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CallMethodResult_Encode(OpcUa_CallMethodResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CallMethodResult_Decode(UA_CallMethodResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CallMethodResult_Decode(OpcUa_CallMethodResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CallMethodResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CallMethodResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_Call
@@ -4496,52 +4496,52 @@ extern struct UA_EncodeableType UA_CallMethodResult_EncodeableType;
 /*============================================================================
  * The CallRequest structure.
  *===========================================================================*/
-typedef struct _UA_CallRequest
+typedef struct _OpcUa_CallRequest
 {
-    UA_RequestHeader      RequestHeader;
-    int32_t               NoOfMethodsToCall;
-    UA_CallMethodRequest* MethodsToCall;
+    OpcUa_RequestHeader      RequestHeader;
+    int32_t                  NoOfMethodsToCall;
+    OpcUa_CallMethodRequest* MethodsToCall;
 }
-UA_CallRequest;
+OpcUa_CallRequest;
 
-void UA_CallRequest_Initialize(UA_CallRequest* pValue);
+void OpcUa_CallRequest_Initialize(OpcUa_CallRequest* pValue);
 
-void UA_CallRequest_Clear(UA_CallRequest* pValue);
+void OpcUa_CallRequest_Clear(OpcUa_CallRequest* pValue);
 
-//StatusCode UA_CallRequest_GetSize(UA_CallRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CallRequest_GetSize(OpcUa_CallRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CallRequest_Encode(UA_CallRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CallRequest_Encode(OpcUa_CallRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CallRequest_Decode(UA_CallRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CallRequest_Decode(OpcUa_CallRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CallRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CallRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CallResponse
 /*============================================================================
  * The CallResponse structure.
  *===========================================================================*/
-typedef struct _UA_CallResponse
+typedef struct _OpcUa_CallResponse
 {
-    UA_ResponseHeader    ResponseHeader;
-    int32_t              NoOfResults;
-    UA_CallMethodResult* Results;
-    int32_t              NoOfDiagnosticInfos;
-    UA_DiagnosticInfo*   DiagnosticInfos;
+    OpcUa_ResponseHeader    ResponseHeader;
+    int32_t                 NoOfResults;
+    OpcUa_CallMethodResult* Results;
+    int32_t                 NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*      DiagnosticInfos;
 }
-UA_CallResponse;
+OpcUa_CallResponse;
 
-void UA_CallResponse_Initialize(UA_CallResponse* pValue);
+void OpcUa_CallResponse_Initialize(OpcUa_CallResponse* pValue);
 
-void UA_CallResponse_Clear(UA_CallResponse* pValue);
+void OpcUa_CallResponse_Clear(OpcUa_CallResponse* pValue);
 
-//StatusCode UA_CallResponse_GetSize(UA_CallResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CallResponse_GetSize(OpcUa_CallResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CallResponse_Encode(UA_CallResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CallResponse_Encode(OpcUa_CallResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CallResponse_Decode(UA_CallResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CallResponse_Decode(OpcUa_CallResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CallResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CallResponse_EncodeableType;
 #endif
 #endif
 
@@ -4549,16 +4549,16 @@ extern struct UA_EncodeableType UA_CallResponse_EncodeableType;
 /*============================================================================
  * The MonitoringMode enumeration.
  *===========================================================================*/
-typedef enum _UA_MonitoringMode
+typedef enum _OpcUa_MonitoringMode
 {
-    UA_MonitoringMode_Disabled  = 0,
-    UA_MonitoringMode_Sampling  = 1,
-    UA_MonitoringMode_Reporting = 2
+    OpcUa_MonitoringMode_Disabled  = 0,
+    OpcUa_MonitoringMode_Sampling  = 1,
+    OpcUa_MonitoringMode_Reporting = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_MonitoringMode_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_MonitoringMode_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_MonitoringMode;
+OpcUa_MonitoringMode;
 
 #endif
 
@@ -4566,16 +4566,16 @@ UA_MonitoringMode;
 /*============================================================================
  * The DataChangeTrigger enumeration.
  *===========================================================================*/
-typedef enum _UA_DataChangeTrigger
+typedef enum _OpcUa_DataChangeTrigger
 {
-    UA_DataChangeTrigger_Status               = 0,
-    UA_DataChangeTrigger_StatusValue          = 1,
-    UA_DataChangeTrigger_StatusValueTimestamp = 2
+    OpcUa_DataChangeTrigger_Status               = 0,
+    OpcUa_DataChangeTrigger_StatusValue          = 1,
+    OpcUa_DataChangeTrigger_StatusValueTimestamp = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_DataChangeTrigger_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_DataChangeTrigger_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_DataChangeTrigger;
+OpcUa_DataChangeTrigger;
 
 #endif
 
@@ -4583,16 +4583,16 @@ UA_DataChangeTrigger;
 /*============================================================================
  * The DeadbandType enumeration.
  *===========================================================================*/
-typedef enum _UA_DeadbandType
+typedef enum _OpcUa_DeadbandType
 {
-    UA_DeadbandType_None     = 0,
-    UA_DeadbandType_Absolute = 1,
-    UA_DeadbandType_Percent  = 2
+    OpcUa_DeadbandType_None     = 0,
+    OpcUa_DeadbandType_Absolute = 1,
+    OpcUa_DeadbandType_Percent  = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_DeadbandType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_DeadbandType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_DeadbandType;
+OpcUa_DeadbandType;
 
 #endif
 
@@ -4600,110 +4600,110 @@ UA_DeadbandType;
 /*============================================================================
  * The DataChangeFilter structure.
  *===========================================================================*/
-typedef struct _UA_DataChangeFilter
+typedef struct _OpcUa_DataChangeFilter
 {
-    UA_DataChangeTrigger Trigger;
-    uint32_t             DeadbandType;
-    double               DeadbandValue;
+    OpcUa_DataChangeTrigger Trigger;
+    uint32_t                DeadbandType;
+    double                  DeadbandValue;
 }
-UA_DataChangeFilter;
+OpcUa_DataChangeFilter;
 
-void UA_DataChangeFilter_Initialize(UA_DataChangeFilter* pValue);
+void OpcUa_DataChangeFilter_Initialize(OpcUa_DataChangeFilter* pValue);
 
-void UA_DataChangeFilter_Clear(UA_DataChangeFilter* pValue);
+void OpcUa_DataChangeFilter_Clear(OpcUa_DataChangeFilter* pValue);
 
-//StatusCode UA_DataChangeFilter_GetSize(UA_DataChangeFilter* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DataChangeFilter_GetSize(OpcUa_DataChangeFilter* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DataChangeFilter_Encode(UA_DataChangeFilter* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DataChangeFilter_Encode(OpcUa_DataChangeFilter* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DataChangeFilter_Decode(UA_DataChangeFilter* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DataChangeFilter_Decode(OpcUa_DataChangeFilter* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DataChangeFilter_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DataChangeFilter_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AggregateFilter
 /*============================================================================
  * The AggregateFilter structure.
  *===========================================================================*/
-typedef struct _UA_AggregateFilter
+typedef struct _OpcUa_AggregateFilter
 {
-    UA_DateTime               StartTime;
-    UA_NodeId                 AggregateType;
-    double                    ProcessingInterval;
-    UA_AggregateConfiguration AggregateConfiguration;
+    UA_DateTime                  StartTime;
+    UA_NodeId                    AggregateType;
+    double                       ProcessingInterval;
+    OpcUa_AggregateConfiguration AggregateConfiguration;
 }
-UA_AggregateFilter;
+OpcUa_AggregateFilter;
 
-void UA_AggregateFilter_Initialize(UA_AggregateFilter* pValue);
+void OpcUa_AggregateFilter_Initialize(OpcUa_AggregateFilter* pValue);
 
-void UA_AggregateFilter_Clear(UA_AggregateFilter* pValue);
+void OpcUa_AggregateFilter_Clear(OpcUa_AggregateFilter* pValue);
 
-//StatusCode UA_AggregateFilter_GetSize(UA_AggregateFilter* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AggregateFilter_GetSize(OpcUa_AggregateFilter* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AggregateFilter_Encode(UA_AggregateFilter* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AggregateFilter_Encode(OpcUa_AggregateFilter* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AggregateFilter_Decode(UA_AggregateFilter* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AggregateFilter_Decode(OpcUa_AggregateFilter* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AggregateFilter_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AggregateFilter_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventFilterResult
 /*============================================================================
  * The EventFilterResult structure.
  *===========================================================================*/
-typedef struct _UA_EventFilterResult
+typedef struct _OpcUa_EventFilterResult
 {
-    int32_t                NoOfSelectClauseResults;
-    StatusCode*            SelectClauseResults;
-    int32_t                NoOfSelectClauseDiagnosticInfos;
-    UA_DiagnosticInfo*     SelectClauseDiagnosticInfos;
-    UA_ContentFilterResult WhereClauseResult;
+    int32_t                   NoOfSelectClauseResults;
+    StatusCode*               SelectClauseResults;
+    int32_t                   NoOfSelectClauseDiagnosticInfos;
+    UA_DiagnosticInfo*        SelectClauseDiagnosticInfos;
+    OpcUa_ContentFilterResult WhereClauseResult;
 }
-UA_EventFilterResult;
+OpcUa_EventFilterResult;
 
-void UA_EventFilterResult_Initialize(UA_EventFilterResult* pValue);
+void OpcUa_EventFilterResult_Initialize(OpcUa_EventFilterResult* pValue);
 
-void UA_EventFilterResult_Clear(UA_EventFilterResult* pValue);
+void OpcUa_EventFilterResult_Clear(OpcUa_EventFilterResult* pValue);
 
-//StatusCode UA_EventFilterResult_GetSize(UA_EventFilterResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EventFilterResult_GetSize(OpcUa_EventFilterResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EventFilterResult_Encode(UA_EventFilterResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EventFilterResult_Encode(OpcUa_EventFilterResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EventFilterResult_Decode(UA_EventFilterResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EventFilterResult_Decode(OpcUa_EventFilterResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EventFilterResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EventFilterResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AggregateFilterResult
 /*============================================================================
  * The AggregateFilterResult structure.
  *===========================================================================*/
-typedef struct _UA_AggregateFilterResult
+typedef struct _OpcUa_AggregateFilterResult
 {
-    UA_DateTime               RevisedStartTime;
-    double                    RevisedProcessingInterval;
-    UA_AggregateConfiguration RevisedAggregateConfiguration;
+    UA_DateTime                  RevisedStartTime;
+    double                       RevisedProcessingInterval;
+    OpcUa_AggregateConfiguration RevisedAggregateConfiguration;
 }
-UA_AggregateFilterResult;
+OpcUa_AggregateFilterResult;
 
-void UA_AggregateFilterResult_Initialize(UA_AggregateFilterResult* pValue);
+void OpcUa_AggregateFilterResult_Initialize(OpcUa_AggregateFilterResult* pValue);
 
-void UA_AggregateFilterResult_Clear(UA_AggregateFilterResult* pValue);
+void OpcUa_AggregateFilterResult_Clear(OpcUa_AggregateFilterResult* pValue);
 
-//StatusCode UA_AggregateFilterResult_GetSize(UA_AggregateFilterResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AggregateFilterResult_GetSize(OpcUa_AggregateFilterResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AggregateFilterResult_Encode(UA_AggregateFilterResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AggregateFilterResult_Encode(OpcUa_AggregateFilterResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AggregateFilterResult_Decode(UA_AggregateFilterResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AggregateFilterResult_Decode(OpcUa_AggregateFilterResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AggregateFilterResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AggregateFilterResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoringParameters
 /*============================================================================
  * The MonitoringParameters structure.
  *===========================================================================*/
-typedef struct _UA_MonitoringParameters
+typedef struct _OpcUa_MonitoringParameters
 {
     uint32_t           ClientHandle;
     double             SamplingInterval;
@@ -4711,51 +4711,51 @@ typedef struct _UA_MonitoringParameters
     uint32_t           QueueSize;
     UA_Boolean         DiscardOldest;
 }
-UA_MonitoringParameters;
+OpcUa_MonitoringParameters;
 
-void UA_MonitoringParameters_Initialize(UA_MonitoringParameters* pValue);
+void OpcUa_MonitoringParameters_Initialize(OpcUa_MonitoringParameters* pValue);
 
-void UA_MonitoringParameters_Clear(UA_MonitoringParameters* pValue);
+void OpcUa_MonitoringParameters_Clear(OpcUa_MonitoringParameters* pValue);
 
-//StatusCode UA_MonitoringParameters_GetSize(UA_MonitoringParameters* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_MonitoringParameters_GetSize(OpcUa_MonitoringParameters* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_MonitoringParameters_Encode(UA_MonitoringParameters* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoringParameters_Encode(OpcUa_MonitoringParameters* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_MonitoringParameters_Decode(UA_MonitoringParameters* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoringParameters_Decode(OpcUa_MonitoringParameters* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_MonitoringParameters_EncodeableType;
+extern struct UA_EncodeableType OpcUa_MonitoringParameters_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemCreateRequest
 /*============================================================================
  * The MonitoredItemCreateRequest structure.
  *===========================================================================*/
-typedef struct _UA_MonitoredItemCreateRequest
+typedef struct _OpcUa_MonitoredItemCreateRequest
 {
-    UA_ReadValueId          ItemToMonitor;
-    UA_MonitoringMode       MonitoringMode;
-    UA_MonitoringParameters RequestedParameters;
+    OpcUa_ReadValueId          ItemToMonitor;
+    OpcUa_MonitoringMode       MonitoringMode;
+    OpcUa_MonitoringParameters RequestedParameters;
 }
-UA_MonitoredItemCreateRequest;
+OpcUa_MonitoredItemCreateRequest;
 
-void UA_MonitoredItemCreateRequest_Initialize(UA_MonitoredItemCreateRequest* pValue);
+void OpcUa_MonitoredItemCreateRequest_Initialize(OpcUa_MonitoredItemCreateRequest* pValue);
 
-void UA_MonitoredItemCreateRequest_Clear(UA_MonitoredItemCreateRequest* pValue);
+void OpcUa_MonitoredItemCreateRequest_Clear(OpcUa_MonitoredItemCreateRequest* pValue);
 
-//StatusCode UA_MonitoredItemCreateRequest_GetSize(UA_MonitoredItemCreateRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_MonitoredItemCreateRequest_GetSize(OpcUa_MonitoredItemCreateRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_MonitoredItemCreateRequest_Encode(UA_MonitoredItemCreateRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemCreateRequest_Encode(OpcUa_MonitoredItemCreateRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_MonitoredItemCreateRequest_Decode(UA_MonitoredItemCreateRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemCreateRequest_Decode(OpcUa_MonitoredItemCreateRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_MonitoredItemCreateRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemCreateResult
 /*============================================================================
  * The MonitoredItemCreateResult structure.
  *===========================================================================*/
-typedef struct _UA_MonitoredItemCreateResult
+typedef struct _OpcUa_MonitoredItemCreateResult
 {
     StatusCode         StatusCode;
     uint32_t           MonitoredItemId;
@@ -4763,19 +4763,19 @@ typedef struct _UA_MonitoredItemCreateResult
     uint32_t           RevisedQueueSize;
     UA_ExtensionObject FilterResult;
 }
-UA_MonitoredItemCreateResult;
+OpcUa_MonitoredItemCreateResult;
 
-void UA_MonitoredItemCreateResult_Initialize(UA_MonitoredItemCreateResult* pValue);
+void OpcUa_MonitoredItemCreateResult_Initialize(OpcUa_MonitoredItemCreateResult* pValue);
 
-void UA_MonitoredItemCreateResult_Clear(UA_MonitoredItemCreateResult* pValue);
+void OpcUa_MonitoredItemCreateResult_Clear(OpcUa_MonitoredItemCreateResult* pValue);
 
-//StatusCode UA_MonitoredItemCreateResult_GetSize(UA_MonitoredItemCreateResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_MonitoredItemCreateResult_GetSize(OpcUa_MonitoredItemCreateResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_MonitoredItemCreateResult_Encode(UA_MonitoredItemCreateResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemCreateResult_Encode(OpcUa_MonitoredItemCreateResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_MonitoredItemCreateResult_Decode(UA_MonitoredItemCreateResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemCreateResult_Decode(OpcUa_MonitoredItemCreateResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_MonitoredItemCreateResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateMonitoredItems
@@ -4783,54 +4783,54 @@ extern struct UA_EncodeableType UA_MonitoredItemCreateResult_EncodeableType;
 /*============================================================================
  * The CreateMonitoredItemsRequest structure.
  *===========================================================================*/
-typedef struct _UA_CreateMonitoredItemsRequest
+typedef struct _OpcUa_CreateMonitoredItemsRequest
 {
-    UA_RequestHeader               RequestHeader;
-    uint32_t                       SubscriptionId;
-    UA_TimestampsToReturn          TimestampsToReturn;
-    int32_t                        NoOfItemsToCreate;
-    UA_MonitoredItemCreateRequest* ItemsToCreate;
+    OpcUa_RequestHeader               RequestHeader;
+    uint32_t                          SubscriptionId;
+    OpcUa_TimestampsToReturn          TimestampsToReturn;
+    int32_t                           NoOfItemsToCreate;
+    OpcUa_MonitoredItemCreateRequest* ItemsToCreate;
 }
-UA_CreateMonitoredItemsRequest;
+OpcUa_CreateMonitoredItemsRequest;
 
-void UA_CreateMonitoredItemsRequest_Initialize(UA_CreateMonitoredItemsRequest* pValue);
+void OpcUa_CreateMonitoredItemsRequest_Initialize(OpcUa_CreateMonitoredItemsRequest* pValue);
 
-void UA_CreateMonitoredItemsRequest_Clear(UA_CreateMonitoredItemsRequest* pValue);
+void OpcUa_CreateMonitoredItemsRequest_Clear(OpcUa_CreateMonitoredItemsRequest* pValue);
 
-//StatusCode UA_CreateMonitoredItemsRequest_GetSize(UA_CreateMonitoredItemsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CreateMonitoredItemsRequest_GetSize(OpcUa_CreateMonitoredItemsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CreateMonitoredItemsRequest_Encode(UA_CreateMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateMonitoredItemsRequest_Encode(OpcUa_CreateMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CreateMonitoredItemsRequest_Decode(UA_CreateMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateMonitoredItemsRequest_Decode(OpcUa_CreateMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CreateMonitoredItemsRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateMonitoredItemsResponse
 /*============================================================================
  * The CreateMonitoredItemsResponse structure.
  *===========================================================================*/
-typedef struct _UA_CreateMonitoredItemsResponse
+typedef struct _OpcUa_CreateMonitoredItemsResponse
 {
-    UA_ResponseHeader             ResponseHeader;
-    int32_t                       NoOfResults;
-    UA_MonitoredItemCreateResult* Results;
-    int32_t                       NoOfDiagnosticInfos;
-    UA_DiagnosticInfo*            DiagnosticInfos;
+    OpcUa_ResponseHeader             ResponseHeader;
+    int32_t                          NoOfResults;
+    OpcUa_MonitoredItemCreateResult* Results;
+    int32_t                          NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*               DiagnosticInfos;
 }
-UA_CreateMonitoredItemsResponse;
+OpcUa_CreateMonitoredItemsResponse;
 
-void UA_CreateMonitoredItemsResponse_Initialize(UA_CreateMonitoredItemsResponse* pValue);
+void OpcUa_CreateMonitoredItemsResponse_Initialize(OpcUa_CreateMonitoredItemsResponse* pValue);
 
-void UA_CreateMonitoredItemsResponse_Clear(UA_CreateMonitoredItemsResponse* pValue);
+void OpcUa_CreateMonitoredItemsResponse_Clear(OpcUa_CreateMonitoredItemsResponse* pValue);
 
-//StatusCode UA_CreateMonitoredItemsResponse_GetSize(UA_CreateMonitoredItemsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CreateMonitoredItemsResponse_GetSize(OpcUa_CreateMonitoredItemsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CreateMonitoredItemsResponse_Encode(UA_CreateMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateMonitoredItemsResponse_Encode(OpcUa_CreateMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CreateMonitoredItemsResponse_Decode(UA_CreateMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateMonitoredItemsResponse_Decode(OpcUa_CreateMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CreateMonitoredItemsResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType;
 #endif
 #endif
 
@@ -4838,50 +4838,50 @@ extern struct UA_EncodeableType UA_CreateMonitoredItemsResponse_EncodeableType;
 /*============================================================================
  * The MonitoredItemModifyRequest structure.
  *===========================================================================*/
-typedef struct _UA_MonitoredItemModifyRequest
+typedef struct _OpcUa_MonitoredItemModifyRequest
 {
-    uint32_t                MonitoredItemId;
-    UA_MonitoringParameters RequestedParameters;
+    uint32_t                   MonitoredItemId;
+    OpcUa_MonitoringParameters RequestedParameters;
 }
-UA_MonitoredItemModifyRequest;
+OpcUa_MonitoredItemModifyRequest;
 
-void UA_MonitoredItemModifyRequest_Initialize(UA_MonitoredItemModifyRequest* pValue);
+void OpcUa_MonitoredItemModifyRequest_Initialize(OpcUa_MonitoredItemModifyRequest* pValue);
 
-void UA_MonitoredItemModifyRequest_Clear(UA_MonitoredItemModifyRequest* pValue);
+void OpcUa_MonitoredItemModifyRequest_Clear(OpcUa_MonitoredItemModifyRequest* pValue);
 
-//StatusCode UA_MonitoredItemModifyRequest_GetSize(UA_MonitoredItemModifyRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_MonitoredItemModifyRequest_GetSize(OpcUa_MonitoredItemModifyRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_MonitoredItemModifyRequest_Encode(UA_MonitoredItemModifyRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemModifyRequest_Encode(OpcUa_MonitoredItemModifyRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_MonitoredItemModifyRequest_Decode(UA_MonitoredItemModifyRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemModifyRequest_Decode(OpcUa_MonitoredItemModifyRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_MonitoredItemModifyRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemModifyResult
 /*============================================================================
  * The MonitoredItemModifyResult structure.
  *===========================================================================*/
-typedef struct _UA_MonitoredItemModifyResult
+typedef struct _OpcUa_MonitoredItemModifyResult
 {
     StatusCode         StatusCode;
     double             RevisedSamplingInterval;
     uint32_t           RevisedQueueSize;
     UA_ExtensionObject FilterResult;
 }
-UA_MonitoredItemModifyResult;
+OpcUa_MonitoredItemModifyResult;
 
-void UA_MonitoredItemModifyResult_Initialize(UA_MonitoredItemModifyResult* pValue);
+void OpcUa_MonitoredItemModifyResult_Initialize(OpcUa_MonitoredItemModifyResult* pValue);
 
-void UA_MonitoredItemModifyResult_Clear(UA_MonitoredItemModifyResult* pValue);
+void OpcUa_MonitoredItemModifyResult_Clear(OpcUa_MonitoredItemModifyResult* pValue);
 
-//StatusCode UA_MonitoredItemModifyResult_GetSize(UA_MonitoredItemModifyResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_MonitoredItemModifyResult_GetSize(OpcUa_MonitoredItemModifyResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_MonitoredItemModifyResult_Encode(UA_MonitoredItemModifyResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemModifyResult_Encode(OpcUa_MonitoredItemModifyResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_MonitoredItemModifyResult_Decode(UA_MonitoredItemModifyResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemModifyResult_Decode(OpcUa_MonitoredItemModifyResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_MonitoredItemModifyResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifyMonitoredItems
@@ -4889,54 +4889,54 @@ extern struct UA_EncodeableType UA_MonitoredItemModifyResult_EncodeableType;
 /*============================================================================
  * The ModifyMonitoredItemsRequest structure.
  *===========================================================================*/
-typedef struct _UA_ModifyMonitoredItemsRequest
+typedef struct _OpcUa_ModifyMonitoredItemsRequest
 {
-    UA_RequestHeader               RequestHeader;
-    uint32_t                       SubscriptionId;
-    UA_TimestampsToReturn          TimestampsToReturn;
-    int32_t                        NoOfItemsToModify;
-    UA_MonitoredItemModifyRequest* ItemsToModify;
+    OpcUa_RequestHeader               RequestHeader;
+    uint32_t                          SubscriptionId;
+    OpcUa_TimestampsToReturn          TimestampsToReturn;
+    int32_t                           NoOfItemsToModify;
+    OpcUa_MonitoredItemModifyRequest* ItemsToModify;
 }
-UA_ModifyMonitoredItemsRequest;
+OpcUa_ModifyMonitoredItemsRequest;
 
-void UA_ModifyMonitoredItemsRequest_Initialize(UA_ModifyMonitoredItemsRequest* pValue);
+void OpcUa_ModifyMonitoredItemsRequest_Initialize(OpcUa_ModifyMonitoredItemsRequest* pValue);
 
-void UA_ModifyMonitoredItemsRequest_Clear(UA_ModifyMonitoredItemsRequest* pValue);
+void OpcUa_ModifyMonitoredItemsRequest_Clear(OpcUa_ModifyMonitoredItemsRequest* pValue);
 
-//StatusCode UA_ModifyMonitoredItemsRequest_GetSize(UA_ModifyMonitoredItemsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ModifyMonitoredItemsRequest_GetSize(OpcUa_ModifyMonitoredItemsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ModifyMonitoredItemsRequest_Encode(UA_ModifyMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModifyMonitoredItemsRequest_Encode(OpcUa_ModifyMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ModifyMonitoredItemsRequest_Decode(UA_ModifyMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModifyMonitoredItemsRequest_Decode(OpcUa_ModifyMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ModifyMonitoredItemsRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifyMonitoredItemsResponse
 /*============================================================================
  * The ModifyMonitoredItemsResponse structure.
  *===========================================================================*/
-typedef struct _UA_ModifyMonitoredItemsResponse
+typedef struct _OpcUa_ModifyMonitoredItemsResponse
 {
-    UA_ResponseHeader             ResponseHeader;
-    int32_t                       NoOfResults;
-    UA_MonitoredItemModifyResult* Results;
-    int32_t                       NoOfDiagnosticInfos;
-    UA_DiagnosticInfo*            DiagnosticInfos;
+    OpcUa_ResponseHeader             ResponseHeader;
+    int32_t                          NoOfResults;
+    OpcUa_MonitoredItemModifyResult* Results;
+    int32_t                          NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*               DiagnosticInfos;
 }
-UA_ModifyMonitoredItemsResponse;
+OpcUa_ModifyMonitoredItemsResponse;
 
-void UA_ModifyMonitoredItemsResponse_Initialize(UA_ModifyMonitoredItemsResponse* pValue);
+void OpcUa_ModifyMonitoredItemsResponse_Initialize(OpcUa_ModifyMonitoredItemsResponse* pValue);
 
-void UA_ModifyMonitoredItemsResponse_Clear(UA_ModifyMonitoredItemsResponse* pValue);
+void OpcUa_ModifyMonitoredItemsResponse_Clear(OpcUa_ModifyMonitoredItemsResponse* pValue);
 
-//StatusCode UA_ModifyMonitoredItemsResponse_GetSize(UA_ModifyMonitoredItemsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ModifyMonitoredItemsResponse_GetSize(OpcUa_ModifyMonitoredItemsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ModifyMonitoredItemsResponse_Encode(UA_ModifyMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModifyMonitoredItemsResponse_Encode(OpcUa_ModifyMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ModifyMonitoredItemsResponse_Decode(UA_ModifyMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModifyMonitoredItemsResponse_Decode(OpcUa_ModifyMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ModifyMonitoredItemsResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType;
 #endif
 #endif
 
@@ -4945,54 +4945,54 @@ extern struct UA_EncodeableType UA_ModifyMonitoredItemsResponse_EncodeableType;
 /*============================================================================
  * The SetMonitoringModeRequest structure.
  *===========================================================================*/
-typedef struct _UA_SetMonitoringModeRequest
+typedef struct _OpcUa_SetMonitoringModeRequest
 {
-    UA_RequestHeader  RequestHeader;
-    uint32_t          SubscriptionId;
-    UA_MonitoringMode MonitoringMode;
-    int32_t           NoOfMonitoredItemIds;
-    uint32_t*         MonitoredItemIds;
+    OpcUa_RequestHeader  RequestHeader;
+    uint32_t             SubscriptionId;
+    OpcUa_MonitoringMode MonitoringMode;
+    int32_t              NoOfMonitoredItemIds;
+    uint32_t*            MonitoredItemIds;
 }
-UA_SetMonitoringModeRequest;
+OpcUa_SetMonitoringModeRequest;
 
-void UA_SetMonitoringModeRequest_Initialize(UA_SetMonitoringModeRequest* pValue);
+void OpcUa_SetMonitoringModeRequest_Initialize(OpcUa_SetMonitoringModeRequest* pValue);
 
-void UA_SetMonitoringModeRequest_Clear(UA_SetMonitoringModeRequest* pValue);
+void OpcUa_SetMonitoringModeRequest_Clear(OpcUa_SetMonitoringModeRequest* pValue);
 
-//StatusCode UA_SetMonitoringModeRequest_GetSize(UA_SetMonitoringModeRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SetMonitoringModeRequest_GetSize(OpcUa_SetMonitoringModeRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SetMonitoringModeRequest_Encode(UA_SetMonitoringModeRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetMonitoringModeRequest_Encode(OpcUa_SetMonitoringModeRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SetMonitoringModeRequest_Decode(UA_SetMonitoringModeRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetMonitoringModeRequest_Decode(OpcUa_SetMonitoringModeRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SetMonitoringModeRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetMonitoringModeResponse
 /*============================================================================
  * The SetMonitoringModeResponse structure.
  *===========================================================================*/
-typedef struct _UA_SetMonitoringModeResponse
+typedef struct _OpcUa_SetMonitoringModeResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    StatusCode*        Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    StatusCode*          Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_SetMonitoringModeResponse;
+OpcUa_SetMonitoringModeResponse;
 
-void UA_SetMonitoringModeResponse_Initialize(UA_SetMonitoringModeResponse* pValue);
+void OpcUa_SetMonitoringModeResponse_Initialize(OpcUa_SetMonitoringModeResponse* pValue);
 
-void UA_SetMonitoringModeResponse_Clear(UA_SetMonitoringModeResponse* pValue);
+void OpcUa_SetMonitoringModeResponse_Clear(OpcUa_SetMonitoringModeResponse* pValue);
 
-//StatusCode UA_SetMonitoringModeResponse_GetSize(UA_SetMonitoringModeResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SetMonitoringModeResponse_GetSize(OpcUa_SetMonitoringModeResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SetMonitoringModeResponse_Encode(UA_SetMonitoringModeResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetMonitoringModeResponse_Encode(OpcUa_SetMonitoringModeResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SetMonitoringModeResponse_Decode(UA_SetMonitoringModeResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetMonitoringModeResponse_Decode(OpcUa_SetMonitoringModeResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SetMonitoringModeResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType;
 #endif
 #endif
 
@@ -5001,60 +5001,60 @@ extern struct UA_EncodeableType UA_SetMonitoringModeResponse_EncodeableType;
 /*============================================================================
  * The SetTriggeringRequest structure.
  *===========================================================================*/
-typedef struct _UA_SetTriggeringRequest
+typedef struct _OpcUa_SetTriggeringRequest
 {
-    UA_RequestHeader RequestHeader;
-    uint32_t         SubscriptionId;
-    uint32_t         TriggeringItemId;
-    int32_t          NoOfLinksToAdd;
-    uint32_t*        LinksToAdd;
-    int32_t          NoOfLinksToRemove;
-    uint32_t*        LinksToRemove;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t            SubscriptionId;
+    uint32_t            TriggeringItemId;
+    int32_t             NoOfLinksToAdd;
+    uint32_t*           LinksToAdd;
+    int32_t             NoOfLinksToRemove;
+    uint32_t*           LinksToRemove;
 }
-UA_SetTriggeringRequest;
+OpcUa_SetTriggeringRequest;
 
-void UA_SetTriggeringRequest_Initialize(UA_SetTriggeringRequest* pValue);
+void OpcUa_SetTriggeringRequest_Initialize(OpcUa_SetTriggeringRequest* pValue);
 
-void UA_SetTriggeringRequest_Clear(UA_SetTriggeringRequest* pValue);
+void OpcUa_SetTriggeringRequest_Clear(OpcUa_SetTriggeringRequest* pValue);
 
-//StatusCode UA_SetTriggeringRequest_GetSize(UA_SetTriggeringRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SetTriggeringRequest_GetSize(OpcUa_SetTriggeringRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SetTriggeringRequest_Encode(UA_SetTriggeringRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetTriggeringRequest_Encode(OpcUa_SetTriggeringRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SetTriggeringRequest_Decode(UA_SetTriggeringRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetTriggeringRequest_Decode(OpcUa_SetTriggeringRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SetTriggeringRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetTriggeringResponse
 /*============================================================================
  * The SetTriggeringResponse structure.
  *===========================================================================*/
-typedef struct _UA_SetTriggeringResponse
+typedef struct _OpcUa_SetTriggeringResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfAddResults;
-    StatusCode*        AddResults;
-    int32_t            NoOfAddDiagnosticInfos;
-    UA_DiagnosticInfo* AddDiagnosticInfos;
-    int32_t            NoOfRemoveResults;
-    StatusCode*        RemoveResults;
-    int32_t            NoOfRemoveDiagnosticInfos;
-    UA_DiagnosticInfo* RemoveDiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfAddResults;
+    StatusCode*          AddResults;
+    int32_t              NoOfAddDiagnosticInfos;
+    UA_DiagnosticInfo*   AddDiagnosticInfos;
+    int32_t              NoOfRemoveResults;
+    StatusCode*          RemoveResults;
+    int32_t              NoOfRemoveDiagnosticInfos;
+    UA_DiagnosticInfo*   RemoveDiagnosticInfos;
 }
-UA_SetTriggeringResponse;
+OpcUa_SetTriggeringResponse;
 
-void UA_SetTriggeringResponse_Initialize(UA_SetTriggeringResponse* pValue);
+void OpcUa_SetTriggeringResponse_Initialize(OpcUa_SetTriggeringResponse* pValue);
 
-void UA_SetTriggeringResponse_Clear(UA_SetTriggeringResponse* pValue);
+void OpcUa_SetTriggeringResponse_Clear(OpcUa_SetTriggeringResponse* pValue);
 
-//StatusCode UA_SetTriggeringResponse_GetSize(UA_SetTriggeringResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SetTriggeringResponse_GetSize(OpcUa_SetTriggeringResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SetTriggeringResponse_Encode(UA_SetTriggeringResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetTriggeringResponse_Encode(OpcUa_SetTriggeringResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SetTriggeringResponse_Decode(UA_SetTriggeringResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetTriggeringResponse_Decode(OpcUa_SetTriggeringResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SetTriggeringResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType;
 #endif
 #endif
 
@@ -5063,53 +5063,53 @@ extern struct UA_EncodeableType UA_SetTriggeringResponse_EncodeableType;
 /*============================================================================
  * The DeleteMonitoredItemsRequest structure.
  *===========================================================================*/
-typedef struct _UA_DeleteMonitoredItemsRequest
+typedef struct _OpcUa_DeleteMonitoredItemsRequest
 {
-    UA_RequestHeader RequestHeader;
-    uint32_t         SubscriptionId;
-    int32_t          NoOfMonitoredItemIds;
-    uint32_t*        MonitoredItemIds;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t            SubscriptionId;
+    int32_t             NoOfMonitoredItemIds;
+    uint32_t*           MonitoredItemIds;
 }
-UA_DeleteMonitoredItemsRequest;
+OpcUa_DeleteMonitoredItemsRequest;
 
-void UA_DeleteMonitoredItemsRequest_Initialize(UA_DeleteMonitoredItemsRequest* pValue);
+void OpcUa_DeleteMonitoredItemsRequest_Initialize(OpcUa_DeleteMonitoredItemsRequest* pValue);
 
-void UA_DeleteMonitoredItemsRequest_Clear(UA_DeleteMonitoredItemsRequest* pValue);
+void OpcUa_DeleteMonitoredItemsRequest_Clear(OpcUa_DeleteMonitoredItemsRequest* pValue);
 
-//StatusCode UA_DeleteMonitoredItemsRequest_GetSize(UA_DeleteMonitoredItemsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteMonitoredItemsRequest_GetSize(OpcUa_DeleteMonitoredItemsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteMonitoredItemsRequest_Encode(UA_DeleteMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteMonitoredItemsRequest_Encode(OpcUa_DeleteMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteMonitoredItemsRequest_Decode(UA_DeleteMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteMonitoredItemsRequest_Decode(OpcUa_DeleteMonitoredItemsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteMonitoredItemsRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteMonitoredItemsResponse
 /*============================================================================
  * The DeleteMonitoredItemsResponse structure.
  *===========================================================================*/
-typedef struct _UA_DeleteMonitoredItemsResponse
+typedef struct _OpcUa_DeleteMonitoredItemsResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    StatusCode*        Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    StatusCode*          Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_DeleteMonitoredItemsResponse;
+OpcUa_DeleteMonitoredItemsResponse;
 
-void UA_DeleteMonitoredItemsResponse_Initialize(UA_DeleteMonitoredItemsResponse* pValue);
+void OpcUa_DeleteMonitoredItemsResponse_Initialize(OpcUa_DeleteMonitoredItemsResponse* pValue);
 
-void UA_DeleteMonitoredItemsResponse_Clear(UA_DeleteMonitoredItemsResponse* pValue);
+void OpcUa_DeleteMonitoredItemsResponse_Clear(OpcUa_DeleteMonitoredItemsResponse* pValue);
 
-//StatusCode UA_DeleteMonitoredItemsResponse_GetSize(UA_DeleteMonitoredItemsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteMonitoredItemsResponse_GetSize(OpcUa_DeleteMonitoredItemsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteMonitoredItemsResponse_Encode(UA_DeleteMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(OpcUa_DeleteMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteMonitoredItemsResponse_Decode(UA_DeleteMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteMonitoredItemsResponse_Decode(OpcUa_DeleteMonitoredItemsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteMonitoredItemsResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType;
 #endif
 #endif
 
@@ -5118,56 +5118,56 @@ extern struct UA_EncodeableType UA_DeleteMonitoredItemsResponse_EncodeableType;
 /*============================================================================
  * The CreateSubscriptionRequest structure.
  *===========================================================================*/
-typedef struct _UA_CreateSubscriptionRequest
+typedef struct _OpcUa_CreateSubscriptionRequest
 {
-    UA_RequestHeader RequestHeader;
-    double           RequestedPublishingInterval;
-    uint32_t         RequestedLifetimeCount;
-    uint32_t         RequestedMaxKeepAliveCount;
-    uint32_t         MaxNotificationsPerPublish;
-    UA_Boolean       PublishingEnabled;
-    UA_Byte          Priority;
+    OpcUa_RequestHeader RequestHeader;
+    double              RequestedPublishingInterval;
+    uint32_t            RequestedLifetimeCount;
+    uint32_t            RequestedMaxKeepAliveCount;
+    uint32_t            MaxNotificationsPerPublish;
+    UA_Boolean          PublishingEnabled;
+    UA_Byte             Priority;
 }
-UA_CreateSubscriptionRequest;
+OpcUa_CreateSubscriptionRequest;
 
-void UA_CreateSubscriptionRequest_Initialize(UA_CreateSubscriptionRequest* pValue);
+void OpcUa_CreateSubscriptionRequest_Initialize(OpcUa_CreateSubscriptionRequest* pValue);
 
-void UA_CreateSubscriptionRequest_Clear(UA_CreateSubscriptionRequest* pValue);
+void OpcUa_CreateSubscriptionRequest_Clear(OpcUa_CreateSubscriptionRequest* pValue);
 
-//StatusCode UA_CreateSubscriptionRequest_GetSize(UA_CreateSubscriptionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CreateSubscriptionRequest_GetSize(OpcUa_CreateSubscriptionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CreateSubscriptionRequest_Encode(UA_CreateSubscriptionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateSubscriptionRequest_Encode(OpcUa_CreateSubscriptionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CreateSubscriptionRequest_Decode(UA_CreateSubscriptionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateSubscriptionRequest_Decode(OpcUa_CreateSubscriptionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CreateSubscriptionRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSubscriptionResponse
 /*============================================================================
  * The CreateSubscriptionResponse structure.
  *===========================================================================*/
-typedef struct _UA_CreateSubscriptionResponse
+typedef struct _OpcUa_CreateSubscriptionResponse
 {
-    UA_ResponseHeader ResponseHeader;
-    uint32_t          SubscriptionId;
-    double            RevisedPublishingInterval;
-    uint32_t          RevisedLifetimeCount;
-    uint32_t          RevisedMaxKeepAliveCount;
+    OpcUa_ResponseHeader ResponseHeader;
+    uint32_t             SubscriptionId;
+    double               RevisedPublishingInterval;
+    uint32_t             RevisedLifetimeCount;
+    uint32_t             RevisedMaxKeepAliveCount;
 }
-UA_CreateSubscriptionResponse;
+OpcUa_CreateSubscriptionResponse;
 
-void UA_CreateSubscriptionResponse_Initialize(UA_CreateSubscriptionResponse* pValue);
+void OpcUa_CreateSubscriptionResponse_Initialize(OpcUa_CreateSubscriptionResponse* pValue);
 
-void UA_CreateSubscriptionResponse_Clear(UA_CreateSubscriptionResponse* pValue);
+void OpcUa_CreateSubscriptionResponse_Clear(OpcUa_CreateSubscriptionResponse* pValue);
 
-//StatusCode UA_CreateSubscriptionResponse_GetSize(UA_CreateSubscriptionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_CreateSubscriptionResponse_GetSize(OpcUa_CreateSubscriptionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_CreateSubscriptionResponse_Encode(UA_CreateSubscriptionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateSubscriptionResponse_Encode(OpcUa_CreateSubscriptionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_CreateSubscriptionResponse_Decode(UA_CreateSubscriptionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_CreateSubscriptionResponse_Decode(OpcUa_CreateSubscriptionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_CreateSubscriptionResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType;
 #endif
 #endif
 
@@ -5176,55 +5176,55 @@ extern struct UA_EncodeableType UA_CreateSubscriptionResponse_EncodeableType;
 /*============================================================================
  * The ModifySubscriptionRequest structure.
  *===========================================================================*/
-typedef struct _UA_ModifySubscriptionRequest
+typedef struct _OpcUa_ModifySubscriptionRequest
 {
-    UA_RequestHeader RequestHeader;
-    uint32_t         SubscriptionId;
-    double           RequestedPublishingInterval;
-    uint32_t         RequestedLifetimeCount;
-    uint32_t         RequestedMaxKeepAliveCount;
-    uint32_t         MaxNotificationsPerPublish;
-    UA_Byte          Priority;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t            SubscriptionId;
+    double              RequestedPublishingInterval;
+    uint32_t            RequestedLifetimeCount;
+    uint32_t            RequestedMaxKeepAliveCount;
+    uint32_t            MaxNotificationsPerPublish;
+    UA_Byte             Priority;
 }
-UA_ModifySubscriptionRequest;
+OpcUa_ModifySubscriptionRequest;
 
-void UA_ModifySubscriptionRequest_Initialize(UA_ModifySubscriptionRequest* pValue);
+void OpcUa_ModifySubscriptionRequest_Initialize(OpcUa_ModifySubscriptionRequest* pValue);
 
-void UA_ModifySubscriptionRequest_Clear(UA_ModifySubscriptionRequest* pValue);
+void OpcUa_ModifySubscriptionRequest_Clear(OpcUa_ModifySubscriptionRequest* pValue);
 
-//StatusCode UA_ModifySubscriptionRequest_GetSize(UA_ModifySubscriptionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ModifySubscriptionRequest_GetSize(OpcUa_ModifySubscriptionRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ModifySubscriptionRequest_Encode(UA_ModifySubscriptionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModifySubscriptionRequest_Encode(OpcUa_ModifySubscriptionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ModifySubscriptionRequest_Decode(UA_ModifySubscriptionRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModifySubscriptionRequest_Decode(OpcUa_ModifySubscriptionRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ModifySubscriptionRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifySubscriptionResponse
 /*============================================================================
  * The ModifySubscriptionResponse structure.
  *===========================================================================*/
-typedef struct _UA_ModifySubscriptionResponse
+typedef struct _OpcUa_ModifySubscriptionResponse
 {
-    UA_ResponseHeader ResponseHeader;
-    double            RevisedPublishingInterval;
-    uint32_t          RevisedLifetimeCount;
-    uint32_t          RevisedMaxKeepAliveCount;
+    OpcUa_ResponseHeader ResponseHeader;
+    double               RevisedPublishingInterval;
+    uint32_t             RevisedLifetimeCount;
+    uint32_t             RevisedMaxKeepAliveCount;
 }
-UA_ModifySubscriptionResponse;
+OpcUa_ModifySubscriptionResponse;
 
-void UA_ModifySubscriptionResponse_Initialize(UA_ModifySubscriptionResponse* pValue);
+void OpcUa_ModifySubscriptionResponse_Initialize(OpcUa_ModifySubscriptionResponse* pValue);
 
-void UA_ModifySubscriptionResponse_Clear(UA_ModifySubscriptionResponse* pValue);
+void OpcUa_ModifySubscriptionResponse_Clear(OpcUa_ModifySubscriptionResponse* pValue);
 
-//StatusCode UA_ModifySubscriptionResponse_GetSize(UA_ModifySubscriptionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ModifySubscriptionResponse_GetSize(OpcUa_ModifySubscriptionResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ModifySubscriptionResponse_Encode(UA_ModifySubscriptionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModifySubscriptionResponse_Encode(OpcUa_ModifySubscriptionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ModifySubscriptionResponse_Decode(UA_ModifySubscriptionResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModifySubscriptionResponse_Decode(OpcUa_ModifySubscriptionResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ModifySubscriptionResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType;
 #endif
 #endif
 
@@ -5233,53 +5233,53 @@ extern struct UA_EncodeableType UA_ModifySubscriptionResponse_EncodeableType;
 /*============================================================================
  * The SetPublishingModeRequest structure.
  *===========================================================================*/
-typedef struct _UA_SetPublishingModeRequest
+typedef struct _OpcUa_SetPublishingModeRequest
 {
-    UA_RequestHeader RequestHeader;
-    UA_Boolean       PublishingEnabled;
-    int32_t          NoOfSubscriptionIds;
-    uint32_t*        SubscriptionIds;
+    OpcUa_RequestHeader RequestHeader;
+    UA_Boolean          PublishingEnabled;
+    int32_t             NoOfSubscriptionIds;
+    uint32_t*           SubscriptionIds;
 }
-UA_SetPublishingModeRequest;
+OpcUa_SetPublishingModeRequest;
 
-void UA_SetPublishingModeRequest_Initialize(UA_SetPublishingModeRequest* pValue);
+void OpcUa_SetPublishingModeRequest_Initialize(OpcUa_SetPublishingModeRequest* pValue);
 
-void UA_SetPublishingModeRequest_Clear(UA_SetPublishingModeRequest* pValue);
+void OpcUa_SetPublishingModeRequest_Clear(OpcUa_SetPublishingModeRequest* pValue);
 
-//StatusCode UA_SetPublishingModeRequest_GetSize(UA_SetPublishingModeRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SetPublishingModeRequest_GetSize(OpcUa_SetPublishingModeRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SetPublishingModeRequest_Encode(UA_SetPublishingModeRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetPublishingModeRequest_Encode(OpcUa_SetPublishingModeRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SetPublishingModeRequest_Decode(UA_SetPublishingModeRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetPublishingModeRequest_Decode(OpcUa_SetPublishingModeRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SetPublishingModeRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetPublishingModeResponse
 /*============================================================================
  * The SetPublishingModeResponse structure.
  *===========================================================================*/
-typedef struct _UA_SetPublishingModeResponse
+typedef struct _OpcUa_SetPublishingModeResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    StatusCode*        Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    StatusCode*          Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_SetPublishingModeResponse;
+OpcUa_SetPublishingModeResponse;
 
-void UA_SetPublishingModeResponse_Initialize(UA_SetPublishingModeResponse* pValue);
+void OpcUa_SetPublishingModeResponse_Initialize(OpcUa_SetPublishingModeResponse* pValue);
 
-void UA_SetPublishingModeResponse_Clear(UA_SetPublishingModeResponse* pValue);
+void OpcUa_SetPublishingModeResponse_Clear(OpcUa_SetPublishingModeResponse* pValue);
 
-//StatusCode UA_SetPublishingModeResponse_GetSize(UA_SetPublishingModeResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SetPublishingModeResponse_GetSize(OpcUa_SetPublishingModeResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SetPublishingModeResponse_Encode(UA_SetPublishingModeResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetPublishingModeResponse_Encode(OpcUa_SetPublishingModeResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SetPublishingModeResponse_Decode(UA_SetPublishingModeResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SetPublishingModeResponse_Decode(OpcUa_SetPublishingModeResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SetPublishingModeResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType;
 #endif
 #endif
 
@@ -5287,173 +5287,173 @@ extern struct UA_EncodeableType UA_SetPublishingModeResponse_EncodeableType;
 /*============================================================================
  * The NotificationMessage structure.
  *===========================================================================*/
-typedef struct _UA_NotificationMessage
+typedef struct _OpcUa_NotificationMessage
 {
     uint32_t            SequenceNumber;
     UA_DateTime         PublishTime;
     int32_t             NoOfNotificationData;
     UA_ExtensionObject* NotificationData;
 }
-UA_NotificationMessage;
+OpcUa_NotificationMessage;
 
-void UA_NotificationMessage_Initialize(UA_NotificationMessage* pValue);
+void OpcUa_NotificationMessage_Initialize(OpcUa_NotificationMessage* pValue);
 
-void UA_NotificationMessage_Clear(UA_NotificationMessage* pValue);
+void OpcUa_NotificationMessage_Clear(OpcUa_NotificationMessage* pValue);
 
-//StatusCode UA_NotificationMessage_GetSize(UA_NotificationMessage* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_NotificationMessage_GetSize(OpcUa_NotificationMessage* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_NotificationMessage_Encode(UA_NotificationMessage* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NotificationMessage_Encode(OpcUa_NotificationMessage* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_NotificationMessage_Decode(UA_NotificationMessage* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NotificationMessage_Decode(OpcUa_NotificationMessage* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_NotificationMessage_EncodeableType;
+extern struct UA_EncodeableType OpcUa_NotificationMessage_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_MonitoredItemNotification
 /*============================================================================
  * The MonitoredItemNotification structure.
  *===========================================================================*/
-typedef struct _UA_MonitoredItemNotification
+typedef struct _OpcUa_MonitoredItemNotification
 {
     uint32_t     ClientHandle;
     UA_DataValue Value;
 }
-UA_MonitoredItemNotification;
+OpcUa_MonitoredItemNotification;
 
-void UA_MonitoredItemNotification_Initialize(UA_MonitoredItemNotification* pValue);
+void OpcUa_MonitoredItemNotification_Initialize(OpcUa_MonitoredItemNotification* pValue);
 
-void UA_MonitoredItemNotification_Clear(UA_MonitoredItemNotification* pValue);
+void OpcUa_MonitoredItemNotification_Clear(OpcUa_MonitoredItemNotification* pValue);
 
-//StatusCode UA_MonitoredItemNotification_GetSize(UA_MonitoredItemNotification* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_MonitoredItemNotification_GetSize(OpcUa_MonitoredItemNotification* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_MonitoredItemNotification_Encode(UA_MonitoredItemNotification* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemNotification_Encode(OpcUa_MonitoredItemNotification* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_MonitoredItemNotification_Decode(UA_MonitoredItemNotification* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_MonitoredItemNotification_Decode(OpcUa_MonitoredItemNotification* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_MonitoredItemNotification_EncodeableType;
+extern struct UA_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DataChangeNotification
 /*============================================================================
  * The DataChangeNotification structure.
  *===========================================================================*/
-typedef struct _UA_DataChangeNotification
+typedef struct _OpcUa_DataChangeNotification
 {
-    int32_t                       NoOfMonitoredItems;
-    UA_MonitoredItemNotification* MonitoredItems;
-    int32_t                       NoOfDiagnosticInfos;
-    UA_DiagnosticInfo*            DiagnosticInfos;
+    int32_t                          NoOfMonitoredItems;
+    OpcUa_MonitoredItemNotification* MonitoredItems;
+    int32_t                          NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*               DiagnosticInfos;
 }
-UA_DataChangeNotification;
+OpcUa_DataChangeNotification;
 
-void UA_DataChangeNotification_Initialize(UA_DataChangeNotification* pValue);
+void OpcUa_DataChangeNotification_Initialize(OpcUa_DataChangeNotification* pValue);
 
-void UA_DataChangeNotification_Clear(UA_DataChangeNotification* pValue);
+void OpcUa_DataChangeNotification_Clear(OpcUa_DataChangeNotification* pValue);
 
-//StatusCode UA_DataChangeNotification_GetSize(UA_DataChangeNotification* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DataChangeNotification_GetSize(OpcUa_DataChangeNotification* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DataChangeNotification_Encode(UA_DataChangeNotification* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DataChangeNotification_Encode(OpcUa_DataChangeNotification* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DataChangeNotification_Decode(UA_DataChangeNotification* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DataChangeNotification_Decode(OpcUa_DataChangeNotification* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DataChangeNotification_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DataChangeNotification_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventFieldList
 /*============================================================================
  * The EventFieldList structure.
  *===========================================================================*/
-typedef struct _UA_EventFieldList
+typedef struct _OpcUa_EventFieldList
 {
     uint32_t    ClientHandle;
     int32_t     NoOfEventFields;
     UA_Variant* EventFields;
 }
-UA_EventFieldList;
+OpcUa_EventFieldList;
 
-void UA_EventFieldList_Initialize(UA_EventFieldList* pValue);
+void OpcUa_EventFieldList_Initialize(OpcUa_EventFieldList* pValue);
 
-void UA_EventFieldList_Clear(UA_EventFieldList* pValue);
+void OpcUa_EventFieldList_Clear(OpcUa_EventFieldList* pValue);
 
-//StatusCode UA_EventFieldList_GetSize(UA_EventFieldList* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EventFieldList_GetSize(OpcUa_EventFieldList* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EventFieldList_Encode(UA_EventFieldList* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EventFieldList_Encode(OpcUa_EventFieldList* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EventFieldList_Decode(UA_EventFieldList* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EventFieldList_Decode(OpcUa_EventFieldList* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EventFieldList_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EventFieldList_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_EventNotificationList
 /*============================================================================
  * The EventNotificationList structure.
  *===========================================================================*/
-typedef struct _UA_EventNotificationList
+typedef struct _OpcUa_EventNotificationList
 {
-    int32_t            NoOfEvents;
-    UA_EventFieldList* Events;
+    int32_t               NoOfEvents;
+    OpcUa_EventFieldList* Events;
 }
-UA_EventNotificationList;
+OpcUa_EventNotificationList;
 
-void UA_EventNotificationList_Initialize(UA_EventNotificationList* pValue);
+void OpcUa_EventNotificationList_Initialize(OpcUa_EventNotificationList* pValue);
 
-void UA_EventNotificationList_Clear(UA_EventNotificationList* pValue);
+void OpcUa_EventNotificationList_Clear(OpcUa_EventNotificationList* pValue);
 
-//StatusCode UA_EventNotificationList_GetSize(UA_EventNotificationList* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EventNotificationList_GetSize(OpcUa_EventNotificationList* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EventNotificationList_Encode(UA_EventNotificationList* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EventNotificationList_Encode(OpcUa_EventNotificationList* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EventNotificationList_Decode(UA_EventNotificationList* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EventNotificationList_Decode(OpcUa_EventNotificationList* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EventNotificationList_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EventNotificationList_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_StatusChangeNotification
 /*============================================================================
  * The StatusChangeNotification structure.
  *===========================================================================*/
-typedef struct _UA_StatusChangeNotification
+typedef struct _OpcUa_StatusChangeNotification
 {
     StatusCode        Status;
     UA_DiagnosticInfo DiagnosticInfo;
 }
-UA_StatusChangeNotification;
+OpcUa_StatusChangeNotification;
 
-void UA_StatusChangeNotification_Initialize(UA_StatusChangeNotification* pValue);
+void OpcUa_StatusChangeNotification_Initialize(OpcUa_StatusChangeNotification* pValue);
 
-void UA_StatusChangeNotification_Clear(UA_StatusChangeNotification* pValue);
+void OpcUa_StatusChangeNotification_Clear(OpcUa_StatusChangeNotification* pValue);
 
-//StatusCode UA_StatusChangeNotification_GetSize(UA_StatusChangeNotification* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_StatusChangeNotification_GetSize(OpcUa_StatusChangeNotification* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_StatusChangeNotification_Encode(UA_StatusChangeNotification* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_StatusChangeNotification_Encode(OpcUa_StatusChangeNotification* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_StatusChangeNotification_Decode(UA_StatusChangeNotification* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_StatusChangeNotification_Decode(OpcUa_StatusChangeNotification* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_StatusChangeNotification_EncodeableType;
+extern struct UA_EncodeableType OpcUa_StatusChangeNotification_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SubscriptionAcknowledgement
 /*============================================================================
  * The SubscriptionAcknowledgement structure.
  *===========================================================================*/
-typedef struct _UA_SubscriptionAcknowledgement
+typedef struct _OpcUa_SubscriptionAcknowledgement
 {
     uint32_t SubscriptionId;
     uint32_t SequenceNumber;
 }
-UA_SubscriptionAcknowledgement;
+OpcUa_SubscriptionAcknowledgement;
 
-void UA_SubscriptionAcknowledgement_Initialize(UA_SubscriptionAcknowledgement* pValue);
+void OpcUa_SubscriptionAcknowledgement_Initialize(OpcUa_SubscriptionAcknowledgement* pValue);
 
-void UA_SubscriptionAcknowledgement_Clear(UA_SubscriptionAcknowledgement* pValue);
+void OpcUa_SubscriptionAcknowledgement_Clear(OpcUa_SubscriptionAcknowledgement* pValue);
 
-//StatusCode UA_SubscriptionAcknowledgement_GetSize(UA_SubscriptionAcknowledgement* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SubscriptionAcknowledgement_GetSize(OpcUa_SubscriptionAcknowledgement* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SubscriptionAcknowledgement_Encode(UA_SubscriptionAcknowledgement* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SubscriptionAcknowledgement_Encode(OpcUa_SubscriptionAcknowledgement* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SubscriptionAcknowledgement_Decode(UA_SubscriptionAcknowledgement* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SubscriptionAcknowledgement_Decode(OpcUa_SubscriptionAcknowledgement* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SubscriptionAcknowledgement_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_Publish
@@ -5461,57 +5461,57 @@ extern struct UA_EncodeableType UA_SubscriptionAcknowledgement_EncodeableType;
 /*============================================================================
  * The PublishRequest structure.
  *===========================================================================*/
-typedef struct _UA_PublishRequest
+typedef struct _OpcUa_PublishRequest
 {
-    UA_RequestHeader                RequestHeader;
-    int32_t                         NoOfSubscriptionAcknowledgements;
-    UA_SubscriptionAcknowledgement* SubscriptionAcknowledgements;
+    OpcUa_RequestHeader                RequestHeader;
+    int32_t                            NoOfSubscriptionAcknowledgements;
+    OpcUa_SubscriptionAcknowledgement* SubscriptionAcknowledgements;
 }
-UA_PublishRequest;
+OpcUa_PublishRequest;
 
-void UA_PublishRequest_Initialize(UA_PublishRequest* pValue);
+void OpcUa_PublishRequest_Initialize(OpcUa_PublishRequest* pValue);
 
-void UA_PublishRequest_Clear(UA_PublishRequest* pValue);
+void OpcUa_PublishRequest_Clear(OpcUa_PublishRequest* pValue);
 
-//StatusCode UA_PublishRequest_GetSize(UA_PublishRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_PublishRequest_GetSize(OpcUa_PublishRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_PublishRequest_Encode(UA_PublishRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_PublishRequest_Encode(OpcUa_PublishRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_PublishRequest_Decode(UA_PublishRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_PublishRequest_Decode(OpcUa_PublishRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_PublishRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_PublishRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_PublishResponse
 /*============================================================================
  * The PublishResponse structure.
  *===========================================================================*/
-typedef struct _UA_PublishResponse
+typedef struct _OpcUa_PublishResponse
 {
-    UA_ResponseHeader      ResponseHeader;
-    uint32_t               SubscriptionId;
-    int32_t                NoOfAvailableSequenceNumbers;
-    uint32_t*              AvailableSequenceNumbers;
-    UA_Boolean             MoreNotifications;
-    UA_NotificationMessage NotificationMessage;
-    int32_t                NoOfResults;
-    StatusCode*            Results;
-    int32_t                NoOfDiagnosticInfos;
-    UA_DiagnosticInfo*     DiagnosticInfos;
+    OpcUa_ResponseHeader      ResponseHeader;
+    uint32_t                  SubscriptionId;
+    int32_t                   NoOfAvailableSequenceNumbers;
+    uint32_t*                 AvailableSequenceNumbers;
+    UA_Boolean                MoreNotifications;
+    OpcUa_NotificationMessage NotificationMessage;
+    int32_t                   NoOfResults;
+    StatusCode*               Results;
+    int32_t                   NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*        DiagnosticInfos;
 }
-UA_PublishResponse;
+OpcUa_PublishResponse;
 
-void UA_PublishResponse_Initialize(UA_PublishResponse* pValue);
+void OpcUa_PublishResponse_Initialize(OpcUa_PublishResponse* pValue);
 
-void UA_PublishResponse_Clear(UA_PublishResponse* pValue);
+void OpcUa_PublishResponse_Clear(OpcUa_PublishResponse* pValue);
 
-//StatusCode UA_PublishResponse_GetSize(UA_PublishResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_PublishResponse_GetSize(OpcUa_PublishResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_PublishResponse_Encode(UA_PublishResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_PublishResponse_Encode(OpcUa_PublishResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_PublishResponse_Decode(UA_PublishResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_PublishResponse_Decode(OpcUa_PublishResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_PublishResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_PublishResponse_EncodeableType;
 #endif
 #endif
 
@@ -5520,49 +5520,49 @@ extern struct UA_EncodeableType UA_PublishResponse_EncodeableType;
 /*============================================================================
  * The RepublishRequest structure.
  *===========================================================================*/
-typedef struct _UA_RepublishRequest
+typedef struct _OpcUa_RepublishRequest
 {
-    UA_RequestHeader RequestHeader;
-    uint32_t         SubscriptionId;
-    uint32_t         RetransmitSequenceNumber;
+    OpcUa_RequestHeader RequestHeader;
+    uint32_t            SubscriptionId;
+    uint32_t            RetransmitSequenceNumber;
 }
-UA_RepublishRequest;
+OpcUa_RepublishRequest;
 
-void UA_RepublishRequest_Initialize(UA_RepublishRequest* pValue);
+void OpcUa_RepublishRequest_Initialize(OpcUa_RepublishRequest* pValue);
 
-void UA_RepublishRequest_Clear(UA_RepublishRequest* pValue);
+void OpcUa_RepublishRequest_Clear(OpcUa_RepublishRequest* pValue);
 
-//StatusCode UA_RepublishRequest_GetSize(UA_RepublishRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RepublishRequest_GetSize(OpcUa_RepublishRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RepublishRequest_Encode(UA_RepublishRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RepublishRequest_Encode(OpcUa_RepublishRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RepublishRequest_Decode(UA_RepublishRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RepublishRequest_Decode(OpcUa_RepublishRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RepublishRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RepublishRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_RepublishResponse
 /*============================================================================
  * The RepublishResponse structure.
  *===========================================================================*/
-typedef struct _UA_RepublishResponse
+typedef struct _OpcUa_RepublishResponse
 {
-    UA_ResponseHeader      ResponseHeader;
-    UA_NotificationMessage NotificationMessage;
+    OpcUa_ResponseHeader      ResponseHeader;
+    OpcUa_NotificationMessage NotificationMessage;
 }
-UA_RepublishResponse;
+OpcUa_RepublishResponse;
 
-void UA_RepublishResponse_Initialize(UA_RepublishResponse* pValue);
+void OpcUa_RepublishResponse_Initialize(OpcUa_RepublishResponse* pValue);
 
-void UA_RepublishResponse_Clear(UA_RepublishResponse* pValue);
+void OpcUa_RepublishResponse_Clear(OpcUa_RepublishResponse* pValue);
 
-//StatusCode UA_RepublishResponse_GetSize(UA_RepublishResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RepublishResponse_GetSize(OpcUa_RepublishResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RepublishResponse_Encode(UA_RepublishResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RepublishResponse_Encode(OpcUa_RepublishResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RepublishResponse_Decode(UA_RepublishResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RepublishResponse_Decode(OpcUa_RepublishResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RepublishResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RepublishResponse_EncodeableType;
 #endif
 #endif
 
@@ -5570,25 +5570,25 @@ extern struct UA_EncodeableType UA_RepublishResponse_EncodeableType;
 /*============================================================================
  * The TransferResult structure.
  *===========================================================================*/
-typedef struct _UA_TransferResult
+typedef struct _OpcUa_TransferResult
 {
     StatusCode StatusCode;
     int32_t    NoOfAvailableSequenceNumbers;
     uint32_t*  AvailableSequenceNumbers;
 }
-UA_TransferResult;
+OpcUa_TransferResult;
 
-void UA_TransferResult_Initialize(UA_TransferResult* pValue);
+void OpcUa_TransferResult_Initialize(OpcUa_TransferResult* pValue);
 
-void UA_TransferResult_Clear(UA_TransferResult* pValue);
+void OpcUa_TransferResult_Clear(OpcUa_TransferResult* pValue);
 
-//StatusCode UA_TransferResult_GetSize(UA_TransferResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_TransferResult_GetSize(OpcUa_TransferResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_TransferResult_Encode(UA_TransferResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TransferResult_Encode(OpcUa_TransferResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_TransferResult_Decode(UA_TransferResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TransferResult_Decode(OpcUa_TransferResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_TransferResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_TransferResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_TransferSubscriptions
@@ -5596,53 +5596,53 @@ extern struct UA_EncodeableType UA_TransferResult_EncodeableType;
 /*============================================================================
  * The TransferSubscriptionsRequest structure.
  *===========================================================================*/
-typedef struct _UA_TransferSubscriptionsRequest
+typedef struct _OpcUa_TransferSubscriptionsRequest
 {
-    UA_RequestHeader RequestHeader;
-    int32_t          NoOfSubscriptionIds;
-    uint32_t*        SubscriptionIds;
-    UA_Boolean       SendInitialValues;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t             NoOfSubscriptionIds;
+    uint32_t*           SubscriptionIds;
+    UA_Boolean          SendInitialValues;
 }
-UA_TransferSubscriptionsRequest;
+OpcUa_TransferSubscriptionsRequest;
 
-void UA_TransferSubscriptionsRequest_Initialize(UA_TransferSubscriptionsRequest* pValue);
+void OpcUa_TransferSubscriptionsRequest_Initialize(OpcUa_TransferSubscriptionsRequest* pValue);
 
-void UA_TransferSubscriptionsRequest_Clear(UA_TransferSubscriptionsRequest* pValue);
+void OpcUa_TransferSubscriptionsRequest_Clear(OpcUa_TransferSubscriptionsRequest* pValue);
 
-//StatusCode UA_TransferSubscriptionsRequest_GetSize(UA_TransferSubscriptionsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_TransferSubscriptionsRequest_GetSize(OpcUa_TransferSubscriptionsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_TransferSubscriptionsRequest_Encode(UA_TransferSubscriptionsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TransferSubscriptionsRequest_Encode(OpcUa_TransferSubscriptionsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_TransferSubscriptionsRequest_Decode(UA_TransferSubscriptionsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TransferSubscriptionsRequest_Decode(OpcUa_TransferSubscriptionsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_TransferSubscriptionsRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_TransferSubscriptionsResponse
 /*============================================================================
  * The TransferSubscriptionsResponse structure.
  *===========================================================================*/
-typedef struct _UA_TransferSubscriptionsResponse
+typedef struct _OpcUa_TransferSubscriptionsResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    UA_TransferResult* Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader  ResponseHeader;
+    int32_t               NoOfResults;
+    OpcUa_TransferResult* Results;
+    int32_t               NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*    DiagnosticInfos;
 }
-UA_TransferSubscriptionsResponse;
+OpcUa_TransferSubscriptionsResponse;
 
-void UA_TransferSubscriptionsResponse_Initialize(UA_TransferSubscriptionsResponse* pValue);
+void OpcUa_TransferSubscriptionsResponse_Initialize(OpcUa_TransferSubscriptionsResponse* pValue);
 
-void UA_TransferSubscriptionsResponse_Clear(UA_TransferSubscriptionsResponse* pValue);
+void OpcUa_TransferSubscriptionsResponse_Clear(OpcUa_TransferSubscriptionsResponse* pValue);
 
-//StatusCode UA_TransferSubscriptionsResponse_GetSize(UA_TransferSubscriptionsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_TransferSubscriptionsResponse_GetSize(OpcUa_TransferSubscriptionsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_TransferSubscriptionsResponse_Encode(UA_TransferSubscriptionsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TransferSubscriptionsResponse_Encode(OpcUa_TransferSubscriptionsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_TransferSubscriptionsResponse_Decode(UA_TransferSubscriptionsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_TransferSubscriptionsResponse_Decode(OpcUa_TransferSubscriptionsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_TransferSubscriptionsResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType;
 #endif
 #endif
 
@@ -5651,52 +5651,52 @@ extern struct UA_EncodeableType UA_TransferSubscriptionsResponse_EncodeableType;
 /*============================================================================
  * The DeleteSubscriptionsRequest structure.
  *===========================================================================*/
-typedef struct _UA_DeleteSubscriptionsRequest
+typedef struct _OpcUa_DeleteSubscriptionsRequest
 {
-    UA_RequestHeader RequestHeader;
-    int32_t          NoOfSubscriptionIds;
-    uint32_t*        SubscriptionIds;
+    OpcUa_RequestHeader RequestHeader;
+    int32_t             NoOfSubscriptionIds;
+    uint32_t*           SubscriptionIds;
 }
-UA_DeleteSubscriptionsRequest;
+OpcUa_DeleteSubscriptionsRequest;
 
-void UA_DeleteSubscriptionsRequest_Initialize(UA_DeleteSubscriptionsRequest* pValue);
+void OpcUa_DeleteSubscriptionsRequest_Initialize(OpcUa_DeleteSubscriptionsRequest* pValue);
 
-void UA_DeleteSubscriptionsRequest_Clear(UA_DeleteSubscriptionsRequest* pValue);
+void OpcUa_DeleteSubscriptionsRequest_Clear(OpcUa_DeleteSubscriptionsRequest* pValue);
 
-//StatusCode UA_DeleteSubscriptionsRequest_GetSize(UA_DeleteSubscriptionsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteSubscriptionsRequest_GetSize(OpcUa_DeleteSubscriptionsRequest* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteSubscriptionsRequest_Encode(UA_DeleteSubscriptionsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteSubscriptionsRequest_Encode(OpcUa_DeleteSubscriptionsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteSubscriptionsRequest_Decode(UA_DeleteSubscriptionsRequest* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteSubscriptionsRequest_Decode(OpcUa_DeleteSubscriptionsRequest* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteSubscriptionsRequest_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteSubscriptionsResponse
 /*============================================================================
  * The DeleteSubscriptionsResponse structure.
  *===========================================================================*/
-typedef struct _UA_DeleteSubscriptionsResponse
+typedef struct _OpcUa_DeleteSubscriptionsResponse
 {
-    UA_ResponseHeader  ResponseHeader;
-    int32_t            NoOfResults;
-    StatusCode*        Results;
-    int32_t            NoOfDiagnosticInfos;
-    UA_DiagnosticInfo* DiagnosticInfos;
+    OpcUa_ResponseHeader ResponseHeader;
+    int32_t              NoOfResults;
+    StatusCode*          Results;
+    int32_t              NoOfDiagnosticInfos;
+    UA_DiagnosticInfo*   DiagnosticInfos;
 }
-UA_DeleteSubscriptionsResponse;
+OpcUa_DeleteSubscriptionsResponse;
 
-void UA_DeleteSubscriptionsResponse_Initialize(UA_DeleteSubscriptionsResponse* pValue);
+void OpcUa_DeleteSubscriptionsResponse_Initialize(OpcUa_DeleteSubscriptionsResponse* pValue);
 
-void UA_DeleteSubscriptionsResponse_Clear(UA_DeleteSubscriptionsResponse* pValue);
+void OpcUa_DeleteSubscriptionsResponse_Clear(OpcUa_DeleteSubscriptionsResponse* pValue);
 
-//StatusCode UA_DeleteSubscriptionsResponse_GetSize(UA_DeleteSubscriptionsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DeleteSubscriptionsResponse_GetSize(OpcUa_DeleteSubscriptionsResponse* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DeleteSubscriptionsResponse_Encode(UA_DeleteSubscriptionsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(OpcUa_DeleteSubscriptionsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DeleteSubscriptionsResponse_Decode(UA_DeleteSubscriptionsResponse* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DeleteSubscriptionsResponse_Decode(OpcUa_DeleteSubscriptionsResponse* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DeleteSubscriptionsResponse_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType;
 #endif
 #endif
 
@@ -5704,16 +5704,16 @@ extern struct UA_EncodeableType UA_DeleteSubscriptionsResponse_EncodeableType;
 /*============================================================================
  * The EnumeratedTestType enumeration.
  *===========================================================================*/
-typedef enum _UA_EnumeratedTestType
+typedef enum _OpcUa_EnumeratedTestType
 {
-    UA_EnumeratedTestType_Red    = 1,
-    UA_EnumeratedTestType_Yellow = 4,
-    UA_EnumeratedTestType_Green  = 5
+    OpcUa_EnumeratedTestType_Red    = 1,
+    OpcUa_EnumeratedTestType_Yellow = 4,
+    OpcUa_EnumeratedTestType_Green  = 5
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_EnumeratedTestType_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_EnumeratedTestType_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_EnumeratedTestType;
+OpcUa_EnumeratedTestType;
 
 #endif
 
@@ -5721,7 +5721,7 @@ UA_EnumeratedTestType;
 /*============================================================================
  * The BuildInfo structure.
  *===========================================================================*/
-typedef struct _UA_BuildInfo
+typedef struct _OpcUa_BuildInfo
 {
     UA_String   ProductUri;
     UA_String   ManufacturerName;
@@ -5730,38 +5730,38 @@ typedef struct _UA_BuildInfo
     UA_String   BuildNumber;
     UA_DateTime BuildDate;
 }
-UA_BuildInfo;
+OpcUa_BuildInfo;
 
-void UA_BuildInfo_Initialize(UA_BuildInfo* pValue);
+void OpcUa_BuildInfo_Initialize(OpcUa_BuildInfo* pValue);
 
-void UA_BuildInfo_Clear(UA_BuildInfo* pValue);
+void OpcUa_BuildInfo_Clear(OpcUa_BuildInfo* pValue);
 
-//StatusCode UA_BuildInfo_GetSize(UA_BuildInfo* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_BuildInfo_GetSize(OpcUa_BuildInfo* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_BuildInfo_Encode(UA_BuildInfo* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BuildInfo_Encode(OpcUa_BuildInfo* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_BuildInfo_Decode(UA_BuildInfo* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_BuildInfo_Decode(OpcUa_BuildInfo* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_BuildInfo_EncodeableType;
+extern struct UA_EncodeableType OpcUa_BuildInfo_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_RedundancySupport
 /*============================================================================
  * The RedundancySupport enumeration.
  *===========================================================================*/
-typedef enum _UA_RedundancySupport
+typedef enum _OpcUa_RedundancySupport
 {
-    UA_RedundancySupport_None           = 0,
-    UA_RedundancySupport_Cold           = 1,
-    UA_RedundancySupport_Warm           = 2,
-    UA_RedundancySupport_Hot            = 3,
-    UA_RedundancySupport_Transparent    = 4,
-    UA_RedundancySupport_HotAndMirrored = 5
+    OpcUa_RedundancySupport_None           = 0,
+    OpcUa_RedundancySupport_Cold           = 1,
+    OpcUa_RedundancySupport_Warm           = 2,
+    OpcUa_RedundancySupport_Hot            = 3,
+    OpcUa_RedundancySupport_Transparent    = 4,
+    OpcUa_RedundancySupport_HotAndMirrored = 5
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_RedundancySupport_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_RedundancySupport_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_RedundancySupport;
+OpcUa_RedundancySupport;
 
 #endif
 
@@ -5769,21 +5769,21 @@ UA_RedundancySupport;
 /*============================================================================
  * The ServerState enumeration.
  *===========================================================================*/
-typedef enum _UA_ServerState
+typedef enum _OpcUa_ServerState
 {
-    UA_ServerState_Running            = 0,
-    UA_ServerState_Failed             = 1,
-    UA_ServerState_NoConfiguration    = 2,
-    UA_ServerState_Suspended          = 3,
-    UA_ServerState_Shutdown           = 4,
-    UA_ServerState_Test               = 5,
-    UA_ServerState_CommunicationFault = 6,
-    UA_ServerState_Unknown            = 7
+    OpcUa_ServerState_Running            = 0,
+    OpcUa_ServerState_Failed             = 1,
+    OpcUa_ServerState_NoConfiguration    = 2,
+    OpcUa_ServerState_Suspended          = 3,
+    OpcUa_ServerState_Shutdown           = 4,
+    OpcUa_ServerState_Test               = 5,
+    OpcUa_ServerState_CommunicationFault = 6,
+    OpcUa_ServerState_Unknown            = 7
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_ServerState_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_ServerState_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_ServerState;
+OpcUa_ServerState;
 
 #endif
 
@@ -5791,107 +5791,107 @@ UA_ServerState;
 /*============================================================================
  * The RedundantServerDataType structure.
  *===========================================================================*/
-typedef struct _UA_RedundantServerDataType
+typedef struct _OpcUa_RedundantServerDataType
 {
-    UA_String      ServerId;
-    UA_Byte        ServiceLevel;
-    UA_ServerState ServerState;
+    UA_String         ServerId;
+    UA_Byte           ServiceLevel;
+    OpcUa_ServerState ServerState;
 }
-UA_RedundantServerDataType;
+OpcUa_RedundantServerDataType;
 
-void UA_RedundantServerDataType_Initialize(UA_RedundantServerDataType* pValue);
+void OpcUa_RedundantServerDataType_Initialize(OpcUa_RedundantServerDataType* pValue);
 
-void UA_RedundantServerDataType_Clear(UA_RedundantServerDataType* pValue);
+void OpcUa_RedundantServerDataType_Clear(OpcUa_RedundantServerDataType* pValue);
 
-//StatusCode UA_RedundantServerDataType_GetSize(UA_RedundantServerDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_RedundantServerDataType_GetSize(OpcUa_RedundantServerDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_RedundantServerDataType_Encode(UA_RedundantServerDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RedundantServerDataType_Encode(OpcUa_RedundantServerDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_RedundantServerDataType_Decode(UA_RedundantServerDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_RedundantServerDataType_Decode(OpcUa_RedundantServerDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_RedundantServerDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_RedundantServerDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_EndpointUrlListDataType
 /*============================================================================
  * The EndpointUrlListDataType structure.
  *===========================================================================*/
-typedef struct _UA_EndpointUrlListDataType
+typedef struct _OpcUa_EndpointUrlListDataType
 {
     int32_t    NoOfEndpointUrlList;
     UA_String* EndpointUrlList;
 }
-UA_EndpointUrlListDataType;
+OpcUa_EndpointUrlListDataType;
 
-void UA_EndpointUrlListDataType_Initialize(UA_EndpointUrlListDataType* pValue);
+void OpcUa_EndpointUrlListDataType_Initialize(OpcUa_EndpointUrlListDataType* pValue);
 
-void UA_EndpointUrlListDataType_Clear(UA_EndpointUrlListDataType* pValue);
+void OpcUa_EndpointUrlListDataType_Clear(OpcUa_EndpointUrlListDataType* pValue);
 
-//StatusCode UA_EndpointUrlListDataType_GetSize(UA_EndpointUrlListDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EndpointUrlListDataType_GetSize(OpcUa_EndpointUrlListDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EndpointUrlListDataType_Encode(UA_EndpointUrlListDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EndpointUrlListDataType_Encode(OpcUa_EndpointUrlListDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EndpointUrlListDataType_Decode(UA_EndpointUrlListDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EndpointUrlListDataType_Decode(OpcUa_EndpointUrlListDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EndpointUrlListDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_NetworkGroupDataType
 /*============================================================================
  * The NetworkGroupDataType structure.
  *===========================================================================*/
-typedef struct _UA_NetworkGroupDataType
+typedef struct _OpcUa_NetworkGroupDataType
 {
-    UA_String                   ServerUri;
-    int32_t                     NoOfNetworkPaths;
-    UA_EndpointUrlListDataType* NetworkPaths;
+    UA_String                      ServerUri;
+    int32_t                        NoOfNetworkPaths;
+    OpcUa_EndpointUrlListDataType* NetworkPaths;
 }
-UA_NetworkGroupDataType;
+OpcUa_NetworkGroupDataType;
 
-void UA_NetworkGroupDataType_Initialize(UA_NetworkGroupDataType* pValue);
+void OpcUa_NetworkGroupDataType_Initialize(OpcUa_NetworkGroupDataType* pValue);
 
-void UA_NetworkGroupDataType_Clear(UA_NetworkGroupDataType* pValue);
+void OpcUa_NetworkGroupDataType_Clear(OpcUa_NetworkGroupDataType* pValue);
 
-//StatusCode UA_NetworkGroupDataType_GetSize(UA_NetworkGroupDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_NetworkGroupDataType_GetSize(OpcUa_NetworkGroupDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_NetworkGroupDataType_Encode(UA_NetworkGroupDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NetworkGroupDataType_Encode(OpcUa_NetworkGroupDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_NetworkGroupDataType_Decode(UA_NetworkGroupDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_NetworkGroupDataType_Decode(OpcUa_NetworkGroupDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_NetworkGroupDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SamplingIntervalDiagnosticsDataType
 /*============================================================================
  * The SamplingIntervalDiagnosticsDataType structure.
  *===========================================================================*/
-typedef struct _UA_SamplingIntervalDiagnosticsDataType
+typedef struct _OpcUa_SamplingIntervalDiagnosticsDataType
 {
     double   SamplingInterval;
     uint32_t MonitoredItemCount;
     uint32_t MaxMonitoredItemCount;
     uint32_t DisabledMonitoredItemCount;
 }
-UA_SamplingIntervalDiagnosticsDataType;
+OpcUa_SamplingIntervalDiagnosticsDataType;
 
-void UA_SamplingIntervalDiagnosticsDataType_Initialize(UA_SamplingIntervalDiagnosticsDataType* pValue);
+void OpcUa_SamplingIntervalDiagnosticsDataType_Initialize(OpcUa_SamplingIntervalDiagnosticsDataType* pValue);
 
-void UA_SamplingIntervalDiagnosticsDataType_Clear(UA_SamplingIntervalDiagnosticsDataType* pValue);
+void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(OpcUa_SamplingIntervalDiagnosticsDataType* pValue);
 
-//StatusCode UA_SamplingIntervalDiagnosticsDataType_GetSize(UA_SamplingIntervalDiagnosticsDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_GetSize(OpcUa_SamplingIntervalDiagnosticsDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SamplingIntervalDiagnosticsDataType_Encode(UA_SamplingIntervalDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Encode(OpcUa_SamplingIntervalDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SamplingIntervalDiagnosticsDataType_Decode(UA_SamplingIntervalDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Decode(OpcUa_SamplingIntervalDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SamplingIntervalDiagnosticsDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServerDiagnosticsSummaryDataType
 /*============================================================================
  * The ServerDiagnosticsSummaryDataType structure.
  *===========================================================================*/
-typedef struct _UA_ServerDiagnosticsSummaryDataType
+typedef struct _OpcUa_ServerDiagnosticsSummaryDataType
 {
     uint32_t ServerViewCount;
     uint32_t CurrentSessionCount;
@@ -5906,200 +5906,200 @@ typedef struct _UA_ServerDiagnosticsSummaryDataType
     uint32_t SecurityRejectedRequestsCount;
     uint32_t RejectedRequestsCount;
 }
-UA_ServerDiagnosticsSummaryDataType;
+OpcUa_ServerDiagnosticsSummaryDataType;
 
-void UA_ServerDiagnosticsSummaryDataType_Initialize(UA_ServerDiagnosticsSummaryDataType* pValue);
+void OpcUa_ServerDiagnosticsSummaryDataType_Initialize(OpcUa_ServerDiagnosticsSummaryDataType* pValue);
 
-void UA_ServerDiagnosticsSummaryDataType_Clear(UA_ServerDiagnosticsSummaryDataType* pValue);
+void OpcUa_ServerDiagnosticsSummaryDataType_Clear(OpcUa_ServerDiagnosticsSummaryDataType* pValue);
 
-//StatusCode UA_ServerDiagnosticsSummaryDataType_GetSize(UA_ServerDiagnosticsSummaryDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ServerDiagnosticsSummaryDataType_GetSize(OpcUa_ServerDiagnosticsSummaryDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ServerDiagnosticsSummaryDataType_Encode(UA_ServerDiagnosticsSummaryDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Encode(OpcUa_ServerDiagnosticsSummaryDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ServerDiagnosticsSummaryDataType_Decode(UA_ServerDiagnosticsSummaryDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Decode(OpcUa_ServerDiagnosticsSummaryDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ServerDiagnosticsSummaryDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServerStatusDataType
 /*============================================================================
  * The ServerStatusDataType structure.
  *===========================================================================*/
-typedef struct _UA_ServerStatusDataType
+typedef struct _OpcUa_ServerStatusDataType
 {
-    UA_DateTime      StartTime;
-    UA_DateTime      CurrentTime;
-    UA_ServerState   State;
-    UA_BuildInfo     BuildInfo;
-    uint32_t         SecondsTillShutdown;
-    UA_LocalizedText ShutdownReason;
+    UA_DateTime       StartTime;
+    UA_DateTime       CurrentTime;
+    OpcUa_ServerState State;
+    OpcUa_BuildInfo   BuildInfo;
+    uint32_t          SecondsTillShutdown;
+    UA_LocalizedText  ShutdownReason;
 }
-UA_ServerStatusDataType;
+OpcUa_ServerStatusDataType;
 
-void UA_ServerStatusDataType_Initialize(UA_ServerStatusDataType* pValue);
+void OpcUa_ServerStatusDataType_Initialize(OpcUa_ServerStatusDataType* pValue);
 
-void UA_ServerStatusDataType_Clear(UA_ServerStatusDataType* pValue);
+void OpcUa_ServerStatusDataType_Clear(OpcUa_ServerStatusDataType* pValue);
 
-//StatusCode UA_ServerStatusDataType_GetSize(UA_ServerStatusDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ServerStatusDataType_GetSize(OpcUa_ServerStatusDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ServerStatusDataType_Encode(UA_ServerStatusDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServerStatusDataType_Encode(OpcUa_ServerStatusDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ServerStatusDataType_Decode(UA_ServerStatusDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServerStatusDataType_Decode(OpcUa_ServerStatusDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ServerStatusDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ServerStatusDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ServiceCounterDataType
 /*============================================================================
  * The ServiceCounterDataType structure.
  *===========================================================================*/
-typedef struct _UA_ServiceCounterDataType
+typedef struct _OpcUa_ServiceCounterDataType
 {
     uint32_t TotalCount;
     uint32_t ErrorCount;
 }
-UA_ServiceCounterDataType;
+OpcUa_ServiceCounterDataType;
 
-void UA_ServiceCounterDataType_Initialize(UA_ServiceCounterDataType* pValue);
+void OpcUa_ServiceCounterDataType_Initialize(OpcUa_ServiceCounterDataType* pValue);
 
-void UA_ServiceCounterDataType_Clear(UA_ServiceCounterDataType* pValue);
+void OpcUa_ServiceCounterDataType_Clear(OpcUa_ServiceCounterDataType* pValue);
 
-//StatusCode UA_ServiceCounterDataType_GetSize(UA_ServiceCounterDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ServiceCounterDataType_GetSize(OpcUa_ServiceCounterDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ServiceCounterDataType_Encode(UA_ServiceCounterDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServiceCounterDataType_Encode(OpcUa_ServiceCounterDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ServiceCounterDataType_Decode(UA_ServiceCounterDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ServiceCounterDataType_Decode(OpcUa_ServiceCounterDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ServiceCounterDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SessionDiagnosticsDataType
 /*============================================================================
  * The SessionDiagnosticsDataType structure.
  *===========================================================================*/
-typedef struct _UA_SessionDiagnosticsDataType
+typedef struct _OpcUa_SessionDiagnosticsDataType
 {
-    UA_NodeId                 SessionId;
-    UA_String                 SessionName;
-    UA_ApplicationDescription ClientDescription;
-    UA_String                 ServerUri;
-    UA_String                 EndpointUrl;
-    int32_t                   NoOfLocaleIds;
-    UA_String*                LocaleIds;
-    double                    ActualSessionTimeout;
-    uint32_t                  MaxResponseMessageSize;
-    UA_DateTime               ClientConnectionTime;
-    UA_DateTime               ClientLastContactTime;
-    uint32_t                  CurrentSubscriptionsCount;
-    uint32_t                  CurrentMonitoredItemsCount;
-    uint32_t                  CurrentPublishRequestsInQueue;
-    UA_ServiceCounterDataType TotalRequestCount;
-    uint32_t                  UnauthorizedRequestCount;
-    UA_ServiceCounterDataType ReadCount;
-    UA_ServiceCounterDataType HistoryReadCount;
-    UA_ServiceCounterDataType WriteCount;
-    UA_ServiceCounterDataType HistoryUpdateCount;
-    UA_ServiceCounterDataType CallCount;
-    UA_ServiceCounterDataType CreateMonitoredItemsCount;
-    UA_ServiceCounterDataType ModifyMonitoredItemsCount;
-    UA_ServiceCounterDataType SetMonitoringModeCount;
-    UA_ServiceCounterDataType SetTriggeringCount;
-    UA_ServiceCounterDataType DeleteMonitoredItemsCount;
-    UA_ServiceCounterDataType CreateSubscriptionCount;
-    UA_ServiceCounterDataType ModifySubscriptionCount;
-    UA_ServiceCounterDataType SetPublishingModeCount;
-    UA_ServiceCounterDataType PublishCount;
-    UA_ServiceCounterDataType RepublishCount;
-    UA_ServiceCounterDataType TransferSubscriptionsCount;
-    UA_ServiceCounterDataType DeleteSubscriptionsCount;
-    UA_ServiceCounterDataType AddNodesCount;
-    UA_ServiceCounterDataType AddReferencesCount;
-    UA_ServiceCounterDataType DeleteNodesCount;
-    UA_ServiceCounterDataType DeleteReferencesCount;
-    UA_ServiceCounterDataType BrowseCount;
-    UA_ServiceCounterDataType BrowseNextCount;
-    UA_ServiceCounterDataType TranslateBrowsePathsToNodeIdsCount;
-    UA_ServiceCounterDataType QueryFirstCount;
-    UA_ServiceCounterDataType QueryNextCount;
-    UA_ServiceCounterDataType RegisterNodesCount;
-    UA_ServiceCounterDataType UnregisterNodesCount;
+    UA_NodeId                    SessionId;
+    UA_String                    SessionName;
+    OpcUa_ApplicationDescription ClientDescription;
+    UA_String                    ServerUri;
+    UA_String                    EndpointUrl;
+    int32_t                      NoOfLocaleIds;
+    UA_String*                   LocaleIds;
+    double                       ActualSessionTimeout;
+    uint32_t                     MaxResponseMessageSize;
+    UA_DateTime                  ClientConnectionTime;
+    UA_DateTime                  ClientLastContactTime;
+    uint32_t                     CurrentSubscriptionsCount;
+    uint32_t                     CurrentMonitoredItemsCount;
+    uint32_t                     CurrentPublishRequestsInQueue;
+    OpcUa_ServiceCounterDataType TotalRequestCount;
+    uint32_t                     UnauthorizedRequestCount;
+    OpcUa_ServiceCounterDataType ReadCount;
+    OpcUa_ServiceCounterDataType HistoryReadCount;
+    OpcUa_ServiceCounterDataType WriteCount;
+    OpcUa_ServiceCounterDataType HistoryUpdateCount;
+    OpcUa_ServiceCounterDataType CallCount;
+    OpcUa_ServiceCounterDataType CreateMonitoredItemsCount;
+    OpcUa_ServiceCounterDataType ModifyMonitoredItemsCount;
+    OpcUa_ServiceCounterDataType SetMonitoringModeCount;
+    OpcUa_ServiceCounterDataType SetTriggeringCount;
+    OpcUa_ServiceCounterDataType DeleteMonitoredItemsCount;
+    OpcUa_ServiceCounterDataType CreateSubscriptionCount;
+    OpcUa_ServiceCounterDataType ModifySubscriptionCount;
+    OpcUa_ServiceCounterDataType SetPublishingModeCount;
+    OpcUa_ServiceCounterDataType PublishCount;
+    OpcUa_ServiceCounterDataType RepublishCount;
+    OpcUa_ServiceCounterDataType TransferSubscriptionsCount;
+    OpcUa_ServiceCounterDataType DeleteSubscriptionsCount;
+    OpcUa_ServiceCounterDataType AddNodesCount;
+    OpcUa_ServiceCounterDataType AddReferencesCount;
+    OpcUa_ServiceCounterDataType DeleteNodesCount;
+    OpcUa_ServiceCounterDataType DeleteReferencesCount;
+    OpcUa_ServiceCounterDataType BrowseCount;
+    OpcUa_ServiceCounterDataType BrowseNextCount;
+    OpcUa_ServiceCounterDataType TranslateBrowsePathsToNodeIdsCount;
+    OpcUa_ServiceCounterDataType QueryFirstCount;
+    OpcUa_ServiceCounterDataType QueryNextCount;
+    OpcUa_ServiceCounterDataType RegisterNodesCount;
+    OpcUa_ServiceCounterDataType UnregisterNodesCount;
 }
-UA_SessionDiagnosticsDataType;
+OpcUa_SessionDiagnosticsDataType;
 
-void UA_SessionDiagnosticsDataType_Initialize(UA_SessionDiagnosticsDataType* pValue);
+void OpcUa_SessionDiagnosticsDataType_Initialize(OpcUa_SessionDiagnosticsDataType* pValue);
 
-void UA_SessionDiagnosticsDataType_Clear(UA_SessionDiagnosticsDataType* pValue);
+void OpcUa_SessionDiagnosticsDataType_Clear(OpcUa_SessionDiagnosticsDataType* pValue);
 
-//StatusCode UA_SessionDiagnosticsDataType_GetSize(UA_SessionDiagnosticsDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SessionDiagnosticsDataType_GetSize(OpcUa_SessionDiagnosticsDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SessionDiagnosticsDataType_Encode(UA_SessionDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SessionDiagnosticsDataType_Encode(OpcUa_SessionDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SessionDiagnosticsDataType_Decode(UA_SessionDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SessionDiagnosticsDataType_Decode(OpcUa_SessionDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SessionDiagnosticsDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SessionSecurityDiagnosticsDataType
 /*============================================================================
  * The SessionSecurityDiagnosticsDataType structure.
  *===========================================================================*/
-typedef struct _UA_SessionSecurityDiagnosticsDataType
+typedef struct _OpcUa_SessionSecurityDiagnosticsDataType
 {
-    UA_NodeId              SessionId;
-    UA_String              ClientUserIdOfSession;
-    int32_t                NoOfClientUserIdHistory;
-    UA_String*             ClientUserIdHistory;
-    UA_String              AuthenticationMechanism;
-    UA_String              Encoding;
-    UA_String              TransportProtocol;
-    UA_MessageSecurityMode SecurityMode;
-    UA_String              SecurityPolicyUri;
-    UA_ByteString          ClientCertificate;
+    UA_NodeId                 SessionId;
+    UA_String                 ClientUserIdOfSession;
+    int32_t                   NoOfClientUserIdHistory;
+    UA_String*                ClientUserIdHistory;
+    UA_String                 AuthenticationMechanism;
+    UA_String                 Encoding;
+    UA_String                 TransportProtocol;
+    OpcUa_MessageSecurityMode SecurityMode;
+    UA_String                 SecurityPolicyUri;
+    UA_ByteString             ClientCertificate;
 }
-UA_SessionSecurityDiagnosticsDataType;
+OpcUa_SessionSecurityDiagnosticsDataType;
 
-void UA_SessionSecurityDiagnosticsDataType_Initialize(UA_SessionSecurityDiagnosticsDataType* pValue);
+void OpcUa_SessionSecurityDiagnosticsDataType_Initialize(OpcUa_SessionSecurityDiagnosticsDataType* pValue);
 
-void UA_SessionSecurityDiagnosticsDataType_Clear(UA_SessionSecurityDiagnosticsDataType* pValue);
+void OpcUa_SessionSecurityDiagnosticsDataType_Clear(OpcUa_SessionSecurityDiagnosticsDataType* pValue);
 
-//StatusCode UA_SessionSecurityDiagnosticsDataType_GetSize(UA_SessionSecurityDiagnosticsDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SessionSecurityDiagnosticsDataType_GetSize(OpcUa_SessionSecurityDiagnosticsDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SessionSecurityDiagnosticsDataType_Encode(UA_SessionSecurityDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Encode(OpcUa_SessionSecurityDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SessionSecurityDiagnosticsDataType_Decode(UA_SessionSecurityDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Decode(OpcUa_SessionSecurityDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SessionSecurityDiagnosticsDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_StatusResult
 /*============================================================================
  * The StatusResult structure.
  *===========================================================================*/
-typedef struct _UA_StatusResult
+typedef struct _OpcUa_StatusResult
 {
     StatusCode        StatusCode;
     UA_DiagnosticInfo DiagnosticInfo;
 }
-UA_StatusResult;
+OpcUa_StatusResult;
 
-void UA_StatusResult_Initialize(UA_StatusResult* pValue);
+void OpcUa_StatusResult_Initialize(OpcUa_StatusResult* pValue);
 
-void UA_StatusResult_Clear(UA_StatusResult* pValue);
+void OpcUa_StatusResult_Clear(OpcUa_StatusResult* pValue);
 
-//StatusCode UA_StatusResult_GetSize(UA_StatusResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_StatusResult_GetSize(OpcUa_StatusResult* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_StatusResult_Encode(UA_StatusResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_StatusResult_Encode(OpcUa_StatusResult* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_StatusResult_Decode(UA_StatusResult* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_StatusResult_Decode(OpcUa_StatusResult* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_StatusResult_EncodeableType;
+extern struct UA_EncodeableType OpcUa_StatusResult_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SubscriptionDiagnosticsDataType
 /*============================================================================
  * The SubscriptionDiagnosticsDataType structure.
  *===========================================================================*/
-typedef struct _UA_SubscriptionDiagnosticsDataType
+typedef struct _OpcUa_SubscriptionDiagnosticsDataType
 {
     UA_NodeId  SessionId;
     uint32_t   SubscriptionId;
@@ -6133,37 +6133,37 @@ typedef struct _UA_SubscriptionDiagnosticsDataType
     uint32_t   NextSequenceNumber;
     uint32_t   EventQueueOverFlowCount;
 }
-UA_SubscriptionDiagnosticsDataType;
+OpcUa_SubscriptionDiagnosticsDataType;
 
-void UA_SubscriptionDiagnosticsDataType_Initialize(UA_SubscriptionDiagnosticsDataType* pValue);
+void OpcUa_SubscriptionDiagnosticsDataType_Initialize(OpcUa_SubscriptionDiagnosticsDataType* pValue);
 
-void UA_SubscriptionDiagnosticsDataType_Clear(UA_SubscriptionDiagnosticsDataType* pValue);
+void OpcUa_SubscriptionDiagnosticsDataType_Clear(OpcUa_SubscriptionDiagnosticsDataType* pValue);
 
-//StatusCode UA_SubscriptionDiagnosticsDataType_GetSize(UA_SubscriptionDiagnosticsDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SubscriptionDiagnosticsDataType_GetSize(OpcUa_SubscriptionDiagnosticsDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SubscriptionDiagnosticsDataType_Encode(UA_SubscriptionDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SubscriptionDiagnosticsDataType_Encode(OpcUa_SubscriptionDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SubscriptionDiagnosticsDataType_Decode(UA_SubscriptionDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SubscriptionDiagnosticsDataType_Decode(OpcUa_SubscriptionDiagnosticsDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SubscriptionDiagnosticsDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModelChangeStructureVerbMask
 /*============================================================================
  * The ModelChangeStructureVerbMask enumeration.
  *===========================================================================*/
-typedef enum _UA_ModelChangeStructureVerbMask
+typedef enum _OpcUa_ModelChangeStructureVerbMask
 {
-    UA_ModelChangeStructureVerbMask_NodeAdded        = 1,
-    UA_ModelChangeStructureVerbMask_NodeDeleted      = 2,
-    UA_ModelChangeStructureVerbMask_ReferenceAdded   = 4,
-    UA_ModelChangeStructureVerbMask_ReferenceDeleted = 8,
-    UA_ModelChangeStructureVerbMask_DataTypeChanged  = 16
+    OpcUa_ModelChangeStructureVerbMask_NodeAdded        = 1,
+    OpcUa_ModelChangeStructureVerbMask_NodeDeleted      = 2,
+    OpcUa_ModelChangeStructureVerbMask_ReferenceAdded   = 4,
+    OpcUa_ModelChangeStructureVerbMask_ReferenceDeleted = 8,
+    OpcUa_ModelChangeStructureVerbMask_DataTypeChanged  = 16
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_ModelChangeStructureVerbMask_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_ModelChangeStructureVerbMask_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_ModelChangeStructureVerbMask;
+OpcUa_ModelChangeStructureVerbMask;
 
 #endif
 
@@ -6171,115 +6171,115 @@ UA_ModelChangeStructureVerbMask;
 /*============================================================================
  * The ModelChangeStructureDataType structure.
  *===========================================================================*/
-typedef struct _UA_ModelChangeStructureDataType
+typedef struct _OpcUa_ModelChangeStructureDataType
 {
     UA_NodeId Affected;
     UA_NodeId AffectedType;
     UA_Byte   Verb;
 }
-UA_ModelChangeStructureDataType;
+OpcUa_ModelChangeStructureDataType;
 
-void UA_ModelChangeStructureDataType_Initialize(UA_ModelChangeStructureDataType* pValue);
+void OpcUa_ModelChangeStructureDataType_Initialize(OpcUa_ModelChangeStructureDataType* pValue);
 
-void UA_ModelChangeStructureDataType_Clear(UA_ModelChangeStructureDataType* pValue);
+void OpcUa_ModelChangeStructureDataType_Clear(OpcUa_ModelChangeStructureDataType* pValue);
 
-//StatusCode UA_ModelChangeStructureDataType_GetSize(UA_ModelChangeStructureDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ModelChangeStructureDataType_GetSize(OpcUa_ModelChangeStructureDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ModelChangeStructureDataType_Encode(UA_ModelChangeStructureDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModelChangeStructureDataType_Encode(OpcUa_ModelChangeStructureDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ModelChangeStructureDataType_Decode(UA_ModelChangeStructureDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ModelChangeStructureDataType_Decode(OpcUa_ModelChangeStructureDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ModelChangeStructureDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_SemanticChangeStructureDataType
 /*============================================================================
  * The SemanticChangeStructureDataType structure.
  *===========================================================================*/
-typedef struct _UA_SemanticChangeStructureDataType
+typedef struct _OpcUa_SemanticChangeStructureDataType
 {
     UA_NodeId Affected;
     UA_NodeId AffectedType;
 }
-UA_SemanticChangeStructureDataType;
+OpcUa_SemanticChangeStructureDataType;
 
-void UA_SemanticChangeStructureDataType_Initialize(UA_SemanticChangeStructureDataType* pValue);
+void OpcUa_SemanticChangeStructureDataType_Initialize(OpcUa_SemanticChangeStructureDataType* pValue);
 
-void UA_SemanticChangeStructureDataType_Clear(UA_SemanticChangeStructureDataType* pValue);
+void OpcUa_SemanticChangeStructureDataType_Clear(OpcUa_SemanticChangeStructureDataType* pValue);
 
-//StatusCode UA_SemanticChangeStructureDataType_GetSize(UA_SemanticChangeStructureDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_SemanticChangeStructureDataType_GetSize(OpcUa_SemanticChangeStructureDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_SemanticChangeStructureDataType_Encode(UA_SemanticChangeStructureDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SemanticChangeStructureDataType_Encode(OpcUa_SemanticChangeStructureDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_SemanticChangeStructureDataType_Decode(UA_SemanticChangeStructureDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_SemanticChangeStructureDataType_Decode(OpcUa_SemanticChangeStructureDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_SemanticChangeStructureDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_Range
 /*============================================================================
  * The Range structure.
  *===========================================================================*/
-typedef struct _UA_Range
+typedef struct _OpcUa_Range
 {
     double Low;
     double High;
 }
-UA_Range;
+OpcUa_Range;
 
-void UA_Range_Initialize(UA_Range* pValue);
+void OpcUa_Range_Initialize(OpcUa_Range* pValue);
 
-void UA_Range_Clear(UA_Range* pValue);
+void OpcUa_Range_Clear(OpcUa_Range* pValue);
 
-//StatusCode UA_Range_GetSize(UA_Range* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_Range_GetSize(OpcUa_Range* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_Range_Encode(UA_Range* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_Range_Encode(OpcUa_Range* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_Range_Decode(UA_Range* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_Range_Decode(OpcUa_Range* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_Range_EncodeableType;
+extern struct UA_EncodeableType OpcUa_Range_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_EUInformation
 /*============================================================================
  * The EUInformation structure.
  *===========================================================================*/
-typedef struct _UA_EUInformation
+typedef struct _OpcUa_EUInformation
 {
     UA_String        NamespaceUri;
     int32_t          UnitId;
     UA_LocalizedText DisplayName;
     UA_LocalizedText Description;
 }
-UA_EUInformation;
+OpcUa_EUInformation;
 
-void UA_EUInformation_Initialize(UA_EUInformation* pValue);
+void OpcUa_EUInformation_Initialize(OpcUa_EUInformation* pValue);
 
-void UA_EUInformation_Clear(UA_EUInformation* pValue);
+void OpcUa_EUInformation_Clear(OpcUa_EUInformation* pValue);
 
-//StatusCode UA_EUInformation_GetSize(UA_EUInformation* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_EUInformation_GetSize(OpcUa_EUInformation* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_EUInformation_Encode(UA_EUInformation* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EUInformation_Encode(OpcUa_EUInformation* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_EUInformation_Decode(UA_EUInformation* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_EUInformation_Decode(OpcUa_EUInformation* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_EUInformation_EncodeableType;
+extern struct UA_EncodeableType OpcUa_EUInformation_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AxisScaleEnumeration
 /*============================================================================
  * The AxisScaleEnumeration enumeration.
  *===========================================================================*/
-typedef enum _UA_AxisScaleEnumeration
+typedef enum _OpcUa_AxisScaleEnumeration
 {
-    UA_AxisScaleEnumeration_Linear = 0,
-    UA_AxisScaleEnumeration_Log    = 1,
-    UA_AxisScaleEnumeration_Ln     = 2
+    OpcUa_AxisScaleEnumeration_Linear = 0,
+    OpcUa_AxisScaleEnumeration_Log    = 1,
+    OpcUa_AxisScaleEnumeration_Ln     = 2
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_AxisScaleEnumeration_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_AxisScaleEnumeration_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_AxisScaleEnumeration;
+OpcUa_AxisScaleEnumeration;
 
 #endif
 
@@ -6287,177 +6287,177 @@ UA_AxisScaleEnumeration;
 /*============================================================================
  * The ComplexNumberType structure.
  *===========================================================================*/
-typedef struct _UA_ComplexNumberType
+typedef struct _OpcUa_ComplexNumberType
 {
     float Real;
     float Imaginary;
 }
-UA_ComplexNumberType;
+OpcUa_ComplexNumberType;
 
-void UA_ComplexNumberType_Initialize(UA_ComplexNumberType* pValue);
+void OpcUa_ComplexNumberType_Initialize(OpcUa_ComplexNumberType* pValue);
 
-void UA_ComplexNumberType_Clear(UA_ComplexNumberType* pValue);
+void OpcUa_ComplexNumberType_Clear(OpcUa_ComplexNumberType* pValue);
 
-//StatusCode UA_ComplexNumberType_GetSize(UA_ComplexNumberType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ComplexNumberType_GetSize(OpcUa_ComplexNumberType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ComplexNumberType_Encode(UA_ComplexNumberType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ComplexNumberType_Encode(OpcUa_ComplexNumberType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ComplexNumberType_Decode(UA_ComplexNumberType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ComplexNumberType_Decode(OpcUa_ComplexNumberType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ComplexNumberType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ComplexNumberType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_DoubleComplexNumberType
 /*============================================================================
  * The DoubleComplexNumberType structure.
  *===========================================================================*/
-typedef struct _UA_DoubleComplexNumberType
+typedef struct _OpcUa_DoubleComplexNumberType
 {
     double Real;
     double Imaginary;
 }
-UA_DoubleComplexNumberType;
+OpcUa_DoubleComplexNumberType;
 
-void UA_DoubleComplexNumberType_Initialize(UA_DoubleComplexNumberType* pValue);
+void OpcUa_DoubleComplexNumberType_Initialize(OpcUa_DoubleComplexNumberType* pValue);
 
-void UA_DoubleComplexNumberType_Clear(UA_DoubleComplexNumberType* pValue);
+void OpcUa_DoubleComplexNumberType_Clear(OpcUa_DoubleComplexNumberType* pValue);
 
-//StatusCode UA_DoubleComplexNumberType_GetSize(UA_DoubleComplexNumberType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_DoubleComplexNumberType_GetSize(OpcUa_DoubleComplexNumberType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_DoubleComplexNumberType_Encode(UA_DoubleComplexNumberType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DoubleComplexNumberType_Encode(OpcUa_DoubleComplexNumberType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_DoubleComplexNumberType_Decode(UA_DoubleComplexNumberType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_DoubleComplexNumberType_Decode(OpcUa_DoubleComplexNumberType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_DoubleComplexNumberType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_AxisInformation
 /*============================================================================
  * The AxisInformation structure.
  *===========================================================================*/
-typedef struct _UA_AxisInformation
+typedef struct _OpcUa_AxisInformation
 {
-    UA_EUInformation        EngineeringUnits;
-    UA_Range                EURange;
-    UA_LocalizedText        Title;
-    UA_AxisScaleEnumeration AxisScaleType;
-    int32_t                 NoOfAxisSteps;
-    double*                 AxisSteps;
+    OpcUa_EUInformation        EngineeringUnits;
+    OpcUa_Range                EURange;
+    UA_LocalizedText           Title;
+    OpcUa_AxisScaleEnumeration AxisScaleType;
+    int32_t                    NoOfAxisSteps;
+    double*                    AxisSteps;
 }
-UA_AxisInformation;
+OpcUa_AxisInformation;
 
-void UA_AxisInformation_Initialize(UA_AxisInformation* pValue);
+void OpcUa_AxisInformation_Initialize(OpcUa_AxisInformation* pValue);
 
-void UA_AxisInformation_Clear(UA_AxisInformation* pValue);
+void OpcUa_AxisInformation_Clear(OpcUa_AxisInformation* pValue);
 
-//StatusCode UA_AxisInformation_GetSize(UA_AxisInformation* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_AxisInformation_GetSize(OpcUa_AxisInformation* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_AxisInformation_Encode(UA_AxisInformation* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AxisInformation_Encode(OpcUa_AxisInformation* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_AxisInformation_Decode(UA_AxisInformation* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_AxisInformation_Decode(OpcUa_AxisInformation* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_AxisInformation_EncodeableType;
+extern struct UA_EncodeableType OpcUa_AxisInformation_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_XVType
 /*============================================================================
  * The XVType structure.
  *===========================================================================*/
-typedef struct _UA_XVType
+typedef struct _OpcUa_XVType
 {
     double X;
     float  Value;
 }
-UA_XVType;
+OpcUa_XVType;
 
-void UA_XVType_Initialize(UA_XVType* pValue);
+void OpcUa_XVType_Initialize(OpcUa_XVType* pValue);
 
-void UA_XVType_Clear(UA_XVType* pValue);
+void OpcUa_XVType_Clear(OpcUa_XVType* pValue);
 
-//StatusCode UA_XVType_GetSize(UA_XVType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_XVType_GetSize(OpcUa_XVType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_XVType_Encode(UA_XVType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_XVType_Encode(OpcUa_XVType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_XVType_Decode(UA_XVType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_XVType_Decode(OpcUa_XVType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_XVType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_XVType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ProgramDiagnosticDataType
 /*============================================================================
  * The ProgramDiagnosticDataType structure.
  *===========================================================================*/
-typedef struct _UA_ProgramDiagnosticDataType
+typedef struct _OpcUa_ProgramDiagnosticDataType
 {
-    UA_NodeId       CreateSessionId;
-    UA_String       CreateClientName;
-    UA_DateTime     InvocationCreationTime;
-    UA_DateTime     LastTransitionTime;
-    UA_String       LastMethodCall;
-    UA_NodeId       LastMethodSessionId;
-    int32_t         NoOfLastMethodInputArguments;
-    UA_Argument*    LastMethodInputArguments;
-    int32_t         NoOfLastMethodOutputArguments;
-    UA_Argument*    LastMethodOutputArguments;
-    UA_DateTime     LastMethodCallTime;
-    UA_StatusResult LastMethodReturnStatus;
+    UA_NodeId          CreateSessionId;
+    UA_String          CreateClientName;
+    UA_DateTime        InvocationCreationTime;
+    UA_DateTime        LastTransitionTime;
+    UA_String          LastMethodCall;
+    UA_NodeId          LastMethodSessionId;
+    int32_t            NoOfLastMethodInputArguments;
+    OpcUa_Argument*    LastMethodInputArguments;
+    int32_t            NoOfLastMethodOutputArguments;
+    OpcUa_Argument*    LastMethodOutputArguments;
+    UA_DateTime        LastMethodCallTime;
+    OpcUa_StatusResult LastMethodReturnStatus;
 }
-UA_ProgramDiagnosticDataType;
+OpcUa_ProgramDiagnosticDataType;
 
-void UA_ProgramDiagnosticDataType_Initialize(UA_ProgramDiagnosticDataType* pValue);
+void OpcUa_ProgramDiagnosticDataType_Initialize(OpcUa_ProgramDiagnosticDataType* pValue);
 
-void UA_ProgramDiagnosticDataType_Clear(UA_ProgramDiagnosticDataType* pValue);
+void OpcUa_ProgramDiagnosticDataType_Clear(OpcUa_ProgramDiagnosticDataType* pValue);
 
-//StatusCode UA_ProgramDiagnosticDataType_GetSize(UA_ProgramDiagnosticDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_ProgramDiagnosticDataType_GetSize(OpcUa_ProgramDiagnosticDataType* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_ProgramDiagnosticDataType_Encode(UA_ProgramDiagnosticDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ProgramDiagnosticDataType_Encode(OpcUa_ProgramDiagnosticDataType* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_ProgramDiagnosticDataType_Decode(UA_ProgramDiagnosticDataType* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_ProgramDiagnosticDataType_Decode(OpcUa_ProgramDiagnosticDataType* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_ProgramDiagnosticDataType_EncodeableType;
+extern struct UA_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_Annotation
 /*============================================================================
  * The Annotation structure.
  *===========================================================================*/
-typedef struct _UA_Annotation
+typedef struct _OpcUa_Annotation
 {
     UA_String   Message;
     UA_String   UserName;
     UA_DateTime AnnotationTime;
 }
-UA_Annotation;
+OpcUa_Annotation;
 
-void UA_Annotation_Initialize(UA_Annotation* pValue);
+void OpcUa_Annotation_Initialize(OpcUa_Annotation* pValue);
 
-void UA_Annotation_Clear(UA_Annotation* pValue);
+void OpcUa_Annotation_Clear(OpcUa_Annotation* pValue);
 
-//StatusCode UA_Annotation_GetSize(UA_Annotation* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
+//StatusCode OpcUa_Annotation_GetSize(OpcUa_Annotation* pValue, struct _OpcUa_Encoder* pEncoder, OpcUa_Int32* pSize);
 
-StatusCode UA_Annotation_Encode(UA_Annotation* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_Annotation_Encode(OpcUa_Annotation* pValue, UA_MsgBuffer* msgBuf);
 
-StatusCode UA_Annotation_Decode(UA_Annotation* pValue, UA_MsgBuffer* msgBuf);
+StatusCode OpcUa_Annotation_Decode(OpcUa_Annotation* pValue, UA_MsgBuffer* msgBuf);
 
-extern struct UA_EncodeableType UA_Annotation_EncodeableType;
+extern struct UA_EncodeableType OpcUa_Annotation_EncodeableType;
 #endif
 
 #ifndef OPCUA_EXCLUDE_ExceptionDeviationFormat
 /*============================================================================
  * The ExceptionDeviationFormat enumeration.
  *===========================================================================*/
-typedef enum _UA_ExceptionDeviationFormat
+typedef enum _OpcUa_ExceptionDeviationFormat
 {
-    UA_ExceptionDeviationFormat_AbsoluteValue    = 0,
-    UA_ExceptionDeviationFormat_PercentOfValue   = 1,
-    UA_ExceptionDeviationFormat_PercentOfRange   = 2,
-    UA_ExceptionDeviationFormat_PercentOfEURange = 3,
-    UA_ExceptionDeviationFormat_Unknown          = 4
+    OpcUa_ExceptionDeviationFormat_AbsoluteValue    = 0,
+    OpcUa_ExceptionDeviationFormat_PercentOfValue   = 1,
+    OpcUa_ExceptionDeviationFormat_PercentOfRange   = 2,
+    OpcUa_ExceptionDeviationFormat_PercentOfEURange = 3,
+    OpcUa_ExceptionDeviationFormat_Unknown          = 4
 #if OPCUA_FORCE_INT32_ENUMS
-    ,_UA_ExceptionDeviationFormat_MaxEnumerationValue = OpcUa_Int32_Max
+    ,_OpcUa_ExceptionDeviationFormat_MaxEnumerationValue = OpcUa_Int32_Max
 #endif
 }
-UA_ExceptionDeviationFormat;
+OpcUa_ExceptionDeviationFormat;
 
 #endif
 
@@ -6484,7 +6484,7 @@ StatusCode UA_Write_Array(UA_MsgBuffer* msgBuf, int32_t* noOfElts, void** eltsAr
  *===========================================================================*/
 extern struct UA_EncodeableType** UA_KnownEncodeableTypes;
 
-OPCUA_END_EXTERN_C
+END_EXTERN_C
 
 #endif
 /* This is the last line of an autogenerated file. */

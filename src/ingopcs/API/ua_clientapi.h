@@ -34,30 +34,30 @@
 #include <ua_types.h>
 #include <ua_channel.h>
 
-OPCUA_BEGIN_EXTERN_C
+BEGIN_EXTERN_C
 
 #ifndef OPCUA_EXCLUDE_FindServers
 /*============================================================================
  * Synchronously calls the FindServers service.
  *===========================================================================*/
-StatusCode UA_ClientApi_FindServers(
-    UA_Channel                  hChannel,
-    const UA_RequestHeader*     pRequestHeader,
-    const UA_String*            pEndpointUrl,
-    int32_t                     nNoOfLocaleIds,
-    const UA_String*            pLocaleIds,
-    int32_t                     nNoOfServerUris,
-    const UA_String*            pServerUris,
-    UA_ResponseHeader*          pResponseHeader,
-    int32_t*                    pNoOfServers,
-    UA_ApplicationDescription** pServers);
+StatusCode OpcUa_ClientApi_FindServers(
+    UA_Channel                     hChannel,
+    const OpcUa_RequestHeader*     pRequestHeader,
+    const UA_String*               pEndpointUrl,
+    int32_t                        nNoOfLocaleIds,
+    const UA_String*               pLocaleIds,
+    int32_t                        nNoOfServerUris,
+    const UA_String*               pServerUris,
+    OpcUa_ResponseHeader*          pResponseHeader,
+    int32_t*                       pNoOfServers,
+    OpcUa_ApplicationDescription** pServers);
 
 /*============================================================================
  * Asynchronously calls the FindServers service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginFindServers(
+StatusCode OpcUa_ClientApi_BeginFindServers(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     const UA_String*               pEndpointUrl,
     int32_t                        nNoOfLocaleIds,
     const UA_String*               pLocaleIds,
@@ -71,24 +71,24 @@ StatusCode UA_ClientApi_BeginFindServers(
 /*============================================================================
  * Synchronously calls the FindServersOnNetwork service.
  *===========================================================================*/
-StatusCode UA_ClientApi_FindServersOnNetwork(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    uint32_t                nStartingRecordId,
-    uint32_t                nMaxRecordsToReturn,
-    int32_t                 nNoOfServerCapabilityFilter,
-    const UA_String*        pServerCapabilityFilter,
-    UA_ResponseHeader*      pResponseHeader,
-    UA_DateTime*            pLastCounterResetTime,
-    int32_t*                pNoOfServers,
-    UA_ServerOnNetwork**    pServers);
+StatusCode OpcUa_ClientApi_FindServersOnNetwork(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    uint32_t                   nStartingRecordId,
+    uint32_t                   nMaxRecordsToReturn,
+    int32_t                    nNoOfServerCapabilityFilter,
+    const UA_String*           pServerCapabilityFilter,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    UA_DateTime*               pLastCounterResetTime,
+    int32_t*                   pNoOfServers,
+    OpcUa_ServerOnNetwork**    pServers);
 
 /*============================================================================
  * Asynchronously calls the FindServersOnNetwork service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginFindServersOnNetwork(
+StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     uint32_t                       nStartingRecordId,
     uint32_t                       nMaxRecordsToReturn,
     int32_t                        nNoOfServerCapabilityFilter,
@@ -101,24 +101,24 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
 /*============================================================================
  * Synchronously calls the GetEndpoints service.
  *===========================================================================*/
-StatusCode UA_ClientApi_GetEndpoints(
-    UA_Channel               hChannel,
-    const UA_RequestHeader*  pRequestHeader,
-    const UA_String*         pEndpointUrl,
-    int32_t                  nNoOfLocaleIds,
-    const UA_String*         pLocaleIds,
-    int32_t                  nNoOfProfileUris,
-    const UA_String*         pProfileUris,
-    UA_ResponseHeader*       pResponseHeader,
-    int32_t*                 pNoOfEndpoints,
-    UA_EndpointDescription** pEndpoints);
+StatusCode OpcUa_ClientApi_GetEndpoints(
+    UA_Channel                  hChannel,
+    const OpcUa_RequestHeader*  pRequestHeader,
+    const UA_String*            pEndpointUrl,
+    int32_t                     nNoOfLocaleIds,
+    const UA_String*            pLocaleIds,
+    int32_t                     nNoOfProfileUris,
+    const UA_String*            pProfileUris,
+    OpcUa_ResponseHeader*       pResponseHeader,
+    int32_t*                    pNoOfEndpoints,
+    OpcUa_EndpointDescription** pEndpoints);
 
 /*============================================================================
  * Asynchronously calls the GetEndpoints service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginGetEndpoints(
+StatusCode OpcUa_ClientApi_BeginGetEndpoints(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     const UA_String*               pEndpointUrl,
     int32_t                        nNoOfLocaleIds,
     const UA_String*               pLocaleIds,
@@ -132,19 +132,19 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
 /*============================================================================
  * Synchronously calls the RegisterServer service.
  *===========================================================================*/
-StatusCode UA_ClientApi_RegisterServer(
-    UA_Channel                 hChannel,
-    const UA_RequestHeader*    pRequestHeader,
-    const UA_RegisteredServer* pServer,
-    UA_ResponseHeader*         pResponseHeader);
+StatusCode OpcUa_ClientApi_RegisterServer(
+    UA_Channel                    hChannel,
+    const OpcUa_RequestHeader*    pRequestHeader,
+    const OpcUa_RegisteredServer* pServer,
+    OpcUa_ResponseHeader*         pResponseHeader);
 
 /*============================================================================
  * Asynchronously calls the RegisterServer service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRegisterServer(
+StatusCode OpcUa_ClientApi_BeginRegisterServer(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
-    const UA_RegisteredServer*     pServer,
+    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_RegisteredServer*  pServer,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
@@ -153,25 +153,25 @@ StatusCode UA_ClientApi_BeginRegisterServer(
 /*============================================================================
  * Synchronously calls the RegisterServer2 service.
  *===========================================================================*/
-StatusCode UA_ClientApi_RegisterServer2(
-    UA_Channel                 hChannel,
-    const UA_RequestHeader*    pRequestHeader,
-    const UA_RegisteredServer* pServer,
-    int32_t                    nNoOfDiscoveryConfiguration,
-    const UA_ExtensionObject*  pDiscoveryConfiguration,
-    UA_ResponseHeader*         pResponseHeader,
-    int32_t*                   pNoOfConfigurationResults,
-    StatusCode**               pConfigurationResults,
-    int32_t*                   pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**        pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_RegisterServer2(
+    UA_Channel                    hChannel,
+    const OpcUa_RequestHeader*    pRequestHeader,
+    const OpcUa_RegisteredServer* pServer,
+    int32_t                       nNoOfDiscoveryConfiguration,
+    const UA_ExtensionObject*     pDiscoveryConfiguration,
+    OpcUa_ResponseHeader*         pResponseHeader,
+    int32_t*                      pNoOfConfigurationResults,
+    StatusCode**                  pConfigurationResults,
+    int32_t*                      pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**           pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the RegisterServer2 service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRegisterServer2(
+StatusCode OpcUa_ClientApi_BeginRegisterServer2(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
-    const UA_RegisteredServer*     pServer,
+    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_RegisteredServer*  pServer,
     int32_t                        nNoOfDiscoveryConfiguration,
     const UA_ExtensionObject*      pDiscoveryConfiguration,
     UA_Channel_PfnRequestComplete* pCallback,
@@ -182,102 +182,102 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
 /*============================================================================
  * Synchronously calls the CreateSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_CreateSession(
-    UA_Channel                       hChannel,
-    const UA_RequestHeader*          pRequestHeader,
-    const UA_ApplicationDescription* pClientDescription,
-    const UA_String*                 pServerUri,
-    const UA_String*                 pEndpointUrl,
-    const UA_String*                 pSessionName,
-    const UA_ByteString*             pClientNonce,
-    const UA_ByteString*             pClientCertificate,
-    double                           nRequestedSessionTimeout,
-    uint32_t                         nMaxResponseMessageSize,
-    UA_ResponseHeader*               pResponseHeader,
-    UA_NodeId*                       pSessionId,
-    UA_NodeId*                       pAuthenticationToken,
-    double*                          pRevisedSessionTimeout,
-    UA_ByteString*                   pServerNonce,
-    UA_ByteString*                   pServerCertificate,
-    int32_t*                         pNoOfServerEndpoints,
-    UA_EndpointDescription**         pServerEndpoints,
-    int32_t*                         pNoOfServerSoftwareCertificates,
-    UA_SignedSoftwareCertificate**   pServerSoftwareCertificates,
-    UA_SignatureData*                pServerSignature,
-    uint32_t*                        pMaxRequestMessageSize);
+StatusCode OpcUa_ClientApi_CreateSession(
+    UA_Channel                          hChannel,
+    const OpcUa_RequestHeader*          pRequestHeader,
+    const OpcUa_ApplicationDescription* pClientDescription,
+    const UA_String*                    pServerUri,
+    const UA_String*                    pEndpointUrl,
+    const UA_String*                    pSessionName,
+    const UA_ByteString*                pClientNonce,
+    const UA_ByteString*                pClientCertificate,
+    double                              nRequestedSessionTimeout,
+    uint32_t                            nMaxResponseMessageSize,
+    OpcUa_ResponseHeader*               pResponseHeader,
+    UA_NodeId*                          pSessionId,
+    UA_NodeId*                          pAuthenticationToken,
+    double*                             pRevisedSessionTimeout,
+    UA_ByteString*                      pServerNonce,
+    UA_ByteString*                      pServerCertificate,
+    int32_t*                            pNoOfServerEndpoints,
+    OpcUa_EndpointDescription**         pServerEndpoints,
+    int32_t*                            pNoOfServerSoftwareCertificates,
+    OpcUa_SignedSoftwareCertificate**   pServerSoftwareCertificates,
+    OpcUa_SignatureData*                pServerSignature,
+    uint32_t*                           pMaxRequestMessageSize);
 
 /*============================================================================
  * Asynchronously calls the CreateSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCreateSession(
-    UA_Channel                       hChannel,
-    const UA_RequestHeader*          pRequestHeader,
-    const UA_ApplicationDescription* pClientDescription,
-    const UA_String*                 pServerUri,
-    const UA_String*                 pEndpointUrl,
-    const UA_String*                 pSessionName,
-    const UA_ByteString*             pClientNonce,
-    const UA_ByteString*             pClientCertificate,
-    double                           nRequestedSessionTimeout,
-    uint32_t                         nMaxResponseMessageSize,
-    UA_Channel_PfnRequestComplete*   pCallback,
-    void*                            pCallbackData);
+StatusCode OpcUa_ClientApi_BeginCreateSession(
+    UA_Channel                          hChannel,
+    const OpcUa_RequestHeader*          pRequestHeader,
+    const OpcUa_ApplicationDescription* pClientDescription,
+    const UA_String*                    pServerUri,
+    const UA_String*                    pEndpointUrl,
+    const UA_String*                    pSessionName,
+    const UA_ByteString*                pClientNonce,
+    const UA_ByteString*                pClientCertificate,
+    double                              nRequestedSessionTimeout,
+    uint32_t                            nMaxResponseMessageSize,
+    UA_Channel_PfnRequestComplete*      pCallback,
+    void*                               pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_ActivateSession
 /*============================================================================
  * Synchronously calls the ActivateSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_ActivateSession(
-    UA_Channel                          hChannel,
-    const UA_RequestHeader*             pRequestHeader,
-    const UA_SignatureData*             pClientSignature,
-    int32_t                             nNoOfClientSoftwareCertificates,
-    const UA_SignedSoftwareCertificate* pClientSoftwareCertificates,
-    int32_t                             nNoOfLocaleIds,
-    const UA_String*                    pLocaleIds,
-    const UA_ExtensionObject*           pUserIdentityToken,
-    const UA_SignatureData*             pUserTokenSignature,
-    UA_ResponseHeader*                  pResponseHeader,
-    UA_ByteString*                      pServerNonce,
-    int32_t*                            pNoOfResults,
-    StatusCode**                        pResults,
-    int32_t*                            pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**                 pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_ActivateSession(
+    UA_Channel                             hChannel,
+    const OpcUa_RequestHeader*             pRequestHeader,
+    const OpcUa_SignatureData*             pClientSignature,
+    int32_t                                nNoOfClientSoftwareCertificates,
+    const OpcUa_SignedSoftwareCertificate* pClientSoftwareCertificates,
+    int32_t                                nNoOfLocaleIds,
+    const UA_String*                       pLocaleIds,
+    const UA_ExtensionObject*              pUserIdentityToken,
+    const OpcUa_SignatureData*             pUserTokenSignature,
+    OpcUa_ResponseHeader*                  pResponseHeader,
+    UA_ByteString*                         pServerNonce,
+    int32_t*                               pNoOfResults,
+    StatusCode**                           pResults,
+    int32_t*                               pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**                    pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the ActivateSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginActivateSession(
-    UA_Channel                          hChannel,
-    const UA_RequestHeader*             pRequestHeader,
-    const UA_SignatureData*             pClientSignature,
-    int32_t                             nNoOfClientSoftwareCertificates,
-    const UA_SignedSoftwareCertificate* pClientSoftwareCertificates,
-    int32_t                             nNoOfLocaleIds,
-    const UA_String*                    pLocaleIds,
-    const UA_ExtensionObject*           pUserIdentityToken,
-    const UA_SignatureData*             pUserTokenSignature,
-    UA_Channel_PfnRequestComplete*      pCallback,
-    void*                               pCallbackData);
+StatusCode OpcUa_ClientApi_BeginActivateSession(
+    UA_Channel                             hChannel,
+    const OpcUa_RequestHeader*             pRequestHeader,
+    const OpcUa_SignatureData*             pClientSignature,
+    int32_t                                nNoOfClientSoftwareCertificates,
+    const OpcUa_SignedSoftwareCertificate* pClientSoftwareCertificates,
+    int32_t                                nNoOfLocaleIds,
+    const UA_String*                       pLocaleIds,
+    const UA_ExtensionObject*              pUserIdentityToken,
+    const OpcUa_SignatureData*             pUserTokenSignature,
+    UA_Channel_PfnRequestComplete*         pCallback,
+    void*                                  pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_CloseSession
 /*============================================================================
  * Synchronously calls the CloseSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_CloseSession(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    UA_Boolean              bDeleteSubscriptions,
-    UA_ResponseHeader*      pResponseHeader);
+StatusCode OpcUa_ClientApi_CloseSession(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    UA_Boolean                 bDeleteSubscriptions,
+    OpcUa_ResponseHeader*      pResponseHeader);
 
 /*============================================================================
  * Asynchronously calls the CloseSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCloseSession(
+StatusCode OpcUa_ClientApi_BeginCloseSession(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     UA_Boolean                     bDeleteSubscriptions,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
@@ -287,19 +287,19 @@ StatusCode UA_ClientApi_BeginCloseSession(
 /*============================================================================
  * Synchronously calls the Cancel service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Cancel(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    uint32_t                nRequestHandle,
-    UA_ResponseHeader*      pResponseHeader,
-    uint32_t*               pCancelCount);
+StatusCode OpcUa_ClientApi_Cancel(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    uint32_t                   nRequestHandle,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    uint32_t*                  pCancelCount);
 
 /*============================================================================
  * Asynchronously calls the Cancel service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCancel(
+StatusCode OpcUa_ClientApi_BeginCancel(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     uint32_t                       nRequestHandle,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
@@ -309,25 +309,25 @@ StatusCode UA_ClientApi_BeginCancel(
 /*============================================================================
  * Synchronously calls the AddNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_AddNodes(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    int32_t                 nNoOfNodesToAdd,
-    const UA_AddNodesItem*  pNodesToAdd,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    UA_AddNodesResult**     pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_AddNodes(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    int32_t                    nNoOfNodesToAdd,
+    const OpcUa_AddNodesItem*  pNodesToAdd,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    OpcUa_AddNodesResult**     pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the AddNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginAddNodes(
+StatusCode OpcUa_ClientApi_BeginAddNodes(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfNodesToAdd,
-    const UA_AddNodesItem*         pNodesToAdd,
+    const OpcUa_AddNodesItem*      pNodesToAdd,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
@@ -336,25 +336,25 @@ StatusCode UA_ClientApi_BeginAddNodes(
 /*============================================================================
  * Synchronously calls the AddReferences service.
  *===========================================================================*/
-StatusCode UA_ClientApi_AddReferences(
-    UA_Channel                  hChannel,
-    const UA_RequestHeader*     pRequestHeader,
-    int32_t                     nNoOfReferencesToAdd,
-    const UA_AddReferencesItem* pReferencesToAdd,
-    UA_ResponseHeader*          pResponseHeader,
-    int32_t*                    pNoOfResults,
-    StatusCode**                pResults,
-    int32_t*                    pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**         pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_AddReferences(
+    UA_Channel                     hChannel,
+    const OpcUa_RequestHeader*     pRequestHeader,
+    int32_t                        nNoOfReferencesToAdd,
+    const OpcUa_AddReferencesItem* pReferencesToAdd,
+    OpcUa_ResponseHeader*          pResponseHeader,
+    int32_t*                       pNoOfResults,
+    StatusCode**                   pResults,
+    int32_t*                       pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**            pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the AddReferences service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginAddReferences(
+StatusCode OpcUa_ClientApi_BeginAddReferences(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfReferencesToAdd,
-    const UA_AddReferencesItem*    pReferencesToAdd,
+    const OpcUa_AddReferencesItem* pReferencesToAdd,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
@@ -363,25 +363,25 @@ StatusCode UA_ClientApi_BeginAddReferences(
 /*============================================================================
  * Synchronously calls the DeleteNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_DeleteNodes(
-    UA_Channel                hChannel,
-    const UA_RequestHeader*   pRequestHeader,
-    int32_t                   nNoOfNodesToDelete,
-    const UA_DeleteNodesItem* pNodesToDelete,
-    UA_ResponseHeader*        pResponseHeader,
-    int32_t*                  pNoOfResults,
-    StatusCode**              pResults,
-    int32_t*                  pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**       pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_DeleteNodes(
+    UA_Channel                   hChannel,
+    const OpcUa_RequestHeader*   pRequestHeader,
+    int32_t                      nNoOfNodesToDelete,
+    const OpcUa_DeleteNodesItem* pNodesToDelete,
+    OpcUa_ResponseHeader*        pResponseHeader,
+    int32_t*                     pNoOfResults,
+    StatusCode**                 pResults,
+    int32_t*                     pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**          pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the DeleteNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginDeleteNodes(
+StatusCode OpcUa_ClientApi_BeginDeleteNodes(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfNodesToDelete,
-    const UA_DeleteNodesItem*      pNodesToDelete,
+    const OpcUa_DeleteNodesItem*   pNodesToDelete,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
@@ -390,56 +390,56 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
 /*============================================================================
  * Synchronously calls the DeleteReferences service.
  *===========================================================================*/
-StatusCode UA_ClientApi_DeleteReferences(
-    UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
-    int32_t                        nNoOfReferencesToDelete,
-    const UA_DeleteReferencesItem* pReferencesToDelete,
-    UA_ResponseHeader*             pResponseHeader,
-    int32_t*                       pNoOfResults,
-    StatusCode**                   pResults,
-    int32_t*                       pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**            pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_DeleteReferences(
+    UA_Channel                        hChannel,
+    const OpcUa_RequestHeader*        pRequestHeader,
+    int32_t                           nNoOfReferencesToDelete,
+    const OpcUa_DeleteReferencesItem* pReferencesToDelete,
+    OpcUa_ResponseHeader*             pResponseHeader,
+    int32_t*                          pNoOfResults,
+    StatusCode**                      pResults,
+    int32_t*                          pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**               pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the DeleteReferences service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginDeleteReferences(
-    UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
-    int32_t                        nNoOfReferencesToDelete,
-    const UA_DeleteReferencesItem* pReferencesToDelete,
-    UA_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+StatusCode OpcUa_ClientApi_BeginDeleteReferences(
+    UA_Channel                        hChannel,
+    const OpcUa_RequestHeader*        pRequestHeader,
+    int32_t                           nNoOfReferencesToDelete,
+    const OpcUa_DeleteReferencesItem* pReferencesToDelete,
+    UA_Channel_PfnRequestComplete*    pCallback,
+    void*                             pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_Browse
 /*============================================================================
  * Synchronously calls the Browse service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Browse(
-    UA_Channel                  hChannel,
-    const UA_RequestHeader*     pRequestHeader,
-    const UA_ViewDescription*   pView,
-    uint32_t                    nRequestedMaxReferencesPerNode,
-    int32_t                     nNoOfNodesToBrowse,
-    const UA_BrowseDescription* pNodesToBrowse,
-    UA_ResponseHeader*          pResponseHeader,
-    int32_t*                    pNoOfResults,
-    UA_BrowseResult**           pResults,
-    int32_t*                    pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**         pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_Browse(
+    UA_Channel                     hChannel,
+    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_ViewDescription*   pView,
+    uint32_t                       nRequestedMaxReferencesPerNode,
+    int32_t                        nNoOfNodesToBrowse,
+    const OpcUa_BrowseDescription* pNodesToBrowse,
+    OpcUa_ResponseHeader*          pResponseHeader,
+    int32_t*                       pNoOfResults,
+    OpcUa_BrowseResult**           pResults,
+    int32_t*                       pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**            pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Browse service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginBrowse(
+StatusCode OpcUa_ClientApi_BeginBrowse(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
-    const UA_ViewDescription*      pView,
+    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_ViewDescription*   pView,
     uint32_t                       nRequestedMaxReferencesPerNode,
     int32_t                        nNoOfNodesToBrowse,
-    const UA_BrowseDescription*    pNodesToBrowse,
+    const OpcUa_BrowseDescription* pNodesToBrowse,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
@@ -448,24 +448,24 @@ StatusCode UA_ClientApi_BeginBrowse(
 /*============================================================================
  * Synchronously calls the BrowseNext service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BrowseNext(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    UA_Boolean              bReleaseContinuationPoints,
-    int32_t                 nNoOfContinuationPoints,
-    const UA_ByteString*    pContinuationPoints,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    UA_BrowseResult**       pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_BrowseNext(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    UA_Boolean                 bReleaseContinuationPoints,
+    int32_t                    nNoOfContinuationPoints,
+    const UA_ByteString*       pContinuationPoints,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    OpcUa_BrowseResult**       pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the BrowseNext service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginBrowseNext(
+StatusCode OpcUa_ClientApi_BeginBrowseNext(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     UA_Boolean                     bReleaseContinuationPoints,
     int32_t                        nNoOfContinuationPoints,
     const UA_ByteString*           pContinuationPoints,
@@ -477,25 +477,25 @@ StatusCode UA_ClientApi_BeginBrowseNext(
 /*============================================================================
  * Synchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
-StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    int32_t                 nNoOfBrowsePaths,
-    const UA_BrowsePath*    pBrowsePaths,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    UA_BrowsePathResult**   pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    int32_t                    nNoOfBrowsePaths,
+    const OpcUa_BrowsePath*    pBrowsePaths,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    OpcUa_BrowsePathResult**   pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
+StatusCode OpcUa_ClientApi_BeginTranslateBrowsePathsToNodeIds(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfBrowsePaths,
-    const UA_BrowsePath*           pBrowsePaths,
+    const OpcUa_BrowsePath*        pBrowsePaths,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
@@ -504,21 +504,21 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
 /*============================================================================
  * Synchronously calls the RegisterNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_RegisterNodes(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    int32_t                 nNoOfNodesToRegister,
-    const UA_NodeId*        pNodesToRegister,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfRegisteredNodeIds,
-    UA_NodeId**             pRegisteredNodeIds);
+StatusCode OpcUa_ClientApi_RegisterNodes(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    int32_t                    nNoOfNodesToRegister,
+    const UA_NodeId*           pNodesToRegister,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfRegisteredNodeIds,
+    UA_NodeId**                pRegisteredNodeIds);
 
 /*============================================================================
  * Asynchronously calls the RegisterNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRegisterNodes(
+StatusCode OpcUa_ClientApi_BeginRegisterNodes(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfNodesToRegister,
     const UA_NodeId*               pNodesToRegister,
     UA_Channel_PfnRequestComplete* pCallback,
@@ -529,19 +529,19 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
 /*============================================================================
  * Synchronously calls the UnregisterNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_UnregisterNodes(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    int32_t                 nNoOfNodesToUnregister,
-    const UA_NodeId*        pNodesToUnregister,
-    UA_ResponseHeader*      pResponseHeader);
+StatusCode OpcUa_ClientApi_UnregisterNodes(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    int32_t                    nNoOfNodesToUnregister,
+    const UA_NodeId*           pNodesToUnregister,
+    OpcUa_ResponseHeader*      pResponseHeader);
 
 /*============================================================================
  * Asynchronously calls the UnregisterNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginUnregisterNodes(
+StatusCode OpcUa_ClientApi_BeginUnregisterNodes(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfNodesToUnregister,
     const UA_NodeId*               pNodesToUnregister,
     UA_Channel_PfnRequestComplete* pCallback,
@@ -552,61 +552,61 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
 /*============================================================================
  * Synchronously calls the QueryFirst service.
  *===========================================================================*/
-StatusCode UA_ClientApi_QueryFirst(
-    UA_Channel                    hChannel,
-    const UA_RequestHeader*       pRequestHeader,
-    const UA_ViewDescription*     pView,
-    int32_t                       nNoOfNodeTypes,
-    const UA_NodeTypeDescription* pNodeTypes,
-    const UA_ContentFilter*       pFilter,
-    uint32_t                      nMaxDataSetsToReturn,
-    uint32_t                      nMaxReferencesToReturn,
-    UA_ResponseHeader*            pResponseHeader,
-    int32_t*                      pNoOfQueryDataSets,
-    UA_QueryDataSet**             pQueryDataSets,
-    UA_ByteString*                pContinuationPoint,
-    int32_t*                      pNoOfParsingResults,
-    UA_ParsingResult**            pParsingResults,
-    int32_t*                      pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**           pDiagnosticInfos,
-    UA_ContentFilterResult*       pFilterResult);
+StatusCode OpcUa_ClientApi_QueryFirst(
+    UA_Channel                       hChannel,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    const OpcUa_ViewDescription*     pView,
+    int32_t                          nNoOfNodeTypes,
+    const OpcUa_NodeTypeDescription* pNodeTypes,
+    const OpcUa_ContentFilter*       pFilter,
+    uint32_t                         nMaxDataSetsToReturn,
+    uint32_t                         nMaxReferencesToReturn,
+    OpcUa_ResponseHeader*            pResponseHeader,
+    int32_t*                         pNoOfQueryDataSets,
+    OpcUa_QueryDataSet**             pQueryDataSets,
+    UA_ByteString*                   pContinuationPoint,
+    int32_t*                         pNoOfParsingResults,
+    OpcUa_ParsingResult**            pParsingResults,
+    int32_t*                         pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**              pDiagnosticInfos,
+    OpcUa_ContentFilterResult*       pFilterResult);
 
 /*============================================================================
  * Asynchronously calls the QueryFirst service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginQueryFirst(
-    UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
-    const UA_ViewDescription*      pView,
-    int32_t                        nNoOfNodeTypes,
-    const UA_NodeTypeDescription*  pNodeTypes,
-    const UA_ContentFilter*        pFilter,
-    uint32_t                       nMaxDataSetsToReturn,
-    uint32_t                       nMaxReferencesToReturn,
-    UA_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+StatusCode OpcUa_ClientApi_BeginQueryFirst(
+    UA_Channel                       hChannel,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    const OpcUa_ViewDescription*     pView,
+    int32_t                          nNoOfNodeTypes,
+    const OpcUa_NodeTypeDescription* pNodeTypes,
+    const OpcUa_ContentFilter*       pFilter,
+    uint32_t                         nMaxDataSetsToReturn,
+    uint32_t                         nMaxReferencesToReturn,
+    UA_Channel_PfnRequestComplete*   pCallback,
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryNext
 /*============================================================================
  * Synchronously calls the QueryNext service.
  *===========================================================================*/
-StatusCode UA_ClientApi_QueryNext(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    UA_Boolean              bReleaseContinuationPoint,
-    const UA_ByteString*    pContinuationPoint,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfQueryDataSets,
-    UA_QueryDataSet**       pQueryDataSets,
-    UA_ByteString*          pRevisedContinuationPoint);
+StatusCode OpcUa_ClientApi_QueryNext(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    UA_Boolean                 bReleaseContinuationPoint,
+    const UA_ByteString*       pContinuationPoint,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfQueryDataSets,
+    OpcUa_QueryDataSet**       pQueryDataSets,
+    UA_ByteString*             pRevisedContinuationPoint);
 
 /*============================================================================
  * Asynchronously calls the QueryNext service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginQueryNext(
+StatusCode OpcUa_ClientApi_BeginQueryNext(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     UA_Boolean                     bReleaseContinuationPoint,
     const UA_ByteString*           pContinuationPoint,
     UA_Channel_PfnRequestComplete* pCallback,
@@ -617,29 +617,29 @@ StatusCode UA_ClientApi_BeginQueryNext(
 /*============================================================================
  * Synchronously calls the Read service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Read(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    double                  nMaxAge,
-    UA_TimestampsToReturn   eTimestampsToReturn,
-    int32_t                 nNoOfNodesToRead,
-    const UA_ReadValueId*   pNodesToRead,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    UA_DataValue**          pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_Read(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    double                     nMaxAge,
+    OpcUa_TimestampsToReturn   eTimestampsToReturn,
+    int32_t                    nNoOfNodesToRead,
+    const OpcUa_ReadValueId*   pNodesToRead,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    UA_DataValue**             pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Read service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRead(
+StatusCode OpcUa_ClientApi_BeginRead(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     double                         nMaxAge,
-    UA_TimestampsToReturn          eTimestampsToReturn,
+    OpcUa_TimestampsToReturn       eTimestampsToReturn,
     int32_t                        nNoOfNodesToRead,
-    const UA_ReadValueId*          pNodesToRead,
+    const OpcUa_ReadValueId*       pNodesToRead,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
@@ -648,58 +648,58 @@ StatusCode UA_ClientApi_BeginRead(
 /*============================================================================
  * Synchronously calls the HistoryRead service.
  *===========================================================================*/
-StatusCode UA_ClientApi_HistoryRead(
-    UA_Channel                   hChannel,
-    const UA_RequestHeader*      pRequestHeader,
-    const UA_ExtensionObject*    pHistoryReadDetails,
-    UA_TimestampsToReturn        eTimestampsToReturn,
-    UA_Boolean                   bReleaseContinuationPoints,
-    int32_t                      nNoOfNodesToRead,
-    const UA_HistoryReadValueId* pNodesToRead,
-    UA_ResponseHeader*           pResponseHeader,
-    int32_t*                     pNoOfResults,
-    UA_HistoryReadResult**       pResults,
-    int32_t*                     pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**          pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_HistoryRead(
+    UA_Channel                      hChannel,
+    const OpcUa_RequestHeader*      pRequestHeader,
+    const UA_ExtensionObject*       pHistoryReadDetails,
+    OpcUa_TimestampsToReturn        eTimestampsToReturn,
+    UA_Boolean                      bReleaseContinuationPoints,
+    int32_t                         nNoOfNodesToRead,
+    const OpcUa_HistoryReadValueId* pNodesToRead,
+    OpcUa_ResponseHeader*           pResponseHeader,
+    int32_t*                        pNoOfResults,
+    OpcUa_HistoryReadResult**       pResults,
+    int32_t*                        pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**             pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the HistoryRead service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginHistoryRead(
-    UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
-    const UA_ExtensionObject*      pHistoryReadDetails,
-    UA_TimestampsToReturn          eTimestampsToReturn,
-    UA_Boolean                     bReleaseContinuationPoints,
-    int32_t                        nNoOfNodesToRead,
-    const UA_HistoryReadValueId*   pNodesToRead,
-    UA_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+StatusCode OpcUa_ClientApi_BeginHistoryRead(
+    UA_Channel                      hChannel,
+    const OpcUa_RequestHeader*      pRequestHeader,
+    const UA_ExtensionObject*       pHistoryReadDetails,
+    OpcUa_TimestampsToReturn        eTimestampsToReturn,
+    UA_Boolean                      bReleaseContinuationPoints,
+    int32_t                         nNoOfNodesToRead,
+    const OpcUa_HistoryReadValueId* pNodesToRead,
+    UA_Channel_PfnRequestComplete*  pCallback,
+    void*                           pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_Write
 /*============================================================================
  * Synchronously calls the Write service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Write(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    int32_t                 nNoOfNodesToWrite,
-    const UA_WriteValue*    pNodesToWrite,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    StatusCode**            pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_Write(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    int32_t                    nNoOfNodesToWrite,
+    const OpcUa_WriteValue*    pNodesToWrite,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    StatusCode**               pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Write service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginWrite(
+StatusCode OpcUa_ClientApi_BeginWrite(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfNodesToWrite,
-    const UA_WriteValue*           pNodesToWrite,
+    const OpcUa_WriteValue*        pNodesToWrite,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
@@ -708,23 +708,23 @@ StatusCode UA_ClientApi_BeginWrite(
 /*============================================================================
  * Synchronously calls the HistoryUpdate service.
  *===========================================================================*/
-StatusCode UA_ClientApi_HistoryUpdate(
-    UA_Channel                hChannel,
-    const UA_RequestHeader*   pRequestHeader,
-    int32_t                   nNoOfHistoryUpdateDetails,
-    const UA_ExtensionObject* pHistoryUpdateDetails,
-    UA_ResponseHeader*        pResponseHeader,
-    int32_t*                  pNoOfResults,
-    UA_HistoryUpdateResult**  pResults,
-    int32_t*                  pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**       pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_HistoryUpdate(
+    UA_Channel                  hChannel,
+    const OpcUa_RequestHeader*  pRequestHeader,
+    int32_t                     nNoOfHistoryUpdateDetails,
+    const UA_ExtensionObject*   pHistoryUpdateDetails,
+    OpcUa_ResponseHeader*       pResponseHeader,
+    int32_t*                    pNoOfResults,
+    OpcUa_HistoryUpdateResult** pResults,
+    int32_t*                    pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**         pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the HistoryUpdate service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginHistoryUpdate(
+StatusCode OpcUa_ClientApi_BeginHistoryUpdate(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfHistoryUpdateDetails,
     const UA_ExtensionObject*      pHistoryUpdateDetails,
     UA_Channel_PfnRequestComplete* pCallback,
@@ -735,25 +735,25 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
 /*============================================================================
  * Synchronously calls the Call service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Call(
-    UA_Channel                  hChannel,
-    const UA_RequestHeader*     pRequestHeader,
-    int32_t                     nNoOfMethodsToCall,
-    const UA_CallMethodRequest* pMethodsToCall,
-    UA_ResponseHeader*          pResponseHeader,
-    int32_t*                    pNoOfResults,
-    UA_CallMethodResult**       pResults,
-    int32_t*                    pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**         pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_Call(
+    UA_Channel                     hChannel,
+    const OpcUa_RequestHeader*     pRequestHeader,
+    int32_t                        nNoOfMethodsToCall,
+    const OpcUa_CallMethodRequest* pMethodsToCall,
+    OpcUa_ResponseHeader*          pResponseHeader,
+    int32_t*                       pNoOfResults,
+    OpcUa_CallMethodResult**       pResults,
+    int32_t*                       pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**            pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Call service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCall(
+StatusCode OpcUa_ClientApi_BeginCall(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfMethodsToCall,
-    const UA_CallMethodRequest*    pMethodsToCall,
+    const OpcUa_CallMethodRequest* pMethodsToCall,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
@@ -762,89 +762,89 @@ StatusCode UA_ClientApi_BeginCall(
 /*============================================================================
  * Synchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_CreateMonitoredItems(
-    UA_Channel                           hChannel,
-    const UA_RequestHeader*              pRequestHeader,
-    uint32_t                             nSubscriptionId,
-    UA_TimestampsToReturn                eTimestampsToReturn,
-    int32_t                              nNoOfItemsToCreate,
-    const UA_MonitoredItemCreateRequest* pItemsToCreate,
-    UA_ResponseHeader*                   pResponseHeader,
-    int32_t*                             pNoOfResults,
-    UA_MonitoredItemCreateResult**       pResults,
-    int32_t*                             pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**                  pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_CreateMonitoredItems(
+    UA_Channel                              hChannel,
+    const OpcUa_RequestHeader*              pRequestHeader,
+    uint32_t                                nSubscriptionId,
+    OpcUa_TimestampsToReturn                eTimestampsToReturn,
+    int32_t                                 nNoOfItemsToCreate,
+    const OpcUa_MonitoredItemCreateRequest* pItemsToCreate,
+    OpcUa_ResponseHeader*                   pResponseHeader,
+    int32_t*                                pNoOfResults,
+    OpcUa_MonitoredItemCreateResult**       pResults,
+    int32_t*                                pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**                     pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCreateMonitoredItems(
-    UA_Channel                           hChannel,
-    const UA_RequestHeader*              pRequestHeader,
-    uint32_t                             nSubscriptionId,
-    UA_TimestampsToReturn                eTimestampsToReturn,
-    int32_t                              nNoOfItemsToCreate,
-    const UA_MonitoredItemCreateRequest* pItemsToCreate,
-    UA_Channel_PfnRequestComplete*       pCallback,
-    void*                                pCallbackData);
+StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
+    UA_Channel                              hChannel,
+    const OpcUa_RequestHeader*              pRequestHeader,
+    uint32_t                                nSubscriptionId,
+    OpcUa_TimestampsToReturn                eTimestampsToReturn,
+    int32_t                                 nNoOfItemsToCreate,
+    const OpcUa_MonitoredItemCreateRequest* pItemsToCreate,
+    UA_Channel_PfnRequestComplete*          pCallback,
+    void*                                   pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifyMonitoredItems
 /*============================================================================
  * Synchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_ModifyMonitoredItems(
-    UA_Channel                           hChannel,
-    const UA_RequestHeader*              pRequestHeader,
-    uint32_t                             nSubscriptionId,
-    UA_TimestampsToReturn                eTimestampsToReturn,
-    int32_t                              nNoOfItemsToModify,
-    const UA_MonitoredItemModifyRequest* pItemsToModify,
-    UA_ResponseHeader*                   pResponseHeader,
-    int32_t*                             pNoOfResults,
-    UA_MonitoredItemModifyResult**       pResults,
-    int32_t*                             pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**                  pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
+    UA_Channel                              hChannel,
+    const OpcUa_RequestHeader*              pRequestHeader,
+    uint32_t                                nSubscriptionId,
+    OpcUa_TimestampsToReturn                eTimestampsToReturn,
+    int32_t                                 nNoOfItemsToModify,
+    const OpcUa_MonitoredItemModifyRequest* pItemsToModify,
+    OpcUa_ResponseHeader*                   pResponseHeader,
+    int32_t*                                pNoOfResults,
+    OpcUa_MonitoredItemModifyResult**       pResults,
+    int32_t*                                pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**                     pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginModifyMonitoredItems(
-    UA_Channel                           hChannel,
-    const UA_RequestHeader*              pRequestHeader,
-    uint32_t                             nSubscriptionId,
-    UA_TimestampsToReturn                eTimestampsToReturn,
-    int32_t                              nNoOfItemsToModify,
-    const UA_MonitoredItemModifyRequest* pItemsToModify,
-    UA_Channel_PfnRequestComplete*       pCallback,
-    void*                                pCallbackData);
+StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
+    UA_Channel                              hChannel,
+    const OpcUa_RequestHeader*              pRequestHeader,
+    uint32_t                                nSubscriptionId,
+    OpcUa_TimestampsToReturn                eTimestampsToReturn,
+    int32_t                                 nNoOfItemsToModify,
+    const OpcUa_MonitoredItemModifyRequest* pItemsToModify,
+    UA_Channel_PfnRequestComplete*          pCallback,
+    void*                                   pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetMonitoringMode
 /*============================================================================
  * Synchronously calls the SetMonitoringMode service.
  *===========================================================================*/
-StatusCode UA_ClientApi_SetMonitoringMode(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    uint32_t                nSubscriptionId,
-    UA_MonitoringMode       eMonitoringMode,
-    int32_t                 nNoOfMonitoredItemIds,
-    const uint32_t*         pMonitoredItemIds,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    StatusCode**            pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_SetMonitoringMode(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    uint32_t                   nSubscriptionId,
+    OpcUa_MonitoringMode       eMonitoringMode,
+    int32_t                    nNoOfMonitoredItemIds,
+    const uint32_t*            pMonitoredItemIds,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    StatusCode**               pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the SetMonitoringMode service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginSetMonitoringMode(
+StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     uint32_t                       nSubscriptionId,
-    UA_MonitoringMode              eMonitoringMode,
+    OpcUa_MonitoringMode           eMonitoringMode,
     int32_t                        nNoOfMonitoredItemIds,
     const uint32_t*                pMonitoredItemIds,
     UA_Channel_PfnRequestComplete* pCallback,
@@ -855,31 +855,31 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
 /*============================================================================
  * Synchronously calls the SetTriggering service.
  *===========================================================================*/
-StatusCode UA_ClientApi_SetTriggering(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    uint32_t                nSubscriptionId,
-    uint32_t                nTriggeringItemId,
-    int32_t                 nNoOfLinksToAdd,
-    const uint32_t*         pLinksToAdd,
-    int32_t                 nNoOfLinksToRemove,
-    const uint32_t*         pLinksToRemove,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfAddResults,
-    StatusCode**            pAddResults,
-    int32_t*                pNoOfAddDiagnosticInfos,
-    UA_DiagnosticInfo**     pAddDiagnosticInfos,
-    int32_t*                pNoOfRemoveResults,
-    StatusCode**            pRemoveResults,
-    int32_t*                pNoOfRemoveDiagnosticInfos,
-    UA_DiagnosticInfo**     pRemoveDiagnosticInfos);
+StatusCode OpcUa_ClientApi_SetTriggering(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    uint32_t                   nSubscriptionId,
+    uint32_t                   nTriggeringItemId,
+    int32_t                    nNoOfLinksToAdd,
+    const uint32_t*            pLinksToAdd,
+    int32_t                    nNoOfLinksToRemove,
+    const uint32_t*            pLinksToRemove,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfAddResults,
+    StatusCode**               pAddResults,
+    int32_t*                   pNoOfAddDiagnosticInfos,
+    UA_DiagnosticInfo**        pAddDiagnosticInfos,
+    int32_t*                   pNoOfRemoveResults,
+    StatusCode**               pRemoveResults,
+    int32_t*                   pNoOfRemoveDiagnosticInfos,
+    UA_DiagnosticInfo**        pRemoveDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the SetTriggering service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginSetTriggering(
+StatusCode OpcUa_ClientApi_BeginSetTriggering(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     uint32_t                       nSubscriptionId,
     uint32_t                       nTriggeringItemId,
     int32_t                        nNoOfLinksToAdd,
@@ -894,24 +894,24 @@ StatusCode UA_ClientApi_BeginSetTriggering(
 /*============================================================================
  * Synchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_DeleteMonitoredItems(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    uint32_t                nSubscriptionId,
-    int32_t                 nNoOfMonitoredItemIds,
-    const uint32_t*         pMonitoredItemIds,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    StatusCode**            pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    uint32_t                   nSubscriptionId,
+    int32_t                    nNoOfMonitoredItemIds,
+    const uint32_t*            pMonitoredItemIds,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    StatusCode**               pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
+StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     uint32_t                       nSubscriptionId,
     int32_t                        nNoOfMonitoredItemIds,
     const uint32_t*                pMonitoredItemIds,
@@ -923,27 +923,27 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
 /*============================================================================
  * Synchronously calls the CreateSubscription service.
  *===========================================================================*/
-StatusCode UA_ClientApi_CreateSubscription(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    double                  nRequestedPublishingInterval,
-    uint32_t                nRequestedLifetimeCount,
-    uint32_t                nRequestedMaxKeepAliveCount,
-    uint32_t                nMaxNotificationsPerPublish,
-    UA_Boolean              bPublishingEnabled,
-    UA_Byte                 nPriority,
-    UA_ResponseHeader*      pResponseHeader,
-    uint32_t*               pSubscriptionId,
-    double*                 pRevisedPublishingInterval,
-    uint32_t*               pRevisedLifetimeCount,
-    uint32_t*               pRevisedMaxKeepAliveCount);
+StatusCode OpcUa_ClientApi_CreateSubscription(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    double                     nRequestedPublishingInterval,
+    uint32_t                   nRequestedLifetimeCount,
+    uint32_t                   nRequestedMaxKeepAliveCount,
+    uint32_t                   nMaxNotificationsPerPublish,
+    UA_Boolean                 bPublishingEnabled,
+    UA_Byte                    nPriority,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    uint32_t*                  pSubscriptionId,
+    double*                    pRevisedPublishingInterval,
+    uint32_t*                  pRevisedLifetimeCount,
+    uint32_t*                  pRevisedMaxKeepAliveCount);
 
 /*============================================================================
  * Asynchronously calls the CreateSubscription service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCreateSubscription(
+StatusCode OpcUa_ClientApi_BeginCreateSubscription(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     double                         nRequestedPublishingInterval,
     uint32_t                       nRequestedLifetimeCount,
     uint32_t                       nRequestedMaxKeepAliveCount,
@@ -958,26 +958,26 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
 /*============================================================================
  * Synchronously calls the ModifySubscription service.
  *===========================================================================*/
-StatusCode UA_ClientApi_ModifySubscription(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    uint32_t                nSubscriptionId,
-    double                  nRequestedPublishingInterval,
-    uint32_t                nRequestedLifetimeCount,
-    uint32_t                nRequestedMaxKeepAliveCount,
-    uint32_t                nMaxNotificationsPerPublish,
-    UA_Byte                 nPriority,
-    UA_ResponseHeader*      pResponseHeader,
-    double*                 pRevisedPublishingInterval,
-    uint32_t*               pRevisedLifetimeCount,
-    uint32_t*               pRevisedMaxKeepAliveCount);
+StatusCode OpcUa_ClientApi_ModifySubscription(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    uint32_t                   nSubscriptionId,
+    double                     nRequestedPublishingInterval,
+    uint32_t                   nRequestedLifetimeCount,
+    uint32_t                   nRequestedMaxKeepAliveCount,
+    uint32_t                   nMaxNotificationsPerPublish,
+    UA_Byte                    nPriority,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    double*                    pRevisedPublishingInterval,
+    uint32_t*                  pRevisedLifetimeCount,
+    uint32_t*                  pRevisedMaxKeepAliveCount);
 
 /*============================================================================
  * Asynchronously calls the ModifySubscription service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginModifySubscription(
+StatusCode OpcUa_ClientApi_BeginModifySubscription(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     uint32_t                       nSubscriptionId,
     double                         nRequestedPublishingInterval,
     uint32_t                       nRequestedLifetimeCount,
@@ -992,24 +992,24 @@ StatusCode UA_ClientApi_BeginModifySubscription(
 /*============================================================================
  * Synchronously calls the SetPublishingMode service.
  *===========================================================================*/
-StatusCode UA_ClientApi_SetPublishingMode(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    UA_Boolean              bPublishingEnabled,
-    int32_t                 nNoOfSubscriptionIds,
-    const uint32_t*         pSubscriptionIds,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    StatusCode**            pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_SetPublishingMode(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    UA_Boolean                 bPublishingEnabled,
+    int32_t                    nNoOfSubscriptionIds,
+    const uint32_t*            pSubscriptionIds,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    StatusCode**               pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the SetPublishingMode service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginSetPublishingMode(
+StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     UA_Boolean                     bPublishingEnabled,
     int32_t                        nNoOfSubscriptionIds,
     const uint32_t*                pSubscriptionIds,
@@ -1021,52 +1021,52 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
 /*============================================================================
  * Synchronously calls the Publish service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Publish(
-    UA_Channel                            hChannel,
-    const UA_RequestHeader*               pRequestHeader,
-    int32_t                               nNoOfSubscriptionAcknowledgements,
-    const UA_SubscriptionAcknowledgement* pSubscriptionAcknowledgements,
-    UA_ResponseHeader*                    pResponseHeader,
-    uint32_t*                             pSubscriptionId,
-    int32_t*                              pNoOfAvailableSequenceNumbers,
-    uint32_t**                            pAvailableSequenceNumbers,
-    UA_Boolean*                           pMoreNotifications,
-    UA_NotificationMessage*               pNotificationMessage,
-    int32_t*                              pNoOfResults,
-    StatusCode**                          pResults,
-    int32_t*                              pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**                   pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_Publish(
+    UA_Channel                               hChannel,
+    const OpcUa_RequestHeader*               pRequestHeader,
+    int32_t                                  nNoOfSubscriptionAcknowledgements,
+    const OpcUa_SubscriptionAcknowledgement* pSubscriptionAcknowledgements,
+    OpcUa_ResponseHeader*                    pResponseHeader,
+    uint32_t*                                pSubscriptionId,
+    int32_t*                                 pNoOfAvailableSequenceNumbers,
+    uint32_t**                               pAvailableSequenceNumbers,
+    UA_Boolean*                              pMoreNotifications,
+    OpcUa_NotificationMessage*               pNotificationMessage,
+    int32_t*                                 pNoOfResults,
+    StatusCode**                             pResults,
+    int32_t*                                 pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**                      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Publish service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginPublish(
-    UA_Channel                            hChannel,
-    const UA_RequestHeader*               pRequestHeader,
-    int32_t                               nNoOfSubscriptionAcknowledgements,
-    const UA_SubscriptionAcknowledgement* pSubscriptionAcknowledgements,
-    UA_Channel_PfnRequestComplete*        pCallback,
-    void*                                 pCallbackData);
+StatusCode OpcUa_ClientApi_BeginPublish(
+    UA_Channel                               hChannel,
+    const OpcUa_RequestHeader*               pRequestHeader,
+    int32_t                                  nNoOfSubscriptionAcknowledgements,
+    const OpcUa_SubscriptionAcknowledgement* pSubscriptionAcknowledgements,
+    UA_Channel_PfnRequestComplete*           pCallback,
+    void*                                    pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_Republish
 /*============================================================================
  * Synchronously calls the Republish service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Republish(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    uint32_t                nSubscriptionId,
-    uint32_t                nRetransmitSequenceNumber,
-    UA_ResponseHeader*      pResponseHeader,
-    UA_NotificationMessage* pNotificationMessage);
+StatusCode OpcUa_ClientApi_Republish(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    uint32_t                   nSubscriptionId,
+    uint32_t                   nRetransmitSequenceNumber,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    OpcUa_NotificationMessage* pNotificationMessage);
 
 /*============================================================================
  * Asynchronously calls the Republish service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRepublish(
+StatusCode OpcUa_ClientApi_BeginRepublish(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     uint32_t                       nSubscriptionId,
     uint32_t                       nRetransmitSequenceNumber,
     UA_Channel_PfnRequestComplete* pCallback,
@@ -1077,24 +1077,24 @@ StatusCode UA_ClientApi_BeginRepublish(
 /*============================================================================
  * Synchronously calls the TransferSubscriptions service.
  *===========================================================================*/
-StatusCode UA_ClientApi_TransferSubscriptions(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    int32_t                 nNoOfSubscriptionIds,
-    const uint32_t*         pSubscriptionIds,
-    UA_Boolean              bSendInitialValues,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    UA_TransferResult**     pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_TransferSubscriptions(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    int32_t                    nNoOfSubscriptionIds,
+    const uint32_t*            pSubscriptionIds,
+    UA_Boolean                 bSendInitialValues,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    OpcUa_TransferResult**     pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the TransferSubscriptions service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginTransferSubscriptions(
+StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfSubscriptionIds,
     const uint32_t*                pSubscriptionIds,
     UA_Boolean                     bSendInitialValues,
@@ -1106,30 +1106,30 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
 /*============================================================================
  * Synchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
-StatusCode UA_ClientApi_DeleteSubscriptions(
-    UA_Channel              hChannel,
-    const UA_RequestHeader* pRequestHeader,
-    int32_t                 nNoOfSubscriptionIds,
-    const uint32_t*         pSubscriptionIds,
-    UA_ResponseHeader*      pResponseHeader,
-    int32_t*                pNoOfResults,
-    StatusCode**            pResults,
-    int32_t*                pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     pDiagnosticInfos);
+StatusCode OpcUa_ClientApi_DeleteSubscriptions(
+    UA_Channel                 hChannel,
+    const OpcUa_RequestHeader* pRequestHeader,
+    int32_t                    nNoOfSubscriptionIds,
+    const uint32_t*            pSubscriptionIds,
+    OpcUa_ResponseHeader*      pResponseHeader,
+    int32_t*                   pNoOfResults,
+    StatusCode**               pResults,
+    int32_t*                   pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginDeleteSubscriptions(
+StatusCode OpcUa_ClientApi_BeginDeleteSubscriptions(
     UA_Channel                     hChannel,
-    const UA_RequestHeader*        pRequestHeader,
+    const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfSubscriptionIds,
     const uint32_t*                pSubscriptionIds,
     UA_Channel_PfnRequestComplete* pCallback,
     void*                          pCallbackData);
 #endif
 
-OPCUA_END_EXTERN_C
+END_EXTERN_C
 
 #endif /* OPCUA_HAVE_CLIENTAPI */
 #endif /* _UA_ClientApi_H_ */

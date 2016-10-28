@@ -27,20 +27,20 @@ typedef StatusCode (SC_ConnectionEvent_CB)(struct SC_ClientConnection* cConnecti
 
 typedef struct SC_ClientConnection
 {
-    UA_NamespaceTable      namespaces;
-    UA_EncodeableType**    encodeableTypes;
-    const PKIProvider*     pkiProvider;
-    const Certificate*     serverCertificate;
-    const Certificate*     clientCertificate;
-    AsymmetricKey*         clientKey;
-    SLinkedList*           pendingRequests;
-    UA_MessageSecurityMode securityMode;
-    UA_String              securityPolicy;
-    uint32_t               requestedLifetime;
-    SC_Connection*         instance;
-    P_Timer                watchdogTimer;
-    SC_ConnectionEvent_CB* callback;
-    void*                  callbackData;
+    UA_NamespaceTable         namespaces;
+    UA_EncodeableType**       encodeableTypes;
+    const PKIProvider*        pkiProvider;
+    const Certificate*        serverCertificate;
+    const Certificate*        clientCertificate;
+    AsymmetricKey*            clientKey;
+    SLinkedList*              pendingRequests;
+    OpcUa_MessageSecurityMode securityMode;
+    UA_String                 securityPolicy;
+    uint32_t                  requestedLifetime;
+    SC_Connection*            instance;
+    P_Timer                   watchdogTimer;
+    SC_ConnectionEvent_CB*    callback;
+    void*                     callbackData;
 
 } SC_ClientConnection;
 
@@ -80,17 +80,17 @@ SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*  namespaceT
 
 void SC_Client_Delete(SC_ClientConnection* scConnection);
 
-StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
-                             const char*            uri,
-                             const PKIProvider*     pki,
-                             const Certificate*     crt_cli,
-                             const AsymmetricKey*   key_priv_cli,
-                             const Certificate*     crt_srv,
-                             UA_MessageSecurityMode securityMode,
-                             const char*            securityPolicy,
-                             uint32_t               requestedLifetime,
-                             SC_ConnectionEvent_CB* callback,
-                             void*                  callbackData);
+StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
+                             const char*               uri,
+                             const PKIProvider*        pki,
+                             const Certificate*        crt_cli,
+                             const AsymmetricKey*      key_priv_cli,
+                             const Certificate*        crt_srv,
+                             OpcUa_MessageSecurityMode securityMode,
+                             const char*               securityPolicy,
+                             uint32_t                  requestedLifetime,
+                             SC_ConnectionEvent_CB*    callback,
+                             void*                     callbackData);
 
 StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection);
 

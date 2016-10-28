@@ -9,6 +9,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "ua_secure_channel_low_level.h"
 
@@ -337,14 +338,14 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
 
 // Check OPCUA cryptographic properties
 
-uint32_t IsMsgEncrypted(UA_MessageSecurityMode securityMode,
-                        UA_MsgBuffer*          msgBuffer)
+uint32_t IsMsgEncrypted(OpcUa_MessageSecurityMode securityMode,
+                        UA_MsgBuffer*             msgBuffer)
 {
-    assert(securityMode != UA_MessageSecurityMode_Invalid);
+    assert(securityMode != OpcUa_MessageSecurityMode_Invalid);
     uint32_t toEncrypt = 1; // True
     // Determine if the message must be encrypted
-    if(securityMode == UA_MessageSecurityMode_None ||
-       (securityMode == UA_MessageSecurityMode_Sign &&
+    if(securityMode == OpcUa_MessageSecurityMode_None ||
+       (securityMode == OpcUa_MessageSecurityMode_Sign &&
         msgBuffer->secureType != UA_OpenSecureChannel))
     {
         toEncrypt = FALSE;
@@ -353,11 +354,11 @@ uint32_t IsMsgEncrypted(UA_MessageSecurityMode securityMode,
     return toEncrypt;
 }
 
-uint32_t IsMsgSigned(UA_MessageSecurityMode securityMode)
+uint32_t IsMsgSigned(OpcUa_MessageSecurityMode securityMode)
 {
     uint32_t toSign = 1; // True
     // Determine if the message must be signed
-    if(securityMode == UA_MessageSecurityMode_None)
+    if(securityMode == OpcUa_MessageSecurityMode_None)
     {
         toSign = FALSE;
     }
@@ -418,10 +419,10 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
         uint32_t signatureSize = 0;
         if(isSymmetric == FALSE){
 
-            if(scConnection->currentSecuMode != UA_MessageSecurityMode_None){
-                AsymmetricKey publicKey;
-                status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
-                                                             &publicKey);
+            if(scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
+            AsymmetricKey publicKey;
+            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
+                                                         &publicKey);
 
                 if(status == STATUS_OK){
                     status = CryptoProvider_AsymmetricGetLength_Msgs(scConnection->currentCryptoProvider,
@@ -448,8 +449,8 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                                                                   0); // No signature => 0 bytes of signature
             }
         }else{
-            if(scConnection->currentSecuMode != UA_MessageSecurityMode_None){
-                if(scConnection->currentSecuMode == UA_MessageSecurityMode_SignAndEncrypt){
+            if(scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
+                if(scConnection->currentSecuMode == OpcUa_MessageSecurityMode_SignAndEncrypt){
                     // Signature and Encryption
                     status = CryptoProvider_SymmetricGetLength_Blocks(scConnection->currentCryptoProvider,
                                                                       &cipherBlockSize,
@@ -548,12 +549,12 @@ StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
     return status;
 }
 
-StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
-                                     UA_MsgBuffer*          msgBuffer,
-                                     UA_MessageSecurityMode secuMode,
-                                     UA_String*             securityPolicy,
-                                     UA_ByteString*         senderCertificate,
-                                     const Certificate*     receiverCertCrypto){
+StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvider,
+                                     UA_MsgBuffer*             msgBuffer,
+                                     OpcUa_MessageSecurityMode secuMode,
+                                     UA_String*                securityPolicy,
+                                     UA_ByteString*            senderCertificate,
+                                     const Certificate*        receiverCertCrypto){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toEncrypt = 1; // True
     uint32_t toSign = 1; // True
@@ -662,17 +663,17 @@ StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
     if(msgBuffer != NULL && msgBody != NULL &&
        encType != NULL){
         nodeId.identifierType = IdentifierType_Numeric;
-        if(encType->namespace == NULL){
+        if(encType->NamespaceUri == NULL){
             nodeId.namespace = 0;
         }else{
             // TODO: find namespace Id
         }
-        nodeId.numeric = encType->binaryTypeId;
+        nodeId.numeric = encType->BinaryEncodingTypeId;
 
         status = NodeId_Write(&nodeId, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = encType->encodeFunction(msgBody, msgBuffer);
+        status = encType->Encode(msgBody, msgBuffer);
     }
     return status;
 }
@@ -1266,7 +1267,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: wh
         status = ByteString_Read(&securityPolicy, transportBuffer);
 
         if(status == STATUS_OK){
-            uint32_t secuPolicyComparison = 0;
+            int32_t secuPolicyComparison = 0;
             status = ByteString_Compare(&scConnection->currentSecuPolicy,
                                         &securityPolicy, &secuPolicyComparison);
 
@@ -1285,7 +1286,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: wh
                 status = STATUS_INVALID_RCV_PARAMETER;
             }else if(toSign != FALSE){
                 // Check certificate is the same as the one in memory
-                uint32_t otherAppCertComparison = 0;
+                int32_t otherAppCertComparison = 0;
                 status = ByteString_Compare(&scConnection->otherAppCertificate,
                                             &senderCertificate,
                                             &otherAppCertComparison);
@@ -1322,8 +1323,8 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: wh
                 // Check thumbprint matches current app certificate thumbprint
 
                 UA_ByteString curAppCertThumbprint;
-                uint32_t thumbprintLength = 0;
-                uint32_t runningAppCertComparison = 0;
+                int32_t thumbprintLength = 0;
+                int32_t runningAppCertComparison = 0;
 
                 status = CryptoProvider_CertificateGetLength_Thumbprint(scConnection->currentCryptoProvider,
                                                                     &thumbprintLength);
@@ -1402,7 +1403,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     uint32_t toDecrypt = 1;
     uint32_t decryptedTextLength = 0;
     CryptoProvider* cryptoProvider = NULL;
-    UA_MessageSecurityMode securityMode = UA_MessageSecurityMode_Invalid;
+    OpcUa_MessageSecurityMode securityMode = OpcUa_MessageSecurityMode_Invalid;
     Buffer* plainBuffer = NULL;
     uint32_t bufferIdx = 0;
 
@@ -1541,15 +1542,15 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
         status = NodeId_Read(&nodeId, receptionBuffer);
     }
 
-    if(status == STATUS_OK && nodeId.identifierType == UA_IdType_Numeric){
+    if(status == STATUS_OK && nodeId.identifierType == OpcUa_IdType_Numeric){
 
         if(respEncType != NULL){
             // Case in which we know the expected type from the request Id
-            if (nodeId.numeric == respEncType->typeId || nodeId.numeric == respEncType->binaryTypeId){
+            if (nodeId.numeric == respEncType->TypeId || nodeId.numeric == respEncType->BinaryEncodingTypeId){
     //          || nodeId.numeric == respEncType->xmlTypeId){ => what is the point to accept this type ?
                 *receivedEncType = respEncType;
             }else if(errEncType != NULL &&
-                     (nodeId.numeric == errEncType->typeId || nodeId.numeric == errEncType->binaryTypeId)){
+                     (nodeId.numeric == errEncType->TypeId || nodeId.numeric == errEncType->BinaryEncodingTypeId)){
     //               || nodeId.numeric == errEncType->xmlTypeId){ => what is the point to accept this type ?
                 *receivedEncType = errEncType;
             }else{
@@ -1559,11 +1560,11 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
             // Check namespace of received type using index
             if(status == STATUS_OK){
                     recEncType = *receivedEncType;
-                    if(recEncType->namespace == NULL && nodeId.namespace != OPCUA_NAMESPACE_INDEX){
+                    if(recEncType->NamespaceUri == NULL && nodeId.namespace != OPCUA_NAMESPACE_INDEX){
                         status = STATUS_INVALID_RCV_PARAMETER;
-                    }else if(recEncType->namespace != NULL){
+                    }else if(recEncType->NamespaceUri != NULL){
                         status = Namespace_GetIndex(namespaceTable,
-                                                    recEncType->namespace,
+                                                    recEncType->NamespaceUri,
                                                     &nsIndex);
                         if(status == STATUS_OK){
                             if(nodeId.namespace != nsIndex){
@@ -1594,9 +1595,9 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
     }
 
     if(status == STATUS_OK){
-        *encodeableObj = malloc(recEncType->allocSize);
+        *encodeableObj = malloc(recEncType->AllocationSize);
         if(*encodeableObj != NULL){
-            status = recEncType->decodeFunction(*encodeableObj, receptionBuffer);
+            status = recEncType->Decode(*encodeableObj, receptionBuffer);
         }else{
             status = STATUS_NOK;
         }
@@ -1613,7 +1614,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
     uint32_t toVerify = 1;
 
     CryptoProvider* cryptoProvider = NULL;
-    UA_MessageSecurityMode securityMode = UA_MessageSecurityMode_Invalid;
+    OpcUa_MessageSecurityMode securityMode = OpcUa_MessageSecurityMode_Invalid;
     Buffer* receptionBuffer = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
 
     uint32_t signatureSize = 0;
@@ -1787,7 +1788,7 @@ StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
     // Only valid for symmetric encryption ! No need for asymm (1 chunk maximum)
     StatusCode status = STATUS_INVALID_PARAMETERS;
     CryptoProvider* cProvider = NULL;
-    UA_MessageSecurityMode securityMode = UA_MessageSecurityMode_Invalid;
+    OpcUa_MessageSecurityMode securityMode = OpcUa_MessageSecurityMode_Invalid;
     uint32_t sigSize = 0;
     uint32_t cipherBlockSize = 0;
     uint32_t plainBlockSize = 0;

@@ -29,7 +29,7 @@ BUILD_DIR_SED=$(subst /,\/,$(BUILD_DIR))
 
 ## Directories
 ### srcs directories definition
-UASTACK_DIR=$(WORKSPACE_DIR)/src/
+UASTACK_DIR=$(WORKSPACE_DIR)/src/ingopcs/
 STUBSERVER_DIR=$(WORKSPACE_DIR)/stub_server
 STUBCLIENT_DIR=$(WORKSPACE_DIR)/stub_client
 TESTS_DIR=$(WORKSPACE_DIR)/test/ingopcs
@@ -69,7 +69,7 @@ DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=
 
 default: all
 
-all: config $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_server $(EXEC_DIR)/check_stack
+all: config $(EXEC_DIR)/stub_client $(EXEC_DIR)/check_stack
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)

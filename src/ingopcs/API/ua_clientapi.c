@@ -30,8 +30,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-/* core */
-#include <opcua_platformdefs.h>
+#include <ua_stack_csts.h>
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
@@ -46,24 +45,24 @@
 /*============================================================================
  * Synchronously calls the FindServers service.
  *===========================================================================*/
-StatusCode UA_ClientApi_FindServers(
-    UA_Channel                  a_hChannel,
-    const UA_RequestHeader*     a_pRequestHeader,
-    const UA_String*            a_pEndpointUrl,
-    int32_t                     a_nNoOfLocaleIds,
-    const UA_String*            a_pLocaleIds,
-    int32_t                     a_nNoOfServerUris,
-    const UA_String*            a_pServerUris,
-    UA_ResponseHeader*          a_pResponseHeader,
-    int32_t*                    a_pNoOfServers,
-    UA_ApplicationDescription** a_pServers)
+StatusCode OpcUa_ClientApi_FindServers(
+    UA_Channel                     a_hChannel,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
+    const UA_String*               a_pEndpointUrl,
+    int32_t                        a_nNoOfLocaleIds,
+    const UA_String*               a_pLocaleIds,
+    int32_t                        a_nNoOfServerUris,
+    const UA_String*               a_pServerUris,
+    OpcUa_ResponseHeader*          a_pResponseHeader,
+    int32_t*                       a_pNoOfServers,
+    OpcUa_ApplicationDescription** a_pServers)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_FindServersRequest cRequest;
-    UA_FindServersResponse* pResponse = NULL;
+    OpcUa_FindServersRequest cRequest;
+    OpcUa_FindServersResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_FindServersRequest_Initialize(&cRequest);
+    OpcUa_FindServersRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -90,24 +89,24 @@ StatusCode UA_ClientApi_FindServers(
             a_hChannel,
             "FindServers",
             (void*)&cRequest,
-            &UA_FindServersRequest_EncodeableType,
-            &UA_FindServersResponse_EncodeableType,
+            &OpcUa_FindServersRequest_EncodeableType,
+            &OpcUa_FindServersResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_FindServersResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_FindServersResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -130,9 +129,9 @@ StatusCode UA_ClientApi_FindServers(
 /*============================================================================
  * Asynchronously calls the FindServers service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginFindServers(
+StatusCode OpcUa_ClientApi_BeginFindServers(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     const UA_String*               a_pEndpointUrl,
     int32_t                        a_nNoOfLocaleIds,
     const UA_String*               a_pLocaleIds,
@@ -142,8 +141,8 @@ StatusCode UA_ClientApi_BeginFindServers(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_FindServersRequest cRequest;
-    UA_FindServersRequest_Initialize(&cRequest);
+    OpcUa_FindServersRequest cRequest;
+    OpcUa_FindServersRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -167,8 +166,8 @@ StatusCode UA_ClientApi_BeginFindServers(
             a_hChannel,
             "FindServers",
             (void*)&cRequest,
-            &UA_FindServersRequest_EncodeableType,
-            &UA_FindServersResponse_EncodeableType,
+            &OpcUa_FindServersRequest_EncodeableType,
+            &OpcUa_FindServersResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -181,24 +180,24 @@ StatusCode UA_ClientApi_BeginFindServers(
 /*============================================================================
  * Synchronously calls the FindServersOnNetwork service.
  *===========================================================================*/
-StatusCode UA_ClientApi_FindServersOnNetwork(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    uint32_t                a_nStartingRecordId,
-    uint32_t                a_nMaxRecordsToReturn,
-    int32_t                 a_nNoOfServerCapabilityFilter,
-    const UA_String*        a_pServerCapabilityFilter,
-    UA_ResponseHeader*      a_pResponseHeader,
-    UA_DateTime*            a_pLastCounterResetTime,
-    int32_t*                a_pNoOfServers,
-    UA_ServerOnNetwork**    a_pServers)
+StatusCode OpcUa_ClientApi_FindServersOnNetwork(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    uint32_t                   a_nStartingRecordId,
+    uint32_t                   a_nMaxRecordsToReturn,
+    int32_t                    a_nNoOfServerCapabilityFilter,
+    const UA_String*           a_pServerCapabilityFilter,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    UA_DateTime*               a_pLastCounterResetTime,
+    int32_t*                   a_pNoOfServers,
+    OpcUa_ServerOnNetwork**    a_pServers)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_FindServersOnNetworkRequest cRequest;
-    UA_FindServersOnNetworkResponse* pResponse = NULL;
+    OpcUa_FindServersOnNetworkRequest cRequest;
+    OpcUa_FindServersOnNetworkResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_FindServersOnNetworkRequest_Initialize(&cRequest);
+    OpcUa_FindServersOnNetworkRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -223,24 +222,24 @@ StatusCode UA_ClientApi_FindServersOnNetwork(
             a_hChannel,
             "FindServersOnNetwork",
             (void*)&cRequest,
-            &UA_FindServersOnNetworkRequest_EncodeableType,
-            &UA_FindServersOnNetworkResponse_EncodeableType,
+            &OpcUa_FindServersOnNetworkRequest_EncodeableType,
+            &OpcUa_FindServersOnNetworkResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_FindServersOnNetworkResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_FindServersOnNetworkResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -264,9 +263,9 @@ StatusCode UA_ClientApi_FindServersOnNetwork(
 /*============================================================================
  * Asynchronously calls the FindServersOnNetwork service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginFindServersOnNetwork(
+StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nStartingRecordId,
     uint32_t                       a_nMaxRecordsToReturn,
     int32_t                        a_nNoOfServerCapabilityFilter,
@@ -275,8 +274,8 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_FindServersOnNetworkRequest cRequest;
-    UA_FindServersOnNetworkRequest_Initialize(&cRequest);
+    OpcUa_FindServersOnNetworkRequest cRequest;
+    OpcUa_FindServersOnNetworkRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -297,8 +296,8 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
             a_hChannel,
             "FindServersOnNetwork",
             (void*)&cRequest,
-            &UA_FindServersOnNetworkRequest_EncodeableType,
-            &UA_FindServersOnNetworkResponse_EncodeableType,
+            &OpcUa_FindServersOnNetworkRequest_EncodeableType,
+            &OpcUa_FindServersOnNetworkResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -311,24 +310,24 @@ StatusCode UA_ClientApi_BeginFindServersOnNetwork(
 /*============================================================================
  * Synchronously calls the GetEndpoints service.
  *===========================================================================*/
-StatusCode UA_ClientApi_GetEndpoints(
-    UA_Channel               a_hChannel,
-    const UA_RequestHeader*  a_pRequestHeader,
-    const UA_String*         a_pEndpointUrl,
-    int32_t                  a_nNoOfLocaleIds,
-    const UA_String*         a_pLocaleIds,
-    int32_t                  a_nNoOfProfileUris,
-    const UA_String*         a_pProfileUris,
-    UA_ResponseHeader*       a_pResponseHeader,
-    int32_t*                 a_pNoOfEndpoints,
-    UA_EndpointDescription** a_pEndpoints)
+StatusCode OpcUa_ClientApi_GetEndpoints(
+    UA_Channel                  a_hChannel,
+    const OpcUa_RequestHeader*  a_pRequestHeader,
+    const UA_String*            a_pEndpointUrl,
+    int32_t                     a_nNoOfLocaleIds,
+    const UA_String*            a_pLocaleIds,
+    int32_t                     a_nNoOfProfileUris,
+    const UA_String*            a_pProfileUris,
+    OpcUa_ResponseHeader*       a_pResponseHeader,
+    int32_t*                    a_pNoOfEndpoints,
+    OpcUa_EndpointDescription** a_pEndpoints)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_GetEndpointsRequest cRequest;
-    UA_GetEndpointsResponse* pResponse = NULL;
+    OpcUa_GetEndpointsRequest cRequest;
+    OpcUa_GetEndpointsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_GetEndpointsRequest_Initialize(&cRequest);
+    OpcUa_GetEndpointsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -355,24 +354,24 @@ StatusCode UA_ClientApi_GetEndpoints(
             a_hChannel,
             "GetEndpoints",
             (void*)&cRequest,
-            &UA_GetEndpointsRequest_EncodeableType,
-            &UA_GetEndpointsResponse_EncodeableType,
+            &OpcUa_GetEndpointsRequest_EncodeableType,
+            &OpcUa_GetEndpointsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_GetEndpointsResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_GetEndpointsResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -395,9 +394,9 @@ StatusCode UA_ClientApi_GetEndpoints(
 /*============================================================================
  * Asynchronously calls the GetEndpoints service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginGetEndpoints(
+StatusCode OpcUa_ClientApi_BeginGetEndpoints(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     const UA_String*               a_pEndpointUrl,
     int32_t                        a_nNoOfLocaleIds,
     const UA_String*               a_pLocaleIds,
@@ -407,8 +406,8 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_GetEndpointsRequest cRequest;
-    UA_GetEndpointsRequest_Initialize(&cRequest);
+    OpcUa_GetEndpointsRequest cRequest;
+    OpcUa_GetEndpointsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -432,8 +431,8 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
             a_hChannel,
             "GetEndpoints",
             (void*)&cRequest,
-            &UA_GetEndpointsRequest_EncodeableType,
-            &UA_GetEndpointsResponse_EncodeableType,
+            &OpcUa_GetEndpointsRequest_EncodeableType,
+            &OpcUa_GetEndpointsResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -446,18 +445,18 @@ StatusCode UA_ClientApi_BeginGetEndpoints(
 /*============================================================================
  * Synchronously calls the RegisterServer service.
  *===========================================================================*/
-StatusCode UA_ClientApi_RegisterServer(
-    UA_Channel                 a_hChannel,
-    const UA_RequestHeader*    a_pRequestHeader,
-    const UA_RegisteredServer* a_pServer,
-    UA_ResponseHeader*         a_pResponseHeader)
+StatusCode OpcUa_ClientApi_RegisterServer(
+    UA_Channel                    a_hChannel,
+    const OpcUa_RequestHeader*    a_pRequestHeader,
+    const OpcUa_RegisteredServer* a_pServer,
+    OpcUa_ResponseHeader*         a_pResponseHeader)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_RegisterServerRequest cRequest;
-    UA_RegisterServerResponse* pResponse = NULL;
+    OpcUa_RegisterServerRequest cRequest;
+    OpcUa_RegisterServerResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_RegisterServerRequest_Initialize(&cRequest);
+    OpcUa_RegisterServerRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -476,24 +475,24 @@ StatusCode UA_ClientApi_RegisterServer(
             a_hChannel,
             "RegisterServer",
             (void*)&cRequest,
-            &UA_RegisterServerRequest_EncodeableType,
-            &UA_RegisterServerResponse_EncodeableType,
+            &OpcUa_RegisterServerRequest_EncodeableType,
+            &OpcUa_RegisterServerResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_RegisterServerResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_RegisterServerResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -514,16 +513,16 @@ StatusCode UA_ClientApi_RegisterServer(
 /*============================================================================
  * Asynchronously calls the RegisterServer service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRegisterServer(
+StatusCode OpcUa_ClientApi_BeginRegisterServer(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
-    const UA_RegisteredServer*     a_pServer,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
+    const OpcUa_RegisteredServer*  a_pServer,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_RegisterServerRequest cRequest;
-    UA_RegisterServerRequest_Initialize(&cRequest);
+    OpcUa_RegisterServerRequest cRequest;
+    OpcUa_RegisterServerRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -541,8 +540,8 @@ StatusCode UA_ClientApi_BeginRegisterServer(
             a_hChannel,
             "RegisterServer",
             (void*)&cRequest,
-            &UA_RegisterServerRequest_EncodeableType,
-            &UA_RegisterServerResponse_EncodeableType,
+            &OpcUa_RegisterServerRequest_EncodeableType,
+            &OpcUa_RegisterServerResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -555,24 +554,24 @@ StatusCode UA_ClientApi_BeginRegisterServer(
 /*============================================================================
  * Synchronously calls the RegisterServer2 service.
  *===========================================================================*/
-StatusCode UA_ClientApi_RegisterServer2(
-    UA_Channel                 a_hChannel,
-    const UA_RequestHeader*    a_pRequestHeader,
-    const UA_RegisteredServer* a_pServer,
-    int32_t                    a_nNoOfDiscoveryConfiguration,
-    const UA_ExtensionObject*  a_pDiscoveryConfiguration,
-    UA_ResponseHeader*         a_pResponseHeader,
-    int32_t*                   a_pNoOfConfigurationResults,
-    StatusCode**               a_pConfigurationResults,
-    int32_t*                   a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**        a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_RegisterServer2(
+    UA_Channel                    a_hChannel,
+    const OpcUa_RequestHeader*    a_pRequestHeader,
+    const OpcUa_RegisteredServer* a_pServer,
+    int32_t                       a_nNoOfDiscoveryConfiguration,
+    const UA_ExtensionObject*     a_pDiscoveryConfiguration,
+    OpcUa_ResponseHeader*         a_pResponseHeader,
+    int32_t*                      a_pNoOfConfigurationResults,
+    StatusCode**                  a_pConfigurationResults,
+    int32_t*                      a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**           a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_RegisterServer2Request cRequest;
-    UA_RegisterServer2Response* pResponse = NULL;
+    OpcUa_RegisterServer2Request cRequest;
+    OpcUa_RegisterServer2Response* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_RegisterServer2Request_Initialize(&cRequest);
+    OpcUa_RegisterServer2Request_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -598,24 +597,24 @@ StatusCode UA_ClientApi_RegisterServer2(
             a_hChannel,
             "RegisterServer2",
             (void*)&cRequest,
-            &UA_RegisterServer2Request_EncodeableType,
-            &UA_RegisterServer2Response_EncodeableType,
+            &OpcUa_RegisterServer2Request_EncodeableType,
+            &OpcUa_RegisterServer2Response_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_RegisterServer2Response_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_RegisterServer2Response_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -640,18 +639,18 @@ StatusCode UA_ClientApi_RegisterServer2(
 /*============================================================================
  * Asynchronously calls the RegisterServer2 service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRegisterServer2(
+StatusCode OpcUa_ClientApi_BeginRegisterServer2(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
-    const UA_RegisteredServer*     a_pServer,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
+    const OpcUa_RegisteredServer*  a_pServer,
     int32_t                        a_nNoOfDiscoveryConfiguration,
     const UA_ExtensionObject*      a_pDiscoveryConfiguration,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_RegisterServer2Request cRequest;
-    UA_RegisterServer2Request_Initialize(&cRequest);
+    OpcUa_RegisterServer2Request cRequest;
+    OpcUa_RegisterServer2Request_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -672,8 +671,8 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
             a_hChannel,
             "RegisterServer2",
             (void*)&cRequest,
-            &UA_RegisterServer2Request_EncodeableType,
-            &UA_RegisterServer2Response_EncodeableType,
+            &OpcUa_RegisterServer2Request_EncodeableType,
+            &OpcUa_RegisterServer2Response_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -686,36 +685,36 @@ StatusCode UA_ClientApi_BeginRegisterServer2(
 /*============================================================================
  * Synchronously calls the CreateSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_CreateSession(
-    UA_Channel                       a_hChannel,
-    const UA_RequestHeader*          a_pRequestHeader,
-    const UA_ApplicationDescription* a_pClientDescription,
-    const UA_String*                 a_pServerUri,
-    const UA_String*                 a_pEndpointUrl,
-    const UA_String*                 a_pSessionName,
-    const UA_ByteString*             a_pClientNonce,
-    const UA_ByteString*             a_pClientCertificate,
-    double                           a_nRequestedSessionTimeout,
-    uint32_t                         a_nMaxResponseMessageSize,
-    UA_ResponseHeader*               a_pResponseHeader,
-    UA_NodeId*                       a_pSessionId,
-    UA_NodeId*                       a_pAuthenticationToken,
-    double*                          a_pRevisedSessionTimeout,
-    UA_ByteString*                   a_pServerNonce,
-    UA_ByteString*                   a_pServerCertificate,
-    int32_t*                         a_pNoOfServerEndpoints,
-    UA_EndpointDescription**         a_pServerEndpoints,
-    int32_t*                         a_pNoOfServerSoftwareCertificates,
-    UA_SignedSoftwareCertificate**   a_pServerSoftwareCertificates,
-    UA_SignatureData*                a_pServerSignature,
-    uint32_t*                        a_pMaxRequestMessageSize)
+StatusCode OpcUa_ClientApi_CreateSession(
+    UA_Channel                          a_hChannel,
+    const OpcUa_RequestHeader*          a_pRequestHeader,
+    const OpcUa_ApplicationDescription* a_pClientDescription,
+    const UA_String*                    a_pServerUri,
+    const UA_String*                    a_pEndpointUrl,
+    const UA_String*                    a_pSessionName,
+    const UA_ByteString*                a_pClientNonce,
+    const UA_ByteString*                a_pClientCertificate,
+    double                              a_nRequestedSessionTimeout,
+    uint32_t                            a_nMaxResponseMessageSize,
+    OpcUa_ResponseHeader*               a_pResponseHeader,
+    UA_NodeId*                          a_pSessionId,
+    UA_NodeId*                          a_pAuthenticationToken,
+    double*                             a_pRevisedSessionTimeout,
+    UA_ByteString*                      a_pServerNonce,
+    UA_ByteString*                      a_pServerCertificate,
+    int32_t*                            a_pNoOfServerEndpoints,
+    OpcUa_EndpointDescription**         a_pServerEndpoints,
+    int32_t*                            a_pNoOfServerSoftwareCertificates,
+    OpcUa_SignedSoftwareCertificate**   a_pServerSoftwareCertificates,
+    OpcUa_SignatureData*                a_pServerSignature,
+    uint32_t*                           a_pMaxRequestMessageSize)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CreateSessionRequest cRequest;
-    UA_CreateSessionResponse* pResponse = NULL;
+    OpcUa_CreateSessionRequest cRequest;
+    OpcUa_CreateSessionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_CreateSessionRequest_Initialize(&cRequest);
+    OpcUa_CreateSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -757,24 +756,24 @@ StatusCode UA_ClientApi_CreateSession(
             a_hChannel,
             "CreateSession",
             (void*)&cRequest,
-            &UA_CreateSessionRequest_EncodeableType,
-            &UA_CreateSessionResponse_EncodeableType,
+            &OpcUa_CreateSessionRequest_EncodeableType,
+            &OpcUa_CreateSessionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_CreateSessionResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_CreateSessionResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -806,23 +805,23 @@ StatusCode UA_ClientApi_CreateSession(
 /*============================================================================
  * Asynchronously calls the CreateSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCreateSession(
-    UA_Channel                       a_hChannel,
-    const UA_RequestHeader*          a_pRequestHeader,
-    const UA_ApplicationDescription* a_pClientDescription,
-    const UA_String*                 a_pServerUri,
-    const UA_String*                 a_pEndpointUrl,
-    const UA_String*                 a_pSessionName,
-    const UA_ByteString*             a_pClientNonce,
-    const UA_ByteString*             a_pClientCertificate,
-    double                           a_nRequestedSessionTimeout,
-    uint32_t                         a_nMaxResponseMessageSize,
-    UA_Channel_PfnRequestComplete*   a_pCallback,
-    void*                            a_pCallbackData)
+StatusCode OpcUa_ClientApi_BeginCreateSession(
+    UA_Channel                          a_hChannel,
+    const OpcUa_RequestHeader*          a_pRequestHeader,
+    const OpcUa_ApplicationDescription* a_pClientDescription,
+    const UA_String*                    a_pServerUri,
+    const UA_String*                    a_pEndpointUrl,
+    const UA_String*                    a_pSessionName,
+    const UA_ByteString*                a_pClientNonce,
+    const UA_ByteString*                a_pClientCertificate,
+    double                              a_nRequestedSessionTimeout,
+    uint32_t                            a_nMaxResponseMessageSize,
+    UA_Channel_PfnRequestComplete*      a_pCallback,
+    void*                               a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CreateSessionRequest cRequest;
-    UA_CreateSessionRequest_Initialize(&cRequest);
+    OpcUa_CreateSessionRequest cRequest;
+    OpcUa_CreateSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -852,8 +851,8 @@ StatusCode UA_ClientApi_BeginCreateSession(
             a_hChannel,
             "CreateSession",
             (void*)&cRequest,
-            &UA_CreateSessionRequest_EncodeableType,
-            &UA_CreateSessionResponse_EncodeableType,
+            &OpcUa_CreateSessionRequest_EncodeableType,
+            &OpcUa_CreateSessionResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -866,29 +865,29 @@ StatusCode UA_ClientApi_BeginCreateSession(
 /*============================================================================
  * Synchronously calls the ActivateSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_ActivateSession(
-    UA_Channel                          a_hChannel,
-    const UA_RequestHeader*             a_pRequestHeader,
-    const UA_SignatureData*             a_pClientSignature,
-    int32_t                             a_nNoOfClientSoftwareCertificates,
-    const UA_SignedSoftwareCertificate* a_pClientSoftwareCertificates,
-    int32_t                             a_nNoOfLocaleIds,
-    const UA_String*                    a_pLocaleIds,
-    const UA_ExtensionObject*           a_pUserIdentityToken,
-    const UA_SignatureData*             a_pUserTokenSignature,
-    UA_ResponseHeader*                  a_pResponseHeader,
-    UA_ByteString*                      a_pServerNonce,
-    int32_t*                            a_pNoOfResults,
-    StatusCode**                        a_pResults,
-    int32_t*                            a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**                 a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_ActivateSession(
+    UA_Channel                             a_hChannel,
+    const OpcUa_RequestHeader*             a_pRequestHeader,
+    const OpcUa_SignatureData*             a_pClientSignature,
+    int32_t                                a_nNoOfClientSoftwareCertificates,
+    const OpcUa_SignedSoftwareCertificate* a_pClientSoftwareCertificates,
+    int32_t                                a_nNoOfLocaleIds,
+    const UA_String*                       a_pLocaleIds,
+    const UA_ExtensionObject*              a_pUserIdentityToken,
+    const OpcUa_SignatureData*             a_pUserTokenSignature,
+    OpcUa_ResponseHeader*                  a_pResponseHeader,
+    UA_ByteString*                         a_pServerNonce,
+    int32_t*                               a_pNoOfResults,
+    StatusCode**                           a_pResults,
+    int32_t*                               a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**                    a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ActivateSessionRequest cRequest;
-    UA_ActivateSessionResponse* pResponse = NULL;
+    OpcUa_ActivateSessionRequest cRequest;
+    OpcUa_ActivateSessionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_ActivateSessionRequest_Initialize(&cRequest);
+    OpcUa_ActivateSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -911,7 +910,7 @@ StatusCode UA_ClientApi_ActivateSession(
         cRequest.RequestHeader                  = *a_pRequestHeader;
         cRequest.ClientSignature                = *a_pClientSignature;
         cRequest.NoOfClientSoftwareCertificates = a_nNoOfClientSoftwareCertificates;
-        cRequest.ClientSoftwareCertificates     = (UA_SignedSoftwareCertificate*)a_pClientSoftwareCertificates;
+        cRequest.ClientSoftwareCertificates     = (OpcUa_SignedSoftwareCertificate*)a_pClientSoftwareCertificates;
         cRequest.NoOfLocaleIds                  = a_nNoOfLocaleIds;
         cRequest.LocaleIds                      = (UA_String*)a_pLocaleIds;
         cRequest.UserIdentityToken              = *a_pUserIdentityToken;
@@ -922,24 +921,24 @@ StatusCode UA_ClientApi_ActivateSession(
             a_hChannel,
             "ActivateSession",
             (void*)&cRequest,
-            &UA_ActivateSessionRequest_EncodeableType,
-            &UA_ActivateSessionResponse_EncodeableType,
+            &OpcUa_ActivateSessionRequest_EncodeableType,
+            &OpcUa_ActivateSessionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_ActivateSessionResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_ActivateSessionResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -965,22 +964,22 @@ StatusCode UA_ClientApi_ActivateSession(
 /*============================================================================
  * Asynchronously calls the ActivateSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginActivateSession(
-    UA_Channel                          a_hChannel,
-    const UA_RequestHeader*             a_pRequestHeader,
-    const UA_SignatureData*             a_pClientSignature,
-    int32_t                             a_nNoOfClientSoftwareCertificates,
-    const UA_SignedSoftwareCertificate* a_pClientSoftwareCertificates,
-    int32_t                             a_nNoOfLocaleIds,
-    const UA_String*                    a_pLocaleIds,
-    const UA_ExtensionObject*           a_pUserIdentityToken,
-    const UA_SignatureData*             a_pUserTokenSignature,
-    UA_Channel_PfnRequestComplete*      a_pCallback,
-    void*                               a_pCallbackData)
+StatusCode OpcUa_ClientApi_BeginActivateSession(
+    UA_Channel                             a_hChannel,
+    const OpcUa_RequestHeader*             a_pRequestHeader,
+    const OpcUa_SignatureData*             a_pClientSignature,
+    int32_t                                a_nNoOfClientSoftwareCertificates,
+    const OpcUa_SignedSoftwareCertificate* a_pClientSoftwareCertificates,
+    int32_t                                a_nNoOfLocaleIds,
+    const UA_String*                       a_pLocaleIds,
+    const UA_ExtensionObject*              a_pUserIdentityToken,
+    const OpcUa_SignatureData*             a_pUserTokenSignature,
+    UA_Channel_PfnRequestComplete*         a_pCallback,
+    void*                                  a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ActivateSessionRequest cRequest;
-    UA_ActivateSessionRequest_Initialize(&cRequest);
+    OpcUa_ActivateSessionRequest cRequest;
+    OpcUa_ActivateSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -997,7 +996,7 @@ StatusCode UA_ClientApi_BeginActivateSession(
         cRequest.RequestHeader                  = *a_pRequestHeader;
         cRequest.ClientSignature                = *a_pClientSignature;
         cRequest.NoOfClientSoftwareCertificates = a_nNoOfClientSoftwareCertificates;
-        cRequest.ClientSoftwareCertificates     = (UA_SignedSoftwareCertificate*)a_pClientSoftwareCertificates;
+        cRequest.ClientSoftwareCertificates     = (OpcUa_SignedSoftwareCertificate*)a_pClientSoftwareCertificates;
         cRequest.NoOfLocaleIds                  = a_nNoOfLocaleIds;
         cRequest.LocaleIds                      = (UA_String*)a_pLocaleIds;
         cRequest.UserIdentityToken              = *a_pUserIdentityToken;
@@ -1008,8 +1007,8 @@ StatusCode UA_ClientApi_BeginActivateSession(
             a_hChannel,
             "ActivateSession",
             (void*)&cRequest,
-            &UA_ActivateSessionRequest_EncodeableType,
-            &UA_ActivateSessionResponse_EncodeableType,
+            &OpcUa_ActivateSessionRequest_EncodeableType,
+            &OpcUa_ActivateSessionResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1022,18 +1021,18 @@ StatusCode UA_ClientApi_BeginActivateSession(
 /*============================================================================
  * Synchronously calls the CloseSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_CloseSession(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    UA_Boolean              a_bDeleteSubscriptions,
-    UA_ResponseHeader*      a_pResponseHeader)
+StatusCode OpcUa_ClientApi_CloseSession(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    UA_Boolean                 a_bDeleteSubscriptions,
+    OpcUa_ResponseHeader*      a_pResponseHeader)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CloseSessionRequest cRequest;
-    UA_CloseSessionResponse* pResponse = NULL;
+    OpcUa_CloseSessionRequest cRequest;
+    OpcUa_CloseSessionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_CloseSessionRequest_Initialize(&cRequest);
+    OpcUa_CloseSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1051,24 +1050,24 @@ StatusCode UA_ClientApi_CloseSession(
             a_hChannel,
             "CloseSession",
             (void*)&cRequest,
-            &UA_CloseSessionRequest_EncodeableType,
-            &UA_CloseSessionResponse_EncodeableType,
+            &OpcUa_CloseSessionRequest_EncodeableType,
+            &OpcUa_CloseSessionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_CloseSessionResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_CloseSessionResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1089,16 +1088,16 @@ StatusCode UA_ClientApi_CloseSession(
 /*============================================================================
  * Asynchronously calls the CloseSession service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCloseSession(
+StatusCode OpcUa_ClientApi_BeginCloseSession(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     UA_Boolean                     a_bDeleteSubscriptions,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CloseSessionRequest cRequest;
-    UA_CloseSessionRequest_Initialize(&cRequest);
+    OpcUa_CloseSessionRequest cRequest;
+    OpcUa_CloseSessionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
@@ -1115,8 +1114,8 @@ StatusCode UA_ClientApi_BeginCloseSession(
             a_hChannel,
             "CloseSession",
             (void*)&cRequest,
-            &UA_CloseSessionRequest_EncodeableType,
-            &UA_CloseSessionResponse_EncodeableType,
+            &OpcUa_CloseSessionRequest_EncodeableType,
+            &OpcUa_CloseSessionResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1129,19 +1128,19 @@ StatusCode UA_ClientApi_BeginCloseSession(
 /*============================================================================
  * Synchronously calls the Cancel service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Cancel(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    uint32_t                a_nRequestHandle,
-    UA_ResponseHeader*      a_pResponseHeader,
-    uint32_t*               a_pCancelCount)
+StatusCode OpcUa_ClientApi_Cancel(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    uint32_t                   a_nRequestHandle,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    uint32_t*                  a_pCancelCount)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CancelRequest cRequest;
-    UA_CancelResponse* pResponse = NULL;
+    OpcUa_CancelRequest cRequest;
+    OpcUa_CancelResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_CancelRequest_Initialize(&cRequest);
+    OpcUa_CancelRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1160,24 +1159,24 @@ StatusCode UA_ClientApi_Cancel(
             a_hChannel,
             "Cancel",
             (void*)&cRequest,
-            &UA_CancelRequest_EncodeableType,
-            &UA_CancelResponse_EncodeableType,
+            &OpcUa_CancelRequest_EncodeableType,
+            &OpcUa_CancelResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_CancelResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_CancelResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1199,16 +1198,16 @@ StatusCode UA_ClientApi_Cancel(
 /*============================================================================
  * Asynchronously calls the Cancel service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCancel(
+StatusCode OpcUa_ClientApi_BeginCancel(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nRequestHandle,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CancelRequest cRequest;
-    UA_CancelRequest_Initialize(&cRequest);
+    OpcUa_CancelRequest cRequest;
+    OpcUa_CancelRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
@@ -1225,8 +1224,8 @@ StatusCode UA_ClientApi_BeginCancel(
             a_hChannel,
             "Cancel",
             (void*)&cRequest,
-            &UA_CancelRequest_EncodeableType,
-            &UA_CancelResponse_EncodeableType,
+            &OpcUa_CancelRequest_EncodeableType,
+            &OpcUa_CancelResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1239,23 +1238,23 @@ StatusCode UA_ClientApi_BeginCancel(
 /*============================================================================
  * Synchronously calls the AddNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_AddNodes(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    int32_t                 a_nNoOfNodesToAdd,
-    const UA_AddNodesItem*  a_pNodesToAdd,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    UA_AddNodesResult**     a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_AddNodes(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    int32_t                    a_nNoOfNodesToAdd,
+    const OpcUa_AddNodesItem*  a_pNodesToAdd,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    OpcUa_AddNodesResult**     a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_AddNodesRequest cRequest;
-    UA_AddNodesResponse* pResponse = NULL;
+    OpcUa_AddNodesRequest cRequest;
+    OpcUa_AddNodesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_AddNodesRequest_Initialize(&cRequest);
+    OpcUa_AddNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1272,31 +1271,31 @@ StatusCode UA_ClientApi_AddNodes(
         /* copy parameters into request object. */
         cRequest.RequestHeader  = *a_pRequestHeader;
         cRequest.NoOfNodesToAdd = a_nNoOfNodesToAdd;
-        cRequest.NodesToAdd     = (UA_AddNodesItem*)a_pNodesToAdd;
+        cRequest.NodesToAdd     = (OpcUa_AddNodesItem*)a_pNodesToAdd;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "AddNodes",
             (void*)&cRequest,
-            &UA_AddNodesRequest_EncodeableType,
-            &UA_AddNodesResponse_EncodeableType,
+            &OpcUa_AddNodesRequest_EncodeableType,
+            &OpcUa_AddNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_AddNodesResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_AddNodesResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1321,17 +1320,17 @@ StatusCode UA_ClientApi_AddNodes(
 /*============================================================================
  * Asynchronously calls the AddNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginAddNodes(
+StatusCode OpcUa_ClientApi_BeginAddNodes(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToAdd,
-    const UA_AddNodesItem*         a_pNodesToAdd,
+    const OpcUa_AddNodesItem*      a_pNodesToAdd,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_AddNodesRequest cRequest;
-    UA_AddNodesRequest_Initialize(&cRequest);
+    OpcUa_AddNodesRequest cRequest;
+    OpcUa_AddNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1343,15 +1342,15 @@ StatusCode UA_ClientApi_BeginAddNodes(
         /* copy parameters into request object. */
         cRequest.RequestHeader  = *a_pRequestHeader;
         cRequest.NoOfNodesToAdd = a_nNoOfNodesToAdd;
-        cRequest.NodesToAdd     = (UA_AddNodesItem*)a_pNodesToAdd;
+        cRequest.NodesToAdd     = (OpcUa_AddNodesItem*)a_pNodesToAdd;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "AddNodes",
             (void*)&cRequest,
-            &UA_AddNodesRequest_EncodeableType,
-            &UA_AddNodesResponse_EncodeableType,
+            &OpcUa_AddNodesRequest_EncodeableType,
+            &OpcUa_AddNodesResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1364,23 +1363,23 @@ StatusCode UA_ClientApi_BeginAddNodes(
 /*============================================================================
  * Synchronously calls the AddReferences service.
  *===========================================================================*/
-StatusCode UA_ClientApi_AddReferences(
-    UA_Channel                  a_hChannel,
-    const UA_RequestHeader*     a_pRequestHeader,
-    int32_t                     a_nNoOfReferencesToAdd,
-    const UA_AddReferencesItem* a_pReferencesToAdd,
-    UA_ResponseHeader*          a_pResponseHeader,
-    int32_t*                    a_pNoOfResults,
-    StatusCode**                a_pResults,
-    int32_t*                    a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**         a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_AddReferences(
+    UA_Channel                     a_hChannel,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
+    int32_t                        a_nNoOfReferencesToAdd,
+    const OpcUa_AddReferencesItem* a_pReferencesToAdd,
+    OpcUa_ResponseHeader*          a_pResponseHeader,
+    int32_t*                       a_pNoOfResults,
+    StatusCode**                   a_pResults,
+    int32_t*                       a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**            a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_AddReferencesRequest cRequest;
-    UA_AddReferencesResponse* pResponse = NULL;
+    OpcUa_AddReferencesRequest cRequest;
+    OpcUa_AddReferencesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_AddReferencesRequest_Initialize(&cRequest);
+    OpcUa_AddReferencesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1397,31 +1396,31 @@ StatusCode UA_ClientApi_AddReferences(
         /* copy parameters into request object. */
         cRequest.RequestHeader       = *a_pRequestHeader;
         cRequest.NoOfReferencesToAdd = a_nNoOfReferencesToAdd;
-        cRequest.ReferencesToAdd     = (UA_AddReferencesItem*)a_pReferencesToAdd;
+        cRequest.ReferencesToAdd     = (OpcUa_AddReferencesItem*)a_pReferencesToAdd;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "AddReferences",
             (void*)&cRequest,
-            &UA_AddReferencesRequest_EncodeableType,
-            &UA_AddReferencesResponse_EncodeableType,
+            &OpcUa_AddReferencesRequest_EncodeableType,
+            &OpcUa_AddReferencesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_AddReferencesResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_AddReferencesResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1446,17 +1445,17 @@ StatusCode UA_ClientApi_AddReferences(
 /*============================================================================
  * Asynchronously calls the AddReferences service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginAddReferences(
+StatusCode OpcUa_ClientApi_BeginAddReferences(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfReferencesToAdd,
-    const UA_AddReferencesItem*    a_pReferencesToAdd,
+    const OpcUa_AddReferencesItem* a_pReferencesToAdd,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_AddReferencesRequest cRequest;
-    UA_AddReferencesRequest_Initialize(&cRequest);
+    OpcUa_AddReferencesRequest cRequest;
+    OpcUa_AddReferencesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1468,15 +1467,15 @@ StatusCode UA_ClientApi_BeginAddReferences(
         /* copy parameters into request object. */
         cRequest.RequestHeader       = *a_pRequestHeader;
         cRequest.NoOfReferencesToAdd = a_nNoOfReferencesToAdd;
-        cRequest.ReferencesToAdd     = (UA_AddReferencesItem*)a_pReferencesToAdd;
+        cRequest.ReferencesToAdd     = (OpcUa_AddReferencesItem*)a_pReferencesToAdd;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "AddReferences",
             (void*)&cRequest,
-            &UA_AddReferencesRequest_EncodeableType,
-            &UA_AddReferencesResponse_EncodeableType,
+            &OpcUa_AddReferencesRequest_EncodeableType,
+            &OpcUa_AddReferencesResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1489,23 +1488,23 @@ StatusCode UA_ClientApi_BeginAddReferences(
 /*============================================================================
  * Synchronously calls the DeleteNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_DeleteNodes(
-    UA_Channel                a_hChannel,
-    const UA_RequestHeader*   a_pRequestHeader,
-    int32_t                   a_nNoOfNodesToDelete,
-    const UA_DeleteNodesItem* a_pNodesToDelete,
-    UA_ResponseHeader*        a_pResponseHeader,
-    int32_t*                  a_pNoOfResults,
-    StatusCode**              a_pResults,
-    int32_t*                  a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**       a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_DeleteNodes(
+    UA_Channel                   a_hChannel,
+    const OpcUa_RequestHeader*   a_pRequestHeader,
+    int32_t                      a_nNoOfNodesToDelete,
+    const OpcUa_DeleteNodesItem* a_pNodesToDelete,
+    OpcUa_ResponseHeader*        a_pResponseHeader,
+    int32_t*                     a_pNoOfResults,
+    StatusCode**                 a_pResults,
+    int32_t*                     a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**          a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_DeleteNodesRequest cRequest;
-    UA_DeleteNodesResponse* pResponse = NULL;
+    OpcUa_DeleteNodesRequest cRequest;
+    OpcUa_DeleteNodesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_DeleteNodesRequest_Initialize(&cRequest);
+    OpcUa_DeleteNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1522,31 +1521,31 @@ StatusCode UA_ClientApi_DeleteNodes(
         /* copy parameters into request object. */
         cRequest.RequestHeader     = *a_pRequestHeader;
         cRequest.NoOfNodesToDelete = a_nNoOfNodesToDelete;
-        cRequest.NodesToDelete     = (UA_DeleteNodesItem*)a_pNodesToDelete;
+        cRequest.NodesToDelete     = (OpcUa_DeleteNodesItem*)a_pNodesToDelete;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "DeleteNodes",
             (void*)&cRequest,
-            &UA_DeleteNodesRequest_EncodeableType,
-            &UA_DeleteNodesResponse_EncodeableType,
+            &OpcUa_DeleteNodesRequest_EncodeableType,
+            &OpcUa_DeleteNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_DeleteNodesResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_DeleteNodesResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1571,17 +1570,17 @@ StatusCode UA_ClientApi_DeleteNodes(
 /*============================================================================
  * Asynchronously calls the DeleteNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginDeleteNodes(
+StatusCode OpcUa_ClientApi_BeginDeleteNodes(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToDelete,
-    const UA_DeleteNodesItem*      a_pNodesToDelete,
+    const OpcUa_DeleteNodesItem*   a_pNodesToDelete,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_DeleteNodesRequest cRequest;
-    UA_DeleteNodesRequest_Initialize(&cRequest);
+    OpcUa_DeleteNodesRequest cRequest;
+    OpcUa_DeleteNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1593,15 +1592,15 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
         /* copy parameters into request object. */
         cRequest.RequestHeader     = *a_pRequestHeader;
         cRequest.NoOfNodesToDelete = a_nNoOfNodesToDelete;
-        cRequest.NodesToDelete     = (UA_DeleteNodesItem*)a_pNodesToDelete;
+        cRequest.NodesToDelete     = (OpcUa_DeleteNodesItem*)a_pNodesToDelete;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteNodes",
             (void*)&cRequest,
-            &UA_DeleteNodesRequest_EncodeableType,
-            &UA_DeleteNodesResponse_EncodeableType,
+            &OpcUa_DeleteNodesRequest_EncodeableType,
+            &OpcUa_DeleteNodesResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1614,23 +1613,23 @@ StatusCode UA_ClientApi_BeginDeleteNodes(
 /*============================================================================
  * Synchronously calls the DeleteReferences service.
  *===========================================================================*/
-StatusCode UA_ClientApi_DeleteReferences(
-    UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
-    int32_t                        a_nNoOfReferencesToDelete,
-    const UA_DeleteReferencesItem* a_pReferencesToDelete,
-    UA_ResponseHeader*             a_pResponseHeader,
-    int32_t*                       a_pNoOfResults,
-    StatusCode**                   a_pResults,
-    int32_t*                       a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**            a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_DeleteReferences(
+    UA_Channel                        a_hChannel,
+    const OpcUa_RequestHeader*        a_pRequestHeader,
+    int32_t                           a_nNoOfReferencesToDelete,
+    const OpcUa_DeleteReferencesItem* a_pReferencesToDelete,
+    OpcUa_ResponseHeader*             a_pResponseHeader,
+    int32_t*                          a_pNoOfResults,
+    StatusCode**                      a_pResults,
+    int32_t*                          a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**               a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_DeleteReferencesRequest cRequest;
-    UA_DeleteReferencesResponse* pResponse = NULL;
+    OpcUa_DeleteReferencesRequest cRequest;
+    OpcUa_DeleteReferencesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_DeleteReferencesRequest_Initialize(&cRequest);
+    OpcUa_DeleteReferencesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1647,31 +1646,31 @@ StatusCode UA_ClientApi_DeleteReferences(
         /* copy parameters into request object. */
         cRequest.RequestHeader          = *a_pRequestHeader;
         cRequest.NoOfReferencesToDelete = a_nNoOfReferencesToDelete;
-        cRequest.ReferencesToDelete     = (UA_DeleteReferencesItem*)a_pReferencesToDelete;
+        cRequest.ReferencesToDelete     = (OpcUa_DeleteReferencesItem*)a_pReferencesToDelete;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "DeleteReferences",
             (void*)&cRequest,
-            &UA_DeleteReferencesRequest_EncodeableType,
-            &UA_DeleteReferencesResponse_EncodeableType,
+            &OpcUa_DeleteReferencesRequest_EncodeableType,
+            &OpcUa_DeleteReferencesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_DeleteReferencesResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_DeleteReferencesResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1696,17 +1695,17 @@ StatusCode UA_ClientApi_DeleteReferences(
 /*============================================================================
  * Asynchronously calls the DeleteReferences service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginDeleteReferences(
-    UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
-    int32_t                        a_nNoOfReferencesToDelete,
-    const UA_DeleteReferencesItem* a_pReferencesToDelete,
-    UA_Channel_PfnRequestComplete* a_pCallback,
-    void*                          a_pCallbackData)
+StatusCode OpcUa_ClientApi_BeginDeleteReferences(
+    UA_Channel                        a_hChannel,
+    const OpcUa_RequestHeader*        a_pRequestHeader,
+    int32_t                           a_nNoOfReferencesToDelete,
+    const OpcUa_DeleteReferencesItem* a_pReferencesToDelete,
+    UA_Channel_PfnRequestComplete*    a_pCallback,
+    void*                             a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_DeleteReferencesRequest cRequest;
-    UA_DeleteReferencesRequest_Initialize(&cRequest);
+    OpcUa_DeleteReferencesRequest cRequest;
+    OpcUa_DeleteReferencesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1718,15 +1717,15 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
         /* copy parameters into request object. */
         cRequest.RequestHeader          = *a_pRequestHeader;
         cRequest.NoOfReferencesToDelete = a_nNoOfReferencesToDelete;
-        cRequest.ReferencesToDelete     = (UA_DeleteReferencesItem*)a_pReferencesToDelete;
+        cRequest.ReferencesToDelete     = (OpcUa_DeleteReferencesItem*)a_pReferencesToDelete;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "DeleteReferences",
             (void*)&cRequest,
-            &UA_DeleteReferencesRequest_EncodeableType,
-            &UA_DeleteReferencesResponse_EncodeableType,
+            &OpcUa_DeleteReferencesRequest_EncodeableType,
+            &OpcUa_DeleteReferencesResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1739,25 +1738,25 @@ StatusCode UA_ClientApi_BeginDeleteReferences(
 /*============================================================================
  * Synchronously calls the Browse service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Browse(
-    UA_Channel                  a_hChannel,
-    const UA_RequestHeader*     a_pRequestHeader,
-    const UA_ViewDescription*   a_pView,
-    uint32_t                    a_nRequestedMaxReferencesPerNode,
-    int32_t                     a_nNoOfNodesToBrowse,
-    const UA_BrowseDescription* a_pNodesToBrowse,
-    UA_ResponseHeader*          a_pResponseHeader,
-    int32_t*                    a_pNoOfResults,
-    UA_BrowseResult**           a_pResults,
-    int32_t*                    a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**         a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_Browse(
+    UA_Channel                     a_hChannel,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
+    const OpcUa_ViewDescription*   a_pView,
+    uint32_t                       a_nRequestedMaxReferencesPerNode,
+    int32_t                        a_nNoOfNodesToBrowse,
+    const OpcUa_BrowseDescription* a_pNodesToBrowse,
+    OpcUa_ResponseHeader*          a_pResponseHeader,
+    int32_t*                       a_pNoOfResults,
+    OpcUa_BrowseResult**           a_pResults,
+    int32_t*                       a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**            a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_BrowseRequest cRequest;
-    UA_BrowseResponse* pResponse = NULL;
+    OpcUa_BrowseRequest cRequest;
+    OpcUa_BrowseResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_BrowseRequest_Initialize(&cRequest);
+    OpcUa_BrowseRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1777,31 +1776,31 @@ StatusCode UA_ClientApi_Browse(
         cRequest.View                          = *a_pView;
         cRequest.RequestedMaxReferencesPerNode = a_nRequestedMaxReferencesPerNode;
         cRequest.NoOfNodesToBrowse             = a_nNoOfNodesToBrowse;
-        cRequest.NodesToBrowse                 = (UA_BrowseDescription*)a_pNodesToBrowse;
+        cRequest.NodesToBrowse                 = (OpcUa_BrowseDescription*)a_pNodesToBrowse;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "Browse",
             (void*)&cRequest,
-            &UA_BrowseRequest_EncodeableType,
-            &UA_BrowseResponse_EncodeableType,
+            &OpcUa_BrowseRequest_EncodeableType,
+            &OpcUa_BrowseResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_BrowseResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_BrowseResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1826,19 +1825,19 @@ StatusCode UA_ClientApi_Browse(
 /*============================================================================
  * Asynchronously calls the Browse service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginBrowse(
+StatusCode OpcUa_ClientApi_BeginBrowse(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
-    const UA_ViewDescription*      a_pView,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
+    const OpcUa_ViewDescription*   a_pView,
     uint32_t                       a_nRequestedMaxReferencesPerNode,
     int32_t                        a_nNoOfNodesToBrowse,
-    const UA_BrowseDescription*    a_pNodesToBrowse,
+    const OpcUa_BrowseDescription* a_pNodesToBrowse,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_BrowseRequest cRequest;
-    UA_BrowseRequest_Initialize(&cRequest);
+    OpcUa_BrowseRequest cRequest;
+    OpcUa_BrowseRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1853,15 +1852,15 @@ StatusCode UA_ClientApi_BeginBrowse(
         cRequest.View                          = *a_pView;
         cRequest.RequestedMaxReferencesPerNode = a_nRequestedMaxReferencesPerNode;
         cRequest.NoOfNodesToBrowse             = a_nNoOfNodesToBrowse;
-        cRequest.NodesToBrowse                 = (UA_BrowseDescription*)a_pNodesToBrowse;
+        cRequest.NodesToBrowse                 = (OpcUa_BrowseDescription*)a_pNodesToBrowse;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Browse",
             (void*)&cRequest,
-            &UA_BrowseRequest_EncodeableType,
-            &UA_BrowseResponse_EncodeableType,
+            &OpcUa_BrowseRequest_EncodeableType,
+            &OpcUa_BrowseResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -1874,24 +1873,24 @@ StatusCode UA_ClientApi_BeginBrowse(
 /*============================================================================
  * Synchronously calls the BrowseNext service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BrowseNext(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    UA_Boolean              a_bReleaseContinuationPoints,
-    int32_t                 a_nNoOfContinuationPoints,
-    const UA_ByteString*    a_pContinuationPoints,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    UA_BrowseResult**       a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_BrowseNext(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    UA_Boolean                 a_bReleaseContinuationPoints,
+    int32_t                    a_nNoOfContinuationPoints,
+    const UA_ByteString*       a_pContinuationPoints,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    OpcUa_BrowseResult**       a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_BrowseNextRequest cRequest;
-    UA_BrowseNextResponse* pResponse = NULL;
+    OpcUa_BrowseNextRequest cRequest;
+    OpcUa_BrowseNextResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_BrowseNextRequest_Initialize(&cRequest);
+    OpcUa_BrowseNextRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1916,24 +1915,24 @@ StatusCode UA_ClientApi_BrowseNext(
             a_hChannel,
             "BrowseNext",
             (void*)&cRequest,
-            &UA_BrowseNextRequest_EncodeableType,
-            &UA_BrowseNextResponse_EncodeableType,
+            &OpcUa_BrowseNextRequest_EncodeableType,
+            &OpcUa_BrowseNextResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_BrowseNextResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_BrowseNextResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -1958,9 +1957,9 @@ StatusCode UA_ClientApi_BrowseNext(
 /*============================================================================
  * Asynchronously calls the BrowseNext service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginBrowseNext(
+StatusCode OpcUa_ClientApi_BeginBrowseNext(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     UA_Boolean                     a_bReleaseContinuationPoints,
     int32_t                        a_nNoOfContinuationPoints,
     const UA_ByteString*           a_pContinuationPoints,
@@ -1968,8 +1967,8 @@ StatusCode UA_ClientApi_BeginBrowseNext(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_BrowseNextRequest cRequest;
-    UA_BrowseNextRequest_Initialize(&cRequest);
+    OpcUa_BrowseNextRequest cRequest;
+    OpcUa_BrowseNextRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -1989,8 +1988,8 @@ StatusCode UA_ClientApi_BeginBrowseNext(
             a_hChannel,
             "BrowseNext",
             (void*)&cRequest,
-            &UA_BrowseNextRequest_EncodeableType,
-            &UA_BrowseNextResponse_EncodeableType,
+            &OpcUa_BrowseNextRequest_EncodeableType,
+            &OpcUa_BrowseNextResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2003,23 +2002,23 @@ StatusCode UA_ClientApi_BeginBrowseNext(
 /*============================================================================
  * Synchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
-StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    int32_t                 a_nNoOfBrowsePaths,
-    const UA_BrowsePath*    a_pBrowsePaths,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    UA_BrowsePathResult**   a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    int32_t                    a_nNoOfBrowsePaths,
+    const OpcUa_BrowsePath*    a_pBrowsePaths,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    OpcUa_BrowsePathResult**   a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_TranslateBrowsePathsToNodeIdsRequest cRequest;
-    UA_TranslateBrowsePathsToNodeIdsResponse* pResponse = NULL;
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest cRequest;
+    OpcUa_TranslateBrowsePathsToNodeIdsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_TranslateBrowsePathsToNodeIdsRequest_Initialize(&cRequest);
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2036,31 +2035,31 @@ StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
         /* copy parameters into request object. */
         cRequest.RequestHeader   = *a_pRequestHeader;
         cRequest.NoOfBrowsePaths = a_nNoOfBrowsePaths;
-        cRequest.BrowsePaths     = (UA_BrowsePath*)a_pBrowsePaths;
+        cRequest.BrowsePaths     = (OpcUa_BrowsePath*)a_pBrowsePaths;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "TranslateBrowsePathsToNodeIds",
             (void*)&cRequest,
-            &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
-            &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
+            &OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
+            &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2085,17 +2084,17 @@ StatusCode UA_ClientApi_TranslateBrowsePathsToNodeIds(
 /*============================================================================
  * Asynchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
+StatusCode OpcUa_ClientApi_BeginTranslateBrowsePathsToNodeIds(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfBrowsePaths,
-    const UA_BrowsePath*           a_pBrowsePaths,
+    const OpcUa_BrowsePath*        a_pBrowsePaths,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_TranslateBrowsePathsToNodeIdsRequest cRequest;
-    UA_TranslateBrowsePathsToNodeIdsRequest_Initialize(&cRequest);
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest cRequest;
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2107,15 +2106,15 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
         /* copy parameters into request object. */
         cRequest.RequestHeader   = *a_pRequestHeader;
         cRequest.NoOfBrowsePaths = a_nNoOfBrowsePaths;
-        cRequest.BrowsePaths     = (UA_BrowsePath*)a_pBrowsePaths;
+        cRequest.BrowsePaths     = (OpcUa_BrowsePath*)a_pBrowsePaths;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "TranslateBrowsePathsToNodeIds",
             (void*)&cRequest,
-            &UA_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
-            &UA_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
+            &OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
+            &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2128,21 +2127,21 @@ StatusCode UA_ClientApi_BeginTranslateBrowsePathsToNodeIds(
 /*============================================================================
  * Synchronously calls the RegisterNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_RegisterNodes(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    int32_t                 a_nNoOfNodesToRegister,
-    const UA_NodeId*        a_pNodesToRegister,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfRegisteredNodeIds,
-    UA_NodeId**             a_pRegisteredNodeIds)
+StatusCode OpcUa_ClientApi_RegisterNodes(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    int32_t                    a_nNoOfNodesToRegister,
+    const UA_NodeId*           a_pNodesToRegister,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfRegisteredNodeIds,
+    UA_NodeId**                a_pRegisteredNodeIds)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_RegisterNodesRequest cRequest;
-    UA_RegisterNodesResponse* pResponse = NULL;
+    OpcUa_RegisterNodesRequest cRequest;
+    OpcUa_RegisterNodesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_RegisterNodesRequest_Initialize(&cRequest);
+    OpcUa_RegisterNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2164,24 +2163,24 @@ StatusCode UA_ClientApi_RegisterNodes(
             a_hChannel,
             "RegisterNodes",
             (void*)&cRequest,
-            &UA_RegisterNodesRequest_EncodeableType,
-            &UA_RegisterNodesResponse_EncodeableType,
+            &OpcUa_RegisterNodesRequest_EncodeableType,
+            &OpcUa_RegisterNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_RegisterNodesResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_RegisterNodesResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2204,17 +2203,17 @@ StatusCode UA_ClientApi_RegisterNodes(
 /*============================================================================
  * Asynchronously calls the RegisterNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRegisterNodes(
+StatusCode OpcUa_ClientApi_BeginRegisterNodes(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToRegister,
     const UA_NodeId*               a_pNodesToRegister,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_RegisterNodesRequest cRequest;
-    UA_RegisterNodesRequest_Initialize(&cRequest);
+    OpcUa_RegisterNodesRequest cRequest;
+    OpcUa_RegisterNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2233,8 +2232,8 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
             a_hChannel,
             "RegisterNodes",
             (void*)&cRequest,
-            &UA_RegisterNodesRequest_EncodeableType,
-            &UA_RegisterNodesResponse_EncodeableType,
+            &OpcUa_RegisterNodesRequest_EncodeableType,
+            &OpcUa_RegisterNodesResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2247,19 +2246,19 @@ StatusCode UA_ClientApi_BeginRegisterNodes(
 /*============================================================================
  * Synchronously calls the UnregisterNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_UnregisterNodes(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    int32_t                 a_nNoOfNodesToUnregister,
-    const UA_NodeId*        a_pNodesToUnregister,
-    UA_ResponseHeader*      a_pResponseHeader)
+StatusCode OpcUa_ClientApi_UnregisterNodes(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    int32_t                    a_nNoOfNodesToUnregister,
+    const UA_NodeId*           a_pNodesToUnregister,
+    OpcUa_ResponseHeader*      a_pResponseHeader)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_UnregisterNodesRequest cRequest;
-    UA_UnregisterNodesResponse* pResponse = NULL;
+    OpcUa_UnregisterNodesRequest cRequest;
+    OpcUa_UnregisterNodesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_UnregisterNodesRequest_Initialize(&cRequest);
+    OpcUa_UnregisterNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2279,24 +2278,24 @@ StatusCode UA_ClientApi_UnregisterNodes(
             a_hChannel,
             "UnregisterNodes",
             (void*)&cRequest,
-            &UA_UnregisterNodesRequest_EncodeableType,
-            &UA_UnregisterNodesResponse_EncodeableType,
+            &OpcUa_UnregisterNodesRequest_EncodeableType,
+            &OpcUa_UnregisterNodesResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_UnregisterNodesResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_UnregisterNodesResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2317,17 +2316,17 @@ StatusCode UA_ClientApi_UnregisterNodes(
 /*============================================================================
  * Asynchronously calls the UnregisterNodes service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginUnregisterNodes(
+StatusCode OpcUa_ClientApi_BeginUnregisterNodes(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToUnregister,
     const UA_NodeId*               a_pNodesToUnregister,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_UnregisterNodesRequest cRequest;
-    UA_UnregisterNodesRequest_Initialize(&cRequest);
+    OpcUa_UnregisterNodesRequest cRequest;
+    OpcUa_UnregisterNodesRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2346,8 +2345,8 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
             a_hChannel,
             "UnregisterNodes",
             (void*)&cRequest,
-            &UA_UnregisterNodesRequest_EncodeableType,
-            &UA_UnregisterNodesResponse_EncodeableType,
+            &OpcUa_UnregisterNodesRequest_EncodeableType,
+            &OpcUa_UnregisterNodesResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2360,31 +2359,31 @@ StatusCode UA_ClientApi_BeginUnregisterNodes(
 /*============================================================================
  * Synchronously calls the QueryFirst service.
  *===========================================================================*/
-StatusCode UA_ClientApi_QueryFirst(
-    UA_Channel                    a_hChannel,
-    const UA_RequestHeader*       a_pRequestHeader,
-    const UA_ViewDescription*     a_pView,
-    int32_t                       a_nNoOfNodeTypes,
-    const UA_NodeTypeDescription* a_pNodeTypes,
-    const UA_ContentFilter*       a_pFilter,
-    uint32_t                      a_nMaxDataSetsToReturn,
-    uint32_t                      a_nMaxReferencesToReturn,
-    UA_ResponseHeader*            a_pResponseHeader,
-    int32_t*                      a_pNoOfQueryDataSets,
-    UA_QueryDataSet**             a_pQueryDataSets,
-    UA_ByteString*                a_pContinuationPoint,
-    int32_t*                      a_pNoOfParsingResults,
-    UA_ParsingResult**            a_pParsingResults,
-    int32_t*                      a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**           a_pDiagnosticInfos,
-    UA_ContentFilterResult*       a_pFilterResult)
+StatusCode OpcUa_ClientApi_QueryFirst(
+    UA_Channel                       a_hChannel,
+    const OpcUa_RequestHeader*       a_pRequestHeader,
+    const OpcUa_ViewDescription*     a_pView,
+    int32_t                          a_nNoOfNodeTypes,
+    const OpcUa_NodeTypeDescription* a_pNodeTypes,
+    const OpcUa_ContentFilter*       a_pFilter,
+    uint32_t                         a_nMaxDataSetsToReturn,
+    uint32_t                         a_nMaxReferencesToReturn,
+    OpcUa_ResponseHeader*            a_pResponseHeader,
+    int32_t*                         a_pNoOfQueryDataSets,
+    OpcUa_QueryDataSet**             a_pQueryDataSets,
+    UA_ByteString*                   a_pContinuationPoint,
+    int32_t*                         a_pNoOfParsingResults,
+    OpcUa_ParsingResult**            a_pParsingResults,
+    int32_t*                         a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**              a_pDiagnosticInfos,
+    OpcUa_ContentFilterResult*       a_pFilterResult)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_QueryFirstRequest cRequest;
-    UA_QueryFirstResponse* pResponse = NULL;
+    OpcUa_QueryFirstRequest cRequest;
+    OpcUa_QueryFirstResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_QueryFirstRequest_Initialize(&cRequest);
+    OpcUa_QueryFirstRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2408,7 +2407,7 @@ StatusCode UA_ClientApi_QueryFirst(
         cRequest.RequestHeader         = *a_pRequestHeader;
         cRequest.View                  = *a_pView;
         cRequest.NoOfNodeTypes         = a_nNoOfNodeTypes;
-        cRequest.NodeTypes             = (UA_NodeTypeDescription*)a_pNodeTypes;
+        cRequest.NodeTypes             = (OpcUa_NodeTypeDescription*)a_pNodeTypes;
         cRequest.Filter                = *a_pFilter;
         cRequest.MaxDataSetsToReturn   = a_nMaxDataSetsToReturn;
         cRequest.MaxReferencesToReturn = a_nMaxReferencesToReturn;
@@ -2418,24 +2417,24 @@ StatusCode UA_ClientApi_QueryFirst(
             a_hChannel,
             "QueryFirst",
             (void*)&cRequest,
-            &UA_QueryFirstRequest_EncodeableType,
-            &UA_QueryFirstResponse_EncodeableType,
+            &OpcUa_QueryFirstRequest_EncodeableType,
+            &OpcUa_QueryFirstResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_QueryFirstResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_QueryFirstResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2464,21 +2463,21 @@ StatusCode UA_ClientApi_QueryFirst(
 /*============================================================================
  * Asynchronously calls the QueryFirst service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginQueryFirst(
-    UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
-    const UA_ViewDescription*      a_pView,
-    int32_t                        a_nNoOfNodeTypes,
-    const UA_NodeTypeDescription*  a_pNodeTypes,
-    const UA_ContentFilter*        a_pFilter,
-    uint32_t                       a_nMaxDataSetsToReturn,
-    uint32_t                       a_nMaxReferencesToReturn,
-    UA_Channel_PfnRequestComplete* a_pCallback,
-    void*                          a_pCallbackData)
+StatusCode OpcUa_ClientApi_BeginQueryFirst(
+    UA_Channel                       a_hChannel,
+    const OpcUa_RequestHeader*       a_pRequestHeader,
+    const OpcUa_ViewDescription*     a_pView,
+    int32_t                          a_nNoOfNodeTypes,
+    const OpcUa_NodeTypeDescription* a_pNodeTypes,
+    const OpcUa_ContentFilter*       a_pFilter,
+    uint32_t                         a_nMaxDataSetsToReturn,
+    uint32_t                         a_nMaxReferencesToReturn,
+    UA_Channel_PfnRequestComplete*   a_pCallback,
+    void*                            a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_QueryFirstRequest cRequest;
-    UA_QueryFirstRequest_Initialize(&cRequest);
+    OpcUa_QueryFirstRequest cRequest;
+    OpcUa_QueryFirstRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2493,7 +2492,7 @@ StatusCode UA_ClientApi_BeginQueryFirst(
         cRequest.RequestHeader         = *a_pRequestHeader;
         cRequest.View                  = *a_pView;
         cRequest.NoOfNodeTypes         = a_nNoOfNodeTypes;
-        cRequest.NodeTypes             = (UA_NodeTypeDescription*)a_pNodeTypes;
+        cRequest.NodeTypes             = (OpcUa_NodeTypeDescription*)a_pNodeTypes;
         cRequest.Filter                = *a_pFilter;
         cRequest.MaxDataSetsToReturn   = a_nMaxDataSetsToReturn;
         cRequest.MaxReferencesToReturn = a_nMaxReferencesToReturn;
@@ -2503,8 +2502,8 @@ StatusCode UA_ClientApi_BeginQueryFirst(
             a_hChannel,
             "QueryFirst",
             (void*)&cRequest,
-            &UA_QueryFirstRequest_EncodeableType,
-            &UA_QueryFirstResponse_EncodeableType,
+            &OpcUa_QueryFirstRequest_EncodeableType,
+            &OpcUa_QueryFirstResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2517,22 +2516,22 @@ StatusCode UA_ClientApi_BeginQueryFirst(
 /*============================================================================
  * Synchronously calls the QueryNext service.
  *===========================================================================*/
-StatusCode UA_ClientApi_QueryNext(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    UA_Boolean              a_bReleaseContinuationPoint,
-    const UA_ByteString*    a_pContinuationPoint,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfQueryDataSets,
-    UA_QueryDataSet**       a_pQueryDataSets,
-    UA_ByteString*          a_pRevisedContinuationPoint)
+StatusCode OpcUa_ClientApi_QueryNext(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    UA_Boolean                 a_bReleaseContinuationPoint,
+    const UA_ByteString*       a_pContinuationPoint,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfQueryDataSets,
+    OpcUa_QueryDataSet**       a_pQueryDataSets,
+    UA_ByteString*             a_pRevisedContinuationPoint)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_QueryNextRequest cRequest;
-    UA_QueryNextResponse* pResponse = NULL;
+    OpcUa_QueryNextRequest cRequest;
+    OpcUa_QueryNextResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_QueryNextRequest_Initialize(&cRequest);
+    OpcUa_QueryNextRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2555,24 +2554,24 @@ StatusCode UA_ClientApi_QueryNext(
             a_hChannel,
             "QueryNext",
             (void*)&cRequest,
-            &UA_QueryNextRequest_EncodeableType,
-            &UA_QueryNextResponse_EncodeableType,
+            &OpcUa_QueryNextRequest_EncodeableType,
+            &OpcUa_QueryNextResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_QueryNextResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_QueryNextResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2596,17 +2595,17 @@ StatusCode UA_ClientApi_QueryNext(
 /*============================================================================
  * Asynchronously calls the QueryNext service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginQueryNext(
+StatusCode OpcUa_ClientApi_BeginQueryNext(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     UA_Boolean                     a_bReleaseContinuationPoint,
     const UA_ByteString*           a_pContinuationPoint,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_QueryNextRequest cRequest;
-    UA_QueryNextRequest_Initialize(&cRequest);
+    OpcUa_QueryNextRequest cRequest;
+    OpcUa_QueryNextRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2625,8 +2624,8 @@ StatusCode UA_ClientApi_BeginQueryNext(
             a_hChannel,
             "QueryNext",
             (void*)&cRequest,
-            &UA_QueryNextRequest_EncodeableType,
-            &UA_QueryNextResponse_EncodeableType,
+            &OpcUa_QueryNextRequest_EncodeableType,
+            &OpcUa_QueryNextResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2639,25 +2638,25 @@ StatusCode UA_ClientApi_BeginQueryNext(
 /*============================================================================
  * Synchronously calls the Read service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Read(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    double                  a_nMaxAge,
-    UA_TimestampsToReturn   a_eTimestampsToReturn,
-    int32_t                 a_nNoOfNodesToRead,
-    const UA_ReadValueId*   a_pNodesToRead,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    UA_DataValue**          a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_Read(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    double                     a_nMaxAge,
+    OpcUa_TimestampsToReturn   a_eTimestampsToReturn,
+    int32_t                    a_nNoOfNodesToRead,
+    const OpcUa_ReadValueId*   a_pNodesToRead,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    UA_DataValue**             a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ReadRequest cRequest;
-    UA_ReadResponse* pResponse = NULL;
+    OpcUa_ReadRequest cRequest;
+    OpcUa_ReadResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_ReadRequest_Initialize(&cRequest);
+    OpcUa_ReadRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2676,31 +2675,31 @@ StatusCode UA_ClientApi_Read(
         cRequest.MaxAge             = a_nMaxAge;
         cRequest.TimestampsToReturn = a_eTimestampsToReturn;
         cRequest.NoOfNodesToRead    = a_nNoOfNodesToRead;
-        cRequest.NodesToRead        = (UA_ReadValueId*)a_pNodesToRead;
+        cRequest.NodesToRead        = (OpcUa_ReadValueId*)a_pNodesToRead;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "Read",
             (void*)&cRequest,
-            &UA_ReadRequest_EncodeableType,
-            &UA_ReadResponse_EncodeableType,
+            &OpcUa_ReadRequest_EncodeableType,
+            &OpcUa_ReadResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_ReadResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_ReadResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2725,19 +2724,19 @@ StatusCode UA_ClientApi_Read(
 /*============================================================================
  * Asynchronously calls the Read service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRead(
+StatusCode OpcUa_ClientApi_BeginRead(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     double                         a_nMaxAge,
-    UA_TimestampsToReturn          a_eTimestampsToReturn,
+    OpcUa_TimestampsToReturn       a_eTimestampsToReturn,
     int32_t                        a_nNoOfNodesToRead,
-    const UA_ReadValueId*          a_pNodesToRead,
+    const OpcUa_ReadValueId*       a_pNodesToRead,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ReadRequest cRequest;
-    UA_ReadRequest_Initialize(&cRequest);
+    OpcUa_ReadRequest cRequest;
+    OpcUa_ReadRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2751,15 +2750,15 @@ StatusCode UA_ClientApi_BeginRead(
         cRequest.MaxAge             = a_nMaxAge;
         cRequest.TimestampsToReturn = a_eTimestampsToReturn;
         cRequest.NoOfNodesToRead    = a_nNoOfNodesToRead;
-        cRequest.NodesToRead        = (UA_ReadValueId*)a_pNodesToRead;
+        cRequest.NodesToRead        = (OpcUa_ReadValueId*)a_pNodesToRead;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Read",
             (void*)&cRequest,
-            &UA_ReadRequest_EncodeableType,
-            &UA_ReadResponse_EncodeableType,
+            &OpcUa_ReadRequest_EncodeableType,
+            &OpcUa_ReadResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2772,26 +2771,26 @@ StatusCode UA_ClientApi_BeginRead(
 /*============================================================================
  * Synchronously calls the HistoryRead service.
  *===========================================================================*/
-StatusCode UA_ClientApi_HistoryRead(
-    UA_Channel                   a_hChannel,
-    const UA_RequestHeader*      a_pRequestHeader,
-    const UA_ExtensionObject*    a_pHistoryReadDetails,
-    UA_TimestampsToReturn        a_eTimestampsToReturn,
-    UA_Boolean                   a_bReleaseContinuationPoints,
-    int32_t                      a_nNoOfNodesToRead,
-    const UA_HistoryReadValueId* a_pNodesToRead,
-    UA_ResponseHeader*           a_pResponseHeader,
-    int32_t*                     a_pNoOfResults,
-    UA_HistoryReadResult**       a_pResults,
-    int32_t*                     a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**          a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_HistoryRead(
+    UA_Channel                      a_hChannel,
+    const OpcUa_RequestHeader*      a_pRequestHeader,
+    const UA_ExtensionObject*       a_pHistoryReadDetails,
+    OpcUa_TimestampsToReturn        a_eTimestampsToReturn,
+    UA_Boolean                      a_bReleaseContinuationPoints,
+    int32_t                         a_nNoOfNodesToRead,
+    const OpcUa_HistoryReadValueId* a_pNodesToRead,
+    OpcUa_ResponseHeader*           a_pResponseHeader,
+    int32_t*                        a_pNoOfResults,
+    OpcUa_HistoryReadResult**       a_pResults,
+    int32_t*                        a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**             a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_HistoryReadRequest cRequest;
-    UA_HistoryReadResponse* pResponse = NULL;
+    OpcUa_HistoryReadRequest cRequest;
+    OpcUa_HistoryReadResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_HistoryReadRequest_Initialize(&cRequest);
+    OpcUa_HistoryReadRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2812,31 +2811,31 @@ StatusCode UA_ClientApi_HistoryRead(
         cRequest.TimestampsToReturn        = a_eTimestampsToReturn;
         cRequest.ReleaseContinuationPoints = a_bReleaseContinuationPoints;
         cRequest.NoOfNodesToRead           = a_nNoOfNodesToRead;
-        cRequest.NodesToRead               = (UA_HistoryReadValueId*)a_pNodesToRead;
+        cRequest.NodesToRead               = (OpcUa_HistoryReadValueId*)a_pNodesToRead;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "HistoryRead",
             (void*)&cRequest,
-            &UA_HistoryReadRequest_EncodeableType,
-            &UA_HistoryReadResponse_EncodeableType,
+            &OpcUa_HistoryReadRequest_EncodeableType,
+            &OpcUa_HistoryReadResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_HistoryReadResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_HistoryReadResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2861,20 +2860,20 @@ StatusCode UA_ClientApi_HistoryRead(
 /*============================================================================
  * Asynchronously calls the HistoryRead service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginHistoryRead(
-    UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
-    const UA_ExtensionObject*      a_pHistoryReadDetails,
-    UA_TimestampsToReturn          a_eTimestampsToReturn,
-    UA_Boolean                     a_bReleaseContinuationPoints,
-    int32_t                        a_nNoOfNodesToRead,
-    const UA_HistoryReadValueId*   a_pNodesToRead,
-    UA_Channel_PfnRequestComplete* a_pCallback,
-    void*                          a_pCallbackData)
+StatusCode OpcUa_ClientApi_BeginHistoryRead(
+    UA_Channel                      a_hChannel,
+    const OpcUa_RequestHeader*      a_pRequestHeader,
+    const UA_ExtensionObject*       a_pHistoryReadDetails,
+    OpcUa_TimestampsToReturn        a_eTimestampsToReturn,
+    UA_Boolean                      a_bReleaseContinuationPoints,
+    int32_t                         a_nNoOfNodesToRead,
+    const OpcUa_HistoryReadValueId* a_pNodesToRead,
+    UA_Channel_PfnRequestComplete*  a_pCallback,
+    void*                           a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_HistoryReadRequest cRequest;
-    UA_HistoryReadRequest_Initialize(&cRequest);
+    OpcUa_HistoryReadRequest cRequest;
+    OpcUa_HistoryReadRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2890,15 +2889,15 @@ StatusCode UA_ClientApi_BeginHistoryRead(
         cRequest.TimestampsToReturn        = a_eTimestampsToReturn;
         cRequest.ReleaseContinuationPoints = a_bReleaseContinuationPoints;
         cRequest.NoOfNodesToRead           = a_nNoOfNodesToRead;
-        cRequest.NodesToRead               = (UA_HistoryReadValueId*)a_pNodesToRead;
+        cRequest.NodesToRead               = (OpcUa_HistoryReadValueId*)a_pNodesToRead;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "HistoryRead",
             (void*)&cRequest,
-            &UA_HistoryReadRequest_EncodeableType,
-            &UA_HistoryReadResponse_EncodeableType,
+            &OpcUa_HistoryReadRequest_EncodeableType,
+            &OpcUa_HistoryReadResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -2911,23 +2910,23 @@ StatusCode UA_ClientApi_BeginHistoryRead(
 /*============================================================================
  * Synchronously calls the Write service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Write(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    int32_t                 a_nNoOfNodesToWrite,
-    const UA_WriteValue*    a_pNodesToWrite,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    StatusCode**            a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_Write(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    int32_t                    a_nNoOfNodesToWrite,
+    const OpcUa_WriteValue*    a_pNodesToWrite,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    StatusCode**               a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_WriteRequest cRequest;
-    UA_WriteResponse* pResponse = NULL;
+    OpcUa_WriteRequest cRequest;
+    OpcUa_WriteResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_WriteRequest_Initialize(&cRequest);
+    OpcUa_WriteRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -2944,31 +2943,31 @@ StatusCode UA_ClientApi_Write(
         /* copy parameters into request object. */
         cRequest.RequestHeader    = *a_pRequestHeader;
         cRequest.NoOfNodesToWrite = a_nNoOfNodesToWrite;
-        cRequest.NodesToWrite     = (UA_WriteValue*)a_pNodesToWrite;
+        cRequest.NodesToWrite     = (OpcUa_WriteValue*)a_pNodesToWrite;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "Write",
             (void*)&cRequest,
-            &UA_WriteRequest_EncodeableType,
-            &UA_WriteResponse_EncodeableType,
+            &OpcUa_WriteRequest_EncodeableType,
+            &OpcUa_WriteResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_WriteResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_WriteResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -2993,17 +2992,17 @@ StatusCode UA_ClientApi_Write(
 /*============================================================================
  * Asynchronously calls the Write service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginWrite(
+StatusCode OpcUa_ClientApi_BeginWrite(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToWrite,
-    const UA_WriteValue*           a_pNodesToWrite,
+    const OpcUa_WriteValue*        a_pNodesToWrite,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_WriteRequest cRequest;
-    UA_WriteRequest_Initialize(&cRequest);
+    OpcUa_WriteRequest cRequest;
+    OpcUa_WriteRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3015,15 +3014,15 @@ StatusCode UA_ClientApi_BeginWrite(
         /* copy parameters into request object. */
         cRequest.RequestHeader    = *a_pRequestHeader;
         cRequest.NoOfNodesToWrite = a_nNoOfNodesToWrite;
-        cRequest.NodesToWrite     = (UA_WriteValue*)a_pNodesToWrite;
+        cRequest.NodesToWrite     = (OpcUa_WriteValue*)a_pNodesToWrite;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Write",
             (void*)&cRequest,
-            &UA_WriteRequest_EncodeableType,
-            &UA_WriteResponse_EncodeableType,
+            &OpcUa_WriteRequest_EncodeableType,
+            &OpcUa_WriteResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3036,23 +3035,23 @@ StatusCode UA_ClientApi_BeginWrite(
 /*============================================================================
  * Synchronously calls the HistoryUpdate service.
  *===========================================================================*/
-StatusCode UA_ClientApi_HistoryUpdate(
-    UA_Channel                a_hChannel,
-    const UA_RequestHeader*   a_pRequestHeader,
-    int32_t                   a_nNoOfHistoryUpdateDetails,
-    const UA_ExtensionObject* a_pHistoryUpdateDetails,
-    UA_ResponseHeader*        a_pResponseHeader,
-    int32_t*                  a_pNoOfResults,
-    UA_HistoryUpdateResult**  a_pResults,
-    int32_t*                  a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**       a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_HistoryUpdate(
+    UA_Channel                  a_hChannel,
+    const OpcUa_RequestHeader*  a_pRequestHeader,
+    int32_t                     a_nNoOfHistoryUpdateDetails,
+    const UA_ExtensionObject*   a_pHistoryUpdateDetails,
+    OpcUa_ResponseHeader*       a_pResponseHeader,
+    int32_t*                    a_pNoOfResults,
+    OpcUa_HistoryUpdateResult** a_pResults,
+    int32_t*                    a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**         a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_HistoryUpdateRequest cRequest;
-    UA_HistoryUpdateResponse* pResponse = NULL;
+    OpcUa_HistoryUpdateRequest cRequest;
+    OpcUa_HistoryUpdateResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_HistoryUpdateRequest_Initialize(&cRequest);
+    OpcUa_HistoryUpdateRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3076,24 +3075,24 @@ StatusCode UA_ClientApi_HistoryUpdate(
             a_hChannel,
             "HistoryUpdate",
             (void*)&cRequest,
-            &UA_HistoryUpdateRequest_EncodeableType,
-            &UA_HistoryUpdateResponse_EncodeableType,
+            &OpcUa_HistoryUpdateRequest_EncodeableType,
+            &OpcUa_HistoryUpdateResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_HistoryUpdateResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_HistoryUpdateResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3118,17 +3117,17 @@ StatusCode UA_ClientApi_HistoryUpdate(
 /*============================================================================
  * Asynchronously calls the HistoryUpdate service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginHistoryUpdate(
+StatusCode OpcUa_ClientApi_BeginHistoryUpdate(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfHistoryUpdateDetails,
     const UA_ExtensionObject*      a_pHistoryUpdateDetails,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_HistoryUpdateRequest cRequest;
-    UA_HistoryUpdateRequest_Initialize(&cRequest);
+    OpcUa_HistoryUpdateRequest cRequest;
+    OpcUa_HistoryUpdateRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3147,8 +3146,8 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
             a_hChannel,
             "HistoryUpdate",
             (void*)&cRequest,
-            &UA_HistoryUpdateRequest_EncodeableType,
-            &UA_HistoryUpdateResponse_EncodeableType,
+            &OpcUa_HistoryUpdateRequest_EncodeableType,
+            &OpcUa_HistoryUpdateResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3161,23 +3160,23 @@ StatusCode UA_ClientApi_BeginHistoryUpdate(
 /*============================================================================
  * Synchronously calls the Call service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Call(
-    UA_Channel                  a_hChannel,
-    const UA_RequestHeader*     a_pRequestHeader,
-    int32_t                     a_nNoOfMethodsToCall,
-    const UA_CallMethodRequest* a_pMethodsToCall,
-    UA_ResponseHeader*          a_pResponseHeader,
-    int32_t*                    a_pNoOfResults,
-    UA_CallMethodResult**       a_pResults,
-    int32_t*                    a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**         a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_Call(
+    UA_Channel                     a_hChannel,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
+    int32_t                        a_nNoOfMethodsToCall,
+    const OpcUa_CallMethodRequest* a_pMethodsToCall,
+    OpcUa_ResponseHeader*          a_pResponseHeader,
+    int32_t*                       a_pNoOfResults,
+    OpcUa_CallMethodResult**       a_pResults,
+    int32_t*                       a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**            a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CallRequest cRequest;
-    UA_CallResponse* pResponse = NULL;
+    OpcUa_CallRequest cRequest;
+    OpcUa_CallResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_CallRequest_Initialize(&cRequest);
+    OpcUa_CallRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3194,31 +3193,31 @@ StatusCode UA_ClientApi_Call(
         /* copy parameters into request object. */
         cRequest.RequestHeader     = *a_pRequestHeader;
         cRequest.NoOfMethodsToCall = a_nNoOfMethodsToCall;
-        cRequest.MethodsToCall     = (UA_CallMethodRequest*)a_pMethodsToCall;
+        cRequest.MethodsToCall     = (OpcUa_CallMethodRequest*)a_pMethodsToCall;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "Call",
             (void*)&cRequest,
-            &UA_CallRequest_EncodeableType,
-            &UA_CallResponse_EncodeableType,
+            &OpcUa_CallRequest_EncodeableType,
+            &OpcUa_CallResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_CallResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_CallResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3243,17 +3242,17 @@ StatusCode UA_ClientApi_Call(
 /*============================================================================
  * Asynchronously calls the Call service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCall(
+StatusCode OpcUa_ClientApi_BeginCall(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfMethodsToCall,
-    const UA_CallMethodRequest*    a_pMethodsToCall,
+    const OpcUa_CallMethodRequest* a_pMethodsToCall,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CallRequest cRequest;
-    UA_CallRequest_Initialize(&cRequest);
+    OpcUa_CallRequest cRequest;
+    OpcUa_CallRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3265,15 +3264,15 @@ StatusCode UA_ClientApi_BeginCall(
         /* copy parameters into request object. */
         cRequest.RequestHeader     = *a_pRequestHeader;
         cRequest.NoOfMethodsToCall = a_nNoOfMethodsToCall;
-        cRequest.MethodsToCall     = (UA_CallMethodRequest*)a_pMethodsToCall;
+        cRequest.MethodsToCall     = (OpcUa_CallMethodRequest*)a_pMethodsToCall;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Call",
             (void*)&cRequest,
-            &UA_CallRequest_EncodeableType,
-            &UA_CallResponse_EncodeableType,
+            &OpcUa_CallRequest_EncodeableType,
+            &OpcUa_CallResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3286,25 +3285,25 @@ StatusCode UA_ClientApi_BeginCall(
 /*============================================================================
  * Synchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_CreateMonitoredItems(
-    UA_Channel                           a_hChannel,
-    const UA_RequestHeader*              a_pRequestHeader,
-    uint32_t                             a_nSubscriptionId,
-    UA_TimestampsToReturn                a_eTimestampsToReturn,
-    int32_t                              a_nNoOfItemsToCreate,
-    const UA_MonitoredItemCreateRequest* a_pItemsToCreate,
-    UA_ResponseHeader*                   a_pResponseHeader,
-    int32_t*                             a_pNoOfResults,
-    UA_MonitoredItemCreateResult**       a_pResults,
-    int32_t*                             a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**                  a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_CreateMonitoredItems(
+    UA_Channel                              a_hChannel,
+    const OpcUa_RequestHeader*              a_pRequestHeader,
+    uint32_t                                a_nSubscriptionId,
+    OpcUa_TimestampsToReturn                a_eTimestampsToReturn,
+    int32_t                                 a_nNoOfItemsToCreate,
+    const OpcUa_MonitoredItemCreateRequest* a_pItemsToCreate,
+    OpcUa_ResponseHeader*                   a_pResponseHeader,
+    int32_t*                                a_pNoOfResults,
+    OpcUa_MonitoredItemCreateResult**       a_pResults,
+    int32_t*                                a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**                     a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CreateMonitoredItemsRequest cRequest;
-    UA_CreateMonitoredItemsResponse* pResponse = NULL;
+    OpcUa_CreateMonitoredItemsRequest cRequest;
+    OpcUa_CreateMonitoredItemsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_CreateMonitoredItemsRequest_Initialize(&cRequest);
+    OpcUa_CreateMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3323,31 +3322,31 @@ StatusCode UA_ClientApi_CreateMonitoredItems(
         cRequest.SubscriptionId     = a_nSubscriptionId;
         cRequest.TimestampsToReturn = a_eTimestampsToReturn;
         cRequest.NoOfItemsToCreate  = a_nNoOfItemsToCreate;
-        cRequest.ItemsToCreate      = (UA_MonitoredItemCreateRequest*)a_pItemsToCreate;
+        cRequest.ItemsToCreate      = (OpcUa_MonitoredItemCreateRequest*)a_pItemsToCreate;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "CreateMonitoredItems",
             (void*)&cRequest,
-            &UA_CreateMonitoredItemsRequest_EncodeableType,
-            &UA_CreateMonitoredItemsResponse_EncodeableType,
+            &OpcUa_CreateMonitoredItemsRequest_EncodeableType,
+            &OpcUa_CreateMonitoredItemsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_CreateMonitoredItemsResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_CreateMonitoredItemsResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3372,19 +3371,19 @@ StatusCode UA_ClientApi_CreateMonitoredItems(
 /*============================================================================
  * Asynchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCreateMonitoredItems(
-    UA_Channel                           a_hChannel,
-    const UA_RequestHeader*              a_pRequestHeader,
-    uint32_t                             a_nSubscriptionId,
-    UA_TimestampsToReturn                a_eTimestampsToReturn,
-    int32_t                              a_nNoOfItemsToCreate,
-    const UA_MonitoredItemCreateRequest* a_pItemsToCreate,
-    UA_Channel_PfnRequestComplete*       a_pCallback,
-    void*                                a_pCallbackData)
+StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
+    UA_Channel                              a_hChannel,
+    const OpcUa_RequestHeader*              a_pRequestHeader,
+    uint32_t                                a_nSubscriptionId,
+    OpcUa_TimestampsToReturn                a_eTimestampsToReturn,
+    int32_t                                 a_nNoOfItemsToCreate,
+    const OpcUa_MonitoredItemCreateRequest* a_pItemsToCreate,
+    UA_Channel_PfnRequestComplete*          a_pCallback,
+    void*                                   a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CreateMonitoredItemsRequest cRequest;
-    UA_CreateMonitoredItemsRequest_Initialize(&cRequest);
+    OpcUa_CreateMonitoredItemsRequest cRequest;
+    OpcUa_CreateMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3398,15 +3397,15 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
         cRequest.SubscriptionId     = a_nSubscriptionId;
         cRequest.TimestampsToReturn = a_eTimestampsToReturn;
         cRequest.NoOfItemsToCreate  = a_nNoOfItemsToCreate;
-        cRequest.ItemsToCreate      = (UA_MonitoredItemCreateRequest*)a_pItemsToCreate;
+        cRequest.ItemsToCreate      = (OpcUa_MonitoredItemCreateRequest*)a_pItemsToCreate;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "CreateMonitoredItems",
             (void*)&cRequest,
-            &UA_CreateMonitoredItemsRequest_EncodeableType,
-            &UA_CreateMonitoredItemsResponse_EncodeableType,
+            &OpcUa_CreateMonitoredItemsRequest_EncodeableType,
+            &OpcUa_CreateMonitoredItemsResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3419,25 +3418,25 @@ StatusCode UA_ClientApi_BeginCreateMonitoredItems(
 /*============================================================================
  * Synchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_ModifyMonitoredItems(
-    UA_Channel                           a_hChannel,
-    const UA_RequestHeader*              a_pRequestHeader,
-    uint32_t                             a_nSubscriptionId,
-    UA_TimestampsToReturn                a_eTimestampsToReturn,
-    int32_t                              a_nNoOfItemsToModify,
-    const UA_MonitoredItemModifyRequest* a_pItemsToModify,
-    UA_ResponseHeader*                   a_pResponseHeader,
-    int32_t*                             a_pNoOfResults,
-    UA_MonitoredItemModifyResult**       a_pResults,
-    int32_t*                             a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**                  a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
+    UA_Channel                              a_hChannel,
+    const OpcUa_RequestHeader*              a_pRequestHeader,
+    uint32_t                                a_nSubscriptionId,
+    OpcUa_TimestampsToReturn                a_eTimestampsToReturn,
+    int32_t                                 a_nNoOfItemsToModify,
+    const OpcUa_MonitoredItemModifyRequest* a_pItemsToModify,
+    OpcUa_ResponseHeader*                   a_pResponseHeader,
+    int32_t*                                a_pNoOfResults,
+    OpcUa_MonitoredItemModifyResult**       a_pResults,
+    int32_t*                                a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**                     a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ModifyMonitoredItemsRequest cRequest;
-    UA_ModifyMonitoredItemsResponse* pResponse = NULL;
+    OpcUa_ModifyMonitoredItemsRequest cRequest;
+    OpcUa_ModifyMonitoredItemsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_ModifyMonitoredItemsRequest_Initialize(&cRequest);
+    OpcUa_ModifyMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3456,31 +3455,31 @@ StatusCode UA_ClientApi_ModifyMonitoredItems(
         cRequest.SubscriptionId     = a_nSubscriptionId;
         cRequest.TimestampsToReturn = a_eTimestampsToReturn;
         cRequest.NoOfItemsToModify  = a_nNoOfItemsToModify;
-        cRequest.ItemsToModify      = (UA_MonitoredItemModifyRequest*)a_pItemsToModify;
+        cRequest.ItemsToModify      = (OpcUa_MonitoredItemModifyRequest*)a_pItemsToModify;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "ModifyMonitoredItems",
             (void*)&cRequest,
-            &UA_ModifyMonitoredItemsRequest_EncodeableType,
-            &UA_ModifyMonitoredItemsResponse_EncodeableType,
+            &OpcUa_ModifyMonitoredItemsRequest_EncodeableType,
+            &OpcUa_ModifyMonitoredItemsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_ModifyMonitoredItemsResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_ModifyMonitoredItemsResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3505,19 +3504,19 @@ StatusCode UA_ClientApi_ModifyMonitoredItems(
 /*============================================================================
  * Asynchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginModifyMonitoredItems(
-    UA_Channel                           a_hChannel,
-    const UA_RequestHeader*              a_pRequestHeader,
-    uint32_t                             a_nSubscriptionId,
-    UA_TimestampsToReturn                a_eTimestampsToReturn,
-    int32_t                              a_nNoOfItemsToModify,
-    const UA_MonitoredItemModifyRequest* a_pItemsToModify,
-    UA_Channel_PfnRequestComplete*       a_pCallback,
-    void*                                a_pCallbackData)
+StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
+    UA_Channel                              a_hChannel,
+    const OpcUa_RequestHeader*              a_pRequestHeader,
+    uint32_t                                a_nSubscriptionId,
+    OpcUa_TimestampsToReturn                a_eTimestampsToReturn,
+    int32_t                                 a_nNoOfItemsToModify,
+    const OpcUa_MonitoredItemModifyRequest* a_pItemsToModify,
+    UA_Channel_PfnRequestComplete*          a_pCallback,
+    void*                                   a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ModifyMonitoredItemsRequest cRequest;
-    UA_ModifyMonitoredItemsRequest_Initialize(&cRequest);
+    OpcUa_ModifyMonitoredItemsRequest cRequest;
+    OpcUa_ModifyMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3531,15 +3530,15 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
         cRequest.SubscriptionId     = a_nSubscriptionId;
         cRequest.TimestampsToReturn = a_eTimestampsToReturn;
         cRequest.NoOfItemsToModify  = a_nNoOfItemsToModify;
-        cRequest.ItemsToModify      = (UA_MonitoredItemModifyRequest*)a_pItemsToModify;
+        cRequest.ItemsToModify      = (OpcUa_MonitoredItemModifyRequest*)a_pItemsToModify;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "ModifyMonitoredItems",
             (void*)&cRequest,
-            &UA_ModifyMonitoredItemsRequest_EncodeableType,
-            &UA_ModifyMonitoredItemsResponse_EncodeableType,
+            &OpcUa_ModifyMonitoredItemsRequest_EncodeableType,
+            &OpcUa_ModifyMonitoredItemsResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3552,25 +3551,25 @@ StatusCode UA_ClientApi_BeginModifyMonitoredItems(
 /*============================================================================
  * Synchronously calls the SetMonitoringMode service.
  *===========================================================================*/
-StatusCode UA_ClientApi_SetMonitoringMode(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    uint32_t                a_nSubscriptionId,
-    UA_MonitoringMode       a_eMonitoringMode,
-    int32_t                 a_nNoOfMonitoredItemIds,
-    const uint32_t*         a_pMonitoredItemIds,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    StatusCode**            a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_SetMonitoringMode(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    uint32_t                   a_nSubscriptionId,
+    OpcUa_MonitoringMode       a_eMonitoringMode,
+    int32_t                    a_nNoOfMonitoredItemIds,
+    const uint32_t*            a_pMonitoredItemIds,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    StatusCode**               a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_SetMonitoringModeRequest cRequest;
-    UA_SetMonitoringModeResponse* pResponse = NULL;
+    OpcUa_SetMonitoringModeRequest cRequest;
+    OpcUa_SetMonitoringModeResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_SetMonitoringModeRequest_Initialize(&cRequest);
+    OpcUa_SetMonitoringModeRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3596,24 +3595,24 @@ StatusCode UA_ClientApi_SetMonitoringMode(
             a_hChannel,
             "SetMonitoringMode",
             (void*)&cRequest,
-            &UA_SetMonitoringModeRequest_EncodeableType,
-            &UA_SetMonitoringModeResponse_EncodeableType,
+            &OpcUa_SetMonitoringModeRequest_EncodeableType,
+            &OpcUa_SetMonitoringModeResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_SetMonitoringModeResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_SetMonitoringModeResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3638,19 +3637,19 @@ StatusCode UA_ClientApi_SetMonitoringMode(
 /*============================================================================
  * Asynchronously calls the SetMonitoringMode service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginSetMonitoringMode(
+StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
-    UA_MonitoringMode              a_eMonitoringMode,
+    OpcUa_MonitoringMode           a_eMonitoringMode,
     int32_t                        a_nNoOfMonitoredItemIds,
     const uint32_t*                a_pMonitoredItemIds,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_SetMonitoringModeRequest cRequest;
-    UA_SetMonitoringModeRequest_Initialize(&cRequest);
+    OpcUa_SetMonitoringModeRequest cRequest;
+    OpcUa_SetMonitoringModeRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3671,8 +3670,8 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
             a_hChannel,
             "SetMonitoringMode",
             (void*)&cRequest,
-            &UA_SetMonitoringModeRequest_EncodeableType,
-            &UA_SetMonitoringModeResponse_EncodeableType,
+            &OpcUa_SetMonitoringModeRequest_EncodeableType,
+            &OpcUa_SetMonitoringModeResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3685,31 +3684,31 @@ StatusCode UA_ClientApi_BeginSetMonitoringMode(
 /*============================================================================
  * Synchronously calls the SetTriggering service.
  *===========================================================================*/
-StatusCode UA_ClientApi_SetTriggering(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    uint32_t                a_nSubscriptionId,
-    uint32_t                a_nTriggeringItemId,
-    int32_t                 a_nNoOfLinksToAdd,
-    const uint32_t*         a_pLinksToAdd,
-    int32_t                 a_nNoOfLinksToRemove,
-    const uint32_t*         a_pLinksToRemove,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfAddResults,
-    StatusCode**            a_pAddResults,
-    int32_t*                a_pNoOfAddDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pAddDiagnosticInfos,
-    int32_t*                a_pNoOfRemoveResults,
-    StatusCode**            a_pRemoveResults,
-    int32_t*                a_pNoOfRemoveDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pRemoveDiagnosticInfos)
+StatusCode OpcUa_ClientApi_SetTriggering(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    uint32_t                   a_nSubscriptionId,
+    uint32_t                   a_nTriggeringItemId,
+    int32_t                    a_nNoOfLinksToAdd,
+    const uint32_t*            a_pLinksToAdd,
+    int32_t                    a_nNoOfLinksToRemove,
+    const uint32_t*            a_pLinksToRemove,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfAddResults,
+    StatusCode**               a_pAddResults,
+    int32_t*                   a_pNoOfAddDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pAddDiagnosticInfos,
+    int32_t*                   a_pNoOfRemoveResults,
+    StatusCode**               a_pRemoveResults,
+    int32_t*                   a_pNoOfRemoveDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pRemoveDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_SetTriggeringRequest cRequest;
-    UA_SetTriggeringResponse* pResponse = NULL;
+    OpcUa_SetTriggeringRequest cRequest;
+    OpcUa_SetTriggeringResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_SetTriggeringRequest_Initialize(&cRequest);
+    OpcUa_SetTriggeringRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3742,24 +3741,24 @@ StatusCode UA_ClientApi_SetTriggering(
             a_hChannel,
             "SetTriggering",
             (void*)&cRequest,
-            &UA_SetTriggeringRequest_EncodeableType,
-            &UA_SetTriggeringResponse_EncodeableType,
+            &OpcUa_SetTriggeringRequest_EncodeableType,
+            &OpcUa_SetTriggeringResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_SetTriggeringResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_SetTriggeringResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3788,9 +3787,9 @@ StatusCode UA_ClientApi_SetTriggering(
 /*============================================================================
  * Asynchronously calls the SetTriggering service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginSetTriggering(
+StatusCode OpcUa_ClientApi_BeginSetTriggering(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
     uint32_t                       a_nTriggeringItemId,
     int32_t                        a_nNoOfLinksToAdd,
@@ -3801,8 +3800,8 @@ StatusCode UA_ClientApi_BeginSetTriggering(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_SetTriggeringRequest cRequest;
-    UA_SetTriggeringRequest_Initialize(&cRequest);
+    OpcUa_SetTriggeringRequest cRequest;
+    OpcUa_SetTriggeringRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3826,8 +3825,8 @@ StatusCode UA_ClientApi_BeginSetTriggering(
             a_hChannel,
             "SetTriggering",
             (void*)&cRequest,
-            &UA_SetTriggeringRequest_EncodeableType,
-            &UA_SetTriggeringResponse_EncodeableType,
+            &OpcUa_SetTriggeringRequest_EncodeableType,
+            &OpcUa_SetTriggeringResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3840,24 +3839,24 @@ StatusCode UA_ClientApi_BeginSetTriggering(
 /*============================================================================
  * Synchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_DeleteMonitoredItems(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    uint32_t                a_nSubscriptionId,
-    int32_t                 a_nNoOfMonitoredItemIds,
-    const uint32_t*         a_pMonitoredItemIds,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    StatusCode**            a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    uint32_t                   a_nSubscriptionId,
+    int32_t                    a_nNoOfMonitoredItemIds,
+    const uint32_t*            a_pMonitoredItemIds,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    StatusCode**               a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_DeleteMonitoredItemsRequest cRequest;
-    UA_DeleteMonitoredItemsResponse* pResponse = NULL;
+    OpcUa_DeleteMonitoredItemsRequest cRequest;
+    OpcUa_DeleteMonitoredItemsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_DeleteMonitoredItemsRequest_Initialize(&cRequest);
+    OpcUa_DeleteMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3882,24 +3881,24 @@ StatusCode UA_ClientApi_DeleteMonitoredItems(
             a_hChannel,
             "DeleteMonitoredItems",
             (void*)&cRequest,
-            &UA_DeleteMonitoredItemsRequest_EncodeableType,
-            &UA_DeleteMonitoredItemsResponse_EncodeableType,
+            &OpcUa_DeleteMonitoredItemsRequest_EncodeableType,
+            &OpcUa_DeleteMonitoredItemsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_DeleteMonitoredItemsResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_DeleteMonitoredItemsResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -3924,9 +3923,9 @@ StatusCode UA_ClientApi_DeleteMonitoredItems(
 /*============================================================================
  * Asynchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
+StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
     int32_t                        a_nNoOfMonitoredItemIds,
     const uint32_t*                a_pMonitoredItemIds,
@@ -3934,8 +3933,8 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_DeleteMonitoredItemsRequest cRequest;
-    UA_DeleteMonitoredItemsRequest_Initialize(&cRequest);
+    OpcUa_DeleteMonitoredItemsRequest cRequest;
+    OpcUa_DeleteMonitoredItemsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -3955,8 +3954,8 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
             a_hChannel,
             "DeleteMonitoredItems",
             (void*)&cRequest,
-            &UA_DeleteMonitoredItemsRequest_EncodeableType,
-            &UA_DeleteMonitoredItemsResponse_EncodeableType,
+            &OpcUa_DeleteMonitoredItemsRequest_EncodeableType,
+            &OpcUa_DeleteMonitoredItemsResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -3969,27 +3968,27 @@ StatusCode UA_ClientApi_BeginDeleteMonitoredItems(
 /*============================================================================
  * Synchronously calls the CreateSubscription service.
  *===========================================================================*/
-StatusCode UA_ClientApi_CreateSubscription(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    double                  a_nRequestedPublishingInterval,
-    uint32_t                a_nRequestedLifetimeCount,
-    uint32_t                a_nRequestedMaxKeepAliveCount,
-    uint32_t                a_nMaxNotificationsPerPublish,
-    UA_Boolean              a_bPublishingEnabled,
-    UA_Byte                 a_nPriority,
-    UA_ResponseHeader*      a_pResponseHeader,
-    uint32_t*               a_pSubscriptionId,
-    double*                 a_pRevisedPublishingInterval,
-    uint32_t*               a_pRevisedLifetimeCount,
-    uint32_t*               a_pRevisedMaxKeepAliveCount)
+StatusCode OpcUa_ClientApi_CreateSubscription(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    double                     a_nRequestedPublishingInterval,
+    uint32_t                   a_nRequestedLifetimeCount,
+    uint32_t                   a_nRequestedMaxKeepAliveCount,
+    uint32_t                   a_nMaxNotificationsPerPublish,
+    UA_Boolean                 a_bPublishingEnabled,
+    UA_Byte                    a_nPriority,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    uint32_t*                  a_pSubscriptionId,
+    double*                    a_pRevisedPublishingInterval,
+    uint32_t*                  a_pRevisedLifetimeCount,
+    uint32_t*                  a_pRevisedMaxKeepAliveCount)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CreateSubscriptionRequest cRequest;
-    UA_CreateSubscriptionResponse* pResponse = NULL;
+    OpcUa_CreateSubscriptionRequest cRequest;
+    OpcUa_CreateSubscriptionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_CreateSubscriptionRequest_Initialize(&cRequest);
+    OpcUa_CreateSubscriptionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4016,24 +4015,24 @@ StatusCode UA_ClientApi_CreateSubscription(
             a_hChannel,
             "CreateSubscription",
             (void*)&cRequest,
-            &UA_CreateSubscriptionRequest_EncodeableType,
-            &UA_CreateSubscriptionResponse_EncodeableType,
+            &OpcUa_CreateSubscriptionRequest_EncodeableType,
+            &OpcUa_CreateSubscriptionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_CreateSubscriptionResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_CreateSubscriptionResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4058,9 +4057,9 @@ StatusCode UA_ClientApi_CreateSubscription(
 /*============================================================================
  * Asynchronously calls the CreateSubscription service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginCreateSubscription(
+StatusCode OpcUa_ClientApi_BeginCreateSubscription(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     double                         a_nRequestedPublishingInterval,
     uint32_t                       a_nRequestedLifetimeCount,
     uint32_t                       a_nRequestedMaxKeepAliveCount,
@@ -4071,8 +4070,8 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_CreateSubscriptionRequest cRequest;
-    UA_CreateSubscriptionRequest_Initialize(&cRequest);
+    OpcUa_CreateSubscriptionRequest cRequest;
+    OpcUa_CreateSubscriptionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
@@ -4094,8 +4093,8 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
             a_hChannel,
             "CreateSubscription",
             (void*)&cRequest,
-            &UA_CreateSubscriptionRequest_EncodeableType,
-            &UA_CreateSubscriptionResponse_EncodeableType,
+            &OpcUa_CreateSubscriptionRequest_EncodeableType,
+            &OpcUa_CreateSubscriptionResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4108,26 +4107,26 @@ StatusCode UA_ClientApi_BeginCreateSubscription(
 /*============================================================================
  * Synchronously calls the ModifySubscription service.
  *===========================================================================*/
-StatusCode UA_ClientApi_ModifySubscription(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    uint32_t                a_nSubscriptionId,
-    double                  a_nRequestedPublishingInterval,
-    uint32_t                a_nRequestedLifetimeCount,
-    uint32_t                a_nRequestedMaxKeepAliveCount,
-    uint32_t                a_nMaxNotificationsPerPublish,
-    UA_Byte                 a_nPriority,
-    UA_ResponseHeader*      a_pResponseHeader,
-    double*                 a_pRevisedPublishingInterval,
-    uint32_t*               a_pRevisedLifetimeCount,
-    uint32_t*               a_pRevisedMaxKeepAliveCount)
+StatusCode OpcUa_ClientApi_ModifySubscription(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    uint32_t                   a_nSubscriptionId,
+    double                     a_nRequestedPublishingInterval,
+    uint32_t                   a_nRequestedLifetimeCount,
+    uint32_t                   a_nRequestedMaxKeepAliveCount,
+    uint32_t                   a_nMaxNotificationsPerPublish,
+    UA_Byte                    a_nPriority,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    double*                    a_pRevisedPublishingInterval,
+    uint32_t*                  a_pRevisedLifetimeCount,
+    uint32_t*                  a_pRevisedMaxKeepAliveCount)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ModifySubscriptionRequest cRequest;
-    UA_ModifySubscriptionResponse* pResponse = NULL;
+    OpcUa_ModifySubscriptionRequest cRequest;
+    OpcUa_ModifySubscriptionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_ModifySubscriptionRequest_Initialize(&cRequest);
+    OpcUa_ModifySubscriptionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4153,24 +4152,24 @@ StatusCode UA_ClientApi_ModifySubscription(
             a_hChannel,
             "ModifySubscription",
             (void*)&cRequest,
-            &UA_ModifySubscriptionRequest_EncodeableType,
-            &UA_ModifySubscriptionResponse_EncodeableType,
+            &OpcUa_ModifySubscriptionRequest_EncodeableType,
+            &OpcUa_ModifySubscriptionResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_ModifySubscriptionResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_ModifySubscriptionResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4194,9 +4193,9 @@ StatusCode UA_ClientApi_ModifySubscription(
 /*============================================================================
  * Asynchronously calls the ModifySubscription service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginModifySubscription(
+StatusCode OpcUa_ClientApi_BeginModifySubscription(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
     double                         a_nRequestedPublishingInterval,
     uint32_t                       a_nRequestedLifetimeCount,
@@ -4207,8 +4206,8 @@ StatusCode UA_ClientApi_BeginModifySubscription(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_ModifySubscriptionRequest cRequest;
-    UA_ModifySubscriptionRequest_Initialize(&cRequest);
+    OpcUa_ModifySubscriptionRequest cRequest;
+    OpcUa_ModifySubscriptionRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
@@ -4230,8 +4229,8 @@ StatusCode UA_ClientApi_BeginModifySubscription(
             a_hChannel,
             "ModifySubscription",
             (void*)&cRequest,
-            &UA_ModifySubscriptionRequest_EncodeableType,
-            &UA_ModifySubscriptionResponse_EncodeableType,
+            &OpcUa_ModifySubscriptionRequest_EncodeableType,
+            &OpcUa_ModifySubscriptionResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4244,24 +4243,24 @@ StatusCode UA_ClientApi_BeginModifySubscription(
 /*============================================================================
  * Synchronously calls the SetPublishingMode service.
  *===========================================================================*/
-StatusCode UA_ClientApi_SetPublishingMode(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    UA_Boolean              a_bPublishingEnabled,
-    int32_t                 a_nNoOfSubscriptionIds,
-    const uint32_t*         a_pSubscriptionIds,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    StatusCode**            a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_SetPublishingMode(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    UA_Boolean                 a_bPublishingEnabled,
+    int32_t                    a_nNoOfSubscriptionIds,
+    const uint32_t*            a_pSubscriptionIds,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    StatusCode**               a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_SetPublishingModeRequest cRequest;
-    UA_SetPublishingModeResponse* pResponse = NULL;
+    OpcUa_SetPublishingModeRequest cRequest;
+    OpcUa_SetPublishingModeResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_SetPublishingModeRequest_Initialize(&cRequest);
+    OpcUa_SetPublishingModeRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4286,24 +4285,24 @@ StatusCode UA_ClientApi_SetPublishingMode(
             a_hChannel,
             "SetPublishingMode",
             (void*)&cRequest,
-            &UA_SetPublishingModeRequest_EncodeableType,
-            &UA_SetPublishingModeResponse_EncodeableType,
+            &OpcUa_SetPublishingModeRequest_EncodeableType,
+            &OpcUa_SetPublishingModeResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_SetPublishingModeResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_SetPublishingModeResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4328,9 +4327,9 @@ StatusCode UA_ClientApi_SetPublishingMode(
 /*============================================================================
  * Asynchronously calls the SetPublishingMode service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginSetPublishingMode(
+StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     UA_Boolean                     a_bPublishingEnabled,
     int32_t                        a_nNoOfSubscriptionIds,
     const uint32_t*                a_pSubscriptionIds,
@@ -4338,8 +4337,8 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_SetPublishingModeRequest cRequest;
-    UA_SetPublishingModeRequest_Initialize(&cRequest);
+    OpcUa_SetPublishingModeRequest cRequest;
+    OpcUa_SetPublishingModeRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4359,8 +4358,8 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
             a_hChannel,
             "SetPublishingMode",
             (void*)&cRequest,
-            &UA_SetPublishingModeRequest_EncodeableType,
-            &UA_SetPublishingModeResponse_EncodeableType,
+            &OpcUa_SetPublishingModeRequest_EncodeableType,
+            &OpcUa_SetPublishingModeResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4373,28 +4372,28 @@ StatusCode UA_ClientApi_BeginSetPublishingMode(
 /*============================================================================
  * Synchronously calls the Publish service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Publish(
-    UA_Channel                            a_hChannel,
-    const UA_RequestHeader*               a_pRequestHeader,
-    int32_t                               a_nNoOfSubscriptionAcknowledgements,
-    const UA_SubscriptionAcknowledgement* a_pSubscriptionAcknowledgements,
-    UA_ResponseHeader*                    a_pResponseHeader,
-    uint32_t*                             a_pSubscriptionId,
-    int32_t*                              a_pNoOfAvailableSequenceNumbers,
-    uint32_t**                            a_pAvailableSequenceNumbers,
-    UA_Boolean*                           a_pMoreNotifications,
-    UA_NotificationMessage*               a_pNotificationMessage,
-    int32_t*                              a_pNoOfResults,
-    StatusCode**                          a_pResults,
-    int32_t*                              a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**                   a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_Publish(
+    UA_Channel                               a_hChannel,
+    const OpcUa_RequestHeader*               a_pRequestHeader,
+    int32_t                                  a_nNoOfSubscriptionAcknowledgements,
+    const OpcUa_SubscriptionAcknowledgement* a_pSubscriptionAcknowledgements,
+    OpcUa_ResponseHeader*                    a_pResponseHeader,
+    uint32_t*                                a_pSubscriptionId,
+    int32_t*                                 a_pNoOfAvailableSequenceNumbers,
+    uint32_t**                               a_pAvailableSequenceNumbers,
+    UA_Boolean*                              a_pMoreNotifications,
+    OpcUa_NotificationMessage*               a_pNotificationMessage,
+    int32_t*                                 a_pNoOfResults,
+    StatusCode**                             a_pResults,
+    int32_t*                                 a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**                      a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_PublishRequest cRequest;
-    UA_PublishResponse* pResponse = NULL;
+    OpcUa_PublishRequest cRequest;
+    OpcUa_PublishResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_PublishRequest_Initialize(&cRequest);
+    OpcUa_PublishRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4416,31 +4415,31 @@ StatusCode UA_ClientApi_Publish(
         /* copy parameters into request object. */
         cRequest.RequestHeader                    = *a_pRequestHeader;
         cRequest.NoOfSubscriptionAcknowledgements = a_nNoOfSubscriptionAcknowledgements;
-        cRequest.SubscriptionAcknowledgements     = (UA_SubscriptionAcknowledgement*)a_pSubscriptionAcknowledgements;
+        cRequest.SubscriptionAcknowledgements     = (OpcUa_SubscriptionAcknowledgement*)a_pSubscriptionAcknowledgements;
 
         /* invoke service */
         status = UA_Channel_InvokeService(
             a_hChannel,
             "Publish",
             (void*)&cRequest,
-            &UA_PublishRequest_EncodeableType,
-            &UA_PublishResponse_EncodeableType,
+            &OpcUa_PublishRequest_EncodeableType,
+            &OpcUa_PublishResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_PublishResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_PublishResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4470,17 +4469,17 @@ StatusCode UA_ClientApi_Publish(
 /*============================================================================
  * Asynchronously calls the Publish service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginPublish(
-    UA_Channel                            a_hChannel,
-    const UA_RequestHeader*               a_pRequestHeader,
-    int32_t                               a_nNoOfSubscriptionAcknowledgements,
-    const UA_SubscriptionAcknowledgement* a_pSubscriptionAcknowledgements,
-    UA_Channel_PfnRequestComplete*        a_pCallback,
-    void*                                 a_pCallbackData)
+StatusCode OpcUa_ClientApi_BeginPublish(
+    UA_Channel                               a_hChannel,
+    const OpcUa_RequestHeader*               a_pRequestHeader,
+    int32_t                                  a_nNoOfSubscriptionAcknowledgements,
+    const OpcUa_SubscriptionAcknowledgement* a_pSubscriptionAcknowledgements,
+    UA_Channel_PfnRequestComplete*           a_pCallback,
+    void*                                    a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_PublishRequest cRequest;
-    UA_PublishRequest_Initialize(&cRequest);
+    OpcUa_PublishRequest cRequest;
+    OpcUa_PublishRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4492,15 +4491,15 @@ StatusCode UA_ClientApi_BeginPublish(
         /* copy parameters into request object. */
         cRequest.RequestHeader                    = *a_pRequestHeader;
         cRequest.NoOfSubscriptionAcknowledgements = a_nNoOfSubscriptionAcknowledgements;
-        cRequest.SubscriptionAcknowledgements     = (UA_SubscriptionAcknowledgement*)a_pSubscriptionAcknowledgements;
+        cRequest.SubscriptionAcknowledgements     = (OpcUa_SubscriptionAcknowledgement*)a_pSubscriptionAcknowledgements;
 
         /* begin invoke service */
         status = UA_Channel_BeginInvokeService(
             a_hChannel,
             "Publish",
             (void*)&cRequest,
-            &UA_PublishRequest_EncodeableType,
-            &UA_PublishResponse_EncodeableType,
+            &OpcUa_PublishRequest_EncodeableType,
+            &OpcUa_PublishResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4513,20 +4512,20 @@ StatusCode UA_ClientApi_BeginPublish(
 /*============================================================================
  * Synchronously calls the Republish service.
  *===========================================================================*/
-StatusCode UA_ClientApi_Republish(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    uint32_t                a_nSubscriptionId,
-    uint32_t                a_nRetransmitSequenceNumber,
-    UA_ResponseHeader*      a_pResponseHeader,
-    UA_NotificationMessage* a_pNotificationMessage)
+StatusCode OpcUa_ClientApi_Republish(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    uint32_t                   a_nSubscriptionId,
+    uint32_t                   a_nRetransmitSequenceNumber,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    OpcUa_NotificationMessage* a_pNotificationMessage)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_RepublishRequest cRequest;
-    UA_RepublishResponse* pResponse = NULL;
+    OpcUa_RepublishRequest cRequest;
+    OpcUa_RepublishResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_RepublishRequest_Initialize(&cRequest);
+    OpcUa_RepublishRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4546,24 +4545,24 @@ StatusCode UA_ClientApi_Republish(
             a_hChannel,
             "Republish",
             (void*)&cRequest,
-            &UA_RepublishRequest_EncodeableType,
-            &UA_RepublishResponse_EncodeableType,
+            &OpcUa_RepublishRequest_EncodeableType,
+            &OpcUa_RepublishResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_RepublishResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_RepublishResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4585,17 +4584,17 @@ StatusCode UA_ClientApi_Republish(
 /*============================================================================
  * Asynchronously calls the Republish service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginRepublish(
+StatusCode OpcUa_ClientApi_BeginRepublish(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
     uint32_t                       a_nRetransmitSequenceNumber,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_RepublishRequest cRequest;
-    UA_RepublishRequest_Initialize(&cRequest);
+    OpcUa_RepublishRequest cRequest;
+    OpcUa_RepublishRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
@@ -4613,8 +4612,8 @@ StatusCode UA_ClientApi_BeginRepublish(
             a_hChannel,
             "Republish",
             (void*)&cRequest,
-            &UA_RepublishRequest_EncodeableType,
-            &UA_RepublishResponse_EncodeableType,
+            &OpcUa_RepublishRequest_EncodeableType,
+            &OpcUa_RepublishResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4627,24 +4626,24 @@ StatusCode UA_ClientApi_BeginRepublish(
 /*============================================================================
  * Synchronously calls the TransferSubscriptions service.
  *===========================================================================*/
-StatusCode UA_ClientApi_TransferSubscriptions(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    int32_t                 a_nNoOfSubscriptionIds,
-    const uint32_t*         a_pSubscriptionIds,
-    UA_Boolean              a_bSendInitialValues,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    UA_TransferResult**     a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_TransferSubscriptions(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    int32_t                    a_nNoOfSubscriptionIds,
+    const uint32_t*            a_pSubscriptionIds,
+    UA_Boolean                 a_bSendInitialValues,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    OpcUa_TransferResult**     a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_TransferSubscriptionsRequest cRequest;
-    UA_TransferSubscriptionsResponse* pResponse = NULL;
+    OpcUa_TransferSubscriptionsRequest cRequest;
+    OpcUa_TransferSubscriptionsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_TransferSubscriptionsRequest_Initialize(&cRequest);
+    OpcUa_TransferSubscriptionsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4669,24 +4668,24 @@ StatusCode UA_ClientApi_TransferSubscriptions(
             a_hChannel,
             "TransferSubscriptions",
             (void*)&cRequest,
-            &UA_TransferSubscriptionsRequest_EncodeableType,
-            &UA_TransferSubscriptionsResponse_EncodeableType,
+            &OpcUa_TransferSubscriptionsRequest_EncodeableType,
+            &OpcUa_TransferSubscriptionsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_TransferSubscriptionsResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_TransferSubscriptionsResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4711,9 +4710,9 @@ StatusCode UA_ClientApi_TransferSubscriptions(
 /*============================================================================
  * Asynchronously calls the TransferSubscriptions service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginTransferSubscriptions(
+StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfSubscriptionIds,
     const uint32_t*                a_pSubscriptionIds,
     UA_Boolean                     a_bSendInitialValues,
@@ -4721,8 +4720,8 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_TransferSubscriptionsRequest cRequest;
-    UA_TransferSubscriptionsRequest_Initialize(&cRequest);
+    OpcUa_TransferSubscriptionsRequest cRequest;
+    OpcUa_TransferSubscriptionsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4742,8 +4741,8 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
             a_hChannel,
             "TransferSubscriptions",
             (void*)&cRequest,
-            &UA_TransferSubscriptionsRequest_EncodeableType,
-            &UA_TransferSubscriptionsResponse_EncodeableType,
+            &OpcUa_TransferSubscriptionsRequest_EncodeableType,
+            &OpcUa_TransferSubscriptionsResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }
@@ -4756,23 +4755,23 @@ StatusCode UA_ClientApi_BeginTransferSubscriptions(
 /*============================================================================
  * Synchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
-StatusCode UA_ClientApi_DeleteSubscriptions(
-    UA_Channel              a_hChannel,
-    const UA_RequestHeader* a_pRequestHeader,
-    int32_t                 a_nNoOfSubscriptionIds,
-    const uint32_t*         a_pSubscriptionIds,
-    UA_ResponseHeader*      a_pResponseHeader,
-    int32_t*                a_pNoOfResults,
-    StatusCode**            a_pResults,
-    int32_t*                a_pNoOfDiagnosticInfos,
-    UA_DiagnosticInfo**     a_pDiagnosticInfos)
+StatusCode OpcUa_ClientApi_DeleteSubscriptions(
+    UA_Channel                 a_hChannel,
+    const OpcUa_RequestHeader* a_pRequestHeader,
+    int32_t                    a_nNoOfSubscriptionIds,
+    const uint32_t*            a_pSubscriptionIds,
+    OpcUa_ResponseHeader*      a_pResponseHeader,
+    int32_t*                   a_pNoOfResults,
+    StatusCode**               a_pResults,
+    int32_t*                   a_pNoOfDiagnosticInfos,
+    UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_DeleteSubscriptionsRequest cRequest;
-    UA_DeleteSubscriptionsResponse* pResponse = NULL;
+    OpcUa_DeleteSubscriptionsRequest cRequest;
+    OpcUa_DeleteSubscriptionsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
     
-    UA_DeleteSubscriptionsRequest_Initialize(&cRequest);
+    OpcUa_DeleteSubscriptionsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4796,24 +4795,24 @@ StatusCode UA_ClientApi_DeleteSubscriptions(
             a_hChannel,
             "DeleteSubscriptions",
             (void*)&cRequest,
-            &UA_DeleteSubscriptionsRequest_EncodeableType,
-            &UA_DeleteSubscriptionsResponse_EncodeableType,
+            &OpcUa_DeleteSubscriptionsRequest_EncodeableType,
+            &OpcUa_DeleteSubscriptionsResponse_EncodeableType,
             (void**)&pResponse,
             &pResponseType);
     }
 
     if(status == STATUS_OK){
         /* check for fault */
-        if (pResponseType->typeId == OpcUaId_ServiceFault)
+        if (pResponseType->TypeId == OpcUaId_ServiceFault)
         {
-            *a_pResponseHeader = ((UA_ServiceFault*)pResponse)->ResponseHeader;
+            *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
         }
 
         /* check response type */
-        else if (UA_DeleteSubscriptionsResponse_EncodeableType.typeId != pResponseType->typeId)
+        else if (OpcUa_DeleteSubscriptionsResponse_EncodeableType.TypeId != pResponseType->TypeId)
         {
-            pResponseType->clearFunction(pResponse);
+            pResponseType->Clear(pResponse);
             status = OpcUa_BadUnknownResponse;
         }
 
@@ -4838,17 +4837,17 @@ StatusCode UA_ClientApi_DeleteSubscriptions(
 /*============================================================================
  * Asynchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
-StatusCode UA_ClientApi_BeginDeleteSubscriptions(
+StatusCode OpcUa_ClientApi_BeginDeleteSubscriptions(
     UA_Channel                     a_hChannel,
-    const UA_RequestHeader*        a_pRequestHeader,
+    const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfSubscriptionIds,
     const uint32_t*                a_pSubscriptionIds,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_DeleteSubscriptionsRequest cRequest;
-    UA_DeleteSubscriptionsRequest_Initialize(&cRequest);
+    OpcUa_DeleteSubscriptionsRequest cRequest;
+    OpcUa_DeleteSubscriptionsRequest_Initialize(&cRequest);
 
     /* validate arguments. */
     if( a_pRequestHeader != NULL
@@ -4867,8 +4866,8 @@ StatusCode UA_ClientApi_BeginDeleteSubscriptions(
             a_hChannel,
             "DeleteSubscriptions",
             (void*)&cRequest,
-            &UA_DeleteSubscriptionsRequest_EncodeableType,
-            &UA_DeleteSubscriptionsResponse_EncodeableType,
+            &OpcUa_DeleteSubscriptionsRequest_EncodeableType,
+            &OpcUa_DeleteSubscriptionsResponse_EncodeableType,
             (UA_Channel_PfnRequestComplete*)a_pCallback,
             a_pCallbackData);
     }

@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <wrappers.h>
 
@@ -74,7 +75,7 @@ SC_ClientConnection* SC_Client_Create(){
         if(scClientConnection != NULL){
             memset (scClientConnection, 0, sizeof(SC_ClientConnection));
             Namespace_Initialize(&scClientConnection->namespaces);
-            scClientConnection->securityMode = UA_MessageSecurityMode_Invalid;
+            scClientConnection->securityMode = OpcUa_MessageSecurityMode_Invalid;
             ByteString_Initialize(&scClientConnection->securityPolicy);
 
             sConnection->state = SC_Connection_Disconnected;
@@ -100,7 +101,11 @@ StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
                                UA_EncodeableType**  encodeableTypes){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(cConnection != NULL && cConnection->instance != NULL){
-        status = Namespace_AttachTable(&cConnection->namespaces, namespaceTable);
+        if(namespaceTable != NULL){
+            status = Namespace_AttachTable(&cConnection->namespaces, namespaceTable);
+        }else{
+            status = STATUS_OK;
+        }
         cConnection->encodeableTypes = encodeableTypes;
     }
     return status;
@@ -156,8 +161,8 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
                                           uint32_t             requestId)
 {
     StatusCode status = STATUS_OK;
-    UA_OpenSecureChannelRequest openRequest;
-    UA_OpenSecureChannelRequest_Initialize(&openRequest);
+    OpcUa_OpenSecureChannelRequest openRequest;
+    OpcUa_OpenSecureChannelRequest_Initialize(&openRequest);
     const uint32_t uzero = 0;
     const uint32_t uone = 1;
 
@@ -192,10 +197,10 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         // Client protocol version
         openRequest.ClientProtocolVersion = scProtocolVersion;
         // Enumeration request type => ISSUE_0
-        openRequest.RequestType = UA_SecurityTokenRequestType_Issue;
+        openRequest.RequestType = OpcUa_SecurityTokenRequestType_Issue;
 
         // Security mode value check
-        if(cConnection->securityMode == UA_MessageSecurityMode_Invalid){
+        if(cConnection->securityMode == OpcUa_MessageSecurityMode_Invalid){
             status = STATUS_INVALID_PARAMETERS;
         }else{
             openRequest.SecurityMode = cConnection->securityMode;
@@ -223,12 +228,12 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
 
     if(status == STATUS_OK){
         status = SC_EncodeMsgBody(sendBuf,
-                                  &UA_OpenSecureChannelRequest_EncodeableType,
+                                  &OpcUa_OpenSecureChannelRequest_EncodeableType,
                                   &openRequest);
     }
 
     SecretBuffer_Unexpose(openRequest.ClientNonce.characters);
-    UA_OpenSecureChannelRequest_Clear(&openRequest);
+    OpcUa_OpenSecureChannelRequest_Clear(&openRequest);
 
     return status;
 }
@@ -295,7 +300,7 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     if(status == STATUS_OK){
         // TODO: remove precedent OPN request if existing => before flush ?
         PendingRequest* pRequest = SC_PendingRequestCreate(requestId,
-                                                           &UA_OpenSecureChannelResponse_EncodeableType,
+                                                           &OpcUa_OpenSecureChannelResponse_EncodeableType,
                                                            0, // Not managed now
                                                            0, // Not managed now
                                                            NULL, // No callback, specifc message header used (OPN)
@@ -314,7 +319,7 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
     assert(cConnection != NULL &&
            pRequest != NULL && pRequest->responseType != NULL);
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_OpenSecureChannelResponse* encObj = NULL;
+    OpcUa_OpenSecureChannelResponse* encObj = NULL;
     UA_EncodeableType* receivedType = NULL;
 
     status = SC_DecodeMsgBody(cConnection->instance->receptionBuffers,
@@ -379,7 +384,7 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
         }
     }
 
-    UA_OpenSecureChannelResponse_Clear(encObj);
+    OpcUa_OpenSecureChannelResponse_Clear(encObj);
     free(encObj);
 
     return status;
@@ -569,14 +574,14 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
             status = SC_DecodeChunk(cConnection->instance->receptionBuffers,
                                     requestId,
                                     NULL,
-                                    &UA_ServiceFault_EncodeableType,
+                                    &OpcUa_ServiceFault_EncodeableType,
                                     &recEncType,
                                     &encObj);
         }else{
             status = SC_DecodeChunk(cConnection->instance->receptionBuffers,
                                     requestId,
                                     pRequest->responseType,
-                                    &UA_ServiceFault_EncodeableType,
+                                    &OpcUa_ServiceFault_EncodeableType,
                                     &recEncType,
                                     &encObj);
             // TODO: check status before ?
@@ -656,7 +661,7 @@ StatusCode OnTransportEvent_CB(void*           connection,
                             // TODO: cases in which retStatus != OK should be sent ?
                             retStatus = cConnection->callback(cConnection,
                                                               cConnection->callbackData,
-                                                              OpcUa_ConnectionEvent_Connect,
+                                                              UA_ConnectionEvent_Connected,
                                                               retStatus);
                         }
                     }else{
@@ -691,17 +696,17 @@ StatusCode OnTransportEvent_CB(void*           connection,
     return retStatus;
 }
 
-StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
-                             const char*            uri,
-                             const PKIProvider*     pki,
-                             const Certificate*     crt_cli,
-                             const AsymmetricKey*   key_priv_cli,
-                             const Certificate*     crt_srv,
-                             UA_MessageSecurityMode securityMode,
-                             const char*            securityPolicy,
-                             uint32_t               requestedLifetime,
-                             SC_ConnectionEvent_CB* callback,
-                             void*                  callbackData)
+StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
+                             const char*               uri,
+                             const PKIProvider*        pki,
+                             const Certificate*        crt_cli,
+                             const AsymmetricKey*      key_priv_cli,
+                             const Certificate*        crt_srv,
+                             OpcUa_MessageSecurityMode securityMode,
+                             const char*               securityPolicy,
+                             uint32_t                  requestedLifetime,
+                             SC_ConnectionEvent_CB*    callback,
+                             void*                     callbackData)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
 
@@ -709,19 +714,19 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
        connection->instance != NULL &&
        connection->instance->state == SC_Connection_Disconnected &&
        uri != NULL &&
-       securityMode != UA_MessageSecurityMode_Invalid &&
+       securityMode != OpcUa_MessageSecurityMode_Invalid &&
        securityPolicy != NULL &&
        requestedLifetime > 0 &&
        ((crt_cli != NULL &&
          key_priv_cli != NULL &&
          crt_srv != NULL &&
          pki != NULL)
-       || securityMode == UA_MessageSecurityMode_None))
+       || securityMode == OpcUa_MessageSecurityMode_None))
     {
         if(connection->clientCertificate == NULL &&
            connection->clientKey == NULL &&
            connection->serverCertificate == NULL &&
-           connection->securityMode == UA_MessageSecurityMode_Invalid &&
+           connection->securityMode == OpcUa_MessageSecurityMode_Invalid &&
            connection->securityPolicy.length <= 0 &&
            connection->callback == NULL &&
            connection->callbackData == NULL)
@@ -747,7 +752,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
             connection->serverCertificate = crt_srv;
 
             if(status == STATUS_OK){
-                if(securityMode != UA_MessageSecurityMode_Invalid){
+                if(securityMode != OpcUa_MessageSecurityMode_Invalid){
                     connection->securityMode = securityMode;
                 }else{
                     status = STATUS_NOK;
@@ -786,16 +791,12 @@ StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
     {
         status = STATUS_OK;
         cConnection->instance->state = SC_Connection_Disconnected;
-        cConnection->securityMode = UA_MessageSecurityMode_Invalid;
+        cConnection->securityMode = OpcUa_MessageSecurityMode_Invalid;
         cConnection->callback = NULL;
         cConnection->callbackData = NULL;
-        if(cConnection->pkiProvider != NULL){
-            PKIProvider_Delete(cConnection->pkiProvider);
-            cConnection->pkiProvider = NULL;
-        }
-        ByteString_Clear(&cConnection->serverCertificate);
-        ByteString_Clear(&cConnection->clientCertificate);
-        SecretBuffer_DeleteClear(cConnection->clientKey);
+        cConnection->pkiProvider = NULL;
+        cConnection->serverCertificate = NULL;
+        cConnection->clientCertificate = NULL;
         cConnection->clientKey = NULL;
         SLinkedList_Clear(cConnection->pendingRequests);
         String_Clear(&cConnection->securityPolicy);

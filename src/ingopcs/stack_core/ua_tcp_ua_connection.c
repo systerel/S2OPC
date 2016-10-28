@@ -10,6 +10,8 @@
 #include "ua_tcp_ua_connection.h"
 
 #include <assert.h>
+#include <string.h>
+
 #include <ua_encoder.h>
 #include <ua_tcp_ua_low_level.h>
 

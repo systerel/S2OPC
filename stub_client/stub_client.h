@@ -8,22 +8,24 @@
 #ifndef STUB_SERVER_STUB_CLIENT_H_
 #define STUB_SERVER_STUB_CLIENT_H_
 
-#include <stdint.h>
-#include <ua_channel.h>
+#include <opcua_channel.h>
+#include <unistd.h>
 
 typedef struct {
-    uint32_t stub;
+OpcUa_Int Stub;
 } StubClient_CallbackData;
 
-StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
-                                               void*            callbackData,
-                                               UA_Channel_Event event,
-                                               StatusCode       status);
+OpcUa_StatusCode StubClient_ConnectionEvent_Callback(OpcUa_Channel                   hChannel,
+													 OpcUa_Void*                     pCallbackData,
+													 OpcUa_Channel_Event             eEvent,
+													 OpcUa_StatusCode                uStatus);
+													 //OpcUa_Channel_SecurityToken*    pSecurityToken);
 
-StatusCode StubClient_ResponseEvent_Callback(UA_Channel         channel,
-                                             void*              response,
-                                             UA_EncodeableType* responseType,
- 										     void*              callbackData,
- 										     StatusCode         status);
+
+OpcUa_StatusCode StubClient_ResponseEvent_Callback(OpcUa_Channel         hChannel,
+												   OpcUa_Void*           pResponse,
+												   OpcUa_EncodeableType* pResponseType,
+												   OpcUa_Void*           pCallbackData,
+												   OpcUa_StatusCode      uStatus);
 
 #endif /* STUB_SERVER_STUB_CLIENT_H_ */

@@ -913,17 +913,17 @@ StatusCode ExtensionObject_Write(const UA_ExtensionObject* extObj, UA_MsgBuffer*
         if(extObj->body.object.objType == NULL){
             status = STATUS_INVALID_PARAMETERS;
         }else{
-            if(strncmp(extObj->body.object.objType->namespace,
+            if(strncmp(extObj->body.object.objType->NamespaceUri,
                        OPCUA_NAMESPACE_NAME,
                        strlen(OPCUA_NAMESPACE_NAME))
                !=  0)
             {
-                status = Namespace_GetIndex(&msgBuffer->nsTable, extObj->body.object.objType->namespace, &nsIndex);
+                status = Namespace_GetIndex(&msgBuffer->nsTable, extObj->body.object.objType->NamespaceUri, &nsIndex);
             }
 
             objNodeId.identifierType = IdentifierType_Numeric;
             objNodeId.namespace = nsIndex;
-            objNodeId.numeric = extObj->body.object.objType->binaryTypeId;
+            objNodeId.numeric = extObj->body.object.objType->BinaryEncodingTypeId;
         }
     }
 
@@ -949,7 +949,7 @@ StatusCode ExtensionObject_Write(const UA_ExtensionObject* extObj, UA_MsgBuffer*
                 lengthPos = msgBuffer->buffers->position;
                 status = Int32_Write(&tmpLength, msgBuffer);
                 if(status == STATUS_OK){
-                    status = extObj->body.object.objType->encodeFunction(extObj->body.object.value, msgBuffer);
+                    status = extObj->body.object.objType->Encode(extObj->body.object.value, msgBuffer);
                 }
                 if(status == STATUS_OK){
                     // Go backward to write correct length value
@@ -1017,8 +1017,8 @@ StatusCode ExtensionObject_Read(UA_ExtensionObject* extObj, UA_MsgBuffer* msgBuf
             case UA_ExtObjBodyEncoding_Object:
                 status = Int32_Read(&extObj->length, msgBuffer);
                 if(status == STATUS_OK){
-                    extObj->body.object.value = malloc(extObj->body.object.objType->allocSize);
-                    status = extObj->body.object.objType->decodeFunction(&extObj->body.object.value, msgBuffer);
+                    extObj->body.object.value = malloc(extObj->body.object.objType->AllocationSize);
+                    status = extObj->body.object.objType->Decode(&extObj->body.object.value, msgBuffer);
                 }
                 break;
             default:
