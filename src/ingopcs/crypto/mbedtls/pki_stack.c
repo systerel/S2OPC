@@ -10,6 +10,8 @@
  */
 
 
+#include <stdlib.h>
+
 #include "ua_base_types.h"
 #include "crypto_provider.h"
 #include "key_manager.h"
@@ -19,28 +21,32 @@
 #include "mbedtls/x509.h"
 
 
-const PKIProvider g_pkiStack = {
-        .pFnValidateCertificate = PKIProviderStack_ValidateCertificate,
-};
-
-
-StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
-                                                const Certificate *pToValidate,
-                                                const Certificate *pCertificateAuthority,
-                                                const CertificateRevList *pRevocationList)
+static StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
+                                                       const Certificate *pToValidate)
 {
     (void)(pPKI);
+    Certificate *cert_ca = NULL;
+    CertificateRevList *cert_rev_list = NULL;
     mbedtls_x509_crl *rev_list = NULL;
     uint32_t failure_reasons = 0;
 
-    if(NULL == pToValidate || NULL == pCertificateAuthority)
+    if(NULL == pPKI || NULL == pToValidate)
+        return STATUS_INVALID_PARAMETERS;
+    if(NULL == pPKI->pFnValidateCertificate || NULL == pPKI->pUserCertAuthList)
         return STATUS_INVALID_PARAMETERS;
 
-    if(NULL != pRevocationList)
-        rev_list = (mbedtls_x509_crl *)(&pRevocationList->crl);
+    // Gathers certificates from pki structure
+    if(NULL != pPKI->pUserCertRevocList)
+    {
+        cert_rev_list = (CertificateRevList *)(pPKI->pUserCertRevocList);
+        rev_list = (mbedtls_x509_crl *)(&cert_rev_list->crl);
+    }
+    cert_ca = (Certificate *)(pPKI->pUserCertAuthList);
+
+    // Now, verifies the certificate
     // crt are not const in crt_verify, but this function does not look like to modify them
     if(mbedtls_x509_crt_verify((mbedtls_x509_crt *)(&pToValidate->crt),
-                               (mbedtls_x509_crt *)(&pCertificateAuthority->crt),
+                               (mbedtls_x509_crt *)(&cert_ca->crt),
                                rev_list,
                                NULL, /* You can specify an expected Common Name here */
                                &failure_reasons,
@@ -50,3 +56,33 @@ StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
 
     return STATUS_OK;
 }
+
+
+StatusCode PKIProviderStack_New(Certificate *pCertAuth,
+                                CertificateRevList *pRevocationList,
+                                PKIProvider **ppPKI)
+{
+    PKIProvider *pki = NULL;
+
+    if(NULL == pCertAuth || NULL == ppPKI)
+        return STATUS_INVALID_PARAMETERS;
+
+    pki = (PKIProvider *)malloc(sizeof(PKIProvider));
+    if(NULL == pki)
+        return STATUS_NOK;
+
+    pki->pFnValidateCertificate = PKIProviderStack_ValidateCertificate;
+    pki->pUserCertAuthList = pCertAuth;
+    pki->pUserCertRevocList = pRevocationList; // Can be NULL
+    pki->pUserData = NULL;
+    *ppPKI = pki;
+
+    return STATUS_OK;
+}
+
+
+void PKIProviderStack_Free(PKIProvider *pPKI)
+{
+    free((void *)pPKI);
+}
+

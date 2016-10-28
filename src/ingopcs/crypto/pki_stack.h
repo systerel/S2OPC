@@ -19,20 +19,19 @@
 #include "pki.h"
 
 
-extern const PKIProvider g_pkiStack; /**> The PKI instance */
-
-
 /**
- * \brief   The minimal validation implementation.
+ * \brief   The minimal validation implementation, with a single certificate authority.
  *
  *          This verifies the certificate in the safest manner (whole certificate chain, date validation).
  *
+ * \warning Certificates must be valid until the destruction of the created PKI (they are not copied).
+ *
  * \param [in, optional] pRevocationList    A certificate chain containing the revocation list. If NULL, no revocation list is checked.
  */
-StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
-                                                const Certificate *pToValidate,
-                                                const Certificate *pCertificateAuthority,
-                                                const CertificateRevList *pRevocationList);
+StatusCode PKIProviderStack_New(Certificate *pCertAuth,
+                                CertificateRevList *pRevocationList,
+                                PKIProvider **ppPKI);
+void PKIProviderStack_Free(PKIProvider *pPKI);
 
 
 #endif /* INGOPCS_PKI_STACK_H_ */
