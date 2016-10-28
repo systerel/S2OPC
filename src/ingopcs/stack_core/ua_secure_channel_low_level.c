@@ -487,6 +487,7 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                                              &cipherBlockSize,
                                              &plainBlockSize);
                  if(status == STATUS_OK){
+                     //TODO: CryptoProvider_AsymmetricGetLength_Signature
                      scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
                                                                        cipherBlockSize,
                                                                        plainBlockSize,

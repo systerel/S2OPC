@@ -223,7 +223,6 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
 StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    CryptoProvider* cProvider = NULL;
     uint32_t requestId = 0;
 
     if(cConnection != NULL){
@@ -241,16 +240,12 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     }
 
     if(status == STATUS_OK){
-        // TODO: temporary replacement of code to gen a foundation crypto provider
-        //cProvider = CryptoProvider_Create(&cConnection->securityPolicy);
-        char* secuPolC = String_GetCString(&cConnection->securityPolicy);
-        cProvider = malloc(sizeof(OpcUa_CryptoProvider));
-        status = OpcUa_CreateCryptoProvider(secuPolC, (OpcUa_CryptoProvider*) cProvider);
-        free(secuPolC);
-        if(cProvider == NULL){
+        cConnection->instance->currentCryptoProvider =
+                CryptoProvider_Create
+                    (String_GetRawCString(&cConnection->securityPolicy));
+
+        if(cConnection->instance->currentCryptoProvider == NULL){
             status = STATUS_NOK;
-        }else{
-            cConnection->instance->currentCryptoProvider = cProvider;
         }
     }
 
@@ -446,20 +441,6 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
         // Retrieve associated pending request
         pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
         if(pRequest == NULL){
-            status = STATUS_NOK;
-        }
-    }
-
-    // TODO: remove only because foundation and ingopcs crypto provider are coexisting
-    if(status == STATUS_OK){
-        if(cConnection->instance->currentCryptoProvider != NULL){
-            OpcUa_DeleteCryptoProvider((OpcUa_CryptoProvider*)cConnection->instance->currentCryptoProvider);
-            free(cConnection->instance->currentCryptoProvider);
-            cConnection->instance->currentCryptoProvider = NULL;
-        }
-        cConnection->instance->currentCryptoProvider = CryptoProvider_Create
-                                                        (String_GetRawCString(&cConnection->securityPolicy));
-        if(cConnection->instance->currentCryptoProvider == NULL){
             status = STATUS_NOK;
         }
     }
