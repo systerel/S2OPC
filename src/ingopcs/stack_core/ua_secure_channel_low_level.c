@@ -191,6 +191,7 @@ StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
     return status;
 }
 
+// TODO: delete this one.
 StatusCode RetrievePublicKeyFromCert(CryptoProvider* cryptoProvider,
                                      UA_ByteString*  certificate,
                                      UA_ByteString*  publicKey)
@@ -245,6 +246,7 @@ StatusCode SC_RetrieveAndSetPublicKeyFromCert(SC_Connection*  scConnection,
 
         if((*publicKey)->length <= 0){
             // Key never extracted from cert. before:
+            // TODO: use KeyManager_Certificate_GetPublicKey
             status = RetrievePublicKeyFromCert(scConnection->currentCryptoProvider,
                                                certificate,
                                                *publicKey);
@@ -471,12 +473,15 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
         if(isSymmetric == FALSE){
             uint32_t publicKeyModulusLength = 0;
             UA_ByteString* publicKey = NULL;
+            // TODO: isn't this already done?
             SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
+            // TODO: use CryptoProvider_AsymmetricGetLength_Msgs or CryptoProvider_AsymmetricGetLength_MsgPlainText instead, if possible.
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
                                                                    publicKey,
                                                                    &publicKeyModulusLength);
 
             if(status == STATUS_OK){
+                // TODO: use CryptoProvider_AsymmetricGetLength_Msgs
                 status = GetAsymmBlocksSizes(&scConnection->currentSecuPolicy,
                                              publicKeyModulusLength,
                                              &cipherBlockSize,
@@ -862,14 +867,17 @@ StatusCode EncodePadding(SC_Connection* scConnection,
             UA_ByteString* publicKey = NULL;
             SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
 
+            // TODO: use CryptoProvider_AsymmetricGetLength_Msgs or CryptoProvider_AsymmetricGetLength_MsgPlainText instead, if possible.
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
                                                                    publicKey,
                                                                    &publicKeyModulusLength);
 
             if(status == STATUS_OK){
+                // TODO: use CryptoProvider_AsymmetricGetLength_Signature
                 *signatureSize = GetAsymmSignatureSize
                                   (&scConnection->currentSecuPolicy,
                                    publicKeyModulusLength);
+                // TODO: use CryptoProvider_AsymmetricGetLength_Msgs
                 status = GetAsymmBlocksSizes
                           (&scConnection->currentSecuPolicy,
                            publicKeyModulusLength,
@@ -1664,13 +1672,16 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
         if(isSymmetric == FALSE){
             uint32_t publicKeyModulusLength = 0;
             UA_ByteString* publicKey = NULL;
+            // TODO: isn't this already done?
             SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
 
+            // TODO: use CryptoProvider_AsymmetricGetLength_Msgs or CryptoProvider_AsymmetricGetLength_MsgPlainText instead, if possible.
             status = CryptoProvider_GetAsymmPublicKeyModulusLength(cryptoProvider,
                                                                    publicKey,
                                                                    &publicKeyModulusLength);
 
             if(status == STATUS_OK){
+                // TODO: use CryptoProvider_AsymmetricGetLength_Signature
                 signatureSize = GetAsymmSignatureSize
                                  (securityPolicy,
                                   publicKeyModulusLength);
