@@ -52,10 +52,10 @@ typedef struct {
     SC_ConnectionState     state;
     uint32_t               startTime;
     UA_ByteString          runningAppCertificate;
-    AsymmetricKey*         runningAppPublicKey;
+    Certificate*           runningAppPublicKeyCert;
     AsymmetricKey*         runningAppPrivateKey; // Pointer on running app private key: do not manage allocation on it
     UA_ByteString          otherAppCertificate;
-    AsymmetricKey*         otherAppPublicKey;
+    Certificate*           otherAppPublicKeyCert;
     UA_MsgBuffer*          sendingBuffer;
     uint32_t               sendingMaxBodySize;
     UA_MsgBuffers*         receptionBuffers;

@@ -704,7 +704,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
 
     if(connection != NULL &&
        connection->instance != NULL &&
-       connection->instance->state != SC_Connection_Disconnected &&
+       connection->instance->state == SC_Connection_Disconnected &&
        uri != NULL &&
        pkiConfig != NULL &&
        clientCertificate != NULL &&
@@ -724,13 +724,18 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
            connection->callback == NULL &&
            connection->callbackData == NULL)
         {
-            // Create CryptoProvider and KeyManager
-            connection->instance->currentCryptoProvider =
-                    CryptoProvider_Create
-                        (String_GetRawCString(&connection->securityPolicy));
 
-            if(connection->instance->currentCryptoProvider == NULL){
-                status = STATUS_NOK;
+            status = String_InitializeFromCString(&connection->securityPolicy, securityPolicy);
+
+            if(STATUS_OK == status){
+                // Create CryptoProvider and KeyManager
+                connection->instance->currentCryptoProvider =
+                        CryptoProvider_Create
+                            (String_GetRawCString(&connection->securityPolicy));
+
+                if(connection->instance->currentCryptoProvider == NULL){
+                    status = STATUS_NOK;
+                }
             }
             
             if(STATUS_OK == status){
@@ -767,10 +772,6 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                 }else{
                     status = STATUS_NOK;
                 }
-            }
-
-            if(status == STATUS_OK){
-                status = String_InitializeFromCString(&connection->securityPolicy, securityPolicy);
             }
 
             connection->requestedLifetime = requestedLifetime;
