@@ -345,7 +345,6 @@ uint32_t GetMaxBodySize(UA_MsgBuffer* msgBuffer,
 }
 
 // Get information from internal properties
-
 StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
                                   uint32_t       plainDataLength,
                                   uint32_t       symmetricAlgo,
@@ -365,15 +364,15 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
             UA_ByteString* otherAppPublicKey = NULL;
 
             // Retrieve other app public key from certificate
+            // TODO integration: see if and how it was avoided previously
             status = SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &otherAppPublicKey);
 
             // Retrieve cipher length
             if(status == STATUS_OK){
-                status = CryptoProvider_AsymmetricEncryptLength
-                          (scConnection->currentCryptoProvider,
-                           plainDataLength,
-                           otherAppPublicKey,
-                           cipherDataLength);
+                status = CryptoProvider_AsymmetricGetLength_Encryption(scConnection->currentCryptoProvider,
+                                                                       otherAppPublicKey,
+                                                                       plainDataLength,
+                                                                       cipherDataLength);
             }
         }
     }else if (status == STATUS_OK){
@@ -947,12 +946,12 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
         }else{
             status = ByteString_InitializeFixedSize(&signedData, signatureSize);
             if(status == STATUS_OK){
-                status = CryptoProvider_AsymmetricSign
-                          (scConnection->currentCryptoProvider,
-                           msgBuffer->buffers->data,
-                           msgBuffer->buffers->length,
-                           scConnection->runningAppPrivateKey,
-                           &signedData);
+                status = CryptoProvider_AsymmetricSign_Low(scConnection->currentCryptoProvider,
+                                                           msgBuffer->buffers->data,
+                                                           msgBuffer->buffers->length,
+                                                           scConnection->runningAppPrivateKey,
+                                                           signedData.characters,
+                                                           signedData.length);
             }else{
                 status = STATUS_NOK;
             }
@@ -1053,7 +1052,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
 
             // Encrypt
             if(status == STATUS_OK){
-                status = CryptoProvider_AsymmetricEncrypt
+                status = CryptoProvider_AsymmetricEncrypt_Low
                           (scConnection->currentCryptoProvider,
                            dataToEncrypt,
                            dataToEncryptLength,
@@ -1188,7 +1187,7 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
                                                         &scConnection->sendingBuffer->buffers->data[scConnection->sendingBuffer->buffers->length - signatureSize],
                                                         signatureSize);
             }
-
+            // TODO integration: AsymmetricVerify ???
         }
 
         //// Check sender certificate size is not bigger than maximum size to be sent
@@ -1463,11 +1462,10 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
 
         if(status == STATUS_OK){
             if(isSymmetric == FALSE){
-                status = CryptoProvider_AsymmetricDecryptLength(cryptoProvider,
-                                                                dataToDecrypt,
-                                                                lengthToDecrypt,
-                                                                scConnection->runningAppPrivateKey,
-                                                                &decryptedTextLength);
+                status = CryptoProvider_AsymmetricGetLength_Decryption(cryptoProvider,
+                                                                       scConnection->runningAppPrivateKey,
+                                                                       lengthToDecrypt,
+                                                                       &decryptedTextLength);
 
                 if(status == STATUS_OK && decryptedTextLength <= scConnection->receptionBuffers->buffers->max_size){
                     // Retrieve next chunk empty buffer
@@ -1482,11 +1480,12 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                     }
                     if(status == STATUS_OK){
                         assert(plainBuffer->max_size >= decryptedTextLength);
-                        status = CryptoProvider_AsymmetricDecrypt(cryptoProvider,
+                        status = CryptoProvider_AsymmetricDecrypt_Low(cryptoProvider,
                                                                   dataToDecrypt,
                                                                   lengthToDecrypt,
                                                                   scConnection->runningAppPrivateKey,
                                                                   &(plainBuffer->data[sequenceNumberPosition]),
+                                                                  decryptedTextLength, // TODO integration: pas très beau d'avoir la variable et son pointeur juste après (devrait marcher ceci dit, mais ne permet pas de vérifier qu'on s'est pas planté)
                                                                   &decryptedTextLength);
                         if(status == STATUS_OK){
                             Buffer_SetDataLength(plainBuffer, sequenceNumberPosition + decryptedTextLength);
@@ -1688,7 +1687,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                   publicKeyModulusLength);
                 signaturePosition = receptionBuffer->length - signatureSize;
 
-                status = CryptoProvider_AsymmetricVerify(cryptoProvider,
+                status = CryptoProvider_AsymmetricVerify_Low(cryptoProvider,
                                                          receptionBuffer->data,
                                                          signaturePosition,
                                                          publicKey,
