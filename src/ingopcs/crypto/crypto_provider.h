@@ -134,26 +134,26 @@ StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
 
 
 // Asymmetric functions
-StatusCode CryptoProvider_AsymmetricEncrypt_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_AsymmetricEncrypt(const CryptoProvider *pProvider,
                                             const uint8_t *pInput,
                                             uint32_t lenInput,
                                             const AsymmetricKey *pKey,
                                             uint8_t *pOutput,
                                             uint32_t lenOutput);
-StatusCode CryptoProvider_AsymmetricDecrypt_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider,
                                             const uint8_t *pInput,
                                             uint32_t lenInput,
                                             const AsymmetricKey *pKey,
                                             uint8_t *pOutput,
                                             uint32_t lenOutput,
                                             uint32_t *lenWritten);
-StatusCode CryptoProvider_AsymmetricSign_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,
                                          const AsymmetricKey *pKeyPrivateLocal,
                                          uint8_t *pSignature,
                                          uint32_t lenSignature);
-StatusCode CryptoProvider_AsymmetricVerify_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenInput,
                                            const AsymmetricKey *pKeyRemotePublic,

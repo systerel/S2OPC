@@ -946,7 +946,7 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
         }else{
             status = ByteString_InitializeFixedSize(&signedData, signatureSize);
             if(status == STATUS_OK){
-                status = CryptoProvider_AsymmetricSign_Low(scConnection->currentCryptoProvider,
+                status = CryptoProvider_AsymmetricSign(scConnection->currentCryptoProvider,
                                                            msgBuffer->buffers->data,
                                                            msgBuffer->buffers->length,
                                                            scConnection->runningAppPrivateKey,
@@ -1052,7 +1052,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
 
             // Encrypt
             if(status == STATUS_OK){
-                status = CryptoProvider_AsymmetricEncrypt_Low
+                status = CryptoProvider_AsymmetricEncrypt
                           (scConnection->currentCryptoProvider,
                            dataToEncrypt,
                            dataToEncryptLength,
@@ -1480,7 +1480,7 @@ StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                     }
                     if(status == STATUS_OK){
                         assert(plainBuffer->max_size >= decryptedTextLength);
-                        status = CryptoProvider_AsymmetricDecrypt_Low(cryptoProvider,
+                        status = CryptoProvider_AsymmetricDecrypt(cryptoProvider,
                                                                   dataToDecrypt,
                                                                   lengthToDecrypt,
                                                                   scConnection->runningAppPrivateKey,
@@ -1687,7 +1687,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                   publicKeyModulusLength);
                 signaturePosition = receptionBuffer->length - signatureSize;
 
-                status = CryptoProvider_AsymmetricVerify_Low(cryptoProvider,
+                status = CryptoProvider_AsymmetricVerify(cryptoProvider,
                                                          receptionBuffer->data,
                                                          signaturePosition,
                                                          publicKey,

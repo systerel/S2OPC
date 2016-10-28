@@ -756,7 +756,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvider *pP
 }
 
 
-StatusCode CryptoProvider_AsymmetricEncrypt_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_AsymmetricEncrypt(const CryptoProvider *pProvider,
                                             const uint8_t *pInput,
                                             uint32_t lenInput,
                                             const AsymmetricKey *pKey,
@@ -796,7 +796,7 @@ StatusCode CryptoProvider_AsymmetricEncrypt_Low(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_AsymmetricDecrypt_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider,
                                             const uint8_t *pInput,
                                             uint32_t lenInput,
                                             const AsymmetricKey *pKey,
@@ -844,7 +844,7 @@ StatusCode CryptoProvider_AsymmetricDecrypt_Low(const CryptoProvider *pProvider,
  * and verify that both hashes are the same. Everyone can decrypt the signature,
  * but only the private key could have forged it.
  */
-StatusCode CryptoProvider_AsymmetricSign_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,
                                          const AsymmetricKey *pKeyPrivateLocal,
@@ -880,7 +880,7 @@ StatusCode CryptoProvider_AsymmetricSign_Low(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_AsymmetricVerify_Low(const CryptoProvider *pProvider,
+StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenInput,
                                            const AsymmetricKey *pKeyRemotePublic,
