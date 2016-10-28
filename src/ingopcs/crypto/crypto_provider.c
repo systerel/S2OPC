@@ -579,6 +579,25 @@ StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
  */
 
 /**
+ * \brief   Compute the length of the key in bytes.
+ *
+ *          The main purpose of this function is to verify the length of the asymmetric key \p pKey with respect to the security policy.
+ */
+StatusCode CryptoProvider_AsymmetricGetLength_KeyBytes(const CryptoProvider *pProvider,
+                                                       const AsymmetricKey *pKey,
+                                                       uint32_t *lenKeyBytes)
+{
+    StatusCode status = STATUS_OK;
+
+    status = CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKey, lenKeyBytes);
+    if(status == STATUS_OK)
+        *lenKeyBytes /= 8;
+
+    return status;
+}
+
+
+/**
  * Calculate the length of the hash used for OAEP encryption/decryption.
  */
 StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvider *pProvider,

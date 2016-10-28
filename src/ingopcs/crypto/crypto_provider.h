@@ -44,6 +44,9 @@ StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
 StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider *pProvider,
                                                       const AsymmetricKey *pKey,
                                                       uint32_t *lenKeyBits);
+StatusCode CryptoProvider_AsymmetricGetLength_KeyBytes(const CryptoProvider *pProvider,
+                                                       const AsymmetricKey *pKey,
+                                                       uint32_t *lenKeyBytes);
 StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvider *pProvider,
                                                              uint32_t *length);
 StatusCode CryptoProvider_AsymmetricGetLength_PSSHashLength(const CryptoProvider *pProvider,
