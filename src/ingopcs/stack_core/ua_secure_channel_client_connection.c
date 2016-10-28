@@ -18,6 +18,25 @@
 #include <ua_secure_channel_low_level.h>
 #include <ua_types.h>
 
+
+typedef enum
+{
+    TMP_Invalid_PKI   = 0,
+    TMP_NO_PKI        = 1,
+    TMP_Override      = 2,
+    TMP_DefaultPKI    = 3
+} TMP_PKI_Types;
+
+typedef struct
+{
+    TMP_PKI_Types   type;
+    char*           trustListLocation;
+    char*           revocationListLocation;
+    char*           untrustedListLocation;
+    uint32_t        flags;
+    void*           unused;
+} TMP_PKIConfig;
+
 PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
                                         UA_EncodeableType*   responseType,
                                         uint32_t             timeoutHint,
@@ -111,7 +130,8 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
         }
         ByteString_Clear(&scConnection->serverCertificate);
         ByteString_Clear(&scConnection->clientCertificate);
-        SecretBuffer_DeleteClear(scConnection->clientKey);
+        KeyManager_AsymmetricKey_Free(scConnection->clientKey);
+        scConnection->clientKey = NULL;
         SLinkedList_Delete(scConnection->pendingRequests);
         String_Clear(&scConnection->securityPolicy);
         if(scConnection->instance != NULL){
@@ -185,14 +205,10 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         }
     }
 
-    // TODO: to remove after complete integration of INGOPCS crypto provider
-    CryptoProvider* cProvider = CryptoProvider_Create(String_GetRawCString(&cConnection->securityPolicy));
-
-    if(status == STATUS_OK && cProvider != NULL){
-        status = CryptoProvider_SymmetricGenerateKey(cProvider, //cConnection->instance->currentCryptoProvider,
+    if(status == STATUS_OK){
+        status = CryptoProvider_SymmetricGenerateKey(cConnection->instance->currentCryptoProvider,
                                                      &cConnection->instance->currentNonce);
-        CryptoProvider_Delete(cProvider);
-        cProvider = NULL;
+
         if(status == STATUS_OK){
             uint8_t* bytes = NULL;
             bytes = SecretBuffer_Expose(cConnection->instance->currentNonce);
@@ -238,17 +254,18 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
         status = String_AttachFrom(&cConnection->instance->currentSecuPolicy,
                                    &cConnection->securityPolicy);
     }
-
-    if(status == STATUS_OK){
-        cConnection->instance->currentCryptoProvider =
-                CryptoProvider_Create
-                    (String_GetRawCString(&cConnection->securityPolicy));
-
-        if(cConnection->instance->currentCryptoProvider == NULL){
-            status = STATUS_NOK;
-        }
-    }
-
+	
+    // TODO: manage prec and current crypto provider here if necessary
+    // for now created only on sc_connect once
+//    if(status == STATUS_OK){
+//        cConnection->instance->currentCryptoProvider =
+//                CryptoProvider_Create
+//                    (String_GetRawCString(&cConnection->securityPolicy));
+//
+//        if(cConnection->instance->currentCryptoProvider == NULL){
+//            status = STATUS_NOK;
+//        }
+//    }
 
     // MaxBodySize to be computed prior any write in sending buffer
     if(status == STATUS_OK){
@@ -683,8 +700,12 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                              void*                  callbackData)
 {
     StatusCode status = STATUS_NOK;
+    TMP_PKIConfig* tmpPkiConfig = NULL;
 
-    if(uri != NULL &&
+    if(connection != NULL &&
+       connection->instance != NULL &&
+       connection->instance->state != SC_Connection_Disconnected &&
+       uri != NULL &&
        pkiConfig != NULL &&
        clientCertificate != NULL &&
        clientKey != NULL &&
@@ -693,21 +714,50 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
        securityPolicy != NULL &&
        requestedLifetime > 0)
     {
+        tmpPkiConfig = (TMP_PKIConfig*) pkiConfig;
+
         if(connection->clientCertificate.length <= 0 &&
-           SecretBuffer_GetLength(connection->clientKey) == 0 &&
+           connection->clientKey == NULL &&
            connection->serverCertificate.length <= 0 &&
            connection->securityMode == UA_MessageSecurityMode_Invalid &&
            connection->securityPolicy.length <= 0 &&
            connection->callback == NULL &&
            connection->callbackData == NULL)
         {
-            // Create PKI provider
-            connection->pkiProvider = PKIProvider_Create(pkiConfig);
-            status = ByteString_Copy(&connection->clientCertificate, clientCertificate);
+            // Create CryptoProvider and KeyManager
+            connection->instance->currentCryptoProvider =
+                    CryptoProvider_Create
+                        (String_GetRawCString(&connection->securityPolicy));
+
+            if(connection->instance->currentCryptoProvider == NULL){
+                status = STATUS_NOK;
+            }
+            
+            if(STATUS_OK == status){
+                connection->instance->currentKeyManager =
+                        KeyManager_Create
+                            (connection->instance->currentCryptoProvider,
+                             (int8_t*) tmpPkiConfig->trustListLocation,
+                             strlen(tmpPkiConfig->trustListLocation),
+                             (int8_t*) tmpPkiConfig->revocationListLocation,
+                             strlen(tmpPkiConfig->revocationListLocation));
+                if(connection->instance->currentKeyManager == NULL){
+                    status = STATUS_NOK;
+                }
+            }
+
+            if(STATUS_OK == status){
+                status = ByteString_Copy(&connection->clientCertificate, clientCertificate);
+            }
 
             if(status == STATUS_OK){
-                connection->clientKey = SecretBuffer_NewFromExposedBuffer
-                                         (clientKey->characters, clientKey->length);
+                 status = KeyManager_AsymmetricKey_CreateFromBuffer
+                             (connection->instance->currentKeyManager,
+                              clientKey->characters, clientKey->length,
+                              &connection->clientKey);
+            }
+
+            if(status == STATUS_OK){
                 status = ByteString_Copy(&connection->serverCertificate, serverCertificate);
             }
 

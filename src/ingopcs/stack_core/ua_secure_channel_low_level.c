@@ -56,9 +56,7 @@ SC_Connection* SC_Create (){
             sConnection->transportConnection = connection;
             sConnection->state = SC_Connection_Error;
             ByteString_Initialize(&sConnection->runningAppCertificate);
-            ByteString_Initialize(&sConnection->runningAppPublicKey);
             ByteString_Initialize(&sConnection->otherAppCertificate);
-            ByteString_Initialize(&sConnection->otherAppPublicKey);
             ByteString_Initialize(&sConnection->currentSecuPolicy);
             ByteString_Initialize(&sConnection->precSecuPolicy);
 
@@ -74,11 +72,12 @@ void SC_Delete (SC_Connection* scConnection){
         // Do not delete runningAppCertificate, runnigAppPrivateKey and otherAppCertificate:
         //  managed by upper level
         ByteString_Clear(&scConnection->runningAppCertificate);
-        ByteString_Clear(&scConnection->runningAppPublicKey);
-        // Never deallocate private key, provided by upper level (client/server connection)
-        scConnection->runningAppPrivateKey = NULL;
+        KeyManager_AsymmetricKey_Free(scConnection->runningAppPublicKey);
+        scConnection->runningAppPublicKey = NULL;
+        scConnection->runningAppPrivateKey = NULL; // DO NOT DEALLOCATE: manage by upper level
         ByteString_Clear(&scConnection->otherAppCertificate);
-        ByteString_Clear(&scConnection->otherAppPublicKey);
+        KeyManager_AsymmetricKey_Free(scConnection->otherAppPublicKey);
+        scConnection->otherAppPublicKey = NULL;
         if(scConnection->sendingBuffer != NULL)
         {
             MsgBuffer_Delete(&scConnection->sendingBuffer);
@@ -100,13 +99,15 @@ void SC_Delete (SC_Connection* scConnection){
         KeySet_Delete(scConnection->precSecuKeySets.senderKeySet);
         CryptoProvider_Delete(scConnection->currentCryptoProvider);
         CryptoProvider_Delete(scConnection->precCryptoProvider);
+        KeyManager_Delete(scConnection->currentKeyManager);
+        KeyManager_Delete(scConnection->precKeyManager);
         free(scConnection);
     }
 }
 
 StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
                                         UA_ByteString* runningAppCertificate,
-                                        SecretBuffer*  runningAppPrivateKey,
+                                        AsymmetricKey* runningAppPrivateKey,
                                         UA_ByteString* otherAppCertificate){
     StatusCode status = STATUS_OK;
     if(scConnection->runningAppCertificate.length <= 0 &&
@@ -117,14 +118,16 @@ StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
             status = ByteString_AttachFrom(&scConnection->runningAppCertificate,
                                            runningAppCertificate);
         }
-        ByteString_Clear(&scConnection->runningAppPublicKey);
+        KeyManager_AsymmetricKey_Free(scConnection->runningAppPublicKey);
+        scConnection->runningAppPublicKey = NULL;
         scConnection->runningAppPrivateKey = runningAppPrivateKey;
 
         if(otherAppCertificate != NULL){
             status = ByteString_AttachFrom(&scConnection->otherAppCertificate,
                                            otherAppCertificate);
         }
-        ByteString_Clear(&scConnection->otherAppPublicKey);
+        KeyManager_AsymmetricKey_Free(scConnection->otherAppPublicKey);
+        scConnection->otherAppPublicKey = NULL;
     }else{
         status = STATUS_INVALID_STATE;
     }
@@ -191,46 +194,14 @@ StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
     return status;
 }
 
-// TODO: delete this one.
-StatusCode RetrievePublicKeyFromCert(CryptoProvider* cryptoProvider,
-                                     UA_ByteString*  certificate,
-                                     UA_ByteString*  publicKey)
-{
-    StatusCode status = STATUS_INVALID_PARAMETERS;
-    uint32_t publicKeyLength = 0;
-    if(cryptoProvider != NULL &&
-       publicKey != NULL &&
-       certificate != NULL)
-    {
-        status = CryptoProvider_GetPublicKeyLengthFromCert(cryptoProvider,
-                                                           certificate,
-                                                           &publicKeyLength);
-        if(status == STATUS_OK){
-            status = ByteString_InitializeFixedSize(publicKey, publicKeyLength);
-        }
-
-        if(status == STATUS_OK){
-            status = CryptoProvider_GetPublicKeyFromCert(cryptoProvider,
-                                                         certificate,
-                                                         publicKey);
-        }else{
-            status = STATUS_NOK;
-        }
-
-    }else if(publicKey == NULL){
-        status = STATUS_NOK;
-    }
-
-    return status;
-}
-
 // Retrieve public key from certificate and set it in internal properties
 StatusCode SC_RetrieveAndSetPublicKeyFromCert(SC_Connection*  scConnection,
                                               uint32_t        runningApp,
-                                              UA_ByteString** publicKey)
+                                              AsymmetricKey** publicKey)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ByteString* certificate = NULL;
+    Certificate* cert = NULL;
 
     if(scConnection != NULL &&
        publicKey != NULL && *publicKey == NULL)
@@ -238,18 +209,27 @@ StatusCode SC_RetrieveAndSetPublicKeyFromCert(SC_Connection*  scConnection,
         if(runningApp == FALSE)
         {
             certificate = &scConnection->otherAppCertificate;
-            *publicKey = &scConnection->otherAppPublicKey;
+            *publicKey = scConnection->otherAppPublicKey;
         }else{
             certificate = &scConnection->runningAppCertificate;
-            *publicKey = &scConnection->runningAppPublicKey;
+            *publicKey = scConnection->runningAppPublicKey;
         }
 
-        if((*publicKey)->length <= 0){
+        if((*publicKey) == NULL){
             // Key never extracted from cert. before:
             // TODO: use KeyManager_Certificate_GetPublicKey
-            status = RetrievePublicKeyFromCert(scConnection->currentCryptoProvider,
-                                               certificate,
-                                               *publicKey);
+            status = KeyManager_Certificate_CreateFromDER(scConnection->currentKeyManager,
+                                                          certificate->characters,
+                                                          certificate->length,
+                                                          &cert);
+
+            if(STATUS_OK == status){
+                status = KeyManager_Certificate_GetPublicKey(scConnection->currentKeyManager,
+                                                             cert,
+                                                             *publicKey);
+                KeyManager_Certificate_Free(cert);
+            }
+
         }else{
             status = STATUS_OK;
         }
@@ -361,7 +341,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
            status = STATUS_INVALID_STATE;
         }else{
 
-            UA_ByteString* otherAppPublicKey = NULL;
+            AsymmetricKey* otherAppPublicKey = NULL;
 
             // Retrieve other app public key from certificate
             // TODO integration: see if and how it was avoided previously
@@ -469,30 +449,28 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
     if(scConnection != NULL){
         uint32_t cipherBlockSize = 0;
         uint32_t plainBlockSize =0;
+        uint32_t signatureSize = 0;
         if(isSymmetric == FALSE){
-            uint32_t publicKeyModulusLength = 0;
-            UA_ByteString* publicKey = NULL;
-            // TODO: isn't this already done?
+            AsymmetricKey* publicKey = NULL;
+            //TODO: possible to avoid this fct and know when it is already store to access field directly ?
             SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
-            // TODO: use CryptoProvider_AsymmetricGetLength_Msgs or CryptoProvider_AsymmetricGetLength_MsgPlainText instead, if possible.
-            status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
-                                                                   publicKey,
-                                                                   &publicKeyModulusLength);
 
             if(status == STATUS_OK){
-                // TODO: use CryptoProvider_AsymmetricGetLength_Msgs
-                status = GetAsymmBlocksSizes(&scConnection->currentSecuPolicy,
-                                             publicKeyModulusLength,
-                                             &cipherBlockSize,
-                                             &plainBlockSize);
+                status = CryptoProvider_AsymmetricGetLength_Msgs(scConnection->currentCryptoProvider,
+                                                                 publicKey,
+                                                                 &cipherBlockSize,
+                                                                 &plainBlockSize);
                  if(status == STATUS_OK){
-                     //TODO: CryptoProvider_AsymmetricGetLength_Signature
+                     status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
+                                                                           publicKey,
+                                                                           &signatureSize);
+                 }
+
+                 if(status == STATUS_OK){
                      scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
                                                                        cipherBlockSize,
                                                                        plainBlockSize,
-                                                                       GetAsymmSignatureSize
-                                                                        (&scConnection->currentSecuPolicy,
-                                                                         publicKeyModulusLength));
+                                                                       signatureSize);
                  }
             }else{
                 status = STATUS_NOK;
@@ -862,27 +840,19 @@ StatusCode EncodePadding(SC_Connection* scConnection,
            scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
-
-            uint32_t publicKeyModulusLength = 0;
-            UA_ByteString* publicKey = NULL;
+            AsymmetricKey* publicKey = NULL;
             SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
 
-            // TODO: use CryptoProvider_AsymmetricGetLength_Msgs or CryptoProvider_AsymmetricGetLength_MsgPlainText instead, if possible.
-            status = CryptoProvider_GetAsymmPublicKeyModulusLength(scConnection->currentCryptoProvider,
-                                                                   publicKey,
-                                                                   &publicKeyModulusLength);
-
             if(status == STATUS_OK){
-                // TODO: use CryptoProvider_AsymmetricGetLength_Signature
-                *signatureSize = GetAsymmSignatureSize
-                                  (&scConnection->currentSecuPolicy,
-                                   publicKeyModulusLength);
-                // TODO: use CryptoProvider_AsymmetricGetLength_Msgs
-                status = GetAsymmBlocksSizes
-                          (&scConnection->currentSecuPolicy,
-                           publicKeyModulusLength,
-                           &cipherBlockSize,
-                           &plainBlockSize);
+                status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
+                                                                      publicKey,
+                                                                      signatureSize);
+            }
+            if(status == STATUS_OK){
+                status = CryptoProvider_AsymmetricGetLength_Msgs(scConnection->currentCryptoProvider,
+                                                                 publicKey,
+                                                                 &cipherBlockSize,
+                                                                 &plainBlockSize);
             }
 
         }
@@ -1013,7 +983,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
            scConnection->otherAppCertificate.length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
-            UA_ByteString* otherAppPublicKey = NULL;
+            AsymmetricKey* otherAppPublicKey = NULL;
             UA_Byte* encryptedData = NULL;
 
             if(status == STATUS_OK){
@@ -1058,7 +1028,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
                            dataToEncryptLength,
                            otherAppPublicKey,
                            &encryptedData[msgBuffer->sequenceNumberPosition],
-                           &encryptedDataLength);
+                           encryptedDataLength);
             }
 
         } // End valid asymmetric encryption data
@@ -1179,15 +1149,15 @@ StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
                                      symmetricAlgo,
                                      signatureSize);
 
-            if(symmetricAlgo != FALSE){
-                status = CryptoProvider_SymmetricVerify(scConnection->currentCryptoProvider,
-                                                        scConnection->sendingBuffer->buffers->data,
-                                                        scConnection->sendingBuffer->buffers->length - signatureSize,
-                                                        scConnection->currentSecuKeySets.senderKeySet->signKey,
-                                                        &scConnection->sendingBuffer->buffers->data[scConnection->sendingBuffer->buffers->length - signatureSize],
-                                                        signatureSize);
-            }
-            // TODO integration: AsymmetricVerify ???
+// TODO: delete, for DEBUG only
+//            if(symmetricAlgo != FALSE){
+//                status = CryptoProvider_SymmetricVerify(scConnection->currentCryptoProvider,
+//                                                        scConnection->sendingBuffer->buffers->data,
+//                                                        scConnection->sendingBuffer->buffers->length - signatureSize,
+//                                                        scConnection->currentSecuKeySets.senderKeySet->signKey,
+//                                                        &scConnection->sendingBuffer->buffers->data[scConnection->sendingBuffer->buffers->length - signatureSize],
+//                                                        signatureSize);
+//            }
         }
 
         //// Check sender certificate size is not bigger than maximum size to be sent
@@ -1646,7 +1616,6 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
 
     CryptoProvider* cryptoProvider = NULL;
     UA_MessageSecurityMode securityMode = UA_MessageSecurityMode_Invalid;
-    UA_String* securityPolicy = NULL;
     Buffer* receptionBuffer = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
 
     uint32_t signatureSize = 0;
@@ -1658,11 +1627,9 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
         if(isPrecCryptoData == FALSE){
             cryptoProvider = scConnection->currentCryptoProvider;
             securityMode = scConnection->currentSecuMode;
-            securityPolicy = &scConnection->currentSecuPolicy;
         }else{
             cryptoProvider = scConnection->precCryptoProvider;
             securityMode = scConnection->precSecuMode;
-            securityPolicy = &scConnection->precSecuPolicy;
         }
 
         toVerify = IsMsgSigned(securityMode);
@@ -1670,21 +1637,20 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
 
     if(toVerify != FALSE){
         if(isSymmetric == FALSE){
-            uint32_t publicKeyModulusLength = 0;
-            UA_ByteString* publicKey = NULL;
+            AsymmetricKey* publicKey = NULL;
             // TODO: isn't this already done?
             SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
 
-            // TODO: use CryptoProvider_AsymmetricGetLength_Msgs or CryptoProvider_AsymmetricGetLength_MsgPlainText instead, if possible.
-            status = CryptoProvider_GetAsymmPublicKeyModulusLength(cryptoProvider,
-                                                                   publicKey,
-                                                                   &publicKeyModulusLength);
+            //TODO: possible to avoid this fct and know when it is already store to access field directly ?
+            SC_RetrieveAndSetPublicKeyFromCert(scConnection, FALSE, &publicKey);
 
             if(status == STATUS_OK){
-                // TODO: use CryptoProvider_AsymmetricGetLength_Signature
-                signatureSize = GetAsymmSignatureSize
-                                 (securityPolicy,
-                                  publicKeyModulusLength);
+                status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
+                                                                    publicKey,
+                                                                    &signatureSize);
+            }
+
+            if(status == STATUS_OK){
                 signaturePosition = receptionBuffer->length - signatureSize;
 
                 status = CryptoProvider_AsymmetricVerify(cryptoProvider,

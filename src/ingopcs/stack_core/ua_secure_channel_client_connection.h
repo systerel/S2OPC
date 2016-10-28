@@ -30,7 +30,7 @@ typedef struct SC_ClientConnection
     PKIProvider*           pkiProvider;
     UA_ByteString          serverCertificate;
     UA_ByteString          clientCertificate;
-    SecretBuffer*          clientKey;
+    AsymmetricKey*         clientKey;
     SLinkedList*           pendingRequests;
     UA_MessageSecurityMode securityMode;
     UA_String              securityPolicy;

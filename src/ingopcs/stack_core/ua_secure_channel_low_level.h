@@ -52,10 +52,10 @@ typedef struct {
     SC_ConnectionState     state;
     uint32_t               startTime;
     UA_ByteString          runningAppCertificate;
-    UA_ByteString          runningAppPublicKey;
-    SecretBuffer*          runningAppPrivateKey; // Pointer on running app private key: do not manage allocation on it
+    AsymmetricKey*         runningAppPublicKey;
+    AsymmetricKey*         runningAppPrivateKey; // Pointer on running app private key: do not manage allocation on it
     UA_ByteString          otherAppCertificate;
-    UA_ByteString          otherAppPublicKey;
+    AsymmetricKey*         otherAppPublicKey;
     UA_MsgBuffer*          sendingBuffer;
     uint32_t               sendingMaxBodySize;
     UA_MsgBuffers*         receptionBuffers;
@@ -64,11 +64,13 @@ typedef struct {
     SC_SecurityToken       currentSecuToken;
     SC_SecurityKeySets     currentSecuKeySets;
     CryptoProvider*        currentCryptoProvider;
+    KeyManager*            currentKeyManager;
     UA_MessageSecurityMode precSecuMode;
     UA_String              precSecuPolicy;
     SC_SecurityToken       precSecuToken;
     SC_SecurityKeySets     precSecuKeySets;
     CryptoProvider*        precCryptoProvider;
+    KeyManager*            precKeyManager;
     SecretBuffer*          currentNonce;
     uint32_t               lastSeqNumSent;
     uint32_t               lastSeqNumReceived;
@@ -82,7 +84,7 @@ void SC_Delete (SC_Connection* scConnection);
 
 StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
                                         UA_ByteString* runningAppCertificate,
-                                        SecretBuffer*  runningAppPrivateKey,
+                                        AsymmetricKey* runningAppPrivateKey,
                                         UA_ByteString* otherAppCertificate);
 
 //Configure secure connection regarding the transport connection properties
