@@ -12,9 +12,6 @@
 #include <stddef.h> // NULL
 #include <stdlib.h> // malloc, free
 
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-
 #include "check_stack.h"
 #include "crypto_provider.h"
 #include "ua_base_types.h"
@@ -23,6 +20,7 @@
 #include "secret_buffer.h"
 #include "crypto_provider_lib.h"
 #include "key_manager.h"
+#include "pki_stack.h"
 
 
 // Helper
@@ -580,16 +578,6 @@ START_TEST(test_pk_x509)
     ck_assert(NULL != pCtx);
 
 
-    // This is the X509 part of the PKI:
-    // Reads a CA
-    mbedtls_x509_crt ca;
-    mbedtls_x509_crt_init(&ca);
-    ck_assert(mbedtls_x509_crt_parse_file(&ca, "trusted/cacert.der") == 0);
-    // Reads the public key (signed with the CA)
-    // (reads a revocation list)
-    // Verify the certificate signature
-    uint32_t flags;
-    ck_assert(mbedtls_x509_crt_verify(&crt, &ca, NULL, NULL, &flags, NULL, 0) == 0);
 
     // We should use the NIST Sign Verification test vectors, but they are not easy to use.
 
@@ -835,10 +823,85 @@ START_TEST(test_crypto_asym_sign)
 END_TEST
 
 
+START_TEST(test_pki_stack)
+{
+    CryptoProvider *crypto = NULL;
+    KeyManager *keyman = NULL;
+    Certificate *crt_pub = NULL, *crt_ca = NULL;
+    uint8_t der_pub[1215], der_ca[1529];
+    const PKIProvider *pki = &g_pkiStack;
+
+    // Init
+    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(NULL != crypto);
+    keyman = KeyManager_Create(crypto,
+                               (int8_t *)"./trusted/", 10,
+                               (int8_t *)"./revoked/", 10);
+    ck_assert(NULL != keyman);
+
+    // Load certificates
+    ck_assert(unhexlify("308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a06035504080c03494446310e30"
+                        "0c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f5043533113301106035504030c0a494e474f"
+                        "5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d3136313030333038313333385a170d313731"
+                        "3030333038313333385a3057310b3009060355040613024652310c300a06035504080c03494446310e300c06035504070c0550415249533111300f060355040a"
+                        "0c08535953544552454c3117301506035504030c0e494e474f5043535f53455256455230820122300d06092a864886f70d01010105000382010f003082010a02"
+                        "82010100ad9921f924639e125c0cde520755f44028d65eaecaf16867823be446b977e0631d64509953b7fe467d1afc449bca6edfe11e1e6d71207c33e2250f3c"
+                        "66875d369a1cda02efc661e73bdf01c517470f2a09ea500b56842fcb125779917b8deb58dc6f2f9511e66c29ba57a69435bc3aab1a23982f531ec763f494ef8b"
+                        "6c6360ea194d7ca2efd777b9a32c295809cf39d2c2ed0dbfc4bfd6fbd24bf782f8d83795cb51964e1dd0a8cdd8f2a0ef2fd0d2b126eb8fc00f00411f362cd4e3"
+                        "0a0a20cde108efa69faede8d9f756838306569c6ea27f1ba5aefac790ff18bcbcc81d7acaa1fac2acede3acd2a61d7b62f202c7bab7df08ee2241a0f08dffdb6"
+                        "2914cf210203010001a360305e301d0603551d0e04160414a3f8e031d1f6f412bace4ddf0eeb62da209d3c79301f0603551d23041830168014db180c557814e7"
+                        "cffd868827b7b00d28f572abb2300f0603551d130101ff040530030101ff300b0603551d0f040403020106300d06092a864886f70d01010b0500038202010039"
+                        "ce25d423f265c38a6df573c1027c6997cc4e5d44db3135ac782180253c6bbdc5017464630d8b17853b214a7866f092a25316f296d342df15ccb443392fa914d5"
+                        "513a91ddc6112cdb70806e9f89898e911c1928ff5ce9139649a8ae11cef04ec645f2f4aef6187c1f044de6ae8845373f9eea33d9148125815ac472f4ab1fe601"
+                        "b99ca01cb683005728ef2f588339f33d433db7afbf1e0695ca5fa5ee5fcd5324a41eadf1ef717c90f2920be83615176df11d347a1e291602a66b248578c2648b"
+                        "f77009f28c3e0bfdceb7acf2f248939bcb260357db378de10eabcf30432952fb9c5a717fcf75884c697253ff6dca2365fcda670921180939e011b195f1190565"
+                        "efa25daefe393d8a67261abe881e98264258fef473423d15c3fc5fa87bce0b8c22dff409017842e0c60dfeb5c88ccc8005080c803c4935a82d762877b9513584"
+                        "6dfd407d49fc3faa523169bfdbbeb5fc5880fed2fa518ee017e42edfa872e781052a47e294c8d82c9858877496dfb76f6bd1c4ab1f0eaa71f48296d88a9950ce"
+                        "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f26f71264fd7962eb513030d14b5262b220b"
+                        "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5be2bf893c1299380675e82455cbef6ccc", der_pub, 1215) == 1215);
+    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_pub, 1215, &crt_pub) == STATUS_OK);
+    ck_assert(unhexlify("308205f5308203dda003020102020900e90749109a17369b300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a0603550408"
+                        "0c03494446310e300c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f50435331133011060355"
+                        "04030c0a494e474f5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d31363035313931343533"
+                        "30345a170d3137303531393134353330345a308188310b3009060355040613024652310c300a06035504080c03494446310e300c06035504070c055041524953"
+                        "3110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f5043533113301106035504030c0a494e474f5043532043413122302006092a"
+                        "864886f70d0109011613696e676f70637340737973746572656c2e667230820222300d06092a864886f70d01010105000382020f003082020a0282020100abed"
+                        "f46dfda704bf8335fb15dcc4e506bcd788085db31484cab130d470dcb2b7cf79a8a173312ba70ba3f4c8db69dd2f321f72784b23552b57bf7d4a40e1d92a73ed"
+                        "ea41347bcdd48e9d14e83bfb6b462d272fc768063df0335e4db34b8bb98de42ce4f9be0927ddcd6e1906bc8ea1e66b5f115fe08576f4be4e0f09c43ae11ec291"
+                        "d7573a260095754a3df53c6c8e96842f46adf87984e7529c535a818d05db40a683301f9a9cc69d511c6eaf409df6925ff1693d33dbb01622369d678b5731b774"
+                        "b09796eb91f49064f7f93932599f66bdf55362bf39ddee38ec311e921b7f5f7840c67314664a9cedb2a922e9adce5ca9caeb734df90dbf1c5a472e1b4a57bb9a"
+                        "bc77c84d9a02bfc6bb21e70d69836e93f6fd6dddb14f7bc13a20e279ebaeb22d8bc96984b6427c686b2b4fa44dd1fec1d534c19baf6f7c2794fb3019276d3929"
+                        "e949670ef6da4667b8c54c5d2dedd430c6aca907a76ed8d8ec0809af203e64a0b5321af3fb636cf3aadbdbdcf6cb18dcb085bd9a38328b7f96f8e59498650fd1"
+                        "67ea8277cf552eb8e33ac3e68ac8351b4c5f673732d7e4f972889e2ae38b4700e6d675a7a720ef9a264cdca78090ada9873656fa81463d59ec5b053ac73b066e"
+                        "83e46d7248cfa47545bebed6885538d9ca87ed0761ff121f85544e6663f0ce4376fa03dc95edb16b0299eb0981ff9231080e881a6a16ecb424de0f4da7990203"
+                        "010001a360305e301d0603551d0e04160414db180c557814e7cffd868827b7b00d28f572abb2301f0603551d23041830168014db180c557814e7cffd868827b7"
+                        "b00d28f572abb2300f0603551d130101ff040530030101ff300b0603551d0f040403020106300d06092a864886f70d01010b05000382020100a1c3776b6048f0"
+                        "658860386ad7b45daba729bf9be81c5ca217a496dbcb0663ecf70e9d7f45c818f9574f8b0c53a378927ddec7ec81a2db09994f4cad32421cbdc23dd5cd1c52ae"
+                        "98c8073da99a333c7ba91691339ae50457c3be352d34af45d93c25107065b3d7652e02ba1a80bea8501d8817186c6ecc7f28cfd903aa74926278668d2f6504ff"
+                        "1491e024aab85e00d700d51d846655660e4ec59c225cec51b51150e91dba37ae953612758b5e79ca7c6ad56bd835bc4be28f95c5e2e34ab843fa569ff3f075ca"
+                        "85d9d18715109a835478fde87368f0a8ab372a01a671ef307ec60564b031561806bb9a8c614aa480e1e1340c1eb67d5ace997996721c18016e3ac00f67e92499"
+                        "b51ffef8d1f0f492b6209f41dff2c36507bdcb3b2ca36d24406444c48fbefa996801fd0611c6050745c15305547510814febcc39567b0fee022d380c6e8479bf"
+                        "9018106a023e121848a1b6c30052e4f22d43dcc44896b6d2acfc63916b2e7eb0eb4c5061e9a09c50c8a81c293ef121a7b71d35bdca67b3d6c5bedc868c4511cb"
+                        "06348fcc19015025e7dfd53d94fe46f7358e0c3dbb3929583001dc1a88d848e4ef229f3cf882f52a06641facd14529a39c4625ad43c7f7b9e1e9496f5ffcb219"
+                        "b146d7ce56ad379adf4d2da72e7f1d7338e3b21df188c51d19b89a090ca514c7723213af58af2151e10890f23851030f801d0e241038462d3a", der_ca, 1529) == 1529);
+    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_ca, 1529, &crt_ca) == STATUS_OK);
+
+    // Checks that the PKI validates our server.pub with our cacert.der
+    ck_assert(pki->pFnValidateCertificate(pki, crt_pub, crt_ca, NULL) == STATUS_OK);
+
+    // Cleaning
+    KeyManager_Certificate_Free(crt_pub);
+    KeyManager_Certificate_Free(crt_ca);
+    KeyManager_Delete(keyman);
+    CryptoProvider_Delete(crypto);
+}
+END_TEST
+
+
 Suite *tests_make_suite_crypto()
 {
     Suite *s;
-    TCase *tc_crypto_symm, *tc_providers, *tc_derives, *tc_misc, *tc_km, *tc_crypto_asym;
+    TCase *tc_crypto_symm, *tc_providers, *tc_derives, *tc_misc, *tc_km, *tc_crypto_asym, *tc_pki_stack;
 
     s = suite_create("Crypto lib");
     tc_crypto_symm = tcase_create("Symmetric Crypto");
@@ -847,6 +910,7 @@ Suite *tests_make_suite_crypto()
     tc_misc = tcase_create("Crypto Misc");
     tc_km = tcase_create("Key Management");
     tc_crypto_asym = tcase_create("Asymmetric Crypto");
+    tc_pki_stack = tcase_create("PKI stack");
 
     suite_add_tcase(s, tc_misc);
     tcase_add_test(tc_misc, test_hexlify);
@@ -869,6 +933,9 @@ Suite *tests_make_suite_crypto()
     //tcase_add_test(tc_crypto_asym, test_pk_x509);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_sign);
+
+    suite_add_tcase(s, tc_pki_stack);
+    tcase_add_test(tc_pki_stack, test_pki_stack);
 
     return s;
 }
