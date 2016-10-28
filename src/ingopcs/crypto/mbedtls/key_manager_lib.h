@@ -33,5 +33,14 @@ typedef struct Certificate {
     uint32_t len_der;       /**> Length of crt_der. */
 } Certificate;
 
+/**
+ * Certificate Revocation List.
+ * Undefined yet.
+ * This implementation might be too much tainted by mbedtls.
+ */
+typedef struct CertificateRevList {
+    mbedtls_x509_crl crl;
+} CertificateRevList;
+
 
 #endif // INGOPCS_KEY_MANAGER_LIB_H_
