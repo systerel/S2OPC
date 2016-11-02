@@ -891,7 +891,7 @@ StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
 
     if(NULL == pProvider || NULL == pInput || 0 == lenInput || NULL == pKeyRemotePublic || NULL == pSignature || 0 == lenSignature)
         return STATUS_INVALID_PARAMETERS;
-    if(NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymSign)
+    if(NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnAsymVerify)
         return STATUS_INVALID_PARAMETERS;
 
     // Check lengths
