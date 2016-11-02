@@ -633,6 +633,10 @@ StatusCode OnTransportEvent_CB(void*           connection,
             //log ?
             TCP_UA_Connection_Disconnect(tcpConnection);
             cConnection->instance->state = SC_Connection_Disconnected;
+            retStatus = cConnection->callback(cConnection,
+                                              cConnection->callbackData,
+                                              UA_ConnectionEvent_Disconnected,
+                                              retStatus);
             break;
 
         case ConnectionEvent_Message:

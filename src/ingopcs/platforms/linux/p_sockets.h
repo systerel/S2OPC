@@ -190,11 +190,11 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet,
  *  \param data     The data bytes to write on socket
  *  \param count    The number of bytes to write
  *
- *  \return         GOOD if operation succeeded, BAD otherwise.
+ *  \return         The number of bytes really written (should always be = to count)
  */
-StatusCode Socket_Write(Socket   sock,
-                        uint8_t* data,
-                        uint32_t count);
+int32_t Socket_Write(Socket   sock,
+                     uint8_t* data,
+                     uint32_t count);
 
 /**
  *  \brief Read data through the socket

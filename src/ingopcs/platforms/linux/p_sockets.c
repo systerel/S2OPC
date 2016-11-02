@@ -147,7 +147,7 @@ StatusCode Socket_Connect(Socket              sock,
 StatusCode Socket_CheckAckConnect(Socket sock){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     int error = 0;
-    socklen_t len = 0;
+    socklen_t len = sizeof(int);
     if(sock != -1){
         if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0 ||
             error != 0)
@@ -224,9 +224,9 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet,
     return (int32_t) nbReady;
 }
 
-StatusCode Socket_Write(Socket   sock,
-                        uint8_t* data,
-                        uint32_t count)
+int32_t Socket_Write(Socket   sock,
+                     uint8_t* data,
+                     uint32_t count)
 {
     uint32_t sentBytes = 0;
     int res = 0;
