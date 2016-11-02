@@ -142,7 +142,7 @@ StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32
  * \note    Same as CreateFromDER, except for a single call, can we refactor?
  *
  */
-StatusCode KeyManager_Certificate_CreateFromFile(const int8_t *szPath,
+StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
                                                  Certificate **ppCert)
 {
     mbedtls_x509_crt *crt = NULL;
@@ -163,7 +163,7 @@ StatusCode KeyManager_Certificate_CreateFromFile(const int8_t *szPath,
     certif->len_der = 0;
 
     // Parsing
-    if(mbedtls_x509_crt_parse_file(crt, (const char *)szPath) == 0)
+    if(mbedtls_x509_crt_parse_file(crt, szPath) == 0)
     {
         certif->crt_der = certif->crt.raw.p;
         certif->len_der = certif->crt.raw.len;

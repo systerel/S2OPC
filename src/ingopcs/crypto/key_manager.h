@@ -43,7 +43,7 @@ void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey);
 
 StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
                                                 Certificate **ppCert);
-StatusCode KeyManager_Certificate_CreateFromFile(const int8_t *szPath,
+StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
                                                  Certificate **ppCert);
 void KeyManager_Certificate_Free(Certificate *cert);
 
