@@ -16,6 +16,8 @@
 #include <ua_namespace_table.h>
 #include <ua_secure_channel_low_level.h>
 
+#include "pki.h"
+
 struct SC_ClientConnection;
 
 typedef StatusCode (SC_ConnectionEvent_CB)(struct SC_ClientConnection* cConnection,
@@ -27,7 +29,7 @@ typedef struct SC_ClientConnection
 {
     UA_NamespaceTable      namespaces;
     UA_EncodeableType**    encodeableTypes;
-    PKIProvider*           pkiProvider;
+    const PKIProvider*     pkiProvider;
     UA_ByteString          serverCertificate;
     UA_ByteString          clientCertificate;
     AsymmetricKey*         clientKey;
@@ -80,10 +82,10 @@ void SC_Client_Delete(SC_ClientConnection* scConnection);
 
 StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                              const char*            uri,
-                             void*                  pkiConfig,
-                             const UA_ByteString*   clientCertificate,
-                             const UA_ByteString*   clientKey,
-                             const UA_ByteString*   serverCertificate,
+                             const PKIProvider*     pki,
+                             const Certificate*     crt_cli,
+                             const AsymmetricKey*   key_priv_cli,
+                             const Certificate*     crt_srv,
                              UA_MessageSecurityMode securityMode,
                              const char*            securityPolicy,
                              uint32_t               requestedLifetime,

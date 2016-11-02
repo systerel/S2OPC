@@ -13,6 +13,8 @@
 #ifdef OPCUA_HAVE_CLIENTAPI
 
 #include <ua_types.h>
+#include "pki.h"
+#include "key_manager.h"
 
 typedef void* UA_Channel;
 
@@ -45,10 +47,10 @@ StatusCode UA_Channel_Delete(UA_Channel* channel);
 
 StatusCode UA_Channel_BeginConnect(UA_Channel                            channel,
                                    const char*                           url,
-                                   const UA_ByteString*                  clientCertificate,
-                                   const UA_ByteString*                  clientPrivateKey,
-                                   const UA_ByteString*                  serverCertificate,
-                                   void*                                 pkiConfig,
+                                   const Certificate*                    crt_cli,
+                                   const AsymmetricKey*                  key_priv,
+                                   const Certificate*                    crt_srv,
+                                   const PKIProvider*                    pki,
                                    const char*                           reqSecuPolicyUri,
                                    int32_t                               requestedLifetime,
                                    UA_MessageSecurityMode                msgSecurityMode,

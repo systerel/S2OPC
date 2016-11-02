@@ -156,10 +156,10 @@ StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
 
 StatusCode UA_Channel_BeginConnect(UA_Channel                            channel,
                                    const char*                           url,
-                                   const UA_ByteString*                  clientCertificate,
-                                   const UA_ByteString*                  clientPrivateKey,
-                                   const UA_ByteString*                  serverCertificate,
-                                   void*                                 pkiConfig,
+                                   const Certificate*                    crt_cli,
+                                   const AsymmetricKey*                  key_priv_cli,
+                                   const Certificate*                    crt_srv,
+                                   const PKIProvider*                    pki,
                                    const char*                           reqSecuPolicyUri,
                                    int32_t                               requestedLifetime,
                                    UA_MessageSecurityMode                msgSecurityMode,
@@ -174,8 +174,8 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
 
     if(cConnection != NULL && cConnection->instance != NULL &&
        url != NULL &&
-       clientCertificate != NULL && clientPrivateKey != NULL &&
-       serverCertificate != NULL && pkiConfig != NULL &&
+       crt_cli != NULL && key_priv_cli != NULL &&
+       crt_srv != NULL && pki != NULL &&
        reqSecuPolicyUri != NULL &&
        msgSecurityMode != UA_MessageSecurityMode_Invalid &&
        cb != NULL)
@@ -195,9 +195,9 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
             }
             if(status == STATUS_OK){
                 status = SC_Client_Connect(cConnection, url,
-                                           pkiConfig,
-                                           clientCertificate, clientPrivateKey,
-                                           serverCertificate,
+                                           pki,
+                                           crt_cli, key_priv_cli,
+                                           crt_srv,
                                            msgSecurityMode,
                                            reqSecuPolicyUri,
                                            requestedLifetime,

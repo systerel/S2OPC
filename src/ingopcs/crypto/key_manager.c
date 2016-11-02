@@ -31,8 +31,8 @@ KeyManager *KeyManager_Create(CryptoProvider *pProvider,
 
     if(NULL == pProvider || NULL == pProvider->pProfile || SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
         return NULL;
-    if(NULL == pathTrusted || NULL == pathRevoked || 0 == lenPathTrusted || 0 == lenPathRevoked)
-        return NULL;
+    //if(NULL == pathTrusted || NULL == pathRevoked || 0 == lenPathTrusted || 0 == lenPathRevoked) FIXME
+    //    return NULL;
 
     out = (KeyManager *)malloc(sizeof(KeyManager));
     if(NULL != out)

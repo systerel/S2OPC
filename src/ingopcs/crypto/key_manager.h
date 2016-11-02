@@ -20,7 +20,7 @@
 typedef struct KeyManager {
     CryptoProvider *pProvider; /**< Crypto provider associated to the key manager. Should not be modified nor replaced outside KeyManager API */
     AsymmetricKey *pkPriv; /**< The current private key associated to the KeyManager. */
-    int8_t *pathTrusted;
+    int8_t *pathTrusted; // TODO: remove that, now it's in PKI
     int8_t *pathRevoked;
 } KeyManager;
 

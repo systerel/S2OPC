@@ -88,6 +88,8 @@ SC_ClientConnection* SC_Client_Create(){
                 free(scClientConnection);
                 scClientConnection = NULL;
             }
+
+            scClientConnection->pkiProvider = NULL;
         }
     }else{
         SC_Delete(sConnection);
@@ -125,9 +127,7 @@ SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*   namespace
 void SC_Client_Delete(SC_ClientConnection* scConnection)
 {
     if(scConnection != NULL){
-        if(scConnection->pkiProvider != NULL){
-            PKIProvider_Delete(scConnection->pkiProvider);
-        }
+        scConnection->pkiProvider = NULL;
         ByteString_Clear(&scConnection->serverCertificate);
         ByteString_Clear(&scConnection->clientCertificate);
         KeyManager_AsymmetricKey_Free(scConnection->clientKey);
@@ -689,10 +689,10 @@ StatusCode OnTransportEvent_CB(void*           connection,
 
 StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                              const char*            uri,
-                             void*                  pkiConfig,
-                             const UA_ByteString*   clientCertificate,
-                             const UA_ByteString*   clientKey,
-                             const UA_ByteString*   serverCertificate,
+                             const PKIProvider*     pki,
+                             const Certificate*     crt_cli,
+                             const AsymmetricKey*   key_priv_cli,
+                             const Certificate*     crt_srv,
                              UA_MessageSecurityMode securityMode,
                              const char*            securityPolicy,
                              uint32_t               requestedLifetime,
@@ -700,22 +700,19 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                              void*                  callbackData)
 {
     StatusCode status = STATUS_NOK;
-    TMP_PKIConfig* tmpPkiConfig = NULL;
 
     if(connection != NULL &&
        connection->instance != NULL &&
        connection->instance->state == SC_Connection_Disconnected &&
        uri != NULL &&
-       pkiConfig != NULL &&
-       clientCertificate != NULL &&
-       clientKey != NULL &&
-       serverCertificate != NULL &&
+       pki != NULL &&
+       crt_cli != NULL &&
+       key_priv_cli != NULL &&
+       crt_srv != NULL &&
        securityMode != UA_MessageSecurityMode_Invalid &&
        securityPolicy != NULL &&
        requestedLifetime > 0)
     {
-        tmpPkiConfig = (TMP_PKIConfig*) pkiConfig;
-
         if(connection->clientCertificate.length <= 0 &&
            connection->clientKey == NULL &&
            connection->serverCertificate.length <= 0 &&
@@ -724,6 +721,8 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
            connection->callback == NULL &&
            connection->callbackData == NULL)
         {
+
+            connection->pkiProvider = pki;
 
             status = String_InitializeFromCString(&connection->securityPolicy, securityPolicy);
 
@@ -742,29 +741,15 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                 connection->instance->currentKeyManager =
                         KeyManager_Create
                             (connection->instance->currentCryptoProvider,
-                             (int8_t*) tmpPkiConfig->trustListLocation,
-                             strlen(tmpPkiConfig->trustListLocation),
-                             (int8_t*) tmpPkiConfig->revocationListLocation,
-                             strlen(tmpPkiConfig->revocationListLocation));
+                             NULL, 0,
+                             NULL, 0);
                 if(connection->instance->currentKeyManager == NULL){
                     status = STATUS_NOK;
                 }
             }
 
-            if(STATUS_OK == status){
-                status = ByteString_Copy(&connection->clientCertificate, clientCertificate);
-            }
-
-            if(status == STATUS_OK){
-                 status = KeyManager_AsymmetricKey_CreateFromBuffer
-                             (connection->instance->currentKeyManager,
-                              clientKey->characters, clientKey->length,
-                              &connection->clientKey);
-            }
-
-            if(status == STATUS_OK){
-                status = ByteString_Copy(&connection->serverCertificate, serverCertificate);
-            }
+            // FIXME: this should be done elsewhere
+            connection->clientKey = (AsymmetricKey *)key_priv_cli; // TODO: const override
 
             if(status == STATUS_OK){
                 if(securityMode != UA_MessageSecurityMode_Invalid){

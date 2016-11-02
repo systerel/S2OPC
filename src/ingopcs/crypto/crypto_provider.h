@@ -165,7 +165,7 @@ StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
 // Certificate validation
 StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
                                                const KeyManager *pKeyMan,
-                                               const PKIProvider *pPKI,
+                                               const struct PKIProvider *pPKI,
                                                const Certificate *pCert);
 
 

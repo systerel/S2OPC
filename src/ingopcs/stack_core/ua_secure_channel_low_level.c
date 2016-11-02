@@ -1240,8 +1240,8 @@ StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
     return status;
 }
 
-StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
-                                        PKIProvider*   pkiProvider,
+StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: why SC_Connection and PKIProvider instead of Sc_ClientConnection which contains both ?
+                                        const PKIProvider*   pkiProvider,
                                         UA_MsgBuffer*  transportBuffer,
                                         uint32_t       validateSenderCert,
                                         uint32_t*      sequenceNumberPosition)
@@ -1304,18 +1304,21 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                 }
 
                 if(status == STATUS_OK && validateSenderCert != FALSE){
-                    void* certStore = NULL;
-                    certStore = PKIProvider_Open_Cert_Store(pkiProvider);
-                    if(certStore != NULL){
-                        status = PKIProvider_Validate_Certificate(pkiProvider,
-                                                                  &senderCertificate,
-                                                                  certStore,
-                                                                  &validationStatusCode);
-                        PKIProvider_Close_Cert_Store(pkiProvider, &certStore);
+                    Certificate *cert = NULL;
+                    status = KeyManager_Certificate_CreateFromDER(scConnection->currentKeyManager,
+                                                                  senderCertificate.characters, senderCertificate.length,
+                                                                  &cert);
+                    if(status == STATUS_OK){
+                        status = CryptoProvider_Certificate_Validate(scConnection->currentCryptoProvider,
+                                                                     scConnection->currentKeyManager,
+                                                                     pkiProvider,
+                                                                     cert);
+                        if(status != STATUS_OK){
+                            // TODO: report validation status code
+                        }
                     }
-                    if(status != STATUS_OK){
-                        // TODO: report validation status code
-                    }
+                    if(NULL != cert)
+                        KeyManager_Certificate_Free(cert);
                 }
             }
         }

@@ -13,7 +13,10 @@
 #include <ua_stack_config.h>
 #include <wrappers.h>
 
-#include <opcua_pkifactory.h>
+#include "crypto_profiles.h"
+#include "pki.h"
+#include "pki_stack.h"
+#include "key_manager.h"
 
 int noEvent = 1;
 int noResp = 1;
@@ -107,6 +110,7 @@ void OpcUa_ProxyStubConfiguration_InitializeDefault(OpcUa_ProxyStubConfiguration
 int main(void){
 
     OpcUa_InitializeStatus(OpcUa_Module_Server, "StubClient_StartUp");
+    StatusCode status = STATUS_OK;
 
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
@@ -125,19 +129,10 @@ int main(void){
 
     // The PKI provider
     // Default directory for certificates
-    char* revoked = "./revoked";
-    char* untrusted = "./untrusted";
-    char* trusted = "./trusted";
-    // Init PKI config certificate validation
-    OpcUa_P_OpenSSL_CertificateStore_Config pPKIConfig;
-    pPKIConfig.PkiType = OpcUa_OpenSSL_PKI;
-    pPKIConfig.CertificateTrustListLocation       = trusted;
-    pPKIConfig.CertificateRevocationListLocation  = revoked;
-    //pPKIConfig.IssuerCertificateStoreLocation         = defaultDir;
-    pPKIConfig.CertificateUntrustedListLocation   = untrusted;
-    pPKIConfig.Flags = OPCUA_P_PKI_OPENSSL_ADD_UNTRUSTED_LIST_TO_ROOT_CERTIFICATES|
-	                   OPCUA_P_PKI_OPENSSL_REQUIRE_CHAIN_CERTIFICATE_IN_TRUST_LIST;
-	           	       // OPCUA_P_PKI_OPENSSL_CHECK_REVOCATION_ALL; revocation list needed
+    //char* revoked = "./revoked";
+    //char* untrusted = "./untrusted";
+    //char* trusted = "./trusted";
+    // Loads certificates, then create PKI
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
@@ -146,18 +141,34 @@ int main(void){
     char* certificateSrvLocation = "./server_public/server.der";
     // Client private key
     char* keyLocation = "./client_private/client.key";
-    OpcUa_PKIProvider pkiProvider;
-    OpcUa_Handle hCertificateStore = OpcUa_Null;
 
-    // The certificates: init
-    OpcUa_ByteString ClientCertificate, ServerCertificate;
-    OpcUa_ByteString_Initialize (&ClientCertificate);
-    OpcUa_ByteString_Initialize (&ServerCertificate);
+    // You need a KeyManger to load the keys/certificates
+    // Temp, you need a CryptoProvider to create a KeyManager
+    CryptoProvider *crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI); // TODO: remove crypto_profiles.h too
+    KeyManager *keyman = KeyManager_Create(crypto, NULL, 0, NULL, 0);
+    if(NULL == crypto)
+        printf("Failed to create CryptoProvider\n");
+    if(NULL == keyman)
+        printf("Failed to create KeyManager\n");
 
-    // Private key: init
-    OpcUa_ByteString ClientPrivateKey;
-    OpcUa_ByteString_Initialize (&ClientPrivateKey);
+    // The certificates: load
+    Certificate *crt_cli = NULL, *crt_srv = NULL;
+    status = KeyManager_Certificate_CreateFromFile(keyman, certificateLocation, &crt_cli);
+    if(STATUS_OK == status)
+        status = KeyManager_Certificate_CreateFromFile(keyman, certificateSrvLocation, &crt_srv);
+    if(STATUS_OK != status)
+        printf("Failed to load certificate(s)\n");
 
+    // Private key: load
+    AsymmetricKey *priv_cli = NULL;
+    status = KeyManager_AsymmetricKey_CreateFromFile(keyman, keyLocation, &priv_cli);
+    if(STATUS_OK != status)
+        printf("Failed to load private key\n");
+
+    // Certificate Authority: load
+    Certificate *crt_ca = NULL;
+    if(STATUS_OK != KeyManager_Certificate_CreateFromFile(keyman, "./trusted/cacert.der", &crt_ca))
+        printf("Failed to load CA\n");
 
     // Empty callback data
     StubClient_CallbackData Callback_Data;
@@ -202,29 +213,9 @@ int main(void){
 
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
-    uStatus = OPCUA_P_PKIFACTORY_CREATEPKIPROVIDER(&pPKIConfig, &pkiProvider);
-    OpcUa_GotoErrorIfBad(uStatus);
-
-    uStatus = pkiProvider.OpenCertificateStore (&pkiProvider, &hCertificateStore);
-    OpcUa_GotoErrorIfBad(uStatus);
-
-    uStatus = pkiProvider.LoadCertificate (&pkiProvider,
-    									   certificateLocation,
-										   hCertificateStore,
-										   &ClientCertificate);
-    OpcUa_GotoErrorIfBad(uStatus);
-
-    uStatus = pkiProvider.LoadPrivateKeyFromFile(keyLocation,
-                  	  	  	  	  	  	  	  	 OpcUa_Crypto_Encoding_PEM,
-												 OpcUa_Null,
-												 &ClientPrivateKey);
-    OpcUa_GotoErrorIfBad(uStatus);
-
-    uStatus = pkiProvider.LoadCertificate (&pkiProvider,
-    									   certificateSrvLocation,
-										   hCertificateStore,
-										   &ServerCertificate);
-    OpcUa_GotoErrorIfBad(uStatus);
+    PKIProvider *pki = NULL;
+    if(STATUS_OK != PKIProviderStack_New(crt_ca, NULL, &pki))
+        printf("Failed to create PKI\n");
 
 #if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
     //uStatus = OpcUa_SocketManager_Create (OpcUa_Null, 0, OPCUA_SOCKET_NO_FLAG);
@@ -234,10 +225,10 @@ int main(void){
     uStatus = UA_Channel_BeginConnect(hChannel,
                                       sEndpointUrl,
                                       //sTransportProfileUri,
-                                      (UA_ByteString*) &ClientCertificate,           /* Client Certificate       */
-                                      (UA_ByteString*) &ClientPrivateKey,            /* Private Key              */
-                                      (UA_ByteString*) &ServerCertificate,           /* Server Certificate       */
-                                      &pPKIConfig,                  /* PKI Config               */
+                                      crt_cli,                      /* Client Certificate       */
+                                      priv_cli,                     /* Private Key              */
+                                      crt_srv,                      /* Server Certificate       */
+                                      pki,                          /* PKI Config               */
                                       pRequestedSecurityPolicyUri, /* Request secu policy */
                                       5,                            /* Request lifetime */
                                       messageSecurityMode,          /* Message secu mode */
@@ -340,12 +331,14 @@ int main(void){
 //										   &pEndpoints); // call back data
 
     printf ("Final status: %d\n", uStatus);
-    pkiProvider.CloseCertificateStore(&pkiProvider, &hCertificateStore);
-    OPCUA_P_PKIFACTORY_DELETEPKIPROVIDER(&pkiProvider);
+    PKIProviderStack_Free(pki);
     String_Clear(&stEndpointUrl);
-    OpcUa_ByteString_Clear(&ClientCertificate);
-    OpcUa_ByteString_Clear(&ClientPrivateKey);
-    OpcUa_ByteString_Clear(&ServerCertificate);
+    KeyManager_Certificate_Free(crt_cli);
+    KeyManager_Certificate_Free(crt_srv);
+    KeyManager_AsymmetricKey_Free(priv_cli);
+    KeyManager_Delete(keyman);
+    free(keyman);
+    CryptoProvider_Delete(crypto); // TODO: wrong name, should be "_Free" because it frees it
     UA_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
     // TODO: only for socket now
@@ -354,12 +347,7 @@ int main(void){
     OpcUa_ReturnStatusCode;
 
     OpcUa_BeginErrorHandling;
-    pkiProvider.CloseCertificateStore(&pkiProvider, &hCertificateStore);
-    OPCUA_P_PKIFACTORY_DELETEPKIPROVIDER(&pkiProvider);
     String_Clear(&stEndpointUrl);
-    OpcUa_ByteString_Clear(&ClientCertificate);
-    OpcUa_ByteString_Clear(&ClientPrivateKey);
-    OpcUa_ByteString_Clear(&ServerCertificate);
     UA_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
     // TODO: only for socket now

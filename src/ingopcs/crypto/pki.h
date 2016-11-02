@@ -14,12 +14,11 @@
 #define INGOPCS_PKI_H_
 
 
+struct PKIProvider;
+
 #include "ua_base_types.h"
 #include "crypto_provider.h"
 #include "key_manager.h"
-
-
-struct PKIProvider;
 
 
 typedef StatusCode (*FnValidateCertificate) (const struct PKIProvider *pPKI,

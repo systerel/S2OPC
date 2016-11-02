@@ -129,7 +129,7 @@ StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
                                   UA_MsgBuffer*  transportBuffer);
 
 StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
-                                        PKIProvider*   pkiProvider,
+                                        const PKIProvider*   pkiProvider,
                                         UA_MsgBuffer*  transportBuffer,
                                         uint32_t       validateSenderCert,
                                         uint32_t*      sequenceNumberPosition);
