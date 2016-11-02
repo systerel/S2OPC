@@ -58,9 +58,9 @@ static StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
 }
 
 
-StatusCode PKIProviderStack_New(Certificate *pCertAuth,
-                                CertificateRevList *pRevocationList,
-                                PKIProvider **ppPKI)
+StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
+                                   CertificateRevList *pRevocationList,
+                                   PKIProvider **ppPKI)
 {
     PKIProvider *pki = NULL;
 
@@ -71,7 +71,7 @@ StatusCode PKIProviderStack_New(Certificate *pCertAuth,
     if(NULL == pki)
         return STATUS_NOK;
 
-    pki->pFnValidateCertificate = PKIProviderStack_ValidateCertificate;
+    *(FnValidateCertificate *)(&pki->pFnValidateCertificate) = &PKIProviderStack_ValidateCertificate;
     pki->pUserCertAuthList = pCertAuth;
     pki->pUserCertRevocList = pRevocationList; // Can be NULL
     pki->pUserData = NULL;

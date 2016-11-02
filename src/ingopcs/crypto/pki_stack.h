@@ -28,9 +28,9 @@
  *
  * \param [in, optional] pRevocationList    A certificate chain containing the revocation list. If NULL, no revocation list is checked.
  */
-StatusCode PKIProviderStack_New(Certificate *pCertAuth,
-                                CertificateRevList *pRevocationList,
-                                PKIProvider **ppPKI);
+StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
+                                   CertificateRevList *pRevocationList,
+                                   PKIProvider **ppPKI);
 void PKIProviderStack_Free(PKIProvider *pPKI);
 
 

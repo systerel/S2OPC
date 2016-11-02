@@ -205,7 +205,7 @@ int main(void){
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
     PKIProvider *pki = NULL;
-    if(STATUS_OK != PKIProviderStack_New(crt_ca, NULL, &pki))
+    if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki))
         printf("Failed to create PKI\n");
 
 #if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO

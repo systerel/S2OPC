@@ -6,6 +6,9 @@
  * This is not the role of the stack to provide a full-blown configurable PKI.
  * The stack provides only a minimal, always safe validating PKI.
  *
+ * This is not the role of the stack to provide any advanced certificate storage.
+ * You can use "user-specific" handles in the PKIProvider struct to implement more options.
+ *
  *  Created on: 28 oct. 2016
  *      Author: PAB
  */
@@ -28,7 +31,7 @@ typedef StatusCode (*FnValidateCertificate) (const struct PKIProvider *pPKI,
 // TODO: find a more appropriate name, such as PublicKeyInfra, CertificateValdiation, CryptoPKI
 typedef struct PKIProvider
 {
-    FnValidateCertificate pFnValidateCertificate; /**> The validation function, which is called by the CryptoProvider API. */
+    const FnValidateCertificate pFnValidateCertificate; /**> The validation function, which is called by the CryptoProvider API. */
 
     void *pUserCertAuthList;    /**> Placeholder for certificate authorities. */
     void *pUserCertRevocList;   /**> Placeholder for certificate revocation list. */

@@ -864,7 +864,7 @@ START_TEST(test_pki_stack)
     ck_assert(KeyManager_Certificate_CreateFromDER(der_ca, 1529, &crt_ca) == STATUS_OK);
 
     // Create PKI with ca
-    ck_assert(PKIProviderStack_New(crt_ca, NULL, &pki) == STATUS_OK);
+    ck_assert(PKIProviderStack_Create(crt_ca, NULL, &pki) == STATUS_OK);
 
     // Checks that the PKI validates our server.pub with our cacert.der
     ck_assert(CryptoProvider_Certificate_Validate(crypto, pki, crt_pub) == STATUS_OK);
