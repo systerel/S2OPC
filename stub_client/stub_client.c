@@ -142,32 +142,23 @@ int main(void){
     // Client private key
     char* keyLocation = "./client_private/client.key";
 
-    // You need a KeyManger to load the keys/certificates
-    // Temp, you need a CryptoProvider to create a KeyManager
-    CryptoProvider *crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI); // TODO: remove crypto_profiles.h too
-    KeyManager *keyman = KeyManager_Create(crypto, NULL, 0, NULL, 0);
-    if(NULL == crypto)
-        printf("Failed to create CryptoProvider\n");
-    if(NULL == keyman)
-        printf("Failed to create KeyManager\n");
-
     // The certificates: load
     Certificate *crt_cli = NULL, *crt_srv = NULL;
-    status = KeyManager_Certificate_CreateFromFile(keyman, (int8_t*) certificateLocation, &crt_cli);
+    status = KeyManager_Certificate_CreateFromFile((int8_t*) certificateLocation, &crt_cli);
     if(STATUS_OK == status)
-        status = KeyManager_Certificate_CreateFromFile(keyman, (int8_t*) certificateSrvLocation, &crt_srv);
+        status = KeyManager_Certificate_CreateFromFile((int8_t*) certificateSrvLocation, &crt_srv);
     if(STATUS_OK != status)
         printf("Failed to load certificate(s)\n");
 
     // Private key: load
     AsymmetricKey *priv_cli = NULL;
-    status = KeyManager_AsymmetricKey_CreateFromFile(keyman, keyLocation, &priv_cli);
+    status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli);
     if(STATUS_OK != status)
         printf("Failed to load private key\n");
 
     // Certificate Authority: load
     Certificate *crt_ca = NULL;
-    if(STATUS_OK != KeyManager_Certificate_CreateFromFile(keyman, (int8_t*) "./trusted/cacert.der", &crt_ca))
+    if(STATUS_OK != KeyManager_Certificate_CreateFromFile((int8_t*) "./trusted/cacert.der", &crt_ca))
         printf("Failed to load CA\n");
 
     // Empty callback data
@@ -336,9 +327,6 @@ int main(void){
     KeyManager_Certificate_Free(crt_cli);
     KeyManager_Certificate_Free(crt_srv);
     KeyManager_AsymmetricKey_Free(priv_cli);
-    KeyManager_Delete(keyman);
-    free(keyman);
-    CryptoProvider_Delete(crypto); // TODO: wrong name, should be "_Free" because it frees it
     UA_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
     // TODO: only for socket now

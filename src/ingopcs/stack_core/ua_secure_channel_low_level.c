@@ -97,8 +97,6 @@ void SC_Delete (SC_Connection* scConnection){
         KeySet_Delete(scConnection->precSecuKeySets.senderKeySet);
         CryptoProvider_Delete(scConnection->currentCryptoProvider);
         CryptoProvider_Delete(scConnection->precCryptoProvider);
-        KeyManager_Delete(scConnection->currentKeyManager);
-        KeyManager_Delete(scConnection->precKeyManager);
         free(scConnection);
     }
 }
@@ -115,8 +113,7 @@ StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
     {
         scConnection->runningAppPublicKeyCert = runningAppCertificate;
         scConnection->runningAppPrivateKey = runningAppPrivateKey;
-        status = KeyManager_Certificate_CopyDER(scConnection->currentKeyManager,
-                                                runningAppCertificate,
+        status = KeyManager_Certificate_CopyDER(runningAppCertificate,
                                                 &scConnection->runningAppCertificate.characters,
                                                 &certLength);
         if(certLength > INT32_MAX){
@@ -128,8 +125,7 @@ StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
         scConnection->otherAppPublicKeyCert = otherAppCertificate;
         if(STATUS_OK == status){
             certLength = 0;
-            status = KeyManager_Certificate_CopyDER(scConnection->currentKeyManager,
-                                                    otherAppCertificate,
+            status = KeyManager_Certificate_CopyDER(otherAppCertificate,
                                                     &scConnection->otherAppCertificate.characters,
                                                     &certLength);
         }
@@ -313,8 +309,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
             // Retrieve other app public key from certificate
             // TODO integration: see if and how it was avoided previously
 
-            status = KeyManager_Certificate_GetPublicKey(scConnection->currentKeyManager,
-                                                         scConnection->otherAppPublicKeyCert,
+            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
                                                          &otherAppPublicKey);
 
             // Retrieve cipher length
@@ -423,8 +418,7 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
         if(isSymmetric == FALSE){
             AsymmetricKey publicKey;
 
-            status = KeyManager_Certificate_GetPublicKey(scConnection->currentKeyManager,
-                                                         scConnection->otherAppPublicKeyCert,
+            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
                                                          &publicKey);
 
             if(status == STATUS_OK){
@@ -533,7 +527,6 @@ StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
 }
 
 StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
-                                     KeyManager*            keyManager,
                                      UA_MsgBuffer*          msgBuffer,
                                      UA_MessageSecurityMode secuMode,
                                      UA_String*             securityPolicy,
@@ -581,7 +574,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
         UA_ByteString recCertThumbprint;
         if(toEncrypt != FALSE){
             uint32_t thumbprintLength = 0;
-            status = KeyManager_CertificateGetLength_Thumbprint(keyManager, &thumbprintLength);
+            status = KeyManager_CertificateGetLength_Thumbprint(cryptoProvider, &thumbprintLength);
 
             if(STATUS_OK == status){
                 if(thumbprintLength <= INT32_MAX){
@@ -591,7 +584,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
                 }
             }
             if(STATUS_OK == status){
-                status = KeyManager_Certificate_GetThumbprint(keyManager,
+                status = KeyManager_Certificate_GetThumbprint(cryptoProvider,
                                                               receiverCertCrypto,
                                                               recCertThumbprint.characters,
                                                               thumbprintLength);
@@ -624,7 +617,6 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
     if(scConnection != NULL)
     {
         status = EncodeAsymmSecurityHeader(scConnection->currentCryptoProvider,
-                                           scConnection->currentKeyManager,
                                            scConnection->sendingBuffer,
                                            scConnection->currentSecuMode,
                                            securityPolicy,
@@ -816,8 +808,7 @@ StatusCode EncodePadding(SC_Connection* scConnection,
            status = STATUS_INVALID_STATE;
         }else{
             AsymmetricKey publicKey;
-            status = KeyManager_Certificate_GetPublicKey(scConnection->currentKeyManager,
-                                                         scConnection->otherAppPublicKeyCert,
+            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
                                                          &publicKey);
 
             if(status == STATUS_OK){
@@ -964,8 +955,7 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
 
             if(status == STATUS_OK){
                 // Retrieve other app public key from certificate
-                status = KeyManager_Certificate_GetPublicKey(scConnection->currentKeyManager,
-                                                             scConnection->otherAppPublicKeyCert,
+                status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
                                                              &otherAppPublicKey);
             }
 
@@ -1276,12 +1266,10 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: wh
 
                 if(status == STATUS_OK && validateSenderCert != FALSE){
                     Certificate *cert = NULL;
-                    status = KeyManager_Certificate_CreateFromDER(scConnection->currentKeyManager,
-                                                                  senderCertificate.characters, senderCertificate.length,
+                    status = KeyManager_Certificate_CreateFromDER(senderCertificate.characters, senderCertificate.length,
                                                                   &cert);
                     if(status == STATUS_OK){
                         status = CryptoProvider_Certificate_Validate(scConnection->currentCryptoProvider,
-                                                                     scConnection->currentKeyManager,
                                                                      pkiProvider,
                                                                      cert);
                     }
@@ -1307,7 +1295,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: wh
                 uint32_t thumbprintLength = 0;
                 uint32_t runningAppCertComparison = 0;
 
-                status = KeyManager_CertificateGetLength_Thumbprint(scConnection->currentKeyManager,
+                status = KeyManager_CertificateGetLength_Thumbprint(scConnection->currentCryptoProvider,
                                                                     &thumbprintLength);
 
                 if(STATUS_OK == status && thumbprintLength > INT32_MAX){
@@ -1317,7 +1305,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: wh
                     if((int32_t) thumbprintLength == receiverCertThumb.length){
                         status = ByteString_InitializeFixedSize(&curAppCertThumbprint, (int32_t) thumbprintLength);
                         if(status == STATUS_OK){
-                            status = KeyManager_Certificate_GetThumbprint(scConnection->currentKeyManager,
+                            status = KeyManager_Certificate_GetThumbprint(scConnection->currentCryptoProvider,
                                                                           scConnection->runningAppPublicKeyCert,
                                                                           curAppCertThumbprint.characters,
                                                                           thumbprintLength);
@@ -1619,8 +1607,7 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
         if(isSymmetric == FALSE){
             AsymmetricKey publicKey;
 
-            status = KeyManager_Certificate_GetPublicKey(scConnection->currentKeyManager,
-                                                         scConnection->otherAppPublicKeyCert,
+            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
                                                          &publicKey);
 
             if(status == STATUS_OK){

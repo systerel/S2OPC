@@ -736,16 +736,6 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                 }
             }
             
-            if(STATUS_OK == status){
-                connection->instance->currentKeyManager =
-                        KeyManager_Create
-                            (connection->instance->currentCryptoProvider,
-                             NULL, 0,
-                             NULL, 0);
-                if(connection->instance->currentKeyManager == NULL){
-                    status = STATUS_NOK;
-                }
-            }
             // FIXME: this should be done elsewhere
             connection->clientKey = (AsymmetricKey *)key_priv_cli; // TODO: const override
             connection->clientCertificate = crt_cli;

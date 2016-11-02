@@ -19,55 +19,6 @@
 #include "key_manager.h"
 
 
-/* ------------------------------------------------------------------------------------------------
- * KeyManager API
- * ------------------------------------------------------------------------------------------------
- */
-KeyManager *KeyManager_Create(CryptoProvider *pProvider,
-                              const int8_t *pathTrusted, uint32_t lenPathTrusted, // Copied, will be \0 terminated
-                              const int8_t *pathRevoked, uint32_t lenPathRevoked)
-{
-    KeyManager *out = NULL;
-
-    if(NULL == pProvider || NULL == pProvider->pProfile || SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
-        return NULL;
-    //if(NULL == pathTrusted || NULL == pathRevoked || 0 == lenPathTrusted || 0 == lenPathRevoked) FIXME
-    //    return NULL;
-
-    out = (KeyManager *)malloc(sizeof(KeyManager));
-    if(NULL != out)
-    {
-        out->pProvider = pProvider;
-        out->pkPriv = NULL;
-        out->pathTrusted = (int8_t *)malloc((lenPathTrusted+1)*sizeof(int8_t));
-        out->pathRevoked = (int8_t *)malloc((lenPathRevoked+1)*sizeof(int8_t));
-        if(out->pathTrusted)
-        {
-            strncpy((char *)out->pathTrusted, (const char *)pathTrusted, lenPathTrusted);
-            out->pathTrusted[lenPathTrusted] = 0;
-        }
-        if(out->pathRevoked)
-        {
-            strncpy((char *)out->pathRevoked, (const char *)pathRevoked, lenPathRevoked);
-            out->pathRevoked[lenPathRevoked] = 0;
-        }
-    }
-
-    return out;
-}
-
-
-void KeyManager_Delete(KeyManager *pManager)
-{
-    if(NULL != pManager)
-    {
-        if(pManager->pathTrusted)
-            free(pManager->pathTrusted);
-        if(pManager->pathRevoked)
-            free(pManager->pathRevoked);
-        // TODO: pkPriv
-    }
-}
 
 
 /* ------------------------------------------------------------------------------------------------
@@ -79,14 +30,14 @@ void KeyManager_Delete(KeyManager *pManager)
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode KeyManager_CertificateGetLength_Thumbprint(const KeyManager *pManager,
+StatusCode KeyManager_CertificateGetLength_Thumbprint(const CryptoProvider *pProvider,
                                                       uint32_t *length)
 {
-    if(NULL == pManager || NULL == pManager->pProvider || NULL == pManager->pProvider->pProfile || NULL == length)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == length)
         return STATUS_INVALID_PARAMETERS;
 
     *length = 0;
-    switch(pManager->pProvider->pProfile->SecurityPolicyID)
+    switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
     default:
@@ -100,13 +51,11 @@ StatusCode KeyManager_CertificateGetLength_Thumbprint(const KeyManager *pManager
 }
 
 
-StatusCode KeyManager_Certificate_CopyDER(const KeyManager *pManager,
-                                          const Certificate *pCert,
+StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
                                           uint8_t **ppDest, uint32_t *lenAllocated)
 {
     uint32_t lenToAllocate = 0;
 
-    (void)(pManager);
     if(NULL == pCert || ppDest == NULL || 0 == lenAllocated)
         return STATUS_INVALID_PARAMETERS;
 

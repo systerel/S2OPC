@@ -64,13 +64,11 @@ typedef struct {
     SC_SecurityToken       currentSecuToken;
     SC_SecurityKeySets     currentSecuKeySets;
     CryptoProvider*        currentCryptoProvider;
-    KeyManager*            currentKeyManager;
     UA_MessageSecurityMode precSecuMode;
     UA_String              precSecuPolicy;
     SC_SecurityToken       precSecuToken;
     SC_SecurityKeySets     precSecuKeySets;
     CryptoProvider*        precCryptoProvider;
-    KeyManager*            precKeyManager;
     SecretBuffer*          currentNonce;
     uint32_t               lastSeqNumSent;
     uint32_t               lastSeqNumReceived;

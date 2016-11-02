@@ -923,7 +923,6 @@ StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
  * ------------------------------------------------------------------------------------------------
  */
 StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
-                                              const KeyManager *pKeyMan,
                                               const PKIProvider *pPKI,
                                               const Certificate *pCert)
 {
@@ -932,7 +931,7 @@ StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
         return STATUS_INVALID_PARAMETERS;
 
     // Let the lib-specific code handle the verification for the current security policy
-    if(pCrypto->pProfile->pFnCertVerify(pCrypto, pKeyMan, pCert) != STATUS_OK)
+    if(pCrypto->pProfile->pFnCertVerify(pCrypto, pCert) != STATUS_OK)
         return STATUS_NOK;
 
     // Verify certificate through PKIProvider callback

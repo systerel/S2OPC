@@ -595,7 +595,6 @@ END_TEST //*/
 START_TEST(test_cert_load)
 {
     CryptoProvider *crypto = NULL;
-    KeyManager *keyman = NULL;
     Certificate *crt_pub = NULL;
     uint8_t thumb[20];
     char hexoutput[40];
@@ -604,10 +603,6 @@ START_TEST(test_cert_load)
     // Init
     crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
     ck_assert(NULL != crypto);
-    keyman = KeyManager_Create(crypto,
-                               (int8_t *)"./trusted/", 10,
-                               (int8_t *)"./revoked/", 10);
-    ck_assert(NULL != keyman);
 
     // Loads a certificate
     //ck_assert(KeyManager_Certificate_CreateFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) == STATUS_OK);
@@ -630,23 +625,22 @@ START_TEST(test_cert_load)
                         "6dfd407d49fc3faa523169bfdbbeb5fc5880fed2fa518ee017e42edfa872e781052a47e294c8d82c9858877496dfb76f6bd1c4ab1f0eaa71f48296d88a9950ce"
                         "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f26f71264fd7962eb513030d14b5262b220b"
                         "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5be2bf893c1299380675e82455cbef6ccc", der_cert, 1215) == 1215);
-    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_cert, 1215, &crt_pub) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_CreateFromDER(der_cert, 1215, &crt_pub) == STATUS_OK);
 
     // Compute thumbprint
-    ck_assert(KeyManager_Certificate_GetThumbprint(keyman, crt_pub, thumb, 20) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_GetThumbprint(crypto, crt_pub, thumb, 20) == STATUS_OK);
     ck_assert(hexlify(thumb, hexoutput, 20) == 20);
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
     ck_assert(memcmp(hexoutput, "af17d03e1605277489815ab88bc4760655b3e2cd", 40) == 0);
 
     // Cleaning
     KeyManager_Certificate_Free(crt_pub);
-    KeyManager_Delete(keyman);
     CryptoProvider_Delete(crypto);
 }
 END_TEST
 
 
-void get_test_keys(KeyManager *keyman, Certificate **ppcrt, AsymmetricKey **ppkpub, AsymmetricKey **ppkpriv)
+void get_test_keys(Certificate **ppcrt, AsymmetricKey **ppkpub, AsymmetricKey **ppkpriv)
 {
     uint8_t der_cert[911], der_priv[1192];
     AsymmetricKey *key_pub = NULL;
@@ -667,12 +661,12 @@ void get_test_keys(KeyManager *keyman, Certificate **ppcrt, AsymmetricKey **ppkp
                         "100bce4792c57b87f1a431d2b456698dd3c248fc6e2644d446f952255f98e3dcb7e5cd200b46f769d581833c21b08d07c4343973e93bed9a2d66ece5b6083e6e"
                         "42b3378987339ab01aab362890dbf57dc22e9d86c0cd4edfa43f489d250bc4244542368c8682125645bd610fbf1c60ec5f94bc697284bde3915e9e051bb255ae"
                         "e1685265a487bd1d72c5f49ef621e0", der_cert, 911) == 911);
-    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_cert, 911, ppcrt) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_CreateFromDER(der_cert, 911, ppcrt) == STATUS_OK);
 
     // Loads the public key from cert
     key_pub = malloc(sizeof(AsymmetricKey));
     ck_assert(NULL != key_pub);
-    ck_assert(KeyManager_Certificate_GetPublicKey(keyman, *ppcrt, key_pub) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_GetPublicKey(*ppcrt, key_pub) == STATUS_OK);
     *ppkpub = key_pub;
 
     // Loads a private key
@@ -695,14 +689,13 @@ void get_test_keys(KeyManager *keyman, Certificate **ppcrt, AsymmetricKey **ppkp
                         "91323c4dfa9ea1c1eb33363f3963d18fb5ed6e77b3607ff9e45e71f8020881eafafd213c4f02818004fbb2f7ca0e8e7f644f40939f9743f8996439a926244282"
                         "1981268f36fba3e4656fc6e9c69bab8b5f56c7b033bed95eeca96952b3d62edd935b80d5187649683196702a0b304e802de7841d6bab06e6877b74bdf2b5e7f2"
                         "673ac6939c1427fb899a4cb26f656b5621914592f61b10d4ff50a4bb360d134d224a780db10f0f97", der_priv, 1192) == 1192);
-    ck_assert(KeyManager_AsymmetricKey_CreateFromBuffer(keyman, der_priv, 1192, ppkpriv) == STATUS_OK);
+    ck_assert(KeyManager_AsymmetricKey_CreateFromBuffer(der_priv, 1192, ppkpriv) == STATUS_OK);
 }
 
 
 START_TEST(test_crypto_asym_crypt)
 {
     CryptoProvider *crypto = NULL;
-    KeyManager *keyman = NULL;
     Certificate *crt_pub = NULL;
     AsymmetricKey *key_pub = NULL, *key_priv = NULL;
     uint8_t input[856], output[1024], input_bis[856];
@@ -712,13 +705,9 @@ START_TEST(test_crypto_asym_crypt)
     // Init
     crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
     ck_assert(NULL != crypto);
-    keyman = KeyManager_Create(crypto,
-                               (int8_t *)"./trusted/", 10,
-                               (int8_t *)"./revoked/", 10);
-    ck_assert(NULL != keyman);
 
     // Load keys
-    get_test_keys(keyman, &crt_pub, &key_pub, &key_priv);
+    get_test_keys(&crt_pub, &key_pub, &key_priv);
 
     // Assert lengths
     ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_pub, &len) == STATUS_OK);
@@ -763,7 +752,6 @@ START_TEST(test_crypto_asym_crypt)
     KeyManager_Certificate_Free(crt_pub);
     KeyManager_AsymmetricKey_Free(key_priv);
     free(key_pub);
-    KeyManager_Delete(keyman);
     CryptoProvider_Delete(crypto);
 }
 END_TEST
@@ -772,7 +760,6 @@ END_TEST
 START_TEST(test_crypto_asym_sign)
 {
     CryptoProvider *crypto = NULL;
-    KeyManager *keyman = NULL;
     Certificate *crt_pub = NULL;
     AsymmetricKey *key_pub = NULL, *key_priv = NULL;
     uint8_t input[856], sig[256];
@@ -782,13 +769,9 @@ START_TEST(test_crypto_asym_sign)
     // Init
     crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
     ck_assert(NULL != crypto);
-    keyman = KeyManager_Create(crypto,
-                               (int8_t *)"./trusted/", 10,
-                               (int8_t *)"./revoked/", 10);
-    ck_assert(NULL != keyman);
 
     // Load keys
-    get_test_keys(keyman, &crt_pub, &key_pub, &key_priv);
+    get_test_keys(&crt_pub, &key_pub, &key_priv);
 
     // Assert lengths
     ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_pub, &len) == STATUS_OK);
@@ -817,7 +800,6 @@ START_TEST(test_crypto_asym_sign)
     KeyManager_Certificate_Free(crt_pub);
     KeyManager_AsymmetricKey_Free(key_priv);
     free(key_pub);
-    KeyManager_Delete(keyman);
     CryptoProvider_Delete(crypto);
 }
 END_TEST
@@ -826,7 +808,6 @@ END_TEST
 START_TEST(test_pki_stack)
 {
     CryptoProvider *crypto = NULL;
-    KeyManager *keyman = NULL;
     Certificate *crt_pub = NULL, *crt_ca = NULL;
     uint8_t der_pub[1215], der_ca[1529];
     PKIProvider *pki = NULL;
@@ -834,10 +815,6 @@ START_TEST(test_pki_stack)
     // Init
     crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
     ck_assert(NULL != crypto);
-    keyman = KeyManager_Create(crypto,
-                               (int8_t *)"./trusted/", 10,
-                               (int8_t *)"./revoked/", 10);
-    ck_assert(NULL != keyman);
 
     // Load certificates
     ck_assert(unhexlify("308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a06035504080c03494446310e30"
@@ -859,7 +836,7 @@ START_TEST(test_pki_stack)
                         "6dfd407d49fc3faa523169bfdbbeb5fc5880fed2fa518ee017e42edfa872e781052a47e294c8d82c9858877496dfb76f6bd1c4ab1f0eaa71f48296d88a9950ce"
                         "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f26f71264fd7962eb513030d14b5262b220b"
                         "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5be2bf893c1299380675e82455cbef6ccc", der_pub, 1215) == 1215);
-    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_pub, 1215, &crt_pub) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_CreateFromDER(der_pub, 1215, &crt_pub) == STATUS_OK);
     ck_assert(unhexlify("308205f5308203dda003020102020900e90749109a17369b300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a0603550408"
                         "0c03494446310e300c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f50435331133011060355"
                         "04030c0a494e474f5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d31363035313931343533"
@@ -884,19 +861,18 @@ START_TEST(test_pki_stack)
                         "9018106a023e121848a1b6c30052e4f22d43dcc44896b6d2acfc63916b2e7eb0eb4c5061e9a09c50c8a81c293ef121a7b71d35bdca67b3d6c5bedc868c4511cb"
                         "06348fcc19015025e7dfd53d94fe46f7358e0c3dbb3929583001dc1a88d848e4ef229f3cf882f52a06641facd14529a39c4625ad43c7f7b9e1e9496f5ffcb219"
                         "b146d7ce56ad379adf4d2da72e7f1d7338e3b21df188c51d19b89a090ca514c7723213af58af2151e10890f23851030f801d0e241038462d3a", der_ca, 1529) == 1529);
-    ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_ca, 1529, &crt_ca) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_CreateFromDER(der_ca, 1529, &crt_ca) == STATUS_OK);
 
     // Create PKI with ca
     ck_assert(PKIProviderStack_New(crt_ca, NULL, &pki) == STATUS_OK);
 
     // Checks that the PKI validates our server.pub with our cacert.der
-    ck_assert(CryptoProvider_Certificate_Validate(crypto, keyman, pki, crt_pub) == STATUS_OK);
+    ck_assert(CryptoProvider_Certificate_Validate(crypto, pki, crt_pub) == STATUS_OK);
 
     // Cleaning
     PKIProviderStack_Free(pki);
     KeyManager_Certificate_Free(crt_pub);
     KeyManager_Certificate_Free(crt_ca);
-    KeyManager_Delete(keyman);
     CryptoProvider_Delete(crypto);
 }
 END_TEST

@@ -16,7 +16,6 @@
 struct CryptoProvider;
 struct CryptoProfile;
 struct CryptolibContext;
-struct KeyManager;
 struct AsymmetricKey;
 struct Certificate;
 
@@ -79,7 +78,6 @@ typedef StatusCode (*FnAsymmetricVerify) (const struct CryptoProvider *pProvider
                                           const struct AsymmetricKey *pKey,
                                           const uint8_t *pSignature);
 typedef StatusCode (*FnCertificateVerify) (const struct CryptoProvider *pCrypto,
-                                           const struct KeyManager *pKeyMan,
                                            const struct Certificate *pCert);
 
 typedef struct CryptoProfile

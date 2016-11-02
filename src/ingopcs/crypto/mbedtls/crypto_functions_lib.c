@@ -552,14 +552,13 @@ StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider *pPro
 }
 
 StatusCode CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const CryptoProvider *pCrypto,
-                                                          const KeyManager *pKeyMan,
                                                           const Certificate *pCert)
 {
     AsymmetricKey pub_key;
     uint32_t key_length = 0;
 
     // Retrieve key
-    if(KeyManager_Certificate_GetPublicKey(pKeyMan, pCert, &pub_key) != STATUS_OK)
+    if(KeyManager_Certificate_GetPublicKey(pCert, &pub_key) != STATUS_OK)
         return STATUS_NOK;
 
     // Verifies key type: RSA

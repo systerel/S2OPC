@@ -33,13 +33,12 @@
 /**
  * Creates an asymmetric key from a \p buffer, in DER or PEM format.
  */
-StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const KeyManager *pManager,
-                                                     const uint8_t *buffer, uint32_t lenBuf,
+StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
                                                      AsymmetricKey **ppKey)
 {
     AsymmetricKey *key = NULL;
 
-    if(NULL == pManager || NULL == buffer || 0 == lenBuf || NULL == ppKey)
+    if(NULL == buffer || 0 == lenBuf || NULL == ppKey)
         return STATUS_INVALID_PARAMETERS;
 
     key = malloc(sizeof(AsymmetricKey));
@@ -59,13 +58,12 @@ StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const KeyManager *pManager,
 }
 
 
-StatusCode KeyManager_AsymmetricKey_CreateFromFile(const KeyManager *pManager,
-                                                   const char *szPath,
+StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
                                                    AsymmetricKey **ppKey)
 {
     AsymmetricKey *key = NULL;
 
-    if(NULL == pManager || NULL == szPath || NULL == ppKey)
+    if(NULL == szPath || NULL == ppKey)
         return STATUS_INVALID_PARAMETERS;
 
     key = malloc(sizeof(AsymmetricKey));
@@ -103,14 +101,13 @@ void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey)
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode KeyManager_Certificate_CreateFromDER(const KeyManager *pManager,
-                                                const uint8_t *bufferDER, uint32_t lenDER,
+StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
                                                 Certificate **ppCert)
 {
     mbedtls_x509_crt *crt = NULL;
     Certificate *certif = NULL;
 
-    if(NULL == pManager || NULL == bufferDER || 0 == lenDER || NULL == ppCert)
+    if(NULL == bufferDER || 0 == lenDER || NULL == ppCert)
         return STATUS_INVALID_PARAMETERS;
 
     // Mem alloc
@@ -145,14 +142,13 @@ StatusCode KeyManager_Certificate_CreateFromDER(const KeyManager *pManager,
  * \note    Same as CreateFromDER, except for a single call, can we refactor?
  *
  */
-StatusCode KeyManager_Certificate_CreateFromFile(const KeyManager *pManager,
-                                                 const int8_t *szPath,
+StatusCode KeyManager_Certificate_CreateFromFile(const int8_t *szPath,
                                                  Certificate **ppCert)
 {
     mbedtls_x509_crt *crt = NULL;
     Certificate *certif = NULL;
 
-    if(NULL == pManager || NULL == szPath || NULL == ppCert)
+    if(NULL == szPath || NULL == ppCert)
         return STATUS_INVALID_PARAMETERS;
 
     // Mem alloc
@@ -194,7 +190,7 @@ void KeyManager_Certificate_Free(Certificate *cert)
 }
 
 
-StatusCode KeyManager_Certificate_GetThumbprint(const KeyManager *pManager,
+StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProvider,
                                                 const Certificate *pCert,
                                                 uint8_t *pDest, uint32_t lenDest)
 {
@@ -204,21 +200,21 @@ StatusCode KeyManager_Certificate_GetThumbprint(const KeyManager *pManager,
     uint32_t lenDER = 0;
     mbedtls_md_type_t type = MBEDTLS_MD_NONE;
 
-    if(NULL == pManager || NULL == pManager->pProvider || NULL == pManager->pProvider->pProfile || NULL == pCert || NULL == pDest || 0 == lenDest)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pCert || NULL == pDest || 0 == lenDest)
         return STATUS_INVALID_PARAMETERS;
 
-    if(KeyManager_CertificateGetLength_Thumbprint(pManager, &lenSupposed) != STATUS_OK)
+    if(KeyManager_CertificateGetLength_Thumbprint(pProvider, &lenSupposed) != STATUS_OK)
         return STATUS_NOK;
 
     if(lenDest != lenSupposed)
         return STATUS_INVALID_PARAMETERS;
 
     // Get DER
-    if(KeyManager_Certificate_CopyDER(pManager, pCert, &pDER, &lenDER) != STATUS_OK)
+    if(KeyManager_Certificate_CopyDER(pCert, &pDER, &lenDER) != STATUS_OK)
         return STATUS_NOK;
 
     // Hash DER with SHA-1
-    switch(pManager->pProvider->pProfile->SecurityPolicyID)
+    switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
     default:
@@ -246,11 +242,9 @@ StatusCode KeyManager_Certificate_GetThumbprint(const KeyManager *pManager,
  * \brief       Fills \p pKey with public key information retrieved from \p pCert.
  * \warning     \p pKey is not valid anymore when \p pCert is freed.
  */
-StatusCode KeyManager_Certificate_GetPublicKey(const KeyManager *pManager,
-                                               const Certificate *pCert,
+StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
                                                AsymmetricKey *pKey)
 {
-    (void)(pManager);
     if(NULL == pCert || NULL == pKey)
         return STATUS_INVALID_PARAMETERS;
 
