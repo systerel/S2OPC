@@ -43,7 +43,7 @@ CryptoProvider *CryptoProvider_Create(const char *uri)
 }
 
 
-void CryptoProvider_Delete(CryptoProvider* pCryptoProvider)
+void CryptoProvider_Free(CryptoProvider* pCryptoProvider)
 {
     if(NULL != pCryptoProvider)
     {

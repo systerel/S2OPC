@@ -95,8 +95,8 @@ void SC_Delete (SC_Connection* scConnection){
         KeySet_Delete(scConnection->currentSecuKeySets.senderKeySet);
         KeySet_Delete(scConnection->precSecuKeySets.receiverKeySet);
         KeySet_Delete(scConnection->precSecuKeySets.senderKeySet);
-        CryptoProvider_Delete(scConnection->currentCryptoProvider);
-        CryptoProvider_Delete(scConnection->precCryptoProvider);
+        CryptoProvider_Free(scConnection->currentCryptoProvider);
+        CryptoProvider_Free(scConnection->precCryptoProvider);
         free(scConnection);
     }
 }

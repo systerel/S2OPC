@@ -268,7 +268,7 @@ START_TEST(test_crypto_symm_crypt)
 
     SecretBuffer_DeleteClear(pSecKey);
     SecretBuffer_DeleteClear(pSecIV);
-    CryptoProvider_Delete(crypto);
+    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -334,7 +334,7 @@ START_TEST(test_crypto_symm_sign)
     ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 31) != STATUS_OK);
 
     SecretBuffer_DeleteClear(pSecKey);
-    CryptoProvider_Delete(crypto);
+    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -370,7 +370,7 @@ START_TEST(test_crypto_symm_gen)
     ck_assert(CryptoProvider_SymmetricGenerateKey(NULL, &pSecKey0) != STATUS_OK);
     ck_assert(CryptoProvider_SymmetricGenerateKey(crypto, NULL) != STATUS_OK);
 
-    CryptoProvider_Delete(crypto);
+    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -448,7 +448,7 @@ START_TEST(test_crypto_derive_data)
                                 "c53fe61599241d26c9615562b9456ede80587da078e639a66a160066241d9dabc8bde9c8c16d46ebb3ff5bc2698dd56a9a8b924ef20eb0b67fa679f6fd41bdc6",
                      2048) == 0);
 
-    CryptoProvider_Delete(crypto);
+    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -552,7 +552,7 @@ START_TEST(test_crypto_derive_keysets)
     SecretBuffer_DeleteClear(serKS.encryptKey);
     SecretBuffer_DeleteClear(serKS.initVector);
 
-    CryptoProvider_Delete(crypto);
+    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -635,7 +635,7 @@ START_TEST(test_cert_load)
 
     // Cleaning
     KeyManager_Certificate_Free(crt_pub);
-    CryptoProvider_Delete(crypto);
+    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -752,7 +752,7 @@ START_TEST(test_crypto_asym_crypt)
     KeyManager_Certificate_Free(crt_pub);
     KeyManager_AsymmetricKey_Free(key_priv);
     free(key_pub);
-    CryptoProvider_Delete(crypto);
+    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -800,7 +800,7 @@ START_TEST(test_crypto_asym_sign)
     KeyManager_Certificate_Free(crt_pub);
     KeyManager_AsymmetricKey_Free(key_priv);
     free(key_pub);
-    CryptoProvider_Delete(crypto);
+    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -873,7 +873,7 @@ START_TEST(test_pki_stack)
     PKIProviderStack_Free(pki);
     KeyManager_Certificate_Free(crt_pub);
     KeyManager_Certificate_Free(crt_ca);
-    CryptoProvider_Delete(crypto);
+    CryptoProvider_Free(crypto);
 }
 END_TEST
 
