@@ -886,11 +886,11 @@ START_TEST(test_pki_stack)
                         "b146d7ce56ad379adf4d2da72e7f1d7338e3b21df188c51d19b89a090ca514c7723213af58af2151e10890f23851030f801d0e241038462d3a", der_ca, 1529) == 1529);
     ck_assert(KeyManager_Certificate_CreateFromDER(keyman, der_ca, 1529, &crt_ca) == STATUS_OK);
 
-    // Create PKI
+    // Create PKI with ca
     ck_assert(PKIProviderStack_New(crt_ca, NULL, &pki) == STATUS_OK);
 
     // Checks that the PKI validates our server.pub with our cacert.der
-    ck_assert(pki->pFnValidateCertificate(pki, crt_pub) == STATUS_OK);
+    ck_assert(CryptoProvider_Certificate_Validate(crypto, keyman, pki, crt_pub) == STATUS_OK);
 
     // Cleaning
     PKIProviderStack_Free(pki);
