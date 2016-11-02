@@ -63,14 +63,50 @@ StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
                                                const AsymmetricKey *pKey,
                                                uint8_t *pOutput,
                                                uint32_t *lenWritten);
+/**
+ * This one is too up-to-date, don't use (but was tested). As not said by the current security policy, classic stack uses PKCS#1 v1.5 padding, not PSS...
+ *
+ * https://tools.ietf.org/html/rfc3447#section-8
+ *   Two signature schemes with appendix are specified in this document:
+ *   RSASSA-PSS and RSASSA-PKCS1-v1_5.  Although no attacks are known
+ *   against RSASSA-PKCS1-v1_5, in the interest of increased robustness,
+ *   RSASSA-PSS is recommended for eventual adoption in new applications.
+ *   RSASSA-PKCS1-v1_5 is included for compatibility with existing
+ *   applications, and while still appropriate for new applications, a
+ *   gradual transition to RSASSA-PSS is encouraged.
+ */
 StatusCode CryptoProvider_AsymSign_RSASSA_PSS(const CryptoProvider *pProvider,
                                               const uint8_t *pInput,
                                               uint32_t lenInput,
                                               const AsymmetricKey *pKey,
                                               uint8_t *pSignature);
+/**
+ * This one is too up-to-date, don't use (but was tested). As not said by the current security policy, classic stack uses PKCS#1 v1.5 padding, not PSS...
+ *
+ * https://tools.ietf.org/html/rfc3447#section-8
+ *   Two signature schemes with appendix are specified in this document:
+ *   RSASSA-PSS and RSASSA-PKCS1-v1_5.  Although no attacks are known
+ *   against RSASSA-PKCS1-v1_5, in the interest of increased robustness,
+ *   RSASSA-PSS is recommended for eventual adoption in new applications.
+ *   RSASSA-PKCS1-v1_5 is included for compatibility with existing
+ *   applications, and while still appropriate for new applications, a
+ *   gradual transition to RSASSA-PSS is encouraged.
+ */
 StatusCode CryptoProvider_AsymVerify_RSASSA_PSS(const CryptoProvider *pProvider,
                                                 const uint8_t *pInput,
                                                 uint32_t lenInput,
                                                 const AsymmetricKey *pKey,
                                                 const uint8_t *pSignature);
+
+
+StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
+                                                    const uint8_t *pInput,
+                                                    uint32_t lenInput,
+                                                    const AsymmetricKey *pKey,
+                                                    uint8_t *pSignature);
+StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
+                                                      const uint8_t *pInput,
+                                                      uint32_t lenInput,
+                                                      const AsymmetricKey *pKey,
+                                                      const uint8_t *pSignature);
 

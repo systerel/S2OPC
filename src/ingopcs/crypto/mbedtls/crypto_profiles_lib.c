@@ -35,7 +35,7 @@ const CryptoProfile g_cpBasic256Sha256 = {
         .pFnDeriveData = &CryptoProvider_DeriveData_PRF_SHA256,
         .pFnAsymEncrypt = &CryptoProvider_AsymEncrypt_RSA_OAEP,
         .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
-        .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PSS,
-        .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PSS,
+        .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15,
+        .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15,
 };
 
