@@ -52,10 +52,10 @@ typedef struct {
     SC_ConnectionState     state;
     uint32_t               startTime;
     UA_ByteString          runningAppCertificate;
-    Certificate*           runningAppPublicKeyCert;
-    AsymmetricKey*         runningAppPrivateKey; // Pointer on running app private key: do not manage allocation on it
+    const Certificate*     runningAppPublicKeyCert;
+    const AsymmetricKey*   runningAppPrivateKey; // Pointer on running app private key: do not manage allocation on it
     UA_ByteString          otherAppCertificate;
-    Certificate*           otherAppPublicKeyCert;
+    const Certificate*     otherAppPublicKeyCert;
     UA_MsgBuffer*          sendingBuffer;
     uint32_t               sendingMaxBodySize;
     UA_MsgBuffers*         receptionBuffers;
@@ -82,10 +82,10 @@ typedef struct {
 SC_Connection* SC_Create (void);
 void SC_Delete (SC_Connection* scConnection);
 
-StatusCode SC_InitApplicationIdentities(SC_Connection* scConnection,
-                                        UA_ByteString* runningAppCertificate,
-                                        AsymmetricKey* runningAppPrivateKey,
-                                        UA_ByteString* otherAppCertificate);
+StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
+                                        const Certificate*   runningAppCertificate,
+                                        const AsymmetricKey* runningAppPrivateKey,
+                                        const Certificate*   otherAppCertificate);
 
 //Configure secure connection regarding the transport connection properties
 StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
@@ -100,9 +100,7 @@ StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
                                     uint32_t             secureChannelId);
 
 StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
-                                        UA_String*     securityPolicy,
-                                        UA_ByteString* senderCertificate,
-                                        UA_ByteString* receiverCertificate);
+                                        UA_String*     securityPolicy);
 
 StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                              uint32_t       isSymmetric);

@@ -30,8 +30,8 @@ typedef struct SC_ClientConnection
     UA_NamespaceTable      namespaces;
     UA_EncodeableType**    encodeableTypes;
     const PKIProvider*     pkiProvider;
-    UA_ByteString          serverCertificate;
-    UA_ByteString          clientCertificate;
+    const Certificate*     serverCertificate;
+    const Certificate*     clientCertificate;
     AsymmetricKey*         clientKey;
     SLinkedList*           pendingRequests;
     UA_MessageSecurityMode securityMode;

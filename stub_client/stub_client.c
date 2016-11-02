@@ -153,9 +153,9 @@ int main(void){
 
     // The certificates: load
     Certificate *crt_cli = NULL, *crt_srv = NULL;
-    status = KeyManager_Certificate_CreateFromFile(keyman, certificateLocation, &crt_cli);
+    status = KeyManager_Certificate_CreateFromFile(keyman, (int8_t*) certificateLocation, &crt_cli);
     if(STATUS_OK == status)
-        status = KeyManager_Certificate_CreateFromFile(keyman, certificateSrvLocation, &crt_srv);
+        status = KeyManager_Certificate_CreateFromFile(keyman, (int8_t*) certificateSrvLocation, &crt_srv);
     if(STATUS_OK != status)
         printf("Failed to load certificate(s)\n");
 
@@ -167,7 +167,7 @@ int main(void){
 
     // Certificate Authority: load
     Certificate *crt_ca = NULL;
-    if(STATUS_OK != KeyManager_Certificate_CreateFromFile(keyman, "./trusted/cacert.der", &crt_ca))
+    if(STATUS_OK != KeyManager_Certificate_CreateFromFile(keyman, (int8_t*) "./trusted/cacert.der", &crt_ca))
         printf("Failed to load CA\n");
 
     // Empty callback data

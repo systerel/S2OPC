@@ -74,8 +74,6 @@ SC_ClientConnection* SC_Client_Create(){
         if(scClientConnection != NULL){
             memset (scClientConnection, 0, sizeof(SC_ClientConnection));
             Namespace_Initialize(&scClientConnection->namespaces);
-            ByteString_Initialize(&scClientConnection->serverCertificate);
-            ByteString_Initialize(&scClientConnection->clientCertificate);
             scClientConnection->securityMode = UA_MessageSecurityMode_Invalid;
             ByteString_Initialize(&scClientConnection->securityPolicy);
 
@@ -128,9 +126,8 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
 {
     if(scConnection != NULL){
         scConnection->pkiProvider = NULL;
-        ByteString_Clear(&scConnection->serverCertificate);
-        ByteString_Clear(&scConnection->clientCertificate);
-        KeyManager_AsymmetricKey_Free(scConnection->clientKey);
+        scConnection->serverCertificate = NULL;
+        scConnection->clientCertificate = NULL;
         scConnection->clientKey = NULL;
         SLinkedList_Delete(scConnection->pendingRequests);
         String_Clear(&scConnection->securityPolicy);
@@ -280,9 +277,7 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
     if(status == STATUS_OK){
         status = SC_EncodeAsymmSecurityHeader(cConnection->instance,
-                                              &cConnection->securityPolicy,
-                                              &cConnection->clientCertificate,
-                                              &cConnection->serverCertificate);
+                                              &cConnection->securityPolicy);
     }
 
     if(status == STATUS_OK){
@@ -613,9 +608,9 @@ StatusCode OnTransportEvent_CB(void*           connection,
             assert(cConnection->instance->state == SC_Connection_Connecting_Transport);
             retStatus = SC_InitApplicationIdentities
                          (cConnection->instance,
-                          &cConnection->clientCertificate,
+                          cConnection->clientCertificate,
                           cConnection->clientKey,
-                          &cConnection->serverCertificate);
+                          cConnection->serverCertificate);
             // Configure secure connection for encoding / decoding messages
             if(status == STATUS_OK){
                 status = SC_InitReceiveSecureBuffers(cConnection->instance,
@@ -713,9 +708,9 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
        securityPolicy != NULL &&
        requestedLifetime > 0)
     {
-        if(connection->clientCertificate.length <= 0 &&
+        if(connection->clientCertificate == NULL &&
            connection->clientKey == NULL &&
-           connection->serverCertificate.length <= 0 &&
+           connection->serverCertificate == NULL &&
            connection->securityMode == UA_MessageSecurityMode_Invalid &&
            connection->securityPolicy.length <= 0 &&
            connection->callback == NULL &&
@@ -747,9 +742,10 @@ StatusCode SC_Client_Connect(SC_ClientConnection*   connection,
                     status = STATUS_NOK;
                 }
             }
-
             // FIXME: this should be done elsewhere
             connection->clientKey = (AsymmetricKey *)key_priv_cli; // TODO: const override
+            connection->clientCertificate = crt_cli;
+            connection->serverCertificate = crt_srv;
 
             if(status == STATUS_OK){
                 if(securityMode != UA_MessageSecurityMode_Invalid){
