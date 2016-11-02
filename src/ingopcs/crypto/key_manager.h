@@ -38,9 +38,8 @@ void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey);
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode KeyManager_CertificateGetLength_Thumbprint(const CryptoProvider *pProvider,
-                                                      uint32_t *);
 
+// Cert length is in CryptoProvider.
 
 StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
                                                 Certificate **ppCert);

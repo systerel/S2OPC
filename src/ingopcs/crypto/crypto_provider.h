@@ -73,6 +73,8 @@ StatusCode CryptoProvider_AsymmetricGetLength_Decryption(const CryptoProvider *p
 StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvider *pProvider,
                                                         const AsymmetricKey *pKey,
                                                         uint32_t *pLength);
+StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvider *pProvider,
+                                                          uint32_t *length);
 
 // Symmetric functions
 StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,

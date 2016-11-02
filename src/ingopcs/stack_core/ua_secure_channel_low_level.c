@@ -574,7 +574,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
         UA_ByteString recCertThumbprint;
         if(toEncrypt != FALSE){
             uint32_t thumbprintLength = 0;
-            status = KeyManager_CertificateGetLength_Thumbprint(cryptoProvider, &thumbprintLength);
+            status = CryptoProvider_CertificateGetLength_Thumbprint(cryptoProvider, &thumbprintLength);
 
             if(STATUS_OK == status){
                 if(thumbprintLength <= INT32_MAX){
@@ -1295,7 +1295,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: wh
                 uint32_t thumbprintLength = 0;
                 uint32_t runningAppCertComparison = 0;
 
-                status = KeyManager_CertificateGetLength_Thumbprint(scConnection->currentCryptoProvider,
+                status = CryptoProvider_CertificateGetLength_Thumbprint(scConnection->currentCryptoProvider,
                                                                     &thumbprintLength);
 
                 if(STATUS_OK == status && thumbprintLength > INT32_MAX){

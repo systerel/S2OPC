@@ -30,27 +30,6 @@
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode KeyManager_CertificateGetLength_Thumbprint(const CryptoProvider *pProvider,
-                                                      uint32_t *length)
-{
-    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == length)
-        return STATUS_INVALID_PARAMETERS;
-
-    *length = 0;
-    switch(pProvider->pProfile->SecurityPolicyID)
-    {
-    case SecurityPolicy_Invalid_ID:
-    default:
-        return STATUS_NOK;
-    case SecurityPolicy_Basic256Sha256_ID:
-        *length = SecurityPolicy_Basic256Sha256_CertLen_Thumbprint;
-        break;
-    }
-
-    return STATUS_OK;
-}
-
-
 StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
                                           uint8_t **ppDest, uint32_t *lenAllocated)
 {

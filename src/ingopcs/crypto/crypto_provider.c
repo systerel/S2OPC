@@ -919,9 +919,30 @@ StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
 
 
 /* ------------------------------------------------------------------------------------------------
- * Certificate validation
+ * Certificate lengths & validation
  * ------------------------------------------------------------------------------------------------
  */
+StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvider *pProvider,
+                                                          uint32_t *length)
+{
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == length)
+        return STATUS_INVALID_PARAMETERS;
+
+    *length = 0;
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_NOK;
+    case SecurityPolicy_Basic256Sha256_ID:
+        *length = SecurityPolicy_Basic256Sha256_CertLen_Thumbprint;
+        break;
+    }
+
+    return STATUS_OK;
+}
+
+
 StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
                                               const PKIProvider *pPKI,
                                               const Certificate *pCert)

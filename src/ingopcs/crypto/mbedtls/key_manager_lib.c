@@ -203,7 +203,7 @@ StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProvider,
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pCert || NULL == pDest || 0 == lenDest)
         return STATUS_INVALID_PARAMETERS;
 
-    if(KeyManager_CertificateGetLength_Thumbprint(pProvider, &lenSupposed) != STATUS_OK)
+    if(CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenSupposed) != STATUS_OK)
         return STATUS_NOK;
 
     if(lenDest != lenSupposed)
