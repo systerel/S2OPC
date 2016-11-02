@@ -15,6 +15,8 @@
 #include "crypto_types.h"
 #include "crypto_provider.h"
 #include "crypto_profiles.h"
+#include "key_manager.h"
+#include "pki.h"
 
 
 CryptoProvider *CryptoProvider_Create(const char *uri)
@@ -913,5 +915,27 @@ StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
     }
 
     return pProvider->pProfile->pFnAsymVerify(pProvider, pInput, lenInput, pKeyRemotePublic, pSignature);
+}
+
+
+/* ------------------------------------------------------------------------------------------------
+ * Certificate validation
+ * ------------------------------------------------------------------------------------------------
+ */
+StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
+                                              const KeyManager *pKeyMan,
+                                              const PKIProvider *pPKI,
+                                              const Certificate *pCert)
+{
+    // TODO: where is the key key_pub <-> key_priv association checked?
+    if(NULL == pCrypto || NULL == pCrypto->pProfile || NULL == pCrypto->pProfile->pFnCertVerify || NULL == pPKI || NULL == pPKI->pFnValidateCertificate || NULL == pCert)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Let the lib-specific code handle the verification for the current security policy
+    if(pCrypto->pProfile->pFnCertVerify(pCrypto, pKeyMan, pCert) != STATUS_OK)
+        return STATUS_NOK;
+
+    // Verify certificate through PKIProvider callback
+    return pPKI->pFnValidateCertificate(pPKI, pCert);
 }
 

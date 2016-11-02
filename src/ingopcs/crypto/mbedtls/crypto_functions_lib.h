@@ -110,3 +110,6 @@ StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider *pPro
                                                       const AsymmetricKey *pKey,
                                                       const uint8_t *pSignature);
 
+StatusCode CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const CryptoProvider *pCrypto,
+                                                          const KeyManager *pKeyMan,
+                                                          const Certificate *pCert);

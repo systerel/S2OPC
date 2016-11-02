@@ -250,7 +250,8 @@ StatusCode KeyManager_Certificate_GetPublicKey(const KeyManager *pManager,
                                                const Certificate *pCert,
                                                AsymmetricKey *pKey)
 {
-    if(NULL == pManager || NULL == pCert || NULL == pKey)
+    (void)(pManager);
+    if(NULL == pCert || NULL == pKey)
         return STATUS_INVALID_PARAMETERS;
 
     memcpy(pKey, &pCert->crt.pk, sizeof(mbedtls_pk_context));

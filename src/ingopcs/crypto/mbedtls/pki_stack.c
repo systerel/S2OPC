@@ -32,7 +32,7 @@ static StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
 
     if(NULL == pPKI || NULL == pToValidate)
         return STATUS_INVALID_PARAMETERS;
-    if(NULL == pPKI->pFnValidateCertificate || NULL == pPKI->pUserCertAuthList)
+    if(NULL == pPKI->pFnValidateCertificate || NULL == pPKI->pUserCertAuthList) // TODO: useful pFn verification?
         return STATUS_INVALID_PARAMETERS;
 
     // Gathers certificates from pki structure

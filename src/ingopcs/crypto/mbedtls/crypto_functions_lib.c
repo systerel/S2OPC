@@ -491,7 +491,6 @@ static inline StatusCode RSASSA_PSS_hash(const uint8_t *pInput, uint32_t lenInpu
     return STATUS_OK;
 }
 
-
 StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
                                                     const uint8_t *pInput,
                                                     uint32_t lenInput,
@@ -552,4 +551,40 @@ StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider *pPro
     return status;
 }
 
+StatusCode CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const CryptoProvider *pCrypto,
+                                                          const KeyManager *pKeyMan,
+                                                          const Certificate *pCert)
+{
+    AsymmetricKey pub_key;
+    uint32_t key_length = 0;
 
+    // Retrieve key
+    if(KeyManager_Certificate_GetPublicKey(pKeyMan, pCert, &pub_key) != STATUS_OK)
+        return STATUS_NOK;
+
+    // Verifies key type: RSA
+    switch(mbedtls_pk_get_type(&pub_key.pk))
+    {
+    case MBEDTLS_PK_RSA:
+    //case MBEDTLS_PK_RSASSA_PSS: // Don't know the exact meaning of these two...
+    //case MBEDTLS_PK_RSA_ALT:
+        break;
+    default:
+        return STATUS_NOK;
+    }
+
+    // Retrieve key length
+    if(CryptoProvider_AsymmetricGetLength_KeyBits(pCrypto, &pub_key, &key_length) != STATUS_OK)
+        return STATUS_NOK;
+    // Verifies key length: 2048-4096
+    if(key_length < SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits || key_length > SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+        return STATUS_NOK;
+
+    // Verifies signing algorithm: SHA-256
+    if(pCert->crt.sig_md != MBEDTLS_MD_SHA256)
+        return STATUS_NOK;
+
+    // Does not verify that key is capable of encryption and signing... (!!!)
+
+    return STATUS_OK;
+}

@@ -15,6 +15,7 @@
 #include "crypto_types.h"
 #include "key_sets.h"
 #include "key_manager.h"
+#include "pki.h"
 
 
 // Creation
@@ -159,6 +160,13 @@ StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
                                            const AsymmetricKey *pKeyRemotePublic,
                                            const uint8_t *pSignature,
                                            uint32_t lenSignature);
+
+
+// Certificate validation
+StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
+                                               const KeyManager *pKeyMan,
+                                               const PKIProvider *pPKI,
+                                               const Certificate *pCert);
 
 
 #endif  // INGOPCS_CRYPTO_PROVIDER_H_
