@@ -197,39 +197,39 @@ StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
 // Retrieve public key from certificate and set it in internal properties
 StatusCode SC_RetrieveAndSetPublicKeyFromCert(SC_Connection*  scConnection,
                                               uint32_t        runningApp,
-                                              AsymmetricKey* publicKey)
+                                              AsymmetricKey*  publicKey)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_ByteString* certificate = NULL;
-    Certificate* cert = NULL;
+    Certificate** cert = NULL;
 
     if(scConnection != NULL && publicKey != NULL)
     {
         if(runningApp == FALSE)
         {
             certificate = &scConnection->otherAppCertificate;
-            cert = scConnection->otherAppPublicKeyCert;
+            cert = &scConnection->otherAppPublicKeyCert;
         }else{
             certificate = &scConnection->runningAppCertificate;
-            cert = scConnection->runningAppPublicKeyCert;
+            cert = &scConnection->runningAppPublicKeyCert;
         }
 
-        if(cert == NULL){
+        if(*cert == NULL){
             // Key never extracted from cert. before:
             status = KeyManager_Certificate_CreateFromDER(scConnection->currentKeyManager,
                                                           certificate->characters,
                                                           certificate->length,
-                                                          &cert);
+                                                          cert);
 
             if(STATUS_OK == status){
                 status = KeyManager_Certificate_GetPublicKey(scConnection->currentKeyManager,
-                                                             cert,
+                                                             *cert,
                                                              publicKey);
             }
         }else{
             status = KeyManager_Certificate_GetPublicKey(scConnection->currentKeyManager,
-                                                                         cert,
-                                                                         publicKey);
+                                                         *cert,
+                                                         publicKey);
         }
     }
 
@@ -351,7 +351,6 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
                                                                        &otherAppPublicKey,
                                                                        plainDataLength,
                                                                        cipherDataLength);
-                KeyManager_AsymmetricKey_Free(&otherAppPublicKey);
             }
         }
     }else if (status == STATUS_OK){
@@ -471,7 +470,6 @@ StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                                                                        plainBlockSize,
                                                                        signatureSize);
                  }
-                 KeyManager_AsymmetricKey_Free(&publicKey);
             }else{
                 status = STATUS_NOK;
             }
@@ -561,10 +559,12 @@ StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
 }
 
 StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
+                                     KeyManager*            keyManager,
                                      UA_MsgBuffer*          msgBuffer,
                                      UA_MessageSecurityMode secuMode,
                                      UA_String*             securityPolicy,
                                      UA_ByteString*         senderCertificate,
+                                     Certificate*           receiverCertCrypto,
                                      UA_ByteString*         receiverCertificate){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toEncrypt = 1; // True
@@ -608,22 +608,26 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*        cryptoProvider,
 
         UA_ByteString recCertThumbprint;
         if(toEncrypt != FALSE){
-            int32_t thumbprintLength = 0;
-            status = CryptoProvider_GetCertThumbprintLength(cryptoProvider,
-                                                            receiverCertificate,
-                                                            &thumbprintLength);
-            if(status == STATUS_OK){
-                status = ByteString_InitializeFixedSize(&recCertThumbprint, thumbprintLength);
-                if(status == STATUS_OK){
-                    status = CryptoProvider_GetCertThumbprint(cryptoProvider,
-                                                              receiverCertificate,
-                                                              &recCertThumbprint);
+            uint32_t thumbprintLength = 0;
+            status = KeyManager_CertificateGetLength_Thumbprint(keyManager, &thumbprintLength);
+
+            if(STATUS_OK == status){
+                if(thumbprintLength <= INT32_MAX){
+                    status = ByteString_InitializeFixedSize(&recCertThumbprint, (int32_t) thumbprintLength);
                 }else{
                     status = STATUS_NOK;
                 }
             }
+            if(STATUS_OK == status){
+                status = KeyManager_Certificate_GetThumbprint(keyManager,
+                                                              receiverCertCrypto,
+                                                              recCertThumbprint.characters,
+                                                              thumbprintLength);
+            }
 
-            status = String_Write(&recCertThumbprint, msgBuffer);
+            if(STATUS_OK == status){
+                status = String_Write(&recCertThumbprint, msgBuffer);
+            }
         }else{
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
@@ -650,10 +654,12 @@ StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
     if(scConnection != NULL)
     {
         status = EncodeAsymmSecurityHeader(scConnection->currentCryptoProvider,
+                                           scConnection->currentKeyManager,
                                            scConnection->sendingBuffer,
                                            scConnection->currentSecuMode,
                                            securityPolicy,
                                            senderCertificate,
+                                           scConnection->otherAppPublicKeyCert,
                                            receiverCertificate);
     }
 
@@ -854,7 +860,6 @@ StatusCode EncodePadding(SC_Connection* scConnection,
                                                                  &cipherBlockSize,
                                                                  &plainBlockSize);
             }
-            KeyManager_AsymmetricKey_Free(&publicKey);
         }
     }else{
         if(scConnection->currentSecuKeySets.senderKeySet == NULL ||
@@ -917,11 +922,11 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
             status = ByteString_InitializeFixedSize(&signedData, signatureSize);
             if(status == STATUS_OK){
                 status = CryptoProvider_AsymmetricSign(scConnection->currentCryptoProvider,
-                                                           msgBuffer->buffers->data,
-                                                           msgBuffer->buffers->length,
-                                                           scConnection->runningAppPrivateKey,
-                                                           signedData.characters,
-                                                           signedData.length);
+                                                       msgBuffer->buffers->data,
+                                                       msgBuffer->buffers->length,
+                                                       scConnection->runningAppPrivateKey,
+                                                       signedData.characters,
+                                                       signedData.length);
             }else{
                 status = STATUS_NOK;
             }
@@ -1030,7 +1035,6 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
                            &encryptedData[msgBuffer->sequenceNumberPosition],
                            encryptedDataLength);
             }
-            KeyManager_AsymmetricKey_Free(&otherAppPublicKey);
 
         } // End valid asymmetric encryption data
     }else if (status == STATUS_OK){
@@ -1329,19 +1333,23 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
                 // Check thumbprint matches current app certificate thumbprint
 
                 UA_ByteString curAppCertThumbprint;
-                int32_t thumbprintLength = 0;
+                uint32_t thumbprintLength = 0;
                 uint32_t runningAppCertComparison = 0;
 
-                status = CryptoProvider_GetCertThumbprintLength(scConnection->currentCryptoProvider,
-                                                                &scConnection->runningAppCertificate,
-                                                                &thumbprintLength);
-                if(status == STATUS_OK){
-                    if(thumbprintLength == receiverCertThumb.length){
-                        status = ByteString_InitializeFixedSize(&curAppCertThumbprint, thumbprintLength);
+                status = KeyManager_CertificateGetLength_Thumbprint(scConnection->currentKeyManager,
+                                                                    &thumbprintLength);
+
+                if(STATUS_OK == status && thumbprintLength > INT32_MAX){
+                    status = STATUS_NOK;
+                }
+                if(STATUS_OK == status){
+                    if((int32_t) thumbprintLength == receiverCertThumb.length){
+                        status = ByteString_InitializeFixedSize(&curAppCertThumbprint, (int32_t) thumbprintLength);
                         if(status == STATUS_OK){
-                            status = CryptoProvider_GetCertThumbprint(scConnection->currentCryptoProvider,
-                                                                      &scConnection->runningAppCertificate,
-                                                                      &curAppCertThumbprint);
+                            status = KeyManager_Certificate_GetThumbprint(scConnection->currentKeyManager,
+                                                                          scConnection->runningAppPublicKeyCert,
+                                                                          curAppCertThumbprint.characters,
+                                                                          thumbprintLength);
 
                             if(status == STATUS_OK){
                                 status = ByteString_Compare(&curAppCertThumbprint,
@@ -1659,7 +1667,6 @@ StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                                          &(receptionBuffer->data[signaturePosition]),
                                                          signatureSize);
             }
-            KeyManager_AsymmetricKey_Free(&publicKey);
         }else{
             SC_SecurityKeySet* receiverKeySet = NULL;
             if(isPrecCryptoData == FALSE){
