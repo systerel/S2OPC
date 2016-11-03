@@ -351,14 +351,15 @@ StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
                                                uint32_t lenCipherText,
                                                const AsymmetricKey *pKey,
                                                uint8_t *pOutput,
-                                               uint32_t *lenWritten)
+                                               uint32_t *pLenWritten)
 {
     StatusCode status = STATUS_OK;
-    uint32_t lenMsgPlain = 0, lenMsgCiph = 0, lenDeciphed = 0;
+    uint32_t lenMsgPlain = 0, lenMsgCiph = 0;
+    size_t lenDeciphed = 0;
     mbedtls_rsa_context *prsa = NULL;
 
-    if(NULL != lenWritten)
-        *lenWritten = 0;
+    if(NULL != pLenWritten)
+        *pLenWritten = 0;
 
     // Verify the type of the key (this is done here because it is more convenient (lib-specific))
     if(mbedtls_pk_get_type(&pKey->pk) != MBEDTLS_PK_RSA) // TODO: maybe we should accept RSASSA_PSS... Undocumented.
@@ -377,14 +378,14 @@ StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
     {
         // TODO: this might fail because of lenMsgPlain (doc recommend that it is at least sizeof(modulus), but here it is the length of the content)
         if(mbedtls_rsa_rsaes_oaep_decrypt(prsa, mbedtls_ctr_drbg_random, &pProvider->pCryptolibContext->ctxDrbg, MBEDTLS_RSA_PRIVATE, NULL, 0,
-                                          (size_t *)&lenDeciphed, (unsigned char *)pInput, (unsigned char *)pOutput, lenMsgPlain) != 0)
+                                          &lenDeciphed, (unsigned char *)pInput, (unsigned char *)pOutput, lenMsgPlain) != 0)
         {
             status = STATUS_NOK;
             break;
         }
 
-        if(NULL != lenWritten)
-            *lenWritten += lenDeciphed;
+        if(NULL != pLenWritten)
+            *pLenWritten += lenDeciphed;
 
         // Advance pointers
         lenCipherText -= lenMsgCiph;

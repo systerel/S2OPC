@@ -62,7 +62,7 @@ StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
                                                uint32_t lenPlainText,
                                                const AsymmetricKey *pKey,
                                                uint8_t *pOutput,
-                                               uint32_t *lenWritten);
+                                               uint32_t *pLenWritten);
 /**
  * This one is too up-to-date, don't use (but was tested). As not said by the current security policy, classic stack uses PKCS#1 v1.5 padding, not PSS...
  *
