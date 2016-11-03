@@ -23,7 +23,7 @@ START_TEST(test_ua_msg_buffer_create_set_type)
     int flushData = 3;
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[0];
+    UA_EncodeableType* encTypes[1];
 
 
     // Test creation / set type
@@ -90,7 +90,7 @@ START_TEST(test_ua_msg_buffer_reset)
     uint8_t flushData = 3;
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[0];
+    UA_EncodeableType* encTypes[1];
 
     // Test reset
     //// Test nominal case
@@ -186,7 +186,7 @@ START_TEST(test_ua_msg_buffer_copy)
     uint8_t flushData = 3;
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[0];
+    UA_EncodeableType* encTypes[1];
 
     // Test reset
     //// Test nominal case
@@ -253,7 +253,7 @@ START_TEST(test_ua_msg_buffers_create)
 {
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[0];
+    UA_EncodeableType* encTypes[1];
 
     // Test creation
     //// Test nominal case
@@ -292,7 +292,7 @@ START_TEST(test_ua_msg_buffers_chunk_mgr)
 {
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[0];
+    UA_EncodeableType* encTypes[1];
     Buffer* buf = NULL;
     Buffer* buf2 = NULL;
     uint32_t bufIdx = 0;
@@ -379,7 +379,7 @@ START_TEST(test_ua_msg_buffers_copy)
     uint8_t flushData = 3;
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[0];
+    UA_EncodeableType* encTypes[1];
 
     // Test reset
     //// Test nominal case
@@ -1555,7 +1555,7 @@ START_TEST(test_ua_encoder_other_types)
 
     // Two bytes node id
     nodeId.identifierType = IdentifierType_Numeric;
-    nodeId.numeric = 114;
+    nodeId.data.numeric = 114;
     status = NodeId_Write(&nodeId, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0x00);
@@ -1564,7 +1564,7 @@ START_TEST(test_ua_encoder_other_types)
     // Four bytes node id
     nodeId.identifierType = IdentifierType_Numeric;
     nodeId.namespace = 5;
-    nodeId.numeric = 1025;
+    nodeId.data.numeric = 1025;
     status = NodeId_Write(&nodeId, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[2] == 0x01);
@@ -1575,7 +1575,7 @@ START_TEST(test_ua_encoder_other_types)
     // Numeric node id
     nodeId.identifierType = IdentifierType_Numeric;
     nodeId.namespace = 5;
-    nodeId.numeric = 0x1FFFF;
+    nodeId.data.numeric = 0x1FFFF;
     status = NodeId_Write(&nodeId, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[6] == 0x02);
@@ -1603,21 +1603,21 @@ START_TEST(test_ua_encoder_other_types)
     status = NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(nodeId2.namespace == 0);
-    ck_assert(nodeId2.numeric == 114);
+    ck_assert(nodeId2.data.numeric == 114);
 
     ////// Four bytes NodeId
     NodeId_Clear(&nodeId2);
     status = NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(nodeId2.namespace == 5);
-    ck_assert(nodeId2.numeric == 1025);
+    ck_assert(nodeId2.data.numeric == 1025);
 
     ////// Numeric NodeId
     NodeId_Clear(&nodeId2);
     status = NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(nodeId2.namespace == 5);
-    ck_assert(nodeId2.numeric == 0x1FFFF);
+    ck_assert(nodeId2.data.numeric == 0x1FFFF);
 
     // TODO: read all other types possibles !
 

@@ -29,19 +29,22 @@ typedef enum {
     SOCKET_LISTENING             = 0x03 // Server: listening socket
 } UA_Socket_State;
 
-typedef struct {
-    Socket           sock;
-    uint8_t          isUsed;
-    UA_Socket_State  state;
-    void*            eventCallback; // UA_Socket_EventCB Type
-    void*            cbData;
-} UA_Socket;
 
-typedef StatusCode (UA_Socket_EventCB) (UA_Socket*  socket,
-                                        uint32_t    socketEvent,
-                                        void*       cbData,
-                                        uint16_t    portNumber,
-                                        uint8_t     isSSL);
+struct UA_Socket;
+
+typedef StatusCode (UA_Socket_EventCB) (struct UA_Socket* socket,
+                                        uint32_t          socketEvent,
+                                        void*             cbData,
+                                        uint16_t          portNumber,
+                                        uint8_t           isSSL);
+
+typedef struct UA_Socket {
+    Socket             sock;
+    uint8_t            isUsed;
+    UA_Socket_State    state;
+    UA_Socket_EventCB* eventCallback; // UA_Socket_EventCB Type
+    void*              cbData;
+} UA_Socket;
 
 typedef struct {
     uint32_t   nbSockets;

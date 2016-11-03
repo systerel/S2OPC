@@ -168,7 +168,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     //// Encode request header
     // Encode authentication token (omitted opaque identifier ???? => must be a bytestring ?)
     openRequest.RequestHeader.AuthenticationToken.identifierType = IdentifierType_Numeric;
-    openRequest.RequestHeader.AuthenticationToken.numeric = UA_Null_Id;
+    openRequest.RequestHeader.AuthenticationToken.data.numeric = UA_Null_Id;
     // Encode 64 bits UtcTime => null ok ?
     openRequest.RequestHeader.Timestamp = 0;
     // Encode requestHandler
@@ -188,7 +188,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         openRequest.RequestHeader.AdditionalHeader.encoding = UA_ExtObjBodyEncoding_None;
         // Type Id: Node Id
         openRequest.RequestHeader.AdditionalHeader.typeId.identifierType = IdentifierType_Numeric;
-        openRequest.RequestHeader.AdditionalHeader.typeId.numeric = UA_Null_Id;
+        openRequest.RequestHeader.AdditionalHeader.typeId.data.numeric = UA_Null_Id;
 
         //// Encode request content
         // Client protocol version

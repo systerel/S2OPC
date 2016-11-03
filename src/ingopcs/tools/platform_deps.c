@@ -19,9 +19,13 @@ uint32_t little_endian(){
 uint32_t float_big_endian(){
     float f = -0.0;
     // Check if sign bit is the first
-    assert((0b10000000 & *((char*) &f)) == 0b10000000 ||
-           (0b10000000 & ((char*) &f)[3]) == 0b10000000);
-    return (0b10000000 & *((char*) &f)) == 0b10000000;
+// GCC version with binary constants extension
+//    assert((0b10000000 & *((char*) &f)) == 0b10000000 ||
+//           (0b10000000 & ((char*) &f)[3]) == 0b10000000);
+//    return (0b10000000 & *((char*) &f)) == 0b10000000;
+        assert((0x80 & *((char*) &f)) == 0x80 ||
+               (0x80 & ((char*) &f)[3]) == 0x80);
+        return (0x80 & *((char*) &f)) == 0x80;
 }
 
 void InitPlatformDependencies(){

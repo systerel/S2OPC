@@ -494,9 +494,9 @@ UA_NodeId_DataEncoding GetNodeIdDataEncoding(const UA_NodeId* nodeId){
     UA_NodeId_DataEncoding encodingEnum = NodeIdEncoding_Invalid;
     switch(nodeId->identifierType){
         case IdentifierType_Numeric:
-            if(nodeId->numeric <= UINT8_MAX){
+            if(nodeId->data.numeric <= UINT8_MAX){
                 encodingEnum = NodeIdEncoding_TwoByte;
-            }else if(nodeId->numeric <= UINT16_MAX){
+            }else if(nodeId->data.numeric <= UINT16_MAX){
                 encodingEnum = NodeIdEncoding_FourByte;
             }else{
                 encodingEnum = NodeIdEncoding_Numeric;
@@ -533,11 +533,11 @@ StatusCode Internal_NodeId_Write(UA_MsgBuffer* msgBuffer,
                 status = STATUS_INVALID_PARAMETERS;
                 break;
             case NodeIdEncoding_TwoByte:
-                byte = (UA_Byte) nodeId->numeric;
+                byte = (UA_Byte) nodeId->data.numeric;
                 status = Byte_Write(&byte, msgBuffer);
                 break;
             case  NodeIdEncoding_FourByte:
-                twoBytes = (uint16_t) nodeId->numeric;
+                twoBytes = (uint16_t) nodeId->data.numeric;
                 if(nodeId->namespace <= UINT8_MAX){
                     const UA_Byte namespace = nodeId->namespace;
                     status = Byte_Write(&namespace, msgBuffer);
@@ -551,25 +551,25 @@ StatusCode Internal_NodeId_Write(UA_MsgBuffer* msgBuffer,
             case  NodeIdEncoding_Numeric:
                 status = UInt16_Write(&nodeId->namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = UInt32_Write(&nodeId->numeric, msgBuffer);
+                    status = UInt32_Write(&nodeId->data.numeric, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_String:
                 status = UInt16_Write(&nodeId->namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = String_Write(&nodeId->string, msgBuffer);
+                    status = String_Write(&nodeId->data.string, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_Guid:
                 status = UInt16_Write(&nodeId->namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = Guid_Write(&nodeId->guid, msgBuffer);
+                    status = Guid_Write(&nodeId->data.guid, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_ByteString:
                 status = UInt16_Write(&nodeId->namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = ByteString_Write(&nodeId->bstring, msgBuffer);
+                    status = ByteString_Write(&nodeId->data.bstring, msgBuffer);
                 }
                 break;
             default:
@@ -612,7 +612,7 @@ StatusCode Internal_NodeId_Read(UA_MsgBuffer* msgBuffer,
                 nodeId->identifierType = IdentifierType_Numeric;
                 nodeId->namespace = 0;
                 status = Byte_Read(&byte, msgBuffer);
-                nodeId->numeric = (uint32_t) byte;
+                nodeId->data.numeric = (uint32_t) byte;
                 break;
             case  NodeIdEncoding_FourByte:
                 nodeId->identifierType = IdentifierType_Numeric;
@@ -620,35 +620,35 @@ StatusCode Internal_NodeId_Read(UA_MsgBuffer* msgBuffer,
                 nodeId->namespace = byte;
                 if(status == STATUS_OK){
                     status = UInt16_Read(&twoBytes, msgBuffer);
-                    nodeId->numeric = twoBytes;
+                    nodeId->data.numeric = twoBytes;
                 }
                 break;
             case  NodeIdEncoding_Numeric:
                 nodeId->identifierType = IdentifierType_Numeric;
                 status = UInt16_Read(&nodeId->namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = UInt32_Read(&nodeId->numeric, msgBuffer);
+                    status = UInt32_Read(&nodeId->data.numeric, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_String:
                 nodeId->identifierType = IdentifierType_String;
                 status = UInt16_Read(&nodeId->namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = String_Read(&nodeId->string, msgBuffer);
+                    status = String_Read(&nodeId->data.string, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_Guid:
                 nodeId->identifierType = IdentifierType_Guid;
                 status = UInt16_Read(&nodeId->namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = Guid_Read(&nodeId->guid, msgBuffer);
+                    status = Guid_Read(&nodeId->data.guid, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_ByteString:
                 nodeId->identifierType = IdentifierType_ByteString;
                 status = UInt16_Read(&nodeId->namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = ByteString_Read(&nodeId->bstring, msgBuffer);
+                    status = ByteString_Read(&nodeId->data.bstring, msgBuffer);
                 }
                 break;
             default:
@@ -923,7 +923,7 @@ StatusCode ExtensionObject_Write(const UA_ExtensionObject* extObj, UA_MsgBuffer*
 
             objNodeId.identifierType = IdentifierType_Numeric;
             objNodeId.namespace = nsIndex;
-            objNodeId.numeric = extObj->body.object.objType->BinaryEncodingTypeId;
+            objNodeId.data.numeric = extObj->body.object.objType->BinaryEncodingTypeId;
         }
     }
 
@@ -989,7 +989,7 @@ StatusCode ExtensionObject_Read(UA_ExtensionObject* extObj, UA_MsgBuffer* msgBuf
             if(nsName != NULL){
                 encType = EncodeableType_GetEncodeableType(msgBuffer->encTypesTable,
                                                            nsName,
-                                                           extObj->typeId.numeric);
+                                                           extObj->typeId.data.numeric);
             }
             if(nsName == NULL || encType == NULL){
                 status = STATUS_NOK;

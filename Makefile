@@ -3,12 +3,16 @@ OSTYPE=$(shell echo $$OSTYPE)
 
 ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      CC=gcc
-     EXCLUDE_DIR="*win32*"
+     EXCLUDE_DIR="*win*"
+     PLATFORM_DIR="*linux*"
+     PFLAGS="-std=gnu99"
      LIBS=$(LIBS_MBEDTLS) -lssl -lcrypto -lrt -lpthread
      COPY_SSL=@cat /dev/null
 else
     CC=i686-w64-mingw32-gcc #i686-pc-mingw32-gcc
     EXCLUDE_DIR="*linux*"
+    PLATFORM_DIR="*win*"
+    PFLAGS=""
     OPEN_SSL_FILES=$(WORKSPACE_DIR)/lib/openssl/include
     INCLUDES_SSL=-I$(OPEN_SSL_FILES)
     LIBS=$(LIBS_MBEDTLS) -lcrypt32 -lrpcrt4 -lws2_32 -llibeay32 -lssleay32
@@ -41,8 +45,16 @@ C_SRC_DIRS=$(UASTACK_DIR) $(STUBCLIENT_DIR) $(TESTS_DIR) #$(STUBSERVER_DIR)
 ### includes stack
 INCLUDES_UASTACK=$(shell find $(UASTACK_DIR) -not -path $(EXCLUDE_DIR) -type d)
 ## object files stack
-UASTACK_SRC_FILES=$(shell find $(UASTACK_DIR) -not -path $(EXCLUDE_DIR) -type f -name "*.c" -exec basename "{}" \;)
-UASTACK_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(UASTACK_SRC_FILES))
+STACK_SRC_FILES=$(shell find $(UASTACK_DIR) -not -path $(EXCLUDE_DIR) -not -path $(PLATFORM_DIR) -type f -name "*.c" -exec basename "{}" \;)
+STACK_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(STACK_SRC_FILES))
+
+PLATFORM_BUILD_DIR=$(BUILD_DIR)_platform
+PLATFORM_BUILD_DIR_SED=$(subst /,\/,$(PLATFORM_BUILD_DIR))
+PLATFORM_SRC_FILES=$(shell find $(UASTACK_DIR) -path $(PLATFORM_DIR) -type f -name "*.c" -exec basename "{}" \;)
+PLATFORM_OBJ_FILES=$(patsubst %.c,$(PLATFORM_BUILD_DIR)/%.o,$(PLATFORM_SRC_FILES))
+
+# add platform objs prior to stack objs
+UASTACK_OBJ_FILES=$(PLATFORM_OBJ_FILES) $(STACK_OBJ_FILES)
 
 ## Tests object files
 TESTS_SRC_FILES=$(shell find $(TESTS_DIR) -type f -name "*.c" -exec basename "{}" \;)
@@ -80,7 +92,8 @@ INCLUDES_MBEDTLS=-I$(MBEDTLS_DIR)/include
 LIBS_MBEDTLS=-L$(MBEDTLS_DIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
 
 # C COMPILER CONFIG
-CFLAGS=-c -g -Wall -Wextra -O0 #-pedantic -std=c99
+CFLAGS=-c -g -Wall -Wextra -O0
+C99FLAGS=-std=c99 -pedantic #-D_POSIX_C_SOURCE=200112L # Add posix as authorized code for linux sockets
 LFLAGS=-g
 INCLUDES=$(INCLUDES_MBEDTLS) $(INCLUDES_SSL) $(addprefix -I, $(INCLUDES_UASTACK))
 DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=1 #-DOPCUA_HAVE_SERVERAPI=1 -DOPCUA_HAVE_OPENSSL=1
@@ -88,7 +101,7 @@ DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=
 # MAKEFILE CONTENT
 
 .PHONY : all config mbedtls check clean clean_mbedtls cleanall
-.DELETE_ON_ERROR : .depend .fdepend
+.DELETE_ON_ERROR : .depend.tmp .depend .pdepend .fdepend
 
 default: all
 
@@ -97,13 +110,14 @@ all: config $(EXEC_DIR)/stub_client $(EXEC_DIR)/check_stack $(EXEC_DIR)/stub_ser
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
 -include .depend
+-include .pdepend
 -include .fdepend
 endif
 endif
 
 config: mbedtls
 	@echo "Configuring build dirs..."
-	@\mkdir -p $(BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR)
+	@\mkdir -p $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR)
 	@\mkdir -p $(EXEC_DIR)/revoked $(EXEC_DIR)/untrusted $(EXEC_DIR)/trusted \
 	 $(EXEC_DIR)/client_private $(EXEC_DIR)/server_private \
 	 $(EXEC_DIR)/client_public $(EXEC_DIR)/server_public
@@ -115,12 +129,20 @@ config: mbedtls
 
 $(BUILD_DIR)/%.o:
 	@echo "  CC $@"
-	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@ $(DEFS)
+	@$(CC) $(CFLAGS) $(C99FLAGS) $(INCLUDES) $< -o $@ $(DEFS)
+
+$(PLATFORM_BUILD_DIR)/%.o:
+	@echo "  CC $@"
+	@$(CC) $(CFLAGS) $(PFLAGS) $(INCLUDES) $< -o $@ $(DEFS)
 
 .depend: $(C_SRC_PATHS) #$(H_SRC_PATHS)
 	@echo "Building dependencies..."
-	@$(CC) $(CFLAGS) $(DEFS) $(INCLUDES) -MM $(C_SRC_PATHS) > $@
-	@sed 's/^\(.*\)\.o:/$(BUILD_DIR_SED)\/\1.o:/g' -i $@
+	@$(CC) $(CFLAGS) $(DEFS) $(INCLUDES) -MM $(C_SRC_PATHS) > $@.tmp
+	@sed 's/^\(.*\)\.o:/$(BUILD_DIR_SED)\/\1.o:/g' $@.tmp > $@
+
+.pdepend: .depend
+	@echo "Building platform dependencies..."
+	@sed 's/^\(.*\)\.o:/$(PLATFORM_BUILD_DIR_SED)\/\1.o:/g' $^.tmp > $@
 
 $(EXEC_DIR)/stub_client: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client.o
 	@echo "Linking $@..."
@@ -147,7 +169,7 @@ clean_mbedtls:
 
 clean:
 	@echo "Cleaning..."
-	@\rm -rf $(BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR)
+	@\rm -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR)
 	@\rm -f .depend .fdepend
 
 cleanall: clean clean_mbedtls
@@ -159,7 +181,7 @@ $(FBUILD_DIR)/%.o:
 
 .fdepend: $(C_FSRC_PATHS)
 	@echo "Building foundation dependencies..."
-	@$(CC) $(CFLAGS) $(DEFS) $(FINCLUDES) -MM $(C_FSRC_PATHS) > $@
+	@$(CC) $(FLAGS) $(DEFS) $(FINCLUDES) -MM $(C_FSRC_PATHS) > $@
 	@sed 's/^\(.*\)\.o:/$(FBUILD_DIR_SED)\/\1.o:/g' -i $@
 
 $(EXEC_DIR)/stub_server: $(FUASTACK_OBJ_FILES) $(FBUILD_DIR)/stub_server.o

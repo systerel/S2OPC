@@ -88,7 +88,7 @@ typedef struct {
         UA_String     string;
         UA_Guid       guid;
         UA_ByteString bstring;
-    };
+    } data;
 } UA_NodeId;
 
 typedef struct {

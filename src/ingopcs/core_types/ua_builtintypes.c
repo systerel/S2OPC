@@ -12,6 +12,8 @@
 
 #include "ua_builtintypes.h"
 
+typedef void (BuiltInFunction) (void*);
+
 void Boolean_Initialize(UA_Boolean* b){
     *b = FALSE;
 }
@@ -416,16 +418,16 @@ void NodeId_InitType(UA_NodeId* nodeId, UA_IdentifierType knownIdType){
     nodeId->identifierType = knownIdType;
     switch(knownIdType){
         case IdentifierType_Numeric:
-            UInt32_Initialize(&nodeId->numeric);
+            UInt32_Initialize(&nodeId->data.numeric);
             break;
         case IdentifierType_String:
-            String_Initialize(&nodeId->string);
+            String_Initialize(&nodeId->data.string);
             break;
         case IdentifierType_Guid:
-            Guid_Initialize(&nodeId->guid);
+            Guid_Initialize(&nodeId->data.guid);
             break;
         case IdentifierType_ByteString:
-            ByteString_Initialize(&nodeId->bstring);
+            ByteString_Initialize(&nodeId->data.bstring);
             break;
     }
 }
@@ -434,16 +436,16 @@ void NodeId_Clear(UA_NodeId* nodeId){
     nodeId->namespace = 0; // OPCUA namespace
     switch(nodeId->identifierType){
         case IdentifierType_Numeric:
-            UInt32_Clear(&nodeId->numeric);
+            UInt32_Clear(&nodeId->data.numeric);
             break;
         case IdentifierType_String:
-            String_Clear(&nodeId->string);
+            String_Clear(&nodeId->data.string);
             break;
         case IdentifierType_Guid:
-            Guid_Clear(&nodeId->guid);
+            Guid_Clear(&nodeId->data.guid);
             break;
         case IdentifierType_ByteString:
-            ByteString_Clear(&nodeId->bstring);
+            ByteString_Clear(&nodeId->data.bstring);
             break;
     }
     nodeId->identifierType = IdentifierType_Numeric;
@@ -542,11 +544,9 @@ void ExtensionObject_Clear(UA_ExtensionObject* extObj){
     extObj->length = -1;
 }
 
-typedef void (*BuiltInFunction) (void*);
-
 void ApplyToVariantNonArrayBuiltInType(UA_BuiltinId builtInTypeId,
                                        UA_VariantValue val,
-                                       BuiltInFunction builtInFunction){
+                                       BuiltInFunction* builtInFunction){
     switch(builtInTypeId){
         case UA_Boolean_Id:
             builtInFunction(&val.boolean);
@@ -631,7 +631,7 @@ void ApplyToVariantNonArrayBuiltInType(UA_BuiltinId builtInTypeId,
 void ApplyToVariantArrayBuiltInType(UA_BuiltinId builtInTypeId,
                                     UA_VariantArrayValue array,
                                     int32_t length,
-                                    BuiltInFunction builtInFunction){
+                                    BuiltInFunction* builtInFunction){
     int32_t idx = 0;
     switch(builtInTypeId){
         case UA_Boolean_Id:
@@ -768,83 +768,83 @@ void Variant_Initialize(UA_Variant* variant){
     memset(variant, 0, sizeof(UA_Variant));
 }
 
-void* GetBuiltInTypeClearFunction(UA_BuiltinId builtInTypeId){
-    void* clearFunction = NULL;
+BuiltInFunction* GetBuiltInTypeClearFunction(UA_BuiltinId builtInTypeId){
+    BuiltInFunction* clearFunction = NULL;
     switch(builtInTypeId){
             case UA_Boolean_Id:
-                clearFunction = Boolean_Clear;
+                clearFunction = (BuiltInFunction*) Boolean_Clear;
                 break;
             case UA_SByte_Id:
-                clearFunction = SByte_Clear;
+                clearFunction = (BuiltInFunction*) SByte_Clear;
                 break;
             case UA_Byte_Id:
-                clearFunction = Byte_Clear;
+                clearFunction = (BuiltInFunction*) Byte_Clear;
                 break;
             case UA_Int16_Id:
-                clearFunction = Int16_Clear;
+                clearFunction = (BuiltInFunction*) Int16_Clear;
                 break;
             case UA_UInt16_Id:
-                clearFunction = UInt16_Clear;
+                clearFunction = (BuiltInFunction*) UInt16_Clear;
                 break;
             case UA_Int32_Id:
-                clearFunction = Int32_Clear;
+                clearFunction = (BuiltInFunction*) Int32_Clear;
                 break;
             case UA_UInt32_Id:
-                clearFunction = UInt32_Clear;
+                clearFunction = (BuiltInFunction*) UInt32_Clear;
                 break;
             case UA_Int64_Id:
-                clearFunction = Int64_Clear;
+                clearFunction = (BuiltInFunction*) Int64_Clear;
                 break;
             case UA_UInt64_Id:
-                clearFunction = UInt64_Clear;
+                clearFunction = (BuiltInFunction*) UInt64_Clear;
                 break;
             case UA_Float_Id:
-                clearFunction = Float_Clear;
+                clearFunction = (BuiltInFunction*) Float_Clear;
                 break;
             case UA_Double_Id:
-                clearFunction = Double_Clear;
+                clearFunction = (BuiltInFunction*) Double_Clear;
                 break;
             case UA_String_Id:
-                clearFunction = String_Clear;
+                clearFunction = (BuiltInFunction*) String_Clear;
                 break;
             case UA_DateTime_Id:
-                clearFunction = DateTime_Clear;
+                clearFunction = (BuiltInFunction*) DateTime_Clear;
                 break;
             case UA_Guid_Id:
-                clearFunction = Guid_Clear;
+                clearFunction = (BuiltInFunction*) Guid_Clear;
                 break;
             case UA_ByteString_Id:
-                clearFunction = ByteString_Clear;
+                clearFunction = (BuiltInFunction*) ByteString_Clear;
                 break;
             case UA_XmlElement_Id:
-                clearFunction = XmlElement_Clear;
+                clearFunction = (BuiltInFunction*) XmlElement_Clear;
                 break;
             case UA_NodeId_Id:
-                clearFunction = NodeId_Clear;
+                clearFunction = (BuiltInFunction*) NodeId_Clear;
                 break;
             case UA_ExpandedNodeId_Id:
-                clearFunction = ExpandedNodeId_Clear;
+                clearFunction = (BuiltInFunction*) ExpandedNodeId_Clear;
                 break;
             case UA_StatusCode_Id:
-                clearFunction = StatusCode_Clear;
+                clearFunction = (BuiltInFunction*) StatusCode_Clear;
                 break;
             case UA_QualifiedName_Id:
-                clearFunction = QualifiedName_Clear;
+                clearFunction = (BuiltInFunction*) QualifiedName_Clear;
                 break;
             case UA_LocalizedText_Id:
-                clearFunction = LocalizedText_Clear;
+                clearFunction = (BuiltInFunction*) LocalizedText_Clear;
                 break;
             case UA_ExtensionObject_Id:
-                clearFunction = ExtensionObject_Clear;
+                clearFunction = (BuiltInFunction*) ExtensionObject_Clear;
                 break;
             case UA_DataValue_Id:
-                clearFunction = DataValue_Clear;
+                clearFunction = (BuiltInFunction*) DataValue_Clear;
                 break;
             case UA_Variant_Id:
-                clearFunction = Variant_Clear;
+                clearFunction = (BuiltInFunction*) Variant_Clear;
                 break;
             case UA_DiagnosticInfo_Id:
-                clearFunction = DiagnosticInfo_Clear;
+                clearFunction = (BuiltInFunction*) DiagnosticInfo_Clear;
                 break;
             default:
                 break;
@@ -853,7 +853,7 @@ void* GetBuiltInTypeClearFunction(UA_BuiltinId builtInTypeId){
 }
 
 void Variant_Clear(UA_Variant* variant){
-    void* clearFunction = GetBuiltInTypeClearFunction(variant->builtInTypeMask);
+    BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->builtInTypeMask);
     // Matrix flag => array flag
     assert(((variant->arrayTypeMask & UA_VariantArrayMatrixFlag) != 0 &&
              (variant->arrayTypeMask & UA_VariantArrayValueFlag) != 0)

@@ -147,7 +147,7 @@ StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
             if(callbackData != NULL && callbackData->callback != NULL)
             {
                 retStatus = callbackData->callback(channel,
-                                                   callbackData->callback,
+                                                   callbackData->callbackData,
                                                    channelConnectionEvent,
                                                    status);
             }
