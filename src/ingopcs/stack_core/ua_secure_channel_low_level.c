@@ -1323,7 +1323,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: wh
                 // Check thumbprint matches current app certificate thumbprint
 
                 UA_ByteString curAppCertThumbprint;
-                int32_t thumbprintLength = 0;
+                uint32_t thumbprintLength = 0;
                 int32_t runningAppCertComparison = 0;
 
                 status = CryptoProvider_CertificateGetLength_Thumbprint(scConnection->currentCryptoProvider,
