@@ -112,6 +112,41 @@ int main(void){
     // Endpoint URL
     OpcUa_CharA *sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
     // Transport profile
+    //const OpcUa_CharA *sTransportProfileUri = OpcUa_TransportProfile_UaTcp;
+
+    // The PKI provider
+    // Default directory for certificates
+    char* revoked = "./revoked";
+    char* untrusted = "./untrusted";
+    char* trusted = "./trusted";
+    // Init PKI config certificate validation
+    OpcUa_P_OpenSSL_CertificateStore_Config pPKIConfig;
+    pPKIConfig.PkiType = OpcUa_OpenSSL_PKI;
+    pPKIConfig.CertificateTrustListLocation       = trusted;
+    pPKIConfig.CertificateRevocationListLocation  = revoked;
+    //pPKIConfig.IssuerCertificateStoreLocation         = defaultDir;
+    pPKIConfig.CertificateUntrustedListLocation   = untrusted;
+    pPKIConfig.Flags = OPCUA_P_PKI_OPENSSL_ADD_UNTRUSTED_LIST_TO_ROOT_CERTIFICATES|
+	                   OPCUA_P_PKI_OPENSSL_REQUIRE_CHAIN_CERTIFICATE_IN_TRUST_LIST;
+	           	       // OPCUA_P_PKI_OPENSSL_CHECK_REVOCATION_ALL; revocation list needed
+
+    // Paths to client certificate/key and server certificate
+    // Client certificate name
+    char* certificateLocation = "./client_public/client.der";
+    // Server certificate name
+    char* certificateSrvLocation = "./server_public/server.der";
+    // Client private key
+    char* keyLocation = "./client_private/client.key";
+    OpcUa_PKIProvider pkiProvider;
+    OpcUa_Handle hCertificateStore = OpcUa_Null;
+
+    // The certificates: init
+    OpcUa_ByteString ClientCertificate, ServerCertificate;
+    OpcUa_ByteString_Initialize (&ClientCertificate);
+
+    // Private key: init
+    OpcUa_ByteString ClientPrivateKey;
+    OpcUa_ByteString_Initialize (&ClientPrivateKey);
 
     // Empty callback data
     StubClient_CallbackData Callback_Data;
@@ -121,7 +156,7 @@ int main(void){
 
 
     // Message security mode: None
-    OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_None;
+    OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;//OpcUa_MessageSecurityMode_None;
 
     OpcUa_InitializeStatus(OpcUa_Module_Server, "StubClient_StartUp");
 
@@ -142,17 +177,44 @@ int main(void){
 
     OpcUa_GotoErrorIfBad(uStatus);
 
+    // Init PKI provider and parse certificate and private key
+    // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
+    uStatus = OpcUa_PKIProvider_Create(&pPKIConfig, &pkiProvider);
+    OpcUa_GotoErrorIfBad(uStatus);
+
+    uStatus = pkiProvider.OpenCertificateStore (&pkiProvider, &hCertificateStore);
+    OpcUa_GotoErrorIfBad(uStatus);
+
+    uStatus = pkiProvider.LoadCertificate (&pkiProvider,
+    									   certificateLocation,
+										   hCertificateStore,
+										   &ClientCertificate);
+    OpcUa_GotoErrorIfBad(uStatus);
+
+    uStatus = pkiProvider.LoadPrivateKeyFromFile(keyLocation,
+                  	  	  	  	  	  	  	  	 OpcUa_Crypto_Encoding_PEM,
+												 OpcUa_Null,
+												 &ClientPrivateKey);
+    OpcUa_GotoErrorIfBad(uStatus);
+
+    uStatus = pkiProvider.LoadCertificate (&pkiProvider,
+    									   certificateSrvLocation,
+										   hCertificateStore,
+										   &ServerCertificate);
+    OpcUa_GotoErrorIfBad(uStatus);
+
 #if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
-    //uStatus = OpcUa_SocketManager_Create (OpcUa_Null, 0, OPCUA_SOCKET_NO_FLAG);
+   	uStatus = OpcUa_SocketManager_Create (OpcUa_Null, 0, OPCUA_SOCKET_NO_FLAG);
 #endif //OPCUA_MULTITHREADED
 
     // Start connection to server
     uStatus = OpcUa_Channel_BeginConnect(hChannel,
     									 sEndpointUrl,
-										 NULL,           /* Client Certificate       */
-										 NULL,            /* Private Key              */
-										 NULL,           /* Server Certificate       */
-										 NULL,                  /* PKI Config               */
+										 //sTransportProfileUri,
+										 &ClientCertificate,           /* Client Certificate       */
+										 &ClientPrivateKey,            /* Private Key              */
+										 &ServerCertificate,           /* Server Certificate       */
+										 &pPKIConfig,                  /* PKI Config               */
 										 pRequestedSecurityPolicyUri, /* Request secu policy */
 										 5,                            /* Request lifetime */
 										 messageSecurityMode,          /* Message secu mode */
