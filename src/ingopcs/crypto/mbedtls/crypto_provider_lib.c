@@ -27,7 +27,7 @@ StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider)
         return STATUS_NOK;
     memset(pctx, 0, sizeof(CryptolibContext));
 
-    pCryptoProvider->pCryptolibContext = (void *)pctx;
+    pCryptoProvider->pCryptolibContext = pctx;
     mbedtls_entropy_init(&pctx->ctxEnt); //
     mbedtls_ctr_drbg_init(&pctx->ctxDrbg);
     if(mbedtls_ctr_drbg_seed(&pctx->ctxDrbg, &mbedtls_entropy_func, &pctx->ctxEnt, NULL, 0) != 0)
