@@ -15,8 +15,6 @@
 #include <ua_secure_channel_client_connection.h>
 #include <ua_stack_config.h>
 
-#include <wrappers.h>
-
 #include <stdlib.h>
 
 typedef struct {

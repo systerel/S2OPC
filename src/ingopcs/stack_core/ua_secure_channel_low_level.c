@@ -5,8 +5,6 @@
  *      Author: vincent
  */
 
-#include <wrappers.h>
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1234,11 +1232,11 @@ StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
     return status;
 }
 
-StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection, // TODO: why SC_Connection and PKIProvider instead of Sc_ClientConnection which contains both ?
-                                        const PKIProvider*   pkiProvider,
-                                        UA_MsgBuffer*  transportBuffer,
-                                        uint32_t       validateSenderCert,
-                                        uint32_t*      sequenceNumberPosition)
+StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, // TODO: why SC_Connection and PKIProvider instead of Sc_ClientConnection which contains both ?
+                                        const PKIProvider* pkiProvider,
+                                        UA_MsgBuffer*      transportBuffer,
+                                        uint32_t           validateSenderCert,
+                                        uint32_t*          sequenceNumberPosition)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toEncrypt = 1; // True

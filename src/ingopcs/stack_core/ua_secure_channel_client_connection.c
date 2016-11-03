@@ -5,16 +5,13 @@
  *      Author: vincent
  */
 
+#include "ua_secure_channel_client_connection.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <wrappers.h>
-
-#include "ua_secure_channel_client_connection.h"
-
 #include <crypto_provider.h>
-
 #include <ua_encoder.h>
 #include <ua_secure_channel_low_level.h>
 #include <ua_types.h>

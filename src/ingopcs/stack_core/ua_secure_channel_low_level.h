@@ -8,9 +8,9 @@
 #ifndef INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_
 #define INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_
 
-#include <wrappers.h>
-
+#include <key_manager.h>
 #include <key_sets.h>
+#include <pki.h>
 #include <ua_types.h>
 #include <ua_tcp_ua_connection.h>
 
@@ -124,11 +124,11 @@ StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
 StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
                                   UA_MsgBuffer*  transportBuffer);
 
-StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection* scConnection,
-                                        const PKIProvider*   pkiProvider,
-                                        UA_MsgBuffer*  transportBuffer,
-                                        uint32_t       validateSenderCert,
-                                        uint32_t*      sequenceNumberPosition);
+StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection,
+                                        const PKIProvider* pkiProvider,
+                                        UA_MsgBuffer*      transportBuffer,
+                                        uint32_t           validateSenderCert,
+                                        uint32_t*          sequenceNumberPosition);
 
 StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                          UA_MsgBuffer*  transportBuffer,

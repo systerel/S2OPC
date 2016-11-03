@@ -9,14 +9,14 @@
 #define INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_
 
 #include <secret_buffer.h>
-
+#include <pki.h>
 #include <singly_linked_list.h>
 #include <ua_builtintypes.h>
 #include <ua_encodeable.h>
 #include <ua_namespace_table.h>
 #include <ua_secure_channel_low_level.h>
 
-#include "pki.h"
+#include <wrappers.h>
 
 struct SC_ClientConnection;
 
