@@ -14,6 +14,7 @@
 #include <opcua_proxystub.h>
 #include <opcua_string.h>
 #include <opcua_sockets.h>
+#include <opcua_pki.h>
 
 #include <ua_clientapi.h>
 
