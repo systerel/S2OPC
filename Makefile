@@ -174,7 +174,7 @@ clean_mbedtls:
 clean:
 	@echo "Cleaning..."
 	@\rm -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR)
-	@\rm -f .depend .fdepend
+	@\rm -f .depend.tmp .depend .pdepend .fdepend
 
 cleanall: clean clean_mbedtls
 
