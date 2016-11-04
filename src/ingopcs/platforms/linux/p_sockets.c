@@ -11,6 +11,7 @@
 #include <netinet/tcp.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <ua_stack_csts.h>
 
 StatusCode Socket_Network_Initialize(){
     return STATUS_OK;
@@ -69,6 +70,16 @@ StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
         if(*sock != -1){
             // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
             setOptStatus = setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY, &true, sizeof(int));
+
+            if(setOptStatus != -1){
+                int rcvbufsize = OPCUA_P_TCPRCVBUFFERSIZE;
+                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, &rcvbufsize, sizeof(int));
+            }
+
+            if(setOptStatus != -1){
+                int sndbufsize = OPCUA_P_TCPSNDBUFFERSIZE;
+                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, &sndbufsize, sizeof(int));
+            }
 
             if(setOptStatus != -1 && setReuseAddr != FALSE){
                 setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(int));
