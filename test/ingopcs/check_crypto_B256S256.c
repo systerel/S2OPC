@@ -69,6 +69,7 @@ START_TEST(test_hexlify)
     unsigned char buf[33], c, d = 0;
     int i;
 
+    // Init
     memset(buf, 0, 33);
 
     // Test single chars
@@ -340,8 +341,6 @@ START_TEST(test_crypto_symm_sign)
     SecretBuffer *pSecKey = NULL;
 
     // Context init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
     ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &len) == STATUS_OK);
     ck_assert(len == 32);
     ck_assert(CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == STATUS_OK);
@@ -822,10 +821,6 @@ START_TEST(test_pki_stack)
     Certificate *crt_pub = NULL, *crt_ca = NULL;
     uint8_t der_pub[1215], der_ca[1529];
     PKIProvider *pki = NULL;
-
-    // Init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
 
     // Load certificates
     ck_assert(unhexlify("308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a06035504080c03494446310e30"
