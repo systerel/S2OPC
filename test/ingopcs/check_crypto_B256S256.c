@@ -1,5 +1,7 @@
-/*
- * Crypto test suite. See check_stack.c for more details.
+/** \file check_crypto_B256S256
+ *
+ * Cryptographic test suite. This suite tests Basic256Sha256.
+ * See check_stack.c for more details.
  *
  *  Created on: Sep 27, 2016
  *      Author: PAB
@@ -92,6 +94,21 @@ START_TEST(test_hexlify)
 END_TEST
 
 
+// Using fixtures
+CryptoProvider *crypto = NULL;
+
+void setup_crypto(void)
+{
+    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
+    ck_assert(NULL != crypto);
+}
+
+void teardown_crypto(void)
+{
+    CryptoProvider_Free(crypto);
+}
+
+
 START_TEST(test_crypto_symm_crypt)
 {
     // TODO: these tests test only Basic256Sha256
@@ -105,12 +122,9 @@ START_TEST(test_crypto_symm_crypt)
     char hexoutput[256];
     int i;
     uint32_t len;
-    CryptoProvider *crypto = NULL;
     SecretBuffer *pSecKey = NULL, *pSecIV = NULL;
 
     // Context init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
     ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &len) == STATUS_OK);
     ck_assert(len == 32);
 
@@ -311,7 +325,6 @@ START_TEST(test_crypto_symm_crypt)
 
     SecretBuffer_DeleteClear(pSecKey);
     SecretBuffer_DeleteClear(pSecIV);
-    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -323,7 +336,6 @@ START_TEST(test_crypto_symm_sign)
     unsigned char input[256];
     unsigned char output[32];
     char hexoutput[1024];
-    CryptoProvider *crypto = NULL;
     uint32_t len;
     SecretBuffer *pSecKey = NULL;
 
@@ -377,24 +389,18 @@ START_TEST(test_crypto_symm_sign)
     ck_assert(CryptoProvider_SymmetricVerify(crypto, input, 64, pSecKey, output, 31) != STATUS_OK);
 
     SecretBuffer_DeleteClear(pSecKey);
-    CryptoProvider_Free(crypto);
 }
 END_TEST
 
 
 START_TEST(test_crypto_symm_gen)
 {
-    // TODO: these tests test only Basic256Sha256
     SecretBuffer *pSecKey0, *pSecKey1;
     ExposedBuffer *pExpKey0, *pExpKey1;
     //char hexoutput[64];
-
-    CryptoProvider *crypto = NULL;
     uint32_t i;
 
     // Context init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
     ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &i) == STATUS_OK);
     ck_assert(i == 32);
 
@@ -412,23 +418,17 @@ START_TEST(test_crypto_symm_gen)
     // Test invalid inputs
     ck_assert(CryptoProvider_SymmetricGenerateKey(NULL, &pSecKey0) != STATUS_OK);
     ck_assert(CryptoProvider_SymmetricGenerateKey(crypto, NULL) != STATUS_OK);
-
-    CryptoProvider_Free(crypto);
 }
 END_TEST
 
 
 START_TEST(test_crypto_derive_data)
 {
-    // TODO: these tests test only Basic256Sha256
-    CryptoProvider *crypto = NULL;
     ExposedBuffer secret[32], seed[32], output[1024];
     char hexoutput[2048];
     uint32_t lenKey, lenKeyBis, lenIV, lenSecr, lenSeed, lenOutp;
 
     // Context init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
     ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
     ck_assert(lenKey == 32);
     ck_assert(lenKeyBis == 32);
@@ -490,24 +490,18 @@ START_TEST(test_crypto_derive_data)
                                 "336574782a7dd28baf983e359a1afd6d0513809d1a83ec9f0a2a2a8a8fb1686635e068c4bce4bee77bb817662335a91312920063dbca5a23adb064bc6e3dad65"
                                 "c53fe61599241d26c9615562b9456ede80587da078e639a66a160066241d9dabc8bde9c8c16d46ebb3ff5bc2698dd56a9a8b924ef20eb0b67fa679f6fd41bdc6",
                      2048) == 0);
-
-    CryptoProvider_Free(crypto);
 }
 END_TEST
 
 
 START_TEST(test_crypto_derive_keysets)
 {
-    // TODO: these tests test only Basic256Sha256
-    CryptoProvider *crypto = NULL;
     ExposedBuffer clientNonce[32], serverNonce[32], *pout, zeros[32];
     char hexoutput[160];
     uint32_t lenKey, lenKeyBis, lenIV, lenCliNonce, lenSerNonce, lenOutp;
     SC_SecurityKeySet cliKS, serKS;
 
     // Context init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
     ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
     ck_assert(lenKey == 32);
     ck_assert(lenKeyBis == 32);
@@ -594,58 +588,16 @@ START_TEST(test_crypto_derive_keysets)
     SecretBuffer_DeleteClear(serKS.signKey);
     SecretBuffer_DeleteClear(serKS.encryptKey);
     SecretBuffer_DeleteClear(serKS.initVector);
-
-    CryptoProvider_Free(crypto);
 }
 END_TEST
 
 
-/*#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/pk.h"
-#include "mbedtls/x509.h"
-#include "mbedtls/x509_crt.h"
-#include "mbedtls/rsa.h"
-#include "mbedtls/md.h"
-
-START_TEST(test_pk_x509)
-{
-    CryptoProvider *crypto = NULL;
-    CryptolibContext *pCtx = NULL;
-    uint32_t i, j;
-
-    // Context init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
-    pCtx = crypto->pCryptolibContext;
-    ck_assert(NULL != pCtx);
-
-
-
-    // We should use the NIST Sign Verification test vectors, but they are not easy to use.
-
-    // TODO: free the contexts & look at code to see if the aes contexts are correctly freed
-    //mbedtls_rsa_free(prsa_pub);
-    //mbedtls_rsa_free(prsa_priv);
-    mbedtls_x509_crt_free(&crt);
-    mbedtls_pk_free(&pk_priv);
-
-    CryptoProvider_Delete(crypto);
-}
-END_TEST //*/
-
-
 START_TEST(test_cert_load)
 {
-    CryptoProvider *crypto = NULL;
     Certificate *crt_pub = NULL;
     uint8_t thumb[20];
     char hexoutput[40];
     uint8_t der_cert[1215];
-
-    // Init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
 
     // Loads a certificate
     //ck_assert(KeyManager_Certificate_CreateFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) == STATUS_OK);
@@ -678,7 +630,6 @@ START_TEST(test_cert_load)
 
     // Cleaning
     KeyManager_Certificate_Free(crt_pub);
-    CryptoProvider_Free(crypto);
 }
 END_TEST
 
@@ -738,16 +689,11 @@ void get_test_keys(Certificate **ppcrt, AsymmetricKey **ppkpub, AsymmetricKey **
 
 START_TEST(test_crypto_asym_crypt)
 {
-    CryptoProvider *crypto = NULL;
     Certificate *crt_pub = NULL;
     AsymmetricKey *key_pub = NULL, *key_priv = NULL;
     uint8_t input[856], output[1024], input_bis[856];
     uint32_t lenPlain = 0, lenCiph = 0, len = 0;
     ExposedBuffer clientNonce[32], serverNonce[32];
-
-    // Init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
 
     // Load keys
     get_test_keys(&crt_pub, &key_pub, &key_priv);
@@ -795,23 +741,17 @@ START_TEST(test_crypto_asym_crypt)
     KeyManager_Certificate_Free(crt_pub);
     KeyManager_AsymmetricKey_Free(key_priv);
     free(key_pub);
-    CryptoProvider_Free(crypto);
 }
 END_TEST
 
 
 START_TEST(test_crypto_asym_sign)
 {
-    CryptoProvider *crypto = NULL;
     Certificate *crt_pub = NULL;
     AsymmetricKey *key_pub = NULL, *key_priv = NULL;
     uint8_t input[856], sig[256];
     uint32_t len = 0;
     ExposedBuffer clientNonce[32], serverNonce[32];
-
-    // Init
-    crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
-    ck_assert(NULL != crypto);
 
     // Load keys
     get_test_keys(&crt_pub, &key_pub, &key_priv);
@@ -843,14 +783,12 @@ START_TEST(test_crypto_asym_sign)
     KeyManager_Certificate_Free(crt_pub);
     KeyManager_AsymmetricKey_Free(key_priv);
     free(key_pub);
-    CryptoProvider_Free(crypto);
 }
 END_TEST
 
 
 START_TEST(test_pki_stack)
 {
-    CryptoProvider *crypto = NULL;
     Certificate *crt_pub = NULL, *crt_ca = NULL;
     uint8_t der_pub[1215], der_ca[1529];
     PKIProvider *pki = NULL;
@@ -916,17 +854,16 @@ START_TEST(test_pki_stack)
     PKIProviderStack_Free(pki);
     KeyManager_Certificate_Free(crt_pub);
     KeyManager_Certificate_Free(crt_ca);
-    CryptoProvider_Free(crypto);
 }
 END_TEST
 
 
-Suite *tests_make_suite_crypto()
+Suite *tests_make_suite_crypto_B256S256()
 {
     Suite *s;
     TCase *tc_crypto_symm, *tc_providers, *tc_derives, *tc_misc, *tc_km, *tc_crypto_asym, *tc_pki_stack;
 
-    s = suite_create("Crypto lib");
+    s = suite_create("Crypto tests Basic256Sha256");
     tc_crypto_symm = tcase_create("Symmetric Crypto");
     tc_providers = tcase_create("Crypto Provider");
     tc_derives = tcase_create("Crypto Data Derivation");
@@ -939,25 +876,30 @@ Suite *tests_make_suite_crypto()
     tcase_add_test(tc_misc, test_hexlify);
 
     suite_add_tcase(s, tc_crypto_symm);
+    tcase_add_checked_fixture(tc_crypto_symm, setup_crypto, teardown_crypto);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_crypt);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_sign);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_gen);
 
     suite_add_tcase(s, tc_providers);
+    tcase_add_checked_fixture(tc_providers, setup_crypto, teardown_crypto);
 
     suite_add_tcase(s, tc_derives);
+    tcase_add_checked_fixture(tc_derives, setup_crypto, teardown_crypto);
     tcase_add_test(tc_derives, test_crypto_derive_data);
     tcase_add_test(tc_derives, test_crypto_derive_keysets);
 
     suite_add_tcase(s, tc_km);
+    tcase_add_checked_fixture(tc_km, setup_crypto, teardown_crypto);
     tcase_add_test(tc_km, test_cert_load);
 
     suite_add_tcase(s, tc_crypto_asym);
-    //tcase_add_test(tc_crypto_asym, test_pk_x509);
+    tcase_add_checked_fixture(tc_crypto_asym, setup_crypto, teardown_crypto);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_sign);
 
     suite_add_tcase(s, tc_pki_stack);
+    tcase_add_checked_fixture(tc_pki_stack, setup_crypto, teardown_crypto);
     tcase_add_test(tc_pki_stack, test_pki_stack);
 
     return s;
