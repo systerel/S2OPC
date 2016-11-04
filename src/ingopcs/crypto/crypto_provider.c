@@ -168,7 +168,7 @@ StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider
 }
 
 
-/*
+/**
  * Does not perform padding-alignment
  */
 StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvider *pProvider,
@@ -185,7 +185,7 @@ StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvider *pP
 }
 
 
-/*
+/**
  * Does not perform padding-alignment
  */
 StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pProvider,
@@ -674,7 +674,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_Msgs(const CryptoProvider *pProvid
 
 
 /** \brief  Calculates the size of the required output buffer to cipher lengthIn bytes through Asymmetric encryption.
- *          Hence, does not include any signature length.
+ *          Hence, does not include any signature length, but includes padding.
  */
 StatusCode CryptoProvider_AsymmetricGetLength_Encryption(const CryptoProvider *pProvider,
                                                          const AsymmetricKey *pKey,
@@ -709,7 +709,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_Encryption(const CryptoProvider *p
 
 
 /** \brief  Calculates the size of the required output buffer to decipher lengthIn bytes through Asymmetric decryption.
- *          Hence, does not include any signature length.
+ *          Hence, does not include any signature length, but includes padding.
  */
 StatusCode CryptoProvider_AsymmetricGetLength_Decryption(const CryptoProvider *pProvider,
                                                          const AsymmetricKey *pKey,

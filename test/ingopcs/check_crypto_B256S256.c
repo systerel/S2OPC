@@ -113,6 +113,33 @@ void teardown_crypto(void)
 }
 
 
+START_TEST(test_crypto_symm_lengths)
+{
+    uint32_t len = 0, lenCiph = 0, lenDeci = 0;
+
+    // Check sizes
+    ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &len) == STATUS_OK);
+    ck_assert(32 == len);
+    ck_assert(CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == STATUS_OK);
+    ck_assert(32 == len);
+    ck_assert(CryptoProvider_SymmetricGetLength_Encryption(crypto, 15, &len) == STATUS_OK);
+    ck_assert(15 == len);
+    ck_assert(CryptoProvider_SymmetricGetLength_Decryption(crypto, 15, &len) == STATUS_OK);
+    ck_assert(15 == len);
+    ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, NULL) == STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, &lenCiph, NULL) == STATUS_OK);
+    ck_assert(16 == lenCiph);
+    ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, &lenDeci) == STATUS_OK);
+    ck_assert(16 == lenDeci);
+    lenCiph = 0;
+    lenDeci = 0;
+    ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, &lenCiph, &lenDeci) == STATUS_OK);
+    ck_assert(16 == lenCiph);
+    ck_assert(16 == lenDeci);
+}
+END_TEST
+
+
 START_TEST(test_crypto_symm_crypt)
 {
     // Tests based on the test vectors provided by the NIST
@@ -123,12 +150,7 @@ START_TEST(test_crypto_symm_crypt)
     unsigned char output[128];
     char hexoutput[256];
     int i;
-    uint32_t len;
     SecretBuffer *pSecKey = NULL, *pSecIV = NULL;
-
-    // Context init
-    ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &len) == STATUS_OK);
-    ck_assert(len == 32);
 
     // Encrypt
     // This single test is not taken from the NIST test vectors...
@@ -337,14 +359,7 @@ START_TEST(test_crypto_symm_sign)
     unsigned char input[256];
     unsigned char output[32];
     char hexoutput[1024];
-    uint32_t len;
     SecretBuffer *pSecKey = NULL;
-
-    // Context init
-    ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &len) == STATUS_OK);
-    ck_assert(len == 32);
-    ck_assert(CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == STATUS_OK);
-    ck_assert(len == 32);
 
     // Test cases of https://tools.ietf.org/html/rfc4231 cannot be used for Basic256Sha256
     // Test cases of http://csrc.nist.gov/groups/STM/cavp/message-authentication.html#hmac cannot be used either, as there is no corresponding key_length=32 and sig_length=32
@@ -392,16 +407,11 @@ START_TEST(test_crypto_symm_sign)
 END_TEST
 
 
-START_TEST(test_crypto_symm_gen)
+START_TEST(test_crypto_symm_generate_key)
 {
     SecretBuffer *pSecKey0, *pSecKey1;
     ExposedBuffer *pExpKey0, *pExpKey1;
     //char hexoutput[64];
-    uint32_t i;
-
-    // Context init
-    ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &i) == STATUS_OK);
-    ck_assert(i == 32);
 
     // It is random, so...
     ck_assert(CryptoProvider_SymmetricGenerateKey(crypto, &pSecKey0) == STATUS_OK);
@@ -421,6 +431,19 @@ START_TEST(test_crypto_symm_gen)
 END_TEST
 
 
+START_TEST(test_crypto_derive_lengths)
+{
+    uint32_t lenKey = 0, lenKeyBis = 0, lenIV = 0;
+
+    // Check sizes
+    ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
+    ck_assert(32 == lenKey);
+    ck_assert(32 == lenKeyBis);
+    ck_assert(16 == lenIV);
+}
+END_TEST
+
+
 START_TEST(test_crypto_derive_data)
 {
     ExposedBuffer secret[32], seed[32], output[1024];
@@ -429,13 +452,9 @@ START_TEST(test_crypto_derive_data)
 
     // Context init
     ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
-    ck_assert(lenKey == 32);
-    ck_assert(lenKeyBis == 32);
-    ck_assert(lenIV == 16);
     lenOutp = lenKey+lenKeyBis+lenIV;
     ck_assert(lenOutp < 1024);
     ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &lenSecr) == STATUS_OK);
-    ck_assert(lenSecr == 32);
     lenSeed = lenSecr;
 
     // This test vectors is unofficial, taken from https://www.ietf.org/mail-archive/web/tls/current/msg03416.html
@@ -502,13 +521,9 @@ START_TEST(test_crypto_derive_keysets)
 
     // Context init
     ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
-    ck_assert(lenKey == 32);
-    ck_assert(lenKeyBis == 32);
-    ck_assert(lenIV == 16);
     lenOutp = lenKey+lenKeyBis+lenIV;
     ck_assert(lenOutp < 1024);
     ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &lenCliNonce) == STATUS_OK);
-    ck_assert(lenCliNonce == 32);
     lenSerNonce = lenCliNonce;
 
     // Prepares security key sets
@@ -639,6 +654,16 @@ START_TEST(test_cert_load)
 END_TEST
 
 
+START_TEST(test_cert_lengths)
+{
+    uint32_t len = 0;
+
+    CryptoProvider_CertificateGetLength_Thumbprint(crypto, &len);
+    ck_assert(20 == len); // SHA-1
+}
+END_TEST
+
+
 START_TEST(test_cert_thumbprint)
 {
     uint8_t thumb[20];
@@ -736,31 +761,61 @@ void teardown_asym_keys(void)
 }
 
 
+START_TEST(test_crypto_asym_load)
+{
+    ;
+}
+END_TEST
+
+
+START_TEST(test_crypto_asym_lengths)
+{
+    uint32_t lenPlain = 0, lenCiph = 0, len = 0;
+
+    // Check lengths
+    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_pub, &len) == STATUS_OK);
+    ck_assert(2048 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_priv, &len) == STATUS_OK);
+    ck_assert(2048 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBytes(crypto, key_pub, &len) == STATUS_OK);
+    ck_assert(256 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBytes(crypto, key_priv, &len) == STATUS_OK);
+    ck_assert(256 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_MsgPlainText(crypto, key_pub, &lenPlain) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricGetLength_MsgCipherText(crypto, key_pub, &lenCiph) == STATUS_OK);
+    ck_assert(256 == lenCiph);
+    ck_assert(214 == lenPlain); // 256 - 2*20 - 2
+    ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_pub, &lenCiph, &lenPlain) == STATUS_OK);
+    ck_assert(256 == lenCiph);
+    ck_assert(214 == lenPlain); // 256 - 2*20 - 2
+    ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_priv, &lenCiph, &lenPlain) == STATUS_OK);
+    ck_assert(256 == lenCiph);
+    ck_assert(214 == lenPlain); // 256 - 2*20 - 2
+    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 32, &len) == STATUS_OK);
+    ck_assert(256 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 256, &len) == STATUS_OK);
+    ck_assert(214 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 856, &len) == STATUS_OK);
+    ck_assert(1024 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 1024, &len) == STATUS_OK);
+    ck_assert(856 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_OAEPHashLength(crypto, &len) == STATUS_OK);
+    ck_assert(20 == len); // SHA-1
+    ck_assert(CryptoProvider_AsymmetricGetLength_PSSHashLength(crypto, &len) == STATUS_OK);
+    ck_assert(32 == len); // SHA-256
+    ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_pub, &len) == STATUS_OK);
+    ck_assert(256 == len); // One block
+    ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_priv, &len) == STATUS_OK);
+    ck_assert(256 == len); // One block
+}
+END_TEST
+
+
 START_TEST(test_crypto_asym_crypt)
 {
     uint8_t input[856], output[1024], input_bis[856];
-    uint32_t lenPlain = 0, lenCiph = 0, len = 0;
+    uint32_t len = 0;
     ExposedBuffer clientNonce[32], serverNonce[32];
-
-    // Assert lengths
-    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_pub, &len) == STATUS_OK);
-    ck_assert(len == 2048);
-    ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_priv, &len) == STATUS_OK);
-    ck_assert(len == 2048);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_pub, &lenCiph, &lenPlain) == STATUS_OK);
-    ck_assert(lenCiph == 256);
-    ck_assert(lenPlain == 214); // 256 - 2*20 - 2
-    ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_priv, &lenCiph, &lenPlain) == STATUS_OK);
-    ck_assert(lenCiph == 256);
-    ck_assert(lenPlain == 214); // 256 - 2*20 - 2
-    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 32, &len) == STATUS_OK);
-    ck_assert(len == 256);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 256, &len) == STATUS_OK);
-    ck_assert(len == 214);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 856, &len) == STATUS_OK);
-    ck_assert(len == 1024);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 1024, &len) == STATUS_OK);
-    ck_assert(len == 856);
 
     // Encryption/Decryption
     // a) Single message (< 214)
@@ -784,19 +839,10 @@ START_TEST(test_crypto_asym_crypt)
 END_TEST
 
 
-START_TEST(test_crypto_asym_sign)
+START_TEST(test_crypto_asym_sign_verify)
 {
     uint8_t input[856], sig[256];
-    uint32_t len = 0;
     ExposedBuffer clientNonce[32], serverNonce[32];
-
-    // Assert lengths
-    ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_pub, &len) == STATUS_OK);
-    ck_assert(len == 256);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_priv, &len) == STATUS_OK);
-    ck_assert(len == 256);
-    ck_assert(CryptoProvider_AsymmetricGetLength_PSSHashLength(crypto, &len) == STATUS_OK);
-    ck_assert(len == 32);
 
     // Signature
     // a) Single message (< 214)
@@ -900,21 +946,24 @@ Suite *tests_make_suite_crypto_B256S256()
 
     suite_add_tcase(s, tc_crypto_symm);
     tcase_add_checked_fixture(tc_crypto_symm, setup_crypto, teardown_crypto);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_lengths);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_crypt);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_sign);
-    tcase_add_test(tc_crypto_symm, test_crypto_symm_gen);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_generate_key);
 
     suite_add_tcase(s, tc_providers);
     tcase_add_checked_fixture(tc_providers, setup_crypto, teardown_crypto);
 
     suite_add_tcase(s, tc_derives);
     tcase_add_checked_fixture(tc_derives, setup_crypto, teardown_crypto);
+    tcase_add_test(tc_derives, test_crypto_derive_lengths);
     tcase_add_test(tc_derives, test_crypto_derive_data);
     tcase_add_test(tc_derives, test_crypto_derive_keysets);
 
     suite_add_tcase(s, tc_km);
     tcase_add_checked_fixture(tc_km, setup_certificate, teardown_certificate);
     tcase_add_test(tc_km, test_cert_load);
+    tcase_add_test(tc_km, test_cert_lengths);
     tcase_add_test(tc_km, test_cert_thumbprint);
     tcase_add_test(tc_km, test_cert_loadkey);
 
@@ -922,8 +971,10 @@ Suite *tests_make_suite_crypto_B256S256()
 
     suite_add_tcase(s, tc_crypto_asym);
     tcase_add_checked_fixture(tc_crypto_asym, setup_asym_keys, teardown_asym_keys);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_load);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_lengths);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt);
-    tcase_add_test(tc_crypto_asym, test_crypto_asym_sign);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_sign_verify);
 
     suite_add_tcase(s, tc_pki_stack);
     tcase_add_checked_fixture(tc_pki_stack, setup_pki_stack, teardown_pki_stack);
