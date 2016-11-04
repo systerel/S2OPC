@@ -5,3 +5,9 @@
 build/
 out/
 apidoc/
+fbuild/
+build_platform/
+.depend
+.depend.tmp
+.fdepend
+.pdepend
