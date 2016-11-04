@@ -105,7 +105,7 @@ DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=
 
 default: all
 
-all: config $(EXEC_DIR)/stub_client $(EXEC_DIR)/check_stack $(EXEC_DIR)/stub_server
+all: config $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/check_stack $(EXEC_DIR)/stub_server
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
@@ -148,11 +148,15 @@ $(EXEC_DIR)/stub_client: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client.o
 	@echo "Linking $@..."
 	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
 
+$(EXEC_DIR)/stub_client_ingopcs: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o
+	@echo "Linking $@..."
+	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
+
 $(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/check_stack.o
 	@echo "Linking $@..."
 	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
-client_server_test: $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_server
+client_server_test: $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server
 	./run_client_server_test.sh
 
 mbedtls:
