@@ -42,7 +42,7 @@ int main(void)
     SRunner *sr;
 
     sr = srunner_create(tests_make_suite_stack());
-    srunner_add_suite(sr, tests_make_suite_crypto());
+    srunner_add_suite(sr, tests_make_suite_crypto_B256S256());
     srunner_add_suite(sr, tests_make_suite_tools());
     srunner_add_suite(sr, tests_make_suite_core_tools());
 

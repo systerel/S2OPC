@@ -10,7 +10,7 @@
 #define CHECK_STACK_H
 
 
-Suite *tests_make_suite_crypto(void);
+Suite *tests_make_suite_crypto_B256S256(void);
 
 Suite *tests_make_suite_tools(void);
 
