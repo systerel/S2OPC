@@ -66,8 +66,10 @@ int unhexlify(const char *src, unsigned char *dst, size_t n)
 
 START_TEST(test_hexlify)
 {
-    unsigned char buf[33], c, d;
+    unsigned char buf[33], c, d = 0;
     int i;
+
+    memset(buf, 0, 33);
 
     // Test single chars
     for(i=0; i<256; ++i)
@@ -106,13 +108,12 @@ void setup_crypto(void)
 void teardown_crypto(void)
 {
     CryptoProvider_Free(crypto);
+    crypto = NULL;
 }
 
 
 START_TEST(test_crypto_symm_crypt)
 {
-    // TODO: these tests test only Basic256Sha256
-
     // Tests based on the test vectors provided by the NIST
     //  (http://csrc.nist.gov/groups/STM/cavp/block-ciphers.html#aes)
     unsigned char key[32];
@@ -331,7 +332,6 @@ END_TEST
 
 START_TEST(test_crypto_symm_sign)
 {
-    // TODO: these tests test only Basic256Sha256
     unsigned char key[256];
     unsigned char input[256];
     unsigned char output[32];
@@ -592,15 +592,16 @@ START_TEST(test_crypto_derive_keysets)
 END_TEST
 
 
-START_TEST(test_cert_load)
+// Fixture for certificate load
+Certificate *crt_pub = NULL;
+
+void setup_certificate(void)
 {
-    Certificate *crt_pub = NULL;
-    uint8_t thumb[20];
-    char hexoutput[40];
     uint8_t der_cert[1215];
 
-    // Loads a certificate
-    //ck_assert(KeyManager_Certificate_CreateFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) == STATUS_OK);
+    setup_crypto();
+
+    // Loads a certificate. This is the server.der.
     ck_assert(unhexlify("308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652310c300a06035504080c03494446310e30"
                         "0c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f5043533113301106035504030c0a494e474f"
                         "5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d3136313030333038313333385a170d313731"
@@ -621,6 +622,30 @@ START_TEST(test_cert_load)
                         "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f26f71264fd7962eb513030d14b5262b220b"
                         "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5be2bf893c1299380675e82455cbef6ccc", der_cert, 1215) == 1215);
     ck_assert(KeyManager_Certificate_CreateFromDER(der_cert, 1215, &crt_pub) == STATUS_OK);
+}
+
+void teardown_certificate(void)
+{
+    KeyManager_Certificate_Free(crt_pub);
+    crt_pub = NULL;
+
+    teardown_crypto();
+}
+
+
+START_TEST(test_cert_load)
+{
+    ;
+}
+END_TEST
+
+
+START_TEST(test_cert_thumbprint)
+{
+    uint8_t thumb[20];
+    char hexoutput[40];
+
+    //ck_assert(KeyManager_Certificate_CreateFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) == STATUS_OK);
 
     // Compute thumbprint
     ck_assert(KeyManager_Certificate_GetThumbprint(crypto, crt_pub, thumb, 20) == STATUS_OK);
@@ -628,18 +653,32 @@ START_TEST(test_cert_load)
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
     ck_assert(memcmp(hexoutput, "af17d03e1605277489815ab88bc4760655b3e2cd", 40) == 0);
 
-    // Cleaning
-    KeyManager_Certificate_Free(crt_pub);
 }
 END_TEST
 
 
-void get_test_keys(Certificate **ppcrt, AsymmetricKey **ppkpub, AsymmetricKey **ppkpriv)
+START_TEST(test_cert_loadkey)
+{
+    AsymmetricKey key_pub;
+
+    // Loads the public key from cert
+    ck_assert(KeyManager_Certificate_GetPublicKey(crt_pub, &key_pub) == STATUS_OK);
+
+    // Note: as the AsymmetricKey is not malloc-ed, it is not free-d, so it is not cleared neither
+}
+END_TEST
+
+
+// Fixtures for Asymetric crypto
+AsymmetricKey *key_pub = NULL, *key_priv = NULL;
+
+void setup_asym_keys(void)
 {
     uint8_t der_cert[911], der_priv[1192];
-    AsymmetricKey *key_pub = NULL;
 
-    // Loads a certificate (self signed test certificate)
+    setup_crypto();
+
+    // This is not the same cert as in setup_certificate. This one was created to also embed the private key in the tests.
     ck_assert(unhexlify("3082038b30820273a003020102020900cf163f0b5124ff4c300d06092a864886f70d01010b0500305c310b3009060355040613024652310f300d06035504080c"
                         "064672616e6365310c300a06035504070c034169783111300f060355040a0c08537973746572656c311b301906035504030c12494e474f504353205465737420"
                         "7375697465301e170d3136313032363136333035345a170d3137303230333136333035345a305c310b3009060355040613024652310f300d06035504080c0646"
@@ -655,15 +694,14 @@ void get_test_keys(Certificate **ppcrt, AsymmetricKey **ppkpub, AsymmetricKey **
                         "100bce4792c57b87f1a431d2b456698dd3c248fc6e2644d446f952255f98e3dcb7e5cd200b46f769d581833c21b08d07c4343973e93bed9a2d66ece5b6083e6e"
                         "42b3378987339ab01aab362890dbf57dc22e9d86c0cd4edfa43f489d250bc4244542368c8682125645bd610fbf1c60ec5f94bc697284bde3915e9e051bb255ae"
                         "e1685265a487bd1d72c5f49ef621e0", der_cert, 911) == 911);
-    ck_assert(KeyManager_Certificate_CreateFromDER(der_cert, 911, ppcrt) == STATUS_OK);
+    ck_assert(KeyManager_Certificate_CreateFromDER(der_cert, 911, &crt_pub) == STATUS_OK);//*/
 
     // Loads the public key from cert
     key_pub = malloc(sizeof(AsymmetricKey));
     ck_assert(NULL != key_pub);
-    ck_assert(KeyManager_Certificate_GetPublicKey(*ppcrt, key_pub) == STATUS_OK);
-    *ppkpub = key_pub;
+    ck_assert(KeyManager_Certificate_GetPublicKey(crt_pub, key_pub) == STATUS_OK);
 
-    // Loads a private key
+    // Loads the corresponding private key
     ck_assert(unhexlify("308204a40201000282010100cbe0cd29bbcdd824999fc5571122e7540405ac94d0a9b3ab3630ce2cf361d50d9e737ce3f7746959003cbe90fc1019dce4797f4a"
                         "87a05cd83521531e1391cf11f2e49ce6b0f68db31fb91675be4bbd4380920fccf46518ac2bff42085ebc6ca107ecef53964e14617aecd75e1f27035c326f1757"
                         "273047ca4d623bc5b08d278e3a320b964b11116df912bf91e99d3fdb78989e3daa144570647efc4c983c4159aecbf99aeb8bdfbf242ac5c43f0092a28aecddb8"
@@ -683,20 +721,27 @@ void get_test_keys(Certificate **ppcrt, AsymmetricKey **ppkpub, AsymmetricKey **
                         "91323c4dfa9ea1c1eb33363f3963d18fb5ed6e77b3607ff9e45e71f8020881eafafd213c4f02818004fbb2f7ca0e8e7f644f40939f9743f8996439a926244282"
                         "1981268f36fba3e4656fc6e9c69bab8b5f56c7b033bed95eeca96952b3d62edd935b80d5187649683196702a0b304e802de7841d6bab06e6877b74bdf2b5e7f2"
                         "673ac6939c1427fb899a4cb26f656b5621914592f61b10d4ff50a4bb360d134d224a780db10f0f97", der_priv, 1192) == 1192);
-    ck_assert(KeyManager_AsymmetricKey_CreateFromBuffer(der_priv, 1192, ppkpriv) == STATUS_OK);
+    ck_assert(KeyManager_AsymmetricKey_CreateFromBuffer(der_priv, 1192, &key_priv) == STATUS_OK);
+}
+
+void teardown_asym_keys(void)
+{
+    KeyManager_AsymmetricKey_Free(key_pub);
+    key_pub = NULL;
+    KeyManager_Certificate_Free(crt_pub);
+    crt_pub = NULL;
+    KeyManager_AsymmetricKey_Free(key_priv);
+    key_priv = NULL;
+
+    teardown_crypto();
 }
 
 
 START_TEST(test_crypto_asym_crypt)
 {
-    Certificate *crt_pub = NULL;
-    AsymmetricKey *key_pub = NULL, *key_priv = NULL;
     uint8_t input[856], output[1024], input_bis[856];
     uint32_t lenPlain = 0, lenCiph = 0, len = 0;
     ExposedBuffer clientNonce[32], serverNonce[32];
-
-    // Load keys
-    get_test_keys(&crt_pub, &key_pub, &key_priv);
 
     // Assert lengths
     ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_pub, &len) == STATUS_OK);
@@ -736,25 +781,15 @@ START_TEST(test_crypto_asym_crypt)
     ck_assert(CryptoProvider_AsymmetricDecrypt(crypto, output, 1024, key_priv, input_bis, 856, &len) == STATUS_OK);
     ck_assert(len == 856);
     ck_assert(memcmp(input, input_bis, 856) == 0);
-
-    // Cleaning
-    KeyManager_Certificate_Free(crt_pub);
-    KeyManager_AsymmetricKey_Free(key_priv);
-    free(key_pub);
 }
 END_TEST
 
 
 START_TEST(test_crypto_asym_sign)
 {
-    Certificate *crt_pub = NULL;
-    AsymmetricKey *key_pub = NULL, *key_priv = NULL;
     uint8_t input[856], sig[256];
     uint32_t len = 0;
     ExposedBuffer clientNonce[32], serverNonce[32];
-
-    // Load keys
-    get_test_keys(&crt_pub, &key_pub, &key_priv);
 
     // Assert lengths
     ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_pub, &len) == STATUS_OK);
@@ -778,11 +813,6 @@ START_TEST(test_crypto_asym_sign)
     ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 856-32) == STATUS_OK);
     ck_assert(CryptoProvider_AsymmetricSign(crypto, input, 856, key_priv, sig, 256) == STATUS_OK);
     ck_assert(CryptoProvider_AsymmetricVerify(crypto, input, 856, key_pub, sig, 256) == STATUS_OK);
-
-    // Cleaning
-    KeyManager_Certificate_Free(crt_pub);
-    KeyManager_AsymmetricKey_Free(key_priv);
-    free(key_pub);
 }
 END_TEST
 
@@ -890,16 +920,20 @@ Suite *tests_make_suite_crypto_B256S256()
     tcase_add_test(tc_derives, test_crypto_derive_keysets);
 
     suite_add_tcase(s, tc_km);
-    tcase_add_checked_fixture(tc_km, setup_crypto, teardown_crypto);
+    tcase_add_checked_fixture(tc_km, setup_certificate, teardown_certificate);
     tcase_add_test(tc_km, test_cert_load);
+    tcase_add_test(tc_km, test_cert_thumbprint);
+    tcase_add_test(tc_km, test_cert_loadkey);
+
+    // TODO: copy key, DER <-> key <-> DER
 
     suite_add_tcase(s, tc_crypto_asym);
-    tcase_add_checked_fixture(tc_crypto_asym, setup_crypto, teardown_crypto);
+    tcase_add_checked_fixture(tc_crypto_asym, setup_asym_keys, setup_asym_keys);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_sign);
 
     suite_add_tcase(s, tc_pki_stack);
-    tcase_add_checked_fixture(tc_pki_stack, setup_crypto, teardown_crypto);
+    tcase_add_checked_fixture(tc_pki_stack, setup_certificate, teardown_certificate);
     tcase_add_test(tc_pki_stack, test_pki_stack);
 
     return s;
