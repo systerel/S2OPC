@@ -238,7 +238,7 @@ void String_Clear(UA_String* string){
 }
 
 void String_Delete(UA_String* string){
-    String_Delete((UA_ByteString*) string);
+    ByteString_Delete((UA_ByteString*) string);
 }
 
 StatusCode String_CopyFromCString(UA_String* string, const char* cString){
