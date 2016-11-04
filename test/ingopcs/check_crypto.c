@@ -29,12 +29,15 @@
 int hexlify(const unsigned char *src, char *dst, size_t n)
 {
     size_t i;
+    char buffer[3];
 
     if(! src || ! dst)
         return -1;
 
-    for(i=0; i<n; ++i)
-        sprintf(&dst[2*i], "%02hhx", src[i]);
+    for(i=0; i<n; ++i) {
+        sprintf(buffer, "%02hhx", src[i]); // sprintf copies the last \0 too
+        memcpy(dst+2*i, buffer, 2);
+    }
 
     return n;
 }
@@ -61,7 +64,7 @@ int unhexlify(const char *src, unsigned char *dst, size_t n)
 
 START_TEST(test_hexlify)
 {
-    unsigned char buf[32], c, d;
+    unsigned char buf[33], c, d;
     int i;
 
     // Test single chars
@@ -78,6 +81,13 @@ START_TEST(test_hexlify)
     ck_assert(strncmp((char *)buf, "00205465737420ff", 16) == 0);
     ck_assert(unhexlify((char *)buf, buf+16, 8) == 8);
     ck_assert(strncmp((char *)(buf+16), "\x00 Test \xFF", 8) == 0);
+
+    // Test overflow
+    buf[32] = 0xDD;
+    ck_assert(hexlify((unsigned char *)"\x00 Test \xFF\x00 Test \xFF", (char *)buf, 16) == 16);
+    ck_assert(buf[32] == 0xDD);
+    ck_assert(unhexlify("00205465737420ff00205465737420ff", buf, 16) == 16);
+    ck_assert(buf[32] == 0xDD);
 }
 END_TEST
 
@@ -165,6 +175,22 @@ START_TEST(test_crypto_symm_crypt)
     SecretBuffer_DeleteClear(pSecKey);
     SecretBuffer_DeleteClear(pSecIV);
 
+    memset(key, 0, sizeof(key));
+    ck_assert(unhexlify("458b67bf212d20f3a57fce392065582dcefbf381aa22949f8338ab9052260e1d", key, 32) == 32);
+    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    ck_assert(NULL != pSecKey);
+    memset(iv, 0, sizeof(iv));
+    ck_assert(unhexlify("4c12effc5963d40459602675153e9649", iv, 16) == 16);
+    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    ck_assert(NULL != pSecIV);
+    ck_assert(unhexlify("256fd73ce35ae3ea9c25dd2a9454493e", input, 16) == 16);
+    memset(output, 0, sizeof(output));
+    ck_assert(CryptoProvider_SymmetricEncrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(hexlify(output, hexoutput, 16) == 16);
+    ck_assert(memcmp(hexoutput, "90b7b9630a2378f53f501ab7beff0391", 32) == 0);
+    SecretBuffer_DeleteClear(pSecKey);
+    SecretBuffer_DeleteClear(pSecIV);
+
     // Decrypt
     ck_assert(unhexlify("28d46cffa158533194214a91e712fc2b45b518076675affd910edeca5f41ac64", key, 32) == 32);
     pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
@@ -209,6 +235,22 @@ START_TEST(test_crypto_symm_crypt)
     SecretBuffer_DeleteClear(pSecKey);
     SecretBuffer_DeleteClear(pSecIV);
 
+    memset(key, 0, sizeof(key));
+    ck_assert(unhexlify("458b67bf212d20f3a57fce392065582dcefbf381aa22949f8338ab9052260e1d", key, 32) == 32);
+    pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
+    ck_assert(NULL != pSecKey);
+    memset(iv, 0, sizeof(iv));
+    ck_assert(unhexlify("4c12effc5963d40459602675153e9649", iv, 16) == 16);
+    pSecIV = SecretBuffer_NewFromExposedBuffer(iv, sizeof(iv));
+    ck_assert(NULL != pSecIV);
+    ck_assert(unhexlify("90b7b9630a2378f53f501ab7beff0391", input, 16) == 16);
+    memset(output, 0, sizeof(output));
+    ck_assert(CryptoProvider_SymmetricDecrypt(crypto, input, 16, pSecKey, pSecIV, output, 16) == STATUS_OK);
+    ck_assert(hexlify(output, hexoutput, 16) == 16);
+    ck_assert(memcmp(hexoutput, "256fd73ce35ae3ea9c25dd2a9454493e", 32) == 0);
+    SecretBuffer_DeleteClear(pSecKey);
+    SecretBuffer_DeleteClear(pSecIV);
+
     // Encrypt + Decrypt
     ck_assert(unhexlify("07eb03a08d291d1b07408bf3512ab40c91097ac77461aad4bb859647f74f00ee", key, 32) == 32);
     pSecKey = SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
@@ -243,6 +285,7 @@ START_TEST(test_crypto_symm_crypt)
     ck_assert(hexlify(output, hexoutput, 128) == 128);
     ck_assert(memcmp(hexoutput, "90b7b9630a2378f53f501ab7beff039155008071bc8438e789932cfd3eb1299195465e6633849463fdb44375278e2fdb1310821e6492cf80ff15cb772509fb42"
                                 "6f3aeee27bd4938882fd2ae6b5bd9d91fa4a43b17bb439ebbe59c042310163a82a5fe5388796eee35a181a1271f00be29b852d8fa759bad01ff4678f010594cd", 256) == 0);
+    memset(input, 0, sizeof(input));
     ck_assert(CryptoProvider_SymmetricDecrypt(crypto, output, 128, pSecKey, pSecIV, input, 128) == STATUS_OK);
     ck_assert(hexlify(input, hexoutput, 128) == 128);
     ck_assert(memcmp(hexoutput, "256fd73ce35ae3ea9c25dd2a9454493e96d8633fe633b56176dce8785ce5dbbb84dbf2c8a2eeb1e96b51899605e4f13bbc11b93bf6f39b3469be14858b5b720d"
