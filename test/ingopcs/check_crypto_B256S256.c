@@ -725,7 +725,7 @@ void setup_asym_keys(void)
 
 void teardown_asym_keys(void)
 {
-    KeyManager_AsymmetricKey_Free(key_pub);
+    free(key_pub);
     key_pub = NULL;
     KeyManager_Certificate_Free(crt_pub);
     crt_pub = NULL;
@@ -923,7 +923,7 @@ Suite *tests_make_suite_crypto_B256S256()
     // TODO: copy key, DER <-> key <-> DER
 
     suite_add_tcase(s, tc_crypto_asym);
-    tcase_add_checked_fixture(tc_crypto_asym, setup_asym_keys, setup_asym_keys);
+    tcase_add_checked_fixture(tc_crypto_asym, setup_asym_keys, teardown_asym_keys);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_sign);
 
