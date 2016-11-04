@@ -287,6 +287,7 @@ int main(void){
     String_Clear(&stEndpointUrl);
     KeyManager_Certificate_Free(crt_cli);
     KeyManager_Certificate_Free(crt_srv);
+    KeyManager_Certificate_Free(crt_ca);
     KeyManager_AsymmetricKey_Free(priv_cli);
     UA_Channel_Delete(&hChannel);
     StackConfiguration_Clear();

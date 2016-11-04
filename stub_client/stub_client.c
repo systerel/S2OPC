@@ -144,6 +144,7 @@ int main(void){
     // The certificates: init
     OpcUa_ByteString ClientCertificate, ServerCertificate;
     OpcUa_ByteString_Initialize (&ClientCertificate);
+    OpcUa_ByteString_Initialize (&ServerCertificate);
 
     // Private key: init
     OpcUa_ByteString ClientPrivateKey;
@@ -151,6 +152,9 @@ int main(void){
 
     // Empty callback data
     StubClient_CallbackData Callback_Data;
+
+    // Endpoint URL in OPC UA string format
+    OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
 
     // Policy security: None
     OpcUa_String* pRequestedSecurityPolicyUri = OpcUa_String_FromCString(OpcUa_SecurityPolicy_Basic256Sha256);
@@ -229,8 +233,6 @@ int main(void){
     OpcUa_RequestHeader rHeader;
     // Local configuration: empty
     OpcUa_String localId, profileUri;
-    // Endpoint URL in OPC UA string format
-    const OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
     // Empty callback data
     StubClient_CallbackData Callback_Data_Get;
 
@@ -250,6 +252,7 @@ int main(void){
     }
 
     if (disconnect){
+        uStatus = STATUS_NOK;
     	goto Error;
     }
 
@@ -283,6 +286,7 @@ int main(void){
     }
 
     if (disconnect){
+        uStatus = STATUS_NOK;
     	goto Error;
     }
 
@@ -302,9 +306,20 @@ int main(void){
 //										   &pNoOfEndpoints,
 //										   &pEndpoints); // call back data
 
+    OpcUa_String_Delete(&pRequestedSecurityPolicyUri);
+    OpcUa_String_Delete(&stEndpointUrl);
+    OpcUa_ByteString_Clear(&ClientCertificate);
+    OpcUa_ByteString_Clear(&ServerCertificate);
     printf ("Final status: %d\n", uStatus);
     OpcUa_ReturnStatusCode;
     OpcUa_BeginErrorHandling;
+    OpcUa_String_Delete(&pRequestedSecurityPolicyUri);
+    OpcUa_String_Delete(&stEndpointUrl);
+    OpcUa_ByteString_Clear(&ClientCertificate);
+    OpcUa_ByteString_Clear(&ServerCertificate);
     printf ("Error status: %d\n", uStatus);
+    if(uStatus != 0){
+        return -1;
+    }
     OpcUa_FinishErrorHandling;
 }
