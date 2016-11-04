@@ -122,7 +122,7 @@ StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
                                        uint32_t          nbSockets){
     uint32_t idx = 0;
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(globalNbSockets + nbSockets > UA_MAXCONNECTIONS)
+    if(globalNbSockets + nbSockets > OPCUA_MAXCONNECTIONS)
         return STATUS_NOK;
 
     // TODO: set lower limit for nbSockets: INT32_MAX just to ensure select returns value <= INT32_MAX (3 sets)

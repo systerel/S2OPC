@@ -68,15 +68,15 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
         connection->state = TCP_Connection_Disconnected;
         connection->protocolVersion = tcpProtocolVersion;
         // TODO: check constraints on connection properties (>8192 bytes ...)
-        connection->sendBufferSize = UA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-        connection->receiveBufferSize = UA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-        connection->maxMessageSizeRcv = UA_ENCODER_MAXMESSAGELENGTH;
-        connection->maxMessageSizeSnd = UA_ENCODER_MAXMESSAGELENGTH;
+        connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+        connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+        connection->maxMessageSizeRcv = OPCUA_ENCODER_MAXMESSAGELENGTH;
+        connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
 #if UA_MULTITHREADED == UA_FALSE
         connection->socketManager = NULL;
-        UA_SocketManager_Initialize(UA_SocketManager_GetGlobal(), UA_MAXCONNECTIONS);
+        UA_SocketManager_Initialize(UA_SocketManager_GetGlobal(), OPCUA_MAXCONNECTIONS);
 #else
         connection->socketManager = UA_SocketManager_Create(1);
 #endif //UA_MULTITHREADED
@@ -92,10 +92,10 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
 
 void ResetConnectionState(TCP_UA_Connection* connection){
     connection->state = TCP_Connection_Disconnected;
-    connection->sendBufferSize = UA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-    connection->receiveBufferSize = UA_TCPCONNECTION_DEFAULTCHUNKSIZE;
-    connection->maxMessageSizeRcv = UA_ENCODER_MAXMESSAGELENGTH;
-    connection->maxMessageSizeSnd = UA_ENCODER_MAXMESSAGELENGTH;
+    connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+    connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
+    connection->maxMessageSizeRcv = OPCUA_ENCODER_MAXMESSAGELENGTH;
+    connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
     connection->maxChunkCountRcv = 0;
     connection->maxChunkCountSnd = 0;
     MsgBuffer_Delete(&connection->inputMsgBuffer);
