@@ -152,7 +152,6 @@ StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
                                                    status);
             }
     }
-
     return retStatus;
 }
 
@@ -328,6 +327,7 @@ StatusCode UA_Channel_Disconnect(UA_Channel channel){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(channel != NULL){
         status = STATUS_NOK;
+        Delete_CallbackData(((SC_ClientConnection*) channel)->callbackData);
         status = SC_Client_Disconnect((SC_ClientConnection*) channel);
         StackConfiguration_Unlocked();
     }
