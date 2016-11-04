@@ -890,8 +890,8 @@ END_TEST
 
 Suite *tests_make_suite_crypto_B256S256()
 {
-    Suite *s;
-    TCase *tc_crypto_symm, *tc_providers, *tc_derives, *tc_misc, *tc_km, *tc_crypto_asym, *tc_pki_stack;
+    Suite *s = NULL;
+    TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_derives = NULL, *tc_misc = NULL, *tc_km = NULL, *tc_crypto_asym = NULL, *tc_pki_stack = NULL;
 
     s = suite_create("Crypto tests Basic256Sha256");
     tc_crypto_symm = tcase_create("Symmetric Crypto");
