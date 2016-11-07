@@ -113,6 +113,25 @@ void teardown_crypto(void)
 }
 
 
+START_TEST(test_crypto_load)
+{
+    ck_assert(NULL != crypto->pProfile);
+    ck_assert(SecurityPolicy_Basic256Sha256_ID == crypto->pProfile->SecurityPolicyID);
+    ck_assert(NULL != crypto->pProfile->pFnSymmEncrypt);
+    ck_assert(NULL != crypto->pProfile->pFnSymmDecrypt);
+    ck_assert(NULL != crypto->pProfile->pFnSymmSign);
+    ck_assert(NULL != crypto->pProfile->pFnSymmVerif);
+    ck_assert(NULL != crypto->pProfile->pFnSymmGenKey);
+    ck_assert(NULL != crypto->pProfile->pFnDeriveData);
+    ck_assert(NULL != crypto->pProfile->pFnAsymEncrypt);
+    ck_assert(NULL != crypto->pProfile->pFnAsymDecrypt);
+    ck_assert(NULL != crypto->pProfile->pFnAsymSign);
+    ck_assert(NULL != crypto->pProfile->pFnAsymVerify);
+    ck_assert(NULL != crypto->pProfile->pFnCertVerify);
+}
+END_TEST
+
+
 START_TEST(test_crypto_symm_lengths)
 {
     uint32_t len = 0, lenCiph = 0, lenDeci = 0;
@@ -914,7 +933,7 @@ void teardown_pki_stack()
 
 START_TEST(test_pki_load)
 {
-    ;
+    ck_assert(NULL != pki->pFnValidateCertificate);
 }
 END_TEST
 
@@ -946,6 +965,7 @@ Suite *tests_make_suite_crypto_B256S256()
 
     suite_add_tcase(s, tc_crypto_symm);
     tcase_add_checked_fixture(tc_crypto_symm, setup_crypto, teardown_crypto);
+    tcase_add_test(tc_crypto_symm, test_crypto_load);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_lengths);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_crypt);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_sign);
@@ -959,6 +979,8 @@ Suite *tests_make_suite_crypto_B256S256()
     tcase_add_test(tc_derives, test_crypto_derive_lengths);
     tcase_add_test(tc_derives, test_crypto_derive_data);
     tcase_add_test(tc_derives, test_crypto_derive_keysets);
+    // TODO: derive_keysets_client
+    // TODO: derive_keysets_server
 
     suite_add_tcase(s, tc_km);
     tcase_add_checked_fixture(tc_km, setup_certificate, teardown_certificate);
@@ -966,8 +988,7 @@ Suite *tests_make_suite_crypto_B256S256()
     tcase_add_test(tc_km, test_cert_lengths);
     tcase_add_test(tc_km, test_cert_thumbprint);
     tcase_add_test(tc_km, test_cert_loadkey);
-
-    // TODO: copy key, DER <-> key <-> DER
+    // TODO: CopyDER
 
     suite_add_tcase(s, tc_crypto_asym);
     tcase_add_checked_fixture(tc_crypto_asym, setup_asym_keys, teardown_asym_keys);

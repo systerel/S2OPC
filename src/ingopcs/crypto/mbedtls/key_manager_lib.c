@@ -58,6 +58,11 @@ StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint
 }
 
 
+/**
+ * Helper function: calls KeyManager_AsymmetricKey_CreateFromBuffer() on the content of the file \p szPath.
+ *
+ * \note    Not in unit tests.
+ */
 StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
                                                    AsymmetricKey **ppKey)
 {
