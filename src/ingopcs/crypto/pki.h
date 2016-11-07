@@ -1,13 +1,16 @@
 /** \file pki.h
  *
  * Defines the common interface that a PKI should provide. This is a minimal interface, as the main
- * API for certificate and key manipulation is provided by the KeyManager.
+ * API for certificate and key manipulation is provided by the KeyManager and CryptoProvider.
  *
  * This is not the role of the stack to provide a full-blown configurable PKI.
  * The stack provides only a minimal, always safe validating PKI.
  *
  * This is not the role of the stack to provide any advanced certificate storage.
  * You can use "user-specific" handles in the PKIProvider struct to implement more options.
+ *
+ * The pFnValidateCertificate function should not be called directly, but you should call
+ * CryptoProvider_Certificate_Validate() instead.
  *
  *  Created on: 28 oct. 2016
  *      Author: PAB
