@@ -1119,7 +1119,7 @@ START_TEST(test_ua_encoder_other_types)
     uint8_t boyString[3] = {0x42, 0x6F, 0x79}; // Boy
 
     ////// Empty string
-    bs->length = 0;
+    bs->Length = 0;
     status = ByteString_Write(bs, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
@@ -1129,7 +1129,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(msgBuffer->buffers->data[3] == 0xFF);
 
     MsgBuffer_Reset(msgBuffer);
-    bs->length = -1;
+    bs->Length = -1;
     status = ByteString_Write(bs, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
@@ -1139,7 +1139,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(msgBuffer->buffers->data[3] == 0xFF);
 
     MsgBuffer_Reset(msgBuffer);
-    bs->length = -10;
+    bs->Length = -10;
     status = ByteString_Write(bs, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
@@ -1179,10 +1179,10 @@ START_TEST(test_ua_encoder_other_types)
     status = ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(ByteString_Equal(bs, bs2) != FALSE);
-    ck_assert(bs2->length == 3);
-    ck_assert(bs2->characters[0] == 0x42);
-    ck_assert(bs2->characters[1] == 0x6F);
-    ck_assert(bs2->characters[2] == 0x79);
+    ck_assert(bs2->Length == 3);
+    ck_assert(bs2->Data[0] == 0x42);
+    ck_assert(bs2->Data[1] == 0x6F);
+    ck_assert(bs2->Data[2] == 0x79);
 
     ////// Read 0 length bytestring
     msgBuffer->buffers->data[0] = 0x00;
@@ -1193,7 +1193,7 @@ START_TEST(test_ua_encoder_other_types)
     ByteString_Clear(bs2);
     ByteString_Initialize(bs2);status = ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(bs2->length == -1); // Null bytestring always decoded -1
+    ck_assert(bs2->Length == -1); // Null bytestring always decoded -1
 
     ////// Read negative length bytestring
     msgBuffer->buffers->data[0] = 0xFF;
@@ -1205,7 +1205,7 @@ START_TEST(test_ua_encoder_other_types)
     ByteString_Initialize(bs2);
     status = ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(bs2->length == -1); // Null bytestring always decoded -1
+    ck_assert(bs2->Length == -1); // Null bytestring always decoded -1
 
     ////// Read -1 length bytestring
     msgBuffer->buffers->data[0] = 0xFF;
@@ -1217,7 +1217,7 @@ START_TEST(test_ua_encoder_other_types)
     ByteString_Initialize(bs2);
     status = ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(bs2->length == -1); // Null bytestring always decoded -1
+    ck_assert(bs2->Length == -1); // Null bytestring always decoded -1
     //// Degraded read
     status = ByteString_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
@@ -1242,7 +1242,7 @@ START_TEST(test_ua_encoder_other_types)
     String_Initialize(&str2);
 
     ////// Empty string
-    str.length = 0;
+    str.Length = 0;
     status = String_Write(&str, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
@@ -1252,7 +1252,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(msgBuffer->buffers->data[3] == 0xFF);
 
     MsgBuffer_Reset(msgBuffer);
-    str.length = -1;
+    str.Length = -1;
     status = String_Write(&str, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
@@ -1262,7 +1262,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(msgBuffer->buffers->data[3] == 0xFF);
 
     MsgBuffer_Reset(msgBuffer);
-    str.length = -10;
+    str.Length = -10;
     status = String_Write(&str, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
@@ -1313,7 +1313,7 @@ START_TEST(test_ua_encoder_other_types)
     String_Clear(&str2);
     String_Initialize(&str2);status = String_Read(&str2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(str2.length == -1); // Null bytestring always decoded -1
+    ck_assert(str2.Length == -1); // Null bytestring always decoded -1
 
     ////// Read negative length bytestring
     msgBuffer->buffers->data[0] = 0xFF;
@@ -1325,7 +1325,7 @@ START_TEST(test_ua_encoder_other_types)
     String_Initialize(&str2);
     status = String_Read(&str2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(str2.length == -1); // Null bytestring always decoded -1
+    ck_assert(str2.Length == -1); // Null bytestring always decoded -1
 
     ////// Read -1 length bytestring
     msgBuffer->buffers->data[0] = 0xFF;
@@ -1337,7 +1337,7 @@ START_TEST(test_ua_encoder_other_types)
     String_Initialize(&str2);
     status = String_Read(&str2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(str2.length == -1); // Null bytestring always decoded -1
+    ck_assert(str2.Length == -1); // Null bytestring always decoded -1
     //// Degraded read
     status = String_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
@@ -1360,7 +1360,7 @@ START_TEST(test_ua_encoder_other_types)
     uint8_t balA[3] = {0x3C, 0x41, 0x3E}; // <A>
 
     ////// Empty string
-    xmlElt.length = 0;
+    xmlElt.Length = 0;
     status = XmlElement_Write(&xmlElt, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
@@ -1370,7 +1370,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(msgBuffer->buffers->data[3] == 0xFF);
 
     MsgBuffer_Reset(msgBuffer);
-    xmlElt.length = -1;
+    xmlElt.Length = -1;
     status = XmlElement_Write(&xmlElt, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
@@ -1380,7 +1380,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(msgBuffer->buffers->data[3] == 0xFF);
 
     MsgBuffer_Reset(msgBuffer);
-    xmlElt.length = -10;
+    xmlElt.Length = -10;
     status = XmlElement_Write(&xmlElt, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
@@ -1391,10 +1391,10 @@ START_TEST(test_ua_encoder_other_types)
 
     /////// Non empty bytestring
     MsgBuffer_Reset(msgBuffer);
-    xmlElt.characters = malloc(sizeof(UA_Byte) * 3);
-    ck_assert(xmlElt.characters != NULL);
-    ck_assert(memcpy(xmlElt.characters, balA, 3) == xmlElt.characters);
-    xmlElt.length = 3;
+    xmlElt.Data = malloc(sizeof(UA_Byte) * 3);
+    ck_assert(xmlElt.Data != NULL);
+    ck_assert(memcpy(xmlElt.Data, balA, 3) == xmlElt.Data);
+    xmlElt.Length = 3;
     status = XmlElement_Write(&xmlElt, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0x03);
@@ -1421,11 +1421,11 @@ START_TEST(test_ua_encoder_other_types)
     XmlElement_Initialize(&xmlElt2);
     status = XmlElement_Read(&xmlElt2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(memcmp(xmlElt.characters, xmlElt2.characters, 3) == 00);
-    ck_assert(xmlElt2.length == 3);
-    ck_assert(xmlElt2.characters[0] == 0x3C);
-    ck_assert(xmlElt2.characters[1] == 0x41);
-    ck_assert(xmlElt2.characters[2] == 0x3E);
+    ck_assert(memcmp(xmlElt.Data, xmlElt2.Data, 3) == 00);
+    ck_assert(xmlElt2.Length == 3);
+    ck_assert(xmlElt2.Data[0] == 0x3C);
+    ck_assert(xmlElt2.Data[1] == 0x41);
+    ck_assert(xmlElt2.Data[2] == 0x3E);
 
     ////// Read 0 length bytestring
     msgBuffer->buffers->data[0] = 0x00;
@@ -1437,7 +1437,7 @@ START_TEST(test_ua_encoder_other_types)
     XmlElement_Initialize(&xmlElt2);
     status = XmlElement_Read(&xmlElt2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(xmlElt2.length == -1); // Null bytestring always decoded -1
+    ck_assert(xmlElt2.Length == -1); // Null bytestring always decoded -1
 
     ////// Read negative length bytestring
     msgBuffer->buffers->data[0] = 0xFF;
@@ -1449,7 +1449,7 @@ START_TEST(test_ua_encoder_other_types)
     XmlElement_Initialize(&xmlElt2);
     status = XmlElement_Read(&xmlElt2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(xmlElt2.length == -1); // Null bytestring always decoded -1
+    ck_assert(xmlElt2.Length == -1); // Null bytestring always decoded -1
 
     ////// Read -1 length bytestring
     msgBuffer->buffers->data[0] = 0xFF;
@@ -1461,7 +1461,7 @@ START_TEST(test_ua_encoder_other_types)
     XmlElement_Initialize(&xmlElt2);
     status = XmlElement_Read(&xmlElt2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(xmlElt2.length == -1); // Null bytestring always decoded -1
+    ck_assert(xmlElt2.Length == -1); // Null bytestring always decoded -1
     //// Degraded read
     status = XmlElement_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
@@ -1486,17 +1486,17 @@ START_TEST(test_ua_encoder_other_types)
     Guid_Initialize(&guid);
     UA_Guid guid2;
     Guid_Initialize(&guid2);
-    guid.data1 = 0x72962B91;
-    guid.data2 = 0xFA75;
-    guid.data3 = 0x4ae6;
-    guid.data4[0] = 0x8D;
-    guid.data4[1] = 0x28;
-    guid.data4[2] = 0xB4;
-    guid.data4[3] = 0x04;
-    guid.data4[4] = 0xDC;
-    guid.data4[5] = 0x7D;
-    guid.data4[6] = 0xAF;
-    guid.data4[7] = 0x63;
+    guid.Data1 = 0x72962B91;
+    guid.Data2 = 0xFA75;
+    guid.Data3 = 0x4ae6;
+    guid.Data4[0] = 0x8D;
+    guid.Data4[1] = 0x28;
+    guid.Data4[2] = 0xB4;
+    guid.Data4[3] = 0x04;
+    guid.Data4[4] = 0xDC;
+    guid.Data4[5] = 0x7D;
+    guid.Data4[6] = 0xAF;
+    guid.Data4[7] = 0x63;
 
     status = Guid_Write(&guid, msgBuffer);
     ck_assert(status == STATUS_OK);
@@ -1554,17 +1554,17 @@ START_TEST(test_ua_encoder_other_types)
     NodeId_Initialize(&nodeId2);
 
     // Two bytes node id
-    nodeId.identifierType = IdentifierType_Numeric;
-    nodeId.data.numeric = 114;
+    nodeId.IdentifierType = IdentifierType_Numeric;
+    nodeId.Data.Numeric = 114;
     status = NodeId_Write(&nodeId, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0x00);
     ck_assert(msgBuffer->buffers->data[1] == 0x72);
 
     // Four bytes node id
-    nodeId.identifierType = IdentifierType_Numeric;
-    nodeId.namespace = 5;
-    nodeId.data.numeric = 1025;
+    nodeId.IdentifierType = IdentifierType_Numeric;
+    nodeId.Namespace = 5;
+    nodeId.Data.Numeric = 1025;
     status = NodeId_Write(&nodeId, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[2] == 0x01);
@@ -1573,9 +1573,9 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(msgBuffer->buffers->data[5] == 0x04);
 
     // Numeric node id
-    nodeId.identifierType = IdentifierType_Numeric;
-    nodeId.namespace = 5;
-    nodeId.data.numeric = 0x1FFFF;
+    nodeId.IdentifierType = IdentifierType_Numeric;
+    nodeId.Namespace = 5;
+    nodeId.Data.Numeric = 0x1FFFF;
     status = NodeId_Write(&nodeId, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[6] == 0x02);
@@ -1602,22 +1602,22 @@ START_TEST(test_ua_encoder_other_types)
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(nodeId2.namespace == 0);
-    ck_assert(nodeId2.data.numeric == 114);
+    ck_assert(nodeId2.Namespace == 0);
+    ck_assert(nodeId2.Data.Numeric == 114);
 
     ////// Four bytes NodeId
     NodeId_Clear(&nodeId2);
     status = NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(nodeId2.namespace == 5);
-    ck_assert(nodeId2.data.numeric == 1025);
+    ck_assert(nodeId2.Namespace == 5);
+    ck_assert(nodeId2.Data.Numeric == 1025);
 
     ////// Numeric NodeId
     NodeId_Clear(&nodeId2);
     status = NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(nodeId2.namespace == 5);
-    ck_assert(nodeId2.data.numeric == 0x1FFFF);
+    ck_assert(nodeId2.Namespace == 5);
+    ck_assert(nodeId2.Data.Numeric == 0x1FFFF);
 
     // TODO: read all other types possibles !
 

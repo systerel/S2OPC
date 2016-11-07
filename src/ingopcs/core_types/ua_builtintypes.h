@@ -14,8 +14,9 @@
 #include <ua_base_types.h>
 #include <ua_encodeable.h>
 
+BEGIN_EXTERN_C
 
-typedef enum {
+typedef enum UA_BuiltinId {
     UA_Null_Id            = 0,
     UA_Boolean_Id         = 1,
     UA_SByte_Id           = 2,
@@ -51,10 +52,10 @@ typedef UA_Byte UA_Boolean;
 
 typedef int8_t UA_SByte;
 
-typedef struct {
-    int32_t   length;
-    UA_Byte*  characters;
-    uint8_t   clearBytes; // flag indicating if bytes must be freed
+typedef struct UA_ByteString {
+    int32_t   Length;
+    UA_Byte*  Data;
+    uint8_t   ClearBytes; // flag indicating if bytes must be freed
 } UA_ByteString;
 
 // TODO: modify string representation for binary compatibility ?
@@ -65,85 +66,85 @@ typedef UA_ByteString UA_XmlElement;
 
 typedef int64_t UA_DateTime;
 
-typedef struct {
-    uint32_t data1;
-    uint16_t data2;
-    uint16_t data3;
-    UA_Byte  data4[8];
+typedef struct UA_Guid {
+    uint32_t Data1;
+    uint16_t Data2;
+    uint16_t Data3;
+    UA_Byte  Data4[8];
 } UA_Guid;
 
-typedef enum {
+typedef enum UA_IdentifierType {
     IdentifierType_Numeric = 0x00,
     IdentifierType_String = 0x01,
     IdentifierType_Guid = 0x02,
     IdentifierType_ByteString = 0x03,
 } UA_IdentifierType;
 
-typedef struct {
-    uint16_t identifierType; // UA_IdentifierType
-    uint16_t namespace;
+typedef struct UA_NodeId {
+    uint16_t IdentifierType; // UA_IdentifierType
+    uint16_t Namespace;
 
     union {
-        uint32_t      numeric;
-        UA_String     string;
-        UA_Guid       guid;
-        UA_ByteString bstring;
-    } data;
+        uint32_t      Numeric;
+        UA_String     String;
+        UA_Guid       Guid;
+        UA_ByteString Bstring;
+    } Data;
 } UA_NodeId;
 
-typedef struct {
-    UA_NodeId nodeId;
-    UA_String namespaceUri;
-    uint32_t  serverIndex;
+typedef struct UA_ExpandedNodeId {
+    UA_NodeId NodeId;
+    UA_String NamespaceUri;
+    uint32_t  ServerIndex;
 } UA_ExpandedNodeId;
 
 typedef struct UA_DiagnosticInfo {
-    int32_t                   symbolicId;
-    int32_t                   namespaceUri;
-    int32_t                   locale;
-    int32_t                   localizedText;
-    UA_String                 additionalInfo;
-    StatusCode                innerStatusCode;
-    struct UA_DiagnosticInfo* innerDiagnosticInfo;
+    int32_t                   SymbolicId;
+    int32_t                   NamespaceUri;
+    int32_t                   Locale;
+    int32_t                   LocalizedText;
+    UA_String                 AdditionalInfo;
+    StatusCode                InnerStatusCode;
+    struct UA_DiagnosticInfo* InnerDiagnosticInfo;
 } UA_DiagnosticInfo;
 
-typedef struct {
-    uint16_t  namespaceIndex;
-    UA_Byte   padding[2]; // For type binary compatibility
-    UA_String name;
+typedef struct UA_QualifiedName {
+    uint16_t  NamespaceIndex;
+    UA_Byte   Padding[2]; // For type binary compatibility
+    UA_String Name;
 } UA_QualifiedName;
 
-typedef struct {
-    UA_String locale;
-    UA_String text;
+typedef struct UA_LocalizedText {
+    UA_String Locale;
+    UA_String Text;
 } UA_LocalizedText;
 
-typedef enum {
+typedef enum UA_ExtObjectBodyEncoding {
     UA_ExtObjBodyEncoding_None = 0x00,
     UA_ExtObjBodyEncoding_ByteString = 0x01,
     UA_ExtObjBodyEncoding_XMLElement = 0x02,
     UA_ExtObjBodyEncoding_Object     = 0x03
 } UA_ExtObjectBodyEncoding;
 
-typedef struct {
-    UA_NodeId                typeId;
-    UA_ExtObjectBodyEncoding encoding;
+typedef struct UA_ExtensionObject {
+    UA_NodeId                TypeId;
+    UA_ExtObjectBodyEncoding Encoding;
 
     union {
-        UA_ByteString bstring;
-        UA_XmlElement xml;
+        UA_ByteString Bstring;
+        UA_XmlElement Xml;
         struct {
-            void*              value;
-            UA_EncodeableType* objType;
-        } object;
+            void*              Value;
+            UA_EncodeableType* ObjType;
+        } Object;
 
-    } body;
+    } Body;
 
-    int32_t   length;
+    int32_t   Length;
 
 } UA_ExtensionObject;
 
-typedef enum {
+typedef enum UA_VariantArrayTypeFlag {
     UA_VariantArrayMatrixFlag = 64, // 2^6 => bit 6
     UA_VariantArrayValueFlag = 128 // 2^7 => bit 7
 } UA_VariantArrayTypeFlag;
@@ -151,85 +152,85 @@ typedef enum {
 struct UA_DataValue;
 struct UA_Variant;
 
-typedef union {
-    UA_Boolean*          booleanArr;
-    UA_SByte*            sbyteArr;
-    UA_Byte*             byteArr;
-    int16_t*             int16Arr;
-    uint16_t*            uint16Arr;
-    int32_t*             int32Arr;
-    uint32_t*            uint32Arr;
-    int64_t*             int64Arr;
-    uint64_t*            uint64Arr;
-    float*               floatvArr;
-    double*              doublevArr;
-    UA_String*           stringArr;
-    UA_DateTime*         dateArr;
-    UA_Guid*             guidArr;
-    UA_ByteString*       bstringArr;
-    UA_XmlElement*       xmlEltArr;
-    UA_NodeId*           nodeIdArr;
-    UA_ExpandedNodeId*   expNodeIdArr;
-    StatusCode*          statusArr;
-    UA_QualifiedName*    qnameArr;
-    UA_LocalizedText*    localizedTextArr;
-    UA_ExtensionObject*  extObjectArr;
-    struct UA_DataValue* dataValueArr;
-    struct UA_Variant*   variantArr;
-    UA_DiagnosticInfo*   diagInfoArr; // TODO: not present ?
+typedef union UA_VariantArrayValue {
+    UA_Boolean*          BooleanArr;
+    UA_SByte*            SbyteArr;
+    UA_Byte*             ByteArr;
+    int16_t*             Int16Arr;
+    uint16_t*            Uint16Arr;
+    int32_t*             Int32Arr;
+    uint32_t*            Uint32Arr;
+    int64_t*             Int64Arr;
+    uint64_t*            Uint64Arr;
+    float*               FloatvArr;
+    double*              DoublevArr;
+    UA_String*           StringArr;
+    UA_DateTime*         DateArr;
+    UA_Guid*             GuidArr;
+    UA_ByteString*       BstringArr;
+    UA_XmlElement*       XmlEltArr;
+    UA_NodeId*           NodeIdArr;
+    UA_ExpandedNodeId*   ExpNodeIdArr;
+    StatusCode*          StatusArr;
+    UA_QualifiedName*    QnameArr;
+    UA_LocalizedText*    LocalizedTextArr;
+    UA_ExtensionObject*  ExtObjectArr;
+    struct UA_DataValue* DataValueArr;
+    struct UA_Variant*   VariantArr;
+    UA_DiagnosticInfo*   DiagInfoArr; // TODO: not present ?
 } UA_VariantArrayValue;
 
-typedef union {
-        UA_Boolean           boolean;
-        UA_SByte             sbyte;
-        UA_Byte              byte;
-        int16_t              int16;
-        uint16_t             uint16;
-        int32_t              int32;
-        uint32_t             uint32;
-        int64_t              int64;
-        uint64_t             uint64;
-        float                floatv;
-        double               doublev;
-        UA_String            string;
-        UA_DateTime          date;
-        UA_Guid*             guid;
-        UA_ByteString        bstring;
-        UA_XmlElement        xmlElt;
-        UA_NodeId*           nodeId;
-        UA_ExpandedNodeId*   expNodeId;
-        StatusCode           status;
-        UA_QualifiedName*    qname;
-        UA_LocalizedText*    localizedText;
-        UA_ExtensionObject*  extObject;
-        struct UA_DataValue* dataValue;
-        UA_DiagnosticInfo*   diagInfo; // TODO: not present ?
+typedef union UA_VariantValue {
+        UA_Boolean           Boolean;
+        UA_SByte             Sbyte;
+        UA_Byte              Byte;
+        int16_t              Int16;
+        uint16_t             Uint16;
+        int32_t              Int32;
+        uint32_t             Uint32;
+        int64_t              Int64;
+        uint64_t             Uint64;
+        float                Floatv;
+        double               Doublev;
+        UA_String            String;
+        UA_DateTime          Date;
+        UA_Guid*             Guid;
+        UA_ByteString        Bstring;
+        UA_XmlElement        XmlElt;
+        UA_NodeId*           NodeId;
+        UA_ExpandedNodeId*   ExpNodeId;
+        StatusCode           Status;
+        UA_QualifiedName*    Qname;
+        UA_LocalizedText*    LocalizedText;
+        UA_ExtensionObject*  ExtObject;
+        struct UA_DataValue* DataValue;
+        UA_DiagnosticInfo*   DiagInfo; // TODO: not present ?
         struct {
-            int32_t              length;
-            UA_VariantArrayValue content;
-        } array;
+            int32_t              Length;
+            UA_VariantArrayValue Content;
+        } Array;
         struct {
-            int32_t              dimensions;
-            int32_t*             arrayDimensions; // Product of dimensions must be <= INT32_MAX ! (binary arrayLength valid for matrix too)
-            UA_VariantArrayValue content;
-        } matrix;
+            int32_t              Dimensions;
+            int32_t*             ArrayDimensions; // Product of dimensions must be <= INT32_MAX ! (binary arrayLength valid for matrix too)
+            UA_VariantArrayValue Content;
+        } Matrix;
 
 } UA_VariantValue;
 
 typedef struct UA_Variant {
-    UA_Byte         builtInTypeMask;
-    UA_Byte         arrayTypeMask;
-    UA_Byte         padding[2];
-    UA_VariantValue value;
+    UA_Byte         BuiltInTypeMask;
+    UA_Byte         ArrayTypeMask;
+    UA_Byte         Padding[2];
+    UA_VariantValue Value;
 } UA_Variant;
 
 typedef struct UA_DataValue {
-    UA_Variant  value;
-    StatusCode  status;
-    UA_DateTime sourceTimestamp;
-    UA_DateTime serverTimestamp;
-    uint16_t    sourcePicoSeconds;
-    uint16_t    serverPicoSeconds;
+    UA_Variant  Value;
+    StatusCode  Status;
+    UA_DateTime SourceTimestamp;
+    UA_DateTime ServerTimestamp;
+    uint16_t    SourcePicoSeconds;
+    uint16_t    ServerPicoSeconds;
 } UA_DataValue;
 
 #define SECURITY_POLICY_NONE           "http://opcfoundation.org/UA/SecurityPolicy#None"
@@ -237,7 +238,7 @@ typedef struct UA_DataValue {
 #define SECURITY_POLICY_BASIC256       "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SECURITY_POLICY_BASIC256SHA256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 
-typedef enum {
+typedef enum UA_SecurityPolicy {
     Security_Policy_None = 0,
     Security_Policy_Basic128Rsa15 = 1,
     Security_Policy_Basic256 = 2,
@@ -352,5 +353,6 @@ void Variant_Clear(UA_Variant* variant);
 void DataValue_Initialize(UA_DataValue* dataValue);
 void DataValue_Clear(UA_DataValue* dataValue);
 
+END_EXTERN_C
 
 #endif /* INGOPCS_UA_TYPES_H_ */

@@ -19,6 +19,8 @@
 # define END_EXTERN_C
 #endif
 
+BEGIN_EXTERN_C
+
 typedef uint32_t StatusCode;
 #define STATUS_OK 0x0 // TODO: change values
 #define STATUS_OK_INCOMPLETE 0x00000001
@@ -30,5 +32,7 @@ typedef uint32_t StatusCode;
 #define FALSE 0
 
 typedef void* P_Timer;
+
+END_EXTERN_C
 
 #endif /* INGOPCS_BASIC_TYPES_H_ */

@@ -171,8 +171,8 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
 
     //// Encode request header
     // Encode authentication token (omitted opaque identifier ???? => must be a bytestring ?)
-    openRequest.RequestHeader.AuthenticationToken.identifierType = IdentifierType_Numeric;
-    openRequest.RequestHeader.AuthenticationToken.data.numeric = UA_Null_Id;
+    openRequest.RequestHeader.AuthenticationToken.IdentifierType = IdentifierType_Numeric;
+    openRequest.RequestHeader.AuthenticationToken.Data.Numeric = UA_Null_Id;
     // Encode 64 bits UtcTime => null ok ?
     openRequest.RequestHeader.Timestamp = 0;
     // Encode requestHandler
@@ -189,10 +189,10 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         // Extension object: additional header => null node id => no content
         // !! Extensible parameter indicated in specification but Extension object in XML file !!
         // Encoding body byte:
-        openRequest.RequestHeader.AdditionalHeader.encoding = UA_ExtObjBodyEncoding_None;
+        openRequest.RequestHeader.AdditionalHeader.Encoding = UA_ExtObjBodyEncoding_None;
         // Type Id: Node Id
-        openRequest.RequestHeader.AdditionalHeader.typeId.identifierType = IdentifierType_Numeric;
-        openRequest.RequestHeader.AdditionalHeader.typeId.data.numeric = UA_Null_Id;
+        openRequest.RequestHeader.AdditionalHeader.TypeId.IdentifierType = IdentifierType_Numeric;
+        openRequest.RequestHeader.AdditionalHeader.TypeId.Data.Numeric = UA_Null_Id;
 
         //// Encode request content
         // Client protocol version
@@ -233,7 +233,7 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
                                   &openRequest);
     }
 
-    SecretBuffer_Unexpose(openRequest.ClientNonce.characters);
+    SecretBuffer_Unexpose(openRequest.ClientNonce.Data);
     OpcUa_OpenSecureChannelRequest_Clear(&openRequest);
 
     return status;
@@ -361,7 +361,7 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
                                                  &encryptKeyLength,
                                                  &signKeyLength,
                                                  &initVectorLength);
-        if(status == STATUS_OK && encObj->ServerNonce.length > 0){
+        if(status == STATUS_OK && encObj->ServerNonce.Length > 0){
             cConnection->instance->currentSecuKeySets.receiverKeySet = KeySet_Create();
             cConnection->instance->currentSecuKeySets.senderKeySet = KeySet_Create();
             pks = cConnection->instance->currentSecuKeySets.receiverKeySet;
@@ -378,8 +378,8 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
             }
             status = CryptoProvider_DeriveKeySetsClient(cConnection->instance->currentCryptoProvider,
                                                         cConnection->instance->currentNonce,
-                                                        encObj->ServerNonce.characters,
-                                                        encObj->ServerNonce.length,
+                                                        encObj->ServerNonce.Data,
+                                                        encObj->ServerNonce.Length,
                                                         cConnection->instance->currentSecuKeySets.senderKeySet,
                                                         cConnection->instance->currentSecuKeySets.receiverKeySet);
         }
@@ -728,7 +728,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
            connection->clientKey == NULL &&
            connection->serverCertificate == NULL &&
            connection->securityMode == OpcUa_MessageSecurityMode_Invalid &&
-           connection->securityPolicy.length <= 0 &&
+           connection->securityPolicy.Length <= 0 &&
            connection->callback == NULL &&
            connection->callbackData == NULL)
         {

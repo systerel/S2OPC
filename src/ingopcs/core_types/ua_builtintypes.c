@@ -99,9 +99,9 @@ void Double_Clear(double* d){
 
 void ByteString_Initialize(UA_ByteString* bstring){
     if(bstring != NULL){
-        bstring->length = -1;
-        bstring->characters = NULL;
-        bstring->clearBytes = 1; // True unless characters attached
+        bstring->Length = -1;
+        bstring->Data = NULL;
+        bstring->ClearBytes = 1; // True unless characters attached
     }
 }
 
@@ -117,10 +117,10 @@ StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size)
     if(bstring != NULL){
         status = STATUS_OK;
         ByteString_Initialize(bstring);
-        bstring->length = size;
-        bstring->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*size);
-        if(bstring->characters != NULL){
-            memset(bstring->characters, 0, size);
+        bstring->Length = size;
+        bstring->Data = (UA_Byte*) malloc (sizeof(UA_Byte)*size);
+        if(bstring->Data != NULL){
+            memset(bstring->Data, 0, size);
         }else{
             status = STATUS_NOK;
         }
@@ -134,9 +134,9 @@ StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32
     if(dest != NULL && bytes != NULL
        && length > 0){
         status = STATUS_OK;
-        dest->length = length;
-        dest->characters = bytes;
-        dest->clearBytes = FALSE; // dest->characters will not be freed on clear
+        dest->Length = length;
+        dest->Data = bytes;
+        dest->ClearBytes = FALSE; // dest->characters will not be freed on clear
     }
     return status;
 }
@@ -145,25 +145,25 @@ StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && src != NULL
-       && src->length > 0 && src->characters != NULL){
+       && src->Length > 0 && src->Data != NULL){
         status = STATUS_OK;
-        dest->length = src->length;
-        dest->characters = src->characters;
-        dest->clearBytes = FALSE; // dest->characters will not be freed on clear
+        dest->Length = src->Length;
+        dest->Data = src->Data;
+        dest->ClearBytes = FALSE; // dest->characters will not be freed on clear
     }
     return status;
 }
 
 StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != NULL && dest->characters == NULL &&
-       src != NULL && src->length > 0){
+    if(dest != NULL && dest->Data == NULL &&
+       src != NULL && src->Length > 0){
         status = STATUS_OK;
-        dest->length = src->length;
-        dest->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->length);
-        if(dest->characters != NULL){
+        dest->Length = src->Length;
+        dest->Data = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->Length);
+        if(dest->Data != NULL){
             // No need of secure copy, both have same size here
-            memcpy(dest->characters, src->characters, dest->length);
+            memcpy(dest->Data, src->Data, dest->Length);
         }else{
             status = STATUS_NOK;
         }
@@ -173,10 +173,10 @@ StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src){
 
 void ByteString_Clear(UA_ByteString* bstring){
     if(bstring != NULL){
-        if(bstring->characters != NULL &&
-           bstring->clearBytes != FALSE){
-            free(bstring->characters);
-            bstring->characters = NULL;
+        if(bstring->Data != NULL &&
+           bstring->ClearBytes != FALSE){
+            free(bstring->Data);
+            bstring->Data = NULL;
         }
     }
 }
@@ -202,12 +202,12 @@ StatusCode String_AttachFrom(UA_String* dest, UA_String* src){
 
 StatusCode String_AttachFromCstring(UA_String* dest, char* src){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != NULL && dest->characters == NULL && src != NULL){
+    if(dest != NULL && dest->Data == NULL && src != NULL){
         status = STATUS_OK;
         if(CHAR_BIT == 8){
-            dest->length = strlen(src);
-            dest->characters = (uint8_t*) src;
-            dest->clearBytes = FALSE; // dest->characters will not be freed on clear
+            dest->Length = strlen(src);
+            dest->Data = (uint8_t*) src;
+            dest->ClearBytes = FALSE; // dest->characters will not be freed on clear
         }else{
             assert(FALSE);
         }
@@ -217,15 +217,15 @@ StatusCode String_AttachFromCstring(UA_String* dest, char* src){
 
 StatusCode String_Copy(UA_String* dest, const UA_String* src){
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != NULL && dest->characters == NULL && src != NULL){
+    if(dest != NULL && dest->Data == NULL && src != NULL){
         // Keep null terminator for C string compatibility
         status = STATUS_OK;
-        dest->length = src->length;
-        dest->characters = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->length+1);
-        if(dest->characters != NULL){
+        dest->Length = src->Length;
+        dest->Data = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->Length+1);
+        if(dest->Data != NULL){
             // No need of secure copy, both have same size here
-            memcpy(dest->characters, src->characters, dest->length);
-            dest->characters[dest->length] = '\0';
+            memcpy(dest->Data, src->Data, dest->Length);
+            dest->Data[dest->Length] = '\0';
         }else{
             status = STATUS_NOK;
         }
@@ -245,7 +245,7 @@ StatusCode String_CopyFromCString(UA_String* string, const char* cString){
     StatusCode status = STATUS_INVALID_PARAMETERS;
     size_t stringLength = 0;
     size_t idx = 0;
-    if(string != NULL && string->characters == NULL
+    if(string != NULL && string->Data == NULL
        && cString != NULL){
         status = STATUS_OK;
 
@@ -254,17 +254,17 @@ StatusCode String_CopyFromCString(UA_String* string, const char* cString){
            stringLength <= INT32_MAX)
         {
             // length without null terminator
-            string->length = stringLength;
+            string->Length = stringLength;
             // keep terminator for compatibility with char* strings
-            string->characters = (UA_Byte*) malloc(sizeof(UA_Byte)*(stringLength+1));
-            if(string->characters != NULL){
+            string->Data = (UA_Byte*) malloc(sizeof(UA_Byte)*(stringLength+1));
+            if(string->Data != NULL){
                 // Keep null terminator for compatibility with c strings !
                 if(CHAR_BIT == 8){
-                    memcpy(string->characters, cString, stringLength + 1);
+                    memcpy(string->Data, cString, stringLength + 1);
                 }else{
                     // On systems for which char is not encoded on 1 byte
                     for(idx = 0; idx < stringLength + 1; idx++){
-                        string->characters[idx] = (uint8_t) cString[idx];
+                        string->Data[idx] = (uint8_t) cString[idx];
                     }
                 }
             }else{
@@ -294,16 +294,16 @@ char* String_GetCString(const UA_String* string){
     char* cString = NULL;
     int32_t idx = 0;
     if(string != NULL &&
-       string->length > 0)
+       string->Length > 0)
     {
-        cString = (char*) malloc(sizeof(char)* (string->length + 1));
+        cString = (char*) malloc(sizeof(char)* (string->Length + 1));
         if(cString != NULL){
             if(CHAR_BIT == 8){
-                memcpy(cString, string->characters, string->length + 1);
+                memcpy(cString, string->Data, string->Length + 1);
             }else{
                 // On systems for which char is not encoded on 1 byte
-                for(idx = 0; idx < string->length + 1; idx++){
-                    cString[idx] = (char) string->characters[idx];
+                for(idx = 0; idx < string->Length + 1; idx++){
+                    cString[idx] = (char) string->Data[idx];
                 }
             }
         }
@@ -314,11 +314,11 @@ char* String_GetCString(const UA_String* string){
 const char* String_GetRawCString(const UA_String* string){
     char* cString = NULL;
     if(string != NULL &&
-       string->length > 0)
+       string->Length > 0)
     {
         if(CHAR_BIT == 8){
-            cString = (char*) string->characters;
-            assert(string->characters[string->length] == '\0');
+            cString = (char*) string->Data;
+            assert(string->Data[string->Length] == '\0');
         }else{
             assert(FALSE);
         }
@@ -337,14 +337,14 @@ StatusCode ByteString_Compare(const UA_ByteString* left,
     }
 
     if(status == STATUS_OK){
-        if(left->length == right->length ||
-           (left->length <= 0 && right->length <= 0)){
-            if(left->length <= 0 && right->length <= 0){
+        if(left->Length == right->Length ||
+           (left->Length <= 0 && right->Length <= 0)){
+            if(left->Length <= 0 && right->Length <= 0){
                 *comparison = 0;
             }else{
-                *comparison = memcmp(left->characters, right->characters, left->length);
+                *comparison = memcmp(left->Data, right->Data, left->Length);
             }
-        }else if(left->length > right->length){
+        }else if(left->Length > right->Length){
 
             *comparison = +1;
         }else{
@@ -414,53 +414,53 @@ void NodeId_Initialize(UA_NodeId* nodeId){
 }
 
 void NodeId_InitType(UA_NodeId* nodeId, UA_IdentifierType knownIdType){
-    nodeId->namespace = 0; // OPCUA namespace
-    nodeId->identifierType = knownIdType;
+    nodeId->Namespace = 0; // OPCUA namespace
+    nodeId->IdentifierType = knownIdType;
     switch(knownIdType){
         case IdentifierType_Numeric:
-            UInt32_Initialize(&nodeId->data.numeric);
+            UInt32_Initialize(&nodeId->Data.Numeric);
             break;
         case IdentifierType_String:
-            String_Initialize(&nodeId->data.string);
+            String_Initialize(&nodeId->Data.String);
             break;
         case IdentifierType_Guid:
-            Guid_Initialize(&nodeId->data.guid);
+            Guid_Initialize(&nodeId->Data.Guid);
             break;
         case IdentifierType_ByteString:
-            ByteString_Initialize(&nodeId->data.bstring);
+            ByteString_Initialize(&nodeId->Data.Bstring);
             break;
     }
 }
 
 void NodeId_Clear(UA_NodeId* nodeId){
-    nodeId->namespace = 0; // OPCUA namespace
-    switch(nodeId->identifierType){
+    nodeId->Namespace = 0; // OPCUA namespace
+    switch(nodeId->IdentifierType){
         case IdentifierType_Numeric:
-            UInt32_Clear(&nodeId->data.numeric);
+            UInt32_Clear(&nodeId->Data.Numeric);
             break;
         case IdentifierType_String:
-            String_Clear(&nodeId->data.string);
+            String_Clear(&nodeId->Data.String);
             break;
         case IdentifierType_Guid:
-            Guid_Clear(&nodeId->data.guid);
+            Guid_Clear(&nodeId->Data.Guid);
             break;
         case IdentifierType_ByteString:
-            ByteString_Clear(&nodeId->data.bstring);
+            ByteString_Clear(&nodeId->Data.Bstring);
             break;
     }
-    nodeId->identifierType = IdentifierType_Numeric;
+    nodeId->IdentifierType = IdentifierType_Numeric;
 }
 
 void ExpandedNodeId_Initialize(UA_ExpandedNodeId* expNodeId){
-    String_Initialize(&expNodeId->namespaceUri);
-    NodeId_Initialize(&expNodeId->nodeId);
-    UInt32_Initialize(&expNodeId->serverIndex);
+    String_Initialize(&expNodeId->NamespaceUri);
+    NodeId_Initialize(&expNodeId->NodeId);
+    UInt32_Initialize(&expNodeId->ServerIndex);
 }
 
 void ExpandedNodeId_Clear(UA_ExpandedNodeId* expNodeId){
-    String_Initialize(&expNodeId->namespaceUri);
-    NodeId_Initialize(&expNodeId->nodeId);
-    UInt32_Initialize(&expNodeId->serverIndex);
+    String_Initialize(&expNodeId->NamespaceUri);
+    NodeId_Initialize(&expNodeId->NodeId);
+    UInt32_Initialize(&expNodeId->ServerIndex);
 }
 
 void StatusCode_Initialize(StatusCode* status){
@@ -473,75 +473,75 @@ void StatusCode_Clear(StatusCode* status){
 
 void DiagnosticInfo_Initialize(UA_DiagnosticInfo* diagInfo){
     if(diagInfo != NULL){
-        diagInfo->symbolicId = -1;
-        diagInfo->namespaceUri = -1;
-        diagInfo->locale = -1;
-        diagInfo->localizedText = -1;
-        String_Initialize(&diagInfo->additionalInfo);
-        diagInfo->innerStatusCode = STATUS_OK;
-        diagInfo->innerDiagnosticInfo = NULL;
+        diagInfo->SymbolicId = -1;
+        diagInfo->NamespaceUri = -1;
+        diagInfo->Locale = -1;
+        diagInfo->LocalizedText = -1;
+        String_Initialize(&diagInfo->AdditionalInfo);
+        diagInfo->InnerStatusCode = STATUS_OK;
+        diagInfo->InnerDiagnosticInfo = NULL;
     }
 }
 
 void DiagnosticInfo_Clear(UA_DiagnosticInfo* diagInfo){
     if(diagInfo != NULL){
-        String_Clear(&diagInfo->additionalInfo);
-        if(diagInfo->innerDiagnosticInfo != NULL){
-            DiagnosticInfo_Clear(diagInfo->innerDiagnosticInfo);
-            free(diagInfo->innerDiagnosticInfo);
+        String_Clear(&diagInfo->AdditionalInfo);
+        if(diagInfo->InnerDiagnosticInfo != NULL){
+            DiagnosticInfo_Clear(diagInfo->InnerDiagnosticInfo);
+            free(diagInfo->InnerDiagnosticInfo);
         }
-        diagInfo->symbolicId = -1;
-        diagInfo->namespaceUri = -1;
-        diagInfo->locale = -1;
-        diagInfo->localizedText = -1;
-        diagInfo->innerStatusCode = STATUS_OK;
-        diagInfo->innerDiagnosticInfo = NULL;
+        diagInfo->SymbolicId = -1;
+        diagInfo->NamespaceUri = -1;
+        diagInfo->Locale = -1;
+        diagInfo->LocalizedText = -1;
+        diagInfo->InnerStatusCode = STATUS_OK;
+        diagInfo->InnerDiagnosticInfo = NULL;
     }
 }
 
 
 void QualifiedName_Initialize(UA_QualifiedName* qname){
-    qname->namespaceIndex = 0;
-    String_Initialize(&qname->name);
+    qname->NamespaceIndex = 0;
+    String_Initialize(&qname->Name);
 }
 
 void QualifiedName_Clear(UA_QualifiedName* qname){
-    qname->namespaceIndex = 0;
-    String_Clear(&qname->name);
+    qname->NamespaceIndex = 0;
+    String_Clear(&qname->Name);
 }
 
 void LocalizedText_Initialize(UA_LocalizedText* localizedText){
-    String_Initialize(&localizedText->locale);
-    String_Initialize(&localizedText->text);
+    String_Initialize(&localizedText->Locale);
+    String_Initialize(&localizedText->Text);
 }
 
 void LocalizedText_Clear(UA_LocalizedText* localizedText){
-    String_Clear(&localizedText->locale);
-    String_Clear(&localizedText->text);
+    String_Clear(&localizedText->Locale);
+    String_Clear(&localizedText->Text);
 }
 
 void ExtensionObject_Initialize(UA_ExtensionObject* extObj){
     memset(extObj, 0, sizeof(UA_ExtensionObject));
-    NodeId_Initialize(&extObj->typeId);
-    extObj->length = -1;
+    NodeId_Initialize(&extObj->TypeId);
+    extObj->Length = -1;
 }
 
 void ExtensionObject_Clear(UA_ExtensionObject* extObj){
-    NodeId_Clear(&extObj->typeId);
-    switch(extObj->encoding){
+    NodeId_Clear(&extObj->TypeId);
+    switch(extObj->Encoding){
         case UA_ExtObjBodyEncoding_None:
             break;
         case UA_ExtObjBodyEncoding_ByteString:
-            ByteString_Clear(&extObj->body.bstring);
+            ByteString_Clear(&extObj->Body.Bstring);
             break;
         case UA_ExtObjBodyEncoding_XMLElement:
-            XmlElement_Clear(&extObj->body.xml);
+            XmlElement_Clear(&extObj->Body.Xml);
             break;
         case UA_ExtObjBodyEncoding_Object:
-            extObj->body.object.objType->Clear(extObj->body.object.value);
+            extObj->Body.Object.ObjType->Clear(extObj->Body.Object.Value);
             break;
     }
-    extObj->length = -1;
+    extObj->Length = -1;
 }
 
 void ApplyToVariantNonArrayBuiltInType(UA_BuiltinId builtInTypeId,
@@ -549,79 +549,79 @@ void ApplyToVariantNonArrayBuiltInType(UA_BuiltinId builtInTypeId,
                                        BuiltInFunction* builtInFunction){
     switch(builtInTypeId){
         case UA_Boolean_Id:
-            builtInFunction(&val.boolean);
+            builtInFunction(&val.Boolean);
             break;
         case UA_SByte_Id:
-            builtInFunction(&val.sbyte);
+            builtInFunction(&val.Sbyte);
             break;
         case UA_Byte_Id:
-            builtInFunction(&val.byte);
+            builtInFunction(&val.Byte);
             break;
         case UA_Int16_Id:
-            builtInFunction(&val.int16);
+            builtInFunction(&val.Int16);
             break;
         case UA_UInt16_Id:
-            builtInFunction(&val.uint16);
+            builtInFunction(&val.Uint16);
             break;
         case UA_Int32_Id:
-            builtInFunction(&val.int32);
+            builtInFunction(&val.Int32);
             break;
         case UA_UInt32_Id:
-            builtInFunction(&val.uint32);
+            builtInFunction(&val.Uint32);
             break;
         case UA_Int64_Id:
-            builtInFunction(&val.int64);
+            builtInFunction(&val.Int64);
             break;
         case UA_UInt64_Id:
-            builtInFunction(&val.uint64);
+            builtInFunction(&val.Uint64);
             break;
         case UA_Float_Id:
-            builtInFunction(&val.floatv);
+            builtInFunction(&val.Floatv);
             break;
         case UA_Double_Id:
-            builtInFunction(&val.doublev);
+            builtInFunction(&val.Doublev);
             break;
         case UA_String_Id:
-            builtInFunction(&val.string);
+            builtInFunction(&val.String);
             break;
         case UA_DateTime_Id:
-            builtInFunction(&val.date);
+            builtInFunction(&val.Date);
             break;
         case UA_Guid_Id:
-            builtInFunction(val.guid);
+            builtInFunction(val.Guid);
             break;
         case UA_ByteString_Id:
-            builtInFunction(&val.bstring);
+            builtInFunction(&val.Bstring);
             break;
         case UA_XmlElement_Id:
-            builtInFunction(&val.xmlElt);
+            builtInFunction(&val.XmlElt);
             break;
         case UA_NodeId_Id:
-            builtInFunction(val.nodeId);
+            builtInFunction(val.NodeId);
             break;
         case UA_ExpandedNodeId_Id:
-            builtInFunction(val.expNodeId);
+            builtInFunction(val.ExpNodeId);
             break;
         case UA_StatusCode_Id:
-            builtInFunction(&val.status);
+            builtInFunction(&val.Status);
             break;
         case UA_QualifiedName_Id:
-            builtInFunction(val.qname);
+            builtInFunction(val.Qname);
             break;
         case UA_LocalizedText_Id:
-            builtInFunction(val.localizedText);
+            builtInFunction(val.LocalizedText);
             break;
         case UA_ExtensionObject_Id:
-            builtInFunction(val.extObject);
+            builtInFunction(val.ExtObject);
             break;
         case UA_DataValue_Id:
-            builtInFunction(val.dataValue);
+            builtInFunction(val.DataValue);
             break;
         case UA_Variant_Id:
             assert(FALSE);
             break;
         case UA_DiagnosticInfo_Id:
-            builtInFunction(val.diagInfo);
+            builtInFunction(val.DiagInfo);
             break;
         default:
             break;
@@ -636,127 +636,127 @@ void ApplyToVariantArrayBuiltInType(UA_BuiltinId builtInTypeId,
     switch(builtInTypeId){
         case UA_Boolean_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.booleanArr[idx]);
+                builtInFunction(&array.BooleanArr[idx]);
             }
             break;
         case UA_SByte_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.sbyteArr[idx]);
+                builtInFunction(&array.SbyteArr[idx]);
             }
             break;
         case UA_Byte_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.byteArr[idx]);
+                builtInFunction(&array.ByteArr[idx]);
             }
             break;
         case UA_Int16_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.int16Arr[idx]);
+                builtInFunction(&array.Int16Arr[idx]);
             }
             break;
         case UA_UInt16_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.uint16Arr[idx]);
+                builtInFunction(&array.Uint16Arr[idx]);
             }
             break;
         case UA_Int32_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.int32Arr[idx]);
+                builtInFunction(&array.Int32Arr[idx]);
             }
             break;
         case UA_UInt32_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.uint32Arr[idx]);
+                builtInFunction(&array.Uint32Arr[idx]);
             }
             break;
         case UA_Int64_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.int64Arr[idx]);
+                builtInFunction(&array.Int64Arr[idx]);
             }
             break;
         case UA_UInt64_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.uint64Arr[idx]);
+                builtInFunction(&array.Uint64Arr[idx]);
             }
             break;
         case UA_Float_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.floatvArr[idx]);
+                builtInFunction(&array.FloatvArr[idx]);
             }
             break;
         case UA_Double_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.doublevArr[idx]);
+                builtInFunction(&array.DoublevArr[idx]);
             }
             break;
         case UA_String_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.stringArr[idx]);
+                builtInFunction(&array.StringArr[idx]);
             }
             break;
         case UA_DateTime_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.dateArr[idx]);
+                builtInFunction(&array.DateArr[idx]);
             }
             break;
         case UA_Guid_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.guidArr[idx]);
+                builtInFunction(&array.GuidArr[idx]);
             }
             break;
         case UA_ByteString_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.bstringArr[idx]);
+                builtInFunction(&array.BstringArr[idx]);
             }
             break;
         case UA_XmlElement_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.xmlEltArr[idx]);
+                builtInFunction(&array.XmlEltArr[idx]);
             }
             break;
         case UA_NodeId_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.nodeIdArr[idx]);
+                builtInFunction(&array.NodeIdArr[idx]);
             }
             break;
         case UA_ExpandedNodeId_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.expNodeIdArr[idx]);
+                builtInFunction(&array.ExpNodeIdArr[idx]);
             }
             break;
         case UA_StatusCode_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.statusArr[idx]);
+                builtInFunction(&array.StatusArr[idx]);
             }
             break;
         case UA_QualifiedName_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.qnameArr[idx]);
+                builtInFunction(&array.QnameArr[idx]);
             }
             break;
         case UA_LocalizedText_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.localizedTextArr[idx]);
+                builtInFunction(&array.LocalizedTextArr[idx]);
             }
             break;
         case UA_ExtensionObject_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.extObjectArr[idx]);
+                builtInFunction(&array.ExtObjectArr[idx]);
             }
             break;
         case UA_DataValue_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.dataValueArr[idx]);
+                builtInFunction(&array.DataValueArr[idx]);
             }
             break;
         case UA_Variant_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.variantArr[idx]);
+                builtInFunction(&array.VariantArr[idx]);
             }
             break;
         case UA_DiagnosticInfo_Id:
             for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.diagInfoArr[idx]);
+                builtInFunction(&array.DiagInfoArr[idx]);
             }
             break;
         default:
@@ -853,32 +853,32 @@ BuiltInFunction* GetBuiltInTypeClearFunction(UA_BuiltinId builtInTypeId){
 }
 
 void Variant_Clear(UA_Variant* variant){
-    BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->builtInTypeMask);
+    BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeMask);
     // Matrix flag => array flag
-    assert(((variant->arrayTypeMask & UA_VariantArrayMatrixFlag) != 0 &&
-             (variant->arrayTypeMask & UA_VariantArrayValueFlag) != 0)
-           || ((variant->arrayTypeMask & UA_VariantArrayMatrixFlag) == 0));
+    assert(((variant->ArrayTypeMask & UA_VariantArrayMatrixFlag) != 0 &&
+             (variant->ArrayTypeMask & UA_VariantArrayValueFlag) != 0)
+           || ((variant->ArrayTypeMask & UA_VariantArrayMatrixFlag) == 0));
 
-    if((variant->arrayTypeMask & UA_VariantArrayValueFlag) != 0){
+    if((variant->ArrayTypeMask & UA_VariantArrayValueFlag) != 0){
         int32_t length = 0;
-        if((variant->arrayTypeMask & UA_VariantArrayMatrixFlag) != 0){
+        if((variant->ArrayTypeMask & UA_VariantArrayMatrixFlag) != 0){
             int32_t idx = 0;
-            for(idx = 0; idx < variant->value.matrix.dimensions; idx ++){
-                length *= variant->value.matrix.arrayDimensions[idx];
+            for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
+                length *= variant->Value.Matrix.ArrayDimensions[idx];
             }
-            ApplyToVariantArrayBuiltInType(variant->builtInTypeMask,
-                                           variant->value.matrix.content,
+            ApplyToVariantArrayBuiltInType(variant->BuiltInTypeMask,
+                                           variant->Value.Matrix.Content,
                                            length,
                                            clearFunction);
         }else{
-            ApplyToVariantArrayBuiltInType(variant->builtInTypeMask,
-                                           variant->value.array.content,
-                                           variant->value.array.length,
+            ApplyToVariantArrayBuiltInType(variant->BuiltInTypeMask,
+                                           variant->Value.Array.Content,
+                                           variant->Value.Array.Length,
                                            clearFunction);
         }
     }else{
-        ApplyToVariantNonArrayBuiltInType(variant->builtInTypeMask,
-                                          variant->value,
+        ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeMask,
+                                          variant->Value,
                                           clearFunction);
     }
 }
@@ -887,11 +887,11 @@ void DataValue_Initialize(UA_DataValue* dataValue){
     memset(dataValue, 0, sizeof(UA_DataValue));
 }
 void DataValue_Clear(UA_DataValue* dataValue){
-    Variant_Clear(&dataValue->value);
-    StatusCode_Clear(&dataValue->status);
-    dataValue->sourceTimestamp = 0;
-    dataValue->serverTimestamp = 0;
-    dataValue->sourcePicoSeconds = 0;
-    dataValue->serverPicoSeconds = 0;
+    Variant_Clear(&dataValue->Value);
+    StatusCode_Clear(&dataValue->Status);
+    dataValue->SourceTimestamp = 0;
+    dataValue->ServerTimestamp = 0;
+    dataValue->SourcePicoSeconds = 0;
+    dataValue->ServerPicoSeconds = 0;
 }
 

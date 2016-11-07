@@ -20,27 +20,27 @@
 const uint32_t scProtocolVersion = 0;
 
 static const UA_String UA_String_Security_Policy_None = {
-        .length = 47,
-        .characters = (UA_Byte*) SECURITY_POLICY_NONE,
-        .clearBytes = FALSE
+        .Length = 47,
+        .Data = (UA_Byte*) SECURITY_POLICY_NONE,
+        .ClearBytes = FALSE
 };
 
 static const UA_String UA_String_Security_Policy_Basic128Rsa15 = {
-        .length = 56,
-        .characters = (UA_Byte*) SECURITY_POLICY_BASIC128RSA15,
-        .clearBytes = FALSE
+        .Length = 56,
+        .Data = (UA_Byte*) SECURITY_POLICY_BASIC128RSA15,
+        .ClearBytes = FALSE
 };
 
 static const UA_String UA_String_Security_Policy_Basic256 = {
-        .length = 51,
-        .characters = (UA_Byte*) SECURITY_POLICY_BASIC256,
-        .clearBytes = FALSE
+        .Length = 51,
+        .Data = (UA_Byte*) SECURITY_POLICY_BASIC256,
+        .ClearBytes = FALSE
 };
 
 static const UA_String UA_String_Security_Policy_Basic256Sha256 = {
-        .length = 57,
-        .characters = (UA_Byte*) SECURITY_POLICY_BASIC256SHA256,
-        .clearBytes = FALSE
+        .Length = 57,
+        .Data = (UA_Byte*) SECURITY_POLICY_BASIC256SHA256,
+        .ClearBytes = FALSE
 };
 
 SC_Connection* SC_Create (){
@@ -106,33 +106,33 @@ StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
                                         const Certificate*   otherAppCertificate){
     StatusCode status = STATUS_OK;
     uint32_t certLength = 0;
-    if(scConnection->runningAppCertificate.length <= 0 &&
+    if(scConnection->runningAppCertificate.Length <= 0 &&
        scConnection->runningAppPrivateKey == NULL &&
-       scConnection->otherAppCertificate.length <= 0)
+       scConnection->otherAppCertificate.Length <= 0)
     {
         scConnection->runningAppPublicKeyCert = runningAppCertificate;
         scConnection->runningAppPrivateKey = runningAppPrivateKey;
         status = KeyManager_Certificate_CopyDER(runningAppCertificate,
-                                                &scConnection->runningAppCertificate.characters,
+                                                &scConnection->runningAppCertificate.Data,
                                                 &certLength);
         if(certLength > INT32_MAX){
             status = STATUS_NOK;
         }else{
-            scConnection->runningAppCertificate.length = (int32_t) certLength;
+            scConnection->runningAppCertificate.Length = (int32_t) certLength;
         }
 
         scConnection->otherAppPublicKeyCert = otherAppCertificate;
         if(STATUS_OK == status){
             certLength = 0;
             status = KeyManager_Certificate_CopyDER(otherAppCertificate,
-                                                    &scConnection->otherAppCertificate.characters,
+                                                    &scConnection->otherAppCertificate.Data,
                                                     &certLength);
         }
 
         if(certLength > INT32_MAX){
             status = STATUS_NOK;
         }else{
-            scConnection->otherAppCertificate.length = (int32_t) certLength;
+            scConnection->otherAppCertificate.Length = (int32_t) certLength;
         }
     }else{
         status = STATUS_INVALID_STATE;
@@ -299,7 +299,7 @@ StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
     }
 
     if(status == STATUS_OK && symmetricAlgo == FALSE){
-        if(scConnection->otherAppCertificate.length <= 0){
+        if(scConnection->otherAppCertificate.Length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
 
@@ -375,7 +375,7 @@ StatusCode CheckMaxSenderCertificateSize(UA_ByteString*  senderCertificate,
      messageChunkSize -
      UA_SECURE_MESSAGE_HEADER_LENGTH -
      4 - // URI length field size
-     securityPolicyUri->length -
+     securityPolicyUri->Length -
      4 - // Sender certificate length field
      4 - // Receiver certificate thumbprint length field
      20 - // Receiver certificate thumbprint length
@@ -388,7 +388,7 @@ StatusCode CheckMaxSenderCertificateSize(UA_ByteString*  senderCertificate,
     }
     maxSize = maxSize - extraPadding - asymmetricSignatureSize;
 
-    if(senderCertificate->length <= maxSize){
+    if(senderCertificate->Length <= maxSize){
         status = STATUS_OK;
     }
     return status;
@@ -567,7 +567,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvider,
 
     // Security Policy:
     if(status == STATUS_OK){
-        if(securityPolicy->length>0){
+        if(securityPolicy->Length>0){
             status = String_Write(securityPolicy, msgBuffer);
         }else{
             // Null security policy is invalid parameter since unspecified
@@ -576,7 +576,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvider,
     }
     // Sender Certificate:
     if(status == STATUS_OK){
-        if(toSign != FALSE && senderCertificate->length>0){ // Field shall be null if message not signed
+        if(toSign != FALSE && senderCertificate->Length>0){ // Field shall be null if message not signed
             status = String_Write(senderCertificate, msgBuffer);
         }else if(toSign == FALSE){
             // TODO:
@@ -608,7 +608,7 @@ StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvider,
             if(STATUS_OK == status){
                 status = KeyManager_Certificate_GetThumbprint(cryptoProvider,
                                                               receiverCertCrypto,
-                                                              recCertThumbprint.characters,
+                                                              recCertThumbprint.Data,
                                                               thumbprintLength);
             }
 
@@ -660,13 +660,13 @@ StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
 
     if(msgBuffer != NULL && msgBody != NULL &&
        encType != NULL){
-        nodeId.identifierType = IdentifierType_Numeric;
+        nodeId.IdentifierType = IdentifierType_Numeric;
         if(encType->NamespaceUri == NULL){
-            nodeId.namespace = 0;
+            nodeId.Namespace = 0;
         }else{
             // TODO: find namespace Id
         }
-        nodeId.data.numeric = encType->BinaryEncodingTypeId;
+        nodeId.Data.Numeric = encType->BinaryEncodingTypeId;
 
         status = NodeId_Write(&nodeId, msgBuffer);
     }
@@ -825,9 +825,9 @@ StatusCode EncodePadding(SC_Connection* scConnection,
     *hasPadding = 1; // True
 
     if(symmetricAlgo == FALSE){
-        if(scConnection->runningAppCertificate.length <= 0 ||
+        if(scConnection->runningAppCertificate.Length <= 0 ||
            scConnection->runningAppPrivateKey == NULL ||
-           scConnection->otherAppCertificate.length <= 0){
+           scConnection->otherAppCertificate.Length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
             AsymmetricKey publicKey;
@@ -899,9 +899,9 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
     StatusCode status = STATUS_OK;
     UA_ByteString signedData;
     if(symmetricAlgo == FALSE){
-        if(scConnection->runningAppCertificate.length <= 0 ||
+        if(scConnection->runningAppCertificate.Length <= 0 ||
            scConnection->runningAppPrivateKey == NULL ||
-           scConnection->otherAppCertificate.length <= 0){
+           scConnection->otherAppCertificate.Length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
             status = ByteString_InitializeFixedSize(&signedData, signatureSize);
@@ -910,16 +910,16 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
                                                        msgBuffer->buffers->data,
                                                        msgBuffer->buffers->length,
                                                        scConnection->runningAppPrivateKey,
-                                                       signedData.characters,
-                                                       signedData.length);
+                                                       signedData.Data,
+                                                       signedData.Length);
             }else{
                 status = STATUS_NOK;
             }
 
             if(status == STATUS_OK){
                 status = Buffer_Write(msgBuffer->buffers,
-                                      signedData.characters,
-                                      signedData.length);
+                                      signedData.Data,
+                                      signedData.Length);
             }
             ByteString_Clear(&signedData);
         }
@@ -935,16 +935,16 @@ StatusCode EncodeSignature(SC_Connection* scConnection,
                            msgBuffer->buffers->data,
                            msgBuffer->buffers->length,
                            scConnection->currentSecuKeySets.senderKeySet->signKey,
-                           signedData.characters,
-                           signedData.length);
+                           signedData.Data,
+                           signedData.Length);
             }else{
                 status = STATUS_NOK;
             }
 
             if(status == STATUS_OK){
                 status = Buffer_Write(msgBuffer->buffers,
-                                      signedData.characters,
-                                      signedData.length);
+                                      signedData.Data,
+                                      signedData.Length);
             }
             ByteString_Clear(&signedData);
         }
@@ -968,9 +968,9 @@ StatusCode EncryptMsg(SC_Connection* scConnection,
     }
 
     if(status == STATUS_OK && symmetricAlgo == FALSE){
-        if(scConnection->runningAppCertificate.length <= 0 ||
+        if(scConnection->runningAppCertificate.Length <= 0 ||
            scConnection->runningAppPrivateKey == NULL ||
-           scConnection->otherAppCertificate.length <= 0){
+           scConnection->otherAppCertificate.Length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
             AsymmetricKey otherAppPublicKey;
@@ -1279,7 +1279,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, // TODO
     if(status == STATUS_OK){
         status = ByteString_Read(&senderCertificate, transportBuffer);
         if(status == STATUS_OK){
-            if (toSign == FALSE && senderCertificate.length > 0){
+            if (toSign == FALSE && senderCertificate.Length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not signed"
                 status = STATUS_INVALID_RCV_PARAMETER;
             }else if(toSign != FALSE){
@@ -1295,7 +1295,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, // TODO
 
                 if(status == STATUS_OK && validateSenderCert != FALSE){
                     Certificate *cert = NULL;
-                    status = KeyManager_Certificate_CreateFromDER(senderCertificate.characters, senderCertificate.length,
+                    status = KeyManager_Certificate_CreateFromDER(senderCertificate.Data, senderCertificate.Length,
                                                                   &cert);
                     if(status == STATUS_OK){
                         status = CryptoProvider_Certificate_Validate(scConnection->currentCryptoProvider,
@@ -1314,7 +1314,7 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, // TODO
         status = ByteString_Read(&receiverCertThumb, transportBuffer);
 
         if(status == STATUS_OK){
-            if(toEncrypt == FALSE && receiverCertThumb.length > 0){
+            if(toEncrypt == FALSE && receiverCertThumb.Length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not encrypted"
                 status =STATUS_INVALID_RCV_PARAMETER;
             }else if(toEncrypt != FALSE){
@@ -1331,12 +1331,12 @@ StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, // TODO
                     status = STATUS_NOK;
                 }
                 if(STATUS_OK == status){
-                    if((int32_t) thumbprintLength == receiverCertThumb.length){
+                    if((int32_t) thumbprintLength == receiverCertThumb.Length){
                         status = ByteString_InitializeFixedSize(&curAppCertThumbprint, (int32_t) thumbprintLength);
                         if(status == STATUS_OK){
                             status = KeyManager_Certificate_GetThumbprint(scConnection->currentCryptoProvider,
                                                                           scConnection->runningAppPublicKeyCert,
-                                                                          curAppCertThumbprint.characters,
+                                                                          curAppCertThumbprint.Data,
                                                                           thumbprintLength);
 
                             if(status == STATUS_OK){
@@ -1540,15 +1540,15 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
         status = NodeId_Read(&nodeId, receptionBuffer);
     }
 
-    if(status == STATUS_OK && nodeId.identifierType == OpcUa_IdType_Numeric){
+    if(status == STATUS_OK && nodeId.IdentifierType == OpcUa_IdType_Numeric){
 
         if(respEncType != NULL){
             // Case in which we know the expected type from the request Id
-            if (nodeId.data.numeric == respEncType->TypeId || nodeId.data.numeric == respEncType->BinaryEncodingTypeId){
+            if (nodeId.Data.Numeric == respEncType->TypeId || nodeId.Data.Numeric == respEncType->BinaryEncodingTypeId){
     //          || nodeId.data.numeric == respEncType->xmlTypeId){ => what is the point to accept this type ?
                 *receivedEncType = respEncType;
             }else if(errEncType != NULL &&
-                     (nodeId.data.numeric == errEncType->TypeId || nodeId.data.numeric == errEncType->BinaryEncodingTypeId)){
+                     (nodeId.Data.Numeric == errEncType->TypeId || nodeId.Data.Numeric == errEncType->BinaryEncodingTypeId)){
     //               || nodeId.data.numeric == errEncType->xmlTypeId){ => what is the point to accept this type ?
                 *receivedEncType = errEncType;
             }else{
@@ -1558,14 +1558,14 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
             // Check namespace of received type using index
             if(status == STATUS_OK){
                 recEncType = *receivedEncType;
-                if(recEncType->NamespaceUri == NULL && nodeId.namespace != OPCUA_NAMESPACE_INDEX){
+                if(recEncType->NamespaceUri == NULL && nodeId.Namespace != OPCUA_NAMESPACE_INDEX){
                     status = STATUS_INVALID_RCV_PARAMETER;
                 }else if(recEncType->NamespaceUri != NULL){
                     status = Namespace_GetIndex(namespaceTable,
                                                 recEncType->NamespaceUri,
                                                 &nsIndex);
                     if(status == STATUS_OK){
-                        if(nodeId.namespace != nsIndex){
+                        if(nodeId.Namespace != nsIndex){
                             status = STATUS_INVALID_RCV_PARAMETER;
                         }
                     }
@@ -1574,12 +1574,12 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
 
         }else{
             // Must be the case in which we cannot know the type before decoding it
-            if(nodeId.namespace == OPCUA_NAMESPACE_INDEX){
-                recEncType = EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.data.numeric);
+            if(nodeId.Namespace == OPCUA_NAMESPACE_INDEX){
+                recEncType = EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.Data.Numeric);
             }else{
-                nsName = Namespace_GetName(namespaceTable, nodeId.namespace);
+                nsName = Namespace_GetName(namespaceTable, nodeId.Namespace);
                 if(nsName != NULL){
-                    recEncType = EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.data.numeric);
+                    recEncType = EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.Data.Numeric);
                 }
                 if(recEncType == NULL){
                     status = STATUS_INVALID_RCV_PARAMETER;

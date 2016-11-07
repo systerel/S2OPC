@@ -9,6 +9,9 @@
 #define INGOPCS_UA_ENCODEABLE_H_
 
 #include <stdint.h>
+#include <ua_base_types.h>
+
+BEGIN_EXTERN_C
 
 struct UA_MsgBuffer;
 
@@ -35,7 +38,9 @@ typedef struct UA_EncodeableType {
 
 
 UA_EncodeableType* EncodeableType_GetEncodeableType(UA_EncodeableType** encTypesTable, // null terminated enctype* list
-                                                    const char*         namespace,
+                                                    const char*         namespac,
                                                     uint32_t            typeId);
+
+END_EXTERN_C
 
 #endif /* INGOPCS_UA_ENCODEABLE_H_ */

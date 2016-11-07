@@ -450,7 +450,7 @@ StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
     if(connection != NULL &&
        uri != NULL &&
        callback != NULL){
-        if(connection->url.length <= 0 &&
+        if(connection->url.Length <= 0 &&
            connection->callback == NULL &&
            connection->callbackData == NULL &&
            connection->state == TCP_Connection_Disconnected)
