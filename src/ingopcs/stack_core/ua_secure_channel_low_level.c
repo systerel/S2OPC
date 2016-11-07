@@ -1529,7 +1529,7 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
                             void**              encodeableObj)
 {
     StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_EncodeableType* recEncType;
+    UA_EncodeableType* recEncType = NULL;
     UA_NodeId nodeId;
     const char* nsName;
     uint16_t nsIndex = 0;
@@ -1557,25 +1557,25 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
 
             // Check namespace of received type using index
             if(status == STATUS_OK){
-                    recEncType = *receivedEncType;
-                    if(recEncType->NamespaceUri == NULL && nodeId.namespace != OPCUA_NAMESPACE_INDEX){
-                        status = STATUS_INVALID_RCV_PARAMETER;
-                    }else if(recEncType->NamespaceUri != NULL){
-                        status = Namespace_GetIndex(namespaceTable,
-                                                    recEncType->NamespaceUri,
-                                                    &nsIndex);
-                        if(status == STATUS_OK){
-                            if(nodeId.namespace != nsIndex){
-                                status = STATUS_INVALID_RCV_PARAMETER;
-                            }
+                recEncType = *receivedEncType;
+                if(recEncType->NamespaceUri == NULL && nodeId.namespace != OPCUA_NAMESPACE_INDEX){
+                    status = STATUS_INVALID_RCV_PARAMETER;
+                }else if(recEncType->NamespaceUri != NULL){
+                    status = Namespace_GetIndex(namespaceTable,
+                                                recEncType->NamespaceUri,
+                                                &nsIndex);
+                    if(status == STATUS_OK){
+                        if(nodeId.namespace != nsIndex){
+                            status = STATUS_INVALID_RCV_PARAMETER;
                         }
                     }
                 }
+            }
 
         }else{
             // Must be the case in which we cannot know the type before decoding it
             if(nodeId.namespace == OPCUA_NAMESPACE_INDEX){
-                EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.data.numeric);
+                recEncType = EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.data.numeric);
             }else{
                 nsName = Namespace_GetName(namespaceTable, nodeId.namespace);
                 if(nsName != NULL){
