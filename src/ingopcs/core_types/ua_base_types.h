@@ -29,4 +29,6 @@ typedef uint32_t StatusCode;
 
 #define FALSE 0
 
+typedef void* P_Timer;
+
 #endif /* INGOPCS_BASIC_TYPES_H_ */

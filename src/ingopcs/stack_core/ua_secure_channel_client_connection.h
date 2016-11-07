@@ -16,8 +16,6 @@
 #include <ua_namespace_table.h>
 #include <ua_secure_channel_low_level.h>
 
-#include <wrappers.h>
-
 struct SC_ClientConnection;
 
 typedef StatusCode (SC_ConnectionEvent_CB)(struct SC_ClientConnection* cConnection,

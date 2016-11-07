@@ -124,6 +124,10 @@ SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*   namespace
     return scClientConnection;
 }
 
+void Timer_Delete(P_Timer* timer){
+    (void) timer;
+}
+
 void SC_Client_Delete(SC_ClientConnection* scConnection)
 {
     if(scConnection != NULL){

@@ -8,6 +8,8 @@
 #ifndef INGOPCS_TCP_UA_LISTENER_H_
 #define INGOPCS_TCP_UA_LISTENER_H_
 
+typedef void* TCP_UA_ListenerEvent_CB;
+
 typedef struct {
     UA_String                url;
     uint32_t                 protocolVersion;
