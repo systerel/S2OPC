@@ -64,11 +64,19 @@ StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint
  * \note    Not in unit tests.
  */
 StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
-                                                   AsymmetricKey **ppKey)
+                                                   AsymmetricKey **ppKey,
+                                                   char *password,
+                                                   uint32_t lenPassword)
 {
     AsymmetricKey *key = NULL;
 
     if(NULL == szPath || NULL == ppKey)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Check password
+    if(NULL == password && 0 != lenPassword)
+        return STATUS_INVALID_PARAMETERS;
+    if(NULL != password && (0 == lenPassword || '\0' != password[lenPassword]))
         return STATUS_INVALID_PARAMETERS;
 
     key = malloc(sizeof(AsymmetricKey));
@@ -76,7 +84,7 @@ StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
         return STATUS_NOK;
     mbedtls_pk_init(&key->pk);
 
-    if(mbedtls_pk_parse_keyfile(&key->pk, szPath, NULL) != 0)
+    if(mbedtls_pk_parse_keyfile(&key->pk, szPath, password) != 0)
     {
         free(key);
         return STATUS_NOK;

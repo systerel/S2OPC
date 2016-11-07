@@ -30,7 +30,9 @@
 StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
                                                      AsymmetricKey **ppKey);
 StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
-                                                   AsymmetricKey **ppKey);
+                                                   AsymmetricKey **ppKey,
+                                                   char *password,
+                                                   uint32_t lenPassword);
 void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey);
 
 StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
