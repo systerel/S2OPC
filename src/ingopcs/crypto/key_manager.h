@@ -33,6 +33,10 @@ StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
                                                    AsymmetricKey **ppKey);
 void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey);
 
+StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
+                                          uint8_t *ppDest, uint32_t lenDest,
+                                          uint32_t *pLenWritten);
+
 
 /* ------------------------------------------------------------------------------------------------
  * Cert API

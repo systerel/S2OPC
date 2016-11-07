@@ -102,6 +102,40 @@ void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey)
     free(pKey);
 }
 
+
+/**
+ * \brief   Creates a DER from the AsymmetricKey \p pKey and copies it to \p pDest.
+ *
+ *          This function does not allocate the buffer containing the DER. The operation may fail if the allocated buffer is not large enough.
+ *          The required length cannot be precisely calculated, but a value of 8 times the key length in bytes is recommended.
+ */
+StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
+                                          uint8_t *pDest, uint32_t lenDest,
+                                          uint32_t *pLenWritten)
+{
+    StatusCode status = STATUS_NOK;
+    uint8_t *buffer = NULL;
+
+    if(NULL == pKey || NULL == pDest || 0 == lenDest || NULL == pLenWritten)
+        return STATUS_INVALID_PARAMETERS;
+
+    buffer = malloc(lenDest);
+    if(NULL == buffer)
+        return STATUS_NOK;
+
+    *pLenWritten = mbedtls_pk_write_key_der(&((AsymmetricKey *)pKey)->pk, buffer, lenDest);
+    if(*pLenWritten > 0 && *pLenWritten <= lenDest)
+    {
+        memcpy(pDest, buffer+lenDest-*pLenWritten, *pLenWritten);
+        status = STATUS_OK;
+    }
+
+    free(buffer);
+
+    return status;
+}
+
+
 /* ------------------------------------------------------------------------------------------------
  * Cert API
  * ------------------------------------------------------------------------------------------------
