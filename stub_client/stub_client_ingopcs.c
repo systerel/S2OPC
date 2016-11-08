@@ -124,7 +124,7 @@ int main(void){
 
     // Private key: load
     AsymmetricKey *priv_cli = NULL;
-    status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli);
+    status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
     if(STATUS_OK != status)
         printf("Failed to load private key\n");
 
