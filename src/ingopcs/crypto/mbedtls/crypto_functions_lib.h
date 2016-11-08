@@ -8,7 +8,7 @@
  */
 
 
-#include "../../core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
 #include "secret_buffer.h"
 #include "crypto_types.h"
 #include "key_manager.h"

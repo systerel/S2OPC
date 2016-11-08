@@ -1,19 +1,19 @@
 /*
- * ua_channel.c
+ *sopc_channel.c
  *
  *  Created on: Sep 29, 2016
  *      Author: vincent
  */
 
-#include <ua_channel.h>
+#include <sopc_channel.h>
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
 #include <opcua_statuscodes.h>
 
-#include <ua_builtintypes.h>
-#include <ua_secure_channel_client_connection.h>
-#include <ua_stack_config.h>
+#include <sopc_builtintypes.h>
+#include <sopc_secure_channel_client_connection.h>
+#include <sopc_stack_config.h>
 
 #include <stdlib.h>
 

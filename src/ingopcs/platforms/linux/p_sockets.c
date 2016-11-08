@@ -11,7 +11,8 @@
 #include <netinet/tcp.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <ua_stack_csts.h>
+
+#include <sopc_stack_csts.h>
 
 SOPC_StatusCode Socket_Network_Initialize(){
     return STATUS_OK;

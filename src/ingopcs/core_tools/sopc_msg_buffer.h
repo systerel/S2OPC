@@ -12,9 +12,9 @@
 #define INGOPCS_MSG_BUFFER_H_
 
 #include <buffer.h>
-#include <ua_encodeable.h>
-#include <ua_namespace_table.h>
-#include "../core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
+#include <sopc_encodeable.h>
+#include <sopc_namespace_table.h>
 
 /** Length of a TCP UA message Header */
 #define TCP_SOPC_HEADER_LENGTH 8

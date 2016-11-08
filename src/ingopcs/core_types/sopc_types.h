@@ -36,9 +36,9 @@
 //#endif /* OPCUA_FORCE_INT32_ENUMS */
 
 #include <platform_deps.h>
-#include <ua_msg_buffer.h>
-#include <ua_builtintypes.h>
-#include <ua_encodeable.h>
+#include <sopc_msg_buffer.h>
+#include <sopc_builtintypes.h>
+#include <sopc_encodeable.h>
 
 BEGIN_EXTERN_C
 

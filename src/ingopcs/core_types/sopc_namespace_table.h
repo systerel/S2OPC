@@ -1,5 +1,5 @@
 /*
- * ua_namespace_table.h
+ *sopc_namespace_table.h
  *
  *  Created on: Sep 15, 2016
  *      Author: vincent
@@ -8,7 +8,7 @@
 #ifndef INGOPCS_SOPC_NAMESPACE_TABLE_H_
 #define INGOPCS_SOPC_NAMESPACE_TABLE_H_
 
-#include <ua_builtintypes.h>
+#include <sopc_builtintypes.h>
 
 #define OPCUA_NAMESPACE_INDEX 0
 extern const char* OPCUA_NAMESPACE_NAME;

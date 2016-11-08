@@ -5,17 +5,17 @@
  *      Author: vincent
  */
 
+#include <sopc_secure_channel_low_level.h>
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "ua_secure_channel_low_level.h"
-
-#include <ua_builtintypes.h>
-#include <ua_encoder.h>
-#include <ua_tcp_ua_low_level.h>
 #include <secret_buffer.h>
 #include <crypto_provider.h>
+#include <sopc_encoder.h>
+#include <sopc_builtintypes.h>
+#include <sopc_tcp_ua_low_level.h>
 
 const uint32_t scProtocolVersion = 0;
 

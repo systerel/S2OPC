@@ -16,7 +16,7 @@
 #include <opcua_sockets.h>
 #include <opcua_pki.h>
 
-#include <ua_clientapi.h>
+#include <sopc_clientapi.h>
 
 int noEvent = 1;
 int noResp = 1;

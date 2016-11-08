@@ -14,7 +14,7 @@
 #include <stddef.h> // NULL
 #include <stdlib.h> // malloc, free
 
-#include "../../src/ingopcs/core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
 #include "check_stack.h"
 #include "crypto_provider.h"
 #include "crypto_profiles.h"

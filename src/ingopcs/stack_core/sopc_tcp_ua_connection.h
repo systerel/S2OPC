@@ -8,9 +8,9 @@
 #ifndef INGOPCS_TCP_SOPC_CONNECTION_H_
 #define INGOPCS_TCP_SOPC_CONNECTION_H_
 
-#include <ua_builtintypes.h>
-#include <ua_msg_buffer.h>
-#include <ua_sockets.h>
+#include <sopc_msg_buffer.h>
+#include <sopc_sockets.h>
+#include <sopc_builtintypes.h>
 
 #define TCP_SOPC_MIN_BUFFER_SIZE 8192
 #define TCP_SOPC_MAX_URL_LENGTH 4096

@@ -1,17 +1,17 @@
 /*
- * ua_namspace_table.c
+ *sopc_namspace_table.c
  *
  *  Created on: Sep 15, 2016
  *      Author: vincent
  */
 
+#include <sopc_namespace_table.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-#include "ua_namespace_table.h"
-
-#include <ua_builtintypes.h>
+#include <sopc_builtintypes.h>
 
 const char* OPCUA_NAMESPACE_NAME = "http://opcfoundation.org/UA/";
 

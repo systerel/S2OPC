@@ -8,8 +8,8 @@
 #ifndef INGOPCS_TCP_SOPC_LOW_LEVEL_H_
 #define INGOPCS_TCP_SOPC_LOW_LEVEL_H_
 
-#include <ua_msg_buffer.h>
-#include <ua_sockets.h>
+#include <sopc_msg_buffer.h>
+#include <sopc_sockets.h>
 
 extern const uint32_t tcpProtocolVersion;
 

@@ -10,7 +10,7 @@
 #define INGOPCS_CRYPTO_PROVIDER_H_
 
 
-#include "../core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
 #include "secret_buffer.h"
 #include "crypto_types.h"
 #include "key_sets.h"

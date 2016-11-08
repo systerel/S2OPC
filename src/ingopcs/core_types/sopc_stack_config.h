@@ -1,5 +1,5 @@
 /*
- * ua_stack_config.h
+ *sopc_stack_config.h
  *
  *  Created on: Oct 3, 2016
  *      Author: vincent
@@ -8,8 +8,8 @@
 #ifndef INGOPCS_SOPC_STACK_CONFIG_H_
 #define INGOPCS_SOPC_STACK_CONFIG_H_
 
-#include <ua_builtintypes.h>
-#include <ua_namespace_table.h>
+#include <sopc_builtintypes.h>
+#include <sopc_namespace_table.h>
 
 typedef struct {
     uint8_t             traceLevel; // enum TBD

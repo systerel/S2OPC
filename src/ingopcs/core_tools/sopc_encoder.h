@@ -1,5 +1,5 @@
 /*
- * ua_encoder.h
+ *sopc_encoder.h
  *
  *  Created on: Aug 3, 2016
  *      Author: vincent
@@ -9,8 +9,8 @@
 #define INGOPCS_SOPC_ENCODER_H_
 
 #include <platform_deps.h>
-#include <ua_builtintypes.h>
-#include <ua_msg_buffer.h>
+#include <sopc_builtintypes.h>
+#include <sopc_msg_buffer.h>
 
 #define SWAP_2_BYTES(x) (x & 0x00FF) << 8 | (x & 0xFF00) >> 8
 #define SWAP_3_BYTES(x) (x & 0x0000FF) << 16 | (x & 0x00FF00) \

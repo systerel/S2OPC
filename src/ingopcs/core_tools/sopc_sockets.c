@@ -1,16 +1,17 @@
 /*
- * ua_sockets.c
+ *sopc_sockets.c
  *
  *  Created on: Oct 20, 2016
  *      Author: vincent
  */
 
-#include "ua_sockets.h"
+#include <sopc_sockets.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include <ua_stack_csts.h>
+#include <sopc_stack_csts.h>
 
 SOPC_SocketManager globalSocketMgr;
 

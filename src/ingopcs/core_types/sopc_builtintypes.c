@@ -1,16 +1,17 @@
 /*
- * ua_ingopcs_type.c
+ *sopc_ingopcs_type.c
  *
  *  Created on: 29 juil. 2016
  *      Author: Vincent
  */
+
+#include <sopc_builtintypes.h>
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 
-#include "ua_builtintypes.h"
 
 typedef void (BuiltInFunction) (void*);
 

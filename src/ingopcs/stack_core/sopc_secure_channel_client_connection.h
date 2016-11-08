@@ -11,10 +11,10 @@
 #include <secret_buffer.h>
 #include <pki.h>
 #include <singly_linked_list.h>
-#include <ua_builtintypes.h>
-#include <ua_encodeable.h>
-#include <ua_namespace_table.h>
-#include <ua_secure_channel_low_level.h>
+#include <sopc_builtintypes.h>
+#include <sopc_encodeable.h>
+#include <sopc_namespace_table.h>
+#include <sopc_secure_channel_low_level.h>
 
 struct SC_ClientConnection;
 

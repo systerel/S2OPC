@@ -17,7 +17,7 @@
 #include "pki.h"
 #include "pki_stack.h"
 
-#include "../../core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
 #include "mbedtls/x509.h"
 
 

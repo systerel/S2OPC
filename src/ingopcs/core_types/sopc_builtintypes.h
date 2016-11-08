@@ -1,5 +1,5 @@
 /*
- * ua_types.h
+ *sopc_types.h
  *
  *  Created on: Jul 22, 2016
  *      Author: vincent
@@ -10,9 +10,9 @@
 
 #include <stdint.h>
 
-#include <ua_stack_csts.h>
-#include <ua_encodeable.h>
-#include "sopc_base_types.h"
+#include <sopc_base_types.h>
+#include <sopc_encodeable.h>
+#include <sopc_stack_csts.h>
 
 BEGIN_EXTERN_C
 

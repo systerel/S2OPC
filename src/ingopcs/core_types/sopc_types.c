@@ -28,18 +28,15 @@
  * ======================================================================*/
 
 /* standard */
+#include <sopc_types.h>
+
 #include <stdlib.h>
 #include <stddef.h>
 #include <assert.h>
 
 /* self */
-#include "ua_types.h"
-
-/* stack */
-#include <ua_encoder.h>
-
-/* types */
 #include <opcua_identifiers.h>
+#include <sopc_encoder.h>
 
 
 #ifndef OPCUA_EXCLUDE_Node

@@ -9,7 +9,8 @@
 #define STUB_SERVER_STUB_CLIENT_H_
 
 #include <stdint.h>
-#include <ua_channel.h>
+
+#include <sopc_channel.h>
 
 typedef struct {
     uint32_t stub;

@@ -13,7 +13,7 @@
 #define INGOPCS_PKI_STACK_H_
 
 
-#include "../core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
 #include "crypto_provider.h"
 #include "key_manager.h"
 #include "pki.h"

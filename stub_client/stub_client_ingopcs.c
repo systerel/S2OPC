@@ -10,14 +10,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <ua_clientapi.h>
-#include <ua_stack_config.h>
 #include <opcua_identifiers.h>
 
 #include <crypto_profiles.h>
 #include <pki.h>
 #include <pki_stack.h>
 #include <key_manager.h>
+#include <sopc_clientapi.h>
+#include <sopc_stack_config.h>
 
 int noEvent = 1;
 int noResp = 1;

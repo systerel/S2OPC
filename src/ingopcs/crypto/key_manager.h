@@ -11,7 +11,7 @@
 #define INGOPCS_KEY_MANAGER_H_
 
 
-#include "../core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
 #include "crypto_types.h"
 #include "key_manager_lib.h"
 

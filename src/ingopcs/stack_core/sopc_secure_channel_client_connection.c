@@ -5,16 +5,16 @@
  *      Author: vincent
  */
 
-#include "ua_secure_channel_client_connection.h"
+#include <sopc_secure_channel_client_connection.h>
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <crypto_provider.h>
-#include <ua_encoder.h>
-#include <ua_secure_channel_low_level.h>
-#include <ua_types.h>
+#include <sopc_encoder.h>
+#include <sopc_types.h>
+#include <sopc_secure_channel_low_level.h>
 
 
 typedef enum
@@ -78,7 +78,7 @@ SC_ClientConnection* SC_Client_Create(){
             sConnection->state = SC_Connection_Disconnected;
             scClientConnection->instance = sConnection;
 
-            // TODO: limit set by configuration in ua_stacks_csts ?
+            // TODO: limit set by configuration insopc_stacks_csts ?
             scClientConnection->pendingRequests = SLinkedList_Create(255);
             if(scClientConnection->pendingRequests == NULL){
                 free(scClientConnection);

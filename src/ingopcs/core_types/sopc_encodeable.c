@@ -1,15 +1,15 @@
 /*
- * ua_encodeable.c
+ *sopc_encodeable.c
  *
  *  Created on: Sep 15, 2016
  *      Author: vincent
  */
 
+#include <sopc_encodeable.h>
+
 #include <string.h>
 
-#include "ua_encodeable.h"
-
-#include <ua_builtintypes.h>
+#include <sopc_builtintypes.h>
 
 SOPC_EncodeableType* EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
                                                     const char*         namespace,

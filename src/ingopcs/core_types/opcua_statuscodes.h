@@ -30,7 +30,7 @@
 #ifndef _OpcUa_StatusCodes_H_
 #define _OpcUa_StatusCodes_H_ 1
 
-#include "sopc_base_types.h"
+#include <sopc_base_types.h>
 
 BEGIN_EXTERN_C
 

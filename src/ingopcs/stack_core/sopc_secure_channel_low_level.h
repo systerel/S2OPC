@@ -11,8 +11,8 @@
 #include <key_manager.h>
 #include <key_sets.h>
 #include <pki.h>
-#include <ua_types.h>
-#include <ua_tcp_ua_connection.h>
+#include <sopc_types.h>
+#include <sopc_tcp_ua_connection.h>
 
 extern const uint32_t scProtocolVersion;
 

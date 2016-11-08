@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../../core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
 #include "crypto_types.h"
 #include "crypto_profiles.h"
 #include "crypto_provider.h"

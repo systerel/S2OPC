@@ -30,16 +30,16 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-#include <ua_stack_csts.h>
+#include <sopc_stack_csts.h>
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
 /* types */
-#include <ua_builtintypes.h>
+#include <sopc_builtintypes.h>
 
 #include <opcua_identifiers.h>
 #include <opcua_statuscodes.h>
-#include <ua_clientapi.h>
+#include <sopc_clientapi.h>
 
 #ifndef OPCUA_EXCLUDE_FindServers
 /*============================================================================

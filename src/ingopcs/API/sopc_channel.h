@@ -1,5 +1,5 @@
 /*
- * ua_channel.h
+ *sopc_channel.h
  *
  *  Created on: Sep 29, 2016
  *      Author: vincent
@@ -8,11 +8,11 @@
 #ifndef INGOPCS_SOPC_CHANNEL_H_
 #define INGOPCS_SOPC_CHANNEL_H_
 
-#include <ua_stack_csts.h>
+#include <sopc_stack_csts.h>
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
-#include <ua_types.h>
+#include <sopc_types.h>
 #include "pki.h"
 #include "key_manager.h"
 

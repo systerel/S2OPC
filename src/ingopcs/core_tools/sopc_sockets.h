@@ -1,12 +1,12 @@
 /*
- * ua_sockets.h
+ *sopc_sockets.h
  *
  *  Created on: Oct 20, 2016
  *      Author: vincent
  */
 #include <stdint.h>
 #include <p_sockets.h>
-#include "../core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
 
 #ifndef INGOPCS_SOCKETS_SOPC_SOCKETS_H_
 #define INGOPCS_SOCKETS_SOPC_SOCKETS_H_

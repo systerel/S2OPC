@@ -13,7 +13,7 @@
 #include <netdb.h>
 #include <sys/select.h>
 
-#include "../../core_types/sopc_base_types.h"
+#include <sopc_base_types.h>
 
 /**
  *  \brief Socket base type

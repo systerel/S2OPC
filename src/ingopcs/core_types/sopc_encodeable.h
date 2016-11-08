@@ -1,5 +1,5 @@
 /*
- * ua_encodeable.h
+ *sopc_encodeable.h
  *
  *  Created on: Sep 5, 2016
  *      Author: vincent
@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "sopc_base_types.h"
+#include <sopc_base_types.h>
 
 BEGIN_EXTERN_C
 
