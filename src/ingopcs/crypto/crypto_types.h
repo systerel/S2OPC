@@ -10,7 +10,7 @@
 #define INGOPCS_CRYPTO_TYPES_H_
 
 
-#include <sopc_base_types.h>
+#include "sopc_base_types.h"
 #include "secret_buffer.h"
 
 struct CryptoProvider;
@@ -99,13 +99,19 @@ typedef struct CryptoProfile
 
 /* ------------------------------------------------------------------------------------------------
  * CryptoProvider
- * CryptolibContext are library-specific and defined in crypto_provider_lib
  * ------------------------------------------------------------------------------------------------
+ */
+/**
+ * \brief   The CryptoProvider context.
+ *
+ * A pointer to a const CryptoProfile which should not be modified and contains pointers to the
+ * cryptographic functions associated to a SecurityPolicy,
+ * and a CryptolibContext, which are library-specific structures defined in crypto_provider_lib.h/c
  */
 typedef struct CryptoProvider
 {
-    const CryptoProfile * const pProfile;
-    struct CryptolibContext *pCryptolibContext;
+    const CryptoProfile * const pProfile; /**< CryptoProfile associated to the chosen Security policy. You should not attempt to modify the content of this pointer. */
+    struct CryptolibContext *pCryptolibContext; /**< A lib-specific context. This should not be accessed directly as its content may change depending on the chosen crypto-lib implementation. */
 } CryptoProvider;
 
 

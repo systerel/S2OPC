@@ -15,6 +15,11 @@
 #include "key_manager.h"
 
 
+/* ------------------------------------------------------------------------------------------------
+ * CryptoProvider creation
+ * ------------------------------------------------------------------------------------------------
+ */
+
 SOPC_StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider)
 {
     CryptolibContext *pctx = NULL;
@@ -56,11 +61,11 @@ SOPC_StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider)
 }
 
 
-/**
- * \brief   Compute the length of the key in bits.
- *
- *          The main purpose of this function is to verify the length of the asymmetric key \p pKey with respect to the security policy.
+/* ------------------------------------------------------------------------------------------------
+ * CryptoProvider get-length operations
+ * ------------------------------------------------------------------------------------------------
  */
+
 SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider *pProvider,
                                                       const AsymmetricKey *pKey,
                                                       uint32_t *lenKeyBits)
@@ -76,26 +81,19 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider 
 }
 
 
-/**
- * \brief   Computes the maximal size of a buffer to be encrypted in a single pass.
- *
- *          RFC 3447 provides the formula used with OAEPadding.
- *          A message shorter than or as long as this size is treated as a single message. A longer message
- *          is cut into pieces of this size before treatment.
- */
 SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProvider *pProvider,
                                                            const AsymmetricKey *pKey,
-                                                           uint32_t *lenMsg)
+                                                           uint32_t *pLenMsg)
 {
     uint32_t lenHash = 0;
 
-    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == lenMsg)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == pLenMsg)
         return STATUS_INVALID_PARAMETERS;
     if(SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
         return STATUS_INVALID_PARAMETERS;
 
-    *lenMsg = mbedtls_pk_get_len(&pKey->pk);
-    if(lenMsg == 0)
+    *pLenMsg = mbedtls_pk_get_len(&pKey->pk);
+    if(pLenMsg == 0)
         return STATUS_NOK;
 
     switch(pProvider->pProfile->SecurityPolicyID) // TODO: should we build some API to fetch the SecurityPolicyID, or avoid to switch on it at all?
@@ -106,7 +104,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProv
     case SecurityPolicy_Basic256Sha256_ID: // TODO: this seems overkill to fetch the size of the chosen OAEP hash function...
         if(CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != STATUS_OK)
             return STATUS_NOK;
-        *lenMsg -= 2*lenHash + 2; // TODO: check for underflow?
+        *pLenMsg -= 2*lenHash + 2; // TODO: check for underflow?
         break;
     }
 
@@ -120,15 +118,15 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProv
  */
 SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgCipherText(const CryptoProvider *pProvider,
                                                             const AsymmetricKey *pKey,
-                                                            uint32_t *lenMsg)
+                                                            uint32_t *pLenMsg)
 {
     (void)(pProvider);
 
-    if(NULL == pKey || NULL == lenMsg)
+    if(NULL == pKey || NULL == pLenMsg)
         return STATUS_INVALID_PARAMETERS;
 
-    *lenMsg = mbedtls_pk_get_len(&pKey->pk);
-    if(lenMsg == 0)
+    *pLenMsg = mbedtls_pk_get_len(&pKey->pk);
+    if(pLenMsg == 0)
         return STATUS_NOK;
 
     return STATUS_OK;

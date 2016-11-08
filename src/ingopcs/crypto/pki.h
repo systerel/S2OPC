@@ -34,11 +34,11 @@ typedef SOPC_StatusCode (*FnValidateCertificate) (const struct PKIProvider *pPKI
 // TODO: find a more appropriate name, such as PublicKeyInfra, CertificateValdiation, CryptoPKI
 typedef struct PKIProvider
 {
-    const FnValidateCertificate pFnValidateCertificate; /**> The validation function, which is called by the CryptoProvider API. */
+    const FnValidateCertificate pFnValidateCertificate; /**< The validation function, which is called by the CryptoProvider API. */
 
-    void *pUserCertAuthList;    /**> Placeholder for certificate authorities. */
-    void *pUserCertRevocList;   /**> Placeholder for certificate revocation list. */
-    void *pUserData;            /**> Placeholder for more data. */
+    void *pUserCertAuthList;    /**< Placeholder for certificate authorities. */
+    void *pUserCertRevocList;   /**< Placeholder for certificate revocation list. */
+    void *pUserData;            /**< Placeholder for more data. */
 } PKIProvider;
 
 
