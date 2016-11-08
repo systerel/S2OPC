@@ -13,10 +13,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ua_base_types.h"
 #include "crypto_types.h"
 #include "crypto_profiles.h"
 #include "key_manager.h"
+#include "../core_types/sopc_base_types.h"
 
 
 
@@ -30,7 +30,7 @@
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
+SOPC_StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
                                           uint8_t **ppDest, uint32_t *lenAllocated)
 {
     uint32_t lenToAllocate = 0;

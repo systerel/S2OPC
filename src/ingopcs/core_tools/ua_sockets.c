@@ -17,8 +17,8 @@ UA_SocketManager globalSocketMgr;
 // Counter to check <= UA_MAXCONNECTIONS
 static uint32_t globalNbSockets = 0;
 
-StatusCode ParseURI (const char* uri, char** hostname, char** port){
-    StatusCode status = STATUS_NOK;
+SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
+    SOPC_StatusCode status = STATUS_NOK;
     size_t idx = 0;
     uint8_t isPort = FALSE;
     uint8_t hasPort = FALSE;
@@ -118,10 +118,10 @@ UA_SocketManager* UA_SocketManager_Create(uint32_t nbSockets){
     return socketMgr;
 }
 
-StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
+SOPC_StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
                                        uint32_t          nbSockets){
     uint32_t idx = 0;
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(globalNbSockets + nbSockets > OPCUA_MAXCONNECTIONS)
         return STATUS_NOK;
 
@@ -173,16 +173,16 @@ UA_Socket* GetFreeSocket(UA_SocketManager* socketMgr){
     return result;
 }
 
-StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketManager,
+SOPC_StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketManager,
                                                const char*        uri,
                                                UA_Socket_EventCB  socketCallback,
                                                void*              callbackData,
                                                UA_Socket**        clientSocket)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     Socket_AddressInfo *res, *p;
     UA_Socket* freeSocket;
-    StatusCode connectStatus = STATUS_NOK;
+    SOPC_StatusCode connectStatus = STATUS_NOK;
     char *hostname = NULL;
     char *port = NULL;
 
@@ -243,17 +243,17 @@ StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketManager,
     return status;
 }
 
-StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
+SOPC_StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
                                                const char*        uri,
                                                uint8_t            listenAllItfs,
                                                UA_Socket_EventCB  socketCallback,
                                                void*              callbackData,
                                                UA_Socket**        clientSocket)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     Socket_AddressInfo *res, *p;
     UA_Socket* freeSocket;
-    StatusCode listenStatus = STATUS_NOK;
+    SOPC_StatusCode listenStatus = STATUS_NOK;
     char *hostname = NULL;
     char *port = NULL;
 
@@ -317,9 +317,9 @@ StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
     return status;
 }
 
-StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
+SOPC_StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
                                  uint32_t          msecTimeout){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
     int32_t nbReady = 0;
     UA_Socket* uaSock = NULL;
@@ -429,7 +429,7 @@ int32_t UA_Socket_Write (UA_Socket* socket,
     return Socket_Write(socket->sock, data, count);
 }
 
-StatusCode UA_Socket_Read (UA_Socket* socket,
+SOPC_StatusCode UA_Socket_Read (UA_Socket* socket,
                            uint8_t*   data,
                            uint32_t   dataSize,
                            uint32_t*  readCount){

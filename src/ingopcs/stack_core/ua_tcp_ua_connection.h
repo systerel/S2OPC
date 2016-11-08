@@ -35,11 +35,11 @@ typedef enum {
     ConnectionEvent_Error
 } ConnectionEvent;
 
-typedef StatusCode (TCP_UA_Connection_Event_CB) (void*           tcpConnection,
+typedef SOPC_StatusCode (TCP_UA_Connection_Event_CB) (void*           tcpConnection,
                                                  void*           callbackData,
                                                  ConnectionEvent event,
                                                  UA_MsgBuffer*   msgBuffer,
-                                                 StatusCode      status);
+                                                 SOPC_StatusCode      status);
 
 typedef struct {
     UA_String                   url;
@@ -65,7 +65,7 @@ typedef struct {
 TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion);
 void TCP_UA_Connection_Delete(TCP_UA_Connection* connection);
 
-StatusCode TCP_UA_Connection_Connect(TCP_UA_Connection*          connection,
+SOPC_StatusCode TCP_UA_Connection_Connect(TCP_UA_Connection*          connection,
                                      const char*                 uri,
                                      TCP_UA_Connection_Event_CB* callback,
                                      void*                       callbackData);

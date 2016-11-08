@@ -84,9 +84,9 @@ void OpcUa_Node_Clear(OpcUa_Node* a_pValue)
 /*============================================================================
  * OpcUa_Node_Encode
  *===========================================================================*/
-StatusCode OpcUa_Node_Encode(OpcUa_Node* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Node_Encode(OpcUa_Node* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -112,9 +112,9 @@ StatusCode OpcUa_Node_Encode(OpcUa_Node* a_pValue, UA_MsgBuffer* msgBuf)
 /*============================================================================
  * OpcUa_Node_Decode
  *===========================================================================*/
-StatusCode OpcUa_Node_Decode(OpcUa_Node* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Node_Decode(OpcUa_Node* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -201,9 +201,9 @@ void OpcUa_InstanceNode_Clear(OpcUa_InstanceNode* a_pValue)
 /*============================================================================
  * OpcUa_InstanceNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_InstanceNode_Encode(OpcUa_InstanceNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_InstanceNode_Encode(OpcUa_InstanceNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -229,9 +229,9 @@ StatusCode OpcUa_InstanceNode_Encode(OpcUa_InstanceNode* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_InstanceNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_InstanceNode_Decode(OpcUa_InstanceNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_InstanceNode_Decode(OpcUa_InstanceNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -318,9 +318,9 @@ void OpcUa_TypeNode_Clear(OpcUa_TypeNode* a_pValue)
 /*============================================================================
  * OpcUa_TypeNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_TypeNode_Encode(OpcUa_TypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TypeNode_Encode(OpcUa_TypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -346,9 +346,9 @@ StatusCode OpcUa_TypeNode_Encode(OpcUa_TypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 /*============================================================================
  * OpcUa_TypeNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_TypeNode_Decode(OpcUa_TypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TypeNode_Decode(OpcUa_TypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -437,9 +437,9 @@ void OpcUa_ObjectNode_Clear(OpcUa_ObjectNode* a_pValue)
 /*============================================================================
  * OpcUa_ObjectNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_ObjectNode_Encode(OpcUa_ObjectNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectNode_Encode(OpcUa_ObjectNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -466,9 +466,9 @@ StatusCode OpcUa_ObjectNode_Encode(OpcUa_ObjectNode* a_pValue, UA_MsgBuffer* msg
 /*============================================================================
  * OpcUa_ObjectNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_ObjectNode_Decode(OpcUa_ObjectNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectNode_Decode(OpcUa_ObjectNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -558,9 +558,9 @@ void OpcUa_ObjectTypeNode_Clear(OpcUa_ObjectTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_ObjectTypeNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_ObjectTypeNode_Encode(OpcUa_ObjectTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectTypeNode_Encode(OpcUa_ObjectTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -587,9 +587,9 @@ StatusCode OpcUa_ObjectTypeNode_Encode(OpcUa_ObjectTypeNode* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_ObjectTypeNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_ObjectTypeNode_Decode(OpcUa_ObjectTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectTypeNode_Decode(OpcUa_ObjectTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -695,9 +695,9 @@ void OpcUa_VariableNode_Clear(OpcUa_VariableNode* a_pValue)
 /*============================================================================
  * OpcUa_VariableNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_VariableNode_Encode(OpcUa_VariableNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableNode_Encode(OpcUa_VariableNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -732,9 +732,9 @@ StatusCode OpcUa_VariableNode_Encode(OpcUa_VariableNode* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_VariableNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_VariableNode_Decode(OpcUa_VariableNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableNode_Decode(OpcUa_VariableNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -842,9 +842,9 @@ void OpcUa_VariableTypeNode_Clear(OpcUa_VariableTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_VariableTypeNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_VariableTypeNode_Encode(OpcUa_VariableTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableTypeNode_Encode(OpcUa_VariableTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -876,9 +876,9 @@ StatusCode OpcUa_VariableTypeNode_Encode(OpcUa_VariableTypeNode* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_VariableTypeNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_VariableTypeNode_Decode(OpcUa_VariableTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableTypeNode_Decode(OpcUa_VariableTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -977,9 +977,9 @@ void OpcUa_ReferenceTypeNode_Clear(OpcUa_ReferenceTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_ReferenceTypeNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReferenceTypeNode_Encode(OpcUa_ReferenceTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceTypeNode_Encode(OpcUa_ReferenceTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1008,9 +1008,9 @@ StatusCode OpcUa_ReferenceTypeNode_Encode(OpcUa_ReferenceTypeNode* a_pValue, UA_
 /*============================================================================
  * OpcUa_ReferenceTypeNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReferenceTypeNode_Decode(OpcUa_ReferenceTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceTypeNode_Decode(OpcUa_ReferenceTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1104,9 +1104,9 @@ void OpcUa_MethodNode_Clear(OpcUa_MethodNode* a_pValue)
 /*============================================================================
  * OpcUa_MethodNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_MethodNode_Encode(OpcUa_MethodNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MethodNode_Encode(OpcUa_MethodNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1134,9 +1134,9 @@ StatusCode OpcUa_MethodNode_Encode(OpcUa_MethodNode* a_pValue, UA_MsgBuffer* msg
 /*============================================================================
  * OpcUa_MethodNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_MethodNode_Decode(OpcUa_MethodNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MethodNode_Decode(OpcUa_MethodNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1229,9 +1229,9 @@ void OpcUa_ViewNode_Clear(OpcUa_ViewNode* a_pValue)
 /*============================================================================
  * OpcUa_ViewNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_ViewNode_Encode(OpcUa_ViewNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewNode_Encode(OpcUa_ViewNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1259,9 +1259,9 @@ StatusCode OpcUa_ViewNode_Encode(OpcUa_ViewNode* a_pValue, UA_MsgBuffer* msgBuf)
 /*============================================================================
  * OpcUa_ViewNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_ViewNode_Decode(OpcUa_ViewNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewNode_Decode(OpcUa_ViewNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1352,9 +1352,9 @@ void OpcUa_DataTypeNode_Clear(OpcUa_DataTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_DataTypeNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_DataTypeNode_Encode(OpcUa_DataTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataTypeNode_Encode(OpcUa_DataTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1381,9 +1381,9 @@ StatusCode OpcUa_DataTypeNode_Encode(OpcUa_DataTypeNode* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_DataTypeNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_DataTypeNode_Decode(OpcUa_DataTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataTypeNode_Decode(OpcUa_DataTypeNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1459,9 +1459,9 @@ void OpcUa_ReferenceNode_Clear(OpcUa_ReferenceNode* a_pValue)
 /*============================================================================
  * OpcUa_ReferenceNode_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReferenceNode_Encode(OpcUa_ReferenceNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceNode_Encode(OpcUa_ReferenceNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1481,9 +1481,9 @@ StatusCode OpcUa_ReferenceNode_Encode(OpcUa_ReferenceNode* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_ReferenceNode_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReferenceNode_Decode(OpcUa_ReferenceNode* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceNode_Decode(OpcUa_ReferenceNode* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1558,9 +1558,9 @@ void OpcUa_Argument_Clear(OpcUa_Argument* a_pValue)
 /*============================================================================
  * OpcUa_Argument_Encode
  *===========================================================================*/
-StatusCode OpcUa_Argument_Encode(OpcUa_Argument* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Argument_Encode(OpcUa_Argument* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1583,9 +1583,9 @@ StatusCode OpcUa_Argument_Encode(OpcUa_Argument* a_pValue, UA_MsgBuffer* msgBuf)
 /*============================================================================
  * OpcUa_Argument_Decode
  *===========================================================================*/
-StatusCode OpcUa_Argument_Decode(OpcUa_Argument* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Argument_Decode(OpcUa_Argument* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1657,9 +1657,9 @@ void OpcUa_EnumValueType_Clear(OpcUa_EnumValueType* a_pValue)
 /*============================================================================
  * OpcUa_EnumValueType_Encode
  *===========================================================================*/
-StatusCode OpcUa_EnumValueType_Encode(OpcUa_EnumValueType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EnumValueType_Encode(OpcUa_EnumValueType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1679,9 +1679,9 @@ StatusCode OpcUa_EnumValueType_Encode(OpcUa_EnumValueType* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_EnumValueType_Decode
  *===========================================================================*/
-StatusCode OpcUa_EnumValueType_Decode(OpcUa_EnumValueType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EnumValueType_Decode(OpcUa_EnumValueType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1752,9 +1752,9 @@ void OpcUa_EnumField_Clear(OpcUa_EnumField* a_pValue)
 /*============================================================================
  * OpcUa_EnumField_Encode
  *===========================================================================*/
-StatusCode OpcUa_EnumField_Encode(OpcUa_EnumField* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EnumField_Encode(OpcUa_EnumField* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1775,9 +1775,9 @@ StatusCode OpcUa_EnumField_Encode(OpcUa_EnumField* a_pValue, UA_MsgBuffer* msgBu
 /*============================================================================
  * OpcUa_EnumField_Decode
  *===========================================================================*/
-StatusCode OpcUa_EnumField_Decode(OpcUa_EnumField* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EnumField_Decode(OpcUa_EnumField* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1845,9 +1845,9 @@ void OpcUa_OptionSet_Clear(OpcUa_OptionSet* a_pValue)
 /*============================================================================
  * OpcUa_OptionSet_Encode
  *===========================================================================*/
-StatusCode OpcUa_OptionSet_Encode(OpcUa_OptionSet* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OptionSet_Encode(OpcUa_OptionSet* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1866,9 +1866,9 @@ StatusCode OpcUa_OptionSet_Encode(OpcUa_OptionSet* a_pValue, UA_MsgBuffer* msgBu
 /*============================================================================
  * OpcUa_OptionSet_Decode
  *===========================================================================*/
-StatusCode OpcUa_OptionSet_Decode(OpcUa_OptionSet* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OptionSet_Decode(OpcUa_OptionSet* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1934,9 +1934,9 @@ void OpcUa_TimeZoneDataType_Clear(OpcUa_TimeZoneDataType* a_pValue)
 /*============================================================================
  * OpcUa_TimeZoneDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_TimeZoneDataType_Encode(OpcUa_TimeZoneDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TimeZoneDataType_Encode(OpcUa_TimeZoneDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1955,9 +1955,9 @@ StatusCode OpcUa_TimeZoneDataType_Encode(OpcUa_TimeZoneDataType* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_TimeZoneDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_TimeZoneDataType_Decode(OpcUa_TimeZoneDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TimeZoneDataType_Decode(OpcUa_TimeZoneDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2036,9 +2036,9 @@ void OpcUa_ApplicationDescription_Clear(OpcUa_ApplicationDescription* a_pValue)
 /*============================================================================
  * OpcUa_ApplicationDescription_Encode
  *===========================================================================*/
-StatusCode OpcUa_ApplicationDescription_Encode(OpcUa_ApplicationDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ApplicationDescription_Encode(OpcUa_ApplicationDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2063,9 +2063,9 @@ StatusCode OpcUa_ApplicationDescription_Encode(OpcUa_ApplicationDescription* a_p
 /*============================================================================
  * OpcUa_ApplicationDescription_Decode
  *===========================================================================*/
-StatusCode OpcUa_ApplicationDescription_Decode(OpcUa_ApplicationDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ApplicationDescription_Decode(OpcUa_ApplicationDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2147,9 +2147,9 @@ void OpcUa_RequestHeader_Clear(OpcUa_RequestHeader* a_pValue)
 /*============================================================================
  * OpcUa_RequestHeader_Encode
  *===========================================================================*/
-StatusCode OpcUa_RequestHeader_Encode(OpcUa_RequestHeader* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RequestHeader_Encode(OpcUa_RequestHeader* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2173,9 +2173,9 @@ StatusCode OpcUa_RequestHeader_Encode(OpcUa_RequestHeader* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_RequestHeader_Decode
  *===========================================================================*/
-StatusCode OpcUa_RequestHeader_Decode(OpcUa_RequestHeader* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RequestHeader_Decode(OpcUa_RequestHeader* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2256,9 +2256,9 @@ void OpcUa_ResponseHeader_Clear(OpcUa_ResponseHeader* a_pValue)
 /*============================================================================
  * OpcUa_ResponseHeader_Encode
  *===========================================================================*/
-StatusCode OpcUa_ResponseHeader_Encode(OpcUa_ResponseHeader* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ResponseHeader_Encode(OpcUa_ResponseHeader* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2282,9 +2282,9 @@ StatusCode OpcUa_ResponseHeader_Encode(OpcUa_ResponseHeader* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_ResponseHeader_Decode
  *===========================================================================*/
-StatusCode OpcUa_ResponseHeader_Decode(OpcUa_ResponseHeader* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ResponseHeader_Decode(OpcUa_ResponseHeader* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2353,9 +2353,9 @@ void OpcUa_ServiceFault_Clear(OpcUa_ServiceFault* a_pValue)
 /*============================================================================
  * OpcUa_ServiceFault_Encode
  *===========================================================================*/
-StatusCode OpcUa_ServiceFault_Encode(OpcUa_ServiceFault* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServiceFault_Encode(OpcUa_ServiceFault* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2373,9 +2373,9 @@ StatusCode OpcUa_ServiceFault_Encode(OpcUa_ServiceFault* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_ServiceFault_Decode
  *===========================================================================*/
-StatusCode OpcUa_ServiceFault_Decode(OpcUa_ServiceFault* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServiceFault_Decode(OpcUa_ServiceFault* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2449,9 +2449,9 @@ void OpcUa_FindServersRequest_Clear(OpcUa_FindServersRequest* a_pValue)
 /*============================================================================
  * OpcUa_FindServersRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_FindServersRequest_Encode(OpcUa_FindServersRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersRequest_Encode(OpcUa_FindServersRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2474,9 +2474,9 @@ StatusCode OpcUa_FindServersRequest_Encode(OpcUa_FindServersRequest* a_pValue, U
 /*============================================================================
  * OpcUa_FindServersRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_FindServersRequest_Decode(OpcUa_FindServersRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersRequest_Decode(OpcUa_FindServersRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2548,9 +2548,9 @@ void OpcUa_FindServersResponse_Clear(OpcUa_FindServersResponse* a_pValue)
 /*============================================================================
  * OpcUa_FindServersResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_FindServersResponse_Encode(OpcUa_FindServersResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersResponse_Encode(OpcUa_FindServersResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2570,9 +2570,9 @@ StatusCode OpcUa_FindServersResponse_Encode(OpcUa_FindServersResponse* a_pValue,
 /*============================================================================
  * OpcUa_FindServersResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_FindServersResponse_Decode(OpcUa_FindServersResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersResponse_Decode(OpcUa_FindServersResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2646,9 +2646,9 @@ void OpcUa_ServerOnNetwork_Clear(OpcUa_ServerOnNetwork* a_pValue)
 /*============================================================================
  * OpcUa_ServerOnNetwork_Encode
  *===========================================================================*/
-StatusCode OpcUa_ServerOnNetwork_Encode(OpcUa_ServerOnNetwork* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerOnNetwork_Encode(OpcUa_ServerOnNetwork* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2670,9 +2670,9 @@ StatusCode OpcUa_ServerOnNetwork_Encode(OpcUa_ServerOnNetwork* a_pValue, UA_MsgB
 /*============================================================================
  * OpcUa_ServerOnNetwork_Decode
  *===========================================================================*/
-StatusCode OpcUa_ServerOnNetwork_Decode(OpcUa_ServerOnNetwork* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerOnNetwork_Decode(OpcUa_ServerOnNetwork* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2748,9 +2748,9 @@ void OpcUa_FindServersOnNetworkRequest_Clear(OpcUa_FindServersOnNetworkRequest* 
 /*============================================================================
  * OpcUa_FindServersOnNetworkRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_FindServersOnNetworkRequest_Encode(OpcUa_FindServersOnNetworkRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Encode(OpcUa_FindServersOnNetworkRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2772,9 +2772,9 @@ StatusCode OpcUa_FindServersOnNetworkRequest_Encode(OpcUa_FindServersOnNetworkRe
 /*============================================================================
  * OpcUa_FindServersOnNetworkRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_FindServersOnNetworkRequest_Decode(OpcUa_FindServersOnNetworkRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Decode(OpcUa_FindServersOnNetworkRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2847,9 +2847,9 @@ void OpcUa_FindServersOnNetworkResponse_Clear(OpcUa_FindServersOnNetworkResponse
 /*============================================================================
  * OpcUa_FindServersOnNetworkResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_FindServersOnNetworkResponse_Encode(OpcUa_FindServersOnNetworkResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Encode(OpcUa_FindServersOnNetworkResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2870,9 +2870,9 @@ StatusCode OpcUa_FindServersOnNetworkResponse_Encode(OpcUa_FindServersOnNetworkR
 /*============================================================================
  * OpcUa_FindServersOnNetworkResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_FindServersOnNetworkResponse_Decode(OpcUa_FindServersOnNetworkResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Decode(OpcUa_FindServersOnNetworkResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2949,9 +2949,9 @@ void OpcUa_UserTokenPolicy_Clear(OpcUa_UserTokenPolicy* a_pValue)
 /*============================================================================
  * OpcUa_UserTokenPolicy_Encode
  *===========================================================================*/
-StatusCode OpcUa_UserTokenPolicy_Encode(OpcUa_UserTokenPolicy* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserTokenPolicy_Encode(OpcUa_UserTokenPolicy* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2973,9 +2973,9 @@ StatusCode OpcUa_UserTokenPolicy_Encode(OpcUa_UserTokenPolicy* a_pValue, UA_MsgB
 /*============================================================================
  * OpcUa_UserTokenPolicy_Decode
  *===========================================================================*/
-StatusCode OpcUa_UserTokenPolicy_Decode(OpcUa_UserTokenPolicy* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserTokenPolicy_Decode(OpcUa_UserTokenPolicy* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3058,9 +3058,9 @@ void OpcUa_EndpointDescription_Clear(OpcUa_EndpointDescription* a_pValue)
 /*============================================================================
  * OpcUa_EndpointDescription_Encode
  *===========================================================================*/
-StatusCode OpcUa_EndpointDescription_Encode(OpcUa_EndpointDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointDescription_Encode(OpcUa_EndpointDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3086,9 +3086,9 @@ StatusCode OpcUa_EndpointDescription_Encode(OpcUa_EndpointDescription* a_pValue,
 /*============================================================================
  * OpcUa_EndpointDescription_Decode
  *===========================================================================*/
-StatusCode OpcUa_EndpointDescription_Decode(OpcUa_EndpointDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointDescription_Decode(OpcUa_EndpointDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3170,9 +3170,9 @@ void OpcUa_GetEndpointsRequest_Clear(OpcUa_GetEndpointsRequest* a_pValue)
 /*============================================================================
  * OpcUa_GetEndpointsRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_GetEndpointsRequest_Encode(OpcUa_GetEndpointsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_GetEndpointsRequest_Encode(OpcUa_GetEndpointsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3195,9 +3195,9 @@ StatusCode OpcUa_GetEndpointsRequest_Encode(OpcUa_GetEndpointsRequest* a_pValue,
 /*============================================================================
  * OpcUa_GetEndpointsRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_GetEndpointsRequest_Decode(OpcUa_GetEndpointsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_GetEndpointsRequest_Decode(OpcUa_GetEndpointsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3269,9 +3269,9 @@ void OpcUa_GetEndpointsResponse_Clear(OpcUa_GetEndpointsResponse* a_pValue)
 /*============================================================================
  * OpcUa_GetEndpointsResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_GetEndpointsResponse_Encode(OpcUa_GetEndpointsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_GetEndpointsResponse_Encode(OpcUa_GetEndpointsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3291,9 +3291,9 @@ StatusCode OpcUa_GetEndpointsResponse_Encode(OpcUa_GetEndpointsResponse* a_pValu
 /*============================================================================
  * OpcUa_GetEndpointsResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_GetEndpointsResponse_Decode(OpcUa_GetEndpointsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_GetEndpointsResponse_Decode(OpcUa_GetEndpointsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3377,9 +3377,9 @@ void OpcUa_RegisteredServer_Clear(OpcUa_RegisteredServer* a_pValue)
 /*============================================================================
  * OpcUa_RegisteredServer_Encode
  *===========================================================================*/
-StatusCode OpcUa_RegisteredServer_Encode(OpcUa_RegisteredServer* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisteredServer_Encode(OpcUa_RegisteredServer* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3406,9 +3406,9 @@ StatusCode OpcUa_RegisteredServer_Encode(OpcUa_RegisteredServer* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_RegisteredServer_Decode
  *===========================================================================*/
-StatusCode OpcUa_RegisteredServer_Decode(OpcUa_RegisteredServer* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisteredServer_Decode(OpcUa_RegisteredServer* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3483,9 +3483,9 @@ void OpcUa_RegisterServerRequest_Clear(OpcUa_RegisterServerRequest* a_pValue)
 /*============================================================================
  * OpcUa_RegisterServerRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_RegisterServerRequest_Encode(OpcUa_RegisterServerRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServerRequest_Encode(OpcUa_RegisterServerRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3504,9 +3504,9 @@ StatusCode OpcUa_RegisterServerRequest_Encode(OpcUa_RegisterServerRequest* a_pVa
 /*============================================================================
  * OpcUa_RegisterServerRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_RegisterServerRequest_Decode(OpcUa_RegisterServerRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServerRequest_Decode(OpcUa_RegisterServerRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3570,9 +3570,9 @@ void OpcUa_RegisterServerResponse_Clear(OpcUa_RegisterServerResponse* a_pValue)
 /*============================================================================
  * OpcUa_RegisterServerResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_RegisterServerResponse_Encode(OpcUa_RegisterServerResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServerResponse_Encode(OpcUa_RegisterServerResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3590,9 +3590,9 @@ StatusCode OpcUa_RegisterServerResponse_Encode(OpcUa_RegisterServerResponse* a_p
 /*============================================================================
  * OpcUa_RegisterServerResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_RegisterServerResponse_Decode(OpcUa_RegisterServerResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServerResponse_Decode(OpcUa_RegisterServerResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3660,9 +3660,9 @@ void OpcUa_MdnsDiscoveryConfiguration_Clear(OpcUa_MdnsDiscoveryConfiguration* a_
 /*============================================================================
  * OpcUa_MdnsDiscoveryConfiguration_Encode
  *===========================================================================*/
-StatusCode OpcUa_MdnsDiscoveryConfiguration_Encode(OpcUa_MdnsDiscoveryConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Encode(OpcUa_MdnsDiscoveryConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3682,9 +3682,9 @@ StatusCode OpcUa_MdnsDiscoveryConfiguration_Encode(OpcUa_MdnsDiscoveryConfigurat
 /*============================================================================
  * OpcUa_MdnsDiscoveryConfiguration_Decode
  *===========================================================================*/
-StatusCode OpcUa_MdnsDiscoveryConfiguration_Decode(OpcUa_MdnsDiscoveryConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Decode(OpcUa_MdnsDiscoveryConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3756,9 +3756,9 @@ void OpcUa_RegisterServer2Request_Clear(OpcUa_RegisterServer2Request* a_pValue)
 /*============================================================================
  * OpcUa_RegisterServer2Request_Encode
  *===========================================================================*/
-StatusCode OpcUa_RegisterServer2Request_Encode(OpcUa_RegisterServer2Request* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServer2Request_Encode(OpcUa_RegisterServer2Request* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3779,9 +3779,9 @@ StatusCode OpcUa_RegisterServer2Request_Encode(OpcUa_RegisterServer2Request* a_p
 /*============================================================================
  * OpcUa_RegisterServer2Request_Decode
  *===========================================================================*/
-StatusCode OpcUa_RegisterServer2Request_Decode(OpcUa_RegisterServer2Request* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServer2Request_Decode(OpcUa_RegisterServer2Request* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3831,7 +3831,7 @@ void OpcUa_RegisterServer2Response_Initialize(OpcUa_RegisterServer2Response* a_p
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -3846,7 +3846,7 @@ void OpcUa_RegisterServer2Response_Clear(OpcUa_RegisterServer2Response* a_pValue
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -3855,9 +3855,9 @@ void OpcUa_RegisterServer2Response_Clear(OpcUa_RegisterServer2Response* a_pValue
 /*============================================================================
  * OpcUa_RegisterServer2Response_Encode
  *===========================================================================*/
-StatusCode OpcUa_RegisterServer2Response_Encode(OpcUa_RegisterServer2Response* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServer2Response_Encode(OpcUa_RegisterServer2Response* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3865,7 +3865,7 @@ StatusCode OpcUa_RegisterServer2Response_Encode(OpcUa_RegisterServer2Response* a
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -3879,9 +3879,9 @@ StatusCode OpcUa_RegisterServer2Response_Encode(OpcUa_RegisterServer2Response* a
 /*============================================================================
  * OpcUa_RegisterServer2Response_Decode
  *===========================================================================*/
-StatusCode OpcUa_RegisterServer2Response_Decode(OpcUa_RegisterServer2Response* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServer2Response_Decode(OpcUa_RegisterServer2Response* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3891,7 +3891,7 @@ StatusCode OpcUa_RegisterServer2Response_Decode(OpcUa_RegisterServer2Response* a
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfConfigurationResults, (void**) &a_pValue->ConfigurationResults, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -3956,9 +3956,9 @@ void OpcUa_ChannelSecurityToken_Clear(OpcUa_ChannelSecurityToken* a_pValue)
 /*============================================================================
  * OpcUa_ChannelSecurityToken_Encode
  *===========================================================================*/
-StatusCode OpcUa_ChannelSecurityToken_Encode(OpcUa_ChannelSecurityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ChannelSecurityToken_Encode(OpcUa_ChannelSecurityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3979,9 +3979,9 @@ StatusCode OpcUa_ChannelSecurityToken_Encode(OpcUa_ChannelSecurityToken* a_pValu
 /*============================================================================
  * OpcUa_ChannelSecurityToken_Decode
  *===========================================================================*/
-StatusCode OpcUa_ChannelSecurityToken_Decode(OpcUa_ChannelSecurityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ChannelSecurityToken_Decode(OpcUa_ChannelSecurityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4058,9 +4058,9 @@ void OpcUa_OpenSecureChannelRequest_Clear(OpcUa_OpenSecureChannelRequest* a_pVal
 /*============================================================================
  * OpcUa_OpenSecureChannelRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_OpenSecureChannelRequest_Encode(OpcUa_OpenSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Encode(OpcUa_OpenSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4083,9 +4083,9 @@ StatusCode OpcUa_OpenSecureChannelRequest_Encode(OpcUa_OpenSecureChannelRequest*
 /*============================================================================
  * OpcUa_OpenSecureChannelRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_OpenSecureChannelRequest_Decode(OpcUa_OpenSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Decode(OpcUa_OpenSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4159,9 +4159,9 @@ void OpcUa_OpenSecureChannelResponse_Clear(OpcUa_OpenSecureChannelResponse* a_pV
 /*============================================================================
  * OpcUa_OpenSecureChannelResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_OpenSecureChannelResponse_Encode(OpcUa_OpenSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Encode(OpcUa_OpenSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4182,9 +4182,9 @@ StatusCode OpcUa_OpenSecureChannelResponse_Encode(OpcUa_OpenSecureChannelRespons
 /*============================================================================
  * OpcUa_OpenSecureChannelResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_OpenSecureChannelResponse_Decode(OpcUa_OpenSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Decode(OpcUa_OpenSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4252,9 +4252,9 @@ void OpcUa_CloseSecureChannelRequest_Clear(OpcUa_CloseSecureChannelRequest* a_pV
 /*============================================================================
  * OpcUa_CloseSecureChannelRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_CloseSecureChannelRequest_Encode(OpcUa_CloseSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Encode(OpcUa_CloseSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4272,9 +4272,9 @@ StatusCode OpcUa_CloseSecureChannelRequest_Encode(OpcUa_CloseSecureChannelReques
 /*============================================================================
  * OpcUa_CloseSecureChannelRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_CloseSecureChannelRequest_Decode(OpcUa_CloseSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Decode(OpcUa_CloseSecureChannelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4337,9 +4337,9 @@ void OpcUa_CloseSecureChannelResponse_Clear(OpcUa_CloseSecureChannelResponse* a_
 /*============================================================================
  * OpcUa_CloseSecureChannelResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_CloseSecureChannelResponse_Encode(OpcUa_CloseSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Encode(OpcUa_CloseSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4357,9 +4357,9 @@ StatusCode OpcUa_CloseSecureChannelResponse_Encode(OpcUa_CloseSecureChannelRespo
 /*============================================================================
  * OpcUa_CloseSecureChannelResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_CloseSecureChannelResponse_Decode(OpcUa_CloseSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Decode(OpcUa_CloseSecureChannelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4425,9 +4425,9 @@ void OpcUa_SignedSoftwareCertificate_Clear(OpcUa_SignedSoftwareCertificate* a_pV
 /*============================================================================
  * OpcUa_SignedSoftwareCertificate_Encode
  *===========================================================================*/
-StatusCode OpcUa_SignedSoftwareCertificate_Encode(OpcUa_SignedSoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Encode(OpcUa_SignedSoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4446,9 +4446,9 @@ StatusCode OpcUa_SignedSoftwareCertificate_Encode(OpcUa_SignedSoftwareCertificat
 /*============================================================================
  * OpcUa_SignedSoftwareCertificate_Decode
  *===========================================================================*/
-StatusCode OpcUa_SignedSoftwareCertificate_Decode(OpcUa_SignedSoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Decode(OpcUa_SignedSoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4514,9 +4514,9 @@ void OpcUa_SignatureData_Clear(OpcUa_SignatureData* a_pValue)
 /*============================================================================
  * OpcUa_SignatureData_Encode
  *===========================================================================*/
-StatusCode OpcUa_SignatureData_Encode(OpcUa_SignatureData* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SignatureData_Encode(OpcUa_SignatureData* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4535,9 +4535,9 @@ StatusCode OpcUa_SignatureData_Encode(OpcUa_SignatureData* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_SignatureData_Decode
  *===========================================================================*/
-StatusCode OpcUa_SignatureData_Decode(OpcUa_SignatureData* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SignatureData_Decode(OpcUa_SignatureData* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4618,9 +4618,9 @@ void OpcUa_CreateSessionRequest_Clear(OpcUa_CreateSessionRequest* a_pValue)
 /*============================================================================
  * OpcUa_CreateSessionRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_CreateSessionRequest_Encode(OpcUa_CreateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSessionRequest_Encode(OpcUa_CreateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4646,9 +4646,9 @@ StatusCode OpcUa_CreateSessionRequest_Encode(OpcUa_CreateSessionRequest* a_pValu
 /*============================================================================
  * OpcUa_CreateSessionRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_CreateSessionRequest_Decode(OpcUa_CreateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSessionRequest_Decode(OpcUa_CreateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4741,9 +4741,9 @@ void OpcUa_CreateSessionResponse_Clear(OpcUa_CreateSessionResponse* a_pValue)
 /*============================================================================
  * OpcUa_CreateSessionResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_CreateSessionResponse_Encode(OpcUa_CreateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSessionResponse_Encode(OpcUa_CreateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4772,9 +4772,9 @@ StatusCode OpcUa_CreateSessionResponse_Encode(OpcUa_CreateSessionResponse* a_pVa
 /*============================================================================
  * OpcUa_CreateSessionResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_CreateSessionResponse_Decode(OpcUa_CreateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSessionResponse_Decode(OpcUa_CreateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4849,9 +4849,9 @@ void OpcUa_UserIdentityToken_Clear(OpcUa_UserIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_UserIdentityToken_Encode
  *===========================================================================*/
-StatusCode OpcUa_UserIdentityToken_Encode(OpcUa_UserIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserIdentityToken_Encode(OpcUa_UserIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4869,9 +4869,9 @@ StatusCode OpcUa_UserIdentityToken_Encode(OpcUa_UserIdentityToken* a_pValue, UA_
 /*============================================================================
  * OpcUa_UserIdentityToken_Decode
  *===========================================================================*/
-StatusCode OpcUa_UserIdentityToken_Decode(OpcUa_UserIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserIdentityToken_Decode(OpcUa_UserIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4934,9 +4934,9 @@ void OpcUa_AnonymousIdentityToken_Clear(OpcUa_AnonymousIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_AnonymousIdentityToken_Encode
  *===========================================================================*/
-StatusCode OpcUa_AnonymousIdentityToken_Encode(OpcUa_AnonymousIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AnonymousIdentityToken_Encode(OpcUa_AnonymousIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4954,9 +4954,9 @@ StatusCode OpcUa_AnonymousIdentityToken_Encode(OpcUa_AnonymousIdentityToken* a_p
 /*============================================================================
  * OpcUa_AnonymousIdentityToken_Decode
  *===========================================================================*/
-StatusCode OpcUa_AnonymousIdentityToken_Decode(OpcUa_AnonymousIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AnonymousIdentityToken_Decode(OpcUa_AnonymousIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5025,9 +5025,9 @@ void OpcUa_UserNameIdentityToken_Clear(OpcUa_UserNameIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_UserNameIdentityToken_Encode
  *===========================================================================*/
-StatusCode OpcUa_UserNameIdentityToken_Encode(OpcUa_UserNameIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserNameIdentityToken_Encode(OpcUa_UserNameIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5048,9 +5048,9 @@ StatusCode OpcUa_UserNameIdentityToken_Encode(OpcUa_UserNameIdentityToken* a_pVa
 /*============================================================================
  * OpcUa_UserNameIdentityToken_Decode
  *===========================================================================*/
-StatusCode OpcUa_UserNameIdentityToken_Decode(OpcUa_UserNameIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserNameIdentityToken_Decode(OpcUa_UserNameIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5118,9 +5118,9 @@ void OpcUa_X509IdentityToken_Clear(OpcUa_X509IdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_X509IdentityToken_Encode
  *===========================================================================*/
-StatusCode OpcUa_X509IdentityToken_Encode(OpcUa_X509IdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_X509IdentityToken_Encode(OpcUa_X509IdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5139,9 +5139,9 @@ StatusCode OpcUa_X509IdentityToken_Encode(OpcUa_X509IdentityToken* a_pValue, UA_
 /*============================================================================
  * OpcUa_X509IdentityToken_Decode
  *===========================================================================*/
-StatusCode OpcUa_X509IdentityToken_Decode(OpcUa_X509IdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_X509IdentityToken_Decode(OpcUa_X509IdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5207,9 +5207,9 @@ void OpcUa_KerberosIdentityToken_Clear(OpcUa_KerberosIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_KerberosIdentityToken_Encode
  *===========================================================================*/
-StatusCode OpcUa_KerberosIdentityToken_Encode(OpcUa_KerberosIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_KerberosIdentityToken_Encode(OpcUa_KerberosIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5228,9 +5228,9 @@ StatusCode OpcUa_KerberosIdentityToken_Encode(OpcUa_KerberosIdentityToken* a_pVa
 /*============================================================================
  * OpcUa_KerberosIdentityToken_Decode
  *===========================================================================*/
-StatusCode OpcUa_KerberosIdentityToken_Decode(OpcUa_KerberosIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_KerberosIdentityToken_Decode(OpcUa_KerberosIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5298,9 +5298,9 @@ void OpcUa_IssuedIdentityToken_Clear(OpcUa_IssuedIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_IssuedIdentityToken_Encode
  *===========================================================================*/
-StatusCode OpcUa_IssuedIdentityToken_Encode(OpcUa_IssuedIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_IssuedIdentityToken_Encode(OpcUa_IssuedIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5320,9 +5320,9 @@ StatusCode OpcUa_IssuedIdentityToken_Encode(OpcUa_IssuedIdentityToken* a_pValue,
 /*============================================================================
  * OpcUa_IssuedIdentityToken_Decode
  *===========================================================================*/
-StatusCode OpcUa_IssuedIdentityToken_Decode(OpcUa_IssuedIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_IssuedIdentityToken_Decode(OpcUa_IssuedIdentityToken* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5402,9 +5402,9 @@ void OpcUa_ActivateSessionRequest_Clear(OpcUa_ActivateSessionRequest* a_pValue)
 /*============================================================================
  * OpcUa_ActivateSessionRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_ActivateSessionRequest_Encode(OpcUa_ActivateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ActivateSessionRequest_Encode(OpcUa_ActivateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5429,9 +5429,9 @@ StatusCode OpcUa_ActivateSessionRequest_Encode(OpcUa_ActivateSessionRequest* a_p
 /*============================================================================
  * OpcUa_ActivateSessionRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_ActivateSessionRequest_Decode(OpcUa_ActivateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ActivateSessionRequest_Decode(OpcUa_ActivateSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5486,7 +5486,7 @@ void OpcUa_ActivateSessionResponse_Initialize(OpcUa_ActivateSessionResponse* a_p
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         ByteString_Initialize(&a_pValue->ServerNonce);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -5502,7 +5502,7 @@ void OpcUa_ActivateSessionResponse_Clear(OpcUa_ActivateSessionResponse* a_pValue
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         ByteString_Clear(&a_pValue->ServerNonce);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -5511,9 +5511,9 @@ void OpcUa_ActivateSessionResponse_Clear(OpcUa_ActivateSessionResponse* a_pValue
 /*============================================================================
  * OpcUa_ActivateSessionResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_ActivateSessionResponse_Encode(OpcUa_ActivateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ActivateSessionResponse_Encode(OpcUa_ActivateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5522,7 +5522,7 @@ StatusCode OpcUa_ActivateSessionResponse_Encode(OpcUa_ActivateSessionResponse* a
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= ByteString_Write(&a_pValue->ServerNonce, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -5536,9 +5536,9 @@ StatusCode OpcUa_ActivateSessionResponse_Encode(OpcUa_ActivateSessionResponse* a
 /*============================================================================
  * OpcUa_ActivateSessionResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_ActivateSessionResponse_Decode(OpcUa_ActivateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ActivateSessionResponse_Decode(OpcUa_ActivateSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5549,7 +5549,7 @@ StatusCode OpcUa_ActivateSessionResponse_Decode(OpcUa_ActivateSessionResponse* a
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= ByteString_Read(&a_pValue->ServerNonce, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -5610,9 +5610,9 @@ void OpcUa_CloseSessionRequest_Clear(OpcUa_CloseSessionRequest* a_pValue)
 /*============================================================================
  * OpcUa_CloseSessionRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_CloseSessionRequest_Encode(OpcUa_CloseSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSessionRequest_Encode(OpcUa_CloseSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5631,9 +5631,9 @@ StatusCode OpcUa_CloseSessionRequest_Encode(OpcUa_CloseSessionRequest* a_pValue,
 /*============================================================================
  * OpcUa_CloseSessionRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_CloseSessionRequest_Decode(OpcUa_CloseSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSessionRequest_Decode(OpcUa_CloseSessionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5697,9 +5697,9 @@ void OpcUa_CloseSessionResponse_Clear(OpcUa_CloseSessionResponse* a_pValue)
 /*============================================================================
  * OpcUa_CloseSessionResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_CloseSessionResponse_Encode(OpcUa_CloseSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSessionResponse_Encode(OpcUa_CloseSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5717,9 +5717,9 @@ StatusCode OpcUa_CloseSessionResponse_Encode(OpcUa_CloseSessionResponse* a_pValu
 /*============================================================================
  * OpcUa_CloseSessionResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_CloseSessionResponse_Decode(OpcUa_CloseSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSessionResponse_Decode(OpcUa_CloseSessionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5786,9 +5786,9 @@ void OpcUa_CancelRequest_Clear(OpcUa_CancelRequest* a_pValue)
 /*============================================================================
  * OpcUa_CancelRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_CancelRequest_Encode(OpcUa_CancelRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CancelRequest_Encode(OpcUa_CancelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5807,9 +5807,9 @@ StatusCode OpcUa_CancelRequest_Encode(OpcUa_CancelRequest* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_CancelRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_CancelRequest_Decode(OpcUa_CancelRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CancelRequest_Decode(OpcUa_CancelRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5875,9 +5875,9 @@ void OpcUa_CancelResponse_Clear(OpcUa_CancelResponse* a_pValue)
 /*============================================================================
  * OpcUa_CancelResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_CancelResponse_Encode(OpcUa_CancelResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CancelResponse_Encode(OpcUa_CancelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5896,9 +5896,9 @@ StatusCode OpcUa_CancelResponse_Encode(OpcUa_CancelResponse* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_CancelResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_CancelResponse_Decode(OpcUa_CancelResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CancelResponse_Decode(OpcUa_CancelResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5972,9 +5972,9 @@ void OpcUa_NodeAttributes_Clear(OpcUa_NodeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_NodeAttributes_Encode
  *===========================================================================*/
-StatusCode OpcUa_NodeAttributes_Encode(OpcUa_NodeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeAttributes_Encode(OpcUa_NodeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5996,9 +5996,9 @@ StatusCode OpcUa_NodeAttributes_Encode(OpcUa_NodeAttributes* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_NodeAttributes_Decode
  *===========================================================================*/
-StatusCode OpcUa_NodeAttributes_Decode(OpcUa_NodeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeAttributes_Decode(OpcUa_NodeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6075,9 +6075,9 @@ void OpcUa_ObjectAttributes_Clear(OpcUa_ObjectAttributes* a_pValue)
 /*============================================================================
  * OpcUa_ObjectAttributes_Encode
  *===========================================================================*/
-StatusCode OpcUa_ObjectAttributes_Encode(OpcUa_ObjectAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectAttributes_Encode(OpcUa_ObjectAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6100,9 +6100,9 @@ StatusCode OpcUa_ObjectAttributes_Encode(OpcUa_ObjectAttributes* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_ObjectAttributes_Decode
  *===========================================================================*/
-StatusCode OpcUa_ObjectAttributes_Decode(OpcUa_ObjectAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectAttributes_Decode(OpcUa_ObjectAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6196,9 +6196,9 @@ void OpcUa_VariableAttributes_Clear(OpcUa_VariableAttributes* a_pValue)
 /*============================================================================
  * OpcUa_VariableAttributes_Encode
  *===========================================================================*/
-StatusCode OpcUa_VariableAttributes_Encode(OpcUa_VariableAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableAttributes_Encode(OpcUa_VariableAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6229,9 +6229,9 @@ StatusCode OpcUa_VariableAttributes_Encode(OpcUa_VariableAttributes* a_pValue, U
 /*============================================================================
  * OpcUa_VariableAttributes_Decode
  *===========================================================================*/
-StatusCode OpcUa_VariableAttributes_Decode(OpcUa_VariableAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableAttributes_Decode(OpcUa_VariableAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6319,9 +6319,9 @@ void OpcUa_MethodAttributes_Clear(OpcUa_MethodAttributes* a_pValue)
 /*============================================================================
  * OpcUa_MethodAttributes_Encode
  *===========================================================================*/
-StatusCode OpcUa_MethodAttributes_Encode(OpcUa_MethodAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MethodAttributes_Encode(OpcUa_MethodAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6345,9 +6345,9 @@ StatusCode OpcUa_MethodAttributes_Encode(OpcUa_MethodAttributes* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_MethodAttributes_Decode
  *===========================================================================*/
-StatusCode OpcUa_MethodAttributes_Decode(OpcUa_MethodAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MethodAttributes_Decode(OpcUa_MethodAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6426,9 +6426,9 @@ void OpcUa_ObjectTypeAttributes_Clear(OpcUa_ObjectTypeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_ObjectTypeAttributes_Encode
  *===========================================================================*/
-StatusCode OpcUa_ObjectTypeAttributes_Encode(OpcUa_ObjectTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectTypeAttributes_Encode(OpcUa_ObjectTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6451,9 +6451,9 @@ StatusCode OpcUa_ObjectTypeAttributes_Encode(OpcUa_ObjectTypeAttributes* a_pValu
 /*============================================================================
  * OpcUa_ObjectTypeAttributes_Decode
  *===========================================================================*/
-StatusCode OpcUa_ObjectTypeAttributes_Decode(OpcUa_ObjectTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectTypeAttributes_Decode(OpcUa_ObjectTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6541,9 +6541,9 @@ void OpcUa_VariableTypeAttributes_Clear(OpcUa_VariableTypeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_VariableTypeAttributes_Encode
  *===========================================================================*/
-StatusCode OpcUa_VariableTypeAttributes_Encode(OpcUa_VariableTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableTypeAttributes_Encode(OpcUa_VariableTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6571,9 +6571,9 @@ StatusCode OpcUa_VariableTypeAttributes_Encode(OpcUa_VariableTypeAttributes* a_p
 /*============================================================================
  * OpcUa_VariableTypeAttributes_Decode
  *===========================================================================*/
-StatusCode OpcUa_VariableTypeAttributes_Decode(OpcUa_VariableTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableTypeAttributes_Decode(OpcUa_VariableTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6660,9 +6660,9 @@ void OpcUa_ReferenceTypeAttributes_Clear(OpcUa_ReferenceTypeAttributes* a_pValue
 /*============================================================================
  * OpcUa_ReferenceTypeAttributes_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReferenceTypeAttributes_Encode(OpcUa_ReferenceTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Encode(OpcUa_ReferenceTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6687,9 +6687,9 @@ StatusCode OpcUa_ReferenceTypeAttributes_Encode(OpcUa_ReferenceTypeAttributes* a
 /*============================================================================
  * OpcUa_ReferenceTypeAttributes_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReferenceTypeAttributes_Decode(OpcUa_ReferenceTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Decode(OpcUa_ReferenceTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6769,9 +6769,9 @@ void OpcUa_DataTypeAttributes_Clear(OpcUa_DataTypeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_DataTypeAttributes_Encode
  *===========================================================================*/
-StatusCode OpcUa_DataTypeAttributes_Encode(OpcUa_DataTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataTypeAttributes_Encode(OpcUa_DataTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6794,9 +6794,9 @@ StatusCode OpcUa_DataTypeAttributes_Encode(OpcUa_DataTypeAttributes* a_pValue, U
 /*============================================================================
  * OpcUa_DataTypeAttributes_Decode
  *===========================================================================*/
-StatusCode OpcUa_DataTypeAttributes_Decode(OpcUa_DataTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataTypeAttributes_Decode(OpcUa_DataTypeAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6876,9 +6876,9 @@ void OpcUa_ViewAttributes_Clear(OpcUa_ViewAttributes* a_pValue)
 /*============================================================================
  * OpcUa_ViewAttributes_Encode
  *===========================================================================*/
-StatusCode OpcUa_ViewAttributes_Encode(OpcUa_ViewAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewAttributes_Encode(OpcUa_ViewAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6902,9 +6902,9 @@ StatusCode OpcUa_ViewAttributes_Encode(OpcUa_ViewAttributes* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_ViewAttributes_Decode
  *===========================================================================*/
-StatusCode OpcUa_ViewAttributes_Decode(OpcUa_ViewAttributes* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewAttributes_Decode(OpcUa_ViewAttributes* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6985,9 +6985,9 @@ void OpcUa_AddNodesItem_Clear(OpcUa_AddNodesItem* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesItem_Encode
  *===========================================================================*/
-StatusCode OpcUa_AddNodesItem_Encode(OpcUa_AddNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesItem_Encode(OpcUa_AddNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7011,9 +7011,9 @@ StatusCode OpcUa_AddNodesItem_Encode(OpcUa_AddNodesItem* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_AddNodesItem_Decode
  *===========================================================================*/
-StatusCode OpcUa_AddNodesItem_Decode(OpcUa_AddNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesItem_Decode(OpcUa_AddNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7084,9 +7084,9 @@ void OpcUa_AddNodesResult_Clear(OpcUa_AddNodesResult* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_AddNodesResult_Encode(OpcUa_AddNodesResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesResult_Encode(OpcUa_AddNodesResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7105,9 +7105,9 @@ StatusCode OpcUa_AddNodesResult_Encode(OpcUa_AddNodesResult* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_AddNodesResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_AddNodesResult_Decode(OpcUa_AddNodesResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesResult_Decode(OpcUa_AddNodesResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7176,9 +7176,9 @@ void OpcUa_AddNodesRequest_Clear(OpcUa_AddNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_AddNodesRequest_Encode(OpcUa_AddNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesRequest_Encode(OpcUa_AddNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7198,9 +7198,9 @@ StatusCode OpcUa_AddNodesRequest_Encode(OpcUa_AddNodesRequest* a_pValue, UA_MsgB
 /*============================================================================
  * OpcUa_AddNodesRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_AddNodesRequest_Decode(OpcUa_AddNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesRequest_Decode(OpcUa_AddNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7273,9 +7273,9 @@ void OpcUa_AddNodesResponse_Clear(OpcUa_AddNodesResponse* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_AddNodesResponse_Encode(OpcUa_AddNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesResponse_Encode(OpcUa_AddNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7297,9 +7297,9 @@ StatusCode OpcUa_AddNodesResponse_Encode(OpcUa_AddNodesResponse* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_AddNodesResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_AddNodesResponse_Decode(OpcUa_AddNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesResponse_Decode(OpcUa_AddNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7377,9 +7377,9 @@ void OpcUa_AddReferencesItem_Clear(OpcUa_AddReferencesItem* a_pValue)
 /*============================================================================
  * OpcUa_AddReferencesItem_Encode
  *===========================================================================*/
-StatusCode OpcUa_AddReferencesItem_Encode(OpcUa_AddReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesItem_Encode(OpcUa_AddReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7402,9 +7402,9 @@ StatusCode OpcUa_AddReferencesItem_Encode(OpcUa_AddReferencesItem* a_pValue, UA_
 /*============================================================================
  * OpcUa_AddReferencesItem_Decode
  *===========================================================================*/
-StatusCode OpcUa_AddReferencesItem_Decode(OpcUa_AddReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesItem_Decode(OpcUa_AddReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7477,9 +7477,9 @@ void OpcUa_AddReferencesRequest_Clear(OpcUa_AddReferencesRequest* a_pValue)
 /*============================================================================
  * OpcUa_AddReferencesRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_AddReferencesRequest_Encode(OpcUa_AddReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesRequest_Encode(OpcUa_AddReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7499,9 +7499,9 @@ StatusCode OpcUa_AddReferencesRequest_Encode(OpcUa_AddReferencesRequest* a_pValu
 /*============================================================================
  * OpcUa_AddReferencesRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_AddReferencesRequest_Decode(OpcUa_AddReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesRequest_Decode(OpcUa_AddReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7550,7 +7550,7 @@ void OpcUa_AddReferencesResponse_Initialize(OpcUa_AddReferencesResponse* a_pValu
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -7565,7 +7565,7 @@ void OpcUa_AddReferencesResponse_Clear(OpcUa_AddReferencesResponse* a_pValue)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -7574,9 +7574,9 @@ void OpcUa_AddReferencesResponse_Clear(OpcUa_AddReferencesResponse* a_pValue)
 /*============================================================================
  * OpcUa_AddReferencesResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_AddReferencesResponse_Encode(OpcUa_AddReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesResponse_Encode(OpcUa_AddReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7584,7 +7584,7 @@ StatusCode OpcUa_AddReferencesResponse_Encode(OpcUa_AddReferencesResponse* a_pVa
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -7598,9 +7598,9 @@ StatusCode OpcUa_AddReferencesResponse_Encode(OpcUa_AddReferencesResponse* a_pVa
 /*============================================================================
  * OpcUa_AddReferencesResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_AddReferencesResponse_Decode(OpcUa_AddReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesResponse_Decode(OpcUa_AddReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7610,7 +7610,7 @@ StatusCode OpcUa_AddReferencesResponse_Decode(OpcUa_AddReferencesResponse* a_pVa
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -7670,9 +7670,9 @@ void OpcUa_DeleteNodesItem_Clear(OpcUa_DeleteNodesItem* a_pValue)
 /*============================================================================
  * OpcUa_DeleteNodesItem_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteNodesItem_Encode(OpcUa_DeleteNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesItem_Encode(OpcUa_DeleteNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7691,9 +7691,9 @@ StatusCode OpcUa_DeleteNodesItem_Encode(OpcUa_DeleteNodesItem* a_pValue, UA_MsgB
 /*============================================================================
  * OpcUa_DeleteNodesItem_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteNodesItem_Decode(OpcUa_DeleteNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesItem_Decode(OpcUa_DeleteNodesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7762,9 +7762,9 @@ void OpcUa_DeleteNodesRequest_Clear(OpcUa_DeleteNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_DeleteNodesRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteNodesRequest_Encode(OpcUa_DeleteNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesRequest_Encode(OpcUa_DeleteNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7784,9 +7784,9 @@ StatusCode OpcUa_DeleteNodesRequest_Encode(OpcUa_DeleteNodesRequest* a_pValue, U
 /*============================================================================
  * OpcUa_DeleteNodesRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteNodesRequest_Decode(OpcUa_DeleteNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesRequest_Decode(OpcUa_DeleteNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7835,7 +7835,7 @@ void OpcUa_DeleteNodesResponse_Initialize(OpcUa_DeleteNodesResponse* a_pValue)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -7850,7 +7850,7 @@ void OpcUa_DeleteNodesResponse_Clear(OpcUa_DeleteNodesResponse* a_pValue)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -7859,9 +7859,9 @@ void OpcUa_DeleteNodesResponse_Clear(OpcUa_DeleteNodesResponse* a_pValue)
 /*============================================================================
  * OpcUa_DeleteNodesResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteNodesResponse_Encode(OpcUa_DeleteNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesResponse_Encode(OpcUa_DeleteNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7869,7 +7869,7 @@ StatusCode OpcUa_DeleteNodesResponse_Encode(OpcUa_DeleteNodesResponse* a_pValue,
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -7883,9 +7883,9 @@ StatusCode OpcUa_DeleteNodesResponse_Encode(OpcUa_DeleteNodesResponse* a_pValue,
 /*============================================================================
  * OpcUa_DeleteNodesResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteNodesResponse_Decode(OpcUa_DeleteNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesResponse_Decode(OpcUa_DeleteNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7895,7 +7895,7 @@ StatusCode OpcUa_DeleteNodesResponse_Decode(OpcUa_DeleteNodesResponse* a_pValue,
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -7961,9 +7961,9 @@ void OpcUa_DeleteReferencesItem_Clear(OpcUa_DeleteReferencesItem* a_pValue)
 /*============================================================================
  * OpcUa_DeleteReferencesItem_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteReferencesItem_Encode(OpcUa_DeleteReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesItem_Encode(OpcUa_DeleteReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7985,9 +7985,9 @@ StatusCode OpcUa_DeleteReferencesItem_Encode(OpcUa_DeleteReferencesItem* a_pValu
 /*============================================================================
  * OpcUa_DeleteReferencesItem_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteReferencesItem_Decode(OpcUa_DeleteReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesItem_Decode(OpcUa_DeleteReferencesItem* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8059,9 +8059,9 @@ void OpcUa_DeleteReferencesRequest_Clear(OpcUa_DeleteReferencesRequest* a_pValue
 /*============================================================================
  * OpcUa_DeleteReferencesRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteReferencesRequest_Encode(OpcUa_DeleteReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesRequest_Encode(OpcUa_DeleteReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8081,9 +8081,9 @@ StatusCode OpcUa_DeleteReferencesRequest_Encode(OpcUa_DeleteReferencesRequest* a
 /*============================================================================
  * OpcUa_DeleteReferencesRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteReferencesRequest_Decode(OpcUa_DeleteReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesRequest_Decode(OpcUa_DeleteReferencesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8132,7 +8132,7 @@ void OpcUa_DeleteReferencesResponse_Initialize(OpcUa_DeleteReferencesResponse* a
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -8147,7 +8147,7 @@ void OpcUa_DeleteReferencesResponse_Clear(OpcUa_DeleteReferencesResponse* a_pVal
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -8156,9 +8156,9 @@ void OpcUa_DeleteReferencesResponse_Clear(OpcUa_DeleteReferencesResponse* a_pVal
 /*============================================================================
  * OpcUa_DeleteReferencesResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteReferencesResponse_Encode(OpcUa_DeleteReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesResponse_Encode(OpcUa_DeleteReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8166,7 +8166,7 @@ StatusCode OpcUa_DeleteReferencesResponse_Encode(OpcUa_DeleteReferencesResponse*
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -8180,9 +8180,9 @@ StatusCode OpcUa_DeleteReferencesResponse_Encode(OpcUa_DeleteReferencesResponse*
 /*============================================================================
  * OpcUa_DeleteReferencesResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteReferencesResponse_Decode(OpcUa_DeleteReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesResponse_Decode(OpcUa_DeleteReferencesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8192,7 +8192,7 @@ StatusCode OpcUa_DeleteReferencesResponse_Decode(OpcUa_DeleteReferencesResponse*
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -8256,9 +8256,9 @@ void OpcUa_ViewDescription_Clear(OpcUa_ViewDescription* a_pValue)
 /*============================================================================
  * OpcUa_ViewDescription_Encode
  *===========================================================================*/
-StatusCode OpcUa_ViewDescription_Encode(OpcUa_ViewDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewDescription_Encode(OpcUa_ViewDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8278,9 +8278,9 @@ StatusCode OpcUa_ViewDescription_Encode(OpcUa_ViewDescription* a_pValue, UA_MsgB
 /*============================================================================
  * OpcUa_ViewDescription_Decode
  *===========================================================================*/
-StatusCode OpcUa_ViewDescription_Decode(OpcUa_ViewDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewDescription_Decode(OpcUa_ViewDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8355,9 +8355,9 @@ void OpcUa_BrowseDescription_Clear(OpcUa_BrowseDescription* a_pValue)
 /*============================================================================
  * OpcUa_BrowseDescription_Encode
  *===========================================================================*/
-StatusCode OpcUa_BrowseDescription_Encode(OpcUa_BrowseDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseDescription_Encode(OpcUa_BrowseDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8380,9 +8380,9 @@ StatusCode OpcUa_BrowseDescription_Encode(OpcUa_BrowseDescription* a_pValue, UA_
 /*============================================================================
  * OpcUa_BrowseDescription_Decode
  *===========================================================================*/
-StatusCode OpcUa_BrowseDescription_Decode(OpcUa_BrowseDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseDescription_Decode(OpcUa_BrowseDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8463,9 +8463,9 @@ void OpcUa_ReferenceDescription_Clear(OpcUa_ReferenceDescription* a_pValue)
 /*============================================================================
  * OpcUa_ReferenceDescription_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReferenceDescription_Encode(OpcUa_ReferenceDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceDescription_Encode(OpcUa_ReferenceDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8489,9 +8489,9 @@ StatusCode OpcUa_ReferenceDescription_Encode(OpcUa_ReferenceDescription* a_pValu
 /*============================================================================
  * OpcUa_ReferenceDescription_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReferenceDescription_Decode(OpcUa_ReferenceDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceDescription_Decode(OpcUa_ReferenceDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8566,9 +8566,9 @@ void OpcUa_BrowseResult_Clear(OpcUa_BrowseResult* a_pValue)
 /*============================================================================
  * OpcUa_BrowseResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_BrowseResult_Encode(OpcUa_BrowseResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseResult_Encode(OpcUa_BrowseResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8589,9 +8589,9 @@ StatusCode OpcUa_BrowseResult_Encode(OpcUa_BrowseResult* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_BrowseResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_BrowseResult_Decode(OpcUa_BrowseResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseResult_Decode(OpcUa_BrowseResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8666,9 +8666,9 @@ void OpcUa_BrowseRequest_Clear(OpcUa_BrowseRequest* a_pValue)
 /*============================================================================
  * OpcUa_BrowseRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_BrowseRequest_Encode(OpcUa_BrowseRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseRequest_Encode(OpcUa_BrowseRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8690,9 +8690,9 @@ StatusCode OpcUa_BrowseRequest_Encode(OpcUa_BrowseRequest* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_BrowseRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_BrowseRequest_Decode(OpcUa_BrowseRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseRequest_Decode(OpcUa_BrowseRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8767,9 +8767,9 @@ void OpcUa_BrowseResponse_Clear(OpcUa_BrowseResponse* a_pValue)
 /*============================================================================
  * OpcUa_BrowseResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_BrowseResponse_Encode(OpcUa_BrowseResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseResponse_Encode(OpcUa_BrowseResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8791,9 +8791,9 @@ StatusCode OpcUa_BrowseResponse_Encode(OpcUa_BrowseResponse* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_BrowseResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_BrowseResponse_Decode(OpcUa_BrowseResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseResponse_Decode(OpcUa_BrowseResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8868,9 +8868,9 @@ void OpcUa_BrowseNextRequest_Clear(OpcUa_BrowseNextRequest* a_pValue)
 /*============================================================================
  * OpcUa_BrowseNextRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_BrowseNextRequest_Encode(OpcUa_BrowseNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseNextRequest_Encode(OpcUa_BrowseNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8891,9 +8891,9 @@ StatusCode OpcUa_BrowseNextRequest_Encode(OpcUa_BrowseNextRequest* a_pValue, UA_
 /*============================================================================
  * OpcUa_BrowseNextRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_BrowseNextRequest_Decode(OpcUa_BrowseNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseNextRequest_Decode(OpcUa_BrowseNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8967,9 +8967,9 @@ void OpcUa_BrowseNextResponse_Clear(OpcUa_BrowseNextResponse* a_pValue)
 /*============================================================================
  * OpcUa_BrowseNextResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_BrowseNextResponse_Encode(OpcUa_BrowseNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseNextResponse_Encode(OpcUa_BrowseNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8991,9 +8991,9 @@ StatusCode OpcUa_BrowseNextResponse_Encode(OpcUa_BrowseNextResponse* a_pValue, U
 /*============================================================================
  * OpcUa_BrowseNextResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_BrowseNextResponse_Decode(OpcUa_BrowseNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseNextResponse_Decode(OpcUa_BrowseNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9067,9 +9067,9 @@ void OpcUa_RelativePathElement_Clear(OpcUa_RelativePathElement* a_pValue)
 /*============================================================================
  * OpcUa_RelativePathElement_Encode
  *===========================================================================*/
-StatusCode OpcUa_RelativePathElement_Encode(OpcUa_RelativePathElement* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RelativePathElement_Encode(OpcUa_RelativePathElement* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9090,9 +9090,9 @@ StatusCode OpcUa_RelativePathElement_Encode(OpcUa_RelativePathElement* a_pValue,
 /*============================================================================
  * OpcUa_RelativePathElement_Decode
  *===========================================================================*/
-StatusCode OpcUa_RelativePathElement_Decode(OpcUa_RelativePathElement* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RelativePathElement_Decode(OpcUa_RelativePathElement* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9160,9 +9160,9 @@ void OpcUa_RelativePath_Clear(OpcUa_RelativePath* a_pValue)
 /*============================================================================
  * OpcUa_RelativePath_Encode
  *===========================================================================*/
-StatusCode OpcUa_RelativePath_Encode(OpcUa_RelativePath* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RelativePath_Encode(OpcUa_RelativePath* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9181,9 +9181,9 @@ StatusCode OpcUa_RelativePath_Encode(OpcUa_RelativePath* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_RelativePath_Decode
  *===========================================================================*/
-StatusCode OpcUa_RelativePath_Decode(OpcUa_RelativePath* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RelativePath_Decode(OpcUa_RelativePath* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9249,9 +9249,9 @@ void OpcUa_BrowsePath_Clear(OpcUa_BrowsePath* a_pValue)
 /*============================================================================
  * OpcUa_BrowsePath_Encode
  *===========================================================================*/
-StatusCode OpcUa_BrowsePath_Encode(OpcUa_BrowsePath* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePath_Encode(OpcUa_BrowsePath* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9270,9 +9270,9 @@ StatusCode OpcUa_BrowsePath_Encode(OpcUa_BrowsePath* a_pValue, UA_MsgBuffer* msg
 /*============================================================================
  * OpcUa_BrowsePath_Decode
  *===========================================================================*/
-StatusCode OpcUa_BrowsePath_Decode(OpcUa_BrowsePath* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePath_Decode(OpcUa_BrowsePath* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9338,9 +9338,9 @@ void OpcUa_BrowsePathTarget_Clear(OpcUa_BrowsePathTarget* a_pValue)
 /*============================================================================
  * OpcUa_BrowsePathTarget_Encode
  *===========================================================================*/
-StatusCode OpcUa_BrowsePathTarget_Encode(OpcUa_BrowsePathTarget* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePathTarget_Encode(OpcUa_BrowsePathTarget* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9359,9 +9359,9 @@ StatusCode OpcUa_BrowsePathTarget_Encode(OpcUa_BrowsePathTarget* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_BrowsePathTarget_Decode
  *===========================================================================*/
-StatusCode OpcUa_BrowsePathTarget_Decode(OpcUa_BrowsePathTarget* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePathTarget_Decode(OpcUa_BrowsePathTarget* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9429,9 +9429,9 @@ void OpcUa_BrowsePathResult_Clear(OpcUa_BrowsePathResult* a_pValue)
 /*============================================================================
  * OpcUa_BrowsePathResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_BrowsePathResult_Encode(OpcUa_BrowsePathResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePathResult_Encode(OpcUa_BrowsePathResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9451,9 +9451,9 @@ StatusCode OpcUa_BrowsePathResult_Encode(OpcUa_BrowsePathResult* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_BrowsePathResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_BrowsePathResult_Decode(OpcUa_BrowsePathResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePathResult_Decode(OpcUa_BrowsePathResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9523,9 +9523,9 @@ void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(OpcUa_TranslateBrowsePaths
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9545,9 +9545,9 @@ StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(OpcUa_TranslateBrow
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9620,9 +9620,9 @@ void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(OpcUa_TranslateBrowsePath
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9644,9 +9644,9 @@ StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(OpcUa_TranslateBro
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9719,9 +9719,9 @@ void OpcUa_RegisterNodesRequest_Clear(OpcUa_RegisterNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_RegisterNodesRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_RegisterNodesRequest_Encode(OpcUa_RegisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterNodesRequest_Encode(OpcUa_RegisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9741,9 +9741,9 @@ StatusCode OpcUa_RegisterNodesRequest_Encode(OpcUa_RegisterNodesRequest* a_pValu
 /*============================================================================
  * OpcUa_RegisterNodesRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_RegisterNodesRequest_Decode(OpcUa_RegisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterNodesRequest_Decode(OpcUa_RegisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9812,9 +9812,9 @@ void OpcUa_RegisterNodesResponse_Clear(OpcUa_RegisterNodesResponse* a_pValue)
 /*============================================================================
  * OpcUa_RegisterNodesResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_RegisterNodesResponse_Encode(OpcUa_RegisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterNodesResponse_Encode(OpcUa_RegisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9834,9 +9834,9 @@ StatusCode OpcUa_RegisterNodesResponse_Encode(OpcUa_RegisterNodesResponse* a_pVa
 /*============================================================================
  * OpcUa_RegisterNodesResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_RegisterNodesResponse_Decode(OpcUa_RegisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterNodesResponse_Decode(OpcUa_RegisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9907,9 +9907,9 @@ void OpcUa_UnregisterNodesRequest_Clear(OpcUa_UnregisterNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_UnregisterNodesRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_UnregisterNodesRequest_Encode(OpcUa_UnregisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UnregisterNodesRequest_Encode(OpcUa_UnregisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9929,9 +9929,9 @@ StatusCode OpcUa_UnregisterNodesRequest_Encode(OpcUa_UnregisterNodesRequest* a_p
 /*============================================================================
  * OpcUa_UnregisterNodesRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_UnregisterNodesRequest_Decode(OpcUa_UnregisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UnregisterNodesRequest_Decode(OpcUa_UnregisterNodesRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9996,9 +9996,9 @@ void OpcUa_UnregisterNodesResponse_Clear(OpcUa_UnregisterNodesResponse* a_pValue
 /*============================================================================
  * OpcUa_UnregisterNodesResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_UnregisterNodesResponse_Encode(OpcUa_UnregisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UnregisterNodesResponse_Encode(OpcUa_UnregisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10016,9 +10016,9 @@ StatusCode OpcUa_UnregisterNodesResponse_Encode(OpcUa_UnregisterNodesResponse* a
 /*============================================================================
  * OpcUa_UnregisterNodesResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_UnregisterNodesResponse_Decode(OpcUa_UnregisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UnregisterNodesResponse_Decode(OpcUa_UnregisterNodesResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10098,9 +10098,9 @@ void OpcUa_EndpointConfiguration_Clear(OpcUa_EndpointConfiguration* a_pValue)
 /*============================================================================
  * OpcUa_EndpointConfiguration_Encode
  *===========================================================================*/
-StatusCode OpcUa_EndpointConfiguration_Encode(OpcUa_EndpointConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointConfiguration_Encode(OpcUa_EndpointConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10126,9 +10126,9 @@ StatusCode OpcUa_EndpointConfiguration_Encode(OpcUa_EndpointConfiguration* a_pVa
 /*============================================================================
  * OpcUa_EndpointConfiguration_Decode
  *===========================================================================*/
-StatusCode OpcUa_EndpointConfiguration_Decode(OpcUa_EndpointConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointConfiguration_Decode(OpcUa_EndpointConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10212,9 +10212,9 @@ void OpcUa_SupportedProfile_Clear(OpcUa_SupportedProfile* a_pValue)
 /*============================================================================
  * OpcUa_SupportedProfile_Encode
  *===========================================================================*/
-StatusCode OpcUa_SupportedProfile_Encode(OpcUa_SupportedProfile* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SupportedProfile_Encode(OpcUa_SupportedProfile* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10238,9 +10238,9 @@ StatusCode OpcUa_SupportedProfile_Encode(OpcUa_SupportedProfile* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_SupportedProfile_Decode
  *===========================================================================*/
-StatusCode OpcUa_SupportedProfile_Decode(OpcUa_SupportedProfile* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SupportedProfile_Decode(OpcUa_SupportedProfile* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10329,9 +10329,9 @@ void OpcUa_SoftwareCertificate_Clear(OpcUa_SoftwareCertificate* a_pValue)
 /*============================================================================
  * OpcUa_SoftwareCertificate_Encode
  *===========================================================================*/
-StatusCode OpcUa_SoftwareCertificate_Encode(OpcUa_SoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SoftwareCertificate_Encode(OpcUa_SoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10359,9 +10359,9 @@ StatusCode OpcUa_SoftwareCertificate_Encode(OpcUa_SoftwareCertificate* a_pValue,
 /*============================================================================
  * OpcUa_SoftwareCertificate_Decode
  *===========================================================================*/
-StatusCode OpcUa_SoftwareCertificate_Decode(OpcUa_SoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SoftwareCertificate_Decode(OpcUa_SoftwareCertificate* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10438,9 +10438,9 @@ void OpcUa_QueryDataDescription_Clear(OpcUa_QueryDataDescription* a_pValue)
 /*============================================================================
  * OpcUa_QueryDataDescription_Encode
  *===========================================================================*/
-StatusCode OpcUa_QueryDataDescription_Encode(OpcUa_QueryDataDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryDataDescription_Encode(OpcUa_QueryDataDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10460,9 +10460,9 @@ StatusCode OpcUa_QueryDataDescription_Encode(OpcUa_QueryDataDescription* a_pValu
 /*============================================================================
  * OpcUa_QueryDataDescription_Decode
  *===========================================================================*/
-StatusCode OpcUa_QueryDataDescription_Decode(OpcUa_QueryDataDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryDataDescription_Decode(OpcUa_QueryDataDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10533,9 +10533,9 @@ void OpcUa_NodeTypeDescription_Clear(OpcUa_NodeTypeDescription* a_pValue)
 /*============================================================================
  * OpcUa_NodeTypeDescription_Encode
  *===========================================================================*/
-StatusCode OpcUa_NodeTypeDescription_Encode(OpcUa_NodeTypeDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeTypeDescription_Encode(OpcUa_NodeTypeDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10556,9 +10556,9 @@ StatusCode OpcUa_NodeTypeDescription_Encode(OpcUa_NodeTypeDescription* a_pValue,
 /*============================================================================
  * OpcUa_NodeTypeDescription_Decode
  *===========================================================================*/
-StatusCode OpcUa_NodeTypeDescription_Decode(OpcUa_NodeTypeDescription* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeTypeDescription_Decode(OpcUa_NodeTypeDescription* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10631,9 +10631,9 @@ void OpcUa_QueryDataSet_Clear(OpcUa_QueryDataSet* a_pValue)
 /*============================================================================
  * OpcUa_QueryDataSet_Encode
  *===========================================================================*/
-StatusCode OpcUa_QueryDataSet_Encode(OpcUa_QueryDataSet* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryDataSet_Encode(OpcUa_QueryDataSet* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10654,9 +10654,9 @@ StatusCode OpcUa_QueryDataSet_Encode(OpcUa_QueryDataSet* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_QueryDataSet_Decode
  *===========================================================================*/
-StatusCode OpcUa_QueryDataSet_Decode(OpcUa_QueryDataSet* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryDataSet_Decode(OpcUa_QueryDataSet* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10730,9 +10730,9 @@ void OpcUa_NodeReference_Clear(OpcUa_NodeReference* a_pValue)
 /*============================================================================
  * OpcUa_NodeReference_Encode
  *===========================================================================*/
-StatusCode OpcUa_NodeReference_Encode(OpcUa_NodeReference* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeReference_Encode(OpcUa_NodeReference* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10754,9 +10754,9 @@ StatusCode OpcUa_NodeReference_Encode(OpcUa_NodeReference* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_NodeReference_Decode
  *===========================================================================*/
-StatusCode OpcUa_NodeReference_Decode(OpcUa_NodeReference* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeReference_Decode(OpcUa_NodeReference* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10827,9 +10827,9 @@ void OpcUa_ContentFilterElement_Clear(OpcUa_ContentFilterElement* a_pValue)
 /*============================================================================
  * OpcUa_ContentFilterElement_Encode
  *===========================================================================*/
-StatusCode OpcUa_ContentFilterElement_Encode(OpcUa_ContentFilterElement* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterElement_Encode(OpcUa_ContentFilterElement* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10849,9 +10849,9 @@ StatusCode OpcUa_ContentFilterElement_Encode(OpcUa_ContentFilterElement* a_pValu
 /*============================================================================
  * OpcUa_ContentFilterElement_Decode
  *===========================================================================*/
-StatusCode OpcUa_ContentFilterElement_Decode(OpcUa_ContentFilterElement* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterElement_Decode(OpcUa_ContentFilterElement* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10918,9 +10918,9 @@ void OpcUa_ContentFilter_Clear(OpcUa_ContentFilter* a_pValue)
 /*============================================================================
  * OpcUa_ContentFilter_Encode
  *===========================================================================*/
-StatusCode OpcUa_ContentFilter_Encode(OpcUa_ContentFilter* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilter_Encode(OpcUa_ContentFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10939,9 +10939,9 @@ StatusCode OpcUa_ContentFilter_Encode(OpcUa_ContentFilter* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_ContentFilter_Decode
  *===========================================================================*/
-StatusCode OpcUa_ContentFilter_Decode(OpcUa_ContentFilter* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilter_Decode(OpcUa_ContentFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11005,9 +11005,9 @@ void OpcUa_ElementOperand_Clear(OpcUa_ElementOperand* a_pValue)
 /*============================================================================
  * OpcUa_ElementOperand_Encode
  *===========================================================================*/
-StatusCode OpcUa_ElementOperand_Encode(OpcUa_ElementOperand* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ElementOperand_Encode(OpcUa_ElementOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11025,9 +11025,9 @@ StatusCode OpcUa_ElementOperand_Encode(OpcUa_ElementOperand* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_ElementOperand_Decode
  *===========================================================================*/
-StatusCode OpcUa_ElementOperand_Decode(OpcUa_ElementOperand* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ElementOperand_Decode(OpcUa_ElementOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11090,9 +11090,9 @@ void OpcUa_LiteralOperand_Clear(OpcUa_LiteralOperand* a_pValue)
 /*============================================================================
  * OpcUa_LiteralOperand_Encode
  *===========================================================================*/
-StatusCode OpcUa_LiteralOperand_Encode(OpcUa_LiteralOperand* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_LiteralOperand_Encode(OpcUa_LiteralOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11110,9 +11110,9 @@ StatusCode OpcUa_LiteralOperand_Encode(OpcUa_LiteralOperand* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_LiteralOperand_Decode
  *===========================================================================*/
-StatusCode OpcUa_LiteralOperand_Decode(OpcUa_LiteralOperand* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_LiteralOperand_Decode(OpcUa_LiteralOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11183,9 +11183,9 @@ void OpcUa_AttributeOperand_Clear(OpcUa_AttributeOperand* a_pValue)
 /*============================================================================
  * OpcUa_AttributeOperand_Encode
  *===========================================================================*/
-StatusCode OpcUa_AttributeOperand_Encode(OpcUa_AttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AttributeOperand_Encode(OpcUa_AttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11207,9 +11207,9 @@ StatusCode OpcUa_AttributeOperand_Encode(OpcUa_AttributeOperand* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_AttributeOperand_Decode
  *===========================================================================*/
-StatusCode OpcUa_AttributeOperand_Decode(OpcUa_AttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AttributeOperand_Decode(OpcUa_AttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11284,9 +11284,9 @@ void OpcUa_SimpleAttributeOperand_Clear(OpcUa_SimpleAttributeOperand* a_pValue)
 /*============================================================================
  * OpcUa_SimpleAttributeOperand_Encode
  *===========================================================================*/
-StatusCode OpcUa_SimpleAttributeOperand_Encode(OpcUa_SimpleAttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SimpleAttributeOperand_Encode(OpcUa_SimpleAttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11308,9 +11308,9 @@ StatusCode OpcUa_SimpleAttributeOperand_Encode(OpcUa_SimpleAttributeOperand* a_p
 /*============================================================================
  * OpcUa_SimpleAttributeOperand_Decode
  *===========================================================================*/
-StatusCode OpcUa_SimpleAttributeOperand_Decode(OpcUa_SimpleAttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SimpleAttributeOperand_Decode(OpcUa_SimpleAttributeOperand* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11361,7 +11361,7 @@ void OpcUa_ContentFilterElementResult_Initialize(OpcUa_ContentFilterElementResul
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfOperandDiagnosticInfos, (void**) &a_pValue->OperandDiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -11376,7 +11376,7 @@ void OpcUa_ContentFilterElementResult_Clear(OpcUa_ContentFilterElementResult* a_
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfOperandDiagnosticInfos, (void**) &a_pValue->OperandDiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -11385,9 +11385,9 @@ void OpcUa_ContentFilterElementResult_Clear(OpcUa_ContentFilterElementResult* a_
 /*============================================================================
  * OpcUa_ContentFilterElementResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_ContentFilterElementResult_Encode(OpcUa_ContentFilterElementResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterElementResult_Encode(OpcUa_ContentFilterElementResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11395,7 +11395,7 @@ StatusCode OpcUa_ContentFilterElementResult_Encode(OpcUa_ContentFilterElementRes
 
     status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfOperandDiagnosticInfos, (void**) &a_pValue->OperandDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -11409,9 +11409,9 @@ StatusCode OpcUa_ContentFilterElementResult_Encode(OpcUa_ContentFilterElementRes
 /*============================================================================
  * OpcUa_ContentFilterElementResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_ContentFilterElementResult_Decode(OpcUa_ContentFilterElementResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterElementResult_Decode(OpcUa_ContentFilterElementResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11421,7 +11421,7 @@ StatusCode OpcUa_ContentFilterElementResult_Decode(OpcUa_ContentFilterElementRes
 
     status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfOperandStatusCodes, (void**) &a_pValue->OperandStatusCodes, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfOperandDiagnosticInfos, (void**) &a_pValue->OperandDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -11484,9 +11484,9 @@ void OpcUa_ContentFilterResult_Clear(OpcUa_ContentFilterResult* a_pValue)
 /*============================================================================
  * OpcUa_ContentFilterResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_ContentFilterResult_Encode(OpcUa_ContentFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterResult_Encode(OpcUa_ContentFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11507,9 +11507,9 @@ StatusCode OpcUa_ContentFilterResult_Encode(OpcUa_ContentFilterResult* a_pValue,
 /*============================================================================
  * OpcUa_ContentFilterResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_ContentFilterResult_Decode(OpcUa_ContentFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterResult_Decode(OpcUa_ContentFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11559,7 +11559,7 @@ void OpcUa_ParsingResult_Initialize(OpcUa_ParsingResult* a_pValue)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDataDiagnosticInfos, (void**) &a_pValue->DataDiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -11574,7 +11574,7 @@ void OpcUa_ParsingResult_Clear(OpcUa_ParsingResult* a_pValue)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDataDiagnosticInfos, (void**) &a_pValue->DataDiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -11583,9 +11583,9 @@ void OpcUa_ParsingResult_Clear(OpcUa_ParsingResult* a_pValue)
 /*============================================================================
  * OpcUa_ParsingResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_ParsingResult_Encode(OpcUa_ParsingResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ParsingResult_Encode(OpcUa_ParsingResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11593,7 +11593,7 @@ StatusCode OpcUa_ParsingResult_Encode(OpcUa_ParsingResult* a_pValue, UA_MsgBuffe
 
     status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDataDiagnosticInfos, (void**) &a_pValue->DataDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -11607,9 +11607,9 @@ StatusCode OpcUa_ParsingResult_Encode(OpcUa_ParsingResult* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_ParsingResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_ParsingResult_Decode(OpcUa_ParsingResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ParsingResult_Decode(OpcUa_ParsingResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11619,7 +11619,7 @@ StatusCode OpcUa_ParsingResult_Decode(OpcUa_ParsingResult* a_pValue, UA_MsgBuffe
 
     status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDataStatusCodes, (void**) &a_pValue->DataStatusCodes, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDataDiagnosticInfos, (void**) &a_pValue->DataDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -11689,9 +11689,9 @@ void OpcUa_QueryFirstRequest_Clear(OpcUa_QueryFirstRequest* a_pValue)
 /*============================================================================
  * OpcUa_QueryFirstRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_QueryFirstRequest_Encode(OpcUa_QueryFirstRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryFirstRequest_Encode(OpcUa_QueryFirstRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11715,9 +11715,9 @@ StatusCode OpcUa_QueryFirstRequest_Encode(OpcUa_QueryFirstRequest* a_pValue, UA_
 /*============================================================================
  * OpcUa_QueryFirstRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_QueryFirstRequest_Decode(OpcUa_QueryFirstRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryFirstRequest_Decode(OpcUa_QueryFirstRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11802,9 +11802,9 @@ void OpcUa_QueryFirstResponse_Clear(OpcUa_QueryFirstResponse* a_pValue)
 /*============================================================================
  * OpcUa_QueryFirstResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_QueryFirstResponse_Encode(OpcUa_QueryFirstResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryFirstResponse_Encode(OpcUa_QueryFirstResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11830,9 +11830,9 @@ StatusCode OpcUa_QueryFirstResponse_Encode(OpcUa_QueryFirstResponse* a_pValue, U
 /*============================================================================
  * OpcUa_QueryFirstResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_QueryFirstResponse_Decode(OpcUa_QueryFirstResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryFirstResponse_Decode(OpcUa_QueryFirstResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11909,9 +11909,9 @@ void OpcUa_QueryNextRequest_Clear(OpcUa_QueryNextRequest* a_pValue)
 /*============================================================================
  * OpcUa_QueryNextRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_QueryNextRequest_Encode(OpcUa_QueryNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryNextRequest_Encode(OpcUa_QueryNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11931,9 +11931,9 @@ StatusCode OpcUa_QueryNextRequest_Encode(OpcUa_QueryNextRequest* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_QueryNextRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_QueryNextRequest_Decode(OpcUa_QueryNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryNextRequest_Decode(OpcUa_QueryNextRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12004,9 +12004,9 @@ void OpcUa_QueryNextResponse_Clear(OpcUa_QueryNextResponse* a_pValue)
 /*============================================================================
  * OpcUa_QueryNextResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_QueryNextResponse_Encode(OpcUa_QueryNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryNextResponse_Encode(OpcUa_QueryNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12027,9 +12027,9 @@ StatusCode OpcUa_QueryNextResponse_Encode(OpcUa_QueryNextResponse* a_pValue, UA_
 /*============================================================================
  * OpcUa_QueryNextResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_QueryNextResponse_Decode(OpcUa_QueryNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryNextResponse_Decode(OpcUa_QueryNextResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12103,9 +12103,9 @@ void OpcUa_ReadValueId_Clear(OpcUa_ReadValueId* a_pValue)
 /*============================================================================
  * OpcUa_ReadValueId_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReadValueId_Encode(OpcUa_ReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadValueId_Encode(OpcUa_ReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12126,9 +12126,9 @@ StatusCode OpcUa_ReadValueId_Encode(OpcUa_ReadValueId* a_pValue, UA_MsgBuffer* m
 /*============================================================================
  * OpcUa_ReadValueId_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReadValueId_Decode(OpcUa_ReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadValueId_Decode(OpcUa_ReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12203,9 +12203,9 @@ void OpcUa_ReadRequest_Clear(OpcUa_ReadRequest* a_pValue)
 /*============================================================================
  * OpcUa_ReadRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReadRequest_Encode(OpcUa_ReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadRequest_Encode(OpcUa_ReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12227,9 +12227,9 @@ StatusCode OpcUa_ReadRequest_Encode(OpcUa_ReadRequest* a_pValue, UA_MsgBuffer* m
 /*============================================================================
  * OpcUa_ReadRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReadRequest_Decode(OpcUa_ReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadRequest_Decode(OpcUa_ReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12304,9 +12304,9 @@ void OpcUa_ReadResponse_Clear(OpcUa_ReadResponse* a_pValue)
 /*============================================================================
  * OpcUa_ReadResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReadResponse_Encode(OpcUa_ReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadResponse_Encode(OpcUa_ReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12328,9 +12328,9 @@ StatusCode OpcUa_ReadResponse_Encode(OpcUa_ReadResponse* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_ReadResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReadResponse_Decode(OpcUa_ReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadResponse_Decode(OpcUa_ReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12404,9 +12404,9 @@ void OpcUa_HistoryReadValueId_Clear(OpcUa_HistoryReadValueId* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadValueId_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryReadValueId_Encode(OpcUa_HistoryReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadValueId_Encode(OpcUa_HistoryReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12427,9 +12427,9 @@ StatusCode OpcUa_HistoryReadValueId_Encode(OpcUa_HistoryReadValueId* a_pValue, U
 /*============================================================================
  * OpcUa_HistoryReadValueId_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryReadValueId_Decode(OpcUa_HistoryReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadValueId_Decode(OpcUa_HistoryReadValueId* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12499,9 +12499,9 @@ void OpcUa_HistoryReadResult_Clear(OpcUa_HistoryReadResult* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryReadResult_Encode(OpcUa_HistoryReadResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadResult_Encode(OpcUa_HistoryReadResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12521,9 +12521,9 @@ StatusCode OpcUa_HistoryReadResult_Encode(OpcUa_HistoryReadResult* a_pValue, UA_
 /*============================================================================
  * OpcUa_HistoryReadResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryReadResult_Decode(OpcUa_HistoryReadResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadResult_Decode(OpcUa_HistoryReadResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12594,9 +12594,9 @@ void OpcUa_ReadEventDetails_Clear(OpcUa_ReadEventDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadEventDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReadEventDetails_Encode(OpcUa_ReadEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadEventDetails_Encode(OpcUa_ReadEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12617,9 +12617,9 @@ StatusCode OpcUa_ReadEventDetails_Encode(OpcUa_ReadEventDetails* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_ReadEventDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReadEventDetails_Decode(OpcUa_ReadEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadEventDetails_Decode(OpcUa_ReadEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12693,9 +12693,9 @@ void OpcUa_ReadRawModifiedDetails_Clear(OpcUa_ReadRawModifiedDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadRawModifiedDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReadRawModifiedDetails_Encode(OpcUa_ReadRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Encode(OpcUa_ReadRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12717,9 +12717,9 @@ StatusCode OpcUa_ReadRawModifiedDetails_Encode(OpcUa_ReadRawModifiedDetails* a_p
 /*============================================================================
  * OpcUa_ReadRawModifiedDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReadRawModifiedDetails_Decode(OpcUa_ReadRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Decode(OpcUa_ReadRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12796,9 +12796,9 @@ void OpcUa_ReadProcessedDetails_Clear(OpcUa_ReadProcessedDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadProcessedDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReadProcessedDetails_Encode(OpcUa_ReadProcessedDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadProcessedDetails_Encode(OpcUa_ReadProcessedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12821,9 +12821,9 @@ StatusCode OpcUa_ReadProcessedDetails_Encode(OpcUa_ReadProcessedDetails* a_pValu
 /*============================================================================
  * OpcUa_ReadProcessedDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReadProcessedDetails_Decode(OpcUa_ReadProcessedDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadProcessedDetails_Decode(OpcUa_ReadProcessedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12895,9 +12895,9 @@ void OpcUa_ReadAtTimeDetails_Clear(OpcUa_ReadAtTimeDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadAtTimeDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_ReadAtTimeDetails_Encode(OpcUa_ReadAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadAtTimeDetails_Encode(OpcUa_ReadAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12917,9 +12917,9 @@ StatusCode OpcUa_ReadAtTimeDetails_Encode(OpcUa_ReadAtTimeDetails* a_pValue, UA_
 /*============================================================================
  * OpcUa_ReadAtTimeDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_ReadAtTimeDetails_Decode(OpcUa_ReadAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadAtTimeDetails_Decode(OpcUa_ReadAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12986,9 +12986,9 @@ void OpcUa_HistoryData_Clear(OpcUa_HistoryData* a_pValue)
 /*============================================================================
  * OpcUa_HistoryData_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryData_Encode(OpcUa_HistoryData* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryData_Encode(OpcUa_HistoryData* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13007,9 +13007,9 @@ StatusCode OpcUa_HistoryData_Encode(OpcUa_HistoryData* a_pValue, UA_MsgBuffer* m
 /*============================================================================
  * OpcUa_HistoryData_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryData_Decode(OpcUa_HistoryData* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryData_Decode(OpcUa_HistoryData* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13077,9 +13077,9 @@ void OpcUa_ModificationInfo_Clear(OpcUa_ModificationInfo* a_pValue)
 /*============================================================================
  * OpcUa_ModificationInfo_Encode
  *===========================================================================*/
-StatusCode OpcUa_ModificationInfo_Encode(OpcUa_ModificationInfo* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModificationInfo_Encode(OpcUa_ModificationInfo* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13099,9 +13099,9 @@ StatusCode OpcUa_ModificationInfo_Encode(OpcUa_ModificationInfo* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_ModificationInfo_Decode
  *===========================================================================*/
-StatusCode OpcUa_ModificationInfo_Decode(OpcUa_ModificationInfo* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModificationInfo_Decode(OpcUa_ModificationInfo* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13172,9 +13172,9 @@ void OpcUa_HistoryModifiedData_Clear(OpcUa_HistoryModifiedData* a_pValue)
 /*============================================================================
  * OpcUa_HistoryModifiedData_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryModifiedData_Encode(OpcUa_HistoryModifiedData* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryModifiedData_Encode(OpcUa_HistoryModifiedData* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13195,9 +13195,9 @@ StatusCode OpcUa_HistoryModifiedData_Encode(OpcUa_HistoryModifiedData* a_pValue,
 /*============================================================================
  * OpcUa_HistoryModifiedData_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryModifiedData_Decode(OpcUa_HistoryModifiedData* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryModifiedData_Decode(OpcUa_HistoryModifiedData* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13265,9 +13265,9 @@ void OpcUa_HistoryEvent_Clear(OpcUa_HistoryEvent* a_pValue)
 /*============================================================================
  * OpcUa_HistoryEvent_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryEvent_Encode(OpcUa_HistoryEvent* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryEvent_Encode(OpcUa_HistoryEvent* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13286,9 +13286,9 @@ StatusCode OpcUa_HistoryEvent_Encode(OpcUa_HistoryEvent* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_HistoryEvent_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryEvent_Decode(OpcUa_HistoryEvent* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryEvent_Decode(OpcUa_HistoryEvent* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13363,9 +13363,9 @@ void OpcUa_HistoryReadRequest_Clear(OpcUa_HistoryReadRequest* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryReadRequest_Encode(OpcUa_HistoryReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadRequest_Encode(OpcUa_HistoryReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13388,9 +13388,9 @@ StatusCode OpcUa_HistoryReadRequest_Encode(OpcUa_HistoryReadRequest* a_pValue, U
 /*============================================================================
  * OpcUa_HistoryReadRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryReadRequest_Decode(OpcUa_HistoryReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadRequest_Decode(OpcUa_HistoryReadRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13466,9 +13466,9 @@ void OpcUa_HistoryReadResponse_Clear(OpcUa_HistoryReadResponse* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryReadResponse_Encode(OpcUa_HistoryReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadResponse_Encode(OpcUa_HistoryReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13490,9 +13490,9 @@ StatusCode OpcUa_HistoryReadResponse_Encode(OpcUa_HistoryReadResponse* a_pValue,
 /*============================================================================
  * OpcUa_HistoryReadResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryReadResponse_Decode(OpcUa_HistoryReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadResponse_Decode(OpcUa_HistoryReadResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13566,9 +13566,9 @@ void OpcUa_WriteValue_Clear(OpcUa_WriteValue* a_pValue)
 /*============================================================================
  * OpcUa_WriteValue_Encode
  *===========================================================================*/
-StatusCode OpcUa_WriteValue_Encode(OpcUa_WriteValue* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteValue_Encode(OpcUa_WriteValue* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13589,9 +13589,9 @@ StatusCode OpcUa_WriteValue_Encode(OpcUa_WriteValue* a_pValue, UA_MsgBuffer* msg
 /*============================================================================
  * OpcUa_WriteValue_Decode
  *===========================================================================*/
-StatusCode OpcUa_WriteValue_Decode(OpcUa_WriteValue* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteValue_Decode(OpcUa_WriteValue* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13662,9 +13662,9 @@ void OpcUa_WriteRequest_Clear(OpcUa_WriteRequest* a_pValue)
 /*============================================================================
  * OpcUa_WriteRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_WriteRequest_Encode(OpcUa_WriteRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteRequest_Encode(OpcUa_WriteRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13684,9 +13684,9 @@ StatusCode OpcUa_WriteRequest_Encode(OpcUa_WriteRequest* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_WriteRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_WriteRequest_Decode(OpcUa_WriteRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteRequest_Decode(OpcUa_WriteRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13735,7 +13735,7 @@ void OpcUa_WriteResponse_Initialize(OpcUa_WriteResponse* a_pValue)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -13750,7 +13750,7 @@ void OpcUa_WriteResponse_Clear(OpcUa_WriteResponse* a_pValue)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -13759,9 +13759,9 @@ void OpcUa_WriteResponse_Clear(OpcUa_WriteResponse* a_pValue)
 /*============================================================================
  * OpcUa_WriteResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_WriteResponse_Encode(OpcUa_WriteResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteResponse_Encode(OpcUa_WriteResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13769,7 +13769,7 @@ StatusCode OpcUa_WriteResponse_Encode(OpcUa_WriteResponse* a_pValue, UA_MsgBuffe
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -13783,9 +13783,9 @@ StatusCode OpcUa_WriteResponse_Encode(OpcUa_WriteResponse* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_WriteResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_WriteResponse_Decode(OpcUa_WriteResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteResponse_Decode(OpcUa_WriteResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13795,7 +13795,7 @@ StatusCode OpcUa_WriteResponse_Decode(OpcUa_WriteResponse* a_pValue, UA_MsgBuffe
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -13853,9 +13853,9 @@ void OpcUa_HistoryUpdateDetails_Clear(OpcUa_HistoryUpdateDetails* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryUpdateDetails_Encode(OpcUa_HistoryUpdateDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateDetails_Encode(OpcUa_HistoryUpdateDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13873,9 +13873,9 @@ StatusCode OpcUa_HistoryUpdateDetails_Encode(OpcUa_HistoryUpdateDetails* a_pValu
 /*============================================================================
  * OpcUa_HistoryUpdateDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryUpdateDetails_Decode(OpcUa_HistoryUpdateDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateDetails_Decode(OpcUa_HistoryUpdateDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13946,9 +13946,9 @@ void OpcUa_UpdateDataDetails_Clear(OpcUa_UpdateDataDetails* a_pValue)
 /*============================================================================
  * OpcUa_UpdateDataDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_UpdateDataDetails_Encode(OpcUa_UpdateDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateDataDetails_Encode(OpcUa_UpdateDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13969,9 +13969,9 @@ StatusCode OpcUa_UpdateDataDetails_Encode(OpcUa_UpdateDataDetails* a_pValue, UA_
 /*============================================================================
  * OpcUa_UpdateDataDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_UpdateDataDetails_Decode(OpcUa_UpdateDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateDataDetails_Decode(OpcUa_UpdateDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14043,9 +14043,9 @@ void OpcUa_UpdateStructureDataDetails_Clear(OpcUa_UpdateStructureDataDetails* a_
 /*============================================================================
  * OpcUa_UpdateStructureDataDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_UpdateStructureDataDetails_Encode(OpcUa_UpdateStructureDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Encode(OpcUa_UpdateStructureDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14066,9 +14066,9 @@ StatusCode OpcUa_UpdateStructureDataDetails_Encode(OpcUa_UpdateStructureDataDeta
 /*============================================================================
  * OpcUa_UpdateStructureDataDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_UpdateStructureDataDetails_Decode(OpcUa_UpdateStructureDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Decode(OpcUa_UpdateStructureDataDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14142,9 +14142,9 @@ void OpcUa_UpdateEventDetails_Clear(OpcUa_UpdateEventDetails* a_pValue)
 /*============================================================================
  * OpcUa_UpdateEventDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_UpdateEventDetails_Encode(OpcUa_UpdateEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateEventDetails_Encode(OpcUa_UpdateEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14166,9 +14166,9 @@ StatusCode OpcUa_UpdateEventDetails_Encode(OpcUa_UpdateEventDetails* a_pValue, U
 /*============================================================================
  * OpcUa_UpdateEventDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_UpdateEventDetails_Decode(OpcUa_UpdateEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateEventDetails_Decode(OpcUa_UpdateEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14241,9 +14241,9 @@ void OpcUa_DeleteRawModifiedDetails_Clear(OpcUa_DeleteRawModifiedDetails* a_pVal
 /*============================================================================
  * OpcUa_DeleteRawModifiedDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteRawModifiedDetails_Encode(OpcUa_DeleteRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Encode(OpcUa_DeleteRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14264,9 +14264,9 @@ StatusCode OpcUa_DeleteRawModifiedDetails_Encode(OpcUa_DeleteRawModifiedDetails*
 /*============================================================================
  * OpcUa_DeleteRawModifiedDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteRawModifiedDetails_Decode(OpcUa_DeleteRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Decode(OpcUa_DeleteRawModifiedDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14336,9 +14336,9 @@ void OpcUa_DeleteAtTimeDetails_Clear(OpcUa_DeleteAtTimeDetails* a_pValue)
 /*============================================================================
  * OpcUa_DeleteAtTimeDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteAtTimeDetails_Encode(OpcUa_DeleteAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Encode(OpcUa_DeleteAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14358,9 +14358,9 @@ StatusCode OpcUa_DeleteAtTimeDetails_Encode(OpcUa_DeleteAtTimeDetails* a_pValue,
 /*============================================================================
  * OpcUa_DeleteAtTimeDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteAtTimeDetails_Decode(OpcUa_DeleteAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Decode(OpcUa_DeleteAtTimeDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14429,9 +14429,9 @@ void OpcUa_DeleteEventDetails_Clear(OpcUa_DeleteEventDetails* a_pValue)
 /*============================================================================
  * OpcUa_DeleteEventDetails_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteEventDetails_Encode(OpcUa_DeleteEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteEventDetails_Encode(OpcUa_DeleteEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14451,9 +14451,9 @@ StatusCode OpcUa_DeleteEventDetails_Encode(OpcUa_DeleteEventDetails* a_pValue, U
 /*============================================================================
  * OpcUa_DeleteEventDetails_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteEventDetails_Decode(OpcUa_DeleteEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteEventDetails_Decode(OpcUa_DeleteEventDetails* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14502,7 +14502,7 @@ void OpcUa_HistoryUpdateResult_Initialize(OpcUa_HistoryUpdateResult* a_pValue)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -14517,7 +14517,7 @@ void OpcUa_HistoryUpdateResult_Clear(OpcUa_HistoryUpdateResult* a_pValue)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -14526,9 +14526,9 @@ void OpcUa_HistoryUpdateResult_Clear(OpcUa_HistoryUpdateResult* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryUpdateResult_Encode(OpcUa_HistoryUpdateResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateResult_Encode(OpcUa_HistoryUpdateResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14536,7 +14536,7 @@ StatusCode OpcUa_HistoryUpdateResult_Encode(OpcUa_HistoryUpdateResult* a_pValue,
 
     status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -14550,9 +14550,9 @@ StatusCode OpcUa_HistoryUpdateResult_Encode(OpcUa_HistoryUpdateResult* a_pValue,
 /*============================================================================
  * OpcUa_HistoryUpdateResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryUpdateResult_Decode(OpcUa_HistoryUpdateResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateResult_Decode(OpcUa_HistoryUpdateResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14562,7 +14562,7 @@ StatusCode OpcUa_HistoryUpdateResult_Decode(OpcUa_HistoryUpdateResult* a_pValue,
 
     status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfOperationResults, (void**) &a_pValue->OperationResults, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -14624,9 +14624,9 @@ void OpcUa_HistoryUpdateRequest_Clear(OpcUa_HistoryUpdateRequest* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryUpdateRequest_Encode(OpcUa_HistoryUpdateRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateRequest_Encode(OpcUa_HistoryUpdateRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14646,9 +14646,9 @@ StatusCode OpcUa_HistoryUpdateRequest_Encode(OpcUa_HistoryUpdateRequest* a_pValu
 /*============================================================================
  * OpcUa_HistoryUpdateRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryUpdateRequest_Decode(OpcUa_HistoryUpdateRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateRequest_Decode(OpcUa_HistoryUpdateRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14721,9 +14721,9 @@ void OpcUa_HistoryUpdateResponse_Clear(OpcUa_HistoryUpdateResponse* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryUpdateResponse_Encode(OpcUa_HistoryUpdateResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateResponse_Encode(OpcUa_HistoryUpdateResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14745,9 +14745,9 @@ StatusCode OpcUa_HistoryUpdateResponse_Encode(OpcUa_HistoryUpdateResponse* a_pVa
 /*============================================================================
  * OpcUa_HistoryUpdateResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryUpdateResponse_Decode(OpcUa_HistoryUpdateResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateResponse_Decode(OpcUa_HistoryUpdateResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14821,9 +14821,9 @@ void OpcUa_CallMethodRequest_Clear(OpcUa_CallMethodRequest* a_pValue)
 /*============================================================================
  * OpcUa_CallMethodRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_CallMethodRequest_Encode(OpcUa_CallMethodRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallMethodRequest_Encode(OpcUa_CallMethodRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14844,9 +14844,9 @@ StatusCode OpcUa_CallMethodRequest_Encode(OpcUa_CallMethodRequest* a_pValue, UA_
 /*============================================================================
  * OpcUa_CallMethodRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_CallMethodRequest_Decode(OpcUa_CallMethodRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallMethodRequest_Decode(OpcUa_CallMethodRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14896,7 +14896,7 @@ void OpcUa_CallMethodResult_Initialize(OpcUa_CallMethodResult* a_pValue)
     {
         StatusCode_Initialize(&a_pValue->StatusCode);
         UA_Initialize_Array(&a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfInputArgumentDiagnosticInfos, (void**) &a_pValue->InputArgumentDiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfOutputArguments, (void**) &a_pValue->OutputArguments, 
@@ -14913,7 +14913,7 @@ void OpcUa_CallMethodResult_Clear(OpcUa_CallMethodResult* a_pValue)
     {
         StatusCode_Clear(&a_pValue->StatusCode);
         UA_Clear_Array(&a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfInputArgumentDiagnosticInfos, (void**) &a_pValue->InputArgumentDiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
         UA_Clear_Array(&a_pValue->NoOfOutputArguments, (void**) &a_pValue->OutputArguments, 
@@ -14924,9 +14924,9 @@ void OpcUa_CallMethodResult_Clear(OpcUa_CallMethodResult* a_pValue)
 /*============================================================================
  * OpcUa_CallMethodResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_CallMethodResult_Encode(OpcUa_CallMethodResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallMethodResult_Encode(OpcUa_CallMethodResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14934,7 +14934,7 @@ StatusCode OpcUa_CallMethodResult_Encode(OpcUa_CallMethodResult* a_pValue, UA_Ms
 
     status &= StatusCode_Write(&a_pValue->StatusCode, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfInputArgumentDiagnosticInfos, (void**) &a_pValue->InputArgumentDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfOutputArguments, (void**) &a_pValue->OutputArguments, 
@@ -14950,9 +14950,9 @@ StatusCode OpcUa_CallMethodResult_Encode(OpcUa_CallMethodResult* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_CallMethodResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_CallMethodResult_Decode(OpcUa_CallMethodResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallMethodResult_Decode(OpcUa_CallMethodResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14962,7 +14962,7 @@ StatusCode OpcUa_CallMethodResult_Decode(OpcUa_CallMethodResult* a_pValue, UA_Ms
 
     status &= StatusCode_Read(&a_pValue->StatusCode, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfInputArgumentResults, (void**) &a_pValue->InputArgumentResults, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfInputArgumentDiagnosticInfos, (void**) &a_pValue->InputArgumentDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfOutputArguments, (void**) &a_pValue->OutputArguments, 
@@ -15026,9 +15026,9 @@ void OpcUa_CallRequest_Clear(OpcUa_CallRequest* a_pValue)
 /*============================================================================
  * OpcUa_CallRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_CallRequest_Encode(OpcUa_CallRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallRequest_Encode(OpcUa_CallRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15048,9 +15048,9 @@ StatusCode OpcUa_CallRequest_Encode(OpcUa_CallRequest* a_pValue, UA_MsgBuffer* m
 /*============================================================================
  * OpcUa_CallRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_CallRequest_Decode(OpcUa_CallRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallRequest_Decode(OpcUa_CallRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15123,9 +15123,9 @@ void OpcUa_CallResponse_Clear(OpcUa_CallResponse* a_pValue)
 /*============================================================================
  * OpcUa_CallResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_CallResponse_Encode(OpcUa_CallResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallResponse_Encode(OpcUa_CallResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15147,9 +15147,9 @@ StatusCode OpcUa_CallResponse_Encode(OpcUa_CallResponse* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_CallResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_CallResponse_Decode(OpcUa_CallResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallResponse_Decode(OpcUa_CallResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15224,9 +15224,9 @@ void OpcUa_DataChangeFilter_Clear(OpcUa_DataChangeFilter* a_pValue)
 /*============================================================================
  * OpcUa_DataChangeFilter_Encode
  *===========================================================================*/
-StatusCode OpcUa_DataChangeFilter_Encode(OpcUa_DataChangeFilter* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataChangeFilter_Encode(OpcUa_DataChangeFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15246,9 +15246,9 @@ StatusCode OpcUa_DataChangeFilter_Encode(OpcUa_DataChangeFilter* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_DataChangeFilter_Decode
  *===========================================================================*/
-StatusCode OpcUa_DataChangeFilter_Decode(OpcUa_DataChangeFilter* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataChangeFilter_Decode(OpcUa_DataChangeFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15317,9 +15317,9 @@ void OpcUa_EventFilter_Clear(OpcUa_EventFilter* a_pValue)
 /*============================================================================
  * OpcUa_EventFilter_Encode
  *===========================================================================*/
-StatusCode OpcUa_EventFilter_Encode(OpcUa_EventFilter* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFilter_Encode(OpcUa_EventFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15339,9 +15339,9 @@ StatusCode OpcUa_EventFilter_Encode(OpcUa_EventFilter* a_pValue, UA_MsgBuffer* m
 /*============================================================================
  * OpcUa_EventFilter_Decode
  *===========================================================================*/
-StatusCode OpcUa_EventFilter_Decode(OpcUa_EventFilter* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFilter_Decode(OpcUa_EventFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15414,9 +15414,9 @@ void OpcUa_AggregateConfiguration_Clear(OpcUa_AggregateConfiguration* a_pValue)
 /*============================================================================
  * OpcUa_AggregateConfiguration_Encode
  *===========================================================================*/
-StatusCode OpcUa_AggregateConfiguration_Encode(OpcUa_AggregateConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateConfiguration_Encode(OpcUa_AggregateConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15438,9 +15438,9 @@ StatusCode OpcUa_AggregateConfiguration_Encode(OpcUa_AggregateConfiguration* a_p
 /*============================================================================
  * OpcUa_AggregateConfiguration_Decode
  *===========================================================================*/
-StatusCode OpcUa_AggregateConfiguration_Decode(OpcUa_AggregateConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateConfiguration_Decode(OpcUa_AggregateConfiguration* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15513,9 +15513,9 @@ void OpcUa_AggregateFilter_Clear(OpcUa_AggregateFilter* a_pValue)
 /*============================================================================
  * OpcUa_AggregateFilter_Encode
  *===========================================================================*/
-StatusCode OpcUa_AggregateFilter_Encode(OpcUa_AggregateFilter* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateFilter_Encode(OpcUa_AggregateFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15536,9 +15536,9 @@ StatusCode OpcUa_AggregateFilter_Encode(OpcUa_AggregateFilter* a_pValue, UA_MsgB
 /*============================================================================
  * OpcUa_AggregateFilter_Decode
  *===========================================================================*/
-StatusCode OpcUa_AggregateFilter_Decode(OpcUa_AggregateFilter* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateFilter_Decode(OpcUa_AggregateFilter* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15587,7 +15587,7 @@ void OpcUa_EventFilterResult_Initialize(OpcUa_EventFilterResult* a_pValue)
     if (a_pValue != NULL)
     {
         UA_Initialize_Array(&a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfSelectClauseDiagnosticInfos, (void**) &a_pValue->SelectClauseDiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
         OpcUa_ContentFilterResult_Initialize(&a_pValue->WhereClauseResult);
@@ -15602,7 +15602,7 @@ void OpcUa_EventFilterResult_Clear(OpcUa_EventFilterResult* a_pValue)
     if (a_pValue != NULL)
     {
         UA_Clear_Array(&a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfSelectClauseDiagnosticInfos, (void**) &a_pValue->SelectClauseDiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
         OpcUa_ContentFilterResult_Clear(&a_pValue->WhereClauseResult);
@@ -15612,16 +15612,16 @@ void OpcUa_EventFilterResult_Clear(OpcUa_EventFilterResult* a_pValue)
 /*============================================================================
  * OpcUa_EventFilterResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_EventFilterResult_Encode(OpcUa_EventFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFilterResult_Encode(OpcUa_EventFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
     }
 
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfSelectClauseDiagnosticInfos, (void**) &a_pValue->SelectClauseDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
     status &= OpcUa_ContentFilterResult_Encode(&a_pValue->WhereClauseResult, msgBuf);
@@ -15636,9 +15636,9 @@ StatusCode OpcUa_EventFilterResult_Encode(OpcUa_EventFilterResult* a_pValue, UA_
 /*============================================================================
  * OpcUa_EventFilterResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_EventFilterResult_Decode(OpcUa_EventFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFilterResult_Decode(OpcUa_EventFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15647,7 +15647,7 @@ StatusCode OpcUa_EventFilterResult_Decode(OpcUa_EventFilterResult* a_pValue, UA_
     OpcUa_EventFilterResult_Initialize(a_pValue);
 
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfSelectClauseDiagnosticInfos, (void**) &a_pValue->SelectClauseDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
     status &= OpcUa_ContentFilterResult_Decode(&a_pValue->WhereClauseResult, msgBuf);
@@ -15709,9 +15709,9 @@ void OpcUa_AggregateFilterResult_Clear(OpcUa_AggregateFilterResult* a_pValue)
 /*============================================================================
  * OpcUa_AggregateFilterResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_AggregateFilterResult_Encode(OpcUa_AggregateFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateFilterResult_Encode(OpcUa_AggregateFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15731,9 +15731,9 @@ StatusCode OpcUa_AggregateFilterResult_Encode(OpcUa_AggregateFilterResult* a_pVa
 /*============================================================================
  * OpcUa_AggregateFilterResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_AggregateFilterResult_Decode(OpcUa_AggregateFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateFilterResult_Decode(OpcUa_AggregateFilterResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15806,9 +15806,9 @@ void OpcUa_MonitoringParameters_Clear(OpcUa_MonitoringParameters* a_pValue)
 /*============================================================================
  * OpcUa_MonitoringParameters_Encode
  *===========================================================================*/
-StatusCode OpcUa_MonitoringParameters_Encode(OpcUa_MonitoringParameters* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoringParameters_Encode(OpcUa_MonitoringParameters* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15830,9 +15830,9 @@ StatusCode OpcUa_MonitoringParameters_Encode(OpcUa_MonitoringParameters* a_pValu
 /*============================================================================
  * OpcUa_MonitoringParameters_Decode
  *===========================================================================*/
-StatusCode OpcUa_MonitoringParameters_Decode(OpcUa_MonitoringParameters* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoringParameters_Decode(OpcUa_MonitoringParameters* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15903,9 +15903,9 @@ void OpcUa_MonitoredItemCreateRequest_Clear(OpcUa_MonitoredItemCreateRequest* a_
 /*============================================================================
  * OpcUa_MonitoredItemCreateRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemCreateRequest_Encode(OpcUa_MonitoredItemCreateRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Encode(OpcUa_MonitoredItemCreateRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15925,9 +15925,9 @@ StatusCode OpcUa_MonitoredItemCreateRequest_Encode(OpcUa_MonitoredItemCreateRequ
 /*============================================================================
  * OpcUa_MonitoredItemCreateRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemCreateRequest_Decode(OpcUa_MonitoredItemCreateRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Decode(OpcUa_MonitoredItemCreateRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16000,9 +16000,9 @@ void OpcUa_MonitoredItemCreateResult_Clear(OpcUa_MonitoredItemCreateResult* a_pV
 /*============================================================================
  * OpcUa_MonitoredItemCreateResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemCreateResult_Encode(OpcUa_MonitoredItemCreateResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Encode(OpcUa_MonitoredItemCreateResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16024,9 +16024,9 @@ StatusCode OpcUa_MonitoredItemCreateResult_Encode(OpcUa_MonitoredItemCreateResul
 /*============================================================================
  * OpcUa_MonitoredItemCreateResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemCreateResult_Decode(OpcUa_MonitoredItemCreateResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Decode(OpcUa_MonitoredItemCreateResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16102,9 +16102,9 @@ void OpcUa_CreateMonitoredItemsRequest_Clear(OpcUa_CreateMonitoredItemsRequest* 
 /*============================================================================
  * OpcUa_CreateMonitoredItemsRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_CreateMonitoredItemsRequest_Encode(OpcUa_CreateMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Encode(OpcUa_CreateMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16126,9 +16126,9 @@ StatusCode OpcUa_CreateMonitoredItemsRequest_Encode(OpcUa_CreateMonitoredItemsRe
 /*============================================================================
  * OpcUa_CreateMonitoredItemsRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_CreateMonitoredItemsRequest_Decode(OpcUa_CreateMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Decode(OpcUa_CreateMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16203,9 +16203,9 @@ void OpcUa_CreateMonitoredItemsResponse_Clear(OpcUa_CreateMonitoredItemsResponse
 /*============================================================================
  * OpcUa_CreateMonitoredItemsResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_CreateMonitoredItemsResponse_Encode(OpcUa_CreateMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Encode(OpcUa_CreateMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16227,9 +16227,9 @@ StatusCode OpcUa_CreateMonitoredItemsResponse_Encode(OpcUa_CreateMonitoredItemsR
 /*============================================================================
  * OpcUa_CreateMonitoredItemsResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_CreateMonitoredItemsResponse_Decode(OpcUa_CreateMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Decode(OpcUa_CreateMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16299,9 +16299,9 @@ void OpcUa_MonitoredItemModifyRequest_Clear(OpcUa_MonitoredItemModifyRequest* a_
 /*============================================================================
  * OpcUa_MonitoredItemModifyRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemModifyRequest_Encode(OpcUa_MonitoredItemModifyRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Encode(OpcUa_MonitoredItemModifyRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16320,9 +16320,9 @@ StatusCode OpcUa_MonitoredItemModifyRequest_Encode(OpcUa_MonitoredItemModifyRequ
 /*============================================================================
  * OpcUa_MonitoredItemModifyRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemModifyRequest_Decode(OpcUa_MonitoredItemModifyRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Decode(OpcUa_MonitoredItemModifyRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16392,9 +16392,9 @@ void OpcUa_MonitoredItemModifyResult_Clear(OpcUa_MonitoredItemModifyResult* a_pV
 /*============================================================================
  * OpcUa_MonitoredItemModifyResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemModifyResult_Encode(OpcUa_MonitoredItemModifyResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Encode(OpcUa_MonitoredItemModifyResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16415,9 +16415,9 @@ StatusCode OpcUa_MonitoredItemModifyResult_Encode(OpcUa_MonitoredItemModifyResul
 /*============================================================================
  * OpcUa_MonitoredItemModifyResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemModifyResult_Decode(OpcUa_MonitoredItemModifyResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Decode(OpcUa_MonitoredItemModifyResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16492,9 +16492,9 @@ void OpcUa_ModifyMonitoredItemsRequest_Clear(OpcUa_ModifyMonitoredItemsRequest* 
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_ModifyMonitoredItemsRequest_Encode(OpcUa_ModifyMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Encode(OpcUa_ModifyMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16516,9 +16516,9 @@ StatusCode OpcUa_ModifyMonitoredItemsRequest_Encode(OpcUa_ModifyMonitoredItemsRe
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_ModifyMonitoredItemsRequest_Decode(OpcUa_ModifyMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Decode(OpcUa_ModifyMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16593,9 +16593,9 @@ void OpcUa_ModifyMonitoredItemsResponse_Clear(OpcUa_ModifyMonitoredItemsResponse
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_ModifyMonitoredItemsResponse_Encode(OpcUa_ModifyMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Encode(OpcUa_ModifyMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16617,9 +16617,9 @@ StatusCode OpcUa_ModifyMonitoredItemsResponse_Encode(OpcUa_ModifyMonitoredItemsR
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_ModifyMonitoredItemsResponse_Decode(OpcUa_ModifyMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Decode(OpcUa_ModifyMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16696,9 +16696,9 @@ void OpcUa_SetMonitoringModeRequest_Clear(OpcUa_SetMonitoringModeRequest* a_pVal
 /*============================================================================
  * OpcUa_SetMonitoringModeRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_SetMonitoringModeRequest_Encode(OpcUa_SetMonitoringModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Encode(OpcUa_SetMonitoringModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16720,9 +16720,9 @@ StatusCode OpcUa_SetMonitoringModeRequest_Encode(OpcUa_SetMonitoringModeRequest*
 /*============================================================================
  * OpcUa_SetMonitoringModeRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_SetMonitoringModeRequest_Decode(OpcUa_SetMonitoringModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Decode(OpcUa_SetMonitoringModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16773,7 +16773,7 @@ void OpcUa_SetMonitoringModeResponse_Initialize(OpcUa_SetMonitoringModeResponse*
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -16788,7 +16788,7 @@ void OpcUa_SetMonitoringModeResponse_Clear(OpcUa_SetMonitoringModeResponse* a_pV
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -16797,9 +16797,9 @@ void OpcUa_SetMonitoringModeResponse_Clear(OpcUa_SetMonitoringModeResponse* a_pV
 /*============================================================================
  * OpcUa_SetMonitoringModeResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_SetMonitoringModeResponse_Encode(OpcUa_SetMonitoringModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Encode(OpcUa_SetMonitoringModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16807,7 +16807,7 @@ StatusCode OpcUa_SetMonitoringModeResponse_Encode(OpcUa_SetMonitoringModeRespons
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -16821,9 +16821,9 @@ StatusCode OpcUa_SetMonitoringModeResponse_Encode(OpcUa_SetMonitoringModeRespons
 /*============================================================================
  * OpcUa_SetMonitoringModeResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_SetMonitoringModeResponse_Decode(OpcUa_SetMonitoringModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Decode(OpcUa_SetMonitoringModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16833,7 +16833,7 @@ StatusCode OpcUa_SetMonitoringModeResponse_Decode(OpcUa_SetMonitoringModeRespons
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -16904,9 +16904,9 @@ void OpcUa_SetTriggeringRequest_Clear(OpcUa_SetTriggeringRequest* a_pValue)
 /*============================================================================
  * OpcUa_SetTriggeringRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_SetTriggeringRequest_Encode(OpcUa_SetTriggeringRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetTriggeringRequest_Encode(OpcUa_SetTriggeringRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16930,9 +16930,9 @@ StatusCode OpcUa_SetTriggeringRequest_Encode(OpcUa_SetTriggeringRequest* a_pValu
 /*============================================================================
  * OpcUa_SetTriggeringRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_SetTriggeringRequest_Decode(OpcUa_SetTriggeringRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetTriggeringRequest_Decode(OpcUa_SetTriggeringRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16985,11 +16985,11 @@ void OpcUa_SetTriggeringResponse_Initialize(OpcUa_SetTriggeringResponse* a_pValu
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfAddDiagnosticInfos, (void**) &a_pValue->AddDiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfRemoveResults, (void**) &a_pValue->RemoveResults, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfRemoveDiagnosticInfos, (void**) &a_pValue->RemoveDiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -17004,11 +17004,11 @@ void OpcUa_SetTriggeringResponse_Clear(OpcUa_SetTriggeringResponse* a_pValue)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfAddDiagnosticInfos, (void**) &a_pValue->AddDiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
         UA_Clear_Array(&a_pValue->NoOfRemoveResults, (void**) &a_pValue->RemoveResults, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfRemoveDiagnosticInfos, (void**) &a_pValue->RemoveDiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -17017,9 +17017,9 @@ void OpcUa_SetTriggeringResponse_Clear(OpcUa_SetTriggeringResponse* a_pValue)
 /*============================================================================
  * OpcUa_SetTriggeringResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_SetTriggeringResponse_Encode(OpcUa_SetTriggeringResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetTriggeringResponse_Encode(OpcUa_SetTriggeringResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17027,11 +17027,11 @@ StatusCode OpcUa_SetTriggeringResponse_Encode(OpcUa_SetTriggeringResponse* a_pVa
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfAddDiagnosticInfos, (void**) &a_pValue->AddDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfRemoveResults, (void**) &a_pValue->RemoveResults, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfRemoveDiagnosticInfos, (void**) &a_pValue->RemoveDiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -17045,9 +17045,9 @@ StatusCode OpcUa_SetTriggeringResponse_Encode(OpcUa_SetTriggeringResponse* a_pVa
 /*============================================================================
  * OpcUa_SetTriggeringResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_SetTriggeringResponse_Decode(OpcUa_SetTriggeringResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetTriggeringResponse_Decode(OpcUa_SetTriggeringResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17057,11 +17057,11 @@ StatusCode OpcUa_SetTriggeringResponse_Decode(OpcUa_SetTriggeringResponse* a_pVa
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfAddResults, (void**) &a_pValue->AddResults, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfAddDiagnosticInfos, (void**) &a_pValue->AddDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfRemoveResults, (void**) &a_pValue->RemoveResults, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfRemoveDiagnosticInfos, (void**) &a_pValue->RemoveDiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -17126,9 +17126,9 @@ void OpcUa_DeleteMonitoredItemsRequest_Clear(OpcUa_DeleteMonitoredItemsRequest* 
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteMonitoredItemsRequest_Encode(OpcUa_DeleteMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Encode(OpcUa_DeleteMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17149,9 +17149,9 @@ StatusCode OpcUa_DeleteMonitoredItemsRequest_Encode(OpcUa_DeleteMonitoredItemsRe
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteMonitoredItemsRequest_Decode(OpcUa_DeleteMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Decode(OpcUa_DeleteMonitoredItemsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17201,7 +17201,7 @@ void OpcUa_DeleteMonitoredItemsResponse_Initialize(OpcUa_DeleteMonitoredItemsRes
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -17216,7 +17216,7 @@ void OpcUa_DeleteMonitoredItemsResponse_Clear(OpcUa_DeleteMonitoredItemsResponse
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -17225,9 +17225,9 @@ void OpcUa_DeleteMonitoredItemsResponse_Clear(OpcUa_DeleteMonitoredItemsResponse
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(OpcUa_DeleteMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(OpcUa_DeleteMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17235,7 +17235,7 @@ StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(OpcUa_DeleteMonitoredItemsR
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -17249,9 +17249,9 @@ StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(OpcUa_DeleteMonitoredItemsR
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteMonitoredItemsResponse_Decode(OpcUa_DeleteMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Decode(OpcUa_DeleteMonitoredItemsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17261,7 +17261,7 @@ StatusCode OpcUa_DeleteMonitoredItemsResponse_Decode(OpcUa_DeleteMonitoredItemsR
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -17332,9 +17332,9 @@ void OpcUa_CreateSubscriptionRequest_Clear(OpcUa_CreateSubscriptionRequest* a_pV
 /*============================================================================
  * OpcUa_CreateSubscriptionRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_CreateSubscriptionRequest_Encode(OpcUa_CreateSubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Encode(OpcUa_CreateSubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17358,9 +17358,9 @@ StatusCode OpcUa_CreateSubscriptionRequest_Encode(OpcUa_CreateSubscriptionReques
 /*============================================================================
  * OpcUa_CreateSubscriptionRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_CreateSubscriptionRequest_Decode(OpcUa_CreateSubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Decode(OpcUa_CreateSubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17437,9 +17437,9 @@ void OpcUa_CreateSubscriptionResponse_Clear(OpcUa_CreateSubscriptionResponse* a_
 /*============================================================================
  * OpcUa_CreateSubscriptionResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_CreateSubscriptionResponse_Encode(OpcUa_CreateSubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Encode(OpcUa_CreateSubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17461,9 +17461,9 @@ StatusCode OpcUa_CreateSubscriptionResponse_Encode(OpcUa_CreateSubscriptionRespo
 /*============================================================================
  * OpcUa_CreateSubscriptionResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_CreateSubscriptionResponse_Decode(OpcUa_CreateSubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Decode(OpcUa_CreateSubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17544,9 +17544,9 @@ void OpcUa_ModifySubscriptionRequest_Clear(OpcUa_ModifySubscriptionRequest* a_pV
 /*============================================================================
  * OpcUa_ModifySubscriptionRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_ModifySubscriptionRequest_Encode(OpcUa_ModifySubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Encode(OpcUa_ModifySubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17570,9 +17570,9 @@ StatusCode OpcUa_ModifySubscriptionRequest_Encode(OpcUa_ModifySubscriptionReques
 /*============================================================================
  * OpcUa_ModifySubscriptionRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_ModifySubscriptionRequest_Decode(OpcUa_ModifySubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Decode(OpcUa_ModifySubscriptionRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17647,9 +17647,9 @@ void OpcUa_ModifySubscriptionResponse_Clear(OpcUa_ModifySubscriptionResponse* a_
 /*============================================================================
  * OpcUa_ModifySubscriptionResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_ModifySubscriptionResponse_Encode(OpcUa_ModifySubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Encode(OpcUa_ModifySubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17670,9 +17670,9 @@ StatusCode OpcUa_ModifySubscriptionResponse_Encode(OpcUa_ModifySubscriptionRespo
 /*============================================================================
  * OpcUa_ModifySubscriptionResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_ModifySubscriptionResponse_Decode(OpcUa_ModifySubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Decode(OpcUa_ModifySubscriptionResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17746,9 +17746,9 @@ void OpcUa_SetPublishingModeRequest_Clear(OpcUa_SetPublishingModeRequest* a_pVal
 /*============================================================================
  * OpcUa_SetPublishingModeRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_SetPublishingModeRequest_Encode(OpcUa_SetPublishingModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetPublishingModeRequest_Encode(OpcUa_SetPublishingModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17769,9 +17769,9 @@ StatusCode OpcUa_SetPublishingModeRequest_Encode(OpcUa_SetPublishingModeRequest*
 /*============================================================================
  * OpcUa_SetPublishingModeRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_SetPublishingModeRequest_Decode(OpcUa_SetPublishingModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetPublishingModeRequest_Decode(OpcUa_SetPublishingModeRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17821,7 +17821,7 @@ void OpcUa_SetPublishingModeResponse_Initialize(OpcUa_SetPublishingModeResponse*
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -17836,7 +17836,7 @@ void OpcUa_SetPublishingModeResponse_Clear(OpcUa_SetPublishingModeResponse* a_pV
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -17845,9 +17845,9 @@ void OpcUa_SetPublishingModeResponse_Clear(OpcUa_SetPublishingModeResponse* a_pV
 /*============================================================================
  * OpcUa_SetPublishingModeResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_SetPublishingModeResponse_Encode(OpcUa_SetPublishingModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetPublishingModeResponse_Encode(OpcUa_SetPublishingModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17855,7 +17855,7 @@ StatusCode OpcUa_SetPublishingModeResponse_Encode(OpcUa_SetPublishingModeRespons
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -17869,9 +17869,9 @@ StatusCode OpcUa_SetPublishingModeResponse_Encode(OpcUa_SetPublishingModeRespons
 /*============================================================================
  * OpcUa_SetPublishingModeResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_SetPublishingModeResponse_Decode(OpcUa_SetPublishingModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetPublishingModeResponse_Decode(OpcUa_SetPublishingModeResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17881,7 +17881,7 @@ StatusCode OpcUa_SetPublishingModeResponse_Decode(OpcUa_SetPublishingModeRespons
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -17945,9 +17945,9 @@ void OpcUa_NotificationMessage_Clear(OpcUa_NotificationMessage* a_pValue)
 /*============================================================================
  * OpcUa_NotificationMessage_Encode
  *===========================================================================*/
-StatusCode OpcUa_NotificationMessage_Encode(OpcUa_NotificationMessage* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NotificationMessage_Encode(OpcUa_NotificationMessage* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17968,9 +17968,9 @@ StatusCode OpcUa_NotificationMessage_Encode(OpcUa_NotificationMessage* a_pValue,
 /*============================================================================
  * OpcUa_NotificationMessage_Decode
  *===========================================================================*/
-StatusCode OpcUa_NotificationMessage_Decode(OpcUa_NotificationMessage* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NotificationMessage_Decode(OpcUa_NotificationMessage* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18042,9 +18042,9 @@ void OpcUa_DataChangeNotification_Clear(OpcUa_DataChangeNotification* a_pValue)
 /*============================================================================
  * OpcUa_DataChangeNotification_Encode
  *===========================================================================*/
-StatusCode OpcUa_DataChangeNotification_Encode(OpcUa_DataChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataChangeNotification_Encode(OpcUa_DataChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18065,9 +18065,9 @@ StatusCode OpcUa_DataChangeNotification_Encode(OpcUa_DataChangeNotification* a_p
 /*============================================================================
  * OpcUa_DataChangeNotification_Decode
  *===========================================================================*/
-StatusCode OpcUa_DataChangeNotification_Decode(OpcUa_DataChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataChangeNotification_Decode(OpcUa_DataChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18135,9 +18135,9 @@ void OpcUa_MonitoredItemNotification_Clear(OpcUa_MonitoredItemNotification* a_pV
 /*============================================================================
  * OpcUa_MonitoredItemNotification_Encode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemNotification_Encode(OpcUa_MonitoredItemNotification* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemNotification_Encode(OpcUa_MonitoredItemNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18156,9 +18156,9 @@ StatusCode OpcUa_MonitoredItemNotification_Encode(OpcUa_MonitoredItemNotificatio
 /*============================================================================
  * OpcUa_MonitoredItemNotification_Decode
  *===========================================================================*/
-StatusCode OpcUa_MonitoredItemNotification_Decode(OpcUa_MonitoredItemNotification* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemNotification_Decode(OpcUa_MonitoredItemNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18224,9 +18224,9 @@ void OpcUa_EventNotificationList_Clear(OpcUa_EventNotificationList* a_pValue)
 /*============================================================================
  * OpcUa_EventNotificationList_Encode
  *===========================================================================*/
-StatusCode OpcUa_EventNotificationList_Encode(OpcUa_EventNotificationList* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventNotificationList_Encode(OpcUa_EventNotificationList* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18245,9 +18245,9 @@ StatusCode OpcUa_EventNotificationList_Encode(OpcUa_EventNotificationList* a_pVa
 /*============================================================================
  * OpcUa_EventNotificationList_Decode
  *===========================================================================*/
-StatusCode OpcUa_EventNotificationList_Decode(OpcUa_EventNotificationList* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventNotificationList_Decode(OpcUa_EventNotificationList* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18315,9 +18315,9 @@ void OpcUa_EventFieldList_Clear(OpcUa_EventFieldList* a_pValue)
 /*============================================================================
  * OpcUa_EventFieldList_Encode
  *===========================================================================*/
-StatusCode OpcUa_EventFieldList_Encode(OpcUa_EventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFieldList_Encode(OpcUa_EventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18337,9 +18337,9 @@ StatusCode OpcUa_EventFieldList_Encode(OpcUa_EventFieldList* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_EventFieldList_Decode
  *===========================================================================*/
-StatusCode OpcUa_EventFieldList_Decode(OpcUa_EventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFieldList_Decode(OpcUa_EventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18406,9 +18406,9 @@ void OpcUa_HistoryEventFieldList_Clear(OpcUa_HistoryEventFieldList* a_pValue)
 /*============================================================================
  * OpcUa_HistoryEventFieldList_Encode
  *===========================================================================*/
-StatusCode OpcUa_HistoryEventFieldList_Encode(OpcUa_HistoryEventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryEventFieldList_Encode(OpcUa_HistoryEventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18427,9 +18427,9 @@ StatusCode OpcUa_HistoryEventFieldList_Encode(OpcUa_HistoryEventFieldList* a_pVa
 /*============================================================================
  * OpcUa_HistoryEventFieldList_Decode
  *===========================================================================*/
-StatusCode OpcUa_HistoryEventFieldList_Decode(OpcUa_HistoryEventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryEventFieldList_Decode(OpcUa_HistoryEventFieldList* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18495,9 +18495,9 @@ void OpcUa_StatusChangeNotification_Clear(OpcUa_StatusChangeNotification* a_pVal
 /*============================================================================
  * OpcUa_StatusChangeNotification_Encode
  *===========================================================================*/
-StatusCode OpcUa_StatusChangeNotification_Encode(OpcUa_StatusChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_StatusChangeNotification_Encode(OpcUa_StatusChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18516,9 +18516,9 @@ StatusCode OpcUa_StatusChangeNotification_Encode(OpcUa_StatusChangeNotification*
 /*============================================================================
  * OpcUa_StatusChangeNotification_Decode
  *===========================================================================*/
-StatusCode OpcUa_StatusChangeNotification_Decode(OpcUa_StatusChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_StatusChangeNotification_Decode(OpcUa_StatusChangeNotification* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18584,9 +18584,9 @@ void OpcUa_SubscriptionAcknowledgement_Clear(OpcUa_SubscriptionAcknowledgement* 
 /*============================================================================
  * OpcUa_SubscriptionAcknowledgement_Encode
  *===========================================================================*/
-StatusCode OpcUa_SubscriptionAcknowledgement_Encode(OpcUa_SubscriptionAcknowledgement* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Encode(OpcUa_SubscriptionAcknowledgement* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18605,9 +18605,9 @@ StatusCode OpcUa_SubscriptionAcknowledgement_Encode(OpcUa_SubscriptionAcknowledg
 /*============================================================================
  * OpcUa_SubscriptionAcknowledgement_Decode
  *===========================================================================*/
-StatusCode OpcUa_SubscriptionAcknowledgement_Decode(OpcUa_SubscriptionAcknowledgement* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Decode(OpcUa_SubscriptionAcknowledgement* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18676,9 +18676,9 @@ void OpcUa_PublishRequest_Clear(OpcUa_PublishRequest* a_pValue)
 /*============================================================================
  * OpcUa_PublishRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_PublishRequest_Encode(OpcUa_PublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_PublishRequest_Encode(OpcUa_PublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18698,9 +18698,9 @@ StatusCode OpcUa_PublishRequest_Encode(OpcUa_PublishRequest* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_PublishRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_PublishRequest_Decode(OpcUa_PublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_PublishRequest_Decode(OpcUa_PublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18754,7 +18754,7 @@ void OpcUa_PublishResponse_Initialize(OpcUa_PublishResponse* a_pValue)
         Boolean_Initialize(&a_pValue->MoreNotifications);
         OpcUa_NotificationMessage_Initialize(&a_pValue->NotificationMessage);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -18774,7 +18774,7 @@ void OpcUa_PublishResponse_Clear(OpcUa_PublishResponse* a_pValue)
         Boolean_Clear(&a_pValue->MoreNotifications);
         OpcUa_NotificationMessage_Clear(&a_pValue->NotificationMessage);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -18783,9 +18783,9 @@ void OpcUa_PublishResponse_Clear(OpcUa_PublishResponse* a_pValue)
 /*============================================================================
  * OpcUa_PublishResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_PublishResponse_Encode(OpcUa_PublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_PublishResponse_Encode(OpcUa_PublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18798,7 +18798,7 @@ StatusCode OpcUa_PublishResponse_Encode(OpcUa_PublishResponse* a_pValue, UA_MsgB
     status &= Boolean_Write(&a_pValue->MoreNotifications, msgBuf);
     status &= OpcUa_NotificationMessage_Encode(&a_pValue->NotificationMessage, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -18812,9 +18812,9 @@ StatusCode OpcUa_PublishResponse_Encode(OpcUa_PublishResponse* a_pValue, UA_MsgB
 /*============================================================================
  * OpcUa_PublishResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_PublishResponse_Decode(OpcUa_PublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_PublishResponse_Decode(OpcUa_PublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18829,7 +18829,7 @@ StatusCode OpcUa_PublishResponse_Decode(OpcUa_PublishResponse* a_pValue, UA_MsgB
     status &= Boolean_Read(&a_pValue->MoreNotifications, msgBuf);
     status &= OpcUa_NotificationMessage_Decode(&a_pValue->NotificationMessage, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -18892,9 +18892,9 @@ void OpcUa_RepublishRequest_Clear(OpcUa_RepublishRequest* a_pValue)
 /*============================================================================
  * OpcUa_RepublishRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_RepublishRequest_Encode(OpcUa_RepublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RepublishRequest_Encode(OpcUa_RepublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18914,9 +18914,9 @@ StatusCode OpcUa_RepublishRequest_Encode(OpcUa_RepublishRequest* a_pValue, UA_Ms
 /*============================================================================
  * OpcUa_RepublishRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_RepublishRequest_Decode(OpcUa_RepublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RepublishRequest_Decode(OpcUa_RepublishRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18983,9 +18983,9 @@ void OpcUa_RepublishResponse_Clear(OpcUa_RepublishResponse* a_pValue)
 /*============================================================================
  * OpcUa_RepublishResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_RepublishResponse_Encode(OpcUa_RepublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RepublishResponse_Encode(OpcUa_RepublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19004,9 +19004,9 @@ StatusCode OpcUa_RepublishResponse_Encode(OpcUa_RepublishResponse* a_pValue, UA_
 /*============================================================================
  * OpcUa_RepublishResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_RepublishResponse_Decode(OpcUa_RepublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RepublishResponse_Decode(OpcUa_RepublishResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19075,9 +19075,9 @@ void OpcUa_TransferResult_Clear(OpcUa_TransferResult* a_pValue)
 /*============================================================================
  * OpcUa_TransferResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_TransferResult_Encode(OpcUa_TransferResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferResult_Encode(OpcUa_TransferResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19097,9 +19097,9 @@ StatusCode OpcUa_TransferResult_Encode(OpcUa_TransferResult* a_pValue, UA_MsgBuf
 /*============================================================================
  * OpcUa_TransferResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_TransferResult_Decode(OpcUa_TransferResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferResult_Decode(OpcUa_TransferResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19171,9 +19171,9 @@ void OpcUa_TransferSubscriptionsRequest_Clear(OpcUa_TransferSubscriptionsRequest
 /*============================================================================
  * OpcUa_TransferSubscriptionsRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_TransferSubscriptionsRequest_Encode(OpcUa_TransferSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Encode(OpcUa_TransferSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19194,9 +19194,9 @@ StatusCode OpcUa_TransferSubscriptionsRequest_Encode(OpcUa_TransferSubscriptions
 /*============================================================================
  * OpcUa_TransferSubscriptionsRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_TransferSubscriptionsRequest_Decode(OpcUa_TransferSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Decode(OpcUa_TransferSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19270,9 +19270,9 @@ void OpcUa_TransferSubscriptionsResponse_Clear(OpcUa_TransferSubscriptionsRespon
 /*============================================================================
  * OpcUa_TransferSubscriptionsResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_TransferSubscriptionsResponse_Encode(OpcUa_TransferSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Encode(OpcUa_TransferSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19294,9 +19294,9 @@ StatusCode OpcUa_TransferSubscriptionsResponse_Encode(OpcUa_TransferSubscription
 /*============================================================================
  * OpcUa_TransferSubscriptionsResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_TransferSubscriptionsResponse_Decode(OpcUa_TransferSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Decode(OpcUa_TransferSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19369,9 +19369,9 @@ void OpcUa_DeleteSubscriptionsRequest_Clear(OpcUa_DeleteSubscriptionsRequest* a_
 /*============================================================================
  * OpcUa_DeleteSubscriptionsRequest_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteSubscriptionsRequest_Encode(OpcUa_DeleteSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Encode(OpcUa_DeleteSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19391,9 +19391,9 @@ StatusCode OpcUa_DeleteSubscriptionsRequest_Encode(OpcUa_DeleteSubscriptionsRequ
 /*============================================================================
  * OpcUa_DeleteSubscriptionsRequest_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteSubscriptionsRequest_Decode(OpcUa_DeleteSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Decode(OpcUa_DeleteSubscriptionsRequest* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19442,7 +19442,7 @@ void OpcUa_DeleteSubscriptionsResponse_Initialize(OpcUa_DeleteSubscriptionsRespo
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
         UA_Initialize_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                            sizeof(StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
+                            sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnInitialize*) StatusCode_Initialize);
         UA_Initialize_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                             sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnInitialize*) DiagnosticInfo_Initialize);
     }
@@ -19457,7 +19457,7 @@ void OpcUa_DeleteSubscriptionsResponse_Clear(OpcUa_DeleteSubscriptionsResponse* 
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
         UA_Clear_Array(&a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                       sizeof(StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
+                       sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnClear*) StatusCode_Clear);
         UA_Clear_Array(&a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                        sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnClear*) DiagnosticInfo_Clear);
     }
@@ -19466,9 +19466,9 @@ void OpcUa_DeleteSubscriptionsResponse_Clear(OpcUa_DeleteSubscriptionsResponse* 
 /*============================================================================
  * OpcUa_DeleteSubscriptionsResponse_Encode
  *===========================================================================*/
-StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(OpcUa_DeleteSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(OpcUa_DeleteSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19476,7 +19476,7 @@ StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(OpcUa_DeleteSubscriptionsRes
 
     status &= OpcUa_ResponseHeader_Encode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                   sizeof(StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
+                   sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnEncode*) StatusCode_Write);
     status &= UA_Write_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                    sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnEncode*) DiagnosticInfo_Write);
 
@@ -19490,9 +19490,9 @@ StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(OpcUa_DeleteSubscriptionsRes
 /*============================================================================
  * OpcUa_DeleteSubscriptionsResponse_Decode
  *===========================================================================*/
-StatusCode OpcUa_DeleteSubscriptionsResponse_Decode(OpcUa_DeleteSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Decode(OpcUa_DeleteSubscriptionsResponse* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19502,7 +19502,7 @@ StatusCode OpcUa_DeleteSubscriptionsResponse_Decode(OpcUa_DeleteSubscriptionsRes
 
     status &= OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfResults, (void**) &a_pValue->Results, 
-                  sizeof(StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
+                  sizeof(SOPC_StatusCode), (UA_EncodeableObject_PfnDecode*) StatusCode_Read);
     status &= UA_Read_Array(msgBuf, &a_pValue->NoOfDiagnosticInfos, (void**) &a_pValue->DiagnosticInfos, 
                   sizeof(UA_DiagnosticInfo), (UA_EncodeableObject_PfnDecode*) DiagnosticInfo_Read);
 
@@ -19571,9 +19571,9 @@ void OpcUa_BuildInfo_Clear(OpcUa_BuildInfo* a_pValue)
 /*============================================================================
  * OpcUa_BuildInfo_Encode
  *===========================================================================*/
-StatusCode OpcUa_BuildInfo_Encode(OpcUa_BuildInfo* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BuildInfo_Encode(OpcUa_BuildInfo* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19596,9 +19596,9 @@ StatusCode OpcUa_BuildInfo_Encode(OpcUa_BuildInfo* a_pValue, UA_MsgBuffer* msgBu
 /*============================================================================
  * OpcUa_BuildInfo_Decode
  *===========================================================================*/
-StatusCode OpcUa_BuildInfo_Decode(OpcUa_BuildInfo* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BuildInfo_Decode(OpcUa_BuildInfo* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19672,9 +19672,9 @@ void OpcUa_RedundantServerDataType_Clear(OpcUa_RedundantServerDataType* a_pValue
 /*============================================================================
  * OpcUa_RedundantServerDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_RedundantServerDataType_Encode(OpcUa_RedundantServerDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RedundantServerDataType_Encode(OpcUa_RedundantServerDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19694,9 +19694,9 @@ StatusCode OpcUa_RedundantServerDataType_Encode(OpcUa_RedundantServerDataType* a
 /*============================================================================
  * OpcUa_RedundantServerDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_RedundantServerDataType_Decode(OpcUa_RedundantServerDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RedundantServerDataType_Decode(OpcUa_RedundantServerDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19763,9 +19763,9 @@ void OpcUa_EndpointUrlListDataType_Clear(OpcUa_EndpointUrlListDataType* a_pValue
 /*============================================================================
  * OpcUa_EndpointUrlListDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_EndpointUrlListDataType_Encode(OpcUa_EndpointUrlListDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointUrlListDataType_Encode(OpcUa_EndpointUrlListDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19784,9 +19784,9 @@ StatusCode OpcUa_EndpointUrlListDataType_Encode(OpcUa_EndpointUrlListDataType* a
 /*============================================================================
  * OpcUa_EndpointUrlListDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_EndpointUrlListDataType_Decode(OpcUa_EndpointUrlListDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointUrlListDataType_Decode(OpcUa_EndpointUrlListDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19854,9 +19854,9 @@ void OpcUa_NetworkGroupDataType_Clear(OpcUa_NetworkGroupDataType* a_pValue)
 /*============================================================================
  * OpcUa_NetworkGroupDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_NetworkGroupDataType_Encode(OpcUa_NetworkGroupDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NetworkGroupDataType_Encode(OpcUa_NetworkGroupDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19876,9 +19876,9 @@ StatusCode OpcUa_NetworkGroupDataType_Encode(OpcUa_NetworkGroupDataType* a_pValu
 /*============================================================================
  * OpcUa_NetworkGroupDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_NetworkGroupDataType_Decode(OpcUa_NetworkGroupDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NetworkGroupDataType_Decode(OpcUa_NetworkGroupDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19949,9 +19949,9 @@ void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(OpcUa_SamplingIntervalDiagn
 /*============================================================================
  * OpcUa_SamplingIntervalDiagnosticsDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Encode(OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Encode(OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19972,9 +19972,9 @@ StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Encode(OpcUa_SamplingInterv
 /*============================================================================
  * OpcUa_SamplingIntervalDiagnosticsDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Decode(OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Decode(OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20062,9 +20062,9 @@ void OpcUa_ServerDiagnosticsSummaryDataType_Clear(OpcUa_ServerDiagnosticsSummary
 /*============================================================================
  * OpcUa_ServerDiagnosticsSummaryDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Encode(OpcUa_ServerDiagnosticsSummaryDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Encode(OpcUa_ServerDiagnosticsSummaryDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20093,9 +20093,9 @@ StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Encode(OpcUa_ServerDiagnostics
 /*============================================================================
  * OpcUa_ServerDiagnosticsSummaryDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Decode(OpcUa_ServerDiagnosticsSummaryDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Decode(OpcUa_ServerDiagnosticsSummaryDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20179,9 +20179,9 @@ void OpcUa_ServerStatusDataType_Clear(OpcUa_ServerStatusDataType* a_pValue)
 /*============================================================================
  * OpcUa_ServerStatusDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_ServerStatusDataType_Encode(OpcUa_ServerStatusDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerStatusDataType_Encode(OpcUa_ServerStatusDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20204,9 +20204,9 @@ StatusCode OpcUa_ServerStatusDataType_Encode(OpcUa_ServerStatusDataType* a_pValu
 /*============================================================================
  * OpcUa_ServerStatusDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_ServerStatusDataType_Decode(OpcUa_ServerStatusDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerStatusDataType_Decode(OpcUa_ServerStatusDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20360,9 +20360,9 @@ void OpcUa_SessionDiagnosticsDataType_Clear(OpcUa_SessionDiagnosticsDataType* a_
 /*============================================================================
  * OpcUa_SessionDiagnosticsDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_SessionDiagnosticsDataType_Encode(OpcUa_SessionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Encode(OpcUa_SessionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20423,9 +20423,9 @@ StatusCode OpcUa_SessionDiagnosticsDataType_Encode(OpcUa_SessionDiagnosticsDataT
 /*============================================================================
  * OpcUa_SessionDiagnosticsDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_SessionDiagnosticsDataType_Decode(OpcUa_SessionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Decode(OpcUa_SessionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20549,9 +20549,9 @@ void OpcUa_SessionSecurityDiagnosticsDataType_Clear(OpcUa_SessionSecurityDiagnos
 /*============================================================================
  * OpcUa_SessionSecurityDiagnosticsDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Encode(OpcUa_SessionSecurityDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Encode(OpcUa_SessionSecurityDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20578,9 +20578,9 @@ StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Encode(OpcUa_SessionSecurity
 /*============================================================================
  * OpcUa_SessionSecurityDiagnosticsDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Decode(OpcUa_SessionSecurityDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Decode(OpcUa_SessionSecurityDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20654,9 +20654,9 @@ void OpcUa_ServiceCounterDataType_Clear(OpcUa_ServiceCounterDataType* a_pValue)
 /*============================================================================
  * OpcUa_ServiceCounterDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_ServiceCounterDataType_Encode(OpcUa_ServiceCounterDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServiceCounterDataType_Encode(OpcUa_ServiceCounterDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20675,9 +20675,9 @@ StatusCode OpcUa_ServiceCounterDataType_Encode(OpcUa_ServiceCounterDataType* a_p
 /*============================================================================
  * OpcUa_ServiceCounterDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_ServiceCounterDataType_Decode(OpcUa_ServiceCounterDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServiceCounterDataType_Decode(OpcUa_ServiceCounterDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20743,9 +20743,9 @@ void OpcUa_StatusResult_Clear(OpcUa_StatusResult* a_pValue)
 /*============================================================================
  * OpcUa_StatusResult_Encode
  *===========================================================================*/
-StatusCode OpcUa_StatusResult_Encode(OpcUa_StatusResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_StatusResult_Encode(OpcUa_StatusResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20764,9 +20764,9 @@ StatusCode OpcUa_StatusResult_Encode(OpcUa_StatusResult* a_pValue, UA_MsgBuffer*
 /*============================================================================
  * OpcUa_StatusResult_Decode
  *===========================================================================*/
-StatusCode OpcUa_StatusResult_Decode(OpcUa_StatusResult* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_StatusResult_Decode(OpcUa_StatusResult* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20890,9 +20890,9 @@ void OpcUa_SubscriptionDiagnosticsDataType_Clear(OpcUa_SubscriptionDiagnosticsDa
 /*============================================================================
  * OpcUa_SubscriptionDiagnosticsDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_SubscriptionDiagnosticsDataType_Encode(OpcUa_SubscriptionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Encode(OpcUa_SubscriptionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20940,9 +20940,9 @@ StatusCode OpcUa_SubscriptionDiagnosticsDataType_Encode(OpcUa_SubscriptionDiagno
 /*============================================================================
  * OpcUa_SubscriptionDiagnosticsDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_SubscriptionDiagnosticsDataType_Decode(OpcUa_SubscriptionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Decode(OpcUa_SubscriptionDiagnosticsDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21040,9 +21040,9 @@ void OpcUa_ModelChangeStructureDataType_Clear(OpcUa_ModelChangeStructureDataType
 /*============================================================================
  * OpcUa_ModelChangeStructureDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_ModelChangeStructureDataType_Encode(OpcUa_ModelChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Encode(OpcUa_ModelChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21062,9 +21062,9 @@ StatusCode OpcUa_ModelChangeStructureDataType_Encode(OpcUa_ModelChangeStructureD
 /*============================================================================
  * OpcUa_ModelChangeStructureDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_ModelChangeStructureDataType_Decode(OpcUa_ModelChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Decode(OpcUa_ModelChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21131,9 +21131,9 @@ void OpcUa_SemanticChangeStructureDataType_Clear(OpcUa_SemanticChangeStructureDa
 /*============================================================================
  * OpcUa_SemanticChangeStructureDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_SemanticChangeStructureDataType_Encode(OpcUa_SemanticChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Encode(OpcUa_SemanticChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21152,9 +21152,9 @@ StatusCode OpcUa_SemanticChangeStructureDataType_Encode(OpcUa_SemanticChangeStru
 /*============================================================================
  * OpcUa_SemanticChangeStructureDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_SemanticChangeStructureDataType_Decode(OpcUa_SemanticChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Decode(OpcUa_SemanticChangeStructureDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21220,9 +21220,9 @@ void OpcUa_Range_Clear(OpcUa_Range* a_pValue)
 /*============================================================================
  * OpcUa_Range_Encode
  *===========================================================================*/
-StatusCode OpcUa_Range_Encode(OpcUa_Range* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Range_Encode(OpcUa_Range* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21241,9 +21241,9 @@ StatusCode OpcUa_Range_Encode(OpcUa_Range* a_pValue, UA_MsgBuffer* msgBuf)
 /*============================================================================
  * OpcUa_Range_Decode
  *===========================================================================*/
-StatusCode OpcUa_Range_Decode(OpcUa_Range* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Range_Decode(OpcUa_Range* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21313,9 +21313,9 @@ void OpcUa_EUInformation_Clear(OpcUa_EUInformation* a_pValue)
 /*============================================================================
  * OpcUa_EUInformation_Encode
  *===========================================================================*/
-StatusCode OpcUa_EUInformation_Encode(OpcUa_EUInformation* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EUInformation_Encode(OpcUa_EUInformation* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21336,9 +21336,9 @@ StatusCode OpcUa_EUInformation_Encode(OpcUa_EUInformation* a_pValue, UA_MsgBuffe
 /*============================================================================
  * OpcUa_EUInformation_Decode
  *===========================================================================*/
-StatusCode OpcUa_EUInformation_Decode(OpcUa_EUInformation* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EUInformation_Decode(OpcUa_EUInformation* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21407,9 +21407,9 @@ void OpcUa_ComplexNumberType_Clear(OpcUa_ComplexNumberType* a_pValue)
 /*============================================================================
  * OpcUa_ComplexNumberType_Encode
  *===========================================================================*/
-StatusCode OpcUa_ComplexNumberType_Encode(OpcUa_ComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ComplexNumberType_Encode(OpcUa_ComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21428,9 +21428,9 @@ StatusCode OpcUa_ComplexNumberType_Encode(OpcUa_ComplexNumberType* a_pValue, UA_
 /*============================================================================
  * OpcUa_ComplexNumberType_Decode
  *===========================================================================*/
-StatusCode OpcUa_ComplexNumberType_Decode(OpcUa_ComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ComplexNumberType_Decode(OpcUa_ComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21496,9 +21496,9 @@ void OpcUa_DoubleComplexNumberType_Clear(OpcUa_DoubleComplexNumberType* a_pValue
 /*============================================================================
  * OpcUa_DoubleComplexNumberType_Encode
  *===========================================================================*/
-StatusCode OpcUa_DoubleComplexNumberType_Encode(OpcUa_DoubleComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DoubleComplexNumberType_Encode(OpcUa_DoubleComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21517,9 +21517,9 @@ StatusCode OpcUa_DoubleComplexNumberType_Encode(OpcUa_DoubleComplexNumberType* a
 /*============================================================================
  * OpcUa_DoubleComplexNumberType_Decode
  *===========================================================================*/
-StatusCode OpcUa_DoubleComplexNumberType_Decode(OpcUa_DoubleComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DoubleComplexNumberType_Decode(OpcUa_DoubleComplexNumberType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21593,9 +21593,9 @@ void OpcUa_AxisInformation_Clear(OpcUa_AxisInformation* a_pValue)
 /*============================================================================
  * OpcUa_AxisInformation_Encode
  *===========================================================================*/
-StatusCode OpcUa_AxisInformation_Encode(OpcUa_AxisInformation* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AxisInformation_Encode(OpcUa_AxisInformation* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21618,9 +21618,9 @@ StatusCode OpcUa_AxisInformation_Encode(OpcUa_AxisInformation* a_pValue, UA_MsgB
 /*============================================================================
  * OpcUa_AxisInformation_Decode
  *===========================================================================*/
-StatusCode OpcUa_AxisInformation_Decode(OpcUa_AxisInformation* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AxisInformation_Decode(OpcUa_AxisInformation* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21690,9 +21690,9 @@ void OpcUa_XVType_Clear(OpcUa_XVType* a_pValue)
 /*============================================================================
  * OpcUa_XVType_Encode
  *===========================================================================*/
-StatusCode OpcUa_XVType_Encode(OpcUa_XVType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_XVType_Encode(OpcUa_XVType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21711,9 +21711,9 @@ StatusCode OpcUa_XVType_Encode(OpcUa_XVType* a_pValue, UA_MsgBuffer* msgBuf)
 /*============================================================================
  * OpcUa_XVType_Decode
  *===========================================================================*/
-StatusCode OpcUa_XVType_Decode(OpcUa_XVType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_XVType_Decode(OpcUa_XVType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21799,9 +21799,9 @@ void OpcUa_ProgramDiagnosticDataType_Clear(OpcUa_ProgramDiagnosticDataType* a_pV
 /*============================================================================
  * OpcUa_ProgramDiagnosticDataType_Encode
  *===========================================================================*/
-StatusCode OpcUa_ProgramDiagnosticDataType_Encode(OpcUa_ProgramDiagnosticDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Encode(OpcUa_ProgramDiagnosticDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21830,9 +21830,9 @@ StatusCode OpcUa_ProgramDiagnosticDataType_Encode(OpcUa_ProgramDiagnosticDataTyp
 /*============================================================================
  * OpcUa_ProgramDiagnosticDataType_Decode
  *===========================================================================*/
-StatusCode OpcUa_ProgramDiagnosticDataType_Decode(OpcUa_ProgramDiagnosticDataType* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Decode(OpcUa_ProgramDiagnosticDataType* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21910,9 +21910,9 @@ void OpcUa_Annotation_Clear(OpcUa_Annotation* a_pValue)
 /*============================================================================
  * OpcUa_Annotation_Encode
  *===========================================================================*/
-StatusCode OpcUa_Annotation_Encode(OpcUa_Annotation* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Annotation_Encode(OpcUa_Annotation* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21932,9 +21932,9 @@ StatusCode OpcUa_Annotation_Encode(OpcUa_Annotation* a_pValue, UA_MsgBuffer* msg
 /*============================================================================
  * OpcUa_Annotation_Decode
  *===========================================================================*/
-StatusCode OpcUa_Annotation_Decode(OpcUa_Annotation* a_pValue, UA_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Annotation_Decode(OpcUa_Annotation* a_pValue, UA_MsgBuffer* msgBuf)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22009,15 +22009,15 @@ void UA_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
     *eltsArray = NULL;
 }
 
-StatusCode UA_Read_EnumeratedType(UA_MsgBuffer* msgBuffer, int32_t* enumerationValue){
+SOPC_StatusCode UA_Read_EnumeratedType(UA_MsgBuffer* msgBuffer, int32_t* enumerationValue){
     return Int32_Read(enumerationValue, msgBuffer);
 }
 
-StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
+SOPC_StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
                          size_t sizeOfElt, UA_EncodeableObject_PfnDecode* decodeFct)
 {
     assert(msgBuffer != NULL && *eltsArray == NULL && noOfElts != NULL);
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     UA_Byte* byteArray = *eltsArray;
     status = Int32_Read(noOfElts, msgBuffer);
     if(status == STATUS_OK && *noOfElts > 0){
@@ -22044,14 +22044,14 @@ StatusCode UA_Read_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** elts
     return status;
 }
                     
-StatusCode UA_Write_EnumeratedType(UA_MsgBuffer* msgBuffer, int32_t* enumerationValue){
+SOPC_StatusCode UA_Write_EnumeratedType(UA_MsgBuffer* msgBuffer, int32_t* enumerationValue){
     return Int32_Write(enumerationValue, msgBuffer);
 }
 
-StatusCode UA_Write_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
+SOPC_StatusCode UA_Write_Array(UA_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
                           size_t sizeOfElt, UA_EncodeableObject_PfnEncode* encodeFct){
     assert(msgBuffer != NULL && *eltsArray != NULL && noOfElts != NULL);
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     UA_Byte* byteArray = *eltsArray;
     
     status = Int32_Write(noOfElts, msgBuffer);

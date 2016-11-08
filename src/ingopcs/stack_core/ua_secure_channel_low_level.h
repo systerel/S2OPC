@@ -80,63 +80,63 @@ typedef struct {
 SC_Connection* SC_Create (void);
 void SC_Delete (SC_Connection* scConnection);
 
-StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
+SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
                                         const Certificate*   runningAppCertificate,
                                         const AsymmetricKey* runningAppPrivateKey,
                                         const Certificate*   otherAppCertificate);
 
 //Configure secure connection regarding the transport connection properties
-StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
+SOPC_StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
                                        UA_NamespaceTable*  namespaceTable,
                                        UA_EncodeableType** encodeableTypes);
-StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
+SOPC_StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
                                    UA_NamespaceTable*  namespaceTable,
                                    UA_EncodeableType** encodeableTypes);
 
-StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
+SOPC_StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
                                     UA_SecureMessageType smType,
                                     uint32_t             secureChannelId);
 
-StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
+SOPC_StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
                                         UA_String*     securityPolicy);
 
-StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
+SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                              uint32_t       isSymmetric);
 
-StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
                                    uint32_t      requestId);
 
-StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
+SOPC_StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
                             UA_EncodeableType* encType,
                             void*              msgBody);
 
-StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
+SOPC_StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
                                    const UA_Byte* data_src,
                                    uint32_t       count);
 
-StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*    msgBuffer,
+SOPC_StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*    msgBuffer,
                                    UA_MsgFinalChunk chunkType);
 
-StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
+SOPC_StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
                                     uint32_t       receivedTokenId,
                                     uint32_t*      isPrecCryptoData);
 
-StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
+SOPC_StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
                                   UA_MsgBuffer*  transportBuffer);
 
-StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection,
+SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection,
                                         const PKIProvider* pkiProvider,
                                         UA_MsgBuffer*      transportBuffer,
                                         uint32_t           validateSenderCert,
                                         uint32_t*          sequenceNumberPosition);
 
-StatusCode SC_DecryptMsg(SC_Connection* scConnection,
+SOPC_StatusCode SC_DecryptMsg(SC_Connection* scConnection,
                          UA_MsgBuffer*  transportBuffer,
                          uint32_t       sequenceNumberPosition,
                          uint32_t       isSymmetric,
                          uint32_t       isPrecCryptoData);
 
-StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
+SOPC_StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
                             UA_NamespaceTable*  namespaceTable,
                             UA_EncodeableType** knownTypes, // only in case next 2 types not provided
                             UA_EncodeableType*  respEncType, // expected type
@@ -144,44 +144,44 @@ StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
                             UA_EncodeableType** receivedEncType, // actually received type
                             void**              encodeableObj);
 
-StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
+SOPC_StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                  uint32_t       isSymmetric,
                                  uint32_t       isPrecCryptoData);
 
-StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection);
+SOPC_StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection);
 
-StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
+SOPC_StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
                                            uint32_t       scProtocolVersion);
 
-StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
+SOPC_StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
                                   UA_EncodeableType* encType,
                                   void*              value,
                                   uint32_t           requestId);
 
-StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
+SOPC_StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
                                        uint32_t*     tokenId,
                                        uint32_t*     snPosition);
 
 // Only for symmetric encrypted buffer
-StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
+SOPC_StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
                                   uint32_t       isPrecCryptoData);
 
-StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
+SOPC_StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
                                    UA_MsgBuffer*  transportMsgBuffer,
                                    uint32_t*      requestId);
 
-StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
+SOPC_StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
                              uint32_t       requestId,
                              uint8_t*       abortReqPresence,
                              uint32_t*      abortReqId);
 
-StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
+SOPC_StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
                               UA_String*     reason);
 
 // SC_CheckPrecChunk and SC_CheckAbortChunk to be called before calling decode chunk
 // HYP: msgBuffers->isFinal = Intermediate or Final
 // (otherwise could fail on abort chunk or unexpected request id)
-StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
+SOPC_StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                           uint32_t            requestId,
                           UA_EncodeableType*  expEncType, // Should not be null for efficiency !
                           UA_EncodeableType*  errEncType,

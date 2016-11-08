@@ -15,7 +15,7 @@
 #include "key_manager.h"
 
 
-StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider)
+SOPC_StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider)
 {
     CryptolibContext *pctx = NULL;
 
@@ -37,7 +37,7 @@ StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider)
 }
 
 
-StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider)
+SOPC_StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider)
 {
     CryptolibContext *pCtx = NULL;
 
@@ -61,7 +61,7 @@ StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider)
  *
  *          The main purpose of this function is to verify the length of the asymmetric key \p pKey with respect to the security policy.
  */
-StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider *pProvider,
                                                       const AsymmetricKey *pKey,
                                                       uint32_t *lenKeyBits)
 {
@@ -83,7 +83,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider *pPro
  *          A message shorter than or as long as this size is treated as a single message. A longer message
  *          is cut into pieces of this size before treatment.
  */
-StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProvider *pProvider,
                                                            const AsymmetricKey *pKey,
                                                            uint32_t *lenMsg)
 {
@@ -118,7 +118,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProvider 
  * \brief   Computes the size of an encrypted buffer unit.
  *          This is the length of the public key modulus.
  */
-StatusCode CryptoProvider_AsymmetricGetLength_MsgCipherText(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgCipherText(const CryptoProvider *pProvider,
                                                             const AsymmetricKey *pKey,
                                                             uint32_t *lenMsg)
 {

@@ -31,7 +31,7 @@ UA_EncodeableType* newEncType;
 OpcUa_StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
                                                      void*            callbackData,
                                                      UA_Channel_Event event,
-                                                     StatusCode       status)
+                                                     SOPC_StatusCode       status)
 {
     (void) callbackData;
     (void) channel;
@@ -50,7 +50,7 @@ OpcUa_StatusCode StubClient_ResponseEvent_Callback(UA_Channel         channel,
                                                    void*              response,
                                                    UA_EncodeableType* responseType,
                                                    void*              callbackData,
-                                                   StatusCode         status){
+                                                   SOPC_StatusCode         status){
     (void) callbackData;
     (void) channel;
     (void) status;
@@ -82,7 +82,7 @@ OpcUa_StatusCode StubClient_ResponseEvent_Callback(UA_Channel         channel,
 }
 
 int main(void){
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
 
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;

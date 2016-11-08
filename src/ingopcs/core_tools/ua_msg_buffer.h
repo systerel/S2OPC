@@ -11,10 +11,10 @@
 #ifndef INGOPCS_MSG_BUFFER_H_
 #define INGOPCS_MSG_BUFFER_H_
 
-#include <ua_base_types.h>
 #include <buffer.h>
 #include <ua_encodeable.h>
 #include <ua_namespace_table.h>
+#include "../core_types/sopc_base_types.h"
 
 /** Length of a TCP UA message Header */
 #define TCP_UA_HEADER_LENGTH 8
@@ -136,7 +136,7 @@ void MsgBuffer_Reset(UA_MsgBuffer* mBuffer);
  *  (0 or SN position to keep the same UA Secure Message header values for sending next chunk)
  *  \return                GOOD if operation succeeded, BAD otherwise (NULL pointer)
  */
-StatusCode MsgBuffer_ResetNextChunk(UA_MsgBuffer* mBuffer,
+SOPC_StatusCode MsgBuffer_ResetNextChunk(UA_MsgBuffer* mBuffer,
                                     uint32_t      bodyPosition);
 
 /**
@@ -146,7 +146,7 @@ StatusCode MsgBuffer_ResetNextChunk(UA_MsgBuffer* mBuffer,
  *  \param sType      Secure message type value to set
  *  \return           GOOD if operation succeeded, BAD otherwise (NULL pointer, TCP UA type not compatible)
  */
-StatusCode MsgBuffer_SetSecureMsgType(UA_MsgBuffer* mBuffer,
+SOPC_StatusCode MsgBuffer_SetSecureMsgType(UA_MsgBuffer* mBuffer,
                                       UA_SecureMessageType sType);
 
 /**
@@ -157,7 +157,7 @@ StatusCode MsgBuffer_SetSecureMsgType(UA_MsgBuffer* mBuffer,
  *  \param srcMsgBuffer     Pointer to source UA Message buffer
  *  \return                 GOOD if operation succeeded, BAD otherwise (NULL pointers, incompatible types)
  */
-StatusCode MsgBuffer_CopyBuffer(UA_MsgBuffer* destMsgBuffer,
+SOPC_StatusCode MsgBuffer_CopyBuffer(UA_MsgBuffer* destMsgBuffer,
                                 UA_MsgBuffer* srcMsgBuffer);
 
 /**
@@ -221,7 +221,7 @@ Buffer* MsgBuffers_NextChunk(UA_MsgBuffers* mBuffer,
  *  \param mBuffer    Pointer to the UA Message buffers
  *  \return           GOOD if operation succeeded, BAD otherwise (NULL pointers, nb chunks < 2)
  */
-StatusCode MsgBuffers_SetCurrentChunkFirst(UA_MsgBuffers* mBuffer);
+SOPC_StatusCode MsgBuffers_SetCurrentChunkFirst(UA_MsgBuffers* mBuffer);
 
 /**
  *  \brief Copy source UA Message buffer content into destination UA Message buffers in buffer corresponding to index
@@ -232,7 +232,7 @@ StatusCode MsgBuffers_SetCurrentChunkFirst(UA_MsgBuffers* mBuffer);
  *  \param limitedLength    Length to be copied from the source buffer (<= srcMsgBuffer->buffers->length && <= destMsgBuffer->buffers[bufferIdx].max_size)
  *  \return                 GOOD if operation succeeded, BAD otherwise
  */
-StatusCode MsgBuffers_CopyBuffer(UA_MsgBuffers* destMsgBuffer,
+SOPC_StatusCode MsgBuffers_CopyBuffer(UA_MsgBuffers* destMsgBuffer,
                                  uint32_t       bufferIdx,
                                  UA_MsgBuffer*  srcMsgBuffer,
                                  uint32_t       limitedLength);

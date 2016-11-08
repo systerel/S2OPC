@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ua_base_types.h"
+#include "../../core_types/sopc_base_types.h"
 #include "crypto_types.h"
 #include "crypto_profiles.h"
 #include "crypto_provider.h"
@@ -33,7 +33,7 @@
 /**
  * Creates an asymmetric key from a \p buffer, in DER or PEM format.
  */
-StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
+SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
                                                      AsymmetricKey **ppKey)
 {
     AsymmetricKey *key = NULL;
@@ -63,7 +63,7 @@ StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint
  *
  * \note    Not in unit tests.
  */
-StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
+SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
                                                    AsymmetricKey **ppKey,
                                                    char *password,
                                                    uint32_t lenPassword)
@@ -117,11 +117,11 @@ void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey)
  *          This function does not allocate the buffer containing the DER. The operation may fail if the allocated buffer is not large enough.
  *          The required length cannot be precisely calculated, but a value of 8 times the key length in bytes is recommended.
  */
-StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
+SOPC_StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
                                           uint8_t *pDest, uint32_t lenDest,
                                           uint32_t *pLenWritten)
 {
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     uint8_t *buffer = NULL;
 
     if(NULL == pKey || NULL == pDest || 0 == lenDest || NULL == pLenWritten)
@@ -148,7 +148,7 @@ StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
  * Cert API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
+SOPC_StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
                                                 Certificate **ppCert)
 {
     mbedtls_x509_crt *crt = NULL;
@@ -189,7 +189,7 @@ StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32
  * \note    Same as CreateFromDER, except for a single call, can we refactor?
  *
  */
-StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
+SOPC_StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
                                                  Certificate **ppCert)
 {
     mbedtls_x509_crt *crt = NULL;
@@ -237,11 +237,11 @@ void KeyManager_Certificate_Free(Certificate *cert)
 }
 
 
-StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProvider,
+SOPC_StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProvider,
                                                 const Certificate *pCert,
                                                 uint8_t *pDest, uint32_t lenDest)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     uint32_t lenSupposed = 0;
     uint8_t *pDER = NULL;
     uint32_t lenDER = 0;
@@ -289,7 +289,7 @@ StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProvider,
  * \brief       Fills \p pKey with public key information retrieved from \p pCert.
  * \warning     \p pKey is not valid anymore when \p pCert is freed.
  */
-StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
+SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
                                                AsymmetricKey *pKey)
 {
     if(NULL == pCert || NULL == pKey)

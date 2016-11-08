@@ -21,7 +21,7 @@
 
 BEGIN_EXTERN_C
 
-typedef uint32_t StatusCode;
+typedef uint32_t SOPC_StatusCode;
 #define STATUS_OK 0x0 // TODO: change values
 #define STATUS_OK_INCOMPLETE 0x00000001
 #define STATUS_NOK 0x80000000//0x10000000

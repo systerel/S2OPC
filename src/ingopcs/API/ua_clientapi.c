@@ -45,7 +45,7 @@
 /*============================================================================
  * Synchronously calls the FindServers service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_FindServers(
+SOPC_StatusCode OpcUa_ClientApi_FindServers(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     const UA_String*               a_pEndpointUrl,
@@ -57,7 +57,7 @@ StatusCode OpcUa_ClientApi_FindServers(
     int32_t*                       a_pNoOfServers,
     OpcUa_ApplicationDescription** a_pServers)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_FindServersRequest cRequest;
     OpcUa_FindServersResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -129,7 +129,7 @@ StatusCode OpcUa_ClientApi_FindServers(
 /*============================================================================
  * Asynchronously calls the FindServers service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginFindServers(
+SOPC_StatusCode OpcUa_ClientApi_BeginFindServers(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     const UA_String*               a_pEndpointUrl,
@@ -140,7 +140,7 @@ StatusCode OpcUa_ClientApi_BeginFindServers(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_FindServersRequest cRequest;
     OpcUa_FindServersRequest_Initialize(&cRequest);
 
@@ -180,7 +180,7 @@ StatusCode OpcUa_ClientApi_BeginFindServers(
 /*============================================================================
  * Synchronously calls the FindServersOnNetwork service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_FindServersOnNetwork(
+SOPC_StatusCode OpcUa_ClientApi_FindServersOnNetwork(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     uint32_t                   a_nStartingRecordId,
@@ -192,7 +192,7 @@ StatusCode OpcUa_ClientApi_FindServersOnNetwork(
     int32_t*                   a_pNoOfServers,
     OpcUa_ServerOnNetwork**    a_pServers)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_FindServersOnNetworkRequest cRequest;
     OpcUa_FindServersOnNetworkResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -263,7 +263,7 @@ StatusCode OpcUa_ClientApi_FindServersOnNetwork(
 /*============================================================================
  * Asynchronously calls the FindServersOnNetwork service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
+SOPC_StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nStartingRecordId,
@@ -273,7 +273,7 @@ StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_FindServersOnNetworkRequest cRequest;
     OpcUa_FindServersOnNetworkRequest_Initialize(&cRequest);
 
@@ -310,7 +310,7 @@ StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
 /*============================================================================
  * Synchronously calls the GetEndpoints service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_GetEndpoints(
+SOPC_StatusCode OpcUa_ClientApi_GetEndpoints(
     UA_Channel                  a_hChannel,
     const OpcUa_RequestHeader*  a_pRequestHeader,
     const UA_String*            a_pEndpointUrl,
@@ -322,7 +322,7 @@ StatusCode OpcUa_ClientApi_GetEndpoints(
     int32_t*                    a_pNoOfEndpoints,
     OpcUa_EndpointDescription** a_pEndpoints)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_GetEndpointsRequest cRequest;
     OpcUa_GetEndpointsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -394,7 +394,7 @@ StatusCode OpcUa_ClientApi_GetEndpoints(
 /*============================================================================
  * Asynchronously calls the GetEndpoints service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginGetEndpoints(
+SOPC_StatusCode OpcUa_ClientApi_BeginGetEndpoints(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     const UA_String*               a_pEndpointUrl,
@@ -405,7 +405,7 @@ StatusCode OpcUa_ClientApi_BeginGetEndpoints(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_GetEndpointsRequest cRequest;
     OpcUa_GetEndpointsRequest_Initialize(&cRequest);
 
@@ -445,13 +445,13 @@ StatusCode OpcUa_ClientApi_BeginGetEndpoints(
 /*============================================================================
  * Synchronously calls the RegisterServer service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_RegisterServer(
+SOPC_StatusCode OpcUa_ClientApi_RegisterServer(
     UA_Channel                    a_hChannel,
     const OpcUa_RequestHeader*    a_pRequestHeader,
     const OpcUa_RegisteredServer* a_pServer,
     OpcUa_ResponseHeader*         a_pResponseHeader)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterServerRequest cRequest;
     OpcUa_RegisterServerResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -513,14 +513,14 @@ StatusCode OpcUa_ClientApi_RegisterServer(
 /*============================================================================
  * Asynchronously calls the RegisterServer service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginRegisterServer(
+SOPC_StatusCode OpcUa_ClientApi_BeginRegisterServer(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     const OpcUa_RegisteredServer*  a_pServer,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterServerRequest cRequest;
     OpcUa_RegisterServerRequest_Initialize(&cRequest);
 
@@ -554,7 +554,7 @@ StatusCode OpcUa_ClientApi_BeginRegisterServer(
 /*============================================================================
  * Synchronously calls the RegisterServer2 service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_RegisterServer2(
+SOPC_StatusCode OpcUa_ClientApi_RegisterServer2(
     UA_Channel                    a_hChannel,
     const OpcUa_RequestHeader*    a_pRequestHeader,
     const OpcUa_RegisteredServer* a_pServer,
@@ -562,11 +562,11 @@ StatusCode OpcUa_ClientApi_RegisterServer2(
     const UA_ExtensionObject*     a_pDiscoveryConfiguration,
     OpcUa_ResponseHeader*         a_pResponseHeader,
     int32_t*                      a_pNoOfConfigurationResults,
-    StatusCode**                  a_pConfigurationResults,
+    SOPC_StatusCode**                  a_pConfigurationResults,
     int32_t*                      a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**           a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterServer2Request cRequest;
     OpcUa_RegisterServer2Response* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -639,7 +639,7 @@ StatusCode OpcUa_ClientApi_RegisterServer2(
 /*============================================================================
  * Asynchronously calls the RegisterServer2 service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginRegisterServer2(
+SOPC_StatusCode OpcUa_ClientApi_BeginRegisterServer2(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     const OpcUa_RegisteredServer*  a_pServer,
@@ -648,7 +648,7 @@ StatusCode OpcUa_ClientApi_BeginRegisterServer2(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterServer2Request cRequest;
     OpcUa_RegisterServer2Request_Initialize(&cRequest);
 
@@ -685,7 +685,7 @@ StatusCode OpcUa_ClientApi_BeginRegisterServer2(
 /*============================================================================
  * Synchronously calls the CreateSession service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_CreateSession(
+SOPC_StatusCode OpcUa_ClientApi_CreateSession(
     UA_Channel                          a_hChannel,
     const OpcUa_RequestHeader*          a_pRequestHeader,
     const OpcUa_ApplicationDescription* a_pClientDescription,
@@ -709,7 +709,7 @@ StatusCode OpcUa_ClientApi_CreateSession(
     OpcUa_SignatureData*                a_pServerSignature,
     uint32_t*                           a_pMaxRequestMessageSize)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CreateSessionRequest cRequest;
     OpcUa_CreateSessionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -805,7 +805,7 @@ StatusCode OpcUa_ClientApi_CreateSession(
 /*============================================================================
  * Asynchronously calls the CreateSession service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginCreateSession(
+SOPC_StatusCode OpcUa_ClientApi_BeginCreateSession(
     UA_Channel                          a_hChannel,
     const OpcUa_RequestHeader*          a_pRequestHeader,
     const OpcUa_ApplicationDescription* a_pClientDescription,
@@ -819,7 +819,7 @@ StatusCode OpcUa_ClientApi_BeginCreateSession(
     UA_Channel_PfnRequestComplete*      a_pCallback,
     void*                               a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CreateSessionRequest cRequest;
     OpcUa_CreateSessionRequest_Initialize(&cRequest);
 
@@ -865,7 +865,7 @@ StatusCode OpcUa_ClientApi_BeginCreateSession(
 /*============================================================================
  * Synchronously calls the ActivateSession service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_ActivateSession(
+SOPC_StatusCode OpcUa_ClientApi_ActivateSession(
     UA_Channel                             a_hChannel,
     const OpcUa_RequestHeader*             a_pRequestHeader,
     const OpcUa_SignatureData*             a_pClientSignature,
@@ -878,11 +878,11 @@ StatusCode OpcUa_ClientApi_ActivateSession(
     OpcUa_ResponseHeader*                  a_pResponseHeader,
     UA_ByteString*                         a_pServerNonce,
     int32_t*                               a_pNoOfResults,
-    StatusCode**                           a_pResults,
+    SOPC_StatusCode**                           a_pResults,
     int32_t*                               a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**                    a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_ActivateSessionRequest cRequest;
     OpcUa_ActivateSessionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -964,7 +964,7 @@ StatusCode OpcUa_ClientApi_ActivateSession(
 /*============================================================================
  * Asynchronously calls the ActivateSession service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginActivateSession(
+SOPC_StatusCode OpcUa_ClientApi_BeginActivateSession(
     UA_Channel                             a_hChannel,
     const OpcUa_RequestHeader*             a_pRequestHeader,
     const OpcUa_SignatureData*             a_pClientSignature,
@@ -977,7 +977,7 @@ StatusCode OpcUa_ClientApi_BeginActivateSession(
     UA_Channel_PfnRequestComplete*         a_pCallback,
     void*                                  a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_ActivateSessionRequest cRequest;
     OpcUa_ActivateSessionRequest_Initialize(&cRequest);
 
@@ -1021,13 +1021,13 @@ StatusCode OpcUa_ClientApi_BeginActivateSession(
 /*============================================================================
  * Synchronously calls the CloseSession service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_CloseSession(
+SOPC_StatusCode OpcUa_ClientApi_CloseSession(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     UA_Boolean                 a_bDeleteSubscriptions,
     OpcUa_ResponseHeader*      a_pResponseHeader)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CloseSessionRequest cRequest;
     OpcUa_CloseSessionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -1088,14 +1088,14 @@ StatusCode OpcUa_ClientApi_CloseSession(
 /*============================================================================
  * Asynchronously calls the CloseSession service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginCloseSession(
+SOPC_StatusCode OpcUa_ClientApi_BeginCloseSession(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     UA_Boolean                     a_bDeleteSubscriptions,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CloseSessionRequest cRequest;
     OpcUa_CloseSessionRequest_Initialize(&cRequest);
 
@@ -1128,14 +1128,14 @@ StatusCode OpcUa_ClientApi_BeginCloseSession(
 /*============================================================================
  * Synchronously calls the Cancel service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_Cancel(
+SOPC_StatusCode OpcUa_ClientApi_Cancel(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     uint32_t                   a_nRequestHandle,
     OpcUa_ResponseHeader*      a_pResponseHeader,
     uint32_t*                  a_pCancelCount)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CancelRequest cRequest;
     OpcUa_CancelResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -1198,14 +1198,14 @@ StatusCode OpcUa_ClientApi_Cancel(
 /*============================================================================
  * Asynchronously calls the Cancel service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginCancel(
+SOPC_StatusCode OpcUa_ClientApi_BeginCancel(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nRequestHandle,
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CancelRequest cRequest;
     OpcUa_CancelRequest_Initialize(&cRequest);
 
@@ -1238,7 +1238,7 @@ StatusCode OpcUa_ClientApi_BeginCancel(
 /*============================================================================
  * Synchronously calls the AddNodes service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_AddNodes(
+SOPC_StatusCode OpcUa_ClientApi_AddNodes(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     int32_t                    a_nNoOfNodesToAdd,
@@ -1249,7 +1249,7 @@ StatusCode OpcUa_ClientApi_AddNodes(
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_AddNodesRequest cRequest;
     OpcUa_AddNodesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -1320,7 +1320,7 @@ StatusCode OpcUa_ClientApi_AddNodes(
 /*============================================================================
  * Asynchronously calls the AddNodes service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginAddNodes(
+SOPC_StatusCode OpcUa_ClientApi_BeginAddNodes(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToAdd,
@@ -1328,7 +1328,7 @@ StatusCode OpcUa_ClientApi_BeginAddNodes(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_AddNodesRequest cRequest;
     OpcUa_AddNodesRequest_Initialize(&cRequest);
 
@@ -1363,18 +1363,18 @@ StatusCode OpcUa_ClientApi_BeginAddNodes(
 /*============================================================================
  * Synchronously calls the AddReferences service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_AddReferences(
+SOPC_StatusCode OpcUa_ClientApi_AddReferences(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfReferencesToAdd,
     const OpcUa_AddReferencesItem* a_pReferencesToAdd,
     OpcUa_ResponseHeader*          a_pResponseHeader,
     int32_t*                       a_pNoOfResults,
-    StatusCode**                   a_pResults,
+    SOPC_StatusCode**                   a_pResults,
     int32_t*                       a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**            a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_AddReferencesRequest cRequest;
     OpcUa_AddReferencesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -1445,7 +1445,7 @@ StatusCode OpcUa_ClientApi_AddReferences(
 /*============================================================================
  * Asynchronously calls the AddReferences service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginAddReferences(
+SOPC_StatusCode OpcUa_ClientApi_BeginAddReferences(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfReferencesToAdd,
@@ -1453,7 +1453,7 @@ StatusCode OpcUa_ClientApi_BeginAddReferences(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_AddReferencesRequest cRequest;
     OpcUa_AddReferencesRequest_Initialize(&cRequest);
 
@@ -1488,18 +1488,18 @@ StatusCode OpcUa_ClientApi_BeginAddReferences(
 /*============================================================================
  * Synchronously calls the DeleteNodes service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_DeleteNodes(
+SOPC_StatusCode OpcUa_ClientApi_DeleteNodes(
     UA_Channel                   a_hChannel,
     const OpcUa_RequestHeader*   a_pRequestHeader,
     int32_t                      a_nNoOfNodesToDelete,
     const OpcUa_DeleteNodesItem* a_pNodesToDelete,
     OpcUa_ResponseHeader*        a_pResponseHeader,
     int32_t*                     a_pNoOfResults,
-    StatusCode**                 a_pResults,
+    SOPC_StatusCode**                 a_pResults,
     int32_t*                     a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**          a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteNodesRequest cRequest;
     OpcUa_DeleteNodesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -1570,7 +1570,7 @@ StatusCode OpcUa_ClientApi_DeleteNodes(
 /*============================================================================
  * Asynchronously calls the DeleteNodes service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginDeleteNodes(
+SOPC_StatusCode OpcUa_ClientApi_BeginDeleteNodes(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToDelete,
@@ -1578,7 +1578,7 @@ StatusCode OpcUa_ClientApi_BeginDeleteNodes(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteNodesRequest cRequest;
     OpcUa_DeleteNodesRequest_Initialize(&cRequest);
 
@@ -1613,18 +1613,18 @@ StatusCode OpcUa_ClientApi_BeginDeleteNodes(
 /*============================================================================
  * Synchronously calls the DeleteReferences service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_DeleteReferences(
+SOPC_StatusCode OpcUa_ClientApi_DeleteReferences(
     UA_Channel                        a_hChannel,
     const OpcUa_RequestHeader*        a_pRequestHeader,
     int32_t                           a_nNoOfReferencesToDelete,
     const OpcUa_DeleteReferencesItem* a_pReferencesToDelete,
     OpcUa_ResponseHeader*             a_pResponseHeader,
     int32_t*                          a_pNoOfResults,
-    StatusCode**                      a_pResults,
+    SOPC_StatusCode**                      a_pResults,
     int32_t*                          a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**               a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteReferencesRequest cRequest;
     OpcUa_DeleteReferencesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -1695,7 +1695,7 @@ StatusCode OpcUa_ClientApi_DeleteReferences(
 /*============================================================================
  * Asynchronously calls the DeleteReferences service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginDeleteReferences(
+SOPC_StatusCode OpcUa_ClientApi_BeginDeleteReferences(
     UA_Channel                        a_hChannel,
     const OpcUa_RequestHeader*        a_pRequestHeader,
     int32_t                           a_nNoOfReferencesToDelete,
@@ -1703,7 +1703,7 @@ StatusCode OpcUa_ClientApi_BeginDeleteReferences(
     UA_Channel_PfnRequestComplete*    a_pCallback,
     void*                             a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteReferencesRequest cRequest;
     OpcUa_DeleteReferencesRequest_Initialize(&cRequest);
 
@@ -1738,7 +1738,7 @@ StatusCode OpcUa_ClientApi_BeginDeleteReferences(
 /*============================================================================
  * Synchronously calls the Browse service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_Browse(
+SOPC_StatusCode OpcUa_ClientApi_Browse(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     const OpcUa_ViewDescription*   a_pView,
@@ -1751,7 +1751,7 @@ StatusCode OpcUa_ClientApi_Browse(
     int32_t*                       a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**            a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseRequest cRequest;
     OpcUa_BrowseResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -1825,7 +1825,7 @@ StatusCode OpcUa_ClientApi_Browse(
 /*============================================================================
  * Asynchronously calls the Browse service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginBrowse(
+SOPC_StatusCode OpcUa_ClientApi_BeginBrowse(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     const OpcUa_ViewDescription*   a_pView,
@@ -1835,7 +1835,7 @@ StatusCode OpcUa_ClientApi_BeginBrowse(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseRequest cRequest;
     OpcUa_BrowseRequest_Initialize(&cRequest);
 
@@ -1873,7 +1873,7 @@ StatusCode OpcUa_ClientApi_BeginBrowse(
 /*============================================================================
  * Synchronously calls the BrowseNext service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BrowseNext(
+SOPC_StatusCode OpcUa_ClientApi_BrowseNext(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     UA_Boolean                 a_bReleaseContinuationPoints,
@@ -1885,7 +1885,7 @@ StatusCode OpcUa_ClientApi_BrowseNext(
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseNextRequest cRequest;
     OpcUa_BrowseNextResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -1957,7 +1957,7 @@ StatusCode OpcUa_ClientApi_BrowseNext(
 /*============================================================================
  * Asynchronously calls the BrowseNext service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginBrowseNext(
+SOPC_StatusCode OpcUa_ClientApi_BeginBrowseNext(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     UA_Boolean                     a_bReleaseContinuationPoints,
@@ -1966,7 +1966,7 @@ StatusCode OpcUa_ClientApi_BeginBrowseNext(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_BrowseNextRequest cRequest;
     OpcUa_BrowseNextRequest_Initialize(&cRequest);
 
@@ -2002,7 +2002,7 @@ StatusCode OpcUa_ClientApi_BeginBrowseNext(
 /*============================================================================
  * Synchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
+SOPC_StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     int32_t                    a_nNoOfBrowsePaths,
@@ -2013,7 +2013,7 @@ StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_TranslateBrowsePathsToNodeIdsRequest cRequest;
     OpcUa_TranslateBrowsePathsToNodeIdsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -2084,7 +2084,7 @@ StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
 /*============================================================================
  * Asynchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginTranslateBrowsePathsToNodeIds(
+SOPC_StatusCode OpcUa_ClientApi_BeginTranslateBrowsePathsToNodeIds(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfBrowsePaths,
@@ -2092,7 +2092,7 @@ StatusCode OpcUa_ClientApi_BeginTranslateBrowsePathsToNodeIds(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_TranslateBrowsePathsToNodeIdsRequest cRequest;
     OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(&cRequest);
 
@@ -2127,7 +2127,7 @@ StatusCode OpcUa_ClientApi_BeginTranslateBrowsePathsToNodeIds(
 /*============================================================================
  * Synchronously calls the RegisterNodes service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_RegisterNodes(
+SOPC_StatusCode OpcUa_ClientApi_RegisterNodes(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     int32_t                    a_nNoOfNodesToRegister,
@@ -2136,7 +2136,7 @@ StatusCode OpcUa_ClientApi_RegisterNodes(
     int32_t*                   a_pNoOfRegisteredNodeIds,
     UA_NodeId**                a_pRegisteredNodeIds)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterNodesRequest cRequest;
     OpcUa_RegisterNodesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -2203,7 +2203,7 @@ StatusCode OpcUa_ClientApi_RegisterNodes(
 /*============================================================================
  * Asynchronously calls the RegisterNodes service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginRegisterNodes(
+SOPC_StatusCode OpcUa_ClientApi_BeginRegisterNodes(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToRegister,
@@ -2211,7 +2211,7 @@ StatusCode OpcUa_ClientApi_BeginRegisterNodes(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_RegisterNodesRequest cRequest;
     OpcUa_RegisterNodesRequest_Initialize(&cRequest);
 
@@ -2246,14 +2246,14 @@ StatusCode OpcUa_ClientApi_BeginRegisterNodes(
 /*============================================================================
  * Synchronously calls the UnregisterNodes service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_UnregisterNodes(
+SOPC_StatusCode OpcUa_ClientApi_UnregisterNodes(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     int32_t                    a_nNoOfNodesToUnregister,
     const UA_NodeId*           a_pNodesToUnregister,
     OpcUa_ResponseHeader*      a_pResponseHeader)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_UnregisterNodesRequest cRequest;
     OpcUa_UnregisterNodesResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -2316,7 +2316,7 @@ StatusCode OpcUa_ClientApi_UnregisterNodes(
 /*============================================================================
  * Asynchronously calls the UnregisterNodes service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginUnregisterNodes(
+SOPC_StatusCode OpcUa_ClientApi_BeginUnregisterNodes(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToUnregister,
@@ -2324,7 +2324,7 @@ StatusCode OpcUa_ClientApi_BeginUnregisterNodes(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_UnregisterNodesRequest cRequest;
     OpcUa_UnregisterNodesRequest_Initialize(&cRequest);
 
@@ -2359,7 +2359,7 @@ StatusCode OpcUa_ClientApi_BeginUnregisterNodes(
 /*============================================================================
  * Synchronously calls the QueryFirst service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_QueryFirst(
+SOPC_StatusCode OpcUa_ClientApi_QueryFirst(
     UA_Channel                       a_hChannel,
     const OpcUa_RequestHeader*       a_pRequestHeader,
     const OpcUa_ViewDescription*     a_pView,
@@ -2378,7 +2378,7 @@ StatusCode OpcUa_ClientApi_QueryFirst(
     UA_DiagnosticInfo**              a_pDiagnosticInfos,
     OpcUa_ContentFilterResult*       a_pFilterResult)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_QueryFirstRequest cRequest;
     OpcUa_QueryFirstResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -2463,7 +2463,7 @@ StatusCode OpcUa_ClientApi_QueryFirst(
 /*============================================================================
  * Asynchronously calls the QueryFirst service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginQueryFirst(
+SOPC_StatusCode OpcUa_ClientApi_BeginQueryFirst(
     UA_Channel                       a_hChannel,
     const OpcUa_RequestHeader*       a_pRequestHeader,
     const OpcUa_ViewDescription*     a_pView,
@@ -2475,7 +2475,7 @@ StatusCode OpcUa_ClientApi_BeginQueryFirst(
     UA_Channel_PfnRequestComplete*   a_pCallback,
     void*                            a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_QueryFirstRequest cRequest;
     OpcUa_QueryFirstRequest_Initialize(&cRequest);
 
@@ -2516,7 +2516,7 @@ StatusCode OpcUa_ClientApi_BeginQueryFirst(
 /*============================================================================
  * Synchronously calls the QueryNext service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_QueryNext(
+SOPC_StatusCode OpcUa_ClientApi_QueryNext(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     UA_Boolean                 a_bReleaseContinuationPoint,
@@ -2526,7 +2526,7 @@ StatusCode OpcUa_ClientApi_QueryNext(
     OpcUa_QueryDataSet**       a_pQueryDataSets,
     UA_ByteString*             a_pRevisedContinuationPoint)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_QueryNextRequest cRequest;
     OpcUa_QueryNextResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -2595,7 +2595,7 @@ StatusCode OpcUa_ClientApi_QueryNext(
 /*============================================================================
  * Asynchronously calls the QueryNext service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginQueryNext(
+SOPC_StatusCode OpcUa_ClientApi_BeginQueryNext(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     UA_Boolean                     a_bReleaseContinuationPoint,
@@ -2603,7 +2603,7 @@ StatusCode OpcUa_ClientApi_BeginQueryNext(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_QueryNextRequest cRequest;
     OpcUa_QueryNextRequest_Initialize(&cRequest);
 
@@ -2638,7 +2638,7 @@ StatusCode OpcUa_ClientApi_BeginQueryNext(
 /*============================================================================
  * Synchronously calls the Read service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_Read(
+SOPC_StatusCode OpcUa_ClientApi_Read(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     double                     a_nMaxAge,
@@ -2651,7 +2651,7 @@ StatusCode OpcUa_ClientApi_Read(
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_ReadRequest cRequest;
     OpcUa_ReadResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -2724,7 +2724,7 @@ StatusCode OpcUa_ClientApi_Read(
 /*============================================================================
  * Asynchronously calls the Read service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginRead(
+SOPC_StatusCode OpcUa_ClientApi_BeginRead(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     double                         a_nMaxAge,
@@ -2734,7 +2734,7 @@ StatusCode OpcUa_ClientApi_BeginRead(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_ReadRequest cRequest;
     OpcUa_ReadRequest_Initialize(&cRequest);
 
@@ -2771,7 +2771,7 @@ StatusCode OpcUa_ClientApi_BeginRead(
 /*============================================================================
  * Synchronously calls the HistoryRead service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_HistoryRead(
+SOPC_StatusCode OpcUa_ClientApi_HistoryRead(
     UA_Channel                      a_hChannel,
     const OpcUa_RequestHeader*      a_pRequestHeader,
     const UA_ExtensionObject*       a_pHistoryReadDetails,
@@ -2785,7 +2785,7 @@ StatusCode OpcUa_ClientApi_HistoryRead(
     int32_t*                        a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**             a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryReadRequest cRequest;
     OpcUa_HistoryReadResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -2860,7 +2860,7 @@ StatusCode OpcUa_ClientApi_HistoryRead(
 /*============================================================================
  * Asynchronously calls the HistoryRead service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginHistoryRead(
+SOPC_StatusCode OpcUa_ClientApi_BeginHistoryRead(
     UA_Channel                      a_hChannel,
     const OpcUa_RequestHeader*      a_pRequestHeader,
     const UA_ExtensionObject*       a_pHistoryReadDetails,
@@ -2871,7 +2871,7 @@ StatusCode OpcUa_ClientApi_BeginHistoryRead(
     UA_Channel_PfnRequestComplete*  a_pCallback,
     void*                           a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryReadRequest cRequest;
     OpcUa_HistoryReadRequest_Initialize(&cRequest);
 
@@ -2910,18 +2910,18 @@ StatusCode OpcUa_ClientApi_BeginHistoryRead(
 /*============================================================================
  * Synchronously calls the Write service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_Write(
+SOPC_StatusCode OpcUa_ClientApi_Write(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     int32_t                    a_nNoOfNodesToWrite,
     const OpcUa_WriteValue*    a_pNodesToWrite,
     OpcUa_ResponseHeader*      a_pResponseHeader,
     int32_t*                   a_pNoOfResults,
-    StatusCode**               a_pResults,
+    SOPC_StatusCode**               a_pResults,
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_WriteRequest cRequest;
     OpcUa_WriteResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -2992,7 +2992,7 @@ StatusCode OpcUa_ClientApi_Write(
 /*============================================================================
  * Asynchronously calls the Write service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginWrite(
+SOPC_StatusCode OpcUa_ClientApi_BeginWrite(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfNodesToWrite,
@@ -3000,7 +3000,7 @@ StatusCode OpcUa_ClientApi_BeginWrite(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_WriteRequest cRequest;
     OpcUa_WriteRequest_Initialize(&cRequest);
 
@@ -3035,7 +3035,7 @@ StatusCode OpcUa_ClientApi_BeginWrite(
 /*============================================================================
  * Synchronously calls the HistoryUpdate service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_HistoryUpdate(
+SOPC_StatusCode OpcUa_ClientApi_HistoryUpdate(
     UA_Channel                  a_hChannel,
     const OpcUa_RequestHeader*  a_pRequestHeader,
     int32_t                     a_nNoOfHistoryUpdateDetails,
@@ -3046,7 +3046,7 @@ StatusCode OpcUa_ClientApi_HistoryUpdate(
     int32_t*                    a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**         a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryUpdateRequest cRequest;
     OpcUa_HistoryUpdateResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -3117,7 +3117,7 @@ StatusCode OpcUa_ClientApi_HistoryUpdate(
 /*============================================================================
  * Asynchronously calls the HistoryUpdate service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginHistoryUpdate(
+SOPC_StatusCode OpcUa_ClientApi_BeginHistoryUpdate(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfHistoryUpdateDetails,
@@ -3125,7 +3125,7 @@ StatusCode OpcUa_ClientApi_BeginHistoryUpdate(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_HistoryUpdateRequest cRequest;
     OpcUa_HistoryUpdateRequest_Initialize(&cRequest);
 
@@ -3160,7 +3160,7 @@ StatusCode OpcUa_ClientApi_BeginHistoryUpdate(
 /*============================================================================
  * Synchronously calls the Call service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_Call(
+SOPC_StatusCode OpcUa_ClientApi_Call(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfMethodsToCall,
@@ -3171,7 +3171,7 @@ StatusCode OpcUa_ClientApi_Call(
     int32_t*                       a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**            a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CallRequest cRequest;
     OpcUa_CallResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -3242,7 +3242,7 @@ StatusCode OpcUa_ClientApi_Call(
 /*============================================================================
  * Asynchronously calls the Call service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginCall(
+SOPC_StatusCode OpcUa_ClientApi_BeginCall(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfMethodsToCall,
@@ -3250,7 +3250,7 @@ StatusCode OpcUa_ClientApi_BeginCall(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CallRequest cRequest;
     OpcUa_CallRequest_Initialize(&cRequest);
 
@@ -3285,7 +3285,7 @@ StatusCode OpcUa_ClientApi_BeginCall(
 /*============================================================================
  * Synchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_CreateMonitoredItems(
+SOPC_StatusCode OpcUa_ClientApi_CreateMonitoredItems(
     UA_Channel                              a_hChannel,
     const OpcUa_RequestHeader*              a_pRequestHeader,
     uint32_t                                a_nSubscriptionId,
@@ -3298,7 +3298,7 @@ StatusCode OpcUa_ClientApi_CreateMonitoredItems(
     int32_t*                                a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**                     a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CreateMonitoredItemsRequest cRequest;
     OpcUa_CreateMonitoredItemsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -3371,7 +3371,7 @@ StatusCode OpcUa_ClientApi_CreateMonitoredItems(
 /*============================================================================
  * Asynchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
+SOPC_StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
     UA_Channel                              a_hChannel,
     const OpcUa_RequestHeader*              a_pRequestHeader,
     uint32_t                                a_nSubscriptionId,
@@ -3381,7 +3381,7 @@ StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
     UA_Channel_PfnRequestComplete*          a_pCallback,
     void*                                   a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CreateMonitoredItemsRequest cRequest;
     OpcUa_CreateMonitoredItemsRequest_Initialize(&cRequest);
 
@@ -3418,7 +3418,7 @@ StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
 /*============================================================================
  * Synchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
+SOPC_StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
     UA_Channel                              a_hChannel,
     const OpcUa_RequestHeader*              a_pRequestHeader,
     uint32_t                                a_nSubscriptionId,
@@ -3431,7 +3431,7 @@ StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
     int32_t*                                a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**                     a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_ModifyMonitoredItemsRequest cRequest;
     OpcUa_ModifyMonitoredItemsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -3504,7 +3504,7 @@ StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
 /*============================================================================
  * Asynchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
+SOPC_StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
     UA_Channel                              a_hChannel,
     const OpcUa_RequestHeader*              a_pRequestHeader,
     uint32_t                                a_nSubscriptionId,
@@ -3514,7 +3514,7 @@ StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
     UA_Channel_PfnRequestComplete*          a_pCallback,
     void*                                   a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_ModifyMonitoredItemsRequest cRequest;
     OpcUa_ModifyMonitoredItemsRequest_Initialize(&cRequest);
 
@@ -3551,7 +3551,7 @@ StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
 /*============================================================================
  * Synchronously calls the SetMonitoringMode service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_SetMonitoringMode(
+SOPC_StatusCode OpcUa_ClientApi_SetMonitoringMode(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     uint32_t                   a_nSubscriptionId,
@@ -3560,11 +3560,11 @@ StatusCode OpcUa_ClientApi_SetMonitoringMode(
     const uint32_t*            a_pMonitoredItemIds,
     OpcUa_ResponseHeader*      a_pResponseHeader,
     int32_t*                   a_pNoOfResults,
-    StatusCode**               a_pResults,
+    SOPC_StatusCode**               a_pResults,
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_SetMonitoringModeRequest cRequest;
     OpcUa_SetMonitoringModeResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -3637,7 +3637,7 @@ StatusCode OpcUa_ClientApi_SetMonitoringMode(
 /*============================================================================
  * Asynchronously calls the SetMonitoringMode service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
+SOPC_StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
@@ -3647,7 +3647,7 @@ StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_SetMonitoringModeRequest cRequest;
     OpcUa_SetMonitoringModeRequest_Initialize(&cRequest);
 
@@ -3684,7 +3684,7 @@ StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
 /*============================================================================
  * Synchronously calls the SetTriggering service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_SetTriggering(
+SOPC_StatusCode OpcUa_ClientApi_SetTriggering(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     uint32_t                   a_nSubscriptionId,
@@ -3695,15 +3695,15 @@ StatusCode OpcUa_ClientApi_SetTriggering(
     const uint32_t*            a_pLinksToRemove,
     OpcUa_ResponseHeader*      a_pResponseHeader,
     int32_t*                   a_pNoOfAddResults,
-    StatusCode**               a_pAddResults,
+    SOPC_StatusCode**               a_pAddResults,
     int32_t*                   a_pNoOfAddDiagnosticInfos,
     UA_DiagnosticInfo**        a_pAddDiagnosticInfos,
     int32_t*                   a_pNoOfRemoveResults,
-    StatusCode**               a_pRemoveResults,
+    SOPC_StatusCode**               a_pRemoveResults,
     int32_t*                   a_pNoOfRemoveDiagnosticInfos,
     UA_DiagnosticInfo**        a_pRemoveDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_SetTriggeringRequest cRequest;
     OpcUa_SetTriggeringResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -3787,7 +3787,7 @@ StatusCode OpcUa_ClientApi_SetTriggering(
 /*============================================================================
  * Asynchronously calls the SetTriggering service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginSetTriggering(
+SOPC_StatusCode OpcUa_ClientApi_BeginSetTriggering(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
@@ -3799,7 +3799,7 @@ StatusCode OpcUa_ClientApi_BeginSetTriggering(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_SetTriggeringRequest cRequest;
     OpcUa_SetTriggeringRequest_Initialize(&cRequest);
 
@@ -3839,7 +3839,7 @@ StatusCode OpcUa_ClientApi_BeginSetTriggering(
 /*============================================================================
  * Synchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
+SOPC_StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     uint32_t                   a_nSubscriptionId,
@@ -3847,11 +3847,11 @@ StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
     const uint32_t*            a_pMonitoredItemIds,
     OpcUa_ResponseHeader*      a_pResponseHeader,
     int32_t*                   a_pNoOfResults,
-    StatusCode**               a_pResults,
+    SOPC_StatusCode**               a_pResults,
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteMonitoredItemsRequest cRequest;
     OpcUa_DeleteMonitoredItemsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -3923,7 +3923,7 @@ StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
 /*============================================================================
  * Asynchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
+SOPC_StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
@@ -3932,7 +3932,7 @@ StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteMonitoredItemsRequest cRequest;
     OpcUa_DeleteMonitoredItemsRequest_Initialize(&cRequest);
 
@@ -3968,7 +3968,7 @@ StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
 /*============================================================================
  * Synchronously calls the CreateSubscription service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_CreateSubscription(
+SOPC_StatusCode OpcUa_ClientApi_CreateSubscription(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     double                     a_nRequestedPublishingInterval,
@@ -3983,7 +3983,7 @@ StatusCode OpcUa_ClientApi_CreateSubscription(
     uint32_t*                  a_pRevisedLifetimeCount,
     uint32_t*                  a_pRevisedMaxKeepAliveCount)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CreateSubscriptionRequest cRequest;
     OpcUa_CreateSubscriptionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -4057,7 +4057,7 @@ StatusCode OpcUa_ClientApi_CreateSubscription(
 /*============================================================================
  * Asynchronously calls the CreateSubscription service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginCreateSubscription(
+SOPC_StatusCode OpcUa_ClientApi_BeginCreateSubscription(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     double                         a_nRequestedPublishingInterval,
@@ -4069,7 +4069,7 @@ StatusCode OpcUa_ClientApi_BeginCreateSubscription(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_CreateSubscriptionRequest cRequest;
     OpcUa_CreateSubscriptionRequest_Initialize(&cRequest);
 
@@ -4107,7 +4107,7 @@ StatusCode OpcUa_ClientApi_BeginCreateSubscription(
 /*============================================================================
  * Synchronously calls the ModifySubscription service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_ModifySubscription(
+SOPC_StatusCode OpcUa_ClientApi_ModifySubscription(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     uint32_t                   a_nSubscriptionId,
@@ -4121,7 +4121,7 @@ StatusCode OpcUa_ClientApi_ModifySubscription(
     uint32_t*                  a_pRevisedLifetimeCount,
     uint32_t*                  a_pRevisedMaxKeepAliveCount)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_ModifySubscriptionRequest cRequest;
     OpcUa_ModifySubscriptionResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -4193,7 +4193,7 @@ StatusCode OpcUa_ClientApi_ModifySubscription(
 /*============================================================================
  * Asynchronously calls the ModifySubscription service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginModifySubscription(
+SOPC_StatusCode OpcUa_ClientApi_BeginModifySubscription(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
@@ -4205,7 +4205,7 @@ StatusCode OpcUa_ClientApi_BeginModifySubscription(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_ModifySubscriptionRequest cRequest;
     OpcUa_ModifySubscriptionRequest_Initialize(&cRequest);
 
@@ -4243,7 +4243,7 @@ StatusCode OpcUa_ClientApi_BeginModifySubscription(
 /*============================================================================
  * Synchronously calls the SetPublishingMode service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_SetPublishingMode(
+SOPC_StatusCode OpcUa_ClientApi_SetPublishingMode(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     UA_Boolean                 a_bPublishingEnabled,
@@ -4251,11 +4251,11 @@ StatusCode OpcUa_ClientApi_SetPublishingMode(
     const uint32_t*            a_pSubscriptionIds,
     OpcUa_ResponseHeader*      a_pResponseHeader,
     int32_t*                   a_pNoOfResults,
-    StatusCode**               a_pResults,
+    SOPC_StatusCode**               a_pResults,
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_SetPublishingModeRequest cRequest;
     OpcUa_SetPublishingModeResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -4327,7 +4327,7 @@ StatusCode OpcUa_ClientApi_SetPublishingMode(
 /*============================================================================
  * Asynchronously calls the SetPublishingMode service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
+SOPC_StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     UA_Boolean                     a_bPublishingEnabled,
@@ -4336,7 +4336,7 @@ StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_SetPublishingModeRequest cRequest;
     OpcUa_SetPublishingModeRequest_Initialize(&cRequest);
 
@@ -4372,7 +4372,7 @@ StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
 /*============================================================================
  * Synchronously calls the Publish service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_Publish(
+SOPC_StatusCode OpcUa_ClientApi_Publish(
     UA_Channel                               a_hChannel,
     const OpcUa_RequestHeader*               a_pRequestHeader,
     int32_t                                  a_nNoOfSubscriptionAcknowledgements,
@@ -4384,11 +4384,11 @@ StatusCode OpcUa_ClientApi_Publish(
     UA_Boolean*                              a_pMoreNotifications,
     OpcUa_NotificationMessage*               a_pNotificationMessage,
     int32_t*                                 a_pNoOfResults,
-    StatusCode**                             a_pResults,
+    SOPC_StatusCode**                             a_pResults,
     int32_t*                                 a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**                      a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_PublishRequest cRequest;
     OpcUa_PublishResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -4469,7 +4469,7 @@ StatusCode OpcUa_ClientApi_Publish(
 /*============================================================================
  * Asynchronously calls the Publish service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginPublish(
+SOPC_StatusCode OpcUa_ClientApi_BeginPublish(
     UA_Channel                               a_hChannel,
     const OpcUa_RequestHeader*               a_pRequestHeader,
     int32_t                                  a_nNoOfSubscriptionAcknowledgements,
@@ -4477,7 +4477,7 @@ StatusCode OpcUa_ClientApi_BeginPublish(
     UA_Channel_PfnRequestComplete*           a_pCallback,
     void*                                    a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_PublishRequest cRequest;
     OpcUa_PublishRequest_Initialize(&cRequest);
 
@@ -4512,7 +4512,7 @@ StatusCode OpcUa_ClientApi_BeginPublish(
 /*============================================================================
  * Synchronously calls the Republish service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_Republish(
+SOPC_StatusCode OpcUa_ClientApi_Republish(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     uint32_t                   a_nSubscriptionId,
@@ -4520,7 +4520,7 @@ StatusCode OpcUa_ClientApi_Republish(
     OpcUa_ResponseHeader*      a_pResponseHeader,
     OpcUa_NotificationMessage* a_pNotificationMessage)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_RepublishRequest cRequest;
     OpcUa_RepublishResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -4584,7 +4584,7 @@ StatusCode OpcUa_ClientApi_Republish(
 /*============================================================================
  * Asynchronously calls the Republish service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginRepublish(
+SOPC_StatusCode OpcUa_ClientApi_BeginRepublish(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     uint32_t                       a_nSubscriptionId,
@@ -4592,7 +4592,7 @@ StatusCode OpcUa_ClientApi_BeginRepublish(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_RepublishRequest cRequest;
     OpcUa_RepublishRequest_Initialize(&cRequest);
 
@@ -4626,7 +4626,7 @@ StatusCode OpcUa_ClientApi_BeginRepublish(
 /*============================================================================
  * Synchronously calls the TransferSubscriptions service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_TransferSubscriptions(
+SOPC_StatusCode OpcUa_ClientApi_TransferSubscriptions(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     int32_t                    a_nNoOfSubscriptionIds,
@@ -4638,7 +4638,7 @@ StatusCode OpcUa_ClientApi_TransferSubscriptions(
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_TransferSubscriptionsRequest cRequest;
     OpcUa_TransferSubscriptionsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -4710,7 +4710,7 @@ StatusCode OpcUa_ClientApi_TransferSubscriptions(
 /*============================================================================
  * Asynchronously calls the TransferSubscriptions service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
+SOPC_StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfSubscriptionIds,
@@ -4719,7 +4719,7 @@ StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_TransferSubscriptionsRequest cRequest;
     OpcUa_TransferSubscriptionsRequest_Initialize(&cRequest);
 
@@ -4755,18 +4755,18 @@ StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
 /*============================================================================
  * Synchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_DeleteSubscriptions(
+SOPC_StatusCode OpcUa_ClientApi_DeleteSubscriptions(
     UA_Channel                 a_hChannel,
     const OpcUa_RequestHeader* a_pRequestHeader,
     int32_t                    a_nNoOfSubscriptionIds,
     const uint32_t*            a_pSubscriptionIds,
     OpcUa_ResponseHeader*      a_pResponseHeader,
     int32_t*                   a_pNoOfResults,
-    StatusCode**               a_pResults,
+    SOPC_StatusCode**               a_pResults,
     int32_t*                   a_pNoOfDiagnosticInfos,
     UA_DiagnosticInfo**        a_pDiagnosticInfos)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteSubscriptionsRequest cRequest;
     OpcUa_DeleteSubscriptionsResponse* pResponse = NULL;
     UA_EncodeableType* pResponseType = NULL;
@@ -4837,7 +4837,7 @@ StatusCode OpcUa_ClientApi_DeleteSubscriptions(
 /*============================================================================
  * Asynchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
-StatusCode OpcUa_ClientApi_BeginDeleteSubscriptions(
+SOPC_StatusCode OpcUa_ClientApi_BeginDeleteSubscriptions(
     UA_Channel                     a_hChannel,
     const OpcUa_RequestHeader*     a_pRequestHeader,
     int32_t                        a_nNoOfSubscriptionIds,
@@ -4845,7 +4845,7 @@ StatusCode OpcUa_ClientApi_BeginDeleteSubscriptions(
     UA_Channel_PfnRequestComplete* a_pCallback,
     void*                          a_pCallbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_DeleteSubscriptionsRequest cRequest;
     OpcUa_DeleteSubscriptionsRequest_Initialize(&cRequest);
 

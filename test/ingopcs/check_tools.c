@@ -11,15 +11,15 @@
 
 #include <stdlib.h>
 #include <check.h>
-#include <ua_base_types.h>
 #include <buffer.h>
 #include <singly_linked_list.h>
+#include "../../src/ingopcs/core_types/sopc_base_types.h"
 #include "check_stack.h"
 
 
 START_TEST(test_buffer_create)
 {
-    StatusCode status = 0;
+    SOPC_StatusCode status = 0;
 
     // Test creation
     //// Test nominal case
@@ -67,7 +67,7 @@ START_TEST(test_buffer_read_write)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02 , 0x03};
     uint8_t readData[4] = {0x00, 0x00, 0x00, 0x00};
-    StatusCode status = 0;
+    SOPC_StatusCode status = 0;
     Buffer* buf = NULL;
 
     // Test write
@@ -191,7 +191,7 @@ END_TEST
 START_TEST(test_buffer_copy)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02 , 0x03};
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     Buffer* buf = NULL;
     Buffer* buf2 = NULL;
 
@@ -303,7 +303,7 @@ END_TEST
 START_TEST(test_buffer_reset)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02 , 0x03};
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     Buffer* buf = NULL;
 
     // Test copy
@@ -384,7 +384,7 @@ END_TEST
 START_TEST(test_buffer_set_properties)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02 , 0x03};
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     Buffer* buf = NULL;
 
     // Test copy

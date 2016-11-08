@@ -18,10 +18,10 @@
 
 struct SC_ClientConnection;
 
-typedef StatusCode (SC_ConnectionEvent_CB)(struct SC_ClientConnection* cConnection,
+typedef SOPC_StatusCode (SC_ConnectionEvent_CB)(struct SC_ClientConnection* cConnection,
                                            void*                       cbData,
                                            SC_ConnectionEvent          event,
-                                           StatusCode                  status);
+                                           SOPC_StatusCode                  status);
 
 typedef struct SC_ClientConnection
 {
@@ -42,11 +42,11 @@ typedef struct SC_ClientConnection
 
 } SC_ClientConnection;
 
-typedef StatusCode (SC_ResponseEvent_CB) (SC_ClientConnection* connection,
+typedef SOPC_StatusCode (SC_ResponseEvent_CB) (SC_ClientConnection* connection,
                                           void*                response,
                                           UA_EncodeableType*   responseType,
                                           void*                callbackData,
-                                          StatusCode           status);
+                                          SOPC_StatusCode           status);
 
 typedef struct PendingRequest
 {
@@ -69,7 +69,7 @@ void SC_PendingRequestDelete(PendingRequest*);
 
 
 SC_ClientConnection* SC_Client_Create();
-StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
+SOPC_StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
                                UA_NamespaceTable*   namespaceTable,
                                UA_EncodeableType**  encodeableTypes);
 
@@ -78,7 +78,7 @@ SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*  namespaceT
 
 void SC_Client_Delete(SC_ClientConnection* scConnection);
 
-StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
+SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
                              const char*               uri,
                              const PKIProvider*        pki,
                              const Certificate*        crt_cli,
@@ -90,9 +90,9 @@ StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
                              SC_ConnectionEvent_CB*    callback,
                              void*                     callbackData);
 
-StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection);
+SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection);
 
-StatusCode SC_Send_Request(SC_ClientConnection* connection,
+SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
                            UA_EncodeableType*   requestType,
                            void*                request,
                            UA_EncodeableType*   responseType,

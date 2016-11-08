@@ -15,9 +15,9 @@
 
 const uint32_t tcpProtocolVersion = 0;
 
-StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
+SOPC_StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
                                TCP_UA_MsgType type){
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     UA_Byte fByte = 'F';
     assert(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH);
     switch(type){
@@ -53,11 +53,11 @@ StatusCode TCP_UA_EncodeHeader(UA_MsgBuffer*  msgBuffer,
     return status;
 }
 
-StatusCode TCP_UA_FinalizeHeader(UA_MsgBuffer* msgBuffer){
+SOPC_StatusCode TCP_UA_FinalizeHeader(UA_MsgBuffer* msgBuffer){
     assert(msgBuffer->type == TCP_UA_Message_Hello
            || msgBuffer->type == TCP_UA_Message_Acknowledge
            || msgBuffer->type == TCP_UA_Message_Error);
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     const uint32_t currentPosition = msgBuffer->buffers->position;
 
     status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
@@ -73,9 +73,9 @@ StatusCode TCP_UA_FinalizeHeader(UA_MsgBuffer* msgBuffer){
 }
 
 
-StatusCode TCP_UA_ReadData(UA_Socket*    socket,
+SOPC_StatusCode TCP_UA_ReadData(UA_Socket*    socket,
                            UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     uint32_t readBytes;
 
     if(msgBuffer->buffers->length >= TCP_UA_HEADER_LENGTH){
@@ -148,8 +148,8 @@ StatusCode TCP_UA_ReadData(UA_Socket*    socket,
     return status;
 }
 
-StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_OK;
+SOPC_StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_OK;
     UA_Byte msgType[3];
     UA_Byte isFinal;
 
@@ -233,11 +233,11 @@ StatusCode TCP_UA_ReadHeader(UA_MsgBuffer* msgBuffer){
     return status;
 }
 
-StatusCode TCP_UA_ReadMsgBuffer(UA_Byte*      data_dest,
+SOPC_StatusCode TCP_UA_ReadMsgBuffer(UA_Byte*      data_dest,
                                 uint32_t      size,
                                 UA_MsgBuffer* msgBuffer,
                                 uint32_t      count){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     Buffer* buffer = NULL;
     if(data_dest != NULL && size > 0 && msgBuffer != NULL && count > 0){
         // Treat single buffer messages and multiple buffers message (UA_MsgBuffers)
@@ -266,8 +266,8 @@ StatusCode TCP_UA_ReadMsgBuffer(UA_Byte*      data_dest,
     return status;
 }
 
-StatusCode TCP_UA_FlushMsgBuffer(UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_NOK;
+SOPC_StatusCode TCP_UA_FlushMsgBuffer(UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_NOK;
     uint32_t writtenBytes = 0;
     writtenBytes = UA_Socket_Write((UA_Socket*) msgBuffer->flushData,
                                    msgBuffer->buffers->data,
@@ -280,11 +280,11 @@ StatusCode TCP_UA_FlushMsgBuffer(UA_MsgBuffer* msgBuffer){
 }
 
 
-StatusCode TCP_UA_WriteMsgBuffer(UA_MsgBuffer*  msgBuffer,
+SOPC_StatusCode TCP_UA_WriteMsgBuffer(UA_MsgBuffer*  msgBuffer,
                                  const UA_Byte* data_src,
                                  uint32_t       count)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(data_src != NULL && msgBuffer != NULL && count > 0)
     {
         if(msgBuffer->buffers->position + count > msgBuffer->buffers->max_size){

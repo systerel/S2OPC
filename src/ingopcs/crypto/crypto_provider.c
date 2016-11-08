@@ -9,11 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <ua_base_types.h>
 #include <secret_buffer.h>
 
 #include "crypto_types.h"
 #include "crypto_provider.h"
+
+#include "../core_types/sopc_base_types.h"
 #include "crypto_profiles.h"
 #include "key_manager.h"
 #include "pki.h"
@@ -56,7 +57,7 @@ void CryptoProvider_Free(CryptoProvider* pCryptoProvider)
  * Symmetric API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
                                            const SecretBuffer *pKey,
@@ -64,7 +65,7 @@ StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer* pExpKey = NULL;
     ExposedBuffer* pExpIV = NULL;
 
@@ -102,7 +103,7 @@ StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenCipherText,
                                            const SecretBuffer *pKey,
@@ -110,7 +111,7 @@ StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer* pExpKey = NULL;
     ExposedBuffer* pExpIV = NULL;
 
@@ -148,7 +149,7 @@ StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider,
                                                      uint32_t *length)
 {
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == length)
@@ -171,7 +172,7 @@ StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider
 /**
  * Does not perform padding-alignment
  */
-StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvider *pProvider,
                                                         uint32_t lengthIn,
                                                         uint32_t *pLengthOut)
 {
@@ -188,7 +189,7 @@ StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvider *pP
 /**
  * Does not perform padding-alignment
  */
-StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pProvider,
                                                         uint32_t lengthIn,
                                                         uint32_t *pLengthOut)
 {
@@ -202,7 +203,7 @@ StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pP
 }
 
 
-StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pProvider,
                                                        uint32_t *pLength)
 {
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pLength)
@@ -222,7 +223,7 @@ StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider *pPr
 }
 
 
-StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *pProvider,
                                                     uint32_t *cipherTextBlockSize,
                                                     uint32_t *plainTextBlockSize)
 {
@@ -246,12 +247,12 @@ StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *pProvi
 }
 
 
-StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
                                            uint32_t *pSymmCryptoKeyLength,
                                            uint32_t *pSymmSignKeyLength,
                                            uint32_t *pSymmInitVectorLength)
 {
-    StatusCode status;
+    SOPC_StatusCode status;
 
     if(NULL == pProvider || NULL == pSymmCryptoKeyLength || NULL == pSymmSignKeyLength || NULL == pSymmInitVectorLength)
         return STATUS_INVALID_PARAMETERS;
@@ -272,14 +273,14 @@ StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
 
 
 // pLenOutput can be NULL
-StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
                                         const uint8_t *pInput,
                                         uint32_t lenInput,
                                         const SecretBuffer *pKey,
                                         uint8_t *pOutput,
                                         uint32_t lenOutput)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
@@ -310,14 +311,14 @@ StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenInput,
                                           const SecretBuffer *pKey,
                                           const uint8_t *pSignature,
                                           uint32_t lenOutput)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer* pExpKey = NULL;
     uint32_t len;
 
@@ -348,10 +349,10 @@ StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
                                                SecretBuffer **ppKeyGenerated)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer *pExpKey;
     uint32_t lenKeyAPI;
 
@@ -383,7 +384,7 @@ StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider,
                                                  const ExposedBuffer *pSecret,
                                                  uint32_t lenSecret,
                                                  const ExposedBuffer *pSeed,
@@ -403,13 +404,13 @@ StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider
 }
 
 
-static inline StatusCode DeriveKS(const CryptoProvider *pProvider,
+static inline SOPC_StatusCode DeriveKS(const CryptoProvider *pProvider,
                                   const ExposedBuffer *pSecret, uint32_t lenSecret,
                                   const ExposedBuffer *pSeed, uint32_t lenSeed,
                                   SC_SecurityKeySet *pks,
                                   uint8_t *genData, uint32_t lenData,
                                   uint32_t lenKeySign, uint32_t lenKeyEncr, uint32_t lenIV);
-StatusCode CryptoProvider_DeriveKeySets(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_DeriveKeySets(const CryptoProvider *pProvider,
                                         const ExposedBuffer *pClientNonce,
                                         uint32_t lenClientNonce,
                                         const ExposedBuffer *pServerNonce,
@@ -417,7 +418,7 @@ StatusCode CryptoProvider_DeriveKeySets(const CryptoProvider *pProvider,
                                         SC_SecurityKeySet *pClientKeySet,
                                         SC_SecurityKeySet *pServerKeySet)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     uint8_t *genData = NULL;
     uint32_t lenData = 0;
     uint32_t lenKeyEncr = 0, lenKeySign = 0, lenIV = 0;
@@ -470,14 +471,14 @@ StatusCode CryptoProvider_DeriveKeySets(const CryptoProvider *pProvider,
     return status;
 }
 
-static inline StatusCode DeriveKS(const CryptoProvider *pProvider,
+static inline SOPC_StatusCode DeriveKS(const CryptoProvider *pProvider,
                                   const ExposedBuffer *pSecret, uint32_t lenSecret,
                                   const ExposedBuffer *pSeed, uint32_t lenSeed,
                                   SC_SecurityKeySet *pks,
                                   uint8_t *genData, uint32_t lenData,
                                   uint32_t lenKeySign, uint32_t lenKeyEncr, uint32_t lenIV)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer *pExpEncr = NULL, *pExpSign = NULL, *pExpIV = NULL;
 
     // Exposes SecretBuffers
@@ -507,14 +508,14 @@ static inline StatusCode DeriveKS(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvider,
                                               const SecretBuffer *pClientNonce,
                                               const ExposedBuffer *pServerNonce,
                                               uint32_t lenServerNonce,
                                               SC_SecurityKeySet *pClientKeySet,
                                               SC_SecurityKeySet *pServerKeySet)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer *pExpCli = NULL;
 
     if(NULL == pProvider || NULL == pClientNonce || NULL == pServerNonce || NULL == pClientKeySet || NULL == pServerKeySet)
@@ -541,14 +542,14 @@ StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
                                               const ExposedBuffer *pClientNonce,
                                               uint32_t lenClientNonce,
                                               const SecretBuffer *pServerNonce,
                                               SC_SecurityKeySet *pClientKeySet,
                                               SC_SecurityKeySet *pServerKeySet)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer *pExpSer = NULL;
 
     if(NULL == pProvider || NULL == pClientNonce || NULL == pServerNonce || NULL == pClientKeySet || NULL == pServerKeySet)
@@ -585,11 +586,11 @@ StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
  *
  *          The main purpose of this function is to verify the length of the asymmetric key \p pKey with respect to the security policy.
  */
-StatusCode CryptoProvider_AsymmetricGetLength_KeyBytes(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBytes(const CryptoProvider *pProvider,
                                                        const AsymmetricKey *pKey,
                                                        uint32_t *lenKeyBytes)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
 
     status = CryptoProvider_AsymmetricGetLength_KeyBits(pProvider, pKey, lenKeyBytes);
     if(status == STATUS_OK)
@@ -602,7 +603,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_KeyBytes(const CryptoProvider *pPr
 /**
  * Calculate the length of the hash used for OAEP encryption/decryption.
  */
-StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvider *pProvider,
                                                              uint32_t *length)
 {
     if(NULL == pProvider || NULL == pProvider->pProfile || SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID || NULL == length)
@@ -625,7 +626,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoProvide
 /**
  * Calculate the length of the hash used for PSS signature/verification.
  */
-StatusCode CryptoProvider_AsymmetricGetLength_PSSHashLength(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_PSSHashLength(const CryptoProvider *pProvider,
                                                             uint32_t *length)
 {
     if(NULL == pProvider || NULL == pProvider->pProfile || SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID || NULL == length)
@@ -645,12 +646,12 @@ StatusCode CryptoProvider_AsymmetricGetLength_PSSHashLength(const CryptoProvider
 }
 
 
-StatusCode CryptoProvider_AsymmetricGetLength_Msgs(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_Msgs(const CryptoProvider *pProvider,
                                                    const AsymmetricKey *pKey,
                                                    uint32_t *cipherTextBlockSize,
                                                    uint32_t *plainTextBlockSize)
 {
-    StatusCode statusA = STATUS_OK, statusB = STATUS_OK;
+    SOPC_StatusCode statusA = STATUS_OK, statusB = STATUS_OK;
 
     if(NULL == pProvider || NULL == pKey)
         return STATUS_INVALID_PARAMETERS;
@@ -676,7 +677,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_Msgs(const CryptoProvider *pProvid
 /** \brief  Calculates the size of the required output buffer to cipher lengthIn bytes through Asymmetric encryption.
  *          Hence, does not include any signature length, but includes padding.
  */
-StatusCode CryptoProvider_AsymmetricGetLength_Encryption(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_Encryption(const CryptoProvider *pProvider,
                                                          const AsymmetricKey *pKey,
                                                          uint32_t lengthIn,
                                                          uint32_t *pLengthOut)
@@ -711,7 +712,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_Encryption(const CryptoProvider *p
 /** \brief  Calculates the size of the required output buffer to decipher lengthIn bytes through Asymmetric decryption.
  *          Hence, does not include any signature length, but includes padding.
  */
-StatusCode CryptoProvider_AsymmetricGetLength_Decryption(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_Decryption(const CryptoProvider *pProvider,
                                                          const AsymmetricKey *pKey,
                                                          uint32_t lengthIn,
                                                          uint32_t *pLengthOut)
@@ -746,7 +747,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_Decryption(const CryptoProvider *p
 /** \brief  Calculates the size of the required output buffer to contain the Asymmetric signature.
  *          It is a single ciphered-message long.
  */
-StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvider *pProvider,
                                                         const AsymmetricKey *pKey,
                                                         uint32_t *pLength)
 {
@@ -758,7 +759,7 @@ StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvider *pP
 }
 
 
-StatusCode CryptoProvider_AsymmetricEncrypt(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricEncrypt(const CryptoProvider *pProvider,
                                             const uint8_t *pInput,
                                             uint32_t lenInput,
                                             const AsymmetricKey *pKey,
@@ -798,7 +799,7 @@ StatusCode CryptoProvider_AsymmetricEncrypt(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider,
                                             const uint8_t *pInput,
                                             uint32_t lenInput,
                                             const AsymmetricKey *pKey,
@@ -846,7 +847,7 @@ StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider,
  * and verify that both hashes are the same. Everyone can decrypt the signature,
  * but only the private key could have forged it.
  */
-StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,
                                          const AsymmetricKey *pKeyPrivateLocal,
@@ -882,7 +883,7 @@ StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenInput,
                                            const AsymmetricKey *pKeyRemotePublic,
@@ -922,7 +923,7 @@ StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
  * Certificate lengths & validation
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvider *pProvider,
                                                           uint32_t *length)
 {
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == length)
@@ -943,7 +944,7 @@ StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvider *
 }
 
 
-StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
+SOPC_StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
                                               const PKIProvider *pPKI,
                                               const Certificate *pCert)
 {

@@ -81,7 +81,7 @@ void EncodeDecode_Double(double* doublev){
     }
 }
 
-StatusCode Byte_Write(const UA_Byte* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Byte_Write(const UA_Byte* value, UA_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
@@ -89,7 +89,7 @@ StatusCode Byte_Write(const UA_Byte* value, UA_MsgBuffer* msgBuffer)
     return TCP_UA_WriteMsgBuffer(msgBuffer, value, 1);
 }
 
-StatusCode Byte_Read(UA_Byte* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Byte_Read(UA_Byte* value, UA_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
@@ -98,7 +98,7 @@ StatusCode Byte_Read(UA_Byte* value, UA_MsgBuffer* msgBuffer)
     return TCP_UA_ReadMsgBuffer(value, 1, msgBuffer, 1);
 }
 
-StatusCode Boolean_Write(const UA_Boolean* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Boolean_Write(const UA_Boolean* value, UA_MsgBuffer* msgBuffer)
 {
     UA_Byte encodedValue;
     if(value == NULL){
@@ -115,9 +115,9 @@ StatusCode Boolean_Write(const UA_Boolean* value, UA_MsgBuffer* msgBuffer)
     return Byte_Write(&encodedValue, msgBuffer);
 }
 
-StatusCode Boolean_Read(UA_Boolean* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Boolean_Read(UA_Boolean* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
@@ -132,7 +132,7 @@ StatusCode Boolean_Read(UA_Boolean* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode SByte_Write(const UA_SByte* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode SByte_Write(const UA_SByte* value, UA_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
@@ -140,7 +140,7 @@ StatusCode SByte_Write(const UA_SByte* value, UA_MsgBuffer* msgBuffer)
     return TCP_UA_WriteMsgBuffer(msgBuffer, (UA_Byte*) value, 1);
 }
 
-StatusCode SByte_Read(UA_SByte* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode SByte_Read(UA_SByte* value, UA_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
@@ -149,9 +149,9 @@ StatusCode SByte_Read(UA_SByte* value, UA_MsgBuffer* msgBuffer)
     return TCP_UA_ReadMsgBuffer((UA_Byte*) value, 1, msgBuffer, 1);
 }
 
-StatusCode Int16_Write(const int16_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Int16_Write(const int16_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         int16_t encodedValue = *value;
         EncodeDecode_Int16(&encodedValue);
@@ -160,9 +160,9 @@ StatusCode Int16_Write(const int16_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Int16_Read(int16_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Int16_Read(int16_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     int16_t readValue;
     if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
@@ -176,9 +176,9 @@ StatusCode Int16_Read(int16_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode UInt16_Write(const uint16_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode UInt16_Write(const uint16_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         uint16_t encodedValue = *value;
         EncodeDecode_UInt16(&encodedValue);
@@ -187,9 +187,9 @@ StatusCode UInt16_Write(const uint16_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode UInt16_Read(uint16_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode UInt16_Read(uint16_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
@@ -201,9 +201,9 @@ StatusCode UInt16_Read(uint16_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Int32_Write(const int32_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Int32_Write(const int32_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         int32_t encodedValue = *value;
         EncodeDecode_Int32(&encodedValue);
@@ -212,9 +212,9 @@ StatusCode Int32_Write(const int32_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Int32_Read(int32_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Int32_Read(int32_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
@@ -224,9 +224,9 @@ StatusCode Int32_Read(int32_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode UInt32_Write(const uint32_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode UInt32_Write(const uint32_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         uint32_t encodedValue = *value;
         EncodeDecode_UInt32(&encodedValue);
@@ -235,9 +235,9 @@ StatusCode UInt32_Write(const uint32_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode UInt32_Read(uint32_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode UInt32_Read(uint32_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
@@ -247,9 +247,9 @@ StatusCode UInt32_Read(uint32_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Int64_Write(const int64_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Int64_Write(const int64_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         int64_t encodedValue = *value;
         EncodeDecode_Int64(&encodedValue);
@@ -258,9 +258,9 @@ StatusCode Int64_Write(const int64_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Int64_Read(int64_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Int64_Read(int64_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*) value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
@@ -270,9 +270,9 @@ StatusCode Int64_Read(int64_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode UInt64_Write(const uint64_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode UInt64_Write(const uint64_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         uint64_t encodedValue = *value;
         EncodeDecode_UInt64(&encodedValue);
@@ -281,9 +281,9 @@ StatusCode UInt64_Write(const uint64_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode UInt64_Read(uint64_t* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode UInt64_Read(uint64_t* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*) value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
@@ -293,9 +293,9 @@ StatusCode UInt64_Read(uint64_t* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Float_Write(const float* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Float_Write(const float* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         float encodedValue = *value;
         EncodeDecode_Float(&encodedValue);
@@ -304,9 +304,9 @@ StatusCode Float_Write(const float* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Float_Read(float* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Float_Read(float* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
@@ -316,9 +316,9 @@ StatusCode Float_Read(float* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Double_Write(const double* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Double_Write(const double* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         double encodedValue = *value;
         EncodeDecode_Double(&encodedValue);
@@ -327,9 +327,9 @@ StatusCode Double_Write(const double* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Double_Read(double* value, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Double_Read(double* value, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((UA_Byte*)value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
@@ -339,9 +339,9 @@ StatusCode Double_Read(double* value, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode ByteString_Write(const UA_ByteString* str, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode ByteString_Write(const UA_ByteString* str, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     if(str == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
@@ -361,9 +361,9 @@ StatusCode ByteString_Write(const UA_ByteString* str, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode ByteString_Read(UA_ByteString* str, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode ByteString_Read(UA_ByteString* str, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     int32_t length;
     if(str == NULL || (str != NULL && str->Data != NULL)){
         status = STATUS_INVALID_PARAMETERS;
@@ -392,14 +392,14 @@ StatusCode ByteString_Read(UA_ByteString* str, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode String_Write(const UA_String* str, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode String_Write(const UA_String* str, UA_MsgBuffer* msgBuffer)
 {
     return ByteString_Write((UA_ByteString*) str, msgBuffer);
 }
 
-StatusCode String_Read(UA_String* str, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode String_Read(UA_String* str, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     int32_t length;
     if(str == NULL || (str != NULL && str->Data != NULL)){
         status = STATUS_INVALID_PARAMETERS;
@@ -432,31 +432,31 @@ StatusCode String_Read(UA_String* str, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode XmlElement_Write(const UA_XmlElement* xml, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode XmlElement_Write(const UA_XmlElement* xml, UA_MsgBuffer* msgBuffer)
 {
     // TODO: check XML validity ?
     return ByteString_Write((UA_ByteString*) xml, msgBuffer);
 }
 
-StatusCode XmlElement_Read(UA_XmlElement* xml, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode XmlElement_Read(UA_XmlElement* xml, UA_MsgBuffer* msgBuffer)
 {
     // TODO: parse XML ?
     return ByteString_Read((UA_ByteString*) xml, msgBuffer);
 }
 
-StatusCode DateTime_Write(const UA_DateTime* date, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode DateTime_Write(const UA_DateTime* date, UA_MsgBuffer* msgBuffer)
 {
     return Int64_Write(date, msgBuffer);
 }
 
-StatusCode DateTime_Read(UA_DateTime* date, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode DateTime_Read(UA_DateTime* date, UA_MsgBuffer* msgBuffer)
 {
     return Int64_Read(date, msgBuffer);
 }
 
-StatusCode Guid_Write(const UA_Guid* guid, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Guid_Write(const UA_Guid* guid, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(guid != NULL){
         status = UInt32_Write(&guid->Data1, msgBuffer);
     }
@@ -472,9 +472,9 @@ StatusCode Guid_Write(const UA_Guid* guid, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode Guid_Read(UA_Guid* guid, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode Guid_Read(UA_Guid* guid, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(guid != NULL){
         status = UInt32_Read(&guid->Data1, msgBuffer);
     }
@@ -515,12 +515,12 @@ UA_NodeId_DataEncoding GetNodeIdDataEncoding(const UA_NodeId* nodeId){
     return encodingEnum;
 }
 
-StatusCode Internal_NodeId_Write(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode Internal_NodeId_Write(UA_MsgBuffer* msgBuffer,
                                  UA_Byte encodingByte,
                                  const UA_NodeId* nodeId)
 {
     assert(nodeId != NULL);
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_NodeId_DataEncoding encodingType = 0x0F & encodingByte; // Eliminate flags
 
     UA_Byte byte = 0;
@@ -580,21 +580,21 @@ StatusCode Internal_NodeId_Write(UA_MsgBuffer* msgBuffer,
     return status;
 }
 
-StatusCode NodeId_Write(const UA_NodeId* nodeId, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode NodeId_Write(const UA_NodeId* nodeId, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(nodeId != NULL){
         status = Internal_NodeId_Write(msgBuffer, GetNodeIdDataEncoding(nodeId), nodeId);
     }
     return status;
 }
 
-StatusCode Internal_NodeId_Read(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode Internal_NodeId_Read(UA_MsgBuffer* msgBuffer,
                                 UA_NodeId* nodeId,
                                 UA_Byte* encodingByte)
 {
     assert(nodeId != NULL);
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_NodeId_DataEncoding encodingType = 0x0F;
 
     UA_Byte byte = 0;
@@ -659,9 +659,9 @@ StatusCode Internal_NodeId_Read(UA_MsgBuffer* msgBuffer,
     return status;
 }
 
-StatusCode NodeId_Read(UA_NodeId* nodeId, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode NodeId_Read(UA_NodeId* nodeId, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     if(nodeId != NULL){
         status = Internal_NodeId_Read(msgBuffer, nodeId, &encodingByte);
@@ -669,8 +669,8 @@ StatusCode NodeId_Read(UA_NodeId* nodeId, UA_MsgBuffer* msgBuffer)
     return status;
 }
 
-StatusCode ExpandedNodeId_Write(const UA_ExpandedNodeId* expNodeId, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode ExpandedNodeId_Write(const UA_ExpandedNodeId* expNodeId, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0xFF;
     if(expNodeId != NULL){
         encodingByte = GetNodeIdDataEncoding(&expNodeId->NodeId);
@@ -694,8 +694,8 @@ StatusCode ExpandedNodeId_Write(const UA_ExpandedNodeId* expNodeId, UA_MsgBuffer
     return status;
 }
 
-StatusCode ExpandedNodeId_Read(UA_ExpandedNodeId* expNodeId, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode ExpandedNodeId_Read(UA_ExpandedNodeId* expNodeId, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     if(expNodeId != NULL){
         status = Internal_NodeId_Read(msgBuffer, &expNodeId->NodeId, &encodingByte);
@@ -717,11 +717,11 @@ StatusCode ExpandedNodeId_Read(UA_ExpandedNodeId* expNodeId, UA_MsgBuffer* msgBu
     return status;
 }
 
-StatusCode StatusCode_Write(const StatusCode* status, UA_MsgBuffer* msgBuffer){
+SOPC_StatusCode StatusCode_Write(const SOPC_StatusCode* status, UA_MsgBuffer* msgBuffer){
     return UInt32_Write(status, msgBuffer);
 }
 
-StatusCode StatusCode_Read(StatusCode* status, UA_MsgBuffer* msgBuffer){
+SOPC_StatusCode StatusCode_Read(SOPC_StatusCode* status, UA_MsgBuffer* msgBuffer){
     return UInt32_Read(status, msgBuffer);
 }
 
@@ -752,9 +752,9 @@ UA_Byte GetDiagInfoEncodingByte(const UA_DiagnosticInfo* diagInfo){
     return encodingByte;
 }
 
-StatusCode DiagnosticInfo_Write(const UA_DiagnosticInfo* diagInfo, UA_MsgBuffer* msgBuffer){
+SOPC_StatusCode DiagnosticInfo_Write(const UA_DiagnosticInfo* diagInfo, UA_MsgBuffer* msgBuffer){
     UA_Byte encodingByte = 0x00;
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(diagInfo != NULL){
         status = STATUS_OK;
         encodingByte = GetDiagInfoEncodingByte(diagInfo);
@@ -790,9 +790,9 @@ StatusCode DiagnosticInfo_Write(const UA_DiagnosticInfo* diagInfo, UA_MsgBuffer*
     return status;
 }
 
-StatusCode DiagnosticInfo_Read(UA_DiagnosticInfo* diagInfo, UA_MsgBuffer* msgBuffer){
+SOPC_StatusCode DiagnosticInfo_Read(UA_DiagnosticInfo* diagInfo, UA_MsgBuffer* msgBuffer){
     UA_Byte encodingByte = 0x00;
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(diagInfo != NULL){
         status  = Byte_Read(&encodingByte, msgBuffer);
     }
@@ -827,8 +827,8 @@ StatusCode DiagnosticInfo_Read(UA_DiagnosticInfo* diagInfo, UA_MsgBuffer* msgBuf
     return status;
 }
 
-StatusCode QualifiedName_Write(const UA_QualifiedName* qname, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode QualifiedName_Write(const UA_QualifiedName* qname, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(qname != NULL){
         status = UInt16_Write(&qname->NamespaceIndex, msgBuffer);
     }
@@ -838,8 +838,8 @@ StatusCode QualifiedName_Write(const UA_QualifiedName* qname, UA_MsgBuffer* msgB
     return status;
 }
 
-StatusCode QualifiedName_Read(UA_QualifiedName* qname, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode QualifiedName_Read(UA_QualifiedName* qname, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(qname != NULL){
         status = UInt16_Read(&qname->NamespaceIndex, msgBuffer);
     }
@@ -862,8 +862,8 @@ UA_Byte GetLocalizedTextEncodingByte(const UA_LocalizedText* ltext){
     return encodingByte;
 }
 
-StatusCode LocalizedText_Write(const UA_LocalizedText* localizedText, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode LocalizedText_Write(const UA_LocalizedText* localizedText, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     if(localizedText != NULL){
         encodingByte = GetLocalizedTextEncodingByte(localizedText);
@@ -877,8 +877,8 @@ StatusCode LocalizedText_Write(const UA_LocalizedText* localizedText, UA_MsgBuff
     return status;
 }
 
-StatusCode LocalizedText_Read(UA_LocalizedText* localizedText, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode LocalizedText_Read(UA_LocalizedText* localizedText, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     if(localizedText != NULL){
         status = Byte_Read(&encodingByte, msgBuffer);
@@ -892,14 +892,14 @@ StatusCode LocalizedText_Read(UA_LocalizedText* localizedText, UA_MsgBuffer* msg
     return status;
 }
 
-StatusCode ExtensionObject_Write(const UA_ExtensionObject* extObj, UA_MsgBuffer* msgBuffer){
+SOPC_StatusCode ExtensionObject_Write(const UA_ExtensionObject* extObj, UA_MsgBuffer* msgBuffer){
     const int32_t tmpLength = -1;
     UA_NodeId objNodeId = extObj->TypeId;
     uint32_t lengthPos;
     uint32_t curPos;
     int32_t length;
     uint16_t nsIndex = OPCUA_NAMESPACE_INDEX;
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     if(extObj != NULL){
         encodingByte = extObj->Encoding;
@@ -966,8 +966,8 @@ StatusCode ExtensionObject_Write(const UA_ExtensionObject* extObj, UA_MsgBuffer*
     return status;
 }
 
-StatusCode ExtensionObject_Read(UA_ExtensionObject* extObj, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode ExtensionObject_Read(UA_ExtensionObject* extObj, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_EncodeableType* encType;
     const char* nsName;
     UA_Byte encodingByte = 0;
@@ -1044,10 +1044,10 @@ UA_Byte GetVariantEncodingMask(const UA_Variant* variant){
     return encodingByte;
 }
 
-StatusCode WriteVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode WriteVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
                                            UA_BuiltinId builtInTypeId,
                                            const UA_VariantValue *val){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     switch(builtInTypeId){
         case UA_Boolean_Id:
             status = Boolean_Write(&val->Boolean, msgBuffer);
@@ -1130,12 +1130,12 @@ StatusCode WriteVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
     return status;
 }
 
-StatusCode WriteVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode WriteVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
                                         UA_BuiltinId builtInTypeId,
                                         const UA_VariantArrayValue* array,
                                         int32_t length)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int32_t idx = 0;
     switch(builtInTypeId){
         case UA_Boolean_Id:
@@ -1269,8 +1269,8 @@ StatusCode WriteVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
     return status;
 }
 
-StatusCode Variant_Write(const UA_Variant* variant, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode Variant_Write(const UA_Variant* variant, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     int32_t arrayLength = 0;
     if(variant != NULL){
@@ -1327,10 +1327,10 @@ StatusCode Variant_Write(const UA_Variant* variant, UA_MsgBuffer* msgBuffer){
     return status;
 }
 
-StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
                                            UA_BuiltinId builtInTypeId,
                                            UA_VariantValue *val){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     switch(builtInTypeId){
         case UA_Boolean_Id:
             status = Boolean_Read(&val->Boolean, msgBuffer);
@@ -1453,12 +1453,12 @@ StatusCode ReadVariantNonArrayBuiltInType(UA_MsgBuffer* msgBuffer,
     return status;
 }
 
-StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
                                         UA_BuiltinId builtInTypeId,
                                         UA_VariantArrayValue* array,
                                         int32_t length)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int32_t idx = 0;
     switch(builtInTypeId){
         case UA_Boolean_Id:
@@ -1642,7 +1642,7 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
             }
             break;
         case UA_StatusCode_Id:
-            array->StatusArr = malloc(sizeof(StatusCode) * length);
+            array->StatusArr = malloc(sizeof(SOPC_StatusCode) * length);
             if(array->StatusArr == NULL){
                 status = STATUS_NOK;
             }else{
@@ -1717,8 +1717,8 @@ StatusCode ReadVariantArrayBuiltInType(UA_MsgBuffer* msgBuffer,
     return status;
 }
 
-StatusCode Variant_Read(UA_Variant* variant, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode Variant_Read(UA_Variant* variant, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingByte = 0;
     int32_t arrayLength = 0;
     if(variant != NULL){
@@ -1804,9 +1804,9 @@ UA_Byte GetDataValueEncodingMask(const UA_DataValue* dataValue){
     return mask;
 }
 
-StatusCode DataValue_Write(const UA_DataValue* dataValue, UA_MsgBuffer* msgBuffer)
+SOPC_StatusCode DataValue_Write(const UA_DataValue* dataValue, UA_MsgBuffer* msgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingMask = 0;
     if(dataValue != NULL){
         encodingMask = GetDataValueEncodingMask(dataValue);
@@ -1833,8 +1833,8 @@ StatusCode DataValue_Write(const UA_DataValue* dataValue, UA_MsgBuffer* msgBuffe
     return status;
 }
 
-StatusCode DataValue_Read(UA_DataValue* dataValue, UA_MsgBuffer* msgBuffer){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode DataValue_Read(UA_DataValue* dataValue, UA_MsgBuffer* msgBuffer){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Byte encodingMask = 0;
     if(dataValue != NULL){
         status = Byte_Read(&encodingMask, msgBuffer);

@@ -30,7 +30,7 @@
 #ifndef _UA_Identifiers_H_
 #define _UA_Identifiers_H_ 1
 
-#include <ua_base_types.h>
+#include "sopc_base_types.h"
 
 BEGIN_EXTERN_C
 

@@ -25,8 +25,8 @@ void Namespace_Initialize(UA_NamespaceTable* nsTable){
     }
 }
 
-StatusCode Namespace_AllocateTable(UA_NamespaceTable* nsTable, uint32_t length){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode Namespace_AllocateTable(UA_NamespaceTable* nsTable, uint32_t length){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(nsTable != NULL){
         status = STATUS_OK;
         nsTable->clearTable = 1; // True
@@ -51,8 +51,8 @@ UA_NamespaceTable* Namespace_CreateTable(uint32_t length){
     return result;
 }
 
-StatusCode Namespace_AttachTable(UA_NamespaceTable* dst, UA_NamespaceTable* src){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode Namespace_AttachTable(UA_NamespaceTable* dst, UA_NamespaceTable* src){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dst != NULL && dst->namespaceArray == NULL &&
        src != NULL && src->namespaceArray != NULL){
         status = STATUS_OK;
@@ -63,11 +63,11 @@ StatusCode Namespace_AttachTable(UA_NamespaceTable* dst, UA_NamespaceTable* src)
     return status;
 }
 
-StatusCode Namespace_GetIndex(UA_NamespaceTable* namespaceTable,
+SOPC_StatusCode Namespace_GetIndex(UA_NamespaceTable* namespaceTable,
                               const char*        namespaceName,
                               uint16_t*          index)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     UA_Namespace namespaceEntry;
     if(namespaceTable != NULL){
         status = STATUS_NOK;

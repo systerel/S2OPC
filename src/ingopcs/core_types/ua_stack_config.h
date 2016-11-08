@@ -21,13 +21,13 @@ typedef struct {
 
 extern UA_StackConfiguration g_stackConfiguration;
 
-StatusCode StackConfiguration_Initialize(); // Init stack configuration and platform dependent code
+SOPC_StatusCode StackConfiguration_Initialize(); // Init stack configuration and platform dependent code
 void StackConfiguration_Locked();
 void StackConfiguration_Unlocked();
 void StackConfiguration_Clear();
 
-StatusCode StackConfiguration_SetNamespaceUris(UA_NamespaceTable* nsTable);
-StatusCode StackConfiguration_AddTypes(UA_EncodeableType** encTypesTable,
+SOPC_StatusCode StackConfiguration_SetNamespaceUris(UA_NamespaceTable* nsTable);
+SOPC_StatusCode StackConfiguration_AddTypes(UA_EncodeableType** encTypesTable,
                                        uint32_t            nbTypes);
 UA_EncodeableType** StackConfiguration_GetEncodeableTypes();
 UA_NamespaceTable* StackConfiguration_GetNamespaces();

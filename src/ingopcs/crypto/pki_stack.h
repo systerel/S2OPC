@@ -13,7 +13,7 @@
 #define INGOPCS_PKI_STACK_H_
 
 
-#include "ua_base_types.h"
+#include "../core_types/sopc_base_types.h"
 #include "crypto_provider.h"
 #include "key_manager.h"
 #include "pki.h"
@@ -28,7 +28,7 @@
  *
  * \param [in, optional] pRevocationList    A certificate chain containing the revocation list. If NULL, no revocation list is checked.
  */
-StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
+SOPC_StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
                                    CertificateRevList *pRevocationList,
                                    PKIProvider **ppPKI);
 void PKIProviderStack_Free(PKIProvider *pPKI);

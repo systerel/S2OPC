@@ -16,7 +16,7 @@ Buffer* Buffer_Create(uint32_t size)
     if(size > 0){
         buf = (Buffer*) malloc(sizeof(Buffer));
         if(buf != NULL){
-            StatusCode status = Buffer_Init(buf, size);
+            SOPC_StatusCode status = Buffer_Init(buf, size);
             if(status != STATUS_OK){
                 Buffer_Delete(buf);
                 buf = NULL;
@@ -26,9 +26,9 @@ Buffer* Buffer_Create(uint32_t size)
     return buf;
 }
 
-StatusCode Buffer_Init(Buffer* buffer, uint32_t size)
+SOPC_StatusCode Buffer_Init(Buffer* buffer, uint32_t size)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(buffer != NULL && size > 0){
         status = STATUS_OK;
     }
@@ -68,10 +68,10 @@ void Buffer_Reset(Buffer* buffer)
     }
 }
 
-StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
+SOPC_StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
                                      uint32_t position)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(buffer != NULL && buffer->data != NULL &&
        position <= buffer->length)
     {
@@ -83,8 +83,8 @@ StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
     return status;
 }
 
-StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(buffer != NULL && buffer->data != NULL &&
        buffer->length >= position){
         status = STATUS_OK;
@@ -93,9 +93,9 @@ StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
     return status;
 }
 
-StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
+SOPC_StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint8_t* data = NULL;
     if(buffer != NULL && buffer->data != NULL &&
        buffer->max_size >= length &&
@@ -112,9 +112,9 @@ StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
     return status;
 }
 
-StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count)
+SOPC_StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count)
 {
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     if(data_src == NULL || buffer == NULL || buffer->data == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
@@ -138,9 +138,9 @@ StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count)
     return status;
 }
 
-StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count)
+SOPC_StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if( buffer != NULL && buffer->data != NULL &&
         buffer->position + count <= buffer->length)
     {
@@ -154,9 +154,9 @@ StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count)
     return status;
 }
 
-StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLength)
+SOPC_StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLength)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && src != NULL &&
        dest->data != NULL && src->data != NULL &&
        src->length >= limitedLength && src->position <= limitedLength &&
@@ -178,9 +178,9 @@ StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLeng
 }
 
 
-StatusCode Buffer_Copy(Buffer* dest, Buffer* src)
+SOPC_StatusCode Buffer_Copy(Buffer* dest, Buffer* src)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(src != NULL)
     {
         status = Buffer_CopyWithLength(dest, src, src->length);

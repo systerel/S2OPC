@@ -9,7 +9,8 @@
 #define INGOPCS_UA_ENCODEABLE_H_
 
 #include <stdint.h>
-#include <ua_base_types.h>
+
+#include "sopc_base_types.h"
 
 BEGIN_EXTERN_C
 

@@ -17,8 +17,8 @@ uint8_t g_lockedConfig = FALSE;
 
 static uint8_t initDone = FALSE;
 
-StatusCode StackConfiguration_Initialize(){
-    StatusCode status = STATUS_OK;
+SOPC_StatusCode StackConfiguration_Initialize(){
+    SOPC_StatusCode status = STATUS_OK;
     if(initDone == FALSE){
         StackConfiguration_Clear();
         initDone = 1;
@@ -50,8 +50,8 @@ void StackConfiguration_Clear(){
     initDone = FALSE;
 }
 
-StatusCode StackConfiguration_SetNamespaceUris(UA_NamespaceTable* nsTable){
-    StatusCode status = STATUS_INVALID_STATE;
+SOPC_StatusCode StackConfiguration_SetNamespaceUris(UA_NamespaceTable* nsTable){
+    SOPC_StatusCode status = STATUS_INVALID_STATE;
     if(initDone != FALSE && g_lockedConfig == FALSE){
         if(nsTable == NULL){
             status = STATUS_INVALID_PARAMETERS;
@@ -68,9 +68,9 @@ static uint32_t GetKnownEncodeableTypesLength(){
     return result + 1;
 }
 
-StatusCode StackConfiguration_AddTypes(UA_EncodeableType** encTypesTable,
+SOPC_StatusCode StackConfiguration_AddTypes(UA_EncodeableType** encTypesTable,
                                        uint32_t            nbTypes){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
     uint32_t nbKnownTypes = 0;
     UA_EncodeableType** additionalTypes = NULL;

@@ -15,15 +15,15 @@ typedef struct {
     uint32_t stub;
 } StubClient_CallbackData;
 
-StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
+SOPC_StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
                                                void*            callbackData,
                                                UA_Channel_Event event,
-                                               StatusCode       status);
+                                               SOPC_StatusCode       status);
 
-StatusCode StubClient_ResponseEvent_Callback(UA_Channel         channel,
+SOPC_StatusCode StubClient_ResponseEvent_Callback(UA_Channel         channel,
                                              void*              response,
                                              UA_EncodeableType* responseType,
  										     void*              callbackData,
- 										     StatusCode         status);
+ 										     SOPC_StatusCode         status);
 
 #endif /* STUB_SERVER_STUB_CLIENT_H_ */

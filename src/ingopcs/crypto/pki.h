@@ -22,12 +22,12 @@
 
 struct PKIProvider;
 
-#include "ua_base_types.h"
+#include "../core_types/sopc_base_types.h"
 #include "crypto_provider.h"
 #include "key_manager.h"
 
 
-typedef StatusCode (*FnValidateCertificate) (const struct PKIProvider *pPKI,
+typedef SOPC_StatusCode (*FnValidateCertificate) (const struct PKIProvider *pPKI,
                                              const Certificate *pToValidate);
 
 

@@ -12,16 +12,16 @@
 
 #include <stdlib.h>
 
-#include "ua_base_types.h"
 #include "crypto_provider.h"
 #include "key_manager.h"
 #include "pki.h"
 #include "pki_stack.h"
 
+#include "../../core_types/sopc_base_types.h"
 #include "mbedtls/x509.h"
 
 
-static StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
+static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
                                                        const Certificate *pToValidate)
 {
     (void)(pPKI);
@@ -58,7 +58,7 @@ static StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
 }
 
 
-StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
+SOPC_StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
                                    CertificateRevList *pRevocationList,
                                    PKIProvider **ppPKI)
 {

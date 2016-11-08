@@ -112,8 +112,8 @@ UA_ByteString* ByteString_Create(){
     return bstring;
 }
 
-StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(bstring != NULL){
         status = STATUS_OK;
         ByteString_Initialize(bstring);
@@ -128,9 +128,9 @@ StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size)
     return status;
 }
 
-StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length)
+SOPC_StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && bytes != NULL
        && length > 0){
         status = STATUS_OK;
@@ -141,9 +141,9 @@ StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32
     return status;
 }
 
-StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
+SOPC_StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && src != NULL
        && src->Length > 0 && src->Data != NULL){
         status = STATUS_OK;
@@ -154,8 +154,8 @@ StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
     return status;
 }
 
-StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && dest->Data == NULL &&
        src != NULL && src->Length > 0){
         status = STATUS_OK;
@@ -196,12 +196,12 @@ UA_String* String_Create(){
     return (UA_String*) ByteString_Create();
 }
 
-StatusCode String_AttachFrom(UA_String* dest, UA_String* src){
+SOPC_StatusCode String_AttachFrom(UA_String* dest, UA_String* src){
     return ByteString_AttachFrom((UA_ByteString*) dest, (UA_ByteString*) src);
 }
 
-StatusCode String_AttachFromCstring(UA_String* dest, char* src){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode String_AttachFromCstring(UA_String* dest, char* src){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && dest->Data == NULL && src != NULL){
         status = STATUS_OK;
         if(CHAR_BIT == 8){
@@ -215,8 +215,8 @@ StatusCode String_AttachFromCstring(UA_String* dest, char* src){
     return status;
 }
 
-StatusCode String_Copy(UA_String* dest, const UA_String* src){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode String_Copy(UA_String* dest, const UA_String* src){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && dest->Data == NULL && src != NULL){
         // Keep null terminator for C string compatibility
         status = STATUS_OK;
@@ -241,8 +241,8 @@ void String_Delete(UA_String* string){
     ByteString_Delete((UA_ByteString*) string);
 }
 
-StatusCode String_CopyFromCString(UA_String* string, const char* cString){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode String_CopyFromCString(UA_String* string, const char* cString){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     size_t stringLength = 0;
     size_t idx = 0;
     if(string != NULL && string->Data == NULL
@@ -278,8 +278,8 @@ StatusCode String_CopyFromCString(UA_String* string, const char* cString){
     return status;
 }
 
-StatusCode String_InitializeFromCString(UA_String* string, const char* cString){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode String_InitializeFromCString(UA_String* string, const char* cString){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
 
     if(string != NULL){
         String_Initialize(string);
@@ -326,11 +326,11 @@ const char* String_GetRawCString(const UA_String* string){
     return cString;
 }
 
-StatusCode ByteString_Compare(const UA_ByteString* left,
+SOPC_StatusCode ByteString_Compare(const UA_ByteString* left,
                               const UA_ByteString* right,
                               int32_t*             comparison)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
 
     if(left != NULL && right != NULL){
         status = STATUS_OK;
@@ -368,7 +368,7 @@ uint32_t ByteString_Equal(const UA_ByteString* left,
     return result;
 }
 
-StatusCode String_Compare(const UA_String* left,
+SOPC_StatusCode String_Compare(const UA_String* left,
                           const UA_String* right,
                           int32_t*         comparison)
 {
@@ -463,11 +463,11 @@ void ExpandedNodeId_Clear(UA_ExpandedNodeId* expNodeId){
     UInt32_Initialize(&expNodeId->ServerIndex);
 }
 
-void StatusCode_Initialize(StatusCode* status){
+void StatusCode_Initialize(SOPC_StatusCode* status){
     *status = STATUS_OK;
 }
 
-void StatusCode_Clear(StatusCode* status){
+void StatusCode_Clear(SOPC_StatusCode* status){
     *status = STATUS_OK;
 }
 

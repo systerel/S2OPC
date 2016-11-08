@@ -5,8 +5,8 @@
  *      Author: vincent
  */
 #include <stdint.h>
-#include <ua_base_types.h>
 #include <p_sockets.h>
+#include "../core_types/sopc_base_types.h"
 
 #ifndef INGOPCS_SOCKETS_UA_SOCKETS_H_
 #define INGOPCS_SOCKETS_UA_SOCKETS_H_
@@ -32,7 +32,7 @@ typedef enum {
 
 struct UA_Socket;
 
-typedef StatusCode (UA_Socket_EventCB) (struct UA_Socket* socket,
+typedef SOPC_StatusCode (UA_Socket_EventCB) (struct UA_Socket* socket,
                                         uint32_t          socketEvent,
                                         void*             cbData,
                                         uint16_t          portNumber,
@@ -54,7 +54,7 @@ UA_SocketManager;
 
 UA_SocketManager* UA_SocketManager_GetGlobal(void);
 
-StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
+SOPC_StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
                                        uint32_t          nbSockets);
 
 UA_SocketManager* UA_SocketManager_Create(uint32_t nbSockets);
@@ -63,27 +63,27 @@ void UA_SocketManager_Clear(UA_SocketManager* socketMgr);
 
 void UA_SocketManager_Delete(UA_SocketManager** socketMgr);
 
-StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketManager,
+SOPC_StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketManager,
                                                const char*        uri,
                                                UA_Socket_EventCB  socketCallback,
                                                void*              callbackData,
                                                UA_Socket**        clientSocket);
 
-StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
+SOPC_StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
                                                const char*        uri,
                                                uint8_t            listenAllItfs,
                                                UA_Socket_EventCB  socketCallback,
                                                void*              callbackData,
                                                UA_Socket**        listenerSocket);
 
-StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
+SOPC_StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
                                  uint32_t          msecTimeout);
 
 int32_t UA_Socket_Write (UA_Socket* socket,
                          uint8_t*   data,
                          uint32_t   count);
 
-StatusCode UA_Socket_Read (UA_Socket* socket,
+SOPC_StatusCode UA_Socket_Read (UA_Socket* socket,
                            uint8_t*   data,
                            uint32_t   dataSize,
                            uint32_t*  readCount);

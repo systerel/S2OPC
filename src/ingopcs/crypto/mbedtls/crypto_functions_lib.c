@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ua_base_types.h"
+#include "../../core_types/sopc_base_types.h"
 #include "secret_buffer.h"
 #include "crypto_profiles.h"
 #include "crypto_provider.h"
@@ -26,7 +26,7 @@
 
 
 // TODO: think about the necessity of lenOutput and pInput might be an ExposedBuffer? Clean Symm + Asym
-StatusCode CryptoProvider_SymmEncrypt_AES256(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmEncrypt_AES256(const CryptoProvider *pProvider,
                                                     const uint8_t *pInput,
                                                     uint32_t lenPlainText,
                                                     const ExposedBuffer *pKey,
@@ -56,7 +56,7 @@ StatusCode CryptoProvider_SymmEncrypt_AES256(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvider,
                                        const uint8_t *pInput,
                                        uint32_t lenCipherText,
                                        const ExposedBuffer *pKey,
@@ -87,7 +87,7 @@ StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pProvider,
                                                       const uint8_t *pInput,
                                                       uint32_t lenInput,
                                                       const ExposedBuffer *pKey,
@@ -109,7 +109,7 @@ StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider,
                                                         const uint8_t *pInput,
                                                         uint32_t lenInput,
                                                         const ExposedBuffer *pKey,
@@ -117,7 +117,7 @@ StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider
 {
     uint32_t lenKey, lenSig;
     uint8_t *pCalcSig;
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
 
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature)
         return STATUS_INVALID_PARAMETERS;
@@ -145,7 +145,7 @@ StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pProvider
 
 
 // Fills pKey with SecurityPolicy_Basic256Sha256_Symm_KeyLength bytes of random data
-StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
                                             ExposedBuffer *pKey)
 {
     CryptolibContext *pCtx = NULL;
@@ -163,15 +163,15 @@ StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
 
 // PRF with SHA256 as defined in RFC 5246 (TLS v1.2), §5, without label.
 // Based on a HMAC with SHA-256.
-static inline StatusCode PSHA_outer(const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
+static inline SOPC_StatusCode PSHA_outer(const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
                                     const ExposedBuffer *pSecret, uint32_t lenSecret,
                                     const ExposedBuffer *pSeed, uint32_t lenSeed,
                                     ExposedBuffer *pOutput, uint32_t lenOutput);
-static inline StatusCode PSHA(mbedtls_md_context_t *pmd, const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
+static inline SOPC_StatusCode PSHA(mbedtls_md_context_t *pmd, const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
                               const ExposedBuffer *pSecret, uint32_t lenSecret,
                               const ExposedBuffer *pSeed, uint32_t lenSeed,
                               ExposedBuffer *pOutput, uint32_t lenOutput);
-StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
                                                 const ExposedBuffer *pSecret,
                                                 uint32_t lenSecret,
                                                 const ExposedBuffer *pSeed,
@@ -179,7 +179,7 @@ StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
                                                 ExposedBuffer *pOutput,
                                                 uint32_t lenOutput)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     uint8_t *bufA = NULL;
     uint32_t lenBufA = 0; // Stores A(i) + seed except for i = 0
     uint32_t lenHash = 0;
@@ -217,12 +217,12 @@ StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
     return status;
 }
 
-static inline StatusCode PSHA_outer(const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
+static inline SOPC_StatusCode PSHA_outer(const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
                                     const ExposedBuffer *pSecret, uint32_t lenSecret,
                                     const ExposedBuffer *pSeed, uint32_t lenSeed,
                                     ExposedBuffer *pOutput, uint32_t lenOutput)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     mbedtls_md_context_t md_ctx;
 
     // Prepares context for HMAC operations
@@ -239,7 +239,7 @@ static inline StatusCode PSHA_outer(const mbedtls_md_info_t *pmd_info, uint8_t *
     return status;
 }
 
-static inline StatusCode PSHA(mbedtls_md_context_t *pmd, const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
+static inline SOPC_StatusCode PSHA(mbedtls_md_context_t *pmd, const mbedtls_md_info_t *pmd_info, uint8_t *bufA, uint32_t lenBufA,
                               const ExposedBuffer *pSecret, uint32_t lenSecret,
                               const ExposedBuffer *pSeed, uint32_t lenSeed,
                               ExposedBuffer *pOutput, uint32_t lenOutput)
@@ -297,13 +297,13 @@ static inline StatusCode PSHA(mbedtls_md_context_t *pmd, const mbedtls_md_info_t
 }
 
 
-StatusCode CryptoProvider_AsymEncrypt_RSA_OAEP(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymEncrypt_RSA_OAEP(const CryptoProvider *pProvider,
                                                const uint8_t *pInput,
                                                uint32_t lenPlainText,
                                                const AsymmetricKey *pKey,
                                                uint8_t *pOutput)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     uint32_t lenMsgPlain = 0, lenMsgCiph = 0, lenToCiph = 0;
     mbedtls_rsa_context *prsa = NULL;
 
@@ -346,14 +346,14 @@ StatusCode CryptoProvider_AsymEncrypt_RSA_OAEP(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
                                                const uint8_t *pInput,
                                                uint32_t lenCipherText,
                                                const AsymmetricKey *pKey,
                                                uint8_t *pOutput,
                                                uint32_t *pLenWritten)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     uint32_t lenMsgPlain = 0, lenMsgCiph = 0;
     size_t lenDeciphed = 0;
     mbedtls_rsa_context *prsa = NULL;
@@ -402,16 +402,16 @@ StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvider,
 /**
  * (Internal) Allocates and compute SHA-256 of \p pInput. You must free it.
  */
-static inline StatusCode RSASSA_PSS_hash(const uint8_t *pInput, uint32_t lenInput,
+static inline SOPC_StatusCode RSASSA_PSS_hash(const uint8_t *pInput, uint32_t lenInput,
                                          uint8_t **ppHash);
 
-StatusCode CryptoProvider_AsymSign_RSASSA_PSS(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PSS(const CryptoProvider *pProvider,
                                               const uint8_t *pInput,
                                               uint32_t lenInput,
                                               const AsymmetricKey *pKey,
                                               uint8_t *pSignature)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     uint8_t *hash = NULL;
     mbedtls_rsa_context *prsa = NULL;
 
@@ -435,14 +435,14 @@ StatusCode CryptoProvider_AsymSign_RSASSA_PSS(const CryptoProvider *pProvider,
 }
 
 
-StatusCode CryptoProvider_AsymVerify_RSASSA_PSS(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PSS(const CryptoProvider *pProvider,
                                                 const uint8_t *pInput,
                                                 uint32_t lenInput,
                                                 const AsymmetricKey *pKey,
                                                 const uint8_t *pSignature)
 {
     (void)(pProvider);
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     uint8_t *hash = NULL;
     mbedtls_rsa_context *prsa = NULL;
 
@@ -466,7 +466,7 @@ StatusCode CryptoProvider_AsymVerify_RSASSA_PSS(const CryptoProvider *pProvider,
 }
 
 
-static inline StatusCode RSASSA_PSS_hash(const uint8_t *pInput, uint32_t lenInput,
+static inline SOPC_StatusCode RSASSA_PSS_hash(const uint8_t *pInput, uint32_t lenInput,
                                          uint8_t **ppHash)
 {
     uint8_t *hash = NULL;
@@ -492,13 +492,13 @@ static inline StatusCode RSASSA_PSS_hash(const uint8_t *pInput, uint32_t lenInpu
     return STATUS_OK;
 }
 
-StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
                                                     const uint8_t *pInput,
                                                     uint32_t lenInput,
                                                     const AsymmetricKey *pKey,
                                                     uint8_t *pSignature)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     uint8_t *hash = NULL;
     mbedtls_rsa_context *prsa = NULL;
 
@@ -522,14 +522,14 @@ StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15(const CryptoProvider *pProvi
 }
 
 
-StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
                                                       const uint8_t *pInput,
                                                       uint32_t lenInput,
                                                       const AsymmetricKey *pKey,
                                                       const uint8_t *pSignature)
 {
     (void)(pProvider);
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     uint8_t *hash = NULL;
     mbedtls_rsa_context *prsa = NULL;
 
@@ -552,7 +552,7 @@ StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider *pPro
     return status;
 }
 
-StatusCode CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const CryptoProvider *pCrypto,
+SOPC_StatusCode CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const CryptoProvider *pCrypto,
                                                           const Certificate *pCert)
 {
     AsymmetricKey pub_key;

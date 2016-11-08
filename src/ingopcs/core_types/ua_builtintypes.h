@@ -11,8 +11,8 @@
 #include <stdint.h>
 
 #include <ua_stack_csts.h>
-#include <ua_base_types.h>
 #include <ua_encodeable.h>
+#include "sopc_base_types.h"
 
 BEGIN_EXTERN_C
 
@@ -104,7 +104,7 @@ typedef struct UA_DiagnosticInfo {
     int32_t                   Locale;
     int32_t                   LocalizedText;
     UA_String                 AdditionalInfo;
-    StatusCode                InnerStatusCode;
+    SOPC_StatusCode                InnerStatusCode;
     struct UA_DiagnosticInfo* InnerDiagnosticInfo;
 } UA_DiagnosticInfo;
 
@@ -171,7 +171,7 @@ typedef union UA_VariantArrayValue {
     UA_XmlElement*       XmlEltArr;
     UA_NodeId*           NodeIdArr;
     UA_ExpandedNodeId*   ExpNodeIdArr;
-    StatusCode*          StatusArr;
+    SOPC_StatusCode*          StatusArr;
     UA_QualifiedName*    QnameArr;
     UA_LocalizedText*    LocalizedTextArr;
     UA_ExtensionObject*  ExtObjectArr;
@@ -199,7 +199,7 @@ typedef union UA_VariantValue {
         UA_XmlElement        XmlElt;
         UA_NodeId*           NodeId;
         UA_ExpandedNodeId*   ExpNodeId;
-        StatusCode           Status;
+        SOPC_StatusCode           Status;
         UA_QualifiedName*    Qname;
         UA_LocalizedText*    LocalizedText;
         UA_ExtensionObject*  ExtObject;
@@ -226,7 +226,7 @@ typedef struct UA_Variant {
 
 typedef struct UA_DataValue {
     UA_Variant  Value;
-    StatusCode  Status;
+    SOPC_StatusCode  Status;
     UA_DateTime SourceTimestamp;
     UA_DateTime ServerTimestamp;
     uint16_t    SourcePicoSeconds;
@@ -280,14 +280,14 @@ void Double_Clear(double* d);
 
 void ByteString_Initialize(UA_ByteString* bstring);
 UA_ByteString* ByteString_Create(void);
-StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size);
-StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length);
-StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src);
-StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src);
+SOPC_StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size);
+SOPC_StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length);
+SOPC_StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src);
+SOPC_StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src);
 void ByteString_Clear(UA_ByteString* bstring);
 void ByteString_Delete(UA_ByteString* bstring);
 
-StatusCode ByteString_Compare(const UA_ByteString* left,
+SOPC_StatusCode ByteString_Compare(const UA_ByteString* left,
                               const UA_ByteString* right,
                               int32_t*             comparison);
 
@@ -297,19 +297,19 @@ uint32_t ByteString_Equal(const UA_ByteString* left,
 
 void String_Initialize(UA_String* string);
 UA_String* String_Create(void);
-StatusCode String_CopyFromCString(UA_String* string, const char* cString);
-StatusCode String_InitializeFromCString(UA_String* string, const char* cString);
+SOPC_StatusCode String_CopyFromCString(UA_String* string, const char* cString);
+SOPC_StatusCode String_InitializeFromCString(UA_String* string, const char* cString);
 char* String_GetCString(const UA_String* string); // Copy
 const char* String_GetRawCString(const UA_String* string); // Pointer to string
 
-StatusCode String_AttachFrom(UA_String* dest, UA_String* src);
-StatusCode String_AttachFromCstring(UA_String* dest, char* src);
+SOPC_StatusCode String_AttachFrom(UA_String* dest, UA_String* src);
+SOPC_StatusCode String_AttachFromCstring(UA_String* dest, char* src);
 
-StatusCode String_Copy(UA_String* dest, const UA_String* src);
+SOPC_StatusCode String_Copy(UA_String* dest, const UA_String* src);
 void String_Clear(UA_String* bstring);
 void String_Delete(UA_String* bstring);
 
-StatusCode String_Compare(const UA_String* left,
+SOPC_StatusCode String_Compare(const UA_String* left,
                           const UA_String* right,
                           int32_t*         comparison);
 
@@ -332,8 +332,8 @@ void NodeId_Clear(UA_NodeId* nodeId);
 void ExpandedNodeId_Initialize(UA_ExpandedNodeId* expNodeId);
 void ExpandedNodeId_Clear(UA_ExpandedNodeId* expNodeId);
 
-void StatusCode_Initialize(StatusCode* status);
-void StatusCode_Clear(StatusCode* status);
+void StatusCode_Initialize(SOPC_StatusCode* status);
+void StatusCode_Clear(SOPC_StatusCode* status);
 
 void DiagnosticInfo_Initialize(UA_DiagnosticInfo* diagInfo);
 void DiagnosticInfo_Clear(UA_DiagnosticInfo* diagInfo);

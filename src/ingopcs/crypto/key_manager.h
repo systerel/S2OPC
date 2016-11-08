@@ -11,7 +11,7 @@
 #define INGOPCS_KEY_MANAGER_H_
 
 
-#include "ua_base_types.h"
+#include "../core_types/sopc_base_types.h"
 #include "crypto_types.h"
 #include "key_manager_lib.h"
 
@@ -27,15 +27,15 @@
  * AsymmetricKey API
  * ------------------------------------------------------------------------------------------------
  */
-StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
+SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer, uint32_t lenBuf,
                                                      AsymmetricKey **ppKey);
-StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
+SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
                                                    AsymmetricKey **ppKey,
                                                    char *password,
                                                    uint32_t lenPassword);
 void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey);
 
-StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
+SOPC_StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
                                           uint8_t *ppDest, uint32_t lenDest,
                                           uint32_t *pLenWritten);
 
@@ -47,18 +47,18 @@ StatusCode KeyManager_AsymmetricKey_ToDER(const AsymmetricKey *pKey,
 
 // Cert length is in CryptoProvider.
 
-StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
+SOPC_StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, uint32_t lenDER,
                                                 Certificate **ppCert);
-StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
+SOPC_StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
                                                  Certificate **ppCert);
 void KeyManager_Certificate_Free(Certificate *cert);
 
-StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
+SOPC_StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
                                           uint8_t **ppDest, uint32_t *lenAllocated);
-StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProvider,
+SOPC_StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProvider,
                                                 const Certificate *pCert,
                                                 uint8_t *pDest, uint32_t lenDest);
-StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
+SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
                                                AsymmetricKey *pKey);
 
 

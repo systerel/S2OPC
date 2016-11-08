@@ -13,16 +13,16 @@
 #include <errno.h>
 #include <ua_stack_csts.h>
 
-StatusCode Socket_Network_Initialize(){
+SOPC_StatusCode Socket_Network_Initialize(){
     return STATUS_OK;
 }
 
-StatusCode Socket_Network_Clear(){
+SOPC_StatusCode Socket_Network_Clear(){
     return STATUS_OK;
 }
 
-StatusCode Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressInfo** addrs){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressInfo** addrs){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     Socket_AddressInfo hints;
     memset(&hints, 0, sizeof(Socket_AddressInfo));
     hints.ai_family = AF_UNSPEC; // AF_INET or AF_INET6  can be use to force IPV4 or IPV6
@@ -57,11 +57,11 @@ void Socket_Clear(Socket* sock){
     *sock = -1;
 }
 
-StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
+SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
                             uint8_t             setReuseAddr,
                             uint8_t             setNonBlocking,
                             Socket*             sock){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int true = 1;
     int setOptStatus = -1;
     if(addr != NULL && sock != NULL){
@@ -96,10 +96,10 @@ StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
     return status;
 }
 
-StatusCode Socket_Listen(Socket              sock,
+SOPC_StatusCode Socket_Listen(Socket              sock,
                          Socket_AddressInfo* addr)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int bindListenStatus = -1;
     if(addr != NULL){
         bindListenStatus = bind(sock, addr->ai_addr, addr->ai_addrlen);
@@ -113,10 +113,10 @@ StatusCode Socket_Listen(Socket              sock,
     return status;
 }
 
-StatusCode Socket_Accept(Socket  listeningSock,
+SOPC_StatusCode Socket_Accept(Socket  listeningSock,
                          Socket* acceptedSock)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     struct sockaddr remoteAddr;
     socklen_t addrLen = 0;
     if(listeningSock != -1 && acceptedSock != NULL){
@@ -135,10 +135,10 @@ StatusCode Socket_Accept(Socket  listeningSock,
     return status;
 }
 
-StatusCode Socket_Connect(Socket              sock,
+SOPC_StatusCode Socket_Connect(Socket              sock,
                           Socket_AddressInfo* addr)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int connectStatus = -1;
     if(addr != NULL && sock != -1){
         connectStatus = connect(sock, addr->ai_addr, sizeof(Socket_AddressInfo));
@@ -155,8 +155,8 @@ StatusCode Socket_Connect(Socket              sock,
     return status;
 }
 
-StatusCode Socket_CheckAckConnect(Socket sock){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode Socket_CheckAckConnect(Socket sock){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int error = 0;
     socklen_t len = sizeof(int);
     if(sock != -1){
@@ -262,12 +262,12 @@ int32_t Socket_Write(Socket   sock,
 }
 
 
-StatusCode Socket_Read(Socket     sock,
+SOPC_StatusCode Socket_Read(Socket     sock,
                        uint8_t*   data,
                        uint32_t   dataSize,
                        uint32_t*  readCount)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
         if(sock != -1 && data != NULL && dataSize > 0){
             *readCount = recv(sock, data, dataSize, 0);
             if(*readCount > 0){

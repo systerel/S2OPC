@@ -10,7 +10,7 @@
 #ifndef INGOPCS_BUFFER_H_
 #define INGOPCS_BUFFER_H_
 
-#include <ua_base_types.h>
+#include "../core_types/sopc_base_types.h"
 
 /**
  *  \brief Bytes buffer structure
@@ -37,7 +37,7 @@ Buffer* Buffer_Create(uint32_t size);
  *  \param size     The size of the buffer
  *  \return         0 if succeeded, non zero otherwise
  */
-StatusCode Buffer_Init(Buffer* buffer, uint32_t size);
+SOPC_StatusCode Buffer_Init(Buffer* buffer, uint32_t size);
 
 /**
  *  \brief          Deallocate buffer data bytes content
@@ -69,7 +69,7 @@ void Buffer_Reset(Buffer* buffer);
  *
  *  \return         0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid position)
  */
-StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
+SOPC_StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
                                      uint32_t position);
 
 /**
@@ -80,7 +80,7 @@ StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
  *
  *  \return            0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid position)
  */
-StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position);
+SOPC_StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position);
 
 /**
  *  \brief           Set buffer to the given length
@@ -90,7 +90,7 @@ StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position);
  *
  *  \return          0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, invalid length)
  */
-StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length);
+SOPC_StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length);
 
 /**
  *  \brief             Write the given bytes into the buffer data bytes from the buffer position (adapting buffer position and length if necessary)
@@ -101,7 +101,7 @@ StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length);
  *
  *  \return            0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, full buffer avoiding operation)
  */
-StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count);
+SOPC_StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count);
 
 /**
  *  \brief              Read the given bytes of the buffer data bytes from the buffer position (adapting buffer position to next position to read)
@@ -112,7 +112,7 @@ StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count)
  *
  *  \return             0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, empty buffer avoiding operation)
  */
-StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count);
+SOPC_StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count);
 
 /**
  *  \brief         Copy the data bytes and properties from the source buffer to the destination buffer
@@ -122,7 +122,7 @@ StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count);
  *
  *  \return        0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, incompatible size)
  */
-StatusCode Buffer_Copy(Buffer* dest, Buffer* src);
+SOPC_StatusCode Buffer_Copy(Buffer* dest, Buffer* src);
 
 /**
  *  \brief                  Copy the data bytes and properties for the given length from the source buffer to the destination buffer
@@ -133,6 +133,6 @@ StatusCode Buffer_Copy(Buffer* dest, Buffer* src);
  *
  *  \return                 0 if succeeded, non zero value otherwise (NULL pointer, non allocated buffer content, incompatible size)
  */
-StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLength);
+SOPC_StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLength);
 
 #endif /* INGOPCS_BUFFER_H_ */

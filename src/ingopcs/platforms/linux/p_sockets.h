@@ -12,7 +12,8 @@
 
 #include <netdb.h>
 #include <sys/select.h>
-#include <ua_base_types.h>
+
+#include "../../core_types/sopc_base_types.h"
 
 /**
  *  \brief Socket base type
@@ -35,12 +36,12 @@ typedef struct {
 /**
  *  \brief Initialize the network communication allowing to use sockets
  */
-StatusCode Socket_Network_Initialize(void);
+SOPC_StatusCode Socket_Network_Initialize(void);
 
 /**
  *  \brief Clear the network communication when sockets not used anymore
  */
-StatusCode Socket_Network_Clear(void);
+SOPC_StatusCode Socket_Network_Clear(void);
 
 /**
  *  \brief Provide a linked list of socket addressing information for establishing TCP connections over IPV4 and IPV6
@@ -52,7 +53,7 @@ StatusCode Socket_Network_Clear(void);
  *
  *  \return            GOOD if operation succeeded, BAD otherwise.
  */
-StatusCode Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressInfo** addrs);
+SOPC_StatusCode Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressInfo** addrs);
 
 /**
  *  \brief Given a socket addressing information element of a linked list,
@@ -89,7 +90,7 @@ void Socket_Clear(Socket* sock);
  *
  *  \return                  GOOD if operation succeeded, BAD otherwise.
  */
-StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
+SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
                             uint8_t             setReuseAddr,
                             uint8_t             setNonBlocking,
                             Socket*             sock);
@@ -102,7 +103,7 @@ StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
-StatusCode Socket_Listen(Socket              sock,
+SOPC_StatusCode Socket_Listen(Socket              sock,
                          Socket_AddressInfo* addr);
 
 /**
@@ -114,7 +115,7 @@ StatusCode Socket_Listen(Socket              sock,
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
-StatusCode Socket_Accept(Socket  listeningSock,
+SOPC_StatusCode Socket_Accept(Socket  listeningSock,
                          Socket* acceptedSock);
 
 /**
@@ -127,7 +128,7 @@ StatusCode Socket_Accept(Socket  listeningSock,
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
-StatusCode Socket_Connect(Socket              sock,
+SOPC_StatusCode Socket_Connect(Socket              sock,
                           Socket_AddressInfo* addr);
 
 /**
@@ -139,7 +140,7 @@ StatusCode Socket_Connect(Socket              sock,
  *
  *  \return        GOOD if connection succeeded, BAD otherwise.
  */
-StatusCode Socket_CheckAckConnect(Socket  sock);
+SOPC_StatusCode Socket_CheckAckConnect(Socket  sock);
 
 /**
  *  \brief Add a socket to the given socket set
@@ -206,7 +207,7 @@ int32_t Socket_Write(Socket   sock,
  *
  *  \return         GOOD if operation succeeded, BAD_DISCONNECT in case of disconnection and BAD otherwise.
  */
-StatusCode Socket_Read(Socket     sock,
+SOPC_StatusCode Socket_Read(Socket     sock,
                        uint8_t*   data,
                        uint32_t   dataSize,
                        uint32_t*  readCount);

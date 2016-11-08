@@ -15,8 +15,8 @@
 #include <ua_encoder.h>
 #include <ua_tcp_ua_low_level.h>
 
-StatusCode InitSendBuffer(TCP_UA_Connection* connection){
-    StatusCode status = STATUS_NOK;
+SOPC_StatusCode InitSendBuffer(TCP_UA_Connection* connection){
+    SOPC_StatusCode status = STATUS_NOK;
     if(connection->outputMsgBuffer == NULL){
         Buffer* buf = Buffer_Create(connection->sendBufferSize);
         if(buf != NULL){
@@ -35,8 +35,8 @@ StatusCode InitSendBuffer(TCP_UA_Connection* connection){
     return status;
 }
 
-StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
-    StatusCode status = STATUS_NOK;
+SOPC_StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
+    SOPC_StatusCode status = STATUS_NOK;
     if(connection->inputMsgBuffer == NULL){
         Buffer* buf = Buffer_Create(connection->receiveBufferSize);
         if(buf != NULL){
@@ -115,8 +115,8 @@ void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
     }
 }
 
-StatusCode SendHelloMsg(TCP_UA_Connection* connection){
-    StatusCode status = STATUS_NOK;
+SOPC_StatusCode SendHelloMsg(TCP_UA_Connection* connection){
+    SOPC_StatusCode status = STATUS_NOK;
     status = InitSendBuffer(connection);
     if(status == STATUS_OK){
         // encode message
@@ -158,8 +158,8 @@ StatusCode SendHelloMsg(TCP_UA_Connection* connection){
     return status;
 }
 
-StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t tempValue = 0;
     uint32_t modifiedReceiveBuffer = 0;
     if(connection != NULL
@@ -249,9 +249,9 @@ StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
     return status;
 }
 
-StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
-    StatusCode tmpStatus = STATUS_NOK;
+SOPC_StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode tmpStatus = STATUS_NOK;
     uint32_t error = 0;
     UA_String* reason = NULL;
     if(connection != NULL && connection->inputMsgBuffer != NULL)
@@ -273,14 +273,14 @@ StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
     return status;
 }
 
-StatusCode OnSocketEvent_CB (UA_Socket*    socket,
+SOPC_StatusCode OnSocketEvent_CB (UA_Socket*    socket,
                              uint32_t      socketEvent,
                              void*         callbackData,
                              uint16_t      usPortNumber,
                              unsigned char bIsSSL){
     (void) usPortNumber;
     (void) bIsSSL;
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     TCP_UA_Connection* connection = (TCP_UA_Connection*) callbackData;
     switch(socketEvent){
         case SOCKET_ACCEPT_EVENT:
@@ -403,8 +403,8 @@ StatusCode OnSocketEvent_CB (UA_Socket*    socket,
     return status;
 }
 
-StatusCode CheckURI (const char* uri){
-    StatusCode status = STATUS_NOK;
+SOPC_StatusCode CheckURI (const char* uri){
+    SOPC_StatusCode status = STATUS_NOK;
     size_t idx = 0;
     uint8_t isPort = 0;
     uint8_t hasPort = 0;
@@ -442,11 +442,11 @@ StatusCode CheckURI (const char* uri){
     return status;
 }
 
-StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
+SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
                                       const char*                 uri,
                                       TCP_UA_Connection_Event_CB* callback,
                                       void*                       callbackData){
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
     if(connection != NULL &&
        uri != NULL &&
        callback != NULL){

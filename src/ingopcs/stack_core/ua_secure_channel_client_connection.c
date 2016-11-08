@@ -93,10 +93,10 @@ SC_ClientConnection* SC_Client_Create(){
     return scClientConnection;
 }
 
-StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
+SOPC_StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
                                UA_NamespaceTable*   namespaceTable,
                                UA_EncodeableType**  encodeableTypes){
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(cConnection != NULL && cConnection->instance != NULL){
         if(namespaceTable != NULL){
             status = Namespace_AttachTable(&cConnection->namespaces, namespaceTable);
@@ -112,7 +112,7 @@ SC_ClientConnection* SC_Client_CreateAndConfigure(UA_NamespaceTable*   namespace
                                                   UA_EncodeableType**  encodeableTypes)
 {
     SC_ClientConnection* scClientConnection = NULL;
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     scClientConnection = SC_Client_Create();
     status = SC_Client_Configure(scClientConnection,
                                  namespaceTable,
@@ -158,10 +158,10 @@ uint32_t GetNextRequestId(SC_Connection* scConnection){
     return requestId;
 }
 
-StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
+SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
                                           uint32_t             requestId)
 {
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     OpcUa_OpenSecureChannelRequest openRequest;
     OpcUa_OpenSecureChannelRequest_Initialize(&openRequest);
     const uint32_t uzero = 0;
@@ -239,9 +239,9 @@ StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     return status;
 }
 
-StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
+SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t requestId = 0;
 
     if(cConnection != NULL){
@@ -314,12 +314,12 @@ StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     return status;
 }
 
-StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
+SOPC_StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
                                          PendingRequest*      pRequest)
 {
     assert(cConnection != NULL &&
            pRequest != NULL && pRequest->responseType != NULL);
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_OpenSecureChannelResponse* encObj = NULL;
     UA_EncodeableType* receivedType = NULL;
 
@@ -391,10 +391,10 @@ StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
     return status;
 }
 
-StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
+SOPC_StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
                                              UA_MsgBuffer*        transportMsgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t validateSenderCertificateTrue = 1; // True: always activated as indicated in API
     const uint32_t isSymmetricFalse = FALSE;
     const uint32_t isPrecCryptoDataFalse = FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
@@ -486,13 +486,13 @@ StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
     return status;
 }
 
-StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
+SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                                    UA_MsgBuffer*        transportMsgBuffer)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint8_t  abortReqPresence = 0;
     uint32_t abortedRequestId = 0;
-    StatusCode abortReqStatus = STATUS_NOK;
+    SOPC_StatusCode abortReqStatus = STATUS_NOK;
     uint32_t requestId = 0;
     uint8_t requestToRemove = FALSE;
     UA_String reason;
@@ -603,15 +603,15 @@ StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     return status;
 }
 
-StatusCode OnTransportEvent_CB(void*           connection,
+SOPC_StatusCode OnTransportEvent_CB(void*           connection,
                                void*           callbackData,
                                ConnectionEvent event,
                                UA_MsgBuffer*   msgBuffer,
-                               StatusCode      status)
+                               SOPC_StatusCode      status)
 {
     SC_ClientConnection* cConnection = (SC_ClientConnection*) callbackData;
     TCP_UA_Connection* tcpConnection = (TCP_UA_Connection*) connection;
-    StatusCode retStatus = STATUS_OK;
+    SOPC_StatusCode retStatus = STATUS_OK;
     assert(cConnection->instance->transportConnection == tcpConnection);
     switch(event){
         case ConnectionEvent_Connected:
@@ -697,7 +697,7 @@ StatusCode OnTransportEvent_CB(void*           connection,
     return retStatus;
 }
 
-StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
+SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
                              const char*               uri,
                              const PKIProvider*        pki,
                              const Certificate*        crt_cli,
@@ -709,7 +709,7 @@ StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
                              SC_ConnectionEvent_CB*    callback,
                              void*                     callbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
 
     if(connection != NULL &&
        connection->instance != NULL &&
@@ -784,9 +784,9 @@ StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
     return status;
 }
 
-StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
+SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(cConnection != NULL && cConnection->instance != NULL &&
        cConnection->instance->transportConnection != NULL)
     {
@@ -806,7 +806,7 @@ StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
     return status;
 }
 
-StatusCode SC_Send_Request(SC_ClientConnection* connection,
+SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
                            UA_EncodeableType*   requestType,
                            void*                request,
                            UA_EncodeableType*   responseType,
@@ -814,7 +814,7 @@ StatusCode SC_Send_Request(SC_ClientConnection* connection,
                            SC_ResponseEvent_CB* callback,
                            void*                callbackData)
 {
-    StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t requestId = 0;
     if(connection != NULL &&
        requestType != NULL &&

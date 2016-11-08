@@ -19,7 +19,7 @@
 
 START_TEST(test_ua_msg_buffer_create_set_type)
 {
-    StatusCode status = 0;
+    SOPC_StatusCode status = 0;
     int flushData = 3;
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
@@ -86,7 +86,7 @@ END_TEST
 
 START_TEST(test_ua_msg_buffer_reset)
 {
-    StatusCode status = 0;
+    SOPC_StatusCode status = 0;
     uint8_t flushData = 3;
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
@@ -182,7 +182,7 @@ END_TEST
 
 START_TEST(test_ua_msg_buffer_copy)
 {
-    StatusCode status = 0;
+    SOPC_StatusCode status = 0;
     uint8_t flushData = 3;
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
@@ -296,7 +296,7 @@ START_TEST(test_ua_msg_buffers_chunk_mgr)
     Buffer* buf = NULL;
     Buffer* buf2 = NULL;
     uint32_t bufIdx = 0;
-    StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_NOK;
 
     // Test chunks management
     //// Test nominal case
@@ -375,7 +375,7 @@ END_TEST
 
 START_TEST(test_ua_msg_buffers_copy)
 {
-    StatusCode status = 0;
+    SOPC_StatusCode status = 0;
     uint8_t flushData = 3;
     UA_NamespaceTable table;
     Namespace_Initialize(&table);
@@ -659,7 +659,7 @@ END_TEST
 START_TEST(test_ua_encoder_basic_types)
 {
     InitPlatformDependencies(); // Necessary to initialize endianess configuration
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     Buffer* buffer = Buffer_Create(100);
     UA_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
 
@@ -1104,7 +1104,7 @@ END_TEST
 START_TEST(test_ua_encoder_other_types)
 {
     InitPlatformDependencies(); // Necessary to initialize endianess configuration
-    StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
     Buffer* buffer = Buffer_Create(100);
     UA_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
 

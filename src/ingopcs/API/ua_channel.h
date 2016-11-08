@@ -29,24 +29,24 @@ typedef enum {
     ChannelEvent_Disconnected = 0x02
 } UA_Channel_Event;
 
-typedef StatusCode (UA_Channel_PfnConnectionStateChanged) (UA_Channel       channel,
+typedef SOPC_StatusCode (UA_Channel_PfnConnectionStateChanged) (UA_Channel       channel,
                                                            void*            cbData,
                                                            UA_Channel_Event cEvent,
-                                                           StatusCode       status);
+                                                           SOPC_StatusCode       status);
 
-typedef StatusCode (UA_Channel_PfnRequestComplete)(UA_Channel         channel,
+typedef SOPC_StatusCode (UA_Channel_PfnRequestComplete)(UA_Channel         channel,
                                                    void*              response,
                                                    UA_EncodeableType* responseType,
                                                    void*              cbData,
-                                                   StatusCode         status);
+                                                   SOPC_StatusCode         status);
 
 //TODO: API indicates namespace too but it is not the case in 1.03 foundation stack
-StatusCode UA_Channel_Create(UA_Channel*               channel,
+SOPC_StatusCode UA_Channel_Create(UA_Channel*               channel,
                              UA_Channel_SerializerType serialType);
-StatusCode UA_Channel_Clear(UA_Channel channel);
-StatusCode UA_Channel_Delete(UA_Channel* channel);
+SOPC_StatusCode UA_Channel_Clear(UA_Channel channel);
+SOPC_StatusCode UA_Channel_Delete(UA_Channel* channel);
 
-StatusCode UA_Channel_BeginConnect(UA_Channel                            channel,
+SOPC_StatusCode UA_Channel_BeginConnect(UA_Channel                            channel,
                                    const char*                           url,
                                    const Certificate*                    crt_cli,
                                    const AsymmetricKey*                  key_priv,
@@ -59,7 +59,7 @@ StatusCode UA_Channel_BeginConnect(UA_Channel                            channel
                                    UA_Channel_PfnConnectionStateChanged* cb,
                                    void*                                 cbData);
 
-StatusCode UA_Channel_BeginInvokeService(UA_Channel                     channel,
+SOPC_StatusCode UA_Channel_BeginInvokeService(UA_Channel                     channel,
                                          char*                          debugName,
                                          void*                          request,
                                          UA_EncodeableType*             requestType,
@@ -67,7 +67,7 @@ StatusCode UA_Channel_BeginInvokeService(UA_Channel                     channel,
                                          UA_Channel_PfnRequestComplete* cb,
                                          void*                          cbData);
 
-StatusCode UA_Channel_InvokeService(UA_Channel          channel,
+SOPC_StatusCode UA_Channel_InvokeService(UA_Channel          channel,
                                     char*               debugName,
                                     void*               request,
                                     UA_EncodeableType*  requestType,
@@ -75,7 +75,7 @@ StatusCode UA_Channel_InvokeService(UA_Channel          channel,
                                     void**              response,
                                     UA_EncodeableType** responseType);
 
-StatusCode UA_Channel_Disconnect(UA_Channel channel);
+SOPC_StatusCode UA_Channel_Disconnect(UA_Channel channel);
 
 #endif /* CLIENT_API */
 

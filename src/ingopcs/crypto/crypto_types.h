@@ -10,7 +10,7 @@
 #define INGOPCS_CRYPTO_TYPES_H_
 
 
-#include "ua_base_types.h"
+#include "../core_types/sopc_base_types.h"
 #include "secret_buffer.h"
 
 struct CryptoProvider;
@@ -23,61 +23,61 @@ struct Certificate;
  * CryptoProfile, internal API
  * ------------------------------------------------------------------------------------------------
  */
-typedef StatusCode (*FnSymmetricEncrypt) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnSymmetricEncrypt) (const struct CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenPlainText,
                                           const ExposedBuffer *pKey,
                                           const ExposedBuffer *pIV,
                                           uint8_t *pOutput,
                                           uint32_t lenOutput);
-typedef StatusCode (*FnSymmetricDecrypt) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnSymmetricDecrypt) (const struct CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenCipherText,
                                           const ExposedBuffer *pKey,
                                           const ExposedBuffer *pIV,
                                           uint8_t *pOutput,
                                           uint32_t lenOutput);
-typedef StatusCode (*FnSymmetricSign) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnSymmetricSign) (const struct CryptoProvider *pProvider,
                                        const uint8_t *pInput,
                                        uint32_t lenInput,
                                        const ExposedBuffer *pKey,
                                        uint8_t *pOutput);
-typedef StatusCode (*FnSymmetricVerify) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnSymmetricVerify) (const struct CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,
                                          const ExposedBuffer *pKey,
                                          const uint8_t *pSignature);
-typedef StatusCode (*FnSymmetricGenKey) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnSymmetricGenKey) (const struct CryptoProvider *pProvider,
                                          ExposedBuffer *pKey);
-typedef StatusCode (*FnDerivePseudoRandomData) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnDerivePseudoRandomData) (const struct CryptoProvider *pProvider,
                                                 const ExposedBuffer *pSecret,
                                                 uint32_t lenSecret,
                                                 const ExposedBuffer *pSeed,
                                                 uint32_t lenSeed,
                                                 ExposedBuffer *pOutput,
                                                 uint32_t lenOutput);
-typedef StatusCode (*FnAsymmetricEncrypt) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnAsymmetricEncrypt) (const struct CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
                                            const struct AsymmetricKey *pKey,
                                            uint8_t *pOutput);
-typedef StatusCode (*FnAsymmetricDecrypt) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnAsymmetricDecrypt) (const struct CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenCipherText,
                                            const struct AsymmetricKey *pKey,
                                            uint8_t *pOutput,
                                            uint32_t *lenWritten);
-typedef StatusCode (*FnAsymmetricSign) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnAsymmetricSign) (const struct CryptoProvider *pProvider,
                                         const uint8_t *pInput,
                                         uint32_t lenInput,
                                         const struct AsymmetricKey *pKey,
                                         uint8_t *pSignature);
-typedef StatusCode (*FnAsymmetricVerify) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnAsymmetricVerify) (const struct CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenInput,
                                           const struct AsymmetricKey *pKey,
                                           const uint8_t *pSignature);
-typedef StatusCode (*FnCertificateVerify) (const struct CryptoProvider *pCrypto,
+typedef SOPC_StatusCode (*FnCertificateVerify) (const struct CryptoProvider *pCrypto,
                                            const struct Certificate *pCert);
 
 typedef struct CryptoProfile
