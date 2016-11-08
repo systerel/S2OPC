@@ -11,11 +11,11 @@
 
 #include <ua_builtintypes.h>
 
-UA_EncodeableType* EncodeableType_GetEncodeableType(UA_EncodeableType** encTypesTable,
+SOPC_EncodeableType* EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
                                                     const char*         namespace,
                                                     uint32_t            typeId){
-    UA_EncodeableType* current = NULL;
-    UA_EncodeableType* result = NULL;
+    SOPC_EncodeableType* current = NULL;
+    SOPC_EncodeableType* result = NULL;
     uint32_t idx = 0;
     if(encTypesTable != NULL){
         current = encTypesTable[idx];
@@ -23,7 +23,7 @@ UA_EncodeableType* EncodeableType_GetEncodeableType(UA_EncodeableType** encTypes
             if(typeId == result->TypeId || typeId == result->BinaryEncodingTypeId){
                 // || typeId = result->xmlTypeId => should not be the case since we use UA binary !
                 //TODO: max namespace or string size ?
-                if(strncmp(namespace, current->NamespaceUri, INT32_MAX) == 0){ // Use maximum UA_String size representation size
+                if(strncmp(namespace, current->NamespaceUri, INT32_MAX) == 0){ // Use maximum SOPC_String size representation size
                     result = current;
                 }
             }else if(idx < UINT32_MAX){

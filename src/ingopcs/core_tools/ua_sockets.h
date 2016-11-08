@@ -8,8 +8,8 @@
 #include <p_sockets.h>
 #include "../core_types/sopc_base_types.h"
 
-#ifndef INGOPCS_SOCKETS_UA_SOCKETS_H_
-#define INGOPCS_SOCKETS_UA_SOCKETS_H_
+#ifndef INGOPCS_SOCKETS_SOPC_SOCKETS_H_
+#define INGOPCS_SOCKETS_SOPC_SOCKETS_H_
 
 typedef enum {
     SOCKET_READ_EVENT,
@@ -19,7 +19,7 @@ typedef enum {
     SOCKET_TIMEOUT_EVENT,
     SOCKET_SHUTDOWN_EVENT,
     SOCKET_CONNECT_EVENT,
-    SOCKET_ACCEPT_EVENT} UA_Socket_Event;
+    SOCKET_ACCEPT_EVENT} SOPC_Socket_Event;
 
 typedef enum {
     SOCKET_DISCONNECTED          = 0x00,
@@ -27,68 +27,68 @@ typedef enum {
                                          // && SO_ERROR to be verified on event to confirm connection accepted
     SOCKET_CONNECTED             = 0x02, // Client: write event received after connect / Server: connection accepted
     SOCKET_LISTENING             = 0x03 // Server: listening socket
-} UA_Socket_State;
+} SOPC_Socket_State;
 
 
-struct UA_Socket;
+struct SOPC_Socket;
 
-typedef SOPC_StatusCode (UA_Socket_EventCB) (struct UA_Socket* socket,
+typedef SOPC_StatusCode (SOPC_Socket_EventCB) (struct SOPC_Socket* socket,
                                         uint32_t          socketEvent,
                                         void*             cbData,
                                         uint16_t          portNumber,
                                         uint8_t           isSSL);
 
-typedef struct UA_Socket {
+typedef struct SOPC_Socket {
     Socket             sock;
     uint8_t            isUsed;
-    UA_Socket_State    state;
-    UA_Socket_EventCB* eventCallback; // UA_Socket_EventCB Type
+    SOPC_Socket_State    state;
+    SOPC_Socket_EventCB* eventCallback; // SOPC_Socket_EventCB Type
     void*              cbData;
-} UA_Socket;
+} SOPC_Socket;
 
 typedef struct {
     uint32_t   nbSockets;
-    UA_Socket  *sockets;
+    SOPC_Socket  *sockets;
 }
-UA_SocketManager;
+SOPC_SocketManager;
 
-UA_SocketManager* UA_SocketManager_GetGlobal(void);
+SOPC_SocketManager* SOPC_SocketManager_GetGlobal(void);
 
-SOPC_StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
+SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
                                        uint32_t          nbSockets);
 
-UA_SocketManager* UA_SocketManager_Create(uint32_t nbSockets);
+SOPC_SocketManager* SOPC_SocketManager_Create(uint32_t nbSockets);
 
-void UA_SocketManager_Clear(UA_SocketManager* socketMgr);
+void SOPC_SocketManager_Clear(SOPC_SocketManager* socketMgr);
 
-void UA_SocketManager_Delete(UA_SocketManager** socketMgr);
+void SOPC_SocketManager_Delete(SOPC_SocketManager** socketMgr);
 
-SOPC_StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketManager,
+SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager*  socketManager,
                                                const char*        uri,
-                                               UA_Socket_EventCB  socketCallback,
+                                               SOPC_Socket_EventCB  socketCallback,
                                                void*              callbackData,
-                                               UA_Socket**        clientSocket);
+                                               SOPC_Socket**        clientSocket);
 
-SOPC_StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
+SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager*  socketManager,
                                                const char*        uri,
                                                uint8_t            listenAllItfs,
-                                               UA_Socket_EventCB  socketCallback,
+                                               SOPC_Socket_EventCB  socketCallback,
                                                void*              callbackData,
-                                               UA_Socket**        listenerSocket);
+                                               SOPC_Socket**        listenerSocket);
 
-SOPC_StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
+SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                                  uint32_t          msecTimeout);
 
-int32_t UA_Socket_Write (UA_Socket* socket,
+int32_t SOPC_Socket_Write (SOPC_Socket* socket,
                          uint8_t*   data,
                          uint32_t   count);
 
-SOPC_StatusCode UA_Socket_Read (UA_Socket* socket,
+SOPC_StatusCode SOPC_Socket_Read (SOPC_Socket* socket,
                            uint8_t*   data,
                            uint32_t   dataSize,
                            uint32_t*  readCount);
 
-void UA_Socket_Close(UA_Socket* socket);
+void SOPC_Socket_Close(SOPC_Socket* socket);
 
 
-#endif /* INGOPCS_SOCKETS_UA_SOCKETS_H_ */
+#endif /* INGOPCS_SOCKETS_SOPC_SOCKETS_H_ */

@@ -21,57 +21,57 @@ START_TEST(test_ua_msg_buffer_create_set_type)
 {
     SOPC_StatusCode status = 0;
     int flushData = 3;
-    UA_NamespaceTable table;
+    SOPC_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[1];
+    SOPC_EncodeableType* encTypes[1];
 
 
     // Test creation / set type
     //// Test nominal case
     Buffer* buf = Buffer_Create(10);
-    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
+    SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ck_assert(msgBuf != NULL);
     ck_assert(msgBuf->nbBuffers == 1);
     ck_assert(msgBuf->buffers == buf);
-    ck_assert(msgBuf->type == TCP_UA_Message_Unknown);
-    ck_assert(msgBuf->secureType == UA_SecureMessage);
+    ck_assert(msgBuf->type == TCP_SOPC_Message_Unknown);
+    ck_assert(msgBuf->secureType == SOPC_SecureMessage);
     ck_assert(msgBuf->currentChunkSize == 0);
     ck_assert(msgBuf->nbChunks == 1);
     ck_assert(msgBuf->maxChunks == 1);
     ck_assert(msgBuf->sequenceNumberPosition == 0);
-    ck_assert(msgBuf->isFinal == UA_Msg_Chunk_Unknown);
+    ck_assert(msgBuf->isFinal == SOPC_Msg_Chunk_Unknown);
     ck_assert(msgBuf->receivedReqId == 0);
     ck_assert(msgBuf->flushData == &flushData);
     ck_assert(msgBuf->nsTable.namespaceArray == table.namespaceArray);
     ck_assert(msgBuf->encTypesTable == encTypes);
 
-    status = MsgBuffer_SetSecureMsgType(msgBuf, UA_OpenSecureChannel);
+    status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_OpenSecureChannel);
     ck_assert(status == STATUS_OK);
-    ck_assert(msgBuf->secureType == UA_OpenSecureChannel);
+    ck_assert(msgBuf->secureType == SOPC_OpenSecureChannel);
 
-    msgBuf->type = TCP_UA_Message_SecureMessage;
-    status = MsgBuffer_SetSecureMsgType(msgBuf, UA_CloseSecureChannel);
+    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status == STATUS_OK);
-    ck_assert(msgBuf->secureType == UA_CloseSecureChannel);
+    ck_assert(msgBuf->secureType == SOPC_CloseSecureChannel);
 
     //// Test set type degraded cases
-    status = MsgBuffer_SetSecureMsgType(NULL, UA_CloseSecureChannel);
+    status = MsgBuffer_SetSecureMsgType(NULL, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
-    msgBuf->type = TCP_UA_Message_Hello; // Not a secure type
-    status = MsgBuffer_SetSecureMsgType(msgBuf, UA_CloseSecureChannel);
+    msgBuf->type = TCP_SOPC_Message_Hello; // Not a secure type
+    status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
-    msgBuf->type = TCP_UA_Message_Acknowledge; // Not a secure type
-    status = MsgBuffer_SetSecureMsgType(msgBuf, UA_CloseSecureChannel);
+    msgBuf->type = TCP_SOPC_Message_Acknowledge; // Not a secure type
+    status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
-    msgBuf->type = TCP_UA_Message_Error; // Not a secure type
-    status = MsgBuffer_SetSecureMsgType(msgBuf, UA_CloseSecureChannel);
+    msgBuf->type = TCP_SOPC_Message_Error; // Not a secure type
+    status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
-    msgBuf->type = TCP_UA_Message_Invalid; // Not a secure type
-    status = MsgBuffer_SetSecureMsgType(msgBuf, UA_CloseSecureChannel);
+    msgBuf->type = TCP_SOPC_Message_Invalid; // Not a secure type
+    status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
     MsgBuffer_Delete(&msgBuf);
@@ -88,23 +88,23 @@ START_TEST(test_ua_msg_buffer_reset)
 {
     SOPC_StatusCode status = 0;
     uint8_t flushData = 3;
-    UA_NamespaceTable table;
+    SOPC_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[1];
+    SOPC_EncodeableType* encTypes[1];
 
     // Test reset
     //// Test nominal case
     Buffer* buf = Buffer_Create(10);
-    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
+    SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
     Buffer_Write(buf, &flushData, 1);
-    msgBuf->type = TCP_UA_Message_SecureMessage;
-    MsgBuffer_SetSecureMsgType(msgBuf, UA_CloseSecureChannel);
+    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
     msgBuf->nbChunks = 2;
     msgBuf->maxChunks = 3;
     msgBuf->sequenceNumberPosition = 2;
-    msgBuf->isFinal = UA_Msg_Chunk_Final;
+    msgBuf->isFinal = SOPC_Msg_Chunk_Final;
     msgBuf->receivedReqId = 1;
     msgBuf->flushData = NULL;
     msgBuf->nsTable.namespaceArray = NULL;
@@ -112,19 +112,19 @@ START_TEST(test_ua_msg_buffer_reset)
     ////// Check modified properties
     ck_assert(msgBuf->buffers->data[0] == flushData);
     ck_assert(msgBuf->buffers->length == 1);
-    ck_assert(msgBuf->secureType == UA_CloseSecureChannel);
+    ck_assert(msgBuf->secureType == SOPC_CloseSecureChannel);
 
     ////// Reset msg buffer
     MsgBuffer_Reset(msgBuf);
     ////// Check reset properties
     ck_assert(msgBuf->buffers->data[0] == 0);
     ck_assert(msgBuf->buffers->length == 0);
-    ck_assert(msgBuf->type == TCP_UA_Message_Unknown);
-    ck_assert(msgBuf->secureType == UA_SecureMessage);
+    ck_assert(msgBuf->type == TCP_SOPC_Message_Unknown);
+    ck_assert(msgBuf->secureType == SOPC_SecureMessage);
     ck_assert(msgBuf->currentChunkSize == 0);
     ck_assert(msgBuf->nbChunks == 1);
     ck_assert(msgBuf->sequenceNumberPosition == 0);
-    ck_assert(msgBuf->isFinal == UA_Msg_Chunk_Unknown);
+    ck_assert(msgBuf->isFinal == SOPC_Msg_Chunk_Unknown);
     ck_assert(msgBuf->receivedReqId == 0);
 
     /////// Check properties not reset
@@ -139,11 +139,11 @@ START_TEST(test_ua_msg_buffer_reset)
     msgBuf = MsgBuffer_Create(buf, 2, &flushData, &table, encTypes);
     Buffer_Write(buf, &flushData, 1);
     Buffer_Write(buf, &flushData, 1);
-    msgBuf->type = TCP_UA_Message_SecureMessage;
-    MsgBuffer_SetSecureMsgType(msgBuf, UA_CloseSecureChannel);
+    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
     msgBuf->sequenceNumberPosition = 2;
-    msgBuf->isFinal = UA_Msg_Chunk_Final;
+    msgBuf->isFinal = SOPC_Msg_Chunk_Final;
     msgBuf->receivedReqId = 1;
 
     ck_assert(msgBuf->buffers->data[0] == flushData);
@@ -161,9 +161,9 @@ START_TEST(test_ua_msg_buffer_reset)
     ck_assert(msgBuf->buffers->length == 1);
     ck_assert(msgBuf->currentChunkSize == 1);
     ////// Internal properties unchanged (sample)
-    ck_assert(msgBuf->secureType == UA_CloseSecureChannel);
+    ck_assert(msgBuf->secureType == SOPC_CloseSecureChannel);
     ck_assert(msgBuf->sequenceNumberPosition == 2);
-    ck_assert(msgBuf->isFinal == UA_Msg_Chunk_Final);
+    ck_assert(msgBuf->isFinal == SOPC_Msg_Chunk_Final);
     ck_assert(msgBuf->receivedReqId == 1);
 
 
@@ -184,31 +184,31 @@ START_TEST(test_ua_msg_buffer_copy)
 {
     SOPC_StatusCode status = 0;
     uint8_t flushData = 3;
-    UA_NamespaceTable table;
+    SOPC_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[1];
+    SOPC_EncodeableType* encTypes[1];
 
     // Test reset
     //// Test nominal case
     Buffer* buf = Buffer_Create(10);
-    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
+    SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
     Buffer_Write(buf, &flushData, 1);
-    msgBuf->type = TCP_UA_Message_SecureMessage;
-    MsgBuffer_SetSecureMsgType(msgBuf, UA_CloseSecureChannel);
+    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
     msgBuf->nbChunks = 2;
     msgBuf->maxChunks = 3;
     msgBuf->sequenceNumberPosition = 2;
-    msgBuf->isFinal = UA_Msg_Chunk_Final;
+    msgBuf->isFinal = SOPC_Msg_Chunk_Final;
     msgBuf->receivedReqId = 1;
     ////// Check modified properties
     ck_assert(msgBuf->buffers->data[0] == flushData);
     ck_assert(msgBuf->buffers->length == 1);
-    ck_assert(msgBuf->secureType == UA_CloseSecureChannel);
+    ck_assert(msgBuf->secureType == SOPC_CloseSecureChannel);
 
     Buffer* bufDest = Buffer_Create(2);
-    UA_MsgBuffer* msgBufDest = MsgBuffer_Create(bufDest, 2, NULL, NULL, NULL);
+    SOPC_MsgBuffer* msgBufDest = MsgBuffer_Create(bufDest, 2, NULL, NULL, NULL);
     ////// Reset msg buffer
     status = MsgBuffer_CopyBuffer(msgBufDest, msgBuf);
     ck_assert(status == STATUS_OK);
@@ -216,12 +216,12 @@ START_TEST(test_ua_msg_buffer_copy)
     ck_assert(msgBufDest->buffers != msgBuf->buffers);
     ck_assert(msgBufDest->buffers->data[0] == flushData);
     ck_assert(msgBufDest->buffers->length == 1);
-    ck_assert(msgBufDest->type == TCP_UA_Message_SecureMessage);
-    ck_assert(msgBufDest->secureType == UA_CloseSecureChannel);
+    ck_assert(msgBufDest->type == TCP_SOPC_Message_SecureMessage);
+    ck_assert(msgBufDest->secureType == SOPC_CloseSecureChannel);
     ck_assert(msgBufDest->currentChunkSize == 9);
     ck_assert(msgBufDest->nbChunks == 2);
     ck_assert(msgBufDest->sequenceNumberPosition == 2);
-    ck_assert(msgBufDest->isFinal == UA_Msg_Chunk_Final);
+    ck_assert(msgBufDest->isFinal == SOPC_Msg_Chunk_Final);
     ck_assert(msgBufDest->receivedReqId == 1);
     /////// Check not concerned fields were not copied
     ck_assert(msgBufDest->maxChunks == 2);
@@ -251,25 +251,25 @@ END_TEST
 
 START_TEST(test_ua_msg_buffers_create)
 {
-    UA_NamespaceTable table;
+    SOPC_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[1];
+    SOPC_EncodeableType* encTypes[1];
 
     // Test creation
     //// Test nominal case
-    UA_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
+    SOPC_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
     ck_assert(msgBuf != NULL);
     ck_assert(msgBuf->nbBuffers == 3);
     ck_assert(msgBuf->buffers[0].data != NULL);
     ck_assert(msgBuf->buffers[1].data != NULL);
     ck_assert(msgBuf->buffers[2].data != NULL);
-    ck_assert(msgBuf->type == TCP_UA_Message_Unknown);
-    ck_assert(msgBuf->secureType == UA_SecureMessage);
+    ck_assert(msgBuf->type == TCP_SOPC_Message_Unknown);
+    ck_assert(msgBuf->secureType == SOPC_SecureMessage);
     ck_assert(msgBuf->currentChunkSize == 0);
     ck_assert(msgBuf->nbChunks == 0);
     ck_assert(msgBuf->maxChunks == 3);
     ck_assert(msgBuf->sequenceNumberPosition == 0);
-    ck_assert(msgBuf->isFinal == UA_Msg_Chunk_Unknown);
+    ck_assert(msgBuf->isFinal == SOPC_Msg_Chunk_Unknown);
     ck_assert(msgBuf->receivedReqId == 0);
     ck_assert(msgBuf->nsTable.namespaceArray == table.namespaceArray);
     ck_assert(msgBuf->encTypesTable == encTypes);
@@ -290,9 +290,9 @@ END_TEST
 
 START_TEST(test_ua_msg_buffers_chunk_mgr)
 {
-    UA_NamespaceTable table;
+    SOPC_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[1];
+    SOPC_EncodeableType* encTypes[1];
     Buffer* buf = NULL;
     Buffer* buf2 = NULL;
     uint32_t bufIdx = 0;
@@ -300,7 +300,7 @@ START_TEST(test_ua_msg_buffers_chunk_mgr)
 
     // Test chunks management
     //// Test nominal case
-    UA_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
+    SOPC_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
 
     ////// No current chunk before NextChunk called
     buf2 = MsgBuffers_GetCurrentChunk(msgBuf);
@@ -377,30 +377,30 @@ START_TEST(test_ua_msg_buffers_copy)
 {
     SOPC_StatusCode status = 0;
     uint8_t flushData = 3;
-    UA_NamespaceTable table;
+    SOPC_NamespaceTable table;
     Namespace_Initialize(&table);
-    UA_EncodeableType* encTypes[1];
+    SOPC_EncodeableType* encTypes[1];
 
     // Test reset
     //// Test nominal case
     Buffer* buf = Buffer_Create(10);
-    UA_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
+    SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
     Buffer_Write(buf, &flushData, 1);
-    msgBuf->type = TCP_UA_Message_SecureMessage;
-    MsgBuffer_SetSecureMsgType(msgBuf, UA_CloseSecureChannel);
+    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
     msgBuf->nbChunks = 2;
     msgBuf->maxChunks = 3;
     msgBuf->sequenceNumberPosition = 2;
-    msgBuf->isFinal = UA_Msg_Chunk_Final;
+    msgBuf->isFinal = SOPC_Msg_Chunk_Final;
     msgBuf->receivedReqId = 1;
     ////// Check modified properties
     ck_assert(msgBuf->buffers->data[0] == flushData);
     ck_assert(msgBuf->buffers->length == 1);
-    ck_assert(msgBuf->secureType == UA_CloseSecureChannel);
+    ck_assert(msgBuf->secureType == SOPC_CloseSecureChannel);
 
-    UA_MsgBuffer* msgBufsDest = MsgBuffers_Create(3, 5, &table, encTypes);
+    SOPC_MsgBuffer* msgBufsDest = MsgBuffers_Create(3, 5, &table, encTypes);
     ////// Copy msg buffer
     status = MsgBuffers_CopyBuffer(msgBufsDest, 0,
                                    msgBuf, 1);
@@ -409,12 +409,12 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBufsDest->buffers[0].data != msgBuf->buffers->data);
     ck_assert(msgBufsDest->buffers[0].data[0] == flushData);
     ck_assert(msgBufsDest->buffers[0].length == 1);
-    ck_assert(msgBufsDest->type == TCP_UA_Message_SecureMessage);
-    ck_assert(msgBufsDest->secureType == UA_CloseSecureChannel);
+    ck_assert(msgBufsDest->type == TCP_SOPC_Message_SecureMessage);
+    ck_assert(msgBufsDest->secureType == SOPC_CloseSecureChannel);
     ck_assert(msgBufsDest->currentChunkSize == 9);
     ck_assert(msgBufsDest->nbChunks == 2);
     ck_assert(msgBufsDest->sequenceNumberPosition == 2);
-    ck_assert(msgBufsDest->isFinal == UA_Msg_Chunk_Final);
+    ck_assert(msgBufsDest->isFinal == SOPC_Msg_Chunk_Final);
     ck_assert(msgBufsDest->receivedReqId == 1);
     /////// Check not concerned fields were not copied
     ck_assert(msgBufsDest->maxChunks == 3);
@@ -429,12 +429,12 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBufsDest->buffers[1].data != msgBuf->buffers->data);
     ck_assert(msgBufsDest->buffers[1].data[0] == flushData);
     ck_assert(msgBufsDest->buffers[1].length == 1);
-    ck_assert(msgBufsDest->type == TCP_UA_Message_SecureMessage);
-    ck_assert(msgBufsDest->secureType == UA_CloseSecureChannel);
+    ck_assert(msgBufsDest->type == TCP_SOPC_Message_SecureMessage);
+    ck_assert(msgBufsDest->secureType == SOPC_CloseSecureChannel);
     ck_assert(msgBufsDest->currentChunkSize == 9);
     ck_assert(msgBufsDest->nbChunks == 2);
     ck_assert(msgBufsDest->sequenceNumberPosition == 2);
-    ck_assert(msgBufsDest->isFinal == UA_Msg_Chunk_Final);
+    ck_assert(msgBufsDest->isFinal == SOPC_Msg_Chunk_Final);
     ck_assert(msgBufsDest->receivedReqId == 1);
     /////// Check not concerned fields were not copied
     ck_assert(msgBufsDest->maxChunks == 3);
@@ -661,14 +661,14 @@ START_TEST(test_ua_encoder_basic_types)
     InitPlatformDependencies(); // Necessary to initialize endianess configuration
     SOPC_StatusCode status = STATUS_OK;
     Buffer* buffer = Buffer_Create(100);
-    UA_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
+    SOPC_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
 
     Buffer* buffer2 = Buffer_Create(8);
-    UA_MsgBuffer* msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
+    SOPC_MsgBuffer* msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
 
     // Test Byte nominal and degraded cases
     //// Nominal write
-    UA_Byte byte = 0xAE;
+    SOPC_Byte byte = 0xAE;
     status = Byte_Write(&byte, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0xAE);
@@ -698,15 +698,15 @@ START_TEST(test_ua_encoder_basic_types)
     // Test Boolean nominal and degraded cases
     MsgBuffer_Reset(msgBuffer);
     //// Nominal write
-    UA_Boolean bool = FALSE;
+    SOPC_Boolean bool = FALSE;
     status = Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == FALSE);
-    bool = 1; // not UA_FALSE
+    bool = 1; // not SOPC_FALSE
     status = Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[1] == 1);
-    bool = 2; // not UA_FALSE
+    bool = 2; // not SOPC_FALSE
     status = Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[2] == 1); // True value always encoded as 1
@@ -743,7 +743,7 @@ START_TEST(test_ua_encoder_basic_types)
     // Test SByteuv16nal and degraded cases
     MsgBuffer_Reset(msgBuffer);
     //// Nominal write
-    UA_SByte sbyte = -1;
+    SOPC_SByte sbyte = -1;
     status = SByte_Write(&sbyte, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1060,7 +1060,7 @@ START_TEST(test_ua_encoder_basic_types)
     // Test DateTime nominal and degraded cases
     MsgBuffer_Reset(msgBuffer);
     //// Nominal write
-    UA_DateTime vDate = -2;
+    SOPC_DateTime vDate = -2;
 
     status = DateTime_Write(&vDate, msgBuffer);
     ck_assert(status == STATUS_OK);
@@ -1106,16 +1106,16 @@ START_TEST(test_ua_encoder_other_types)
     InitPlatformDependencies(); // Necessary to initialize endianess configuration
     SOPC_StatusCode status = STATUS_OK;
     Buffer* buffer = Buffer_Create(100);
-    UA_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
+    SOPC_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
 
     Buffer* buffer2 = Buffer_Create(8);
-    UA_MsgBuffer* msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
+    SOPC_MsgBuffer* msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
 
     //////////////////////////////////////////////
     // Test ByteString nominal and degraded cases
     //// Nominal write
-    UA_ByteString* bs = ByteString_Create();
-    UA_ByteString* bs2 = ByteString_Create();
+    SOPC_ByteString* bs = ByteString_Create();
+    SOPC_ByteString* bs2 = ByteString_Create();
     uint8_t boyString[3] = {0x42, 0x6F, 0x79}; // Boy
 
     ////// Empty string
@@ -1236,9 +1236,9 @@ START_TEST(test_ua_encoder_other_types)
     // Test String nominal and degraded cases
     //// Nominal write
     MsgBuffer_Reset(msgBuffer);
-    UA_String str;
+    SOPC_String str;
     String_Initialize(&str);
-    UA_String str2;
+    SOPC_String str2;
     String_Initialize(&str2);
 
     ////// Empty string
@@ -1353,9 +1353,9 @@ START_TEST(test_ua_encoder_other_types)
     // Test XmlElement nominal and degraded cases
     //// Nominal write
     MsgBuffer_Reset(msgBuffer);
-    UA_XmlElement xmlElt;
+    SOPC_XmlElement xmlElt;
     XmlElement_Initialize(&xmlElt);
-    UA_XmlElement xmlElt2;
+    SOPC_XmlElement xmlElt2;
     XmlElement_Initialize(&xmlElt2);
     uint8_t balA[3] = {0x3C, 0x41, 0x3E}; // <A>
 
@@ -1391,7 +1391,7 @@ START_TEST(test_ua_encoder_other_types)
 
     /////// Non empty bytestring
     MsgBuffer_Reset(msgBuffer);
-    xmlElt.Data = malloc(sizeof(UA_Byte) * 3);
+    xmlElt.Data = malloc(sizeof(SOPC_Byte) * 3);
     ck_assert(xmlElt.Data != NULL);
     ck_assert(memcpy(xmlElt.Data, balA, 3) == xmlElt.Data);
     xmlElt.Length = 3;
@@ -1482,9 +1482,9 @@ START_TEST(test_ua_encoder_other_types)
     // Test GUID nominal and degraded cases
     //// Nominal write
     MsgBuffer_Reset(msgBuffer);
-    UA_Guid guid;
+    SOPC_Guid guid;
     Guid_Initialize(&guid);
-    UA_Guid guid2;
+    SOPC_Guid guid2;
     Guid_Initialize(&guid2);
     guid.Data1 = 0x72962B91;
     guid.Data2 = 0xFA75;
@@ -1531,7 +1531,7 @@ START_TEST(test_ua_encoder_other_types)
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = Guid_Read(&guid2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(memcmp(&guid, &guid2, sizeof(UA_Guid)) == 0);
+    ck_assert(memcmp(&guid, &guid2, sizeof(SOPC_Guid)) == 0);
 
     //// Degraded read
     status = Guid_Read(NULL, msgBuffer);
@@ -1548,9 +1548,9 @@ START_TEST(test_ua_encoder_other_types)
     // Test NodeId nominal and degraded cases
     //// Nominal write
     MsgBuffer_Reset(msgBuffer);
-    UA_NodeId nodeId;
+    SOPC_NodeId nodeId;
     NodeId_Initialize(&nodeId);
-    UA_NodeId nodeId2;
+    SOPC_NodeId nodeId2;
     NodeId_Initialize(&nodeId2);
 
     // Two bytes node id

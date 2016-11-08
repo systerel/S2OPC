@@ -17,12 +17,12 @@ typedef struct {
 
 SOPC_StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
                                                void*            callbackData,
-                                               UA_Channel_Event event,
+                                               SOPC_Channel_Event event,
                                                SOPC_StatusCode       status);
 
 SOPC_StatusCode StubClient_ResponseEvent_Callback(UA_Channel         channel,
                                              void*              response,
-                                             UA_EncodeableType* responseType,
+                                             SOPC_EncodeableType* responseType,
  										     void*              callbackData,
  										     SOPC_StatusCode         status);
 

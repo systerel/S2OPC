@@ -14,27 +14,27 @@
 
 typedef void (BuiltInFunction) (void*);
 
-void Boolean_Initialize(UA_Boolean* b){
+void Boolean_Initialize(SOPC_Boolean* b){
     *b = FALSE;
 }
 
-void Boolean_Clear(UA_Boolean* b){
+void Boolean_Clear(SOPC_Boolean* b){
     *b = FALSE;
 }
 
-void SByte_Initialize(UA_SByte* sbyte){
+void SByte_Initialize(SOPC_SByte* sbyte){
     *sbyte = 0;
 }
 
-void SByte_Clear(UA_SByte* sbyte){
+void SByte_Clear(SOPC_SByte* sbyte){
     *sbyte = 0;
 }
 
-void Byte_Initialize(UA_Byte* byte){
+void Byte_Initialize(SOPC_Byte* byte){
     *byte = 0;
 }
 
-void Byte_Clear(UA_Byte* byte){
+void Byte_Clear(SOPC_Byte* byte){
     *byte = 0;
 }
 
@@ -97,7 +97,7 @@ void Double_Clear(double* d){
     *d = 0.0;
 }
 
-void ByteString_Initialize(UA_ByteString* bstring){
+void ByteString_Initialize(SOPC_ByteString* bstring){
     if(bstring != NULL){
         bstring->Length = -1;
         bstring->Data = NULL;
@@ -105,20 +105,20 @@ void ByteString_Initialize(UA_ByteString* bstring){
     }
 }
 
-UA_ByteString* ByteString_Create(){
-    UA_ByteString* bstring = NULL;
-    bstring = (UA_ByteString*) malloc(sizeof(UA_ByteString));
+SOPC_ByteString* ByteString_Create(){
+    SOPC_ByteString* bstring = NULL;
+    bstring = (SOPC_ByteString*) malloc(sizeof(SOPC_ByteString));
     ByteString_Initialize(bstring);
     return bstring;
 }
 
-SOPC_StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size){
+SOPC_StatusCode ByteString_InitializeFixedSize(SOPC_ByteString* bstring, uint32_t size){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(bstring != NULL){
         status = STATUS_OK;
         ByteString_Initialize(bstring);
         bstring->Length = size;
-        bstring->Data = (UA_Byte*) malloc (sizeof(UA_Byte)*size);
+        bstring->Data = (SOPC_Byte*) malloc (sizeof(SOPC_Byte)*size);
         if(bstring->Data != NULL){
             memset(bstring->Data, 0, size);
         }else{
@@ -128,7 +128,7 @@ SOPC_StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t 
     return status;
 }
 
-SOPC_StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length)
+SOPC_StatusCode ByteString_AttachFromBytes(SOPC_ByteString* dest, SOPC_Byte* bytes, int32_t length)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && bytes != NULL
@@ -141,7 +141,7 @@ SOPC_StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, 
     return status;
 }
 
-SOPC_StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
+SOPC_StatusCode ByteString_AttachFrom(SOPC_ByteString* dest, SOPC_ByteString* src)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && src != NULL
@@ -154,13 +154,13 @@ SOPC_StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src)
     return status;
 }
 
-SOPC_StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src){
+SOPC_StatusCode ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && dest->Data == NULL &&
        src != NULL && src->Length > 0){
         status = STATUS_OK;
         dest->Length = src->Length;
-        dest->Data = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->Length);
+        dest->Data = (SOPC_Byte*) malloc (sizeof(SOPC_Byte)*dest->Length);
         if(dest->Data != NULL){
             // No need of secure copy, both have same size here
             memcpy(dest->Data, src->Data, dest->Length);
@@ -171,7 +171,7 @@ SOPC_StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src){
     return status;
 }
 
-void ByteString_Clear(UA_ByteString* bstring){
+void ByteString_Clear(SOPC_ByteString* bstring){
     if(bstring != NULL){
         if(bstring->Data != NULL &&
            bstring->ClearBytes != FALSE){
@@ -181,26 +181,26 @@ void ByteString_Clear(UA_ByteString* bstring){
     }
 }
 
-void ByteString_Delete(UA_ByteString* bstring){
+void ByteString_Delete(SOPC_ByteString* bstring){
     if(bstring != NULL){
         ByteString_Clear(bstring);
         free(bstring);
     }
 }
 
-void String_Initialize(UA_String* string){
-    ByteString_Initialize((UA_ByteString*) string);
+void String_Initialize(SOPC_String* string){
+    ByteString_Initialize((SOPC_ByteString*) string);
 }
 
-UA_String* String_Create(){
-    return (UA_String*) ByteString_Create();
+SOPC_String* String_Create(){
+    return (SOPC_String*) ByteString_Create();
 }
 
-SOPC_StatusCode String_AttachFrom(UA_String* dest, UA_String* src){
-    return ByteString_AttachFrom((UA_ByteString*) dest, (UA_ByteString*) src);
+SOPC_StatusCode String_AttachFrom(SOPC_String* dest, SOPC_String* src){
+    return ByteString_AttachFrom((SOPC_ByteString*) dest, (SOPC_ByteString*) src);
 }
 
-SOPC_StatusCode String_AttachFromCstring(UA_String* dest, char* src){
+SOPC_StatusCode String_AttachFromCstring(SOPC_String* dest, char* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && dest->Data == NULL && src != NULL){
         status = STATUS_OK;
@@ -215,13 +215,13 @@ SOPC_StatusCode String_AttachFromCstring(UA_String* dest, char* src){
     return status;
 }
 
-SOPC_StatusCode String_Copy(UA_String* dest, const UA_String* src){
+SOPC_StatusCode String_Copy(SOPC_String* dest, const SOPC_String* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && dest->Data == NULL && src != NULL){
         // Keep null terminator for C string compatibility
         status = STATUS_OK;
         dest->Length = src->Length;
-        dest->Data = (UA_Byte*) malloc (sizeof(UA_Byte)*dest->Length+1);
+        dest->Data = (SOPC_Byte*) malloc (sizeof(SOPC_Byte)*dest->Length+1);
         if(dest->Data != NULL){
             // No need of secure copy, both have same size here
             memcpy(dest->Data, src->Data, dest->Length);
@@ -233,15 +233,15 @@ SOPC_StatusCode String_Copy(UA_String* dest, const UA_String* src){
     return status;
 }
 
-void String_Clear(UA_String* string){
-    ByteString_Clear((UA_ByteString*) string);
+void String_Clear(SOPC_String* string){
+    ByteString_Clear((SOPC_ByteString*) string);
 }
 
-void String_Delete(UA_String* string){
-    ByteString_Delete((UA_ByteString*) string);
+void String_Delete(SOPC_String* string){
+    ByteString_Delete((SOPC_ByteString*) string);
 }
 
-SOPC_StatusCode String_CopyFromCString(UA_String* string, const char* cString){
+SOPC_StatusCode String_CopyFromCString(SOPC_String* string, const char* cString){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     size_t stringLength = 0;
     size_t idx = 0;
@@ -256,7 +256,7 @@ SOPC_StatusCode String_CopyFromCString(UA_String* string, const char* cString){
             // length without null terminator
             string->Length = stringLength;
             // keep terminator for compatibility with char* strings
-            string->Data = (UA_Byte*) malloc(sizeof(UA_Byte)*(stringLength+1));
+            string->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte)*(stringLength+1));
             if(string->Data != NULL){
                 // Keep null terminator for compatibility with c strings !
                 if(CHAR_BIT == 8){
@@ -278,7 +278,7 @@ SOPC_StatusCode String_CopyFromCString(UA_String* string, const char* cString){
     return status;
 }
 
-SOPC_StatusCode String_InitializeFromCString(UA_String* string, const char* cString){
+SOPC_StatusCode String_InitializeFromCString(SOPC_String* string, const char* cString){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
 
     if(string != NULL){
@@ -290,7 +290,7 @@ SOPC_StatusCode String_InitializeFromCString(UA_String* string, const char* cStr
 }
 
 
-char* String_GetCString(const UA_String* string){
+char* String_GetCString(const SOPC_String* string){
     char* cString = NULL;
     int32_t idx = 0;
     if(string != NULL &&
@@ -311,7 +311,7 @@ char* String_GetCString(const UA_String* string){
     return cString;
 }
 
-const char* String_GetRawCString(const UA_String* string){
+const char* String_GetRawCString(const SOPC_String* string){
     char* cString = NULL;
     if(string != NULL &&
        string->Length > 0)
@@ -326,8 +326,8 @@ const char* String_GetRawCString(const UA_String* string){
     return cString;
 }
 
-SOPC_StatusCode ByteString_Compare(const UA_ByteString* left,
-                              const UA_ByteString* right,
+SOPC_StatusCode ByteString_Compare(const SOPC_ByteString* left,
+                              const SOPC_ByteString* right,
                               int32_t*             comparison)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -355,8 +355,8 @@ SOPC_StatusCode ByteString_Compare(const UA_ByteString* left,
     return status;
 }
 
-uint32_t ByteString_Equal(const UA_ByteString* left,
-                          const UA_ByteString* right)
+uint32_t ByteString_Equal(const SOPC_ByteString* left,
+                          const SOPC_ByteString* right)
 {
     int32_t compare = 0;
     uint32_t result = FALSE;
@@ -368,52 +368,52 @@ uint32_t ByteString_Equal(const UA_ByteString* left,
     return result;
 }
 
-SOPC_StatusCode String_Compare(const UA_String* left,
-                          const UA_String* right,
+SOPC_StatusCode String_Compare(const SOPC_String* left,
+                          const SOPC_String* right,
                           int32_t*         comparison)
 {
 
-    return ByteString_Compare((UA_ByteString*) left,
-                              (UA_ByteString*) right, comparison);
+    return ByteString_Compare((SOPC_ByteString*) left,
+                              (SOPC_ByteString*) right, comparison);
 }
 
-uint32_t String_Equal(const UA_String* left,
-                      const UA_String* right)
+uint32_t String_Equal(const SOPC_String* left,
+                      const SOPC_String* right)
 {
-    return ByteString_Equal((UA_ByteString*) left,
-                              (UA_ByteString*) right);
+    return ByteString_Equal((SOPC_ByteString*) left,
+                              (SOPC_ByteString*) right);
 }
 
-void XmlElement_Initialize(UA_XmlElement* xmlElt){
-    ByteString_Initialize((UA_ByteString*) xmlElt);
+void XmlElement_Initialize(SOPC_XmlElement* xmlElt){
+    ByteString_Initialize((SOPC_ByteString*) xmlElt);
 }
 
-void XmlElement_Clear(UA_XmlElement* xmlElt){
-    ByteString_Clear((UA_ByteString*) xmlElt);
+void XmlElement_Clear(SOPC_XmlElement* xmlElt){
+    ByteString_Clear((SOPC_ByteString*) xmlElt);
 }
 
 
-void DateTime_Initialize(UA_DateTime* dateTime){
+void DateTime_Initialize(SOPC_DateTime* dateTime){
     *dateTime = 0;
 }
 
-void DateTime_Clear(UA_DateTime* dateTime){
+void DateTime_Clear(SOPC_DateTime* dateTime){
     *dateTime = 0;
 }
 
-void Guid_Initialize(UA_Guid* guid){
-    memset(guid, 0, sizeof(UA_Guid));
+void Guid_Initialize(SOPC_Guid* guid){
+    memset(guid, 0, sizeof(SOPC_Guid));
 }
 
-void Guid_Clear(UA_Guid* guid){
-    memset(guid, 0, sizeof(UA_Guid));
+void Guid_Clear(SOPC_Guid* guid){
+    memset(guid, 0, sizeof(SOPC_Guid));
 }
 
-void NodeId_Initialize(UA_NodeId* nodeId){
-    memset(nodeId, 0, sizeof(UA_NodeId));
+void NodeId_Initialize(SOPC_NodeId* nodeId){
+    memset(nodeId, 0, sizeof(SOPC_NodeId));
 }
 
-void NodeId_InitType(UA_NodeId* nodeId, UA_IdentifierType knownIdType){
+void NodeId_InitType(SOPC_NodeId* nodeId, SOPC_IdentifierType knownIdType){
     nodeId->Namespace = 0; // OPCUA namespace
     nodeId->IdentifierType = knownIdType;
     switch(knownIdType){
@@ -432,7 +432,7 @@ void NodeId_InitType(UA_NodeId* nodeId, UA_IdentifierType knownIdType){
     }
 }
 
-void NodeId_Clear(UA_NodeId* nodeId){
+void NodeId_Clear(SOPC_NodeId* nodeId){
     nodeId->Namespace = 0; // OPCUA namespace
     switch(nodeId->IdentifierType){
         case IdentifierType_Numeric:
@@ -451,13 +451,13 @@ void NodeId_Clear(UA_NodeId* nodeId){
     nodeId->IdentifierType = IdentifierType_Numeric;
 }
 
-void ExpandedNodeId_Initialize(UA_ExpandedNodeId* expNodeId){
+void ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId){
     String_Initialize(&expNodeId->NamespaceUri);
     NodeId_Initialize(&expNodeId->NodeId);
     UInt32_Initialize(&expNodeId->ServerIndex);
 }
 
-void ExpandedNodeId_Clear(UA_ExpandedNodeId* expNodeId){
+void ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId){
     String_Initialize(&expNodeId->NamespaceUri);
     NodeId_Initialize(&expNodeId->NodeId);
     UInt32_Initialize(&expNodeId->ServerIndex);
@@ -471,7 +471,7 @@ void StatusCode_Clear(SOPC_StatusCode* status){
     *status = STATUS_OK;
 }
 
-void DiagnosticInfo_Initialize(UA_DiagnosticInfo* diagInfo){
+void DiagnosticInfo_Initialize(SOPC_DiagnosticInfo* diagInfo){
     if(diagInfo != NULL){
         diagInfo->SymbolicId = -1;
         diagInfo->NamespaceUri = -1;
@@ -483,7 +483,7 @@ void DiagnosticInfo_Initialize(UA_DiagnosticInfo* diagInfo){
     }
 }
 
-void DiagnosticInfo_Clear(UA_DiagnosticInfo* diagInfo){
+void DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo){
     if(diagInfo != NULL){
         String_Clear(&diagInfo->AdditionalInfo);
         if(diagInfo->InnerDiagnosticInfo != NULL){
@@ -500,127 +500,127 @@ void DiagnosticInfo_Clear(UA_DiagnosticInfo* diagInfo){
 }
 
 
-void QualifiedName_Initialize(UA_QualifiedName* qname){
+void QualifiedName_Initialize(SOPC_QualifiedName* qname){
     qname->NamespaceIndex = 0;
     String_Initialize(&qname->Name);
 }
 
-void QualifiedName_Clear(UA_QualifiedName* qname){
+void QualifiedName_Clear(SOPC_QualifiedName* qname){
     qname->NamespaceIndex = 0;
     String_Clear(&qname->Name);
 }
 
-void LocalizedText_Initialize(UA_LocalizedText* localizedText){
+void LocalizedText_Initialize(SOPC_LocalizedText* localizedText){
     String_Initialize(&localizedText->Locale);
     String_Initialize(&localizedText->Text);
 }
 
-void LocalizedText_Clear(UA_LocalizedText* localizedText){
+void LocalizedText_Clear(SOPC_LocalizedText* localizedText){
     String_Clear(&localizedText->Locale);
     String_Clear(&localizedText->Text);
 }
 
-void ExtensionObject_Initialize(UA_ExtensionObject* extObj){
-    memset(extObj, 0, sizeof(UA_ExtensionObject));
+void ExtensionObject_Initialize(SOPC_ExtensionObject* extObj){
+    memset(extObj, 0, sizeof(SOPC_ExtensionObject));
     NodeId_Initialize(&extObj->TypeId);
     extObj->Length = -1;
 }
 
-void ExtensionObject_Clear(UA_ExtensionObject* extObj){
+void ExtensionObject_Clear(SOPC_ExtensionObject* extObj){
     NodeId_Clear(&extObj->TypeId);
     switch(extObj->Encoding){
-        case UA_ExtObjBodyEncoding_None:
+        case SOPC_ExtObjBodyEncoding_None:
             break;
-        case UA_ExtObjBodyEncoding_ByteString:
+        case SOPC_ExtObjBodyEncoding_ByteString:
             ByteString_Clear(&extObj->Body.Bstring);
             break;
-        case UA_ExtObjBodyEncoding_XMLElement:
+        case SOPC_ExtObjBodyEncoding_XMLElement:
             XmlElement_Clear(&extObj->Body.Xml);
             break;
-        case UA_ExtObjBodyEncoding_Object:
+        case SOPC_ExtObjBodyEncoding_Object:
             extObj->Body.Object.ObjType->Clear(extObj->Body.Object.Value);
             break;
     }
     extObj->Length = -1;
 }
 
-void ApplyToVariantNonArrayBuiltInType(UA_BuiltinId builtInTypeId,
-                                       UA_VariantValue val,
+void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                       SOPC_VariantValue val,
                                        BuiltInFunction* builtInFunction){
     switch(builtInTypeId){
-        case UA_Boolean_Id:
+        case SOPC_Boolean_Id:
             builtInFunction(&val.Boolean);
             break;
-        case UA_SByte_Id:
+        case SOPC_SByte_Id:
             builtInFunction(&val.Sbyte);
             break;
-        case UA_Byte_Id:
+        case SOPC_Byte_Id:
             builtInFunction(&val.Byte);
             break;
-        case UA_Int16_Id:
+        case SOPC_Int16_Id:
             builtInFunction(&val.Int16);
             break;
-        case UA_UInt16_Id:
+        case SOPC_UInt16_Id:
             builtInFunction(&val.Uint16);
             break;
-        case UA_Int32_Id:
+        case SOPC_Int32_Id:
             builtInFunction(&val.Int32);
             break;
-        case UA_UInt32_Id:
+        case SOPC_UInt32_Id:
             builtInFunction(&val.Uint32);
             break;
-        case UA_Int64_Id:
+        case SOPC_Int64_Id:
             builtInFunction(&val.Int64);
             break;
-        case UA_UInt64_Id:
+        case SOPC_UInt64_Id:
             builtInFunction(&val.Uint64);
             break;
-        case UA_Float_Id:
+        case SOPC_Float_Id:
             builtInFunction(&val.Floatv);
             break;
-        case UA_Double_Id:
+        case SOPC_Double_Id:
             builtInFunction(&val.Doublev);
             break;
-        case UA_String_Id:
+        case SOPC_String_Id:
             builtInFunction(&val.String);
             break;
-        case UA_DateTime_Id:
+        case SOPC_DateTime_Id:
             builtInFunction(&val.Date);
             break;
-        case UA_Guid_Id:
+        case SOPC_Guid_Id:
             builtInFunction(val.Guid);
             break;
-        case UA_ByteString_Id:
+        case SOPC_ByteString_Id:
             builtInFunction(&val.Bstring);
             break;
-        case UA_XmlElement_Id:
+        case SOPC_XmlElement_Id:
             builtInFunction(&val.XmlElt);
             break;
-        case UA_NodeId_Id:
+        case SOPC_NodeId_Id:
             builtInFunction(val.NodeId);
             break;
-        case UA_ExpandedNodeId_Id:
+        case SOPC_ExpandedNodeId_Id:
             builtInFunction(val.ExpNodeId);
             break;
-        case UA_StatusCode_Id:
+        case SOPC_StatusCode_Id:
             builtInFunction(&val.Status);
             break;
-        case UA_QualifiedName_Id:
+        case SOPC_QualifiedName_Id:
             builtInFunction(val.Qname);
             break;
-        case UA_LocalizedText_Id:
+        case SOPC_LocalizedText_Id:
             builtInFunction(val.LocalizedText);
             break;
-        case UA_ExtensionObject_Id:
+        case SOPC_ExtensionObject_Id:
             builtInFunction(val.ExtObject);
             break;
-        case UA_DataValue_Id:
+        case SOPC_DataValue_Id:
             builtInFunction(val.DataValue);
             break;
-        case UA_Variant_Id:
+        case SOPC_Variant_Id:
             assert(FALSE);
             break;
-        case UA_DiagnosticInfo_Id:
+        case SOPC_DiagnosticInfo_Id:
             builtInFunction(val.DiagInfo);
             break;
         default:
@@ -628,133 +628,133 @@ void ApplyToVariantNonArrayBuiltInType(UA_BuiltinId builtInTypeId,
     }
 }
 
-void ApplyToVariantArrayBuiltInType(UA_BuiltinId builtInTypeId,
-                                    UA_VariantArrayValue array,
+void ApplyToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                    SOPC_VariantArrayValue array,
                                     int32_t length,
                                     BuiltInFunction* builtInFunction){
     int32_t idx = 0;
     switch(builtInTypeId){
-        case UA_Boolean_Id:
+        case SOPC_Boolean_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.BooleanArr[idx]);
             }
             break;
-        case UA_SByte_Id:
+        case SOPC_SByte_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.SbyteArr[idx]);
             }
             break;
-        case UA_Byte_Id:
+        case SOPC_Byte_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.ByteArr[idx]);
             }
             break;
-        case UA_Int16_Id:
+        case SOPC_Int16_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.Int16Arr[idx]);
             }
             break;
-        case UA_UInt16_Id:
+        case SOPC_UInt16_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.Uint16Arr[idx]);
             }
             break;
-        case UA_Int32_Id:
+        case SOPC_Int32_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.Int32Arr[idx]);
             }
             break;
-        case UA_UInt32_Id:
+        case SOPC_UInt32_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.Uint32Arr[idx]);
             }
             break;
-        case UA_Int64_Id:
+        case SOPC_Int64_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.Int64Arr[idx]);
             }
             break;
-        case UA_UInt64_Id:
+        case SOPC_UInt64_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.Uint64Arr[idx]);
             }
             break;
-        case UA_Float_Id:
+        case SOPC_Float_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.FloatvArr[idx]);
             }
             break;
-        case UA_Double_Id:
+        case SOPC_Double_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.DoublevArr[idx]);
             }
             break;
-        case UA_String_Id:
+        case SOPC_String_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.StringArr[idx]);
             }
             break;
-        case UA_DateTime_Id:
+        case SOPC_DateTime_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.DateArr[idx]);
             }
             break;
-        case UA_Guid_Id:
+        case SOPC_Guid_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.GuidArr[idx]);
             }
             break;
-        case UA_ByteString_Id:
+        case SOPC_ByteString_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.BstringArr[idx]);
             }
             break;
-        case UA_XmlElement_Id:
+        case SOPC_XmlElement_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.XmlEltArr[idx]);
             }
             break;
-        case UA_NodeId_Id:
+        case SOPC_NodeId_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.NodeIdArr[idx]);
             }
             break;
-        case UA_ExpandedNodeId_Id:
+        case SOPC_ExpandedNodeId_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.ExpNodeIdArr[idx]);
             }
             break;
-        case UA_StatusCode_Id:
+        case SOPC_StatusCode_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.StatusArr[idx]);
             }
             break;
-        case UA_QualifiedName_Id:
+        case SOPC_QualifiedName_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.QnameArr[idx]);
             }
             break;
-        case UA_LocalizedText_Id:
+        case SOPC_LocalizedText_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.LocalizedTextArr[idx]);
             }
             break;
-        case UA_ExtensionObject_Id:
+        case SOPC_ExtensionObject_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.ExtObjectArr[idx]);
             }
             break;
-        case UA_DataValue_Id:
+        case SOPC_DataValue_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.DataValueArr[idx]);
             }
             break;
-        case UA_Variant_Id:
+        case SOPC_Variant_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.VariantArr[idx]);
             }
             break;
-        case UA_DiagnosticInfo_Id:
+        case SOPC_DiagnosticInfo_Id:
             for(idx = 0; idx < length; idx++){
                 builtInFunction(&array.DiagInfoArr[idx]);
             }
@@ -764,86 +764,86 @@ void ApplyToVariantArrayBuiltInType(UA_BuiltinId builtInTypeId,
     }
 }
 
-void Variant_Initialize(UA_Variant* variant){
-    memset(variant, 0, sizeof(UA_Variant));
+void Variant_Initialize(SOPC_Variant* variant){
+    memset(variant, 0, sizeof(SOPC_Variant));
 }
 
-BuiltInFunction* GetBuiltInTypeClearFunction(UA_BuiltinId builtInTypeId){
+BuiltInFunction* GetBuiltInTypeClearFunction(SOPC_BuiltinId builtInTypeId){
     BuiltInFunction* clearFunction = NULL;
     switch(builtInTypeId){
-            case UA_Boolean_Id:
+            case SOPC_Boolean_Id:
                 clearFunction = (BuiltInFunction*) Boolean_Clear;
                 break;
-            case UA_SByte_Id:
+            case SOPC_SByte_Id:
                 clearFunction = (BuiltInFunction*) SByte_Clear;
                 break;
-            case UA_Byte_Id:
+            case SOPC_Byte_Id:
                 clearFunction = (BuiltInFunction*) Byte_Clear;
                 break;
-            case UA_Int16_Id:
+            case SOPC_Int16_Id:
                 clearFunction = (BuiltInFunction*) Int16_Clear;
                 break;
-            case UA_UInt16_Id:
+            case SOPC_UInt16_Id:
                 clearFunction = (BuiltInFunction*) UInt16_Clear;
                 break;
-            case UA_Int32_Id:
+            case SOPC_Int32_Id:
                 clearFunction = (BuiltInFunction*) Int32_Clear;
                 break;
-            case UA_UInt32_Id:
+            case SOPC_UInt32_Id:
                 clearFunction = (BuiltInFunction*) UInt32_Clear;
                 break;
-            case UA_Int64_Id:
+            case SOPC_Int64_Id:
                 clearFunction = (BuiltInFunction*) Int64_Clear;
                 break;
-            case UA_UInt64_Id:
+            case SOPC_UInt64_Id:
                 clearFunction = (BuiltInFunction*) UInt64_Clear;
                 break;
-            case UA_Float_Id:
+            case SOPC_Float_Id:
                 clearFunction = (BuiltInFunction*) Float_Clear;
                 break;
-            case UA_Double_Id:
+            case SOPC_Double_Id:
                 clearFunction = (BuiltInFunction*) Double_Clear;
                 break;
-            case UA_String_Id:
+            case SOPC_String_Id:
                 clearFunction = (BuiltInFunction*) String_Clear;
                 break;
-            case UA_DateTime_Id:
+            case SOPC_DateTime_Id:
                 clearFunction = (BuiltInFunction*) DateTime_Clear;
                 break;
-            case UA_Guid_Id:
+            case SOPC_Guid_Id:
                 clearFunction = (BuiltInFunction*) Guid_Clear;
                 break;
-            case UA_ByteString_Id:
+            case SOPC_ByteString_Id:
                 clearFunction = (BuiltInFunction*) ByteString_Clear;
                 break;
-            case UA_XmlElement_Id:
+            case SOPC_XmlElement_Id:
                 clearFunction = (BuiltInFunction*) XmlElement_Clear;
                 break;
-            case UA_NodeId_Id:
+            case SOPC_NodeId_Id:
                 clearFunction = (BuiltInFunction*) NodeId_Clear;
                 break;
-            case UA_ExpandedNodeId_Id:
+            case SOPC_ExpandedNodeId_Id:
                 clearFunction = (BuiltInFunction*) ExpandedNodeId_Clear;
                 break;
-            case UA_StatusCode_Id:
+            case SOPC_StatusCode_Id:
                 clearFunction = (BuiltInFunction*) StatusCode_Clear;
                 break;
-            case UA_QualifiedName_Id:
+            case SOPC_QualifiedName_Id:
                 clearFunction = (BuiltInFunction*) QualifiedName_Clear;
                 break;
-            case UA_LocalizedText_Id:
+            case SOPC_LocalizedText_Id:
                 clearFunction = (BuiltInFunction*) LocalizedText_Clear;
                 break;
-            case UA_ExtensionObject_Id:
+            case SOPC_ExtensionObject_Id:
                 clearFunction = (BuiltInFunction*) ExtensionObject_Clear;
                 break;
-            case UA_DataValue_Id:
+            case SOPC_DataValue_Id:
                 clearFunction = (BuiltInFunction*) DataValue_Clear;
                 break;
-            case UA_Variant_Id:
+            case SOPC_Variant_Id:
                 clearFunction = (BuiltInFunction*) Variant_Clear;
                 break;
-            case UA_DiagnosticInfo_Id:
+            case SOPC_DiagnosticInfo_Id:
                 clearFunction = (BuiltInFunction*) DiagnosticInfo_Clear;
                 break;
             default:
@@ -852,16 +852,16 @@ BuiltInFunction* GetBuiltInTypeClearFunction(UA_BuiltinId builtInTypeId){
     return clearFunction;
 }
 
-void Variant_Clear(UA_Variant* variant){
+void Variant_Clear(SOPC_Variant* variant){
     BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeMask);
     // Matrix flag => array flag
-    assert(((variant->ArrayTypeMask & UA_VariantArrayMatrixFlag) != 0 &&
-             (variant->ArrayTypeMask & UA_VariantArrayValueFlag) != 0)
-           || ((variant->ArrayTypeMask & UA_VariantArrayMatrixFlag) == 0));
+    assert(((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0 &&
+             (variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0)
+           || ((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) == 0));
 
-    if((variant->ArrayTypeMask & UA_VariantArrayValueFlag) != 0){
+    if((variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0){
         int32_t length = 0;
-        if((variant->ArrayTypeMask & UA_VariantArrayMatrixFlag) != 0){
+        if((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
             int32_t idx = 0;
             for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
                 length *= variant->Value.Matrix.ArrayDimensions[idx];
@@ -883,10 +883,10 @@ void Variant_Clear(UA_Variant* variant){
     }
 }
 
-void DataValue_Initialize(UA_DataValue* dataValue){
-    memset(dataValue, 0, sizeof(UA_DataValue));
+void DataValue_Initialize(SOPC_DataValue* dataValue){
+    memset(dataValue, 0, sizeof(SOPC_DataValue));
 }
-void DataValue_Clear(UA_DataValue* dataValue){
+void DataValue_Clear(SOPC_DataValue* dataValue){
     Variant_Clear(&dataValue->Value);
     StatusCode_Clear(&dataValue->Status);
     dataValue->SourceTimestamp = 0;

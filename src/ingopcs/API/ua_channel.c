@@ -18,11 +18,11 @@
 #include <stdlib.h>
 
 typedef struct {
-    UA_Channel_PfnConnectionStateChanged* callback;
+    SOPC_Channel_PfnConnectionStateChanged* callback;
     void*                                 callbackData;
 } Channel_CallbackData;
 
-Channel_CallbackData* Create_CallbackData(UA_Channel_PfnConnectionStateChanged* callback,
+Channel_CallbackData* Create_CallbackData(SOPC_Channel_PfnConnectionStateChanged* callback,
                                           void*                                 callbackData)
 {
     Channel_CallbackData* result = malloc(sizeof(Channel_CallbackData));
@@ -40,7 +40,7 @@ void Delete_CallbackData(Channel_CallbackData* chCbData){
 // TODO: "atomic" callbackData for multithreading
 typedef struct {
     void*              response;
-    UA_EncodeableType* responseType;
+    SOPC_EncodeableType* responseType;
     SOPC_StatusCode         status;
 } InvokeCallbackData;
 
@@ -54,7 +54,7 @@ InvokeCallbackData* Create_InvokeCallbackData(){
 
 void Set_InvokeCallbackData(InvokeCallbackData* invCbData,
                             void*               response,
-                            UA_EncodeableType*  responseType,
+                            SOPC_EncodeableType*  responseType,
                             SOPC_StatusCode          status)
 {
     invCbData->response = response;
@@ -64,7 +64,7 @@ void Set_InvokeCallbackData(InvokeCallbackData* invCbData,
 
 SOPC_StatusCode Get_InvokeCallbackData(InvokeCallbackData* invCbData,
                                   void**              response,
-                                  UA_EncodeableType** responseType){
+                                  SOPC_EncodeableType** responseType){
     *response = invCbData->response;
     *responseType = invCbData->responseType;
     return invCbData->status;
@@ -77,8 +77,8 @@ void Delete_InvokeCallbackData(InvokeCallbackData* invCbData){
 }
 
 
-SOPC_StatusCode UA_Channel_Create(UA_Channel*               channel,
-                             UA_Channel_SerializerType serialType){
+SOPC_StatusCode SOPC_Channel_Create(SOPC_Channel*               channel,
+                             SOPC_Channel_SerializerType serialType){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(channel != NULL && serialType == ChannelSerializer_Binary){
         *channel = SC_Client_Create();
@@ -91,20 +91,20 @@ SOPC_StatusCode UA_Channel_Create(UA_Channel*               channel,
     return status;
 }
 
-SOPC_StatusCode UA_Channel_Clear(UA_Channel channel){
+SOPC_StatusCode SOPC_Channel_Clear(SOPC_Channel channel){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     // Ensure disconnect called for deallocation
-    status = UA_Channel_Disconnect(channel);
+    status = SOPC_Channel_Disconnect(channel);
     Delete_InvokeCallbackData(cConnection->callbackData);
     SC_Client_Delete(cConnection);
     return status;
 }
 
-SOPC_StatusCode UA_Channel_Delete(UA_Channel* channel){
+SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(channel != NULL){
-        status = UA_Channel_Clear(*channel);
+        status = SOPC_Channel_Clear(*channel);
     }
     return status;
 }
@@ -114,24 +114,24 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
                                SC_ConnectionEvent   event,
                                SOPC_StatusCode           status){
     SOPC_StatusCode retStatus = STATUS_INVALID_PARAMETERS;
-    UA_Channel channel = (UA_Channel) cConnection;
+    SOPC_Channel channel = (SOPC_Channel) cConnection;
     Channel_CallbackData* callbackData = cbData;
-    UA_Channel_Event channelConnectionEvent = ChannelEvent_Invalid;
+    SOPC_Channel_Event channelConnectionEvent = ChannelEvent_Invalid;
 
     switch(event){
-        case UA_ConnectionEvent_Connected:
+        case SOPC_ConnectionEvent_Connected:
             channelConnectionEvent = ChannelEvent_Connected;
             break;
-        case UA_ConnectionEvent_Disconnected:
+        case SOPC_ConnectionEvent_Disconnected:
             channelConnectionEvent = ChannelEvent_Disconnected;
             break;
-        case UA_ConnectionEvent_SecureMessageComplete:
-        case UA_ConnectionEvent_SecureMessageChunk:
-        case UA_ConnectionEvent_SecureMessageAbort:
+        case SOPC_ConnectionEvent_SecureMessageComplete:
+        case SOPC_ConnectionEvent_SecureMessageChunk:
+        case SOPC_ConnectionEvent_SecureMessageAbort:
             // TODO: traces ?
             break;
-        case UA_ConnectionEvent_Invalid:
-        case UA_ConnectionEvent_UnexpectedError:
+        case SOPC_ConnectionEvent_Invalid:
+        case SOPC_ConnectionEvent_UnexpectedError:
             channelConnectionEvent = ChannelEvent_Disconnected;
             break;
     }
@@ -155,7 +155,7 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
     return retStatus;
 }
 
-SOPC_StatusCode UA_Channel_BeginConnect(UA_Channel                            channel,
+SOPC_StatusCode SOPC_Channel_BeginConnect(SOPC_Channel                            channel,
                                    const char*                           url,
                                    const Certificate*                    crt_cli,
                                    const AsymmetricKey*                  key_priv_cli,
@@ -165,7 +165,7 @@ SOPC_StatusCode UA_Channel_BeginConnect(UA_Channel                            ch
                                    int32_t                               requestedLifetime,
                                    OpcUa_MessageSecurityMode             msgSecurityMode,
                                    uint32_t                              networkTimeout,
-                                   UA_Channel_PfnConnectionStateChanged* cb,
+                                   SOPC_Channel_PfnConnectionStateChanged* cb,
                                    void*                                 cbData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -210,12 +210,12 @@ SOPC_StatusCode UA_Channel_BeginConnect(UA_Channel                            ch
     return status;
 }
 
-SOPC_StatusCode UA_Channel_BeginInvokeService(UA_Channel                     channel,
+SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                     channel,
                                          char*                          debugName,
                                          void*                          request,
-                                         UA_EncodeableType*             requestType,
-                                         UA_EncodeableType*             responseType,
-                                         UA_Channel_PfnRequestComplete* cb,
+                                         SOPC_EncodeableType*             requestType,
+                                         SOPC_EncodeableType*             responseType,
+                                         SOPC_Channel_PfnRequestComplete* cb,
                                          void*                          cbData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -244,9 +244,9 @@ SOPC_StatusCode UA_Channel_BeginInvokeService(UA_Channel                     cha
     return status;
 }
 
-SOPC_StatusCode InvokeRequestCompleteCallback(UA_Channel         channel,
+SOPC_StatusCode InvokeRequestCompleteCallback(SOPC_Channel         channel,
                                          void*              response,
-                                         UA_EncodeableType* responseType,
+                                         SOPC_EncodeableType* responseType,
                                          void*              cbData,
                                          SOPC_StatusCode         status){
     SOPC_StatusCode retStatus = STATUS_INVALID_PARAMETERS;
@@ -261,13 +261,13 @@ SOPC_StatusCode InvokeRequestCompleteCallback(UA_Channel         channel,
     return retStatus;
 }
 
-SOPC_StatusCode UA_Channel_InvokeService(UA_Channel          channel,
+SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
                                     char*               debugName,
                                     void*               request,
-                                    UA_EncodeableType*  requestType,
-                                    UA_EncodeableType*  expResponseType,
+                                    SOPC_EncodeableType*  requestType,
+                                    SOPC_EncodeableType*  expResponseType,
                                     void**              response,
-                                    UA_EncodeableType** responseType){
+                                    SOPC_EncodeableType** responseType){
     const uint32_t sleepTimeout = 500;
     uint32_t loopCpt = 0;
     uint8_t receivedEvent = FALSE;
@@ -282,7 +282,7 @@ SOPC_StatusCode UA_Channel_InvokeService(UA_Channel          channel,
         if(invCallbackData != NULL){
             // There is always a request header as first struct field in a request (safe cast)
             timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
-            status = UA_Channel_BeginInvokeService(channel,
+            status = SOPC_Channel_BeginInvokeService(channel,
                                                    debugName,
                                                    request, requestType,
                                                    expResponseType,
@@ -298,16 +298,16 @@ SOPC_StatusCode UA_Channel_InvokeService(UA_Channel          channel,
            loopCpt * sleepTimeout <= timeout)
     {
         loopCpt++;
-#if UA_MULTITHREADED
+#if SOPC_MULTITHREADED
         // just wait for callback called
         //Sleep (sleepTimeout);
         return OpcUa_BadNotImplemented;
 #else
         // TODO: will retrieve any message: is it a problem ?
         // Retrieve received messages on socket
-        status = UA_SocketManager_Loop (UA_SocketManager_GetGlobal(),
+        status = SOPC_SocketManager_Loop (SOPC_SocketManager_GetGlobal(),
                                         sleepTimeout);
-#endif //UA_MULTITHREADED
+#endif //SOPC_MULTITHREADED
         status = Get_InvokeCallbackData(invCallbackData,
                                         response,
                                         responseType);
@@ -323,7 +323,7 @@ SOPC_StatusCode UA_Channel_InvokeService(UA_Channel          channel,
     return status;
 }
 
-SOPC_StatusCode UA_Channel_Disconnect(UA_Channel channel){
+SOPC_StatusCode SOPC_Channel_Disconnect(SOPC_Channel channel){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(channel != NULL){
         status = STATUS_NOK;

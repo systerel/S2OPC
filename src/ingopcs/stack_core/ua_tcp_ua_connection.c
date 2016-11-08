@@ -15,7 +15,7 @@
 #include <ua_encoder.h>
 #include <ua_tcp_ua_low_level.h>
 
-SOPC_StatusCode InitSendBuffer(TCP_UA_Connection* connection){
+SOPC_StatusCode InitSendBuffer(TCP_SOPC_Connection* connection){
     SOPC_StatusCode status = STATUS_NOK;
     if(connection->outputMsgBuffer == NULL){
         Buffer* buf = Buffer_Create(connection->sendBufferSize);
@@ -35,7 +35,7 @@ SOPC_StatusCode InitSendBuffer(TCP_UA_Connection* connection){
     return status;
 }
 
-SOPC_StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
+SOPC_StatusCode InitReceiveBuffer(TCP_SOPC_Connection* connection){
     SOPC_StatusCode status = STATUS_NOK;
     if(connection->inputMsgBuffer == NULL){
         Buffer* buf = Buffer_Create(connection->receiveBufferSize);
@@ -55,15 +55,15 @@ SOPC_StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
     return status;
 }
 
-TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
-    TCP_UA_Connection* connection = NULL;
+TCP_SOPC_Connection* TCP_SOPC_Connection_Create(uint32_t scProtocolVersion){
+    TCP_SOPC_Connection* connection = NULL;
 
     if(tcpProtocolVersion == scProtocolVersion){
-        connection = (TCP_UA_Connection *) malloc(sizeof(TCP_UA_Connection));
+        connection = (TCP_SOPC_Connection *) malloc(sizeof(TCP_SOPC_Connection));
     }
 
     if(connection != NULL){
-        memset (connection, 0, sizeof(TCP_UA_Connection));
+        memset (connection, 0, sizeof(TCP_SOPC_Connection));
         String_Initialize(&connection->url);
         connection->state = TCP_Connection_Disconnected;
         connection->protocolVersion = tcpProtocolVersion;
@@ -74,12 +74,12 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
         connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
-#if UA_MULTITHREADED == UA_FALSE
+#if SOPC_MULTITHREADED == SOPC_FALSE
         connection->socketManager = NULL;
-        UA_SocketManager_Initialize(UA_SocketManager_GetGlobal(), OPCUA_MAXCONNECTIONS);
+        SOPC_SocketManager_Initialize(SOPC_SocketManager_GetGlobal(), OPCUA_MAXCONNECTIONS);
 #else
-        connection->socketManager = UA_SocketManager_Create(1);
-#endif //UA_MULTITHREADED
+        connection->socketManager = SOPC_SocketManager_Create(1);
+#endif //SOPC_MULTITHREADED
 
         if(connection->socketManager != NULL){
             free(connection);
@@ -90,7 +90,7 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
     return connection;
 }
 
-void ResetConnectionState(TCP_UA_Connection* connection){
+void ResetConnectionState(TCP_SOPC_Connection* connection){
     connection->state = TCP_Connection_Disconnected;
     connection->sendBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
     connection->receiveBufferSize = OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE;
@@ -103,11 +103,11 @@ void ResetConnectionState(TCP_UA_Connection* connection){
     MsgBuffer_Delete(&connection->sendingQueue);
 }
 
-void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
+void TCP_SOPC_Connection_Delete(TCP_SOPC_Connection* connection){
     if(connection != NULL){
         String_Clear(&connection->url);
-        UA_SocketManager_Delete(&connection->socketManager);
-        UA_Socket_Close(connection->socket);
+        SOPC_SocketManager_Delete(&connection->socketManager);
+        SOPC_Socket_Close(connection->socket);
         MsgBuffer_Delete(&connection->inputMsgBuffer);
         MsgBuffer_Delete(&connection->outputMsgBuffer);
         MsgBuffer_Delete(&connection->sendingQueue);
@@ -115,13 +115,13 @@ void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
     }
 }
 
-SOPC_StatusCode SendHelloMsg(TCP_UA_Connection* connection){
+SOPC_StatusCode SendHelloMsg(TCP_SOPC_Connection* connection){
     SOPC_StatusCode status = STATUS_NOK;
     status = InitSendBuffer(connection);
     if(status == STATUS_OK){
         // encode message
-        status = TCP_UA_EncodeHeader(connection->outputMsgBuffer,
-                                     TCP_UA_Message_Hello);
+        status = TCP_SOPC_EncodeHeader(connection->outputMsgBuffer,
+                                     TCP_SOPC_Message_Hello);
     }
     if(status == STATUS_OK){
         status = UInt32_Write(&connection->protocolVersion,
@@ -148,23 +148,23 @@ SOPC_StatusCode SendHelloMsg(TCP_UA_Connection* connection){
                               connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = TCP_UA_FinalizeHeader(connection->outputMsgBuffer);
+        status = TCP_SOPC_FinalizeHeader(connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = TCP_UA_FlushMsgBuffer(connection->outputMsgBuffer);
+        status = TCP_SOPC_FlushMsgBuffer(connection->outputMsgBuffer);
     }
     // Check status and manage incorrect sending: close the connection or manage ?
 
     return status;
 }
 
-SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
+SOPC_StatusCode ReceiveAckMsg(TCP_SOPC_Connection* connection){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t tempValue = 0;
     uint32_t modifiedReceiveBuffer = 0;
     if(connection != NULL
        && connection->inputMsgBuffer != NULL){
-        if(connection->inputMsgBuffer->currentChunkSize == TCP_UA_ACK_MSG_LENGTH){
+        if(connection->inputMsgBuffer->currentChunkSize == TCP_SOPC_ACK_MSG_LENGTH){
             // Read protocol version of server
             status = UInt32_Read(&tempValue, connection->inputMsgBuffer);
             if(status == STATUS_OK){
@@ -181,7 +181,7 @@ SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
                 if(status == STATUS_OK){
                     // Adapt send buffer size if needed
                     if(connection->sendBufferSize > tempValue){
-                        if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ // see mantis #3447 for >= instead of >
+                        if(tempValue >= TCP_SOPC_MIN_BUFFER_SIZE){ // see mantis #3447 for >= instead of >
                             connection->sendBufferSize = tempValue;
                             // Adapt send buffer size
                             MsgBuffer_Delete(&connection->outputMsgBuffer);
@@ -201,7 +201,7 @@ SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
                 if(status == STATUS_OK){
                     // Check size and adapt receive buffer size if needed
                     if(connection->receiveBufferSize > tempValue){
-                        if(tempValue >= TCP_UA_MIN_BUFFER_SIZE){ // see mantis #3447 for >= instead of >
+                        if(tempValue >= TCP_SOPC_MIN_BUFFER_SIZE){ // see mantis #3447 for >= instead of >
                             connection->receiveBufferSize = tempValue;
                             modifiedReceiveBuffer = 1;
                         }else{
@@ -249,14 +249,14 @@ SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
     return status;
 }
 
-SOPC_StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
+SOPC_StatusCode ReceiveErrorMsg(TCP_SOPC_Connection* connection){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_StatusCode tmpStatus = STATUS_NOK;
     uint32_t error = 0;
-    UA_String* reason = NULL;
+    SOPC_String* reason = NULL;
     if(connection != NULL && connection->inputMsgBuffer != NULL)
     {
-        if(connection->inputMsgBuffer->currentChunkSize >= TCP_UA_ERR_MIN_MSG_LENGTH)
+        if(connection->inputMsgBuffer->currentChunkSize >= TCP_SOPC_ERR_MIN_MSG_LENGTH)
         {
             // Read error cpde
             status = UInt32_Read(&error, connection->inputMsgBuffer);
@@ -273,7 +273,7 @@ SOPC_StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
     return status;
 }
 
-SOPC_StatusCode OnSocketEvent_CB (UA_Socket*    socket,
+SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket*    socket,
                              uint32_t      socketEvent,
                              void*         callbackData,
                              uint16_t      usPortNumber,
@@ -281,7 +281,7 @@ SOPC_StatusCode OnSocketEvent_CB (UA_Socket*    socket,
     (void) usPortNumber;
     (void) bIsSSL;
     SOPC_StatusCode status = STATUS_NOK;
-    TCP_UA_Connection* connection = (TCP_UA_Connection*) callbackData;
+    TCP_SOPC_Connection* connection = (TCP_SOPC_Connection*) callbackData;
     switch(socketEvent){
         case SOCKET_ACCEPT_EVENT:
             status = STATUS_INVALID_STATE;
@@ -321,17 +321,17 @@ SOPC_StatusCode OnSocketEvent_CB (UA_Socket*    socket,
             break;
         case SOCKET_EXCEPT_EVENT:
             status = STATUS_INVALID_STATE;
-            UA_Socket_Close(connection->socket);
+            SOPC_Socket_Close(connection->socket);
             break;
         case SOCKET_READ_EVENT:
             // Manage message reception
-            status = TCP_UA_ReadData(socket, connection->inputMsgBuffer);
+            status = TCP_SOPC_ReadData(socket, connection->inputMsgBuffer);
             if(status == STATUS_OK){
                 switch(connection->inputMsgBuffer->type){
-                    case(TCP_UA_Message_Hello):
+                    case(TCP_SOPC_Message_Hello):
                         status = STATUS_INVALID_RCV_PARAMETER;
                         break;
-                    case(TCP_UA_Message_Acknowledge):
+                    case(TCP_SOPC_Message_Acknowledge):
                         status = ReceiveAckMsg(connection);
                         if(status == STATUS_OK){
                             if(connection->callback != NULL){
@@ -351,7 +351,7 @@ SOPC_StatusCode OnSocketEvent_CB (UA_Socket*    socket,
                             }
                         }
                         break;
-                    case(TCP_UA_Message_Error):
+                    case(TCP_SOPC_Message_Error):
                         status = ReceiveErrorMsg(connection);
                         if(connection->callback != NULL){
                             connection->callback(connection,
@@ -361,7 +361,7 @@ SOPC_StatusCode OnSocketEvent_CB (UA_Socket*    socket,
                                                  status);
                         }
                         break;
-                    case(TCP_UA_Message_SecureMessage):
+                    case(TCP_SOPC_Message_SecureMessage):
                         if(connection->callback != NULL){
                             connection->callback(connection,
                                                  connection->callbackData,
@@ -370,8 +370,8 @@ SOPC_StatusCode OnSocketEvent_CB (UA_Socket*    socket,
                                                  status);
                         }
                         break;
-                    case(TCP_UA_Message_Unknown):
-                    case(TCP_UA_Message_Invalid):
+                    case(TCP_SOPC_Message_Unknown):
+                    case(TCP_SOPC_Message_Invalid):
                     default:
                         status = STATUS_INVALID_STATE;
                         break;
@@ -442,9 +442,9 @@ SOPC_StatusCode CheckURI (const char* uri){
     return status;
 }
 
-SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
+SOPC_StatusCode TCP_SOPC_Connection_Connect (TCP_SOPC_Connection*          connection,
                                       const char*                 uri,
-                                      TCP_UA_Connection_Event_CB* callback,
+                                      TCP_SOPC_Connection_Event_CB* callback,
                                       void*                       callbackData){
     SOPC_StatusCode status = STATUS_NOK;
     if(connection != NULL &&
@@ -463,8 +463,8 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
                 connection->callback = callback;
                 connection->callbackData = callbackData;
 
-#if UA_MULTITHREADED == UA_FALSE
-                status = UA_SocketManager_CreateClientSocket(UA_SocketManager_GetGlobal(),
+#if SOPC_MULTITHREADED == SOPC_FALSE
+                status = SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager_GetGlobal(),
                                                              uri,
                                                              OnSocketEvent_CB,
                                                              (void*) connection,
@@ -472,13 +472,13 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
 #else
 
                 if(status == STATUS_OK){
-                    status = UA_SocketManager_CreateClientSocket(connection->socketManager,
+                    status = SOPC_SocketManager_CreateClientSocket(connection->socketManager,
                                                                  uri,
                                                                  OnSocketEvent_CB,
                                                                  (void*) connection,
                                                                  &(connection->socket));
                 }
-#endif //UA_MULTITHREADED
+#endif //SOPC_MULTITHREADED
 
             }else{
                 status = STATUS_INVALID_PARAMETERS;
@@ -492,15 +492,15 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
     return status;
 }
 
-void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
-    UA_Socket_Close(connection->socket);
+void TCP_SOPC_Connection_Disconnect(TCP_SOPC_Connection* connection){
+    SOPC_Socket_Close(connection->socket);
     String_Clear(&connection->url);
     connection->callback = NULL;
     connection->callbackData = NULL;
     ResetConnectionState(connection);
 }
 
-uint32_t TCP_UA_Connection_GetReceiveProtocolVersion(TCP_UA_Connection* connection,
+uint32_t TCP_SOPC_Connection_GetReceiveProtocolVersion(TCP_SOPC_Connection* connection,
                                                      uint32_t*          protocolVersion){
     *protocolVersion = connection->receivedProtocolVersion;
     return 1;

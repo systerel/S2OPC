@@ -5,8 +5,8 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_UA_STACK_CSTS_H_
-#define INGOPCS_UA_STACK_CSTS_H_
+#ifndef INGOPCS_SOPC_STACK_CSTS_H_
+#define INGOPCS_SOPC_STACK_CSTS_H_
 
 #include <stdint.h>
 
@@ -57,4 +57,4 @@
 // Maximum number of simultaneous connections managed by stack
 #define OPCUA_MAXCONNECTIONS 150
 
-#endif /* INGOPCS_UA_STACK_CSTS_H_ */
+#endif /* INGOPCS_SOPC_STACK_CSTS_H_ */

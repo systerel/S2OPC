@@ -18,23 +18,23 @@ typedef enum SC_EndpointState
 typedef struct SecurityPolicy
 {
     OpcUa_MessageSecurityMode securityMode;
-    UA_String                 SecurityPolicy;
+    SOPC_String                 SecurityPolicy;
 } SecurityPolicy;
 
 typedef void* SC_EndpointEvent_CB;
 
 typedef struct SC_ServerEndpoint
 {
-    UA_NamespaceTable*   namespaces;
-    UA_EncodeableType*   encodeableTypes;
+    SOPC_NamespaceTable*   namespaces;
+    SOPC_EncodeableType*   encodeableTypes;
     PKIProvider          pkiProvider;
-    UA_Byte*             serverCertificate;
+    SOPC_Byte*             serverCertificate;
     SecretBuffer*        serverKey;
     SC_EndpointState     state;
     SecurityPolicy*      securityPolicies;
     uint32_t             lastSecureChannelId;
     SC_Connection*       secureChannelConnections;
-    TCP_UA_Listener*     transportConnection;
+    TCP_SOPC_Listener*     transportConnection;
     P_Timer              watchdogTimer;
     SC_EndpointEvent_CB* callback;
     void*                callbackData;

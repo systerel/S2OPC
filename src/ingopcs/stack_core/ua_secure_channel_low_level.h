@@ -35,37 +35,37 @@ typedef enum SC_ConnectionState
 
 
 typedef enum {
-    UA_ConnectionEvent_Invalid = 0x00,
-    UA_ConnectionEvent_Connected = 0x01,
-//    UA_ConnectionEvent_Reconnecting, => not the case anymore ? mantis #3371
-    UA_ConnectionEvent_Disconnected = 0x02,
-    UA_ConnectionEvent_SecureMessageComplete = 0x03,
-    UA_ConnectionEvent_SecureMessageChunk = 0x04,
-    UA_ConnectionEvent_SecureMessageAbort = 0x05,
-//    UA_ConnectionEvent_RefillSendQueue, => to be evaluated, socket behavior
-    UA_ConnectionEvent_UnexpectedError = 0x06
+    SOPC_ConnectionEvent_Invalid = 0x00,
+    SOPC_ConnectionEvent_Connected = 0x01,
+//    SOPC_ConnectionEvent_Reconnecting, => not the case anymore ? mantis #3371
+    SOPC_ConnectionEvent_Disconnected = 0x02,
+    SOPC_ConnectionEvent_SecureMessageComplete = 0x03,
+    SOPC_ConnectionEvent_SecureMessageChunk = 0x04,
+    SOPC_ConnectionEvent_SecureMessageAbort = 0x05,
+//    SOPC_ConnectionEvent_RefillSendQueue, => to be evaluated, socket behavior
+    SOPC_ConnectionEvent_UnexpectedError = 0x06
 } SC_ConnectionEvent;
 
 
 typedef struct {
-    TCP_UA_Connection*        transportConnection;
+    TCP_SOPC_Connection*        transportConnection;
     SC_ConnectionState        state;
     uint32_t                  startTime;
-    UA_ByteString             runningAppCertificate;
+    SOPC_ByteString             runningAppCertificate;
     const Certificate*        runningAppPublicKeyCert; // Pointer on upper level param: do not manage allocation on it
     const AsymmetricKey*      runningAppPrivateKey; // Pointer on upper level param: do not manage allocation on it
-    UA_ByteString             otherAppCertificate;
+    SOPC_ByteString             otherAppCertificate;
     const Certificate*        otherAppPublicKeyCert; // Pointer on upper level param: do not manage allocation on it
-    UA_MsgBuffer*             sendingBuffer;
+    SOPC_MsgBuffer*             sendingBuffer;
     uint32_t                  sendingMaxBodySize;
-    UA_MsgBuffers*            receptionBuffers;
+    SOPC_MsgBuffers*            receptionBuffers;
     OpcUa_MessageSecurityMode currentSecuMode;
-    UA_String                 currentSecuPolicy;
+    SOPC_String                 currentSecuPolicy;
     SC_SecurityToken          currentSecuToken;
     SC_SecurityKeySets        currentSecuKeySets;
     CryptoProvider*           currentCryptoProvider;
     OpcUa_MessageSecurityMode precSecuMode;
-    UA_String                 precSecuPolicy;
+    SOPC_String                 precSecuPolicy;
     SC_SecurityToken          precSecuToken;
     SC_SecurityKeySets        precSecuKeySets;
     CryptoProvider*           precCryptoProvider;
@@ -87,61 +87,61 @@ SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
 
 //Configure secure connection regarding the transport connection properties
 SOPC_StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
-                                       UA_NamespaceTable*  namespaceTable,
-                                       UA_EncodeableType** encodeableTypes);
+                                       SOPC_NamespaceTable*  namespaceTable,
+                                       SOPC_EncodeableType** encodeableTypes);
 SOPC_StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
-                                   UA_NamespaceTable*  namespaceTable,
-                                   UA_EncodeableType** encodeableTypes);
+                                   SOPC_NamespaceTable*  namespaceTable,
+                                   SOPC_EncodeableType** encodeableTypes);
 
-SOPC_StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
-                                    UA_SecureMessageType smType,
+SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffer*        msgBuffer,
+                                    SOPC_SecureMessageType smType,
                                     uint32_t             secureChannelId);
 
 SOPC_StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
-                                        UA_String*     securityPolicy);
+                                        SOPC_String*     securityPolicy);
 
 SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
                              uint32_t       isSymmetric);
 
-SOPC_StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode SC_EncodeSequenceHeader(SOPC_MsgBuffer* msgBuffer,
                                    uint32_t      requestId);
 
-SOPC_StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
-                            UA_EncodeableType* encType,
+SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffer*      msgBuffer,
+                            SOPC_EncodeableType* encType,
                             void*              msgBody);
 
-SOPC_StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
-                                   const UA_Byte* data_src,
+SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
+                                   const SOPC_Byte* data_src,
                                    uint32_t       count);
 
-SOPC_StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*    msgBuffer,
-                                   UA_MsgFinalChunk chunkType);
+SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*    msgBuffer,
+                                   SOPC_MsgFinalChunk chunkType);
 
 SOPC_StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
                                     uint32_t       receivedTokenId,
                                     uint32_t*      isPrecCryptoData);
 
 SOPC_StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
-                                  UA_MsgBuffer*  transportBuffer);
+                                  SOPC_MsgBuffer*  transportBuffer);
 
 SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection,
                                         const PKIProvider* pkiProvider,
-                                        UA_MsgBuffer*      transportBuffer,
+                                        SOPC_MsgBuffer*      transportBuffer,
                                         uint32_t           validateSenderCert,
                                         uint32_t*          sequenceNumberPosition);
 
 SOPC_StatusCode SC_DecryptMsg(SC_Connection* scConnection,
-                         UA_MsgBuffer*  transportBuffer,
+                         SOPC_MsgBuffer*  transportBuffer,
                          uint32_t       sequenceNumberPosition,
                          uint32_t       isSymmetric,
                          uint32_t       isPrecCryptoData);
 
-SOPC_StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
-                            UA_NamespaceTable*  namespaceTable,
-                            UA_EncodeableType** knownTypes, // only in case next 2 types not provided
-                            UA_EncodeableType*  respEncType, // expected type
-                            UA_EncodeableType*  errEncType,  // + expected error type (or both null if unknown)
-                            UA_EncodeableType** receivedEncType, // actually received type
+SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
+                            SOPC_NamespaceTable*  namespaceTable,
+                            SOPC_EncodeableType** knownTypes, // only in case next 2 types not provided
+                            SOPC_EncodeableType*  respEncType, // expected type
+                            SOPC_EncodeableType*  errEncType,  // + expected error type (or both null if unknown)
+                            SOPC_EncodeableType** receivedEncType, // actually received type
                             void**              encodeableObj);
 
 SOPC_StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
@@ -154,11 +154,11 @@ SOPC_StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
                                            uint32_t       scProtocolVersion);
 
 SOPC_StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
-                                  UA_EncodeableType* encType,
+                                  SOPC_EncodeableType* encType,
                                   void*              value,
                                   uint32_t           requestId);
 
-SOPC_StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
+SOPC_StatusCode SC_DecodeSymmSecurityHeader(SOPC_MsgBuffer* transportBuffer,
                                        uint32_t*     tokenId,
                                        uint32_t*     snPosition);
 
@@ -167,25 +167,25 @@ SOPC_StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
                                   uint32_t       isPrecCryptoData);
 
 SOPC_StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
-                                   UA_MsgBuffer*  transportMsgBuffer,
+                                   SOPC_MsgBuffer*  transportMsgBuffer,
                                    uint32_t*      requestId);
 
-SOPC_StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
+SOPC_StatusCode SC_CheckPrecChunk(SOPC_MsgBuffers* msgBuffer,
                              uint32_t       requestId,
                              uint8_t*       abortReqPresence,
                              uint32_t*      abortReqId);
 
-SOPC_StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
-                              UA_String*     reason);
+SOPC_StatusCode SC_CheckAbortChunk(SOPC_MsgBuffers* msgBuffer,
+                              SOPC_String*     reason);
 
 // SC_CheckPrecChunk and SC_CheckAbortChunk to be called before calling decode chunk
 // HYP: msgBuffers->isFinal = Intermediate or Final
 // (otherwise could fail on abort chunk or unexpected request id)
-SOPC_StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
+SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
                           uint32_t            requestId,
-                          UA_EncodeableType*  expEncType, // Should not be null for efficiency !
-                          UA_EncodeableType*  errEncType,
-                          UA_EncodeableType** recEncType,
+                          SOPC_EncodeableType*  expEncType, // Should not be null for efficiency !
+                          SOPC_EncodeableType*  errEncType,
+                          SOPC_EncodeableType** recEncType,
                           void**              encObj);
 
 #endif /* INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_ */

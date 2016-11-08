@@ -5,8 +5,8 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_UA_TYPES_H_
-#define INGOPCS_UA_TYPES_H_
+#ifndef INGOPCS_SOPC_TYPES_H_
+#define INGOPCS_SOPC_TYPES_H_
 
 #include <stdint.h>
 
@@ -16,146 +16,146 @@
 
 BEGIN_EXTERN_C
 
-typedef enum UA_BuiltinId {
-    UA_Null_Id            = 0,
-    UA_Boolean_Id         = 1,
-    UA_SByte_Id           = 2,
-    UA_Byte_Id            = 3,
-    UA_Int16_Id           = 4,
-    UA_UInt16_Id          = 5,
-    UA_Int32_Id           = 6,
-    UA_UInt32_Id          = 7,
-    UA_Int64_Id           = 8,
-    UA_UInt64_Id          = 9,
-    UA_Float_Id           = 10,
-    UA_Double_Id          = 11,
-    UA_String_Id          = 12,
-    UA_DateTime_Id        = 13,
-    UA_Guid_Id            = 14,
-    UA_ByteString_Id      = 15,
-    UA_XmlElement_Id      = 16,
-    UA_NodeId_Id          = 17,
-    UA_ExpandedNodeId_Id  = 18,
-    UA_StatusCode_Id      = 19,
-    UA_QualifiedName_Id   = 20,
-    UA_LocalizedText_Id   = 21,
-    UA_ExtensionObject_Id = 22,
-    UA_DataValue_Id       = 23,
-    UA_Variant_Id         = 24,
-    UA_DiagnosticInfo_Id  = 25
-} UA_BuiltinId;
-#define UA_BUILTINID_MAX 25
+typedef enum SOPC_BuiltinId {
+    SOPC_Null_Id            = 0,
+    SOPC_Boolean_Id         = 1,
+    SOPC_SByte_Id           = 2,
+    SOPC_Byte_Id            = 3,
+    SOPC_Int16_Id           = 4,
+    SOPC_UInt16_Id          = 5,
+    SOPC_Int32_Id           = 6,
+    SOPC_UInt32_Id          = 7,
+    SOPC_Int64_Id           = 8,
+    SOPC_UInt64_Id          = 9,
+    SOPC_Float_Id           = 10,
+    SOPC_Double_Id          = 11,
+    SOPC_String_Id          = 12,
+    SOPC_DateTime_Id        = 13,
+    SOPC_Guid_Id            = 14,
+    SOPC_ByteString_Id      = 15,
+    SOPC_XmlElement_Id      = 16,
+    SOPC_NodeId_Id          = 17,
+    SOPC_ExpandedNodeId_Id  = 18,
+    SOPC_StatusCode_Id      = 19,
+    SOPC_QualifiedName_Id   = 20,
+    SOPC_LocalizedText_Id   = 21,
+    SOPC_ExtensionObject_Id = 22,
+    SOPC_DataValue_Id       = 23,
+    SOPC_Variant_Id         = 24,
+    SOPC_DiagnosticInfo_Id  = 25
+} SOPC_BuiltinId;
+#define SOPC_BUILTINID_MAX 25
 
-typedef uint8_t UA_Byte;
+typedef uint8_t SOPC_Byte;
 
-typedef UA_Byte UA_Boolean;
+typedef SOPC_Byte SOPC_Boolean;
 
-typedef int8_t UA_SByte;
+typedef int8_t SOPC_SByte;
 
-typedef struct UA_ByteString {
+typedef struct SOPC_ByteString {
     int32_t   Length;
-    UA_Byte*  Data;
+    SOPC_Byte*  Data;
     uint8_t   ClearBytes; // flag indicating if bytes must be freed
-} UA_ByteString;
+} SOPC_ByteString;
 
 // TODO: modify string representation for binary compatibility ?
 // Check if internal representation used by SDK
-typedef UA_ByteString UA_String;
+typedef SOPC_ByteString SOPC_String;
 
-typedef UA_ByteString UA_XmlElement;
+typedef SOPC_ByteString SOPC_XmlElement;
 
-typedef int64_t UA_DateTime;
+typedef int64_t SOPC_DateTime;
 
-typedef struct UA_Guid {
+typedef struct SOPC_Guid {
     uint32_t Data1;
     uint16_t Data2;
     uint16_t Data3;
-    UA_Byte  Data4[8];
-} UA_Guid;
+    SOPC_Byte  Data4[8];
+} SOPC_Guid;
 
-typedef enum UA_IdentifierType {
+typedef enum SOPC_IdentifierType {
     IdentifierType_Numeric = 0x00,
     IdentifierType_String = 0x01,
     IdentifierType_Guid = 0x02,
     IdentifierType_ByteString = 0x03,
-} UA_IdentifierType;
+} SOPC_IdentifierType;
 
-typedef struct UA_NodeId {
-    uint16_t IdentifierType; // UA_IdentifierType
+typedef struct SOPC_NodeId {
+    uint16_t IdentifierType; // SOPC_IdentifierType
     uint16_t Namespace;
 
     union {
         uint32_t      Numeric;
-        UA_String     String;
-        UA_Guid       Guid;
-        UA_ByteString Bstring;
+        SOPC_String     String;
+        SOPC_Guid       Guid;
+        SOPC_ByteString Bstring;
     } Data;
-} UA_NodeId;
+} SOPC_NodeId;
 
-typedef struct UA_ExpandedNodeId {
-    UA_NodeId NodeId;
-    UA_String NamespaceUri;
+typedef struct SOPC_ExpandedNodeId {
+    SOPC_NodeId NodeId;
+    SOPC_String NamespaceUri;
     uint32_t  ServerIndex;
-} UA_ExpandedNodeId;
+} SOPC_ExpandedNodeId;
 
-typedef struct UA_DiagnosticInfo {
+typedef struct SOPC_DiagnosticInfo {
     int32_t                   SymbolicId;
     int32_t                   NamespaceUri;
     int32_t                   Locale;
     int32_t                   LocalizedText;
-    UA_String                 AdditionalInfo;
+    SOPC_String                 AdditionalInfo;
     SOPC_StatusCode                InnerStatusCode;
-    struct UA_DiagnosticInfo* InnerDiagnosticInfo;
-} UA_DiagnosticInfo;
+    struct SOPC_DiagnosticInfo* InnerDiagnosticInfo;
+} SOPC_DiagnosticInfo;
 
-typedef struct UA_QualifiedName {
+typedef struct SOPC_QualifiedName {
     uint16_t  NamespaceIndex;
-    UA_Byte   Padding[2]; // For type binary compatibility
-    UA_String Name;
-} UA_QualifiedName;
+    SOPC_Byte   Padding[2]; // For type binary compatibility
+    SOPC_String Name;
+} SOPC_QualifiedName;
 
-typedef struct UA_LocalizedText {
-    UA_String Locale;
-    UA_String Text;
-} UA_LocalizedText;
+typedef struct SOPC_LocalizedText {
+    SOPC_String Locale;
+    SOPC_String Text;
+} SOPC_LocalizedText;
 
-typedef enum UA_ExtObjectBodyEncoding {
-    UA_ExtObjBodyEncoding_None = 0x00,
-    UA_ExtObjBodyEncoding_ByteString = 0x01,
-    UA_ExtObjBodyEncoding_XMLElement = 0x02,
-    UA_ExtObjBodyEncoding_Object     = 0x03
-} UA_ExtObjectBodyEncoding;
+typedef enum SOPC_ExtObjectBodyEncoding {
+    SOPC_ExtObjBodyEncoding_None = 0x00,
+    SOPC_ExtObjBodyEncoding_ByteString = 0x01,
+    SOPC_ExtObjBodyEncoding_XMLElement = 0x02,
+    SOPC_ExtObjBodyEncoding_Object     = 0x03
+} SOPC_ExtObjectBodyEncoding;
 
-typedef struct UA_ExtensionObject {
-    UA_NodeId                TypeId;
-    UA_ExtObjectBodyEncoding Encoding;
+typedef struct SOPC_ExtensionObject {
+    SOPC_NodeId                TypeId;
+    SOPC_ExtObjectBodyEncoding Encoding;
 
     union {
-        UA_ByteString Bstring;
-        UA_XmlElement Xml;
+        SOPC_ByteString Bstring;
+        SOPC_XmlElement Xml;
         struct {
             void*              Value;
-            UA_EncodeableType* ObjType;
+            SOPC_EncodeableType* ObjType;
         } Object;
 
     } Body;
 
     int32_t   Length;
 
-} UA_ExtensionObject;
+} SOPC_ExtensionObject;
 
-typedef enum UA_VariantArrayTypeFlag {
-    UA_VariantArrayMatrixFlag = 64, // 2^6 => bit 6
-    UA_VariantArrayValueFlag = 128 // 2^7 => bit 7
-} UA_VariantArrayTypeFlag;
+typedef enum SOPC_VariantArrayTypeFlag {
+    SOPC_VariantArrayMatrixFlag = 64, // 2^6 => bit 6
+    SOPC_VariantArrayValueFlag = 128 // 2^7 => bit 7
+} SOPC_VariantArrayTypeFlag;
 
-struct UA_DataValue;
-struct UA_Variant;
+struct SOPC_DataValue;
+struct SOPC_Variant;
 
-typedef union UA_VariantArrayValue {
-    UA_Boolean*          BooleanArr;
-    UA_SByte*            SbyteArr;
-    UA_Byte*             ByteArr;
+typedef union SOPC_VariantArrayValue {
+    SOPC_Boolean*          BooleanArr;
+    SOPC_SByte*            SbyteArr;
+    SOPC_Byte*             ByteArr;
     int16_t*             Int16Arr;
     uint16_t*            Uint16Arr;
     int32_t*             Int32Arr;
@@ -164,26 +164,26 @@ typedef union UA_VariantArrayValue {
     uint64_t*            Uint64Arr;
     float*               FloatvArr;
     double*              DoublevArr;
-    UA_String*           StringArr;
-    UA_DateTime*         DateArr;
-    UA_Guid*             GuidArr;
-    UA_ByteString*       BstringArr;
-    UA_XmlElement*       XmlEltArr;
-    UA_NodeId*           NodeIdArr;
-    UA_ExpandedNodeId*   ExpNodeIdArr;
+    SOPC_String*           StringArr;
+    SOPC_DateTime*         DateArr;
+    SOPC_Guid*             GuidArr;
+    SOPC_ByteString*       BstringArr;
+    SOPC_XmlElement*       XmlEltArr;
+    SOPC_NodeId*           NodeIdArr;
+    SOPC_ExpandedNodeId*   ExpNodeIdArr;
     SOPC_StatusCode*          StatusArr;
-    UA_QualifiedName*    QnameArr;
-    UA_LocalizedText*    LocalizedTextArr;
-    UA_ExtensionObject*  ExtObjectArr;
-    struct UA_DataValue* DataValueArr;
-    struct UA_Variant*   VariantArr;
-    UA_DiagnosticInfo*   DiagInfoArr; // TODO: not present ?
-} UA_VariantArrayValue;
+    SOPC_QualifiedName*    QnameArr;
+    SOPC_LocalizedText*    LocalizedTextArr;
+    SOPC_ExtensionObject*  ExtObjectArr;
+    struct SOPC_DataValue* DataValueArr;
+    struct SOPC_Variant*   VariantArr;
+    SOPC_DiagnosticInfo*   DiagInfoArr; // TODO: not present ?
+} SOPC_VariantArrayValue;
 
-typedef union UA_VariantValue {
-        UA_Boolean           Boolean;
-        UA_SByte             Sbyte;
-        UA_Byte              Byte;
+typedef union SOPC_VariantValue {
+        SOPC_Boolean           Boolean;
+        SOPC_SByte             Sbyte;
+        SOPC_Byte              Byte;
         int16_t              Int16;
         uint16_t             Uint16;
         int32_t              Int32;
@@ -192,67 +192,67 @@ typedef union UA_VariantValue {
         uint64_t             Uint64;
         float                Floatv;
         double               Doublev;
-        UA_String            String;
-        UA_DateTime          Date;
-        UA_Guid*             Guid;
-        UA_ByteString        Bstring;
-        UA_XmlElement        XmlElt;
-        UA_NodeId*           NodeId;
-        UA_ExpandedNodeId*   ExpNodeId;
+        SOPC_String            String;
+        SOPC_DateTime          Date;
+        SOPC_Guid*             Guid;
+        SOPC_ByteString        Bstring;
+        SOPC_XmlElement        XmlElt;
+        SOPC_NodeId*           NodeId;
+        SOPC_ExpandedNodeId*   ExpNodeId;
         SOPC_StatusCode           Status;
-        UA_QualifiedName*    Qname;
-        UA_LocalizedText*    LocalizedText;
-        UA_ExtensionObject*  ExtObject;
-        struct UA_DataValue* DataValue;
-        UA_DiagnosticInfo*   DiagInfo; // TODO: not present ?
+        SOPC_QualifiedName*    Qname;
+        SOPC_LocalizedText*    LocalizedText;
+        SOPC_ExtensionObject*  ExtObject;
+        struct SOPC_DataValue* DataValue;
+        SOPC_DiagnosticInfo*   DiagInfo; // TODO: not present ?
         struct {
             int32_t              Length;
-            UA_VariantArrayValue Content;
+            SOPC_VariantArrayValue Content;
         } Array;
         struct {
             int32_t              Dimensions;
             int32_t*             ArrayDimensions; // Product of dimensions must be <= INT32_MAX ! (binary arrayLength valid for matrix too)
-            UA_VariantArrayValue Content;
+            SOPC_VariantArrayValue Content;
         } Matrix;
 
-} UA_VariantValue;
+} SOPC_VariantValue;
 
-typedef struct UA_Variant {
-    UA_Byte         BuiltInTypeMask;
-    UA_Byte         ArrayTypeMask;
-    UA_Byte         Padding[2];
-    UA_VariantValue Value;
-} UA_Variant;
+typedef struct SOPC_Variant {
+    SOPC_Byte         BuiltInTypeMask;
+    SOPC_Byte         ArrayTypeMask;
+    SOPC_Byte         Padding[2];
+    SOPC_VariantValue Value;
+} SOPC_Variant;
 
-typedef struct UA_DataValue {
-    UA_Variant  Value;
+typedef struct SOPC_DataValue {
+    SOPC_Variant  Value;
     SOPC_StatusCode  Status;
-    UA_DateTime SourceTimestamp;
-    UA_DateTime ServerTimestamp;
+    SOPC_DateTime SourceTimestamp;
+    SOPC_DateTime ServerTimestamp;
     uint16_t    SourcePicoSeconds;
     uint16_t    ServerPicoSeconds;
-} UA_DataValue;
+} SOPC_DataValue;
 
 #define SECURITY_POLICY_NONE           "http://opcfoundation.org/UA/SecurityPolicy#None"
 #define SECURITY_POLICY_BASIC128RSA15  "http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15"
 #define SECURITY_POLICY_BASIC256       "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SECURITY_POLICY_BASIC256SHA256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 
-typedef enum UA_SecurityPolicy {
+typedef enum SOPC_SecurityPolicy {
     Security_Policy_None = 0,
     Security_Policy_Basic128Rsa15 = 1,
     Security_Policy_Basic256 = 2,
     Security_Policy_Basic256Sha256 = 3,
-} UA_SecurityPolicy;
+} SOPC_SecurityPolicy;
 
-void Boolean_Initialize(UA_Boolean* b);
-void Boolean_Clear(UA_Boolean* b);
+void Boolean_Initialize(SOPC_Boolean* b);
+void Boolean_Clear(SOPC_Boolean* b);
 
-void SByte_Initialize(UA_SByte* sbyte);
-void SByte_Clear(UA_SByte* sbyte);
+void SByte_Initialize(SOPC_SByte* sbyte);
+void SByte_Clear(SOPC_SByte* sbyte);
 
-void Byte_Initialize(UA_Byte* byte);
-void Byte_Clear(UA_Byte* byte);
+void Byte_Initialize(SOPC_Byte* byte);
+void Byte_Clear(SOPC_Byte* byte);
 
 void Int16_Initialize(int16_t* intv);
 void Int16_Clear(int16_t* intv);
@@ -278,81 +278,81 @@ void Float_Clear(float* f);
 void Double_Initialize(double* d);
 void Double_Clear(double* d);
 
-void ByteString_Initialize(UA_ByteString* bstring);
-UA_ByteString* ByteString_Create(void);
-SOPC_StatusCode ByteString_InitializeFixedSize(UA_ByteString* bstring, uint32_t size);
-SOPC_StatusCode ByteString_AttachFromBytes(UA_ByteString* dest, UA_Byte* bytes, int32_t length);
-SOPC_StatusCode ByteString_AttachFrom(UA_ByteString* dest, UA_ByteString* src);
-SOPC_StatusCode ByteString_Copy(UA_ByteString* dest, const UA_ByteString* src);
-void ByteString_Clear(UA_ByteString* bstring);
-void ByteString_Delete(UA_ByteString* bstring);
+void ByteString_Initialize(SOPC_ByteString* bstring);
+SOPC_ByteString* ByteString_Create(void);
+SOPC_StatusCode ByteString_InitializeFixedSize(SOPC_ByteString* bstring, uint32_t size);
+SOPC_StatusCode ByteString_AttachFromBytes(SOPC_ByteString* dest, SOPC_Byte* bytes, int32_t length);
+SOPC_StatusCode ByteString_AttachFrom(SOPC_ByteString* dest, SOPC_ByteString* src);
+SOPC_StatusCode ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src);
+void ByteString_Clear(SOPC_ByteString* bstring);
+void ByteString_Delete(SOPC_ByteString* bstring);
 
-SOPC_StatusCode ByteString_Compare(const UA_ByteString* left,
-                              const UA_ByteString* right,
+SOPC_StatusCode ByteString_Compare(const SOPC_ByteString* left,
+                              const SOPC_ByteString* right,
                               int32_t*             comparison);
 
 // Returns 0 if false
-uint32_t ByteString_Equal(const UA_ByteString* left,
-                          const UA_ByteString* right);
+uint32_t ByteString_Equal(const SOPC_ByteString* left,
+                          const SOPC_ByteString* right);
 
-void String_Initialize(UA_String* string);
-UA_String* String_Create(void);
-SOPC_StatusCode String_CopyFromCString(UA_String* string, const char* cString);
-SOPC_StatusCode String_InitializeFromCString(UA_String* string, const char* cString);
-char* String_GetCString(const UA_String* string); // Copy
-const char* String_GetRawCString(const UA_String* string); // Pointer to string
+void String_Initialize(SOPC_String* string);
+SOPC_String* String_Create(void);
+SOPC_StatusCode String_CopyFromCString(SOPC_String* string, const char* cString);
+SOPC_StatusCode String_InitializeFromCString(SOPC_String* string, const char* cString);
+char* String_GetCString(const SOPC_String* string); // Copy
+const char* String_GetRawCString(const SOPC_String* string); // Pointer to string
 
-SOPC_StatusCode String_AttachFrom(UA_String* dest, UA_String* src);
-SOPC_StatusCode String_AttachFromCstring(UA_String* dest, char* src);
+SOPC_StatusCode String_AttachFrom(SOPC_String* dest, SOPC_String* src);
+SOPC_StatusCode String_AttachFromCstring(SOPC_String* dest, char* src);
 
-SOPC_StatusCode String_Copy(UA_String* dest, const UA_String* src);
-void String_Clear(UA_String* bstring);
-void String_Delete(UA_String* bstring);
+SOPC_StatusCode String_Copy(SOPC_String* dest, const SOPC_String* src);
+void String_Clear(SOPC_String* bstring);
+void String_Delete(SOPC_String* bstring);
 
-SOPC_StatusCode String_Compare(const UA_String* left,
-                          const UA_String* right,
+SOPC_StatusCode String_Compare(const SOPC_String* left,
+                          const SOPC_String* right,
                           int32_t*         comparison);
 
-uint32_t String_Equal(const UA_String* left,
-                      const UA_String* right);
+uint32_t String_Equal(const SOPC_String* left,
+                      const SOPC_String* right);
 
-void XmlElement_Initialize(UA_XmlElement* xmlElt);
-void XmlElement_Clear(UA_XmlElement* xmlElt);
+void XmlElement_Initialize(SOPC_XmlElement* xmlElt);
+void XmlElement_Clear(SOPC_XmlElement* xmlElt);
 
-void DateTime_Initialize(UA_DateTime* dateTime);
-void DateTime_Clear(UA_DateTime* dateTime);
+void DateTime_Initialize(SOPC_DateTime* dateTime);
+void DateTime_Clear(SOPC_DateTime* dateTime);
 
-void Guid_Initialize(UA_Guid* guid);
-void Guid_Clear(UA_Guid* guid);
+void Guid_Initialize(SOPC_Guid* guid);
+void Guid_Clear(SOPC_Guid* guid);
 
-void NodeId_Initialize(UA_NodeId* nodeId);
-void NodeId_InitType(UA_NodeId* nodeId, UA_IdentifierType knownIdType);
-void NodeId_Clear(UA_NodeId* nodeId);
+void NodeId_Initialize(SOPC_NodeId* nodeId);
+void NodeId_InitType(SOPC_NodeId* nodeId, SOPC_IdentifierType knownIdType);
+void NodeId_Clear(SOPC_NodeId* nodeId);
 
-void ExpandedNodeId_Initialize(UA_ExpandedNodeId* expNodeId);
-void ExpandedNodeId_Clear(UA_ExpandedNodeId* expNodeId);
+void ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId);
+void ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId);
 
 void StatusCode_Initialize(SOPC_StatusCode* status);
 void StatusCode_Clear(SOPC_StatusCode* status);
 
-void DiagnosticInfo_Initialize(UA_DiagnosticInfo* diagInfo);
-void DiagnosticInfo_Clear(UA_DiagnosticInfo* diagInfo);
+void DiagnosticInfo_Initialize(SOPC_DiagnosticInfo* diagInfo);
+void DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo);
 
-void QualifiedName_Initialize(UA_QualifiedName* qname);
-void QualifiedName_Clear(UA_QualifiedName* qname);
+void QualifiedName_Initialize(SOPC_QualifiedName* qname);
+void QualifiedName_Clear(SOPC_QualifiedName* qname);
 
-void LocalizedText_Initialize(UA_LocalizedText* localizedText);
-void LocalizedText_Clear(UA_LocalizedText* localizedText);
+void LocalizedText_Initialize(SOPC_LocalizedText* localizedText);
+void LocalizedText_Clear(SOPC_LocalizedText* localizedText);
 
-void ExtensionObject_Initialize(UA_ExtensionObject* extObj);
-void ExtensionObject_Clear(UA_ExtensionObject* extObj);
+void ExtensionObject_Initialize(SOPC_ExtensionObject* extObj);
+void ExtensionObject_Clear(SOPC_ExtensionObject* extObj);
 
-void Variant_Initialize(UA_Variant* variant);
-void Variant_Clear(UA_Variant* variant);
+void Variant_Initialize(SOPC_Variant* variant);
+void Variant_Clear(SOPC_Variant* variant);
 
-void DataValue_Initialize(UA_DataValue* dataValue);
-void DataValue_Clear(UA_DataValue* dataValue);
+void DataValue_Initialize(SOPC_DataValue* dataValue);
+void DataValue_Clear(SOPC_DataValue* dataValue);
 
 END_EXTERN_C
 
-#endif /* INGOPCS_UA_TYPES_H_ */
+#endif /* INGOPCS_SOPC_TYPES_H_ */

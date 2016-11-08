@@ -5,21 +5,21 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_TCP_UA_LISTENER_H_
-#define INGOPCS_TCP_UA_LISTENER_H_
+#ifndef INGOPCS_TCP_SOPC_LISTENER_H_
+#define INGOPCS_TCP_SOPC_LISTENER_H_
 
-typedef void* TCP_UA_ListenerEvent_CB;
+typedef void* TCP_SOPC_ListenerEvent_CB;
 
 typedef struct {
-    UA_String                url;
+    SOPC_String                url;
     uint32_t                 protocolVersion;
-    UA_SocketManager*        socketManager;
-    UA_Socket*               socket;
-    TCP_UA_Connection*       clientConnections;
-    UA_MsgBuffer*            pendingMsgBuffer;
-    TCP_UA_ListenerEvent_CB* eventCB;
+    SOPC_SocketManager*        socketManager;
+    SOPC_Socket*               socket;
+    TCP_SOPC_Connection*       clientConnections;
+    SOPC_MsgBuffer*            pendingMsgBuffer;
+    TCP_SOPC_ListenerEvent_CB* eventCB;
 
-} TCP_UA_Listener;
+} TCP_SOPC_Listener;
 
 
-#endif /* INGOPCS_TCP_UA_LISTENER_H_ */
+#endif /* INGOPCS_TCP_SOPC_LISTENER_H_ */

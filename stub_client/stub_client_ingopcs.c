@@ -26,11 +26,11 @@ int connected = 0;
 
 OpcUa_Handle StubClient_g_pPortLayerHandle = OpcUa_Null;
 
-UA_EncodeableType* newEncType;
+SOPC_EncodeableType* newEncType;
 
-OpcUa_StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
+OpcUa_StatusCode StubClient_ConnectionEvent_Callback(SOPC_Channel       channel,
                                                      void*            callbackData,
-                                                     UA_Channel_Event event,
+                                                     SOPC_Channel_Event event,
                                                      SOPC_StatusCode       status)
 {
     (void) callbackData;
@@ -46,9 +46,9 @@ OpcUa_StatusCode StubClient_ConnectionEvent_Callback(UA_Channel       channel,
     return 0;
 }
 
-OpcUa_StatusCode StubClient_ResponseEvent_Callback(UA_Channel         channel,
+OpcUa_StatusCode StubClient_ResponseEvent_Callback(SOPC_Channel         channel,
                                                    void*              response,
-                                                   UA_EncodeableType* responseType,
+                                                   SOPC_EncodeableType* responseType,
                                                    void*              callbackData,
                                                    SOPC_StatusCode         status){
     (void) callbackData;
@@ -93,7 +93,7 @@ int main(void){
 
     OpcUa_Channel hChannel;
     // Endpoint URL
-    UA_String stEndpointUrl;
+    SOPC_String stEndpointUrl;
     String_Initialize(&stEndpointUrl);
     OpcUa_CharA *sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
     // Transport profile
@@ -148,15 +148,15 @@ int main(void){
 	OpcUa_GotoErrorIfBad(uStatus);
 
 	// Add types
-	newEncType = malloc(sizeof(UA_EncodeableType));
+	newEncType = malloc(sizeof(SOPC_EncodeableType));
 	if(newEncType == NULL){
 	    return STATUS_NOK;
 	}
-	memset(newEncType, 0, sizeof(UA_EncodeableType));
+	memset(newEncType, 0, sizeof(SOPC_EncodeableType));
 	StackConfiguration_AddTypes(&newEncType, 1);
 
     // Create channel object
-    uStatus = UA_Channel_Create(&hChannel, OpcUa_Channel_SerializerType_Binary);
+    uStatus = SOPC_Channel_Create(&hChannel, OpcUa_Channel_SerializerType_Binary);
 	OpcUa_GotoErrorIfBad(uStatus);
 
     printf ("%d\n", uStatus);
@@ -174,7 +174,7 @@ int main(void){
 #endif //OPCUA_MULTITHREADED
 
     // Start connection to server
-    uStatus = UA_Channel_BeginConnect(hChannel,
+    uStatus = SOPC_Channel_BeginConnect(hChannel,
                                       sEndpointUrl,
                                       //sTransportProfileUri,
                                       crt_cli,                      /* Client Certificate       */
@@ -185,7 +185,7 @@ int main(void){
                                       5,                            /* Request lifetime */
                                       messageSecurityMode,          /* Message secu mode */
                                       10,                           /* Network timeout */
-                                      (UA_Channel_PfnConnectionStateChanged*) StubClient_ConnectionEvent_Callback,
+                                      (SOPC_Channel_PfnConnectionStateChanged*) StubClient_ConnectionEvent_Callback,
                                       &Callback_Data);              /* Connect Callback Data   */
 
     OpcUa_GotoErrorIfBad(uStatus);
@@ -198,7 +198,7 @@ int main(void){
     // Local configuration: empty
     // TODO: wrappers for managing OpcUa_String
     //OpcUa_String localId, profileUri;
-    UA_String localId, profileUri;
+    SOPC_String localId, profileUri;
     // Endpoint URL in OPC UA string format
     // TODO: wrappers for managing OpcUa_String
     //const OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
@@ -216,7 +216,7 @@ int main(void){
     	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
-    	uStatus = UA_SocketManager_Loop (UA_SocketManager_GetGlobal(),
+    	uStatus = SOPC_SocketManager_Loop (SOPC_SocketManager_GetGlobal(),
     				                     sleepTimeout);
         printf ("ServerLoop status: %d\n", uStatus);
         OpcUa_GotoErrorIfBad(uStatus);
@@ -242,7 +242,7 @@ int main(void){
                                                 &localId,           // local id
                                                 0,            // No of profile URI
                                                 &profileUri,           // profile uri
-                                                (UA_Channel_PfnRequestComplete*) StubClient_ResponseEvent_Callback, // response call back
+                                                (SOPC_Channel_PfnRequestComplete*) StubClient_ResponseEvent_Callback, // response call back
                                                 &Callback_Data_Get); // call back data
 
     while (noResp && loopCpt * sleepTimeout <= loopTimeout)
@@ -253,7 +253,7 @@ int main(void){
     	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
-    	uStatus = UA_SocketManager_Loop (UA_SocketManager_GetGlobal(),
+    	uStatus = SOPC_SocketManager_Loop (SOPC_SocketManager_GetGlobal(),
     				                     sleepTimeout);
         printf ("ServerLoop status: %d\n", uStatus);
         OpcUa_GotoErrorIfBad(uStatus);
@@ -289,14 +289,14 @@ int main(void){
     KeyManager_Certificate_Free(crt_srv);
     KeyManager_Certificate_Free(crt_ca);
     KeyManager_AsymmetricKey_Free(priv_cli);
-    UA_Channel_Delete(&hChannel);
+    SOPC_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
 
     OpcUa_ReturnStatusCode;
 
     OpcUa_BeginErrorHandling;
     String_Clear(&stEndpointUrl);
-    UA_Channel_Delete(&hChannel);
+    SOPC_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
 
     printf ("Error status: %d\n", uStatus);

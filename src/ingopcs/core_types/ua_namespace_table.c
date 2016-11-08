@@ -17,7 +17,7 @@ const char* OPCUA_NAMESPACE_NAME = "http://opcfoundation.org/UA/";
 
 const int32_t OPCUA_NAMESPACE_NAME_MAXLENGTH = INT32_MAX;
 
-void Namespace_Initialize(UA_NamespaceTable* nsTable){
+void Namespace_Initialize(SOPC_NamespaceTable* nsTable){
     if(nsTable != NULL){
         nsTable->lastIdx = 0;
         nsTable->namespaceArray = NULL;
@@ -25,13 +25,13 @@ void Namespace_Initialize(UA_NamespaceTable* nsTable){
     }
 }
 
-SOPC_StatusCode Namespace_AllocateTable(UA_NamespaceTable* nsTable, uint32_t length){
+SOPC_StatusCode Namespace_AllocateTable(SOPC_NamespaceTable* nsTable, uint32_t length){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(nsTable != NULL){
         status = STATUS_OK;
         nsTable->clearTable = 1; // True
         nsTable->lastIdx = length - 1;
-        nsTable->namespaceArray = malloc(sizeof(UA_Namespace)*length);
+        nsTable->namespaceArray = malloc(sizeof(SOPC_Namespace)*length);
         if(nsTable->namespaceArray == NULL){
             status = STATUS_NOK;
         }
@@ -39,10 +39,10 @@ SOPC_StatusCode Namespace_AllocateTable(UA_NamespaceTable* nsTable, uint32_t len
     return status;
 }
 
-UA_NamespaceTable* Namespace_CreateTable(uint32_t length){
-    UA_NamespaceTable* result = NULL;
+SOPC_NamespaceTable* Namespace_CreateTable(uint32_t length){
+    SOPC_NamespaceTable* result = NULL;
     if(length - 1 <= UINT16_MAX){
-        result = malloc(sizeof(UA_NamespaceTable));
+        result = malloc(sizeof(SOPC_NamespaceTable));
         if(Namespace_AllocateTable(result, length) != STATUS_OK && result != NULL){
             free(result);
             result = NULL;
@@ -51,7 +51,7 @@ UA_NamespaceTable* Namespace_CreateTable(uint32_t length){
     return result;
 }
 
-SOPC_StatusCode Namespace_AttachTable(UA_NamespaceTable* dst, UA_NamespaceTable* src){
+SOPC_StatusCode Namespace_AttachTable(SOPC_NamespaceTable* dst, SOPC_NamespaceTable* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dst != NULL && dst->namespaceArray == NULL &&
        src != NULL && src->namespaceArray != NULL){
@@ -63,12 +63,12 @@ SOPC_StatusCode Namespace_AttachTable(UA_NamespaceTable* dst, UA_NamespaceTable*
     return status;
 }
 
-SOPC_StatusCode Namespace_GetIndex(UA_NamespaceTable* namespaceTable,
+SOPC_StatusCode Namespace_GetIndex(SOPC_NamespaceTable* namespaceTable,
                               const char*        namespaceName,
                               uint16_t*          index)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_Namespace namespaceEntry;
+    SOPC_Namespace namespaceEntry;
     if(namespaceTable != NULL){
         status = STATUS_NOK;
         uint32_t idx = 0;
@@ -83,9 +83,9 @@ SOPC_StatusCode Namespace_GetIndex(UA_NamespaceTable* namespaceTable,
     return status;
 }
 
-const char* Namespace_GetName(UA_NamespaceTable* namespaceTable,
+const char* Namespace_GetName(SOPC_NamespaceTable* namespaceTable,
                               uint16_t index){
-    UA_Namespace namespaceEntry;
+    SOPC_Namespace namespaceEntry;
     char* result = NULL;
     if(namespaceTable != NULL){
         uint32_t idx = 0;
@@ -99,7 +99,7 @@ const char* Namespace_GetName(UA_NamespaceTable* namespaceTable,
     return result;
 }
 
-void Namespace_Clear(UA_NamespaceTable* namespaceTable)
+void Namespace_Clear(SOPC_NamespaceTable* namespaceTable)
 {
     if(namespaceTable != NULL){
         if(namespaceTable->clearTable != FALSE &&
@@ -110,7 +110,7 @@ void Namespace_Clear(UA_NamespaceTable* namespaceTable)
     }
 }
 
-void Namespace_Delete(UA_NamespaceTable* namespaceTable)
+void Namespace_Delete(SOPC_NamespaceTable* namespaceTable)
 {
     if(namespaceTable != NULL){
         Namespace_Clear(namespaceTable);

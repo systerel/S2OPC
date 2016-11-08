@@ -12,9 +12,9 @@
 
 #include <ua_stack_csts.h>
 
-UA_SocketManager globalSocketMgr;
+SOPC_SocketManager globalSocketMgr;
 
-// Counter to check <= UA_MAXCONNECTIONS
+// Counter to check <= SOPC_MAXCONNECTIONS
 static uint32_t globalNbSockets = 0;
 
 SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
@@ -100,16 +100,16 @@ SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
     return status;
 }
 
-UA_SocketManager* UA_SocketManager_GetGlobal(){
+SOPC_SocketManager* SOPC_SocketManager_GetGlobal(){
     return &globalSocketMgr;
 }
 
-UA_SocketManager* UA_SocketManager_Create(uint32_t nbSockets){
-    UA_SocketManager* socketMgr = NULL;
+SOPC_SocketManager* SOPC_SocketManager_Create(uint32_t nbSockets){
+    SOPC_SocketManager* socketMgr = NULL;
     if(nbSockets > 0){
-        socketMgr = malloc(sizeof(UA_SocketManager));
+        socketMgr = malloc(sizeof(SOPC_SocketManager));
         if(socketMgr != NULL){
-            if(STATUS_OK != UA_SocketManager_Initialize(socketMgr, nbSockets)){
+            if(STATUS_OK != SOPC_SocketManager_Initialize(socketMgr, nbSockets)){
                 free(socketMgr);
                 socketMgr = NULL;
             }
@@ -118,7 +118,7 @@ UA_SocketManager* UA_SocketManager_Create(uint32_t nbSockets){
     return socketMgr;
 }
 
-SOPC_StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
+SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
                                        uint32_t          nbSockets){
     uint32_t idx = 0;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -127,10 +127,10 @@ SOPC_StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
 
     // TODO: set lower limit for nbSockets: INT32_MAX just to ensure select returns value <= INT32_MAX (3 sets)
     if(socketMgr != NULL && socketMgr->nbSockets == 0 && nbSockets <= INT32_MAX/3){
-        socketMgr->sockets = malloc(sizeof(UA_Socket) * nbSockets);
+        socketMgr->sockets = malloc(sizeof(SOPC_Socket) * nbSockets);
         if(socketMgr->sockets != NULL){
             status = STATUS_OK;
-            memset(socketMgr->sockets, 0, sizeof(UA_Socket) * nbSockets);
+            memset(socketMgr->sockets, 0, sizeof(SOPC_Socket) * nbSockets);
             socketMgr->nbSockets = nbSockets;
             for(idx = 0; idx < nbSockets; idx++){
                 Socket_Clear(&(socketMgr->sockets[idx].sock));
@@ -141,7 +141,7 @@ SOPC_StatusCode UA_SocketManager_Initialize(UA_SocketManager* socketMgr,
     return status;
 }
 
-void UA_SocketManager_Clear(UA_SocketManager* socketMgr){
+void SOPC_SocketManager_Clear(SOPC_SocketManager* socketMgr){
     if(socketMgr != NULL &&
        socketMgr->nbSockets > 0 &&
        socketMgr->sockets != NULL){
@@ -153,15 +153,15 @@ void UA_SocketManager_Clear(UA_SocketManager* socketMgr){
     }
 }
 
-void UA_SocketManager_Delete(UA_SocketManager** socketMgr){
+void SOPC_SocketManager_Delete(SOPC_SocketManager** socketMgr){
     if(socketMgr != NULL){
-        UA_SocketManager_Clear(*socketMgr);
+        SOPC_SocketManager_Clear(*socketMgr);
         *socketMgr = NULL;
     }
 }
 
-UA_Socket* GetFreeSocket(UA_SocketManager* socketMgr){
-    UA_Socket* result = NULL;
+SOPC_Socket* GetFreeSocket(SOPC_SocketManager* socketMgr){
+    SOPC_Socket* result = NULL;
     size_t idx = 0;
     if(socketMgr != NULL){
         for(idx = 0; idx < socketMgr->nbSockets; idx++){
@@ -173,15 +173,15 @@ UA_Socket* GetFreeSocket(UA_SocketManager* socketMgr){
     return result;
 }
 
-SOPC_StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketManager,
+SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager*  socketManager,
                                                const char*        uri,
-                                               UA_Socket_EventCB  socketCallback,
+                                               SOPC_Socket_EventCB  socketCallback,
                                                void*              callbackData,
-                                               UA_Socket**        clientSocket)
+                                               SOPC_Socket**        clientSocket)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     Socket_AddressInfo *res, *p;
-    UA_Socket* freeSocket;
+    SOPC_Socket* freeSocket;
     SOPC_StatusCode connectStatus = STATUS_NOK;
     char *hostname = NULL;
     char *port = NULL;
@@ -218,7 +218,7 @@ SOPC_StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketMan
                 }
 
                 if(connectStatus != STATUS_OK){
-                    UA_Socket_Close(freeSocket);
+                    SOPC_Socket_Close(freeSocket);
                 }
             }
             status = connectStatus;
@@ -243,16 +243,16 @@ SOPC_StatusCode UA_SocketManager_CreateClientSocket(UA_SocketManager*  socketMan
     return status;
 }
 
-SOPC_StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketManager,
+SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager*  socketManager,
                                                const char*        uri,
                                                uint8_t            listenAllItfs,
-                                               UA_Socket_EventCB  socketCallback,
+                                               SOPC_Socket_EventCB  socketCallback,
                                                void*              callbackData,
-                                               UA_Socket**        clientSocket)
+                                               SOPC_Socket**        clientSocket)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     Socket_AddressInfo *res, *p;
-    UA_Socket* freeSocket;
+    SOPC_Socket* freeSocket;
     SOPC_StatusCode listenStatus = STATUS_NOK;
     char *hostname = NULL;
     char *port = NULL;
@@ -293,7 +293,7 @@ SOPC_StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketMan
                 }
 
                 if(status != STATUS_OK){
-                    UA_Socket_Close(freeSocket);
+                    SOPC_Socket_Close(freeSocket);
                 }
             }
         }
@@ -317,14 +317,14 @@ SOPC_StatusCode UA_SocketManager_CreateServerSocket(UA_SocketManager*  socketMan
     return status;
 }
 
-SOPC_StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
+SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                                  uint32_t          msecTimeout){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
     int32_t nbReady = 0;
-    UA_Socket* uaSock = NULL;
-    UA_Socket* acceptSock = NULL;
-    UA_Socket_EventCB*  callback = NULL;
+    SOPC_Socket* uaSock = NULL;
+    SOPC_Socket* acceptSock = NULL;
+    SOPC_Socket_EventCB*  callback = NULL;
     SocketSet readSet, writeSet, exceptSet;
 
     SocketSet_Clear(&readSet);
@@ -359,7 +359,7 @@ SOPC_StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
             for(idx = 0; idx < socketManager->nbSockets; idx++){
                 uaSock = &(socketManager->sockets[idx]);
                 if(uaSock->isUsed != FALSE){
-                    callback = (UA_Socket_EventCB*) uaSock->eventCallback;
+                    callback = (SOPC_Socket_EventCB*) uaSock->eventCallback;
                     if(uaSock->state == SOCKET_CONNECTING){
                         if(SocketSet_IsPresent(uaSock->sock, &writeSet) != FALSE){
                             // Check connection erros: mandatory when non blocking connection
@@ -369,7 +369,7 @@ SOPC_StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
                                          uaSock->cbData,
                                          0,
                                          0);
-                                UA_Socket_Close(uaSock);
+                                SOPC_Socket_Close(uaSock);
                             }else{
                                 callback(uaSock,
                                          SOCKET_CONNECT_EVENT,
@@ -423,20 +423,20 @@ SOPC_StatusCode UA_SocketManager_Loop(UA_SocketManager* socketManager,
     return status;
 }
 
-int32_t UA_Socket_Write (UA_Socket* socket,
+int32_t SOPC_Socket_Write (SOPC_Socket* socket,
                          uint8_t*   data,
                          uint32_t   count){
     return Socket_Write(socket->sock, data, count);
 }
 
-SOPC_StatusCode UA_Socket_Read (UA_Socket* socket,
+SOPC_StatusCode SOPC_Socket_Read (SOPC_Socket* socket,
                            uint8_t*   data,
                            uint32_t   dataSize,
                            uint32_t*  readCount){
     return Socket_Read(socket->sock, data, dataSize, readCount);
 }
 
-void UA_Socket_Close(UA_Socket* socket){
+void SOPC_Socket_Close(SOPC_Socket* socket){
     if(socket != NULL){
         Socket_Close(&socket->sock);
         socket->isUsed = FALSE;

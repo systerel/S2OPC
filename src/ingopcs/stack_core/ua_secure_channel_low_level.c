@@ -19,33 +19,33 @@
 
 const uint32_t scProtocolVersion = 0;
 
-static const UA_String UA_String_Security_Policy_None = {
+static const SOPC_String SOPC_String_Security_Policy_None = {
         .Length = 47,
-        .Data = (UA_Byte*) SECURITY_POLICY_NONE,
+        .Data = (SOPC_Byte*) SECURITY_POLICY_NONE,
         .ClearBytes = FALSE
 };
 
-static const UA_String UA_String_Security_Policy_Basic128Rsa15 = {
+static const SOPC_String SOPC_String_Security_Policy_Basic128Rsa15 = {
         .Length = 56,
-        .Data = (UA_Byte*) SECURITY_POLICY_BASIC128RSA15,
+        .Data = (SOPC_Byte*) SECURITY_POLICY_BASIC128RSA15,
         .ClearBytes = FALSE
 };
 
-static const UA_String UA_String_Security_Policy_Basic256 = {
+static const SOPC_String SOPC_String_Security_Policy_Basic256 = {
         .Length = 51,
-        .Data = (UA_Byte*) SECURITY_POLICY_BASIC256,
+        .Data = (SOPC_Byte*) SECURITY_POLICY_BASIC256,
         .ClearBytes = FALSE
 };
 
-static const UA_String UA_String_Security_Policy_Basic256Sha256 = {
+static const SOPC_String SOPC_String_Security_Policy_Basic256Sha256 = {
         .Length = 57,
-        .Data = (UA_Byte*) SECURITY_POLICY_BASIC256SHA256,
+        .Data = (SOPC_Byte*) SECURITY_POLICY_BASIC256SHA256,
         .ClearBytes = FALSE
 };
 
 SC_Connection* SC_Create (){
     SC_Connection* sConnection = NULL;
-    TCP_UA_Connection* connection = TCP_UA_Connection_Create(scProtocolVersion);
+    TCP_SOPC_Connection* connection = TCP_SOPC_Connection_Create(scProtocolVersion);
 
     if(connection != NULL){
         sConnection = (SC_Connection *) malloc(sizeof(SC_Connection));
@@ -60,7 +60,7 @@ SC_Connection* SC_Create (){
             ByteString_Initialize(&sConnection->precSecuPolicy);
 
         }else{
-            TCP_UA_Connection_Delete(connection);
+            TCP_SOPC_Connection_Delete(connection);
         }
     }
     return sConnection;
@@ -85,7 +85,7 @@ void SC_Delete (SC_Connection* scConnection){
         }
         if(scConnection->transportConnection != NULL)
         {
-            TCP_UA_Connection_Delete(scConnection->transportConnection);
+            TCP_SOPC_Connection_Delete(scConnection->transportConnection);
         }
         String_Clear(&scConnection->currentSecuPolicy);
         ByteString_Clear(&scConnection->precSecuPolicy);
@@ -141,8 +141,8 @@ SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
 }
 
 SOPC_StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
-                                       UA_NamespaceTable*  namespaceTable,
-                                       UA_EncodeableType** encodeableTypes)
+                                       SOPC_NamespaceTable*  namespaceTable,
+                                       SOPC_EncodeableType** encodeableTypes)
 {
     SOPC_StatusCode status = STATUS_INVALID_STATE;
     if(scConnection->receptionBuffers == NULL){
@@ -178,11 +178,11 @@ SOPC_StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
 }
 
 SOPC_StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
-                                   UA_NamespaceTable*  namespaceTable,
-                                   UA_EncodeableType** encodeableTypes)
+                                   SOPC_NamespaceTable*  namespaceTable,
+                                   SOPC_EncodeableType** encodeableTypes)
 {
     SOPC_StatusCode status = STATUS_NOK;
-    UA_MsgBuffer* msgBuffer;
+    SOPC_MsgBuffer* msgBuffer;
     if(scConnection->sendingBuffer == NULL){
         Buffer* buf = Buffer_Create(scConnection->transportConnection->sendBufferSize);
         msgBuffer = MsgBuffer_Create(buf,
@@ -210,27 +210,27 @@ uint8_t Is_ExtraPaddingSizePresent(uint32_t plainBlockSize){
     return plainBlockSize > 256;
 }
 
-SOPC_StatusCode GetAsymmBlocksSizes(UA_String* securityPolicyUri,
+SOPC_StatusCode GetAsymmBlocksSizes(SOPC_String* securityPolicyUri,
                                uint32_t   keySize,
                                uint32_t*  cipherTextBlockSize,
                                uint32_t*  plainTextBlockSize){
     SOPC_StatusCode status = STATUS_OK;
     const uint32_t sha1outputLength = 20; // bytes (160 bits)
 
-    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != FALSE)
+    if(String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_None) != FALSE)
     {
         *cipherTextBlockSize = 1;
         *plainTextBlockSize = 1;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != FALSE){
+    }else if(String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic128Rsa15) != FALSE){
         // RSA 1.5: RSA spec 7.2.1 (https://tools.ietf.org/html/rfc3447)
         *cipherTextBlockSize = keySize;
         *plainTextBlockSize = keySize - 11;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != FALSE){
+    }else if(String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic256) != FALSE){
         // RSA OAEP: RSA spec 7.1.1 (https://tools.ietf.org/html/rfc3447)
         // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
         *cipherTextBlockSize = keySize;
         *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
-   }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != FALSE){
+   }else if(String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic256Sha256) != FALSE){
        // RSA OAEP: RSA spec 7.1.1 (https://tools.ietf.org/html/rfc3447)
        // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
        *cipherTextBlockSize = keySize;
@@ -241,27 +241,27 @@ SOPC_StatusCode GetAsymmBlocksSizes(UA_String* securityPolicyUri,
    return status;
 }
 
-uint32_t GetAsymmSignatureSize(UA_String* securityPolicyUri,
+uint32_t GetAsymmSignatureSize(SOPC_String* securityPolicyUri,
                                uint32_t   privateKeySize)
 {
     uint32_t signatureSize = 0;
-    if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_None) != FALSE)
+    if(String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_None) != FALSE)
     {
         signatureSize = 0;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic128Rsa15) != FALSE){
+    }else if(String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic128Rsa15) != FALSE){
         // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
         signatureSize = privateKeySize;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256) != FALSE){
+    }else if(String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic256) != FALSE){
         // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
         signatureSize = privateKeySize;
-    }else if(String_Equal(securityPolicyUri, &UA_String_Security_Policy_Basic256Sha256) != FALSE){
+    }else if(String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic256Sha256) != FALSE){
         // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
         signatureSize = privateKeySize;
     }
     return signatureSize;
 }
 
-uint32_t GetMaxBodySize(UA_MsgBuffer* msgBuffer,
+uint32_t GetMaxBodySize(SOPC_MsgBuffer* msgBuffer,
                         uint32_t     cipherBlockSize,
                         uint32_t     plainBlockSize,
                         uint32_t     signatureSize)
@@ -283,7 +283,7 @@ uint32_t GetMaxBodySize(UA_MsgBuffer* msgBuffer,
     }
 
     // MaxBodySize = unCiphered block size * max blocs - sequence header -1 for PaddingSize field(s)
-    return plainBlockSize * maxBlocks - UA_SECURE_MESSAGE_SEQUENCE_LENGTH - signatureSize - paddingSizeFields;
+    return plainBlockSize * maxBlocks - SOPC_SECURE_MESSAGE_SEQUENCE_LENGTH - signatureSize - paddingSizeFields;
 }
 
 // Get information from internal properties
@@ -337,14 +337,14 @@ SOPC_StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
 // Check OPCUA cryptographic properties
 
 uint32_t IsMsgEncrypted(OpcUa_MessageSecurityMode securityMode,
-                        UA_MsgBuffer*             msgBuffer)
+                        SOPC_MsgBuffer*             msgBuffer)
 {
     assert(securityMode != OpcUa_MessageSecurityMode_Invalid);
     uint32_t toEncrypt = 1; // True
     // Determine if the message must be encrypted
     if(securityMode == OpcUa_MessageSecurityMode_None ||
        (securityMode == OpcUa_MessageSecurityMode_Sign &&
-        msgBuffer->secureType != UA_OpenSecureChannel))
+        msgBuffer->secureType != SOPC_OpenSecureChannel))
     {
         toEncrypt = FALSE;
     }
@@ -363,9 +363,9 @@ uint32_t IsMsgSigned(OpcUa_MessageSecurityMode securityMode)
     return toSign;
 }
 
-SOPC_StatusCode CheckMaxSenderCertificateSize(UA_ByteString*  senderCertificate,
+SOPC_StatusCode CheckMaxSenderCertificateSize(SOPC_ByteString*  senderCertificate,
                                          uint32_t        messageChunkSize,
-                                         UA_String*      securityPolicyUri,
+                                         SOPC_String*      securityPolicyUri,
                                          uint8_t         hasPadding,
                                          uint32_t        padding,
                                          uint32_t        extraPadding,
@@ -373,7 +373,7 @@ SOPC_StatusCode CheckMaxSenderCertificateSize(UA_ByteString*  senderCertificate,
     SOPC_StatusCode status = STATUS_NOK;
     int32_t maxSize = // Fit in a single message chunk with at least 1 byte of body
      messageChunkSize -
-     UA_SECURE_MESSAGE_HEADER_LENGTH -
+     SOPC_SECURE_MESSAGE_HEADER_LENGTH -
      4 - // URI length field size
      securityPolicyUri->Length -
      4 - // Sender certificate length field
@@ -484,34 +484,34 @@ SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
 
 //// End cryptographic properties helpers
 
-SOPC_StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
-                                    UA_SecureMessageType smType,
+SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffer*        msgBuffer,
+                                    SOPC_SecureMessageType smType,
                                     uint32_t             secureChannelId)
 {
     SOPC_StatusCode status = STATUS_NOK;
-    UA_Byte fByte = 'F';
+    SOPC_Byte fByte = 'F';
     if(msgBuffer != NULL){
         status = STATUS_OK;
         switch(smType){
-                case UA_SecureMessage:
+                case SOPC_SecureMessage:
                     status = Buffer_Write(msgBuffer->buffers, MSG, 3);
                     break;
-                case UA_OpenSecureChannel:
+                case SOPC_OpenSecureChannel:
                     status = Buffer_Write(msgBuffer->buffers, OPN, 3);
                     break;
-                case UA_CloseSecureChannel:
+                case SOPC_CloseSecureChannel:
                     status = Buffer_Write(msgBuffer->buffers, CLO, 3);
                     break;
         }
         status = MsgBuffer_SetSecureMsgType(msgBuffer, smType);
         if(status == STATUS_OK){
-            // Default behavior: final except if too long for UA_SecureMessage only !
+            // Default behavior: final except if too long for SOPC_SecureMessage only !
             status = Buffer_Write(msgBuffer->buffers, &fByte, 1);
         }
         if(status == STATUS_OK){
-            msgBuffer->isFinal = UA_Msg_Chunk_Final;
+            msgBuffer->isFinal = SOPC_Msg_Chunk_Final;
             // Temporary message size
-            const uint32_t msgHeaderLength = UA_SECURE_MESSAGE_HEADER_LENGTH;
+            const uint32_t msgHeaderLength = SOPC_SECURE_MESSAGE_HEADER_LENGTH;
             status = UInt32_Write(&msgHeaderLength, msgBuffer);
         }
         if(status == STATUS_OK){
@@ -526,7 +526,7 @@ SOPC_StatusCode SC_EncodeSecureMsgHeader(UA_MsgBuffer*        msgBuffer,
     return status;
 }
 
-SOPC_StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode SC_EncodeSequenceHeader(SOPC_MsgBuffer* msgBuffer,
                                    uint32_t      requestId){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t zero = 0;
@@ -548,10 +548,10 @@ SOPC_StatusCode SC_EncodeSequenceHeader(UA_MsgBuffer* msgBuffer,
 }
 
 SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvider,
-                                     UA_MsgBuffer*             msgBuffer,
+                                     SOPC_MsgBuffer*             msgBuffer,
                                      OpcUa_MessageSecurityMode secuMode,
-                                     UA_String*                securityPolicy,
-                                     UA_ByteString*            senderCertificate,
+                                     SOPC_String*                securityPolicy,
+                                     SOPC_ByteString*            senderCertificate,
                                      const Certificate*        receiverCertCrypto){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toEncrypt = 1; // True
@@ -594,7 +594,7 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
     // Receiver Certificate Thumbprint:
     if(status == STATUS_OK){
         if(toEncrypt != FALSE && receiverCertCrypto != NULL){
-            UA_ByteString recCertThumbprint;
+            SOPC_ByteString recCertThumbprint;
             uint32_t thumbprintLength = 0;
             status = CryptoProvider_CertificateGetLength_Thumbprint(cryptoProvider, &thumbprintLength);
 
@@ -635,7 +635,7 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
 }
 
 SOPC_StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
-                                        UA_String*     securityPolicy){
+                                        SOPC_String*     securityPolicy){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(scConnection != NULL)
     {
@@ -650,12 +650,12 @@ SOPC_StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
     return status;
 }
 
-SOPC_StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
-                            UA_EncodeableType* encType,
+SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffer*      msgBuffer,
+                            SOPC_EncodeableType* encType,
                             void*              msgBody)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_NodeId nodeId;
+    SOPC_NodeId nodeId;
     NodeId_Initialize(&nodeId);
 
     if(msgBuffer != NULL && msgBody != NULL &&
@@ -676,8 +676,8 @@ SOPC_StatusCode SC_EncodeMsgBody(UA_MsgBuffer*      msgBuffer,
     return status;
 }
 
-SOPC_StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
-                                   const UA_Byte* data_src,
+SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
+                                   const SOPC_Byte* data_src,
                                    uint32_t       count){
     SC_Connection* scConnection = NULL;
     SOPC_StatusCode status = STATUS_NOK;
@@ -689,13 +689,13 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
         scConnection = (SC_Connection*) msgBuffer->flushData;
         if(msgBuffer->buffers->position + count >
             msgBuffer->sequenceNumberPosition +
-            UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+            SOPC_SECURE_MESSAGE_SEQUENCE_LENGTH +
             scConnection->sendingMaxBodySize)
         {
             // Precedent position cannot be greater than message size:
             //  otherwise it means size has not been checked precedent time (it could occurs only when writing headers)
             assert(msgBuffer->sequenceNumberPosition +
-                    UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+                    SOPC_SECURE_MESSAGE_SEQUENCE_LENGTH +
                     scConnection->sendingMaxBodySize >= msgBuffer->buffers->position);
             if(msgBuffer->maxChunks != 0 && msgBuffer->nbChunks + 1 > msgBuffer->maxChunks){
                 // TODO: send an abort message instead of message !!!
@@ -703,7 +703,7 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
             }else{
                 // Fulfill buffer with maximum amount of bytes
                 uint32_t tmpCount = // Maximum Count - Precedent Count => Count to write
-                 (msgBuffer->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+                 (msgBuffer->sequenceNumberPosition + SOPC_SECURE_MESSAGE_SEQUENCE_LENGTH +
                   scConnection->sendingMaxBodySize) - msgBuffer->buffers->position;
                 count = count - tmpCount;
                 status = Buffer_Write(msgBuffer->buffers, data_src, tmpCount);
@@ -711,14 +711,14 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
                 // Flush it !
                 if(status == STATUS_OK){
                     status = SC_FlushSecureMsgBuffer(msgBuffer,
-                                                     UA_Msg_Chunk_Intermediate);
+                                                     SOPC_Msg_Chunk_Intermediate);
                 }
 
                 if(status == STATUS_OK){
                     status = MsgBuffer_ResetNextChunk
                               (msgBuffer,
                                msgBuffer->sequenceNumberPosition +
-                                UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+                                SOPC_SECURE_MESSAGE_SEQUENCE_LENGTH);
                 }
             }
         }
@@ -729,13 +729,13 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(UA_MsgBuffer*  msgBuffer,
     return status;
 }
 
-SOPC_StatusCode Set_Message_Length(UA_MsgBuffer* msgBuffer,
+SOPC_StatusCode Set_Message_Length(SOPC_MsgBuffer* msgBuffer,
                               uint32_t      msgLength){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t originPosition = 0;
     if(msgBuffer != NULL && msgLength < msgBuffer->buffers->max_size){
         originPosition = msgBuffer->buffers->position;
-        status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
+        status = Buffer_SetPosition(msgBuffer->buffers, SOPC_HEADER_LENGTH_POSITION);
     }
     if(status == STATUS_OK){
         status = UInt32_Write(&msgLength, msgBuffer);
@@ -747,25 +747,25 @@ SOPC_StatusCode Set_Message_Length(UA_MsgBuffer* msgBuffer,
     return status;
 }
 
-SOPC_StatusCode Set_Message_Chunk_Type(UA_MsgBuffer*    msgBuffer,
-                                  UA_MsgFinalChunk chunkType){
+SOPC_StatusCode Set_Message_Chunk_Type(SOPC_MsgBuffer*    msgBuffer,
+                                  SOPC_MsgFinalChunk chunkType){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t originPosition = 0;
 
     if(msgBuffer != NULL){
         originPosition = msgBuffer->buffers->position;
-        status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_ISFINAL_POSITION);
+        status = Buffer_SetPosition(msgBuffer->buffers, SOPC_HEADER_ISFINAL_POSITION);
     }
 
-    UA_Byte chunkTypeByte;
+    SOPC_Byte chunkTypeByte;
     switch(chunkType){
-        case UA_Msg_Chunk_Final:
+        case SOPC_Msg_Chunk_Final:
             chunkTypeByte = 'F';
             break;
-        case UA_Msg_Chunk_Intermediate:
+        case SOPC_Msg_Chunk_Intermediate:
             chunkTypeByte = 'C';
             break;
-        case UA_Msg_Chunk_Abort:
+        case SOPC_Msg_Chunk_Abort:
             chunkTypeByte = 'A';
             break;
         default:
@@ -773,7 +773,7 @@ SOPC_StatusCode Set_Message_Chunk_Type(UA_MsgBuffer*    msgBuffer,
     }
 
     if(status == STATUS_OK){
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, &chunkTypeByte, 1);
+        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, &chunkTypeByte, 1);
     }
 
     if(status == STATUS_OK){
@@ -783,7 +783,7 @@ SOPC_StatusCode Set_Message_Chunk_Type(UA_MsgBuffer*    msgBuffer,
     return status;
 }
 
-SOPC_StatusCode Set_Sequence_Number(UA_MsgBuffer* msgBuffer){
+SOPC_StatusCode Set_Sequence_Number(SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_Connection* scConnection = NULL;
     uint32_t originPosition = 0;
@@ -812,7 +812,7 @@ SOPC_StatusCode Set_Sequence_Number(UA_MsgBuffer* msgBuffer){
 }
 
 SOPC_StatusCode EncodePadding(SC_Connection* scConnection,
-                          UA_MsgBuffer* msgBuffer,
+                          SOPC_MsgBuffer* msgBuffer,
                           uint8_t       symmetricAlgo,
                           uint8_t*      hasPadding,
                           uint16_t*     realPaddingLength, // >= paddingSizeField
@@ -869,12 +869,12 @@ SOPC_StatusCode EncodePadding(SC_Connection* scConnection,
                                             *signatureSize);
         //Little endian conversion of padding:
         EncodeDecode_UInt16(realPaddingLength);
-        status = Buffer_Write(msgBuffer->buffers, (UA_Byte*) realPaddingLength, 1);
+        status = Buffer_Write(msgBuffer->buffers, (SOPC_Byte*) realPaddingLength, 1);
         paddingSizeField = 0xFF & *realPaddingLength;
 
         if(status == STATUS_OK){
             // The value of each byte of the padding is equal to paddingSize:
-            UA_Byte paddingBytes[*realPaddingLength];
+            SOPC_Byte paddingBytes[*realPaddingLength];
             memset(paddingBytes, paddingSizeField, *realPaddingLength);
             status = Buffer_Write(msgBuffer->buffers, paddingBytes, *realPaddingLength);
         }
@@ -883,7 +883,7 @@ SOPC_StatusCode EncodePadding(SC_Connection* scConnection,
         if(status == STATUS_OK && Is_ExtraPaddingSizePresent(plainBlockSize) != FALSE){
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
-            UA_Byte extraPadding = 0x00FF & *realPaddingLength;
+            SOPC_Byte extraPadding = 0x00FF & *realPaddingLength;
             Buffer_Write(msgBuffer->buffers, &extraPadding, 1);
         }
     }
@@ -892,12 +892,12 @@ SOPC_StatusCode EncodePadding(SC_Connection* scConnection,
 }
 
 SOPC_StatusCode EncodeSignature(SC_Connection* scConnection,
-                           UA_MsgBuffer* msgBuffer,
+                           SOPC_MsgBuffer* msgBuffer,
                            uint8_t       symmetricAlgo,
                            uint32_t      signatureSize)
 {
     SOPC_StatusCode status = STATUS_OK;
-    UA_ByteString signedData;
+    SOPC_ByteString signedData;
     if(symmetricAlgo == FALSE){
         if(scConnection->runningAppCertificate.Length <= 0 ||
            scConnection->runningAppPrivateKey == NULL ||
@@ -953,13 +953,13 @@ SOPC_StatusCode EncodeSignature(SC_Connection* scConnection,
 }
 
 SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
-                      UA_MsgBuffer*  msgBuffer,
+                      SOPC_MsgBuffer*  msgBuffer,
                       uint8_t        symmetricAlgo,
                       uint32_t       encryptedDataLength,
-                      UA_MsgBuffer*  encryptedMsgBuffer)
+                      SOPC_MsgBuffer*  encryptedMsgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_Byte* dataToEncrypt = &msgBuffer->buffers->data[msgBuffer->sequenceNumberPosition];
+    SOPC_Byte* dataToEncrypt = &msgBuffer->buffers->data[msgBuffer->sequenceNumberPosition];
     const uint32_t dataToEncryptLength = msgBuffer->buffers->length - msgBuffer->sequenceNumberPosition;
 
     if(scConnection != NULL && msgBuffer != NULL &&
@@ -974,7 +974,7 @@ SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
            status = STATUS_INVALID_STATE;
         }else{
             AsymmetricKey otherAppPublicKey;
-            UA_Byte* encryptedData = NULL;
+            SOPC_Byte* encryptedData = NULL;
 
             if(status == STATUS_OK){
                 // Retrieve other app public key from certificate
@@ -1028,7 +1028,7 @@ SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
            scConnection->currentSecuKeySets.receiverKeySet == NULL){
             status = STATUS_INVALID_STATE;
         }else{
-            UA_Byte* encryptedData = NULL;
+            SOPC_Byte* encryptedData = NULL;
 
             // Check size of encrypted data array
             if(status == STATUS_OK){
@@ -1065,8 +1065,8 @@ SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
     return status;
 }
 
-SOPC_StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
-                                   UA_MsgFinalChunk  chunkType){
+SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*     msgBuffer,
+                                   SOPC_MsgFinalChunk  chunkType){
     SC_Connection* scConnection = NULL;
     SOPC_StatusCode status = STATUS_NOK;
     uint8_t toEncrypt = 1; // True
@@ -1079,7 +1079,7 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
     uint32_t encryptedLength = 0;
 
     if(msgBuffer == NULL || msgBuffer->flushData == NULL ||
-       (chunkType != UA_Msg_Chunk_Final && msgBuffer->secureType != UA_SecureMessage))
+       (chunkType != SOPC_Msg_Chunk_Final && msgBuffer->secureType != SOPC_SecureMessage))
     {
         status = STATUS_INVALID_PARAMETERS;
     }else{
@@ -1091,7 +1091,7 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
         toSign = IsMsgSigned(scConnection->currentSecuMode);
 
         // Determine if the asymmetric algorithms must be used
-        if(msgBuffer->secureType == UA_OpenSecureChannel){
+        if(msgBuffer->secureType == SOPC_OpenSecureChannel){
             symmetricAlgo = FALSE;
         }
 
@@ -1159,7 +1159,7 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
 
         //// Check sender certificate size is not bigger than maximum size to be sent
         if(status == STATUS_OK &&
-           msgBuffer->secureType == UA_OpenSecureChannel &&
+           msgBuffer->secureType == SOPC_OpenSecureChannel &&
            toSign != FALSE)
         {
             status = CheckMaxSenderCertificateSize(&scConnection->runningAppCertificate,
@@ -1188,10 +1188,10 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
 
         if(status == STATUS_OK){
             // TODO: detach transport buffer ?
-            status = TCP_UA_FlushMsgBuffer(scConnection->transportConnection->outputMsgBuffer);
+            status = TCP_SOPC_FlushMsgBuffer(scConnection->transportConnection->outputMsgBuffer);
         }
 
-        if(status == STATUS_OK && chunkType == UA_Msg_Chunk_Final){
+        if(status == STATUS_OK && chunkType == SOPC_Msg_Chunk_Final){
             // Reset buffer for next sending
             MsgBuffer_Reset(scConnection->sendingBuffer);
         }
@@ -1200,7 +1200,7 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(UA_MsgBuffer*     msgBuffer,
 }
 
 SOPC_StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
-                                  UA_MsgBuffer*  transportBuffer)
+                                  SOPC_MsgBuffer*  transportBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t secureChannelId = 0;
@@ -1234,7 +1234,7 @@ SOPC_StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
 
 SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, // TODO: why SC_Connection and PKIProvider instead of Sc_ClientConnection which contains both ?
                                         const PKIProvider* pkiProvider,
-                                        UA_MsgBuffer*      transportBuffer,
+                                        SOPC_MsgBuffer*      transportBuffer,
                                         uint32_t           validateSenderCert,
                                         uint32_t*          sequenceNumberPosition)
 {
@@ -1242,11 +1242,11 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
     uint32_t toEncrypt = 1; // True
     uint32_t toSign = 1; // True
 
-    UA_ByteString securityPolicy;
+    SOPC_ByteString securityPolicy;
     ByteString_Initialize(&securityPolicy);
-    UA_ByteString senderCertificate;
+    SOPC_ByteString senderCertificate;
     ByteString_Initialize(&senderCertificate);
-    UA_ByteString receiverCertThumb;
+    SOPC_ByteString receiverCertThumb;
     ByteString_Initialize(&receiverCertThumb);
 
     if(scConnection != NULL &&
@@ -1320,7 +1320,7 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
             }else if(toEncrypt != FALSE){
                 // Check thumbprint matches current app certificate thumbprint
 
-                UA_ByteString curAppCertThumbprint;
+                SOPC_ByteString curAppCertThumbprint;
                 uint32_t thumbprintLength = 0;
                 int32_t runningAppCertComparison = 0;
 
@@ -1392,7 +1392,7 @@ SOPC_StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
 }
 
 SOPC_StatusCode SC_DecryptMsg(SC_Connection* scConnection,
-                         UA_MsgBuffer*  transportBuffer,
+                         SOPC_MsgBuffer*  transportBuffer,
                          uint32_t       sequenceNumberPosition,
                          uint32_t       isSymmetric,
                          uint32_t       isPrecCryptoData)
@@ -1424,7 +1424,7 @@ SOPC_StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     // TODO: factorize common code between length retrieved and decrypt ...
     if(toDecrypt != FALSE){
         // Message is encrypted
-        UA_Byte* dataToDecrypt = &(transportBuffer->buffers->data[sequenceNumberPosition]);
+        SOPC_Byte* dataToDecrypt = &(transportBuffer->buffers->data[sequenceNumberPosition]);
         uint32_t lengthToDecrypt = transportBuffer->buffers->length - sequenceNumberPosition;
 
         if(status == STATUS_OK){
@@ -1520,17 +1520,17 @@ SOPC_StatusCode SC_DecryptMsg(SC_Connection* scConnection,
     return status;
 }
 
-SOPC_StatusCode SC_DecodeMsgBody(UA_MsgBuffer*       receptionBuffer,
-                            UA_NamespaceTable*  namespaceTable,
-                            UA_EncodeableType** knownTypes,
-                            UA_EncodeableType*  respEncType,
-                            UA_EncodeableType*  errEncType,
-                            UA_EncodeableType** receivedEncType,
+SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
+                            SOPC_NamespaceTable*  namespaceTable,
+                            SOPC_EncodeableType** knownTypes,
+                            SOPC_EncodeableType*  respEncType,
+                            SOPC_EncodeableType*  errEncType,
+                            SOPC_EncodeableType** receivedEncType,
                             void**              encodeableObj)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_EncodeableType* recEncType = NULL;
-    UA_NodeId nodeId;
+    SOPC_EncodeableType* recEncType = NULL;
+    SOPC_NodeId nodeId;
     const char* nsName;
     uint16_t nsIndex = 0;
     NodeId_Initialize(&nodeId);
@@ -1692,7 +1692,7 @@ SOPC_StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection)
     }
 
     if(status == STATUS_OK){
-        if(scConnection->receptionBuffers->secureType == UA_OpenSecureChannel){
+        if(scConnection->receptionBuffers->secureType == SOPC_OpenSecureChannel){
             scConnection->lastSeqNumReceived = seqNumber;
         }else{
             if(scConnection->lastSeqNumReceived + 1 != seqNumber){
@@ -1719,7 +1719,7 @@ SOPC_StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
     if(scConnection != NULL){
         status = STATUS_OK;
         // use Get_Rcv_Protocol_Version and check it is the same as the one received in SC
-        if(TCP_UA_Connection_GetReceiveProtocolVersion(scConnection->transportConnection,
+        if(TCP_SOPC_Connection_GetReceiveProtocolVersion(scConnection->transportConnection,
                                                        &transportProtocolVersion)
                    != FALSE)
         {
@@ -1732,19 +1732,19 @@ SOPC_StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
 }
 
 SOPC_StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
-                                  UA_EncodeableType* encType,
+                                  SOPC_EncodeableType* encType,
                                   void*              value,
                                   uint32_t           requestId)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    UA_MsgBuffer* msgBuffer = scConnection->sendingBuffer;
+    SOPC_MsgBuffer* msgBuffer = scConnection->sendingBuffer;
     if(scConnection != NULL &&
        encType != NULL &&
        value != NULL)
     {
         // Encode secure message header:
         status = SC_EncodeSecureMsgHeader(msgBuffer,
-                                          UA_SecureMessage,
+                                          SOPC_SecureMessage,
                                           scConnection->currentSecuToken.channelId);
     }
 
@@ -1765,7 +1765,7 @@ SOPC_StatusCode SC_EncodeSecureMessage(SC_Connection*     scConnection,
 
 }
 
-SOPC_StatusCode SC_DecodeSymmSecurityHeader(UA_MsgBuffer* transportBuffer,
+SOPC_StatusCode SC_DecodeSymmSecurityHeader(SOPC_MsgBuffer* transportBuffer,
                                        uint32_t*     tokenId,
                                        uint32_t*     snPosition)
 {
@@ -1858,7 +1858,7 @@ SOPC_StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
 }
 
 SOPC_StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
-                                   UA_MsgBuffer*  transportMsgBuffer,
+                                   SOPC_MsgBuffer*  transportMsgBuffer,
                                    uint32_t*      requestId)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1923,7 +1923,7 @@ SOPC_StatusCode SC_DecryptSecureMessage(SC_Connection* scConnection,
     return status;
 }
 
-SOPC_StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
+SOPC_StatusCode SC_CheckPrecChunk(SOPC_MsgBuffers* msgBuffer,
                              uint32_t       requestId,
                              uint8_t*       abortReqPresence,
                              uint32_t*      abortReqId)
@@ -1950,12 +1950,12 @@ SOPC_StatusCode SC_CheckPrecChunk(UA_MsgBuffers* msgBuffer,
     return status;
 }
 
-SOPC_StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
-                              UA_String*     reason){
+SOPC_StatusCode SC_CheckAbortChunk(SOPC_MsgBuffers* msgBuffer,
+                              SOPC_String*     reason){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t errorCode = 0;
     if(msgBuffer != NULL && reason != NULL){
-        if(msgBuffer->isFinal == UA_Msg_Chunk_Abort){
+        if(msgBuffer->isFinal == SOPC_Msg_Chunk_Abort){
             status = UInt32_Read(&errorCode, msgBuffer);
             if(status == STATUS_OK){
                 status = errorCode;
@@ -1969,17 +1969,17 @@ SOPC_StatusCode SC_CheckAbortChunk(UA_MsgBuffers* msgBuffer,
     return status;
 }
 
-SOPC_StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
+SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
                           uint32_t            requestId,
-                          UA_EncodeableType*  expEncType,
-                          UA_EncodeableType*  errEncType,
-                          UA_EncodeableType** recEncType,
+                          SOPC_EncodeableType*  expEncType,
+                          SOPC_EncodeableType*  errEncType,
+                          SOPC_EncodeableType** recEncType,
                           void**              encObj){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t msgSize = 0;
     Buffer* tmpBuffer = NULL;
     uint32_t idx = 0;
-    UA_MsgBuffer* tmpMsgBuffer = NULL;
+    SOPC_MsgBuffer* tmpMsgBuffer = NULL;
     Buffer* buffer = NULL;
 
     if(msgBuffers != NULL &&
@@ -1987,7 +1987,7 @@ SOPC_StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
     {
 
         switch(msgBuffers->isFinal){
-            case UA_Msg_Chunk_Final:
+            case SOPC_Msg_Chunk_Final:
                 // Treat case with only 1 chunk for response
                 if(msgBuffers->nbChunks == 1){
                     status = SC_DecodeMsgBody(msgBuffers,
@@ -2042,7 +2042,7 @@ SOPC_StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
 
                 MsgBuffers_Reset(msgBuffers);
                 break;
-            case UA_Msg_Chunk_Intermediate:
+            case SOPC_Msg_Chunk_Intermediate:
                 assert(msgBuffers->nbChunks >= 1);
                 if(msgBuffers->nbChunks == 1){
                     msgBuffers->receivedReqId = requestId;
@@ -2051,12 +2051,12 @@ SOPC_StatusCode SC_DecodeChunk(UA_MsgBuffers*      msgBuffers,
                     assert(FALSE);
                 }
                 break;
-            case UA_Msg_Chunk_Abort:
+            case SOPC_Msg_Chunk_Abort:
                 status = STATUS_NOK;
                 assert(FALSE);
                 break;
-            case UA_Msg_Chunk_Unknown:
-            case UA_Msg_Chunk_Invalid:
+            case SOPC_Msg_Chunk_Unknown:
+            case SOPC_Msg_Chunk_Invalid:
                 status = STATUS_NOK;
                 assert(FALSE);
         }

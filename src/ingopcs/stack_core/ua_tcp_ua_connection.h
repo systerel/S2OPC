@@ -5,15 +5,15 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_TCP_UA_CONNECTION_H_
-#define INGOPCS_TCP_UA_CONNECTION_H_
+#ifndef INGOPCS_TCP_SOPC_CONNECTION_H_
+#define INGOPCS_TCP_SOPC_CONNECTION_H_
 
 #include <ua_builtintypes.h>
 #include <ua_msg_buffer.h>
 #include <ua_sockets.h>
 
-#define TCP_UA_MIN_BUFFER_SIZE 8192
-#define TCP_UA_MAX_URL_LENGTH 4096
+#define TCP_SOPC_MIN_BUFFER_SIZE 8192
+#define TCP_SOPC_MAX_URL_LENGTH 4096
 
 typedef enum TCP_ConnectionState
 {
@@ -35,14 +35,14 @@ typedef enum {
     ConnectionEvent_Error
 } ConnectionEvent;
 
-typedef SOPC_StatusCode (TCP_UA_Connection_Event_CB) (void*           tcpConnection,
+typedef SOPC_StatusCode (TCP_SOPC_Connection_Event_CB) (void*           tcpConnection,
                                                  void*           callbackData,
                                                  ConnectionEvent event,
-                                                 UA_MsgBuffer*   msgBuffer,
+                                                 SOPC_MsgBuffer*   msgBuffer,
                                                  SOPC_StatusCode      status);
 
 typedef struct {
-    UA_String                   url;
+    SOPC_String                   url;
     uint32_t                    protocolVersion;
     uint32_t                    receivedProtocolVersion;
     uint32_t                    receiveBufferSize;
@@ -52,27 +52,27 @@ typedef struct {
     uint32_t                    maxMessageSizeSnd;
     uint32_t                    maxChunkCountSnd;
     TCP_ConnectionState         state;
-    UA_SocketManager*           socketManager;
-    UA_Socket*                  socket;
-    UA_MsgBuffer*               inputMsgBuffer;
-    UA_MsgBuffer*               outputMsgBuffer;
-    UA_MsgBuffer*               sendingQueue;
-    TCP_UA_Connection_Event_CB* callback;
+    SOPC_SocketManager*           socketManager;
+    SOPC_Socket*                  socket;
+    SOPC_MsgBuffer*               inputMsgBuffer;
+    SOPC_MsgBuffer*               outputMsgBuffer;
+    SOPC_MsgBuffer*               sendingQueue;
+    TCP_SOPC_Connection_Event_CB* callback;
     void*                       callbackData;
 
-} TCP_UA_Connection;
+} TCP_SOPC_Connection;
 
-TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion);
-void TCP_UA_Connection_Delete(TCP_UA_Connection* connection);
+TCP_SOPC_Connection* TCP_SOPC_Connection_Create(uint32_t scProtocolVersion);
+void TCP_SOPC_Connection_Delete(TCP_SOPC_Connection* connection);
 
-SOPC_StatusCode TCP_UA_Connection_Connect(TCP_UA_Connection*          connection,
+SOPC_StatusCode TCP_SOPC_Connection_Connect(TCP_SOPC_Connection*          connection,
                                      const char*                 uri,
-                                     TCP_UA_Connection_Event_CB* callback,
+                                     TCP_SOPC_Connection_Event_CB* callback,
                                      void*                       callbackData);
-void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection);
+void TCP_SOPC_Connection_Disconnect(TCP_SOPC_Connection* connection);
 
-// return UA_FALSE if no protocol version (for non TCP protocol only: must be generic)
-uint32_t TCP_UA_Connection_GetReceiveProtocolVersion(TCP_UA_Connection* connection,
+// return SOPC_FALSE if no protocol version (for non TCP protocol only: must be generic)
+uint32_t TCP_SOPC_Connection_GetReceiveProtocolVersion(TCP_SOPC_Connection* connection,
                                                      uint32_t*          protocolVersion);
 
-#endif /* INGOPCS_TCP_UA_CONNECTION_H_ */
+#endif /* INGOPCS_TCP_SOPC_CONNECTION_H_ */
