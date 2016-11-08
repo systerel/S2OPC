@@ -29,7 +29,6 @@
 
 #ifndef _SOPC_ClientApi_H_
 #define _SOPC_ClientApi_H_ 1
-
 #ifdef OPCUA_HAVE_CLIENTAPI
 
 #include <sopc_types.h>
@@ -42,13 +41,13 @@ BEGIN_EXTERN_C
  * Synchronously calls the FindServers service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_FindServers(
-    SOPC_Channel                     hChannel,
+    SOPC_Channel                   hChannel,
     const OpcUa_RequestHeader*     pRequestHeader,
-    const SOPC_String*               pEndpointUrl,
+    const SOPC_String*             pEndpointUrl,
     int32_t                        nNoOfLocaleIds,
-    const SOPC_String*               pLocaleIds,
+    const SOPC_String*             pLocaleIds,
     int32_t                        nNoOfServerUris,
-    const SOPC_String*               pServerUris,
+    const SOPC_String*             pServerUris,
     OpcUa_ResponseHeader*          pResponseHeader,
     int32_t*                       pNoOfServers,
     OpcUa_ApplicationDescription** pServers);
@@ -58,14 +57,14 @@ SOPC_StatusCode OpcUa_ClientApi_FindServers(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginFindServers(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_RequestHeader*       pRequestHeader,
     const SOPC_String*               pEndpointUrl,
-    int32_t                        nNoOfLocaleIds,
+    int32_t                          nNoOfLocaleIds,
     const SOPC_String*               pLocaleIds,
-    int32_t                        nNoOfServerUris,
+    int32_t                          nNoOfServerUris,
     const SOPC_String*               pServerUris,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_FindServersOnNetwork
@@ -73,14 +72,14 @@ SOPC_StatusCode OpcUa_ClientApi_BeginFindServers(
  * Synchronously calls the FindServersOnNetwork service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_FindServersOnNetwork(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     uint32_t                   nStartingRecordId,
     uint32_t                   nMaxRecordsToReturn,
     int32_t                    nNoOfServerCapabilityFilter,
-    const SOPC_String*           pServerCapabilityFilter,
+    const SOPC_String*         pServerCapabilityFilter,
     OpcUa_ResponseHeader*      pResponseHeader,
-    SOPC_DateTime*               pLastCounterResetTime,
+    SOPC_DateTime*             pLastCounterResetTime,
     int32_t*                   pNoOfServers,
     OpcUa_ServerOnNetwork**    pServers);
 
@@ -89,13 +88,13 @@ SOPC_StatusCode OpcUa_ClientApi_FindServersOnNetwork(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    uint32_t                       nStartingRecordId,
-    uint32_t                       nMaxRecordsToReturn,
-    int32_t                        nNoOfServerCapabilityFilter,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    uint32_t                         nStartingRecordId,
+    uint32_t                         nMaxRecordsToReturn,
+    int32_t                          nNoOfServerCapabilityFilter,
     const SOPC_String*               pServerCapabilityFilter,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_GetEndpoints
@@ -103,13 +102,13 @@ SOPC_StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
  * Synchronously calls the GetEndpoints service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_GetEndpoints(
-    SOPC_Channel                  hChannel,
+    SOPC_Channel                hChannel,
     const OpcUa_RequestHeader*  pRequestHeader,
-    const SOPC_String*            pEndpointUrl,
+    const SOPC_String*          pEndpointUrl,
     int32_t                     nNoOfLocaleIds,
-    const SOPC_String*            pLocaleIds,
+    const SOPC_String*          pLocaleIds,
     int32_t                     nNoOfProfileUris,
-    const SOPC_String*            pProfileUris,
+    const SOPC_String*          pProfileUris,
     OpcUa_ResponseHeader*       pResponseHeader,
     int32_t*                    pNoOfEndpoints,
     OpcUa_EndpointDescription** pEndpoints);
@@ -119,14 +118,14 @@ SOPC_StatusCode OpcUa_ClientApi_GetEndpoints(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginGetEndpoints(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_RequestHeader*       pRequestHeader,
     const SOPC_String*               pEndpointUrl,
-    int32_t                        nNoOfLocaleIds,
+    int32_t                          nNoOfLocaleIds,
     const SOPC_String*               pLocaleIds,
-    int32_t                        nNoOfProfileUris,
+    int32_t                          nNoOfProfileUris,
     const SOPC_String*               pProfileUris,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer
@@ -134,7 +133,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginGetEndpoints(
  * Synchronously calls the RegisterServer service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_RegisterServer(
-    SOPC_Channel                    hChannel,
+    SOPC_Channel                  hChannel,
     const OpcUa_RequestHeader*    pRequestHeader,
     const OpcUa_RegisteredServer* pServer,
     OpcUa_ResponseHeader*         pResponseHeader);
@@ -144,10 +143,10 @@ SOPC_StatusCode OpcUa_ClientApi_RegisterServer(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginRegisterServer(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    const OpcUa_RegisteredServer*  pServer,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    const OpcUa_RegisteredServer*    pServer,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterServer2
@@ -155,28 +154,28 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRegisterServer(
  * Synchronously calls the RegisterServer2 service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_RegisterServer2(
-    SOPC_Channel                    hChannel,
+    SOPC_Channel                  hChannel,
     const OpcUa_RequestHeader*    pRequestHeader,
     const OpcUa_RegisteredServer* pServer,
     int32_t                       nNoOfDiscoveryConfiguration,
-    const SOPC_ExtensionObject*     pDiscoveryConfiguration,
+    const SOPC_ExtensionObject*   pDiscoveryConfiguration,
     OpcUa_ResponseHeader*         pResponseHeader,
     int32_t*                      pNoOfConfigurationResults,
-    SOPC_StatusCode**                  pConfigurationResults,
+    SOPC_StatusCode**             pConfigurationResults,
     int32_t*                      pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**           pDiagnosticInfos);
+    SOPC_DiagnosticInfo**         pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the RegisterServer2 service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginRegisterServer2(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    const OpcUa_RegisteredServer*  pServer,
-    int32_t                        nNoOfDiscoveryConfiguration,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    const OpcUa_RegisteredServer*    pServer,
+    int32_t                          nNoOfDiscoveryConfiguration,
     const SOPC_ExtensionObject*      pDiscoveryConfiguration,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSession
@@ -184,22 +183,22 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRegisterServer2(
  * Synchronously calls the CreateSession service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_CreateSession(
-    SOPC_Channel                          hChannel,
+    SOPC_Channel                        hChannel,
     const OpcUa_RequestHeader*          pRequestHeader,
     const OpcUa_ApplicationDescription* pClientDescription,
-    const SOPC_String*                    pServerUri,
-    const SOPC_String*                    pEndpointUrl,
-    const SOPC_String*                    pSessionName,
-    const SOPC_ByteString*                pClientNonce,
-    const SOPC_ByteString*                pClientCertificate,
+    const SOPC_String*                  pServerUri,
+    const SOPC_String*                  pEndpointUrl,
+    const SOPC_String*                  pSessionName,
+    const SOPC_ByteString*              pClientNonce,
+    const SOPC_ByteString*              pClientCertificate,
     double                              nRequestedSessionTimeout,
     uint32_t                            nMaxResponseMessageSize,
     OpcUa_ResponseHeader*               pResponseHeader,
-    SOPC_NodeId*                          pSessionId,
-    SOPC_NodeId*                          pAuthenticationToken,
+    SOPC_NodeId*                        pSessionId,
+    SOPC_NodeId*                        pAuthenticationToken,
     double*                             pRevisedSessionTimeout,
-    SOPC_ByteString*                      pServerNonce,
-    SOPC_ByteString*                      pServerCertificate,
+    SOPC_ByteString*                    pServerNonce,
+    SOPC_ByteString*                    pServerCertificate,
     int32_t*                            pNoOfServerEndpoints,
     OpcUa_EndpointDescription**         pServerEndpoints,
     int32_t*                            pNoOfServerSoftwareCertificates,
@@ -211,17 +210,17 @@ SOPC_StatusCode OpcUa_ClientApi_CreateSession(
  * Asynchronously calls the CreateSession service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginCreateSession(
-    SOPC_Channel                          hChannel,
+    SOPC_Channel                        hChannel,
     const OpcUa_RequestHeader*          pRequestHeader,
     const OpcUa_ApplicationDescription* pClientDescription,
-    const SOPC_String*                    pServerUri,
-    const SOPC_String*                    pEndpointUrl,
-    const SOPC_String*                    pSessionName,
-    const SOPC_ByteString*                pClientNonce,
-    const SOPC_ByteString*                pClientCertificate,
+    const SOPC_String*                  pServerUri,
+    const SOPC_String*                  pEndpointUrl,
+    const SOPC_String*                  pSessionName,
+    const SOPC_ByteString*              pClientNonce,
+    const SOPC_ByteString*              pClientCertificate,
     double                              nRequestedSessionTimeout,
     uint32_t                            nMaxResponseMessageSize,
-    SOPC_Channel_PfnRequestComplete*      pCallback,
+    SOPC_Channel_PfnRequestComplete*    pCallback,
     void*                               pCallbackData);
 #endif
 
@@ -230,36 +229,36 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCreateSession(
  * Synchronously calls the ActivateSession service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_ActivateSession(
-    SOPC_Channel                             hChannel,
+    SOPC_Channel                           hChannel,
     const OpcUa_RequestHeader*             pRequestHeader,
     const OpcUa_SignatureData*             pClientSignature,
     int32_t                                nNoOfClientSoftwareCertificates,
     const OpcUa_SignedSoftwareCertificate* pClientSoftwareCertificates,
     int32_t                                nNoOfLocaleIds,
-    const SOPC_String*                       pLocaleIds,
-    const SOPC_ExtensionObject*              pUserIdentityToken,
+    const SOPC_String*                     pLocaleIds,
+    const SOPC_ExtensionObject*            pUserIdentityToken,
     const OpcUa_SignatureData*             pUserTokenSignature,
     OpcUa_ResponseHeader*                  pResponseHeader,
-    SOPC_ByteString*                         pServerNonce,
+    SOPC_ByteString*                       pServerNonce,
     int32_t*                               pNoOfResults,
-    SOPC_StatusCode**                           pResults,
+    SOPC_StatusCode**                      pResults,
     int32_t*                               pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**                    pDiagnosticInfos);
+    SOPC_DiagnosticInfo**                  pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the ActivateSession service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginActivateSession(
-    SOPC_Channel                             hChannel,
+    SOPC_Channel                           hChannel,
     const OpcUa_RequestHeader*             pRequestHeader,
     const OpcUa_SignatureData*             pClientSignature,
     int32_t                                nNoOfClientSoftwareCertificates,
     const OpcUa_SignedSoftwareCertificate* pClientSoftwareCertificates,
     int32_t                                nNoOfLocaleIds,
-    const SOPC_String*                       pLocaleIds,
-    const SOPC_ExtensionObject*              pUserIdentityToken,
+    const SOPC_String*                     pLocaleIds,
+    const SOPC_ExtensionObject*            pUserIdentityToken,
     const OpcUa_SignatureData*             pUserTokenSignature,
-    SOPC_Channel_PfnRequestComplete*         pCallback,
+    SOPC_Channel_PfnRequestComplete*       pCallback,
     void*                                  pCallbackData);
 #endif
 
@@ -268,9 +267,9 @@ SOPC_StatusCode OpcUa_ClientApi_BeginActivateSession(
  * Synchronously calls the CloseSession service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_CloseSession(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
-    SOPC_Boolean                 bDeleteSubscriptions,
+    SOPC_Boolean               bDeleteSubscriptions,
     OpcUa_ResponseHeader*      pResponseHeader);
 
 /*============================================================================
@@ -278,10 +277,10 @@ SOPC_StatusCode OpcUa_ClientApi_CloseSession(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginCloseSession(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_RequestHeader*       pRequestHeader,
     SOPC_Boolean                     bDeleteSubscriptions,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_Cancel
@@ -289,7 +288,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCloseSession(
  * Synchronously calls the Cancel service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_Cancel(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     uint32_t                   nRequestHandle,
     OpcUa_ResponseHeader*      pResponseHeader,
@@ -300,10 +299,10 @@ SOPC_StatusCode OpcUa_ClientApi_Cancel(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginCancel(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    uint32_t                       nRequestHandle,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    uint32_t                         nRequestHandle,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddNodes
@@ -311,7 +310,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCancel(
  * Synchronously calls the AddNodes service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_AddNodes(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     int32_t                    nNoOfNodesToAdd,
     const OpcUa_AddNodesItem*  pNodesToAdd,
@@ -319,18 +318,18 @@ SOPC_StatusCode OpcUa_ClientApi_AddNodes(
     int32_t*                   pNoOfResults,
     OpcUa_AddNodesResult**     pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the AddNodes service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginAddNodes(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfNodesToAdd,
-    const OpcUa_AddNodesItem*      pNodesToAdd,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfNodesToAdd,
+    const OpcUa_AddNodesItem*        pNodesToAdd,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_AddReferences
@@ -338,26 +337,26 @@ SOPC_StatusCode OpcUa_ClientApi_BeginAddNodes(
  * Synchronously calls the AddReferences service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_AddReferences(
-    SOPC_Channel                     hChannel,
+    SOPC_Channel                   hChannel,
     const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfReferencesToAdd,
     const OpcUa_AddReferencesItem* pReferencesToAdd,
     OpcUa_ResponseHeader*          pResponseHeader,
     int32_t*                       pNoOfResults,
-    SOPC_StatusCode**                   pResults,
+    SOPC_StatusCode**              pResults,
     int32_t*                       pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**            pDiagnosticInfos);
+    SOPC_DiagnosticInfo**          pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the AddReferences service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginAddReferences(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfReferencesToAdd,
-    const OpcUa_AddReferencesItem* pReferencesToAdd,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfReferencesToAdd,
+    const OpcUa_AddReferencesItem*   pReferencesToAdd,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteNodes
@@ -365,26 +364,26 @@ SOPC_StatusCode OpcUa_ClientApi_BeginAddReferences(
  * Synchronously calls the DeleteNodes service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_DeleteNodes(
-    SOPC_Channel                   hChannel,
+    SOPC_Channel                 hChannel,
     const OpcUa_RequestHeader*   pRequestHeader,
     int32_t                      nNoOfNodesToDelete,
     const OpcUa_DeleteNodesItem* pNodesToDelete,
     OpcUa_ResponseHeader*        pResponseHeader,
     int32_t*                     pNoOfResults,
-    SOPC_StatusCode**                 pResults,
+    SOPC_StatusCode**            pResults,
     int32_t*                     pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**          pDiagnosticInfos);
+    SOPC_DiagnosticInfo**        pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the DeleteNodes service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginDeleteNodes(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfNodesToDelete,
-    const OpcUa_DeleteNodesItem*   pNodesToDelete,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfNodesToDelete,
+    const OpcUa_DeleteNodesItem*     pNodesToDelete,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteReferences
@@ -392,25 +391,25 @@ SOPC_StatusCode OpcUa_ClientApi_BeginDeleteNodes(
  * Synchronously calls the DeleteReferences service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_DeleteReferences(
-    SOPC_Channel                        hChannel,
+    SOPC_Channel                      hChannel,
     const OpcUa_RequestHeader*        pRequestHeader,
     int32_t                           nNoOfReferencesToDelete,
     const OpcUa_DeleteReferencesItem* pReferencesToDelete,
     OpcUa_ResponseHeader*             pResponseHeader,
     int32_t*                          pNoOfResults,
-    SOPC_StatusCode**                      pResults,
+    SOPC_StatusCode**                 pResults,
     int32_t*                          pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**               pDiagnosticInfos);
+    SOPC_DiagnosticInfo**             pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the DeleteReferences service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginDeleteReferences(
-    SOPC_Channel                        hChannel,
+    SOPC_Channel                      hChannel,
     const OpcUa_RequestHeader*        pRequestHeader,
     int32_t                           nNoOfReferencesToDelete,
     const OpcUa_DeleteReferencesItem* pReferencesToDelete,
-    SOPC_Channel_PfnRequestComplete*    pCallback,
+    SOPC_Channel_PfnRequestComplete*  pCallback,
     void*                             pCallbackData);
 #endif
 
@@ -419,7 +418,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginDeleteReferences(
  * Synchronously calls the Browse service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_Browse(
-    SOPC_Channel                     hChannel,
+    SOPC_Channel                   hChannel,
     const OpcUa_RequestHeader*     pRequestHeader,
     const OpcUa_ViewDescription*   pView,
     uint32_t                       nRequestedMaxReferencesPerNode,
@@ -429,20 +428,20 @@ SOPC_StatusCode OpcUa_ClientApi_Browse(
     int32_t*                       pNoOfResults,
     OpcUa_BrowseResult**           pResults,
     int32_t*                       pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**            pDiagnosticInfos);
+    SOPC_DiagnosticInfo**          pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Browse service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginBrowse(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    const OpcUa_ViewDescription*   pView,
-    uint32_t                       nRequestedMaxReferencesPerNode,
-    int32_t                        nNoOfNodesToBrowse,
-    const OpcUa_BrowseDescription* pNodesToBrowse,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    const OpcUa_ViewDescription*     pView,
+    uint32_t                         nRequestedMaxReferencesPerNode,
+    int32_t                          nNoOfNodesToBrowse,
+    const OpcUa_BrowseDescription*   pNodesToBrowse,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_BrowseNext
@@ -450,28 +449,28 @@ SOPC_StatusCode OpcUa_ClientApi_BeginBrowse(
  * Synchronously calls the BrowseNext service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BrowseNext(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
-    SOPC_Boolean                 bReleaseContinuationPoints,
+    SOPC_Boolean               bReleaseContinuationPoints,
     int32_t                    nNoOfContinuationPoints,
-    const SOPC_ByteString*       pContinuationPoints,
+    const SOPC_ByteString*     pContinuationPoints,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfResults,
     OpcUa_BrowseResult**       pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the BrowseNext service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginBrowseNext(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_RequestHeader*       pRequestHeader,
     SOPC_Boolean                     bReleaseContinuationPoints,
-    int32_t                        nNoOfContinuationPoints,
+    int32_t                          nNoOfContinuationPoints,
     const SOPC_ByteString*           pContinuationPoints,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_TranslateBrowsePathsToNodeIds
@@ -479,7 +478,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginBrowseNext(
  * Synchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     int32_t                    nNoOfBrowsePaths,
     const OpcUa_BrowsePath*    pBrowsePaths,
@@ -487,18 +486,18 @@ SOPC_StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
     int32_t*                   pNoOfResults,
     OpcUa_BrowsePathResult**   pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the TranslateBrowsePathsToNodeIds service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginTranslateBrowsePathsToNodeIds(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfBrowsePaths,
-    const OpcUa_BrowsePath*        pBrowsePaths,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfBrowsePaths,
+    const OpcUa_BrowsePath*          pBrowsePaths,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_RegisterNodes
@@ -506,24 +505,24 @@ SOPC_StatusCode OpcUa_ClientApi_BeginTranslateBrowsePathsToNodeIds(
  * Synchronously calls the RegisterNodes service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_RegisterNodes(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     int32_t                    nNoOfNodesToRegister,
-    const SOPC_NodeId*           pNodesToRegister,
+    const SOPC_NodeId*         pNodesToRegister,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfRegisteredNodeIds,
-    SOPC_NodeId**                pRegisteredNodeIds);
+    SOPC_NodeId**              pRegisteredNodeIds);
 
 /*============================================================================
  * Asynchronously calls the RegisterNodes service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginRegisterNodes(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfNodesToRegister,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfNodesToRegister,
     const SOPC_NodeId*               pNodesToRegister,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_UnregisterNodes
@@ -531,10 +530,10 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRegisterNodes(
  * Synchronously calls the UnregisterNodes service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_UnregisterNodes(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     int32_t                    nNoOfNodesToUnregister,
-    const SOPC_NodeId*           pNodesToUnregister,
+    const SOPC_NodeId*         pNodesToUnregister,
     OpcUa_ResponseHeader*      pResponseHeader);
 
 /*============================================================================
@@ -542,11 +541,11 @@ SOPC_StatusCode OpcUa_ClientApi_UnregisterNodes(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginUnregisterNodes(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfNodesToUnregister,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfNodesToUnregister,
     const SOPC_NodeId*               pNodesToUnregister,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_QueryFirst
@@ -554,7 +553,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginUnregisterNodes(
  * Synchronously calls the QueryFirst service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_QueryFirst(
-    SOPC_Channel                       hChannel,
+    SOPC_Channel                     hChannel,
     const OpcUa_RequestHeader*       pRequestHeader,
     const OpcUa_ViewDescription*     pView,
     int32_t                          nNoOfNodeTypes,
@@ -565,18 +564,18 @@ SOPC_StatusCode OpcUa_ClientApi_QueryFirst(
     OpcUa_ResponseHeader*            pResponseHeader,
     int32_t*                         pNoOfQueryDataSets,
     OpcUa_QueryDataSet**             pQueryDataSets,
-    SOPC_ByteString*                   pContinuationPoint,
+    SOPC_ByteString*                 pContinuationPoint,
     int32_t*                         pNoOfParsingResults,
     OpcUa_ParsingResult**            pParsingResults,
     int32_t*                         pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**              pDiagnosticInfos,
+    SOPC_DiagnosticInfo**            pDiagnosticInfos,
     OpcUa_ContentFilterResult*       pFilterResult);
 
 /*============================================================================
  * Asynchronously calls the QueryFirst service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginQueryFirst(
-    SOPC_Channel                       hChannel,
+    SOPC_Channel                     hChannel,
     const OpcUa_RequestHeader*       pRequestHeader,
     const OpcUa_ViewDescription*     pView,
     int32_t                          nNoOfNodeTypes,
@@ -584,7 +583,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginQueryFirst(
     const OpcUa_ContentFilter*       pFilter,
     uint32_t                         nMaxDataSetsToReturn,
     uint32_t                         nMaxReferencesToReturn,
-    SOPC_Channel_PfnRequestComplete*   pCallback,
+    SOPC_Channel_PfnRequestComplete* pCallback,
     void*                            pCallbackData);
 #endif
 
@@ -593,25 +592,25 @@ SOPC_StatusCode OpcUa_ClientApi_BeginQueryFirst(
  * Synchronously calls the QueryNext service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_QueryNext(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
-    SOPC_Boolean                 bReleaseContinuationPoint,
-    const SOPC_ByteString*       pContinuationPoint,
+    SOPC_Boolean               bReleaseContinuationPoint,
+    const SOPC_ByteString*     pContinuationPoint,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfQueryDataSets,
     OpcUa_QueryDataSet**       pQueryDataSets,
-    SOPC_ByteString*             pRevisedContinuationPoint);
+    SOPC_ByteString*           pRevisedContinuationPoint);
 
 /*============================================================================
  * Asynchronously calls the QueryNext service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginQueryNext(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_RequestHeader*       pRequestHeader,
     SOPC_Boolean                     bReleaseContinuationPoint,
     const SOPC_ByteString*           pContinuationPoint,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_Read
@@ -619,7 +618,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginQueryNext(
  * Synchronously calls the Read service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_Read(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     double                     nMaxAge,
     OpcUa_TimestampsToReturn   eTimestampsToReturn,
@@ -627,22 +626,22 @@ SOPC_StatusCode OpcUa_ClientApi_Read(
     const OpcUa_ReadValueId*   pNodesToRead,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfResults,
-    SOPC_DataValue**             pResults,
+    SOPC_DataValue**           pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Read service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginRead(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    double                         nMaxAge,
-    OpcUa_TimestampsToReturn       eTimestampsToReturn,
-    int32_t                        nNoOfNodesToRead,
-    const OpcUa_ReadValueId*       pNodesToRead,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    double                           nMaxAge,
+    OpcUa_TimestampsToReturn         eTimestampsToReturn,
+    int32_t                          nNoOfNodesToRead,
+    const OpcUa_ReadValueId*         pNodesToRead,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryRead
@@ -650,32 +649,32 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRead(
  * Synchronously calls the HistoryRead service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_HistoryRead(
-    SOPC_Channel                      hChannel,
+    SOPC_Channel                    hChannel,
     const OpcUa_RequestHeader*      pRequestHeader,
-    const SOPC_ExtensionObject*       pHistoryReadDetails,
+    const SOPC_ExtensionObject*     pHistoryReadDetails,
     OpcUa_TimestampsToReturn        eTimestampsToReturn,
-    SOPC_Boolean                      bReleaseContinuationPoints,
+    SOPC_Boolean                    bReleaseContinuationPoints,
     int32_t                         nNoOfNodesToRead,
     const OpcUa_HistoryReadValueId* pNodesToRead,
     OpcUa_ResponseHeader*           pResponseHeader,
     int32_t*                        pNoOfResults,
     OpcUa_HistoryReadResult**       pResults,
     int32_t*                        pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**             pDiagnosticInfos);
+    SOPC_DiagnosticInfo**           pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the HistoryRead service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginHistoryRead(
-    SOPC_Channel                      hChannel,
-    const OpcUa_RequestHeader*      pRequestHeader,
-    const SOPC_ExtensionObject*       pHistoryReadDetails,
-    OpcUa_TimestampsToReturn        eTimestampsToReturn,
-    SOPC_Boolean                      bReleaseContinuationPoints,
-    int32_t                         nNoOfNodesToRead,
-    const OpcUa_HistoryReadValueId* pNodesToRead,
-    SOPC_Channel_PfnRequestComplete*  pCallback,
-    void*                           pCallbackData);
+    SOPC_Channel                     hChannel,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    const SOPC_ExtensionObject*      pHistoryReadDetails,
+    OpcUa_TimestampsToReturn         eTimestampsToReturn,
+    SOPC_Boolean                     bReleaseContinuationPoints,
+    int32_t                          nNoOfNodesToRead,
+    const OpcUa_HistoryReadValueId*  pNodesToRead,
+    SOPC_Channel_PfnRequestComplete* pCallback,
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_Write
@@ -683,26 +682,26 @@ SOPC_StatusCode OpcUa_ClientApi_BeginHistoryRead(
  * Synchronously calls the Write service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_Write(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     int32_t                    nNoOfNodesToWrite,
     const OpcUa_WriteValue*    pNodesToWrite,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfResults,
-    SOPC_StatusCode**               pResults,
+    SOPC_StatusCode**          pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Write service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginWrite(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfNodesToWrite,
-    const OpcUa_WriteValue*        pNodesToWrite,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfNodesToWrite,
+    const OpcUa_WriteValue*          pNodesToWrite,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_HistoryUpdate
@@ -710,26 +709,26 @@ SOPC_StatusCode OpcUa_ClientApi_BeginWrite(
  * Synchronously calls the HistoryUpdate service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_HistoryUpdate(
-    SOPC_Channel                  hChannel,
+    SOPC_Channel                hChannel,
     const OpcUa_RequestHeader*  pRequestHeader,
     int32_t                     nNoOfHistoryUpdateDetails,
-    const SOPC_ExtensionObject*   pHistoryUpdateDetails,
+    const SOPC_ExtensionObject* pHistoryUpdateDetails,
     OpcUa_ResponseHeader*       pResponseHeader,
     int32_t*                    pNoOfResults,
     OpcUa_HistoryUpdateResult** pResults,
     int32_t*                    pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**         pDiagnosticInfos);
+    SOPC_DiagnosticInfo**       pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the HistoryUpdate service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginHistoryUpdate(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfHistoryUpdateDetails,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfHistoryUpdateDetails,
     const SOPC_ExtensionObject*      pHistoryUpdateDetails,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_Call
@@ -737,7 +736,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginHistoryUpdate(
  * Synchronously calls the Call service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_Call(
-    SOPC_Channel                     hChannel,
+    SOPC_Channel                   hChannel,
     const OpcUa_RequestHeader*     pRequestHeader,
     int32_t                        nNoOfMethodsToCall,
     const OpcUa_CallMethodRequest* pMethodsToCall,
@@ -745,18 +744,18 @@ SOPC_StatusCode OpcUa_ClientApi_Call(
     int32_t*                       pNoOfResults,
     OpcUa_CallMethodResult**       pResults,
     int32_t*                       pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**            pDiagnosticInfos);
+    SOPC_DiagnosticInfo**          pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Call service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginCall(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfMethodsToCall,
-    const OpcUa_CallMethodRequest* pMethodsToCall,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfMethodsToCall,
+    const OpcUa_CallMethodRequest*   pMethodsToCall,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateMonitoredItems
@@ -764,7 +763,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCall(
  * Synchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_CreateMonitoredItems(
-    SOPC_Channel                              hChannel,
+    SOPC_Channel                            hChannel,
     const OpcUa_RequestHeader*              pRequestHeader,
     uint32_t                                nSubscriptionId,
     OpcUa_TimestampsToReturn                eTimestampsToReturn,
@@ -774,19 +773,19 @@ SOPC_StatusCode OpcUa_ClientApi_CreateMonitoredItems(
     int32_t*                                pNoOfResults,
     OpcUa_MonitoredItemCreateResult**       pResults,
     int32_t*                                pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**                     pDiagnosticInfos);
+    SOPC_DiagnosticInfo**                   pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the CreateMonitoredItems service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
-    SOPC_Channel                              hChannel,
+    SOPC_Channel                            hChannel,
     const OpcUa_RequestHeader*              pRequestHeader,
     uint32_t                                nSubscriptionId,
     OpcUa_TimestampsToReturn                eTimestampsToReturn,
     int32_t                                 nNoOfItemsToCreate,
     const OpcUa_MonitoredItemCreateRequest* pItemsToCreate,
-    SOPC_Channel_PfnRequestComplete*          pCallback,
+    SOPC_Channel_PfnRequestComplete*        pCallback,
     void*                                   pCallbackData);
 #endif
 
@@ -795,7 +794,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
  * Synchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
-    SOPC_Channel                              hChannel,
+    SOPC_Channel                            hChannel,
     const OpcUa_RequestHeader*              pRequestHeader,
     uint32_t                                nSubscriptionId,
     OpcUa_TimestampsToReturn                eTimestampsToReturn,
@@ -805,19 +804,19 @@ SOPC_StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
     int32_t*                                pNoOfResults,
     OpcUa_MonitoredItemModifyResult**       pResults,
     int32_t*                                pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**                     pDiagnosticInfos);
+    SOPC_DiagnosticInfo**                   pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the ModifyMonitoredItems service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
-    SOPC_Channel                              hChannel,
+    SOPC_Channel                            hChannel,
     const OpcUa_RequestHeader*              pRequestHeader,
     uint32_t                                nSubscriptionId,
     OpcUa_TimestampsToReturn                eTimestampsToReturn,
     int32_t                                 nNoOfItemsToModify,
     const OpcUa_MonitoredItemModifyRequest* pItemsToModify,
-    SOPC_Channel_PfnRequestComplete*          pCallback,
+    SOPC_Channel_PfnRequestComplete*        pCallback,
     void*                                   pCallbackData);
 #endif
 
@@ -826,7 +825,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
  * Synchronously calls the SetMonitoringMode service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_SetMonitoringMode(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     uint32_t                   nSubscriptionId,
     OpcUa_MonitoringMode       eMonitoringMode,
@@ -834,22 +833,22 @@ SOPC_StatusCode OpcUa_ClientApi_SetMonitoringMode(
     const uint32_t*            pMonitoredItemIds,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfResults,
-    SOPC_StatusCode**               pResults,
+    SOPC_StatusCode**          pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the SetMonitoringMode service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    uint32_t                       nSubscriptionId,
-    OpcUa_MonitoringMode           eMonitoringMode,
-    int32_t                        nNoOfMonitoredItemIds,
-    const uint32_t*                pMonitoredItemIds,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    uint32_t                         nSubscriptionId,
+    OpcUa_MonitoringMode             eMonitoringMode,
+    int32_t                          nNoOfMonitoredItemIds,
+    const uint32_t*                  pMonitoredItemIds,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetTriggering
@@ -857,7 +856,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
  * Synchronously calls the SetTriggering service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_SetTriggering(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     uint32_t                   nSubscriptionId,
     uint32_t                   nTriggeringItemId,
@@ -867,28 +866,28 @@ SOPC_StatusCode OpcUa_ClientApi_SetTriggering(
     const uint32_t*            pLinksToRemove,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfAddResults,
-    SOPC_StatusCode**               pAddResults,
+    SOPC_StatusCode**          pAddResults,
     int32_t*                   pNoOfAddDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pAddDiagnosticInfos,
+    SOPC_DiagnosticInfo**      pAddDiagnosticInfos,
     int32_t*                   pNoOfRemoveResults,
-    SOPC_StatusCode**               pRemoveResults,
+    SOPC_StatusCode**          pRemoveResults,
     int32_t*                   pNoOfRemoveDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pRemoveDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pRemoveDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the SetTriggering service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginSetTriggering(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    uint32_t                       nSubscriptionId,
-    uint32_t                       nTriggeringItemId,
-    int32_t                        nNoOfLinksToAdd,
-    const uint32_t*                pLinksToAdd,
-    int32_t                        nNoOfLinksToRemove,
-    const uint32_t*                pLinksToRemove,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    uint32_t                         nSubscriptionId,
+    uint32_t                         nTriggeringItemId,
+    int32_t                          nNoOfLinksToAdd,
+    const uint32_t*                  pLinksToAdd,
+    int32_t                          nNoOfLinksToRemove,
+    const uint32_t*                  pLinksToRemove,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteMonitoredItems
@@ -896,28 +895,28 @@ SOPC_StatusCode OpcUa_ClientApi_BeginSetTriggering(
  * Synchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     uint32_t                   nSubscriptionId,
     int32_t                    nNoOfMonitoredItemIds,
     const uint32_t*            pMonitoredItemIds,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfResults,
-    SOPC_StatusCode**               pResults,
+    SOPC_StatusCode**          pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the DeleteMonitoredItems service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    uint32_t                       nSubscriptionId,
-    int32_t                        nNoOfMonitoredItemIds,
-    const uint32_t*                pMonitoredItemIds,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    uint32_t                         nSubscriptionId,
+    int32_t                          nNoOfMonitoredItemIds,
+    const uint32_t*                  pMonitoredItemIds,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_CreateSubscription
@@ -925,14 +924,14 @@ SOPC_StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
  * Synchronously calls the CreateSubscription service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_CreateSubscription(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     double                     nRequestedPublishingInterval,
     uint32_t                   nRequestedLifetimeCount,
     uint32_t                   nRequestedMaxKeepAliveCount,
     uint32_t                   nMaxNotificationsPerPublish,
-    SOPC_Boolean                 bPublishingEnabled,
-    SOPC_Byte                    nPriority,
+    SOPC_Boolean               bPublishingEnabled,
+    SOPC_Byte                  nPriority,
     OpcUa_ResponseHeader*      pResponseHeader,
     uint32_t*                  pSubscriptionId,
     double*                    pRevisedPublishingInterval,
@@ -944,15 +943,15 @@ SOPC_StatusCode OpcUa_ClientApi_CreateSubscription(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginCreateSubscription(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    double                         nRequestedPublishingInterval,
-    uint32_t                       nRequestedLifetimeCount,
-    uint32_t                       nRequestedMaxKeepAliveCount,
-    uint32_t                       nMaxNotificationsPerPublish,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    double                           nRequestedPublishingInterval,
+    uint32_t                         nRequestedLifetimeCount,
+    uint32_t                         nRequestedMaxKeepAliveCount,
+    uint32_t                         nMaxNotificationsPerPublish,
     SOPC_Boolean                     bPublishingEnabled,
     SOPC_Byte                        nPriority,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_ModifySubscription
@@ -960,14 +959,14 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCreateSubscription(
  * Synchronously calls the ModifySubscription service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_ModifySubscription(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     uint32_t                   nSubscriptionId,
     double                     nRequestedPublishingInterval,
     uint32_t                   nRequestedLifetimeCount,
     uint32_t                   nRequestedMaxKeepAliveCount,
     uint32_t                   nMaxNotificationsPerPublish,
-    SOPC_Byte                    nPriority,
+    SOPC_Byte                  nPriority,
     OpcUa_ResponseHeader*      pResponseHeader,
     double*                    pRevisedPublishingInterval,
     uint32_t*                  pRevisedLifetimeCount,
@@ -978,15 +977,15 @@ SOPC_StatusCode OpcUa_ClientApi_ModifySubscription(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginModifySubscription(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    uint32_t                       nSubscriptionId,
-    double                         nRequestedPublishingInterval,
-    uint32_t                       nRequestedLifetimeCount,
-    uint32_t                       nRequestedMaxKeepAliveCount,
-    uint32_t                       nMaxNotificationsPerPublish,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    uint32_t                         nSubscriptionId,
+    double                           nRequestedPublishingInterval,
+    uint32_t                         nRequestedLifetimeCount,
+    uint32_t                         nRequestedMaxKeepAliveCount,
+    uint32_t                         nMaxNotificationsPerPublish,
     SOPC_Byte                        nPriority,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_SetPublishingMode
@@ -994,28 +993,28 @@ SOPC_StatusCode OpcUa_ClientApi_BeginModifySubscription(
  * Synchronously calls the SetPublishingMode service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_SetPublishingMode(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
-    SOPC_Boolean                 bPublishingEnabled,
+    SOPC_Boolean               bPublishingEnabled,
     int32_t                    nNoOfSubscriptionIds,
     const uint32_t*            pSubscriptionIds,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfResults,
-    SOPC_StatusCode**               pResults,
+    SOPC_StatusCode**          pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the SetPublishingMode service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
+    const OpcUa_RequestHeader*       pRequestHeader,
     SOPC_Boolean                     bPublishingEnabled,
-    int32_t                        nNoOfSubscriptionIds,
-    const uint32_t*                pSubscriptionIds,
+    int32_t                          nNoOfSubscriptionIds,
+    const uint32_t*                  pSubscriptionIds,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_Publish
@@ -1023,7 +1022,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
  * Synchronously calls the Publish service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_Publish(
-    SOPC_Channel                               hChannel,
+    SOPC_Channel                             hChannel,
     const OpcUa_RequestHeader*               pRequestHeader,
     int32_t                                  nNoOfSubscriptionAcknowledgements,
     const OpcUa_SubscriptionAcknowledgement* pSubscriptionAcknowledgements,
@@ -1031,22 +1030,22 @@ SOPC_StatusCode OpcUa_ClientApi_Publish(
     uint32_t*                                pSubscriptionId,
     int32_t*                                 pNoOfAvailableSequenceNumbers,
     uint32_t**                               pAvailableSequenceNumbers,
-    SOPC_Boolean*                              pMoreNotifications,
+    SOPC_Boolean*                            pMoreNotifications,
     OpcUa_NotificationMessage*               pNotificationMessage,
     int32_t*                                 pNoOfResults,
-    SOPC_StatusCode**                             pResults,
+    SOPC_StatusCode**                        pResults,
     int32_t*                                 pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**                      pDiagnosticInfos);
+    SOPC_DiagnosticInfo**                    pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the Publish service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginPublish(
-    SOPC_Channel                               hChannel,
+    SOPC_Channel                             hChannel,
     const OpcUa_RequestHeader*               pRequestHeader,
     int32_t                                  nNoOfSubscriptionAcknowledgements,
     const OpcUa_SubscriptionAcknowledgement* pSubscriptionAcknowledgements,
-    SOPC_Channel_PfnRequestComplete*           pCallback,
+    SOPC_Channel_PfnRequestComplete*         pCallback,
     void*                                    pCallbackData);
 #endif
 
@@ -1055,7 +1054,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginPublish(
  * Synchronously calls the Republish service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_Republish(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     uint32_t                   nSubscriptionId,
     uint32_t                   nRetransmitSequenceNumber,
@@ -1067,11 +1066,11 @@ SOPC_StatusCode OpcUa_ClientApi_Republish(
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginRepublish(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    uint32_t                       nSubscriptionId,
-    uint32_t                       nRetransmitSequenceNumber,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    uint32_t                         nSubscriptionId,
+    uint32_t                         nRetransmitSequenceNumber,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_TransferSubscriptions
@@ -1079,28 +1078,28 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRepublish(
  * Synchronously calls the TransferSubscriptions service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_TransferSubscriptions(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     int32_t                    nNoOfSubscriptionIds,
     const uint32_t*            pSubscriptionIds,
-    SOPC_Boolean                 bSendInitialValues,
+    SOPC_Boolean               bSendInitialValues,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfResults,
     OpcUa_TransferResult**     pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the TransferSubscriptions service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfSubscriptionIds,
-    const uint32_t*                pSubscriptionIds,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfSubscriptionIds,
+    const uint32_t*                  pSubscriptionIds,
     SOPC_Boolean                     bSendInitialValues,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 #ifndef OPCUA_EXCLUDE_DeleteSubscriptions
@@ -1108,26 +1107,26 @@ SOPC_StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
  * Synchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_DeleteSubscriptions(
-    SOPC_Channel                 hChannel,
+    SOPC_Channel               hChannel,
     const OpcUa_RequestHeader* pRequestHeader,
     int32_t                    nNoOfSubscriptionIds,
     const uint32_t*            pSubscriptionIds,
     OpcUa_ResponseHeader*      pResponseHeader,
     int32_t*                   pNoOfResults,
-    SOPC_StatusCode**               pResults,
+    SOPC_StatusCode**          pResults,
     int32_t*                   pNoOfDiagnosticInfos,
-    SOPC_DiagnosticInfo**        pDiagnosticInfos);
+    SOPC_DiagnosticInfo**      pDiagnosticInfos);
 
 /*============================================================================
  * Asynchronously calls the DeleteSubscriptions service.
  *===========================================================================*/
 SOPC_StatusCode OpcUa_ClientApi_BeginDeleteSubscriptions(
     SOPC_Channel                     hChannel,
-    const OpcUa_RequestHeader*     pRequestHeader,
-    int32_t                        nNoOfSubscriptionIds,
-    const uint32_t*                pSubscriptionIds,
+    const OpcUa_RequestHeader*       pRequestHeader,
+    int32_t                          nNoOfSubscriptionIds,
+    const uint32_t*                  pSubscriptionIds,
     SOPC_Channel_PfnRequestComplete* pCallback,
-    void*                          pCallbackData);
+    void*                            pCallbackData);
 #endif
 
 END_EXTERN_C

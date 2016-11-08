@@ -28,15 +28,18 @@
  * ======================================================================*/
 
 /* standard */
-#include <sopc_types.h>
-
 #include <stdlib.h>
 #include <stddef.h>
 #include <assert.h>
 
 /* self */
-#include <opcua_identifiers.h>
+#include "sopc_types.h"
+
+/* stack */
 #include <sopc_encoder.h>
+
+/* types */
+#include <opcua_identifiers.h>
 
 
 #ifndef OPCUA_EXCLUDE_Node
@@ -21977,7 +21980,7 @@ void SOPC_Initialize_EnumeratedType(int32_t* enumerationValue)
 }
 
 void SOPC_Initialize_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
-                         SOPC_EncodeableObject_PfnInitialize* initFct)
+                           SOPC_EncodeableObject_PfnInitialize* initFct)
 {
     (void) initFct;
     (void) sizeOfElt;
@@ -21990,7 +21993,7 @@ void SOPC_Clear_EnumeratedType(int32_t* enumerationValue){
 }
 
 void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
-                    SOPC_EncodeableObject_PfnClear* clearFct)
+                      SOPC_EncodeableObject_PfnClear* clearFct)
 {
     int32_t idx = 0;
     uint32_t pos = 0;
@@ -22011,7 +22014,7 @@ SOPC_StatusCode SOPC_Read_EnumeratedType(SOPC_MsgBuffer* msgBuffer, int32_t* enu
 }
 
 SOPC_StatusCode SOPC_Read_Array(SOPC_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
-                         size_t sizeOfElt, SOPC_EncodeableObject_PfnDecode* decodeFct)
+                                size_t sizeOfElt, SOPC_EncodeableObject_PfnDecode* decodeFct)
 {
     assert(msgBuffer != NULL && *eltsArray == NULL && noOfElts != NULL);
     SOPC_StatusCode status = STATUS_OK;
@@ -22046,7 +22049,7 @@ SOPC_StatusCode SOPC_Write_EnumeratedType(SOPC_MsgBuffer* msgBuffer, int32_t* en
 }
 
 SOPC_StatusCode SOPC_Write_Array(SOPC_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
-                          size_t sizeOfElt, SOPC_EncodeableObject_PfnEncode* encodeFct){
+                                 size_t sizeOfElt, SOPC_EncodeableObject_PfnEncode* encodeFct){
     assert(msgBuffer != NULL && *eltsArray != NULL && noOfElts != NULL);
     SOPC_StatusCode status = STATUS_OK;
     SOPC_Byte* byteArray = *eltsArray;
