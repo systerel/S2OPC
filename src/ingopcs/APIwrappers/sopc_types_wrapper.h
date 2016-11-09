@@ -178,46 +178,46 @@ typedef void* OpcUa_SocketManager;
     SOPC_Clear_EnumeratedType((int32_t*) &a_pValue->xName)
 
 #define OpcUa_Field_Write(xType, xName) \
-    status |= xType##_Write(&a_pValue->xName, msgBuf)
+    if(STATUS_OK == status) status = xType##_Write(&a_pValue->xName, msgBuf)
 
 #define OpcUa_Field_WriteArray(xType, xName) \
-    status |= SOPC_Write_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
-                              sizeof(xType), (SOPC_EncodeableObject_PfnEncode*) xType##_Write)
+    if(STATUS_OK == status) status = SOPC_Write_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
+                                                      sizeof(xType), (SOPC_EncodeableObject_PfnEncode*) xType##_Write)
 
 #define OpcUa_Field_WriteEncodeableArray(xType, xName) \
-    status |= SOPC_Write_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
-                              sizeof(xType), (SOPC_EncodeableObject_PfnEncode*) xType##_Encode)
+    if(STATUS_OK == status) status = SOPC_Write_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
+                                                      sizeof(xType), (SOPC_EncodeableObject_PfnEncode*) xType##_Encode)
 
 #define OpcUa_Field_WriteEnumeratedArray(xType, xName) \
-    status |= SOPC_Write_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
-                              sizeof(xType), (SOPC_EncodeableObject_PfnEncode*) SOPC_Write_EnumeratedType)
+    if(STATUS_OK == status) status = SOPC_Write_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
+                                                      sizeof(xType), (SOPC_EncodeableObject_PfnEncode*) SOPC_Write_EnumeratedType)
 
 #define OpcUa_Field_WriteEncodeable(xType, xName) \
-    status |= xType##_Encode(&a_pValue->xName, msgBuf)
+    if(STATUS_OK == status) status = xType##_Encode(&a_pValue->xName, msgBuf)
 
 #define OpcUa_Field_WriteEnumerated(xType, xName) \
-    status |= SOPC_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->xName)
+    if(STATUS_OK == status) status = SOPC_Write_EnumeratedType(msgBuf, (int32_t*) &a_pValue->xName)
 
 #define OpcUa_Field_Read(xType, xName) \
-    status |= xType##_Read(&a_pValue->xName, msgBuf)
+    if(STATUS_OK == status) status = xType##_Read(&a_pValue->xName, msgBuf)
 
 #define OpcUa_Field_ReadArray(xType, xName) \
-    status |= SOPC_Read_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
-                             sizeof(xType), (SOPC_EncodeableObject_PfnDecode*) xType##_Read)
+    if(STATUS_OK == status) status = SOPC_Read_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
+                                                     sizeof(xType), (SOPC_EncodeableObject_PfnDecode*) xType##_Read)
 
 #define OpcUa_Field_ReadEncodeableArray(xType, xName) \
-    status |= SOPC_Read_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
-                             sizeof(xType), (SOPC_EncodeableObject_PfnDecode*) xType##_Decode)
+    if(STATUS_OK == status) status = SOPC_Read_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
+                                                     sizeof(xType), (SOPC_EncodeableObject_PfnDecode*) xType##_Decode)
 
 #define OpcUa_Field_ReadEnumeratedArray(xType, xName) \
-    status |= SOPC_Read_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
-                             sizeof(xType), (SOPC_EncodeableObject_PfnDecode*) SOPC_Read_EnumeratedType)
+    if(STATUS_OK == status) status = SOPC_Read_Array(msgBuf, &a_pValue->NoOf##xName, (void**) &a_pValue->xName, \
+                                                     sizeof(xType), (SOPC_EncodeableObject_PfnDecode*) SOPC_Read_EnumeratedType)
 
 #define OpcUa_Field_ReadEncodeable(xType, xName) \
-    status |= xType##_Decode(&a_pValue->xName, msgBuf)
+    if(STATUS_OK == status) status = xType##_Decode(&a_pValue->xName, msgBuf)
 
 #define OpcUa_Field_ReadEnumerated(xType, xName) \
-    status |= SOPC_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->xName)
+    if(STATUS_OK == status) status = SOPC_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->xName)
 
 #define OpcUa_Field_GetSize(xType, xName)
 #define OpcUa_Field_GetSizeArray(xType, xName)
