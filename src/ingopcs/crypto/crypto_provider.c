@@ -11,10 +11,9 @@
 
 #include <secret_buffer.h>
 
+#include "sopc_base_types.h"
 #include "crypto_types.h"
 #include "crypto_provider.h"
-
-#include <sopc_base_types.h>
 #include "crypto_profiles.h"
 #include "key_manager.h"
 #include "pki.h"

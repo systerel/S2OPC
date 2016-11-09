@@ -13,11 +13,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <sopc_base_types.h>
+#include "sopc_base_types.h"
 #include "secret_buffer.h"
 #include "crypto_profiles.h"
 #include "crypto_provider.h"
 #include "crypto_provider_lib.h"
+
 #include "mbedtls/aes.h"
 #include "mbedtls/md.h"
 #include "mbedtls/entropy.h"
