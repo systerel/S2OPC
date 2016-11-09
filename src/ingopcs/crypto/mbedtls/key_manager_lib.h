@@ -1,7 +1,6 @@
-/*
- * KeyManager provides functions for Asymmetric Key Management such as loading a signed public key,
- *  the corresponding private key, and provides the ability to verify signatures with x509 certificates.
- * KeyManager replaces the old concept of PKIProvider. PrivateKey should not be in the PublicKeyInfrastructure...
+/** \file key_manager_lib.h
+ *
+ * Implementations for AsymmetricKey and Certificate are mainly lib-specific.
  *
  *  Created on: Oct. 19 2016
  *      Author: PAB
@@ -15,7 +14,10 @@
 #include "mbedtls/x509_crt.h"
 
 /**
- * The asymmetric key structure is mainly lib-dependent. Its content can be enriched for future uses.
+ * \brief   The asymmetric key representation.
+ *
+ *          It should be treated as an abstract handle.
+ *          The asymmetric key structure is mainly lib-specific. Its content can be enriched for future uses.
  */
 typedef struct AsymmetricKey {
     mbedtls_pk_context pk;
@@ -23,9 +25,10 @@ typedef struct AsymmetricKey {
 
 
 /**
- * The certificate is mainly lib-dependent. Its content can be enriched for future uses.
- * In fact, a certificate is a linked chain of signed public key signed by the next public key, until it reaches
- *  the top-level-root-self-signed and trusted public-key.
+ * \brief   The signed public key representation.
+ *
+ *          It should be treated as an abstract handle.
+ *          The certificate structure is mainly lib-specific. Its content can be enriched for future uses.
  */
 typedef struct Certificate {
     mbedtls_x509_crt crt;   /**< Certificate as a lib-dependent format */
@@ -34,9 +37,10 @@ typedef struct Certificate {
 } Certificate;
 
 /**
- * Certificate Revocation List.
- * Undefined yet.
- * This implementation might be too much tainted by mbedtls.
+ * \brief   Certificate Revocation List.
+ *
+ *          Unspecified yet.
+ *          This current  implementation might be too much tainted by mbedtls.
  */
 typedef struct CertificateRevList {
     mbedtls_x509_crl crl;
