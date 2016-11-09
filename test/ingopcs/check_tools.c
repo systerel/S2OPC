@@ -11,9 +11,9 @@
 
 #include <stdlib.h>
 #include <check.h>
-#include <buffer.h>
-#include <singly_linked_list.h>
-#include <sopc_base_types.h>
+#include "buffer.h"
+#include "singly_linked_list.h"
+#include "sopc_base_types.h"
 #include "check_stack.h"
 
 

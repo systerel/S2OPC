@@ -5,14 +5,14 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_SOPC_TYPES_H_
-#define INGOPCS_SOPC_TYPES_H_
+#ifndef SOPC_TYPES_H_
+#define SOPC_TYPES_H_
 
 #include <stdint.h>
 
-#include <sopc_base_types.h>
-#include <sopc_encodeable.h>
-#include <sopc_stack_csts.h>
+#include "sopc_base_types.h"
+#include "sopc_encodeable.h"
+#include "sopc_stack_csts.h"
 
 BEGIN_EXTERN_C
 

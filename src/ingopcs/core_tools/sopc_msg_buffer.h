@@ -1,5 +1,5 @@
 /*
- *  \file msg_buffer.h
+ *  \file sopc_msg_buffer.h
  *
  *  \brief Binary UA (and TCP UA) message representation with one or several chunks.
  *  It is used for TCP UA messages layer and UA secure messages layer (write/read operations are layer dependent).
@@ -11,10 +11,10 @@
 #ifndef INGOPCS_MSG_BUFFER_H_
 #define INGOPCS_MSG_BUFFER_H_
 
-#include <buffer.h>
-#include <sopc_base_types.h>
-#include <sopc_encodeable.h>
-#include <sopc_namespace_table.h>
+#include "buffer.h"
+#include "sopc_base_types.h"
+#include "sopc_encodeable.h"
+#include "sopc_namespace_table.h"
 
 /** Length of a TCP UA message Header */
 #define TCP_SOPC_HEADER_LENGTH 8

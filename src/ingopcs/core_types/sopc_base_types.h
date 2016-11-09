@@ -5,8 +5,8 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_BASIC_TYPES_H_
-#define INGOPCS_BASIC_TYPES_H_
+#ifndef SOPC_BASE_TYPES_H_
+#define SOPC_BASE_TYPES_H_
 
 #include <stdint.h>
 #include <stddef.h>
@@ -35,4 +35,4 @@ typedef void* P_Timer;
 
 END_EXTERN_C
 
-#endif /* INGOPCS_BASIC_TYPES_H_ */
+#endif /* SOPC_BASE_TYPES_H_ */

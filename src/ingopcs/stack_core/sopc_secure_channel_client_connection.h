@@ -8,13 +8,13 @@
 #ifndef INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_
 #define INGOPCS_SECURE_CHANNEL_CLIENT_CONNECTION_H_
 
-#include <secret_buffer.h>
-#include <pki.h>
-#include <singly_linked_list.h>
-#include <sopc_builtintypes.h>
-#include <sopc_encodeable.h>
-#include <sopc_namespace_table.h>
-#include <sopc_secure_channel_low_level.h>
+#include "secret_buffer.h"
+#include "pki.h"
+#include "singly_linked_list.h"
+#include "sopc_builtintypes.h"
+#include "sopc_encodeable.h"
+#include "sopc_namespace_table.h"
+#include "sopc_secure_channel_low_level.h"
 
 struct SC_ClientConnection;
 

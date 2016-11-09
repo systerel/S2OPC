@@ -10,7 +10,7 @@
 #ifndef INGOPCS_BUFFER_H_
 #define INGOPCS_BUFFER_H_
 
-#include <sopc_base_types.h>
+#include "sopc_base_types.h"
 
 /**
  *  \brief Bytes buffer structure

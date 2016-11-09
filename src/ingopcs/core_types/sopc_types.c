@@ -36,10 +36,10 @@
 #include "sopc_types.h"
 
 /* stack */
-#include <sopc_encoder.h>
+#include "sopc_encoder.h"
 
 /* types */
-#include <opcua_identifiers.h>
+#include "opcua_identifiers.h"
 
 
 #ifndef OPCUA_EXCLUDE_Node

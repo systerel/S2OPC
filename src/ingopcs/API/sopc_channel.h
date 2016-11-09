@@ -7,8 +7,8 @@
  *      Author: VMO (Systerel)
  */
 
-#ifndef INGOPCS_SOPC_CHANNEL_H_
-#define INGOPCS_SOPC_CHANNEL_H_
+#ifndef SOPC_CHANNEL_H_
+#define SOPC_CHANNEL_H_
 
 #include "sopc_stack_csts.h"
 

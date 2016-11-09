@@ -5,11 +5,11 @@
  *      Author: vincent
  */
 
-#include <sopc_encodeable.h>
+#include "sopc_encodeable.h"
 
 #include <string.h>
 
-#include <sopc_builtintypes.h>
+#include "sopc_builtintypes.h"
 
 SOPC_EncodeableType* EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
                                                     const char*         namespace,

@@ -8,11 +8,11 @@
 #ifndef INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_
 #define INGOPCS_SECURE_CHANNEL_LOW_LEVEL_H_
 
-#include <key_manager.h>
-#include <key_sets.h>
-#include <pki.h>
-#include <sopc_types.h>
-#include <sopc_tcp_ua_connection.h>
+#include "key_manager.h"
+#include "key_sets.h"
+#include "pki.h"
+#include "sopc_types.h"
+#include "sopc_tcp_ua_connection.h"
 
 extern const uint32_t scProtocolVersion;
 

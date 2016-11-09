@@ -5,11 +5,11 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_SOPC_STACK_CONFIG_H_
-#define INGOPCS_SOPC_STACK_CONFIG_H_
+#ifndef SOPC_STACK_CONFIG_H_
+#define SOPC_STACK_CONFIG_H_
 
-#include <sopc_builtintypes.h>
-#include <sopc_namespace_table.h>
+#include "sopc_builtintypes.h"
+#include "sopc_namespace_table.h"
 
 typedef struct {
     uint8_t             traceLevel; // enum TBD

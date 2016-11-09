@@ -5,11 +5,11 @@
  *      Author: vincent
  */
 #include <stdint.h>
-#include <p_sockets.h>
-#include <sopc_base_types.h>
+#include "p_sockets.h"
+#include "sopc_base_types.h"
 
-#ifndef INGOPCS_SOCKETS_SOPC_SOCKETS_H_
-#define INGOPCS_SOCKETS_SOPC_SOCKETS_H_
+#ifndef SOPC_SOCKETS_H_
+#define SOPC_SOCKETS_H_
 
 typedef enum {
     SOCKET_READ_EVENT,
@@ -77,7 +77,7 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager*  socke
                                                SOPC_Socket**        listenerSocket);
 
 SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
-                                 uint32_t          msecTimeout);
+                                        uint32_t          msecTimeout);
 
 int32_t SOPC_Socket_Write (SOPC_Socket* socket,
                          uint8_t*   data,
@@ -91,4 +91,4 @@ SOPC_StatusCode SOPC_Socket_Read (SOPC_Socket* socket,
 void SOPC_Socket_Close(SOPC_Socket* socket);
 
 
-#endif /* INGOPCS_SOCKETS_SOPC_SOCKETS_H_ */
+#endif /* SOPC_SOCKETS_H_ */

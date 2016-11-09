@@ -5,10 +5,10 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_SOPC_NAMESPACE_TABLE_H_
-#define INGOPCS_SOPC_NAMESPACE_TABLE_H_
+#ifndef SOPC_NAMESPACE_TABLE_H_
+#define SOPC_NAMESPACE_TABLE_H_
 
-#include <sopc_builtintypes.h>
+#include "sopc_builtintypes.h"
 
 #define OPCUA_NAMESPACE_INDEX 0
 extern const char* OPCUA_NAMESPACE_NAME;

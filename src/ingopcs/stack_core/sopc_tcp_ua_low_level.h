@@ -5,11 +5,11 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_TCP_SOPC_LOW_LEVEL_H_
-#define INGOPCS_TCP_SOPC_LOW_LEVEL_H_
+#ifndef SOPC_LOW_LEVEL_H_
+#define SOPC_LOW_LEVEL_H_
 
-#include <sopc_msg_buffer.h>
-#include <sopc_sockets.h>
+#include "sopc_msg_buffer.h"
+#include "sopc_sockets.h"
 
 extern const uint32_t tcpProtocolVersion;
 
@@ -34,4 +34,4 @@ SOPC_StatusCode TCP_SOPC_ReadData(SOPC_Socket*    socket,
 
 SOPC_StatusCode TCP_SOPC_ReadHeader(SOPC_MsgBuffer* msgBuffer);
 
-#endif /* INGOPCS_TCP_SOPC_LOW_LEVEL_H_ */
+#endif /* SOPC_LOW_LEVEL_H_ */

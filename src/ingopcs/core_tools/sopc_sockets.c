@@ -5,13 +5,13 @@
  *      Author: vincent
  */
 
-#include <sopc_sockets.h>
+#include "sopc_sockets.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include <sopc_stack_csts.h>
+#include "sopc_stack_csts.h"
 
 SOPC_SocketManager globalSocketMgr;
 
@@ -120,7 +120,7 @@ SOPC_SocketManager* SOPC_SocketManager_Create(uint32_t nbSockets){
 }
 
 SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
-                                       uint32_t          nbSockets){
+                                              uint32_t          nbSockets){
     uint32_t idx = 0;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(globalNbSockets + nbSockets > OPCUA_MAXCONNECTIONS)
@@ -319,7 +319,7 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager*  socke
 }
 
 SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
-                                 uint32_t          msecTimeout){
+                                        uint32_t            msecTimeout){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
     int32_t nbReady = 0;

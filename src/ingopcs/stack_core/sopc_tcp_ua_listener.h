@@ -5,8 +5,8 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_TCP_SOPC_LISTENER_H_
-#define INGOPCS_TCP_SOPC_LISTENER_H_
+#ifndef SOPC_LISTENER_H_
+#define SOPC_LISTENER_H_
 
 typedef void* TCP_SOPC_ListenerEvent_CB;
 
@@ -22,4 +22,4 @@ typedef struct {
 } TCP_SOPC_Listener;
 
 
-#endif /* INGOPCS_TCP_SOPC_LISTENER_H_ */
+#endif /* SOPC_LISTENER_H_ */

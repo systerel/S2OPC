@@ -5,7 +5,7 @@
  *      Author: Vincent
  */
 
-#include <sopc_builtintypes.h>
+#include "sopc_builtintypes.h"
 
 #include <assert.h>
 #include <stdlib.h>

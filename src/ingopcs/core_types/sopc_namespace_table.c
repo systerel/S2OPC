@@ -5,13 +5,13 @@
  *      Author: vincent
  */
 
-#include <sopc_namespace_table.h>
+#include "sopc_namespace_table.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <sopc_builtintypes.h>
+#include "sopc_builtintypes.h"
 
 const char* OPCUA_NAMESPACE_NAME = "http://opcfoundation.org/UA/";
 

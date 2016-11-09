@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include <sopc_stack_csts.h>
+#include "sopc_stack_csts.h"
 
 SOPC_StatusCode Socket_Network_Initialize(){
     return STATUS_OK;

@@ -5,12 +5,12 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_SOPC_ENCODEABLE_H_
-#define INGOPCS_SOPC_ENCODEABLE_H_
+#ifndef SOPC_ENCODEABLE_H_
+#define SOPC_ENCODEABLE_H_
 
 #include <stdint.h>
 
-#include <sopc_base_types.h>
+#include "sopc_base_types.h"
 
 BEGIN_EXTERN_C
 

@@ -5,7 +5,7 @@
  *      Author: Vincent
  */
 
-#include <sopc_msg_buffer.h>
+#include "sopc_msg_buffer.h"
 
 #include <assert.h>
 #include <stdlib.h>

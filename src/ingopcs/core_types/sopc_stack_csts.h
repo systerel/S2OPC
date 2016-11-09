@@ -5,8 +5,8 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_SOPC_STACK_CSTS_H_
-#define INGOPCS_SOPC_STACK_CSTS_H_
+#ifndef SOPC_STACK_CSTS_H_
+#define SOPC_STACK_CSTS_H_
 
 #include <stdint.h>
 

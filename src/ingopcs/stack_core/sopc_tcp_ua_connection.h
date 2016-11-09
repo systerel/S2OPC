@@ -5,12 +5,12 @@
  *      Author: vincent
  */
 
-#ifndef INGOPCS_TCP_SOPC_CONNECTION_H_
-#define INGOPCS_TCP_SOPC_CONNECTION_H_
+#ifndef SOPC_CONNECTION_H_
+#define SOPC_CONNECTION_H_
 
-#include <sopc_msg_buffer.h>
-#include <sopc_sockets.h>
-#include <sopc_builtintypes.h>
+#include "sopc_msg_buffer.h"
+#include "sopc_sockets.h"
+#include "sopc_builtintypes.h"
 
 #define TCP_SOPC_MIN_BUFFER_SIZE 8192
 #define TCP_SOPC_MAX_URL_LENGTH 4096
@@ -75,4 +75,4 @@ void TCP_SOPC_Connection_Disconnect(TCP_SOPC_Connection* connection);
 uint32_t TCP_SOPC_Connection_GetReceiveProtocolVersion(TCP_SOPC_Connection* connection,
                                                      uint32_t*          protocolVersion);
 
-#endif /* INGOPCS_TCP_SOPC_CONNECTION_H_ */
+#endif /* SOPC_CONNECTION_H_ */

@@ -8,8 +8,9 @@
 #ifndef STUB_SERVER_STUB_CLIENT_H_
 #define STUB_SERVER_STUB_CLIENT_H_
 
-#include <opcua_channel.h>
 #include <unistd.h>
+
+#include "opcua_channel.h"
 
 typedef struct {
 OpcUa_Int Stub;

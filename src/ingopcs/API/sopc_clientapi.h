@@ -31,8 +31,8 @@
 #define _SOPC_ClientApi_H_ 1
 #ifdef OPCUA_HAVE_CLIENTAPI
 
-#include <sopc_types.h>
-#include <sopc_channel.h>
+#include "sopc_types.h"
+#include "sopc_channel.h"
 
 BEGIN_EXTERN_C
 

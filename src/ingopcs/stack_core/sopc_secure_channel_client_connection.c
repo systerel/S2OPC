@@ -5,16 +5,16 @@
  *      Author: vincent
  */
 
-#include <sopc_secure_channel_client_connection.h>
+#include "sopc_secure_channel_client_connection.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <crypto_provider.h>
-#include <sopc_encoder.h>
-#include <sopc_types.h>
-#include <sopc_secure_channel_low_level.h>
+#include "crypto_provider.h"
+#include "sopc_encoder.h"
+#include "sopc_types.h"
+#include "sopc_secure_channel_low_level.h"
 
 
 typedef enum

@@ -5,14 +5,14 @@
  *      Author: vincent
  */
 
-#include <sopc_encoder.h>
+#include "sopc_encoder.h"
 
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
 
-#include <sopc_encodeable.h>
-#include <sopc_tcp_ua_low_level.h>
+#include "sopc_encodeable.h"
+#include "sopc_tcp_ua_low_level.h"
 
 void EncodeDecode_Int16(int16_t* intv)
 {

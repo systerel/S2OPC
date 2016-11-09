@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <check.h>
-#include <sopc_encoder.h>
-#include <sopc_msg_buffer.h>
+#include "sopc_encoder.h"
+#include "sopc_msg_buffer.h"
 #include "check_stack.h"
 
 

@@ -5,12 +5,12 @@
  *      Author: vincent
  */
 
-#include <sopc_stack_config.h>
+#include "sopc_stack_config.h"
 
 #include <stdlib.h>
 #include <string.h>
-#include <p_sockets.h>
-#include <sopc_types.h>
+#include "p_sockets.h"
+#include "sopc_types.h"
 
 SOPC_StackConfiguration g_stackConfiguration;
 uint8_t g_lockedConfig = FALSE;

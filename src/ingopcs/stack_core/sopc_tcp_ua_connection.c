@@ -4,7 +4,7 @@
  *  Created on: Jul 22, 2016
  *      Author: vincent
  */
-#include <sopc_tcp_ua_connection.h>
+#include "sopc_tcp_ua_connection.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -12,8 +12,8 @@
 #include <assert.h>
 #include <string.h>
 
-#include <sopc_encoder.h>
-#include <sopc_tcp_ua_low_level.h>
+#include "sopc_encoder.h"
+#include "sopc_tcp_ua_low_level.h"
 
 SOPC_StatusCode InitSendBuffer(TCP_SOPC_Connection* connection){
     SOPC_StatusCode status = STATUS_NOK;

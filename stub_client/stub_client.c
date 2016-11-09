@@ -9,14 +9,13 @@
 
 #include <stdio.h>
 
-#include <opcua_statuscodes.h>
-#include <opcua_identifiers.h>
+#include "opcua_statuscodes.h"
+#include "opcua_identifiers.h"
 #include <opcua_proxystub.h>
 #include <opcua_string.h>
-#include <opcua_sockets.h>
-#include <opcua_pki.h>
-
-#include <sopc_clientapi.h>
+#include "sopc_clientapi.h"
+#include "opcua_pki.h"
+#include "opcua_sockets.h"
 
 int noEvent = 1;
 int noResp = 1;

@@ -6,7 +6,7 @@
  */
 
 #include <assert.h>
-#include <platform_deps.h>
+#include "platform_deps.h"
 
 Endianess endianess  = P_Endianess_Undefined;
 Endianess floatEndianess = P_Endianess_Undefined;

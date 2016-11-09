@@ -8,7 +8,7 @@
 #ifndef INGOPCS_KEY_SETS_H_
 #define INGOPCS_KEY_SETS_H_
 
-#include <secret_buffer.h>
+#include "secret_buffer.h"
 
 typedef struct SC_SecurityKeySet{
     SecretBuffer* signKey;
