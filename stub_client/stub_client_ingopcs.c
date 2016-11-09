@@ -5,38 +5,34 @@
  *      Author: Vincent Monfort (Systerel)
  */
 
-#include "stub_client.h"
+#include "stub_client_ingopcs.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#include <opcua_identifiers.h>
-
-#include <crypto_profiles.h>
-#include <pki.h>
-#include <pki_stack.h>
-#include <key_manager.h>
-#include <sopc_clientapi.h>
-#include <sopc_stack_config.h>
+#include "opcua_identifiers.h"
+#include "sopc_stack_config.h"
+#include "crypto_profiles.h"
+#include "pki_stack.h"
+#include "sopc_clientapi.h"
+#include "sopc_run.h"
 
 int noEvent = 1;
 int noResp = 1;
 int disconnect = 0;
 int connected = 0;
 
-OpcUa_Handle StubClient_g_pPortLayerHandle = OpcUa_Null;
-
 SOPC_EncodeableType* newEncType;
 
-OpcUa_StatusCode StubClient_ConnectionEvent_Callback(SOPC_Channel       channel,
-                                                     void*            callbackData,
-                                                     SOPC_Channel_Event event,
-                                                     SOPC_StatusCode       status)
+SOPC_StatusCode StubClient_ConnectionEvent_Callback(SOPC_Channel       channel,
+                                                    void*              callbackData,
+                                                    SOPC_Channel_Event event,
+                                                    SOPC_StatusCode    status)
 {
     (void) callbackData;
     (void) channel;
     printf ("\nConnection event: channel event=%d and status=%x\n", event, status);
-	if (status == OpcUa_Good){
+	if (status == STATUS_OK){
 	    connected = 1;
 		noEvent = 0;
 	}
@@ -46,11 +42,11 @@ OpcUa_StatusCode StubClient_ConnectionEvent_Callback(SOPC_Channel       channel,
     return 0;
 }
 
-OpcUa_StatusCode StubClient_ResponseEvent_Callback(SOPC_Channel         channel,
-                                                   void*              response,
-                                                   SOPC_EncodeableType* responseType,
-                                                   void*              callbackData,
-                                                   SOPC_StatusCode         status){
+SOPC_StatusCode StubClient_ResponseEvent_Callback(SOPC_Channel         channel,
+                                                  void*                response,
+                                                  SOPC_EncodeableType* responseType,
+                                                  void*                callbackData,
+                                                  SOPC_StatusCode      status){
     (void) callbackData;
     (void) channel;
     (void) status;
@@ -76,7 +72,7 @@ OpcUa_StatusCode StubClient_ResponseEvent_Callback(SOPC_Channel         channel,
     }
 
     // Free the allocated response message
-    OpcUa_Free(response);
+    free(response);
 
     return 0;
 }
@@ -91,20 +87,11 @@ int main(void){
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
-    OpcUa_Channel hChannel;
+    SOPC_Channel hChannel;
     // Endpoint URL
     SOPC_String stEndpointUrl;
     String_Initialize(&stEndpointUrl);
-    OpcUa_CharA *sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
-    // Transport profile
-    //const OpcUa_CharA *sTransportProfileUri = OpcUa_TransportProfile_UaTcp;
-
-    // The PKI provider
-    // Default directory for certificates
-    //char* revoked = "./revoked";
-    //char* untrusted = "./untrusted";
-    //char* trusted = "./trusted";
-    // Loads certificates, then create PKI
+    char* sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
@@ -137,15 +124,15 @@ int main(void){
     StubClient_CallbackData Callback_Data;
 
     // Policy security: None
-    char* pRequestedSecurityPolicyUri = OpcUa_SecurityPolicy_Basic256Sha256;
-    OpcUa_GotoErrorIfBad(uStatus);
+    char* pRequestedSecurityPolicyUri = SecurityPolicy_Basic256Sha256_URI;
+    if(STATUS_OK != status) goto Error;
 
     // Message security mode: None
     OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;//OpcUa_MessageSecurityMode_None;
 
 	// Init stack configuration
 	StackConfiguration_Initialize();
-	OpcUa_GotoErrorIfBad(uStatus);
+	if(STATUS_OK != status) goto Error;
 
 	// Add types
 	newEncType = malloc(sizeof(SOPC_EncodeableType));
@@ -156,12 +143,12 @@ int main(void){
 	StackConfiguration_AddTypes(&newEncType, 1);
 
     // Create channel object
-    uStatus = SOPC_Channel_Create(&hChannel, OpcUa_Channel_SerializerType_Binary);
-	OpcUa_GotoErrorIfBad(uStatus);
+    status = SOPC_Channel_Create(&hChannel, ChannelSerializer_Binary);
+	if(STATUS_OK != status) goto Error;
 
-    printf ("%d\n", uStatus);
+    printf ("%d\n", status);
 
-    OpcUa_GotoErrorIfBad(uStatus);
+    if(STATUS_OK != status) goto Error;
 
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
@@ -169,12 +156,8 @@ int main(void){
     if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki))
         printf("Failed to create PKI\n");
 
-#if OPCUA_MULTITHREADED == OPCUA_CONFIG_NO
-    //uStatus = OpcUa_SocketManager_Create (OpcUa_Null, 0, OPCUA_SOCKET_NO_FLAG);
-#endif //OPCUA_MULTITHREADED
-
     // Start connection to server
-    uStatus = SOPC_Channel_BeginConnect(hChannel,
+    status = SOPC_Channel_BeginConnect(hChannel,
                                       sEndpointUrl,
                                       //sTransportProfileUri,
                                       crt_cli,                      /* Client Certificate       */
@@ -188,22 +171,16 @@ int main(void){
                                       (SOPC_Channel_PfnConnectionStateChanged*) StubClient_ConnectionEvent_Callback,
                                       &Callback_Data);              /* Connect Callback Data   */
 
-    OpcUa_GotoErrorIfBad(uStatus);
+    if(STATUS_OK != status) goto Error;
 
     // Request header
-    // TODO: wrappers for managing OpcUa_String (inside request header ...)
-    //OpcUa_RequestHeader rHeader;
     OpcUa_RequestHeader rHeader;
 
     // Local configuration: empty
-    // TODO: wrappers for managing OpcUa_String
-    //OpcUa_String localId, profileUri;
     SOPC_String localId, profileUri;
     // Endpoint URL in OPC UA string format
-    // TODO: wrappers for managing OpcUa_String
-    //const OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
-    uStatus = String_AttachFromCstring(&stEndpointUrl, sEndpointUrl);
-    OpcUa_GotoErrorIfBad(uStatus);
+    status = String_AttachFromCstring(&stEndpointUrl, sEndpointUrl);
+    if(STATUS_OK != status) goto Error;
 
     // Empty callback data
     StubClient_CallbackData Callback_Data_Get;
@@ -216,26 +193,24 @@ int main(void){
     	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
-    	uStatus = SOPC_SocketManager_Loop (SOPC_SocketManager_GetGlobal(),
-    				                     sleepTimeout);
-        printf ("ServerLoop status: %d\n", uStatus);
-        OpcUa_GotoErrorIfBad(uStatus);
+    	status = SOPC_TreatReceivedMessages(sleepTimeout);
+        printf ("ServerLoop status: %d\n", status);
+        if(STATUS_OK != status) goto Error;
 #endif //OPCUA_MULTITHREADED
     }
     loopCpt = 0;
 
     if (disconnect != 0 || connected == 0){
-        uStatus = STATUS_NOK;
+        status = STATUS_NOK;
     	goto Error;
     }
 
     // Initialization of empty request header
-    // TODO: wrappers for managing OpcUa_String (inside request header ...)
     OpcUa_RequestHeader_Initialize (&rHeader);
 
-    // To retrieve response from callaback
+    // To retrieve response from callback
 
-    uStatus = OpcUa_ClientApi_BeginGetEndpoints(hChannel,     // Channel
+    status = OpcUa_ClientApi_BeginGetEndpoints(hChannel,     // Channel
                                                 &rHeader,      // Request header
                                                 &stEndpointUrl, // Endpoint
                                                 0,            // No of local id
@@ -253,36 +228,19 @@ int main(void){
     	OpcUa_Thread_Sleep (sleepTimeout);
 #else
     	// Retrieve received messages on socket
-    	uStatus = SOPC_SocketManager_Loop (SOPC_SocketManager_GetGlobal(),
-    				                     sleepTimeout);
-        printf ("ServerLoop status: %d\n", uStatus);
-        OpcUa_GotoErrorIfBad(uStatus);
+    	status = SOPC_TreatReceivedMessages(sleepTimeout);
+        printf ("ServerLoop status: %d\n", status);
+        if(STATUS_OK != status) goto Error;
 #endif //OPCUA_MULTITHREADED
     }
     loopCpt = 0;
 
     if (disconnect != 0 || noResp != 0){
-        uStatus = STATUS_NOK;
+        status = STATUS_NOK;
     	goto Error;
     }
 
-// Get Endpoints multithread ONLY:
-//    OpcUa_ResponseHeader pResponseHeader;
-//	OpcUa_Int32 pNoOfEndpoints;
-//    OpcUa_EndpointDescription* pEndpoints;
-//
-//    uStatus = OpcUa_ClientApi_GetEndpoints(hChannel,     // Channel
-//    									   &rHeader,      // Request header
-//										   stEndpointUrl, // Endpoint
-//										   0,            // No of local id
-//										   &localId,           // local id
-//										   0,            // No of profile URI
-//										   &profileUri,           // profile uri
-//										   &pResponseHeader, // response call back
-//										   &pNoOfEndpoints,
-//										   &pEndpoints); // call back data
-
-    printf ("Final status: %d\n", uStatus);
+    printf ("Final status: %d\n", status);
     PKIProviderStack_Free(pki);
     String_Clear(&stEndpointUrl);
     KeyManager_Certificate_Free(crt_cli);
@@ -292,16 +250,16 @@ int main(void){
     SOPC_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
 
-    OpcUa_ReturnStatusCode;
+    return status;
 
-    OpcUa_BeginErrorHandling;
+    Error:
     String_Clear(&stEndpointUrl);
     SOPC_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
 
-    printf ("Error status: %d\n", uStatus);
-    if(uStatus != 0){
+    printf ("Error status: %d\n", status);
+    if(status != 0){
         return -1;
     }
-    OpcUa_FinishErrorHandling;
+    return status;
 }
