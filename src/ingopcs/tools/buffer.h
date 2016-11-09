@@ -19,8 +19,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_BUFFER_H_
-#define INGOPCS_BUFFER_H_
+#ifndef SOPC_BUFFER_H_
+#define SOPC_BUFFER_H_
 
 #include "sopc_base_types.h"
 
@@ -147,4 +147,4 @@ SOPC_StatusCode Buffer_Copy(Buffer* dest, Buffer* src);
  */
 SOPC_StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLength);
 
-#endif /* INGOPCS_BUFFER_H_ */
+#endif /* SOPC_BUFFER_H_ */

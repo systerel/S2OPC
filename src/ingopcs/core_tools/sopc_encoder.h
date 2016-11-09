@@ -206,4 +206,4 @@ SOPC_StatusCode DataValue_Write(const SOPC_DataValue* dataValue, SOPC_MsgBuffer*
 SOPC_StatusCode DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* msgBuffer);
 
 
-#endif /* INGOPCS_SOPC_ENCODER_H_ */
+#endif /* SOPC_ENCODER_H_ */

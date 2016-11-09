@@ -97,7 +97,7 @@ SOPC_StatusCode Byte_Write(const SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
-    return TCP_SOPC_WriteMsgBuffer(msgBuffer, value, 1);
+    return TCP_UA_WriteMsgBuffer(msgBuffer, value, 1);
 }
 
 SOPC_StatusCode Byte_Read(SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
@@ -106,7 +106,7 @@ SOPC_StatusCode Byte_Read(SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
         return STATUS_INVALID_PARAMETERS;
     }
 
-    return TCP_SOPC_ReadMsgBuffer(value, 1, msgBuffer, 1);
+    return TCP_UA_ReadMsgBuffer(value, 1, msgBuffer, 1);
 }
 
 SOPC_StatusCode Boolean_Write(const SOPC_Boolean* value, SOPC_MsgBuffer* msgBuffer)
@@ -148,7 +148,7 @@ SOPC_StatusCode SByte_Write(const SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
-    return TCP_SOPC_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) value, 1);
+    return TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) value, 1);
 }
 
 SOPC_StatusCode SByte_Read(SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
@@ -157,7 +157,7 @@ SOPC_StatusCode SByte_Read(SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
         return STATUS_INVALID_PARAMETERS;
     }
 
-    return TCP_SOPC_ReadMsgBuffer((SOPC_Byte*) value, 1, msgBuffer, 1);
+    return TCP_UA_ReadMsgBuffer((SOPC_Byte*) value, 1, msgBuffer, 1);
 }
 
 SOPC_StatusCode Int16_Write(const int16_t* value, SOPC_MsgBuffer* msgBuffer)
@@ -166,7 +166,7 @@ SOPC_StatusCode Int16_Write(const int16_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         int16_t encodedValue = *value;
         EncodeDecode_Int16(&encodedValue);
-        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
     }
     return status;
 }
@@ -178,7 +178,7 @@ SOPC_StatusCode Int16_Read(int16_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*)&readValue, 2, msgBuffer, 2);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)&readValue, 2, msgBuffer, 2);
         if(status == STATUS_OK){
             EncodeDecode_Int16(&readValue);
             *value = readValue;
@@ -193,7 +193,7 @@ SOPC_StatusCode UInt16_Write(const uint16_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         uint16_t encodedValue = *value;
         EncodeDecode_UInt16(&encodedValue);
-        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
     }
     return status;
 }
@@ -204,7 +204,7 @@ SOPC_StatusCode UInt16_Read(uint16_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*)value, 2, msgBuffer, 2);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 2, msgBuffer, 2);
         if(status == STATUS_OK){
             EncodeDecode_UInt16(value);
         }
@@ -218,7 +218,7 @@ SOPC_StatusCode Int32_Write(const int32_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         int32_t encodedValue = *value;
         EncodeDecode_Int32(&encodedValue);
-        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
 }
@@ -227,7 +227,7 @@ SOPC_StatusCode Int32_Read(int32_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*)value, 4, msgBuffer, 4);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
             EncodeDecode_Int32(value);
         }
@@ -241,7 +241,7 @@ SOPC_StatusCode UInt32_Write(const uint32_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         uint32_t encodedValue = *value;
         EncodeDecode_UInt32(&encodedValue);
-        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
 }
@@ -250,7 +250,7 @@ SOPC_StatusCode UInt32_Read(uint32_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*)value, 4, msgBuffer, 4);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
             EncodeDecode_UInt32(value);
         }
@@ -264,7 +264,7 @@ SOPC_StatusCode Int64_Write(const int64_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         int64_t encodedValue = *value;
         EncodeDecode_Int64(&encodedValue);
-        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
 }
@@ -273,7 +273,7 @@ SOPC_StatusCode Int64_Read(int64_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*) value, 8, msgBuffer, 8);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*) value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
             EncodeDecode_Int64(value);
         }
@@ -287,7 +287,7 @@ SOPC_StatusCode UInt64_Write(const uint64_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         uint64_t encodedValue = *value;
         EncodeDecode_UInt64(&encodedValue);
-        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
 }
@@ -296,7 +296,7 @@ SOPC_StatusCode UInt64_Read(uint64_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*) value, 8, msgBuffer, 8);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*) value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
             EncodeDecode_UInt64(value);
         }
@@ -310,7 +310,7 @@ SOPC_StatusCode Float_Write(const float* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         float encodedValue = *value;
         EncodeDecode_Float(&encodedValue);
-        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
 }
@@ -319,7 +319,7 @@ SOPC_StatusCode Float_Read(float* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*)value, 4, msgBuffer, 4);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
             EncodeDecode_Float(value);
         }
@@ -333,7 +333,7 @@ SOPC_StatusCode Double_Write(const double* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         double encodedValue = *value;
         EncodeDecode_Double(&encodedValue);
-        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
 }
@@ -342,7 +342,7 @@ SOPC_StatusCode Double_Read(double* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*)value, 8, msgBuffer, 8);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
             EncodeDecode_Double(value);
         }
@@ -366,7 +366,7 @@ SOPC_StatusCode ByteString_Write(const SOPC_ByteString* str, SOPC_MsgBuffer* msg
         if(status == STATUS_OK &&
            str->Length > 0)
         {
-            status = TCP_SOPC_WriteMsgBuffer(msgBuffer, str->Data, str->Length);
+            status = TCP_UA_WriteMsgBuffer(msgBuffer, str->Data, str->Length);
         }
     }
     return status;
@@ -379,14 +379,14 @@ SOPC_StatusCode ByteString_Read(SOPC_ByteString* str, SOPC_MsgBuffer* msgBuffer)
     if(str == NULL || (str != NULL && str->Data != NULL)){
         status = STATUS_INVALID_PARAMETERS;
     }else{
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*)&length, 4, msgBuffer, 4);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)&length, 4, msgBuffer, 4);
         if(status == STATUS_OK){
             EncodeDecode_Int32(&length);
             if(length > 0){
                 str->Length = length;
                 str->Data = malloc(sizeof(SOPC_Byte) * length);
                 if(str->Data != NULL){
-                    status = TCP_SOPC_ReadMsgBuffer(str->Data, length, msgBuffer, length);
+                    status = TCP_UA_ReadMsgBuffer(str->Data, length, msgBuffer, length);
                     if(status != STATUS_OK){
                         status = STATUS_INVALID_STATE;
                         free(str->Data);
@@ -415,7 +415,7 @@ SOPC_StatusCode String_Read(SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
     if(str == NULL || (str != NULL && str->Data != NULL)){
         status = STATUS_INVALID_PARAMETERS;
     }else{
-        status = TCP_SOPC_ReadMsgBuffer((SOPC_Byte*)&length, 4, msgBuffer, 4);
+        status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)&length, 4, msgBuffer, 4);
         if(status == STATUS_OK){
             EncodeDecode_Int32(&length);
             if(length > 0){
@@ -423,7 +423,7 @@ SOPC_StatusCode String_Read(SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
                 // +1 to add '\0' character for CString compatibility
                 str->Data = malloc(sizeof(SOPC_Byte) * (length + 1));
                 if(str->Data != NULL){
-                    status = TCP_SOPC_ReadMsgBuffer(str->Data, length, msgBuffer, length);
+                    status = TCP_UA_ReadMsgBuffer(str->Data, length, msgBuffer, length);
                     if(status != STATUS_OK){
                         status = STATUS_INVALID_STATE;
                         free(str->Data);
@@ -478,7 +478,7 @@ SOPC_StatusCode Guid_Write(const SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
         status = UInt16_Write(&guid->Data3, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = TCP_SOPC_WriteMsgBuffer(msgBuffer, &(guid->Data4[0]), 8);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer, &(guid->Data4[0]), 8);
     }
     return status;
 }
@@ -496,7 +496,7 @@ SOPC_StatusCode Guid_Read(SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
         status = UInt16_Read(&guid->Data3, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = TCP_SOPC_ReadMsgBuffer(&(guid->Data4[0]), 8, msgBuffer, 8);
+        status = TCP_UA_ReadMsgBuffer(&(guid->Data4[0]), 8, msgBuffer, 8);
     }
     return status;
 }

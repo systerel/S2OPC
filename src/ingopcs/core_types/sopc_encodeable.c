@@ -22,8 +22,8 @@
 #include "sopc_builtintypes.h"
 
 SOPC_EncodeableType* EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
-                                                    const char*         namespace,
-                                                    uint32_t            typeId){
+                                                      const char*           namespace,
+                                                      uint32_t              typeId){
     SOPC_EncodeableType* current = NULL;
     SOPC_EncodeableType* result = NULL;
     uint32_t idx = 0;

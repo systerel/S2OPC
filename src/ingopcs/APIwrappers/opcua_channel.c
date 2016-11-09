@@ -17,8 +17,8 @@
 #include "opcua_channel.h"
 
 #include <string.h>
-
 #include "pki_stack.h"
+
 
 #ifdef OPCUA_HAVE_CLIENTAPI
 
@@ -51,7 +51,7 @@ OpcUa_StatusCode OpcUa_Channel_Create(  OpcUa_Channel*                  a_phChan
         return STATUS_NOK;
     }
     return SOPC_Channel_Create(a_phChannel,
-                             ChannelSerializer_Binary);
+                               SOPC_ChannelSerializer_Binary);
 }
 
 /*============================================================================

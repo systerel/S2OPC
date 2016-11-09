@@ -46,7 +46,7 @@ typedef struct
 } TMP_PKIConfig;
 
 PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
-                                        SOPC_EncodeableType*   responseType,
+                                        SOPC_EncodeableType* responseType,
                                         uint32_t             timeoutHint,
                                         uint32_t             startTime,
                                         SC_ResponseEvent_CB* callback,
@@ -103,9 +103,9 @@ SC_ClientConnection* SC_Client_Create(){
     return scClientConnection;
 }
 
-SOPC_StatusCode SC_Client_Configure(SC_ClientConnection* cConnection,
-                               SOPC_NamespaceTable*   namespaceTable,
-                               SOPC_EncodeableType**  encodeableTypes){
+SOPC_StatusCode SC_Client_Configure(SC_ClientConnection*   cConnection,
+                                    SOPC_NamespaceTable*   namespaceTable,
+                                    SOPC_EncodeableType**  encodeableTypes){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(cConnection != NULL && cConnection->instance != NULL){
         if(namespaceTable != NULL){
@@ -169,7 +169,7 @@ uint32_t GetNextRequestId(SC_Connection* scConnection){
 }
 
 SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
-                                          uint32_t             requestId)
+                                               uint32_t             requestId)
 {
     SOPC_StatusCode status = STATUS_OK;
     OpcUa_OpenSecureChannelRequest openRequest;
@@ -325,7 +325,7 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 }
 
 SOPC_StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
-                                         PendingRequest*      pRequest)
+                                              PendingRequest*      pRequest)
 {
     assert(cConnection != NULL &&
            pRequest != NULL && pRequest->responseType != NULL);
@@ -402,7 +402,7 @@ SOPC_StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
 }
 
 SOPC_StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnection,
-                                             SOPC_MsgBuffer*        transportMsgBuffer)
+                                                  SOPC_MsgBuffer*      transportMsgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t validateSenderCertificateTrue = 1; // True: always activated as indicated in API
@@ -497,7 +497,7 @@ SOPC_StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnecti
 }
 
 SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
-                                   SOPC_MsgBuffer*        transportMsgBuffer)
+                                        SOPC_MsgBuffer*      transportMsgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint8_t  abortReqPresence = 0;
@@ -614,13 +614,13 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
 }
 
 SOPC_StatusCode OnTransportEvent_CB(void*           connection,
-                               void*           callbackData,
-                               ConnectionEvent event,
-                               SOPC_MsgBuffer*   msgBuffer,
-                               SOPC_StatusCode      status)
+                                    void*           callbackData,
+                                    ConnectionEvent event,
+                                    SOPC_MsgBuffer* msgBuffer,
+                                    SOPC_StatusCode status)
 {
     SC_ClientConnection* cConnection = (SC_ClientConnection*) callbackData;
-    TCP_SOPC_Connection* tcpConnection = (TCP_SOPC_Connection*) connection;
+    TCP_UA_Connection* tcpConnection = (TCP_UA_Connection*) connection;
     SOPC_StatusCode retStatus = STATUS_OK;
     assert(cConnection->instance->transportConnection == tcpConnection);
     switch(event){
@@ -652,7 +652,7 @@ SOPC_StatusCode OnTransportEvent_CB(void*           connection,
 
         case ConnectionEvent_Disconnected:
             //log ?
-            TCP_SOPC_Connection_Disconnect(tcpConnection);
+            TCP_UA_Connection_Disconnect(tcpConnection);
             cConnection->instance->state = SC_Connection_Disconnected;
             retStatus = cConnection->callback(cConnection,
                                               cConnection->callbackData,
@@ -697,7 +697,7 @@ SOPC_StatusCode OnTransportEvent_CB(void*           connection,
             break;
         case ConnectionEvent_Error:
             //log ?
-            TCP_SOPC_Connection_Disconnect(tcpConnection);
+            TCP_UA_Connection_Disconnect(tcpConnection);
             cConnection->instance->state = SC_Connection_Disconnected;
             //scConnection->callback: TODO: incompatible types to modify in foundation code
             break;
@@ -708,16 +708,16 @@ SOPC_StatusCode OnTransportEvent_CB(void*           connection,
 }
 
 SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
-                             const char*               uri,
-                             const PKIProvider*        pki,
-                             const Certificate*        crt_cli,
-                             const AsymmetricKey*      key_priv_cli,
-                             const Certificate*        crt_srv,
-                             OpcUa_MessageSecurityMode securityMode,
-                             const char*               securityPolicy,
-                             uint32_t                  requestedLifetime,
-                             SC_ConnectionEvent_CB*    callback,
-                             void*                     callbackData)
+                                  const char*               uri,
+                                  const PKIProvider*        pki,
+                                  const Certificate*        crt_cli,
+                                  const AsymmetricKey*      key_priv_cli,
+                                  const Certificate*        crt_srv,
+                                  OpcUa_MessageSecurityMode securityMode,
+                                  const char*               securityPolicy,
+                                  uint32_t                  requestedLifetime,
+                                  SC_ConnectionEvent_CB*    callback,
+                                  void*                     callbackData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
 
@@ -777,7 +777,7 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
             if(status == STATUS_OK){
                 // TODO: check security mode = None if securityPolicy != None ??? => see http://opcfoundation.org/UA-Profile/UA/SecurityPolicy%23Basic128Rsa15
                 connection->instance->state = SC_Connection_Connecting_Transport;
-                status = TCP_SOPC_Connection_Connect(connection->instance->transportConnection,
+                status = TCP_UA_Connection_Connect(connection->instance->transportConnection,
                                                    uri,
                                                    OnTransportEvent_CB,
                                                    (void*) connection);
@@ -811,7 +811,7 @@ SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
         cConnection->clientKey = NULL;
         SLinkedList_Clear(cConnection->pendingRequests);
         String_Clear(&cConnection->securityPolicy);
-        TCP_SOPC_Connection_Disconnect(cConnection->instance->transportConnection);
+        TCP_UA_Connection_Disconnect(cConnection->instance->transportConnection);
     }
     return status;
 }

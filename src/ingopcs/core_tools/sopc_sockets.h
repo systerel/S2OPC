@@ -44,29 +44,29 @@ typedef enum {
 struct SOPC_Socket;
 
 typedef SOPC_StatusCode (SOPC_Socket_EventCB) (struct SOPC_Socket* socket,
-                                        uint32_t          socketEvent,
-                                        void*             cbData,
-                                        uint16_t          portNumber,
-                                        uint8_t           isSSL);
+                                               uint32_t            socketEvent,
+                                               void*               cbData,
+                                               uint16_t            portNumber,
+                                               uint8_t             isSSL);
 
 typedef struct SOPC_Socket {
-    Socket             sock;
-    uint8_t            isUsed;
+    Socket               sock;
+    uint8_t              isUsed;
     SOPC_Socket_State    state;
     SOPC_Socket_EventCB* eventCallback; // SOPC_Socket_EventCB Type
-    void*              cbData;
+    void*                cbData;
 } SOPC_Socket;
 
 typedef struct {
-    uint32_t   nbSockets;
-    SOPC_Socket  *sockets;
+    uint32_t    nbSockets;
+    SOPC_Socket *sockets;
 }
 SOPC_SocketManager;
 
 SOPC_SocketManager* SOPC_SocketManager_GetGlobal(void);
 
 SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
-                                       uint32_t          nbSockets);
+                                              uint32_t            nbSockets);
 
 SOPC_SocketManager* SOPC_SocketManager_Create(uint32_t nbSockets);
 
@@ -74,30 +74,30 @@ void SOPC_SocketManager_Clear(SOPC_SocketManager* socketMgr);
 
 void SOPC_SocketManager_Delete(SOPC_SocketManager** socketMgr);
 
-SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager*  socketManager,
-                                               const char*        uri,
-                                               SOPC_Socket_EventCB  socketCallback,
-                                               void*              callbackData,
-                                               SOPC_Socket**        clientSocket);
+SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager* socketManager,
+                                                      const char*         uri,
+                                                      SOPC_Socket_EventCB socketCallback,
+                                                      void*               callbackData,
+                                                      SOPC_Socket**       clientSocket);
 
-SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager*  socketManager,
-                                               const char*        uri,
-                                               uint8_t            listenAllItfs,
-                                               SOPC_Socket_EventCB  socketCallback,
-                                               void*              callbackData,
-                                               SOPC_Socket**        listenerSocket);
+SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socketManager,
+                                                      const char*         uri,
+                                                      uint8_t             listenAllItfs,
+                                                      SOPC_Socket_EventCB socketCallback,
+                                                      void*               callbackData,
+                                                      SOPC_Socket**       listenerSocket);
 
 SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
-                                        uint32_t          msecTimeout);
+                                        uint32_t            msecTimeout);
 
 int32_t SOPC_Socket_Write (SOPC_Socket* socket,
-                         uint8_t*   data,
-                         uint32_t   count);
+                           uint8_t*     data,
+                           uint32_t     count);
 
 SOPC_StatusCode SOPC_Socket_Read (SOPC_Socket* socket,
-                           uint8_t*   data,
-                           uint32_t   dataSize,
-                           uint32_t*  readCount);
+                                  uint8_t*     data,
+                                  uint32_t     dataSize,
+                                  uint32_t*    readCount);
 
 void SOPC_Socket_Close(SOPC_Socket* socket);
 

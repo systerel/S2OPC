@@ -338,8 +338,8 @@ const char* String_GetRawCString(const SOPC_String* string){
 }
 
 SOPC_StatusCode ByteString_Compare(const SOPC_ByteString* left,
-                              const SOPC_ByteString* right,
-                              int32_t*             comparison)
+                                   const SOPC_ByteString* right,
+                                   int32_t*               comparison)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
 
@@ -380,8 +380,8 @@ uint32_t ByteString_Equal(const SOPC_ByteString* left,
 }
 
 SOPC_StatusCode String_Compare(const SOPC_String* left,
-                          const SOPC_String* right,
-                          int32_t*         comparison)
+                               const SOPC_String* right,
+                               int32_t*           comparison)
 {
 
     return ByteString_Compare((SOPC_ByteString*) left,

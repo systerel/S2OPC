@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_TYPES_H_
-#define SOPC_TYPES_H_
+#ifndef SOPC_BUILTINTYPES_H_
+#define SOPC_BUILTINTYPES_H_
 
 #include <stdint.h>
 
@@ -63,9 +63,9 @@ typedef SOPC_Byte SOPC_Boolean;
 typedef int8_t SOPC_SByte;
 
 typedef struct SOPC_ByteString {
-    int32_t   Length;
-    SOPC_Byte*  Data;
-    uint8_t   ClearBytes; // flag indicating if bytes must be freed
+    int32_t    Length;
+    SOPC_Byte* Data;
+    uint8_t    ClearBytes; // flag indicating if bytes must be freed
 } SOPC_ByteString;
 
 // TODO: modify string representation for binary compatibility ?
@@ -95,7 +95,7 @@ typedef struct SOPC_NodeId {
     uint16_t Namespace;
 
     union {
-        uint32_t      Numeric;
+        uint32_t        Numeric;
         SOPC_String     String;
         SOPC_Guid       Guid;
         SOPC_ByteString Bstring;
@@ -109,17 +109,17 @@ typedef struct SOPC_ExpandedNodeId {
 } SOPC_ExpandedNodeId;
 
 typedef struct SOPC_DiagnosticInfo {
-    int32_t                   SymbolicId;
-    int32_t                   NamespaceUri;
-    int32_t                   Locale;
-    int32_t                   LocalizedText;
+    int32_t                     SymbolicId;
+    int32_t                     NamespaceUri;
+    int32_t                     Locale;
+    int32_t                     LocalizedText;
     SOPC_String                 AdditionalInfo;
-    SOPC_StatusCode                InnerStatusCode;
+    SOPC_StatusCode             InnerStatusCode;
     struct SOPC_DiagnosticInfo* InnerDiagnosticInfo;
 } SOPC_DiagnosticInfo;
 
 typedef struct SOPC_QualifiedName {
-    uint16_t  NamespaceIndex;
+    uint16_t    NamespaceIndex;
     SOPC_Byte   Padding[2]; // For type binary compatibility
     SOPC_String Name;
 } SOPC_QualifiedName;
@@ -144,7 +144,7 @@ typedef struct SOPC_ExtensionObject {
         SOPC_ByteString Bstring;
         SOPC_XmlElement Xml;
         struct {
-            void*              Value;
+            void*                Value;
             SOPC_EncodeableType* ObjType;
         } Object;
 
@@ -166,14 +166,14 @@ typedef union SOPC_VariantArrayValue {
     SOPC_Boolean*          BooleanArr;
     SOPC_SByte*            SbyteArr;
     SOPC_Byte*             ByteArr;
-    int16_t*             Int16Arr;
-    uint16_t*            Uint16Arr;
-    int32_t*             Int32Arr;
-    uint32_t*            Uint32Arr;
-    int64_t*             Int64Arr;
-    uint64_t*            Uint64Arr;
-    float*               FloatvArr;
-    double*              DoublevArr;
+    int16_t*               Int16Arr;
+    uint16_t*              Uint16Arr;
+    int32_t*               Int32Arr;
+    uint32_t*              Uint32Arr;
+    int64_t*               Int64Arr;
+    uint64_t*              Uint64Arr;
+    float*                 FloatvArr;
+    double*                DoublevArr;
     SOPC_String*           StringArr;
     SOPC_DateTime*         DateArr;
     SOPC_Guid*             GuidArr;
@@ -181,7 +181,7 @@ typedef union SOPC_VariantArrayValue {
     SOPC_XmlElement*       XmlEltArr;
     SOPC_NodeId*           NodeIdArr;
     SOPC_ExpandedNodeId*   ExpNodeIdArr;
-    SOPC_StatusCode*          StatusArr;
+    SOPC_StatusCode*       StatusArr;
     SOPC_QualifiedName*    QnameArr;
     SOPC_LocalizedText*    LocalizedTextArr;
     SOPC_ExtensionObject*  ExtObjectArr;
@@ -194,14 +194,14 @@ typedef union SOPC_VariantValue {
         SOPC_Boolean           Boolean;
         SOPC_SByte             Sbyte;
         SOPC_Byte              Byte;
-        int16_t              Int16;
-        uint16_t             Uint16;
-        int32_t              Int32;
-        uint32_t             Uint32;
-        int64_t              Int64;
-        uint64_t             Uint64;
-        float                Floatv;
-        double               Doublev;
+        int16_t                Int16;
+        uint16_t               Uint16;
+        int32_t                Int32;
+        uint32_t               Uint32;
+        int64_t                Int64;
+        uint64_t               Uint64;
+        float                  Floatv;
+        double                 Doublev;
         SOPC_String            String;
         SOPC_DateTime          Date;
         SOPC_Guid*             Guid;
@@ -209,19 +209,19 @@ typedef union SOPC_VariantValue {
         SOPC_XmlElement        XmlElt;
         SOPC_NodeId*           NodeId;
         SOPC_ExpandedNodeId*   ExpNodeId;
-        SOPC_StatusCode           Status;
+        SOPC_StatusCode        Status;
         SOPC_QualifiedName*    Qname;
         SOPC_LocalizedText*    LocalizedText;
         SOPC_ExtensionObject*  ExtObject;
         struct SOPC_DataValue* DataValue;
         SOPC_DiagnosticInfo*   DiagInfo; // TODO: not present ?
         struct {
-            int32_t              Length;
+            int32_t                Length;
             SOPC_VariantArrayValue Content;
         } Array;
         struct {
-            int32_t              Dimensions;
-            int32_t*             ArrayDimensions; // Product of dimensions must be <= INT32_MAX ! (binary arrayLength valid for matrix too)
+            int32_t                Dimensions;
+            int32_t*               ArrayDimensions; // Product of dimensions must be <= INT32_MAX ! (binary arrayLength valid for matrix too)
             SOPC_VariantArrayValue Content;
         } Matrix;
 
@@ -235,25 +235,18 @@ typedef struct SOPC_Variant {
 } SOPC_Variant;
 
 typedef struct SOPC_DataValue {
-    SOPC_Variant  Value;
-    SOPC_StatusCode  Status;
-    SOPC_DateTime SourceTimestamp;
-    SOPC_DateTime ServerTimestamp;
-    uint16_t    SourcePicoSeconds;
-    uint16_t    ServerPicoSeconds;
+    SOPC_Variant    Value;
+    SOPC_StatusCode Status;
+    SOPC_DateTime   SourceTimestamp;
+    SOPC_DateTime   ServerTimestamp;
+    uint16_t        SourcePicoSeconds;
+    uint16_t        ServerPicoSeconds;
 } SOPC_DataValue;
 
 #define SECURITY_POLICY_NONE           "http://opcfoundation.org/UA/SecurityPolicy#None"
 #define SECURITY_POLICY_BASIC128RSA15  "http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15"
 #define SECURITY_POLICY_BASIC256       "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
 #define SECURITY_POLICY_BASIC256SHA256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
-
-typedef enum SOPC_SecurityPolicy {
-    Security_Policy_None = 0,
-    Security_Policy_Basic128Rsa15 = 1,
-    Security_Policy_Basic256 = 2,
-    Security_Policy_Basic256Sha256 = 3,
-} SOPC_SecurityPolicy;
 
 void Boolean_Initialize(SOPC_Boolean* b);
 void Boolean_Clear(SOPC_Boolean* b);
@@ -298,8 +291,8 @@ void ByteString_Clear(SOPC_ByteString* bstring);
 void ByteString_Delete(SOPC_ByteString* bstring);
 
 SOPC_StatusCode ByteString_Compare(const SOPC_ByteString* left,
-                              const SOPC_ByteString* right,
-                              int32_t*             comparison);
+                                   const SOPC_ByteString* right,
+                                   int32_t*               comparison);
 
 // Returns 0 if false
 uint32_t ByteString_Equal(const SOPC_ByteString* left,
@@ -320,8 +313,8 @@ void String_Clear(SOPC_String* bstring);
 void String_Delete(SOPC_String* bstring);
 
 SOPC_StatusCode String_Compare(const SOPC_String* left,
-                          const SOPC_String* right,
-                          int32_t*         comparison);
+                               const SOPC_String* right,
+                               int32_t*           comparison);
 
 uint32_t String_Equal(const SOPC_String* left,
                       const SOPC_String* right);
@@ -365,4 +358,4 @@ void DataValue_Clear(SOPC_DataValue* dataValue);
 
 END_EXTERN_C
 
-#endif /* INGOPCS_SOPC_TYPES_H_ */
+#endif /* SOPC_SOPC_BUILTINTYPES_H_ */

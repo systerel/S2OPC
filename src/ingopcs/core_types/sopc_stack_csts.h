@@ -67,4 +67,4 @@
 // Maximum number of simultaneous connections managed by stack
 #define OPCUA_MAXCONNECTIONS 150
 
-#endif /* INGOPCS_SOPC_STACK_CSTS_H_ */
+#endif /* SOPC_STACK_CSTS_H_ */

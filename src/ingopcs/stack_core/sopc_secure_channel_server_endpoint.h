@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_SECURE_CHANNEL_SERVER_ENDPOINT_H_
-#define INGOPCS_SECURE_CHANNEL_SERVER_ENDPOINT_H_
+#ifndef SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_
+#define SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_
 
 typedef enum SC_EndpointState
 {
@@ -28,7 +28,7 @@ typedef enum SC_EndpointState
 typedef struct SecurityPolicy
 {
     OpcUa_MessageSecurityMode securityMode;
-    SOPC_String                 SecurityPolicy;
+    SOPC_String               SecurityPolicy;
 } SecurityPolicy;
 
 typedef void* SC_EndpointEvent_CB;
@@ -37,19 +37,19 @@ typedef struct SC_ServerEndpoint
 {
     SOPC_NamespaceTable*   namespaces;
     SOPC_EncodeableType*   encodeableTypes;
-    PKIProvider          pkiProvider;
+    PKIProvider            pkiProvider;
     SOPC_Byte*             serverCertificate;
-    SecretBuffer*        serverKey;
-    SC_EndpointState     state;
-    SecurityPolicy*      securityPolicies;
-    uint32_t             lastSecureChannelId;
-    SC_Connection*       secureChannelConnections;
-    TCP_SOPC_Listener*     transportConnection;
-    P_Timer              watchdogTimer;
-    SC_EndpointEvent_CB* callback;
-    void*                callbackData;
+    SecretBuffer*          serverKey;
+    SC_EndpointState       state;
+    SecurityPolicy*        securityPolicies;
+    uint32_t               lastSecureChannelId;
+    SC_Connection*         secureChannelConnections;
+    TCP_UA_Listener*  transportConnection;
+    P_Timer                watchdogTimer;
+    SC_EndpointEvent_CB*   callback;
+    void*                  callbackData;
 
 } SC_ServerEndpoint;
 
 
-#endif /* INGOPCS_SECURE_CHANNEL_SERVER_ENDPOINT_H_ */
+#endif /* SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_ */

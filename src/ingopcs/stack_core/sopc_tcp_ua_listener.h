@@ -15,21 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_LISTENER_H_
-#define SOPC_LISTENER_H_
+#ifndef SOPC_TCP_UA_LISTENER_H_
+#define SOPC_TCP_UA_LISTENER_H_
 
-typedef void* TCP_SOPC_ListenerEvent_CB;
+typedef void* TCP_UA_ListenerEvent_CB;
 
 typedef struct {
-    SOPC_String                url;
+    SOPC_String              url;
     uint32_t                 protocolVersion;
-    SOPC_SocketManager*        socketManager;
-    SOPC_Socket*               socket;
-    TCP_SOPC_Connection*       clientConnections;
-    SOPC_MsgBuffer*            pendingMsgBuffer;
-    TCP_SOPC_ListenerEvent_CB* eventCB;
+    SOPC_SocketManager*      socketManager;
+    SOPC_Socket*             socket;
+    TCP_UA_Connection*       clientConnections;
+    SOPC_MsgBuffer*          pendingMsgBuffer;
+    TCP_UA_ListenerEvent_CB* eventCB;
 
-} TCP_SOPC_Listener;
+} TCP_UA_Listener;
 
 
-#endif /* SOPC_LISTENER_H_ */
+#endif /* SOPC_TCP_UA_LISTENER_H_ */

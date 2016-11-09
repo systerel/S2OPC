@@ -22,11 +22,11 @@
 #include "sopc_namespace_table.h"
 
 typedef struct {
-    uint8_t             traceLevel; // enum TBD
+    uint8_t               traceLevel; // enum TBD
     // TBD: lengths configurable
     SOPC_NamespaceTable*  nsTable;
     SOPC_EncodeableType** encTypesTable;
-    uint32_t            nbEncTypesTable;
+    uint32_t              nbEncTypesTable;
 } SOPC_StackConfiguration;
 
 extern SOPC_StackConfiguration g_stackConfiguration;
@@ -42,4 +42,4 @@ SOPC_StatusCode StackConfiguration_AddTypes(SOPC_EncodeableType** encTypesTable,
 SOPC_EncodeableType** StackConfiguration_GetEncodeableTypes();
 SOPC_NamespaceTable* StackConfiguration_GetNamespaces();
 
-#endif /* INGOPCS_SOPC_STACK_CONFIG_H_ */
+#endif /* SOPC_STACK_CONFIG_H_ */

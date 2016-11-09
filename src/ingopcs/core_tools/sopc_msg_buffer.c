@@ -27,18 +27,18 @@ const SOPC_Byte MSG[3] = {'M','S','G'};
 const SOPC_Byte OPN[3] = {'O','P','N'};
 const SOPC_Byte CLO[3] = {'C','L','O'};
 
-SOPC_MsgBuffer* MsgBuffer_Create(Buffer*             buffer,
-                               uint32_t            maxChunks,
-                               void*               flushData,
-                               SOPC_NamespaceTable*  nsTable,
-                               SOPC_EncodeableType** encTypesTable)
+SOPC_MsgBuffer* MsgBuffer_Create(Buffer*               buffer,
+                                 uint32_t              maxChunks,
+                                 void*                 flushData,
+                                 SOPC_NamespaceTable*  nsTable,
+                                 SOPC_EncodeableType** encTypesTable)
 {
     SOPC_MsgBuffer* mBuffer = NULL;
     if(buffer != NULL){
         mBuffer = (SOPC_MsgBuffer*) malloc(sizeof(SOPC_MsgBuffer));
         mBuffer->nbBuffers = 1;
         mBuffer->buffers = buffer;
-        mBuffer->type = TCP_SOPC_Message_Unknown;
+        mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = SOPC_SecureMessage;
         mBuffer->currentChunkSize = 0;
         mBuffer->nbChunks = 1;
@@ -69,7 +69,7 @@ void MsgBuffer_Reset(SOPC_MsgBuffer* mBuffer){
     if(mBuffer != NULL){
         assert(mBuffer->nbBuffers == 1);
         Buffer_Reset(mBuffer->buffers);
-        mBuffer->type = TCP_SOPC_Message_Unknown;
+        mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = SOPC_SecureMessage;
         mBuffer->currentChunkSize = 0;
         mBuffer->nbChunks = 1;
@@ -80,7 +80,7 @@ void MsgBuffer_Reset(SOPC_MsgBuffer* mBuffer){
 }
 
 SOPC_StatusCode MsgBuffer_ResetNextChunk(SOPC_MsgBuffer* mBuffer,
-                                    uint32_t      bodyPosition){
+                                         uint32_t        bodyPosition){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(mBuffer != NULL){
         assert(mBuffer->nbBuffers == 1);
@@ -100,13 +100,13 @@ SOPC_StatusCode MsgBuffer_ResetNextChunk(SOPC_MsgBuffer* mBuffer,
 
 
 SOPC_StatusCode MsgBuffer_SetSecureMsgType(SOPC_MsgBuffer*        mBuffer,
-                                      SOPC_SecureMessageType sType){
+                                           SOPC_SecureMessageType sType){
     SOPC_StatusCode status = STATUS_INVALID_STATE;
     if(mBuffer != NULL &&
-        (mBuffer->type == TCP_SOPC_Message_Unknown || mBuffer->type == TCP_SOPC_Message_SecureMessage)){
+        (mBuffer->type == TCP_UA_Message_Unknown || mBuffer->type == TCP_UA_Message_SecureMessage)){
         assert(mBuffer->nbBuffers == 1);
         mBuffer->secureType = sType;
-        mBuffer->type = TCP_SOPC_Message_SecureMessage;
+        mBuffer->type = TCP_UA_Message_SecureMessage;
         status = STATUS_OK;
     }
     return status;
@@ -126,7 +126,7 @@ void MsgBuffer_InternalCopyProperties(SOPC_MsgBuffer* destMsgBuffer,
 }
 
 SOPC_StatusCode MsgBuffer_CopyBuffer(SOPC_MsgBuffer* destMsgBuffer,
-                                SOPC_MsgBuffer* srcMsgBuffer){
+                                     SOPC_MsgBuffer* srcMsgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(destMsgBuffer != NULL && srcMsgBuffer != NULL){
         assert(destMsgBuffer->nbBuffers == 1);
@@ -141,10 +141,10 @@ SOPC_StatusCode MsgBuffer_CopyBuffer(SOPC_MsgBuffer* destMsgBuffer,
     return status;
 }
 
-SOPC_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
-                                 uint32_t            bufferSize,
-                                 SOPC_NamespaceTable*  nsTable,
-                                 SOPC_EncodeableType** encTypesTable)
+SOPC_MsgBuffers* MsgBuffers_Create(uint32_t              maxChunks,
+                                   uint32_t              bufferSize,
+                                   SOPC_NamespaceTable*  nsTable,
+                                   SOPC_EncodeableType** encTypesTable)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_MsgBuffers* mBuffers = NULL;
@@ -176,7 +176,7 @@ SOPC_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
             }
 
             if(status == STATUS_OK){
-                mBuffers->type = TCP_SOPC_Message_Unknown;
+                mBuffers->type = TCP_UA_Message_Unknown;
                 mBuffers->secureType = SOPC_SecureMessage;
                 mBuffers->currentChunkSize = 0;
                 mBuffers->nbChunks = 0;
@@ -202,7 +202,7 @@ void MsgBuffers_Reset(SOPC_MsgBuffers* mBuffer){
         for(idx = 0; idx < mBuffer->nbChunks; idx++){
             Buffer_Reset(&(mBuffer->buffers[idx]));
         }
-        mBuffer->type = TCP_SOPC_Message_Unknown;
+        mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = SOPC_SecureMessage;
         mBuffer->currentChunkSize = 0;
         mBuffer->nbChunks = 0;
@@ -238,7 +238,7 @@ Buffer* MsgBuffers_GetCurrentChunk(SOPC_MsgBuffers* mBuffer){
 }
 
 Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
-                             uint32_t*      bufferIdx){
+                             uint32_t*        bufferIdx){
     Buffer* buf = NULL;
     if(mBuffer != NULL && bufferIdx != NULL){
         if(mBuffer->nbChunks < mBuffer->maxChunks){
@@ -274,9 +274,9 @@ void MsgBuffers_InternalCopyProperties(SOPC_MsgBuffers* destMsgBuffer,
 }
 
 SOPC_StatusCode MsgBuffers_CopyBuffer(SOPC_MsgBuffers* destMsgBuffer,
-                                 uint32_t       bufferIdx,
-                                 SOPC_MsgBuffer*  srcMsgBuffer,
-                                 uint32_t       limitedLength){
+                                      uint32_t         bufferIdx,
+                                      SOPC_MsgBuffer*  srcMsgBuffer,
+                                      uint32_t         limitedLength){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(destMsgBuffer != NULL && srcMsgBuffer != NULL &&
        bufferIdx < destMsgBuffer->maxChunks &&

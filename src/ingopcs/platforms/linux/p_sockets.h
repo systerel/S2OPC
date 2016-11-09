@@ -19,8 +19,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_PLATFORMS_LINUX_P_SOCKETS_H_
-#define INGOPCS_PLATFORMS_LINUX_P_SOCKETS_H_
+#ifndef SOPC_P_SOCKETS_H_
+#define SOPC_P_SOCKETS_H_
 
 #include <netdb.h>
 #include <sys/select.h>
@@ -103,9 +103,9 @@ void Socket_Clear(Socket* sock);
  *  \return                  GOOD if operation succeeded, BAD otherwise.
  */
 SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
-                            uint8_t             setReuseAddr,
-                            uint8_t             setNonBlocking,
-                            Socket*             sock);
+                                 uint8_t             setReuseAddr,
+                                 uint8_t             setNonBlocking,
+                                 Socket*             sock);
 
 /**
  *  \brief Configure the socket to listen connections using the given addressing information
@@ -116,7 +116,7 @@ SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
 SOPC_StatusCode Socket_Listen(Socket              sock,
-                         Socket_AddressInfo* addr);
+                              Socket_AddressInfo* addr);
 
 /**
  *  \brief Operation to accept a connection on a listening socket
@@ -128,7 +128,7 @@ SOPC_StatusCode Socket_Listen(Socket              sock,
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
 SOPC_StatusCode Socket_Accept(Socket  listeningSock,
-                         Socket* acceptedSock);
+                              Socket* acceptedSock);
 
 /**
  *  \brief Operation to establish a connection using the given socket and addressing information
@@ -141,7 +141,7 @@ SOPC_StatusCode Socket_Accept(Socket  listeningSock,
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
 SOPC_StatusCode Socket_Connect(Socket              sock,
-                          Socket_AddressInfo* addr);
+                               Socket_AddressInfo* addr);
 
 /**
  *  \brief Operation to check connection establishment result on a connecting socket
@@ -220,9 +220,9 @@ int32_t Socket_Write(Socket   sock,
  *  \return         GOOD if operation succeeded, BAD_DISCONNECT in case of disconnection and BAD otherwise.
  */
 SOPC_StatusCode Socket_Read(Socket     sock,
-                       uint8_t*   data,
-                       uint32_t   dataSize,
-                       uint32_t*  readCount);
+                            uint8_t*   data,
+                            uint32_t   dataSize,
+                            uint32_t*  readCount);
 
 
 /**
@@ -232,4 +232,4 @@ SOPC_StatusCode Socket_Read(Socket     sock,
  */
 void Socket_Close(Socket*  sock);
 
-#endif /* INGOPCS_PLATFORMS_LINUX_P_SOCKETS_H_ */
+#endif /* SOPC_P_SOCKETS_H_ */

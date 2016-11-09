@@ -74,8 +74,8 @@ SOPC_StatusCode Namespace_AttachTable(SOPC_NamespaceTable* dst, SOPC_NamespaceTa
 }
 
 SOPC_StatusCode Namespace_GetIndex(SOPC_NamespaceTable* namespaceTable,
-                              const char*        namespaceName,
-                              uint16_t*          index)
+                                   const char*          namespaceName,
+                                   uint16_t*            index)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Namespace namespaceEntry;

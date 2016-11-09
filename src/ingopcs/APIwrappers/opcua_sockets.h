@@ -48,4 +48,4 @@ OpcUa_StatusCode OpcUa_SocketManager_Loop(     OpcUa_SocketManager     pSocketMa
 
 OPCUA_END_EXTERN_C
 
-#endif /* SRC_INGOPCS_WRAPPERSAPI_OPCUA_SOCKETS_H_ */
+#endif /* _OPCUA_SOCKETS_H_ */

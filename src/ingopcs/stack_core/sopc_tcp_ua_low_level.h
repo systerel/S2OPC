@@ -15,33 +15,33 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_LOW_LEVEL_H_
-#define SOPC_LOW_LEVEL_H_
+#ifndef SOPC_TCP_UA_LOW_LEVEL_H_
+#define SOPC_TCP_UA_LOW_LEVEL_H_
 
 #include "sopc_msg_buffer.h"
 #include "sopc_sockets.h"
 
 extern const uint32_t tcpProtocolVersion;
 
-SOPC_StatusCode TCP_SOPC_WriteMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
-                                 const SOPC_Byte* data_src,
-                                 uint32_t       count);
+SOPC_StatusCode TCP_UA_WriteMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
+                                      const SOPC_Byte* data_src,
+                                      uint32_t         count);
 
-SOPC_StatusCode TCP_SOPC_ReadMsgBuffer(SOPC_Byte* data_dest,
-                                uint32_t size,
-                                SOPC_MsgBuffer* msgBuffer,
-                                uint32_t count);
+SOPC_StatusCode TCP_UA_ReadMsgBuffer(SOPC_Byte*      data_dest,
+                                     uint32_t        size,
+                                     SOPC_MsgBuffer* msgBuffer,
+                                     uint32_t        count);
 
-SOPC_StatusCode TCP_SOPC_FlushMsgBuffer(SOPC_MsgBuffer* msgBuffer);
+SOPC_StatusCode TCP_UA_FlushMsgBuffer(SOPC_MsgBuffer* msgBuffer);
 
-SOPC_StatusCode TCP_SOPC_EncodeHeader(SOPC_MsgBuffer*  msgBuffer,
-                               TCP_SOPC_MsgType type);
+SOPC_StatusCode TCP_UA_EncodeHeader(SOPC_MsgBuffer* msgBuffer,
+                                    TCP_UA_MsgType  type);
 
-SOPC_StatusCode TCP_SOPC_FinalizeHeader(SOPC_MsgBuffer* msgBuffer);
+SOPC_StatusCode TCP_UA_FinalizeHeader(SOPC_MsgBuffer* msgBuffer);
 
-SOPC_StatusCode TCP_SOPC_ReadData(SOPC_Socket*    socket,
-                           SOPC_MsgBuffer* msgBuffer);
+SOPC_StatusCode TCP_UA_ReadData(SOPC_Socket*    socket,
+                                SOPC_MsgBuffer* msgBuffer);
 
-SOPC_StatusCode TCP_SOPC_ReadHeader(SOPC_MsgBuffer* msgBuffer);
+SOPC_StatusCode TCP_UA_ReadHeader(SOPC_MsgBuffer* msgBuffer);
 
-#endif /* SOPC_LOW_LEVEL_H_ */
+#endif /* SOPC_TCP_UA_LOW_LEVEL_H_ */

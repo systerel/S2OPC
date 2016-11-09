@@ -46,7 +46,7 @@ SOPC_StatusCode StubClient_ConnectionEvent_Callback(SOPC_Channel       channel,
 	    connected = 1;
 		noEvent = 0;
 	}
-	if (event == ChannelEvent_Disconnected){
+	if (event == SOPC_ChannelEvent_Disconnected){
 		disconnect = 1;
 	}
     return 0;
@@ -153,7 +153,7 @@ int main(void){
 	StackConfiguration_AddTypes(&newEncType, 1);
 
     // Create channel object
-    status = SOPC_Channel_Create(&hChannel, ChannelSerializer_Binary);
+    status = SOPC_Channel_Create(&hChannel, SOPC_ChannelSerializer_Binary);
 	if(STATUS_OK != status) goto Error;
 
     printf ("%d\n", status);

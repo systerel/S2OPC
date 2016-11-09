@@ -90,7 +90,7 @@ void Delete_InvokeCallbackData(InvokeCallbackData* invCbData){
 SOPC_StatusCode SOPC_Channel_Create(SOPC_Channel*               channel,
                                     SOPC_Channel_SerializerType serialType){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(channel != NULL && serialType == ChannelSerializer_Binary){
+    if(channel != NULL && serialType == SOPC_ChannelSerializer_Binary){
         *channel = SC_Client_Create();
         if(channel != NULL){
             status = STATUS_OK;
@@ -121,14 +121,14 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
     SOPC_StatusCode retStatus = STATUS_INVALID_PARAMETERS;
     SOPC_Channel channel = (SOPC_Channel) cConnection;
     Channel_CallbackData* callbackData = cbData;
-    SOPC_Channel_Event channelConnectionEvent = ChannelEvent_Invalid;
+    SOPC_Channel_Event channelConnectionEvent = SOPC_ChannelEvent_Invalid;
 
     switch(event){
         case SOPC_ConnectionEvent_Connected:
-            channelConnectionEvent = ChannelEvent_Connected;
+            channelConnectionEvent = SOPC_ChannelEvent_Connected;
             break;
         case SOPC_ConnectionEvent_Disconnected:
-            channelConnectionEvent = ChannelEvent_Disconnected;
+            channelConnectionEvent = SOPC_ChannelEvent_Disconnected;
             break;
         case SOPC_ConnectionEvent_SecureMessageComplete:
         case SOPC_ConnectionEvent_SecureMessageChunk:
@@ -137,18 +137,18 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
             break;
         case SOPC_ConnectionEvent_Invalid:
         case SOPC_ConnectionEvent_UnexpectedError:
-            channelConnectionEvent = ChannelEvent_Disconnected;
+            channelConnectionEvent = SOPC_ChannelEvent_Disconnected;
             break;
     }
 
     // Channel event management
     switch(channelConnectionEvent){
-        case ChannelEvent_Invalid:
+        case SOPC_ChannelEvent_Invalid:
             // Nothing to do
             retStatus = STATUS_OK;
             break;
-        case ChannelEvent_Connected:
-        case ChannelEvent_Disconnected:
+        case SOPC_ChannelEvent_Connected:
+        case SOPC_ChannelEvent_Disconnected:
             if(callbackData != NULL && callbackData->callback != NULL)
             {
                 retStatus = callbackData->callback(channel,

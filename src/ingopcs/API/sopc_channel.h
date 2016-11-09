@@ -40,17 +40,17 @@ typedef void* SOPC_Channel;
  *  Note: only binary serialization is available in INGPOCS
  */
 typedef enum {
-    ChannelSerializer_Invalid = 0x00,
-    ChannelSerializer_Binary = 0x01
+    SOPC_ChannelSerializer_Invalid = 0x00,
+    SOPC_ChannelSerializer_Binary = 0x01
 } SOPC_Channel_SerializerType;
 
 /**
  *  \brief Channel connection event enumeration type
  */
 typedef enum {
-    ChannelEvent_Invalid = 0x00,
-    ChannelEvent_Connected = 0x01,
-    ChannelEvent_Disconnected = 0x02
+    SOPC_ChannelEvent_Invalid = 0x00,
+    SOPC_ChannelEvent_Connected = 0x01,
+    SOPC_ChannelEvent_Disconnected = 0x02
 } SOPC_Channel_Event;
 
 /**
@@ -184,4 +184,4 @@ SOPC_StatusCode SOPC_Channel_Disconnect(SOPC_Channel channel);
 
 #endif /* CLIENT_API */
 
-#endif /* INGOPCS_SOPC_CHANNEL_H_ */
+#endif /* SOPC_CHANNEL_H_ */

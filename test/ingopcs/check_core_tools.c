@@ -45,7 +45,7 @@ START_TEST(test_ua_msg_buffer_create_set_type)
     ck_assert(msgBuf != NULL);
     ck_assert(msgBuf->nbBuffers == 1);
     ck_assert(msgBuf->buffers == buf);
-    ck_assert(msgBuf->type == TCP_SOPC_Message_Unknown);
+    ck_assert(msgBuf->type == TCP_UA_Message_Unknown);
     ck_assert(msgBuf->secureType == SOPC_SecureMessage);
     ck_assert(msgBuf->currentChunkSize == 0);
     ck_assert(msgBuf->nbChunks == 1);
@@ -61,7 +61,7 @@ START_TEST(test_ua_msg_buffer_create_set_type)
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuf->secureType == SOPC_OpenSecureChannel);
 
-    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    msgBuf->type = TCP_UA_Message_SecureMessage;
     status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuf->secureType == SOPC_CloseSecureChannel);
@@ -70,19 +70,19 @@ START_TEST(test_ua_msg_buffer_create_set_type)
     status = MsgBuffer_SetSecureMsgType(NULL, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
-    msgBuf->type = TCP_SOPC_Message_Hello; // Not a secure type
+    msgBuf->type = TCP_UA_Message_Hello; // Not a secure type
     status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
-    msgBuf->type = TCP_SOPC_Message_Acknowledge; // Not a secure type
+    msgBuf->type = TCP_UA_Message_Acknowledge; // Not a secure type
     status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
-    msgBuf->type = TCP_SOPC_Message_Error; // Not a secure type
+    msgBuf->type = TCP_UA_Message_Error; // Not a secure type
     status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
-    msgBuf->type = TCP_SOPC_Message_Invalid; // Not a secure type
+    msgBuf->type = TCP_UA_Message_Invalid; // Not a secure type
     status = MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     ck_assert(status != STATUS_OK);
 
@@ -110,7 +110,7 @@ START_TEST(test_ua_msg_buffer_reset)
     SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
     Buffer_Write(buf, &flushData, 1);
-    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    msgBuf->type = TCP_UA_Message_SecureMessage;
     MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
     msgBuf->nbChunks = 2;
@@ -131,7 +131,7 @@ START_TEST(test_ua_msg_buffer_reset)
     ////// Check reset properties
     ck_assert(msgBuf->buffers->data[0] == 0);
     ck_assert(msgBuf->buffers->length == 0);
-    ck_assert(msgBuf->type == TCP_SOPC_Message_Unknown);
+    ck_assert(msgBuf->type == TCP_UA_Message_Unknown);
     ck_assert(msgBuf->secureType == SOPC_SecureMessage);
     ck_assert(msgBuf->currentChunkSize == 0);
     ck_assert(msgBuf->nbChunks == 1);
@@ -151,7 +151,7 @@ START_TEST(test_ua_msg_buffer_reset)
     msgBuf = MsgBuffer_Create(buf, 2, &flushData, &table, encTypes);
     Buffer_Write(buf, &flushData, 1);
     Buffer_Write(buf, &flushData, 1);
-    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    msgBuf->type = TCP_UA_Message_SecureMessage;
     MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
     msgBuf->sequenceNumberPosition = 2;
@@ -206,7 +206,7 @@ START_TEST(test_ua_msg_buffer_copy)
     SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
     Buffer_Write(buf, &flushData, 1);
-    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    msgBuf->type = TCP_UA_Message_SecureMessage;
     MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
     msgBuf->nbChunks = 2;
@@ -228,7 +228,7 @@ START_TEST(test_ua_msg_buffer_copy)
     ck_assert(msgBufDest->buffers != msgBuf->buffers);
     ck_assert(msgBufDest->buffers->data[0] == flushData);
     ck_assert(msgBufDest->buffers->length == 1);
-    ck_assert(msgBufDest->type == TCP_SOPC_Message_SecureMessage);
+    ck_assert(msgBufDest->type == TCP_UA_Message_SecureMessage);
     ck_assert(msgBufDest->secureType == SOPC_CloseSecureChannel);
     ck_assert(msgBufDest->currentChunkSize == 9);
     ck_assert(msgBufDest->nbChunks == 2);
@@ -275,7 +275,7 @@ START_TEST(test_ua_msg_buffers_create)
     ck_assert(msgBuf->buffers[0].data != NULL);
     ck_assert(msgBuf->buffers[1].data != NULL);
     ck_assert(msgBuf->buffers[2].data != NULL);
-    ck_assert(msgBuf->type == TCP_SOPC_Message_Unknown);
+    ck_assert(msgBuf->type == TCP_UA_Message_Unknown);
     ck_assert(msgBuf->secureType == SOPC_SecureMessage);
     ck_assert(msgBuf->currentChunkSize == 0);
     ck_assert(msgBuf->nbChunks == 0);
@@ -399,7 +399,7 @@ START_TEST(test_ua_msg_buffers_copy)
     SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
     Buffer_Write(buf, &flushData, 1);
-    msgBuf->type = TCP_SOPC_Message_SecureMessage;
+    msgBuf->type = TCP_UA_Message_SecureMessage;
     MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
     msgBuf->nbChunks = 2;
@@ -421,7 +421,7 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBufsDest->buffers[0].data != msgBuf->buffers->data);
     ck_assert(msgBufsDest->buffers[0].data[0] == flushData);
     ck_assert(msgBufsDest->buffers[0].length == 1);
-    ck_assert(msgBufsDest->type == TCP_SOPC_Message_SecureMessage);
+    ck_assert(msgBufsDest->type == TCP_UA_Message_SecureMessage);
     ck_assert(msgBufsDest->secureType == SOPC_CloseSecureChannel);
     ck_assert(msgBufsDest->currentChunkSize == 9);
     ck_assert(msgBufsDest->nbChunks == 2);
@@ -441,7 +441,7 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBufsDest->buffers[1].data != msgBuf->buffers->data);
     ck_assert(msgBufsDest->buffers[1].data[0] == flushData);
     ck_assert(msgBufsDest->buffers[1].length == 1);
-    ck_assert(msgBufsDest->type == TCP_SOPC_Message_SecureMessage);
+    ck_assert(msgBufsDest->type == TCP_UA_Message_SecureMessage);
     ck_assert(msgBufsDest->secureType == SOPC_CloseSecureChannel);
     ck_assert(msgBufsDest->currentChunkSize == 9);
     ck_assert(msgBufsDest->nbChunks == 2);
@@ -714,11 +714,11 @@ START_TEST(test_ua_encoder_basic_types)
     status = Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == FALSE);
-    bool = 1; // not SOPC_FALSE
+    bool = 1; // not FALSE
     status = Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[1] == 1);
-    bool = 2; // not SOPC_FALSE
+    bool = 2; // not FALSE
     status = Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[2] == 1); // True value always encoded as 1

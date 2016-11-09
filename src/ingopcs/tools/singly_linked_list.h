@@ -19,8 +19,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_SINGLY_LINKED_LIST_H_
-#define INGOPCS_SINGLY_LINKED_LIST_H_
+#ifndef SOPC_SINGLY_LINKED_LIST_H_
+#define SOPC_SINGLY_LINKED_LIST_H_
 
 /**
  *  \brief Singly linked list structure
@@ -81,4 +81,4 @@ void SLinkedList_Clear(SLinkedList* list);
 void SLinkedList_Delete(SLinkedList* list);
 
 
-#endif /* INGOPCS_SINGLE_LINKED_LIST_H_ */
+#endif /* SOPC_SINGLE_LINKED_LIST_H_ */

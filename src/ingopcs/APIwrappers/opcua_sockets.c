@@ -47,11 +47,11 @@ OpcUa_StatusCode OpcUa_SocketManager_Loop(     OpcUa_SocketManager     pSocketMa
                                                OpcUa_Boolean           bRunOnce){
     OpcUa_StatusCode status = STATUS_OK;
     if(pSocketManager == NULL){
-#if SOPC_MULTITHREADED
+#if OPCUA_MULTITHREADED
         return STATUS_NOK;
 #else
         pSocketManager = SOPC_SocketManager_GetGlobal();
-#endif //SOPC_MULTITHREADED
+#endif //OPCUA_MULTITHREADED
     }
     /* the serving loop */
     do

@@ -54,20 +54,6 @@ typedef SOPC_ExtensionObject ExtensionObject;
 typedef SOPC_Variant Variant;
 typedef SOPC_DataValue DataValue;
 
-typedef struct _OpcUa_EnumeratedValue
-{
-    char* Name;
-    int32_t Value;
-}
-OpcUa_EnumeratedValue;
-
-typedef struct _OpcUa_EnumeratedType
-{
-  char* TypeName;
-  OpcUa_EnumeratedValue* Values;
-}
-OpcUa_EnumeratedType;
-
 typedef int OpcUa_Int;
 typedef char* OpcUa_StringA;
 typedef char  OpcUa_CharA;
@@ -244,4 +230,4 @@ typedef void* OpcUa_SocketManager;
 
 END_EXTERN_C
 
-#endif // INGOPCS_SOPC_TYPES_WRAPPER_H_
+#endif // SOPC_TYPES_WRAPPER_H_

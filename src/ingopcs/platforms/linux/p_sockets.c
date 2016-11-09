@@ -69,9 +69,9 @@ void Socket_Clear(Socket* sock){
 }
 
 SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
-                            uint8_t             setReuseAddr,
-                            uint8_t             setNonBlocking,
-                            Socket*             sock){
+                                 uint8_t             setReuseAddr,
+                                 uint8_t             setNonBlocking,
+                                 Socket*             sock){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int true = 1;
     int setOptStatus = -1;
@@ -108,7 +108,7 @@ SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
 }
 
 SOPC_StatusCode Socket_Listen(Socket              sock,
-                         Socket_AddressInfo* addr)
+                              Socket_AddressInfo* addr)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int bindListenStatus = -1;
@@ -125,7 +125,7 @@ SOPC_StatusCode Socket_Listen(Socket              sock,
 }
 
 SOPC_StatusCode Socket_Accept(Socket  listeningSock,
-                         Socket* acceptedSock)
+                              Socket* acceptedSock)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     struct sockaddr remoteAddr;
@@ -147,7 +147,7 @@ SOPC_StatusCode Socket_Accept(Socket  listeningSock,
 }
 
 SOPC_StatusCode Socket_Connect(Socket              sock,
-                          Socket_AddressInfo* addr)
+                               Socket_AddressInfo* addr)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int connectStatus = -1;
@@ -274,9 +274,9 @@ int32_t Socket_Write(Socket   sock,
 
 
 SOPC_StatusCode Socket_Read(Socket     sock,
-                       uint8_t*   data,
-                       uint32_t   dataSize,
-                       uint32_t*  readCount)
+                            uint8_t*   data,
+                            uint32_t   dataSize,
+                            uint32_t*  readCount)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
         if(sock != -1 && data != NULL && dataSize > 0){

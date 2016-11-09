@@ -25,7 +25,7 @@
 
 SOPC_SocketManager globalSocketMgr;
 
-// Counter to check <= SOPC_MAXCONNECTIONS
+// Counter to check <= OPCUA_MAXCONNECTIONS
 static uint32_t globalNbSockets = 0;
 
 SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
@@ -130,7 +130,7 @@ SOPC_SocketManager* SOPC_SocketManager_Create(uint32_t nbSockets){
 }
 
 SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
-                                              uint32_t          nbSockets){
+                                              uint32_t            nbSockets){
     uint32_t idx = 0;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(globalNbSockets + nbSockets > OPCUA_MAXCONNECTIONS)
@@ -184,11 +184,11 @@ SOPC_Socket* GetFreeSocket(SOPC_SocketManager* socketMgr){
     return result;
 }
 
-SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager*  socketManager,
-                                               const char*        uri,
-                                               SOPC_Socket_EventCB  socketCallback,
-                                               void*              callbackData,
-                                               SOPC_Socket**        clientSocket)
+SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager* socketManager,
+                                                      const char*         uri,
+                                                      SOPC_Socket_EventCB socketCallback,
+                                                      void*               callbackData,
+                                                      SOPC_Socket**       clientSocket)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     Socket_AddressInfo *res, *p;
@@ -254,12 +254,12 @@ SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager*  socke
     return status;
 }
 
-SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager*  socketManager,
-                                               const char*        uri,
-                                               uint8_t            listenAllItfs,
-                                               SOPC_Socket_EventCB  socketCallback,
-                                               void*              callbackData,
-                                               SOPC_Socket**        clientSocket)
+SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socketManager,
+                                                      const char*         uri,
+                                                      uint8_t             listenAllItfs,
+                                                      SOPC_Socket_EventCB socketCallback,
+                                                      void*               callbackData,
+                                                      SOPC_Socket**       clientSocket)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     Socket_AddressInfo *res, *p;
@@ -435,15 +435,15 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
 }
 
 int32_t SOPC_Socket_Write (SOPC_Socket* socket,
-                         uint8_t*   data,
-                         uint32_t   count){
+                           uint8_t*     data,
+                           uint32_t     count){
     return Socket_Write(socket->sock, data, count);
 }
 
 SOPC_StatusCode SOPC_Socket_Read (SOPC_Socket* socket,
-                           uint8_t*   data,
-                           uint32_t   dataSize,
-                           uint32_t*  readCount){
+                                  uint8_t*     data,
+                                  uint32_t     dataSize,
+                                  uint32_t*    readCount){
     return Socket_Read(socket->sock, data, dataSize, readCount);
 }
 

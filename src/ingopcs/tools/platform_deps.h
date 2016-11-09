@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_PLATFORM_DEPS_H_
-#define INGOPCS_PLATFORM_DEPS_H_
+#ifndef SOPC_PLATFORM_DEPS_H_
+#define SOPC_PLATFORM_DEPS_H_
 
 #include <stdint.h>
 
@@ -32,4 +32,4 @@ extern Endianess floatEndianess;
 
 void InitPlatformDependencies(void);
 
-#endif /* INGOPCS_PLATFORM_DEPS_H_ */
+#endif /* SOPC_PLATFORM_DEPS_H_ */

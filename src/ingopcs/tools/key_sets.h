@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_KEY_SETS_H_
-#define INGOPCS_KEY_SETS_H_
+#ifndef SOPC_KEY_SETS_H_
+#define SOPC_KEY_SETS_H_
 
 #include "secret_buffer.h"
 
@@ -34,4 +34,4 @@ typedef struct {
 SC_SecurityKeySet* KeySet_Create();
 void KeySet_Delete(SC_SecurityKeySet* keySet);
 
-#endif /* INGOPCS_KEY_SETS_H_ */
+#endif /* SOPC_KEY_SETS_H_ */

@@ -33,9 +33,9 @@ typedef SOPC_Channel OpcUa_Channel;
 /**
  * @brief Types of events that can occur at an channel and get reported to the application.
  */
-#define eOpcUa_Channel_Event_Invalid ChannelEvent_Invalid
-#define eOpcUa_Channel_Event_Connected ChannelEvent_Connected
-#define eOpcUa_Channel_Event_Disconnected ChannelEvent_Disconnected
+#define eOpcUa_Channel_Event_Invalid SOPC_ChannelEvent_Invalid
+#define eOpcUa_Channel_Event_Connected SOPC_ChannelEvent_Connected
+#define eOpcUa_Channel_Event_Disconnected SOPC_ChannelEvent_Disconnected
 typedef SOPC_Channel_Event OpcUa_Channel_Event;
 //typedef enum eOpcUa_Channel_Event
 //{
@@ -52,9 +52,9 @@ typedef SOPC_Channel_Event OpcUa_Channel_Event;
  *
  * @see OpcUa_Channel_Create
  */
-#define OpcUa_Channel_SerializerType_Invalid ChannelSerializer_Invalid
-#define OpcUa_Channel_SerializerType_Binary ChannelSerializer_Binary
-#define OpcUa_Channel_SerializerType_Xml ChannelSerializer_Invalid
+#define OpcUa_Channel_SerializerType_Invalid SOPC_ChannelSerializer_Invalid
+#define OpcUa_Channel_SerializerType_Binary SOPC_ChannelSerializer_Binary
+#define OpcUa_Channel_SerializerType_Xml SOPC_ChannelSerializer_Invalid
 typedef SOPC_Channel_SerializerType OpcUa_Channel_SerializerType;
 //enum _OpcUa_Channel_SerializerType
 //{

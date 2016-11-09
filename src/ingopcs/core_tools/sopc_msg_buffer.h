@@ -20,8 +20,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_MSG_BUFFER_H_
-#define INGOPCS_MSG_BUFFER_H_
+#ifndef SOPC_MSG_BUFFER_H_
+#define SOPC_MSG_BUFFER_H_
 
 #include "buffer.h"
 #include "sopc_base_types.h"
@@ -29,21 +29,21 @@
 #include "sopc_namespace_table.h"
 
 /** Length of a TCP UA message Header */
-#define TCP_SOPC_HEADER_LENGTH 8
+#define TCP_UA_HEADER_LENGTH 8
 /** Length of a TCP UA ACK message */
-#define TCP_SOPC_ACK_MSG_LENGTH 28
+#define TCP_UA_ACK_MSG_LENGTH 28
 /** Minimum length of a TCP UA ERROR message */
-#define TCP_SOPC_ERR_MIN_MSG_LENGTH 16
+#define TCP_UA_ERR_MIN_MSG_LENGTH 16
 
 /** Position of MessageSize header field in a UA message chunk*/
-#define SOPC_HEADER_LENGTH_POSITION 4
+#define UA_HEADER_LENGTH_POSITION 4
 /** Position of IsFinal header field in a UA message chunk*/
-#define SOPC_HEADER_ISFINAL_POSITION 3
+#define UA_HEADER_ISFINAL_POSITION 3
 
 /** Length of an UA secure message chunk header */
-#define SOPC_SECURE_MESSAGE_HEADER_LENGTH 12
+#define UA_SECURE_MESSAGE_HEADER_LENGTH 12
 /** Length of an UA secure message chunk sequence header */
-#define SOPC_SECURE_MESSAGE_SEQUENCE_LENGTH 8
+#define UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
 
 extern const SOPC_Byte HEL[3]; /**< TCP UA Hello Message type constant */
 extern const SOPC_Byte ACK[3]; /**< TCP UA Ack Message type constant */
@@ -65,13 +65,13 @@ typedef enum {
  *  \brief TCP UA Message types
  */
 typedef enum {
-    TCP_SOPC_Message_Unknown,
-    TCP_SOPC_Message_Invalid,
-    TCP_SOPC_Message_Hello,        /**< HEL type */
-    TCP_SOPC_Message_Acknowledge,  /**< ACK type */
-    TCP_SOPC_Message_Error,        /**< ERR type */
-    TCP_SOPC_Message_SecureMessage /**< MSG, OPN or CLO types */
-} TCP_SOPC_MsgType;
+    TCP_UA_Message_Unknown,
+    TCP_UA_Message_Invalid,
+    TCP_UA_Message_Hello,        /**< HEL type */
+    TCP_UA_Message_Acknowledge,  /**< ACK type */
+    TCP_UA_Message_Error,        /**< ERR type */
+    TCP_UA_Message_SecureMessage /**< MSG, OPN or CLO types */
+} TCP_UA_MsgType;
 
 /**
  *  \brief UA Message Chunk IsFinal type
@@ -90,17 +90,17 @@ typedef enum {
  *  and SOPC_MsgBuffers type to store several chunks at same time.
  */
 typedef struct SOPC_MsgBuffer {
-    uint32_t             nbBuffers;              /**< Number of buffers allocated (one per chunk) */
-    Buffer*              buffers;                /**< Pointers on buffers for the UA Message (nbBuffers buffers) */
-    TCP_SOPC_MsgType       type;                   /**< Type of the TCP UA Message stored */
+    uint32_t               nbBuffers;              /**< Number of buffers allocated (one per chunk) */
+    Buffer*                buffers;                /**< Pointers on buffers for the UA Message (nbBuffers buffers) */
+    TCP_UA_MsgType    type;                   /**< Type of the TCP UA Message stored */
     SOPC_SecureMessageType secureType;             /**< Type of the UA Secure Message stored (only valid if type = SecureMessage) */
-    uint32_t             currentChunkSize;       /**< MessageSize of the current message chunk (current is chunk corresponding to nbChunks) */
-    uint32_t             nbChunks;               /**< Current number of message chunks received or sent for the current message */
-    uint32_t             maxChunks;              /**< Maximum number of message chunks allowed (by UA connection configuration) */
-    uint32_t             sequenceNumberPosition; /**< Position of sequence number (data to encrypt start point) */
+    uint32_t               currentChunkSize;       /**< MessageSize of the current message chunk (current is chunk corresponding to nbChunks) */
+    uint32_t               nbChunks;               /**< Current number of message chunks received or sent for the current message */
+    uint32_t               maxChunks;              /**< Maximum number of message chunks allowed (by UA connection configuration) */
+    uint32_t               sequenceNumberPosition; /**< Position of sequence number (data to encrypt start point) */
     SOPC_MsgFinalChunk     isFinal;                /**< IsFinal value of the current message chunk */
-    uint32_t             receivedReqId;          /**< Request Id of the received message chunks (ensure all chunks have same id). Valid when nbChunks > 1 */
-    void*                flushData;              /**< Data stored by structure user and that could be used to flush a message chunk */
+    uint32_t               receivedReqId;          /**< Request Id of the received message chunks (ensure all chunks have same id). Valid when nbChunks > 1 */
+    void*                  flushData;              /**< Data stored by structure user and that could be used to flush a message chunk */
     SOPC_NamespaceTable    nsTable;                /**< Namespace table to be used for encoding / decoding UA messages */
     SOPC_EncodeableType**  encTypesTable;          /**< EncodeableType table to be used for encoding / decoding UA messages */
 } SOPC_MsgBuffer;
@@ -116,11 +116,11 @@ typedef struct SOPC_MsgBuffer {
  *
  *  \return                  NULL if buffer creation failed (NULL buffer), allocated UA Message Buffer otherwise.
  */
-SOPC_MsgBuffer* MsgBuffer_Create(Buffer*             buffer,
-                               uint32_t            maxChunks,
-                               void*               flushData,
-                               SOPC_NamespaceTable*  nsTable,
-                               SOPC_EncodeableType** encTypesTable);
+SOPC_MsgBuffer* MsgBuffer_Create(Buffer*               buffer,
+                                 uint32_t              maxChunks,
+                                 void*                 flushData,
+                                 SOPC_NamespaceTable*  nsTable,
+                                 SOPC_EncodeableType** encTypesTable);
 
 
 /**
@@ -149,7 +149,7 @@ void MsgBuffer_Reset(SOPC_MsgBuffer* mBuffer);
  *  \return                GOOD if operation succeeded, BAD otherwise (NULL pointer)
  */
 SOPC_StatusCode MsgBuffer_ResetNextChunk(SOPC_MsgBuffer* mBuffer,
-                                    uint32_t      bodyPosition);
+                                         uint32_t        bodyPosition);
 
 /**
  *  \brief Set the Secure Message Type of the UA Message (and coherent TCP UA type)
@@ -158,8 +158,8 @@ SOPC_StatusCode MsgBuffer_ResetNextChunk(SOPC_MsgBuffer* mBuffer,
  *  \param sType      Secure message type value to set
  *  \return           GOOD if operation succeeded, BAD otherwise (NULL pointer, TCP UA type not compatible)
  */
-SOPC_StatusCode MsgBuffer_SetSecureMsgType(SOPC_MsgBuffer* mBuffer,
-                                      SOPC_SecureMessageType sType);
+SOPC_StatusCode MsgBuffer_SetSecureMsgType(SOPC_MsgBuffer*        mBuffer,
+                                           SOPC_SecureMessageType sType);
 
 /**
  *  \brief Copy source UA Message buffer content into destination one.
@@ -170,7 +170,7 @@ SOPC_StatusCode MsgBuffer_SetSecureMsgType(SOPC_MsgBuffer* mBuffer,
  *  \return                 GOOD if operation succeeded, BAD otherwise (NULL pointers, incompatible types)
  */
 SOPC_StatusCode MsgBuffer_CopyBuffer(SOPC_MsgBuffer* destMsgBuffer,
-                                SOPC_MsgBuffer* srcMsgBuffer);
+                                     SOPC_MsgBuffer* srcMsgBuffer);
 
 /**
  *  \brief UA Message buffer with several buffers (to store several chunks)
@@ -188,10 +188,10 @@ typedef struct SOPC_MsgBuffer SOPC_MsgBuffers;
  *
  *  \return                  NULL if buffer creation failed (maxChunks == 0, bufferSize == 0, NULL namespaces, NULL encodeable types), allocated UA Message Buffer otherwise.
  */
-SOPC_MsgBuffers* MsgBuffers_Create(uint32_t            maxChunks,
-                                 uint32_t            bufferSize,
-                                 SOPC_NamespaceTable*  nsTable,
-                                 SOPC_EncodeableType** encTypesTable);
+SOPC_MsgBuffers* MsgBuffers_Create(uint32_t              maxChunks,
+                                   uint32_t              bufferSize,
+                                   SOPC_NamespaceTable*  nsTable,
+                                   SOPC_EncodeableType** encTypesTable);
 
 /**
  *  \brief Reset the UA Message buffers state (buffers content, type, number of chunks, etc.)
@@ -224,7 +224,7 @@ Buffer* MsgBuffers_GetCurrentChunk(SOPC_MsgBuffers* mBuffer);
  *  \return           Pointer to the next chunk buffer which became current, NULL if argument was NULL or incoherent
  */
 Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
-                             uint32_t*      bufferIdx);
+                             uint32_t*        bufferIdx);
 
 
 /**
@@ -245,9 +245,9 @@ SOPC_StatusCode MsgBuffers_SetCurrentChunkFirst(SOPC_MsgBuffers* mBuffer);
  *  \return                 GOOD if operation succeeded, BAD otherwise
  */
 SOPC_StatusCode MsgBuffers_CopyBuffer(SOPC_MsgBuffers* destMsgBuffer,
-                                 uint32_t       bufferIdx,
-                                 SOPC_MsgBuffer*  srcMsgBuffer,
-                                 uint32_t       limitedLength);
+                                      uint32_t         bufferIdx,
+                                      SOPC_MsgBuffer*  srcMsgBuffer,
+                                      uint32_t         limitedLength);
 
 
-#endif /* INGOPCS_MSG_BUFFER_H_ */
+#endif /* SOPC_MSG_BUFFER_H_ */

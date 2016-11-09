@@ -18,8 +18,8 @@
  */
 
 
-#ifndef INGOPCS_SECRET_BUFFER_H_
-#define INGOPCS_SECRET_BUFFER_H_
+#ifndef SOPC_SECRET_BUFFER_H_
+#define SOPC_SECRET_BUFFER_H_
 
 #include <stdint.h>
 
@@ -42,4 +42,4 @@ ExposedBuffer * SecretBuffer_Expose(const SecretBuffer *sec);
 void SecretBuffer_Unexpose(ExposedBuffer *buf);
 
 
-#endif // INGOPCS_SECRET_BUFFER_H_
+#endif // SOPC_SECRET_BUFFER_H_

@@ -34,12 +34,12 @@ typedef uint32_t (SOPC_EncodeableObject_PfnEncode) (void* value, struct SOPC_Msg
 typedef uint32_t (SOPC_EncodeableObject_PfnDecode) (void* value, struct SOPC_MsgBuffer* msgBuffer);
 
 typedef struct SOPC_EncodeableType {
-    char*                              TypeName;
-    uint32_t                           TypeId;
-    uint32_t                           BinaryEncodingTypeId;
-    uint32_t                           XmlEncodingTypeId;
-    char*                              NamespaceUri;
-    uint32_t                           AllocationSize;
+    char*                                TypeName;
+    uint32_t                             TypeId;
+    uint32_t                             BinaryEncodingTypeId;
+    uint32_t                             XmlEncodingTypeId;
+    char*                                NamespaceUri;
+    uint32_t                             AllocationSize;
     SOPC_EncodeableObject_PfnInitialize* Initialize;
     SOPC_EncodeableObject_PfnClear*      Clear;
     SOPC_EncodeableObject_PfnGetSize*    GetSize;
@@ -49,9 +49,9 @@ typedef struct SOPC_EncodeableType {
 
 
 SOPC_EncodeableType* EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable, // null terminated enctype* list
-                                                    const char*         namespac,
-                                                    uint32_t            typeId);
+                                                      const char*           namespac,
+                                                      uint32_t              typeId);
 
 END_EXTERN_C
 
-#endif /* INGOPCS_SOPC_ENCODEABLE_H_ */
+#endif /* SOPC_ENCODEABLE_H_ */
