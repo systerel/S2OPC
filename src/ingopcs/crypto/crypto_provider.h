@@ -347,6 +347,31 @@ SOPC_StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvi
  * Symmetric cryptography
  * ------------------------------------------------------------------------------------------------
  */
+
+/** \brief          Encrypts a padded payload \p pInput of \p lenPlainText bytes.
+ *
+ *                  Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
+ *                  Does not apply a padding scheme, which must be done before calling this function.
+ *                  To calculate the padded size, use CryptoProvider_SymmetricGetLength_Blocks().
+ *
+ *                  The key and initialization vectors are usually derived from shared secrets
+ *                  with CryptoProvider_DeriveKeySets().
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pInput    A valid pointer to the payload to cipher. The payload must be padded.
+ * \param lenPlainText  Length in bytes of the payload to cipher.
+ * \param pKey      A valid pointer to a SecretBuffer containing the symmetric encryption key.
+ * \param pIV       A valid pointer to a SecretBuffer containing the initialization vector.
+ * \param pOutput   A valid pointer to the buffer which will contain the ciphered payload.
+ * \param lenOutput The exact length of the ciphered payload. CryptoProvider_SymmetricGetLength_Encryption()
+ *                  provides the expected size of this buffer.
+ *
+ * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
@@ -354,6 +379,33 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            const SecretBuffer *pIV,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput);
+
+/** \brief          Decrypts a payload \p pInput of \p lenPlainText bytes into a padded deciphered payload \p pOutput.
+ *
+ *                  Writes the deciphered payload in \p pOutput of \p lenOutput bytes.
+ *                  Does not use a padding scheme, which must be done after calling this function
+ *                  to obtain the initial message.
+ *                  To calculate the padded size, use CryptoProvider_SymmetricGetLength_Blocks().
+ *
+ *                  The encryption key and initialization vectors are usually derived from shared secrets
+ *                  with CryptoProvider_DeriveKeySets().
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pInput    A valid pointer to the payload to decipher.
+ * \param lenCipherText  Length in bytes of the payload to decipher. The payload size must be a multiple of the
+ *                  decipher block size, see CryptoProvider_SymmetricGetLength_Blocks().
+ * \param pKey      A valid pointer to a SecretBuffer containing the symmetric encryption key.
+ * \param pIV       A valid pointer to a SecretBuffer containing the initialization vector.
+ * \param pOutput   A valid pointer to the buffer which will contain the deciphered payload.
+ * \param lenOutput The exact length of the deciphered payload. CryptoProvider_SymmetricGetLength_Decryption()
+ *                  provides the expected size of this buffer.
+ *
+ * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenCipherText,
@@ -361,18 +413,82 @@ SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
                                            const SecretBuffer *pIV,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput);
+
+/** \brief          Signs a payload \p pInput of \p lenInput bytes, writes the signature in \p pOutput of \p lenOutput bytes.
+ *
+ *                  The signature is as long as the underlying hash digest, which size is computed with
+ *                  CryptoProvider_SymmetricGetLength_Signature().
+ *                  Usually, the unpadded plain text message is signed.
+ *
+ *                  The signing key is usually derived from shared secrets with CryptoProvider_DeriveKeySets().
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pInput    A valid pointer to the payload to sign.
+ * \param lenInput  Length in bytes of the payload to sign.
+ * \param pKey      A valid pointer to a SecretBuffer containing the symmetric signing key.
+ * \param pOutput   A valid pointer to the buffer which will contain the signature.
+ * \param lenOutput The exact length of the signature buffer. CryptoProvider_SymmetricGetLength_Signature()
+ *                  provides the expected size of this buffer.
+ *
+ * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
                                         const uint8_t *pInput,
                                         uint32_t lenInput,
                                         const SecretBuffer *pKey,
                                         uint8_t *pOutput,
                                         uint32_t lenOutput);
+
+/** \brief          Verifies the signature \p pSignature of the payload \p pInput of \p lenInput bytes.
+ *
+ *                  The signature is as long as the underlying hash digest, which size is computed with
+ *                  CryptoProvider_SymmetricGetLength_Signature().
+ *                  Usually, the unpadded plain text message is signed.
+ *                  The signature verification process computes the signature from \p pInput and
+ *                  compares it with the content of \p pSignature.
+ *
+ *                  The signing key is usually derived from shared secrets with CryptoProvider_DeriveKeySets().
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pInput    A valid pointer to the payload to sign.
+ * \param lenInput  Length in bytes of the payload to sign.
+ * \param pKey      A valid pointer to a SecretBuffer containing the symmetric signing key.
+ * \param pSignature  A valid pointer to the signature.
+ * \param lenOutput The exact length of the signature buffer. CryptoProvider_SymmetricGetLength_Signature()
+ *                  provides the expected size of this buffer.
+ *
+ * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenInput,
                                           const SecretBuffer *pKey,
                                           const uint8_t *pSignature,
                                           uint32_t lenOutput);
+
+/**
+ * \brief           Generates a single truly random symmetric key for the current security policy.
+ *
+ *                  Uses the entropy generator provided by the underlying cryptographic library.
+ *                  The new SecretBuffer is to be freed by the caller.
+ *
+ * \note            Helper. You should use CryptoProvider_DeriveKeySets() instead.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param ppKeyGenerated  A valid handle to the newly created SecretBuffer.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error (e.g. no entropy source).
+ */
 SOPC_StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
                                                SecretBuffer **ppKeyGenerated);
 
@@ -381,6 +497,12 @@ SOPC_StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvi
  * Key derivation
  * ------------------------------------------------------------------------------------------------
  */
+
+/**
+ * \brief           Derives pseudo-random data from the randomly generated and shared secrets.
+ *
+ * \note            Internal API, use CryptoProvider_DeriveKeySetsClient() or CryptoProvider_DeriveKeySetsServer() instead.
+ */
 SOPC_StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pProvider,
                                                  const ExposedBuffer *pSecret,
                                                  uint32_t lenSecret,
@@ -388,6 +510,27 @@ SOPC_StatusCode CryptoProvider_DerivePseudoRandomData(const CryptoProvider *pPro
                                                  uint32_t lenSeed,
                                                  ExposedBuffer *pOutput,
                                                  uint32_t lenOutput);
+
+/**
+ * \brief           Derive pseudo-random key sets from the randomly generated and shared secrets.
+ *
+ * \sa              CryptoProvider_SymmetricGenerateKey(), CryptoProvider_DeriveKeySetsClient(),
+ *                  and CryptoProvider_DeriveKeySetsServer().
+ *
+ * \param pProvider         An initialized cryptographic context.
+ * \param pClientNonce      A valid pointer to the client nonce buffer, the client part of the secret.
+ * \param lenClientNonce    Length in bytes of the buffer of the client nonce. Its size should be *TBD*.
+ * \param pServerNonce      A valid pointer to the server nonce buffer, the server part of the secret.
+ * \param lenServerNonce    Length in bytes of the buffer of the server nonce. Its size should be *TBD*.
+ * \param pClientKeySet     A valid pointer to a pre-allocated SC_SecurityKeySet which will contain the client side derived data.
+ * \param pServerKeySet     A valid pointer to a pre-allocated SC_SecurityKeySet which will contain the server side derived data.
+ *
+ * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_DeriveKeySets(const CryptoProvider *pProvider,
                                         const ExposedBuffer *pClientNonce,
                                         uint32_t lenClientNonce,
@@ -395,12 +538,50 @@ SOPC_StatusCode CryptoProvider_DeriveKeySets(const CryptoProvider *pProvider,
                                         uint32_t lenServerNonce,
                                         SC_SecurityKeySet *pClientKeySet,
                                         SC_SecurityKeySet *pServerKeySet);
+
+/**
+ * \brief           Derive pseudo-random key sets from the randomly generated and shared secrets.
+ *
+ *                  This function is similar to CryptoProvider_DeriveKeySets but uses the client nonce as a SecretBuffer.
+ *
+ * \param pProvider         An initialized cryptographic context.
+ * \param pClientNonce      A valid pointer to the client nonce as a SecretBuffer.
+ * \param pServerNonce      A valid pointer to the server nonce buffer, the server part of the secret.
+ * \param lenServerNonce    Length in bytes of the buffer of the server nonce. Its size should be *TBD*.
+ * \param pClientKeySet     A valid pointer to a pre-allocated SC_SecurityKeySet which will contain the client side derived data.
+ * \param pServerKeySet     A valid pointer to a pre-allocated SC_SecurityKeySet which will contain the server side derived data.
+ *
+ * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvider, // DeriveKeySets
                                               const SecretBuffer *pClientNonce,
                                               const ExposedBuffer *pServerNonce,
                                               uint32_t lenServerNonce,
                                               SC_SecurityKeySet *pClientKeySet,
                                               SC_SecurityKeySet *pServerKeySet);
+
+/**
+ * \brief           Derive pseudo-random key sets from the randomly generated and shared secrets.
+ *
+ *                  This function is similar to CryptoProvider_DeriveKeySets but uses the server nonce as a SecretBuffer.
+ *
+ * \param pProvider         An initialized cryptographic context.
+ * \param pClientNonce      A valid pointer to the client nonce buffer, the client part of the secret.
+ * \param lenClientNonce    Length in bytes of the buffer of the client nonce. Its size should be *TBD*.
+ * \param pServerNonce      A valid pointer to the server nonce as a SecretBuffer.
+ * \param pClientKeySet     A valid pointer to a pre-allocated SC_SecurityKeySet which will contain the client side derived data.
+ * \param pServerKeySet     A valid pointer to a pre-allocated SC_SecurityKeySet which will contain the server side derived data.
+ *
+ * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
                                               const ExposedBuffer *pClientNonce,
                                               uint32_t lenClientNonce,
@@ -426,6 +607,12 @@ SOPC_StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider
                                             uint8_t *pOutput,
                                             uint32_t lenOutput,
                                             uint32_t *lenWritten);
+
+/*
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error (e.g. no entropy source).
+ */
 SOPC_StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,
