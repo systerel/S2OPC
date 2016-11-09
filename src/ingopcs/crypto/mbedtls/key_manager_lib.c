@@ -225,15 +225,15 @@ SOPC_StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
 }
 
 
-void KeyManager_Certificate_Free(Certificate *cert)
+void KeyManager_Certificate_Free(Certificate *pCert)
 {
-    if(NULL == cert)
+    if(NULL == pCert)
         return;
 
-    mbedtls_x509_crt_free(&cert->crt);
-    cert->crt_der = NULL;
-    cert->len_der = 0;
-    free(cert);
+    mbedtls_x509_crt_free(&pCert->crt);
+    pCert->crt_der = NULL;
+    pCert->len_der = 0;
+    free(pCert);
 }
 
 

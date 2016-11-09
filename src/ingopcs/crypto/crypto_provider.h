@@ -1,6 +1,7 @@
 /** \file crypto_provider.h
  *
- * Defines the cryptographic API: a  data alongside a read-only cryptoprofile.
+ * Defines the cryptographic API. This API mainly relies on the CryptoProvider, which is composed of
+ * lib-specific data alongside a read-only CryptoProfile.
  *
  *  Created on: Sep 28, 2016
  *      Author: PAB
@@ -752,7 +753,28 @@ SOPC_StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
  * Certificate validation
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
+
+/**
+ * \brief           Validates the given Certificate \p pCert.
+ *
+ *                  This function first verifies that the signed public key respects the current
+ *                  security policy (asymmetric key type and length, signature hash type, ...),
+ *                  and then let the PKIProvider handle the signature validation.
+ *                  The verification of the signature chain up to the certificate authority is
+ *                  not endorsed by the CryptoProvider, but by the PKIProvider, which must be
+ *                  created and configured outside the stack.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pPKI      An initialized public key infrastructure (PKIProvider).
+ * \param pCert     A valid pointer to the Certificate to validate.
+ *
+ * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
+SOPC_StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pProvider,
                                                const struct PKIProvider *pPKI,
                                                const Certificate *pCert);
 

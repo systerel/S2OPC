@@ -31,11 +31,11 @@
  * ------------------------------------------------------------------------------------------------
  */
 SOPC_StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
-                                          uint8_t **ppDest, uint32_t *lenAllocated)
+                                          uint8_t **ppDest, uint32_t *pLenAllocated)
 {
     uint32_t lenToAllocate = 0;
 
-    if(NULL == pCert || ppDest == NULL || 0 == lenAllocated)
+    if(NULL == pCert || ppDest == NULL || 0 == pLenAllocated)
         return STATUS_INVALID_PARAMETERS;
 
     // Allocation
@@ -49,7 +49,7 @@ SOPC_StatusCode KeyManager_Certificate_CopyDER(const Certificate *pCert,
 
     // Copy
     memcpy((void *)(*ppDest), (void *)(pCert->crt_der), lenToAllocate);
-    *lenAllocated = lenToAllocate;
+    *pLenAllocated = lenToAllocate;
 
     return STATUS_OK;
 }

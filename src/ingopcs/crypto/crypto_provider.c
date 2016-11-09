@@ -936,16 +936,16 @@ SOPC_StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
  * Certificate validation
  * ------------------------------------------------------------------------------------------------
  */
-SOPC_StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pCrypto,
+SOPC_StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pProvider,
                                               const PKIProvider *pPKI,
                                               const Certificate *pCert)
 {
     // TODO: where is the key key_pub <-> key_priv association checked?
-    if(NULL == pCrypto || NULL == pCrypto->pProfile || NULL == pCrypto->pProfile->pFnCertVerify || NULL == pPKI || NULL == pPKI->pFnValidateCertificate || NULL == pCert)
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnCertVerify || NULL == pPKI || NULL == pPKI->pFnValidateCertificate || NULL == pCert)
         return STATUS_INVALID_PARAMETERS;
 
     // Let the lib-specific code handle the verification for the current security policy
-    if(pCrypto->pProfile->pFnCertVerify(pCrypto, pCert) != STATUS_OK)
+    if(pProvider->pProfile->pFnCertVerify(pProvider, pCert) != STATUS_OK)
         return STATUS_NOK;
 
     // Verify certificate through PKIProvider callback
