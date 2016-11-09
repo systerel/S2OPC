@@ -193,7 +193,7 @@ OpcUa_StatusCode OpcUa_Channel_BeginConnect(OpcUa_Channel                       
                                          pKeyCli,
                                          srv,
                                          pki,
-                                         String_GetRawCString(a_pRequestedSecurityPolicyUri),
+                                         SOPC_String_GetRawCString(a_pRequestedSecurityPolicyUri),
                                          a_nRequestedLifetime,
                                          a_messageSecurityMode,
                                          a_nNetworkTimeout,

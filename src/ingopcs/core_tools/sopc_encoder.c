@@ -92,7 +92,7 @@ void EncodeDecode_Double(double* doublev){
     }
 }
 
-SOPC_StatusCode Byte_Write(const SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Byte_Write(const SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
@@ -100,7 +100,7 @@ SOPC_StatusCode Byte_Write(const SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
     return TCP_UA_WriteMsgBuffer(msgBuffer, value, 1);
 }
 
-SOPC_StatusCode Byte_Read(SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Byte_Read(SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
@@ -109,7 +109,7 @@ SOPC_StatusCode Byte_Read(SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
     return TCP_UA_ReadMsgBuffer(value, 1, msgBuffer, 1);
 }
 
-SOPC_StatusCode Boolean_Write(const SOPC_Boolean* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_Byte encodedValue;
     if(value == NULL){
@@ -123,16 +123,16 @@ SOPC_StatusCode Boolean_Write(const SOPC_Boolean* value, SOPC_MsgBuffer* msgBuff
         encodedValue = 1;
     }
 
-    return Byte_Write(&encodedValue, msgBuffer);
+    return SOPC_Byte_Write(&encodedValue, msgBuffer);
 }
 
-SOPC_StatusCode Boolean_Read(SOPC_Boolean* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_NOK;
     if(value == NULL){
         status = STATUS_INVALID_PARAMETERS;
     }else{
-        status = Byte_Read((SOPC_Byte*) value, msgBuffer);
+        status = SOPC_Byte_Read((SOPC_Byte*) value, msgBuffer);
         if(status == STATUS_OK){
             if(*value != FALSE){
                 // Decoder should use 1 as True value
@@ -143,7 +143,7 @@ SOPC_StatusCode Boolean_Read(SOPC_Boolean* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode SByte_Write(const SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_SByte_Write(const SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
@@ -151,7 +151,7 @@ SOPC_StatusCode SByte_Write(const SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
     return TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) value, 1);
 }
 
-SOPC_StatusCode SByte_Read(SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_SByte_Read(SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
@@ -160,7 +160,7 @@ SOPC_StatusCode SByte_Read(SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
     return TCP_UA_ReadMsgBuffer((SOPC_Byte*) value, 1, msgBuffer, 1);
 }
 
-SOPC_StatusCode Int16_Write(const int16_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Int16_Write(const int16_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -171,7 +171,7 @@ SOPC_StatusCode Int16_Write(const int16_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Int16_Read(int16_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Int16_Read(int16_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_NOK;
     int16_t readValue;
@@ -187,7 +187,7 @@ SOPC_StatusCode Int16_Read(int16_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode UInt16_Write(const uint16_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_UInt16_Write(const uint16_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -198,7 +198,7 @@ SOPC_StatusCode UInt16_Write(const uint16_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode UInt16_Read(uint16_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_UInt16_Read(uint16_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_NOK;
     if(value == NULL){
@@ -212,7 +212,7 @@ SOPC_StatusCode UInt16_Read(uint16_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Int32_Write(const int32_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Int32_Write(const int32_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -223,7 +223,7 @@ SOPC_StatusCode Int32_Write(const int32_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Int32_Read(int32_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Int32_Read(int32_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -235,7 +235,7 @@ SOPC_StatusCode Int32_Read(int32_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode UInt32_Write(const uint32_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_UInt32_Write(const uint32_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -246,7 +246,7 @@ SOPC_StatusCode UInt32_Write(const uint32_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode UInt32_Read(uint32_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_UInt32_Read(uint32_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -258,7 +258,7 @@ SOPC_StatusCode UInt32_Read(uint32_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Int64_Write(const int64_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Int64_Write(const int64_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -269,7 +269,7 @@ SOPC_StatusCode Int64_Write(const int64_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Int64_Read(int64_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Int64_Read(int64_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -281,7 +281,7 @@ SOPC_StatusCode Int64_Read(int64_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode UInt64_Write(const uint64_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_UInt64_Write(const uint64_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -292,7 +292,7 @@ SOPC_StatusCode UInt64_Write(const uint64_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode UInt64_Read(uint64_t* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_UInt64_Read(uint64_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -304,7 +304,7 @@ SOPC_StatusCode UInt64_Read(uint64_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Float_Write(const float* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Float_Write(const float* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -315,7 +315,7 @@ SOPC_StatusCode Float_Write(const float* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Float_Read(float* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Float_Read(float* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -327,7 +327,7 @@ SOPC_StatusCode Float_Read(float* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Double_Write(const double* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Double_Write(const double* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -338,7 +338,7 @@ SOPC_StatusCode Double_Write(const double* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Double_Read(double* value, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Double_Read(double* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
@@ -350,7 +350,7 @@ SOPC_StatusCode Double_Read(double* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode ByteString_Write(const SOPC_ByteString* str, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_NOK;
     if(str == NULL){
@@ -362,7 +362,7 @@ SOPC_StatusCode ByteString_Write(const SOPC_ByteString* str, SOPC_MsgBuffer* msg
         }else{
             length = -1;
         }
-        status = Int32_Write(&length, msgBuffer);
+        status = SOPC_Int32_Write(&length, msgBuffer);
         if(status == STATUS_OK &&
            str->Length > 0)
         {
@@ -372,7 +372,7 @@ SOPC_StatusCode ByteString_Write(const SOPC_ByteString* str, SOPC_MsgBuffer* msg
     return status;
 }
 
-SOPC_StatusCode ByteString_Read(SOPC_ByteString* str, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_NOK;
     int32_t length;
@@ -403,12 +403,12 @@ SOPC_StatusCode ByteString_Read(SOPC_ByteString* str, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode String_Write(const SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_String_Write(const SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
 {
-    return ByteString_Write((SOPC_ByteString*) str, msgBuffer);
+    return SOPC_ByteString_Write((SOPC_ByteString*) str, msgBuffer);
 }
 
-SOPC_StatusCode String_Read(SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_String_Read(SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_NOK;
     int32_t length;
@@ -443,39 +443,39 @@ SOPC_StatusCode String_Read(SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode XmlElement_Write(const SOPC_XmlElement* xml, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_XmlElement_Write(const SOPC_XmlElement* xml, SOPC_MsgBuffer* msgBuffer)
 {
     // TODO: check XML validity ?
-    return ByteString_Write((SOPC_ByteString*) xml, msgBuffer);
+    return SOPC_ByteString_Write((SOPC_ByteString*) xml, msgBuffer);
 }
 
-SOPC_StatusCode XmlElement_Read(SOPC_XmlElement* xml, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_XmlElement_Read(SOPC_XmlElement* xml, SOPC_MsgBuffer* msgBuffer)
 {
     // TODO: parse XML ?
-    return ByteString_Read((SOPC_ByteString*) xml, msgBuffer);
+    return SOPC_ByteString_Read((SOPC_ByteString*) xml, msgBuffer);
 }
 
-SOPC_StatusCode DateTime_Write(const SOPC_DateTime* date, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_MsgBuffer* msgBuffer)
 {
-    return Int64_Write(date, msgBuffer);
+    return SOPC_Int64_Write(date, msgBuffer);
 }
 
-SOPC_StatusCode DateTime_Read(SOPC_DateTime* date, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_DateTime_Read(SOPC_DateTime* date, SOPC_MsgBuffer* msgBuffer)
 {
-    return Int64_Read(date, msgBuffer);
+    return SOPC_Int64_Read(date, msgBuffer);
 }
 
-SOPC_StatusCode Guid_Write(const SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(guid != NULL){
-        status = UInt32_Write(&guid->Data1, msgBuffer);
+        status = SOPC_UInt32_Write(&guid->Data1, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = UInt16_Write(&guid->Data2, msgBuffer);
+        status = SOPC_UInt16_Write(&guid->Data2, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = UInt16_Write(&guid->Data3, msgBuffer);
+        status = SOPC_UInt16_Write(&guid->Data3, msgBuffer);
     }
     if(status == STATUS_OK){
         status = TCP_UA_WriteMsgBuffer(msgBuffer, &(guid->Data4[0]), 8);
@@ -483,17 +483,17 @@ SOPC_StatusCode Guid_Write(const SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode Guid_Read(SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_Guid_Read(SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(guid != NULL){
-        status = UInt32_Read(&guid->Data1, msgBuffer);
+        status = SOPC_UInt32_Read(&guid->Data1, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = UInt16_Read(&guid->Data2, msgBuffer);
+        status = SOPC_UInt16_Read(&guid->Data2, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = UInt16_Read(&guid->Data3, msgBuffer);
+        status = SOPC_UInt16_Read(&guid->Data3, msgBuffer);
     }
     if(status == STATUS_OK){
         status = TCP_UA_ReadMsgBuffer(&(guid->Data4[0]), 8, msgBuffer, 8);
@@ -537,7 +537,7 @@ SOPC_StatusCode Internal_NodeId_Write(SOPC_MsgBuffer* msgBuffer,
     SOPC_Byte byte = 0;
     uint16_t twoBytes = 0;
 
-    status = Byte_Write(&encodingByte, msgBuffer);
+    status = SOPC_Byte_Write(&encodingByte, msgBuffer);
     if(status == STATUS_OK){
         switch(encodingType){
             case NodeIdEncoding_Invalid:
@@ -545,42 +545,42 @@ SOPC_StatusCode Internal_NodeId_Write(SOPC_MsgBuffer* msgBuffer,
                 break;
             case NodeIdEncoding_TwoByte:
                 byte = (SOPC_Byte) nodeId->Data.Numeric;
-                status = Byte_Write(&byte, msgBuffer);
+                status = SOPC_Byte_Write(&byte, msgBuffer);
                 break;
             case  NodeIdEncoding_FourByte:
                 twoBytes = (uint16_t) nodeId->Data.Numeric;
                 if(nodeId->Namespace <= UINT8_MAX){
                     const SOPC_Byte namespace = nodeId->Namespace;
-                    status = Byte_Write(&namespace, msgBuffer);
+                    status = SOPC_Byte_Write(&namespace, msgBuffer);
                 }else{
                     status = STATUS_INVALID_PARAMETERS;
                 }
                 if(status == STATUS_OK){
-                    status = UInt16_Write(&twoBytes, msgBuffer);
+                    status = SOPC_UInt16_Write(&twoBytes, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_Numeric:
-                status = UInt16_Write(&nodeId->Namespace, msgBuffer);
+                status = SOPC_UInt16_Write(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = UInt32_Write(&nodeId->Data.Numeric, msgBuffer);
+                    status = SOPC_UInt32_Write(&nodeId->Data.Numeric, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_String:
-                status = UInt16_Write(&nodeId->Namespace, msgBuffer);
+                status = SOPC_UInt16_Write(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = String_Write(&nodeId->Data.String, msgBuffer);
+                    status = SOPC_String_Write(&nodeId->Data.String, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_Guid:
-                status = UInt16_Write(&nodeId->Namespace, msgBuffer);
+                status = SOPC_UInt16_Write(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = Guid_Write(&nodeId->Data.Guid, msgBuffer);
+                    status = SOPC_Guid_Write(&nodeId->Data.Guid, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_ByteString:
-                status = UInt16_Write(&nodeId->Namespace, msgBuffer);
+                status = SOPC_UInt16_Write(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = ByteString_Write(&nodeId->Data.Bstring, msgBuffer);
+                    status = SOPC_ByteString_Write(&nodeId->Data.Bstring, msgBuffer);
                 }
                 break;
             default:
@@ -591,7 +591,7 @@ SOPC_StatusCode Internal_NodeId_Write(SOPC_MsgBuffer* msgBuffer,
     return status;
 }
 
-SOPC_StatusCode NodeId_Write(const SOPC_NodeId* nodeId, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_NodeId_Write(const SOPC_NodeId* nodeId, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(nodeId != NULL){
@@ -611,7 +611,7 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_MsgBuffer* msgBuffer,
     SOPC_Byte byte = 0;
     uint16_t twoBytes = 0;
 
-    status = Byte_Read(encodingByte, msgBuffer);
+    status = SOPC_Byte_Read(encodingByte, msgBuffer);
 
     if(status == STATUS_OK){
         encodingType = 0x0F & *encodingByte; // Eliminate flags
@@ -622,44 +622,44 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_MsgBuffer* msgBuffer,
             case NodeIdEncoding_TwoByte:
                 nodeId->IdentifierType = IdentifierType_Numeric;
                 nodeId->Namespace = 0;
-                status = Byte_Read(&byte, msgBuffer);
+                status = SOPC_Byte_Read(&byte, msgBuffer);
                 nodeId->Data.Numeric = (uint32_t) byte;
                 break;
             case  NodeIdEncoding_FourByte:
                 nodeId->IdentifierType = IdentifierType_Numeric;
-                status = Byte_Read(&byte, msgBuffer);
+                status = SOPC_Byte_Read(&byte, msgBuffer);
                 nodeId->Namespace = byte;
                 if(status == STATUS_OK){
-                    status = UInt16_Read(&twoBytes, msgBuffer);
+                    status = SOPC_UInt16_Read(&twoBytes, msgBuffer);
                     nodeId->Data.Numeric = twoBytes;
                 }
                 break;
             case  NodeIdEncoding_Numeric:
                 nodeId->IdentifierType = IdentifierType_Numeric;
-                status = UInt16_Read(&nodeId->Namespace, msgBuffer);
+                status = SOPC_UInt16_Read(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = UInt32_Read(&nodeId->Data.Numeric, msgBuffer);
+                    status = SOPC_UInt32_Read(&nodeId->Data.Numeric, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_String:
                 nodeId->IdentifierType = IdentifierType_String;
-                status = UInt16_Read(&nodeId->Namespace, msgBuffer);
+                status = SOPC_UInt16_Read(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = String_Read(&nodeId->Data.String, msgBuffer);
+                    status = SOPC_String_Read(&nodeId->Data.String, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_Guid:
                 nodeId->IdentifierType = IdentifierType_Guid;
-                status = UInt16_Read(&nodeId->Namespace, msgBuffer);
+                status = SOPC_UInt16_Read(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = Guid_Read(&nodeId->Data.Guid, msgBuffer);
+                    status = SOPC_Guid_Read(&nodeId->Data.Guid, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_ByteString:
                 nodeId->IdentifierType = IdentifierType_ByteString;
-                status = UInt16_Read(&nodeId->Namespace, msgBuffer);
+                status = SOPC_UInt16_Read(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = ByteString_Read(&nodeId->Data.Bstring, msgBuffer);
+                    status = SOPC_ByteString_Read(&nodeId->Data.Bstring, msgBuffer);
                 }
                 break;
             default:
@@ -670,7 +670,7 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_MsgBuffer* msgBuffer,
     return status;
 }
 
-SOPC_StatusCode NodeId_Read(SOPC_NodeId* nodeId, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
@@ -680,7 +680,7 @@ SOPC_StatusCode NodeId_Read(SOPC_NodeId* nodeId, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
-SOPC_StatusCode ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0xFF;
     if(expNodeId != NULL){
@@ -695,17 +695,17 @@ SOPC_StatusCode ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId, SOPC_
     }
     if(status == STATUS_OK && expNodeId->NamespaceUri.Length > 0)
     {
-        status = String_Write(&expNodeId->NamespaceUri, msgBuffer);
+        status = SOPC_String_Write(&expNodeId->NamespaceUri, msgBuffer);
     }
     if(status == STATUS_OK && expNodeId->ServerIndex > 0)
     {
-        status = UInt32_Write(&expNodeId->ServerIndex, msgBuffer);
+        status = SOPC_UInt32_Write(&expNodeId->ServerIndex, msgBuffer);
     }
 
     return status;
 }
 
-SOPC_StatusCode ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     if(expNodeId != NULL){
@@ -714,26 +714,26 @@ SOPC_StatusCode ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_MsgBuff
     if(status == STATUS_OK &&
        (encodingByte & NodeIdEncoding_NamespaceUriFlag) != 0x00)
     {
-        status = String_Read(&expNodeId->NamespaceUri, msgBuffer);
+        status = SOPC_String_Read(&expNodeId->NamespaceUri, msgBuffer);
     }else{
-        String_Clear(&expNodeId->NamespaceUri);
+        SOPC_String_Clear(&expNodeId->NamespaceUri);
     }
     if(status == STATUS_OK &&
         (encodingByte & NodeIdEncoding_ServerIndexFlag) != 0)
     {
-        status = UInt32_Read(&expNodeId->ServerIndex, msgBuffer);
+        status = SOPC_UInt32_Read(&expNodeId->ServerIndex, msgBuffer);
     }else{
-        UInt32_Clear(&expNodeId->ServerIndex);
+        SOPC_UInt32_Clear(&expNodeId->ServerIndex);
     }
     return status;
 }
 
-SOPC_StatusCode StatusCode_Write(const SOPC_StatusCode* status, SOPC_MsgBuffer* msgBuffer){
-    return UInt32_Write(status, msgBuffer);
+SOPC_StatusCode SOPC_StatusCode_Write(const SOPC_StatusCode* status, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_UInt32_Write(status, msgBuffer);
 }
 
-SOPC_StatusCode StatusCode_Read(SOPC_StatusCode* status, SOPC_MsgBuffer* msgBuffer){
-    return UInt32_Read(status, msgBuffer);
+SOPC_StatusCode SOPC_StatusCode_Read(SOPC_StatusCode* status, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_UInt32_Read(status, msgBuffer);
 }
 
 SOPC_Byte GetDiagInfoEncodingByte(const SOPC_DiagnosticInfo* diagInfo){
@@ -763,7 +763,7 @@ SOPC_Byte GetDiagInfoEncodingByte(const SOPC_DiagnosticInfo* diagInfo){
     return encodingByte;
 }
 
-SOPC_StatusCode DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, SOPC_MsgBuffer* msgBuffer){
     SOPC_Byte encodingByte = 0x00;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(diagInfo != NULL){
@@ -772,90 +772,90 @@ SOPC_StatusCode DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, SOPC_M
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_SymbolicId) != 0x00){
-        status = Int32_Write(&diagInfo->SymbolicId, msgBuffer);
+        status = SOPC_Int32_Write(&diagInfo->SymbolicId, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_Namespace) != 0x00){
-        status = Int32_Write(&diagInfo->NamespaceUri, msgBuffer);
+        status = SOPC_Int32_Write(&diagInfo->NamespaceUri, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_Locale) != 0x00){
-        status = Int32_Write(&diagInfo->Locale, msgBuffer);
+        status = SOPC_Int32_Write(&diagInfo->Locale, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_LocalizedTest) != 0x00){
-        status = Int32_Write(&diagInfo->LocalizedText, msgBuffer);
+        status = SOPC_Int32_Write(&diagInfo->LocalizedText, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_AdditionalInfo) != 0x00){
-        status = String_Write(&diagInfo->AdditionalInfo, msgBuffer);
+        status = SOPC_String_Write(&diagInfo->AdditionalInfo, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_InnerStatusCode) != 0x00){
-        status = StatusCode_Write(&diagInfo->InnerStatusCode, msgBuffer);
+        status = SOPC_StatusCode_Write(&diagInfo->InnerStatusCode, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_InnerDianosticInfo) != 0x00){
-        status = DiagnosticInfo_Write(diagInfo->InnerDiagnosticInfo, msgBuffer);
+        status = SOPC_DiagnosticInfo_Write(diagInfo->InnerDiagnosticInfo, msgBuffer);
     }
     return status;
 }
 
-SOPC_StatusCode DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, SOPC_MsgBuffer* msgBuffer){
     SOPC_Byte encodingByte = 0x00;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(diagInfo != NULL){
-        status  = Byte_Read(&encodingByte, msgBuffer);
+        status  = SOPC_Byte_Read(&encodingByte, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_SymbolicId) != 0x00){
-        status = Int32_Read(&diagInfo->SymbolicId, msgBuffer);
+        status = SOPC_Int32_Read(&diagInfo->SymbolicId, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_Namespace) != 0x00){
-        status = Int32_Read(&diagInfo->NamespaceUri, msgBuffer);
+        status = SOPC_Int32_Read(&diagInfo->NamespaceUri, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_Locale) != 0x00){
-        status = Int32_Read(&diagInfo->Locale, msgBuffer);
+        status = SOPC_Int32_Read(&diagInfo->Locale, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_LocalizedTest) != 0x00){
-        status = Int32_Read(&diagInfo->LocalizedText, msgBuffer);
+        status = SOPC_Int32_Read(&diagInfo->LocalizedText, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_AdditionalInfo) != 0x00){
-        status = String_Read(&diagInfo->AdditionalInfo, msgBuffer);
+        status = SOPC_String_Read(&diagInfo->AdditionalInfo, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_InnerStatusCode) != 0x00){
-        status = StatusCode_Read(&diagInfo->InnerStatusCode, msgBuffer);
+        status = SOPC_StatusCode_Read(&diagInfo->InnerStatusCode, msgBuffer);
     }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_InnerDianosticInfo) != 0x00){
-        status = DiagnosticInfo_Read(diagInfo->InnerDiagnosticInfo, msgBuffer);
+        status = SOPC_DiagnosticInfo_Read(diagInfo->InnerDiagnosticInfo, msgBuffer);
     }
     return status;
 }
 
-SOPC_StatusCode QualifiedName_Write(const SOPC_QualifiedName* qname, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(qname != NULL){
-        status = UInt16_Write(&qname->NamespaceIndex, msgBuffer);
+        status = SOPC_UInt16_Write(&qname->NamespaceIndex, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = String_Write(&qname->Name, msgBuffer);
+        status = SOPC_String_Write(&qname->Name, msgBuffer);
     }
     return status;
 }
 
-SOPC_StatusCode QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(qname != NULL){
-        status = UInt16_Read(&qname->NamespaceIndex, msgBuffer);
+        status = SOPC_UInt16_Read(&qname->NamespaceIndex, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = String_Read(&qname->Name, msgBuffer);
+        status = SOPC_String_Read(&qname->Name, msgBuffer);
     }
     return status;
 }
@@ -865,45 +865,45 @@ SOPC_Byte GetLocalizedTextEncodingByte(const SOPC_LocalizedText* ltext){
     assert(ltext != NULL);
     SOPC_Byte encodingByte = 0;
     if(ltext->Locale.Length > 0){
-        encodingByte |= LocalizedText_Locale;
+        encodingByte |= SOPC_LocalizedText_Locale;
     }
     if(ltext->Text.Length > 0){
-        encodingByte |= LocalizedText_Text;
+        encodingByte |= SOPC_LocalizedText_Text;
     }
     return encodingByte;
 }
 
-SOPC_StatusCode LocalizedText_Write(const SOPC_LocalizedText* localizedText, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedText, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     if(localizedText != NULL){
         encodingByte = GetLocalizedTextEncodingByte(localizedText);
     }
-    if(status == STATUS_OK && (encodingByte & LocalizedText_Locale) != 0){
-        status = String_Write(&localizedText->Locale, msgBuffer);
+    if(status == STATUS_OK && (encodingByte & SOPC_LocalizedText_Locale) != 0){
+        status = SOPC_String_Write(&localizedText->Locale, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingByte & LocalizedText_Text) != 0){
-        status = String_Write(&localizedText->Text, msgBuffer);
+    if(status == STATUS_OK && (encodingByte & SOPC_LocalizedText_Text) != 0){
+        status = SOPC_String_Write(&localizedText->Text, msgBuffer);
     }
     return status;
 }
 
-SOPC_StatusCode LocalizedText_Read(SOPC_LocalizedText* localizedText, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     if(localizedText != NULL){
-        status = Byte_Read(&encodingByte, msgBuffer);
+        status = SOPC_Byte_Read(&encodingByte, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingByte & LocalizedText_Locale) != 0){
-        status = String_Read(&localizedText->Locale, msgBuffer);
+    if(status == STATUS_OK && (encodingByte & SOPC_LocalizedText_Locale) != 0){
+        status = SOPC_String_Read(&localizedText->Locale, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingByte & LocalizedText_Text) != 0){
-        status = String_Read(&localizedText->Text, msgBuffer);
+    if(status == STATUS_OK && (encodingByte & SOPC_LocalizedText_Text) != 0){
+        status = SOPC_String_Read(&localizedText->Text, msgBuffer);
     }
     return status;
 }
 
-SOPC_StatusCode ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_MsgBuffer* msgBuffer){
     const int32_t tmpLength = -1;
     SOPC_NodeId objNodeId = extObj->TypeId;
     uint32_t lengthPos;
@@ -939,11 +939,11 @@ SOPC_StatusCode ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_M
     }
 
     if(status == STATUS_OK){
-        status = NodeId_Write(&objNodeId, msgBuffer);
+        status = SOPC_NodeId_Write(&objNodeId, msgBuffer);
     }
 
     if(status == STATUS_OK){
-        status = Byte_Write(&encodingByte, msgBuffer);
+        status = SOPC_Byte_Write(&encodingByte, msgBuffer);
     }
 
     if(status == STATUS_OK){
@@ -951,14 +951,14 @@ SOPC_StatusCode ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_M
             case SOPC_ExtObjBodyEncoding_None:
                 break;
             case SOPC_ExtObjBodyEncoding_ByteString:
-                status = ByteString_Write(&extObj->Body.Bstring, msgBuffer);
+                status = SOPC_ByteString_Write(&extObj->Body.Bstring, msgBuffer);
                 break;
             case SOPC_ExtObjBodyEncoding_XMLElement:
-                status = XmlElement_Write(&extObj->Body.Xml, msgBuffer);
+                status = SOPC_XmlElement_Write(&extObj->Body.Xml, msgBuffer);
                 break;
             case SOPC_ExtObjBodyEncoding_Object:
                 lengthPos = msgBuffer->buffers->position;
-                status = Int32_Write(&tmpLength, msgBuffer);
+                status = SOPC_Int32_Write(&tmpLength, msgBuffer);
                 if(status == STATUS_OK){
                     status = extObj->Body.Object.ObjType->Encode(extObj->Body.Object.Value, msgBuffer);
                 }
@@ -967,7 +967,7 @@ SOPC_StatusCode ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_M
                     curPos = msgBuffer->buffers->position;
                     length = curPos - (lengthPos + 4);
                     Buffer_SetPosition(msgBuffer->buffers, lengthPos);
-                    Int32_Write(&length, msgBuffer);
+                    SOPC_Int32_Write(&length, msgBuffer);
                     Buffer_SetPosition(msgBuffer->buffers, curPos);
                 }
                 break;
@@ -977,16 +977,16 @@ SOPC_StatusCode ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_M
     return status;
 }
 
-SOPC_StatusCode ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_EncodeableType* encType;
     const char* nsName;
     SOPC_Byte encodingByte = 0;
     if(extObj != NULL){
-        status = NodeId_Read(&extObj->TypeId, msgBuffer);
+        status = SOPC_NodeId_Read(&extObj->TypeId, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = Byte_Read(&encodingByte, msgBuffer);
+        status = SOPC_Byte_Read(&encodingByte, msgBuffer);
     }
 
     if(status == STATUS_OK &&
@@ -1020,13 +1020,13 @@ SOPC_StatusCode ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_MsgBuffe
                 extObj->Length = -1;
                 break;
             case SOPC_ExtObjBodyEncoding_ByteString:
-                status = ByteString_Read(&extObj->Body.Bstring, msgBuffer);
+                status = SOPC_ByteString_Read(&extObj->Body.Bstring, msgBuffer);
                 break;
             case SOPC_ExtObjBodyEncoding_XMLElement:
-                status = XmlElement_Read(&extObj->Body.Xml, msgBuffer);
+                status = SOPC_XmlElement_Read(&extObj->Body.Xml, msgBuffer);
                 break;
             case SOPC_ExtObjBodyEncoding_Object:
-                status = Int32_Read(&extObj->Length, msgBuffer);
+                status = SOPC_Int32_Read(&extObj->Length, msgBuffer);
                 if(status == STATUS_OK){
                     extObj->Body.Object.Value = malloc(extObj->Body.Object.ObjType->AllocationSize);
                     status = extObj->Body.Object.ObjType->Decode(&extObj->Body.Object.Value, msgBuffer);
@@ -1061,79 +1061,79 @@ SOPC_StatusCode WriteVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     switch(builtInTypeId){
         case SOPC_Boolean_Id:
-            status = Boolean_Write(&val->Boolean, msgBuffer);
+            status = SOPC_Boolean_Write(&val->Boolean, msgBuffer);
             break;
         case SOPC_SByte_Id:
-            status = SByte_Write(&val->Sbyte, msgBuffer);
+            status = SOPC_SByte_Write(&val->Sbyte, msgBuffer);
             break;
         case SOPC_Byte_Id:
-            status = Byte_Write(&val->Byte, msgBuffer);
+            status = SOPC_Byte_Write(&val->Byte, msgBuffer);
             break;
         case SOPC_Int16_Id:
-            status = Int16_Write(&val->Int16, msgBuffer);
+            status = SOPC_Int16_Write(&val->Int16, msgBuffer);
             break;
         case SOPC_UInt16_Id:
-            status = UInt16_Write(&val->Uint16, msgBuffer);
+            status = SOPC_UInt16_Write(&val->Uint16, msgBuffer);
             break;
         case SOPC_Int32_Id:
-            status = Int32_Write(&val->Int32, msgBuffer);
+            status = SOPC_Int32_Write(&val->Int32, msgBuffer);
             break;
         case SOPC_UInt32_Id:
-            status = UInt32_Write(&val->Uint32, msgBuffer);
+            status = SOPC_UInt32_Write(&val->Uint32, msgBuffer);
             break;
         case SOPC_Int64_Id:
-            status = Int64_Write(&val->Int64, msgBuffer);
+            status = SOPC_Int64_Write(&val->Int64, msgBuffer);
             break;
         case SOPC_UInt64_Id:
-            status = UInt64_Write(&val->Uint64, msgBuffer);
+            status = SOPC_UInt64_Write(&val->Uint64, msgBuffer);
             break;
         case SOPC_Float_Id:
-            status = Float_Write(&val->Floatv, msgBuffer);
+            status = SOPC_Float_Write(&val->Floatv, msgBuffer);
             break;
         case SOPC_Double_Id:
-            status = Double_Write(&val->Doublev, msgBuffer);
+            status = SOPC_Double_Write(&val->Doublev, msgBuffer);
             break;
         case SOPC_String_Id:
-            status = String_Write(&val->String, msgBuffer);
+            status = SOPC_String_Write(&val->String, msgBuffer);
             break;
         case SOPC_DateTime_Id:
-            status = DateTime_Write(&val->Date, msgBuffer);
+            status = SOPC_DateTime_Write(&val->Date, msgBuffer);
             break;
         case SOPC_Guid_Id:
-            status = Guid_Write(val->Guid, msgBuffer);
+            status = SOPC_Guid_Write(val->Guid, msgBuffer);
             break;
         case SOPC_ByteString_Id:
-            status = ByteString_Write(&val->Bstring, msgBuffer);
+            status = SOPC_ByteString_Write(&val->Bstring, msgBuffer);
             break;
         case SOPC_XmlElement_Id:
-            status = XmlElement_Write(&val->XmlElt, msgBuffer);
+            status = SOPC_XmlElement_Write(&val->XmlElt, msgBuffer);
             break;
         case SOPC_NodeId_Id:
-            status = NodeId_Write(val->NodeId, msgBuffer);
+            status = SOPC_NodeId_Write(val->NodeId, msgBuffer);
             break;
         case SOPC_ExpandedNodeId_Id:
-            status = ExpandedNodeId_Write(val->ExpNodeId, msgBuffer);
+            status = SOPC_ExpandedNodeId_Write(val->ExpNodeId, msgBuffer);
             break;
         case SOPC_StatusCode_Id:
-            status = StatusCode_Write(&val->Status, msgBuffer);
+            status = SOPC_StatusCode_Write(&val->Status, msgBuffer);
             break;
         case SOPC_QualifiedName_Id:
-            status = QualifiedName_Write(val->Qname, msgBuffer);
+            status = SOPC_QualifiedName_Write(val->Qname, msgBuffer);
             break;
         case SOPC_LocalizedText_Id:
-            status = LocalizedText_Write(val->LocalizedText, msgBuffer);
+            status = SOPC_LocalizedText_Write(val->LocalizedText, msgBuffer);
             break;
         case SOPC_ExtensionObject_Id:
-            status = ExtensionObject_Write(val->ExtObject, msgBuffer);
+            status = SOPC_ExtensionObject_Write(val->ExtObject, msgBuffer);
             break;
         case SOPC_DataValue_Id:
-            status = DataValue_Write(val->DataValue, msgBuffer);
+            status = SOPC_DataValue_Write(val->DataValue, msgBuffer);
             break;
         case SOPC_Variant_Id:
             assert(FALSE);
             break;
         case SOPC_DiagnosticInfo_Id:
-            status = DiagnosticInfo_Write(val->DiagInfo, msgBuffer);
+            status = SOPC_DiagnosticInfo_Write(val->DiagInfo, msgBuffer);
             break;
         default:
             break;
@@ -1146,132 +1146,132 @@ SOPC_StatusCode WriteVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                                         const SOPC_VariantArrayValue* array,
                                         int32_t length)
 {
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode status = STATUS_OK;
     int32_t idx = 0;
     switch(builtInTypeId){
         case SOPC_Boolean_Id:
             for(idx = 0; idx < length; idx++){
-                status |= Boolean_Write(&array->BooleanArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_Boolean_Write(&array->BooleanArr[idx], msgBuffer);
             }
             break;
         case SOPC_SByte_Id:
             for(idx = 0; idx < length; idx++){
-                status |= SByte_Write(&array->SbyteArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_SByte_Write(&array->SbyteArr[idx], msgBuffer);
             }
             break;
         case SOPC_Byte_Id:
             for(idx = 0; idx < length; idx++){
-                status |= Byte_Write(&array->ByteArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_Byte_Write(&array->ByteArr[idx], msgBuffer);
             }
             break;
         case SOPC_Int16_Id:
             for(idx = 0; idx < length; idx++){
-                status |= Int16_Write(&array->Int16Arr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_Int16_Write(&array->Int16Arr[idx], msgBuffer);
             }
             break;
         case SOPC_UInt16_Id:
             for(idx = 0; idx < length; idx++){
-                status |= UInt16_Write(&array->Uint16Arr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_UInt16_Write(&array->Uint16Arr[idx], msgBuffer);
             }
             break;
         case SOPC_Int32_Id:
             for(idx = 0; idx < length; idx++){
-                status |= Int32_Write(&array->Int32Arr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_Int32_Write(&array->Int32Arr[idx], msgBuffer);
             }
             break;
         case SOPC_UInt32_Id:
             for(idx = 0; idx < length; idx++){
-                status |= UInt32_Write(&array->Uint32Arr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_UInt32_Write(&array->Uint32Arr[idx], msgBuffer);
             }
             break;
         case SOPC_Int64_Id:
             for(idx = 0; idx < length; idx++){
-                status |= Int64_Write(&array->Int64Arr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_Int64_Write(&array->Int64Arr[idx], msgBuffer);
             }
             break;
         case SOPC_UInt64_Id:
             for(idx = 0; idx < length; idx++){
-                status |= UInt64_Write(&array->Uint64Arr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_UInt64_Write(&array->Uint64Arr[idx], msgBuffer);
             }
             break;
         case SOPC_Float_Id:
             for(idx = 0; idx < length; idx++){
-                status |= Float_Write(&array->FloatvArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_Float_Write(&array->FloatvArr[idx], msgBuffer);
             }
             break;
         case SOPC_Double_Id:
             for(idx = 0; idx < length; idx++){
-                status |= Double_Write(&array->DoublevArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_Double_Write(&array->DoublevArr[idx], msgBuffer);
             }
             break;
         case SOPC_String_Id:
             for(idx = 0; idx < length; idx++){
-                status |= String_Write(&array->StringArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_String_Write(&array->StringArr[idx], msgBuffer);
             }
             break;
         case SOPC_DateTime_Id:
             for(idx = 0; idx < length; idx++){
-                status |= DateTime_Write(&array->DateArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_DateTime_Write(&array->DateArr[idx], msgBuffer);
             }
             break;
         case SOPC_Guid_Id:
             for(idx = 0; idx < length; idx++){
-                status |= Guid_Write(&array->GuidArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_Guid_Write(&array->GuidArr[idx], msgBuffer);
             }
             break;
         case SOPC_ByteString_Id:
             for(idx = 0; idx < length; idx++){
-                status |= ByteString_Write(&array->BstringArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_ByteString_Write(&array->BstringArr[idx], msgBuffer);
             }
             break;
         case SOPC_XmlElement_Id:
             for(idx = 0; idx < length; idx++){
-                status |= XmlElement_Write(&array->XmlEltArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_XmlElement_Write(&array->XmlEltArr[idx], msgBuffer);
             }
             break;
         case SOPC_NodeId_Id:
             for(idx = 0; idx < length; idx++){
-                status |= NodeId_Write(&array->NodeIdArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_NodeId_Write(&array->NodeIdArr[idx], msgBuffer);
             }
             break;
         case SOPC_ExpandedNodeId_Id:
             for(idx = 0; idx < length; idx++){
-                status |= ExpandedNodeId_Write(&array->ExpNodeIdArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_ExpandedNodeId_Write(&array->ExpNodeIdArr[idx], msgBuffer);
             }
             break;
         case SOPC_StatusCode_Id:
             for(idx = 0; idx < length; idx++){
-                status |= StatusCode_Write(&array->StatusArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_StatusCode_Write(&array->StatusArr[idx], msgBuffer);
             }
             break;
         case SOPC_QualifiedName_Id:
             for(idx = 0; idx < length; idx++){
-                status |= QualifiedName_Write(&array->QnameArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_QualifiedName_Write(&array->QnameArr[idx], msgBuffer);
             }
             break;
         case SOPC_LocalizedText_Id:
             for(idx = 0; idx < length; idx++){
-                status |= LocalizedText_Write(&array->LocalizedTextArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_LocalizedText_Write(&array->LocalizedTextArr[idx], msgBuffer);
             }
             break;
         case SOPC_ExtensionObject_Id:
             for(idx = 0; idx < length; idx++){
-                status |= ExtensionObject_Write(&array->ExtObjectArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_ExtensionObject_Write(&array->ExtObjectArr[idx], msgBuffer);
             }
             break;
         case SOPC_DataValue_Id:
             for(idx = 0; idx < length; idx++){
-                status |= DataValue_Write(&array->DataValueArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_DataValue_Write(&array->DataValueArr[idx], msgBuffer);
             }
             break;
         case SOPC_Variant_Id:
             for(idx = 0; idx < length; idx++){
-                status |= Variant_Write(&array->VariantArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_Variant_Write(&array->VariantArr[idx], msgBuffer);
             }
             break;
         case SOPC_DiagnosticInfo_Id:
             for(idx = 0; idx < length; idx++){
-                status |= DiagnosticInfo_Write(&array->DiagInfoArr[idx], msgBuffer);
+                if(STATUS_OK == status) status = SOPC_DiagnosticInfo_Write(&array->DiagInfoArr[idx], msgBuffer);
             }
             break;
         default:
@@ -1280,13 +1280,13 @@ SOPC_StatusCode WriteVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
     return status;
 }
 
-SOPC_StatusCode Variant_Write(const SOPC_Variant* variant, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     int32_t arrayLength = 0;
     if(variant != NULL){
         encodingByte = GetVariantEncodingMask(variant);
-        status = Byte_Write(&encodingByte, msgBuffer);
+        status = SOPC_Byte_Write(&encodingByte, msgBuffer);
     }
     if(status == STATUS_OK){
         if((variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0){
@@ -1298,7 +1298,7 @@ SOPC_StatusCode Variant_Write(const SOPC_Variant* variant, SOPC_MsgBuffer* msgBu
             }else{
                 arrayLength = variant->Value.Array.Length;
             }
-            status = Int32_Write(&arrayLength, msgBuffer);
+            status = SOPC_Int32_Write(&arrayLength, msgBuffer);
         }else if((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
             status = STATUS_INVALID_PARAMETERS;
         }
@@ -1313,13 +1313,13 @@ SOPC_StatusCode Variant_Write(const SOPC_Variant* variant, SOPC_MsgBuffer* msgBu
                 // Encode dimension array
                 if(status == STATUS_OK){
                     // length
-                    status = Int32_Write(&variant->Value.Matrix.Dimensions, msgBuffer);
+                    status = SOPC_Int32_Write(&variant->Value.Matrix.Dimensions, msgBuffer);
                 }
                 if(status == STATUS_OK){
                     // array
                     int32_t idx = 0;
                     for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
-                        status = Int32_Write(&variant->Value.Matrix.ArrayDimensions[idx], msgBuffer);
+                        status = SOPC_Int32_Write(&variant->Value.Matrix.ArrayDimensions[idx], msgBuffer);
                     }
                 }
             }else{
@@ -1344,62 +1344,62 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     switch(builtInTypeId){
         case SOPC_Boolean_Id:
-            status = Boolean_Read(&val->Boolean, msgBuffer);
+            status = SOPC_Boolean_Read(&val->Boolean, msgBuffer);
             break;
         case SOPC_SByte_Id:
-            status = SByte_Read(&val->Sbyte, msgBuffer);
+            status = SOPC_SByte_Read(&val->Sbyte, msgBuffer);
             break;
         case SOPC_Byte_Id:
-            status = Byte_Read(&val->Byte, msgBuffer);
+            status = SOPC_Byte_Read(&val->Byte, msgBuffer);
             break;
         case SOPC_Int16_Id:
-            status = Int16_Read(&val->Int16, msgBuffer);
+            status = SOPC_Int16_Read(&val->Int16, msgBuffer);
             break;
         case SOPC_UInt16_Id:
-            status = UInt16_Read(&val->Uint16, msgBuffer);
+            status = SOPC_UInt16_Read(&val->Uint16, msgBuffer);
             break;
         case SOPC_Int32_Id:
-            status = Int32_Read(&val->Int32, msgBuffer);
+            status = SOPC_Int32_Read(&val->Int32, msgBuffer);
             break;
         case SOPC_UInt32_Id:
-            status = UInt32_Read(&val->Uint32, msgBuffer);
+            status = SOPC_UInt32_Read(&val->Uint32, msgBuffer);
             break;
         case SOPC_Int64_Id:
-            status = Int64_Read(&val->Int64, msgBuffer);
+            status = SOPC_Int64_Read(&val->Int64, msgBuffer);
             break;
         case SOPC_UInt64_Id:
-            status = UInt64_Read(&val->Uint64, msgBuffer);
+            status = SOPC_UInt64_Read(&val->Uint64, msgBuffer);
             break;
         case SOPC_Float_Id:
-            status = Float_Read(&val->Floatv, msgBuffer);
+            status = SOPC_Float_Read(&val->Floatv, msgBuffer);
             break;
         case SOPC_Double_Id:
-            status = Double_Read(&val->Doublev, msgBuffer);
+            status = SOPC_Double_Read(&val->Doublev, msgBuffer);
             break;
         case SOPC_String_Id:
-            status = String_Read(&val->String, msgBuffer);
+            status = SOPC_String_Read(&val->String, msgBuffer);
             break;
         case SOPC_DateTime_Id:
-            status = DateTime_Read(&val->Date, msgBuffer);
+            status = SOPC_DateTime_Read(&val->Date, msgBuffer);
             break;
         case SOPC_Guid_Id:
             val->Guid = malloc(sizeof(SOPC_Guid));
             if(val->Guid != NULL){
-                status = Guid_Read(val->Guid, msgBuffer);
+                status = SOPC_Guid_Read(val->Guid, msgBuffer);
             }else{
                 status = STATUS_NOK;
             }
             break;
         case SOPC_ByteString_Id:
-            status = ByteString_Read(&val->Bstring, msgBuffer);
+            status = SOPC_ByteString_Read(&val->Bstring, msgBuffer);
             break;
         case SOPC_XmlElement_Id:
-            status = XmlElement_Read(&val->XmlElt, msgBuffer);
+            status = SOPC_XmlElement_Read(&val->XmlElt, msgBuffer);
             break;
         case SOPC_NodeId_Id:
             val->NodeId = malloc(sizeof(SOPC_NodeId));
             if(val->NodeId != NULL){
-                status = NodeId_Read(val->NodeId, msgBuffer);
+                status = SOPC_NodeId_Read(val->NodeId, msgBuffer);
             }else{
                 status = STATUS_NOK;
             }
@@ -1407,18 +1407,18 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_ExpandedNodeId_Id:
             val->ExpNodeId = malloc(sizeof(SOPC_ExpandedNodeId));
             if(val->ExpNodeId != NULL){
-                status = ExpandedNodeId_Read(val->ExpNodeId, msgBuffer);
+                status = SOPC_ExpandedNodeId_Read(val->ExpNodeId, msgBuffer);
             }else{
                 status = STATUS_NOK;
             }
             break;
         case SOPC_StatusCode_Id:
-            status = StatusCode_Read(&val->Status, msgBuffer);
+            status = SOPC_StatusCode_Read(&val->Status, msgBuffer);
             break;
         case SOPC_QualifiedName_Id:
             val->Qname = malloc(sizeof(SOPC_QualifiedName));
             if(val->Qname != NULL){
-                status = QualifiedName_Read(val->Qname, msgBuffer);
+                status = SOPC_QualifiedName_Read(val->Qname, msgBuffer);
             }else{
                 status = STATUS_NOK;
             }
@@ -1426,7 +1426,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_LocalizedText_Id:
             val->LocalizedText = malloc(sizeof(SOPC_LocalizedText));
             if(val->LocalizedText != NULL){
-                status = LocalizedText_Read(val->LocalizedText, msgBuffer);
+                status = SOPC_LocalizedText_Read(val->LocalizedText, msgBuffer);
             }else{
                 status = STATUS_NOK;
             }
@@ -1434,7 +1434,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_ExtensionObject_Id:
             val->ExtObject = malloc(sizeof(SOPC_ExtensionObject));
             if(val->ExtObject != NULL){
-                status = ExtensionObject_Read(val->ExtObject, msgBuffer);
+                status = SOPC_ExtensionObject_Read(val->ExtObject, msgBuffer);
             }else{
                 status = STATUS_NOK;
             }
@@ -1442,7 +1442,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_DataValue_Id:
             val->DataValue = malloc(sizeof(SOPC_DataValue));
             if(val->DataValue != NULL){
-                status = DataValue_Read(val->DataValue, msgBuffer);
+                status = SOPC_DataValue_Read(val->DataValue, msgBuffer);
             }else{
                 status = STATUS_NOK;
             }
@@ -1453,7 +1453,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_DiagnosticInfo_Id:
             val->DiagInfo = malloc(sizeof(SOPC_DiagnosticInfo));
             if(val->DiagInfo != NULL){
-                status = DiagnosticInfo_Read(val->DiagInfo, msgBuffer);
+                status = SOPC_DiagnosticInfo_Read(val->DiagInfo, msgBuffer);
             }else{
                 status = STATUS_NOK;
             }
@@ -1478,7 +1478,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= Boolean_Read(&array->BooleanArr[idx], msgBuffer);
+                    status |= SOPC_Boolean_Read(&array->BooleanArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1488,7 +1488,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= SByte_Read(&array->SbyteArr[idx], msgBuffer);
+                    status |= SOPC_SByte_Read(&array->SbyteArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1498,7 +1498,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= Byte_Read(&array->ByteArr[idx], msgBuffer);
+                    status |= SOPC_Byte_Read(&array->ByteArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1508,7 +1508,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= Int16_Read(&array->Int16Arr[idx], msgBuffer);
+                    status |= SOPC_Int16_Read(&array->Int16Arr[idx], msgBuffer);
                 }
             }
             break;
@@ -1518,7 +1518,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= UInt16_Read(&array->Uint16Arr[idx], msgBuffer);
+                    status |= SOPC_UInt16_Read(&array->Uint16Arr[idx], msgBuffer);
                 }
             }
             break;
@@ -1528,7 +1528,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= Int32_Read(&array->Int32Arr[idx], msgBuffer);
+                    status |= SOPC_Int32_Read(&array->Int32Arr[idx], msgBuffer);
                 }
             }
             break;
@@ -1538,7 +1538,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= UInt32_Read(&array->Uint32Arr[idx], msgBuffer);
+                    status |= SOPC_UInt32_Read(&array->Uint32Arr[idx], msgBuffer);
                 }
             }
             break;
@@ -1548,7 +1548,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= Int64_Read(&array->Int64Arr[idx], msgBuffer);
+                    status |= SOPC_Int64_Read(&array->Int64Arr[idx], msgBuffer);
                 }
             }
             break;
@@ -1558,7 +1558,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= UInt64_Read(&array->Uint64Arr[idx], msgBuffer);
+                    status |= SOPC_UInt64_Read(&array->Uint64Arr[idx], msgBuffer);
                 }
             }
             break;
@@ -1568,7 +1568,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= Float_Read(&array->FloatvArr[idx], msgBuffer);
+                    status |= SOPC_Float_Read(&array->FloatvArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1578,7 +1578,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= Double_Read(&array->DoublevArr[idx], msgBuffer);
+                    status |= SOPC_Double_Read(&array->DoublevArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1588,7 +1588,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= String_Read(&array->StringArr[idx], msgBuffer);
+                    status |= SOPC_String_Read(&array->StringArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1598,7 +1598,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= DateTime_Read(&array->DateArr[idx], msgBuffer);
+                    status |= SOPC_DateTime_Read(&array->DateArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1608,7 +1608,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= Guid_Read(&array->GuidArr[idx], msgBuffer);
+                    status |= SOPC_Guid_Read(&array->GuidArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1618,7 +1618,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= ByteString_Read(&array->BstringArr[idx], msgBuffer);
+                    status |= SOPC_ByteString_Read(&array->BstringArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1628,7 +1628,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= XmlElement_Read(&array->XmlEltArr[idx], msgBuffer);
+                    status |= SOPC_XmlElement_Read(&array->XmlEltArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1638,7 +1638,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= NodeId_Read(&array->NodeIdArr[idx], msgBuffer);
+                    status |= SOPC_NodeId_Read(&array->NodeIdArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1648,7 +1648,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= ExpandedNodeId_Read(&array->ExpNodeIdArr[idx], msgBuffer);
+                    status |= SOPC_ExpandedNodeId_Read(&array->ExpNodeIdArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1658,7 +1658,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= StatusCode_Read(&array->StatusArr[idx], msgBuffer);
+                    status |= SOPC_StatusCode_Read(&array->StatusArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1668,7 +1668,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= QualifiedName_Read(&array->QnameArr[idx], msgBuffer);
+                    status |= SOPC_QualifiedName_Read(&array->QnameArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1678,7 +1678,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= LocalizedText_Read(&array->LocalizedTextArr[idx], msgBuffer);
+                    status |= SOPC_LocalizedText_Read(&array->LocalizedTextArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1688,7 +1688,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= ExtensionObject_Read(&array->ExtObjectArr[idx], msgBuffer);
+                    status |= SOPC_ExtensionObject_Read(&array->ExtObjectArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1698,7 +1698,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= DataValue_Read(&array->DataValueArr[idx], msgBuffer);
+                    status |= SOPC_DataValue_Read(&array->DataValueArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1708,7 +1708,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= Variant_Read(&array->VariantArr[idx], msgBuffer);
+                    status |= SOPC_Variant_Read(&array->VariantArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1718,7 +1718,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length; idx++){
-                    status |= DiagnosticInfo_Read(&array->DiagInfoArr[idx], msgBuffer);
+                    status |= SOPC_DiagnosticInfo_Read(&array->DiagInfoArr[idx], msgBuffer);
                 }
             }
             break;
@@ -1728,12 +1728,12 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
     return status;
 }
 
-SOPC_StatusCode Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     int32_t arrayLength = 0;
     if(variant != NULL){
-        status = Byte_Read(&encodingByte, msgBuffer);
+        status = SOPC_Byte_Read(&encodingByte, msgBuffer);
     }
     if(status == STATUS_OK){
         // Retrieve array flags
@@ -1743,7 +1743,7 @@ SOPC_StatusCode Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuffer){
                 variant->ArrayTypeMask |= SOPC_VariantArrayMatrixFlag;
             }
             // Read array length
-            status = Int32_Read(&arrayLength, msgBuffer);
+            status = SOPC_Int32_Read(&arrayLength, msgBuffer);
         }else if((encodingByte & SOPC_VariantArrayMatrixFlag) != 0){
             status = STATUS_INVALID_PARAMETERS;
         }
@@ -1761,7 +1761,7 @@ SOPC_StatusCode Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuffer){
                 // Decode dimension array
                 if(status == STATUS_OK){
                     // length
-                    status = Int32_Read(&variant->Value.Matrix.Dimensions, msgBuffer);
+                    status = SOPC_Int32_Read(&variant->Value.Matrix.Dimensions, msgBuffer);
                 }
                 if(status == STATUS_OK){
                     // array
@@ -1769,7 +1769,7 @@ SOPC_StatusCode Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuffer){
                     if(variant->Value.Matrix.ArrayDimensions != NULL){
                         int32_t idx = 0;
                         for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
-                            status = Int32_Read(&variant->Value.Matrix.ArrayDimensions[idx], msgBuffer);
+                            status = SOPC_Int32_Read(&variant->Value.Matrix.ArrayDimensions[idx], msgBuffer);
                         }
                     }else{
                         status = STATUS_NOK;
@@ -1795,88 +1795,88 @@ SOPC_Byte GetDataValueEncodingMask(const SOPC_DataValue* dataValue){
     assert(dataValue != NULL);
     SOPC_Byte mask = 0;
     if(dataValue->Value.BuiltInTypeMask != SOPC_Null_Id && dataValue->Value.BuiltInTypeMask <= SOPC_BUILTINID_MAX){
-        mask |= DataValue_NotNullValue;
+        mask |= SOPC_DataValue_NotNullValue;
     }
     if(dataValue->Status != STATUS_OK){
-        mask |= DataValue_NotGoodStatusCode;
+        mask |= SOPC_DataValue_NotGoodStatusCode;
     }
     if(dataValue->SourceTimestamp > 0){
-        mask |= DataValue_NotMinSourceDate;
+        mask |= SOPC_DataValue_NotMinSourceDate;
     }
     if(dataValue->SourcePicoSeconds > 0){
-        mask |= DataValue_NotZeroSourcePico;
+        mask |= SOPC_DataValue_NotZeroSourcePico;
     }
     if(dataValue->ServerTimestamp > 0){
-            mask |= DataValue_NotMinServerDate;
+            mask |= SOPC_DataValue_NotMinServerDate;
     }
     if(dataValue->ServerPicoSeconds > 0){
-        mask |= DataValue_NotZeroServerPico;
+        mask |= SOPC_DataValue_NotZeroServerPico;
     }
     return mask;
 }
 
-SOPC_StatusCode DataValue_Write(const SOPC_DataValue* dataValue, SOPC_MsgBuffer* msgBuffer)
+SOPC_StatusCode SOPC_DataValue_Write(const SOPC_DataValue* dataValue, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingMask = 0;
     if(dataValue != NULL){
         encodingMask = GetDataValueEncodingMask(dataValue);
-        status = Byte_Write(&encodingMask, msgBuffer);
+        status = SOPC_Byte_Write(&encodingMask, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotNullValue) != 0){
-        status = Variant_Write(&dataValue->Value, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotNullValue) != 0){
+        status = SOPC_Variant_Write(&dataValue->Value, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotGoodStatusCode) != 0){
-        status = StatusCode_Write(&dataValue->Status, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotGoodStatusCode) != 0){
+        status = SOPC_StatusCode_Write(&dataValue->Status, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotMinSourceDate) != 0){
-        status = DateTime_Write(&dataValue->SourceTimestamp, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinSourceDate) != 0){
+        status = SOPC_DateTime_Write(&dataValue->SourceTimestamp, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotZeroSourcePico) != 0){
-        status = UInt16_Write(&dataValue->SourcePicoSeconds, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroSourcePico) != 0){
+        status = SOPC_UInt16_Write(&dataValue->SourcePicoSeconds, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotMinServerDate) != 0){
-            status = DateTime_Write(&dataValue->ServerTimestamp, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinServerDate) != 0){
+            status = SOPC_DateTime_Write(&dataValue->ServerTimestamp, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotZeroServerPico) != 0){
-        status = UInt16_Write(&dataValue->ServerPicoSeconds, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroServerPico) != 0){
+        status = SOPC_UInt16_Write(&dataValue->ServerPicoSeconds, msgBuffer);
     }
     return status;
 }
 
-SOPC_StatusCode DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingMask = 0;
     if(dataValue != NULL){
-        status = Byte_Read(&encodingMask, msgBuffer);
+        status = SOPC_Byte_Read(&encodingMask, msgBuffer);
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotNullValue) != 0){
-        status = Variant_Read(&dataValue->Value, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotNullValue) != 0){
+        status = SOPC_Variant_Read(&dataValue->Value, msgBuffer);
     }else{
         dataValue->Value.BuiltInTypeMask = SOPC_Null_Id;
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotGoodStatusCode) != 0){
-        status = StatusCode_Read(&dataValue->Status, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotGoodStatusCode) != 0){
+        status = SOPC_StatusCode_Read(&dataValue->Status, msgBuffer);
     }else{
         dataValue->Status = STATUS_OK;
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotMinSourceDate) != 0){
-        status = DateTime_Read(&dataValue->SourceTimestamp, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinSourceDate) != 0){
+        status = SOPC_DateTime_Read(&dataValue->SourceTimestamp, msgBuffer);
     }else{
         dataValue->SourceTimestamp = 0;
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotZeroSourcePico) != 0){
-        status = UInt16_Read(&dataValue->SourcePicoSeconds, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroSourcePico) != 0){
+        status = SOPC_UInt16_Read(&dataValue->SourcePicoSeconds, msgBuffer);
     }else{
         dataValue->SourcePicoSeconds = 0;
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotMinServerDate) != 0){
-            status = DateTime_Read(&dataValue->ServerTimestamp, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinServerDate) != 0){
+            status = SOPC_DateTime_Read(&dataValue->ServerTimestamp, msgBuffer);
     }else{
         dataValue->ServerTimestamp = 0;
     }
-    if(status == STATUS_OK && (encodingMask & DataValue_NotZeroServerPico) != 0){
-        status = UInt16_Read(&dataValue->ServerPicoSeconds, msgBuffer);
+    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroServerPico) != 0){
+        status = SOPC_UInt16_Read(&dataValue->ServerPicoSeconds, msgBuffer);
     }else{
         dataValue->ServerPicoSeconds = 0;
     }

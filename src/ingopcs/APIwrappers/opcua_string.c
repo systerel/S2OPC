@@ -24,11 +24,11 @@
 
 OpcUa_String* OpcUa_String_FromCString( OpcUa_StringA   a_strCString )
 {
-    SOPC_String* string = String_Create();
-    if(String_AttachFromCstring(string, a_strCString) == STATUS_OK){
+    SOPC_String* string = SOPC_String_Create();
+    if(SOPC_String_AttachFromCstring(string, a_strCString) == STATUS_OK){
         return (OpcUa_String*) string;
     }else{
-        String_Delete(string);
+        SOPC_String_Delete(string);
         return NULL;
     }
 }
@@ -38,7 +38,7 @@ OpcUa_String* OpcUa_String_FromCString( OpcUa_StringA   a_strCString )
  *===========================================================================*/
 OpcUa_StatusCode OpcUa_String_Initialize( /*  bi */ OpcUa_String* a_pString )
 {
-    String_Initialize(a_pString);
+    SOPC_String_Initialize(a_pString);
 
     return STATUS_OK;
 }
@@ -88,7 +88,7 @@ OpcUa_StatusCode OpcUa_String_AttachToString(  /* in */ OpcUa_StringA           
  *===========================================================================*/
 OpcUa_Void OpcUa_String_Delete(OpcUa_String** a_ppString)
 {
-    String_Delete(*a_ppString);
+    SOPC_String_Delete(*a_ppString);
     *a_ppString = NULL;
 }
 
@@ -98,14 +98,14 @@ OpcUa_Void OpcUa_String_Delete(OpcUa_String** a_ppString)
 *===========================================================================*/
 OpcUa_Void OpcUa_String_Clear(OpcUa_String* a_pString)
 {
-    String_Clear(a_pString);
+    SOPC_String_Clear(a_pString);
 }
 
 
 /*============================================================================
 * Get pointer to internal raw string.
 *===========================================================================*/
-#define OpcUa_String_GetRawString String_GetCString
+#define OpcUa_String_GetRawString SOPC_String_GetCString
 
 /*============================================================================
 * Check if string is empty.
@@ -155,7 +155,7 @@ OpcUa_StatusCode OpcUa_String_StrnCpy( OpcUa_String*       a_pDestString,
     if(a_pSrcString->Length != (int32_t) a_uLength){
         return STATUS_NOK;
     }else{
-        return String_Copy(a_pDestString, a_pSrcString);
+        return SOPC_String_Copy(a_pDestString, a_pSrcString);
     }
 }
 
@@ -183,7 +183,7 @@ OpcUa_Int32 OpcUa_String_StrnCmp(   const OpcUa_String* a_pLeftString,
 {
     int32_t res = -1;
     assert(a_bIgnoreCase == FALSE);
-    if(STATUS_OK == String_Compare(a_pLeftString, a_pRightString, &res)){
+    if(STATUS_OK == SOPC_String_Compare(a_pLeftString, a_pRightString, &res)){
         assert((int32_t) a_uLength == a_pLeftString->Length || (int32_t) a_uLength == a_pRightString->Length);
     }else{
         assert(FALSE);
@@ -197,12 +197,12 @@ OpcUa_Int32 OpcUa_String_StrnCmp(   const OpcUa_String* a_pLeftString,
  * OpcUa_String_AttachReadOnly
  *===========================================================================*/
 // TODO: read only ? not enforced
-#define OpcUa_String_AttachReadOnly String_AttachFromCstring
+#define OpcUa_String_AttachReadOnly SOPC_String_AttachFromCstring
 
 /*============================================================================
  * OpcUa_String_AttachCopy
  *===========================================================================*/
-#define OpcUa_String_AttachCopy String_CopyFromCString
+#define OpcUa_String_AttachCopy SOPC_String_CopyFromCString
 
 /*============================================================================
  * OpcUa_String_AttachWithOwnership
@@ -210,7 +210,7 @@ OpcUa_Int32 OpcUa_String_StrnCmp(   const OpcUa_String* a_pLeftString,
 OpcUa_StatusCode OpcUa_String_AttachWithOwnership(OpcUa_String* a_pDst, OpcUa_StringA a_pSrc)
 {
     OpcUa_StatusCode status;
-    status = String_AttachFromCstring(a_pDst, a_pSrc);
+    status = SOPC_String_AttachFromCstring(a_pDst, a_pSrc);
     a_pDst->ClearBytes = 1;
     return status;
 }

@@ -100,7 +100,7 @@ int main(void){
     SOPC_Channel hChannel;
     // Endpoint URL
     SOPC_String stEndpointUrl;
-    String_Initialize(&stEndpointUrl);
+    SOPC_String_Initialize(&stEndpointUrl);
     char* sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
 
     // Paths to client certificate/key and server certificate
@@ -189,7 +189,7 @@ int main(void){
     // Local configuration: empty
     SOPC_String localId, profileUri;
     // Endpoint URL in OPC UA string format
-    status = String_AttachFromCstring(&stEndpointUrl, sEndpointUrl);
+    status = SOPC_String_AttachFromCstring(&stEndpointUrl, sEndpointUrl);
     if(STATUS_OK != status) goto Error;
 
     // Empty callback data
@@ -252,7 +252,7 @@ int main(void){
 
     printf ("Final status: %d\n", status);
     PKIProviderStack_Free(pki);
-    String_Clear(&stEndpointUrl);
+    SOPC_String_Clear(&stEndpointUrl);
     KeyManager_Certificate_Free(crt_cli);
     KeyManager_Certificate_Free(crt_srv);
     KeyManager_Certificate_Free(crt_ca);
@@ -263,7 +263,7 @@ int main(void){
     return status;
 
     Error:
-    String_Clear(&stEndpointUrl);
+    SOPC_String_Clear(&stEndpointUrl);
     SOPC_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
 

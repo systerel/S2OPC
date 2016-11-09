@@ -118,8 +118,8 @@ typedef void* OpcUa_SocketManager;
 #define OpcUa_EncodeableObject_PfnEncode SOPC_EncodeableObject_PfnEncode
 #define OpcUa_EncodeableObject_PfnDecode SOPC_EncodeableObject_PfnDecode
 
-#define OpcUa_ByteString_Initialize ByteString_Initialize
-#define OpcUa_ByteString_Clear ByteString_Clear
+#define OpcUa_ByteString_Initialize SOPC_ByteString_Initialize
+#define OpcUa_ByteString_Clear SOPC_ByteString_Clear
 
 #define OpcUa_Free free
 #define OpcUa_MemSet memset

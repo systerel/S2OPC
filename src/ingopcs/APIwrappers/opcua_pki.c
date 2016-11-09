@@ -91,7 +91,7 @@ OpcUa_StatusCode OpcUa_PKIProvider_LoadCertificate(
         uint32_t lenAllocated = 0;
         status = KeyManager_Certificate_CopyDER(cert, &a_pCertificate->Data, &lenAllocated);
         if(lenAllocated > INT32_MAX){
-            ByteString_Clear(a_pCertificate);
+            SOPC_ByteString_Clear(a_pCertificate);
         }else{
             a_pCertificate->Length = (int32_t) lenAllocated;
         }

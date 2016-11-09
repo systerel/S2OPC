@@ -75,7 +75,7 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
 
     if(connection != NULL){
         memset (connection, 0, sizeof(TCP_UA_Connection));
-        String_Initialize(&connection->url);
+        SOPC_String_Initialize(&connection->url);
         connection->state = TCP_Connection_Disconnected;
         connection->protocolVersion = tcpProtocolVersion;
         // TODO: check constraints on connection properties (>8192 bytes ...)
@@ -116,7 +116,7 @@ void ResetConnectionState(TCP_UA_Connection* connection){
 
 void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
     if(connection != NULL){
-        String_Clear(&connection->url);
+        SOPC_String_Clear(&connection->url);
         SOPC_SocketManager_Delete(&connection->socketManager);
         SOPC_Socket_Close(connection->socket);
         MsgBuffer_Delete(&connection->inputMsgBuffer);
@@ -135,27 +135,27 @@ SOPC_StatusCode SendHelloMsg(TCP_UA_Connection* connection){
                                      TCP_UA_Message_Hello);
     }
     if(status == STATUS_OK){
-        status = UInt32_Write(&connection->protocolVersion,
+        status = SOPC_UInt32_Write(&connection->protocolVersion,
                               connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = UInt32_Write(&connection->receiveBufferSize,
+        status = SOPC_UInt32_Write(&connection->receiveBufferSize,
                               connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = UInt32_Write(&connection->sendBufferSize,
+        status = SOPC_UInt32_Write(&connection->sendBufferSize,
                               connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = UInt32_Write(&connection->maxMessageSizeRcv,
+        status = SOPC_UInt32_Write(&connection->maxMessageSizeRcv,
                               connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = UInt32_Write(&connection->maxChunkCountRcv,
+        status = SOPC_UInt32_Write(&connection->maxChunkCountRcv,
                               connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = String_Write(&connection->url,
+        status = SOPC_String_Write(&connection->url,
                               connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
@@ -177,7 +177,7 @@ SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
        && connection->inputMsgBuffer != NULL){
         if(connection->inputMsgBuffer->currentChunkSize == TCP_UA_ACK_MSG_LENGTH){
             // Read protocol version of server
-            status = UInt32_Read(&tempValue, connection->inputMsgBuffer);
+            status = SOPC_UInt32_Read(&tempValue, connection->inputMsgBuffer);
             if(status == STATUS_OK){
                 // Check protocol version compatible
                 if(connection->protocolVersion > tempValue){
@@ -188,7 +188,7 @@ SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
             // ReceiveBufferSize
             if(status == STATUS_OK){
                 // Read received buffer size of SERVER
-                status = UInt32_Read(&tempValue, connection->inputMsgBuffer);
+                status = SOPC_UInt32_Read(&tempValue, connection->inputMsgBuffer);
                 if(status == STATUS_OK){
                     // Adapt send buffer size if needed
                     if(connection->sendBufferSize > tempValue){
@@ -208,7 +208,7 @@ SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
             // SendBufferSize
             if(status == STATUS_OK){
                 // Read sending buffer size of SERVER
-                status = UInt32_Read(&tempValue, connection->inputMsgBuffer);
+                status = SOPC_UInt32_Read(&tempValue, connection->inputMsgBuffer);
                 if(status == STATUS_OK){
                     // Check size and adapt receive buffer size if needed
                     if(connection->receiveBufferSize > tempValue){
@@ -228,7 +228,7 @@ SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
 
             //MaxMessageSize of SERVER
             if(status == STATUS_OK){
-                status = UInt32_Read(&tempValue, connection->inputMsgBuffer);
+                status = SOPC_UInt32_Read(&tempValue, connection->inputMsgBuffer);
                 if(status == STATUS_OK){
                     if(connection->maxMessageSizeSnd > tempValue){
                         connection->maxMessageSizeSnd = tempValue;
@@ -238,7 +238,7 @@ SOPC_StatusCode ReceiveAckMsg(TCP_UA_Connection* connection){
 
             //MaxChunkCount of SERVER
             if(status == STATUS_OK){
-                status = UInt32_Read(&tempValue, connection->inputMsgBuffer);
+                status = SOPC_UInt32_Read(&tempValue, connection->inputMsgBuffer);
                 if(status == STATUS_OK){
                     if(connection->maxChunkCountSnd > tempValue){
                         connection->maxChunkCountSnd = tempValue;
@@ -270,10 +270,10 @@ SOPC_StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
         if(connection->inputMsgBuffer->currentChunkSize >= TCP_UA_ERR_MIN_MSG_LENGTH)
         {
             // Read error cpde
-            status = UInt32_Read(&error, connection->inputMsgBuffer);
+            status = SOPC_UInt32_Read(&error, connection->inputMsgBuffer);
             if(status == STATUS_OK){
                 status = error;
-                tmpStatus = String_Read(reason, connection->inputMsgBuffer);
+                tmpStatus = SOPC_String_Read(reason, connection->inputMsgBuffer);
                 if(tmpStatus == STATUS_OK){
                     //TODO: log error reason !!!
                 }
@@ -467,7 +467,7 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
            connection->state == TCP_Connection_Disconnected)
         {
             if(CheckURI(uri) == STATUS_OK){
-                status = String_InitializeFromCString(&connection->url, uri);
+                status = SOPC_String_InitializeFromCString(&connection->url, uri);
             }
 
             if(status == STATUS_OK){
@@ -505,7 +505,7 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
 
 void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
     SOPC_Socket_Close(connection->socket);
-    String_Clear(&connection->url);
+    SOPC_String_Clear(&connection->url);
     connection->callback = NULL;
     connection->callbackData = NULL;
     ResetConnectionState(connection);

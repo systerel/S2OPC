@@ -58,5 +58,8 @@ OpcUa_StatusCode OpcUa_SocketManager_Loop(     OpcUa_SocketManager     pSocketMa
     {
         status |= SOPC_SocketManager_Loop(pSocketManager, msecTimeout);
     } while(!bRunOnce);
+    if(STATUS_OK != status){
+        status = STATUS_NOK;
+    }
     return status;
 }

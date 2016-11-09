@@ -53,7 +53,7 @@ SOPC_StatusCode TCP_UA_EncodeHeader(SOPC_MsgBuffer* msgBuffer,
     }
     if(status == STATUS_OK){
         const uint32_t headerLength = TCP_UA_HEADER_LENGTH;
-        status = UInt32_Write(&headerLength, msgBuffer);
+        status = SOPC_UInt32_Write(&headerLength, msgBuffer);
         if(status == STATUS_OK){
             msgBuffer->type = type;
             msgBuffer->currentChunkSize = TCP_UA_HEADER_LENGTH;
@@ -73,7 +73,7 @@ SOPC_StatusCode TCP_UA_FinalizeHeader(SOPC_MsgBuffer* msgBuffer){
     status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
 
     if(status == STATUS_OK){
-        status = UInt32_Write(&currentPosition, msgBuffer);
+        status = SOPC_UInt32_Write(&currentPosition, msgBuffer);
     }
     if(status == STATUS_OK){
         status = Buffer_SetPosition(msgBuffer->buffers, currentPosition);
@@ -234,7 +234,7 @@ SOPC_StatusCode TCP_UA_ReadHeader(SOPC_MsgBuffer* msgBuffer){
 
         // READ message size
         if(status == STATUS_OK){
-            status = UInt32_Read(&msgBuffer->currentChunkSize, msgBuffer);
+            status = SOPC_UInt32_Read(&msgBuffer->currentChunkSize, msgBuffer);
         }
 
     }else{

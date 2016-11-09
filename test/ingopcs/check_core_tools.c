@@ -681,104 +681,104 @@ START_TEST(test_ua_encoder_basic_types)
     // Test Byte nominal and degraded cases
     //// Nominal write
     SOPC_Byte byte = 0xAE;
-    status = Byte_Write(&byte, msgBuffer);
+    status = SOPC_Byte_Write(&byte, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0xAE);
     //// Degraded write
-    status = Byte_Write(NULL, msgBuffer);
+    status = SOPC_Byte_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Byte_Write(&byte, NULL);
+    status = SOPC_Byte_Write(&byte, NULL);
     ck_assert(status != STATUS_OK);
     msgBufferFull->buffers->position = 8; // Set buffer full
-    status = Byte_Write(&byte, msgBufferFull);
+    status = SOPC_Byte_Write(&byte, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     byte = 0x00;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = Byte_Read(&byte, msgBuffer);
+    status = SOPC_Byte_Read(&byte, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(byte == 0xAE);
     //// Degraded read
-    status = Byte_Read(NULL, msgBuffer);
+    status = SOPC_Byte_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Byte_Read(&byte, NULL);
+    status = SOPC_Byte_Read(&byte, NULL);
     ck_assert(status != STATUS_OK);
-    status = Byte_Read(&byte, msgBuffer); // Nothing to read anymore
+    status = SOPC_Byte_Read(&byte, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test Boolean nominal and degraded cases
     MsgBuffer_Reset(msgBuffer);
     //// Nominal write
     SOPC_Boolean bool = FALSE;
-    status = Boolean_Write(&bool, msgBuffer);
+    status = SOPC_Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == FALSE);
     bool = 1; // not FALSE
-    status = Boolean_Write(&bool, msgBuffer);
+    status = SOPC_Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[1] == 1);
     bool = 2; // not FALSE
-    status = Boolean_Write(&bool, msgBuffer);
+    status = SOPC_Boolean_Write(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[2] == 1); // True value always encoded as 1
 
     //// Degraded write
-    status = Boolean_Write(NULL, msgBuffer);
+    status = SOPC_Boolean_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Boolean_Write(&bool, NULL);
+    status = SOPC_Boolean_Write(&bool, NULL);
     ck_assert(status != STATUS_OK);
-    status = Boolean_Write(&bool, msgBufferFull); // Test with full buffer
+    status = SOPC_Boolean_Write(&bool, msgBufferFull); // Test with full buffer
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     bool = 4;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     msgBuffer->buffers->data[2] = 2; // Simulates a true value received as 2
-    status = Boolean_Read(&bool, msgBuffer);
+    status = SOPC_Boolean_Read(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(bool == FALSE);
-    status = Boolean_Read(&bool, msgBuffer);
+    status = SOPC_Boolean_Read(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(bool == 1);
-    status = Boolean_Read(&bool, msgBuffer);
+    status = SOPC_Boolean_Read(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(bool == 1); // True value always decoded as 1
     //// Degraded read
-    status = Boolean_Read(NULL, msgBuffer);
+    status = SOPC_Boolean_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Boolean_Read(&bool, NULL);
+    status = SOPC_Boolean_Read(&bool, NULL);
     ck_assert(status != STATUS_OK);
-    status = Boolean_Read(&bool, msgBuffer); // Nothing to read anymore
+    status = SOPC_Boolean_Read(&bool, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test SByteuv16nal and degraded cases
     MsgBuffer_Reset(msgBuffer);
     //// Nominal write
     SOPC_SByte sbyte = -1;
-    status = SByte_Write(&sbyte, msgBuffer);
+    status = SOPC_SByte_Write(&sbyte, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
     //// Degraded write
-    status = SByte_Write(NULL, msgBuffer);
+    status = SOPC_SByte_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = SByte_Write(&sbyte, NULL);
+    status = SOPC_SByte_Write(&sbyte, NULL);
     ck_assert(status != STATUS_OK);
-    status = SByte_Write(&sbyte, msgBufferFull);
+    status = SOPC_SByte_Write(&sbyte, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     sbyte = 0x00;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = SByte_Read(&sbyte, msgBuffer);
+    status = SOPC_SByte_Read(&sbyte, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(sbyte == -1);
     //// Degraded read
-    status = SByte_Read(NULL, msgBuffer);
+    status = SOPC_SByte_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = SByte_Read(&sbyte, NULL);
+    status = SOPC_SByte_Read(&sbyte, NULL);
     ck_assert(status != STATUS_OK);
-    status = SByte_Read(&sbyte, msgBuffer); // Nothing to read anymore
+    status = SOPC_SByte_Read(&sbyte, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test Int16 nominal and degraded cases
@@ -786,32 +786,32 @@ START_TEST(test_ua_encoder_basic_types)
     //// Nominal write
     int16_t v16 = -2;
 
-    status = Int16_Write(&v16, msgBuffer);
+    status = SOPC_Int16_Write(&v16, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// Little endian encoded
     ck_assert(msgBuffer->buffers->data[0] == 0xFE &&
               msgBuffer->buffers->data[1] == 0xFF);
     //// Degraded write
-    status = Int16_Write(NULL, msgBuffer);
+    status = SOPC_Int16_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Int16_Write(&v16, NULL);
+    status = SOPC_Int16_Write(&v16, NULL);
     ck_assert(status != STATUS_OK);
     status = msgBufferFull->buffers->position = 7; // Set buffer almost full (1 byte left)
-    status = Int16_Write(&v16, msgBufferFull);
+    status = SOPC_Int16_Write(&v16, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     v16 = 0;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = Int16_Read(&v16, msgBuffer);
+    status = SOPC_Int16_Read(&v16, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(v16 == -2);
     //// Degraded read
-    status = Int16_Read(NULL, msgBuffer);
+    status = SOPC_Int16_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Int16_Read(&v16, NULL);
+    status = SOPC_Int16_Read(&v16, NULL);
     ck_assert(status != STATUS_OK);
-    status = Int16_Read(&v16, msgBuffer); // Nothing to read anymore
+    status = SOPC_Int16_Read(&v16, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test UInt16 nominal and degraded cases
@@ -819,32 +819,32 @@ START_TEST(test_ua_encoder_basic_types)
     //// Nominal write
     uint16_t vu16 = 2;
 
-    status = UInt16_Write(&vu16, msgBuffer);
+    status = SOPC_UInt16_Write(&vu16, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// Little endian encoded
     ck_assert(msgBuffer->buffers->data[0] == 0x02 &&
               msgBuffer->buffers->data[1] == 0x00);
     //// Degraded write
-    status = UInt16_Write(NULL, msgBuffer);
+    status = SOPC_UInt16_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = UInt16_Write(&vu16, NULL);
+    status = SOPC_UInt16_Write(&vu16, NULL);
     ck_assert(status != STATUS_OK);
     status = msgBufferFull->buffers->position = 7; // Set buffer almost full (1 byte left)
-    status = UInt16_Write(&vu16, msgBufferFull);
+    status = SOPC_UInt16_Write(&vu16, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     vu16 = 0;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = UInt16_Read(&vu16, msgBuffer);
+    status = SOPC_UInt16_Read(&vu16, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vu16 == 2);
     //// Degraded read
-    status = UInt16_Read(NULL, msgBuffer);
+    status = SOPC_UInt16_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = UInt16_Read(&vu16, NULL);
+    status = SOPC_UInt16_Read(&vu16, NULL);
     ck_assert(status != STATUS_OK);
-    status = UInt16_Read(&vu16, msgBuffer); // Nothing to read anymore
+    status = SOPC_UInt16_Read(&vu16, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test Int32 nominal and degraded cases
@@ -852,7 +852,7 @@ START_TEST(test_ua_encoder_basic_types)
     //// Nominal write
     int32_t v32 = -2;
 
-    status = Int32_Write(&v32, msgBuffer);
+    status = SOPC_Int32_Write(&v32, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// Little endian encoded
     ck_assert(msgBuffer->buffers->data[0] == 0xFE &&
@@ -860,26 +860,26 @@ START_TEST(test_ua_encoder_basic_types)
               msgBuffer->buffers->data[2] == 0xFF &&
               msgBuffer->buffers->data[3] == 0xFF);
     //// Degraded write
-    status = Int32_Write(NULL, msgBuffer);
+    status = SOPC_Int32_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Int32_Write(&v32, NULL);
+    status = SOPC_Int32_Write(&v32, NULL);
     ck_assert(status != STATUS_OK);
     status = msgBufferFull->buffers->position = 5; // Set buffer almost full (3 byte left)
-    status = Int32_Write(&v32, msgBufferFull);
+    status = SOPC_Int32_Write(&v32, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     v32 = 0;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = Int32_Read(&v32, msgBuffer);
+    status = SOPC_Int32_Read(&v32, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(v32 == -2);
     //// Degraded read
-    status = Int32_Read(NULL, msgBuffer);
+    status = SOPC_Int32_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Int32_Read(&v32, NULL);
+    status = SOPC_Int32_Read(&v32, NULL);
     ck_assert(status != STATUS_OK);
-    status = Int32_Read(&v32, msgBuffer); // Nothing to read anymore
+    status = SOPC_Int32_Read(&v32, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test UInt32 nominal and degraded cases
@@ -887,7 +887,7 @@ START_TEST(test_ua_encoder_basic_types)
     //// Nominal write
     uint32_t vu32 = 1048578;
 
-    status = UInt32_Write(&vu32, msgBuffer);
+    status = SOPC_UInt32_Write(&vu32, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// Little endian encoded
     ck_assert(msgBuffer->buffers->data[0] == 0x02 &&
@@ -895,26 +895,26 @@ START_TEST(test_ua_encoder_basic_types)
               msgBuffer->buffers->data[2] == 0x10 &&
               msgBuffer->buffers->data[3] == 0x00);
     //// Degraded write
-    status = UInt32_Write(NULL, msgBuffer);
+    status = SOPC_UInt32_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = UInt32_Write(&vu32, NULL);
+    status = SOPC_UInt32_Write(&vu32, NULL);
     ck_assert(status != STATUS_OK);
     status = msgBufferFull->buffers->position = 5; // Set buffer almost full (3 byte left)
-    status = UInt32_Write(&vu32, msgBufferFull);
+    status = SOPC_UInt32_Write(&vu32, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     vu32 = 0;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = UInt32_Read(&vu32, msgBuffer);
+    status = SOPC_UInt32_Read(&vu32, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vu32 == 1048578);
     //// Degraded read
-    status = UInt32_Read(NULL, msgBuffer);
+    status = SOPC_UInt32_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = UInt32_Read(&vu32, NULL);
+    status = SOPC_UInt32_Read(&vu32, NULL);
     ck_assert(status != STATUS_OK);
-    status = UInt32_Read(&vu32, msgBuffer); // Nothing to read anymore
+    status = SOPC_UInt32_Read(&vu32, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test Int64 nominal and degraded cases
@@ -922,7 +922,7 @@ START_TEST(test_ua_encoder_basic_types)
     //// Nominal write
     int64_t v64 = -2;
 
-    status = Int64_Write(&v64, msgBuffer);
+    status = SOPC_Int64_Write(&v64, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// Little endian encoded
     ck_assert(msgBuffer->buffers->data[0] == 0xFE &&
@@ -934,26 +934,26 @@ START_TEST(test_ua_encoder_basic_types)
               msgBuffer->buffers->data[6] == 0xFF &&
               msgBuffer->buffers->data[7] == 0xFF);
     //// Degraded write
-    status = Int64_Write(NULL, msgBuffer);
+    status = SOPC_Int64_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Int64_Write(&v64, NULL);
+    status = SOPC_Int64_Write(&v64, NULL);
     ck_assert(status != STATUS_OK);
     status = msgBufferFull->buffers->position = 1; // Set buffer almost full (7 byte left)
-    status = Int64_Write(&v64, msgBufferFull);
+    status = SOPC_Int64_Write(&v64, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     v64 = 0;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = Int64_Read(&v64, msgBuffer);
+    status = SOPC_Int64_Read(&v64, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(v64 == -2);
     //// Degraded read
-    status = Int64_Read(NULL, msgBuffer);
+    status = SOPC_Int64_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Int64_Read(&v64, NULL);
+    status = SOPC_Int64_Read(&v64, NULL);
     ck_assert(status != STATUS_OK);
-    status = Int64_Read(&v64, msgBuffer); // Nothing to read anymore
+    status = SOPC_Int64_Read(&v64, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test UInt64 nominal and degraded cases
@@ -961,7 +961,7 @@ START_TEST(test_ua_encoder_basic_types)
     //// Nominal write
     uint64_t vu64 = 0x100000000000002;
 
-    status = UInt64_Write(&vu64, msgBuffer);
+    status = SOPC_UInt64_Write(&vu64, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// Little endian encoded
     ck_assert(msgBuffer->buffers->data[0] == 0x02 &&
@@ -973,26 +973,26 @@ START_TEST(test_ua_encoder_basic_types)
               msgBuffer->buffers->data[6] == 0x00 &&
               msgBuffer->buffers->data[7] == 0x01);
     //// Degraded write
-    status = UInt64_Write(NULL, msgBuffer);
+    status = SOPC_UInt64_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = UInt64_Write(&vu64, NULL);
+    status = SOPC_UInt64_Write(&vu64, NULL);
     ck_assert(status != STATUS_OK);
     status = msgBufferFull->buffers->position = 1; // Set buffer almost full (7 byte left)
-    status = UInt64_Write(&vu64, msgBufferFull);
+    status = SOPC_UInt64_Write(&vu64, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     vu64 = 0;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = UInt64_Read(&vu64, msgBuffer);
+    status = SOPC_UInt64_Read(&vu64, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vu64 == 0x100000000000002);
     //// Degraded read
-    status = UInt64_Read(NULL, msgBuffer);
+    status = SOPC_UInt64_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = UInt64_Read(&vu64, NULL);
+    status = SOPC_UInt64_Read(&vu64, NULL);
     ck_assert(status != STATUS_OK);
-    status = UInt64_Read(&vu64, msgBuffer); // Nothing to read anymore
+    status = SOPC_UInt64_Read(&vu64, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test Float nominal and degraded cases
@@ -1000,7 +1000,7 @@ START_TEST(test_ua_encoder_basic_types)
     //// Nominal write
     float vfloat = -6.5;
 
-    status = Float_Write(&vfloat, msgBuffer);
+    status = SOPC_Float_Write(&vfloat, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// Little endian encoded
     ck_assert(msgBuffer->buffers->data[0] == 0x00 &&
@@ -1008,26 +1008,26 @@ START_TEST(test_ua_encoder_basic_types)
               msgBuffer->buffers->data[2] == 0xD0 &&
               msgBuffer->buffers->data[3] == 0xC0);
     //// Degraded write
-    status = Float_Write(NULL, msgBuffer);
+    status = SOPC_Float_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Float_Write(&vfloat, NULL);
+    status = SOPC_Float_Write(&vfloat, NULL);
     ck_assert(status != STATUS_OK);
     status = msgBufferFull->buffers->position = 5; // Set buffer almost full (3 byte left)
-    status = Float_Write(&vfloat, msgBufferFull);
+    status = SOPC_Float_Write(&vfloat, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     vfloat = 0;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = Float_Read(&vfloat, msgBuffer);
+    status = SOPC_Float_Read(&vfloat, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vfloat == -6.5);
     //// Degraded read
-    status = Float_Read(NULL, msgBuffer);
+    status = SOPC_Float_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Float_Read(&vfloat, NULL);
+    status = SOPC_Float_Read(&vfloat, NULL);
     ck_assert(status != STATUS_OK);
-    status = Float_Read(&vfloat, msgBuffer); // Nothing to read anymore
+    status = SOPC_Float_Read(&vfloat, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test Double nominal and degraded cases
@@ -1035,7 +1035,7 @@ START_TEST(test_ua_encoder_basic_types)
     //// Nominal write
     double vdouble = -6.5;
 
-    status = Double_Write(&vdouble, msgBuffer);
+    status = SOPC_Double_Write(&vdouble, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// Little endian encoded
     ck_assert(msgBuffer->buffers->data[0] == 0x00 &&
@@ -1047,26 +1047,26 @@ START_TEST(test_ua_encoder_basic_types)
               msgBuffer->buffers->data[6] == 0x1A &&
               msgBuffer->buffers->data[7] == 0xC0);
     //// Degraded write
-    status = Double_Write(NULL, msgBuffer);
+    status = SOPC_Double_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Double_Write(&vdouble, NULL);
+    status = SOPC_Double_Write(&vdouble, NULL);
     ck_assert(status != STATUS_OK);
     status = msgBufferFull->buffers->position = 1; // Set buffer almost full (7 byte left)
-    status = Double_Write(&vdouble, msgBufferFull);
+    status = SOPC_Double_Write(&vdouble, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     vdouble = 0;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = Double_Read(&vdouble, msgBuffer);
+    status = SOPC_Double_Read(&vdouble, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vdouble == -6.5);
     //// Degraded read
-    status = Double_Read(NULL, msgBuffer);
+    status = SOPC_Double_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Double_Read(&vdouble, NULL);
+    status = SOPC_Double_Read(&vdouble, NULL);
     ck_assert(status != STATUS_OK);
-    status = Double_Read(&vdouble, msgBuffer); // Nothing to read anymore
+    status = SOPC_Double_Read(&vdouble, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test DateTime nominal and degraded cases
@@ -1074,7 +1074,7 @@ START_TEST(test_ua_encoder_basic_types)
     //// Nominal write
     SOPC_DateTime vDate = -2;
 
-    status = DateTime_Write(&vDate, msgBuffer);
+    status = SOPC_DateTime_Write(&vDate, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// Little endian encoded
     ck_assert(msgBuffer->buffers->data[0] == 0xFE &&
@@ -1086,26 +1086,26 @@ START_TEST(test_ua_encoder_basic_types)
               msgBuffer->buffers->data[6] == 0xFF &&
               msgBuffer->buffers->data[7] == 0xFF);
     //// Degraded write
-    status = DateTime_Write(NULL, msgBuffer);
+    status = SOPC_DateTime_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = DateTime_Write(&vDate, NULL);
+    status = SOPC_DateTime_Write(&vDate, NULL);
     ck_assert(status != STATUS_OK);
     status = msgBufferFull->buffers->position = 1; // Set buffer almost full (7 byte left)
-    status = DateTime_Write(&vDate, msgBufferFull);
+    status = SOPC_DateTime_Write(&vDate, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     vDate = 0;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = DateTime_Read(&vDate, msgBuffer);
+    status = SOPC_DateTime_Read(&vDate, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vDate == -2);
     //// Degraded read
-    status = DateTime_Read(NULL, msgBuffer);
+    status = SOPC_DateTime_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = DateTime_Read(&vDate, NULL);
+    status = SOPC_DateTime_Read(&vDate, NULL);
     ck_assert(status != STATUS_OK);
-    status = DateTime_Read(&vDate, msgBuffer); // Nothing to read anymore
+    status = SOPC_DateTime_Read(&vDate, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     MsgBuffer_Delete(&msgBuffer);
@@ -1126,13 +1126,13 @@ START_TEST(test_ua_encoder_other_types)
     //////////////////////////////////////////////
     // Test ByteString nominal and degraded cases
     //// Nominal write
-    SOPC_ByteString* bs = ByteString_Create();
-    SOPC_ByteString* bs2 = ByteString_Create();
+    SOPC_ByteString* bs = SOPC_ByteString_Create();
+    SOPC_ByteString* bs2 = SOPC_ByteString_Create();
     uint8_t boyString[3] = {0x42, 0x6F, 0x79}; // Boy
 
     ////// Empty string
     bs->Length = 0;
-    status = ByteString_Write(bs, msgBuffer);
+    status = SOPC_ByteString_Write(bs, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1142,7 +1142,7 @@ START_TEST(test_ua_encoder_other_types)
 
     MsgBuffer_Reset(msgBuffer);
     bs->Length = -1;
-    status = ByteString_Write(bs, msgBuffer);
+    status = SOPC_ByteString_Write(bs, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1152,7 +1152,7 @@ START_TEST(test_ua_encoder_other_types)
 
     MsgBuffer_Reset(msgBuffer);
     bs->Length = -10;
-    status = ByteString_Write(bs, msgBuffer);
+    status = SOPC_ByteString_Write(bs, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1162,9 +1162,9 @@ START_TEST(test_ua_encoder_other_types)
 
     /////// Non empty bytestring
     MsgBuffer_Reset(msgBuffer);
-    status = ByteString_AttachFromBytes(bs, boyString, 3);
+    status = SOPC_ByteString_AttachFromBytes(bs, boyString, 3);
     ck_assert(status == STATUS_OK);
-    status = ByteString_Write(bs, msgBuffer);
+    status = SOPC_ByteString_Write(bs, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0x03);
     ck_assert(msgBuffer->buffers->data[1] == 0x00);
@@ -1176,21 +1176,21 @@ START_TEST(test_ua_encoder_other_types)
 
 
     //// Degraded write
-    status = ByteString_Write(NULL, msgBuffer);
+    status = SOPC_ByteString_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = ByteString_Write(bs, NULL);
+    status = SOPC_ByteString_Write(bs, NULL);
     ck_assert(status != STATUS_OK);
     msgBufferFull->buffers->position = 2; // Set buffer almost full (6 byte left)
-    status = ByteString_Write(bs, msgBufferFull);
+    status = SOPC_ByteString_Write(bs, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    ByteString_Clear(bs2);
-    ByteString_Initialize(bs2);
-    status = ByteString_Read(bs2, msgBuffer);
+    SOPC_ByteString_Clear(bs2);
+    SOPC_ByteString_Initialize(bs2);
+    status = SOPC_ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(ByteString_Equal(bs, bs2) != FALSE);
+    ck_assert(SOPC_ByteString_Equal(bs, bs2) != FALSE);
     ck_assert(bs2->Length == 3);
     ck_assert(bs2->Data[0] == 0x42);
     ck_assert(bs2->Data[1] == 0x6F);
@@ -1202,8 +1202,8 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0x00;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    ByteString_Clear(bs2);
-    ByteString_Initialize(bs2);status = ByteString_Read(bs2, msgBuffer);
+    SOPC_ByteString_Clear(bs2);
+    SOPC_ByteString_Initialize(bs2);status = SOPC_ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(bs2->Length == -1); // Null bytestring always decoded -1
 
@@ -1213,9 +1213,9 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0xFF;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    ByteString_Clear(bs2);
-    ByteString_Initialize(bs2);
-    status = ByteString_Read(bs2, msgBuffer);
+    SOPC_ByteString_Clear(bs2);
+    SOPC_ByteString_Initialize(bs2);
+    status = SOPC_ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(bs2->Length == -1); // Null bytestring always decoded -1
 
@@ -1225,21 +1225,21 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[2] = 0xFF;
     msgBuffer->buffers->data[3] = 0xFF;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    ByteString_Clear(bs2);
-    ByteString_Initialize(bs2);
-    status = ByteString_Read(bs2, msgBuffer);
+    SOPC_ByteString_Clear(bs2);
+    SOPC_ByteString_Initialize(bs2);
+    status = SOPC_ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(bs2->Length == -1); // Null bytestring always decoded -1
     //// Degraded read
-    status = ByteString_Read(NULL, msgBuffer);
+    status = SOPC_ByteString_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = ByteString_Read(bs, NULL);
+    status = SOPC_ByteString_Read(bs, NULL);
     ck_assert(status != STATUS_OK);
-    status = ByteString_Read(bs, msgBuffer); // Nothing to read anymore
+    status = SOPC_ByteString_Read(bs, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
-    ByteString_Delete(bs);
-    ByteString_Delete(bs2);
+    SOPC_ByteString_Delete(bs);
+    SOPC_ByteString_Delete(bs2);
     bs = NULL;
     bs2 = NULL;
 
@@ -1249,13 +1249,13 @@ START_TEST(test_ua_encoder_other_types)
     //// Nominal write
     MsgBuffer_Reset(msgBuffer);
     SOPC_String str;
-    String_Initialize(&str);
+    SOPC_String_Initialize(&str);
     SOPC_String str2;
-    String_Initialize(&str2);
+    SOPC_String_Initialize(&str2);
 
     ////// Empty string
     str.Length = 0;
-    status = String_Write(&str, msgBuffer);
+    status = SOPC_String_Write(&str, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1265,7 +1265,7 @@ START_TEST(test_ua_encoder_other_types)
 
     MsgBuffer_Reset(msgBuffer);
     str.Length = -1;
-    status = String_Write(&str, msgBuffer);
+    status = SOPC_String_Write(&str, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1275,7 +1275,7 @@ START_TEST(test_ua_encoder_other_types)
 
     MsgBuffer_Reset(msgBuffer);
     str.Length = -10;
-    status = String_Write(&str, msgBuffer);
+    status = SOPC_String_Write(&str, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1285,9 +1285,9 @@ START_TEST(test_ua_encoder_other_types)
 
     /////// Non empty bytestring
     MsgBuffer_Reset(msgBuffer);
-    status = String_AttachFromCstring(&str, "Boy");
+    status = SOPC_String_AttachFromCstring(&str, "Boy");
     ck_assert(status == STATUS_OK);
-    status = String_Write(&str, msgBuffer);
+    status = SOPC_String_Write(&str, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0x03);
     ck_assert(msgBuffer->buffers->data[1] == 0x00);
@@ -1299,22 +1299,22 @@ START_TEST(test_ua_encoder_other_types)
 
 
     //// Degraded write
-    status = String_Write(NULL, msgBuffer);
+    status = SOPC_String_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = String_Write(&str, NULL);
+    status = SOPC_String_Write(&str, NULL);
     ck_assert(status != STATUS_OK);
     msgBufferFull->buffers->position = 2; // Set buffer almost full (6 byte left)
-    status = String_Write(&str, msgBufferFull);
+    status = SOPC_String_Write(&str, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    String_Clear(&str2);
-    String_Initialize(&str2);
-    status = String_Read(&str2, msgBuffer);
+    SOPC_String_Clear(&str2);
+    SOPC_String_Initialize(&str2);
+    status = SOPC_String_Read(&str2, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(String_Equal(&str, &str2) != FALSE);
-    ck_assert(memcmp(String_GetRawCString(&str2), "Boy", 3) == 0);
+    ck_assert(SOPC_String_Equal(&str, &str2) != FALSE);
+    ck_assert(memcmp(SOPC_String_GetRawCString(&str2), "Boy", 3) == 0);
 
     ////// Read 0 length bytestring
     msgBuffer->buffers->data[0] = 0x00;
@@ -1322,8 +1322,8 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0x00;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    String_Clear(&str2);
-    String_Initialize(&str2);status = String_Read(&str2, msgBuffer);
+    SOPC_String_Clear(&str2);
+    SOPC_String_Initialize(&str2);status = SOPC_String_Read(&str2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(str2.Length == -1); // Null bytestring always decoded -1
 
@@ -1333,9 +1333,9 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0xFF;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    String_Clear(&str2);
-    String_Initialize(&str2);
-    status = String_Read(&str2, msgBuffer);
+    SOPC_String_Clear(&str2);
+    SOPC_String_Initialize(&str2);
+    status = SOPC_String_Read(&str2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(str2.Length == -1); // Null bytestring always decoded -1
 
@@ -1345,35 +1345,35 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[2] = 0xFF;
     msgBuffer->buffers->data[3] = 0xFF;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    String_Clear(&str2);
-    String_Initialize(&str2);
-    status = String_Read(&str2, msgBuffer);
+    SOPC_String_Clear(&str2);
+    SOPC_String_Initialize(&str2);
+    status = SOPC_String_Read(&str2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(str2.Length == -1); // Null bytestring always decoded -1
     //// Degraded read
-    status = String_Read(NULL, msgBuffer);
+    status = SOPC_String_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = String_Read(&str, NULL);
+    status = SOPC_String_Read(&str, NULL);
     ck_assert(status != STATUS_OK);
-    status = String_Read(&str, msgBuffer); // Nothing to read anymore
+    status = SOPC_String_Read(&str, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
-    String_Clear(&str);
-    String_Clear(&str2);
+    SOPC_String_Clear(&str);
+    SOPC_String_Clear(&str2);
 
     //////////////////////////////////////////
     // Test XmlElement nominal and degraded cases
     //// Nominal write
     MsgBuffer_Reset(msgBuffer);
     SOPC_XmlElement xmlElt;
-    XmlElement_Initialize(&xmlElt);
+    SOPC_XmlElement_Initialize(&xmlElt);
     SOPC_XmlElement xmlElt2;
-    XmlElement_Initialize(&xmlElt2);
+    SOPC_XmlElement_Initialize(&xmlElt2);
     uint8_t balA[3] = {0x3C, 0x41, 0x3E}; // <A>
 
     ////// Empty string
     xmlElt.Length = 0;
-    status = XmlElement_Write(&xmlElt, msgBuffer);
+    status = SOPC_XmlElement_Write(&xmlElt, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1383,7 +1383,7 @@ START_TEST(test_ua_encoder_other_types)
 
     MsgBuffer_Reset(msgBuffer);
     xmlElt.Length = -1;
-    status = XmlElement_Write(&xmlElt, msgBuffer);
+    status = SOPC_XmlElement_Write(&xmlElt, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1393,7 +1393,7 @@ START_TEST(test_ua_encoder_other_types)
 
     MsgBuffer_Reset(msgBuffer);
     xmlElt.Length = -10;
-    status = XmlElement_Write(&xmlElt, msgBuffer);
+    status = SOPC_XmlElement_Write(&xmlElt, msgBuffer);
     ck_assert(status == STATUS_OK);
     ////// -1 length must be encoded for null string
     ck_assert(msgBuffer->buffers->data[0] == 0xFF);
@@ -1407,7 +1407,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(xmlElt.Data != NULL);
     ck_assert(memcpy(xmlElt.Data, balA, 3) == xmlElt.Data);
     xmlElt.Length = 3;
-    status = XmlElement_Write(&xmlElt, msgBuffer);
+    status = SOPC_XmlElement_Write(&xmlElt, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0x03);
     ck_assert(msgBuffer->buffers->data[1] == 0x00);
@@ -1419,19 +1419,19 @@ START_TEST(test_ua_encoder_other_types)
 
 
     //// Degraded write
-    status = XmlElement_Write(NULL, msgBuffer);
+    status = SOPC_XmlElement_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = XmlElement_Write(&xmlElt, NULL);
+    status = SOPC_XmlElement_Write(&xmlElt, NULL);
     ck_assert(status != STATUS_OK);
     msgBufferFull->buffers->position = 2; // Set buffer almost full (6 byte left)
-    status = XmlElement_Write(&xmlElt, msgBufferFull);
+    status = SOPC_XmlElement_Write(&xmlElt, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    XmlElement_Clear(&xmlElt2);
-    XmlElement_Initialize(&xmlElt2);
-    status = XmlElement_Read(&xmlElt2, msgBuffer);
+    SOPC_XmlElement_Clear(&xmlElt2);
+    SOPC_XmlElement_Initialize(&xmlElt2);
+    status = SOPC_XmlElement_Read(&xmlElt2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(memcmp(xmlElt.Data, xmlElt2.Data, 3) == 00);
     ck_assert(xmlElt2.Length == 3);
@@ -1445,9 +1445,9 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0x00;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    XmlElement_Clear(&xmlElt2);
-    XmlElement_Initialize(&xmlElt2);
-    status = XmlElement_Read(&xmlElt2, msgBuffer);
+    SOPC_XmlElement_Clear(&xmlElt2);
+    SOPC_XmlElement_Initialize(&xmlElt2);
+    status = SOPC_XmlElement_Read(&xmlElt2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(xmlElt2.Length == -1); // Null bytestring always decoded -1
 
@@ -1457,9 +1457,9 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0xFF;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    XmlElement_Clear(&xmlElt2);
-    XmlElement_Initialize(&xmlElt2);
-    status = XmlElement_Read(&xmlElt2, msgBuffer);
+    SOPC_XmlElement_Clear(&xmlElt2);
+    SOPC_XmlElement_Initialize(&xmlElt2);
+    status = SOPC_XmlElement_Read(&xmlElt2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(xmlElt2.Length == -1); // Null bytestring always decoded -1
 
@@ -1469,21 +1469,21 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[2] = 0xFF;
     msgBuffer->buffers->data[3] = 0xFF;
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    XmlElement_Clear(&xmlElt2);
-    XmlElement_Initialize(&xmlElt2);
-    status = XmlElement_Read(&xmlElt2, msgBuffer);
+    SOPC_XmlElement_Clear(&xmlElt2);
+    SOPC_XmlElement_Initialize(&xmlElt2);
+    status = SOPC_XmlElement_Read(&xmlElt2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(xmlElt2.Length == -1); // Null bytestring always decoded -1
     //// Degraded read
-    status = XmlElement_Read(NULL, msgBuffer);
+    status = SOPC_XmlElement_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = XmlElement_Read(&xmlElt, NULL);
+    status = SOPC_XmlElement_Read(&xmlElt, NULL);
     ck_assert(status != STATUS_OK);
-    status = XmlElement_Read(&xmlElt, msgBuffer); // Nothing to read anymore
+    status = SOPC_XmlElement_Read(&xmlElt, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
-    XmlElement_Clear(&xmlElt);
-    XmlElement_Clear(&xmlElt2);
+    SOPC_XmlElement_Clear(&xmlElt);
+    SOPC_XmlElement_Clear(&xmlElt2);
 
     // Resize "full" msg buffer
     /////////////////////////////////////////
@@ -1495,9 +1495,9 @@ START_TEST(test_ua_encoder_other_types)
     //// Nominal write
     MsgBuffer_Reset(msgBuffer);
     SOPC_Guid guid;
-    Guid_Initialize(&guid);
+    SOPC_Guid_Initialize(&guid);
     SOPC_Guid guid2;
-    Guid_Initialize(&guid2);
+    SOPC_Guid_Initialize(&guid2);
     guid.Data1 = 0x72962B91;
     guid.Data2 = 0xFA75;
     guid.Data3 = 0x4ae6;
@@ -1510,7 +1510,7 @@ START_TEST(test_ua_encoder_other_types)
     guid.Data4[6] = 0xAF;
     guid.Data4[7] = 0x63;
 
-    status = Guid_Write(&guid, msgBuffer);
+    status = SOPC_Guid_Write(&guid, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0x91);
     ck_assert(msgBuffer->buffers->data[1] == 0x2B);
@@ -1531,44 +1531,44 @@ START_TEST(test_ua_encoder_other_types)
 
 
     //// Degraded write
-    status = Guid_Write(NULL, msgBuffer);
+    status = SOPC_Guid_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Guid_Write(&guid, NULL);
+    status = SOPC_Guid_Write(&guid, NULL);
     ck_assert(status != STATUS_OK);
     msgBufferFull->buffers->position = 17; // Set buffer almost full (15 byte left)
-    status = Guid_Write(&guid, msgBufferFull);
+    status = SOPC_Guid_Write(&guid, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = Guid_Read(&guid2, msgBuffer);
+    status = SOPC_Guid_Read(&guid2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(memcmp(&guid, &guid2, sizeof(SOPC_Guid)) == 0);
 
     //// Degraded read
-    status = Guid_Read(NULL, msgBuffer);
+    status = SOPC_Guid_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = Guid_Read(&guid, NULL);
+    status = SOPC_Guid_Read(&guid, NULL);
     ck_assert(status != STATUS_OK);
-    status = Guid_Read(&guid, msgBuffer); // Nothing to read anymore
+    status = SOPC_Guid_Read(&guid, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
-    Guid_Clear(&guid);
-    Guid_Clear(&guid2);
+    SOPC_Guid_Clear(&guid);
+    SOPC_Guid_Clear(&guid2);
 
     /////////////////////////////////////////
     // Test NodeId nominal and degraded cases
     //// Nominal write
     MsgBuffer_Reset(msgBuffer);
     SOPC_NodeId nodeId;
-    NodeId_Initialize(&nodeId);
+    SOPC_NodeId_Initialize(&nodeId);
     SOPC_NodeId nodeId2;
-    NodeId_Initialize(&nodeId2);
+    SOPC_NodeId_Initialize(&nodeId2);
 
     // Two bytes node id
     nodeId.IdentifierType = IdentifierType_Numeric;
     nodeId.Data.Numeric = 114;
-    status = NodeId_Write(&nodeId, msgBuffer);
+    status = SOPC_NodeId_Write(&nodeId, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[0] == 0x00);
     ck_assert(msgBuffer->buffers->data[1] == 0x72);
@@ -1577,7 +1577,7 @@ START_TEST(test_ua_encoder_other_types)
     nodeId.IdentifierType = IdentifierType_Numeric;
     nodeId.Namespace = 5;
     nodeId.Data.Numeric = 1025;
-    status = NodeId_Write(&nodeId, msgBuffer);
+    status = SOPC_NodeId_Write(&nodeId, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[2] == 0x01);
     ck_assert(msgBuffer->buffers->data[3] == 0x05);
@@ -1588,7 +1588,7 @@ START_TEST(test_ua_encoder_other_types)
     nodeId.IdentifierType = IdentifierType_Numeric;
     nodeId.Namespace = 5;
     nodeId.Data.Numeric = 0x1FFFF;
-    status = NodeId_Write(&nodeId, msgBuffer);
+    status = SOPC_NodeId_Write(&nodeId, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(msgBuffer->buffers->data[6] == 0x02);
     ck_assert(msgBuffer->buffers->data[7] == 0x05);
@@ -1601,32 +1601,32 @@ START_TEST(test_ua_encoder_other_types)
     // TODO: write all other types possibles !
 
     //// Degraded write
-    status = NodeId_Write(NULL, msgBuffer);
+    status = SOPC_NodeId_Write(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = NodeId_Write(&nodeId, NULL);
+    status = SOPC_NodeId_Write(&nodeId, NULL);
     ck_assert(status != STATUS_OK);
     msgBufferFull->buffers->position = 26; // Set buffer almost full (6 byte left)
-    status = NodeId_Write(&nodeId, msgBufferFull);
+    status = SOPC_NodeId_Write(&nodeId, msgBufferFull);
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
     ////// Two bytes NodeId
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
-    status = NodeId_Read(&nodeId2, msgBuffer);
+    status = SOPC_NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(nodeId2.Namespace == 0);
     ck_assert(nodeId2.Data.Numeric == 114);
 
     ////// Four bytes NodeId
-    NodeId_Clear(&nodeId2);
-    status = NodeId_Read(&nodeId2, msgBuffer);
+    SOPC_NodeId_Clear(&nodeId2);
+    status = SOPC_NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(nodeId2.Namespace == 5);
     ck_assert(nodeId2.Data.Numeric == 1025);
 
     ////// Numeric NodeId
-    NodeId_Clear(&nodeId2);
-    status = NodeId_Read(&nodeId2, msgBuffer);
+    SOPC_NodeId_Clear(&nodeId2);
+    status = SOPC_NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(nodeId2.Namespace == 5);
     ck_assert(nodeId2.Data.Numeric == 0x1FFFF);
@@ -1634,15 +1634,15 @@ START_TEST(test_ua_encoder_other_types)
     // TODO: read all other types possibles !
 
     //// Degraded read
-    status = NodeId_Read(NULL, msgBuffer);
+    status = SOPC_NodeId_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);
-    status = NodeId_Read(&nodeId, NULL);
+    status = SOPC_NodeId_Read(&nodeId, NULL);
     ck_assert(status != STATUS_OK);
-    status = NodeId_Read(&nodeId, msgBuffer); // Nothing to read anymore
+    status = SOPC_NodeId_Read(&nodeId, msgBuffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
-    NodeId_Clear(&nodeId);
-    NodeId_Clear(&nodeId2);
+    SOPC_NodeId_Clear(&nodeId);
+    SOPC_NodeId_Clear(&nodeId2);
 
 
     MsgBuffer_Delete(&msgBuffer);

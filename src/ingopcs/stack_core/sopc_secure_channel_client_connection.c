@@ -83,7 +83,7 @@ SC_ClientConnection* SC_Client_Create(){
             memset (scClientConnection, 0, sizeof(SC_ClientConnection));
             Namespace_Initialize(&scClientConnection->namespaces);
             scClientConnection->securityMode = OpcUa_MessageSecurityMode_Invalid;
-            ByteString_Initialize(&scClientConnection->securityPolicy);
+            SOPC_ByteString_Initialize(&scClientConnection->securityPolicy);
 
             sConnection->state = SC_Connection_Disconnected;
             scClientConnection->instance = sConnection;
@@ -146,7 +146,7 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
         scConnection->clientCertificate = NULL;
         scConnection->clientKey = NULL;
         SLinkedList_Delete(scConnection->pendingRequests);
-        String_Clear(&scConnection->securityPolicy);
+        SOPC_String_Clear(&scConnection->securityPolicy);
         if(scConnection->instance != NULL){
             SC_Delete(scConnection->instance);
         }
@@ -190,7 +190,7 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     // Encode returnDiagnostic => symbolic id
     openRequest.RequestHeader.ReturnDiagnostics = uone;
     // Encode auditEntryId
-    status = String_CopyFromCString(&openRequest.RequestHeader.AuditEntryId, "audit1");
+    status = SOPC_String_CopyFromCString(&openRequest.RequestHeader.AuditEntryId, "audit1");
 
     if(status == STATUS_OK){
         // Encode timeoutHint => no timeout (for now)
@@ -225,7 +225,7 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         if(status == STATUS_OK){
             uint8_t* bytes = NULL;
             bytes = SecretBuffer_Expose(cConnection->instance->currentNonce);
-            status = ByteString_AttachFromBytes(&openRequest.ClientNonce,
+            status = SOPC_ByteString_AttachFromBytes(&openRequest.ClientNonce,
                                                 bytes,
                                                 SecretBuffer_GetLength(cConnection->instance->currentNonce));
         }else{
@@ -264,7 +264,7 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
         // Set security configuration for secure channel request
         cConnection->instance->currentSecuMode = cConnection->securityMode;
-        status = String_AttachFrom(&cConnection->instance->currentSecuPolicy,
+        status = SOPC_String_AttachFrom(&cConnection->instance->currentSecuPolicy,
                                    &cConnection->securityPolicy);
     }
 	
@@ -273,7 +273,7 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 //    if(status == STATUS_OK){
 //        cConnection->instance->currentCryptoProvider =
 //                CryptoProvider_Create
-//                    (String_GetRawCString(&cConnection->securityPolicy));
+//                    (SOPC_String_GetRawCString(&cConnection->securityPolicy));
 //
 //        if(cConnection->instance->currentCryptoProvider == NULL){
 //            status = STATUS_NOK;
@@ -462,7 +462,7 @@ SOPC_StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnecti
 
     if(status == STATUS_OK){
         // Retrieve request id
-        status = UInt32_Read(&requestId, cConnection->instance->receptionBuffers);
+        status = SOPC_UInt32_Read(&requestId, cConnection->instance->receptionBuffers);
     }
 
     if(status == STATUS_OK){
@@ -506,7 +506,7 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     uint32_t requestId = 0;
     uint8_t requestToRemove = FALSE;
     SOPC_String reason;
-    String_Initialize(&reason);
+    SOPC_String_Initialize(&reason);
 
     PendingRequest* pRequest = NULL;
     SOPC_EncodeableType* recEncType = NULL;
@@ -609,7 +609,7 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
         }
     }
 
-    String_Clear(&reason);
+    SOPC_String_Clear(&reason);
     return status;
 }
 
@@ -744,13 +744,13 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
         {
             connection->pkiProvider = pki;
 
-            status = String_InitializeFromCString(&connection->securityPolicy, securityPolicy);
+            status = SOPC_String_InitializeFromCString(&connection->securityPolicy, securityPolicy);
 
             if(STATUS_OK == status){
                 // Create CryptoProvider and KeyManager
                 connection->instance->currentCryptoProvider =
                         CryptoProvider_Create
-                            (String_GetRawCString(&connection->securityPolicy));
+                            (SOPC_String_GetRawCString(&connection->securityPolicy));
 
                 if(connection->instance->currentCryptoProvider == NULL){
                     status = STATUS_NOK;
@@ -810,7 +810,7 @@ SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
         cConnection->clientCertificate = NULL;
         cConnection->clientKey = NULL;
         SLinkedList_Clear(cConnection->pendingRequests);
-        String_Clear(&cConnection->securityPolicy);
+        SOPC_String_Clear(&cConnection->securityPolicy);
         TCP_UA_Connection_Disconnect(cConnection->instance->transportConnection);
     }
     return status;
