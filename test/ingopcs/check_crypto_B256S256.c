@@ -133,7 +133,7 @@ START_TEST(test_crypto_load)
     ck_assert(NULL != crypto->pProfile->pFnSymmDecrypt);
     ck_assert(NULL != crypto->pProfile->pFnSymmSign);
     ck_assert(NULL != crypto->pProfile->pFnSymmVerif);
-    ck_assert(NULL != crypto->pProfile->pFnSymmGenKey);
+    ck_assert(NULL != crypto->pProfile->pFnGenRnd);
     ck_assert(NULL != crypto->pProfile->pFnDeriveData);
     ck_assert(NULL != crypto->pProfile->pFnAsymEncrypt);
     ck_assert(NULL != crypto->pProfile->pFnAsymDecrypt);
@@ -438,26 +438,26 @@ START_TEST(test_crypto_symm_sign)
 END_TEST
 
 
-START_TEST(test_crypto_symm_generate_key)
+START_TEST(test_crypto_symm_generate_nonce) // TODO: it is a _nonce, maybe it is not a crypto_symm...
 {
-    SecretBuffer *pSecKey0, *pSecKey1;
+    SecretBuffer *pSecNonce0, *pSecNonce1;
     ExposedBuffer *pExpKey0, *pExpKey1;
     //char hexoutput[64];
 
     // It is random, so...
-    ck_assert(CryptoProvider_SymmetricGenerateKey(crypto, &pSecKey0) == STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricGenerateKey(crypto, &pSecKey1) == STATUS_OK);
-    ck_assert(NULL != (pExpKey0 = SecretBuffer_Expose(pSecKey0)));
-    ck_assert(NULL != (pExpKey1 = SecretBuffer_Expose(pSecKey1)));
+    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce0) == STATUS_OK);
+    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce1) == STATUS_OK);
+    ck_assert(NULL != (pExpKey0 = SecretBuffer_Expose(pSecNonce0)));
+    ck_assert(NULL != (pExpKey1 = SecretBuffer_Expose(pSecNonce1)));
     ck_assert(memcmp(pExpKey0, pExpKey1, 32) != 0);
     SecretBuffer_Unexpose(pExpKey0);
     SecretBuffer_Unexpose(pExpKey1);
-    SecretBuffer_DeleteClear(pSecKey0);
-    SecretBuffer_DeleteClear(pSecKey1);
+    SecretBuffer_DeleteClear(pSecNonce0);
+    SecretBuffer_DeleteClear(pSecNonce1);
 
     // Test invalid inputs
-    ck_assert(CryptoProvider_SymmetricGenerateKey(NULL, &pSecKey0) != STATUS_OK);
-    ck_assert(CryptoProvider_SymmetricGenerateKey(crypto, NULL) != STATUS_OK);
+    ck_assert(CryptoProvider_GenerateSecureChannelNonce(NULL, &pSecNonce0) != STATUS_OK);
+    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, NULL) != STATUS_OK);
 }
 END_TEST
 
@@ -1052,7 +1052,7 @@ Suite *tests_make_suite_crypto_B256S256()
     tcase_add_test(tc_crypto_symm, test_crypto_symm_lengths);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_crypt);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_sign);
-    tcase_add_test(tc_crypto_symm, test_crypto_symm_generate_key);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_generate_nonce);
 
     suite_add_tcase(s, tc_providers);
     tcase_add_checked_fixture(tc_providers, setup_crypto, teardown_crypto);
