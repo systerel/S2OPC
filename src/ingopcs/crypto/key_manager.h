@@ -23,8 +23,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_KEY_MANAGER_H_
-#define INGOPCS_KEY_MANAGER_H_
+#ifndef SOPC_KEY_MANAGER_H_
+#define SOPC_KEY_MANAGER_H_
 
 
 #include "sopc_base_types.h"
@@ -222,4 +222,4 @@ SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
                                                AsymmetricKey *pKey);
 
 
-#endif /* INGOPCS_KEY_MANAGER_H_ */
+#endif /* SOPC_KEY_MANAGER_H_ */

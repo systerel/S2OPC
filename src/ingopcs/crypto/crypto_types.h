@@ -19,8 +19,8 @@
  */
 
 
-#ifndef INGOPCS_CRYPTO_TYPES_H_
-#define INGOPCS_CRYPTO_TYPES_H_
+#ifndef SOPC_CRYPTO_TYPES_H_
+#define SOPC_CRYPTO_TYPES_H_
 
 
 #include "sopc_base_types.h"
@@ -128,5 +128,5 @@ typedef struct CryptoProvider
 } CryptoProvider;
 
 
-#endif /* INGOPCS_CRYPTO_TYPES_H_ */
+#endif /* SOPC_CRYPTO_TYPES_H_ */
 

@@ -21,8 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_PKI_STACK_H_
-#define INGOPCS_PKI_STACK_H_
+#ifndef SOPC_PKI_STACK_H_
+#define SOPC_PKI_STACK_H_
 
 
 #include "sopc_base_types.h"
@@ -61,4 +61,4 @@ SOPC_StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
 void PKIProviderStack_Free(PKIProvider *pPKI);
 
 
-#endif /* INGOPCS_PKI_STACK_H_ */
+#endif /* SOPC_PKI_STACK_H_ */

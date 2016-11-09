@@ -20,8 +20,8 @@
  */
 
 
-#ifndef INGOPCS_CRYPTO_PROVIDER_H_
-#define INGOPCS_CRYPTO_PROVIDER_H_
+#ifndef SOPC_CRYPTO_PROVIDER_H_
+#define SOPC_CRYPTO_PROVIDER_H_
 
 
 #include "sopc_base_types.h"
@@ -791,4 +791,4 @@ SOPC_StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pProvi
                                                const Certificate *pCert);
 
 
-#endif  // INGOPCS_CRYPTO_PROVIDER_H_
+#endif  /* SOPC_CRYPTO_PROVIDER_H_ */

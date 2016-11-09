@@ -21,8 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_CRYPTO_PROFILES_H_
-#define INGOPCS_CRYPTO_PROFILES_H_
+#ifndef SOPC_CRYPTO_PROFILES_H_
+#define SOPC_CRYPTO_PROFILES_H_
 
 
 #include "crypto_types.h"
@@ -50,4 +50,4 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 extern const CryptoProfile g_cpBasic256Sha256;
 
 
-#endif  /* INGOPCS_CRYPTO_PROFILES_H_ */
+#endif  /* SOPC_CRYPTO_PROFILES_H_ */

@@ -18,8 +18,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_CRYPTO_PROVIDER_LIB_H_
-#define INGOPCS_CRYPTO_PROVIDER_LIB_H_
+#ifndef SOPC_CRYPTO_PROVIDER_LIB_H_
+#define SOPC_CRYPTO_PROVIDER_LIB_H_
 
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
@@ -31,4 +31,4 @@ typedef struct CryptolibContext {
 } CryptolibContext;
 
 
-#endif /* INGOPCS_CRYPTO_PROVIDER_LIB_H_ */
+#endif /* SOPC_CRYPTO_PROVIDER_LIB_H_ */

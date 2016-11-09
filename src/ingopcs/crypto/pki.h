@@ -28,8 +28,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INGOPCS_PKI_H_
-#define INGOPCS_PKI_H_
+#ifndef SOPC_PKI_H_
+#define SOPC_PKI_H_
 
 
 struct PKIProvider;
@@ -72,4 +72,4 @@ typedef struct PKIProvider
 } PKIProvider;
 
 
-#endif /* INGOPCS_PKI_H_ */
+#endif /* SOPC_PKI_H_ */
