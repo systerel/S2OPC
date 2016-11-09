@@ -295,7 +295,8 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_Encryption(const CryptoProvid
                                                          uint32_t lengthIn,
                                                          uint32_t *pLengthOut);
 
-/** \brief          Calculates the size of the required output buffer to decipher lengthIn bytes through
+/**
+ * \brief           Calculates the size of the required output buffer to decipher lengthIn bytes through
  *                  asymmetric decryption.
  *
  *                  Hence, the computation takes into account the padding, but it does not include any signature length.
@@ -314,7 +315,8 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_Decryption(const CryptoProvid
                                                          uint32_t lengthIn,
                                                          uint32_t *pLengthOut);
 
-/** \brief          Calculates the size of the required output buffer to contain the asymmetric signature.
+/**
+ * \brief           Calculates the size of the required output buffer to contain the asymmetric signature.
  *
  *                  It is a single ciphered-message long.
  *
@@ -348,7 +350,8 @@ SOPC_StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvi
  * ------------------------------------------------------------------------------------------------
  */
 
-/** \brief          Encrypts a padded payload \p pInput of \p lenPlainText bytes.
+/**
+ * \brief           Encrypts a padded payload \p pInput of \p lenPlainText bytes.
  *
  *                  Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
  *                  Does not apply a padding scheme, which must be done before calling this function.
@@ -380,7 +383,8 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput);
 
-/** \brief          Decrypts a payload \p pInput of \p lenPlainText bytes into a padded deciphered payload \p pOutput.
+/**
+ * \brief           Decrypts a payload \p pInput of \p lenPlainText bytes into a padded deciphered payload \p pOutput.
  *
  *                  Writes the deciphered payload in \p pOutput of \p lenOutput bytes.
  *                  Does not use a padding scheme, which must be done after calling this function
@@ -414,7 +418,8 @@ SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput);
 
-/** \brief          Signs a payload \p pInput of \p lenInput bytes, writes the signature in \p pOutput of \p lenOutput bytes.
+/**
+ * \brief           Signs a payload \p pInput of \p lenInput bytes, writes the signature in \p pOutput of \p lenOutput bytes.
  *
  *                  The signature is as long as the underlying hash digest, which size is computed with
  *                  CryptoProvider_SymmetricGetLength_Signature().
@@ -443,7 +448,8 @@ SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
                                         uint8_t *pOutput,
                                         uint32_t lenOutput);
 
-/** \brief          Verifies the signature \p pSignature of the payload \p pInput of \p lenInput bytes.
+/**
+ * \brief           Verifies the signature \p pSignature of the payload \p pInput of \p lenInput bytes.
  *
  *                  The signature is as long as the underlying hash digest, which size is computed with
  *                  CryptoProvider_SymmetricGetLength_Signature().
@@ -594,21 +600,107 @@ SOPC_StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvid
  * Asymmetric cryptography
  * ------------------------------------------------------------------------------------------------
  */
+
+/**
+ * \brief           Encrypts a payload \p pInput of \p lenInput bytes.
+ *
+ *                  Writes the ciphered payload in \p pOutput of \p lenOutput bytes.
+ *                  The message may be padded. Depending on the chosen security policy, optimal padding
+ *                  is performed if \p lenPlainText is less than the maximum message size (computed with
+ *                  CryptoProvider_AsymmetricGetLength_MsgPlainText()).
+ *                  If the payload is larger than the maximum message size for a single encryption pass,
+ *                  it is split in several smaller messages of at most that maximum length.
+ *
+ *                  The key is usually taken from a signed public key (Certificate,
+ *                  KeyManager_Certificate_GetPublicKey()) and is the public key of the receiver.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pInput    A valid pointer to the payload to cipher. The payload may be padded by the function, if necessary.
+ * \param lenInput  Length in bytes of the payload to cipher.
+ * \param pKey      A valid pointer to an AsymmetricKey containing the asymmetric encryption key (public key).
+ * \param pOutput   A valid pointer to the buffer which will contain the ciphered payload.
+ * \param lenOutput The exact length of the ciphered payload. CryptoProvider_AsymmetricGetLength_Encryption()
+ *                  provides the expected size of this buffer.
+ *
+ * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_AsymmetricEncrypt(const CryptoProvider *pProvider,
                                             const uint8_t *pInput,
                                             uint32_t lenInput,
                                             const AsymmetricKey *pKey,
                                             uint8_t *pOutput,
                                             uint32_t lenOutput);
+
+/**
+ * \brief           Decrypts a payload \p pInput of \p lenInput bytes.
+ *
+ *                  Writes the deciphered payload in \p pOutput of \p lenOutput bytes.
+ *                  Depending on the chosen security policy, when the message was padded with
+ *                  CryptoProvider_AsymmetricEncrypt(), the output is unpadded by this function and the initial payload
+ *                  is written to \p pOutput.
+ *                  If the payload is larger than the maximum message size for a single decryption pass,
+ *                  it is split in several smaller messages of at most that maximum length
+ *                  (CryptoProvider_AsymmetricGetLength_MsgCipherText()).
+ *
+ *                  The key is usually taken from a private key (Certificate,
+ *                  KeyManager_AsymmetricKey_CreateFromFile()) and is the private key of the sender.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pInput    A valid pointer to the payload to cipher. The payload may be padded by the function, if necessary.
+ * \param lenInput  Length in bytes of the payload to cipher.
+ * \param pKey      A valid pointer to an AsymmetricKey containing the asymmetric decryption key (private key).
+ * \param pOutput   A valid pointer to the buffer which will contain the deciphered payload.
+ * \param lenOutput The exact length of the deciphered payload. CryptoProvider_AsymmetricGetLength_Decryption()
+ *                  provides the expected size of this buffer.
+ * \param pLenWritten  An optional pointer to the length in bytes that are written to the \p pOutput buffer.
+ *                     Useful to determine the actual size of the plain text.
+ *
+ * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider,
                                             const uint8_t *pInput,
                                             uint32_t lenInput,
                                             const AsymmetricKey *pKey,
                                             uint8_t *pOutput,
                                             uint32_t lenOutput,
-                                            uint32_t *lenWritten);
+                                            uint32_t *pLenWritten);
 
-/*
+/**
+ * \brief           Signs a payload \p pInput of \p lenInput bytes.
+ *
+ *                  Writes the signature to \p pSignature, which is exactly \p lenSignature bytes long.
+ *                  The signature is as long as a single ciphered message, which size is computed with
+ *                  CryptoProvider_AsymmetricGetLength_Signature().
+ *                  Usually, the unpadded plain text message is signed.
+ *                  The asymmetric signature process first hashes the \p pInput.
+ *
+ *                  The key is usually taken from a private key (KeyManager_AsymmetricKey_CreateFromFile())
+ *                  and is the private key of the sender, which authenticates the sender as the signer.
+ *
+ *                  The signature is already encrypted and does not require to be ciphered again before
+ *                  being sent to the receiver.
+ *
+ * \note            The signature process may use the entropy source of the CryptoProvider
+ *                  (depending on the current security policy).
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pInput    A valid pointer to the payload to sign.
+ * \param lenInput  Length in bytes of the payload to sign.
+ * \param pKeyPrivateLocal  A valid pointer to an AsymmetricKey containing the asymmetric signing key (private key of the sender).
+ * \param pSignature   A valid pointer to the buffer which will contain the signature.
+ * \param lenSignature The exact length of the signature payload. CryptoProvider_AsymmetricGetLength_Signature()
+ *                  provides the expected size of this buffer.
+ *
+ * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ *
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized or sizes are incorrect,
  *                  and STATUS_NOK when there was an error (e.g. no entropy source).
@@ -619,6 +711,35 @@ SOPC_StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
                                          const AsymmetricKey *pKeyPrivateLocal,
                                          uint8_t *pSignature,
                                          uint32_t lenSignature);
+
+/**
+ * \brief           Verifies the signature \p pSignature of a payload \p pInput of \p lenInput bytes.
+ *
+ *                  The signature \p pSignature is exactly \p lenSignature bytes long.
+ *                  The signature is as long as a single ciphered message, which size is computed with
+ *                  CryptoProvider_AsymmetricGetLength_Signature().
+ *                  The asymmetric verify process first deciphers the signature which should provide
+ *                  the hash of \pInput.
+ *                  Usually, the unpadded plain text message is signed.
+ *
+ *                  The key is usually taken from a public key (Certificate,
+ *                  KeyManager_Certificate_GetPublicKey()) and is the public key of the sender,
+ *                  which authenticates the sender as the signer.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pInput    A valid pointer to the signed payload to verify.
+ * \param lenInput  Length in bytes of the signed payload to verify.
+ * \param pKeyRemotePublic  A valid pointer to an AsymmetricKey containing the asymmetric verification key (public key of the sender).
+ * \param pSignature   A valid pointer to the buffer which will contain the signature.
+ * \param lenSignature The exact length of the signature payload. CryptoProvider_AsymmetricGetLength_Signature()
+ *                  provides the expected size of this buffer.
+ *
+ * \note            Contents of the outputs is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error.
+ */
 SOPC_StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenInput,

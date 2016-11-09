@@ -818,7 +818,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider
                                             const AsymmetricKey *pKey,
                                             uint8_t *pOutput,
                                             uint32_t lenOutput,
-                                            uint32_t *lenWritten /**< lenWritten can be NULL */)
+                                            uint32_t *pLenWritten)
 {
     uint32_t lenOutCalc = 0;
     uint32_t lenKey = 0;
@@ -849,7 +849,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider
     }
 
     // We can now proceed
-    return pProvider->pProfile->pFnAsymDecrypt(pProvider, pInput, lenInput, pKey, pOutput, lenWritten);
+    return pProvider->pProfile->pFnAsymDecrypt(pProvider, pInput, lenInput, pKey, pOutput, pLenWritten);
 }
 
 
