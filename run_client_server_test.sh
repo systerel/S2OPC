@@ -46,7 +46,7 @@ SERVER_EXITCODE=`cat server.exitcode`
 if [[ $CLIENT_EXITCODE -eq 0 && $SERVER_EXITCODE -eq 0 ]]; then
     echo "ok 2 - test: stub_client_ingopcs / stub_server: Passed" >> client_server_result.tap
 else
-    echo "not ok 2 - test: stub_client_ingopcs / stub_server exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" > client_server_result.tap
+    echo "not ok 2 - test: stub_client_ingopcs / stub_server exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
 fi
 echo "1..2" >> client_server_result.tap
 # Clean created files
