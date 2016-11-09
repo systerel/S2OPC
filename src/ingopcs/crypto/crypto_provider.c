@@ -375,11 +375,15 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
     SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer* pExpKey = NULL;
     ExposedBuffer* pExpIV = NULL;
+    uint32_t lenCiphered = 0;
 
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput ||
        NULL == pProvider->pProfile->pFnSymmEncrypt)
         return STATUS_INVALID_PARAMETERS;
-    if(lenPlainText != lenOutput) // TODO: use CryptoProvider API to check this length.
+
+    if(CryptoProvider_SymmetricGetLength_Encryption(pProvider, lenPlainText, &lenCiphered) != STATUS_OK)
+        return STATUS_NOK;
+    if(lenCiphered != lenOutput)
         return STATUS_INVALID_PARAMETERS;
 
     // TODO: unit-test these watchdogs
@@ -421,11 +425,15 @@ SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
     SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer* pExpKey = NULL;
     ExposedBuffer* pExpIV = NULL;
+    uint32_t lenDeciphered = 0;
 
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pIV || NULL == pOutput ||
        NULL == pProvider->pProfile->pFnSymmDecrypt)
         return STATUS_INVALID_PARAMETERS;
-    if(lenCipherText != lenOutput)
+
+    if(CryptoProvider_SymmetricGetLength_Decryption(pProvider, lenCipherText, &lenDeciphered) != STATUS_OK)
+        return STATUS_NOK;
+    if(lenDeciphered != lenOutput)
         return STATUS_INVALID_PARAMETERS;
 
     // TODO: unit-test these watchdogs
