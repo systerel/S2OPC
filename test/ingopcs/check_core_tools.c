@@ -4,8 +4,20 @@
  * If you want to debug the exe, you should define env var CK_FORK=no
  * http://check.sourceforge.net/doc/check_html/check_4.html#No-Fork-Mode
  *
- *  Created on: Oct 7, 2016
- *      Author: VMO
+ *  Copyright (C) 2016 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 
