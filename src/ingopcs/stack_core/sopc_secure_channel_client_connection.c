@@ -219,7 +219,7 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     }
 
     if(status == STATUS_OK){
-        status = CryptoProvider_SymmetricGenerateKey(cConnection->instance->currentCryptoProvider,
+        status = CryptoProvider_GenerateSecureChannelNonce(cConnection->instance->currentCryptoProvider,
                                                      &cConnection->instance->currentNonce);
 
         if(status == STATUS_OK){

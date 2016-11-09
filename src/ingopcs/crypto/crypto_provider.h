@@ -493,29 +493,30 @@ SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
                                           const uint8_t *pSignature,
                                           uint32_t lenOutput);
 
-/**
- * \brief           Generates a single truly random symmetric key for the current security policy.
- *
- *                  Uses the entropy generator provided by the underlying cryptographic library.
- *                  The new SecretBuffer is to be freed by the caller.
- *
- * \note            Helper. You should use CryptoProvider_DeriveKeySets() instead.
- *
- * \param pProvider An initialized cryptographic context.
- * \param ppKeyGenerated  A valid handle to the newly created SecretBuffer.
- *
- * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized or sizes are incorrect,
- *                  and STATUS_NOK when there was an error (e.g. no entropy source).
- */
-SOPC_StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
-                                               SecretBuffer **ppKeyGenerated);
-
 
 /* ------------------------------------------------------------------------------------------------
  * Key derivation
  * ------------------------------------------------------------------------------------------------
  */
+
+/**
+ * \brief           Generates a single truly random nonce for the SecureChannel creation.
+ *
+ *                  The length of the nonce is defined by the current security policy (see *TBD*).
+ *                  Uses the entropy generator provided by the underlying cryptographic library.
+ *                  The new SecretBuffer is to be freed by the caller.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param ppNonce   A valid handle to the newly created SecretBuffer.
+ *
+ * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error (e.g. no entropy source).
+ */
+SOPC_StatusCode CryptoProvider_GenerateSecureChannelNonce(const CryptoProvider *pProvider,
+                                                          SecretBuffer **ppNonce);
 
 /**
  * \brief           Derives pseudo-random data from the randomly generated and shared secrets.

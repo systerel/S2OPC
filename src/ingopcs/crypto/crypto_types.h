@@ -60,8 +60,9 @@ typedef SOPC_StatusCode (*FnSymmetricVerify) (const struct CryptoProvider *pProv
                                          uint32_t lenInput,
                                          const ExposedBuffer *pKey,
                                          const uint8_t *pSignature);
-typedef SOPC_StatusCode (*FnSymmetricGenKey) (const struct CryptoProvider *pProvider,
-                                         ExposedBuffer *pKey);
+typedef SOPC_StatusCode (*FnGenerateRandom) (const struct CryptoProvider *pProvider,
+                                             ExposedBuffer *pData,
+                                             uint32_t lenData);
 typedef SOPC_StatusCode (*FnDerivePseudoRandomData) (const struct CryptoProvider *pProvider,
                                                 const ExposedBuffer *pSecret,
                                                 uint32_t lenSecret,
@@ -100,7 +101,7 @@ typedef struct CryptoProfile
     const FnSymmetricDecrypt    pFnSymmDecrypt;
     const FnSymmetricSign       pFnSymmSign;
     const FnSymmetricVerify     pFnSymmVerif;
-    const FnSymmetricGenKey     pFnSymmGenKey;
+    const FnGenerateRandom      pFnGenRnd;
     const FnDerivePseudoRandomData  pFnDeriveData;
     const FnAsymmetricEncrypt   pFnAsymEncrypt;
     const FnAsymmetricDecrypt   pFnAsymDecrypt;

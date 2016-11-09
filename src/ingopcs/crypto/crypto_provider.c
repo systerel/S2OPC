@@ -550,35 +550,42 @@ SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
 }
 
 
-SOPC_StatusCode CryptoProvider_SymmetricGenerateKey(const CryptoProvider *pProvider,
-                                               SecretBuffer **ppKeyGenerated)
+/* ------------------------------------------------------------------------------------------------
+ * Symmetric cryptography
+ * ------------------------------------------------------------------------------------------------
+ */
+
+
+SOPC_StatusCode CryptoProvider_GenerateSecureChannelNonce(const CryptoProvider *pProvider,
+                                               SecretBuffer **ppNonce)
 {
     SOPC_StatusCode status = STATUS_OK;
     ExposedBuffer *pExpKey;
-    uint32_t lenKeyAPI;
+    uint32_t lenNonce;
 
-    if(NULL == pProvider || NULL == ppKeyGenerated || NULL == pProvider->pProfile->pFnSymmGenKey)
+    if(NULL == pProvider || NULL == ppNonce || NULL == pProvider->pProfile->pFnGenRnd)
         return STATUS_INVALID_PARAMETERS;
 
     // Empties pointer in case an error occurs after that point.
-    *ppKeyGenerated = NULL;
+    *ppNonce = NULL;
 
-    if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKeyAPI) != STATUS_OK)
+    // TODO: provide a GetLength_SecureChannelNonce and use it here
+    if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenNonce) != STATUS_OK)
         return STATUS_NOK;
 
-    pExpKey = (ExposedBuffer *)malloc(lenKeyAPI);
+    pExpKey = (ExposedBuffer *)malloc(lenNonce);
     if(NULL == pExpKey)
         return STATUS_NOK;
 
-    status = pProvider->pProfile->pFnSymmGenKey(pProvider, pExpKey);
+    status = pProvider->pProfile->pFnGenRnd(pProvider, pExpKey, lenNonce);
     if(STATUS_OK == status)
     {
-        *ppKeyGenerated = SecretBuffer_NewFromExposedBuffer(pExpKey, lenKeyAPI);
-        if(NULL == *ppKeyGenerated)
+        *ppNonce = SecretBuffer_NewFromExposedBuffer(pExpKey, lenNonce);
+        if(NULL == *ppNonce)
             status = STATUS_NOK;
     }
 
-    memset(pExpKey, 0, lenKeyAPI);
+    memset(pExpKey, 0, lenNonce);
     free(pExpKey);
 
     return status;

@@ -158,17 +158,15 @@ SOPC_StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pPro
 }
 
 
-// Fills pKey with SecurityPolicy_Basic256Sha256_Symm_KeyLength bytes of random data
-SOPC_StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
-                                            ExposedBuffer *pKey)
+// Fills a buffer with "truly" random data
+SOPC_StatusCode CryptoProvider_GenTrueRnd(const CryptoProvider *pProvider,
+                                          ExposedBuffer *pData,
+                                          uint32_t lenData)
 {
     CryptolibContext *pCtx = NULL;
 
-    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pProvider->pCryptolibContext || NULL == pKey)
-        return STATUS_INVALID_PARAMETERS;
-
     pCtx = pProvider->pCryptolibContext;
-    if(mbedtls_ctr_drbg_random(&(pCtx->ctxDrbg), pKey, SecurityPolicy_Basic256Sha256_SymmLen_Key) != 0)
+    if(mbedtls_ctr_drbg_random(&(pCtx->ctxDrbg), pData, lenData) != 0)
         return STATUS_NOK;
 
     return STATUS_OK;

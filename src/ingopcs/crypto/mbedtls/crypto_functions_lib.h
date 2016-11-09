@@ -58,8 +58,9 @@ SOPC_StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pPro
                                                         uint32_t lenInput,
                                                         const ExposedBuffer *pKey,
                                                         const uint8_t *pSignature);
-SOPC_StatusCode CryptoProvider_SymmGenKey_AES256(const CryptoProvider *pProvider,
-                                            ExposedBuffer *pKey);
+SOPC_StatusCode CryptoProvider_GenTrueRnd(const CryptoProvider *pProvider,
+                                          ExposedBuffer *pData,
+                                          uint32_t lenData);
 SOPC_StatusCode CryptoProvider_DeriveData_PRF_SHA256(const CryptoProvider *pProvider,
                                                 const ExposedBuffer *pSecret,
                                                 uint32_t lenSecret,
