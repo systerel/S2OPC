@@ -34,12 +34,10 @@ BUILD_DIR_SED=$(subst /,\/,$(BUILD_DIR))
 ## Directories
 ### srcs directories definition
 UASTACK_DIR=$(WORKSPACE_DIR)/src/ingopcs/
-FUASTACK_DIR=$(WORKSPACE_DIR)/src/foundation/
-STUBSERVER_DIR=$(WORKSPACE_DIR)/stub_server
 STUBCLIENT_DIR=$(WORKSPACE_DIR)/stub_client
 TESTS_DIR=$(WORKSPACE_DIR)/test/ingopcs
 ### concatenate all srcs directories
-C_SRC_DIRS=$(UASTACK_DIR) $(STUBCLIENT_DIR) $(TESTS_DIR) #$(STUBSERVER_DIR) 
+C_SRC_DIRS=$(UASTACK_DIR) $(STUBCLIENT_DIR) $(TESTS_DIR)
 
 ## Stack
 ### includes stack
@@ -64,28 +62,6 @@ TESTS_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(TESTS_SRC_FILES))
 C_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.c")
 H_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.h")
 
-################################## TEMPORARY FOUNDATION code compilation ####################
-FBUILD_DIR=$(WORKSPACE_DIR)/fbuild
-FBUILD_DIR_SED=$(subst /,\/,$(FBUILD_DIR))
-## Directories
-### srcs directories definition
-FUASTACK_DIR=$(WORKSPACE_DIR)/src/foundation/
-### concatenate all srcs directories
-C_FSRC_DIRS=$(FUASTACK_DIR) $(STUBSERVER_DIR)
-
-## Stack
-### includes stack
-INCLUDES_FUASTACK=$(shell find $(FUASTACK_DIR) -not -path $(EXCLUDE_DIR) -type d)
-## object files stack
-FUASTACK_SRC_FILES=$(shell find $(FUASTACK_DIR) -not -path $(EXCLUDE_DIR) -type f -name "*.c" -exec basename "{}" \;)
-FUASTACK_OBJ_FILES=$(patsubst %.c,$(FBUILD_DIR)/%.o,$(FUASTACK_SRC_FILES))
-
-## All .c and .h files to compute dependencies
-C_FSRC_PATHS=$(shell find $(C_FSRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.c")
-FINCLUDES=$(INCLUDES_SSL) $(addprefix -I, $(INCLUDES_FUASTACK))
-############################# END TEMPORARY FOUNDATION code compilation ####################
-
-
 # MBEDTLS INPUTS
 MBEDTLS_DIR=$(WORKSPACE_DIR)/lib/mbedtls-2.3.0
 INCLUDES_MBEDTLS=-I$(MBEDTLS_DIR)/include
@@ -101,18 +77,17 @@ DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=
 # MAKEFILE CONTENT
 
 .PHONY : all doc config mbedtls check clean clean_mbedtls cleanall
-.DELETE_ON_ERROR : .depend.tmp .depend .pdepend .fdepend
+.DELETE_ON_ERROR : .depend.tmp .depend .pdepend
 
 default: all
 
-all: config $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/check_stack $(EXEC_DIR)/stub_server
+all: config $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/check_stack
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
 ifneq ($(MAKECMDGOALS),doc)
 -include .depend
 -include .pdepend
--include .fdepend
 endif
 endif
 endif
@@ -150,10 +125,6 @@ $(PLATFORM_BUILD_DIR)/%.o:
 	@echo "Building platform dependencies..."
 	@sed 's/^\(.*\)\.o:/$(PLATFORM_BUILD_DIR_SED)\/\1.o:/g' $^.tmp > $@
 
-$(EXEC_DIR)/stub_client: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client.o
-	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
-
 $(EXEC_DIR)/stub_client_ingopcs: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o
 	@echo "Linking $@..."
 	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
@@ -162,7 +133,7 @@ $(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/ch
 	@echo "Linking $@..."
 	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
-client_server_test: $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server
+client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server
 	./run_client_server_test.sh
 
 mbedtls:
@@ -180,21 +151,6 @@ clean_mbedtls:
 clean:
 	@echo "Cleaning..."
 	@\rm -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR) apidoc
-	@\rm -f .depend.tmp .depend .pdepend .fdepend
+	@\rm -f .depend.tmp .depend .pdepend
 
 cleanall: clean clean_mbedtls
-
-################################## TEMPORARY FOUNDATION code compilation ####################
-$(FBUILD_DIR)/%.o:
-	@echo "  CC $@"
-	@$(CC) $(CFLAGS) $(FINCLUDES) $< -o $@ $(DEFS)
-
-.fdepend: $(C_FSRC_PATHS)
-	@echo "Building foundation dependencies..."
-	@$(CC) $(FLAGS) $(DEFS) $(FINCLUDES) -MM $(C_FSRC_PATHS) > $@
-	@sed 's/^\(.*\)\.o:/$(FBUILD_DIR_SED)\/\1.o:/g' -i $@
-
-$(EXEC_DIR)/stub_server: $(FUASTACK_OBJ_FILES) $(FBUILD_DIR)/stub_server.o
-	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(FINCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
-	@$(COPY_SSL)

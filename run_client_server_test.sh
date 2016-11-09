@@ -9,25 +9,6 @@ echo "#!/bin/bash
 echo \$? > server.exitcode" > test_server.sh
 chmod +x test_server.sh
 
-## FOUNDATION API VERSION
-# Execute server side of the test
-./test_server.sh &
-sleep 1 # Wait server started
-
-# Execute client side of the test and retrieve exit code
-./stub_client
-CLIENT_EXITCODE="$?"
-# Wait end of server side execution and retrieve exit code
-sleep 10
-SERVER_EXITCODE=`cat server.exitcode`
-
-# Fullfil TAP result
-if [[ $CLIENT_EXITCODE -eq 0 && $SERVER_EXITCODE -eq 0 ]]; then
-    echo "ok 1 - test: stub_client / stub_server: Passed" > client_server_result.tap
-else
-    echo "not ok 1 - test: stub_client / stub_server exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" > client_server_result.tap
-fi
-
 ## INGOPCS API VERSION
 # remove precedent exit code file
 rm -f server.exitcode
@@ -44,10 +25,10 @@ SERVER_EXITCODE=`cat server.exitcode`
 
 # Fullfil TAP result
 if [[ $CLIENT_EXITCODE -eq 0 && $SERVER_EXITCODE -eq 0 ]]; then
-    echo "ok 2 - test: stub_client_ingopcs / stub_server: Passed" >> client_server_result.tap
+    echo "ok 1 - test: stub_client_ingopcs / stub_server: Passed" >> client_server_result.tap
 else
-    echo "not ok 2 - test: stub_client_ingopcs / stub_server exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
+    echo "not ok 1 - test: stub_client_ingopcs / stub_server exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" >> client_server_result.tap
 fi
-echo "1..2" >> client_server_result.tap
+echo "1..1" >> client_server_result.tap
 # Clean created files
 rm -f server.exitcode test_server.sh
