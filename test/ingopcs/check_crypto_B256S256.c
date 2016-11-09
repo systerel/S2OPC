@@ -1,4 +1,4 @@
-/** \file check_crypto_B256S256
+/** \file
  *
  * Cryptographic test suite. This suite tests Basic256Sha256.
  * See check_stack.c for more details.

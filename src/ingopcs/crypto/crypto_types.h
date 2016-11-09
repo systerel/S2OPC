@@ -1,5 +1,6 @@
-/*
- * Defines the cryptographic structures: CryptoProfiles and CryptoProviders.
+/** \file
+ *
+ * \brief Defines the cryptographic structures: CryptoProfiles and CryptoProviders.
  *
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -127,5 +128,5 @@ typedef struct CryptoProvider
 } CryptoProvider;
 
 
-#endif // INGOPCS_CRYPTO_TYPES_H_
+#endif /* INGOPCS_CRYPTO_TYPES_H_ */
 

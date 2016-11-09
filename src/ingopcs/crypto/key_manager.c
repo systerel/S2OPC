@@ -1,4 +1,5 @@
-/*
+/** \file
+ *
  * KeyManager provides functions for Asymmetric Key Management such as loading a signed public key,
  *  the corresponding private key, and provides the ability to verify signatures with x509 certificates.
  * KeyManager replaces the old concept of PKIProvider. PrivateKey should not be in the PublicKeyInfrastructure...

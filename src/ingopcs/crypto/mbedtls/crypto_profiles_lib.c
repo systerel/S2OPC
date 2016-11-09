@@ -1,4 +1,5 @@
-/*
+/** \file
+ *
  * Defines the cryptographic profiles: the set of functions associated to each cryptographic profiles.
  * These profiles are defined as struct of pointers. These immutable struct are extern and const, so that a profile
  * could not be modified before execution time.

@@ -59,4 +59,4 @@ typedef struct CertificateRevList {
 } CertificateRevList;
 
 
-#endif // INGOPCS_KEY_MANAGER_LIB_H_
+#endif /* INGOPCS_KEY_MANAGER_LIB_H_ */

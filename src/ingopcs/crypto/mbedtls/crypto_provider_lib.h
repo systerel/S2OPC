@@ -1,5 +1,6 @@
-/*
- * Defines the library specific structures.
+/** \file
+ *
+ * Defines the library specific structure CryptolibContext.
  *
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -30,4 +31,4 @@ typedef struct CryptolibContext {
 } CryptolibContext;
 
 
-#endif // INGOPCS_CRYPTO_PROVIDER_LIB_H_
+#endif /* INGOPCS_CRYPTO_PROVIDER_LIB_H_ */

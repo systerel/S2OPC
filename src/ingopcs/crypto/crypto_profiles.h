@@ -1,4 +1,5 @@
-/*
+/** \file
+ *
  * Defines constants for the cryptographic profiles. CryptoProfiles are defined in crypto_types and
  * are defined as struct of pointers. These immutable struct are extern and const, because they are
  * lib-specific (hence CryptoProfile_Get and these variables are in different translation units).
@@ -49,4 +50,4 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 extern const CryptoProfile g_cpBasic256Sha256;
 
 
-#endif  // INGOPCS_CRYPTO_PROFILES_H_
+#endif  /* INGOPCS_CRYPTO_PROFILES_H_ */

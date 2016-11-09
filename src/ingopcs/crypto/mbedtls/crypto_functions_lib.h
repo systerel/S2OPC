@@ -1,4 +1,5 @@
-/*
+/** \file
+ *
  * Gathers the definitions of the lib-specific and crypto-related functions.
  * Sources for these functions should be split in the future to provide
  * finer grained linking options (https://www.ingopcs.net/trac/ingopcs.projects/ticket/187).
@@ -19,6 +20,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+#ifndef SOPC_CRYPTO_FUNCTIONS_LIB_
+#define SOPC_CRYPTO_FUNCTIONS_LIB_
 
 #include "sopc_base_types.h"
 #include "secret_buffer.h"
@@ -124,3 +128,6 @@ SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider 
 
 SOPC_StatusCode CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const CryptoProvider *pCrypto,
                                                           const Certificate *pCert);
+
+
+#endif /* SOPC_CRYPTO_FUNCTIONS_LIB_ */
