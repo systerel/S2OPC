@@ -878,7 +878,7 @@ SOPC_StatusCode EncodePadding(SC_Connection* scConnection,
                                             plainBlockSize,
                                             *signatureSize);
         //Little endian conversion of padding:
-        EncodeDecode_UInt16(realPaddingLength);
+        SOPC_EncodeDecode_UInt16(realPaddingLength);
         status = Buffer_Write(msgBuffer->buffers, (SOPC_Byte*) realPaddingLength, 1);
         paddingSizeField = 0xFF & *realPaddingLength;
 

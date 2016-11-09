@@ -24,7 +24,7 @@
 #include "sopc_encodeable.h"
 #include "sopc_tcp_ua_low_level.h"
 
-void EncodeDecode_Int16(int16_t* intv)
+void SOPC_EncodeDecode_Int16(int16_t* intv)
 {
     uint16_t* twoBytes = (uint16_t*) intv;
     assert(endianess != P_Endianess_Undefined);
@@ -33,7 +33,7 @@ void EncodeDecode_Int16(int16_t* intv)
     }
 }
 
-void EncodeDecode_UInt16(uint16_t* uintv)
+void SOPC_EncodeDecode_UInt16(uint16_t* uintv)
 {
     assert(endianess != P_Endianess_Undefined);
     if(endianess == P_Endianess_BigEndian){
@@ -41,7 +41,7 @@ void EncodeDecode_UInt16(uint16_t* uintv)
     }
 }
 
-void EncodeDecode_Int32(int32_t* intv)
+void SOPC_EncodeDecode_Int32(int32_t* intv)
 {
     assert(endianess != P_Endianess_Undefined);
     uint32_t* fourBytes = (uint32_t*) intv;
@@ -51,7 +51,7 @@ void EncodeDecode_Int32(int32_t* intv)
 }
 
 
-void EncodeDecode_UInt32(uint32_t* uintv)
+void SOPC_EncodeDecode_UInt32(uint32_t* uintv)
 {
     assert(endianess != P_Endianess_Undefined);
     if(endianess == P_Endianess_BigEndian){
@@ -59,7 +59,7 @@ void EncodeDecode_UInt32(uint32_t* uintv)
     }
 }
 
-void EncodeDecode_Int64(int64_t* intv)
+void SOPC_EncodeDecode_Int64(int64_t* intv)
 {
     assert(endianess != P_Endianess_Undefined);
     uint64_t* eightBytes = (uint64_t*) intv;
@@ -68,7 +68,7 @@ void EncodeDecode_Int64(int64_t* intv)
     }
 }
 
-void EncodeDecode_UInt64(uint64_t* uintv)
+void SOPC_EncodeDecode_UInt64(uint64_t* uintv)
 {
     assert(endianess != P_Endianess_Undefined);
     if(endianess == P_Endianess_BigEndian){
@@ -76,7 +76,7 @@ void EncodeDecode_UInt64(uint64_t* uintv)
     }
 }
 
-void EncodeDecode_Float(float* floatv){
+void SOPC_EncodeDecode_Float(float* floatv){
     assert(floatEndianess != P_Endianess_Undefined);
     uint32_t* fourBytes = (uint32_t*) floatv;
     if(floatEndianess == P_Endianess_BigEndian){
@@ -84,7 +84,7 @@ void EncodeDecode_Float(float* floatv){
     }
 }
 
-void EncodeDecode_Double(double* doublev){
+void SOPC_EncodeDecode_Double(double* doublev){
     assert(floatEndianess != P_Endianess_Undefined);
     uint64_t* eightBytes = (uint64_t*) doublev;
     if(floatEndianess == P_Endianess_BigEndian){
@@ -165,7 +165,7 @@ SOPC_StatusCode SOPC_Int16_Write(const int16_t* value, SOPC_MsgBuffer* msgBuffer
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         int16_t encodedValue = *value;
-        EncodeDecode_Int16(&encodedValue);
+        SOPC_EncodeDecode_Int16(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
     }
     return status;
@@ -180,7 +180,7 @@ SOPC_StatusCode SOPC_Int16_Read(int16_t* value, SOPC_MsgBuffer* msgBuffer)
     }else{
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)&readValue, 2, msgBuffer, 2);
         if(status == STATUS_OK){
-            EncodeDecode_Int16(&readValue);
+            SOPC_EncodeDecode_Int16(&readValue);
             *value = readValue;
         }
     }
@@ -192,7 +192,7 @@ SOPC_StatusCode SOPC_UInt16_Write(const uint16_t* value, SOPC_MsgBuffer* msgBuff
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         uint16_t encodedValue = *value;
-        EncodeDecode_UInt16(&encodedValue);
+        SOPC_EncodeDecode_UInt16(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
     }
     return status;
@@ -206,7 +206,7 @@ SOPC_StatusCode SOPC_UInt16_Read(uint16_t* value, SOPC_MsgBuffer* msgBuffer)
     }else{
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 2, msgBuffer, 2);
         if(status == STATUS_OK){
-            EncodeDecode_UInt16(value);
+            SOPC_EncodeDecode_UInt16(value);
         }
     }
     return status;
@@ -217,7 +217,7 @@ SOPC_StatusCode SOPC_Int32_Write(const int32_t* value, SOPC_MsgBuffer* msgBuffer
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         int32_t encodedValue = *value;
-        EncodeDecode_Int32(&encodedValue);
+        SOPC_EncodeDecode_Int32(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
@@ -229,7 +229,7 @@ SOPC_StatusCode SOPC_Int32_Read(int32_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
-            EncodeDecode_Int32(value);
+            SOPC_EncodeDecode_Int32(value);
         }
     }
     return status;
@@ -240,7 +240,7 @@ SOPC_StatusCode SOPC_UInt32_Write(const uint32_t* value, SOPC_MsgBuffer* msgBuff
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         uint32_t encodedValue = *value;
-        EncodeDecode_UInt32(&encodedValue);
+        SOPC_EncodeDecode_UInt32(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
@@ -252,7 +252,7 @@ SOPC_StatusCode SOPC_UInt32_Read(uint32_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
-            EncodeDecode_UInt32(value);
+            SOPC_EncodeDecode_UInt32(value);
         }
     }
     return status;
@@ -263,7 +263,7 @@ SOPC_StatusCode SOPC_Int64_Write(const int64_t* value, SOPC_MsgBuffer* msgBuffer
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         int64_t encodedValue = *value;
-        EncodeDecode_Int64(&encodedValue);
+        SOPC_EncodeDecode_Int64(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
@@ -275,7 +275,7 @@ SOPC_StatusCode SOPC_Int64_Read(int64_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*) value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
-            EncodeDecode_Int64(value);
+            SOPC_EncodeDecode_Int64(value);
         }
     }
     return status;
@@ -286,7 +286,7 @@ SOPC_StatusCode SOPC_UInt64_Write(const uint64_t* value, SOPC_MsgBuffer* msgBuff
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         uint64_t encodedValue = *value;
-        EncodeDecode_UInt64(&encodedValue);
+        SOPC_EncodeDecode_UInt64(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
@@ -298,7 +298,7 @@ SOPC_StatusCode SOPC_UInt64_Read(uint64_t* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*) value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
-            EncodeDecode_UInt64(value);
+            SOPC_EncodeDecode_UInt64(value);
         }
     }
     return status;
@@ -309,7 +309,7 @@ SOPC_StatusCode SOPC_Float_Write(const float* value, SOPC_MsgBuffer* msgBuffer)
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         float encodedValue = *value;
-        EncodeDecode_Float(&encodedValue);
+        SOPC_EncodeDecode_Float(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
@@ -321,7 +321,7 @@ SOPC_StatusCode SOPC_Float_Read(float* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 4, msgBuffer, 4);
         if(status == STATUS_OK){
-            EncodeDecode_Float(value);
+            SOPC_EncodeDecode_Float(value);
         }
     }
     return status;
@@ -332,7 +332,7 @@ SOPC_StatusCode SOPC_Double_Write(const double* value, SOPC_MsgBuffer* msgBuffer
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(value != NULL){
         double encodedValue = *value;
-        EncodeDecode_Double(&encodedValue);
+        SOPC_EncodeDecode_Double(&encodedValue);
         status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
@@ -344,7 +344,7 @@ SOPC_StatusCode SOPC_Double_Read(double* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)value, 8, msgBuffer, 8);
         if(status == STATUS_OK){
-            EncodeDecode_Double(value);
+            SOPC_EncodeDecode_Double(value);
         }
     }
     return status;
@@ -381,7 +381,7 @@ SOPC_StatusCode SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_MsgBuffer* msgBu
     }else{
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)&length, 4, msgBuffer, 4);
         if(status == STATUS_OK){
-            EncodeDecode_Int32(&length);
+            SOPC_EncodeDecode_Int32(&length);
             if(length > 0){
                 str->Length = length;
                 str->Data = malloc(sizeof(SOPC_Byte) * length);
@@ -417,7 +417,7 @@ SOPC_StatusCode SOPC_String_Read(SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
     }else{
         status = TCP_UA_ReadMsgBuffer((SOPC_Byte*)&length, 4, msgBuffer, 4);
         if(status == STATUS_OK){
-            EncodeDecode_Int32(&length);
+            SOPC_EncodeDecode_Int32(&length);
             if(length > 0){
                 str->Length = length;
                 // +1 to add '\0' character for CString compatibility

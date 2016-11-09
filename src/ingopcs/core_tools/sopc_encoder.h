@@ -81,7 +81,7 @@ typedef enum {
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
  */
-void EncodeDecode_Int16(int16_t* intv);
+void SOPC_EncodeDecode_Int16(int16_t* intv);
 
 /**
  *  \brief Encode a unsigned 16 bits integer from machine endianess representation to binary UA encoding endianess representation.
@@ -91,7 +91,7 @@ void EncodeDecode_Int16(int16_t* intv);
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
  */
-void EncodeDecode_UInt16(uint16_t* uintv);
+void SOPC_EncodeDecode_UInt16(uint16_t* uintv);
 
 /**
  *  \brief Encode a signed 32 bits integer from machine endianess representation to binary UA encoding endianess representation.
@@ -101,7 +101,7 @@ void EncodeDecode_UInt16(uint16_t* uintv);
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
  */
-void EncodeDecode_Int32(int32_t* intv);
+void SOPC_EncodeDecode_Int32(int32_t* intv);
 
 /**
  *  \brief Encode an unsigned 32 bits integer from machine endianess representation to binary UA encoding endianess representation.
@@ -111,7 +111,7 @@ void EncodeDecode_Int32(int32_t* intv);
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
  */
-void EncodeDecode_UInt32(uint32_t* uintv);
+void SOPC_EncodeDecode_UInt32(uint32_t* uintv);
 
 /**
  *  \brief Encode a signed 64 bits integer from machine endianess representation to binary UA encoding endianess representation.
@@ -121,7 +121,7 @@ void EncodeDecode_UInt32(uint32_t* uintv);
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
  */
-void EncodeDecode_Int64(int64_t* intv);
+void SOPC_EncodeDecode_Int64(int64_t* intv);
 
 /**
  *  \brief Encode an unsigned 64 bits integer from machine endianess representation to binary UA encoding endianess representation.
@@ -131,7 +131,7 @@ void EncodeDecode_Int64(int64_t* intv);
  *
  *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
  */
-void EncodeDecode_UInt64(uint64_t* uintv);
+void SOPC_EncodeDecode_UInt64(uint64_t* uintv);
 
 /**
  *  \brief Encode a float from machine endianess representation to binary UA encoding endianess representation.
@@ -141,7 +141,7 @@ void EncodeDecode_UInt64(uint64_t* uintv);
  *
  *  \param floatv     Pointer to the integer value to encode or decode with correct endianess in place
  */
-void EncodeDecode_Float(float* floatv);
+void SOPC_EncodeDecode_Float(float* floatv);
 
 /**
  *  \brief Encode a double from machine endianess representation to binary UA encoding endianess representation.
@@ -151,7 +151,7 @@ void EncodeDecode_Float(float* floatv);
  *
  *  \param doublev     Pointer to the integer value to encode or decode with correct endianess in place
  */
-void EncodeDecode_Double(double* doublev);
+void SOPC_EncodeDecode_Double(double* doublev);
 
 SOPC_StatusCode SOPC_Byte_Write(const SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer);
 SOPC_StatusCode SOPC_Byte_Read(SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer);

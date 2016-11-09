@@ -495,13 +495,13 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes = (uint8_t*) &v16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
-    EncodeDecode_Int16(&v16);
+    SOPC_EncodeDecode_Int16(&v16);
     ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC);
 
     bytes = (uint8_t*) &vu16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
-    EncodeDecode_UInt16(&vu16);
+    SOPC_EncodeDecode_UInt16(&vu16);
     ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC);
 
     bytes = (uint8_t*) &v32;
@@ -509,7 +509,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[1] = 0xBC;
     bytes[2] = 0xCD;
     bytes[3] = 0xDE;
-    EncodeDecode_Int32(&v32);
+    SOPC_EncodeDecode_Int32(&v32);
     ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC &&
               bytes[2] == 0xCD && bytes[3] == 0xDE);
 
@@ -518,7 +518,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[1] = 0xBC;
     bytes[2] = 0xCD;
     bytes[3] = 0xDE;
-    EncodeDecode_UInt32(&vu32);
+    SOPC_EncodeDecode_UInt32(&vu32);
     ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC &&
               bytes[2] == 0xCD && bytes[3] == 0xDE);
 
@@ -531,7 +531,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[5] = 0xBC;
     bytes[6] = 0xCD;
     bytes[7] = 0xDE;
-    EncodeDecode_Int64(&v64);
+    SOPC_EncodeDecode_Int64(&v64);
     ck_assert(bytes[0] == 0x00 && bytes[1] == 0x11 &&
               bytes[2] == 0x22 && bytes[3] == 0x33 &&
               bytes[4] == 0xAB && bytes[5] == 0xBC &&
@@ -546,7 +546,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[5] = 0xBC;
     bytes[6] = 0xCD;
     bytes[7] = 0xDE;
-    EncodeDecode_UInt64(&vu64);
+    SOPC_EncodeDecode_UInt64(&vu64);
     ck_assert(bytes[0] == 0x00 && bytes[1] == 0x11 &&
               bytes[2] == 0x22 && bytes[3] == 0x33 &&
               bytes[4] == 0xAB && bytes[5] == 0xBC &&
@@ -558,7 +558,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[1] = 0x00;
     bytes[2] = 0xD0;
     bytes[3] = 0xC0;
-    EncodeDecode_Float(&vfloat);
+    SOPC_EncodeDecode_Float(&vfloat);
     ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 &&
               bytes[2] == 0xD0 && bytes[3] == 0xC0);
 
@@ -571,7 +571,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[5] = 0x00;
     bytes[6] = 0x1A;
     bytes[7] = 0xC0;
-    EncodeDecode_Double(&vdouble);
+    SOPC_EncodeDecode_Double(&vdouble);
     ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 &&
               bytes[2] == 0x00 && bytes[3] == 0x00 &&
               bytes[4] == 0x00 && bytes[5] == 0x00 &&
@@ -583,13 +583,13 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes = (uint8_t*) &v16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
-    EncodeDecode_Int16(&v16);
+    SOPC_EncodeDecode_Int16(&v16);
     ck_assert(bytes[1] == 0xAB && bytes[0] == 0xBC);
 
     bytes = (uint8_t*) &vu16;
     bytes[0] = 0xAB;
     bytes[1] = 0xBC;
-    EncodeDecode_UInt16(&vu16);
+    SOPC_EncodeDecode_UInt16(&vu16);
     ck_assert(bytes[1] == 0xAB && bytes[0] == 0xBC);
 
     bytes = (uint8_t*) &v32;
@@ -597,7 +597,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[1] = 0xBC;
     bytes[2] = 0xCD;
     bytes[3] = 0xDE;
-    EncodeDecode_Int32(&v32);
+    SOPC_EncodeDecode_Int32(&v32);
     ck_assert(bytes[3] == 0xAB && bytes[2] == 0xBC &&
               bytes[1] == 0xCD && bytes[0] == 0xDE);
 
@@ -606,7 +606,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[1] = 0xBC;
     bytes[2] = 0xCD;
     bytes[3] = 0xDE;
-    EncodeDecode_UInt32(&vu32);
+    SOPC_EncodeDecode_UInt32(&vu32);
     ck_assert(bytes[3] == 0xAB && bytes[2] == 0xBC &&
               bytes[1] == 0xCD && bytes[0] == 0xDE);
 
@@ -619,7 +619,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[5] = 0xBC;
     bytes[6] = 0xCD;
     bytes[7] = 0xDE;
-    EncodeDecode_Int64(&v64);
+    SOPC_EncodeDecode_Int64(&v64);
     ck_assert(bytes[7] == 0x00 && bytes[6] == 0x11 &&
               bytes[5] == 0x22 && bytes[4] == 0x33 &&
               bytes[3] == 0xAB && bytes[2] == 0xBC &&
@@ -634,7 +634,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[5] = 0xBC;
     bytes[6] = 0xCD;
     bytes[7] = 0xDE;
-    EncodeDecode_UInt64(&vu64);
+    SOPC_EncodeDecode_UInt64(&vu64);
     ck_assert(bytes[7] == 0x00 && bytes[6] == 0x11 &&
               bytes[5] == 0x22 && bytes[4] == 0x33 &&
               bytes[3] == 0xAB && bytes[2] == 0xBC &&
@@ -646,7 +646,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[1] = 0xD0;
     bytes[2] = 0x00;
     bytes[3] = 0x00;
-    EncodeDecode_Float(&vfloat);
+    SOPC_EncodeDecode_Float(&vfloat);
     ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 &&
               bytes[2] == 0xD0 && bytes[3] == 0xC0);
 
@@ -659,7 +659,7 @@ START_TEST(test_ua_encoder_endianess_mgt)
     bytes[5] = 0x00;
     bytes[6] = 0x00;
     bytes[7] = 0x00;
-    EncodeDecode_Double(&vdouble);
+    SOPC_EncodeDecode_Double(&vdouble);
     ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 &&
               bytes[2] == 0x00 && bytes[3] == 0x00 &&
               bytes[4] == 0x00 && bytes[5] == 0x00 &&
