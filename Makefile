@@ -100,7 +100,7 @@ DEFS=-DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=
 
 # MAKEFILE CONTENT
 
-.PHONY : all config mbedtls check clean clean_mbedtls cleanall
+.PHONY : all doc config mbedtls check clean clean_mbedtls cleanall
 .DELETE_ON_ERROR : .depend.tmp .depend .pdepend .fdepend
 
 default: all
@@ -114,6 +114,10 @@ ifneq ($(MAKECMDGOALS),cleanall)
 -include .fdepend
 endif
 endif
+
+doc:
+	@echo "Generating documentation in apidoc/ with doxygen"
+	@doxygen doxygen/ingopcs-stack.doxyfile -DOPCUA_HAVE_CLIENTAPI=1
 
 config: mbedtls
 	@echo "Configuring build dirs..."
@@ -173,7 +177,7 @@ clean_mbedtls:
 
 clean:
 	@echo "Cleaning..."
-	@\rm -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR)
+	@\rm -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR) apidoc
 	@\rm -f .depend.tmp .depend .pdepend .fdepend
 
 cleanall: clean clean_mbedtls

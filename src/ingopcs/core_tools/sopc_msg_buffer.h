@@ -1,4 +1,4 @@
-/*
+/**
  *  \file sopc_msg_buffer.h
  *
  *  \brief Binary UA (and TCP UA) message representation with one or several chunks.

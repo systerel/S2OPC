@@ -1,4 +1,4 @@
-/*
+/**
  *  \file sopc_channel.h
  *
  *  \brief High level API to manipulate an OPC-UA Channel and invoke OPC UA services through the channel

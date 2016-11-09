@@ -1,4 +1,4 @@
-/*
+/**
  *  \file sopc_run.h
  *
  *  \brief API to trigger message reception and events in single threaded mode

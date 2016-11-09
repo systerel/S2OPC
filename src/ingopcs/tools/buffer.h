@@ -1,4 +1,4 @@
-/*
+/**
  *  \file buffer.h
  *
  *  \brief A buffer of bytes with a maximum size, length and position.

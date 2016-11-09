@@ -1,4 +1,5 @@
-/*
+/**
+ *  \file secret_buffer.h
  *  \brief SecretBuffer (mangled key) and ExposedKeyBuffer (contiguous deciphered buffered) APIs.
  *
  *  Copyright (C) 2016 Systerel and others.

@@ -1,4 +1,4 @@
-/*
+/**
  *  \file p_sockets.h
  *
  *  \brief Platform independent socket interface with a platform dependent implementation.
