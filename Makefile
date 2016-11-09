@@ -5,7 +5,7 @@ ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      CC=gcc
      EXCLUDE_DIR="*win*"
      PLATFORM_DIR="*linux*"
-     PFLAGS="-std=gnu99"
+     PFLAGS=-std=c99 -pedantic -D_XOPEN_SOURCE=600
      LIBS=$(LIBS_MBEDTLS) -lssl -lcrypto -lrt -lpthread
      COPY_SSL=@cat /dev/null
 else
