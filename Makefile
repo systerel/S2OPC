@@ -109,9 +109,11 @@ all: config $(EXEC_DIR)/stub_client $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
+ifneq ($(MAKECMDGOALS),doc)
 -include .depend
 -include .pdepend
 -include .fdepend
+endif
 endif
 endif
 
