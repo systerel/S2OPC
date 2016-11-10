@@ -331,6 +331,7 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
 SOPC_StatusCode SOPC_Channel_Disconnect(SOPC_Channel channel){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
+    // TODO: call the connection state change callback ? Or not necessary because voluntarily closed ?
     if(cConnection != NULL){
         status = STATUS_NOK;
         Delete_CallbackData(cConnection->callbackData);
