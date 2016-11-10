@@ -1,0 +1,25 @@
+INGOPCS OPC UA stack
+====================
+
+This project contains the following elements:
+- src/ingopcs: source files of the INGOPCS project OPC UA stack (client side only)
+- test/ingopcs: unit tests on the stack
+- stub_client: define a client side simple use case of the stack (to be runned faced to an equivalent stub server)
+- cert: certificates and keys as client / server using an internal CA
+- Makefile*: makefile compiling internal tests and stack code (not as a library)
+- build: compiled files during make execution
+- out: built internal tests executables, certificates and keys necessary for execution
+
+Compilation: 
+- Pre-requesite: gcc
+- To compile the stack as a simple client use case and unit tests: execute the "make" command
+Documentation generation:
+- Pre-requesite: doxygen
+- To generate the documentation: execute the "make doc" command
+- Documentation generated in apidoc/ directory
+
+To run the tests of the stack (unit test and client/server simple use case):
+- Compile the stack and tests
+- Copy stub_server executable (compiled with OPC Foundation Ansi-C stack) into out/ directory
+- Execute the test-all.sh script
+- Check results in out/*.tap files 
