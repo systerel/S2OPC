@@ -10,16 +10,16 @@ This project contains the following elements:
 - build: compiled files during make execution
 - out: built internal tests executables, certificates and keys necessary for execution
 
-Compilation: 
-- Pre-requesite: gcc
-- To compile the stack as a simple client use case and unit tests: execute the "make" command
+Compilation (Linux, tested under Ubuntu 14.04):
+- Pre-requesite: gcc, make
+- To compile the stack as a simple client use case, and unit tests: execute the "make" command
 Documentation generation:
 - Pre-requesite: doxygen
 - To generate the documentation: execute the "make doc" command
-- Documentation generated in apidoc/ directory
+- Documentation generated in apidoc/ and explored with a web-browser from file apidoc/html/index.html
 
 To run the tests of the stack (unit test and client/server simple use case):
 - Compile the stack and tests
 - Copy stub_server executable (compiled with OPC Foundation Ansi-C stack) into out/ directory
 - Execute the test-all.sh script
-- Check results in out/*.tap files 
+- Check results in out/*.tap files
