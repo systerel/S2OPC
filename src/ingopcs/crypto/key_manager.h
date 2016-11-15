@@ -6,7 +6,8 @@
  * KeyManager is different than PKIProvider, which only handles signed public key validation and storage.
  *
  * KeyManager API is context-less. The KeyManager is generic, and is not linked to the current security policy.
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

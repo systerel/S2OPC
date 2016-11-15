@@ -4,7 +4,8 @@
  *
  * This is not the role of the stack to provide a full-blown configurable PKI.
  * The stack provides only a minimal, always safe validating PKI.
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

@@ -2,7 +2,8 @@
  * \file single_linked_list.h
  *
  *  \brief A singly linked list based on elements with unique identifiers and dynamically allocated.
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

@@ -2,7 +2,8 @@
  *  \file sopc_channel.h
  *
  *  \brief High level API to manipulate an OPC-UA Channel and invoke OPC UA services through the channel
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

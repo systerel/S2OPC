@@ -5,7 +5,8 @@
  * KeyManager replaces the old concept of PKIProvider. PrivateKey should not be in the PublicKeyInfrastructure...
  *
  * Most of the functions are lib-dependent. This file defines the others.
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

@@ -2,7 +2,8 @@
  *
  * \brief   Defines the cryptographic API. This API mainly relies on the CryptoProvider, which is composed of
  *          lib-specific data alongside a read-only CryptoProfile.
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

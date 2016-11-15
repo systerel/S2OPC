@@ -2,7 +2,8 @@
  *  \file buffer.h
  *
  *  \brief A buffer of bytes with a maximum size, length and position.
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

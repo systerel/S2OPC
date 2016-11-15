@@ -6,7 +6,8 @@
  *
  * \warning     These functions should only be called through the stack API, as they don't verify
  *              nor sanitize their arguments.
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

@@ -3,7 +3,8 @@
  * Gathers the definitions of the lib-specific and crypto-related functions.
  * Sources for these functions should be split in the future to provide
  * finer grained linking options (https://www.ingopcs.net/trac/ingopcs.projects/ticket/187).
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

@@ -2,7 +2,8 @@
  *
  * Cryptographic test suite. This suite tests Basic256Sha256.
  * See check_stack.c for more details.
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

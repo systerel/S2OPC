@@ -3,7 +3,8 @@
  *
  *  \brief Binary UA (and TCP UA) message representation with one or several chunks.
  *  It is used for TCP UA messages layer and UA secure messages layer (write/read operations are layer dependent).
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify

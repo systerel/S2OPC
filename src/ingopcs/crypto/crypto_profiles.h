@@ -4,7 +4,8 @@
  * are defined as struct of pointers. These immutable struct are extern and const, because they are
  * lib-specific (hence CryptoProfile_Get and these variables are in different translation units).
  * The CryptoProfiles should be accessed through CryptoProfile_Get ONLY.
- *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
