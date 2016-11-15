@@ -2,24 +2,55 @@ INGOPCS OPC UA stack
 ====================
 
 This project contains the following elements:
-- src/ingopcs: source files of the INGOPCS project OPC UA stack (client side only)
+- src/ingopcs: source files of the INGOPCS project OPC UA stack
+  (client side only)
+- lib/mbedtls-2.3.0: source files of mbedtls cryptographic library
 - test/ingopcs: unit tests on the stack
-- stub_client: define a client side simple use case of the stack (to be runned faced to an equivalent stub server)
+- stub_client: define a client side simple use case of the stack (to
+  be runned faced to an equivalent stub server)
 - cert: certificates and keys as client / server using an internal CA
-- Makefile*: makefile compiling internal tests and stack code (not as a library)
+- Makefile*: makefile compiling internal tests and stack code (not as
+  a library)
 - build: compiled files during make execution
-- out: built internal tests executables, certificates and keys necessary for execution
+- out: built internal tests executables, certificates and keys
+  necessary for execution
+- apidoc/html: generated code documentation in HTML format
+
+Licenses: 
+- Unless specifically indicated otherwise in a file, INGOPCS files are
+licensed under the GNU AFFERO GPL v3 license, as can be found in:
+agpl-3.0.txt
+- OPC UA stack code generated with the OPC foundation code generator
+  tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT
+  License 1.00
+- The mbedtls library is also distributed under the Apache 2.0 license
 
 Compilation (Linux, tested under Ubuntu 14.04):
-- Pre-requesite: gcc, make
-- To compile the stack as a simple client use case, and unit tests: execute the "make" command
+- Pre-requesites: 
+  * gcc (tested with GCC version >= 4.8.4)
+  * make (tested with GNU Make version >= 3.81)
+  * Check library (https://libcheck.github.io/check/)
+- To compile the stack as a simple client use case, and unit tests:
+  execute the "make" command
+
 Documentation generation:
 - Pre-requesite: doxygen
 - To generate the documentation: execute the "make doc" command
-- Documentation generated in apidoc/ and explored with a web-browser from file apidoc/html/index.html
+- Documentation generated in apidoc/ and explored with a web-browser
+  from file apidoc/html/index.html
 
-To run the tests of the stack (unit test and client/server simple use case):
+To run the tests of the stack:
 - Compile the stack and tests
-- Copy stub_server executable (compiled with OPC Foundation Ansi-C stack) into out/ directory
+- Copy stub_server executable (compiled with OPC Foundation Ansi-C
+  stack) into out/ directory
 - Execute the test-all.sh script
 - Check results in out/*.tap files
+Tests are covering the following cases:
+- Unit tests: cryptographic library and tools used by the stack
+- Client/Server simple use case:
+  * Client requests to open a secure channel with security policy
+    Basic256Sha256 and in SignAndEncrypt mode
+  * If request is accepted, the client send a GetEndpoints request and
+    checks the response received (a server stub will respond with a
+    service fault since it does not really implement the service)
+  
