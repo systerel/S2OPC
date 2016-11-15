@@ -14,14 +14,8 @@ if [[ -z $DELIVERY_NAME ]]; then
     exit 1
 fi
 
-git clone $LOCAL_REPO || exit 2
-mv $REPO_NAME $DELIVERY_NAME || exit 2
-cd $DELIVERY_NAME
-git checkout $DELIVERY_NAME || exit 2
-rm -rf .git .gitignore .project .cproject delivery.sh
-make doc || exit 2
-cd ../
-tar -zcvf $DELIVERY_NAME.tar.gz $DELIVERY_NAME
+git archive -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME
+
 if [ $? -eq 0 ]; then
     echo "=============================================================="
     echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' succeeded"
