@@ -14,7 +14,7 @@ if [[ -z $DELIVERY_NAME ]]; then
     exit 1
 fi
 
-git archive -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME
+git archive --prefix=$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME
 
 if [ $? -eq 0 ]; then
     echo "=============================================================="
