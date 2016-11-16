@@ -552,6 +552,23 @@ START_TEST(test_linked_list)
     value = SLinkedList_Remove(NULL, 1);
     ck_assert(value == NULL);
 
+    //// Check apply to free elements
+    void *p = NULL;
+    SLinkedList_Clear(list);
+    p = malloc(sizeof(int));
+    ck_assert(NULL != p);
+    *(int *)p = 2;
+    ck_assert(SLinkedList_Add(list, 0, p) != NULL);
+    p = malloc(sizeof(double));
+    ck_assert(NULL != p);
+    *(double *)p = 2.;
+    ck_assert(SLinkedList_Add(list, 1, p) != NULL);
+    p = malloc(sizeof(char)*5);
+    ck_assert(NULL != p);
+    memcpy(p, "toto", 5);
+    ck_assert(SLinkedList_Add(list, 2, p) != NULL);
+    SLinkedList_Apply(list, SLinkedList_EltGenericFree);
+
     SLinkedList_Delete(list);
     list = NULL;
 }
