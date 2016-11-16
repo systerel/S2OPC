@@ -58,6 +58,17 @@ void* SLinkedList_Add(SLinkedList* list, uint32_t id, void* value);
 void* SLinkedList_Find(SLinkedList* list, uint32_t id);
 
 /**
+ * \brief           Apply a function to the value of each element of the list.
+ *
+ *                  An example is the SLinkedList_EltGenericFree() function which frees the \p void* \p value
+ *                  of each element of the list.
+ *
+ * \param list      Pointer to the linked list
+ * \param pFn       Function pointer which takes the id and the value of each element
+ */
+void SLinkedList_Apply(SLinkedList* list, void (*pFn)(uint32_t id, void *val));
+
+/**
  *  \brief          Find and remove the value associated to the given id in the linked list
  *
  *  \param list     Pointer on the linked list in which element must be found
@@ -80,6 +91,12 @@ void SLinkedList_Clear(SLinkedList* list);
  *  \param list    Pointer to the list to deallocate (pointer must not be used anymore after operation)
  */
 void SLinkedList_Delete(SLinkedList* list);
+
+
+/**
+ * \brief           Frees the value of an element of the SLinkedList.
+ */
+void SLinkedList_EltGenericFree(uint32_t id, void *val);
 
 
 #endif /* SOPC_SINGLE_LINKED_LIST_H_ */

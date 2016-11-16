@@ -96,6 +96,21 @@ void* SLinkedList_Find(SLinkedList* list, uint32_t id){
     return result;
 }
 
+void SLinkedList_Apply(SLinkedList* list, void (*pFn)(uint32_t id, void *val))
+{
+    SLinkedList_Elt* elt = NULL;
+
+    if(NULL == list || NULL == pFn)
+        return;
+
+    elt = list->first;
+    while(NULL != elt)
+    {
+        pFn(elt->id, elt->value);
+        elt = elt->next;
+    }
+}
+
 // Returns null => Not found, otherwise => elt pointer
 void* SLinkedList_Remove(SLinkedList* list, uint32_t id){
     SLinkedList_Elt* elt = NULL;
@@ -148,4 +163,11 @@ void SLinkedList_Delete(SLinkedList* list){
         SLinkedList_Clear(list);
         free(list);
     }
+}
+
+
+void SLinkedList_EltGenericFree(uint32_t id, void *val)
+{
+    (void)(id);
+    free(val);
 }
