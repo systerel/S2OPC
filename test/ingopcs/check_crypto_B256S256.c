@@ -978,7 +978,8 @@ END_TEST
 START_TEST(test_pki_cert_validation)
 {
     // Checks that the PKI validates our server.pub with our cacert.der
-    ck_assert(CryptoProvider_Certificate_Validate(crypto, pki, crt_pub) == STATUS_OK);
+    ck_assert_msg(CryptoProvider_Certificate_Validate(crypto, pki, crt_pub) == STATUS_OK,
+                  "Validation failed, is this a \"date\" problem?");
 }
 END_TEST
 
