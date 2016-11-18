@@ -44,7 +44,9 @@ Channel_CallbackData* Create_CallbackData(SOPC_Channel_PfnConnectionStateChanged
 }
 
 void Delete_CallbackData(Channel_CallbackData* chCbData){
-    free(chCbData);
+    if(chCbData != NULL){
+        free(chCbData);
+    }
 }
 
 // TODO: "atomic" callbackData for multithreading
