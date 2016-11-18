@@ -22,7 +22,6 @@
 #include <string.h>
 #include <limits.h>
 
-
 typedef void (BuiltInFunction) (void*);
 
 void SOPC_Boolean_Initialize(SOPC_Boolean* b){
@@ -189,6 +188,7 @@ void SOPC_ByteString_Clear(SOPC_ByteString* bstring){
             free(bstring->Data);
             bstring->Data = NULL;
         }
+        SOPC_ByteString_Initialize(bstring);
     }
 }
 
@@ -232,13 +232,15 @@ SOPC_StatusCode SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src){
         // Keep null terminator for C string compatibility
         status = STATUS_OK;
         dest->Length = src->Length;
-        dest->Data = (SOPC_Byte*) malloc (sizeof(SOPC_Byte)*dest->Length+1);
-        if(dest->Data != NULL){
-            // No need of secure copy, both have same size here
-            memcpy(dest->Data, src->Data, dest->Length);
-            dest->Data[dest->Length] = '\0';
-        }else{
-            status = STATUS_NOK;
+        if(dest->Length > 0){
+            dest->Data = (SOPC_Byte*) malloc (sizeof(SOPC_Byte)*dest->Length+1);
+            if(dest->Data != NULL){
+                // No need of secure copy, both have same size here
+                memcpy(dest->Data, src->Data, dest->Length);
+                dest->Data[dest->Length] = '\0';
+            }else{
+                status = STATUS_NOK;
+            }
         }
     }
     return status;
