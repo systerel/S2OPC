@@ -25,11 +25,13 @@
 #include "sopc_secure_channel_client_connection.h"
 #include "sopc_stack_config.h"
 
+#include <assert.h>
 #include <stdlib.h>
 
 typedef struct {
     SOPC_Channel_PfnConnectionStateChanged* callback;
     void*                                   callbackData;
+    uint8_t                                 connectedFlag;
 } Channel_CallbackData;
 
 Channel_CallbackData* Create_CallbackData(SOPC_Channel_PfnConnectionStateChanged* callback,
@@ -39,6 +41,7 @@ Channel_CallbackData* Create_CallbackData(SOPC_Channel_PfnConnectionStateChanged
     if(result != NULL){
         result->callback = callback;
         result->callbackData = callbackData;
+        result->connectedFlag = FALSE;
     }
     return result;
 }
@@ -128,9 +131,11 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
     switch(event){
         case SOPC_ConnectionEvent_Connected:
             channelConnectionEvent = SOPC_ChannelEvent_Connected;
+            callbackData->connectedFlag = 1; // TRUE
             break;
         case SOPC_ConnectionEvent_Disconnected:
             channelConnectionEvent = SOPC_ChannelEvent_Disconnected;
+            callbackData->connectedFlag = FALSE;
             break;
         case SOPC_ConnectionEvent_SecureMessageComplete:
         case SOPC_ConnectionEvent_SecureMessageChunk:
@@ -140,6 +145,7 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
         case SOPC_ConnectionEvent_Invalid:
         case SOPC_ConnectionEvent_UnexpectedError:
             channelConnectionEvent = SOPC_ChannelEvent_Disconnected;
+            callbackData->connectedFlag = FALSE;
             break;
     }
 
@@ -162,22 +168,24 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
     return retStatus;
 }
 
-SOPC_StatusCode SOPC_Channel_BeginConnect(SOPC_Channel                            channel,
-                                          const char*                             url,
-                                          const Certificate*                      crt_cli,
-                                          const AsymmetricKey*                    key_priv_cli,
-                                          const Certificate*                      crt_srv,
-                                          const PKIProvider*                      pki,
-                                          const char*                             reqSecuPolicyUri,
-                                          int32_t                                 requestedLifetime,
-                                          OpcUa_MessageSecurityMode               msgSecurityMode,
-                                          uint32_t                                networkTimeout,
-                                          SOPC_Channel_PfnConnectionStateChanged* cb,
-                                          void*                                   cbData)
+SOPC_StatusCode SOPC_Channel_InternalBeginConnect(SOPC_Channel                            channel,
+                                                  const char*                             url,
+                                                  const Certificate*                      crt_cli,
+                                                  const AsymmetricKey*                    key_priv_cli,
+                                                  const Certificate*                      crt_srv,
+                                                  const PKIProvider*                      pki,
+                                                  const char*                             reqSecuPolicyUri,
+                                                  int32_t                                 requestedLifetime,
+                                                  OpcUa_MessageSecurityMode               msgSecurityMode,
+                                                  uint32_t                                networkTimeout,
+                                                  SOPC_Channel_PfnConnectionStateChanged* cb,
+                                                  void*                                   cbData,
+                                                  Channel_CallbackData**                  channelCbData)
 {
+    assert(channelCbData != NULL);
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
-    Channel_CallbackData* internalCbData = NULL;
+    Channel_CallbackData* internalCbData = *channelCbData;
     (void) networkTimeout;
 
     if(cConnection != NULL && cConnection->instance != NULL &&
@@ -214,6 +222,78 @@ SOPC_StatusCode SOPC_Channel_BeginConnect(SOPC_Channel                          
             }
         }
     }
+    return status;
+}
+
+SOPC_StatusCode SOPC_Channel_BeginConnect(SOPC_Channel                            channel,
+                                          const char*                             url,
+                                          const Certificate*                      crt_cli,
+                                          const AsymmetricKey*                    key_priv_cli,
+                                          const Certificate*                      crt_srv,
+                                          const PKIProvider*                      pki,
+                                          const char*                             reqSecuPolicyUri,
+                                          int32_t                                 requestedLifetime,
+                                          OpcUa_MessageSecurityMode               msgSecurityMode,
+                                          uint32_t                                networkTimeout,
+                                          SOPC_Channel_PfnConnectionStateChanged* cb,
+                                          void*                                   cbData)
+{
+    Channel_CallbackData* internalCbData = NULL;
+    return SOPC_Channel_InternalBeginConnect(channel, url, crt_cli,
+                                             key_priv_cli, crt_srv,
+                                             pki, reqSecuPolicyUri,
+                                             requestedLifetime, msgSecurityMode,
+                                             networkTimeout, cb, cbData, &internalCbData);
+}
+
+SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            channel,
+                                     const char*                             url,
+                                     const Certificate*                      crt_cli,
+                                     const AsymmetricKey*                    key_priv_cli,
+                                     const Certificate*                      crt_srv,
+                                     const PKIProvider*                      pki,
+                                     const char*                             reqSecuPolicyUri,
+                                     int32_t                                 requestedLifetime,
+                                     OpcUa_MessageSecurityMode               msgSecurityMode,
+                                     uint32_t                                networkTimeout,
+                                     SOPC_Channel_PfnConnectionStateChanged* cb,
+                                     void*                                   cbData)
+{
+    Channel_CallbackData* internalCbData = NULL;
+    uint8_t receivedEvent = FALSE;
+    const uint32_t sleepTimeout = 500;
+    uint32_t timeout = networkTimeout;
+    uint32_t loopCpt = 0;
+    SOPC_StatusCode status = SOPC_Channel_InternalBeginConnect(channel, url, crt_cli,
+                                                               key_priv_cli, crt_srv,
+                                                               pki, reqSecuPolicyUri,
+                                                               requestedLifetime, msgSecurityMode,
+                                                               networkTimeout, cb, cbData,
+                                                               &internalCbData);
+    while (status == STATUS_OK &&
+           receivedEvent == FALSE &&
+           loopCpt * sleepTimeout <= timeout)
+    {
+        loopCpt++;
+#if OPCUA_MULTITHREADED
+        // just wait for callback called
+        //Sleep (sleepTimeout);
+        return OpcUa_BadNotImplemented;
+#else
+        // TODO: will retrieve any message: is it a problem ?
+        // Retrieve received messages on socket
+        status = SOPC_SocketManager_Loop (SOPC_SocketManager_GetGlobal(),
+                                          sleepTimeout);
+#endif //OPCUA_MULTITHREADED
+        if(internalCbData->connectedFlag != FALSE){
+            receivedEvent = 1; // True
+        }
+    }
+
+    if(loopCpt * sleepTimeout > timeout){
+        status = OpcUa_BadTimeout;
+    }
+
     return status;
 }
 

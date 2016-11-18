@@ -52,6 +52,19 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
                                            SOPC_Channel_PfnConnectionStateChanged* callback,
                                            void*                                   callbackData);
 
+SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            channel,
+                                      char*                                   url,
+                                      SOPC_Channel_PfnConnectionStateChanged* callback,
+                                      void*                                   callbackData,
+                                      SOPC_ByteString*                        clientCertificate,
+                                      SOPC_ByteString*                        clientPrivateKey,
+                                      SOPC_ByteString*                        serverCertificate,
+                                      void*                                   pkiConfig,
+                                      SOPC_String*                            requestedSecurityPolicyUri,
+                                      int32_t                                 requestedLifetime,
+                                      OpcUa_MessageSecurityMode               messageSecurityMode,
+                                      uint32_t                                networkTimeout);
+
 END_EXTERN_C
 
 #endif /* SOPC_WRAPPER_CHANNEL_H_ */

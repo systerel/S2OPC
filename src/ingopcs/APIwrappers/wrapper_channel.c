@@ -165,33 +165,70 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
     return status;
 }
 
-SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                               channel,
-                                      char*                               url,
-                                      SOPC_Channel_PfnConnectionStateChanged*    callback,
-                                      void*                                 callbackData,
-                                      SOPC_ByteString*                           clientCertificate,
-                                      SOPC_ByteString*                           clientPrivateKey,
-                                      SOPC_ByteString*                           serverCertificate,
-                                      void*                                 pkiConfig,
-                                      SOPC_String*                               requestedSecurityPolicyUri,
+SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            channel,
+                                      char*                                   url,
+                                      SOPC_Channel_PfnConnectionStateChanged* callback,
+                                      void*                                   callbackData,
+                                      SOPC_ByteString*                        clientCertificate,
+                                      SOPC_ByteString*                        clientPrivateKey,
+                                      SOPC_ByteString*                        serverCertificate,
+                                      void*                                   pkiConfig,
+                                      SOPC_String*                            requestedSecurityPolicyUri,
                                       int32_t                                 requestedLifetime,
-                                      OpcUa_MessageSecurityMode                   messageSecurityMode,
+                                      OpcUa_MessageSecurityMode               messageSecurityMode,
                                       uint32_t                                networkTimeout)
 {
-    (void) channel;
-    (void) url;
-    (void) callback;
-    (void) callbackData;
-    (void) clientCertificate;
-    (void) clientPrivateKey;
-    (void) serverCertificate;
-    (void) pkiConfig;
-    (void) requestedSecurityPolicyUri;
-    (void) requestedLifetime;
-    (void) messageSecurityMode;
-    (void) networkTimeout;
+    SOPC_StatusCode status = STATUS_OK;
+    Certificate *cli = NULL, *srv = NULL, *crt_ca = NULL;
+    AsymmetricKey *pKeyCli = NULL;
+    PKIProvider *pki;
+    PKIConfig *pPKIConfig = pkiConfig;
+    if(clientCertificate != NULL && clientPrivateKey != NULL &&
+       serverCertificate != NULL && pkiConfig != NULL){
+        status = KeyManager_Certificate_CreateFromDER(clientCertificate->Data,
+                                                      clientCertificate->Length,
+                                                      &cli);
+        if(STATUS_OK == status){
+            pKeyCli = (AsymmetricKey*) clientPrivateKey->Data;
+        }
+        if(STATUS_OK == status){
+            status = KeyManager_Certificate_CreateFromDER(serverCertificate->Data,
+                                                          serverCertificate->Length,
+                                                          &srv);
+        }
+        //TODO: CA folder != CA cert: how to deal with that ?
+        if(STATUS_OK == status){
+            const char* cacertname = "/cacert.der";
+            char cacert[strlen(pPKIConfig->trustListLocation) + strlen(cacertname) + 1];
+            if(cacert != memcpy(cacert, pPKIConfig->trustListLocation, strlen(pPKIConfig->trustListLocation)))
+                status = STATUS_NOK;
+            if(&cacert[strlen(pPKIConfig->trustListLocation)] !=
+                memcpy(&cacert[strlen(pPKIConfig->trustListLocation)], cacertname, strlen(cacertname) + 1))
+                status = STATUS_NOK;
+            if(STATUS_OK == status){
+                status = KeyManager_Certificate_CreateFromFile(cacert, &crt_ca);
+            }
+        }
+        if(STATUS_OK == status){
+            status = PKIProviderStack_Create(crt_ca, NULL, &pki);
+        }
+    }
 
-    return STATUS_NOK;
+    if(STATUS_OK == status){
+        status = SOPC_Channel_Connect(channel,
+                                      url,
+                                      cli,
+                                      pKeyCli,
+                                      srv,
+                                      pki,
+                                      SOPC_String_GetRawCString(requestedSecurityPolicyUri),
+                                      requestedLifetime,
+                                      messageSecurityMode,
+                                      networkTimeout,
+                                      callback,
+                                      callbackData);
+    }
+    return status;
 }
 
 #endif /* OPCUA_HAVE_CLIENTAPI */

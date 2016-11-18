@@ -129,6 +129,19 @@ SOPC_StatusCode SOPC_Channel_BeginConnect(SOPC_Channel                          
                                           void*                                   cbData);
 
 
+SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            channel,
+                                     const char*                             url,
+                                     const Certificate*                      crt_cli,
+                                     const AsymmetricKey*                    key_priv_cli,
+                                     const Certificate*                      crt_srv,
+                                     const PKIProvider*                      pki,
+                                     const char*                             reqSecuPolicyUri,
+                                     int32_t                                 requestedLifetime,
+                                     OpcUa_MessageSecurityMode               msgSecurityMode,
+                                     uint32_t                                networkTimeout,
+                                     SOPC_Channel_PfnConnectionStateChanged* cb,
+                                     void*                                   cbData);
+
 /**
  *  \brief Send the given service request message and set the callback to call on service response reception.
  *         Note: in single threaded mode, it is necessary to call the socket manager loop to receive messages.
