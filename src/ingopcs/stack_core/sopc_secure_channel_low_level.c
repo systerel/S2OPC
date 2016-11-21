@@ -120,29 +120,36 @@ SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
        scConnection->runningAppPrivateKey == NULL &&
        scConnection->otherAppCertificate.Length <= 0)
     {
-        scConnection->runningAppPublicKeyCert = runningAppCertificate;
-        scConnection->runningAppPrivateKey = runningAppPrivateKey;
-        status = KeyManager_Certificate_CopyDER(runningAppCertificate,
-                                                &scConnection->runningAppCertificate.Data,
-                                                &certLength);
-        if(certLength > INT32_MAX){
-            status = STATUS_NOK;
+        if(runningAppCertificate == NULL && runningAppPrivateKey == NULL &&
+           otherAppCertificate == NULL &&
+           scConnection->currentSecuMode == OpcUa_MessageSecurityMode_None)
+        {
+            NULL; // None security mode: no certificate to use
         }else{
-            scConnection->runningAppCertificate.Length = (int32_t) certLength;
-        }
-
-        scConnection->otherAppPublicKeyCert = otherAppCertificate;
-        if(STATUS_OK == status){
-            certLength = 0;
-            status = KeyManager_Certificate_CopyDER(otherAppCertificate,
-                                                    &scConnection->otherAppCertificate.Data,
+            scConnection->runningAppPublicKeyCert = runningAppCertificate;
+            scConnection->runningAppPrivateKey = runningAppPrivateKey;
+            status = KeyManager_Certificate_CopyDER(runningAppCertificate,
+                                                    &scConnection->runningAppCertificate.Data,
                                                     &certLength);
-        }
+            if(certLength > INT32_MAX){
+                status = STATUS_NOK;
+            }else{
+                scConnection->runningAppCertificate.Length = (int32_t) certLength;
+            }
 
-        if(certLength > INT32_MAX){
-            status = STATUS_NOK;
-        }else{
-            scConnection->otherAppCertificate.Length = (int32_t) certLength;
+            scConnection->otherAppPublicKeyCert = otherAppCertificate;
+            if(STATUS_OK == status){
+                certLength = 0;
+                status = KeyManager_Certificate_CopyDER(otherAppCertificate,
+                                                        &scConnection->otherAppCertificate.Data,
+                                                        &certLength);
+            }
+
+            if(certLength > INT32_MAX){
+                status = STATUS_NOK;
+            }else{
+                scConnection->otherAppCertificate.Length = (int32_t) certLength;
+            }
         }
     }else{
         status = STATUS_INVALID_STATE;
