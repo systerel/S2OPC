@@ -417,9 +417,11 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket*    socket,
 SOPC_StatusCode CheckURI (const char* uri){
     SOPC_StatusCode status = STATUS_NOK;
     size_t idx = 0;
-    uint8_t isPort = 0;
-    uint8_t hasPort = 0;
-    uint8_t invalid = 0;
+    uint8_t isPort = FALSE;
+    uint8_t hasPort = FALSE;
+    uint8_t hasName = FALSE;
+    uint8_t invalid = FALSE;
+
     if(uri != NULL){
 
         if(strlen(uri) + 4  > 4096){
@@ -429,24 +431,31 @@ SOPC_StatusCode CheckURI (const char* uri){
             // search for a ':' defining port for given IP
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
             for(idx = 10; idx < strlen(uri) - 1; idx++){
-                if(isPort){
+                if(isPort != FALSE){
                     if(uri[idx] >= '0' && uri[idx] <= '9'){
                         // port definition
                         hasPort = 1;
                     }else if(uri[idx] == '/'){
-                        // end of port definition + at least one character remaining
-                        if(hasPort != 0 && invalid == 0){
-                            status = STATUS_OK;
+                        // Name of the endpoint after port, invalid otherwise
+                        if(hasPort == 0){
+                            invalid = 1;
+                        }else{
+                            hasName = 1;
                         }
                     }else{
-                        // unexpected character
-                        invalid = 1;
+                        if(hasPort == FALSE || hasName == FALSE){
+                            // unexpected character since we do not expect a endpoint name
+                            invalid = 1;
+                        }
                     }
                 }else{
                     if(uri[idx] == ':'){
                         isPort = 1;
                     }
                 }
+            }
+            if(hasPort != FALSE && invalid == FALSE){
+                status = STATUS_OK;
             }
         }
     }

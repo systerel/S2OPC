@@ -33,6 +33,7 @@ SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
     size_t idx = 0;
     uint8_t isPort = FALSE;
     uint8_t hasPort = FALSE;
+    uint8_t hasName = FALSE;
     size_t hostnameLength = 0;
     size_t portIdx = 0;
     size_t portLength = 0;
@@ -55,15 +56,19 @@ SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
                             hasPort = 1;
                             portIdx = idx;
                         }
-                    }else if(uri[idx] == '/'){
-                        // end of port definition + at least one character remaining
-                        if(hasPort != FALSE && invalid == FALSE){
+                    }else if(uri[idx] == '/' && invalid == FALSE){
+                        // Name of the endpoint after port, invalid otherwise
+                        if(hasPort == FALSE){
+                            invalid = 1;
+                        }else{
                             portLength = idx - portIdx;
-                            status = STATUS_OK;
+                            hasName = 1;
                         }
-                    }else if(hasPort == FALSE){
-                        // unexpected character
-                        invalid = 1;
+                    }else{
+                        if(hasPort == FALSE || hasName == FALSE){
+                            // unexpected character: we do not expect a endpoint name
+                            invalid = 1;
+                        }
                     }
                 }else{
                     if(uri[idx] == ':'){
@@ -73,9 +78,14 @@ SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
                 }
             }
 
-            if(invalid != 0){
-                status = STATUS_NOK;
+            if(hasPort != FALSE && invalid == FALSE){
+                status = STATUS_OK;
+                if(portLength == 0){
+                    // No endpoint name after port provided
+                    portLength = idx - portIdx + 1;
+                }
             }
+
         }
     }
 
