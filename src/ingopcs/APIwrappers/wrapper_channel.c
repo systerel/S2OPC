@@ -176,6 +176,7 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
                                       SOPC_String*                            requestedSecurityPolicyUri,
                                       int32_t                                 requestedLifetime,
                                       OpcUa_MessageSecurityMode               messageSecurityMode,
+                                      void*                                   securityToken,
                                       uint32_t                                networkTimeout)
 {
     SOPC_StatusCode status = STATUS_OK;
@@ -183,8 +184,10 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
     AsymmetricKey *pKeyCli = NULL;
     PKIProvider *pki;
     PKIConfig *pPKIConfig = pkiConfig;
-    if(clientCertificate != NULL && clientPrivateKey != NULL &&
-       serverCertificate != NULL && pkiConfig != NULL){
+    if(clientCertificate != NULL && clientCertificate->Length > 0 &&
+       clientPrivateKey != NULL && clientPrivateKey->Length > 0 &&
+       serverCertificate != NULL && serverCertificate->Length > 0 &&
+       pkiConfig != NULL){
         status = KeyManager_Certificate_CreateFromDER(clientCertificate->Data,
                                                       clientCertificate->Length,
                                                       &cli);

@@ -63,6 +63,7 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
                                       SOPC_String*                            requestedSecurityPolicyUri,
                                       int32_t                                 requestedLifetime,
                                       OpcUa_MessageSecurityMode               messageSecurityMode,
+                                      void*                                   securityToken, // TODO: old API parametere
                                       uint32_t                                networkTimeout);
 
 END_EXTERN_C
