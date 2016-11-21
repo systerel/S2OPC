@@ -60,8 +60,10 @@ Socket_AddressInfo* Socket_AddrInfo_IterNext(Socket_AddressInfo* addr){
 }
 
 void Socket_AddrInfoDelete(Socket_AddressInfo** addrs){
-    freeaddrinfo(*addrs);
-    *addrs = NULL;
+    if(addrs != NULL){
+        freeaddrinfo(*addrs);
+        *addrs = NULL;
+    }
 }
 
 void Socket_Clear(Socket* sock){
