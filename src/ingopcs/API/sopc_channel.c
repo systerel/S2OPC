@@ -32,6 +32,7 @@ typedef struct {
     SOPC_Channel_PfnConnectionStateChanged* callback;
     void*                                   callbackData;
     uint8_t                                 connectedFlag;
+    uint8_t                                 disconnectedFlag;
 } Channel_CallbackData;
 
 Channel_CallbackData* Create_CallbackData(SOPC_Channel_PfnConnectionStateChanged* callback,
@@ -42,6 +43,7 @@ Channel_CallbackData* Create_CallbackData(SOPC_Channel_PfnConnectionStateChanged
         result->callback = callback;
         result->callbackData = callbackData;
         result->connectedFlag = FALSE;
+        result->disconnectedFlag = FALSE;
     }
     return result;
 }
@@ -108,10 +110,11 @@ SOPC_StatusCode SOPC_Channel_Create(SOPC_Channel*               channel,
 
 SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SC_ClientConnection* cConnection = (SC_ClientConnection*) *channel;
-    if(channel != NULL){
+    SC_ClientConnection* cConnection = NULL;
+    if(channel != NULL && *channel != NULL){
         // Ensure disconnect called for deallocation
         status = SOPC_Channel_Disconnect(*channel);
+        cConnection = (SC_ClientConnection*) *channel;
         Delete_InvokeCallbackData(cConnection->callbackData);
         SC_Client_Delete(cConnection);
         *channel = NULL;
@@ -132,10 +135,12 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
         case SOPC_ConnectionEvent_Connected:
             channelConnectionEvent = SOPC_ChannelEvent_Connected;
             callbackData->connectedFlag = 1; // TRUE
+            callbackData->disconnectedFlag = FALSE;
             break;
         case SOPC_ConnectionEvent_Disconnected:
             channelConnectionEvent = SOPC_ChannelEvent_Disconnected;
             callbackData->connectedFlag = FALSE;
+            callbackData->disconnectedFlag = 1; // TRUE
             break;
         case SOPC_ConnectionEvent_SecureMessageComplete:
         case SOPC_ConnectionEvent_SecureMessageChunk:
@@ -146,6 +151,7 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
         case SOPC_ConnectionEvent_UnexpectedError:
             channelConnectionEvent = SOPC_ChannelEvent_Disconnected;
             callbackData->connectedFlag = FALSE;
+            callbackData->disconnectedFlag = 1; // TRUE
             break;
     }
 
@@ -185,7 +191,6 @@ SOPC_StatusCode SOPC_Channel_InternalBeginConnect(SOPC_Channel                  
     assert(channelCbData != NULL);
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
-    Channel_CallbackData* internalCbData = *channelCbData;
     (void) networkTimeout;
 
     if(cConnection != NULL && cConnection->instance != NULL &&
@@ -205,8 +210,8 @@ SOPC_StatusCode SOPC_Channel_InternalBeginConnect(SOPC_Channel                  
                                          StackConfiguration_GetNamespaces(),
                                          StackConfiguration_GetEncodeableTypes());
             if(status == STATUS_OK){
-                internalCbData = Create_CallbackData(cb, cbData);
-                if(internalCbData == NULL){
+                *channelCbData = Create_CallbackData(cb, cbData);
+                if(*channelCbData == NULL){
                     status = STATUS_NOK;
                 }
             }
@@ -218,7 +223,7 @@ SOPC_StatusCode SOPC_Channel_InternalBeginConnect(SOPC_Channel                  
                                            msgSecurityMode,
                                            reqSecuPolicyUri,
                                            requestedLifetime,
-                                           ChannelConnectionCB, internalCbData);
+                                           ChannelConnectionCB, *channelCbData);
             }
         }
     }
@@ -287,6 +292,9 @@ SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            cha
 #endif //OPCUA_MULTITHREADED
         if(internalCbData->connectedFlag != FALSE){
             receivedEvent = 1; // True
+        }else if(internalCbData->disconnectedFlag != FALSE){
+            receivedEvent = 1; // True
+            status = STATUS_NOK; // Connection failed
         }
     }
 
