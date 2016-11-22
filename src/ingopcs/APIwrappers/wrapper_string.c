@@ -94,7 +94,7 @@ void OpcUa_String_Clear(SOPC_String* str)
 }
 
 char* OpcUa_String_GetRawString(const SOPC_String* str){
-    return SOPC_String_GetCString(str);
+    return (char*) SOPC_String_GetRawCString(str);
 }
 
 uint8_t OpcUa_String_IsEmpty(const SOPC_String* str)
