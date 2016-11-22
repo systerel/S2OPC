@@ -64,12 +64,10 @@ typedef int8_t SOPC_SByte;
 
 typedef struct SOPC_ByteString {
     int32_t    Length;
-    SOPC_Byte* Data;
     uint8_t    ClearBytes; // flag indicating if bytes must be freed
+    SOPC_Byte* Data;
 } SOPC_ByteString;
 
-// TODO: modify string representation for binary compatibility ?
-// Check if internal representation used by SDK
 typedef SOPC_ByteString SOPC_String;
 
 typedef SOPC_ByteString SOPC_XmlElement;
