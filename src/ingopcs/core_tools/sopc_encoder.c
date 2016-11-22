@@ -877,7 +877,9 @@ SOPC_StatusCode SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedText
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     if(localizedText != NULL){
+        status = STATUS_OK;
         encodingByte = GetLocalizedTextEncodingByte(localizedText);
+        status = SOPC_Byte_Write(&encodingByte, msgBuffer);
     }
     if(status == STATUS_OK && (encodingByte & SOPC_LocalizedText_Locale) != 0){
         status = SOPC_String_Write(&localizedText->Locale, msgBuffer);
