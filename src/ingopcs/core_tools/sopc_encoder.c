@@ -574,7 +574,7 @@ SOPC_StatusCode Internal_NodeId_Write(SOPC_MsgBuffer* msgBuffer,
             case  NodeIdEncoding_Guid:
                 status = SOPC_UInt16_Write(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = SOPC_Guid_Write(&nodeId->Data.Guid, msgBuffer);
+                    status = SOPC_Guid_Write(nodeId->Data.Guid, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_ByteString:
@@ -652,7 +652,8 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_MsgBuffer* msgBuffer,
                 nodeId->IdentifierType = IdentifierType_Guid;
                 status = SOPC_UInt16_Read(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
-                    status = SOPC_Guid_Read(&nodeId->Data.Guid, msgBuffer);
+                    nodeId->Data.Guid = malloc(sizeof(SOPC_Guid));
+                    status = SOPC_Guid_Read(nodeId->Data.Guid, msgBuffer);
                 }
                 break;
             case  NodeIdEncoding_ByteString:

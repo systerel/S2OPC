@@ -95,7 +95,7 @@ typedef struct SOPC_NodeId {
     union {
         uint32_t        Numeric;
         SOPC_String     String;
-        SOPC_Guid       Guid;
+        SOPC_Guid*      Guid;
         SOPC_ByteString Bstring;
     } Data;
 } SOPC_NodeId;

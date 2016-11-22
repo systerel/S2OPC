@@ -437,7 +437,8 @@ void SOPC_NodeId_InitType(SOPC_NodeId* nodeId, SOPC_IdentifierType knownIdType){
             SOPC_String_Initialize(&nodeId->Data.String);
             break;
         case IdentifierType_Guid:
-            SOPC_Guid_Initialize(&nodeId->Data.Guid);
+            nodeId->Data.Guid = malloc(sizeof(SOPC_Guid));
+            SOPC_Guid_Initialize(nodeId->Data.Guid);
             break;
         case IdentifierType_ByteString:
             SOPC_ByteString_Initialize(&nodeId->Data.Bstring);
@@ -455,7 +456,11 @@ void SOPC_NodeId_Clear(SOPC_NodeId* nodeId){
             SOPC_String_Clear(&nodeId->Data.String);
             break;
         case IdentifierType_Guid:
-            SOPC_Guid_Clear(&nodeId->Data.Guid);
+            SOPC_Guid_Clear(nodeId->Data.Guid);
+            if(nodeId->Data.Guid != NULL){
+                free(nodeId->Data.Guid);
+            }
+            nodeId->Data.Guid = NULL;
             break;
         case IdentifierType_ByteString:
             SOPC_ByteString_Clear(&nodeId->Data.Bstring);
