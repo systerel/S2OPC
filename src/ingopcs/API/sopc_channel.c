@@ -328,13 +328,13 @@ SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                    
 
         // There is always a request header as first struct field in a request (safe cast)
         timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
-        SC_Send_Request(cConnection,
-                        requestType,
-                        request,
-                        responseType,
-                        timeout,
-                        (SC_ResponseEvent_CB*) cb,
-                        cbData);
+        status = SC_Send_Request(cConnection,
+                                 requestType,
+                                 request,
+                                 responseType,
+                                 timeout,
+                                 (SC_ResponseEvent_CB*) cb,
+                                 cbData);
     }
     return status;
 }
