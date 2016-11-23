@@ -1720,6 +1720,9 @@ SOPC_StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection)
                 }else{
                     status = STATUS_NOK;
                 }
+            }else{
+                // Correct sequence number
+                scConnection->lastSeqNumReceived++;
             }
         }
     }
