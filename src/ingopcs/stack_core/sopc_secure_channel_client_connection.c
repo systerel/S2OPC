@@ -218,7 +218,7 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         }
     }
 
-    if(status == STATUS_OK){
+    if(status == STATUS_OK && cConnection->securityMode != OpcUa_MessageSecurityMode_None){
         status = CryptoProvider_GenerateSecureChannelNonce(cConnection->instance->currentCryptoProvider,
                                                      &cConnection->instance->currentNonce);
 
@@ -364,7 +364,7 @@ SOPC_StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
         }
     }
 
-    if(status == STATUS_OK){
+    if(status == STATUS_OK && cConnection->securityMode != OpcUa_MessageSecurityMode_None){
         uint32_t encryptKeyLength = 0, signKeyLength = 0, initVectorLength = 0;
         SC_SecurityKeySet *pks = NULL;
         status = CryptoProvider_DeriveGetLengths(cConnection->instance->currentCryptoProvider,
