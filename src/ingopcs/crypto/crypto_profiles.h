@@ -2,10 +2,6 @@
  *
  * \brief Defines the cryptographic profiles: constants and struct.
  *
- * CryptoProfiles are defined as struct of pointers. These immutable struct are extern and const, because they are
- * lib-specific (hence CryptoProfile_Get and these variables are in different translation units).
- * The CryptoProfiles should be accessed through CryptoProfile_Get ONLY, and should not be modified,
- * as multiple calls to CryptoProfile_Get returns the same instances.
  */
 /*
  *  Copyright (C) 2016 Systerel and others.
@@ -125,8 +121,15 @@ typedef SOPC_StatusCode (*FnCertificateVerify) (const struct CryptoProvider *pCr
  * The CryptoProfile definition
  * ------------------------------------------------------------------------------------------------
  */
-struct CryptoProfile
-{
+/**
+ * \brief   CryptoProfiles gather pointers to cryptographic functions associated to a security policy.
+ *
+ * CryptoProfiles are defined as struct of pointers. These immutable struct are extern and const, because they are
+ * lib-specific (hence CryptoProfile_Get and these variables are in different translation units).
+ * The CryptoProfiles should be accessed through CryptoProfile_Get ONLY, and should not be modified,
+ * as multiple calls to CryptoProfile_Get returns the same instances.
+ */
+struct CryptoProfile {
     const uint32_t                  SecurityPolicyID;
     const FnSymmetricEncrypt        pFnSymmEncrypt;
     const FnSymmetricDecrypt        pFnSymmDecrypt;
@@ -140,5 +143,6 @@ struct CryptoProfile
     const FnAsymmetricVerify        pFnAsymVerify;
     const FnCertificateVerify       pFnCertVerify;
 };
+
 
 #endif  /* SOPC_CRYPTO_PROFILES_H_ */
