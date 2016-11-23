@@ -27,7 +27,7 @@
 
 #include "sopc_base_types.h"
 #include "secret_buffer.h"
-#include "crypto_types.h"
+#include "crypto_decl.h"
 #include "key_manager.h"
 
 

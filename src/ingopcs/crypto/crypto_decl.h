@@ -1,6 +1,8 @@
 /** \file
  *
- * \brief Defines the part of the CryptoProvider which is lib-specific: CryptolibContext.
+ * \brief Defines the common declarations for the cryptographic objects.
+ *
+ * Avoids the circular dependencies.
  */
 /*
  *  Copyright (C) 2016 Systerel and others.
@@ -19,17 +21,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_CRYPTO_PROVIDER_LIB_H_
-#define SOPC_CRYPTO_PROVIDER_LIB_H_
 
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
+#ifndef SOPC_CRYPTO_DECL_H_
+#define SOPC_CRYPTO_DECL_H_
 
 
-struct CryptolibContext {
-    mbedtls_entropy_context ctxEnt;
-    mbedtls_ctr_drbg_context ctxDrbg;
-};
+typedef struct CryptoProvider CryptoProvider;
+typedef struct CryptoProfile CryptoProfile;
+typedef struct CryptolibContext CryptolibContext;
+typedef struct AsymmetricKey AsymmetricKey;
+typedef struct Certificate Certificate;
+typedef struct PKIProvider PKIProvider;
 
 
-#endif /* SOPC_CRYPTO_PROVIDER_LIB_H_ */
+#endif /* SOPC_CRYPTO_DECL_H_ */

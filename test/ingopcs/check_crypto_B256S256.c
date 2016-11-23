@@ -31,7 +31,7 @@
 #include "check_stack.h"
 #include "crypto_provider.h"
 #include "crypto_profiles.h"
-#include "crypto_types.h"
+#include "crypto_decl.h"
 #include "secret_buffer.h"
 #include "crypto_provider_lib.h"
 #include "key_manager.h"

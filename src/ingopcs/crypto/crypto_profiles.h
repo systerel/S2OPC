@@ -1,9 +1,11 @@
 /** \file
  *
- * Defines constants for the cryptographic profiles. CryptoProfiles are defined in crypto_types and
- * are defined as struct of pointers. These immutable struct are extern and const, because they are
+ * \brief Defines the cryptographic profiles: constants and struct.
+ *
+ * CryptoProfiles are defined as struct of pointers. These immutable struct are extern and const, because they are
  * lib-specific (hence CryptoProfile_Get and these variables are in different translation units).
- * The CryptoProfiles should be accessed through CryptoProfile_Get ONLY.
+ * The CryptoProfiles should be accessed through CryptoProfile_Get ONLY, and should not be modified,
+ * as multiple calls to CryptoProfile_Get returns the same instances.
  */
 /*
  *  Copyright (C) 2016 Systerel and others.
@@ -26,8 +28,7 @@
 #define SOPC_CRYPTO_PROFILES_H_
 
 
-#include "crypto_types.h"
-
+#include "crypto_decl.h"
 
 // API
 const CryptoProfile * CryptoProfile_Get(const char *uri);
@@ -50,5 +51,94 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 // CryptoProfiles instances
 extern const CryptoProfile g_cpBasic256Sha256;
 
+
+#include "sopc_base_types.h"
+#include "secret_buffer.h"
+#include "crypto_decl.h"
+
+
+/* ------------------------------------------------------------------------------------------------
+ * Internal CryptoProfile function pointers.
+ * ------------------------------------------------------------------------------------------------
+ */
+typedef SOPC_StatusCode (*FnSymmetricEncrypt) (const struct CryptoProvider *pProvider,
+                                          const uint8_t *pInput,
+                                          uint32_t lenPlainText,
+                                          const ExposedBuffer *pKey,
+                                          const ExposedBuffer *pIV,
+                                          uint8_t *pOutput,
+                                          uint32_t lenOutput);
+typedef SOPC_StatusCode (*FnSymmetricDecrypt) (const struct CryptoProvider *pProvider,
+                                          const uint8_t *pInput,
+                                          uint32_t lenCipherText,
+                                          const ExposedBuffer *pKey,
+                                          const ExposedBuffer *pIV,
+                                          uint8_t *pOutput,
+                                          uint32_t lenOutput);
+typedef SOPC_StatusCode (*FnSymmetricSign) (const struct CryptoProvider *pProvider,
+                                       const uint8_t *pInput,
+                                       uint32_t lenInput,
+                                       const ExposedBuffer *pKey,
+                                       uint8_t *pOutput);
+typedef SOPC_StatusCode (*FnSymmetricVerify) (const struct CryptoProvider *pProvider,
+                                         const uint8_t *pInput,
+                                         uint32_t lenInput,
+                                         const ExposedBuffer *pKey,
+                                         const uint8_t *pSignature);
+typedef SOPC_StatusCode (*FnGenerateRandom) (const struct CryptoProvider *pProvider,
+                                             ExposedBuffer *pData,
+                                             uint32_t lenData);
+typedef SOPC_StatusCode (*FnDerivePseudoRandomData) (const struct CryptoProvider *pProvider,
+                                                const ExposedBuffer *pSecret,
+                                                uint32_t lenSecret,
+                                                const ExposedBuffer *pSeed,
+                                                uint32_t lenSeed,
+                                                ExposedBuffer *pOutput,
+                                                uint32_t lenOutput);
+typedef SOPC_StatusCode (*FnAsymmetricEncrypt) (const struct CryptoProvider *pProvider,
+                                           const uint8_t *pInput,
+                                           uint32_t lenPlainText,
+                                           const struct AsymmetricKey *pKey,
+                                           uint8_t *pOutput);
+typedef SOPC_StatusCode (*FnAsymmetricDecrypt) (const struct CryptoProvider *pProvider,
+                                           const uint8_t *pInput,
+                                           uint32_t lenCipherText,
+                                           const struct AsymmetricKey *pKey,
+                                           uint8_t *pOutput,
+                                           uint32_t *lenWritten);
+typedef SOPC_StatusCode (*FnAsymmetricSign) (const struct CryptoProvider *pProvider,
+                                        const uint8_t *pInput,
+                                        uint32_t lenInput,
+                                        const struct AsymmetricKey *pKey,
+                                        uint8_t *pSignature);
+typedef SOPC_StatusCode (*FnAsymmetricVerify) (const struct CryptoProvider *pProvider,
+                                          const uint8_t *pInput,
+                                          uint32_t lenInput,
+                                          const struct AsymmetricKey *pKey,
+                                          const uint8_t *pSignature);
+typedef SOPC_StatusCode (*FnCertificateVerify) (const struct CryptoProvider *pCrypto,
+                                           const struct Certificate *pCert);
+
+
+
+/* ------------------------------------------------------------------------------------------------
+ * The CryptoProfile definition
+ * ------------------------------------------------------------------------------------------------
+ */
+struct CryptoProfile
+{
+    const uint32_t                  SecurityPolicyID;
+    const FnSymmetricEncrypt        pFnSymmEncrypt;
+    const FnSymmetricDecrypt        pFnSymmDecrypt;
+    const FnSymmetricSign           pFnSymmSign;
+    const FnSymmetricVerify         pFnSymmVerif;
+    const FnGenerateRandom          pFnGenRnd;
+    const FnDerivePseudoRandomData  pFnDeriveData;
+    const FnAsymmetricEncrypt       pFnAsymEncrypt;
+    const FnAsymmetricDecrypt       pFnAsymDecrypt;
+    const FnAsymmetricSign          pFnAsymSign;
+    const FnAsymmetricVerify        pFnAsymVerify;
+    const FnCertificateVerify       pFnCertVerify;
+};
 
 #endif  /* SOPC_CRYPTO_PROFILES_H_ */

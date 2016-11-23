@@ -26,16 +26,16 @@
 #include "mbedtls/pk.h"
 #include "mbedtls/x509_crt.h"
 
+
 /**
  * \brief   The asymmetric key representation.
  *
  *          It should be treated as an abstract handle.
  *          The asymmetric key structure is mainly lib-specific. Its content can be enriched for future uses.
  */
-typedef struct AsymmetricKey {
+struct AsymmetricKey {
     mbedtls_pk_context pk;
-} AsymmetricKey;
-
+};
 
 /**
  * \brief   The signed public key representation.
@@ -43,11 +43,11 @@ typedef struct AsymmetricKey {
  *          It should be treated as an abstract handle.
  *          The certificate structure is mainly lib-specific. Its content can be enriched for future uses.
  */
-typedef struct Certificate {
+struct Certificate {
     mbedtls_x509_crt crt;   /**< Certificate as a lib-dependent format */
     uint8_t *crt_der;       /**< Certificate in the DER format, which should be canonical. Points to internal mbedtls buffer.*/
     uint32_t len_der;       /**< Length of crt_der. */
-} Certificate;
+};
 
 /**
  * \brief   Certificate Revocation List.

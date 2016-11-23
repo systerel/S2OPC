@@ -33,9 +33,9 @@
 #define SOPC_PKI_H_
 
 
-struct PKIProvider;
 
 #include "sopc_base_types.h"
+#include "crypto_decl.h"
 #include "crypto_provider.h"
 #include "key_manager.h"
 
@@ -48,7 +48,7 @@ typedef SOPC_StatusCode (*FnValidateCertificate) (const struct PKIProvider *pPKI
 /**
  * \brief   The PKIProvider object defines the common interface for the Public Key Infrastructure.
  */
-typedef struct PKIProvider
+struct PKIProvider
 {
     /**
      *  \brief          The validation function, which is wrapped by CryptoProvider_Certificate_Validate().
@@ -70,7 +70,7 @@ typedef struct PKIProvider
     void *pUserCertRevocList;
     /** \brief PKI implementations can use this placeholder to store more specific data. */
     void *pUserData;
-} PKIProvider;
+};
 
 
 #endif /* SOPC_PKI_H_ */

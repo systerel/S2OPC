@@ -20,7 +20,9 @@
 
 #include <string.h>
 
+#include "crypto_decl.h"
 #include "crypto_profiles.h"
+
 
 
 const CryptoProfile *CryptoProfile_Get(const char *uri)
