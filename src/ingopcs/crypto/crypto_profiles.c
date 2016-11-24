@@ -27,8 +27,12 @@
 
 const CryptoProfile *CryptoProfile_Get(const char *uri)
 {
-    if(strncmp(uri, SecurityPolicy_Basic256Sha256_URI, strlen(SecurityPolicy_Basic256Sha256_URI)) == 0)
+    // Compares len+1 to include the trailing \0 of the zero-terminated #defined URI.
+    // This avoids false positives with strings prefixed by a valid security policy.
+    if(strncmp(uri, SecurityPolicy_Basic256Sha256_URI, strlen(SecurityPolicy_Basic256Sha256_URI)+1) == 0)
         return &g_cpBasic256Sha256;
+    if(strncmp(uri, SecurityPolicy_Basic256_URI, strlen(SecurityPolicy_Basic256_URI)+1) == 0)
+        return &g_cpBasic256;
 
     return NULL;
 }
