@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "p_sockets.h"
+#include "sopc_raw_sockets.h"
+
 #include <unistd.h>
 #include <string.h>
 #include <netinet/tcp.h>

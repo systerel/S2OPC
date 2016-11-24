@@ -16,7 +16,7 @@
  */
 
 #include <stdint.h>
-#include "p_sockets.h"
+#include "sopc_raw_sockets.h"
 #include "sopc_base_types.h"
 
 #ifndef SOPC_SOCKETS_H_

@@ -19,7 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "p_sockets.h"
+#include "sopc_raw_sockets.h"
 #include "sopc_types.h"
 
 typedef struct SOPC_StackConfiguration {
