@@ -627,6 +627,7 @@ Suite *tests_make_suite_tools(void)
 
     tc_hexlify = tcase_create("Hexlify (tests only)");
     tcase_add_test(tc_hexlify, test_hexlify);
+    suite_add_tcase(s, tc_hexlify);
 
     return s;
 }

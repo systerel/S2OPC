@@ -23,10 +23,8 @@
 
 
 #include <stdio.h>
-#include <string.h>
-#include <check.h>
-#include <stddef.h> // NULL
 #include <stdlib.h> // malloc, free
+#include <check.h>
 
 #include "sopc_base_types.h"
 #include "hexlify.h"
@@ -81,7 +79,9 @@ START_TEST(test_crypto_symm_lengths)
     uint32_t len = 0, lenCiph = 0, lenDeci = 0;
 
     // Check sizes
-    ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &len) == STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &len) == STATUS_OK);
+    ck_assert(32 == len);
+    ck_assert(CryptoProvider_SymmetricGetLength_SignKey(crypto, &len) == STATUS_OK);
     ck_assert(32 == len);
     ck_assert(CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == STATUS_OK);
     ck_assert(32 == len);
@@ -417,7 +417,7 @@ START_TEST(test_crypto_derive_data)
     ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
     lenOutp = lenKey+lenKeyBis+lenIV;
     ck_assert(lenOutp < 1024);
-    ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &lenSecr) == STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenSecr) == STATUS_OK); // TODO: use future GetLength_Nonce
     lenSeed = lenSecr;
 
     // This test vectors is unofficial, taken from https://www.ietf.org/mail-archive/web/tls/current/msg03416.html
@@ -486,7 +486,7 @@ START_TEST(test_crypto_derive_keysets)
     ck_assert(CryptoProvider_DeriveGetLengths(crypto, &lenKey, &lenKeyBis, &lenIV) == STATUS_OK);
     lenOutp = lenKey+lenKeyBis+lenIV;
     ck_assert(lenOutp < 1024);
-    ck_assert(CryptoProvider_SymmetricGetLength_Key(crypto, &lenCliNonce) == STATUS_OK);
+    ck_assert(CryptoProvider_SymmetricGetLength_CryptoKey(crypto, &lenCliNonce) == STATUS_OK); // TODO: use future GetLength_Nonce
     lenSerNonce = lenCliNonce;
 
     // Prepares security key sets

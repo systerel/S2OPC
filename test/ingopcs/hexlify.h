@@ -25,6 +25,9 @@
 #define SOPC_HEXLIFY_H_
 
 
+#include <stddef.h> // size_t
+
+
 int hexlify(const unsigned char *src, char *dst, size_t n);
 int unhexlify(const char *src, unsigned char *dst, size_t n);
 
