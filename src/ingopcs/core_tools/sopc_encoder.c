@@ -653,6 +653,7 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_MsgBuffer* msgBuffer,
                 status = SOPC_UInt16_Read(&nodeId->Namespace, msgBuffer);
                 if(status == STATUS_OK){
                     nodeId->Data.Guid = malloc(sizeof(SOPC_Guid));
+                    SOPC_Guid_Initialize(nodeId->Data.Guid);
                     status = SOPC_Guid_Read(nodeId->Data.Guid, msgBuffer);
                 }
                 break;
@@ -1032,6 +1033,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
                 status = SOPC_Int32_Read(&extObj->Length, msgBuffer);
                 if(status == STATUS_OK){
                     extObj->Body.Object.Value = malloc(extObj->Body.Object.ObjType->AllocationSize);
+                    extObj->Body.Object.ObjType->Initialize(extObj->Body.Object.Value);
                     status = extObj->Body.Object.ObjType->Decode(&extObj->Body.Object.Value, msgBuffer);
                 }
                 break;
@@ -1388,6 +1390,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_Guid_Id:
             val->Guid = malloc(sizeof(SOPC_Guid));
             if(val->Guid != NULL){
+                SOPC_Guid_Initialize(val->Guid);
                 status = SOPC_Guid_Read(val->Guid, msgBuffer);
             }else{
                 status = STATUS_NOK;
@@ -1402,6 +1405,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_NodeId_Id:
             val->NodeId = malloc(sizeof(SOPC_NodeId));
             if(val->NodeId != NULL){
+                SOPC_NodeId_Initialize(val->NodeId);
                 status = SOPC_NodeId_Read(val->NodeId, msgBuffer);
             }else{
                 status = STATUS_NOK;
@@ -1410,6 +1414,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_ExpandedNodeId_Id:
             val->ExpNodeId = malloc(sizeof(SOPC_ExpandedNodeId));
             if(val->ExpNodeId != NULL){
+                SOPC_ExpandedNodeId_Initialize(val->ExpNodeId);
                 status = SOPC_ExpandedNodeId_Read(val->ExpNodeId, msgBuffer);
             }else{
                 status = STATUS_NOK;
@@ -1421,6 +1426,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_QualifiedName_Id:
             val->Qname = malloc(sizeof(SOPC_QualifiedName));
             if(val->Qname != NULL){
+                SOPC_QualifiedName_Initialize(val->Qname);
                 status = SOPC_QualifiedName_Read(val->Qname, msgBuffer);
             }else{
                 status = STATUS_NOK;
@@ -1429,6 +1435,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_LocalizedText_Id:
             val->LocalizedText = malloc(sizeof(SOPC_LocalizedText));
             if(val->LocalizedText != NULL){
+                SOPC_LocalizedText_Initialize(val->LocalizedText);
                 status = SOPC_LocalizedText_Read(val->LocalizedText, msgBuffer);
             }else{
                 status = STATUS_NOK;
@@ -1437,6 +1444,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_ExtensionObject_Id:
             val->ExtObject = malloc(sizeof(SOPC_ExtensionObject));
             if(val->ExtObject != NULL){
+                SOPC_ExtensionObject_Initialize(val->ExtObject);
                 status = SOPC_ExtensionObject_Read(val->ExtObject, msgBuffer);
             }else{
                 status = STATUS_NOK;
@@ -1445,6 +1453,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_DataValue_Id:
             val->DataValue = malloc(sizeof(SOPC_DataValue));
             if(val->DataValue != NULL){
+                SOPC_DataValue_Initialize(val->DataValue);
                 status = SOPC_DataValue_Read(val->DataValue, msgBuffer);
             }else{
                 status = STATUS_NOK;
@@ -1456,6 +1465,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
         case SOPC_DiagnosticInfo_Id:
             val->DiagInfo = malloc(sizeof(SOPC_DiagnosticInfo));
             if(val->DiagInfo != NULL){
+                SOPC_DiagnosticInfo_Initialize(val->DiagInfo);
                 status = SOPC_DiagnosticInfo_Read(val->DiagInfo, msgBuffer);
             }else{
                 status = STATUS_NOK;
@@ -1591,6 +1601,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_String_Initialize(&array->StringArr[idx]);
                     status = SOPC_String_Read(&array->StringArr[idx], msgBuffer);
                 }
             }
@@ -1601,6 +1612,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_DateTime_Initialize(&array->DateArr[idx]);
                     status = SOPC_DateTime_Read(&array->DateArr[idx], msgBuffer);
                 }
             }
@@ -1611,6 +1623,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_Guid_Initialize(&array->GuidArr[idx]);
                     status = SOPC_Guid_Read(&array->GuidArr[idx], msgBuffer);
                 }
             }
@@ -1621,6 +1634,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_ByteString_Initialize(&array->BstringArr[idx]);
                     status = SOPC_ByteString_Read(&array->BstringArr[idx], msgBuffer);
                 }
             }
@@ -1631,6 +1645,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_XmlElement_Initialize(&array->XmlEltArr[idx]);
                     status = SOPC_XmlElement_Read(&array->XmlEltArr[idx], msgBuffer);
                 }
             }
@@ -1641,6 +1656,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_NodeId_Initialize(&array->NodeIdArr[idx]);
                     status = SOPC_NodeId_Read(&array->NodeIdArr[idx], msgBuffer);
                 }
             }
@@ -1651,6 +1667,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_ExpandedNodeId_Initialize(&array->ExpNodeIdArr[idx]);
                     status = SOPC_ExpandedNodeId_Read(&array->ExpNodeIdArr[idx], msgBuffer);
                 }
             }
@@ -1671,6 +1688,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_QualifiedName_Initialize(&array->QnameArr[idx]);
                     status = SOPC_QualifiedName_Read(&array->QnameArr[idx], msgBuffer);
                 }
             }
@@ -1681,6 +1699,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_LocalizedText_Initialize(&array->LocalizedTextArr[idx]);
                     status = SOPC_LocalizedText_Read(&array->LocalizedTextArr[idx], msgBuffer);
                 }
             }
@@ -1691,6 +1710,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_ExtensionObject_Initialize(&array->ExtObjectArr[idx]);
                     status = SOPC_ExtensionObject_Read(&array->ExtObjectArr[idx], msgBuffer);
                 }
             }
@@ -1701,6 +1721,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_DataValue_Initialize(&array->DataValueArr[idx]);
                     status = SOPC_DataValue_Read(&array->DataValueArr[idx], msgBuffer);
                 }
             }
@@ -1711,6 +1732,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_Variant_Initialize(&array->VariantArr[idx]);
                     status = SOPC_Variant_Read(&array->VariantArr[idx], msgBuffer);
                 }
             }
@@ -1721,6 +1743,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
+                    SOPC_DiagnosticInfo_Initialize(&array->DiagInfoArr[idx]);
                     status = SOPC_DiagnosticInfo_Read(&array->DiagInfoArr[idx], msgBuffer);
                 }
             }
