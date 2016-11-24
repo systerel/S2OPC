@@ -165,8 +165,8 @@ int main(void){
     // Endpoint URL in OPC UA string format
     OpcUa_String* stEndpointUrl = OpcUa_String_FromCString(sEndpointUrl);
 
-    // Policy security: None
-    OpcUa_String* pRequestedSecurityPolicyUri = OpcUa_String_FromCString(OpcUa_SecurityPolicy_Basic256Sha256);
+    // Policy security: Basic256 at least
+    OpcUa_String* pRequestedSecurityPolicyUri = OpcUa_String_FromCString(OpcUa_SecurityPolicy_Basic256);
 
 
     // Message security mode: None

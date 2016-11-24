@@ -146,17 +146,20 @@ int main(void){
     // Empty callback data
     StubServer_Endpoint Callback_Data;
 
-    // Number of the secu policy configuration: 1
-    OpcUa_UInt NbOfSecurityPolicyConfigurations = 1;
+    // Number of the secu policy configuration: 2
+    OpcUa_UInt NbOfSecurityPolicyConfigurations = 2;
 
     // Policy security: None
     //const OpcUa_String* pSecurityPolicyUri = OpcUa_String_FromCString(OpcUa_SecurityPolicy_Basic128Rsa15);
 
-    // Secu policy configuration: empty
+    // Secu policy configuration: Basic256Sha256
     OpcUa_Endpoint_SecurityPolicyConfiguration* secuConfig = (OpcUa_Endpoint_SecurityPolicyConfiguration*)OpcUa_Alloc(NbOfSecurityPolicyConfigurations * sizeof(OpcUa_Endpoint_SecurityPolicyConfiguration));
     OpcUa_String_AttachReadOnly(&secuConfig[0].sSecurityPolicy, OpcUa_SecurityPolicy_Basic256Sha256);
-    secuConfig[0].uMessageSecurityModes = OPCUA_SECURECHANNEL_MESSAGESECURITYMODE_SIGNANDENCRYPT | OPCUA_SECURECHANNEL_MESSAGESECURITYMODE_NONE |\
-    		OPCUA_SECURECHANNEL_MESSAGESECURITYMODE_SIGN;
+    secuConfig[0].uMessageSecurityModes = OPCUA_SECURECHANNEL_MESSAGESECURITYMODE_SIGNANDENCRYPT;
+
+    // Secu policy configuration: Basic256
+    OpcUa_String_AttachReadOnly(&secuConfig[1].sSecurityPolicy, OpcUa_SecurityPolicy_Basic256);
+    secuConfig[1].uMessageSecurityModes = OPCUA_SECURECHANNEL_MESSAGESECURITYMODE_SIGNANDENCRYPT;
 
 	// Initialize proxystub level with default services and TCP UA protocol
     uStatus = OpcUa_Endpoint_Create (&hEndpoint, OpcUa_Endpoint_SerializerType_Binary, OpcUa_Null); //StubServer_SupportedServices);
