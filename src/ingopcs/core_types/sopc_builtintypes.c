@@ -931,34 +931,33 @@ BuiltInFunction* GetBuiltInTypeClearFunction(SOPC_BuiltinId builtInTypeId){
 }
 
 void SOPC_Variant_Clear(SOPC_Variant* variant){
+    int32_t length = 0;
+    int32_t idx = 0;
     if(variant != NULL){
-        BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeMask);
-        // Matrix flag => array flag
-        assert(((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0 &&
-                 (variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0)
-               || ((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) == 0));
-
-        if((variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0){
-            int32_t length = 0;
-            if((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
-                int32_t idx = 0;
-                for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
-                    length *= variant->Value.Matrix.ArrayDimensions[idx];
-                }
-                ApplyToVariantArrayBuiltInType(variant->BuiltInTypeMask,
-                                               variant->Value.Matrix.Content,
-                                               length,
-                                               clearFunction);
-            }else{
-                ApplyToVariantArrayBuiltInType(variant->BuiltInTypeMask,
+        BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeId);
+        switch(variant->ArrayType){
+            case SOPC_VariantArrayType_SingleValue:
+                ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeId,
+                                                  variant->Value,
+                                                  clearFunction);
+                break;
+            case SOPC_VariantArrayType_Array:
+                ApplyToVariantArrayBuiltInType(variant->BuiltInTypeId,
                                                variant->Value.Array.Content,
                                                variant->Value.Array.Length,
                                                clearFunction);
-            }
-        }else{
-            ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeMask,
-                                              variant->Value,
-                                              clearFunction);
+                break;
+            case SOPC_VariantArrayType_Matrix:
+                for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
+                    length *= variant->Value.Matrix.ArrayDimensions[idx];
+                }
+                ApplyToVariantArrayBuiltInType(variant->BuiltInTypeId,
+                                               variant->Value.Matrix.Content,
+                                               length,
+                                               clearFunction);
+                free(variant->Value.Matrix.ArrayDimensions);
+                variant->Value.Matrix.ArrayDimensions = NULL;
+                break;
         }
     }
 }

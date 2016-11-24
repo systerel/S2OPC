@@ -157,6 +157,13 @@ typedef enum SOPC_VariantArrayTypeFlag {
     SOPC_VariantArrayValueFlag = 128 // 2^7 => bit 7
 } SOPC_VariantArrayTypeFlag;
 
+// Binary compatible types
+typedef enum SOPC_VariantArrayType {
+    SOPC_VariantArrayType_SingleValue = 0x0,
+    SOPC_VariantArrayType_Array = 0x1,
+    SOPC_VariantArrayType_Matrix = 0x2
+} SOPC_VariantArrayType;
+
 struct SOPC_DataValue;
 struct SOPC_Variant;
 
@@ -226,8 +233,8 @@ typedef union SOPC_VariantValue {
 } SOPC_VariantValue;
 
 typedef struct SOPC_Variant {
-    SOPC_Byte         BuiltInTypeMask;
-    SOPC_Byte         ArrayTypeMask;
+    SOPC_Byte         BuiltInTypeId;
+    SOPC_Byte         ArrayType;
     SOPC_Byte         Padding[2];
     SOPC_VariantValue Value;
 } SOPC_Variant;

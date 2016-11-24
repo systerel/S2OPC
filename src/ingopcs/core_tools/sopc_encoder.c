@@ -1048,11 +1048,11 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
 
 SOPC_Byte GetVariantEncodingMask(const SOPC_Variant* variant){
     assert(variant != NULL);
-    SOPC_Byte encodingByte = variant->BuiltInTypeMask;
-    if((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
+    SOPC_Byte encodingByte = variant->BuiltInTypeId;
+    if(variant->ArrayType == SOPC_VariantArrayType_Matrix){
         encodingByte |= SOPC_VariantArrayMatrixFlag;
     }
-    if((variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0){
+    if(variant->ArrayType == SOPC_VariantArrayType_Array){
         encodingByte |= SOPC_VariantArrayValueFlag;
     }
     return encodingByte;
@@ -1287,56 +1287,55 @@ SOPC_StatusCode SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_MsgBuffer* 
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     int32_t arrayLength = 0;
+    int32_t idx = 0;
+
     if(variant != NULL){
         encodingByte = GetVariantEncodingMask(variant);
         status = SOPC_Byte_Write(&encodingByte, msgBuffer);
     }
-    if(status == STATUS_OK){
-        if((variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0){
-            if((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
-                int32_t idx = 0;
+    if(STATUS_OK == status){
+        switch(variant->ArrayType){
+            case SOPC_VariantArrayType_SingleValue:
+                status = WriteVariantNonArrayBuiltInType(msgBuffer,
+                                                         variant->BuiltInTypeId,
+                                                         &variant->Value);
+                break;
+            case SOPC_VariantArrayType_Array:
+                arrayLength = variant->Value.Array.Length;
+                status = SOPC_Int32_Write(&arrayLength, msgBuffer);
+                if(STATUS_OK == status){
+                    status = WriteVariantArrayBuiltInType(msgBuffer,
+                                                          variant->BuiltInTypeId,
+                                                          &variant->Value.Array.Content,
+                                                          arrayLength);
+                }
+                break;
+            case SOPC_VariantArrayType_Matrix:
                 arrayLength = 1;
                 for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
                     arrayLength *= variant->Value.Matrix.ArrayDimensions[idx];
                 }
-            }else{
-                arrayLength = variant->Value.Array.Length;
-            }
-            status = SOPC_Int32_Write(&arrayLength, msgBuffer);
-        }else if((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
-            status = STATUS_INVALID_PARAMETERS;
-        }
-    }
-    if(status == STATUS_OK){
-        if((variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0){
-            if((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
-                status = WriteVariantArrayBuiltInType(msgBuffer,
-                                                      variant->BuiltInTypeMask,
-                                                      &variant->Value.Matrix.Content,
-                                                      arrayLength);
+                status = SOPC_Int32_Write(&arrayLength, msgBuffer);
+
+                if(STATUS_OK == status){
+                    status = WriteVariantArrayBuiltInType(msgBuffer,
+                                                          variant->BuiltInTypeId,
+                                                          &variant->Value.Matrix.Content,
+                                                          arrayLength);
+                }
                 // Encode dimension array
-                if(status == STATUS_OK){
+                if(STATUS_OK == status){
                     // length
                     status = SOPC_Int32_Write(&variant->Value.Matrix.Dimensions, msgBuffer);
                 }
-                if(status == STATUS_OK){
+                if(STATUS_OK == status){
                     // array
                     int32_t idx = 0;
                     for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
                         status = SOPC_Int32_Write(&variant->Value.Matrix.ArrayDimensions[idx], msgBuffer);
                     }
                 }
-            }else{
-                status = WriteVariantArrayBuiltInType(msgBuffer,
-                                                      variant->BuiltInTypeMask,
-                                                      &variant->Value.Array.Content,
-                                                      arrayLength);
-            }
-        }else{
-            // We already checked that matrix flag => array flag, here it's a single builtin type
-            status = WriteVariantNonArrayBuiltInType(msgBuffer,
-                                                     variant->BuiltInTypeMask,
-                                                     &variant->Value);
+                break;
         }
     }
     return status;
@@ -1742,9 +1741,10 @@ SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuff
     if(status == STATUS_OK){
         // Retrieve array flags
         if((encodingByte & SOPC_VariantArrayValueFlag) != 0){
-            variant->ArrayTypeMask = SOPC_VariantArrayValueFlag;
             if((encodingByte & SOPC_VariantArrayMatrixFlag) != 0){
-                variant->ArrayTypeMask |= SOPC_VariantArrayMatrixFlag;
+                variant->ArrayType = SOPC_VariantArrayType_Matrix;
+            }else{
+                variant->ArrayType = SOPC_VariantArrayType_Array;
             }
             // Read array length
             status = SOPC_Int32_Read(&arrayLength, msgBuffer);
@@ -1752,14 +1752,26 @@ SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuff
             status = STATUS_INVALID_PARAMETERS;
         }
         // Retrieve builtin type id: avoid 2^7 and 2^6 which are array flags
-        variant->BuiltInTypeMask = 0x3F & encodingByte;
+        variant->BuiltInTypeId = 0x3F & encodingByte;
     }
 
     if(status == STATUS_OK){
-        if((variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0){
-            if(status == STATUS_OK && (variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
+        switch(variant->ArrayType){
+            case SOPC_VariantArrayType_SingleValue:
+                status = ReadVariantNonArrayBuiltInType(msgBuffer,
+                                                        variant->BuiltInTypeId,
+                                                        &variant->Value);
+                break;
+            case SOPC_VariantArrayType_Array:
                 status = ReadVariantArrayBuiltInType(msgBuffer,
-                                                     variant->BuiltInTypeMask,
+                                                     variant->BuiltInTypeId,
+                                                     &variant->Value.Array.Content,
+                                                     arrayLength);
+                variant->Value.Array.Length = arrayLength;
+                break;
+            case SOPC_VariantArrayType_Matrix:
+                status = ReadVariantArrayBuiltInType(msgBuffer,
+                                                     variant->BuiltInTypeId,
                                                      &variant->Value.Matrix.Content,
                                                      arrayLength);
                 // Decode dimension array
@@ -1779,18 +1791,7 @@ SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuff
                         status = STATUS_NOK;
                     }
                 }
-            }else{
-                status = ReadVariantArrayBuiltInType(msgBuffer,
-                                                     variant->BuiltInTypeMask,
-                                                     &variant->Value.Array.Content,
-                                                     arrayLength);
-                variant->Value.Array.Length = arrayLength;
-            }
-        }else{
-            // We already checked that matrix flag => array flag, here it's a single builtin type
-            status = ReadVariantNonArrayBuiltInType(msgBuffer,
-                                                    variant->BuiltInTypeMask,
-                                                    &variant->Value);
+                break;
         }
     }
     return status;
@@ -1799,7 +1800,7 @@ SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuff
 SOPC_Byte GetDataValueEncodingMask(const SOPC_DataValue* dataValue){
     assert(dataValue != NULL);
     SOPC_Byte mask = 0;
-    if(dataValue->Value.BuiltInTypeMask != SOPC_Null_Id && dataValue->Value.BuiltInTypeMask <= SOPC_BUILTINID_MAX){
+    if(dataValue->Value.BuiltInTypeId != SOPC_Null_Id && dataValue->Value.BuiltInTypeId <= SOPC_BUILTINID_MAX){
         mask |= SOPC_DataValue_NotNullValue;
     }
     if(dataValue->Status != STATUS_OK){
@@ -1858,7 +1859,7 @@ SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* m
     if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotNullValue) != 0){
         status = SOPC_Variant_Read(&dataValue->Value, msgBuffer);
     }else{
-        dataValue->Value.BuiltInTypeMask = SOPC_Null_Id;
+        dataValue->Value.BuiltInTypeId = SOPC_Null_Id;
     }
     if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotGoodStatusCode) != 0){
         status = SOPC_StatusCode_Read(&dataValue->Status, msgBuffer);
