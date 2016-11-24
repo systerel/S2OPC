@@ -559,7 +559,7 @@ SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
 
     // Assert key size
-    if(CryptoProvider_SymmetricGetLength_CryptoKey(pProvider, &len) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_SignKey(pProvider, &len) != STATUS_OK)
         return STATUS_NOK;
     if(SecretBuffer_GetLength(pKey) != len)
         return STATUS_INVALID_PARAMETERS;
@@ -597,7 +597,7 @@ SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
 
     // Assert key size
-    if(CryptoProvider_SymmetricGetLength_CryptoKey(pProvider, &len) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_SignKey(pProvider, &len) != STATUS_OK)
         return STATUS_NOK;
     if(SecretBuffer_GetLength(pKey) != len)
         return STATUS_INVALID_PARAMETERS;
