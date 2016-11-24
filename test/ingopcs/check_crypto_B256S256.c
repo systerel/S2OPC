@@ -40,22 +40,22 @@
 
 
 // Using fixtures
-CryptoProvider *crypto = NULL;
+static CryptoProvider *crypto = NULL;
 
-void setup_crypto(void)
+static inline void setup_crypto(void)
 {
     crypto = CryptoProvider_Create(SecurityPolicy_Basic256Sha256_URI);
     ck_assert(NULL != crypto);
 }
 
-void teardown_crypto(void)
+static inline void teardown_crypto(void)
 {
     CryptoProvider_Free(crypto);
     crypto = NULL;
 }
 
 
-START_TEST(test_crypto_load)
+START_TEST(test_crypto_load_B256S256)
 {
     ck_assert(NULL != crypto->pProfile);
     ck_assert(SecurityPolicy_Basic256Sha256_ID == crypto->pProfile->SecurityPolicyID);
@@ -74,7 +74,7 @@ START_TEST(test_crypto_load)
 END_TEST
 
 
-START_TEST(test_crypto_symm_lengths)
+START_TEST(test_crypto_symm_lengths_B256S256)
 {
     uint32_t len = 0, lenCiph = 0, lenDeci = 0;
 
@@ -103,7 +103,7 @@ START_TEST(test_crypto_symm_lengths)
 END_TEST
 
 
-START_TEST(test_crypto_symm_crypt)
+START_TEST(test_crypto_symm_crypt_B256S256)
 {
     // Tests based on the test vectors provided by the NIST
     //  (http://csrc.nist.gov/groups/STM/cavp/block-ciphers.html#aes)
@@ -316,7 +316,7 @@ START_TEST(test_crypto_symm_crypt)
 END_TEST
 
 
-START_TEST(test_crypto_symm_sign)
+START_TEST(test_crypto_symm_sign_B256S256)
 {
     unsigned char key[256];
     unsigned char input[256];
@@ -370,7 +370,7 @@ START_TEST(test_crypto_symm_sign)
 END_TEST
 
 
-START_TEST(test_crypto_symm_generate_nonce) // TODO: it is a _nonce, maybe it is not a crypto_symm...
+START_TEST(test_crypto_symm_generate_nonce_B256S256) // TODO: it is a _nonce, maybe it is not a crypto_symm...
 {
     SecretBuffer *pSecNonce0, *pSecNonce1;
     ExposedBuffer *pExpKey0, *pExpKey1;
@@ -394,7 +394,7 @@ START_TEST(test_crypto_symm_generate_nonce) // TODO: it is a _nonce, maybe it is
 END_TEST
 
 
-START_TEST(test_crypto_derive_lengths)
+START_TEST(test_crypto_derive_lengths_B256S256)
 {
     uint32_t lenKey = 0, lenKeyBis = 0, lenIV = 0;
 
@@ -407,7 +407,7 @@ START_TEST(test_crypto_derive_lengths)
 END_TEST
 
 
-START_TEST(test_crypto_derive_data)
+START_TEST(test_crypto_derive_data_B256S256)
 {
     ExposedBuffer secret[32], seed[32], output[1024];
     char hexoutput[2048];
@@ -475,7 +475,7 @@ START_TEST(test_crypto_derive_data)
 END_TEST
 
 
-START_TEST(test_crypto_derive_keysets)
+START_TEST(test_crypto_derive_keysets_B256S256)
 {
     ExposedBuffer clientNonce[32], serverNonce[32], *pout, zeros[32];
     char hexoutput[160];
@@ -570,9 +570,9 @@ END_TEST
 
 
 // Fixture for certificate load
-Certificate *crt_pub = NULL;
+static Certificate *crt_pub = NULL;
 
-void setup_certificate(void)
+static inline void setup_certificate(void)
 {
     uint8_t der_cert[1215];
 
@@ -601,7 +601,7 @@ void setup_certificate(void)
     ck_assert(KeyManager_Certificate_CreateFromDER(der_cert, 1215, &crt_pub) == STATUS_OK);
 }
 
-void teardown_certificate(void)
+static inline void teardown_certificate(void)
 {
     KeyManager_Certificate_Free(crt_pub);
     crt_pub = NULL;
@@ -610,14 +610,14 @@ void teardown_certificate(void)
 }
 
 
-START_TEST(test_cert_load)
+START_TEST(test_cert_load_B256S256)
 {
     ;
 }
 END_TEST
 
 
-START_TEST(test_cert_lengths)
+START_TEST(test_cert_lengths_B256S256)
 {
     uint32_t len = 0;
 
@@ -627,7 +627,7 @@ START_TEST(test_cert_lengths)
 END_TEST
 
 
-START_TEST(test_cert_thumbprint)
+START_TEST(test_cert_thumbprint_B256S256)
 {
     uint8_t thumb[20];
     char hexoutput[40];
@@ -644,7 +644,7 @@ START_TEST(test_cert_thumbprint)
 END_TEST
 
 
-START_TEST(test_cert_loadkey)
+START_TEST(test_cert_loadkey_B256S256)
 {
     AsymmetricKey key_pub;
 
@@ -657,7 +657,7 @@ END_TEST
 
 
 // Fixtures for Asymetric crypto
-AsymmetricKey *key_pub = NULL, *key_priv = NULL;
+static AsymmetricKey *key_pub = NULL, *key_priv = NULL;
 
 // Certificates: these are not the same cert as in setup_certificate. This one was created to also embed the private key in the tests.
 #define DER_ASYM_PUB_HEXA "3082038b30820273a003020102020900cf163f0b5124ff4c300d06092a864886f70d01010b0500305c310b3009060355040613024652310f300d06035504080c"\
@@ -697,7 +697,7 @@ AsymmetricKey *key_pub = NULL, *key_priv = NULL;
                            "673ac6939c1427fb899a4cb26f656b5621914592f61b10d4ff50a4bb360d134d224a780db10f0f97"
 #define DER_ASYM_PRIV_LENG 1192
 
-void setup_asym_keys(void)
+static inline void setup_asym_keys(void)
 {
     uint8_t der_cert[DER_ASYM_PUB_LENG], der_priv[DER_ASYM_PRIV_LENG];
 
@@ -717,7 +717,7 @@ void setup_asym_keys(void)
     ck_assert(KeyManager_AsymmetricKey_CreateFromBuffer(der_priv, DER_ASYM_PRIV_LENG, &key_priv) == STATUS_OK);
 }
 
-void teardown_asym_keys(void)
+static inline void teardown_asym_keys(void)
 {
     free(key_pub);
     key_pub = NULL;
@@ -730,14 +730,14 @@ void teardown_asym_keys(void)
 }
 
 
-START_TEST(test_crypto_asym_load)
+START_TEST(test_crypto_asym_load_B256S256)
 {
     ;
 }
 END_TEST
 
 
-START_TEST(test_crypto_asym_lengths)
+START_TEST(test_crypto_asym_lengths_B256S256)
 {
     uint32_t lenPlain = 0, lenCiph = 0, len = 0;
 
@@ -780,7 +780,7 @@ START_TEST(test_crypto_asym_lengths)
 END_TEST
 
 
-START_TEST(test_crypto_asym_crypt)
+START_TEST(test_crypto_asym_crypt_B256S256)
 {
     uint8_t input[856], output[1024], input_bis[856];
     uint32_t len = 0;
@@ -808,7 +808,7 @@ START_TEST(test_crypto_asym_crypt)
 END_TEST
 
 
-START_TEST(test_crypto_asym_sign_verify)
+START_TEST(test_crypto_asym_sign_verify_B256S256)
 {
     uint8_t input[856], sig[256];
     ExposedBuffer clientNonce[32], serverNonce[32];
@@ -831,7 +831,7 @@ START_TEST(test_crypto_asym_sign_verify)
 END_TEST
 
 
-START_TEST(test_crypto_asym_copykey)
+START_TEST(test_crypto_asym_copykey_B256S256)
 {
     uint8_t buffer[2048], der_priv[DER_ASYM_PRIV_LENG];
     uint32_t lenDER = 0;
@@ -850,10 +850,10 @@ END_TEST
 
 
 // Fixtures for PKI: server.der certificate and CA
-Certificate *crt_ca = NULL;
-PKIProvider *pki = NULL;
+static Certificate *crt_ca = NULL;
+static PKIProvider *pki = NULL;
 
-void setup_pki_stack()
+static inline void setup_pki_stack()
 {
     uint8_t der_ca[1529];
 
@@ -890,7 +890,7 @@ void setup_pki_stack()
     ck_assert(PKIProviderStack_Create(crt_ca, NULL, &pki) == STATUS_OK);
 }
 
-void teardown_pki_stack()
+static inline void teardown_pki_stack()
 {
     PKIProviderStack_Free(pki);
     KeyManager_Certificate_Free(crt_ca);
@@ -899,14 +899,14 @@ void teardown_pki_stack()
 }
 
 
-START_TEST(test_pki_load)
+START_TEST(test_pki_load_B256S256)
 {
     ck_assert(NULL != pki->pFnValidateCertificate);
 }
 END_TEST
 
 
-START_TEST(test_pki_cert_validation)
+START_TEST(test_pki_cert_validation_B256S256)
 {
     // Checks that the PKI validates our server.pub with our cacert.der
     ck_assert_msg(CryptoProvider_Certificate_Validate(crypto, pki, crt_pub) == STATUS_OK,
@@ -915,7 +915,7 @@ START_TEST(test_pki_cert_validation)
 END_TEST
 
 
-START_TEST(test_cert_copyder)
+START_TEST(test_cert_copyder_B256S256)
 {
     uint8_t *buffer0 = NULL, *buffer1 = NULL;
     uint8_t der_cert[1215];
@@ -977,43 +977,43 @@ Suite *tests_make_suite_crypto_B256S256()
 
     suite_add_tcase(s, tc_crypto_symm);
     tcase_add_checked_fixture(tc_crypto_symm, setup_crypto, teardown_crypto);
-    tcase_add_test(tc_crypto_symm, test_crypto_load);
-    tcase_add_test(tc_crypto_symm, test_crypto_symm_lengths);
-    tcase_add_test(tc_crypto_symm, test_crypto_symm_crypt);
-    tcase_add_test(tc_crypto_symm, test_crypto_symm_sign);
-    tcase_add_test(tc_crypto_symm, test_crypto_symm_generate_nonce);
+    tcase_add_test(tc_crypto_symm, test_crypto_load_B256S256);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_lengths_B256S256);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_crypt_B256S256);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_sign_B256S256);
+    tcase_add_test(tc_crypto_symm, test_crypto_symm_generate_nonce_B256S256);
 
     suite_add_tcase(s, tc_providers);
     tcase_add_checked_fixture(tc_providers, setup_crypto, teardown_crypto);
 
     suite_add_tcase(s, tc_derives);
     tcase_add_checked_fixture(tc_derives, setup_crypto, teardown_crypto);
-    tcase_add_test(tc_derives, test_crypto_derive_lengths);
-    tcase_add_test(tc_derives, test_crypto_derive_data);
-    tcase_add_test(tc_derives, test_crypto_derive_keysets);
+    tcase_add_test(tc_derives, test_crypto_derive_lengths_B256S256);
+    tcase_add_test(tc_derives, test_crypto_derive_data_B256S256);
+    tcase_add_test(tc_derives, test_crypto_derive_keysets_B256S256);
     // TODO: derive_keysets_client
     // TODO: derive_keysets_server
 
     suite_add_tcase(s, tc_km);
     tcase_add_checked_fixture(tc_km, setup_certificate, teardown_certificate);
-    tcase_add_test(tc_km, test_cert_load);
-    tcase_add_test(tc_km, test_cert_lengths);
-    tcase_add_test(tc_km, test_cert_thumbprint);
-    tcase_add_test(tc_km, test_cert_loadkey);
-    tcase_add_test(tc_km, test_cert_copyder);
+    tcase_add_test(tc_km, test_cert_load_B256S256);
+    tcase_add_test(tc_km, test_cert_lengths_B256S256);
+    tcase_add_test(tc_km, test_cert_thumbprint_B256S256);
+    tcase_add_test(tc_km, test_cert_loadkey_B256S256);
+    tcase_add_test(tc_km, test_cert_copyder_B256S256);
 
     suite_add_tcase(s, tc_crypto_asym);
     tcase_add_checked_fixture(tc_crypto_asym, setup_asym_keys, teardown_asym_keys);
-    tcase_add_test(tc_crypto_asym, test_crypto_asym_load);
-    tcase_add_test(tc_crypto_asym, test_crypto_asym_lengths);
-    tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt);
-    tcase_add_test(tc_crypto_asym, test_crypto_asym_sign_verify);
-    tcase_add_test(tc_crypto_asym, test_crypto_asym_copykey);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_load_B256S256);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_lengths_B256S256);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt_B256S256);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_sign_verify_B256S256);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_copykey_B256S256);
 
     suite_add_tcase(s, tc_pki_stack);
     tcase_add_checked_fixture(tc_pki_stack, setup_pki_stack, teardown_pki_stack);
-    tcase_add_test(tc_pki_stack, test_pki_load);
-    tcase_add_test(tc_pki_stack, test_pki_cert_validation);
+    tcase_add_test(tc_pki_stack, test_pki_load_B256S256);
+    tcase_add_test(tc_pki_stack, test_pki_cert_validation_B256S256);
 
     return s;
 }
