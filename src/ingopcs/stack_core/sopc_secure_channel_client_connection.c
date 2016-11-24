@@ -26,24 +26,15 @@
 #include "sopc_types.h"
 #include "sopc_secure_channel_low_level.h"
 
-
-typedef enum
+typedef struct PendingRequest
 {
-    TMP_Invalid_PKI   = 0,
-    TMP_NO_PKI        = 1,
-    TMP_Override      = 2,
-    TMP_DefaultPKI    = 3
-} TMP_PKI_Types;
-
-typedef struct
-{
-    TMP_PKI_Types   type;
-    char*           trustListLocation;
-    char*           revocationListLocation;
-    char*           untrustedListLocation;
-    uint32_t        flags;
-    void*           unused;
-} TMP_PKIConfig;
+    uint32_t             requestId; // 0 is invalid request
+    SOPC_EncodeableType* responseType;
+    uint32_t             timeoutHint;
+    uint32_t             startTime;
+    SC_ResponseEvent_CB* callback;
+    void*                callbackData;
+} PendingRequest;
 
 PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
                                         SOPC_EncodeableType* responseType,
@@ -96,6 +87,8 @@ SC_ClientConnection* SC_Client_Create(){
             }
 
             scClientConnection->pkiProvider = NULL;
+
+            Mutex_Inititalization(&scClientConnection->mutex);
         }
     }else{
         SC_Delete(sConnection);
@@ -108,12 +101,14 @@ SOPC_StatusCode SC_Client_Configure(SC_ClientConnection*   cConnection,
                                     SOPC_EncodeableType**  encodeableTypes){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(cConnection != NULL && cConnection->instance != NULL){
+        Mutex_Lock(&cConnection->mutex);
         if(namespaceTable != NULL){
             status = Namespace_AttachTable(&cConnection->namespaces, namespaceTable);
         }else{
             status = STATUS_OK;
         }
         cConnection->encodeableTypes = encodeableTypes;
+        Mutex_Unlock(&cConnection->mutex);
     }
     return status;
 }
@@ -141,6 +136,7 @@ void Timer_Delete(P_Timer* timer){
 void SC_Client_Delete(SC_ClientConnection* scConnection)
 {
     if(scConnection != NULL){
+        Mutex_Lock(&scConnection->mutex);
         scConnection->pkiProvider = NULL;
         scConnection->serverCertificate = NULL;
         scConnection->clientCertificate = NULL;
@@ -151,6 +147,8 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
             SC_Delete(scConnection->instance);
         }
         Timer_Delete(&scConnection->watchdogTimer);
+        Mutex_Unlock(&scConnection->mutex);
+        Mutex_Clear(&scConnection->mutex);
         free(scConnection);
     }
 }
@@ -734,6 +732,7 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
          pki != NULL)
        || securityMode == OpcUa_MessageSecurityMode_None))
     {
+        Mutex_Lock(&connection->mutex);
         if(connection->clientCertificate == NULL &&
            connection->clientKey == NULL &&
            connection->serverCertificate == NULL &&
@@ -790,6 +789,8 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
         }else{
             status = STATUS_INVALID_STATE;
         }
+
+        Mutex_Unlock(&connection->mutex);
     }
     return status;
 }
@@ -800,6 +801,7 @@ SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
     if(cConnection != NULL && cConnection->instance != NULL &&
        cConnection->instance->transportConnection != NULL)
     {
+        Mutex_Lock(&cConnection->mutex);
         status = STATUS_OK;
         cConnection->instance->state = SC_Connection_Disconnected;
         cConnection->securityMode = OpcUa_MessageSecurityMode_Invalid;
@@ -812,17 +814,18 @@ SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
         SLinkedList_Clear(cConnection->pendingRequests);
         SOPC_String_Clear(&cConnection->securityPolicy);
         TCP_UA_Connection_Disconnect(cConnection->instance->transportConnection);
+        Mutex_Unlock(&cConnection->mutex);
     }
     return status;
 }
 
 SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
-                           SOPC_EncodeableType*   requestType,
-                           void*                request,
-                           SOPC_EncodeableType*   responseType,
-                           uint32_t             timeout,
-                           SC_ResponseEvent_CB* callback,
-                           void*                callbackData)
+                                SOPC_EncodeableType*   requestType,
+                                void*                request,
+                                SOPC_EncodeableType*   responseType,
+                                uint32_t             timeout,
+                                SC_ResponseEvent_CB* callback,
+                                void*                callbackData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t requestId = 0;
@@ -830,28 +833,32 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
        requestType != NULL &&
        request != NULL)
     {
+        Mutex_Lock(&connection->mutex);
+
         requestId = GetNextRequestId(connection->instance);
         status = SC_EncodeSecureMessage(connection->instance,
                                         requestType,
                                         request,
                                         requestId);
-    }
 
-    if(status == STATUS_OK){
-        // Create associated pending request
-        PendingRequest* pRequest = SC_PendingRequestCreate(requestId,
-                                                           responseType,
-                                                           timeout,
-                                                           0, // Not managed now
-                                                           callback,
-                                                           callbackData);
-        if(pRequest != SLinkedList_Add(connection->pendingRequests, requestId, pRequest)){
-            status = STATUS_NOK;
+        if(status == STATUS_OK){
+            // Create associated pending request
+            PendingRequest* pRequest = SC_PendingRequestCreate(requestId,
+                                                               responseType,
+                                                               timeout,
+                                                               0, // Not managed now
+                                                               callback,
+                                                               callbackData);
+            if(pRequest != SLinkedList_Add(connection->pendingRequests, requestId, pRequest)){
+                status = STATUS_NOK;
+            }
         }
-    }
 
-    if(status == STATUS_OK){
-        status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, SOPC_Msg_Chunk_Final);
+        if(status == STATUS_OK){
+            status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, SOPC_Msg_Chunk_Final);
+        }
+
+        Mutex_Unlock(&connection->mutex);
     }
 
     return status;

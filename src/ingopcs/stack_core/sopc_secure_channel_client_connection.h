@@ -25,6 +25,7 @@
 #include "sopc_encodeable.h"
 #include "sopc_namespace_table.h"
 #include "sopc_secure_channel_low_level.h"
+#include "sopc_mutexes.h"
 
 struct SC_ClientConnection;
 
@@ -49,6 +50,7 @@ typedef struct SC_ClientConnection
     P_Timer                   watchdogTimer;
     SC_ConnectionEvent_CB*    callback;
     void*                     callbackData;
+    Mutex                     mutex;
 
 } SC_ClientConnection;
 
@@ -57,26 +59,6 @@ typedef SOPC_StatusCode (SC_ResponseEvent_CB) (SC_ClientConnection* connection,
                                                SOPC_EncodeableType* responseType,
                                                void*                callbackData,
                                                SOPC_StatusCode      status);
-
-typedef struct PendingRequest
-{
-    uint32_t             requestId; // 0 is invalid request
-    SOPC_EncodeableType* responseType;
-    uint32_t             timeoutHint;
-    uint32_t             startTime;
-    SC_ResponseEvent_CB* callback;
-    void*                callbackData;
-} PendingRequest;
-
-PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
-                                        SOPC_EncodeableType* responseType,
-                                        uint32_t             timeoutHint,
-                                        uint32_t             startTime,
-                                        SC_ResponseEvent_CB* callback,
-                                        void*                callbackData);
-
-void SC_PendingRequestDelete(PendingRequest*);
-
 
 SC_ClientConnection* SC_Client_Create();
 SOPC_StatusCode SC_Client_Configure(SC_ClientConnection*  cConnection,
