@@ -505,7 +505,7 @@ static inline SOPC_StatusCode RSASSA_PSS_hash(const uint8_t *pInput, uint32_t le
     return STATUS_OK;
 }
 
-SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const CryptoProvider *pProvider,
                                                     const uint8_t *pInput,
                                                     uint32_t lenInput,
                                                     const AsymmetricKey *pKey,
@@ -535,7 +535,7 @@ SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15(const CryptoProvider *p
 }
 
 
-SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const CryptoProvider *pProvider,
                                                       const uint8_t *pInput,
                                                       uint32_t lenInput,
                                                       const AsymmetricKey *pKey,

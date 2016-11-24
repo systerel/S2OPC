@@ -33,6 +33,8 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 #define SecurityPolicy_Invalid_ID           0
 #define SecurityPolicy_Basic256Sha256_URI   "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 #define SecurityPolicy_Basic256Sha256_ID    1
+#define SecurityPolicy_Basic256_URI   "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
+#define SecurityPolicy_Basic256_ID    2
 
 // Basic256Sha256, sizes in bytes
 #define SecurityPolicy_Basic256Sha256_SymmLen_Block         16
@@ -41,12 +43,24 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 #define SecurityPolicy_Basic256Sha256_SymmLen_Signature     32
 #define SecurityPolicy_Basic256Sha256_CertLen_Thumbprint    20
 #define SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash     20 /**< RSA OAEP uses SHA-1 */
-#define SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash      32 /**< RSASS PSS uses SHA-256 */
+#define SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash      32 /**< RSASS PSS uses SHA-256 in this context */
 #define SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits    2048
 #define SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits    4096
 
+// Basic256, sizes in bytes
+#define SecurityPolicy_Basic256_SymmLen_Block               16
+#define SecurityPolicy_Basic256_SymmLen_CryptoKey           32
+#define SecurityPolicy_Basic256_SymmLen_SignKey             24
+#define SecurityPolicy_Basic256_SymmLen_Signature           20
+#define SecurityPolicy_Basic256_CertLen_Thumbprint          20
+#define SecurityPolicy_Basic256_AsymLen_OAEP_Hash           20 /**< RSA OAEP uses SHA-1 */
+#define SecurityPolicy_Basic256_AsymLen_PSS_Hash            20 /**< RSASS PSS uses SHA-1 in this context */
+#define SecurityPolicy_Basic256_AsymLen_KeyMinBits          1024
+#define SecurityPolicy_Basic256_AsymLen_KeyMaxBits          2048
+
 // CryptoProfiles instances
 extern const CryptoProfile g_cpBasic256Sha256;
+extern const CryptoProfile g_cpBasic256;
 
 
 #include "sopc_base_types.h"

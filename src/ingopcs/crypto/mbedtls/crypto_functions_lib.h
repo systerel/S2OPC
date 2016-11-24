@@ -117,12 +117,12 @@ SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PSS(const CryptoProvider *pProv
                                                 const uint8_t *pSignature);
 
 
-SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const CryptoProvider *pProvider,
                                                     const uint8_t *pInput,
                                                     uint32_t lenInput,
                                                     const AsymmetricKey *pKey,
                                                     uint8_t *pSignature);
-SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const CryptoProvider *pProvider,
                                                       const uint8_t *pInput,
                                                       uint32_t lenInput,
                                                       const AsymmetricKey *pKey,
