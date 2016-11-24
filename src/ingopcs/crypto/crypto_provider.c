@@ -90,6 +90,9 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_CryptoKey(const CryptoProvider
     case SecurityPolicy_Basic256Sha256_ID:
         *pLength = SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey;
         break;
+    case SecurityPolicy_Basic256_ID:
+        *pLength = SecurityPolicy_Basic256_SymmLen_CryptoKey;
+        break;
     }
 
     return STATUS_OK;
@@ -138,6 +141,9 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_SignKey(const CryptoProvider *
     case SecurityPolicy_Basic256Sha256_ID:
         *pLength = SecurityPolicy_Basic256Sha256_SymmLen_SignKey;
         break;
+    case SecurityPolicy_Basic256_ID:
+        *pLength = SecurityPolicy_Basic256_SymmLen_SignKey;
+        break;
     }
 
     return STATUS_OK;
@@ -157,6 +163,9 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider
         return STATUS_NOK;
     case SecurityPolicy_Basic256Sha256_ID:
         *pLength = SecurityPolicy_Basic256Sha256_SymmLen_Signature;
+        break;
+    case SecurityPolicy_Basic256_ID:
+        *pLength = SecurityPolicy_Basic256_SymmLen_Signature;
         break;
     }
 
@@ -181,6 +190,12 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *p
             *pCipherTextBlockSize = SecurityPolicy_Basic256Sha256_SymmLen_Block;
         if(NULL != pPlainTextBlockSize)
             *pPlainTextBlockSize = SecurityPolicy_Basic256Sha256_SymmLen_Block;
+        break;
+    case SecurityPolicy_Basic256_ID:
+        if(NULL != pCipherTextBlockSize)
+            *pCipherTextBlockSize = SecurityPolicy_Basic256_SymmLen_Block;
+        if(NULL != pPlainTextBlockSize)
+            *pPlainTextBlockSize = SecurityPolicy_Basic256_SymmLen_Block;
         break;
     }
 
@@ -242,6 +257,9 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoPr
     case SecurityPolicy_Basic256Sha256_ID:
         *length = SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash;
         break;
+    case SecurityPolicy_Basic256_ID:
+        *length = SecurityPolicy_Basic256_AsymLen_OAEP_Hash;
+        break;
     }
 
     return STATUS_OK;
@@ -261,6 +279,9 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_PSSHashLength(const CryptoPro
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
         *length = SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash;
+        break;
+    case SecurityPolicy_Basic256_ID:
+        *length = SecurityPolicy_Basic256_AsymLen_PSS_Hash;
         break;
     }
 
@@ -387,6 +408,9 @@ SOPC_StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvi
     case SecurityPolicy_Basic256Sha256_ID:
         *pLength = SecurityPolicy_Basic256Sha256_CertLen_Thumbprint;
         break;
+    case SecurityPolicy_Basic256_ID:
+        *pLength = SecurityPolicy_Basic256_CertLen_Thumbprint;
+        break;
     }
 
     return STATUS_OK;
@@ -431,6 +455,14 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
         if(SecretBuffer_GetLength(pKey) != SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey) // Wrong key size
             return STATUS_INVALID_PARAMETERS;
         if(SecretBuffer_GetLength(pIV) != SecurityPolicy_Basic256Sha256_SymmLen_Block) // Wrong IV size (should be block size)
+            return STATUS_INVALID_PARAMETERS;
+        break;
+    case SecurityPolicy_Basic256_ID:
+        if((lenPlainText%SecurityPolicy_Basic256_SymmLen_Block) != 0) // Not block-aligned
+            return STATUS_INVALID_PARAMETERS;
+        if(SecretBuffer_GetLength(pKey) != SecurityPolicy_Basic256_SymmLen_CryptoKey) // Wrong key size
+            return STATUS_INVALID_PARAMETERS;
+        if(SecretBuffer_GetLength(pIV) != SecurityPolicy_Basic256_SymmLen_Block) // Wrong IV size (should be block size)
             return STATUS_INVALID_PARAMETERS;
         break;
     }
@@ -481,6 +513,14 @@ SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
         if(SecretBuffer_GetLength(pKey) != SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey) // Wrong key size
             return STATUS_INVALID_PARAMETERS;
         if(SecretBuffer_GetLength(pIV) != SecurityPolicy_Basic256Sha256_SymmLen_Block) // Wrong IV size (should be block size)
+            return STATUS_INVALID_PARAMETERS;
+        break;
+    case SecurityPolicy_Basic256_ID:
+        if((lenCipherText%SecurityPolicy_Basic256_SymmLen_Block) != 0) // Not block-aligned
+            return STATUS_INVALID_PARAMETERS;
+        if(SecretBuffer_GetLength(pKey) != SecurityPolicy_Basic256_SymmLen_CryptoKey) // Wrong key size
+            return STATUS_INVALID_PARAMETERS;
+        if(SecretBuffer_GetLength(pIV) != SecurityPolicy_Basic256_SymmLen_Block) // Wrong IV size (should be block size)
             return STATUS_INVALID_PARAMETERS;
         break;
     }
@@ -845,6 +885,10 @@ SOPC_StatusCode CryptoProvider_AsymmetricEncrypt(const CryptoProvider *pProvider
         if(lenKey < SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
             return STATUS_INVALID_PARAMETERS;
         break;
+    case SecurityPolicy_Basic256_ID:
+        if(lenKey < SecurityPolicy_Basic256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
+            return STATUS_INVALID_PARAMETERS;
+        break;
     }
 
     // We can now proceed
@@ -884,6 +928,10 @@ SOPC_StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
         if(lenKey < SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+            return STATUS_INVALID_PARAMETERS;
+        break;
+    case SecurityPolicy_Basic256_ID:
+        if(lenKey < SecurityPolicy_Basic256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
             return STATUS_INVALID_PARAMETERS;
         break;
     }
@@ -930,6 +978,10 @@ SOPC_StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
         if(lenKey < SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
             return STATUS_INVALID_PARAMETERS;
         break;
+    case SecurityPolicy_Basic256_ID:
+        if(lenKey < SecurityPolicy_Basic256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
+            return STATUS_INVALID_PARAMETERS;
+        break;
     }
 
     return pProvider->pProfile->pFnAsymSign(pProvider, pInput, lenInput, pKeyPrivateLocal, pSignature);
@@ -964,6 +1016,10 @@ SOPC_StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
         if(lenKey < SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+            return STATUS_INVALID_PARAMETERS;
+        break;
+    case SecurityPolicy_Basic256_ID:
+        if(lenKey < SecurityPolicy_Basic256_AsymLen_KeyMinBits || lenKey > SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
             return STATUS_INVALID_PARAMETERS;
         break;
     }

@@ -115,6 +115,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProv
     default:
         return STATUS_NOK;
     case SecurityPolicy_Basic256Sha256_ID: // TODO: this seems overkill to fetch the size of the chosen OAEP hash function...
+    case SecurityPolicy_Basic256_ID:
         if(CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != STATUS_OK)
             return STATUS_NOK;
         *pLenMsg -= 2*lenHash + 2; // TODO: check for underflow?

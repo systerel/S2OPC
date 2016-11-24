@@ -275,6 +275,7 @@ SOPC_StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProv
         status = STATUS_NOK;
         break;
     case SecurityPolicy_Basic256Sha256_ID:
+    case SecurityPolicy_Basic256_ID:
         type = MBEDTLS_MD_SHA1;
         break;
     }
