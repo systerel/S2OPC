@@ -420,7 +420,6 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
 
     // TODO: unit-test these watchdogs
-    // TODO: use API for these watchdogs
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:

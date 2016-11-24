@@ -58,63 +58,63 @@ extern const CryptoProfile g_cpBasic256Sha256;
  * Internal CryptoProfile function pointers.
  * ------------------------------------------------------------------------------------------------
  */
-typedef SOPC_StatusCode (*FnSymmetricEncrypt) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnSymmetricEncrypt) (const CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenPlainText,
                                           const ExposedBuffer *pKey,
                                           const ExposedBuffer *pIV,
                                           uint8_t *pOutput,
                                           uint32_t lenOutput);
-typedef SOPC_StatusCode (*FnSymmetricDecrypt) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnSymmetricDecrypt) (const CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenCipherText,
                                           const ExposedBuffer *pKey,
                                           const ExposedBuffer *pIV,
                                           uint8_t *pOutput,
                                           uint32_t lenOutput);
-typedef SOPC_StatusCode (*FnSymmetricSign) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnSymmetricSign) (const CryptoProvider *pProvider,
                                        const uint8_t *pInput,
                                        uint32_t lenInput,
                                        const ExposedBuffer *pKey,
                                        uint8_t *pOutput);
-typedef SOPC_StatusCode (*FnSymmetricVerify) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnSymmetricVerify) (const CryptoProvider *pProvider,
                                          const uint8_t *pInput,
                                          uint32_t lenInput,
                                          const ExposedBuffer *pKey,
                                          const uint8_t *pSignature);
-typedef SOPC_StatusCode (*FnGenerateRandom) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnGenerateRandom) (const CryptoProvider *pProvider,
                                              ExposedBuffer *pData,
                                              uint32_t lenData);
-typedef SOPC_StatusCode (*FnDerivePseudoRandomData) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnDerivePseudoRandomData) (const CryptoProvider *pProvider,
                                                 const ExposedBuffer *pSecret,
                                                 uint32_t lenSecret,
                                                 const ExposedBuffer *pSeed,
                                                 uint32_t lenSeed,
                                                 ExposedBuffer *pOutput,
                                                 uint32_t lenOutput);
-typedef SOPC_StatusCode (*FnAsymmetricEncrypt) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnAsymmetricEncrypt) (const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
-                                           const struct AsymmetricKey *pKey,
+                                           const AsymmetricKey *pKey,
                                            uint8_t *pOutput);
-typedef SOPC_StatusCode (*FnAsymmetricDecrypt) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnAsymmetricDecrypt) (const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenCipherText,
-                                           const struct AsymmetricKey *pKey,
+                                           const AsymmetricKey *pKey,
                                            uint8_t *pOutput,
                                            uint32_t *lenWritten);
-typedef SOPC_StatusCode (*FnAsymmetricSign) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnAsymmetricSign) (const CryptoProvider *pProvider,
                                         const uint8_t *pInput,
                                         uint32_t lenInput,
-                                        const struct AsymmetricKey *pKey,
+                                        const AsymmetricKey *pKey,
                                         uint8_t *pSignature);
-typedef SOPC_StatusCode (*FnAsymmetricVerify) (const struct CryptoProvider *pProvider,
+typedef SOPC_StatusCode (*FnAsymmetricVerify) (const CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenInput,
-                                          const struct AsymmetricKey *pKey,
+                                          const AsymmetricKey *pKey,
                                           const uint8_t *pSignature);
-typedef SOPC_StatusCode (*FnCertificateVerify) (const struct CryptoProvider *pCrypto,
-                                           const struct Certificate *pCert);
+typedef SOPC_StatusCode (*FnCertificateVerify) (const CryptoProvider *pCrypto,
+                                           const Certificate *pCert);
 
 
 

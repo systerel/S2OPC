@@ -44,7 +44,7 @@
 struct CryptoProvider
 {
     const CryptoProfile * const pProfile; /**< CryptoProfile associated to the chosen Security policy. You should not attempt to modify the content of this pointer. */
-    struct CryptolibContext *pCryptolibContext; /**< A lib-specific context. This should not be accessed directly as its content may change depending on the chosen crypto-lib implementation. */
+    CryptolibContext *pCryptolibContext; /**< A lib-specific context. This should not be accessed directly as its content may change depending on the chosen crypto-lib implementation. */
 };
 
 
@@ -819,7 +819,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
  *                  and STATUS_NOK when there was an error.
  */
 SOPC_StatusCode CryptoProvider_Certificate_Validate(const CryptoProvider *pProvider,
-                                               const struct PKIProvider *pPKI,
+                                               const PKIProvider *pPKI,
                                                const Certificate *pCert);
 
 
