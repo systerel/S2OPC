@@ -98,7 +98,7 @@ SOPC_StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider);
  */
 
 /**
- * \brief           Writes the length in bytes of the key of the symmetric algorithm in \p pLength.
+ * \brief           Writes the length in bytes in \p pLength of the key used for symmetric encryption/decryption.
  *
  *                  The length of the key depends on the security policy associated with \p pProvider.
  *
@@ -109,7 +109,7 @@ SOPC_StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider);
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
  */
-SOPC_StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_CryptoKey(const CryptoProvider *pProvider,
                                                      uint32_t *pLength);
 
 /**
@@ -145,6 +145,21 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvide
 SOPC_StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvider *pProvider,
                                                         uint32_t lengthIn,
                                                         uint32_t *pLengthOut);
+
+/**
+ * \brief           Writes the length in bytes in \p pLength of the key used for symmetric signature.
+ *
+ *                  The length of the key depends on the security policy associated with \p pProvider.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pLength   A valid pointer to the length in bytes of the key. Its content is unspecified
+ *                  when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized.
+ */
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_SignKey(const CryptoProvider *pProvider,
+                                                          uint32_t *pLength);
 
 /**
  * \brief           Provides the length in bytes of the symmetric signature message.

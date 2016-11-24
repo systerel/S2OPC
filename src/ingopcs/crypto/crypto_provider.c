@@ -76,7 +76,7 @@ void CryptoProvider_Free(CryptoProvider* pCryptoProvider)
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pProvider,
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_CryptoKey(const CryptoProvider *pProvider,
                                                      uint32_t *pLength)
 {
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pLength)
@@ -88,7 +88,7 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Key(const CryptoProvider *pPro
     default:
         return STATUS_NOK;
     case SecurityPolicy_Basic256Sha256_ID:
-        *pLength = SecurityPolicy_Basic256Sha256_SymmLen_Key;
+        *pLength = SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey;
         break;
     }
 
@@ -119,6 +119,26 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvide
         return STATUS_INVALID_PARAMETERS;
 
     *pLengthOut = lengthIn;
+
+    return STATUS_OK;
+}
+
+
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_SignKey(const CryptoProvider *pProvider,
+                                                     uint32_t *pLength)
+{
+    if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pLength)
+        return STATUS_INVALID_PARAMETERS;
+
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    default:
+        return STATUS_NOK;
+    case SecurityPolicy_Basic256Sha256_ID:
+        *pLength = SecurityPolicy_Basic256Sha256_SymmLen_SignKey;
+        break;
+    }
 
     return STATUS_OK;
 }
@@ -182,11 +202,12 @@ SOPC_StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
     *pSymmSignKeyLength = 0;
     *pSymmInitVectorLength = 0;
 
-    status = CryptoProvider_SymmetricGetLength_Key(pProvider, pSymmCryptoKeyLength);
+    status = CryptoProvider_SymmetricGetLength_CryptoKey(pProvider, pSymmCryptoKeyLength);
     if(status == STATUS_OK)
     {
-        *pSymmSignKeyLength = *pSymmCryptoKeyLength;
-        status = CryptoProvider_SymmetricGetLength_Blocks(pProvider, pSymmInitVectorLength, NULL);
+        status = CryptoProvider_SymmetricGetLength_SignKey(pProvider, pSymmSignKeyLength);
+        if(STATUS_OK == status)
+            status = CryptoProvider_SymmetricGetLength_Blocks(pProvider, pSymmInitVectorLength, NULL);
     }
 
     return status;
@@ -399,6 +420,7 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
 
     // TODO: unit-test these watchdogs
+    // TODO: use API for these watchdogs
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
@@ -407,7 +429,7 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
     case SecurityPolicy_Basic256Sha256_ID:
         if((lenPlainText%SecurityPolicy_Basic256Sha256_SymmLen_Block) != 0) // Not block-aligned
             return STATUS_INVALID_PARAMETERS;
-        if(SecretBuffer_GetLength(pKey) != SecurityPolicy_Basic256Sha256_SymmLen_Key) // Wrong key size
+        if(SecretBuffer_GetLength(pKey) != SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey) // Wrong key size
             return STATUS_INVALID_PARAMETERS;
         if(SecretBuffer_GetLength(pIV) != SecurityPolicy_Basic256Sha256_SymmLen_Block) // Wrong IV size (should be block size)
             return STATUS_INVALID_PARAMETERS;
@@ -457,7 +479,7 @@ SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
     case SecurityPolicy_Basic256Sha256_ID:
         if((lenCipherText%SecurityPolicy_Basic256Sha256_SymmLen_Block) != 0) // Not block-aligned
             return STATUS_INVALID_PARAMETERS;
-        if(SecretBuffer_GetLength(pKey) != SecurityPolicy_Basic256Sha256_SymmLen_Key) // Wrong key size
+        if(SecretBuffer_GetLength(pKey) != SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey) // Wrong key size
             return STATUS_INVALID_PARAMETERS;
         if(SecretBuffer_GetLength(pIV) != SecurityPolicy_Basic256Sha256_SymmLen_Block) // Wrong IV size (should be block size)
             return STATUS_INVALID_PARAMETERS;
@@ -498,7 +520,7 @@ SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
 
     // Assert key size
-    if(CryptoProvider_SymmetricGetLength_Key(pProvider, &len) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_CryptoKey(pProvider, &len) != STATUS_OK)
         return STATUS_NOK;
     if(SecretBuffer_GetLength(pKey) != len)
         return STATUS_INVALID_PARAMETERS;
@@ -536,7 +558,7 @@ SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
         return STATUS_INVALID_PARAMETERS;
 
     // Assert key size
-    if(CryptoProvider_SymmetricGetLength_Key(pProvider, &len) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_CryptoKey(pProvider, &len) != STATUS_OK)
         return STATUS_NOK;
     if(SecretBuffer_GetLength(pKey) != len)
         return STATUS_INVALID_PARAMETERS;
@@ -571,8 +593,8 @@ SOPC_StatusCode CryptoProvider_GenerateSecureChannelNonce(const CryptoProvider *
     // Empties pointer in case an error occurs after that point.
     *ppNonce = NULL;
 
-    // TODO: provide a GetLength_SecureChannelNonce and use it here
-    if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenNonce) != STATUS_OK)
+    // TODO: provide a GetLength_SecureChannelNonce and use it here (== CryptoKey)
+    if(CryptoProvider_SymmetricGetLength_CryptoKey(pProvider, &lenNonce) != STATUS_OK)
         return STATUS_NOK;
 
     pExpKey = (ExposedBuffer *)malloc(lenNonce);

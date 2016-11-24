@@ -90,7 +90,7 @@ SOPC_StatusCode CryptoProvider_SymmDecrypt_AES256(const CryptoProvider *pProvide
     memcpy(iv_cpy, pIV, SecurityPolicy_Basic256Sha256_SymmLen_Block);
     mbedtls_aes_init(&aes);
 
-    if(mbedtls_aes_setkey_dec(&aes, (unsigned char *)pKey, SecurityPolicy_Basic256Sha256_SymmLen_Key*8) != 0)
+    if(mbedtls_aes_setkey_dec(&aes, (unsigned char *)pKey, SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey*8) != 0)
         return STATUS_INVALID_PARAMETERS;
     if(mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (unsigned char *)pInput, (unsigned char *)pOutput) != 0)
         return STATUS_INVALID_PARAMETERS;
@@ -113,7 +113,7 @@ SOPC_StatusCode CryptoProvider_SymmSign_HMAC_SHA256(const CryptoProvider *pProvi
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pOutput)
         return STATUS_INVALID_PARAMETERS;
 
-    if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKey) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_SignKey(pProvider, &lenKey) != STATUS_OK)
         return STATUS_NOK;
 
     const mbedtls_md_info_t *pinfo = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
@@ -137,7 +137,7 @@ SOPC_StatusCode CryptoProvider_SymmVerify_HMAC_SHA256(const CryptoProvider *pPro
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pInput || NULL == pKey || NULL == pSignature)
         return STATUS_INVALID_PARAMETERS;
 
-    if(CryptoProvider_SymmetricGetLength_Key(pProvider, &lenKey) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_SignKey(pProvider, &lenKey) != STATUS_OK)
         return STATUS_NOK;
 
     if(CryptoProvider_SymmetricGetLength_Signature(pProvider, &lenSig) != STATUS_OK)

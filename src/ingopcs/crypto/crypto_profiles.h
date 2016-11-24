@@ -36,7 +36,8 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 
 // Basic256Sha256, sizes in bytes
 #define SecurityPolicy_Basic256Sha256_SymmLen_Block         16
-#define SecurityPolicy_Basic256Sha256_SymmLen_Key           32
+#define SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey     32
+#define SecurityPolicy_Basic256Sha256_SymmLen_SignKey       32
 #define SecurityPolicy_Basic256Sha256_SymmLen_Signature     32
 #define SecurityPolicy_Basic256Sha256_CertLen_Thumbprint    20
 #define SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash     20 /**< RSA OAEP uses SHA-1 */
