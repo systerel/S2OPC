@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include "sopc_raw_sockets.h"
 #include "sopc_base_types.h"
+#include "sopc_mutexes.h"
 
 #ifndef SOPC_SOCKETS_H_
 #define SOPC_SOCKETS_H_
@@ -60,6 +61,7 @@ typedef struct SOPC_Socket {
 typedef struct {
     uint32_t    nbSockets;
     SOPC_Socket *sockets;
+    Mutex       mutex;
 }
 SOPC_SocketManager;
 

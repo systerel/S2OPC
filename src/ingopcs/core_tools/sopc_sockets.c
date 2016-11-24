@@ -157,6 +157,8 @@ SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
                 Socket_Clear(&(socketMgr->sockets[idx].sock));
             }
             globalNbSockets += nbSockets;
+
+            Mutex_Inititalization(&socketMgr->mutex);
         }
     }
     return status;
@@ -166,11 +168,14 @@ void SOPC_SocketManager_Clear(SOPC_SocketManager* socketMgr){
     if(socketMgr != NULL &&
        socketMgr->nbSockets > 0 &&
        socketMgr->sockets != NULL){
+        Mutex_Lock(&socketMgr->mutex);
         assert(globalNbSockets >= socketMgr->nbSockets);
         globalNbSockets -= socketMgr->nbSockets;
         free(socketMgr->sockets);
         socketMgr->sockets = NULL;
         socketMgr->nbSockets = 0;
+        Mutex_Unlock(&socketMgr->mutex);
+        Mutex_Clear(&socketMgr->mutex);
     }
 }
 
@@ -208,6 +213,7 @@ SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager* socket
     char *port = NULL;
 
     if(socketManager != NULL && uri != NULL && clientSocket != NULL){
+        Mutex_Lock(&socketManager->mutex);
         status = ParseURI(uri, &hostname, &port);
         if(status == STATUS_OK){
             freeSocket = GetFreeSocket(socketManager);
@@ -250,13 +256,15 @@ SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager* socket
         if(hostname != NULL){
             free(hostname);
         }
-    }
 
-    if(status == STATUS_OK){
-        freeSocket->isUsed = 1;
-        freeSocket->eventCallback = socketCallback;
-        freeSocket->cbData = callbackData;
-        *clientSocket = freeSocket;
+        if(status == STATUS_OK){
+            freeSocket->isUsed = 1;
+            freeSocket->eventCallback = socketCallback;
+            freeSocket->cbData = callbackData;
+            *clientSocket = freeSocket;
+        }
+
+        Mutex_Unlock(&socketManager->mutex);
     }
 
     Socket_AddrInfoDelete(&res);
@@ -279,6 +287,7 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
     char *port = NULL;
 
     if(socketManager != NULL && uri != NULL && clientSocket != NULL){
+        Mutex_Lock(&socketManager->mutex);
         status = ParseURI(uri, &hostname, &port);
         if(status == STATUS_OK){
             freeSocket = GetFreeSocket(socketManager);
@@ -324,13 +333,16 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
         if(hostname != NULL){
             free(hostname);
         }
-    }
 
-    if(status == STATUS_OK){
-        freeSocket->isUsed = 1;
-        freeSocket->eventCallback = socketCallback;
-        freeSocket->cbData = callbackData;
-        *clientSocket = freeSocket;
+
+        if(status == STATUS_OK){
+            freeSocket->isUsed = 1;
+            freeSocket->eventCallback = socketCallback;
+            freeSocket->cbData = callbackData;
+            *clientSocket = freeSocket;
+        }
+
+        Mutex_Unlock(&socketManager->mutex);
     }
 
     Socket_AddrInfoDelete(&res);
@@ -357,6 +369,7 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
     }
 
     if(status == STATUS_OK){
+        Mutex_Lock(&socketManager->mutex);
 
         // Add used sockets in the correct socket sets
         for(idx = 0; idx < socketManager->nbSockets; idx++){
@@ -424,6 +437,7 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                                     }
                                 }
                             }else{
+                                Mutex_Unlock(&socketManager->mutex);
                                 return STATUS_INVALID_STATE;
                             }
                         }
@@ -439,6 +453,8 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                 }
             }
         }
+
+        Mutex_Unlock(&socketManager->mutex);
     }
 
     return status;
