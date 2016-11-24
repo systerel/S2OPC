@@ -25,86 +25,108 @@
 typedef void (BuiltInFunction) (void*);
 
 void SOPC_Boolean_Initialize(SOPC_Boolean* b){
-    *b = FALSE;
+    if(b != NULL)
+        *b = FALSE;
 }
 
 void SOPC_Boolean_Clear(SOPC_Boolean* b){
-    *b = FALSE;
+    if(b != NULL)
+        *b = FALSE;
 }
 
 void SOPC_SByte_Initialize(SOPC_SByte* sbyte){
-    *sbyte = 0;
+    if(sbyte != NULL)
+        *sbyte = 0;
 }
 
 void SOPC_SByte_Clear(SOPC_SByte* sbyte){
-    *sbyte = 0;
+    if(sbyte != NULL)
+        *sbyte = 0;
 }
 
 void SOPC_Byte_Initialize(SOPC_Byte* byte){
-    *byte = 0;
+    if(byte != NULL)
+        *byte = 0;
 }
 
 void SOPC_Byte_Clear(SOPC_Byte* byte){
-    *byte = 0;
+    if(byte != NULL)
+        *byte = 0;
 }
 
 void SOPC_Int16_Initialize(int16_t* intv){
-    *intv = 0;
+    if(intv != NULL)
+        *intv = 0;
 }
 
 void SOPC_Int16_Clear(int16_t* intv){
-    *intv = 0;
+    if(intv != NULL)
+        *intv = 0;
 }
 
 void SOPC_UInt16_Initialize(uint16_t* uint){
-    *uint = 0;
+    if(uint != NULL)
+        *uint = 0;
 }
 void SOPC_UInt16_Clear(uint16_t* uint){
-    *uint = 0;
+    if(uint != NULL)
+        *uint = 0;
 }
 
 void SOPC_Int32_Initialize(int32_t* intv){
-    *intv = 0;
+    if(intv != NULL)
+        *intv = 0;
 }
 void SOPC_Int32_Clear(int32_t* intv){
-    *intv = 0;
+    if(intv != NULL)
+        *intv = 0;
 }
 
 void SOPC_UInt32_Initialize(uint32_t* uint){
-    *uint = 0;
+    if(uint != NULL)
+        *uint = 0;
 }
 void SOPC_UInt32_Clear(uint32_t* uint){
-    *uint = 0;
+    if(uint != NULL)
+        *uint = 0;
 }
 
 void SOPC_Int64_Initialize(int64_t* intv){
-    *intv = 0;
+    if(intv != NULL)
+        *intv = 0;
 }
 void SOPC_Int64_Clear(int64_t* intv){
-    *intv = 0;
+    if(intv != NULL)
+        *intv = 0;
 }
 
 void SOPC_UInt64_Initialize(uint64_t* uint){
-    *uint = 0;
+    if(uint != NULL)
+        *uint = 0;
 }
 void SOPC_UInt64_Clear(uint64_t* uint){
-    *uint = 0;
+    if(uint != NULL)
+        *uint = 0;
 }
 
 void SOPC_Float_Initialize(float* f){
-    *f = 0.0;
+    if(f != NULL)
+        *f = 0.0;
 }
 
 void SOPC_Float_Clear(float* f){
-    *f = 0.0;
+    if(f != NULL)
+        *f = 0.0;
 }
 
 void SOPC_Double_Initialize(double* d){
-    *d = 0.0;
+    if(d != NULL)
+        *d = 0.0;
 }
 
 void SOPC_Double_Clear(double* d){
-    *d = 0.0;
+    if(d != NULL)
+        *d = 0.0;
 }
 
 void SOPC_ByteString_Initialize(SOPC_ByteString* bstring){
@@ -368,11 +390,11 @@ SOPC_StatusCode SOPC_ByteString_Compare(const SOPC_ByteString* left,
     return status;
 }
 
-uint32_t SOPC_ByteString_Equal(const SOPC_ByteString* left,
-                          const SOPC_ByteString* right)
+uint8_t SOPC_ByteString_Equal(const SOPC_ByteString* left,
+                              const SOPC_ByteString* right)
 {
     int32_t compare = 0;
-    uint32_t result = FALSE;
+    uint8_t result = FALSE;
 
     if(SOPC_ByteString_Compare(left, right, &compare) == STATUS_OK){
         result = compare == 0;
@@ -391,14 +413,16 @@ SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
 }
 
 uint32_t SOPC_String_Equal(const SOPC_String* left,
-                      const SOPC_String* right)
+                           const SOPC_String* right)
 {
     return SOPC_ByteString_Equal((SOPC_ByteString*) left,
                               (SOPC_ByteString*) right);
 }
 
 void SOPC_XmlElement_Initialize(SOPC_XmlElement* xmlElt){
-    SOPC_ByteString_Initialize((SOPC_ByteString*) xmlElt);
+    if(xmlElt != NULL){
+        SOPC_ByteString_Initialize((SOPC_ByteString*) xmlElt);
+    }
 }
 
 void SOPC_XmlElement_Clear(SOPC_XmlElement* xmlElt){
@@ -407,86 +431,108 @@ void SOPC_XmlElement_Clear(SOPC_XmlElement* xmlElt){
 
 
 void SOPC_DateTime_Initialize(SOPC_DateTime* dateTime){
-    *dateTime = 0;
+    if(dateTime != NULL){
+        *dateTime = 0;
+    }
 }
 
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime){
-    *dateTime = 0;
+    if(dateTime != NULL){
+        *dateTime = 0;
+    }
 }
 
 void SOPC_Guid_Initialize(SOPC_Guid* guid){
-    memset(guid, 0, sizeof(SOPC_Guid));
+    if(guid != NULL){
+        memset(guid, 0, sizeof(SOPC_Guid));
+    }
 }
 
 void SOPC_Guid_Clear(SOPC_Guid* guid){
-    memset(guid, 0, sizeof(SOPC_Guid));
+    if(guid != NULL){
+        memset(guid, 0, sizeof(SOPC_Guid));
+    }
 }
 
 void SOPC_NodeId_Initialize(SOPC_NodeId* nodeId){
-    memset(nodeId, 0, sizeof(SOPC_NodeId));
+    if(nodeId != NULL){
+        memset(nodeId, 0, sizeof(SOPC_NodeId));
+    }
 }
 
 void SOPC_NodeId_InitType(SOPC_NodeId* nodeId, SOPC_IdentifierType knownIdType){
-    nodeId->Namespace = 0; // OPCUA namespace
-    nodeId->IdentifierType = knownIdType;
-    switch(knownIdType){
-        case IdentifierType_Numeric:
-            SOPC_UInt32_Initialize(&nodeId->Data.Numeric);
-            break;
-        case IdentifierType_String:
-            SOPC_String_Initialize(&nodeId->Data.String);
-            break;
-        case IdentifierType_Guid:
-            nodeId->Data.Guid = malloc(sizeof(SOPC_Guid));
-            SOPC_Guid_Initialize(nodeId->Data.Guid);
-            break;
-        case IdentifierType_ByteString:
-            SOPC_ByteString_Initialize(&nodeId->Data.Bstring);
-            break;
+    if(nodeId != NULL){
+        nodeId->Namespace = 0; // OPCUA namespace
+        nodeId->IdentifierType = knownIdType;
+        switch(knownIdType){
+            case IdentifierType_Numeric:
+                SOPC_UInt32_Initialize(&nodeId->Data.Numeric);
+                break;
+            case IdentifierType_String:
+                SOPC_String_Initialize(&nodeId->Data.String);
+                break;
+            case IdentifierType_Guid:
+                nodeId->Data.Guid = malloc(sizeof(SOPC_Guid));
+                SOPC_Guid_Initialize(nodeId->Data.Guid);
+                break;
+            case IdentifierType_ByteString:
+                SOPC_ByteString_Initialize(&nodeId->Data.Bstring);
+                break;
+        }
     }
 }
 
 void SOPC_NodeId_Clear(SOPC_NodeId* nodeId){
-    nodeId->Namespace = 0; // OPCUA namespace
-    switch(nodeId->IdentifierType){
-        case IdentifierType_Numeric:
-            SOPC_UInt32_Clear(&nodeId->Data.Numeric);
-            break;
-        case IdentifierType_String:
-            SOPC_String_Clear(&nodeId->Data.String);
-            break;
-        case IdentifierType_Guid:
-            SOPC_Guid_Clear(nodeId->Data.Guid);
-            if(nodeId->Data.Guid != NULL){
-                free(nodeId->Data.Guid);
-            }
-            nodeId->Data.Guid = NULL;
-            break;
-        case IdentifierType_ByteString:
-            SOPC_ByteString_Clear(&nodeId->Data.Bstring);
-            break;
+    if(nodeId != NULL){
+        nodeId->Namespace = 0; // OPCUA namespace
+        switch(nodeId->IdentifierType){
+            case IdentifierType_Numeric:
+                SOPC_UInt32_Clear(&nodeId->Data.Numeric);
+                break;
+            case IdentifierType_String:
+                SOPC_String_Clear(&nodeId->Data.String);
+                break;
+            case IdentifierType_Guid:
+                SOPC_Guid_Clear(nodeId->Data.Guid);
+                if(nodeId->Data.Guid != NULL){
+                    free(nodeId->Data.Guid);
+                }
+                nodeId->Data.Guid = NULL;
+                break;
+            case IdentifierType_ByteString:
+                SOPC_ByteString_Clear(&nodeId->Data.Bstring);
+                break;
+        }
+        nodeId->IdentifierType = IdentifierType_Numeric;
     }
-    nodeId->IdentifierType = IdentifierType_Numeric;
 }
 
 void SOPC_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId){
-    SOPC_String_Initialize(&expNodeId->NamespaceUri);
-    SOPC_NodeId_Initialize(&expNodeId->NodeId);
-    SOPC_UInt32_Initialize(&expNodeId->ServerIndex);
+    if(expNodeId != NULL){
+        SOPC_String_Initialize(&expNodeId->NamespaceUri);
+        SOPC_NodeId_Initialize(&expNodeId->NodeId);
+        SOPC_UInt32_Initialize(&expNodeId->ServerIndex);
+    }
 }
 
 void SOPC_ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId){
-    SOPC_String_Initialize(&expNodeId->NamespaceUri);
-    SOPC_NodeId_Initialize(&expNodeId->NodeId);
-    SOPC_UInt32_Initialize(&expNodeId->ServerIndex);
+    if(expNodeId != NULL){
+        SOPC_String_Initialize(&expNodeId->NamespaceUri);
+        SOPC_NodeId_Initialize(&expNodeId->NodeId);
+        SOPC_UInt32_Initialize(&expNodeId->ServerIndex);
+    }
 }
 
 void SOPC_StatusCode_Initialize(SOPC_StatusCode* status){
-    *status = STATUS_OK;
+    if(status != NULL){
+        *status = STATUS_OK;
+    }
 }
 
 void SOPC_StatusCode_Clear(SOPC_StatusCode* status){
-    *status = STATUS_OK;
+    if(status != NULL){
+        *status = STATUS_OK;
+    }
 }
 
 void SOPC_DiagnosticInfo_Initialize(SOPC_DiagnosticInfo* diagInfo){
@@ -519,47 +565,59 @@ void SOPC_DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo){
 
 
 void SOPC_QualifiedName_Initialize(SOPC_QualifiedName* qname){
-    qname->NamespaceIndex = 0;
-    SOPC_String_Initialize(&qname->Name);
+    if(qname != NULL){
+        qname->NamespaceIndex = 0;
+        SOPC_String_Initialize(&qname->Name);
+    }
 }
 
 void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname){
-    qname->NamespaceIndex = 0;
-    SOPC_String_Clear(&qname->Name);
+    if(qname != NULL){
+        qname->NamespaceIndex = 0;
+        SOPC_String_Clear(&qname->Name);
+    }
 }
 
 void SOPC_LocalizedText_Initialize(SOPC_LocalizedText* localizedText){
-    SOPC_String_Initialize(&localizedText->Locale);
-    SOPC_String_Initialize(&localizedText->Text);
+    if(localizedText != NULL){
+        SOPC_String_Initialize(&localizedText->Locale);
+        SOPC_String_Initialize(&localizedText->Text);
+    }
 }
 
 void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText){
-    SOPC_String_Clear(&localizedText->Locale);
-    SOPC_String_Clear(&localizedText->Text);
+    if(localizedText != NULL){
+        SOPC_String_Clear(&localizedText->Locale);
+        SOPC_String_Clear(&localizedText->Text);
+    }
 }
 
 void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj){
-    memset(extObj, 0, sizeof(SOPC_ExtensionObject));
-    SOPC_NodeId_Initialize(&extObj->TypeId);
-    extObj->Length = -1;
+    if(extObj != NULL){
+        memset(extObj, 0, sizeof(SOPC_ExtensionObject));
+        SOPC_NodeId_Initialize(&extObj->TypeId);
+        extObj->Length = -1;
+    }
 }
 
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj){
-    SOPC_NodeId_Clear(&extObj->TypeId);
-    switch(extObj->Encoding){
-        case SOPC_ExtObjBodyEncoding_None:
-            break;
-        case SOPC_ExtObjBodyEncoding_ByteString:
-            SOPC_ByteString_Clear(&extObj->Body.Bstring);
-            break;
-        case SOPC_ExtObjBodyEncoding_XMLElement:
-            SOPC_XmlElement_Clear(&extObj->Body.Xml);
-            break;
-        case SOPC_ExtObjBodyEncoding_Object:
-            extObj->Body.Object.ObjType->Clear(extObj->Body.Object.Value);
-            break;
+    if(extObj != NULL){
+        SOPC_NodeId_Clear(&extObj->TypeId);
+        switch(extObj->Encoding){
+            case SOPC_ExtObjBodyEncoding_None:
+                break;
+            case SOPC_ExtObjBodyEncoding_ByteString:
+                SOPC_ByteString_Clear(&extObj->Body.Bstring);
+                break;
+            case SOPC_ExtObjBodyEncoding_XMLElement:
+                SOPC_XmlElement_Clear(&extObj->Body.Xml);
+                break;
+            case SOPC_ExtObjBodyEncoding_Object:
+                extObj->Body.Object.ObjType->Clear(extObj->Body.Object.Value);
+                break;
+        }
+        extObj->Length = -1;
     }
-    extObj->Length = -1;
 }
 
 void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
@@ -783,7 +841,9 @@ void ApplyToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
 }
 
 void SOPC_Variant_Initialize(SOPC_Variant* variant){
-    memset(variant, 0, sizeof(SOPC_Variant));
+    if(variant != NULL){
+        memset(variant, 0, sizeof(SOPC_Variant));
+    }
 }
 
 BuiltInFunction* GetBuiltInTypeClearFunction(SOPC_BuiltinId builtInTypeId){
@@ -871,45 +931,51 @@ BuiltInFunction* GetBuiltInTypeClearFunction(SOPC_BuiltinId builtInTypeId){
 }
 
 void SOPC_Variant_Clear(SOPC_Variant* variant){
-    BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeMask);
-    // Matrix flag => array flag
-    assert(((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0 &&
-             (variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0)
-           || ((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) == 0));
+    if(variant != NULL){
+        BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeMask);
+        // Matrix flag => array flag
+        assert(((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0 &&
+                 (variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0)
+               || ((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) == 0));
 
-    if((variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0){
-        int32_t length = 0;
-        if((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
-            int32_t idx = 0;
-            for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
-                length *= variant->Value.Matrix.ArrayDimensions[idx];
+        if((variant->ArrayTypeMask & SOPC_VariantArrayValueFlag) != 0){
+            int32_t length = 0;
+            if((variant->ArrayTypeMask & SOPC_VariantArrayMatrixFlag) != 0){
+                int32_t idx = 0;
+                for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
+                    length *= variant->Value.Matrix.ArrayDimensions[idx];
+                }
+                ApplyToVariantArrayBuiltInType(variant->BuiltInTypeMask,
+                                               variant->Value.Matrix.Content,
+                                               length,
+                                               clearFunction);
+            }else{
+                ApplyToVariantArrayBuiltInType(variant->BuiltInTypeMask,
+                                               variant->Value.Array.Content,
+                                               variant->Value.Array.Length,
+                                               clearFunction);
             }
-            ApplyToVariantArrayBuiltInType(variant->BuiltInTypeMask,
-                                           variant->Value.Matrix.Content,
-                                           length,
-                                           clearFunction);
         }else{
-            ApplyToVariantArrayBuiltInType(variant->BuiltInTypeMask,
-                                           variant->Value.Array.Content,
-                                           variant->Value.Array.Length,
-                                           clearFunction);
+            ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeMask,
+                                              variant->Value,
+                                              clearFunction);
         }
-    }else{
-        ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeMask,
-                                          variant->Value,
-                                          clearFunction);
     }
 }
 
 void SOPC_DataValue_Initialize(SOPC_DataValue* dataValue){
-    memset(dataValue, 0, sizeof(SOPC_DataValue));
+    if(dataValue != NULL){
+        memset(dataValue, 0, sizeof(SOPC_DataValue));
+    }
 }
 void SOPC_DataValue_Clear(SOPC_DataValue* dataValue){
-    SOPC_Variant_Clear(&dataValue->Value);
-    SOPC_StatusCode_Clear(&dataValue->Status);
-    dataValue->SourceTimestamp = 0;
-    dataValue->ServerTimestamp = 0;
-    dataValue->SourcePicoSeconds = 0;
-    dataValue->ServerPicoSeconds = 0;
+    if(dataValue != NULL){
+        SOPC_Variant_Clear(&dataValue->Value);
+        SOPC_StatusCode_Clear(&dataValue->Status);
+        dataValue->SourceTimestamp = 0;
+        dataValue->ServerTimestamp = 0;
+        dataValue->SourcePicoSeconds = 0;
+        dataValue->ServerPicoSeconds = 0;
+    }
 }
 

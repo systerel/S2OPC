@@ -293,8 +293,8 @@ SOPC_StatusCode SOPC_ByteString_Compare(const SOPC_ByteString* left,
                                    int32_t*               comparison);
 
 // Returns 0 if false
-uint32_t SOPC_ByteString_Equal(const SOPC_ByteString* left,
-                          const SOPC_ByteString* right);
+uint8_t SOPC_ByteString_Equal(const SOPC_ByteString* left,
+                              const SOPC_ByteString* right);
 
 void SOPC_String_Initialize(SOPC_String* string);
 SOPC_String* SOPC_String_Create(void);
