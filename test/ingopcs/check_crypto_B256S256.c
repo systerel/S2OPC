@@ -1,6 +1,7 @@
 /** \file
  *
- * Cryptographic test suite. This suite tests Basic256Sha256.
+ * \brief Cryptographic test suite. This suite tests "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256".
+ *
  * See check_stack.c for more details.
  */
 /*
@@ -28,6 +29,7 @@
 #include <stdlib.h> // malloc, free
 
 #include "sopc_base_types.h"
+#include "hexlify.h"
 #include "check_stack.h"
 #include "crypto_provider.h"
 #include "crypto_profiles.h"
@@ -37,77 +39,6 @@
 #include "key_manager.h"
 #include "pki_stack.h"
 
-
-// Helper
-// You should allocate strlen(src)*2 in dst. n is strlen(src)
-// Returns n the number of translated chars (< 0 for errors)
-int hexlify(const unsigned char *src, char *dst, size_t n)
-{
-    size_t i;
-    char buffer[3];
-
-    if(! src || ! dst)
-        return -1;
-
-    for(i=0; i<n; ++i) {
-        sprintf(buffer, "%02hhx", src[i]); // sprintf copies the last \0 too
-        memcpy(dst+2*i, buffer, 2);
-    }
-
-    return n;
-}
-
-// Helper
-// You should allocate strlen(src)/2 in dst. n is strlen(dst)
-// Returns n the number of translated couples (< 0 for errors)
-int unhexlify(const char *src, unsigned char *dst, size_t n)
-{
-    size_t i;
-
-    if(! src || ! dst)
-        return -1;
-
-    for(i=0; i<n; ++i)
-    {
-        if(sscanf(&src[2*i], "%02hhx", &dst[i]) < 1)
-            return i;
-    }
-
-    return n;
-}
-
-
-START_TEST(test_hexlify)
-{
-    unsigned char buf[33], c, d = 0;
-    int i;
-
-    // Init
-    memset(buf, 0, 33);
-
-    // Test single chars
-    for(i=0; i<256; ++i)
-    {
-        c = (unsigned char)i;
-        ck_assert(hexlify(&c, (char *)buf, 1) == 1);
-        ck_assert(unhexlify((char *)buf, &d, 1) == 1);
-        ck_assert(c == d);
-    }
-
-    // Test vector
-    ck_assert(hexlify((unsigned char *)"\x00 Test \xFF", (char *)buf, 8) == 8);
-    ck_assert(strncmp((char *)buf, "00205465737420ff", 16) == 0);
-    ck_assert(unhexlify((char *)buf, buf+16, 8) == 8);
-    ck_assert(strncmp((char *)(buf+16), "\x00 Test \xFF", 8) == 0);
-
-    // Test overflow
-    buf[32] = 0xDD;
-    ck_assert(hexlify((unsigned char *)"\x00 Test \xFF\x00 Test \xFF", (char *)buf, 16) == 16);
-    ck_assert(buf[32] == 0xDD);
-    ck_assert(unhexlify("00205465737420ff00205465737420ff", buf, 16) == 16);
-    ck_assert(buf[32] == 0xDD);
-}
-END_TEST
 
 
 // Using fixtures
@@ -1034,19 +965,15 @@ END_TEST
 Suite *tests_make_suite_crypto_B256S256()
 {
     Suite *s = NULL;
-    TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_derives = NULL, *tc_misc = NULL, *tc_km = NULL, *tc_crypto_asym = NULL, *tc_pki_stack = NULL;
+    TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_derives = NULL, *tc_km = NULL, *tc_crypto_asym = NULL, *tc_pki_stack = NULL;
 
     s = suite_create("Crypto tests Basic256Sha256");
     tc_crypto_symm = tcase_create("Symmetric Crypto");
     tc_providers = tcase_create("Crypto Provider");
     tc_derives = tcase_create("Crypto Data Derivation");
-    tc_misc = tcase_create("Crypto Misc");
     tc_km = tcase_create("Key Management");
     tc_crypto_asym = tcase_create("Asymmetric Crypto");
     tc_pki_stack = tcase_create("PKI stack");
-
-    suite_add_tcase(s, tc_misc);
-    tcase_add_test(tc_misc, test_hexlify);
 
     suite_add_tcase(s, tc_crypto_symm);
     tcase_add_checked_fixture(tc_crypto_symm, setup_crypto, teardown_crypto);

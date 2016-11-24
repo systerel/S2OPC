@@ -1,7 +1,9 @@
-/*
- * Tests suites are gathered here.
- * Inspired from https://github.com/libcheck/check/blob/master/tests/check_check.h
+/** \file
  *
+ * \brief Helpers for tests.
+ *
+ */
+/*
  *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -18,16 +20,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CHECK_STACK_H
-#define CHECK_STACK_H
+
+#ifndef SOPC_HEXLIFY_H_
+#define SOPC_HEXLIFY_H_
 
 
-Suite *tests_make_suite_crypto_B256S256(void);
-Suite *tests_make_suite_crypto_B256(void);
-
-Suite *tests_make_suite_tools(void);
-
-Suite *tests_make_suite_core_tools(void);
+int hexlify(const unsigned char *src, char *dst, size_t n);
+int unhexlify(const char *src, unsigned char *dst, size_t n);
 
 
-#endif  // CHECK_STACK_H
+#endif /* SOPC_HEXLIFY_H_ */

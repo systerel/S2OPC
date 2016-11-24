@@ -28,6 +28,40 @@
 #include "singly_linked_list.h"
 #include "sopc_base_types.h"
 #include "check_stack.h"
+#include "hexlify.h"
+
+
+START_TEST(test_hexlify)
+{
+    unsigned char buf[33], c, d = 0;
+    int i;
+
+    // Init
+    memset(buf, 0, 33);
+
+    // Test single chars
+    for(i=0; i<256; ++i)
+    {
+        c = (unsigned char)i;
+        ck_assert(hexlify(&c, (char *)buf, 1) == 1);
+        ck_assert(unhexlify((char *)buf, &d, 1) == 1);
+        ck_assert(c == d);
+    }
+
+    // Test vector
+    ck_assert(hexlify((unsigned char *)"\x00 Test \xFF", (char *)buf, 8) == 8);
+    ck_assert(strncmp((char *)buf, "00205465737420ff", 16) == 0);
+    ck_assert(unhexlify((char *)buf, buf+16, 8) == 8);
+    ck_assert(strncmp((char *)(buf+16), "\x00 Test \xFF", 8) == 0);
+
+    // Test overflow
+    buf[32] = 0xDD;
+    ck_assert(hexlify((unsigned char *)"\x00 Test \xFF\x00 Test \xFF", (char *)buf, 16) == 16);
+    ck_assert(buf[32] == 0xDD);
+    ck_assert(unhexlify("00205465737420ff00205465737420ff", buf, 16) == 16);
+    ck_assert(buf[32] == 0xDD);
+}
+END_TEST
 
 
 START_TEST(test_buffer_create)
@@ -577,7 +611,7 @@ END_TEST
 Suite *tests_make_suite_tools(void)
 {
     Suite *s;
-    TCase *tc_buffer, *tc_linkedlist;
+    TCase *tc_hexlify, *tc_buffer, *tc_linkedlist;
 
     s = suite_create("Tools");
     tc_buffer = tcase_create("Buffer");
@@ -590,6 +624,9 @@ Suite *tests_make_suite_tools(void)
     tc_linkedlist = tcase_create("Linked List");
     tcase_add_test(tc_linkedlist, test_linked_list);
     suite_add_tcase(s, tc_linkedlist);
+
+    tc_hexlify = tcase_create("Hexlify (tests only)");
+    tcase_add_test(tc_hexlify, test_hexlify);
 
     return s;
 }
