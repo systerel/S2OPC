@@ -80,13 +80,18 @@ SOPC_StatusCode Namespace_GetIndex(SOPC_NamespaceTable* namespaceTable,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Namespace namespaceEntry;
     if(namespaceTable != NULL){
-        status = STATUS_NOK;
-        uint32_t idx = 0;
-        for (idx = 0; idx <= namespaceTable->lastIdx; idx++){
-            namespaceEntry = namespaceTable->namespaceArray[idx];
-            if(strncmp(namespaceEntry.namespaceName, namespaceName, OPCUA_NAMESPACE_NAME_MAXLENGTH) == 0){
-                status = STATUS_OK;
-                *index = namespaceEntry.namespaceIndex;
+        if(namespaceName == NULL){
+            status = STATUS_OK;
+            index = OPCUA_NAMESPACE_INDEX;
+        }else{
+            status = STATUS_NOK;
+            uint32_t idx = 0;
+            for (idx = 0; idx <= namespaceTable->lastIdx; idx++){
+                namespaceEntry = namespaceTable->namespaceArray[idx];
+                if(strncmp(namespaceEntry.namespaceName, namespaceName, strlen(namespaceName) + 1) == 0){
+                    status = STATUS_OK;
+                    *index = namespaceEntry.namespaceIndex;
+                }
             }
         }
     }

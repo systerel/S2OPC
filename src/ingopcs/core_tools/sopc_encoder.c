@@ -928,13 +928,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, S
         if(extObj->Body.Object.ObjType == NULL){
             status = STATUS_INVALID_PARAMETERS;
         }else{
-            if(strncmp(extObj->Body.Object.ObjType->NamespaceUri,
-                       OPCUA_NAMESPACE_NAME,
-                       strlen(OPCUA_NAMESPACE_NAME))
-               !=  0)
-            {
-                status = Namespace_GetIndex(&msgBuffer->nsTable, extObj->Body.Object.ObjType->NamespaceUri, &nsIndex);
-            }
+            status = Namespace_GetIndex(&msgBuffer->nsTable, extObj->Body.Object.ObjType->NamespaceUri, &nsIndex);
 
             objNodeId.IdentifierType = IdentifierType_Numeric;
             objNodeId.Namespace = nsIndex;
