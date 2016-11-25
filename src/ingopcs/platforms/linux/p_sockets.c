@@ -260,7 +260,8 @@ int32_t Socket_Write(Socket   sock,
        count <= INT32_MAX)
     {
         // TODO: Use write event to write later ?
-        while(res >=0 && sentBytes < count){
+        do
+        {
             if(res != 0){
                 usleep(50000);
             }
@@ -268,7 +269,7 @@ int32_t Socket_Write(Socket   sock,
             if(res > 0){
                 sentBytes += res;
             }
-        }
+        } while(res > 0 && sentBytes < count);
         return sentBytes;
     }else{
         return -1;
