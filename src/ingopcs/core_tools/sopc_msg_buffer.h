@@ -26,7 +26,6 @@
 
 #include "buffer.h"
 #include "sopc_base_types.h"
-#include "sopc_encodeable.h"
 #include "sopc_namespace_table.h"
 
 /** Length of a TCP UA message Header */

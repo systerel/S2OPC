@@ -9,7 +9,7 @@
 #define SOPC_WRAPPER_PROXYSTUB_H_
 
 #include "sopc_base_types.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 
 BEGIN_EXTERN_C
 

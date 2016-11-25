@@ -21,7 +21,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_tcp_ua_low_level.h"
 
 void SOPC_EncodeDecode_Int16(int16_t* intv)
@@ -1007,9 +1007,9 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
                 nsFound = 1; // TRUE
             }
             if(nsFound != FALSE){
-                encType = EncodeableType_GetEncodeableType(msgBuffer->encTypesTable,
-                                                           nsName,
-                                                           extObj->TypeId.Data.Numeric);
+                encType = SOPC_EncodeableType_GetEncodeableType(msgBuffer->encTypesTable,
+                                                                nsName,
+                                                                extObj->TypeId.Data.Numeric);
             }
             if(nsFound == FALSE || encType == NULL){
                 status = STATUS_NOK;

@@ -40,7 +40,7 @@
 #include "platform_deps.h"
 #include "sopc_msg_buffer.h"
 #include "sopc_builtintypes.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 
 BEGIN_EXTERN_C
 

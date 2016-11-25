@@ -1592,11 +1592,11 @@ SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
         }else{
             // Must be the case in which we cannot know the type before decoding it
             if(nodeId.Namespace == OPCUA_NAMESPACE_INDEX){
-                recEncType = EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.Data.Numeric);
+                recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.Data.Numeric);
             }else{
                 nsName = Namespace_GetName(namespaceTable, nodeId.Namespace);
                 if(nsName != NULL){
-                    recEncType = EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.Data.Numeric);
+                    recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.Data.Numeric);
                 }
                 if(recEncType == NULL){
                     status = STATUS_INVALID_RCV_PARAMETER;

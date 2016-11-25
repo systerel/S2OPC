@@ -21,7 +21,7 @@
 #include <stdint.h>
 
 #include "sopc_base_types.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_stack_csts.h"
 
 BEGIN_EXTERN_C

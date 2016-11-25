@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 
 #include <string.h>
 
 #include "sopc_builtintypes.h"
 #include "sopc_namespace_table.h"
 
-SOPC_EncodeableType* EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
-                                                      const char*           namespace,
-                                                      uint32_t              typeId){
+SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
+                                                           const char*           namespace,
+                                                           uint32_t              typeId){
     SOPC_EncodeableType* current = NULL;
     const char* currentNs = NULL;
     SOPC_EncodeableType* result = NULL;

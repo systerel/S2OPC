@@ -22,7 +22,7 @@
 #include "pki.h"
 #include "singly_linked_list.h"
 #include "sopc_builtintypes.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_namespace_table.h"
 #include "sopc_secure_channel_low_level.h"
 #include "sopc_mutexes.h"
