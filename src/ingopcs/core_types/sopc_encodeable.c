@@ -20,23 +20,39 @@
 #include <string.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_namespace_table.h"
 
 SOPC_EncodeableType* EncodeableType_GetEncodeableType(SOPC_EncodeableType** encTypesTable,
                                                       const char*           namespace,
                                                       uint32_t              typeId){
     SOPC_EncodeableType* current = NULL;
+    const char* currentNs = NULL;
     SOPC_EncodeableType* result = NULL;
     uint32_t idx = 0;
     if(encTypesTable != NULL){
         current = encTypesTable[idx];
         while(current != NULL && result == NULL){
-            if(typeId == result->TypeId || typeId == result->BinaryEncodingTypeId){
-                // || typeId = result->xmlTypeId => should not be the case since we use UA binary !
-                //TODO: max namespace or string size ?
-                if(strncmp(namespace, current->NamespaceUri, INT32_MAX) == 0){ // Use maximum SOPC_String size representation size
+            if(typeId == current->TypeId || typeId == current->BinaryEncodingTypeId){
+                // || typeId = current->xmlTypeId => should not be the case since we use UA binary !
+                if(current->NamespaceUri == NULL && namespace == NULL){
+                    // Default namespace for both
                     result = current;
+                }else{
+                    if(namespace == NULL){
+                        namespace = OPCUA_NAMESPACE_NAME;
+                    }
+                    if(current->NamespaceUri == NULL){
+                        // It is considered as default namespace:
+                        currentNs = OPCUA_NAMESPACE_NAME;
+                    }else{
+                        currentNs = current->NamespaceUri;
+                    }
+                    if(strncmp(namespace, currentNs, strlen(namespace)+1) == 0){
+                        result = current;
+                    }
                 }
-            }else if(idx < UINT32_MAX){
+            }
+            if(result == NULL && idx < UINT32_MAX){
                 idx++;
                 current = encTypesTable[idx];
             }else{

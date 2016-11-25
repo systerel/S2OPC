@@ -985,6 +985,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_EncodeableType* encType;
     const char* nsName;
+    uint8_t nsFound = FALSE;
     SOPC_Byte encodingByte = 0;
     if(extObj != NULL){
         status = SOPC_NodeId_Read(&extObj->TypeId, msgBuffer);
@@ -998,15 +999,19 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
         if(extObj->TypeId.IdentifierType == IdentifierType_Numeric){
             if(extObj->TypeId.Namespace != OPCUA_NAMESPACE_INDEX){
                 nsName = Namespace_GetName(&msgBuffer->nsTable, extObj->TypeId.Namespace);
+                if(nsName != NULL){
+                    nsFound = 1; // TRUE
+                }
             }else{
-                nsName = OPCUA_NAMESPACE_NAME;
+                nsName = NULL; // <=> OPCUA_NAMESPACE_NAME in GetEncodeableType
+                nsFound = 1; // TRUE
             }
-            if(nsName != NULL){
+            if(nsFound != FALSE){
                 encType = EncodeableType_GetEncodeableType(msgBuffer->encTypesTable,
                                                            nsName,
                                                            extObj->TypeId.Data.Numeric);
             }
-            if(nsName == NULL || encType == NULL){
+            if(nsFound == FALSE || encType == NULL){
                 status = STATUS_NOK;
             }else{
                 encodingByte = SOPC_ExtObjBodyEncoding_Object;
