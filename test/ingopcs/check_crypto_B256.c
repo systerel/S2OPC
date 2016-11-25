@@ -661,43 +661,29 @@ END_TEST
 static AsymmetricKey *key_pub = NULL, *key_priv = NULL;
 
 // Certificates: these are not the same cert as in setup_certificate. This one was created to also embed the private key in the tests.
-// TODO: generate a new key-pair (it is not mandatory, these one are 2048 long, so it is okay (2048 <= max=2048)
-#define DER_ASYM_PUB_HEXA "3082038b30820273a003020102020900cf163f0b5124ff4c300d06092a864886f70d01010b0500305c310b3009060355040613024652310f300d06035504080c"\
+#define DER_ASYM_PUB_HEXA "30820286308201efa003020102020900c4d03aaaf2bbde98300d06092a864886f70d01010b0500305c310b3009060355040613024652310f300d06035504080c"\
                           "064672616e6365310c300a06035504070c034169783111300f060355040a0c08537973746572656c311b301906035504030c12494e474f504353205465737420"\
-                          "7375697465301e170d3136313032363136333035345a170d3137303230333136333035345a305c310b3009060355040613024652310f300d06035504080c0646"\
+                          "7375697465301e170d3136313132353137353033385a170d3137303330353137353033385a305c310b3009060355040613024652310f300d06035504080c0646"\
                           "72616e6365310c300a06035504070c034169783111300f060355040a0c08537973746572656c311b301906035504030c12494e474f5043532054657374207375"\
-                          "69746530820122300d06092a864886f70d01010105000382010f003082010a0282010100cbe0cd29bbcdd824999fc5571122e7540405ac94d0a9b3ab3630ce2c"\
-                          "f361d50d9e737ce3f7746959003cbe90fc1019dce4797f4a87a05cd83521531e1391cf11f2e49ce6b0f68db31fb91675be4bbd4380920fccf46518ac2bff4208"\
-                          "5ebc6ca107ecef53964e14617aecd75e1f27035c326f1757273047ca4d623bc5b08d278e3a320b964b11116df912bf91e99d3fdb78989e3daa144570647efc4c"\
-                          "983c4159aecbf99aeb8bdfbf242ac5c43f0092a28aecddb8bdabf4aad7af68ae6bfe6d5cf6cb6e3a6a0c2d33ad3d592514703578d1cead67aa2c497600e0b983"\
-                          "0ee8671f59f25262d596e4dbfe60ec6f5acb0c4f1cedf6b138fa12fd661b65e537c3539b0203010001a350304e301d0603551d0e041604147d33f73c22b315aa"\
-                          "bd26ecb5a6db8a0bb511fbd0301f0603551d230418301680147d33f73c22b315aabd26ecb5a6db8a0bb511fbd0300c0603551d13040530030101ff300d06092a"\
-                          "864886f70d01010b05000382010100550cb4f83c4b3567dc7aed66698056a034f38685e8227c0c0f00de0d7bd267f728d3b05c6f0fc089163e5654a833fd84cb"\
-                          "6e5cc71853483cf09c4804ff862a01e920234578f2d6c8cd89008d017dce5d15be8a52396a101d32434d34aef346387216f550b1f932c94072168cdc68ad460d"\
-                          "100bce4792c57b87f1a431d2b456698dd3c248fc6e2644d446f952255f98e3dcb7e5cd200b46f769d581833c21b08d07c4343973e93bed9a2d66ece5b6083e6e"\
-                          "42b3378987339ab01aab362890dbf57dc22e9d86c0cd4edfa43f489d250bc4244542368c8682125645bd610fbf1c60ec5f94bc697284bde3915e9e051bb255ae"\
-                          "e1685265a487bd1d72c5f49ef621e0"
-#define DER_ASYM_PUB_LENG 911
-#define DER_ASYM_PRIV_HEXA "308204a40201000282010100cbe0cd29bbcdd824999fc5571122e7540405ac94d0a9b3ab3630ce2cf361d50d9e737ce3f7746959003cbe90fc1019dce4797f4a"\
-                           "87a05cd83521531e1391cf11f2e49ce6b0f68db31fb91675be4bbd4380920fccf46518ac2bff42085ebc6ca107ecef53964e14617aecd75e1f27035c326f1757"\
-                           "273047ca4d623bc5b08d278e3a320b964b11116df912bf91e99d3fdb78989e3daa144570647efc4c983c4159aecbf99aeb8bdfbf242ac5c43f0092a28aecddb8"\
-                           "bdabf4aad7af68ae6bfe6d5cf6cb6e3a6a0c2d33ad3d592514703578d1cead67aa2c497600e0b9830ee8671f59f25262d596e4dbfe60ec6f5acb0c4f1cedf6b1"\
-                           "38fa12fd661b65e537c3539b020301000102820101009c87cb5d2868e1733053bfc29a508f052d5561ec9bcc3f3acb8f6b2c8dec66145fbc517e01866a3fbff3"\
-                           "e368136f153c485a940597dde28ac937fdc5d0c6991231c79e436c48d0005ff1ce31b65a1644d658ce32d0cd31c536be736753bd1d36018cc32f0cee83ad5820"\
-                           "b135fd7b099466d06e3e26c365cb07e0ccfd7a10d5f57879f21648083e9997cb1f78a3bd934dd472bafd852458e4fc843e14959d46cc2252e7bb12c0cfaee462"\
-                           "3196595ce587921c600908e10c2e7257ea99a83c6df5b392220b88a11e3dcaf88c55a1a3ce8222037e19585cf644ccca65c188e7d109c447773c9e06cf15e2e2"\
-                           "b745b0195d042cb264184d3b711d3e9e7e89858aa96102818100f2c690168005c536c5958a45ada4c1cad84203f961c560d996158d2b184d93f48934a0d46ec0"\
-                           "512ee0670c2e49fda8b5de29fad03c3e5da406885a6d9775af2dfd5e61357997f2dbcaa087f79e076e95606904cfeab68185bbb4d2854d8f835e1eb38da5614b"\
-                           "944970e8b5e4130262219f69394ede5c16e78112cfb3512b10b102818100d6fbd2ed02d9529b4e3a04a27da4659b2968d082cf660c0c4520cb1909084ff77ec3"\
-                           "8dccc74f924a0db25869855ea95e6c61990837c9a46658ce233104b1bd2b9d1c16221561f41116926bd963406f789cea1b730c326bd0e4cf01ebc6e2d047f2bb"\
-                           "c591a5bfff19512186fbfcbfe1fa32776163a11bef64a8cd1316ba0a5c0b0281803b53787c771671e5fb8c9a7882816375fd38cc9dd15d9958328bdbae6f46ed"\
-                           "e3f0ef7269d7129a04198434fecec7f4c5549fef919957282ce007cc0941dcd94d24c03e8301ceb6e32cf5e3a407f30afbe7ce6205a8f6a65a16cf8e2e5310c1"\
-                           "ea6b183781f56fb1b1ecac815e55a2dc7618ed6ebaae2dd4cf07c4a00ad2c7f25102818100c22e052f75024c9de0c380ca30081c8a5095ceb8489298d1406345"\
-                           "6f207c74964cd65f2f16dba57be3f131f065b9c1eb7aa390f11e4ab0868d31ec116b770b31e89fa4d236541a7a90d3c23c416cc302c360a5587e2cd0bb86dfff"\
-                           "91323c4dfa9ea1c1eb33363f3963d18fb5ed6e77b3607ff9e45e71f8020881eafafd213c4f02818004fbb2f7ca0e8e7f644f40939f9743f8996439a926244282"\
-                           "1981268f36fba3e4656fc6e9c69bab8b5f56c7b033bed95eeca96952b3d62edd935b80d5187649683196702a0b304e802de7841d6bab06e6877b74bdf2b5e7f2"\
-                           "673ac6939c1427fb899a4cb26f656b5621914592f61b10d4ff50a4bb360d134d224a780db10f0f97"
-#define DER_ASYM_PRIV_LENG 1192
+                          "69746530819f300d06092a864886f70d010101050003818d0030818902818100ec5d569bf77931e401c07a030921301a74cfe6a3f994175b0db5d668a5f10ec8"\
+                          "d17828919b436f64cc2540ea246d9bcae0d891a4983d39f9342218a2c87836824e98fe63814429119f98bcfc4b81fc9946f01eefca8e3ae6ec2878a77bd960ed"\
+                          "c5acf1ea7f8af18a6de2f0a6b4f8c52da4a70816718c20da7dfa629fc9e613510203010001a350304e301d0603551d0e041604142417c23c516564e10e04671a"\
+                          "234ca8939b492a5d301f0603551d230418301680142417c23c516564e10e04671a234ca8939b492a5d300c0603551d13040530030101ff300d06092a864886f7"\
+                          "0d01010b050003818100630e6c7d008cc1b681608231dbb28d274683498c654a8244c2fc1411c4d239a0512803bf4dfbd2f1ddd96a83f7de68c4fd6b8df80782"\
+                          "043dcb8d80a27021dd03b2f403c06ebd45b9e75a5a06715283c6796988bb23fce0749c8aecee4cc205cb423ebfb84f57759e1b02cc48e89cd3cb90b27e2785d7"\
+                          "a22ebee8bf0988edec28"
+#define DER_ASYM_PUB_LENG 650
+#define DER_ASYM_PRIV_HEXA "3082025e02010002818100ec5d569bf77931e401c07a030921301a74cfe6a3f994175b0db5d668a5f10ec8d17828919b436f64cc2540ea246d9bcae0d891a498"\
+                           "3d39f9342218a2c87836824e98fe63814429119f98bcfc4b81fc9946f01eefca8e3ae6ec2878a77bd960edc5acf1ea7f8af18a6de2f0a6b4f8c52da4a7081671"\
+                           "8c20da7dfa629fc9e613510203010001028181008e8f9d7564c60c7961351e62465766140ef07643e07c99b9a9834b56c2ffa9d325c43b73d719cd4e167341bb"\
+                           "f74cc4f290bb0edd1f958e29e86fc83c267d9b21c45a7618c4c5ca124e2dd8bbb2828669f57a9dc5395f4ce49f7afb251ddb4ebe97cadf648f26fc850e2587d7"\
+                           "3bd86bbda4769615de4fcbc4de6b1d9cf15b8d81024100f6401a1f0eae030171ae99edf82e708fb46912889189315ad27c759a75207cc0f11d129aa995393174"\
+                           "a045fb29a6476487e6cd92242978729e2136d5ce953f65024100f5b909a77e0bd1de7d9979429508e17f4339fbe05cffd0c9d4c3ee886f39183bb5ac452d3c36"\
+                           "68a2af1a01fe435bc4ad14be9b1dbd359eca5a89aa923001337d024012d2296cf0414a8784b9d498049d000b6bbd902612018b5d26b34e85c4a7fc00ff2cbaac"\
+                           "4983d740396aba8e8ccb61af845796a4b1d0dd9cdd0b2ad6c29853a5024100f34a19fcf417cfdb72901a378a4818bc605b70bf5c550cec48f5159f903fff765f"\
+                           "120a0c17a9e73fec0edc1a5ba6e8bc55e5c2bf572f57e112736ba70250ae21024100ca81e8f4360563e0721f3a2227be2f52141806f398801e3f7cba4c1e960b"\
+                           "f7b53ff4babc92075300f69c8d1f2e56738165896558707f1831bd84f929cf12fb51"
+#define DER_ASYM_PRIV_LENG 610
 
 static inline void setup_asym_keys(void)
 {
@@ -745,46 +731,46 @@ START_TEST(test_crypto_asym_lengths_B256)
 
     // Check lengths
     ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_pub, &len) == STATUS_OK);
-    ck_assert(2048 == len);
+    ck_assert(1024 == len);
     ck_assert(CryptoProvider_AsymmetricGetLength_KeyBits(crypto, key_priv, &len) == STATUS_OK);
-    ck_assert(2048 == len);
+    ck_assert(1024 == len);
     ck_assert(CryptoProvider_AsymmetricGetLength_KeyBytes(crypto, key_pub, &len) == STATUS_OK);
-    ck_assert(256 == len);
+    ck_assert(128 == len);
     ck_assert(CryptoProvider_AsymmetricGetLength_KeyBytes(crypto, key_priv, &len) == STATUS_OK);
-    ck_assert(256 == len);
+    ck_assert(128 == len);
     ck_assert(CryptoProvider_AsymmetricGetLength_MsgPlainText(crypto, key_pub, &lenPlain) == STATUS_OK);
     ck_assert(CryptoProvider_AsymmetricGetLength_MsgCipherText(crypto, key_pub, &lenCiph) == STATUS_OK);
-    ck_assert(256 == lenCiph);
-    ck_assert(214 == lenPlain); // 256 - 2*20 - 2
+    ck_assert(128 == lenCiph);
+    ck_assert(86 == lenPlain); // 128 - 2*20 - 2
     ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_pub, &lenCiph, &lenPlain) == STATUS_OK);
-    ck_assert(256 == lenCiph);
-    ck_assert(214 == lenPlain); // 256 - 2*20 - 2
+    ck_assert(128 == lenCiph);
+    ck_assert(86 == lenPlain); // 128 - 2*20 - 2
     ck_assert(CryptoProvider_AsymmetricGetLength_Msgs(crypto, key_priv, &lenCiph, &lenPlain) == STATUS_OK);
-    ck_assert(256 == lenCiph);
-    ck_assert(214 == lenPlain); // 256 - 2*20 - 2
+    ck_assert(128 == lenCiph);
+    ck_assert(86 == lenPlain); // 128 - 2*20 - 2
     ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 32, &len) == STATUS_OK);
-    ck_assert(256 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 256, &len) == STATUS_OK);
-    ck_assert(214 == len);
-    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 856, &len) == STATUS_OK);
+    ck_assert(128 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 128, &len) == STATUS_OK);
+    ck_assert(86 == len);
+    ck_assert(CryptoProvider_AsymmetricGetLength_Encryption(crypto, key_pub, 688, &len) == STATUS_OK);
     ck_assert(1024 == len);
     ck_assert(CryptoProvider_AsymmetricGetLength_Decryption(crypto, key_priv, 1024, &len) == STATUS_OK);
-    ck_assert(856 == len);
+    ck_assert(688 == len);
     ck_assert(CryptoProvider_AsymmetricGetLength_OAEPHashLength(crypto, &len) == STATUS_OK);
     ck_assert(20 == len); // SHA-1
     ck_assert(CryptoProvider_AsymmetricGetLength_PSSHashLength(crypto, &len) == STATUS_OK);
     ck_assert(20 == len); // SHA-1
     ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_pub, &len) == STATUS_OK);
-    ck_assert(256 == len); // One block
+    ck_assert(128 == len); // One block
     ck_assert(CryptoProvider_AsymmetricGetLength_Signature(crypto, key_priv, &len) == STATUS_OK);
-    ck_assert(256 == len); // One block
+    ck_assert(128 == len); // One block
 }
 END_TEST
 
 
 START_TEST(test_crypto_asym_crypt_B256)
 {
-    uint8_t input[856], output[1024], input_bis[856];
+    uint8_t input[688], output[1024], input_bis[688];
     uint32_t len = 0;
     ExposedBuffer clientNonce[32], serverNonce[32];
 
@@ -793,42 +779,42 @@ START_TEST(test_crypto_asym_crypt_B256)
     memset(input, 0, 856);
     memset(output, 0, 1024);
     strncpy((char *)input, "Test INGOPCS Test", 32); // And test padding btw...
-    ck_assert(CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 256) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricDecrypt(crypto, output, 256, key_priv, input_bis, 214, &len) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 128) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricDecrypt(crypto, output, 128, key_priv, input_bis, 86, &len) == STATUS_OK);
     ck_assert(len == 32);
     ck_assert(memcmp(input, input_bis, 32) == 0);
     // b) Multiple messages (> 214, and as output is 1024, < 856)
     //  Using previously generated nonce, to fill input[32:856]
     ck_assert(unhexlify("c3cc8578608ae88e9690b921254d028e1b9cdc75fbf5070c4e39e5712b4a8bdf", clientNonce, 32) == 32);
     ck_assert(unhexlify("9b8a2d541f4b3ed8ae69111cc85c4ea875fb7e2a541aa87d703fe1a5d037dcfc", serverNonce, 32) == 32);
-    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 856-32) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricEncrypt(crypto, input, 856, key_pub, output, 1024) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricDecrypt(crypto, output, 1024, key_priv, input_bis, 856, &len) == STATUS_OK);
-    ck_assert(len == 856);
-    ck_assert(memcmp(input, input_bis, 856) == 0);
+    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 688-32) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricEncrypt(crypto, input, 688, key_pub, output, 1024) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricDecrypt(crypto, output, 1024, key_priv, input_bis, 688, &len) == STATUS_OK);
+    ck_assert(len == 688);
+    ck_assert(memcmp(input, input_bis, 688) == 0);
 }
 END_TEST
 
 
 START_TEST(test_crypto_asym_sign_verify_B256)
 {
-    uint8_t input[856], sig[256];
+    uint8_t input[688], sig[128];
     ExposedBuffer clientNonce[32], serverNonce[32];
 
     // Signature
     // a) Single message (< 214)
-    memset(input, 0, 856);
-    memset(sig, 0, 256);
+    memset(input, 0, 688);
+    memset(sig, 0, 128);
     strncpy((char *)input, "Test INGOPCS Test", 32); // And test padding btw...
-    ck_assert(CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 256) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 256) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricSign(crypto, input, 32, key_priv, sig, 128) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricVerify(crypto, input, 32, key_pub, sig, 128) == STATUS_OK);
     // b) Multiple messages (> 214, and as output is 1024, < 856)
     //  Using previously generated nonce, to fill input[32:856]
     ck_assert(unhexlify("c3cc8578608ae88e9690b921254d028e1b9cdc75fbf5070c4e39e5712b4a8bdf", clientNonce, 32) == 32);
     ck_assert(unhexlify("9b8a2d541f4b3ed8ae69111cc85c4ea875fb7e2a541aa87d703fe1a5d037dcfc", serverNonce, 32) == 32);
-    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 856-32) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricSign(crypto, input, 856, key_priv, sig, 256) == STATUS_OK);
-    ck_assert(CryptoProvider_AsymmetricVerify(crypto, input, 856, key_pub, sig, 256) == STATUS_OK);
+    ck_assert(CryptoProvider_DerivePseudoRandomData(crypto, clientNonce, 32, serverNonce, 32, input+32, 688-32) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricSign(crypto, input, 688, key_priv, sig, 128) == STATUS_OK);
+    ck_assert(CryptoProvider_AsymmetricVerify(crypto, input, 688, key_pub, sig, 128) == STATUS_OK);
 }
 END_TEST
 
