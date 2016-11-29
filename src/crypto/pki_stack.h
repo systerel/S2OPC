@@ -37,6 +37,7 @@
  *
  *                  This verifies the certificate in the safest manner (whole certificate chain, with date validation),
  *                  with a single certificate authority, and an optional revocation list.
+ *                  It requires a certificate authority signed with SHA-256, and an RSA private key which is at least 2048 bits long.
  *
  * \warning         Provided certificates must be valid until the destruction of the created PKI (they are not copied).
  *

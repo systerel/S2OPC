@@ -34,6 +34,23 @@
 #include "mbedtls/x509.h"
 
 
+/**
+ * The minimal profile supported by the PKIProviderStack. It requires cacert signed with
+ *  at least SHA-256, with an RSA key of at least 2048 bits.
+ */
+static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_minimal =
+{
+    /* Hashes from SHA-256 and above */
+    .allowed_mds = MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA256 ) |
+                   MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA384 ) |
+                   MBEDTLS_X509_ID_FLAG( MBEDTLS_MD_SHA512 ),
+    .allowed_pks = 0xFFFFFFF,       /* Any PK alg */
+    .allowed_curves = 0xFFFFFFFF,   /* Any curve  */
+    .rsa_min_bitlen = 2048,
+};
+
+
+
 static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *pPKI,
                                                        const Certificate *pToValidate)
 {
@@ -58,12 +75,13 @@ static SOPC_StatusCode PKIProviderStack_ValidateCertificate(const PKIProvider *p
 
     // Now, verifies the certificate
     // crt are not const in crt_verify, but this function does not look like to modify them
-    if(mbedtls_x509_crt_verify((mbedtls_x509_crt *)(&pToValidate->crt),
-                               (mbedtls_x509_crt *)(&cert_ca->crt),
-                               rev_list,
-                               NULL, /* You can specify an expected Common Name here */
-                               &failure_reasons,
-                               NULL, NULL) != 0)
+    if(mbedtls_x509_crt_verify_with_profile((mbedtls_x509_crt *)(&pToValidate->crt),
+                                            (mbedtls_x509_crt *)(&cert_ca->crt),
+                                            rev_list,
+                                            &mbedtls_x509_crt_profile_minimal,
+                                            NULL, /* You can specify an expected Common Name here */
+                                            &failure_reasons,
+                                            NULL, NULL) != 0)
         // TODO: you could further analyze here...
         return STATUS_NOK;
 
