@@ -64,13 +64,16 @@ typedef int8_t SOPC_SByte;
 
 typedef struct SOPC_ByteString {
     int32_t    Length;
-    uint8_t    ClearBytes; // flag indicating if bytes must be freed
     SOPC_Byte* Data;
 } SOPC_ByteString;
 
-typedef SOPC_ByteString SOPC_String;
-
 typedef SOPC_ByteString SOPC_XmlElement;
+
+typedef struct SOPC_String {
+    int32_t    Length;
+    uint8_t    ClearBytes; // flag indicating if bytes must be freed
+    SOPC_Byte* Data;
+} SOPC_String;
 
 typedef int64_t SOPC_DateTime;
 
@@ -289,8 +292,7 @@ void SOPC_Double_Clear(double* d);
 void SOPC_ByteString_Initialize(SOPC_ByteString* bstring);
 SOPC_ByteString* SOPC_ByteString_Create(void);
 SOPC_StatusCode SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, uint32_t size);
-SOPC_StatusCode SOPC_ByteString_AttachFromBytes(SOPC_ByteString* dest, SOPC_Byte* bytes, int32_t length);
-SOPC_StatusCode SOPC_ByteString_AttachFrom(SOPC_ByteString* dest, SOPC_ByteString* src);
+SOPC_StatusCode SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, SOPC_Byte* bytes, int32_t length);
 SOPC_StatusCode SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src);
 void SOPC_ByteString_Clear(SOPC_ByteString* bstring);
 void SOPC_ByteString_Delete(SOPC_ByteString* bstring);

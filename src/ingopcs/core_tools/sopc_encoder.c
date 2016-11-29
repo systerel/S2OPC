@@ -405,7 +405,24 @@ SOPC_StatusCode SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_MsgBuffer* msgBu
 
 SOPC_StatusCode SOPC_String_Write(const SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
 {
-    return SOPC_ByteString_Write((SOPC_ByteString*) str, msgBuffer);
+    SOPC_StatusCode status = STATUS_NOK;
+    if(str == NULL){
+        status = STATUS_INVALID_PARAMETERS;
+    }else{
+        int32_t length;
+        if(str->Length > 0){
+            length = str->Length;
+        }else{
+            length = -1;
+        }
+        status = SOPC_Int32_Write(&length, msgBuffer);
+        if(status == STATUS_OK &&
+           str->Length > 0)
+        {
+            status = TCP_UA_WriteMsgBuffer(msgBuffer, str->Data, str->Length);
+        }
+    }
+    return status;
 }
 
 SOPC_StatusCode SOPC_String_Read(SOPC_String* str, SOPC_MsgBuffer* msgBuffer)

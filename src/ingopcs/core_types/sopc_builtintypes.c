@@ -133,7 +133,6 @@ void SOPC_ByteString_Initialize(SOPC_ByteString* bstring){
     if(bstring != NULL){
         bstring->Length = -1;
         bstring->Data = NULL;
-        bstring->ClearBytes = 1; // True unless characters attached
     }
 }
 
@@ -160,28 +159,17 @@ SOPC_StatusCode SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, ui
     return status;
 }
 
-SOPC_StatusCode SOPC_ByteString_AttachFromBytes(SOPC_ByteString* dest, SOPC_Byte* bytes, int32_t length)
+SOPC_StatusCode SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, SOPC_Byte* bytes, int32_t length)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && bytes != NULL
        && length > 0){
-        status = STATUS_OK;
         dest->Length = length;
-        dest->Data = bytes;
-        dest->ClearBytes = FALSE; // dest->characters will not be freed on clear
-    }
-    return status;
-}
-
-SOPC_StatusCode SOPC_ByteString_AttachFrom(SOPC_ByteString* dest, SOPC_ByteString* src)
-{
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(dest != NULL && src != NULL
-       && src->Length > 0 && src->Data != NULL){
-        status = STATUS_OK;
-        dest->Length = src->Length;
-        dest->Data = src->Data;
-        dest->ClearBytes = FALSE; // dest->characters will not be freed on clear
+        dest->Data = malloc(sizeof(SOPC_Byte)*length);
+        if(dest->Data != NULL){
+            memcpy(dest->Data, bytes, length);
+            status = STATUS_OK;
+        }
     }
     return status;
 }
@@ -205,8 +193,7 @@ SOPC_StatusCode SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteStrin
 
 void SOPC_ByteString_Clear(SOPC_ByteString* bstring){
     if(bstring != NULL){
-        if(bstring->Data != NULL &&
-           bstring->ClearBytes != FALSE){
+        if(bstring->Data != NULL){
             free(bstring->Data);
             bstring->Data = NULL;
         }
@@ -223,6 +210,7 @@ void SOPC_ByteString_Delete(SOPC_ByteString* bstring){
 
 void SOPC_String_Initialize(SOPC_String* string){
     SOPC_ByteString_Initialize((SOPC_ByteString*) string);
+    string->ClearBytes = 1; // True unless characters attached
 }
 
 SOPC_String* SOPC_String_Create(){
@@ -230,7 +218,15 @@ SOPC_String* SOPC_String_Create(){
 }
 
 SOPC_StatusCode SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src){
-    return SOPC_ByteString_AttachFrom((SOPC_ByteString*) dest, (SOPC_ByteString*) src);
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(dest != NULL && src != NULL
+       && src->Length > 0 && src->Data != NULL){
+        status = STATUS_OK;
+        dest->Length = src->Length;
+        dest->Data = src->Data;
+        dest->ClearBytes = FALSE; // dest->characters will not be freed on clear
+    }
+    return status;
 }
 
 SOPC_StatusCode SOPC_String_AttachFromCstring(SOPC_String* dest, char* src){
@@ -269,7 +265,14 @@ SOPC_StatusCode SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src){
 }
 
 void SOPC_String_Clear(SOPC_String* string){
-    SOPC_ByteString_Clear((SOPC_ByteString*) string);
+    if(string != NULL){
+        if(string->Data != NULL &&
+                string->ClearBytes != FALSE){
+            free(string->Data);
+            string->Data = NULL;
+        }
+        SOPC_String_Initialize(string);
+    }
 }
 
 void SOPC_String_Delete(SOPC_String* string){

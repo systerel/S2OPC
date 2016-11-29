@@ -74,7 +74,7 @@ SC_ClientConnection* SC_Client_Create(){
             memset (scClientConnection, 0, sizeof(SC_ClientConnection));
             Namespace_Initialize(&scClientConnection->namespaces);
             scClientConnection->securityMode = OpcUa_MessageSecurityMode_Invalid;
-            SOPC_ByteString_Initialize(&scClientConnection->securityPolicy);
+            SOPC_String_Initialize(&scClientConnection->securityPolicy);
 
             sConnection->state = SC_Connection_Disconnected;
             scClientConnection->instance = sConnection;
@@ -223,9 +223,9 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         if(status == STATUS_OK){
             uint8_t* bytes = NULL;
             bytes = SecretBuffer_Expose(cConnection->instance->currentNonce);
-            status = SOPC_ByteString_AttachFromBytes(&openRequest.ClientNonce,
-                                                bytes,
-                                                SecretBuffer_GetLength(cConnection->instance->currentNonce));
+            status = SOPC_ByteString_CopyFromBytes(&openRequest.ClientNonce,
+                                                   bytes,
+                                                   SecretBuffer_GetLength(cConnection->instance->currentNonce));
         }else{
             status = STATUS_NOK;
         }

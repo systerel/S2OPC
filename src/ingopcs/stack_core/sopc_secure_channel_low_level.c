@@ -66,8 +66,8 @@ SC_Connection* SC_Create (){
             sConnection->state = SC_Connection_Error;
             SOPC_ByteString_Initialize(&sConnection->runningAppCertificate);
             SOPC_ByteString_Initialize(&sConnection->otherAppCertificate);
-            SOPC_ByteString_Initialize(&sConnection->currentSecuPolicy);
-            SOPC_ByteString_Initialize(&sConnection->precSecuPolicy);
+            SOPC_String_Initialize(&sConnection->currentSecuPolicy);
+            SOPC_String_Initialize(&sConnection->precSecuPolicy);
 
         }else{
             TCP_UA_Connection_Delete(connection);
@@ -98,7 +98,7 @@ void SC_Delete (SC_Connection* scConnection){
             TCP_UA_Connection_Delete(scConnection->transportConnection);
         }
         SOPC_String_Clear(&scConnection->currentSecuPolicy);
-        SOPC_ByteString_Clear(&scConnection->precSecuPolicy);
+        SOPC_String_Clear(&scConnection->precSecuPolicy);
         SecretBuffer_DeleteClear(scConnection->currentNonce);
         KeySet_Delete(scConnection->currentSecuKeySets.receiverKeySet);
         KeySet_Delete(scConnection->currentSecuKeySets.senderKeySet);
@@ -594,7 +594,7 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
     // Sender Certificate:
     if(status == STATUS_OK){
         if(toSign != FALSE && senderCertificate->Length>0){ // Field shall be null if message not signed
-            status = SOPC_String_Write(senderCertificate, msgBuffer);
+            status = SOPC_ByteString_Write(senderCertificate, msgBuffer);
         }else if(toSign == FALSE){
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
@@ -630,7 +630,7 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
             }
 
             if(STATUS_OK == status){
-                status = SOPC_String_Write(&recCertThumbprint, msgBuffer);
+                status = SOPC_ByteString_Write(&recCertThumbprint, msgBuffer);
             }
             SOPC_ByteString_Clear(&recCertThumbprint);
         }else if(toEncrypt == FALSE){
@@ -1259,8 +1259,8 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
     uint32_t toEncrypt = 1; // True
     uint32_t toSign = 1; // True
 
-    SOPC_ByteString securityPolicy;
-    SOPC_ByteString_Initialize(&securityPolicy);
+    SOPC_String securityPolicy; // It's a byte string but it's same UA binary representation (use String for String_Compare)
+    SOPC_String_Initialize(&securityPolicy);
     SOPC_ByteString senderCertificate;
     SOPC_ByteString_Initialize(&senderCertificate);
     SOPC_ByteString receiverCertThumb;
@@ -1279,12 +1279,12 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
 
     // Security Policy:
     if(status == STATUS_OK){
-        status = SOPC_ByteString_Read(&securityPolicy, transportBuffer);
+        status = SOPC_String_Read(&securityPolicy, transportBuffer);
 
         if(status == STATUS_OK){
             int32_t secuPolicyComparison = 0;
-            status = SOPC_ByteString_Compare(&scConnection->currentSecuPolicy,
-                                        &securityPolicy, &secuPolicyComparison);
+            status = SOPC_String_Compare(&scConnection->currentSecuPolicy,
+                                         &securityPolicy, &secuPolicyComparison);
 
             if(status != STATUS_OK || secuPolicyComparison != 0){
                 status = STATUS_INVALID_RCV_PARAMETER;
@@ -1383,7 +1383,7 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
         } // if decoded thumbprint
     }
 
-    SOPC_ByteString_Clear(&securityPolicy);
+    SOPC_String_Clear(&securityPolicy);
     SOPC_ByteString_Clear(&senderCertificate);
     SOPC_ByteString_Clear(&receiverCertThumb);
 

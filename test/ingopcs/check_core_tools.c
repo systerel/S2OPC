@@ -1162,7 +1162,7 @@ START_TEST(test_ua_encoder_other_types)
 
     /////// Non empty bytestring
     MsgBuffer_Reset(msgBuffer);
-    status = SOPC_ByteString_AttachFromBytes(bs, boyString, 3);
+    status = SOPC_ByteString_CopyFromBytes(bs, boyString, 3);
     ck_assert(status == STATUS_OK);
     status = SOPC_ByteString_Write(bs, msgBuffer);
     ck_assert(status == STATUS_OK);
