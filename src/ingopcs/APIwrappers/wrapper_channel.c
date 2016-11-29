@@ -192,7 +192,7 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
                                                       clientCertificate->Length,
                                                       &cli);
         if(STATUS_OK == status){
-            pKeyCli = (AsymmetricKey*) clientPrivateKey->Data;
+            status = KeyManager_AsymmetricKey_CreateFromBuffer(clientPrivateKey->Data, clientPrivateKey->Length, &pKeyCli);
         }
         if(STATUS_OK == status){
             status = KeyManager_Certificate_CreateFromDER(serverCertificate->Data,
