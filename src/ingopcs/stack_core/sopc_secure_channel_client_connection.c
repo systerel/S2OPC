@@ -199,8 +199,8 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
         // Encoding body byte:
         openRequest.RequestHeader.AdditionalHeader.Encoding = SOPC_ExtObjBodyEncoding_None;
         // Type Id: Node Id
-        openRequest.RequestHeader.AdditionalHeader.TypeId.IdentifierType = IdentifierType_Numeric;
-        openRequest.RequestHeader.AdditionalHeader.TypeId.Data.Numeric = SOPC_Null_Id;
+        openRequest.RequestHeader.AdditionalHeader.TypeId.NodeId.IdentifierType = IdentifierType_Numeric;
+        openRequest.RequestHeader.AdditionalHeader.TypeId.NodeId.Data.Numeric = SOPC_Null_Id;
 
         //// Encode request content
         // Client protocol version

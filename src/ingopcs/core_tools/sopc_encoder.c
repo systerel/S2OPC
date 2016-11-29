@@ -926,7 +926,7 @@ SOPC_StatusCode SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText, SOPC_
 
 SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_MsgBuffer* msgBuffer){
     const int32_t tmpLength = -1;
-    SOPC_NodeId objNodeId = extObj->TypeId;
+    SOPC_NodeId nodeId;
     uint32_t lengthPos;
     uint32_t curPos;
     int32_t length;
@@ -935,6 +935,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, S
     SOPC_Byte encodingByte = 0;
     if(extObj != NULL){
         encodingByte = extObj->Encoding;
+        nodeId = extObj->TypeId.NodeId;
         status = STATUS_OK;
     }
 
@@ -947,14 +948,14 @@ SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, S
         }else{
             status = Namespace_GetIndex(&msgBuffer->nsTable, extObj->Body.Object.ObjType->NamespaceUri, &nsIndex);
 
-            objNodeId.IdentifierType = IdentifierType_Numeric;
-            objNodeId.Namespace = nsIndex;
-            objNodeId.Data.Numeric = extObj->Body.Object.ObjType->BinaryEncodingTypeId;
+            nodeId.IdentifierType = IdentifierType_Numeric;
+            nodeId.Namespace = nsIndex;
+            nodeId.Data.Numeric = extObj->Body.Object.ObjType->BinaryEncodingTypeId;
         }
     }
 
     if(status == STATUS_OK){
-        status = SOPC_NodeId_Write(&objNodeId, msgBuffer);
+        status = SOPC_NodeId_Write(&nodeId, msgBuffer);
     }
 
     if(status == STATUS_OK){
@@ -999,7 +1000,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
     uint8_t nsFound = FALSE;
     SOPC_Byte encodingByte = 0;
     if(extObj != NULL){
-        status = SOPC_NodeId_Read(&extObj->TypeId, msgBuffer);
+        status = SOPC_NodeId_Read(&extObj->TypeId.NodeId, msgBuffer);
     }
     if(status == STATUS_OK){
         status = SOPC_Byte_Read(&encodingByte, msgBuffer);
@@ -1007,9 +1008,9 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
 
     if(status == STATUS_OK &&
        encodingByte == SOPC_ExtObjBodyEncoding_ByteString){
-        if(extObj->TypeId.IdentifierType == IdentifierType_Numeric){
-            if(extObj->TypeId.Namespace != OPCUA_NAMESPACE_INDEX){
-                nsName = Namespace_GetName(&msgBuffer->nsTable, extObj->TypeId.Namespace);
+        if(extObj->TypeId.NodeId.IdentifierType == IdentifierType_Numeric){
+            if(extObj->TypeId.NodeId.Namespace != OPCUA_NAMESPACE_INDEX){
+                nsName = Namespace_GetName(&msgBuffer->nsTable, extObj->TypeId.NodeId.Namespace);
                 if(nsName != NULL){
                     nsFound = 1; // TRUE
                 }
@@ -1020,13 +1021,14 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
             if(nsFound != FALSE){
                 encType = SOPC_EncodeableType_GetEncodeableType(msgBuffer->encTypesTable,
                                                                 nsName,
-                                                                extObj->TypeId.Data.Numeric);
+                                                                extObj->TypeId.NodeId.Data.Numeric);
             }
             if(nsFound == FALSE || encType == NULL){
                 status = STATUS_NOK;
             }else{
                 encodingByte = SOPC_ExtObjBodyEncoding_Object;
                 extObj->Body.Object.ObjType = encType;
+                SOPC_String_AttachFromCstring(&extObj->TypeId.NamespaceUri, encType->NamespaceUri);
             }
         }else{
             status = STATUS_INVALID_RCV_PARAMETER;

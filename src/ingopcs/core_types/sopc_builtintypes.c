@@ -598,14 +598,14 @@ void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText){
 void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj){
     if(extObj != NULL){
         memset(extObj, 0, sizeof(SOPC_ExtensionObject));
-        SOPC_NodeId_Initialize(&extObj->TypeId);
+        SOPC_ExpandedNodeId_Initialize(&extObj->TypeId);
         extObj->Length = -1;
     }
 }
 
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj){
     if(extObj != NULL){
-        SOPC_NodeId_Clear(&extObj->TypeId);
+        SOPC_ExpandedNodeId_Clear(&extObj->TypeId);
         switch(extObj->Encoding){
             case SOPC_ExtObjBodyEncoding_None:
                 break;

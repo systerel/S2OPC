@@ -138,7 +138,7 @@ typedef enum SOPC_ExtObjectBodyEncoding {
 } SOPC_ExtObjectBodyEncoding;
 
 typedef struct SOPC_ExtensionObject {
-    SOPC_NodeId                TypeId;
+    SOPC_ExpandedNodeId        TypeId;
     SOPC_ExtObjectBodyEncoding Encoding;
 
     union {
