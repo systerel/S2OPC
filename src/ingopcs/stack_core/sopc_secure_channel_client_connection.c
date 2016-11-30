@@ -182,7 +182,7 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     openRequest.RequestHeader.AuthenticationToken.IdentifierType = IdentifierType_Numeric;
     openRequest.RequestHeader.AuthenticationToken.Data.Numeric = SOPC_Null_Id;
     // Encode 64 bits UtcTime => null ok ?
-    openRequest.RequestHeader.Timestamp = 0;
+    SOPC_DateTime_Clear(&openRequest.RequestHeader.Timestamp);
     // Encode requestHandler
     openRequest.RequestHeader.RequestHandle = requestId;
     // Encode returnDiagnostic => symbolic id
@@ -353,7 +353,7 @@ SOPC_StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
             }else{
                 cConnection->instance->currentSecuToken.channelId = encObj->SecurityToken.ChannelId;
                 cConnection->instance->currentSecuToken.tokenId = encObj->SecurityToken.TokenId;
-                cConnection->instance->currentSecuToken.createdAt = encObj->SecurityToken.CreatedAt;
+                cConnection->instance->currentSecuToken.createdAt = SOPC_DateTime_ToInt64(&encObj->SecurityToken.CreatedAt);
                 cConnection->instance->currentSecuToken.revisedLifetime = encObj->SecurityToken.RevisedLifetime;
             }
         }else{

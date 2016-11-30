@@ -435,13 +435,29 @@ void SOPC_XmlElement_Clear(SOPC_XmlElement* xmlElt){
 
 void SOPC_DateTime_Initialize(SOPC_DateTime* dateTime){
     if(dateTime != NULL){
-        *dateTime = 0;
+        dateTime->Low32 = 0;
+        dateTime->High32 = 0;
     }
 }
 
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime){
+    SOPC_DateTime_Initialize(dateTime);
+}
+
+int64_t SOPC_DateTime_ToInt64(const SOPC_DateTime* dateTime){
+    int64_t result = 0;
+    uint64_t shiftHigh = 0;
     if(dateTime != NULL){
-        *dateTime = 0;
+        shiftHigh = dateTime->High32;
+        result = dateTime->Low32 + (shiftHigh << 32);
+    }
+    return result;
+}
+
+void SOPC_DateTime_FromInt64(SOPC_DateTime* dateTime, int64_t date){
+    if(dateTime != NULL){
+        dateTime->Low32 = date & 0x00000000FFFFFFFF;
+        dateTime->High32 = date >> 32;
     }
 }
 
@@ -974,8 +990,8 @@ void SOPC_DataValue_Clear(SOPC_DataValue* dataValue){
     if(dataValue != NULL){
         SOPC_Variant_Clear(&dataValue->Value);
         SOPC_StatusCode_Clear(&dataValue->Status);
-        dataValue->SourceTimestamp = 0;
-        dataValue->ServerTimestamp = 0;
+        SOPC_DateTime_Clear(&dataValue->SourceTimestamp);
+        SOPC_DateTime_Clear(&dataValue->ServerTimestamp);
         dataValue->SourcePicoSeconds = 0;
         dataValue->ServerPicoSeconds = 0;
     }

@@ -1072,7 +1072,9 @@ START_TEST(test_ua_encoder_basic_types)
     // Test DateTime nominal and degraded cases
     MsgBuffer_Reset(msgBuffer);
     //// Nominal write
-    SOPC_DateTime vDate = -2;
+    SOPC_DateTime vDate;
+    SOPC_DateTime_Initialize(&vDate);
+    SOPC_DateTime_FromInt64(&vDate, -2);
 
     status = SOPC_DateTime_Write(&vDate, msgBuffer);
     ck_assert(status == STATUS_OK);
@@ -1095,11 +1097,11 @@ START_TEST(test_ua_encoder_basic_types)
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
-    vDate = 0;
+    SOPC_DateTime_Clear(&vDate);
     Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_DateTime_Read(&vDate, msgBuffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(vDate == -2);
+    ck_assert(SOPC_DateTime_ToInt64(&vDate) == -2);
     //// Degraded read
     status = SOPC_DateTime_Read(NULL, msgBuffer);
     ck_assert(status != STATUS_OK);

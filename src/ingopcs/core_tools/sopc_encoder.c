@@ -474,12 +474,24 @@ SOPC_StatusCode SOPC_XmlElement_Read(SOPC_XmlElement* xml, SOPC_MsgBuffer* msgBu
 
 SOPC_StatusCode SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_MsgBuffer* msgBuffer)
 {
-    return SOPC_Int64_Write(date, msgBuffer);
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    int64_t dateTime = 0;
+    if(NULL != date){
+        dateTime = SOPC_DateTime_ToInt64(date);
+        status = SOPC_Int64_Write(&dateTime, msgBuffer);
+    }
+    return status;
 }
 
 SOPC_StatusCode SOPC_DateTime_Read(SOPC_DateTime* date, SOPC_MsgBuffer* msgBuffer)
 {
-    return SOPC_Int64_Read(date, msgBuffer);
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    int64_t dateTime = 0;
+    if(NULL != date){
+        status = SOPC_Int64_Read(&dateTime, msgBuffer);
+        SOPC_DateTime_FromInt64(date, dateTime);
+    }
+    return status;
 }
 
 SOPC_StatusCode SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
@@ -1847,13 +1859,13 @@ SOPC_Byte GetDataValueEncodingMask(const SOPC_DataValue* dataValue){
     if(dataValue->Status != STATUS_OK){
         mask |= SOPC_DataValue_NotGoodStatusCode;
     }
-    if(dataValue->SourceTimestamp > 0){
+    if(dataValue->SourceTimestamp.Low32 > 0 || dataValue->SourceTimestamp.High32 > 0){
         mask |= SOPC_DataValue_NotMinSourceDate;
     }
     if(dataValue->SourcePicoSeconds > 0){
         mask |= SOPC_DataValue_NotZeroSourcePico;
     }
-    if(dataValue->ServerTimestamp > 0){
+    if(dataValue->ServerTimestamp.Low32 > 0 || dataValue->ServerTimestamp.Low32 > 0){
             mask |= SOPC_DataValue_NotMinServerDate;
     }
     if(dataValue->ServerPicoSeconds > 0){
@@ -1910,7 +1922,8 @@ SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* m
     if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinSourceDate) != 0){
         status = SOPC_DateTime_Read(&dataValue->SourceTimestamp, msgBuffer);
     }else{
-        dataValue->SourceTimestamp = 0;
+        dataValue->SourceTimestamp.Low32 = 0;
+        dataValue->SourceTimestamp.High32 = 0;
     }
     if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroSourcePico) != 0){
         status = SOPC_UInt16_Read(&dataValue->SourcePicoSeconds, msgBuffer);
@@ -1920,7 +1933,8 @@ SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* m
     if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinServerDate) != 0){
             status = SOPC_DateTime_Read(&dataValue->ServerTimestamp, msgBuffer);
     }else{
-        dataValue->ServerTimestamp = 0;
+        dataValue->ServerTimestamp.Low32 = 0;
+        dataValue->ServerTimestamp.High32 = 0;
     }
     if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroServerPico) != 0){
         status = SOPC_UInt16_Read(&dataValue->ServerPicoSeconds, msgBuffer);
