@@ -1052,7 +1052,7 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
                 if(status == STATUS_OK){
                     extObj->Body.Object.Value = malloc(extObj->Body.Object.ObjType->AllocationSize);
                     extObj->Body.Object.ObjType->Initialize(extObj->Body.Object.Value);
-                    status = extObj->Body.Object.ObjType->Decode(&extObj->Body.Object.Value, msgBuffer);
+                    status = extObj->Body.Object.ObjType->Decode(extObj->Body.Object.Value, msgBuffer);
                 }
                 break;
             default:
