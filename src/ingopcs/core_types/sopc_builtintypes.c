@@ -954,6 +954,9 @@ void SOPC_Variant_Clear(SOPC_Variant* variant){
     int32_t idx = 0;
     if(variant != NULL){
         BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeId);
+        if(clearFunction == NULL)
+            return;
+
         switch(variant->ArrayType){
             case SOPC_VariantArrayType_SingleValue:
                 ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeId,

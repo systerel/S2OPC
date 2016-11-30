@@ -22964,7 +22964,7 @@ SOPC_StatusCode SOPC_Read_Array(SOPC_MsgBuffer* msgBuffer, int32_t* noOfElts, vo
         }
     }
     
-    if(STATUS_OK == status && *noOfElts){
+    if(STATUS_OK == status && *noOfElts > 0){
         int32_t idx = 0;
         uint32_t pos = 0;
         for (idx = 0; status == STATUS_OK && idx < *noOfElts; idx ++){
@@ -22976,6 +22976,7 @@ SOPC_StatusCode SOPC_Read_Array(SOPC_MsgBuffer* msgBuffer, int32_t* noOfElts, vo
         if(STATUS_OK != status){
             free(*eltsArray);
             *eltsArray = NULL;
+            *noOfElts = 0;
         }
         
     }
