@@ -635,6 +635,8 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj){
                 break;
             case SOPC_ExtObjBodyEncoding_Object:
                 extObj->Body.Object.ObjType->Clear(extObj->Body.Object.Value);
+                free(extObj->Body.Object.Value);
+                extObj->Body.Object.Value = NULL;
                 break;
         }
         extObj->Length = -1;
