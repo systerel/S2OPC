@@ -953,6 +953,233 @@ BuiltInFunction* GetBuiltInTypeClearFunction(SOPC_BuiltinId builtInTypeId){
     return clearFunction;
 }
 
+void FreeVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                 SOPC_VariantArrayValue* array)
+{
+    switch(builtInTypeId){
+        case SOPC_Null_Id:
+            break;
+        case SOPC_Boolean_Id:
+            if(array->BooleanArr != NULL){
+                free(array->BooleanArr);
+                array->BooleanArr = NULL;
+            }
+            break;
+        case SOPC_SByte_Id:
+            if(array->SbyteArr != NULL){
+                free(array->SbyteArr);
+                array->SbyteArr = NULL;
+            }
+            break;
+        case SOPC_Byte_Id:
+            if(array->ByteArr != NULL){
+                free(array->ByteArr);
+                array->ByteArr = NULL;
+            }
+            break;
+        case SOPC_Int16_Id:
+            if(array->Int16Arr != NULL){
+                free(array->Int16Arr);
+                array->Int16Arr = NULL;
+            }
+            break;
+        case SOPC_UInt16_Id:
+            if(array->Uint16Arr != NULL){
+                free(array->Uint16Arr);
+                array->Uint16Arr = NULL;
+            }
+            break;
+        case SOPC_Int32_Id:
+            if(array->Int32Arr != NULL){
+                free(array->Int32Arr);
+                array->Int32Arr = NULL;
+            }
+            break;
+        case SOPC_UInt32_Id:
+            if(array->Uint32Arr != NULL){
+                free(array->Uint32Arr);
+                array->Uint32Arr = NULL;
+            }
+            break;
+        case SOPC_Int64_Id:
+            if(array->Int64Arr != NULL){
+                free(array->Int64Arr);
+                array->Int64Arr = NULL;
+            }
+            break;
+        case SOPC_UInt64_Id:
+            if(array->Uint64Arr != NULL){
+                free(array->Uint64Arr);
+                array->Uint64Arr = NULL;
+            }
+            break;
+        case SOPC_Float_Id:
+            if(array->FloatvArr != NULL){
+                free(array->FloatvArr);
+                array->FloatvArr = NULL;
+            }
+            break;
+        case SOPC_Double_Id:
+            if(array->DoublevArr != NULL){
+                free(array->DoublevArr);
+                array->DoublevArr = NULL;
+            }
+            break;
+        case SOPC_String_Id:
+            if(array->StringArr != NULL){
+                free(array->StringArr);
+                array->StringArr = NULL;
+            }
+            break;
+        case SOPC_DateTime_Id:
+            if(array->DateArr != NULL){
+                free(array->DateArr);
+                array->DateArr = NULL;
+            }
+            break;
+        case SOPC_Guid_Id:
+            if(array->GuidArr != NULL){
+                free(array->GuidArr);
+                array->GuidArr = NULL;
+            }
+            break;
+        case SOPC_ByteString_Id:
+            if(array->BstringArr != NULL){
+                free(array->BstringArr);
+                array->BstringArr = NULL;
+            }
+            break;
+        case SOPC_XmlElement_Id:
+            if(array->XmlEltArr != NULL){
+                free(array->XmlEltArr);
+                array->XmlEltArr = NULL;
+            }
+            break;
+        case SOPC_NodeId_Id:
+            if(array->NodeIdArr != NULL){
+                free(array->NodeIdArr);
+                array->NodeIdArr = NULL;
+            }
+            break;
+        case SOPC_ExpandedNodeId_Id:
+            if(array->ExpNodeIdArr != NULL){
+                free(array->ExpNodeIdArr);
+                array->ExpNodeIdArr = NULL;
+            }
+            break;
+        case SOPC_StatusCode_Id:
+            if(array->StatusArr != NULL){
+                free(array->StatusArr);
+                array->StatusArr = NULL;
+            }
+            break;
+        case SOPC_QualifiedName_Id:
+            if(array->QnameArr != NULL){
+                free(array->QnameArr);
+                array->QnameArr = NULL;
+            }
+            break;
+        case SOPC_LocalizedText_Id:
+            if(array->LocalizedTextArr != NULL){
+                free(array->LocalizedTextArr);
+                array->LocalizedTextArr = NULL;
+            }
+            break;
+        case SOPC_ExtensionObject_Id:
+            if(array->ExtObjectArr != NULL){
+                free(array->ExtObjectArr);
+                array->ExtObjectArr = NULL;
+            }
+            break;
+        case SOPC_DataValue_Id:
+            if(array->DataValueArr != NULL){
+                free(array->DataValueArr);
+                array->DataValueArr = NULL;
+            }
+            break;
+        case SOPC_Variant_Id:
+            if(array->VariantArr != NULL){
+                free(array->VariantArr);
+                array->VariantArr = NULL;
+            }
+            break;
+        case SOPC_DiagnosticInfo_Id:
+            if(array->DiagInfoArr != NULL){
+                free(array->DiagInfoArr);
+                array->DiagInfoArr = NULL;
+            }
+            break;
+    }
+}
+
+void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+                                    SOPC_VariantValue *val)
+{
+    switch(builtInTypeId){
+        case SOPC_Null_Id:
+        case SOPC_Boolean_Id:
+        case SOPC_SByte_Id:
+        case SOPC_Byte_Id:
+        case SOPC_Int16_Id:
+        case SOPC_UInt16_Id:
+        case SOPC_Int32_Id:
+        case SOPC_UInt32_Id:
+        case SOPC_Int64_Id:
+        case SOPC_UInt64_Id:
+        case SOPC_Float_Id:
+        case SOPC_Double_Id:
+        case SOPC_String_Id:
+        case SOPC_DateTime_Id:
+        case SOPC_ByteString_Id:
+        case SOPC_XmlElement_Id:
+        case SOPC_StatusCode_Id:
+            break;
+        case SOPC_Guid_Id:
+            if(NULL != val->Guid){
+                free(val->Guid);
+            }
+            break;
+        case SOPC_NodeId_Id:
+            if(NULL != val->NodeId){
+                free(val->NodeId);
+            }
+            break;
+        case SOPC_ExpandedNodeId_Id:
+            if(NULL != val->ExpNodeId){
+                free(val->ExpNodeId);
+            }
+            break;
+        case SOPC_QualifiedName_Id:
+            if(NULL != val->Qname){
+                free(val->Qname);
+            }
+            break;
+        case SOPC_LocalizedText_Id:
+            if(NULL != val->LocalizedText){
+                free(val->LocalizedText);
+            }
+            break;
+        case SOPC_ExtensionObject_Id:
+            if(NULL != val->ExtObject){
+                free(val->ExtObject);
+            }
+            break;
+        case SOPC_DataValue_Id:
+            if(NULL != val->DataValue){
+                free(val->DataValue);
+            }
+            break;
+        case SOPC_Variant_Id:
+            assert(FALSE);
+            break;
+        case SOPC_DiagnosticInfo_Id:
+            if(NULL != val->DiagInfo){
+                free(val->DiagInfo);
+            }
+            break;
+    }
+}
+
 void SOPC_Variant_Clear(SOPC_Variant* variant){
     int32_t length = 0;
     int32_t idx = 0;
@@ -966,23 +1193,29 @@ void SOPC_Variant_Clear(SOPC_Variant* variant){
                 ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeId,
                                                   variant->Value,
                                                   clearFunction);
+                FreeVariantNonArrayBuiltInType(variant->BuiltInTypeId,
+                                               &variant->Value);
                 break;
             case SOPC_VariantArrayType_Array:
                 ApplyToVariantArrayBuiltInType(variant->BuiltInTypeId,
                                                variant->Value.Array.Content,
                                                variant->Value.Array.Length,
                                                clearFunction);
+                FreeVariantArrayBuiltInType(variant->BuiltInTypeId,
+                                            &variant->Value.Array.Content);
+
                 break;
             case SOPC_VariantArrayType_Matrix:
                 for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
                     length *= variant->Value.Matrix.ArrayDimensions[idx];
                 }
+                free(variant->Value.Matrix.ArrayDimensions);
                 ApplyToVariantArrayBuiltInType(variant->BuiltInTypeId,
                                                variant->Value.Matrix.Content,
                                                length,
                                                clearFunction);
-                free(variant->Value.Matrix.ArrayDimensions);
-                variant->Value.Matrix.ArrayDimensions = NULL;
+                FreeVariantArrayBuiltInType(variant->BuiltInTypeId,
+                                            &variant->Value.Matrix.Content);
                 break;
         }
     }

@@ -1556,8 +1556,8 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
             }
             break;
         case SOPC_UInt16_Id:
-            array->SbyteArr = malloc(sizeof(uint16_t) * length);
-            if(array->SbyteArr == NULL){
+            array->Uint16Arr = malloc(sizeof(uint16_t) * length);
+            if(array->Uint16Arr == NULL){
                 status = STATUS_NOK;
             }else{
                 for(idx = 0; idx < length && STATUS_OK == status; idx++){
