@@ -26,6 +26,9 @@
 #include <netdb.h>
 #include <sys/select.h>
 
+#define MAX_SEND_ATTEMPTS 20
+#define SLEEP_NEXT_SEND_ATTEMP 50000 // micro seconds
+
 /**
  *  \brief Socket base type
  */

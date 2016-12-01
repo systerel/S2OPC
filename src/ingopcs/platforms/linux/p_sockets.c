@@ -255,6 +255,8 @@ int32_t Socket_Write(Socket   sock,
 {
     uint32_t sentBytes = 0;
     int res = 0;
+    int8_t error = FALSE;
+    uint8_t nbAttempt = 0;
     if(sock != -1 &&
        data != NULL &&
        count <= INT32_MAX)
@@ -262,14 +264,22 @@ int32_t Socket_Write(Socket   sock,
         // TODO: Use write event to write later ?
         do
         {
-            if(res != 0){
-                usleep(50000);
+            if(nbAttempt > 0){
+                usleep(SLEEP_NEXT_SEND_ATTEMP);
             }
+            nbAttempt++;
             res = send(sock, data, count, 0);
-            if(res > 0){
+            if(res >= 0){
                 sentBytes += res;
+            }else{
+                // ERROR CASE
+                if(errno == EAGAIN || errno == EWOULDBLOCK){
+                    // Try again in those cases
+                }else{
+                    error = 1; // TRUE
+                }
             }
-        } while(res > 0 && sentBytes < count);
+        } while(sentBytes < count && error == FALSE && nbAttempt < MAX_SEND_ATTEMPTS);
         return sentBytes;
     }else{
         return -1;
