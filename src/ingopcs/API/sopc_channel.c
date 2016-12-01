@@ -415,6 +415,8 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
         status = OpcUa_BadTimeout;
     }
 
+    Delete_InvokeCallbackData(invCallbackData);
+
     return status;
 }
 
