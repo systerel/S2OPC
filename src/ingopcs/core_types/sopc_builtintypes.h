@@ -71,7 +71,7 @@ typedef SOPC_ByteString SOPC_XmlElement;
 
 typedef struct SOPC_String {
     int32_t    Length;
-    uint8_t    ClearBytes; // flag indicating if bytes must be freed
+    uint8_t    DoNotClear; // flag indicating if bytes must be freed
     SOPC_Byte* Data;
 } SOPC_String;
 

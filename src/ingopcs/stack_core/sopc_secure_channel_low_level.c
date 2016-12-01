@@ -32,25 +32,25 @@ const uint32_t scProtocolVersion = 0;
 static const SOPC_String SOPC_String_Security_Policy_None = {
         .Length = 47,
         .Data = (SOPC_Byte*) SECURITY_POLICY_NONE,
-        .ClearBytes = FALSE
+        .DoNotClear = 1
 };
 
 static const SOPC_String SOPC_String_Security_Policy_Basic128Rsa15 = {
         .Length = 56,
         .Data = (SOPC_Byte*) SECURITY_POLICY_BASIC128RSA15,
-        .ClearBytes = FALSE
+        .DoNotClear = 1
 };
 
 static const SOPC_String SOPC_String_Security_Policy_Basic256 = {
         .Length = 51,
         .Data = (SOPC_Byte*) SECURITY_POLICY_BASIC256,
-        .ClearBytes = FALSE
+        .DoNotClear = 1
 };
 
 static const SOPC_String SOPC_String_Security_Policy_Basic256Sha256 = {
         .Length = 57,
         .Data = (SOPC_Byte*) SECURITY_POLICY_BASIC256SHA256,
-        .ClearBytes = FALSE
+        .DoNotClear = 1
 };
 
 SC_Connection* SC_Create (){

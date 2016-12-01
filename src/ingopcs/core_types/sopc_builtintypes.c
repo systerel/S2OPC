@@ -210,7 +210,7 @@ void SOPC_ByteString_Delete(SOPC_ByteString* bstring){
 
 void SOPC_String_Initialize(SOPC_String* string){
     SOPC_ByteString_Initialize((SOPC_ByteString*) string);
-    string->ClearBytes = 1; // True unless characters attached
+    string->DoNotClear = FALSE; // False unless characters attached
 }
 
 SOPC_String* SOPC_String_Create(){
@@ -224,7 +224,7 @@ SOPC_StatusCode SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src){
         status = STATUS_OK;
         dest->Length = src->Length;
         dest->Data = src->Data;
-        dest->ClearBytes = FALSE; // dest->characters will not be freed on clear
+        dest->DoNotClear = 1; // dest->characters will not be freed on clear
     }
     return status;
 }
@@ -236,7 +236,7 @@ SOPC_StatusCode SOPC_String_AttachFromCstring(SOPC_String* dest, char* src){
         if(CHAR_BIT == 8){
             dest->Length = strlen(src);
             dest->Data = (uint8_t*) src;
-            dest->ClearBytes = FALSE; // dest->characters will not be freed on clear
+            dest->DoNotClear = 1; // dest->characters will not be freed on clear
         }else{
             assert(FALSE);
         }
@@ -267,7 +267,7 @@ SOPC_StatusCode SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src){
 void SOPC_String_Clear(SOPC_String* string){
     if(string != NULL){
         if(string->Data != NULL &&
-                string->ClearBytes != FALSE){
+           string->DoNotClear == FALSE){
             free(string->Data);
             string->Data = NULL;
         }

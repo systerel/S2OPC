@@ -78,7 +78,7 @@ SOPC_StatusCode OpcUa_String_AttachToString(char*        srcStr,
         }else{
             status = SOPC_String_CopyFromCString(newString, srcStr);
         }
-        newString->ClearBytes = freeOnClear;
+        newString->DoNotClear = (freeOnClear == FALSE);
     }
     return status;
 }
@@ -221,6 +221,6 @@ SOPC_StatusCode OpcUa_String_AttachWithOwnership(SOPC_String* dest,
 {
     SOPC_StatusCode status;
     status = SOPC_String_AttachFromCstring(dest, src);
-    dest->ClearBytes = 1;
+    dest->DoNotClear = FALSE;
     return status;
 }
