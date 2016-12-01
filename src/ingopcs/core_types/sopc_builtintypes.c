@@ -256,6 +256,8 @@ SOPC_StatusCode SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src){
                 // No need of secure copy, both have same size here
                 memcpy(dest->Data, src->Data, dest->Length);
                 dest->Data[dest->Length] = '\0';
+                // Since it is a copy, be sure to clear bytes on clear
+                dest->DoNotClear = FALSE;
             }else{
                 status = STATUS_NOK;
             }
