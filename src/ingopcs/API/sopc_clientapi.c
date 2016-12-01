@@ -119,10 +119,10 @@ SOPC_StatusCode OpcUa_ClientApi_FindServers(
             *a_pNoOfServers    = pResponse->NoOfServers;
             *a_pServers        = pResponse->Servers;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -170,7 +170,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginFindServers(
             (void*)&cRequest,
             &OpcUa_FindServersRequest_EncodeableType,
             &OpcUa_FindServersResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -253,10 +253,10 @@ SOPC_StatusCode OpcUa_ClientApi_FindServersOnNetwork(
             *a_pNoOfServers          = pResponse->NoOfServers;
             *a_pServers              = pResponse->Servers;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -300,7 +300,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
             (void*)&cRequest,
             &OpcUa_FindServersOnNetworkRequest_EncodeableType,
             &OpcUa_FindServersOnNetworkResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -384,10 +384,10 @@ SOPC_StatusCode OpcUa_ClientApi_GetEndpoints(
             *a_pNoOfEndpoints  = pResponse->NoOfEndpoints;
             *a_pEndpoints      = pResponse->Endpoints;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -435,7 +435,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginGetEndpoints(
             (void*)&cRequest,
             &OpcUa_GetEndpointsRequest_EncodeableType,
             &OpcUa_GetEndpointsResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -503,10 +503,10 @@ SOPC_StatusCode OpcUa_ClientApi_RegisterServer(
         {
             *a_pResponseHeader = pResponse->ResponseHeader;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -544,7 +544,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRegisterServer(
             (void*)&cRequest,
             &OpcUa_RegisterServerRequest_EncodeableType,
             &OpcUa_RegisterServerResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -629,10 +629,10 @@ SOPC_StatusCode OpcUa_ClientApi_RegisterServer2(
             *a_pNoOfDiagnosticInfos      = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos          = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -675,7 +675,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRegisterServer2(
             (void*)&cRequest,
             &OpcUa_RegisterServer2Request_EncodeableType,
             &OpcUa_RegisterServer2Response_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -795,10 +795,10 @@ SOPC_StatusCode OpcUa_ClientApi_CreateSession(
             *a_pServerSignature                = pResponse->ServerSignature;
             *a_pMaxRequestMessageSize          = pResponse->MaxRequestMessageSize;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -855,7 +855,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCreateSession(
             (void*)&cRequest,
             &OpcUa_CreateSessionRequest_EncodeableType,
             &OpcUa_CreateSessionResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -954,10 +954,10 @@ SOPC_StatusCode OpcUa_ClientApi_ActivateSession(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -1011,7 +1011,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginActivateSession(
             (void*)&cRequest,
             &OpcUa_ActivateSessionRequest_EncodeableType,
             &OpcUa_ActivateSessionResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -1078,10 +1078,10 @@ SOPC_StatusCode OpcUa_ClientApi_CloseSession(
         {
             *a_pResponseHeader = pResponse->ResponseHeader;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -1118,7 +1118,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCloseSession(
             (void*)&cRequest,
             &OpcUa_CloseSessionRequest_EncodeableType,
             &OpcUa_CloseSessionResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -1188,10 +1188,10 @@ SOPC_StatusCode OpcUa_ClientApi_Cancel(
             *a_pResponseHeader = pResponse->ResponseHeader;
             *a_pCancelCount    = pResponse->CancelCount;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -1228,7 +1228,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCancel(
             (void*)&cRequest,
             &OpcUa_CancelRequest_EncodeableType,
             &OpcUa_CancelResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -1310,10 +1310,10 @@ SOPC_StatusCode OpcUa_ClientApi_AddNodes(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -1353,7 +1353,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginAddNodes(
             (void*)&cRequest,
             &OpcUa_AddNodesRequest_EncodeableType,
             &OpcUa_AddNodesResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -1435,10 +1435,10 @@ SOPC_StatusCode OpcUa_ClientApi_AddReferences(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -1478,7 +1478,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginAddReferences(
             (void*)&cRequest,
             &OpcUa_AddReferencesRequest_EncodeableType,
             &OpcUa_AddReferencesResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -1560,10 +1560,10 @@ SOPC_StatusCode OpcUa_ClientApi_DeleteNodes(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -1603,7 +1603,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginDeleteNodes(
             (void*)&cRequest,
             &OpcUa_DeleteNodesRequest_EncodeableType,
             &OpcUa_DeleteNodesResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -1685,10 +1685,10 @@ SOPC_StatusCode OpcUa_ClientApi_DeleteReferences(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -1728,7 +1728,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginDeleteReferences(
             (void*)&cRequest,
             &OpcUa_DeleteReferencesRequest_EncodeableType,
             &OpcUa_DeleteReferencesResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -1815,10 +1815,10 @@ SOPC_StatusCode OpcUa_ClientApi_Browse(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -1863,7 +1863,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginBrowse(
             (void*)&cRequest,
             &OpcUa_BrowseRequest_EncodeableType,
             &OpcUa_BrowseResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -1947,10 +1947,10 @@ SOPC_StatusCode OpcUa_ClientApi_BrowseNext(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -1992,7 +1992,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginBrowseNext(
             (void*)&cRequest,
             &OpcUa_BrowseNextRequest_EncodeableType,
             &OpcUa_BrowseNextResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -2074,10 +2074,10 @@ SOPC_StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -2117,7 +2117,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginTranslateBrowsePathsToNodeIds(
             (void*)&cRequest,
             &OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType,
             &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -2193,10 +2193,10 @@ SOPC_StatusCode OpcUa_ClientApi_RegisterNodes(
             *a_pNoOfRegisteredNodeIds = pResponse->NoOfRegisteredNodeIds;
             *a_pRegisteredNodeIds     = pResponse->RegisteredNodeIds;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -2236,7 +2236,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRegisterNodes(
             (void*)&cRequest,
             &OpcUa_RegisterNodesRequest_EncodeableType,
             &OpcUa_RegisterNodesResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -2306,10 +2306,10 @@ SOPC_StatusCode OpcUa_ClientApi_UnregisterNodes(
         {
             *a_pResponseHeader = pResponse->ResponseHeader;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -2349,7 +2349,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginUnregisterNodes(
             (void*)&cRequest,
             &OpcUa_UnregisterNodesRequest_EncodeableType,
             &OpcUa_UnregisterNodesResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -2453,10 +2453,10 @@ SOPC_StatusCode OpcUa_ClientApi_QueryFirst(
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
             *a_pFilterResult        = pResponse->FilterResult;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -2506,7 +2506,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginQueryFirst(
             (void*)&cRequest,
             &OpcUa_QueryFirstRequest_EncodeableType,
             &OpcUa_QueryFirstResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -2585,10 +2585,10 @@ SOPC_StatusCode OpcUa_ClientApi_QueryNext(
             *a_pQueryDataSets            = pResponse->QueryDataSets;
             *a_pRevisedContinuationPoint = pResponse->RevisedContinuationPoint;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -2628,7 +2628,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginQueryNext(
             (void*)&cRequest,
             &OpcUa_QueryNextRequest_EncodeableType,
             &OpcUa_QueryNextResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -2714,10 +2714,10 @@ SOPC_StatusCode OpcUa_ClientApi_Read(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -2761,7 +2761,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRead(
             (void*)&cRequest,
             &OpcUa_ReadRequest_EncodeableType,
             &OpcUa_ReadResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -2850,10 +2850,10 @@ SOPC_StatusCode OpcUa_ClientApi_HistoryRead(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -2900,7 +2900,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginHistoryRead(
             (void*)&cRequest,
             &OpcUa_HistoryReadRequest_EncodeableType,
             &OpcUa_HistoryReadResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -2982,10 +2982,10 @@ SOPC_StatusCode OpcUa_ClientApi_Write(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -3025,7 +3025,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginWrite(
             (void*)&cRequest,
             &OpcUa_WriteRequest_EncodeableType,
             &OpcUa_WriteResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -3107,10 +3107,10 @@ SOPC_StatusCode OpcUa_ClientApi_HistoryUpdate(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -3150,7 +3150,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginHistoryUpdate(
             (void*)&cRequest,
             &OpcUa_HistoryUpdateRequest_EncodeableType,
             &OpcUa_HistoryUpdateResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -3232,10 +3232,10 @@ SOPC_StatusCode OpcUa_ClientApi_Call(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -3275,7 +3275,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCall(
             (void*)&cRequest,
             &OpcUa_CallRequest_EncodeableType,
             &OpcUa_CallResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -3361,10 +3361,10 @@ SOPC_StatusCode OpcUa_ClientApi_CreateMonitoredItems(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -3408,7 +3408,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
             (void*)&cRequest,
             &OpcUa_CreateMonitoredItemsRequest_EncodeableType,
             &OpcUa_CreateMonitoredItemsResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -3494,10 +3494,10 @@ SOPC_StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -3541,7 +3541,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
             (void*)&cRequest,
             &OpcUa_ModifyMonitoredItemsRequest_EncodeableType,
             &OpcUa_ModifyMonitoredItemsResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -3627,10 +3627,10 @@ SOPC_StatusCode OpcUa_ClientApi_SetMonitoringMode(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -3674,7 +3674,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
             (void*)&cRequest,
             &OpcUa_SetMonitoringModeRequest_EncodeableType,
             &OpcUa_SetMonitoringModeResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -3777,10 +3777,10 @@ SOPC_StatusCode OpcUa_ClientApi_SetTriggering(
             *a_pNoOfRemoveDiagnosticInfos = pResponse->NoOfRemoveDiagnosticInfos;
             *a_pRemoveDiagnosticInfos     = pResponse->RemoveDiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -3829,7 +3829,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginSetTriggering(
             (void*)&cRequest,
             &OpcUa_SetTriggeringRequest_EncodeableType,
             &OpcUa_SetTriggeringResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -3913,10 +3913,10 @@ SOPC_StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -3958,7 +3958,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
             (void*)&cRequest,
             &OpcUa_DeleteMonitoredItemsRequest_EncodeableType,
             &OpcUa_DeleteMonitoredItemsResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -4047,10 +4047,10 @@ SOPC_StatusCode OpcUa_ClientApi_CreateSubscription(
             *a_pRevisedLifetimeCount      = pResponse->RevisedLifetimeCount;
             *a_pRevisedMaxKeepAliveCount  = pResponse->RevisedMaxKeepAliveCount;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -4097,7 +4097,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCreateSubscription(
             (void*)&cRequest,
             &OpcUa_CreateSubscriptionRequest_EncodeableType,
             &OpcUa_CreateSubscriptionResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -4183,10 +4183,10 @@ SOPC_StatusCode OpcUa_ClientApi_ModifySubscription(
             *a_pRevisedLifetimeCount      = pResponse->RevisedLifetimeCount;
             *a_pRevisedMaxKeepAliveCount  = pResponse->RevisedMaxKeepAliveCount;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -4233,7 +4233,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginModifySubscription(
             (void*)&cRequest,
             &OpcUa_ModifySubscriptionRequest_EncodeableType,
             &OpcUa_ModifySubscriptionResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -4317,10 +4317,10 @@ SOPC_StatusCode OpcUa_ClientApi_SetPublishingMode(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -4362,7 +4362,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
             (void*)&cRequest,
             &OpcUa_SetPublishingModeRequest_EncodeableType,
             &OpcUa_SetPublishingModeResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -4459,10 +4459,10 @@ SOPC_StatusCode OpcUa_ClientApi_Publish(
             *a_pNoOfDiagnosticInfos          = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos              = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -4502,7 +4502,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginPublish(
             (void*)&cRequest,
             &OpcUa_PublishRequest_EncodeableType,
             &OpcUa_PublishResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -4574,10 +4574,10 @@ SOPC_StatusCode OpcUa_ClientApi_Republish(
             *a_pResponseHeader      = pResponse->ResponseHeader;
             *a_pNotificationMessage = pResponse->NotificationMessage;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -4616,7 +4616,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRepublish(
             (void*)&cRequest,
             &OpcUa_RepublishRequest_EncodeableType,
             &OpcUa_RepublishResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -4700,10 +4700,10 @@ SOPC_StatusCode OpcUa_ClientApi_TransferSubscriptions(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -4745,7 +4745,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
             (void*)&cRequest,
             &OpcUa_TransferSubscriptionsRequest_EncodeableType,
             &OpcUa_TransferSubscriptionsResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
@@ -4827,10 +4827,10 @@ SOPC_StatusCode OpcUa_ClientApi_DeleteSubscriptions(
             *a_pNoOfDiagnosticInfos = pResponse->NoOfDiagnosticInfos;
             *a_pDiagnosticInfos     = pResponse->DiagnosticInfos;
         }
-    }else{
-        //TODO: check if status invalid response could have been already deallocated in InvokeService
-        /* memory contained in the reponse objects is owned by the caller */
-        free(pResponse);
+        
+        if(pResponse != NULL){
+            free(pResponse);
+        }
     }
 
     return status;
@@ -4870,7 +4870,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginDeleteSubscriptions(
             (void*)&cRequest,
             &OpcUa_DeleteSubscriptionsRequest_EncodeableType,
             &OpcUa_DeleteSubscriptionsResponse_EncodeableType,
-            (SOPC_Channel_PfnRequestComplete*)a_pCallback,
+            a_pCallback,
             a_pCallbackData);
     }
 
