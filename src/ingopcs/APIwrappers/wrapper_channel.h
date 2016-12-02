@@ -41,6 +41,9 @@ SOPC_StatusCode OpcUa_Channel_Disconnect(SOPC_Channel channel);
 
 SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                            channel,
                                            char*                                   url,
+#ifdef STACK_1_02
+                                           char*                                   sTransportProfileUri,
+#endif
                                            SOPC_ByteString*                        clientCertificate,
                                            SOPC_ByteString*                        clientPrivateKey,
                                            SOPC_ByteString*                        serverCertificate,
@@ -48,12 +51,18 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
                                            SOPC_String*                            requestedSecurityPolicyUri,
                                            int32_t                                 requestedLifetime,
                                            OpcUa_MessageSecurityMode               messageSecurityMode,
+#ifdef STACK_1_01
+                                           void*                                   securityToken,
+#endif
                                            uint32_t                                networkTimeout,
                                            SOPC_Channel_PfnConnectionStateChanged* callback,
                                            void*                                   callbackData);
 
 SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            channel,
                                       char*                                   url,
+#ifdef STACK_1_02
+                                      char*                                   sTransportProfileUri,
+#endif
                                       SOPC_Channel_PfnConnectionStateChanged* callback,
                                       void*                                   callbackData,
                                       SOPC_ByteString*                        clientCertificate,
@@ -63,7 +72,9 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
                                       SOPC_String*                            requestedSecurityPolicyUri,
                                       int32_t                                 requestedLifetime,
                                       OpcUa_MessageSecurityMode               messageSecurityMode,
-                                      void*                                   securityToken, // TODO: old API parametere
+#if defined STACK_1_01 || defined STACK_1_02
+                                      void*                                   securityToken,
+#endif
                                       uint32_t                                networkTimeout);
 
 END_EXTERN_C
