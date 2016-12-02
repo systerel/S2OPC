@@ -96,6 +96,7 @@ SOPC_StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
 
 void PKIProviderStack_Free(PKIProvider *pPKI)
 {
-    free((void *)pPKI);
+    if(NULL != pPKI)
+        free((void *)pPKI);
 }
 
