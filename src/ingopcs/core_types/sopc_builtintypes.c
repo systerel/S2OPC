@@ -538,9 +538,9 @@ void SOPC_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId){
 
 void SOPC_ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId){
     if(expNodeId != NULL){
-        SOPC_String_Initialize(&expNodeId->NamespaceUri);
-        SOPC_NodeId_Initialize(&expNodeId->NodeId);
-        SOPC_UInt32_Initialize(&expNodeId->ServerIndex);
+        SOPC_String_Clear(&expNodeId->NamespaceUri);
+        SOPC_NodeId_Clear(&expNodeId->NodeId);
+        SOPC_UInt32_Clear(&expNodeId->ServerIndex);
     }
 }
 
