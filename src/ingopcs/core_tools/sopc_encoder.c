@@ -23,6 +23,7 @@
 
 #include "sopc_encodeabletype.h"
 #include "sopc_tcp_ua_low_level.h"
+#include "sopc_secure_channel_low_level.h"
 
 void SOPC_EncodeDecode_Int16(int16_t* intv)
 {
@@ -97,7 +98,7 @@ SOPC_StatusCode SOPC_Byte_Write(const SOPC_Byte* value, SOPC_MsgBuffer* msgBuffe
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
-    return TCP_UA_WriteMsgBuffer(msgBuffer, value, 1);
+    return SC_WriteSecureMsgBuffer(msgBuffer, value, 1);
 }
 
 SOPC_StatusCode SOPC_Byte_Read(SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
@@ -148,7 +149,7 @@ SOPC_StatusCode SOPC_SByte_Write(const SOPC_SByte* value, SOPC_MsgBuffer* msgBuf
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
-    return TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) value, 1);
+    return SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) value, 1);
 }
 
 SOPC_StatusCode SOPC_SByte_Read(SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
@@ -166,7 +167,7 @@ SOPC_StatusCode SOPC_Int16_Write(const int16_t* value, SOPC_MsgBuffer* msgBuffer
     if(value != NULL){
         int16_t encodedValue = *value;
         SOPC_EncodeDecode_Int16(&encodedValue);
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
+        status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
     }
     return status;
 }
@@ -193,7 +194,7 @@ SOPC_StatusCode SOPC_UInt16_Write(const uint16_t* value, SOPC_MsgBuffer* msgBuff
     if(value != NULL){
         uint16_t encodedValue = *value;
         SOPC_EncodeDecode_UInt16(&encodedValue);
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
+        status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
     }
     return status;
 }
@@ -218,7 +219,7 @@ SOPC_StatusCode SOPC_Int32_Write(const int32_t* value, SOPC_MsgBuffer* msgBuffer
     if(value != NULL){
         int32_t encodedValue = *value;
         SOPC_EncodeDecode_Int32(&encodedValue);
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
+        status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
 }
@@ -241,7 +242,7 @@ SOPC_StatusCode SOPC_UInt32_Write(const uint32_t* value, SOPC_MsgBuffer* msgBuff
     if(value != NULL){
         uint32_t encodedValue = *value;
         SOPC_EncodeDecode_UInt32(&encodedValue);
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
+        status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
 }
@@ -264,7 +265,7 @@ SOPC_StatusCode SOPC_Int64_Write(const int64_t* value, SOPC_MsgBuffer* msgBuffer
     if(value != NULL){
         int64_t encodedValue = *value;
         SOPC_EncodeDecode_Int64(&encodedValue);
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
+        status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
 }
@@ -287,7 +288,7 @@ SOPC_StatusCode SOPC_UInt64_Write(const uint64_t* value, SOPC_MsgBuffer* msgBuff
     if(value != NULL){
         uint64_t encodedValue = *value;
         SOPC_EncodeDecode_UInt64(&encodedValue);
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
+        status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
 }
@@ -310,7 +311,7 @@ SOPC_StatusCode SOPC_Float_Write(const float* value, SOPC_MsgBuffer* msgBuffer)
     if(value != NULL){
         float encodedValue = *value;
         SOPC_EncodeDecode_Float(&encodedValue);
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
+        status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
 }
@@ -333,7 +334,7 @@ SOPC_StatusCode SOPC_Double_Write(const double* value, SOPC_MsgBuffer* msgBuffer
     if(value != NULL){
         double encodedValue = *value;
         SOPC_EncodeDecode_Double(&encodedValue);
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
+        status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
 }
@@ -366,7 +367,7 @@ SOPC_StatusCode SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_MsgBuffer
         if(status == STATUS_OK &&
            str->Length > 0)
         {
-            status = TCP_UA_WriteMsgBuffer(msgBuffer, str->Data, str->Length);
+            status = SC_WriteSecureMsgBuffer(msgBuffer, str->Data, str->Length);
         }
     }
     return status;
@@ -419,7 +420,7 @@ SOPC_StatusCode SOPC_String_Write(const SOPC_String* str, SOPC_MsgBuffer* msgBuf
         if(status == STATUS_OK &&
            str->Length > 0)
         {
-            status = TCP_UA_WriteMsgBuffer(msgBuffer, str->Data, str->Length);
+            status = SC_WriteSecureMsgBuffer(msgBuffer, str->Data, str->Length);
         }
     }
     return status;
@@ -507,7 +508,7 @@ SOPC_StatusCode SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer
         status = SOPC_UInt16_Write(&guid->Data3, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, &(guid->Data4[0]), 8);
+        status = SC_WriteSecureMsgBuffer(msgBuffer, &(guid->Data4[0]), 8);
     }
     return status;
 }

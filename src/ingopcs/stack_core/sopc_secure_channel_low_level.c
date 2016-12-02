@@ -693,59 +693,6 @@ SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffer*      msgBuffer,
     return status;
 }
 
-SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
-                                        const SOPC_Byte* data_src,
-                                        uint32_t         count){
-    SC_Connection* scConnection = NULL;
-    SOPC_StatusCode status = STATUS_NOK;
-    if(data_src == NULL || msgBuffer == NULL || msgBuffer->flushData == NULL)
-    {
-        status = STATUS_INVALID_PARAMETERS;
-    }else{
-        status = STATUS_OK;
-        scConnection = (SC_Connection*) msgBuffer->flushData;
-        if(msgBuffer->buffers->position + count >
-            msgBuffer->sequenceNumberPosition +
-            UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
-            scConnection->sendingMaxBodySize)
-        {
-            // Precedent position cannot be greater than message size:
-            //  otherwise it means size has not been checked precedent time (it could occurs only when writing headers)
-            assert(msgBuffer->sequenceNumberPosition +
-                    UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
-                    scConnection->sendingMaxBodySize >= msgBuffer->buffers->position);
-            if(msgBuffer->maxChunks != 0 && msgBuffer->nbChunks + 1 > msgBuffer->maxChunks){
-                // TODO: send an abort message instead of message !!!
-                status = STATUS_INVALID_STATE;
-            }else{
-                // Fulfill buffer with maximum amount of bytes
-                uint32_t tmpCount = // Maximum Count - Precedent Count => Count to write
-                 (msgBuffer->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
-                  scConnection->sendingMaxBodySize) - msgBuffer->buffers->position;
-                count = count - tmpCount;
-                status = Buffer_Write(msgBuffer->buffers, data_src, tmpCount);
-
-                // Flush it !
-                if(status == STATUS_OK){
-                    status = SC_FlushSecureMsgBuffer(msgBuffer,
-                                                     SOPC_Msg_Chunk_Intermediate);
-                }
-
-                if(status == STATUS_OK){
-                    status = MsgBuffer_ResetNextChunk
-                              (msgBuffer,
-                               msgBuffer->sequenceNumberPosition +
-                                UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
-                }
-            }
-        }
-        if(status == STATUS_OK){
-            status = Buffer_Write(msgBuffer->buffers, data_src, count);
-        }
-    }
-    return status;
-}
-
 SOPC_StatusCode Set_Message_Length(SOPC_MsgBuffer* msgBuffer,
                                    uint32_t        msgLength){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
