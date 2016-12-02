@@ -6,6 +6,7 @@
  */
 
 #include "wrapper_channel.h"
+#include "sopc_secure_channel_client_connection.h"
 
 #include <string.h>
 
@@ -44,12 +45,26 @@ SOPC_StatusCode OpcUa_Channel_Create(SOPC_Channel*               channel,
 
 void OpcUa_Channel_Clear(SOPC_Channel channel)
 {
-    SOPC_Channel_Disconnect(channel);
+    OpcUa_Channel_Disconnect(channel);
 }
 
 void OpcUa_Channel_Delete(SOPC_Channel* channel)
 {
-    SOPC_Channel_Delete(channel);
+    if(channel != NULL){
+        SC_ClientConnection* cConnection = (SC_ClientConnection*) *channel;
+        if(cConnection->pkiProvider != NULL){
+            KeyManager_Certificate_Free(cConnection->pkiProvider->pUserCertAuthList);
+            PKIProviderStack_Free((PKIProvider*) cConnection->pkiProvider);
+        }
+        cConnection->pkiProvider = NULL;
+        KeyManager_Certificate_Free((Certificate*) cConnection->clientCertificate);
+        cConnection->clientCertificate = NULL;
+        KeyManager_Certificate_Free((Certificate*) cConnection->serverCertificate);
+        cConnection->serverCertificate = NULL;
+        KeyManager_AsymmetricKey_Free((AsymmetricKey*) cConnection->clientKey);
+        cConnection->clientKey = NULL;
+        SOPC_Channel_Delete(channel);
+    }
 }
 
 SOPC_StatusCode OpcUa_Channel_BeginInvokeService(SOPC_Channel                     channel,
@@ -96,7 +111,21 @@ SOPC_StatusCode OpcUa_Channel_BeginDisconnect(SOPC_Channel                      
 
 SOPC_StatusCode OpcUa_Channel_Disconnect(SOPC_Channel channel)
 {
-    return SOPC_Channel_Disconnect(channel);
+    SOPC_StatusCode status = STATUS_OK;
+    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
+    if(cConnection->pkiProvider != NULL){
+        KeyManager_Certificate_Free(cConnection->pkiProvider->pUserCertAuthList);
+        PKIProviderStack_Free((PKIProvider*) cConnection->pkiProvider);
+    }
+    cConnection->pkiProvider = NULL;
+    KeyManager_Certificate_Free((Certificate*) cConnection->clientCertificate);
+    cConnection->clientCertificate = NULL;
+    KeyManager_Certificate_Free((Certificate*) cConnection->serverCertificate);
+    cConnection->serverCertificate = NULL;
+    KeyManager_AsymmetricKey_Free((AsymmetricKey*) cConnection->clientKey);
+    cConnection->clientKey = NULL;
+    status = SOPC_Channel_Disconnect(channel);
+    return status;
 }
 
 SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                            channel,
@@ -123,7 +152,7 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
                                                       clientCertificate->Length,
                                                       &cli);
         if(STATUS_OK == status){
-            pKeyCli = (AsymmetricKey*) clientPrivateKey->Data;
+            status = KeyManager_AsymmetricKey_CreateFromBuffer(clientPrivateKey->Data, clientPrivateKey->Length, &pKeyCli);
         }
         if(STATUS_OK == status){
             status = KeyManager_Certificate_CreateFromDER(serverCertificate->Data,
@@ -162,6 +191,15 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
                                            callback,
                                            callbackData);
     }
+    if(STATUS_OK != status){
+        if(pki != NULL){
+            KeyManager_Certificate_Free(pki->pUserCertAuthList);
+            PKIProviderStack_Free(pki);
+        }
+        KeyManager_Certificate_Free(cli);
+        KeyManager_Certificate_Free(srv);
+        KeyManager_AsymmetricKey_Free(pKeyCli);
+    }
     return status;
 }
 
@@ -182,7 +220,7 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
     SOPC_StatusCode status = STATUS_OK;
     Certificate *cli = NULL, *srv = NULL, *crt_ca = NULL;
     AsymmetricKey *pKeyCli = NULL;
-    PKIProvider *pki;
+    PKIProvider *pki = NULL;
     PKIConfig *pPKIConfig = pkiConfig;
     if(clientCertificate != NULL && clientCertificate->Length > 0 &&
        clientPrivateKey != NULL && clientPrivateKey->Length > 0 &&
@@ -230,6 +268,15 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
                                       networkTimeout,
                                       callback,
                                       callbackData);
+    }
+    if(STATUS_OK != status){
+        if(pki != NULL){
+            KeyManager_Certificate_Free(pki->pUserCertAuthList);
+            PKIProviderStack_Free(pki);
+        }
+        KeyManager_Certificate_Free(cli);
+        KeyManager_Certificate_Free(srv);
+        KeyManager_AsymmetricKey_Free(pKeyCli);
     }
     return status;
 }
