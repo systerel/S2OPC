@@ -168,6 +168,9 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
                 retStatus = callbackData->callback(channel,
                                                    callbackData->callbackData,
                                                    channelConnectionEvent,
+#ifdef STACK_1_02
+                                                   NULL,
+#endif
                                                    status);
             }
     }

@@ -60,6 +60,9 @@ typedef enum {
 typedef SOPC_StatusCode (SOPC_Channel_PfnConnectionStateChanged) (SOPC_Channel       channel,
                                                                   void*              cbData,
                                                                   SOPC_Channel_Event cEvent,
+#ifdef STACK_1_02
+                                                                  void*              securityToken,
+#endif
                                                                   SOPC_StatusCode    status);
 
 /**
