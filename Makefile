@@ -49,13 +49,11 @@ BUILD_DIR_SED=$(subst /,\/,$(BUILD_DIR))
 
 ## Directories
 ### srcs directories definition
-UASTACK_DIR=$(WORKSPACE_DIR)/src/ingopcs/
-FUASTACK_DIR=$(WORKSPACE_DIR)/src/foundation/
-STUBSERVER_DIR=$(WORKSPACE_DIR)/stub_server
+UASTACK_DIR=$(WORKSPACE_DIR)/src/
 STUBCLIENT_DIR=$(WORKSPACE_DIR)/stub_client
 TESTS_DIR=$(WORKSPACE_DIR)/test/ingopcs
 ### concatenate all srcs directories
-C_SRC_DIRS=$(UASTACK_DIR) $(STUBCLIENT_DIR) $(TESTS_DIR) #$(STUBSERVER_DIR) 
+C_SRC_DIRS=$(UASTACK_DIR) $(STUBCLIENT_DIR) $(TESTS_DIR)
 
 ## Stack
 ### includes stack
@@ -80,28 +78,6 @@ TESTS_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(TESTS_SRC_FILES))
 C_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.c")
 H_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.h")
 
-################################## TEMPORARY FOUNDATION code compilation ####################
-FBUILD_DIR=$(WORKSPACE_DIR)/fbuild
-FBUILD_DIR_SED=$(subst /,\/,$(FBUILD_DIR))
-## Directories
-### srcs directories definition
-FUASTACK_DIR=$(WORKSPACE_DIR)/src/foundation/
-### concatenate all srcs directories
-C_FSRC_DIRS=$(FUASTACK_DIR) $(STUBSERVER_DIR)
-
-## Stack
-### includes stack
-INCLUDES_FUASTACK=$(shell find $(FUASTACK_DIR) -not -path $(EXCLUDE_DIR) -type d)
-## object files stack
-FUASTACK_SRC_FILES=$(shell find $(FUASTACK_DIR) -not -path $(EXCLUDE_DIR) -type f -name "*.c" -exec basename "{}" \;)
-FUASTACK_OBJ_FILES=$(patsubst %.c,$(FBUILD_DIR)/%.o,$(FUASTACK_SRC_FILES))
-
-## All .c and .h files to compute dependencies
-C_FSRC_PATHS=$(shell find $(C_FSRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.c")
-FINCLUDES=$(INCLUDES_SSL) $(addprefix -I, $(INCLUDES_FUASTACK))
-############################# END TEMPORARY FOUNDATION code compilation ####################
-
-
 # MBEDTLS INPUTS
 MBEDTLS_DIR=$(WORKSPACE_DIR)/lib/mbedtls-2.3.0
 INCLUDES_MBEDTLS=-I$(MBEDTLS_DIR)/include
@@ -109,19 +85,19 @@ LIBS_MBEDTLS=-L$(MBEDTLS_DIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
 
 # C COMPILER CONFIG
 CFLAGS=-c -g -Wall -Wextra -O0 $(SHARED_FLAG)
-C99FLAGS=-std=c99 -pedantic #-D_POSIX_C_SOURCE=200112L # Add posix as authorized code for linux sockets
+C99FLAGS=-std=c99 -pedantic
 LFLAGS=-g
 INCLUDES=$(INCLUDES_MBEDTLS) $(INCLUDES_SSL) $(addprefix -I, $(INCLUDES_UASTACK))
-DEFS=$(DEF_STACK) -DOPCUA_USE_SYNCHRONISATION=0 -DOPCUA_MULTITHREADED=0 -DOPCUA_TRACE_ENABLE=1 #-DOPCUA_HAVE_SERVERAPI=1 -DOPCUA_HAVE_OPENSSL=1
+DEFS=$(DEF_STACK)
 
 # MAKEFILE CONTENT
 
 .PHONY : all doc config mbedtls check clean clean_mbedtls cleanall
-.DELETE_ON_ERROR : .depend.tmp .depend .pdepend .fdepend
+.DELETE_ON_ERROR : .depend.tmp .depend .pdepend
 
 default: all
 
-all: config $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/check_stack $(EXEC_DIR)/stub_server
+all: config $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/check_stack
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
@@ -200,13 +176,3 @@ cleanall: clean clean_mbedtls
 $(FBUILD_DIR)/%.o:
 	@echo "  CC $@"
 	$(CC) $(CFLAGS) $(FINCLUDES) $< -o $@ $(DEFS)
-
-.fdepend: $(C_FSRC_PATHS)
-	@echo "Building foundation dependencies..."
-	@$(CC) $(FLAGS) $(DEFS) $(FINCLUDES) -MM $(C_FSRC_PATHS) > $@
-	@sed 's/^\(.*\)\.o:/$(FBUILD_DIR_SED)\/\1.o:/g' -i $@
-
-$(EXEC_DIR)/stub_server: $(FUASTACK_OBJ_FILES) $(FBUILD_DIR)/stub_server.o
-	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(FINCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
-	@$(COPY_SSL)

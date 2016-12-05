@@ -27,6 +27,4 @@ else
 fi
 # run unit tests
 mid check CK_TAP_LOG_FILE_NAME=results.tap
-# run client server tests
-mid client_server_test
 
