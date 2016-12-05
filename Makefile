@@ -32,6 +32,11 @@ else
     endif
 endif
 
+ifdef SHARED
+    SHARED_FLAG=-fPIC
+    MBED_SHARED="SHARED=yes"
+endif
+
 
 # OUTPUTS
 WORKSPACE_DIR=.
@@ -103,7 +108,7 @@ INCLUDES_MBEDTLS=-I$(MBEDTLS_DIR)/include
 LIBS_MBEDTLS=-L$(MBEDTLS_DIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
 
 # C COMPILER CONFIG
-CFLAGS=-c -g -Wall -Wextra -O0
+CFLAGS=-c -g -Wall -Wextra -O0 $(SHARED_FLAG)
 C99FLAGS=-std=c99 -pedantic #-D_POSIX_C_SOURCE=200112L # Add posix as authorized code for linux sockets
 LFLAGS=-g
 INCLUDES=$(INCLUDES_MBEDTLS) $(INCLUDES_SSL) $(addprefix -I, $(INCLUDES_UASTACK))
@@ -163,7 +168,7 @@ $(PLATFORM_BUILD_DIR)/%.o:
 
 $(EXEC_DIR)/stub_client_ingopcs: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o
 	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
+	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
 
 $(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/check_stack.o
 	@echo "Linking $@..."
@@ -174,7 +179,7 @@ client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server
 
 mbedtls:
 	@echo "Building mbedtls..."
-	@$(MAKE) -C $(MBEDTLS_DIR)
+	@$(MAKE) $(MBED_SHARED) -C $(MBEDTLS_DIR)
 
 check: $(EXEC_DIR)/check_stack
 	@echo "Executing tests..."
@@ -194,7 +199,7 @@ cleanall: clean clean_mbedtls
 ################################## TEMPORARY FOUNDATION code compilation ####################
 $(FBUILD_DIR)/%.o:
 	@echo "  CC $@"
-	@$(CC) $(CFLAGS) $(FINCLUDES) $< -o $@ $(DEFS)
+	$(CC) $(CFLAGS) $(FINCLUDES) $< -o $@ $(DEFS)
 
 .fdepend: $(C_FSRC_PATHS)
 	@echo "Building foundation dependencies..."
