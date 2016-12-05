@@ -278,7 +278,10 @@ void SOPC_String_Clear(SOPC_String* string){
 }
 
 void SOPC_String_Delete(SOPC_String* string){
-    SOPC_ByteString_Delete((SOPC_ByteString*) string);
+    if(NULL != string){
+        SOPC_String_Clear(string);
+        free(string);
+    }
 }
 
 SOPC_StatusCode SOPC_String_CopyFromCString(SOPC_String* string, const char* cString){
