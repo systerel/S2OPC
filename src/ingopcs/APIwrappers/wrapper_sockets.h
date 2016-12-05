@@ -23,15 +23,31 @@
 
 BEGIN_EXTERN_C
 
-SOPC_StatusCode OpcUa_SocketManager_Create(SOPC_SocketManager* sManager,
-                                           uint32_t            nbSockets,
-                                           uint32_t            flags);
+SOPC_StatusCode OpcUa_P_SocketManager_Create(SOPC_SocketManager* sManager,
+                                             uint32_t            nbSockets,
+                                             uint32_t            flags);
 
-void OpcUa_SocketManager_Delete(SOPC_SocketManager* sManager);
+void OpcUa_P_SocketManager_Delete(SOPC_SocketManager* sManager);
 
-SOPC_StatusCode OpcUa_SocketManager_Loop(SOPC_SocketManager* sManager,
-                                         uint32_t            msTimeout,
-                                         uint8_t             runOnce);
+SOPC_StatusCode OpcUa_P_SocketManager_ServeLoop(SOPC_SocketManager* sManager,
+                                                uint32_t            msTimeout,
+                                                uint8_t             runOnce);
+
+
+void OpcUa_P_Socket_InetAddr();
+void OpcUa_P_SocketManager_CreateServer();
+void OpcUa_P_SocketManager_CreateClient();
+void OpcUa_P_SocketManager_CreateSslServer();
+void OpcUa_P_SocketManager_CreateSslClient();
+void OpcUa_P_SocketManager_SignalEvent();
+void OpcUa_P_Socket_Read();
+void OpcUa_P_Socket_Write();
+void OpcUa_P_Socket_Close();
+void OpcUa_P_Socket_GetPeerInfo();
+void OpcUa_P_Socket_GetLastError();
+void OpcUa_P_Socket_SetUserData();
+void OpcUa_P_Socket_InitializeNetwork();
+void OpcUa_P_Socket_CleanupNetwork();
 
 END_EXTERN_C
 
