@@ -62,17 +62,19 @@ void OpcUa_Channel_Delete(SOPC_Channel* channel)
 {
     if(channel != NULL){
         SC_ClientConnection* cConnection = (SC_ClientConnection*) *channel;
-        if(cConnection->pkiProvider != NULL){
-            KeyManager_Certificate_Free(cConnection->pkiProvider->pUserCertAuthList);
-            PKIProviderStack_Free((PKIProvider*) cConnection->pkiProvider);
+        if(cConnection != NULL){
+            if(cConnection->pkiProvider != NULL){
+                KeyManager_Certificate_Free(cConnection->pkiProvider->pUserCertAuthList);
+                PKIProviderStack_Free((PKIProvider*) cConnection->pkiProvider);
+            }
+            cConnection->pkiProvider = NULL;
+            KeyManager_Certificate_Free((Certificate*) cConnection->clientCertificate);
+            cConnection->clientCertificate = NULL;
+            KeyManager_Certificate_Free((Certificate*) cConnection->serverCertificate);
+            cConnection->serverCertificate = NULL;
+            KeyManager_AsymmetricKey_Free((AsymmetricKey*) cConnection->clientKey);
+            cConnection->clientKey = NULL;
         }
-        cConnection->pkiProvider = NULL;
-        KeyManager_Certificate_Free((Certificate*) cConnection->clientCertificate);
-        cConnection->clientCertificate = NULL;
-        KeyManager_Certificate_Free((Certificate*) cConnection->serverCertificate);
-        cConnection->serverCertificate = NULL;
-        KeyManager_AsymmetricKey_Free((AsymmetricKey*) cConnection->clientKey);
-        cConnection->clientKey = NULL;
         SOPC_Channel_Delete(channel);
     }
 }
