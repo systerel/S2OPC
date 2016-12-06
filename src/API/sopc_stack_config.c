@@ -41,6 +41,8 @@ SOPC_StatusCode StackConfiguration_Initialize(){
     }
     Namespace_Initialize(g_stackConfiguration.nsTable);
     status = Socket_Network_Initialize();
+    if(STATUS_OK == status)
+        status = SOPC_SocketManager_Config_Init();
     InitPlatformDependencies();
     return status;
 }
@@ -60,6 +62,7 @@ void StackConfiguration_Clear(){
     g_stackConfiguration.nsTable = NULL;
     g_stackConfiguration.encTypesTable = NULL;
     g_stackConfiguration.nbEncTypesTable = 0;
+    SOPC_SocketManager_Config_Clear();
     Socket_Network_Clear();
     StackConfiguration_Unlocked();
     initDone = FALSE;

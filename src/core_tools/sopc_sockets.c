@@ -24,6 +24,7 @@
 #include "sopc_stack_csts.h"
 
 SOPC_SocketManager globalSocketMgr;
+uint8_t            globalInitialized = FALSE;
 
 // Counter to check <= OPCUA_MAXCONNECTIONS
 static uint32_t globalNbSockets = 0;
@@ -125,6 +126,26 @@ SOPC_SocketManager* SOPC_SocketManager_GetGlobal(){
     return &globalSocketMgr;
 }
 
+SOPC_StatusCode SOPC_SocketManager_Config_Init(){
+    SOPC_StatusCode status = STATUS_NOK;
+    globalNbSockets = 0;
+#if OPCUA_MULTITHREADED == FALSE
+    status = SOPC_SocketManager_Initialize(SOPC_SocketManager_GetGlobal(), OPCUA_MAXCONNECTIONS);
+#else
+    status = STATUS_OK;
+#endif //OPCUA_MULTITHREADED
+    return status;
+}
+
+void SOPC_SocketManager_Config_Clear(){
+#if OPCUA_MULTITHREADED == FALSE
+    SOPC_SocketManager_Clear(SOPC_SocketManager_GetGlobal());
+#else
+    NULL;
+#endif //OPCUA_MULTITHREADED
+    return;
+}
+
 SOPC_SocketManager* SOPC_SocketManager_Create(uint32_t nbSockets){
     SOPC_SocketManager* socketMgr = NULL;
     if(nbSockets > 0){
@@ -143,6 +164,7 @@ SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
                                               uint32_t            nbSockets){
     uint32_t idx = 0;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+
     if(globalNbSockets + nbSockets > OPCUA_MAXCONNECTIONS)
         return STATUS_NOK;
 
@@ -165,6 +187,7 @@ SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
 }
 
 void SOPC_SocketManager_Clear(SOPC_SocketManager* socketMgr){
+
     if(socketMgr != NULL &&
        socketMgr->nbSockets > 0 &&
        socketMgr->sockets != NULL){

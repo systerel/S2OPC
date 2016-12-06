@@ -86,8 +86,8 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion){
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
 #if OPCUA_MULTITHREADED == FALSE
+        // Will use the global socket manager
         connection->socketManager = NULL;
-        SOPC_SocketManager_Initialize(SOPC_SocketManager_GetGlobal(), OPCUA_MAXCONNECTIONS);
 #else
         connection->socketManager = SOPC_SocketManager_Create(1);
 #endif //OPCUA_MULTITHREADED

@@ -67,6 +67,10 @@ SOPC_SocketManager;
 
 SOPC_SocketManager* SOPC_SocketManager_GetGlobal(void);
 
+SOPC_StatusCode SOPC_SocketManager_Config_Init(void);
+
+void SOPC_SocketManager_Config_Clear(void);
+
 SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
                                               uint32_t            nbSockets);
 
