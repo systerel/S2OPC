@@ -23,6 +23,9 @@
 #ifndef SOPC_SINGLY_LINKED_LIST_H_
 #define SOPC_SINGLY_LINKED_LIST_H_
 
+#include <stdlib.h>
+#include <stdint.h>
+
 /**
  *  \brief Singly linked list structure
  */
