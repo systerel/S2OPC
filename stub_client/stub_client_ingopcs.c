@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "opcua_identifiers.h"
 #include "sopc_stack_config.h"
@@ -200,7 +201,7 @@ int main(void){
         loopCpt++;
 #if OPCUA_MULTITHREADED
     	// just wait for callback called
-    	OpcUa_Thread_Sleep (sleepTimeout);
+    	assert(FALSE);
 #else
     	// Retrieve received messages on socket
     	status = SOPC_TreatReceivedMessages(sleepTimeout);
@@ -235,7 +236,7 @@ int main(void){
         loopCpt++;
 #if OPCUA_MULTITHREADED
     	// just wait for callback
-    	OpcUa_Thread_Sleep (sleepTimeout);
+        assert(FALSE);
 #else
     	// Retrieve received messages on socket
     	status = SOPC_TreatReceivedMessages(sleepTimeout);
