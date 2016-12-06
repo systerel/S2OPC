@@ -65,7 +65,8 @@ void SC_PendingRequestDelete(PendingRequest* pRequest){
 
 SC_ClientConnection* SC_Client_Create(){
     SC_ClientConnection* scClientConnection = NULL;
-    SC_Connection* sConnection = SC_Create();
+    TCP_UA_Connection* connection = TCP_UA_Connection_Create(scProtocolVersion, FALSE); // Server side connection == FALSE
+    SC_Connection* sConnection = SC_Create(connection);
 
     if(sConnection != NULL){
         scClientConnection = (SC_ClientConnection *) malloc (sizeof(SC_ClientConnection));
@@ -76,7 +77,6 @@ SC_ClientConnection* SC_Client_Create(){
             scClientConnection->securityMode = OpcUa_MessageSecurityMode_Invalid;
             SOPC_String_Initialize(&scClientConnection->securityPolicy);
 
-            sConnection->state = SC_Connection_Disconnected;
             scClientConnection->instance = sConnection;
 
             // TODO: limit set by configuration insopc_stacks_csts ?
@@ -94,6 +94,7 @@ SC_ClientConnection* SC_Client_Create(){
             }
         }
     }else{
+        TCP_UA_Connection_Delete(connection);
         SC_Delete(sConnection);
     }
     return scClientConnection;
@@ -393,6 +394,7 @@ SOPC_StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnecti
     const uint32_t validateSenderCertificateTrue = 1; // True: always activated as indicated in API
     const uint32_t isSymmetricFalse = FALSE;
     const uint32_t isPrecCryptoDataFalse = FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
+    uint32_t secureChannelId = 0;
     uint32_t requestId = 0;
     uint32_t snPosition = 0;
     PendingRequest* pRequest = NULL;
@@ -410,8 +412,21 @@ SOPC_StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnecti
     // Message header already managed by transport layer
     // (except secure channel Id)
     if(status == STATUS_OK){
-        status = SC_DecodeSecureMsgSCid(cConnection->instance,
-                                        transportMsgBuffer);
+        status = SOPC_UInt32_Read(&secureChannelId, transportMsgBuffer);
+
+        if(status == STATUS_OK){
+            if(secureChannelId == 0){
+                // A server cannot attribute 0 as secure channel id:
+                //  not so clear but implied by 6.7.6 part 6: "may be 0 if the Message is an OPN"
+                status = STATUS_INVALID_RCV_PARAMETER;
+            }else if(cConnection->instance->secureChannelId == 0){
+                // Assign Id provided by server
+                cConnection->instance->secureChannelId = secureChannelId;
+            }else if(cConnection->instance->secureChannelId != secureChannelId){
+                // Different Id assigned by server: invalid case (id never changes on same connection instance)
+                status = STATUS_INVALID_RCV_PARAMETER;
+            }
+        }
     }
 
     if(status == STATUS_OK){
@@ -602,16 +617,21 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     return status;
 }
 
-SOPC_StatusCode OnTransportEvent_CB(void*           connection,
-                                    void*           callbackData,
+SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                                     ConnectionEvent event,
                                     SOPC_MsgBuffer* msgBuffer,
                                     SOPC_StatusCode status)
 {
     SC_ClientConnection* cConnection = (SC_ClientConnection*) callbackData;
-    TCP_UA_Connection* tcpConnection = (TCP_UA_Connection*) connection;
+    TCP_UA_Connection* tcpConnection = NULL;
     SOPC_StatusCode retStatus = STATUS_OK;
-    assert(cConnection->instance->transportConnection == tcpConnection);
+
+    if(NULL == cConnection || NULL == cConnection->instance ||
+       NULL == cConnection->instance->transportConnection)
+        return STATUS_NOK;
+
+    tcpConnection = cConnection->instance->transportConnection;
+
     switch(event){
         case ConnectionEvent_Connected:
             assert(status == STATUS_OK);
@@ -650,38 +670,41 @@ SOPC_StatusCode OnTransportEvent_CB(void*           connection,
             break;
 
         case ConnectionEvent_Message:
-            assert(status == STATUS_OK);
-            switch(msgBuffer->secureType){
-                case SOPC_OpenSecureChannel:
-                    if(cConnection->instance->state == SC_Connection_Connecting_Secure){
-                        // Receive Open Secure Channel response
-                        retStatus = Receive_OpenSecureChannelResponse(cConnection, msgBuffer);
-                        if(retStatus == STATUS_OK){
-                            cConnection->instance->state = SC_Connection_Connected;
-                            // TODO: cases in which retStatus != OK should be sent ?
-                            retStatus = cConnection->callback(cConnection,
-                                                              cConnection->callbackData,
-                                                              SOPC_ConnectionEvent_Connected,
-                                                              retStatus);
+            if(STATUS_OK == status){
+                switch(msgBuffer->secureType){
+                    case SOPC_OpenSecureChannel:
+                        if(cConnection->instance->state == SC_Connection_Connecting_Secure){
+                            // Receive Open Secure Channel response
+                            retStatus = Receive_OpenSecureChannelResponse(cConnection, msgBuffer);
+                            if(retStatus == STATUS_OK){
+                                cConnection->instance->state = SC_Connection_Connected;
+                                // TODO: cases in which retStatus != OK should be sent ?
+                                retStatus = cConnection->callback(cConnection,
+                                                                  cConnection->callbackData,
+                                                                  SOPC_ConnectionEvent_Connected,
+                                                                  retStatus);
+                            }
+                        }else{
+                            retStatus = STATUS_INVALID_RCV_PARAMETER;
                         }
-                    }else{
-                        retStatus = STATUS_INVALID_RCV_PARAMETER;
-                    }
-                    break;
-                case SOPC_CloseSecureChannel:
-                    if(cConnection->instance->state == SC_Connection_Connected){
-                        assert(FALSE);
-                    }else{
-                        retStatus = STATUS_INVALID_RCV_PARAMETER;
-                    }
-                    break;
-                case SOPC_SecureMessage:
-                    if(cConnection->instance->state == SC_Connection_Connected){
-                        retStatus = Receive_ServiceResponse(cConnection, msgBuffer);
-                    }else{
-                        retStatus = STATUS_INVALID_RCV_PARAMETER;
-                    }
-                    break;
+                        break;
+                    case SOPC_CloseSecureChannel:
+                        if(cConnection->instance->state == SC_Connection_Connected){
+                            assert(FALSE);
+                        }else{
+                            retStatus = STATUS_INVALID_RCV_PARAMETER;
+                        }
+                        break;
+                    case SOPC_SecureMessage:
+                        if(cConnection->instance->state == SC_Connection_Connected){
+                            retStatus = Receive_ServiceResponse(cConnection, msgBuffer);
+                        }else{
+                            retStatus = STATUS_INVALID_RCV_PARAMETER;
+                        }
+                        break;
+                }
+            }else{
+                retStatus = status;
             }
             break;
         case ConnectionEvent_Error:
@@ -690,8 +713,6 @@ SOPC_StatusCode OnTransportEvent_CB(void*           connection,
             cConnection->instance->state = SC_Connection_Disconnected;
             //scConnection->callback: TODO: incompatible types to modify in foundation code
             break;
-        default:
-            assert(FALSE);
     }
     return retStatus;
 }

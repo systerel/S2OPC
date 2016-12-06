@@ -67,4 +67,7 @@
 // Maximum number of simultaneous connections managed by stack
 #define OPCUA_MAXCONNECTIONS 150
 
+// Maximum number of simultaneous connections on 1 endpoint managed by stack
+#define OPCUA_ENDPOINT_MAXCONNECTIONS 50
+
 #endif /* SOPC_STACK_CSTS_H_ */

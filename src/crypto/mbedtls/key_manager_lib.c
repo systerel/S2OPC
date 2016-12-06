@@ -298,7 +298,7 @@ SOPC_StatusCode KeyManager_Certificate_GetThumbprint(const CryptoProvider *pProv
  * \warning     \p pKey is not valid anymore when \p pCert is freed.
  */
 SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
-                                               AsymmetricKey *pKey)
+                                                    AsymmetricKey *pKey)
 {
     if(NULL == pCert || NULL == pKey)
         return STATUS_INVALID_PARAMETERS;

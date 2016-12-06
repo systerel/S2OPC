@@ -30,8 +30,7 @@ typedef enum {
     SOCKET_WRITE_EVENT,
     SOCKET_CLOSE_EVENT,
     SOCKET_EXCEPT_EVENT,
-    SOCKET_TIMEOUT_EVENT,
-    SOCKET_SHUTDOWN_EVENT,
+//    SOCKET_TIMEOUT_EVENT,
     SOCKET_CONNECT_EVENT,
     SOCKET_ACCEPT_EVENT} SOPC_Socket_Event;
 
@@ -95,6 +94,10 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
                                                       SOPC_Socket_EventCB socketCallback,
                                                       void*               callbackData,
                                                       SOPC_Socket**       listenerSocket);
+
+SOPC_StatusCode SOPC_SocketManager_ConfigureAcceptedSocket(SOPC_Socket*        acceptedSocket,
+                                                           SOPC_Socket_EventCB socketCallback,
+                                                           void*               callbackData);
 
 SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                                         uint32_t            msecTimeout);

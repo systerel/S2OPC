@@ -32,6 +32,8 @@
 #define TCP_UA_HEADER_LENGTH 8
 /** Length of a TCP UA ACK message */
 #define TCP_UA_ACK_MSG_LENGTH 28
+/** Minimum length of a TCP UA HELLO message (without including URL string content but only its size)*/
+#define TCP_UA_HEL_MSG_LENGTH 32
 /** Minimum length of a TCP UA ERROR message */
 #define TCP_UA_ERR_MIN_MSG_LENGTH 16
 

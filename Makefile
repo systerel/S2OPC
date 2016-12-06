@@ -51,9 +51,10 @@ BUILD_DIR_SED=$(subst /,\/,$(BUILD_DIR))
 ### srcs directories definition
 UASTACK_DIR=$(WORKSPACE_DIR)/src/
 STUBCLIENT_DIR=$(WORKSPACE_DIR)/stub_client
+STUBSERVER_DIR=$(WORKSPACE_DIR)/stub_server
 TESTS_DIR=$(WORKSPACE_DIR)/test/ingopcs
 ### concatenate all srcs directories
-C_SRC_DIRS=$(UASTACK_DIR) $(STUBCLIENT_DIR) $(TESTS_DIR)
+C_SRC_DIRS=$(UASTACK_DIR) $(STUBCLIENT_DIR) $(STUBSERVER_DIR) $(TESTS_DIR)
 
 ## Stack
 ### includes stack
@@ -97,7 +98,7 @@ DEFS=$(DEF_STACK)
 
 default: all
 
-all: config $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/check_stack
+all: config $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs $(EXEC_DIR)/check_stack
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
@@ -143,6 +144,10 @@ $(PLATFORM_BUILD_DIR)/%.o:
 	@sed 's/^\(.*\)\.o:/$(PLATFORM_BUILD_DIR_SED)\/\1.o:/g' $^.tmp > $@
 
 $(EXEC_DIR)/stub_client_ingopcs: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o
+	@echo "Linking $@..."
+	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
+
+$(EXEC_DIR)/stub_server_ingopcs: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server_ingopcs.o
 	@echo "Linking $@..."
 	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
 

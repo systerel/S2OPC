@@ -30,7 +30,7 @@ typedef struct {
     uint32_t channelId;
     uint32_t tokenId;
     int64_t  createdAt;
-    int32_t  revisedLifetime;
+    uint32_t revisedLifetime;
 } SC_SecurityToken;
 
 typedef enum SC_ConnectionState
@@ -58,7 +58,7 @@ typedef enum {
 
 
 typedef struct {
-    TCP_UA_Connection*   transportConnection;
+    TCP_UA_Connection*        transportConnection;
     SC_ConnectionState        state;
     uint32_t                  startTime;
     SOPC_ByteString           runningAppCertificate;
@@ -84,10 +84,9 @@ typedef struct {
     uint32_t                  lastSeqNumReceived;
     uint32_t                  lastRequestIdSent;
     uint32_t                  secureChannelId;
-
 } SC_Connection;
 
-SC_Connection* SC_Create (void);
+SC_Connection* SC_Create (TCP_UA_Connection* connection);
 void SC_Delete (SC_Connection* scConnection);
 
 SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
@@ -133,6 +132,20 @@ SOPC_StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
 
 SOPC_StatusCode SC_DecodeSecureMsgSCid(SC_Connection* scConnection,
                                        SOPC_MsgBuffer*  transportBuffer);
+
+SOPC_StatusCode SC_DecodeAsymSecurityHeader_SecurityPolicy(SC_Connection*  scConnection,
+                                                           SOPC_MsgBuffer* transportBuffer,
+                                                           SOPC_String*    securityPolicy);
+
+
+SOPC_StatusCode SC_DecodeAsymSecurityHeader_Certificates(SC_Connection*     scConnection,
+                                                         SOPC_MsgBuffer*    transportBuffer,
+                                                         const PKIProvider* pkiProvider,
+                                                         uint32_t           validateSenderCert,
+                                                         uint8_t            enforceOnSecuMode,
+                                                         uint32_t*          sequenceNumberPosition,
+                                                         uint8_t*           senderCertificatePresence,
+                                                         uint8_t*           receiverCertificatePresense);
 
 SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection,
                                              const PKIProvider* pkiProvider,

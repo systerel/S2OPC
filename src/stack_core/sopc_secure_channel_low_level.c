@@ -53,9 +53,8 @@ static const SOPC_String SOPC_String_Security_Policy_Basic256Sha256 = {
         .DoNotClear = 1
 };
 
-SC_Connection* SC_Create (){
+SC_Connection* SC_Create (TCP_UA_Connection* connection){
     SC_Connection* sConnection = NULL;
-    TCP_UA_Connection* connection = TCP_UA_Connection_Create(scProtocolVersion);
 
     if(connection != NULL){
         sConnection = (SC_Connection *) malloc(sizeof(SC_Connection));
@@ -63,7 +62,7 @@ SC_Connection* SC_Create (){
         if(sConnection != 0){
             memset (sConnection, 0, sizeof(SC_Connection));
             sConnection->transportConnection = connection;
-            sConnection->state = SC_Connection_Error;
+            sConnection->state = SC_Connection_Disconnected;
             SOPC_ByteString_Initialize(&sConnection->runningAppCertificate);
             SOPC_ByteString_Initialize(&sConnection->otherAppCertificate);
             SOPC_String_Initialize(&sConnection->currentSecuPolicy);
@@ -114,18 +113,22 @@ SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
                                              const Certificate*   runningAppCertificate,
                                              const AsymmetricKey* runningAppPrivateKey,
                                              const Certificate*   otherAppCertificate){
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t certLength = 0;
     if(scConnection->runningAppCertificate.Length <= 0 &&
        scConnection->runningAppPrivateKey == NULL &&
+       scConnection->otherAppPublicKeyCert == NULL &&
        scConnection->otherAppCertificate.Length <= 0)
     {
         if(runningAppCertificate == NULL && runningAppPrivateKey == NULL &&
            otherAppCertificate == NULL &&
            scConnection->currentSecuMode == OpcUa_MessageSecurityMode_None)
         {
-            NULL; // None security mode: no certificate to use
-        }else{
+            status = STATUS_OK;; // None security mode: no certificate to use
+        }else if(runningAppCertificate != NULL && runningAppPrivateKey != NULL &&
+                 (otherAppCertificate != NULL || // For a client side connection other app certificate is mandatory
+                  scConnection->transportConnection->serverSideConnection != FALSE))
+        {
             scConnection->runningAppPublicKeyCert = runningAppCertificate;
             scConnection->runningAppPrivateKey = runningAppPrivateKey;
             status = KeyManager_Certificate_CopyDER(runningAppCertificate,
@@ -137,19 +140,38 @@ SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
                 scConnection->runningAppCertificate.Length = (int32_t) certLength;
             }
 
-            scConnection->otherAppPublicKeyCert = otherAppCertificate;
-            if(STATUS_OK == status){
-                certLength = 0;
-                status = KeyManager_Certificate_CopyDER(otherAppCertificate,
-                                                        &scConnection->otherAppCertificate.Data,
-                                                        &certLength);
-            }
+            if(otherAppCertificate != NULL){
+                scConnection->otherAppPublicKeyCert = otherAppCertificate;
+                if(STATUS_OK == status){
+                    certLength = 0;
+                    status = KeyManager_Certificate_CopyDER(otherAppCertificate,
+                                                            &scConnection->otherAppCertificate.Data,
+                                                            &certLength);
+                }
 
-            if(certLength > INT32_MAX){
-                status = STATUS_NOK;
-            }else{
-                scConnection->otherAppCertificate.Length = (int32_t) certLength;
+                if(certLength > INT32_MAX){
+                    status = STATUS_NOK;
+                }else{
+                    scConnection->otherAppCertificate.Length = (int32_t) certLength;
+                }
             }
+        }
+    }else{
+        status = STATUS_INVALID_STATE;
+    }
+    return status;
+}
+
+SOPC_StatusCode SC_InitOtherAppIdentity(SC_Connection*       scConnection,
+                                        Certificate*         otherAppCertificate,
+                                        SOPC_ByteString*     otherAppCertificateBs){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(scConnection->otherAppPublicKeyCert == NULL &&
+       scConnection->otherAppCertificate.Length <= 0)
+    {
+        status = SOPC_ByteString_Copy(&scConnection->otherAppCertificate, otherAppCertificateBs);
+        if(STATUS_OK == status){
+            scConnection->otherAppPublicKeyCert = otherAppCertificate;
         }
     }else{
         status = STATUS_INVALID_STATE;
@@ -1206,65 +1228,59 @@ SOPC_StatusCode SC_DecodeSecureMsgSCid(SC_Connection*  scConnection,
     }
 
     if(status == STATUS_OK){
-        if(secureChannelId == 0){
-            // A server cannot attribute 0 as secure channel id:
-            //  not so clear but implied by 6.7.6 part 6: "may be 0 if the Message is an OPN"
-            status = STATUS_INVALID_RCV_PARAMETER;
-        }else if(scConnection->secureChannelId == 0){
-            // Assign Id provided by server
-            scConnection->secureChannelId = secureChannelId;
-        }else if(scConnection->secureChannelId != secureChannelId){
+        if(scConnection->secureChannelId != secureChannelId){
             // Different Id assigned by server: invalid case (id never changes on same connection instance)
-            status = STATUS_INVALID_PARAMETERS;
+            status = STATUS_INVALID_RCV_PARAMETER;
         }
     }
 
     return status;
 }
 
-SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, // TODO: why SC_Connection and PKIProvider instead of Sc_ClientConnection which contains both ?
-                                             const PKIProvider* pkiProvider,
-                                             SOPC_MsgBuffer*    transportBuffer,
-                                             uint32_t           validateSenderCert,
-                                             uint32_t*          sequenceNumberPosition)
+SOPC_StatusCode SC_DecodeAsymSecurityHeader_SecurityPolicy(SC_Connection*  scConnection,
+                                                           SOPC_MsgBuffer* transportBuffer,
+                                                           SOPC_String*    securityPolicy)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(scConnection != NULL &&
+       transportBuffer != NULL &&
+       securityPolicy != NULL)
+        {
+            status = SOPC_String_Read(securityPolicy, transportBuffer);
+        }
+        return status;
+}
+
+SOPC_StatusCode SC_DecodeAsymSecurityHeader_Certificates(SC_Connection*     scConnection,
+                                                         SOPC_MsgBuffer*    transportBuffer,
+                                                         const PKIProvider* pkiProvider,
+                                                         uint32_t           validateSenderCert,
+                                                         uint8_t            enforceOnSecuMode,
+                                                         uint32_t*          sequenceNumberPosition,
+                                                         uint8_t*           senderCertificatePresence,
+                                                         uint8_t*           receiverCertificatePresense)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t toEncrypt = 1; // True
     uint32_t toSign = 1; // True
-
-    SOPC_String securityPolicy; // It's a byte string but it's same UA binary representation (use String for String_Compare)
-    SOPC_String_Initialize(&securityPolicy);
     SOPC_ByteString senderCertificate;
     SOPC_ByteString_Initialize(&senderCertificate);
     SOPC_ByteString receiverCertThumb;
     SOPC_ByteString_Initialize(&receiverCertThumb);
-
     if(scConnection != NULL &&
-       transportBuffer != NULL)
+       transportBuffer != NULL &&
+       sequenceNumberPosition != NULL &&
+       senderCertificatePresence != NULL &&
+       receiverCertificatePresense != NULL)
     {
-        // Asymmetric security header must use current security parameters
-        // (TODO: add guarantee we are treating last OPN sent: using pending requests ?)
-        toEncrypt = IsMsgEncrypted(scConnection->currentSecuMode,
-                                   transportBuffer);
-        toSign = IsMsgSigned(scConnection->currentSecuMode);
-        status = STATUS_OK;
-    }
-
-    // Security Policy:
-    if(status == STATUS_OK){
-        status = SOPC_String_Read(&securityPolicy, transportBuffer);
-
-        if(status == STATUS_OK){
-            int32_t secuPolicyComparison = 0;
-            status = SOPC_String_Compare(&scConnection->currentSecuPolicy,
-                                         &securityPolicy,
-                                         FALSE,
-                                         &secuPolicyComparison);
-
-            if(status != STATUS_OK || secuPolicyComparison != 0){
-                status = STATUS_INVALID_RCV_PARAMETER;
-            }
+        if(enforceOnSecuMode != FALSE){
+            // Asymmetric security header must use current security parameters
+            // (TODO: add guarantee we are treating last OPN sent: using pending requests ?)
+            toEncrypt = IsMsgEncrypted(scConnection->currentSecuMode,
+                                       transportBuffer);
+            toSign = IsMsgSigned(scConnection->currentSecuMode);
         }
+        status = STATUS_OK;
     }
 
     // Sender Certificate:
@@ -1274,15 +1290,19 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
             if (toSign == FALSE && senderCertificate.Length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not signed"
                 status = STATUS_INVALID_RCV_PARAMETER;
-            }else if(toSign != FALSE){
-                // Check certificate is the same as the one in memory
-                int32_t otherAppCertComparison = 0;
-                status = SOPC_ByteString_Compare(&scConnection->otherAppCertificate,
-                                            &senderCertificate,
-                                            &otherAppCertComparison);
+                *senderCertificatePresence = 1; // TRUE
+            }else if(toSign != FALSE && senderCertificate.Length > 0){
+                *senderCertificatePresence = 1; // TRUE
+                if(scConnection->transportConnection->serverSideConnection == FALSE){
+                    // Check certificate is the same as the one in memory (CLIENT SIDE ONLY)
+                    int32_t otherAppCertComparison = 0;
+                    status = SOPC_ByteString_Compare(&scConnection->otherAppCertificate,
+                                                     &senderCertificate,
+                                                     &otherAppCertComparison);
 
-                if(status != STATUS_OK || otherAppCertComparison != 0){
-                    status = STATUS_INVALID_RCV_PARAMETER;
+                    if(status != STATUS_OK || otherAppCertComparison != 0){
+                        status = STATUS_INVALID_RCV_PARAMETER;
+                    }
                 }
 
                 if(status == STATUS_OK && validateSenderCert != FALSE){
@@ -1294,9 +1314,28 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
                                                                      pkiProvider,
                                                                      cert);
                     }
-                    if(NULL != cert)
-                        KeyManager_Certificate_Free(cert);
+
+                    if(scConnection->transportConnection->serverSideConnection == FALSE){
+                        if(NULL != cert)
+                            KeyManager_Certificate_Free(cert);
+                    }else{
+                        if(status == STATUS_OK){
+                            // Set as valid other application certificate (SERVER SIDE ONLY)
+                            status = SC_InitOtherAppIdentity(scConnection,
+                                                             cert,
+                                                             &senderCertificate);
+                        }else{
+                            // Error case (SERVER SIDE ONLY)
+                            if(NULL != cert)
+                                KeyManager_Certificate_Free(cert);
+                        }
+                    }
                 }
+            }else if(enforceOnSecuMode == FALSE){
+                // Without security mode to enforce, absence could be normal
+                *senderCertificatePresence = FALSE;
+            }else{
+                status = STATUS_INVALID_RCV_PARAMETER;
             }
         }
     }
@@ -1309,15 +1348,16 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
             if(toEncrypt == FALSE && receiverCertThumb.Length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not encrypted"
                 status =STATUS_INVALID_RCV_PARAMETER;
-            }else if(toEncrypt != FALSE){
+                *receiverCertificatePresense = 1; // TRUE
+            }else if(toEncrypt != FALSE && receiverCertThumb.Length > 0){
                 // Check thumbprint matches current app certificate thumbprint
-
+                *receiverCertificatePresense = 1; // TRUE
                 SOPC_ByteString curAppCertThumbprint;
                 uint32_t thumbprintLength = 0;
                 int32_t runningAppCertComparison = 0;
 
                 status = CryptoProvider_CertificateGetLength_Thumbprint(scConnection->currentCryptoProvider,
-                                                                    &thumbprintLength);
+                                                                        &thumbprintLength);
 
                 if(STATUS_OK == status && thumbprintLength > INT32_MAX){
                     status = STATUS_NOK;
@@ -1351,16 +1391,63 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
 
                 SOPC_ByteString_Clear(&curAppCertThumbprint);
 
-            } // if toEncrypt
+            }else if(enforceOnSecuMode == FALSE){ // if toEncrypt
+                // Without security mode to enforce, absence could be normal
+                *receiverCertificatePresense = FALSE;
+            }else{
+                status = STATUS_INVALID_RCV_PARAMETER;
+            }
+
             // Set the sequence number position which is the next position to read
             //  since whole asymmetric security header was read
             *sequenceNumberPosition = transportBuffer->buffers->position;
         } // if decoded thumbprint
     }
 
-    SOPC_String_Clear(&securityPolicy);
     SOPC_ByteString_Clear(&senderCertificate);
     SOPC_ByteString_Clear(&receiverCertThumb);
+
+    return status;
+}
+
+SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection,
+                                             const PKIProvider* pkiProvider,
+                                             SOPC_MsgBuffer*    transportBuffer,
+                                             uint32_t           validateSenderCert,
+                                             uint32_t*          sequenceNumberPosition)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint8_t senderCertificatePresence, receiverCertificatePresence;
+
+    SOPC_String securityPolicy; // It's a byte string but it's same UA binary representation (use String for String_Compare)
+    SOPC_String_Initialize(&securityPolicy);
+
+    status = SC_DecodeAsymSecurityHeader_SecurityPolicy(scConnection, transportBuffer, &securityPolicy);
+
+    // Security Policy:
+    if(status == STATUS_OK){
+        int32_t secuPolicyComparison = 0;
+        status = SOPC_String_Compare(&scConnection->currentSecuPolicy,
+                                     &securityPolicy,
+                                     FALSE,
+                                     &secuPolicyComparison);
+
+        if(status != STATUS_OK || secuPolicyComparison != 0){
+            status = STATUS_INVALID_RCV_PARAMETER;
+        }
+    }
+
+    // Sender and Receiver Certificate:
+    if(status == STATUS_OK){
+        status = SC_DecodeAsymSecurityHeader_Certificates(scConnection, transportBuffer, pkiProvider,
+                                                          validateSenderCert,
+                                                          1, // enforceSecuMode == TRUE
+                                                          sequenceNumberPosition,
+                                                          &senderCertificatePresence,
+                                                          &receiverCertificatePresence);
+    }
+
+    SOPC_String_Clear(&securityPolicy);
 
     return status;
 }
@@ -1515,7 +1602,7 @@ SOPC_StatusCode SC_DecryptMsg(SC_Connection*  scConnection,
 SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
                                  SOPC_NamespaceTable*  namespaceTable,
                                  SOPC_EncodeableType** knownTypes,
-                                 SOPC_EncodeableType*  respEncType,
+                                 SOPC_EncodeableType*  recvEncType,
                                  SOPC_EncodeableType*  errEncType,
                                  SOPC_EncodeableType** receivedEncType,
                                  void**                encodeableObj)
@@ -1527,18 +1614,18 @@ SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
     uint16_t nsIndex = 0;
     SOPC_NodeId_Initialize(&nodeId);
     if(receptionBuffer != NULL && namespaceTable != NULL && encodeableObj != NULL &&
-       (knownTypes != NULL || respEncType != NULL))
+       (knownTypes != NULL || recvEncType != NULL))
     {
         status = SOPC_NodeId_Read(&nodeId, receptionBuffer);
     }
 
     if(status == STATUS_OK && nodeId.IdentifierType == OpcUa_IdType_Numeric){
 
-        if(respEncType != NULL){
+        if(recvEncType != NULL){
             // Case in which we know the expected type from the request Id
-            if (nodeId.Data.Numeric == respEncType->TypeId || nodeId.Data.Numeric == respEncType->BinaryEncodingTypeId){
-    //          || nodeId.data.numeric == respEncType->xmlTypeId){ => what is the point to accept this type ?
-                *receivedEncType = respEncType;
+            if (nodeId.Data.Numeric == recvEncType->TypeId || nodeId.Data.Numeric == recvEncType->BinaryEncodingTypeId){
+    //          || nodeId.data.numeric == recvEncType->xmlTypeId){ => what is the point to accept this type ?
+                *receivedEncType = recvEncType;
             }else if(errEncType != NULL &&
                      (nodeId.Data.Numeric == errEncType->TypeId || nodeId.Data.Numeric == errEncType->BinaryEncodingTypeId)){
     //               || nodeId.data.numeric == errEncType->xmlTypeId){ => what is the point to accept this type ?
@@ -1717,7 +1804,7 @@ SOPC_StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
         // use Get_Rcv_Protocol_Version and check it is the same as the one received in SC
         if(TCP_UA_Connection_GetReceiveProtocolVersion(scConnection->transportConnection,
                                                        &transportProtocolVersion)
-                   != FALSE)
+           != FALSE)
         {
             if(scProtocolVersion != transportProtocolVersion){
                 status = STATUS_INVALID_RCV_PARAMETER;

@@ -366,6 +366,8 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
 
                 if(status != STATUS_OK){
                     SOPC_Socket_Close(freeSocket);
+                }else{
+                    listenStatus = STATUS_OK;
                 }
             }
         }
@@ -389,6 +391,20 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
 
     Socket_AddrInfoDelete(&res);
 
+    return status;
+}
+
+SOPC_StatusCode SOPC_SocketManager_ConfigureAcceptedSocket(SOPC_Socket*        acceptedSocket,
+                                                           SOPC_Socket_EventCB socketCallback,
+                                                           void*               callbackData)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+
+    if(acceptedSocket != NULL && socketCallback != NULL){
+        acceptedSocket->eventCallback = socketCallback;
+        acceptedSocket->cbData = callbackData;
+        status = STATUS_OK;
+    }
     return status;
 }
 
@@ -468,8 +484,9 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                                     if(status == STATUS_OK){
                                         acceptSock->isUsed = 1;
                                         acceptSock->state = SOCKET_CONNECTED;
-                                        acceptSock->eventCallback = uaSock->eventCallback;
-                                        acceptSock->cbData = uaSock->cbData;
+                                        callback(acceptSock,
+                                                 SOCKET_ACCEPT_EVENT,
+                                                 uaSock->cbData);
                                     }
                                 }
                             }else{

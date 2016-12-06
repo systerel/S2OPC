@@ -1,0 +1,910 @@
+/*
+ *  Copyright (C) 2016 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "sopc_secure_channel_server_endpoint.h"
+
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "sopc_tcp_ua_listener.h"
+#include "sopc_types.h"
+#include "sopc_encoder.h"
+#include "crypto_profiles.h"
+
+typedef struct TransportEvent_CallbackData {
+    SC_ServerEndpoint* endpoint;
+    SC_Connection*     scConnection;
+    uint32_t           scConnectionId;
+} TransportEvent_CallbackData;
+
+TransportEvent_CallbackData* Create_TransportEventCbData(SC_ServerEndpoint* endpoint,
+                                                         SC_Connection*     scConnection,
+                                                         uint32_t           scConnectionId)
+{
+    TransportEvent_CallbackData* result = malloc(sizeof(TransportEvent_CallbackData));
+    if(NULL != result){
+        result->endpoint = endpoint;
+        result->scConnection = scConnection;
+        result->scConnectionId = scConnectionId;
+    }
+    return result;
+}
+
+void Delete_TransportEventCbData(TransportEvent_CallbackData* cbData){
+    if(NULL != cbData){
+        free(cbData);
+    }
+}
+
+SOPC_StatusCode Read_OpenSecureChannelRequest(SC_Connection*       scConnection,
+                                              SOPC_SecurityPolicy* secuPolicy,
+                                              uint8_t              senderCertPresence,
+                                              uint8_t              receiverCertPresence,
+                                              uint32_t*            requestHandle)
+{
+    assert(scConnection != NULL && secuPolicy != NULL && requestHandle != NULL);
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_OpenSecureChannelRequest* encObj = NULL;
+    SOPC_EncodeableType* receivedType = NULL;
+
+    status = SC_DecodeMsgBody(scConnection->receptionBuffers,
+                              &scConnection->receptionBuffers->nsTable,
+                              NULL,
+                              &OpcUa_OpenSecureChannelRequest_EncodeableType,
+                              NULL,
+                              &receivedType,
+                              (void**) &encObj);
+    if(STATUS_OK == status){
+        status = SC_CheckReceivedProtocolVersion(scConnection, encObj->ClientProtocolVersion);
+    }
+
+    if(STATUS_OK == status){
+        *requestHandle = encObj->RequestHeader.RequestHandle;
+        // TODO: in case of renew: when moving from current to prec ?
+        if(encObj->RequestType == OpcUa_SecurityTokenRequestType_Issue){
+            switch(encObj->SecurityMode){
+                case OpcUa_MessageSecurityMode_Invalid:
+                    status = STATUS_INVALID_RCV_PARAMETER;
+                    break;
+                case OpcUa_MessageSecurityMode_None:
+                    if((SECURITY_MODE_NONE_MASK & secuPolicy->securityModes) != 0){
+                        if(senderCertPresence == FALSE && receiverCertPresence == FALSE){
+                            status = STATUS_OK;
+                        }else{
+                            // Certificates shall be null when Secu mode = None (part 6. table 27)
+                            status = STATUS_NOK;
+                        }
+                    }
+                    break;
+                case OpcUa_MessageSecurityMode_Sign:
+                    if((SECURITY_MODE_SIGN_MASK & secuPolicy->securityModes) != 0){
+                        if(senderCertPresence != FALSE && receiverCertPresence != FALSE){
+                            status = STATUS_OK;
+                        }else{
+                            // Certificates shall not be null when Secu mode = Sign (part 6. table 27)
+                            // Note: message is always signed and encrypted in asymmetric security headers
+                            // since it is necessary for establishment of symmetric encryption
+                            status = STATUS_NOK;
+                        }
+                    }
+                    break;
+                case OpcUa_MessageSecurityMode_SignAndEncrypt:
+                    if((SECURITY_MODE_SIGNANDENCRYPT_MASK & secuPolicy->securityModes) != 0){
+                        if(senderCertPresence != FALSE && receiverCertPresence != FALSE){
+                            status = STATUS_OK;
+                        }else{
+                            // Certificates shall not be null when Secu mode = Sign (part 6. table 27)
+                            // Note: message is always signed and encrypted in asymmetric security headers
+                            // since it is necessary for establishment of symmetric encryption
+                            status = STATUS_NOK;
+                        }
+                    }
+                    break;
+            }
+            if(STATUS_OK == status){
+                scConnection->currentSecuMode = encObj->SecurityMode;
+            }
+
+            if(STATUS_OK == status){
+                if(encObj->RequestedLifetime > OPCUA_SECURITYTOKEN_LIFETIME_MAX){
+                    scConnection->currentSecuToken.revisedLifetime = OPCUA_SECURITYTOKEN_LIFETIME_MAX;
+                }else if(encObj->RequestedLifetime < OPCUA_SECURITYTOKEN_LIFETIME_MIN){
+                    scConnection->currentSecuToken.revisedLifetime = OPCUA_SECURITYTOKEN_LIFETIME_MIN;
+                }else{
+                    scConnection->currentSecuToken.revisedLifetime = encObj->RequestedLifetime;
+                }
+            }
+
+
+            if(STATUS_OK == status && scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
+                uint32_t encryptKeyLength = 0, signKeyLength = 0, initVectorLength = 0;
+                SC_SecurityKeySet *pks = NULL;
+
+
+                status = CryptoProvider_GenerateSecureChannelNonce(scConnection->currentCryptoProvider,
+                                                                   &scConnection->currentNonce);
+
+                if(STATUS_OK == status){
+                    status = CryptoProvider_DeriveGetLengths(scConnection->currentCryptoProvider,
+                                                             &encryptKeyLength,
+                                                             &signKeyLength,
+                                                             &initVectorLength);
+                }
+
+                if(STATUS_OK == status && encObj->ClientNonce.Length > 0){
+                    scConnection->currentSecuKeySets.receiverKeySet = KeySet_Create();
+                    scConnection->currentSecuKeySets.senderKeySet = KeySet_Create();
+                    pks = scConnection->currentSecuKeySets.receiverKeySet;
+                    if(NULL != pks) {
+                        pks->signKey = SecretBuffer_New(signKeyLength);
+                        pks->encryptKey = SecretBuffer_New(encryptKeyLength);
+                        pks->initVector = SecretBuffer_New(initVectorLength);
+                    }
+                    pks = scConnection->currentSecuKeySets.senderKeySet;
+                    if(NULL != pks) {
+                        pks->signKey = SecretBuffer_New(signKeyLength);
+                        pks->encryptKey = SecretBuffer_New(encryptKeyLength);
+                        pks->initVector = SecretBuffer_New(initVectorLength);
+                    }
+                    status = CryptoProvider_DeriveKeySetsServer(scConnection->currentCryptoProvider,
+                                                                encObj->ClientNonce.Data,
+                                                                encObj->ClientNonce.Length,
+                                                                scConnection->currentNonce,
+                                                                scConnection->currentSecuKeySets.receiverKeySet,
+                                                                scConnection->currentSecuKeySets.senderKeySet);
+                }
+            }
+
+        }else{
+            // TODO: Renew: not managed for now
+            assert(FALSE);
+        }
+    }
+
+    OpcUa_OpenSecureChannelRequest_Clear(encObj);
+    free(encObj);
+
+    return status;
+}
+
+SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
+                                                 SC_Connection*     scConnection,
+                                                 SOPC_MsgBuffer*    transportMsgBuffer,
+                                                 uint32_t*          requestId,
+                                                 uint32_t*          requestHandle)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    const uint32_t validateSenderCertificateTrue = 1; // True: mandatory
+    const uint32_t isSymmetricFalse = FALSE;
+    const uint32_t isPrecCryptoDataFalse = FALSE; // TODO: add guarantee we are treating last OPN sent: using pending requests ?
+    uint32_t idx = 0;
+    int32_t secuPolicyComparison = 0;
+    uint8_t senderCertPresence = FALSE;
+    uint8_t receiverCertPresence = FALSE;
+    SOPC_String strSecuPolicy;
+    SOPC_String_Initialize(&strSecuPolicy);
+    SOPC_SecurityPolicy* secuPolicy;
+    uint32_t secureChannelId = 0;
+    uint32_t snPosition = 0;
+
+    if(scConnection != NULL && transportMsgBuffer != NULL){
+        status = STATUS_OK;
+    }
+
+    if(STATUS_OK == status &&
+       transportMsgBuffer->isFinal != SOPC_Msg_Chunk_Final){
+        // OPN request/response must be in one chunk only
+        status = STATUS_INVALID_RCV_PARAMETER;
+    }
+
+    // Message header already managed by transport layer
+    // (except secure channel Id)
+    if(STATUS_OK == status){
+        status = SOPC_UInt32_Read(&secureChannelId, transportMsgBuffer);
+    }
+
+    if(STATUS_OK == status){
+        // Decode asymmetric security header:
+        // - Check security policy
+        // - Validate other app certificate
+        // - Check current app certificate thumbprint
+        status = SC_DecodeAsymSecurityHeader_SecurityPolicy(scConnection, transportMsgBuffer, &strSecuPolicy);
+
+        // Check security policy correct
+        // TODO: check that in case of renew the security policy could change (=> if not just check same as old one)
+        secuPolicyComparison = -1;
+        for(idx = 0; idx < sEndpoint->nbSecurityPolicies && secuPolicyComparison != 0; idx++){
+            secuPolicy = &sEndpoint->securityPolicies[idx];
+            if(STATUS_OK == SOPC_String_Compare(&strSecuPolicy,
+                                                &secuPolicy->securityPolicy,
+                                                FALSE,
+                                                &secuPolicyComparison)){
+            }else{
+                // Do not consider result
+                secuPolicyComparison = -1;
+            }
+        }
+
+        // TODO: in case of renew: when moving from current to prec ?
+
+        if(secuPolicyComparison == 0 && secuPolicy != NULL && scConnection->currentSecuPolicy.Length <= 0){
+            status = SOPC_String_AttachFrom(&scConnection->currentSecuPolicy, &secuPolicy->securityPolicy);
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+
+    // TODO: in case of renew: when moving from current to prec ?
+    if(STATUS_OK == status && scConnection->currentCryptoProvider == NULL){
+        scConnection->currentCryptoProvider = CryptoProvider_Create(SOPC_String_GetRawCString(&secuPolicy->securityPolicy));
+        if(scConnection->currentCryptoProvider == NULL){
+            status = STATUS_NOK;
+        }
+    }else{
+        status = STATUS_NOK;
+    }
+
+    if(STATUS_OK == status){
+        status = SC_DecodeAsymSecurityHeader_Certificates(scConnection, transportMsgBuffer, sEndpoint->pkiProvider,
+                                                          validateSenderCertificateTrue, // always validate server cert
+                                                          FALSE, // enforceSecuMode == FALSE => unknown secu mode for now
+                                                          &snPosition,
+                                                          &senderCertPresence,
+                                                          &receiverCertPresence); // Sender and receiver certificates presence depend on secu mode
+    }
+
+    if(STATUS_OK == status){
+        // Since the security mode is not known before decoding (and possibly decrypting) the message
+        // we have to deduce it from the certificates presence (None or SignAndEncrypt only possible in OPN)
+        if(senderCertPresence == FALSE && receiverCertPresence == FALSE){
+            scConnection->currentSecuMode = OpcUa_MessageSecurityMode_None;
+        }else if(senderCertPresence != FALSE && receiverCertPresence != FALSE){
+            scConnection->currentSecuMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
+        }else{
+            status = STATUS_INVALID_RCV_PARAMETER;
+        }
+    }
+
+    if(STATUS_OK == status){
+        // Decrypt message content and store complete message in secure connection buffer
+        status = SC_DecryptMsg(scConnection,
+                               transportMsgBuffer,
+                               snPosition,
+                               isSymmetricFalse,
+                               isPrecCryptoDataFalse);
+    }
+
+    if(STATUS_OK == status){
+        // Check decrypted message signature
+        status = SC_VerifyMsgSignature(scConnection,
+                                       isSymmetricFalse,
+                                       isPrecCryptoDataFalse); // IsAsymmetric = TRUE
+    }
+
+    // TODO: differentiate errors after this point must generate a ServiceFaultMessage whereas precedent errors
+    //       must generate a transport error and close the connection
+
+    if(STATUS_OK == status){
+        status = SC_CheckSeqNumReceived(scConnection);
+    }
+
+    if(STATUS_OK == status){
+        // Retrieve request id
+        status = SOPC_UInt32_Read(requestId, scConnection->receptionBuffers);
+    }
+
+    if(STATUS_OK == status){
+        // Decode message body content
+        status = Read_OpenSecureChannelRequest(scConnection,
+                                               secuPolicy,
+                                               senderCertPresence,
+                                               receiverCertPresence,
+                                               requestHandle);
+    }
+
+    // Set the secure channel id
+    if(STATUS_OK == status){
+        if(secureChannelId == 0 && scConnection->secureChannelId == 0){
+            //TODO: on server side, randomize secure channel ids (table 26 part 6)!
+            // TODO: ensure ++ is not still in use ?
+            uint32_t decl = NULL;
+            // A server cannot attribute 0 as secure channel id:
+            //  not so clear but implied by 6.7.6 part 6: "may be 0 if the Message is an OPN"
+            sEndpoint->lastSecureChannelId++;
+            scConnection->secureChannelId = sEndpoint->lastSecureChannelId;
+        }else if(scConnection->secureChannelId != secureChannelId){
+            // Different Id between client and server: invalid case (id never changes on same connection instance)
+            status = STATUS_INVALID_RCV_PARAMETER;
+        }
+    }
+
+    // TODO: in case of renew: when moving from current to prec ?
+    if(STATUS_OK == status && scConnection->currentSecuToken.channelId == 0){
+        scConnection->currentSecuToken.channelId = scConnection->secureChannelId;
+    }else if(scConnection->currentSecuToken.channelId != scConnection->secureChannelId){
+        status = STATUS_NOK;
+    }
+
+    // TODO: in case of renew: when moving from current to prec ?
+    if(STATUS_OK == status && scConnection->currentSecuToken.tokenId == 0){
+        // TODO: generate token Id
+        uint32_t decl2 = NULL;
+        scConnection->currentSecuToken.tokenId = sEndpoint->lastSecureChannelId;
+    }else{
+        status = STATUS_NOK;
+    }
+
+    if(STATUS_OK == status && scConnection->currentSecuToken.createdAt == 0){
+        scConnection->currentSecuToken.createdAt = 0; // TODO: use current date
+    }else{
+        status = STATUS_NOK;
+    }
+
+    // Reset reception buffers for next messages
+    MsgBuffers_Reset(scConnection->receptionBuffers);
+
+    return status;
+}
+
+
+SOPC_StatusCode Write_OpenSecureChannelResponse(SC_Connection* scConnection,
+                                                uint32_t       requestHandle)
+{
+    SOPC_StatusCode status = STATUS_OK;
+    uint8_t* bytes = NULL;
+    OpcUa_OpenSecureChannelResponse openResponse;
+    OpcUa_OpenSecureChannelResponse_Initialize(&openResponse);
+
+    SOPC_MsgBuffer* sendBuf = scConnection->sendingBuffer;
+
+    //// Encode response header
+    // Encode 64 bits UtcTime => null ok ?
+    SOPC_DateTime_Clear(&openResponse.ResponseHeader.Timestamp);
+    // Encode requestHandler
+    openResponse.ResponseHeader.RequestHandle = requestHandle;
+    // Encode service result code: always OK since we should send tranport error or service fault in other cases
+    openResponse.ResponseHeader.ServiceResult = STATUS_OK;
+    // No service diagnostic (default)
+    // No of string table = 0 (default)
+    // String table = NULL (default)
+
+    // Extension object: additional header => null node id => no content
+    // !! Extensible parameter indicated in specification but Extension object in XML file !!
+    // Encoding body byte:
+    openResponse.ResponseHeader.AdditionalHeader.Encoding = SOPC_ExtObjBodyEncoding_None;
+    // Type Id: Node Id
+    openResponse.ResponseHeader.AdditionalHeader.TypeId.NodeId.IdentifierType = IdentifierType_Numeric;
+    openResponse.ResponseHeader.AdditionalHeader.TypeId.NodeId.Data.Numeric = SOPC_Null_Id;
+
+    //// Encode response content
+    // Server protocol version
+    openResponse.ServerProtocolVersion = scProtocolVersion;
+    // Security token
+    openResponse.SecurityToken.ChannelId = scConnection->currentSecuToken.channelId;
+    openResponse.SecurityToken.TokenId = scConnection->currentSecuToken.tokenId;
+    SOPC_DateTime_FromInt64(&openResponse.SecurityToken.CreatedAt, scConnection->currentSecuToken.createdAt);
+    openResponse.SecurityToken.RevisedLifetime = scConnection->currentSecuToken.revisedLifetime;
+    // Server nonce
+    bytes = SecretBuffer_Expose(scConnection->currentNonce);
+    status = SOPC_ByteString_CopyFromBytes(&openResponse.ServerNonce,
+                                           bytes,
+                                           SecretBuffer_GetLength(scConnection->currentNonce));
+
+    if(status == STATUS_OK){
+        status = SC_EncodeMsgBody(sendBuf,
+                                  &OpcUa_OpenSecureChannelResponse_EncodeableType,
+                                  &openResponse);
+    }
+
+    SecretBuffer_Unexpose(openResponse.ServerNonce.Data);
+    OpcUa_OpenSecureChannelResponse_Clear(&openResponse);
+
+    return status;
+}
+
+SOPC_StatusCode Send_OpenSecureChannelResponse(SC_Connection*     scConnection,
+                                               uint32_t           requestId,
+                                               uint32_t           requestHandle)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+
+    if(scConnection != NULL){
+        status = STATUS_OK;
+    }
+
+    // MaxBodySize to be computed prior any write in sending buffer
+    if(status == STATUS_OK){
+        status = SC_SetMaxBodySize(scConnection, FALSE);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_EncodeSecureMsgHeader(scConnection->sendingBuffer,
+                                          SOPC_OpenSecureChannel,
+                                          scConnection->secureChannelId);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_EncodeAsymmSecurityHeader(scConnection,
+                                              &scConnection->currentSecuPolicy);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_EncodeSequenceHeader(scConnection->sendingBuffer, requestId);
+    }
+
+    if(status == STATUS_OK){
+        status = Write_OpenSecureChannelResponse(scConnection, requestHandle);
+    }
+
+    if(status == STATUS_OK){
+        status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final);
+    }
+
+    return status;
+}
+
+SOPC_StatusCode Receive_ServiceRequest(SC_Connection*        scConnection,
+                                       SOPC_MsgBuffer*       transportMsgBuffer,
+                                       uint32_t*             requestId,
+                                       SOPC_EncodeableType** receivedEncType,
+                                       void**                receivedEncObj)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint8_t  abortReqPresence = 0;
+    uint32_t abortedRequestId = 0;
+    SOPC_StatusCode abortReqStatus = STATUS_NOK;
+    SOPC_String reason;
+    SOPC_String_Initialize(&reason);
+
+    // Message header already managed by transport layer
+    // (except secure channel Id)
+    if(scConnection != NULL && transportMsgBuffer != NULL &&
+       receivedEncType != NULL && receivedEncObj != NULL)
+    {
+        status = SC_CheckAbortChunk(scConnection->receptionBuffers,
+                                            &reason);
+        // Decoded request id to be aborted
+        abortReqPresence = 1;
+        abortedRequestId = *requestId;
+
+        if(status != STATUS_OK){
+            abortReqStatus = status;
+            //TODO: report (trace)
+        }
+    }
+
+    if(STATUS_OK == status){
+        status = SC_DecryptSecureMessage(scConnection,
+                                         transportMsgBuffer,
+                                         requestId);
+    }
+
+    if(STATUS_OK == status){
+        // Check if the request Id is still the same that precedent chunks for the message.
+        // If it is not, abort and reset buffers.
+        status = SC_CheckPrecChunk(scConnection->receptionBuffers,
+                                   *requestId,
+                                   &abortReqPresence,
+                                   &abortedRequestId);
+    }
+
+    if(abortReqPresence != FALSE){
+        // Note: status is OK if from a prec chunk or NOK if current chunk is abort chunk
+        // Reset since we will not decode the message in this case (aborted in last chunk or invalid request id)
+        MsgBuffers_Reset(scConnection->receptionBuffers);
+    }
+
+    if(STATUS_OK == status){
+        status = SC_DecodeChunk(scConnection->receptionBuffers,
+                                *requestId,
+                                NULL,
+                                NULL,
+                                receivedEncType,
+                                receivedEncObj);
+    }
+
+    SOPC_String_Clear(&reason);
+
+    return status;
+}
+
+SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
+                                              ConnectionEvent event,
+                                              SOPC_MsgBuffer* msgBuffer,
+                                              SOPC_StatusCode status)
+{
+    TransportEvent_CallbackData* teventCbData = (TransportEvent_CallbackData*) callbackData;
+    SC_ServerEndpoint* sEndpoint = NULL;
+    SC_Connection* scConnection = NULL;
+    uint32_t requestId = 0;
+    SOPC_EncodeableType* receivedEncType = NULL;
+    void* receivedEncObj = NULL;
+    SOPC_StatusCode retStatus = STATUS_OK;
+    if(NULL != teventCbData &&
+       NULL != teventCbData->endpoint && NULL != teventCbData->scConnection)
+    {
+        sEndpoint = teventCbData->endpoint;
+        scConnection = teventCbData->scConnection;
+        retStatus = status;
+        switch(event){
+            case ConnectionEvent_Connected:
+                if(SC_Connection_Disconnected == scConnection->state){
+                    // Configure secure connection for encoding / decoding messages
+					if(status == STATUS_OK){
+						// Set only server side identity for now
+                    	status = SC_InitApplicationIdentities(scConnection,
+                        	                                  sEndpoint->serverCertificate,
+                            	                              sEndpoint->serverKey,
+                                	                          NULL);
+                	}
+                    if(STATUS_OK == status){
+                        status = SC_InitReceiveSecureBuffers(scConnection,
+                                                             &sEndpoint->namespaces,
+                                                             sEndpoint->encodeableTypes);
+                    }
+                    if(STATUS_OK == status){
+                        status = SC_InitSendSecureBuffer(scConnection,
+                                                         &sEndpoint->namespaces,
+                                                         sEndpoint->encodeableTypes);
+                    }
+                    if(STATUS_OK == status){
+                        scConnection->state = SC_Connection_Connecting_Secure;
+                    }
+                }
+                break;
+            case ConnectionEvent_Message:
+                switch(msgBuffer->secureType){
+                    case SOPC_OpenSecureChannel:
+                        if(SC_Connection_Connecting_Secure == scConnection->state){
+                            uint32_t requestId = 0;
+                            uint32_t requestHandle = 0;
+                            // Receive Open Secure Channel request
+                            retStatus = Receive_OpenSecureChannelRequest(sEndpoint, scConnection, msgBuffer,
+                                                                         &requestId, &requestHandle);
+
+                            if(STATUS_OK == retStatus){
+                                retStatus = Send_OpenSecureChannelResponse(scConnection,
+                                                                           requestId, requestHandle);
+                            }
+
+                            if(STATUS_OK == retStatus){
+                                scConnection->state = SC_Connection_Connected;
+                                // TODO: differentiate renew from new ...
+                                if(NULL != sEndpoint->callback){
+                                    sEndpoint->callback(sEndpoint, scConnection,
+                                                        sEndpoint->callbackData,
+                                                        SC_EndpointConnectionEvent_New,
+                                                        retStatus,
+                                                        NULL, NULL, NULL);
+                                }
+                            }else{
+                                // TODO: Regarding status and if it is before secu verif or after
+                                //       a transport error (before) or a service fault (after) must be sent
+                                OnConnectionTransportEvent_CB(callbackData,
+                                                              ConnectionEvent_Error,
+                                                              NULL,
+                                                              status);
+                            }
+
+                        }else{
+                            retStatus = STATUS_INVALID_RCV_PARAMETER;
+                        }
+                        break;
+                    case SOPC_CloseSecureChannel:
+                        if(SC_Connection_Connected == scConnection->state){
+                            OnConnectionTransportEvent_CB(callbackData,
+                                                          ConnectionEvent_Error,
+                                                          NULL,
+                                                          status);
+                        }
+                        break;
+                    case SOPC_SecureMessage:
+                        if(SC_Connection_Connected == scConnection->state){
+                            retStatus = Receive_ServiceRequest(scConnection, msgBuffer, &requestId,
+                                                               &receivedEncType, &receivedEncObj);
+
+                            // TODO: Manage partial request / abort
+                            if(NULL != sEndpoint->callback){
+                                sEndpoint->callback(sEndpoint, scConnection,
+                                                    sEndpoint->callbackData,
+                                                    SC_EndpointConnectionEvent_Request,
+                                                    retStatus,
+                                                    &requestId, receivedEncType, receivedEncObj);
+                            }
+                        }else{
+                            retStatus = STATUS_INVALID_RCV_PARAMETER;
+                        }
+
+                        break;
+                }
+                break;
+            case ConnectionEvent_Error:
+            case ConnectionEvent_Disconnected:
+                TCP_UA_Connection_Disconnect(scConnection->transportConnection);
+                if(scConnection->state != SC_Connection_Disconnected){
+                    if(NULL != sEndpoint->callback){
+                        sEndpoint->callback(sEndpoint, scConnection,
+                                            sEndpoint->callbackData,
+                                            SC_EndpointConnectionEvent_Disconnected,
+                                            OpcUa_BadSecureChannelClosed,
+                                            NULL, NULL, NULL);
+                    }
+                }
+                scConnection->state = SC_Connection_Disconnected;
+                // Add as a new secure connection to the endpoint
+                if(scConnection ==  SLinkedList_Remove(sEndpoint->secureChannelConnections,
+                                                       teventCbData->scConnectionId)){
+                    SC_Delete(scConnection);
+                    scConnection = NULL;
+                }else{
+                    // Connection not found !
+                    assert(FALSE);
+                }
+                break;
+        }
+    }
+    return retStatus;
+}
+
+SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
+                                 SC_Connection*       scConnection,
+                                 uint32_t             requestId,
+                                 SOPC_EncodeableType* responseType,
+                                 void*                response)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(sEndpoint != NULL &&
+       scConnection != NULL &&
+       responseType != NULL &&
+       response != NULL)
+    {
+        Mutex_Lock(&sEndpoint->mutex);
+
+        // TODO: check response handle <=> request handle ? Or resp. application ?
+        status = SC_EncodeSecureMessage(scConnection,
+                                        responseType,
+                                        response,
+                                        requestId);
+
+        if(status == STATUS_OK){
+            status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final);
+        }
+
+        Mutex_Unlock(&sEndpoint->mutex);
+    }
+
+    return status;
+
+}
+
+SOPC_StatusCode AcceptedNewConnection(SC_ServerEndpoint* sEndpoint,
+                                      TCP_UA_Connection* newTcpConnection){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SC_Connection* scConnection = NULL;
+    TransportEvent_CallbackData* connectionCbData = NULL;
+    Mutex_Lock(&sEndpoint->mutex);
+    if(sEndpoint != NULL && newTcpConnection != NULL){
+        scConnection = SC_Create(newTcpConnection);
+        if(NULL == scConnection){
+            status = STATUS_NOK;
+        }else{
+            sEndpoint->lastSecureConnectionId++;
+            connectionCbData = Create_TransportEventCbData(sEndpoint,
+                                                           scConnection,
+                                                           sEndpoint->lastSecureConnectionId);
+            status = TCP_UA_Connection_AcceptedSetCallback(newTcpConnection,
+                                                           OnConnectionTransportEvent_CB,
+                                                           connectionCbData);
+            // TODO: activate a timer for end of SC connection timeout (in SC_Connection)
+        }
+
+        if(STATUS_OK == status){
+            // Add as a new secure connection to the endpoint
+            SLinkedList_Add(sEndpoint->secureChannelConnections,
+                            sEndpoint->lastSecureConnectionId,
+                            scConnection);
+        }else{
+            Delete_TransportEventCbData(connectionCbData);
+            connectionCbData = NULL;
+            scConnection->transportConnection = NULL; // connection provided as parameter cannot be freed here
+            SC_Delete(scConnection);
+            scConnection = NULL;
+        }
+    }
+    Mutex_Unlock(&sEndpoint->mutex);
+    return status;
+}
+
+SOPC_StatusCode OnListenerEvent_CB(SC_ServerEndpoint* sEndpoint,
+                                   TCP_ListenerEvent  event,
+                                   SOPC_StatusCode    status,
+                                   TCP_UA_Connection* newTcpConnection){
+    SOPC_StatusCode retStatus = STATUS_OK;
+    switch(event){
+        case TCP_ListenerEvent_Error:
+            SC_ServerEndpoint_Close(sEndpoint);
+            if(NULL != sEndpoint->callback){
+                sEndpoint->callback(sEndpoint, NULL,
+                                    sEndpoint->callbackData,
+                                    SC_EndpointListenerEvent_Closed,
+                                    status,
+                                    NULL, NULL, NULL);
+            }
+            break;
+        case TCP_ListenerEvent_Closed:
+            if(NULL != sEndpoint->callback){
+                sEndpoint->callback(sEndpoint, NULL,
+                                    sEndpoint->callbackData,
+                                    SC_EndpointListenerEvent_Closed,
+                                    status,
+                                    NULL, NULL, NULL);
+            }
+            break;
+        case TCP_ListenerEvent_Opened:
+            if(NULL != sEndpoint->callback){
+                sEndpoint->callback(sEndpoint, NULL,
+                                    sEndpoint->callbackData,
+                                    SC_EndpointListenerEvent_Opened,
+                                    status,
+                                    NULL, NULL, NULL);
+            }
+            break;
+        case TCP_ListenerEvent_Connect:
+            if(NULL != newTcpConnection){
+                retStatus = AcceptedNewConnection(sEndpoint, newTcpConnection);
+            }else{
+                retStatus = STATUS_INVALID_PARAMETERS;
+            }
+            break;
+    }
+    return retStatus;
+}
+
+SC_ServerEndpoint* SC_ServerEndpoint_Create(){
+    SC_ServerEndpoint* result = NULL;
+    TCP_UA_Listener* listener = TCP_UA_Listener_Create(scProtocolVersion);
+    if(NULL != listener){
+        result = malloc(sizeof(SC_ServerEndpoint));
+        if(NULL != result){
+            memset(result, 0, sizeof(SC_ServerEndpoint));
+            result->transportListener = listener;
+            result->state = SC_Endpoint_Closed;
+            result->secureChannelConnections = SLinkedList_Create(OPCUA_ENDPOINT_MAXCONNECTIONS);
+
+            if(NULL != result->secureChannelConnections &&
+               STATUS_OK != Mutex_Inititalization(&result->mutex)){
+                free(result);
+                result= NULL;
+            }
+        }
+    }
+    return result;
+}
+
+SOPC_StatusCode SC_ServerEndpoint_Configure(SC_ServerEndpoint*     endpoint,
+                                            SOPC_NamespaceTable*   namespaceTable,
+                                            SOPC_EncodeableType**  encodeableTypes){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(endpoint != NULL){
+        Mutex_Lock(&endpoint->mutex);
+        if(namespaceTable != NULL){
+            status = Namespace_AttachTable(&endpoint->namespaces, namespaceTable);
+        }else{
+            status = STATUS_OK;
+        }
+        endpoint->encodeableTypes = encodeableTypes;
+        Mutex_Unlock(&endpoint->mutex);
+    }
+    return status;
+}
+
+SOPC_StatusCode SC_ServerEndpoint_Open(SC_ServerEndpoint*   endpoint,
+                                       const char*          endpointURL,
+                                       const PKIProvider*   pki,
+                                       const Certificate*   serverCertificate,
+                                       const AsymmetricKey* serverKey,
+                                       uint8_t              nbSecurityPolicies,
+                                       SOPC_SecurityPolicy* securityPolicies,
+                                       SC_EndpointEvent_CB* callback,
+                                       void*                callbackData){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint8_t cryptoNeeded = FALSE;
+    uint16_t idx = 0;
+    SOPC_SecurityPolicy* secuPolicy = NULL;
+
+    if(endpoint != NULL && endpoint->transportListener != NULL &&
+       endpointURL != NULL &&
+       nbSecurityPolicies > 0 && securityPolicies != NULL){
+        status = STATUS_OK;
+        for(idx = 0; idx < nbSecurityPolicies && STATUS_OK == status; idx++){
+            secuPolicy = &securityPolicies[idx];
+            if(secuPolicy != NULL &&
+               (secuPolicy->securityModes & SECURITY_MODE_ANY_MASK) != 0x00)
+            {
+                if(NULL == CryptoProfile_Get(SOPC_String_GetRawCString(&secuPolicy->securityPolicy)))
+                {
+                    // Security policy is not recognized
+                    status = STATUS_INVALID_PARAMETERS;
+                }else if((secuPolicy->securityModes & SECURITY_MODE_SIGN_MASK) != 0 ||
+                         (secuPolicy->securityModes & SECURITY_MODE_SIGNANDENCRYPT_MASK) != 0){
+                    cryptoNeeded = 1;
+                }
+            }else{
+                status = STATUS_INVALID_PARAMETERS;
+            }
+        }
+
+        if(STATUS_OK == status && cryptoNeeded != FALSE){
+            if(serverCertificate == NULL || serverKey == NULL){
+                // Certificate and keys needed for cryptographic operations
+                status = STATUS_INVALID_PARAMETERS;
+            }
+        }
+
+        if(STATUS_OK == status){
+            endpoint->nbSecurityPolicies = nbSecurityPolicies;
+            endpoint->securityPolicies = malloc(sizeof(SOPC_SecurityPolicy) * nbSecurityPolicies);
+            if(endpoint->securityPolicies != NULL){
+                memcpy(endpoint->securityPolicies, securityPolicies, sizeof(SOPC_SecurityPolicy) * nbSecurityPolicies);
+            }else{
+                status = STATUS_NOK;
+            }
+        }
+
+        if(STATUS_OK == status){
+            endpoint->pkiProvider = pki;
+            endpoint->serverCertificate = serverCertificate;
+            endpoint->serverKey = serverKey;
+            endpoint->callback = callback;
+            endpoint->callbackData = callbackData;
+            status = TCP_UA_Listener_Open(endpoint->transportListener,
+                                          endpointURL,
+                                          OnListenerEvent_CB,
+                                          endpoint);
+        }
+        if(STATUS_OK == status){
+            endpoint->state = SC_Endpoint_Opened;
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(endpoint != NULL){
+        if(endpoint->state != SC_Endpoint_Opened){
+            status = STATUS_INVALID_STATE;
+        }else{
+            TCP_UA_Listener_Close(endpoint->transportListener);
+        }
+    }
+    return status;
+}
+
+void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint){
+    if(endpoint != NULL){
+        if(endpoint->state == SC_Endpoint_Opened){
+            SC_ServerEndpoint_Close(endpoint);
+        }
+        if(endpoint->transportListener != NULL){
+            TCP_UA_Listener_Delete(endpoint->transportListener);
+            endpoint->transportListener = NULL;
+        }
+        free(endpoint);
+    }
+}

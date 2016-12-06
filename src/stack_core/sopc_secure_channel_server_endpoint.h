@@ -18,6 +18,14 @@
 #ifndef SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_
 #define SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_
 
+#include "singly_linked_list.h"
+#include "sopc_mutexes.h"
+#include "sopc_builtintypes.h"
+#include "sopc_namespace_table.h"
+#include "sopc_tcp_ua_listener.h"
+#include "sopc_secure_channel_low_level.h"
+#include "crypto_decl.h"
+
 typedef enum SC_EndpointState
 {
     SC_Endpoint_Opened,
@@ -25,31 +33,86 @@ typedef enum SC_EndpointState
     SC_Endpoint_Error
 } SC_EndpointState;
 
-typedef struct SecurityPolicy
+typedef enum SC_EndpointEvent
 {
-    OpcUa_MessageSecurityMode securityMode;
-    SOPC_String               SecurityPolicy;
-} SecurityPolicy;
+    SC_EndpointListenerEvent_Opened,
+    SC_EndpointListenerEvent_Closed,
+    SC_EndpointConnectionEvent_New,
+    SC_EndpointConnectionEvent_Renewed,
+    SC_EndpointConnectionEvent_Disconnected,
+    SC_EndpointConnectionEvent_Request,
+    SC_EndpointConnectionEvent_PartialRequest,
+    SC_EndpointConnectionEvent_AbortRequest,
+    SC_EndpointConnectionEvent_DecoderError
+} SC_EndpointEvent;
 
-typedef void* SC_EndpointEvent_CB;
+#define SECURITY_MODE_NONE_MASK 0x01
+#define SECURITY_MODE_SIGN_MASK 0x02
+#define SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
+#define SECURITY_MODE_ANY_MASK 0x07
+
+typedef struct SOPC_SecurityPolicy
+{
+    uint16_t    securityModes;
+    SOPC_String securityPolicy; // TODO: Replace by secu policy ID provided by crypto module
+} SOPC_SecurityPolicy;
+
+struct SC_ServerEndpoint;
+
+typedef SOPC_StatusCode (SC_EndpointEvent_CB) (struct SC_ServerEndpoint* sEndpoint,
+                                               SC_Connection*            scConnection,
+                                               void*                     cbData,
+                                               SC_EndpointEvent          event,
+                                               SOPC_StatusCode           status,
+                                               uint32_t*                 requestId,
+                                               SOPC_EncodeableType*      reqEncType,
+                                               void*                     reqEncObj);
 
 typedef struct SC_ServerEndpoint
 {
-    SOPC_NamespaceTable*   namespaces;
-    SOPC_EncodeableType*   encodeableTypes;
-    PKIProvider            pkiProvider;
-    SOPC_Byte*             serverCertificate;
-    SecretBuffer*          serverKey;
+    SOPC_NamespaceTable    namespaces;
+    SOPC_EncodeableType**  encodeableTypes;
+    const PKIProvider*     pkiProvider;
+    const Certificate*     serverCertificate;
+    const AsymmetricKey*   serverKey;
+    SOPC_SecurityPolicy*   securityPolicies;
+    uint8_t                nbSecurityPolicies;
     SC_EndpointState       state;
-    SecurityPolicy*        securityPolicies;
     uint32_t               lastSecureChannelId;
-    SC_Connection*         secureChannelConnections;
-    TCP_UA_Listener*  transportConnection;
+    uint32_t               lastSecureConnectionId; // internal use only (used in secureChannelConnections)
+    SLinkedList*           secureChannelConnections;
+    TCP_UA_Listener*       transportListener;
     P_Timer                watchdogTimer;
     SC_EndpointEvent_CB*   callback;
     void*                  callbackData;
-
+    void**                 servicesTable; // Table of services defined in upper level
+    Mutex                  mutex;
 } SC_ServerEndpoint;
 
+SC_ServerEndpoint* SC_ServerEndpoint_Create();
+
+SOPC_StatusCode SC_ServerEndpoint_Configure(SC_ServerEndpoint*     endpoint,
+                                            SOPC_NamespaceTable*   namespaceTable,
+                                            SOPC_EncodeableType**  encodeableTypes);
+
+SOPC_StatusCode SC_ServerEndpoint_Open(SC_ServerEndpoint*   endpoint,
+                                       const char*          endpointURL,
+                                       const PKIProvider*   pki,
+                                       const Certificate*   serverCertificate,
+                                       const AsymmetricKey* serverKey,
+                                       uint8_t              nbSecurityPolicies,
+                                       SOPC_SecurityPolicy* securityPolicies,
+                                       SC_EndpointEvent_CB* callback,
+                                       void*                callbackData);
+
+SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
+                                 SC_Connection*       scConnection,
+                                 uint32_t             requestId,
+                                 SOPC_EncodeableType* responseType,
+                                 void*                response);
+
+SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint);
+
+void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint);
 
 #endif /* SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_ */

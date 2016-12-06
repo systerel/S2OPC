@@ -24,13 +24,13 @@
 
 #define TCP_UA_MIN_BUFFER_SIZE 8192
 
-typedef enum TCP_ConnectionState
+typedef enum TCP_UA_ConnectionState
 {
-    TCP_Connection_Connecting,
-    TCP_Connection_Connected,
-    TCP_Connection_Disconnected,
-    TCP_Connection_Error
-} TCP_ConnectionState;
+    TCP_UA_Connection_Connecting,
+    TCP_UA_Connection_Connected,
+    TCP_UA_Connection_Disconnected,
+    TCP_UA_Connection_Error
+} TCP_UA_ConnectionState;
 
 typedef enum {
     ConnectionEvent_Connected,
@@ -44,13 +44,13 @@ typedef enum {
     ConnectionEvent_Error
 } ConnectionEvent;
 
-typedef SOPC_StatusCode (TCP_UA_Connection_Event_CB) (void*           tcpConnection,
-                                                      void*           callbackData,
-                                                      ConnectionEvent event,
-                                                      SOPC_MsgBuffer* msgBuffer,
-                                                      SOPC_StatusCode status);
+typedef SOPC_StatusCode (TCP_UA_Connection_Event_CB) (void*                     callbackData,
+                                                      ConnectionEvent           event,
+                                                      SOPC_MsgBuffer*           msgBuffer,
+                                                      SOPC_StatusCode           status);
 
-typedef struct {
+typedef struct TCP_UA_Connection {
+    uint8_t                     serverSideConnection;
     SOPC_String                 url;
     uint32_t                    protocolVersion;
     uint32_t                    receivedProtocolVersion;
@@ -60,7 +60,7 @@ typedef struct {
     uint32_t                    maxChunkCountRcv;
     uint32_t                    maxMessageSizeSnd;
     uint32_t                    maxChunkCountSnd;
-    TCP_ConnectionState         state;
+    TCP_UA_ConnectionState      state;
     SOPC_SocketManager*         socketManager;
     SOPC_Socket*                socket;
     SOPC_MsgBuffer*             inputMsgBuffer;
@@ -71,13 +71,26 @@ typedef struct {
 
 } TCP_UA_Connection;
 
-TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion);
+TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion,
+                                            uint8_t  serverSideConnection); // Must be true if server side of the connection
+
 void TCP_UA_Connection_Delete(TCP_UA_Connection* connection);
 
 SOPC_StatusCode TCP_UA_Connection_Connect(TCP_UA_Connection*          connection,
                                           const char*                 uri,
                                           TCP_UA_Connection_Event_CB* callback,
                                           void*                       callbackData);
+
+// Configure socket of an accepted connection
+SOPC_StatusCode TCP_UA_Connection_AcceptedSetSocket(TCP_UA_Connection* connection,
+                                                    SOPC_String*       sURI,
+                                                    SOPC_Socket*       connectionSocket);
+
+// Configure callback of an accepted connection
+SOPC_StatusCode TCP_UA_Connection_AcceptedSetCallback(TCP_UA_Connection*          connection,
+                                                      TCP_UA_Connection_Event_CB* callback,
+                                                      void*                       callbackData);
+
 void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection);
 
 // return FALSE if no protocol version (for non TCP protocol only: must be generic)
