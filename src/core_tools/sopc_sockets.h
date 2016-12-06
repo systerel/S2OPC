@@ -46,9 +46,7 @@ struct SOPC_Socket;
 
 typedef SOPC_StatusCode (SOPC_Socket_EventCB) (struct SOPC_Socket* socket,
                                                uint32_t            socketEvent,
-                                               void*               cbData,
-                                               uint16_t            portNumber,
-                                               uint8_t             isSSL);
+                                               void*               cbData);
 
 typedef struct SOPC_Socket {
     Socket               sock;

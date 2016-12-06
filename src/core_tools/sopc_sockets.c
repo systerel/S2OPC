@@ -423,16 +423,12 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                             if(STATUS_OK != Socket_CheckAckConnect(uaSock->sock)){
                                 callback(uaSock,
                                          SOCKET_CLOSE_EVENT,
-                                         uaSock->cbData,
-                                         0,
-                                         0);
+                                         uaSock->cbData);
                                 SOPC_Socket_Close(uaSock);
                             }else{
                                 callback(uaSock,
                                          SOCKET_CONNECT_EVENT,
-                                         uaSock->cbData,
-                                         0,
-                                         0);
+                                         uaSock->cbData);
                                 uaSock->state = SOCKET_CONNECTED;
                             }
                         }
@@ -441,9 +437,7 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                             if(uaSock->state == SOCKET_CONNECTED){
                                 callback(uaSock,
                                          SOCKET_READ_EVENT,
-                                         uaSock->cbData,
-                                         0,
-                                         0);
+                                         uaSock->cbData);
                             }else if(uaSock->state == SOCKET_LISTENING){
                                 acceptSock = GetFreeSocket(socketManager);
                                 if(acceptSock == NULL){
@@ -469,9 +463,7 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                     if(SocketSet_IsPresent(uaSock->sock, &exceptSet) != FALSE){
                         callback(uaSock,
                                  SOCKET_EXCEPT_EVENT,
-                                 uaSock->cbData,
-                                 0,
-                                 0);
+                                 uaSock->cbData);
                     }
                 }
             }

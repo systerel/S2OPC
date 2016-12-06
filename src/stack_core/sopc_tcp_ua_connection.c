@@ -286,11 +286,7 @@ SOPC_StatusCode ReceiveErrorMsg(TCP_UA_Connection* connection){
 
 SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket*    socket,
                              uint32_t      socketEvent,
-                             void*         callbackData,
-                             uint16_t      usPortNumber,
-                             unsigned char bIsSSL){
-    (void) usPortNumber;
-    (void) bIsSSL;
+                             void*         callbackData){
     SOPC_StatusCode status = STATUS_NOK;
     TCP_UA_Connection* connection = (TCP_UA_Connection*) callbackData;
     switch(socketEvent){
@@ -414,54 +410,6 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket*    socket,
     return status;
 }
 
-SOPC_StatusCode CheckURI (const char* uri){
-    SOPC_StatusCode status = STATUS_NOK;
-    size_t idx = 0;
-    uint8_t isPort = FALSE;
-    uint8_t hasPort = FALSE;
-    uint8_t hasName = FALSE;
-    uint8_t invalid = FALSE;
-
-    if(uri != NULL){
-
-        if(strlen(uri) + 4  > 4096){
-            // Encoded value shall be less than 4096 bytes
-            status = STATUS_INVALID_PARAMETERS;
-        }else if(strlen(uri) > 10 && memcmp(uri, (const char*) "opc.tcp://", 10) == 0){
-            // search for a ':' defining port for given IP
-            // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
-            for(idx = 10; idx < strlen(uri) - 1; idx++){
-                if(isPort != FALSE){
-                    if(uri[idx] >= '0' && uri[idx] <= '9'){
-                        // port definition
-                        hasPort = 1;
-                    }else if(uri[idx] == '/'){
-                        // Name of the endpoint after port, invalid otherwise
-                        if(hasPort == 0){
-                            invalid = 1;
-                        }else{
-                            hasName = 1;
-                        }
-                    }else{
-                        if(hasPort == FALSE || hasName == FALSE){
-                            // unexpected character since we do not expect a endpoint name
-                            invalid = 1;
-                        }
-                    }
-                }else{
-                    if(uri[idx] == ':'){
-                        isPort = 1;
-                    }
-                }
-            }
-            if(hasPort != FALSE && invalid == FALSE){
-                status = STATUS_OK;
-            }
-        }
-    }
-    return status;
-}
-
 SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connection,
                                            const char*                 uri,
                                            TCP_UA_Connection_Event_CB* callback,
@@ -475,7 +423,7 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
            connection->callbackData == NULL &&
            connection->state == TCP_Connection_Disconnected)
         {
-            if(CheckURI(uri) == STATUS_OK){
+            if(TCP_UA_CheckURI(uri) == STATUS_OK){
                 status = SOPC_String_InitializeFromCString(&connection->url, uri);
             }
 

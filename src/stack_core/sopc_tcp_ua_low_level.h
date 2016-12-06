@@ -44,4 +44,6 @@ SOPC_StatusCode TCP_UA_ReadData(SOPC_Socket*    socket,
 
 SOPC_StatusCode TCP_UA_ReadHeader(SOPC_MsgBuffer* msgBuffer);
 
+SOPC_StatusCode TCP_UA_CheckURI(const char* uri);
+
 #endif /* SOPC_TCP_UA_LOW_LEVEL_H_ */
