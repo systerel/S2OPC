@@ -27,6 +27,9 @@ static SOPC_NamespaceTable* gNsTable = NULL;
 SOPC_StatusCode OpcUa_ProxyStub_Initialize(void* pCalltable,
                                            void* pConfig)
 {
+    gNsTable = NULL;
+    OpcUa_ProxyStub_g_PlatformLayerCalltable = NULL;
+    OpcUa_ProxyStub_g_Configuration = NULL;
     if(pCalltable != NULL){
         OpcUa_ProxyStub_g_PlatformLayerCalltable = pCalltable;
     }
