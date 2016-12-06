@@ -21,6 +21,7 @@
 #include <string.h>
 #include "sopc_raw_sockets.h"
 #include "sopc_types.h"
+#include "sopc_sockets.h"
 
 typedef struct SOPC_StackConfiguration {
     SOPC_NamespaceTable*  nsTable;
