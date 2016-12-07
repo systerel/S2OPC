@@ -36,6 +36,10 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
         }else{
             status = STATUS_OK;
             scConnection = (SC_Connection*) msgBuffer->flushData;
+            assert(msgBuffer->sequenceNumberPosition +
+                    UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+                    scConnection->sendingMaxBodySize >= msgBuffer->buffers->position);
+
             if(msgBuffer->buffers->position + count >
                 msgBuffer->sequenceNumberPosition +
                 UA_SECURE_MESSAGE_SEQUENCE_LENGTH +

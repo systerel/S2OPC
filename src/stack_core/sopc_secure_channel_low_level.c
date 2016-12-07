@@ -279,28 +279,51 @@ uint32_t GetAsymmSignatureSize(SOPC_String* securityPolicyUri,
 }
 
 uint32_t GetMaxBodySize(SOPC_MsgBuffer* msgBuffer,
+                        uint8_t         toEncrypt,
                         uint32_t        cipherBlockSize,
                         uint32_t        plainBlockSize,
+                        uint8_t         toSign,
                         uint32_t        signatureSize)
 {
+    uint32_t result = 0;
+    uint32_t paddingSizeFields = 0;
+    if(toEncrypt == FALSE){
+        // No encryption => consider same size blocks and no padding size fields
+        cipherBlockSize = 1;
+        plainBlockSize = 1;
+        paddingSizeFields = 0;
+    }else{
+        // By default only 1 byte for padding size field. +1 if extra padding
+        paddingSizeFields = 1;
+        if(Is_ExtraPaddingSizePresent(plainBlockSize) != FALSE){
+            paddingSizeFields += 1;
+        }
+    }
+
+    if(toSign == FALSE){
+        signatureSize = 0;
+    }
+
     // Ensure cipher block size is greater or equal to plain block size:
     //  otherwise the plain size could be greater than the  buffer size regarding computation
     assert(cipherBlockSize >= plainBlockSize);
-    // By default only 1 byte for padding size field. +1 if extra padding
-    uint32_t paddingSizeFields = 1;
-    const uint32_t headersSize = msgBuffer->sequenceNumberPosition - 1;
-    const uint32_t bodyChunkSize = msgBuffer->buffers->max_size - headersSize;
+
+    const uint32_t headersSize = msgBuffer->sequenceNumberPosition; // Non encrypted header size (sequence header encrypted)
+    const uint32_t bodyChunkSize = msgBuffer->buffers->max_size - headersSize; // Body includes sequence header (encrypted)
 
     // Computed maxBlock and then maxBodySize based on revised formula of mantis ticket #2897
     // Spec 1.03 part 6 incoherent
     const uint32_t maxBlocks = bodyChunkSize / cipherBlockSize;
 
-    if(Is_ExtraPaddingSizePresent(plainBlockSize) != FALSE){
-        paddingSizeFields += 1;
-    }
 
-    // MaxBodySize = unCiphered block size * max blocs - sequence header -1 for PaddingSize field(s)
-    return plainBlockSize * maxBlocks - UA_SECURE_MESSAGE_SEQUENCE_LENGTH - signatureSize - paddingSizeFields;
+    // MaxBodySize = unCiphered block size * max blocs - sequence header -1 for PaddingSize field(s) - signature size
+    // <=> Maximum body size after adding the sequence header, padding size fields (padding could be 0) and signature in plain text available size
+    result = plainBlockSize * maxBlocks - UA_SECURE_MESSAGE_SEQUENCE_LENGTH - signatureSize - paddingSizeFields;
+    // Maximum body size (+headers+signature+padding size fields) cannot be greater than maximum buffer size
+    assert(msgBuffer->buffers->max_size >=
+           (msgBuffer->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+            result + signatureSize + paddingSizeFields));
+    return result;
 }
 
 // Get information from internal properties
@@ -429,72 +452,75 @@ SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(scConnection != NULL){
         status = STATUS_OK;
+        uint8_t  toEncrypt = FALSE;
         uint32_t cipherBlockSize = 0;
         uint32_t plainBlockSize =0;
+        uint8_t  toSign = FALSE;
         uint32_t signatureSize = 0;
         if(isSymmetric == FALSE){
 
             if(scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
-            AsymmetricKey publicKey;
-            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
-                                                         &publicKey);
+                AsymmetricKey publicKey;
+                // Asymmetric case: used only for opening channel, signature AND encryption mandatory in this case
+                toEncrypt = 1; // TRUE
+                toSign = 1; // TRUE
+
+                status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
+                                                             &publicKey);
 
                 if(status == STATUS_OK){
+                    // Compute block sizes
                     status = CryptoProvider_AsymmetricGetLength_Msgs(scConnection->currentCryptoProvider,
                                                                      &publicKey,
                                                                      &cipherBlockSize,
                                                                      &plainBlockSize);
-                     if(status == STATUS_OK){
-                         status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
-                                                                               &publicKey,
-                                                                               &signatureSize);
-                     }
-
-                     if(status == STATUS_OK){
-                         scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
-                                                                           cipherBlockSize,
-                                                                           plainBlockSize,
-                                                                           signatureSize);
-                     }
+                }
+                if(status == STATUS_OK){
+                    // Compute signature size
+                    status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
+                                                                           &publicKey,
+                                                                           &signatureSize);
                 }
             }else{
-                // No signature or encryption
-                scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
-                                                                  1, 1, // No data encryption => 1 byte = 1 byte
-                                                                  0); // No signature => 0 bytes of signature
+                toEncrypt = FALSE; // No data encryption
+                toSign = FALSE;    // No signature
             }
         }else{
             if(scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
+
                 if(scConnection->currentSecuMode == OpcUa_MessageSecurityMode_SignAndEncrypt){
-                    // Signature and Encryption
+                    // Encryption necessary: compute block sizes
+                    toEncrypt = 1; // TRUE
                     status = CryptoProvider_SymmetricGetLength_Blocks(scConnection->currentCryptoProvider,
                                                                       &cipherBlockSize,
                                                                       &plainBlockSize);
                 }else{
-                    // No data encryption: 1 byte = 1 byte
-                    cipherBlockSize = 1;
-                    plainBlockSize = 1;
+                    toEncrypt = FALSE;
                 }
 
                 if(status == STATUS_OK){
-                    // Signature
-                    uint32_t signatureSize = 0;
+                    // Signature necessary in both Sign and SignAndEncrypt cases: compute signature size
+                    toSign = 1; // TRUE
                     status = CryptoProvider_SymmetricGetLength_Signature(scConnection->currentCryptoProvider,
                                                                           &signatureSize);
-                    if(status == STATUS_OK){
-                        scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
-                                                                          cipherBlockSize,
-                                                                          plainBlockSize,
-                                                                          signatureSize);
-                    }
                 }
             }else{
                 // No signature or encryption
-                scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
-                                                                  1, 1, // No data encryption => 1 byte = 1 byte
-                                                                  0); // No signature => 0 bytes of signature
+                toEncrypt = FALSE;
+                toSign = FALSE;
             }
         }
+
+        // Compute the max body size regarding encryption and signature use
+        if(status == STATUS_OK){
+             scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
+                                                               toEncrypt,
+                                                               cipherBlockSize,
+                                                               plainBlockSize,
+                                                               toSign,
+                                                               signatureSize);
+         }
+
     }
     return status;
 }
