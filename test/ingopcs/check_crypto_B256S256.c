@@ -621,7 +621,7 @@ START_TEST(test_cert_lengths_B256S256)
 {
     uint32_t len = 0;
 
-    CryptoProvider_CertificateGetLength_Thumbprint(crypto, &len);
+    ck_assert(CryptoProvider_CertificateGetLength_Thumbprint(crypto, &len) == STATUS_OK);
     ck_assert(20 == len); // SHA-1
 }
 END_TEST
