@@ -24,6 +24,7 @@
 
 Suite *tests_make_suite_crypto_B256S256(void);
 Suite *tests_make_suite_crypto_B256(void);
+Suite *tests_make_suite_crypto_None(void);
 
 Suite *tests_make_suite_tools(void);
 
