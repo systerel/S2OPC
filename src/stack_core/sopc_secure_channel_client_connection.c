@@ -88,7 +88,10 @@ SC_ClientConnection* SC_Client_Create(){
 
             scClientConnection->pkiProvider = NULL;
 
-            Mutex_Inititalization(&scClientConnection->mutex);
+            if(STATUS_OK != Mutex_Inititalization(&scClientConnection->mutex)){
+                SC_Client_Delete(scClientConnection);
+                scClientConnection = NULL;
+            }
         }
     }else{
         SC_Delete(sConnection);
@@ -111,22 +114,6 @@ SOPC_StatusCode SC_Client_Configure(SC_ClientConnection*   cConnection,
         Mutex_Unlock(&cConnection->mutex);
     }
     return status;
-}
-
-SC_ClientConnection* SC_Client_CreateAndConfigure(SOPC_NamespaceTable*   namespaceTable,
-                                                  SOPC_EncodeableType**  encodeableTypes)
-{
-    SC_ClientConnection* scClientConnection = NULL;
-    SOPC_StatusCode status = STATUS_OK;
-    scClientConnection = SC_Client_Create();
-    status = SC_Client_Configure(scClientConnection,
-                                 namespaceTable,
-                                 encodeableTypes);
-    if(status != STATUS_OK){
-        SC_Client_Delete(scClientConnection);
-        scClientConnection = NULL;
-    }
-    return scClientConnection;
 }
 
 void Timer_Delete(P_Timer* timer){

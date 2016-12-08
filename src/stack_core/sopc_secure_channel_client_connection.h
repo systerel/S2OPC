@@ -65,9 +65,6 @@ SOPC_StatusCode SC_Client_Configure(SC_ClientConnection*  cConnection,
                                     SOPC_NamespaceTable*  namespaceTable,
                                     SOPC_EncodeableType** encodeableTypes);
 
-SC_ClientConnection* SC_Client_CreateAndConfigure(SOPC_NamespaceTable*  namespaceTable,
-                                                  SOPC_EncodeableType** encodeableTypes);
-
 void SC_Client_Delete(SC_ClientConnection* scConnection);
 
 SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
