@@ -85,6 +85,7 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_CryptoKey(const CryptoProvider
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_NOK;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -103,11 +104,22 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Encryption(const CryptoProvide
                                                         uint32_t lengthIn,
                                                         uint32_t *pLengthOut)
 {
-    (void) pProvider; // Reserved for future use
+    if(NULL == pProvider || NULL == pProvider->pProfile)
+        return STATUS_INVALID_PARAMETERS;
     if(NULL == pLengthOut)
         return STATUS_INVALID_PARAMETERS;
 
-    *pLengthOut = lengthIn;
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
+    default:
+        return STATUS_NOK;
+    case SecurityPolicy_Basic256Sha256_ID:
+    case SecurityPolicy_Basic256_ID:
+        *pLengthOut = lengthIn;
+        break;
+    }
 
     return STATUS_OK;
 }
@@ -117,11 +129,22 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Decryption(const CryptoProvide
                                                         uint32_t lengthIn,
                                                         uint32_t *pLengthOut)
 {
-    (void) pProvider; // Reserved for future use
+    if(NULL == pProvider || NULL == pProvider->pProfile)
+        return STATUS_INVALID_PARAMETERS;
     if(NULL == pLengthOut)
         return STATUS_INVALID_PARAMETERS;
 
-    *pLengthOut = lengthIn;
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
+    default:
+        return STATUS_NOK;
+    case SecurityPolicy_Basic256Sha256_ID:
+    case SecurityPolicy_Basic256_ID:
+        *pLengthOut = lengthIn;
+        break;
+    }
 
     return STATUS_OK;
 }
@@ -136,6 +159,7 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_SignKey(const CryptoProvider *
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_NOK;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -159,6 +183,7 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_NOK;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -183,6 +208,7 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *p
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -252,6 +278,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_OAEPHashLength(const CryptoPr
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -275,6 +302,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_PSSHashLength(const CryptoPro
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -403,6 +431,7 @@ SOPC_StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvi
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_NOK;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -447,6 +476,7 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -505,6 +535,7 @@ SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -626,7 +657,7 @@ SOPC_StatusCode CryptoProvider_GenerateSecureChannelNonce(const CryptoProvider *
     ExposedBuffer *pExpKey;
     uint32_t lenNonce;
 
-    if(NULL == pProvider || NULL == ppNonce || NULL == pProvider->pProfile->pFnGenRnd)
+    if(NULL == pProvider || NULL == ppNonce || NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnGenRnd)
         return STATUS_INVALID_PARAMETERS;
 
     // Empties pointer in case an error occurs after that point.
@@ -879,6 +910,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricEncrypt(const CryptoProvider *pProvider
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -924,6 +956,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricDecrypt(const CryptoProvider *pProvider
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -972,6 +1005,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:
@@ -1012,6 +1046,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricVerify(const CryptoProvider *pProvider,
     switch(pProvider->pProfile->SecurityPolicyID)
     {
     case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
     default:
         return STATUS_INVALID_PARAMETERS;
     case SecurityPolicy_Basic256Sha256_ID:

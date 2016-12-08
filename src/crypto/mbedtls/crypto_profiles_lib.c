@@ -81,3 +81,21 @@ const CryptoProfile g_cpBasic256 = {
         .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048,
 };
 
+/* Security Policy "None": nothing to do
+ */
+
+ const CryptoProfile g_cpNone = {
+        .SecurityPolicyID = SecurityPolicy_None_ID,
+        .pFnSymmEncrypt = NULL,
+        .pFnSymmDecrypt = NULL,
+        .pFnSymmSign = NULL,
+        .pFnSymmVerif = NULL,
+        .pFnGenRnd = NULL,
+        .pFnDeriveData = NULL,
+        .pFnAsymEncrypt = NULL,
+        .pFnAsymDecrypt = NULL,
+        .pFnAsymSign = NULL,
+        .pFnAsymVerify = NULL,
+        .pFnCertVerify = NULL,
+};
+

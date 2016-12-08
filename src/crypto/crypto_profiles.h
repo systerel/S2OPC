@@ -33,8 +33,11 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 #define SecurityPolicy_Invalid_ID           0
 #define SecurityPolicy_Basic256Sha256_URI   "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 #define SecurityPolicy_Basic256Sha256_ID    1
-#define SecurityPolicy_Basic256_URI   "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
-#define SecurityPolicy_Basic256_ID    2
+#define SecurityPolicy_Basic256_URI         "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
+#define SecurityPolicy_Basic256_ID          2
+#define SecurityPolicy_None_URI             "http://opcfoundation.org/UA/SecurityPolicy#None"
+#define SecurityPolicy_None_ID              3
+
 
 // Basic256Sha256, sizes in bytes
 #define SecurityPolicy_Basic256Sha256_SymmLen_Block         16
@@ -61,6 +64,7 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 // CryptoProfiles instances
 extern const CryptoProfile g_cpBasic256Sha256;
 extern const CryptoProfile g_cpBasic256;
+extern const CryptoProfile g_cpNone;
 
 
 #include "sopc_base_types.h"

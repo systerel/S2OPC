@@ -45,8 +45,9 @@ SOPC_StatusCode CryptoProvider_Init(CryptoProvider *pCryptoProvider)
         return STATUS_NOK;
     memset(pctx, 0, sizeof(CryptolibContext));
 
+    // TODO: it may be nice to not create a full context with SecuPolicy None
     pCryptoProvider->pCryptolibContext = pctx;
-    mbedtls_entropy_init(&pctx->ctxEnt); //
+    mbedtls_entropy_init(&pctx->ctxEnt);
     mbedtls_ctr_drbg_init(&pctx->ctxDrbg);
     if(mbedtls_ctr_drbg_seed(&pctx->ctxDrbg, &mbedtls_entropy_func, &pctx->ctxEnt, NULL, 0) != 0)
         return STATUS_NOK;

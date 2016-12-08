@@ -33,6 +33,8 @@ const CryptoProfile *CryptoProfile_Get(const char *uri)
         return &g_cpBasic256Sha256;
     if(strncmp(uri, SecurityPolicy_Basic256_URI, strlen(SecurityPolicy_Basic256_URI)+1) == 0)
         return &g_cpBasic256;
+    if(strncmp(uri, SecurityPolicy_None_URI, strlen(SecurityPolicy_None_URI)+1) == 0)
+        return &g_cpNone;
 
     return NULL;
 }
