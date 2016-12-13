@@ -19,8 +19,9 @@
 
 #include <assert.h>
 #include <string.h>
-#include <ctype.h>
+#include <limits.h>
 
+#include "base_tools.h"
 #include "sopc_builtintypes.h"
 
 #define NOLENGTH UINT32_MAX
@@ -127,6 +128,7 @@ uint8_t OpcUa_String_IsNull(const SOPC_String* str)
 
 uint32_t OpcUa_String_StrLen(const SOPC_String*  str)
 {
+    assert(CHAR_BIT == 8);
     if(str == NULL || str->Data == NULL){
         return 0;
     }
@@ -163,6 +165,7 @@ SOPC_StatusCode OpcUa_String_StrnCat(SOPC_String*       dest,
     }else{
         return STATUS_INVALID_PARAMETERS;
     }
+    assert(CHAR_BIT == 8);
     assert(length == NOLENGTH || length == len); // Do not accept length != concat length
     char concat[len+1];
     if(dest->Length > 0){
@@ -185,37 +188,21 @@ int32_t OpcUa_String_StrnCmp(const SOPC_String* str1,
                              uint8_t            ignoreCase)
 {
     int32_t res = -1;
-    int32_t idx = 0;
-    int lc1, lc2;
-    if(ignoreCase == FALSE){
-        if(STATUS_OK != SOPC_String_Compare(str1, str2, &res)){
-            assert(FALSE);
-        }
-    }else{
-        if(str1->Length == str2->Length ||
-           (str1->Length >= (int32_t) length && str2->Length >= (int32_t) length))
-        {
-            if((str1->Length <= 0 && str2->Length <= 0) || length == 0){
-                res = 0;
-            }else if(ignoreCase == FALSE){
-                res = strncmp((char*) str1->Data, (char*) str2->Data, length);
-            }else{
-                res = 0;
-                for(idx = 0; idx < str1->Length && idx < str2->Length && res == 0; idx ++){
-                    lc1 = tolower(str1->Data[idx]);
-                    lc2 = tolower(str2->Data[idx]);
-                    if(lc1 < lc2){
-                        res = -1;
-                    }else if(lc1 > lc2){
-                        res = +1;
-                    }
-                }
-            }
-        }else if(str1->Length > str2->Length){
-             res = +1;
+    assert(CHAR_BIT == 8);
+    if(str1->Length == str2->Length ||
+       (str1->Length >= (int32_t) length && str2->Length >= (int32_t) length))
+    {
+        if((str1->Length <= 0 && str2->Length <= 0) || length == 0){
+            res = 0;
+        }else if(ignoreCase == FALSE){
+            res = strncmp((char*) str1->Data, (char*) str2->Data, length);
         }else{
-            res = -1;
+            res = strncmp_ignore_case((char*) str1->Data, (char*) str2->Data, length);
         }
+    }else if(str1->Length > str2->Length){
+         res = +1;
+    }else{
+        res = -1;
     }
     return res;
 }

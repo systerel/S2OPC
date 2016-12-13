@@ -323,8 +323,9 @@ void SOPC_String_Clear(SOPC_String* bstring);
 void SOPC_String_Delete(SOPC_String* bstring);
 
 SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
-                               const SOPC_String* right,
-                               int32_t*           comparison);
+                                    const SOPC_String* right,
+                                    uint8_t            ignoreCase,
+                                    int32_t*           comparison);
 
 uint32_t SOPC_String_Equal(const SOPC_String* left,
                       const SOPC_String* right);

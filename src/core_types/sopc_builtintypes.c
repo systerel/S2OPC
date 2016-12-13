@@ -22,6 +22,8 @@
 #include <string.h>
 #include <limits.h>
 
+#include "base_tools.h"
+
 typedef void (BuiltInFunction) (void*);
 
 void SOPC_Boolean_Initialize(SOPC_Boolean* b){
@@ -232,14 +234,11 @@ SOPC_StatusCode SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src){
 SOPC_StatusCode SOPC_String_AttachFromCstring(SOPC_String* dest, char* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && dest->Data == NULL && src != NULL){
+        assert(CHAR_BIT == 8);
         status = STATUS_OK;
-        if(CHAR_BIT == 8){
-            dest->Length = strlen(src);
-            dest->Data = (uint8_t*) src;
-            dest->DoNotClear = 1; // dest->characters will not be freed on clear
-        }else{
-            assert(FALSE);
-        }
+        dest->Length = strlen(src);
+        dest->Data = (uint8_t*) src;
+        dest->DoNotClear = 1; // dest->characters will not be freed on clear
     }
     return status;
 }
@@ -370,8 +369,8 @@ const char* SOPC_String_GetRawCString(const SOPC_String* string){
 }
 
 SOPC_StatusCode SOPC_ByteString_Compare(const SOPC_ByteString* left,
-                                   const SOPC_ByteString* right,
-                                   int32_t*               comparison)
+                                        const SOPC_ByteString* right,
+                                        int32_t*               comparison)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
 
@@ -412,12 +411,30 @@ uint8_t SOPC_ByteString_Equal(const SOPC_ByteString* left,
 }
 
 SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
-                               const SOPC_String* right,
-                               int32_t*           comparison)
+                                    const SOPC_String* right,
+                                    uint8_t            ignoreCase,
+                                    int32_t*           comparison)
 {
+    if(left == NULL || right == NULL || comparison == NULL)
+        return STATUS_INVALID_PARAMETERS;
 
-    return SOPC_ByteString_Compare((SOPC_ByteString*) left,
-                              (SOPC_ByteString*) right, comparison);
+    if(left->Length == right->Length)
+    {
+        assert(CHAR_BIT == 8);
+        if(left->Length <= 0 && right->Length <= 0){
+            *comparison = 0;
+        }else if(ignoreCase == FALSE){
+            *comparison = strcmp((char*) left->Data, (char*) right->Data);
+        }else{
+            *comparison = strncmp_ignore_case((char*) left->Data, (char*) right->Data, left->Length);
+        }
+    }else if(left->Length > right->Length){
+         *comparison = +1;
+    }else{
+        *comparison = -1;
+    }
+
+    return STATUS_OK;
 }
 
 uint32_t SOPC_String_Equal(const SOPC_String* left,

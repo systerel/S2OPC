@@ -1257,7 +1257,9 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection, //
         if(status == STATUS_OK){
             int32_t secuPolicyComparison = 0;
             status = SOPC_String_Compare(&scConnection->currentSecuPolicy,
-                                         &securityPolicy, &secuPolicyComparison);
+                                         &securityPolicy,
+                                         FALSE,
+                                         &secuPolicyComparison);
 
             if(status != STATUS_OK || secuPolicyComparison != 0){
                 status = STATUS_INVALID_RCV_PARAMETER;
