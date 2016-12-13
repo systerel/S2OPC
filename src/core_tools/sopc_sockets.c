@@ -21,6 +21,7 @@
 #include <string.h>
 #include <assert.h>
 
+#include "base_tools.h"
 #include "sopc_stack_csts.h"
 
 SOPC_SocketManager globalSocketMgr;
@@ -29,24 +30,22 @@ uint8_t            globalInitialized = FALSE;
 // Counter to check <= OPCUA_MAXCONNECTIONS
 static uint32_t globalNbSockets = 0;
 
-SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
+SOPC_StatusCode Internal_CheckURI(const char* uri,
+                                  size_t* hostnameLength,
+                                  size_t* portIdx,
+                                  size_t* portLength){
     SOPC_StatusCode status = STATUS_NOK;
     size_t idx = 0;
     uint8_t isPort = FALSE;
     uint8_t hasPort = FALSE;
     uint8_t hasName = FALSE;
-    size_t hostnameLength = 0;
-    size_t portIdx = 0;
-    size_t portLength = 0;
     uint8_t invalid = FALSE;
-    char *lHostname = NULL;
-    char *lPort = NULL;
-    if(uri != NULL && hostname != NULL && port != NULL){
+    if(uri != NULL && hostnameLength != NULL && portLength != NULL){
 
-        if(strlen(uri) + 4  > 4096){
+        if(strlen(uri) + 4  > TCP_UA_MAX_URL_LENGTH){
             // Encoded value shall be less than 4096 bytes
             status = STATUS_INVALID_PARAMETERS;
-        }else if(strlen(uri) > 10 && memcmp(uri, (const char*) "opc.tcp://", 10) == 0){
+        }else if(strlen(uri) > 10 && strncmp_ignore_case(uri, (const char*) "opc.tcp://", 10) == 0){
             // search for a ':' defining port for given IP
             // search for a '/' defining endpoint name for given IP => at least 1 char after it (len - 1)
             for(idx = 10; idx < strlen(uri) - 1; idx++){
@@ -55,14 +54,14 @@ SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
                         if(hasPort == FALSE){
                             // port definition
                             hasPort = 1;
-                            portIdx = idx;
+                            *portIdx = idx;
                         }
                     }else if(uri[idx] == '/' && invalid == FALSE){
                         // Name of the endpoint after port, invalid otherwise
                         if(hasPort == FALSE){
                             invalid = 1;
                         }else{
-                            portLength = idx - portIdx;
+                            *portLength = idx - *portIdx;
                             hasName = 1;
                         }
                     }else{
@@ -73,7 +72,7 @@ SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
                     }
                 }else{
                     if(uri[idx] == ':'){
-                        hostnameLength = idx - 10;
+                        *hostnameLength = idx - 10;
                         isPort = 1;
                     }
                 }
@@ -81,13 +80,27 @@ SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
 
             if(hasPort != FALSE && invalid == FALSE){
                 status = STATUS_OK;
-                if(portLength == 0){
+                if(*portLength == 0){
                     // No endpoint name after port provided
-                    portLength = idx - portIdx + 1;
+                    *portLength = idx - *portIdx + 1;
                 }
             }
 
         }
+    }
+    return status;
+}
+
+SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    size_t hostnameLength = 0;
+    size_t portIdx = 0;
+    size_t portLength = 0;
+    char *lHostname = NULL;
+    char *lPort = NULL;
+
+    if(uri != NULL && hostname != NULL && port != NULL){
+        status = Internal_CheckURI(uri, &hostnameLength, &portIdx, &portLength);
     }
 
     if(status == STATUS_OK){
@@ -120,6 +133,12 @@ SOPC_StatusCode ParseURI (const char* uri, char** hostname, char** port){
     }
 
     return status;
+}
+
+SOPC_StatusCode SOPC_Check_TCP_UA_URI(const char* uri){
+    size_t hostLength, portIdx, portLength;
+
+    return Internal_CheckURI(uri, &hostLength, &portIdx, &portLength);
 }
 
 SOPC_SocketManager* SOPC_SocketManager_GetGlobal(){

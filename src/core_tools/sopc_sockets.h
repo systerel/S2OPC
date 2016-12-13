@@ -23,6 +23,8 @@
 #ifndef SOPC_SOCKETS_H_
 #define SOPC_SOCKETS_H_
 
+#define TCP_UA_MAX_URL_LENGTH 4096
+
 typedef enum {
     SOCKET_READ_EVENT,
     SOCKET_WRITE_EVENT,
@@ -62,6 +64,9 @@ typedef struct {
     Mutex       mutex;
 }
 SOPC_SocketManager;
+
+// Check TCP UA URI format
+SOPC_StatusCode SOPC_Check_TCP_UA_URI(const char* uri);
 
 SOPC_SocketManager* SOPC_SocketManager_GetGlobal(void);
 

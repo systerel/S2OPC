@@ -423,7 +423,7 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
            connection->callbackData == NULL &&
            connection->state == TCP_Connection_Disconnected)
         {
-            if(TCP_UA_CheckURI(uri) == STATUS_OK){
+            if(SOPC_Check_TCP_UA_URI(uri) == STATUS_OK){
                 status = SOPC_String_InitializeFromCString(&connection->url, uri);
             }
 

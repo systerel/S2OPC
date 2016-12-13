@@ -23,7 +23,6 @@
 #include "sopc_builtintypes.h"
 
 #define TCP_UA_MIN_BUFFER_SIZE 8192
-#define TCP_UA_MAX_URL_LENGTH 4096
 
 typedef enum TCP_ConnectionState
 {
