@@ -160,6 +160,7 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
                                            void*                                   callbackData)
 {
     SOPC_StatusCode status = STATUS_OK;
+    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     Certificate *cli = NULL, *srv = NULL, *crt_ca = NULL;
     AsymmetricKey *pKeyCli = NULL;
     PKIProvider *pki;
@@ -217,6 +218,12 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
         KeyManager_Certificate_Free(cli);
         KeyManager_Certificate_Free(srv);
         KeyManager_AsymmetricKey_Free(pKeyCli);
+        if(cConnection != NULL){
+            cConnection->pkiProvider = NULL;
+            cConnection->clientCertificate = NULL;
+            cConnection->clientKey = NULL;
+            cConnection->serverCertificate = NULL;
+        }
     }
     return status;
 }
@@ -241,6 +248,7 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
                                       uint32_t                                networkTimeout)
 {
     SOPC_StatusCode status = STATUS_OK;
+    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     Certificate *cli = NULL, *srv = NULL, *crt_ca = NULL;
     AsymmetricKey *pKeyCli = NULL;
     PKIProvider *pki = NULL;
@@ -300,6 +308,12 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
         KeyManager_Certificate_Free(cli);
         KeyManager_Certificate_Free(srv);
         KeyManager_AsymmetricKey_Free(pKeyCli);
+        if(cConnection != NULL){
+            cConnection->pkiProvider = NULL;
+            cConnection->clientCertificate = NULL;
+            cConnection->clientKey = NULL;
+            cConnection->serverCertificate = NULL;
+        }
     }
     return status;
 }
