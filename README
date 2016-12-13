@@ -2,8 +2,8 @@ INGOPCS OPC UA stack
 ====================
 
 This project contains the following elements:
-- src/ingopcs: source files of the INGOPCS project OPC UA stack
-  (client side only)
+- src/: source files of the INGOPCS project OPC UA stack (client side
+  only)
 - lib/mbedtls-2.3.0: source files of mbedtls cryptographic library
 - test/ingopcs: unit tests on the stack
 - stub_client: define a client side simple use case of the stack (to
@@ -12,6 +12,8 @@ This project contains the following elements:
 - Makefile*: makefile compiling internal tests and stack code (not as
   a library)
 - build: compiled files during make execution
+- build_platform: platform dependant compiled files during make
+  execution
 - out: built internal tests executables, certificates and keys
   necessary for execution
 - apidoc/html: generated code documentation in HTML format
@@ -39,18 +41,11 @@ Documentation generation:
 - Documentation generated in apidoc/ and explored with a web-browser
   from file apidoc/html/index.html
 
-To run the tests of the stack:
+To run the unit tests of the stack:
 - Compile the stack and tests
-- Copy stub_server executable (compiled with OPC Foundation Ansi-C
-  stack) into out/ directory
 - Execute the test-all.sh script
-- Check results in out/*.tap files
+- Check results in out/results.tap files
+
 Tests are covering the following cases:
 - Unit tests: cryptographic library and tools used by the stack
-- Client/Server simple use case:
-  * Client requests to open a secure channel with security policy
-    Basic256Sha256 and in SignAndEncrypt mode
-  * If request is accepted, the client send a GetEndpoints request and
-    checks the response received (a server stub will respond with a
-    service fault since it does not really implement the service)
   
