@@ -1577,6 +1577,7 @@ SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
                     status = STATUS_INVALID_RCV_PARAMETER;
                 }
             }
+            *receivedEncType = recEncType;
         }
 
 
