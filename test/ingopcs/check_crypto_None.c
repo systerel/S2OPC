@@ -63,7 +63,7 @@ START_TEST(test_crypto_load_None)
     ck_assert(NULL == crypto->pProfile->pFnSymmDecrypt);
     ck_assert(NULL == crypto->pProfile->pFnSymmSign);
     ck_assert(NULL == crypto->pProfile->pFnSymmVerif);
-    ck_assert(NULL == crypto->pProfile->pFnGenRnd);
+    ck_assert(NULL != crypto->pProfile->pFnGenRnd);
     ck_assert(NULL == crypto->pProfile->pFnDeriveData);
     ck_assert(NULL == crypto->pProfile->pFnAsymEncrypt);
     ck_assert(NULL == crypto->pProfile->pFnAsymDecrypt);
@@ -168,17 +168,33 @@ START_TEST(test_crypto_symm_sign_None)
 END_TEST
 
 
-START_TEST(test_crypto_symm_generate_nonce_None) // TODO: it is a _nonce, maybe it is not a crypto_symm...
+START_TEST(test_crypto_generate_nonce_None)
 {
     SecretBuffer *pSecNonce;
     //char hexoutput[64];
 
-    // It is random, so...
-    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce) == STATUS_INVALID_PARAMETERS);
+    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce) == STATUS_NOK);
 
-    // Test invalid inputs (TODO: assert attended error code instead of != OK)
-    ck_assert(CryptoProvider_GenerateSecureChannelNonce(NULL, &pSecNonce) != STATUS_OK);
-    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, NULL) != STATUS_OK);
+    // Test invalid inputs
+    ck_assert(CryptoProvider_GenerateSecureChannelNonce(NULL, &pSecNonce) == STATUS_INVALID_PARAMETERS);
+    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, NULL) == STATUS_INVALID_PARAMETERS);
+}
+END_TEST
+
+
+START_TEST(test_crypto_generate_uint32_None)
+{
+    // Yes, you should still be able to generate simple uint32_t in None
+    uint32_t i = 0, j = 0;
+
+    // It is random, so you should not have two times the same number (unless you are unlucky (1/2**32)).
+    ck_assert(CryptoProvider_GenerateRandomID(crypto, &i) == STATUS_OK);
+    ck_assert(CryptoProvider_GenerateRandomID(crypto, &j) == STATUS_OK);
+    ck_assert(i != j);
+
+    // Test invalid inputs
+    ck_assert(CryptoProvider_GenerateRandomID(NULL, &i) == STATUS_INVALID_PARAMETERS);
+    ck_assert(CryptoProvider_GenerateRandomID(crypto, NULL) == STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
@@ -595,11 +611,12 @@ END_TEST
 Suite *tests_make_suite_crypto_None()
 {
     Suite *s = NULL;
-    TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_derives = NULL, *tc_km = NULL, *tc_crypto_asym = NULL, *tc_pki_stack = NULL;
+    TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_rands = NULL, *tc_derives = NULL, *tc_km = NULL, *tc_crypto_asym = NULL, *tc_pki_stack = NULL;
 
     s = suite_create("Crypto tests None");
     tc_crypto_symm = tcase_create("Symmetric Crypto");
     tc_providers = tcase_create("Crypto Provider");
+    tc_rands = tcase_create("Random Generation");
     tc_derives = tcase_create("Crypto Data Derivation");
     tc_km = tcase_create("Key Management");
     tc_crypto_asym = tcase_create("Asymmetric Crypto");
@@ -611,7 +628,11 @@ Suite *tests_make_suite_crypto_None()
     tcase_add_test(tc_crypto_symm, test_crypto_symm_lengths_None);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_crypt_None);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_sign_None);
-    tcase_add_test(tc_crypto_symm, test_crypto_symm_generate_nonce_None);
+
+    suite_add_tcase(s, tc_rands);
+    tcase_add_checked_fixture(tc_rands, setup_crypto, teardown_crypto);
+    tcase_add_test(tc_rands, test_crypto_generate_nonce_None);
+    tcase_add_test(tc_rands, test_crypto_generate_uint32_None);
 
     suite_add_tcase(s, tc_providers);
     tcase_add_checked_fixture(tc_providers, setup_crypto, teardown_crypto);

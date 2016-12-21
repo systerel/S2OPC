@@ -372,7 +372,7 @@ START_TEST(test_crypto_symm_sign_B256S256)
 END_TEST
 
 
-START_TEST(test_crypto_symm_generate_nonce_B256S256) // TODO: it is a _nonce, maybe it is not a crypto_symm...
+START_TEST(test_crypto_generate_nonce_B256S256)
 {
     SecretBuffer *pSecNonce0, *pSecNonce1;
     ExposedBuffer *pExpKey0, *pExpKey1;
@@ -384,14 +384,31 @@ START_TEST(test_crypto_symm_generate_nonce_B256S256) // TODO: it is a _nonce, ma
     ck_assert(NULL != (pExpKey0 = SecretBuffer_Expose(pSecNonce0)));
     ck_assert(NULL != (pExpKey1 = SecretBuffer_Expose(pSecNonce1)));
     ck_assert(memcmp(pExpKey0, pExpKey1, 32) != 0);
+    // You have a slight chance to fail here (1/(2**256))
     SecretBuffer_Unexpose(pExpKey0);
     SecretBuffer_Unexpose(pExpKey1);
     SecretBuffer_DeleteClear(pSecNonce0);
     SecretBuffer_DeleteClear(pSecNonce1);
 
     // Test invalid inputs
-    ck_assert(CryptoProvider_GenerateSecureChannelNonce(NULL, &pSecNonce0) != STATUS_OK);
-    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, NULL) != STATUS_OK);
+    ck_assert(CryptoProvider_GenerateSecureChannelNonce(NULL, &pSecNonce0) == STATUS_INVALID_PARAMETERS);
+    ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, NULL) == STATUS_INVALID_PARAMETERS);
+}
+END_TEST
+
+
+START_TEST(test_crypto_generate_uint32_B256S256)
+{
+    uint32_t i = 0, j = 0;
+
+    // It is random, so you should not have two times the same number (unless you are unlucky (1/2**32)).
+    ck_assert(CryptoProvider_GenerateRandomID(crypto, &i) == STATUS_OK);
+    ck_assert(CryptoProvider_GenerateRandomID(crypto, &j) == STATUS_OK);
+    ck_assert(i != j);
+
+    // Test invalid inputs
+    ck_assert(CryptoProvider_GenerateRandomID(NULL, &i) == STATUS_INVALID_PARAMETERS);
+    ck_assert(CryptoProvider_GenerateRandomID(crypto, NULL) == STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
@@ -967,11 +984,12 @@ END_TEST
 Suite *tests_make_suite_crypto_B256S256()
 {
     Suite *s = NULL;
-    TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_derives = NULL, *tc_km = NULL, *tc_crypto_asym = NULL, *tc_pki_stack = NULL;
+    TCase *tc_crypto_symm = NULL, *tc_providers = NULL, *tc_rands = NULL, *tc_derives = NULL, *tc_km = NULL, *tc_crypto_asym = NULL, *tc_pki_stack = NULL;
 
     s = suite_create("Crypto tests Basic256Sha256");
     tc_crypto_symm = tcase_create("Symmetric Crypto");
     tc_providers = tcase_create("Crypto Provider");
+    tc_rands = tcase_create("Random Generation");
     tc_derives = tcase_create("Crypto Data Derivation");
     tc_km = tcase_create("Key Management");
     tc_crypto_asym = tcase_create("Asymmetric Crypto");
@@ -983,7 +1001,11 @@ Suite *tests_make_suite_crypto_B256S256()
     tcase_add_test(tc_crypto_symm, test_crypto_symm_lengths_B256S256);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_crypt_B256S256);
     tcase_add_test(tc_crypto_symm, test_crypto_symm_sign_B256S256);
-    tcase_add_test(tc_crypto_symm, test_crypto_symm_generate_nonce_B256S256);
+
+    suite_add_tcase(s, tc_rands);
+    tcase_add_checked_fixture(tc_rands, setup_crypto, teardown_crypto);
+    tcase_add_test(tc_rands, test_crypto_generate_nonce_B256S256);
+    tcase_add_test(tc_rands, test_crypto_generate_uint32_B256S256);
 
     suite_add_tcase(s, tc_providers);
     tcase_add_checked_fixture(tc_providers, setup_crypto, teardown_crypto);
