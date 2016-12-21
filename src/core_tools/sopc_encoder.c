@@ -802,6 +802,9 @@ SOPC_StatusCode SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, S
         status = STATUS_OK;
         encodingByte = GetDiagInfoEncodingByte(diagInfo);
     }
+    if(status == STATUS_OK){
+        SOPC_Byte_Write(&encodingByte, msgBuffer);
+    }
     if(status == STATUS_OK &&
         (encodingByte & DiagInfoEncoding_SymbolicId) != 0x00){
         status = SOPC_Int32_Write(&diagInfo->SymbolicId, msgBuffer);
