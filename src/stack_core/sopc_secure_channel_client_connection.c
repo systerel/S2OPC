@@ -500,12 +500,6 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     // Message header already managed by transport layer
     // (except secure channel Id)
     if(cConnection != NULL){
-        status = SC_DecryptSecureMessage(cConnection->instance,
-                                         transportMsgBuffer,
-                                         &requestId);
-    }
-
-    if(status == STATUS_OK){
         status = SC_CheckAbortChunk(cConnection->instance->receptionBuffers,
                                     &reason);
         // Decoded request id to be aborted
@@ -515,7 +509,14 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
         if(status != STATUS_OK){
             abortReqStatus = status;
             //TODO: report (trace)
+            // Reset buffer since next message should be a new message
         }
+    }
+
+    if(status == STATUS_OK){
+        status = SC_DecryptSecureMessage(cConnection->instance,
+                                         transportMsgBuffer,
+                                         &requestId);
     }
 
     if(status == STATUS_OK){
@@ -539,6 +540,9 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
             }
             SC_PendingRequestDelete(pRequest);
         }
+        // Reset since we will not decode the message in this case (aborted in last chunk)
+        MsgBuffers_Reset(cConnection->instance->receptionBuffers);
+        status = STATUS_NOK;
     }
 
     if(status == STATUS_OK){
@@ -807,9 +811,9 @@ SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
 }
 
 SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
-                                SOPC_EncodeableType*   requestType,
+                                SOPC_EncodeableType* requestType,
                                 void*                request,
-                                SOPC_EncodeableType*   responseType,
+                                SOPC_EncodeableType* responseType,
                                 uint32_t             timeout,
                                 SC_ResponseEvent_CB* callback,
                                 void*                callbackData)
