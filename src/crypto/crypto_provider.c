@@ -664,7 +664,7 @@ SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
 
 
 /* ------------------------------------------------------------------------------------------------
- * Symmetric cryptography
+ * Random and pseudo-random functionalities
  * ------------------------------------------------------------------------------------------------
  */
 
@@ -701,6 +701,16 @@ SOPC_StatusCode CryptoProvider_GenerateSecureChannelNonce(const CryptoProvider *
     free(pExpKey);
 
     return status;
+}
+
+
+SOPC_StatusCode CryptoProvider_GenerateRandomID(const CryptoProvider *pProvider,
+                                                uint32_t *pID)
+{
+    if(NULL == pProvider || NULL == pID || NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnGenRnd)
+        return STATUS_INVALID_PARAMETERS;
+
+    return pProvider->pProfile->pFnGenRnd(pProvider, (ExposedBuffer *)pID, sizeof(uint32_t));
 }
 
 

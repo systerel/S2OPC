@@ -564,6 +564,21 @@ SOPC_StatusCode CryptoProvider_GenerateSecureChannelNonce(const CryptoProvider *
                                                           SecretBuffer **ppNonce);
 
 /**
+ * \brief           Generates 4 bytes of truly random data.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pID       A valid pointer which will contain the random data.
+ *
+ * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error (e.g. no entropy source).
+ */
+SOPC_StatusCode CryptoProvider_GenerateRandomID(const CryptoProvider *pProvider,
+                                                uint32_t *pID);
+
+/**
  * \brief           Derives pseudo-random data from the randomly generated and shared secrets.
  *
  * \note            Internal API, use CryptoProvider_DeriveKeySetsClient() or CryptoProvider_DeriveKeySetsServer() instead.
