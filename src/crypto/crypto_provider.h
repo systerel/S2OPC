@@ -107,7 +107,8 @@ SOPC_StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider);
  *                  when return value is not STATUS_OK.
  *
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized.
+ *                  \p pProvider not correctly initialized, and STATUS_NOK for an unsupported
+ *                  security policy.
  */
 SOPC_StatusCode CryptoProvider_SymmetricGetLength_CryptoKey(const CryptoProvider *pProvider,
                                                      uint32_t *pLength);
@@ -193,6 +194,19 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Signature(const CryptoProvider
 SOPC_StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *pProvider,
                                                     uint32_t *pCipherTextBlockSize,
                                                     uint32_t *pPlainTextBlockSize);
+
+/**
+ * \brief           Provides the length in bytes of the SecureChannel nonces used in the symmetric encryption process.
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param pLenNonce  A valid pointer to the length in bytes of the nonce used by the encryption process.
+ *                   Its content is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized.
+ */
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_SecureChannelNonce(const CryptoProvider *pProvider,
+                                                                     uint32_t *pLenNonce);
 
 /**
  * \brief           Provides the lengths in bytes of the secrets derived from the nonce exchange.
@@ -526,7 +540,7 @@ SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
 
 
 /* ------------------------------------------------------------------------------------------------
- * Key derivation
+ * Random and pseudo-random functionalities
  * ------------------------------------------------------------------------------------------------
  */
 

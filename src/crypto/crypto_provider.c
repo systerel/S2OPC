@@ -229,6 +229,25 @@ SOPC_StatusCode CryptoProvider_SymmetricGetLength_Blocks(const CryptoProvider *p
 }
 
 
+SOPC_StatusCode CryptoProvider_SymmetricGetLength_SecureChannelNonce(const CryptoProvider *pProvider,
+                                                                     uint32_t *pLenNonce)
+{
+    if(NULL == pProvider || NULL == pProvider->pProfile)
+        return STATUS_INVALID_PARAMETERS;
+
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
+    default:
+        return STATUS_INVALID_PARAMETERS;
+    case SecurityPolicy_Basic256Sha256_ID:
+    case SecurityPolicy_Basic256_ID:
+        return CryptoProvider_SymmetricGetLength_CryptoKey(pProvider, pLenNonce);
+    }
+}
+
+
 SOPC_StatusCode CryptoProvider_DeriveGetLengths(const CryptoProvider *pProvider,
                                            uint32_t *pSymmCryptoKeyLength,
                                            uint32_t *pSymmSignKeyLength,
@@ -663,8 +682,7 @@ SOPC_StatusCode CryptoProvider_GenerateSecureChannelNonce(const CryptoProvider *
     // Empties pointer in case an error occurs after that point.
     *ppNonce = NULL;
 
-    // TODO: provide a GetLength_SecureChannelNonce and use it here (== CryptoKey)
-    if(CryptoProvider_SymmetricGetLength_CryptoKey(pProvider, &lenNonce) != STATUS_OK)
+    if(CryptoProvider_SymmetricGetLength_SecureChannelNonce(pProvider, &lenNonce) != STATUS_OK)
         return STATUS_NOK;
 
     pExpKey = (ExposedBuffer *)malloc(lenNonce);
