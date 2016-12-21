@@ -89,6 +89,8 @@ START_TEST(test_crypto_symm_lengths_B256S256)
     ck_assert(15 == len);
     ck_assert(CryptoProvider_SymmetricGetLength_Decryption(crypto, 15, &len) == STATUS_OK);
     ck_assert(15 == len);
+    ck_assert(CryptoProvider_SymmetricGetLength_SecureChannelNonce(crypto, &len) == STATUS_OK);
+    ck_assert(32 == len);
     ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, NULL) == STATUS_OK);
     ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, &lenCiph, NULL) == STATUS_OK);
     ck_assert(16 == lenCiph);

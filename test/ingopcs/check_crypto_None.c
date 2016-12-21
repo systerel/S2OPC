@@ -84,6 +84,7 @@ START_TEST(test_crypto_symm_lengths_None)
     ck_assert(CryptoProvider_SymmetricGetLength_Signature(crypto, &len) == STATUS_NOK);
     ck_assert(CryptoProvider_SymmetricGetLength_Encryption(crypto, 15, &len) == STATUS_NOK);
     ck_assert(CryptoProvider_SymmetricGetLength_Decryption(crypto, 15, &len) == STATUS_NOK);
+    ck_assert(CryptoProvider_SymmetricGetLength_SecureChannelNonce(crypto, &len) == STATUS_INVALID_PARAMETERS);
     ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, NULL) == STATUS_INVALID_PARAMETERS);
     ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, &lenCiph, NULL) == STATUS_INVALID_PARAMETERS);
     ck_assert(CryptoProvider_SymmetricGetLength_Blocks(crypto, NULL, &lenDeci) == STATUS_INVALID_PARAMETERS);
