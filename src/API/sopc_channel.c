@@ -33,12 +33,12 @@ typedef struct {
     void*                                   callbackData;
     uint8_t                                 connectedFlag;
     uint8_t                                 disconnectedFlag;
-} Channel_CallbackData;
+} SOPC_InternalChannel_CallbackData;
 
-Channel_CallbackData* Create_CallbackData(SOPC_Channel_PfnConnectionStateChanged* callback,
-                                          void*                                   callbackData)
+SOPC_InternalChannel_CallbackData* SOPC_Create_ChannelCallbackData(SOPC_Channel_PfnConnectionStateChanged* callback,
+                                                                   void*                                   callbackData)
 {
-    Channel_CallbackData* result = malloc(sizeof(Channel_CallbackData));
+    SOPC_InternalChannel_CallbackData* result = malloc(sizeof(SOPC_InternalChannel_CallbackData));
     if(result != NULL){
         result->callback = callback;
         result->callbackData = callbackData;
@@ -48,7 +48,7 @@ Channel_CallbackData* Create_CallbackData(SOPC_Channel_PfnConnectionStateChanged
     return result;
 }
 
-void Delete_CallbackData(Channel_CallbackData* chCbData){
+void SOPC_Delete_ChannelCallbackData(SOPC_InternalChannel_CallbackData* chCbData){
     if(chCbData != NULL){
         free(chCbData);
     }
@@ -128,7 +128,7 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
                                     SOPC_StatusCode      status){
     SOPC_StatusCode retStatus = STATUS_INVALID_PARAMETERS;
     SOPC_Channel channel = (SOPC_Channel) cConnection;
-    Channel_CallbackData* callbackData = cbData;
+    SOPC_InternalChannel_CallbackData* callbackData = cbData;
     SOPC_Channel_Event channelConnectionEvent = SOPC_ChannelEvent_Invalid;
 
     switch(event){
@@ -189,7 +189,7 @@ SOPC_StatusCode SOPC_Channel_InternalBeginConnect(SOPC_Channel                  
                                                   uint32_t                                networkTimeout,
                                                   SOPC_Channel_PfnConnectionStateChanged* cb,
                                                   void*                                   cbData,
-                                                  Channel_CallbackData**                  channelCbData)
+                                                  SOPC_InternalChannel_CallbackData**                  channelCbData)
 {
     assert(channelCbData != NULL);
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -213,7 +213,7 @@ SOPC_StatusCode SOPC_Channel_InternalBeginConnect(SOPC_Channel                  
                                          StackConfiguration_GetNamespaces(),
                                          StackConfiguration_GetEncodeableTypes());
             if(status == STATUS_OK){
-                *channelCbData = Create_CallbackData(cb, cbData);
+                *channelCbData = SOPC_Create_ChannelCallbackData(cb, cbData);
                 if(*channelCbData == NULL){
                     status = STATUS_NOK;
                 }
@@ -246,7 +246,7 @@ SOPC_StatusCode SOPC_Channel_BeginConnect(SOPC_Channel                          
                                           SOPC_Channel_PfnConnectionStateChanged* cb,
                                           void*                                   cbData)
 {
-    Channel_CallbackData* internalCbData = NULL;
+    SOPC_InternalChannel_CallbackData* internalCbData = NULL;
     return SOPC_Channel_InternalBeginConnect(channel, url, crt_cli,
                                              key_priv_cli, crt_srv,
                                              pki, reqSecuPolicyUri,
@@ -267,7 +267,7 @@ SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            cha
                                      SOPC_Channel_PfnConnectionStateChanged* cb,
                                      void*                                   cbData)
 {
-    Channel_CallbackData* internalCbData = NULL;
+    SOPC_InternalChannel_CallbackData* internalCbData = NULL;
     uint8_t receivedEvent = FALSE;
     const uint32_t sleepTimeout = 500;
     uint32_t timeout = networkTimeout;
@@ -429,7 +429,7 @@ SOPC_StatusCode SOPC_Channel_Disconnect(SOPC_Channel channel){
     // TODO: call the connection state change callback ? Or not necessary because voluntarily closed ?
     if(cConnection != NULL){
         status = STATUS_NOK;
-        Delete_CallbackData(cConnection->callbackData);
+        SOPC_Delete_ChannelCallbackData(cConnection->callbackData);
         status = SC_Client_Disconnect(cConnection);
         StackConfiguration_Unlocked();
     }
