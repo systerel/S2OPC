@@ -106,7 +106,7 @@ SOPC_StatusCode OpcUa_ServerApi_FindServers(
 SOPC_StatusCode OpcUa_Server_BeginFindServers(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -116,7 +116,7 @@ SOPC_StatusCode OpcUa_Server_BeginFindServers(
     OpcUa_ServerApi_PfnFindServers* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -126,7 +126,7 @@ SOPC_StatusCode OpcUa_Server_BeginFindServers(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_FindServersRequest*)a_ppRequest;
+        pRequest = (OpcUa_FindServersRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -253,7 +253,7 @@ SOPC_StatusCode OpcUa_ServerApi_FindServersOnNetwork(
 SOPC_StatusCode OpcUa_Server_BeginFindServersOnNetwork(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -263,7 +263,7 @@ SOPC_StatusCode OpcUa_Server_BeginFindServersOnNetwork(
     OpcUa_ServerApi_PfnFindServersOnNetwork* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -273,7 +273,7 @@ SOPC_StatusCode OpcUa_Server_BeginFindServersOnNetwork(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_FindServersOnNetworkRequest*)a_ppRequest;
+        pRequest = (OpcUa_FindServersOnNetworkRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -399,7 +399,7 @@ SOPC_StatusCode OpcUa_ServerApi_GetEndpoints(
 SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -409,7 +409,7 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
     OpcUa_ServerApi_PfnGetEndpoints* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -419,7 +419,7 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_GetEndpointsRequest*)a_ppRequest;
+        pRequest = (OpcUa_GetEndpointsRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -529,7 +529,7 @@ SOPC_StatusCode OpcUa_ServerApi_RegisterServer(
 SOPC_StatusCode OpcUa_Server_BeginRegisterServer(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -539,7 +539,7 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterServer(
     OpcUa_ServerApi_PfnRegisterServer* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -549,7 +549,7 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterServer(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_RegisterServerRequest*)a_ppRequest;
+        pRequest = (OpcUa_RegisterServerRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -670,7 +670,7 @@ SOPC_StatusCode OpcUa_ServerApi_RegisterServer2(
 SOPC_StatusCode OpcUa_Server_BeginRegisterServer2(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -680,7 +680,7 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterServer2(
     OpcUa_ServerApi_PfnRegisterServer2* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -690,7 +690,7 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterServer2(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_RegisterServer2Request*)a_ppRequest;
+        pRequest = (OpcUa_RegisterServer2Request*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -854,7 +854,7 @@ SOPC_StatusCode OpcUa_ServerApi_CreateSession(
 SOPC_StatusCode OpcUa_Server_BeginCreateSession(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -864,7 +864,7 @@ SOPC_StatusCode OpcUa_Server_BeginCreateSession(
     OpcUa_ServerApi_PfnCreateSession* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -874,7 +874,7 @@ SOPC_StatusCode OpcUa_Server_BeginCreateSession(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_CreateSessionRequest*)a_ppRequest;
+        pRequest = (OpcUa_CreateSessionRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -1027,7 +1027,7 @@ SOPC_StatusCode OpcUa_ServerApi_ActivateSession(
 SOPC_StatusCode OpcUa_Server_BeginActivateSession(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1037,7 +1037,7 @@ SOPC_StatusCode OpcUa_Server_BeginActivateSession(
     OpcUa_ServerApi_PfnActivateSession* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -1047,7 +1047,7 @@ SOPC_StatusCode OpcUa_Server_BeginActivateSession(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_ActivateSessionRequest*)a_ppRequest;
+        pRequest = (OpcUa_ActivateSessionRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -1162,7 +1162,7 @@ SOPC_StatusCode OpcUa_ServerApi_CloseSession(
 SOPC_StatusCode OpcUa_Server_BeginCloseSession(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1172,7 +1172,7 @@ SOPC_StatusCode OpcUa_Server_BeginCloseSession(
     OpcUa_ServerApi_PfnCloseSession* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -1182,7 +1182,7 @@ SOPC_StatusCode OpcUa_Server_BeginCloseSession(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_CloseSessionRequest*)a_ppRequest;
+        pRequest = (OpcUa_CloseSessionRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -1289,7 +1289,7 @@ SOPC_StatusCode OpcUa_ServerApi_Cancel(
 SOPC_StatusCode OpcUa_Server_BeginCancel(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1299,7 +1299,7 @@ SOPC_StatusCode OpcUa_Server_BeginCancel(
     OpcUa_ServerApi_PfnCancel* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -1309,7 +1309,7 @@ SOPC_StatusCode OpcUa_Server_BeginCancel(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_CancelRequest*)a_ppRequest;
+        pRequest = (OpcUa_CancelRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -1428,7 +1428,7 @@ SOPC_StatusCode OpcUa_ServerApi_AddNodes(
 SOPC_StatusCode OpcUa_Server_BeginAddNodes(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1438,7 +1438,7 @@ SOPC_StatusCode OpcUa_Server_BeginAddNodes(
     OpcUa_ServerApi_PfnAddNodes* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -1448,7 +1448,7 @@ SOPC_StatusCode OpcUa_Server_BeginAddNodes(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_AddNodesRequest*)a_ppRequest;
+        pRequest = (OpcUa_AddNodesRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -1571,7 +1571,7 @@ SOPC_StatusCode OpcUa_ServerApi_AddReferences(
 SOPC_StatusCode OpcUa_Server_BeginAddReferences(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1581,7 +1581,7 @@ SOPC_StatusCode OpcUa_Server_BeginAddReferences(
     OpcUa_ServerApi_PfnAddReferences* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -1591,7 +1591,7 @@ SOPC_StatusCode OpcUa_Server_BeginAddReferences(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_AddReferencesRequest*)a_ppRequest;
+        pRequest = (OpcUa_AddReferencesRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -1714,7 +1714,7 @@ SOPC_StatusCode OpcUa_ServerApi_DeleteNodes(
 SOPC_StatusCode OpcUa_Server_BeginDeleteNodes(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1724,7 +1724,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteNodes(
     OpcUa_ServerApi_PfnDeleteNodes* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -1734,7 +1734,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteNodes(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_DeleteNodesRequest*)a_ppRequest;
+        pRequest = (OpcUa_DeleteNodesRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -1857,7 +1857,7 @@ SOPC_StatusCode OpcUa_ServerApi_DeleteReferences(
 SOPC_StatusCode OpcUa_Server_BeginDeleteReferences(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1867,7 +1867,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteReferences(
     OpcUa_ServerApi_PfnDeleteReferences* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -1877,7 +1877,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteReferences(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_DeleteReferencesRequest*)a_ppRequest;
+        pRequest = (OpcUa_DeleteReferencesRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -2006,7 +2006,7 @@ SOPC_StatusCode OpcUa_ServerApi_Browse(
 SOPC_StatusCode OpcUa_Server_BeginBrowse(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2016,7 +2016,7 @@ SOPC_StatusCode OpcUa_Server_BeginBrowse(
     OpcUa_ServerApi_PfnBrowse* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -2026,7 +2026,7 @@ SOPC_StatusCode OpcUa_Server_BeginBrowse(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_BrowseRequest*)a_ppRequest;
+        pRequest = (OpcUa_BrowseRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -2154,7 +2154,7 @@ SOPC_StatusCode OpcUa_ServerApi_BrowseNext(
 SOPC_StatusCode OpcUa_Server_BeginBrowseNext(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2164,7 +2164,7 @@ SOPC_StatusCode OpcUa_Server_BeginBrowseNext(
     OpcUa_ServerApi_PfnBrowseNext* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -2174,7 +2174,7 @@ SOPC_StatusCode OpcUa_Server_BeginBrowseNext(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_BrowseNextRequest*)a_ppRequest;
+        pRequest = (OpcUa_BrowseNextRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -2298,7 +2298,7 @@ SOPC_StatusCode OpcUa_ServerApi_TranslateBrowsePathsToNodeIds(
 SOPC_StatusCode OpcUa_Server_BeginTranslateBrowsePathsToNodeIds(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2308,7 +2308,7 @@ SOPC_StatusCode OpcUa_Server_BeginTranslateBrowsePathsToNodeIds(
     OpcUa_ServerApi_PfnTranslateBrowsePathsToNodeIds* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -2318,7 +2318,7 @@ SOPC_StatusCode OpcUa_Server_BeginTranslateBrowsePathsToNodeIds(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_TranslateBrowsePathsToNodeIdsRequest*)a_ppRequest;
+        pRequest = (OpcUa_TranslateBrowsePathsToNodeIdsRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -2435,7 +2435,7 @@ SOPC_StatusCode OpcUa_ServerApi_RegisterNodes(
 SOPC_StatusCode OpcUa_Server_BeginRegisterNodes(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2445,7 +2445,7 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterNodes(
     OpcUa_ServerApi_PfnRegisterNodes* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -2455,7 +2455,7 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterNodes(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_RegisterNodesRequest*)a_ppRequest;
+        pRequest = (OpcUa_RegisterNodesRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -2564,7 +2564,7 @@ SOPC_StatusCode OpcUa_ServerApi_UnregisterNodes(
 SOPC_StatusCode OpcUa_Server_BeginUnregisterNodes(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2574,7 +2574,7 @@ SOPC_StatusCode OpcUa_Server_BeginUnregisterNodes(
     OpcUa_ServerApi_PfnUnregisterNodes* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -2584,7 +2584,7 @@ SOPC_StatusCode OpcUa_Server_BeginUnregisterNodes(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_UnregisterNodesRequest*)a_ppRequest;
+        pRequest = (OpcUa_UnregisterNodesRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -2727,7 +2727,7 @@ SOPC_StatusCode OpcUa_ServerApi_QueryFirst(
 SOPC_StatusCode OpcUa_Server_BeginQueryFirst(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2737,7 +2737,7 @@ SOPC_StatusCode OpcUa_Server_BeginQueryFirst(
     OpcUa_ServerApi_PfnQueryFirst* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -2747,7 +2747,7 @@ SOPC_StatusCode OpcUa_Server_BeginQueryFirst(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_QueryFirstRequest*)a_ppRequest;
+        pRequest = (OpcUa_QueryFirstRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -2876,7 +2876,7 @@ SOPC_StatusCode OpcUa_ServerApi_QueryNext(
 SOPC_StatusCode OpcUa_Server_BeginQueryNext(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -2886,7 +2886,7 @@ SOPC_StatusCode OpcUa_Server_BeginQueryNext(
     OpcUa_ServerApi_PfnQueryNext* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -2896,7 +2896,7 @@ SOPC_StatusCode OpcUa_Server_BeginQueryNext(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_QueryNextRequest*)a_ppRequest;
+        pRequest = (OpcUa_QueryNextRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -3024,7 +3024,7 @@ SOPC_StatusCode OpcUa_ServerApi_Read(
 SOPC_StatusCode OpcUa_Server_BeginRead(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3034,7 +3034,7 @@ SOPC_StatusCode OpcUa_Server_BeginRead(
     OpcUa_ServerApi_PfnRead* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -3044,7 +3044,7 @@ SOPC_StatusCode OpcUa_Server_BeginRead(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_ReadRequest*)a_ppRequest;
+        pRequest = (OpcUa_ReadRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -3178,7 +3178,7 @@ SOPC_StatusCode OpcUa_ServerApi_HistoryRead(
 SOPC_StatusCode OpcUa_Server_BeginHistoryRead(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3188,7 +3188,7 @@ SOPC_StatusCode OpcUa_Server_BeginHistoryRead(
     OpcUa_ServerApi_PfnHistoryRead* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -3198,7 +3198,7 @@ SOPC_StatusCode OpcUa_Server_BeginHistoryRead(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_HistoryReadRequest*)a_ppRequest;
+        pRequest = (OpcUa_HistoryReadRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -3324,7 +3324,7 @@ SOPC_StatusCode OpcUa_ServerApi_Write(
 SOPC_StatusCode OpcUa_Server_BeginWrite(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3334,7 +3334,7 @@ SOPC_StatusCode OpcUa_Server_BeginWrite(
     OpcUa_ServerApi_PfnWrite* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -3344,7 +3344,7 @@ SOPC_StatusCode OpcUa_Server_BeginWrite(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_WriteRequest*)a_ppRequest;
+        pRequest = (OpcUa_WriteRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -3467,7 +3467,7 @@ SOPC_StatusCode OpcUa_ServerApi_HistoryUpdate(
 SOPC_StatusCode OpcUa_Server_BeginHistoryUpdate(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3477,7 +3477,7 @@ SOPC_StatusCode OpcUa_Server_BeginHistoryUpdate(
     OpcUa_ServerApi_PfnHistoryUpdate* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -3487,7 +3487,7 @@ SOPC_StatusCode OpcUa_Server_BeginHistoryUpdate(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_HistoryUpdateRequest*)a_ppRequest;
+        pRequest = (OpcUa_HistoryUpdateRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -3610,7 +3610,7 @@ SOPC_StatusCode OpcUa_ServerApi_Call(
 SOPC_StatusCode OpcUa_Server_BeginCall(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3620,7 +3620,7 @@ SOPC_StatusCode OpcUa_Server_BeginCall(
     OpcUa_ServerApi_PfnCall* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -3630,7 +3630,7 @@ SOPC_StatusCode OpcUa_Server_BeginCall(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_CallRequest*)a_ppRequest;
+        pRequest = (OpcUa_CallRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -3759,7 +3759,7 @@ SOPC_StatusCode OpcUa_ServerApi_CreateMonitoredItems(
 SOPC_StatusCode OpcUa_Server_BeginCreateMonitoredItems(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3769,7 +3769,7 @@ SOPC_StatusCode OpcUa_Server_BeginCreateMonitoredItems(
     OpcUa_ServerApi_PfnCreateMonitoredItems* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -3779,7 +3779,7 @@ SOPC_StatusCode OpcUa_Server_BeginCreateMonitoredItems(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_CreateMonitoredItemsRequest*)a_ppRequest;
+        pRequest = (OpcUa_CreateMonitoredItemsRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -3910,7 +3910,7 @@ SOPC_StatusCode OpcUa_ServerApi_ModifyMonitoredItems(
 SOPC_StatusCode OpcUa_Server_BeginModifyMonitoredItems(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -3920,7 +3920,7 @@ SOPC_StatusCode OpcUa_Server_BeginModifyMonitoredItems(
     OpcUa_ServerApi_PfnModifyMonitoredItems* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -3930,7 +3930,7 @@ SOPC_StatusCode OpcUa_Server_BeginModifyMonitoredItems(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_ModifyMonitoredItemsRequest*)a_ppRequest;
+        pRequest = (OpcUa_ModifyMonitoredItemsRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -4061,7 +4061,7 @@ SOPC_StatusCode OpcUa_ServerApi_SetMonitoringMode(
 SOPC_StatusCode OpcUa_Server_BeginSetMonitoringMode(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4071,7 +4071,7 @@ SOPC_StatusCode OpcUa_Server_BeginSetMonitoringMode(
     OpcUa_ServerApi_PfnSetMonitoringMode* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -4081,7 +4081,7 @@ SOPC_StatusCode OpcUa_Server_BeginSetMonitoringMode(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_SetMonitoringModeRequest*)a_ppRequest;
+        pRequest = (OpcUa_SetMonitoringModeRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -4229,7 +4229,7 @@ SOPC_StatusCode OpcUa_ServerApi_SetTriggering(
 SOPC_StatusCode OpcUa_Server_BeginSetTriggering(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4239,7 +4239,7 @@ SOPC_StatusCode OpcUa_Server_BeginSetTriggering(
     OpcUa_ServerApi_PfnSetTriggering* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -4249,7 +4249,7 @@ SOPC_StatusCode OpcUa_Server_BeginSetTriggering(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_SetTriggeringRequest*)a_ppRequest;
+        pRequest = (OpcUa_SetTriggeringRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -4383,7 +4383,7 @@ SOPC_StatusCode OpcUa_ServerApi_DeleteMonitoredItems(
 SOPC_StatusCode OpcUa_Server_BeginDeleteMonitoredItems(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4393,7 +4393,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteMonitoredItems(
     OpcUa_ServerApi_PfnDeleteMonitoredItems* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -4403,7 +4403,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteMonitoredItems(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_DeleteMonitoredItemsRequest*)a_ppRequest;
+        pRequest = (OpcUa_DeleteMonitoredItemsRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -4540,7 +4540,7 @@ SOPC_StatusCode OpcUa_ServerApi_CreateSubscription(
 SOPC_StatusCode OpcUa_Server_BeginCreateSubscription(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4550,7 +4550,7 @@ SOPC_StatusCode OpcUa_Server_BeginCreateSubscription(
     OpcUa_ServerApi_PfnCreateSubscription* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -4560,7 +4560,7 @@ SOPC_StatusCode OpcUa_Server_BeginCreateSubscription(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_CreateSubscriptionRequest*)a_ppRequest;
+        pRequest = (OpcUa_CreateSubscriptionRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -4697,7 +4697,7 @@ SOPC_StatusCode OpcUa_ServerApi_ModifySubscription(
 SOPC_StatusCode OpcUa_Server_BeginModifySubscription(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4707,7 +4707,7 @@ SOPC_StatusCode OpcUa_Server_BeginModifySubscription(
     OpcUa_ServerApi_PfnModifySubscription* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -4717,7 +4717,7 @@ SOPC_StatusCode OpcUa_Server_BeginModifySubscription(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_ModifySubscriptionRequest*)a_ppRequest;
+        pRequest = (OpcUa_ModifySubscriptionRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -4846,7 +4846,7 @@ SOPC_StatusCode OpcUa_ServerApi_SetPublishingMode(
 SOPC_StatusCode OpcUa_Server_BeginSetPublishingMode(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -4856,7 +4856,7 @@ SOPC_StatusCode OpcUa_Server_BeginSetPublishingMode(
     OpcUa_ServerApi_PfnSetPublishingMode* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -4866,7 +4866,7 @@ SOPC_StatusCode OpcUa_Server_BeginSetPublishingMode(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_SetPublishingModeRequest*)a_ppRequest;
+        pRequest = (OpcUa_SetPublishingModeRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -5005,7 +5005,7 @@ SOPC_StatusCode OpcUa_ServerApi_Publish(
 SOPC_StatusCode OpcUa_Server_BeginPublish(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -5015,7 +5015,7 @@ SOPC_StatusCode OpcUa_Server_BeginPublish(
     OpcUa_ServerApi_PfnPublish* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -5025,7 +5025,7 @@ SOPC_StatusCode OpcUa_Server_BeginPublish(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_PublishRequest*)a_ppRequest;
+        pRequest = (OpcUa_PublishRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -5145,7 +5145,7 @@ SOPC_StatusCode OpcUa_ServerApi_Republish(
 SOPC_StatusCode OpcUa_Server_BeginRepublish(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -5155,7 +5155,7 @@ SOPC_StatusCode OpcUa_Server_BeginRepublish(
     OpcUa_ServerApi_PfnRepublish* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -5165,7 +5165,7 @@ SOPC_StatusCode OpcUa_Server_BeginRepublish(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_RepublishRequest*)a_ppRequest;
+        pRequest = (OpcUa_RepublishRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -5288,7 +5288,7 @@ SOPC_StatusCode OpcUa_ServerApi_TransferSubscriptions(
 SOPC_StatusCode OpcUa_Server_BeginTransferSubscriptions(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -5298,7 +5298,7 @@ SOPC_StatusCode OpcUa_Server_BeginTransferSubscriptions(
     OpcUa_ServerApi_PfnTransferSubscriptions* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -5308,7 +5308,7 @@ SOPC_StatusCode OpcUa_Server_BeginTransferSubscriptions(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_TransferSubscriptionsRequest*)a_ppRequest;
+        pRequest = (OpcUa_TransferSubscriptionsRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){
@@ -5432,7 +5432,7 @@ SOPC_StatusCode OpcUa_ServerApi_DeleteSubscriptions(
 SOPC_StatusCode OpcUa_Server_BeginDeleteSubscriptions(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void*                       a_ppRequest,
+    void**                      a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -5442,7 +5442,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteSubscriptions(
     OpcUa_ServerApi_PfnDeleteSubscriptions* pfnInvoke = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
-       && a_ppRequest != NULL
+       && a_ppRequest != NULL && *a_ppRequest != NULL
        && a_pRequestType != NULL){
         status = STATUS_OK;
     }
@@ -5452,7 +5452,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteSubscriptions(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_DeleteSubscriptionsRequest*)a_ppRequest;
+        pRequest = (OpcUa_DeleteSubscriptionsRequest*)*a_ppRequest;
     }
 
     if(status == STATUS_OK){

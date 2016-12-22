@@ -161,7 +161,7 @@ SOPC_StatusCode SecureChannelEndpointEvent_CB(struct SC_ServerEndpoint* sEndpoin
                     if(reqContext != NULL){
                         retStatus = service->BeginInvokeService((SOPC_Endpoint) sEndpoint,
                                                                 reqContext,
-                                                                reqEncObj,
+                                                                &reqEncObj,
                                                                 reqEncType);
                     }else{
                         retStatus = STATUS_NOK;

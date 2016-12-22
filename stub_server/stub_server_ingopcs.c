@@ -65,7 +65,7 @@ int main(void){
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
-    SOPC_Endpoint endpoint;
+    SOPC_Endpoint endpoint = NULL;
     // Endpoint URL
     char* endpointUrl = "opc.tcp://localhost:8888/myEndPoint";
 

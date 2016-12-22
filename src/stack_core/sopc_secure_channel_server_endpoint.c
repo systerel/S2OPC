@@ -358,6 +358,8 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
     // Reset reception buffers for next messages
     MsgBuffers_Reset(scConnection->receptionBuffers);
 
+    SOPC_String_Clear(&strSecuPolicy);
+
     return status;
 }
 
@@ -626,6 +628,10 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                                                     retStatus,
                                                     &requestId, receivedEncType, receivedEncObj);
                             }
+                            // Clear encodeable object
+                            receivedEncType->Clear(receivedEncObj);
+                            free(receivedEncObj);
+                            receivedEncObj = NULL;
                         }else{
                             retStatus = STATUS_INVALID_RCV_PARAMETER;
                         }
@@ -635,7 +641,6 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                 break;
             case ConnectionEvent_Error:
             case ConnectionEvent_Disconnected:
-                TCP_UA_Connection_Disconnect(scConnection->transportConnection);
                 if(scConnection->state != SC_Connection_Disconnected){
                     if(NULL != sEndpoint->callback){
                         sEndpoint->callback(sEndpoint, scConnection,
@@ -655,6 +660,8 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                     // Connection not found !
                     assert(FALSE);
                 }
+
+                Delete_TransportEventCbData(teventCbData);
                 break;
         }
     }
@@ -896,6 +903,11 @@ SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint){
     return status;
 }
 
+void Internal_SLinkedList_Delete_Connection(uint32_t id, void *val){
+    (void) id;
+    SC_Delete((SC_Connection*) val);
+}
+
 void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint){
     if(endpoint != NULL){
         if(endpoint->state == SC_Endpoint_Opened){
@@ -904,6 +916,14 @@ void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint){
         if(endpoint->transportListener != NULL){
             TCP_UA_Listener_Delete(endpoint->transportListener);
             endpoint->transportListener = NULL;
+        }
+        if(endpoint->secureChannelConnections != NULL){
+            SLinkedList_Apply(endpoint->secureChannelConnections,
+                              Internal_SLinkedList_Delete_Connection);
+            SLinkedList_Delete(endpoint->secureChannelConnections);
+        }
+        if(endpoint->securityPolicies != NULL){
+            free(endpoint->securityPolicies);
         }
         free(endpoint);
     }

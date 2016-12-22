@@ -83,6 +83,11 @@ void SC_Delete (SC_Connection* scConnection){
         scConnection->runningAppPublicKeyCert = NULL;
         scConnection->runningAppPrivateKey = NULL; // DO NOT DEALLOCATE: manage by upper level
         SOPC_ByteString_Clear(&scConnection->otherAppCertificate);
+        if(scConnection->otherAppPublicKeyCert != NULL &&
+           scConnection->transportConnection->serverSideConnection != FALSE){
+            // On server side only
+            KeyManager_Certificate_Free((Certificate*) scConnection->otherAppPublicKeyCert);
+        }
         scConnection->otherAppPublicKeyCert = NULL;
         if(scConnection->sendingBuffer != NULL)
         {
@@ -95,6 +100,7 @@ void SC_Delete (SC_Connection* scConnection){
         if(scConnection->transportConnection != NULL)
         {
             TCP_UA_Connection_Delete(scConnection->transportConnection);
+            scConnection->transportConnection = NULL;
         }
         SOPC_String_Clear(&scConnection->currentSecuPolicy);
         SOPC_String_Clear(&scConnection->precSecuPolicy);

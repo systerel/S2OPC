@@ -61,7 +61,7 @@ SOPC_StatusCode OpcUa_ServerApi_FindServers(
 SOPC_StatusCode OpcUa_Server_BeginFindServers(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -88,7 +88,7 @@ SOPC_StatusCode OpcUa_ServerApi_FindServersOnNetwork(
 SOPC_StatusCode OpcUa_Server_BeginFindServersOnNetwork(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -115,7 +115,7 @@ SOPC_StatusCode OpcUa_ServerApi_GetEndpoints(
 SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -136,7 +136,7 @@ SOPC_StatusCode OpcUa_ServerApi_RegisterServer(
 SOPC_StatusCode OpcUa_Server_BeginRegisterServer(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -163,7 +163,7 @@ SOPC_StatusCode OpcUa_ServerApi_RegisterServer2(
 SOPC_StatusCode OpcUa_Server_BeginRegisterServer2(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -202,7 +202,7 @@ SOPC_StatusCode OpcUa_ServerApi_CreateSession(
 SOPC_StatusCode OpcUa_Server_BeginCreateSession(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -234,7 +234,7 @@ SOPC_StatusCode OpcUa_ServerApi_ActivateSession(
 SOPC_StatusCode OpcUa_Server_BeginActivateSession(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -255,7 +255,7 @@ SOPC_StatusCode OpcUa_ServerApi_CloseSession(
 SOPC_StatusCode OpcUa_Server_BeginCloseSession(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -277,7 +277,7 @@ SOPC_StatusCode OpcUa_ServerApi_Cancel(
 SOPC_StatusCode OpcUa_Server_BeginCancel(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -303,7 +303,7 @@ SOPC_StatusCode OpcUa_ServerApi_AddNodes(
 SOPC_StatusCode OpcUa_Server_BeginAddNodes(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -329,7 +329,7 @@ SOPC_StatusCode OpcUa_ServerApi_AddReferences(
 SOPC_StatusCode OpcUa_Server_BeginAddReferences(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -355,7 +355,7 @@ SOPC_StatusCode OpcUa_ServerApi_DeleteNodes(
 SOPC_StatusCode OpcUa_Server_BeginDeleteNodes(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -381,7 +381,7 @@ SOPC_StatusCode OpcUa_ServerApi_DeleteReferences(
 SOPC_StatusCode OpcUa_Server_BeginDeleteReferences(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -409,7 +409,7 @@ SOPC_StatusCode OpcUa_ServerApi_Browse(
 SOPC_StatusCode OpcUa_Server_BeginBrowse(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -436,7 +436,7 @@ SOPC_StatusCode OpcUa_ServerApi_BrowseNext(
 SOPC_StatusCode OpcUa_Server_BeginBrowseNext(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -462,7 +462,7 @@ SOPC_StatusCode OpcUa_ServerApi_TranslateBrowsePathsToNodeIds(
 SOPC_StatusCode OpcUa_Server_BeginTranslateBrowsePathsToNodeIds(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -486,7 +486,7 @@ SOPC_StatusCode OpcUa_ServerApi_RegisterNodes(
 SOPC_StatusCode OpcUa_Server_BeginRegisterNodes(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -508,7 +508,7 @@ SOPC_StatusCode OpcUa_ServerApi_UnregisterNodes(
 SOPC_StatusCode OpcUa_Server_BeginUnregisterNodes(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -542,7 +542,7 @@ SOPC_StatusCode OpcUa_ServerApi_QueryFirst(
 SOPC_StatusCode OpcUa_Server_BeginQueryFirst(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -567,7 +567,7 @@ SOPC_StatusCode OpcUa_ServerApi_QueryNext(
 SOPC_StatusCode OpcUa_Server_BeginQueryNext(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -595,7 +595,7 @@ SOPC_StatusCode OpcUa_ServerApi_Read(
 SOPC_StatusCode OpcUa_Server_BeginRead(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -624,7 +624,7 @@ SOPC_StatusCode OpcUa_ServerApi_HistoryRead(
 SOPC_StatusCode OpcUa_Server_BeginHistoryRead(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -650,7 +650,7 @@ SOPC_StatusCode OpcUa_ServerApi_Write(
 SOPC_StatusCode OpcUa_Server_BeginWrite(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -676,7 +676,7 @@ SOPC_StatusCode OpcUa_ServerApi_HistoryUpdate(
 SOPC_StatusCode OpcUa_Server_BeginHistoryUpdate(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -702,7 +702,7 @@ SOPC_StatusCode OpcUa_ServerApi_Call(
 SOPC_StatusCode OpcUa_Server_BeginCall(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -730,7 +730,7 @@ SOPC_StatusCode OpcUa_ServerApi_CreateMonitoredItems(
 SOPC_StatusCode OpcUa_Server_BeginCreateMonitoredItems(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -758,7 +758,7 @@ SOPC_StatusCode OpcUa_ServerApi_ModifyMonitoredItems(
 SOPC_StatusCode OpcUa_Server_BeginModifyMonitoredItems(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -786,7 +786,7 @@ SOPC_StatusCode OpcUa_ServerApi_SetMonitoringMode(
 SOPC_StatusCode OpcUa_Server_BeginSetMonitoringMode(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -820,7 +820,7 @@ SOPC_StatusCode OpcUa_ServerApi_SetTriggering(
 SOPC_StatusCode OpcUa_Server_BeginSetTriggering(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -847,7 +847,7 @@ SOPC_StatusCode OpcUa_ServerApi_DeleteMonitoredItems(
 SOPC_StatusCode OpcUa_Server_BeginDeleteMonitoredItems(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -877,7 +877,7 @@ SOPC_StatusCode OpcUa_ServerApi_CreateSubscription(
 SOPC_StatusCode OpcUa_Server_BeginCreateSubscription(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -906,7 +906,7 @@ SOPC_StatusCode OpcUa_ServerApi_ModifySubscription(
 SOPC_StatusCode OpcUa_Server_BeginModifySubscription(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -933,7 +933,7 @@ SOPC_StatusCode OpcUa_ServerApi_SetPublishingMode(
 SOPC_StatusCode OpcUa_Server_BeginSetPublishingMode(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -964,7 +964,7 @@ SOPC_StatusCode OpcUa_ServerApi_Publish(
 SOPC_StatusCode OpcUa_Server_BeginPublish(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -987,7 +987,7 @@ SOPC_StatusCode OpcUa_ServerApi_Republish(
 SOPC_StatusCode OpcUa_Server_BeginRepublish(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -1014,7 +1014,7 @@ SOPC_StatusCode OpcUa_ServerApi_TransferSubscriptions(
 SOPC_StatusCode OpcUa_Server_BeginTransferSubscriptions(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 
@@ -1040,7 +1040,7 @@ SOPC_StatusCode OpcUa_ServerApi_DeleteSubscriptions(
 SOPC_StatusCode OpcUa_Server_BeginDeleteSubscriptions(
     SOPC_Endpoint               a_hEndpoint,
     struct SOPC_RequestContext* a_hContext,
-    void *                      a_ppRequest,
+    void **                     a_ppRequest,
     SOPC_EncodeableType*        a_pRequestType);
 #endif
 

@@ -134,6 +134,7 @@ void TCP_UA_Listener_Close(TCP_UA_Listener* listener){
                                STATUS_OK,
                                NULL);
         }
+        SOPC_String_Clear(&listener->url);
         listener->callback = NULL;
         listener->callbackData = NULL;
     }

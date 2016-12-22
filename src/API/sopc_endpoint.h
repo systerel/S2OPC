@@ -61,7 +61,7 @@ typedef SOPC_StatusCode (SOPC_InvokeService) (SOPC_Endpoint endpoint, ...);
 
 typedef SOPC_StatusCode (SOPC_BeginInvokeService) (SOPC_Endpoint               endpoint,
                                                    struct SOPC_RequestContext* requestContext,
-                                                   void*                       a_ppRequest,
+                                                   void**                      a_ppRequest,
                                                    SOPC_EncodeableType*        a_pRequestType);
 
 typedef struct SOPC_ServiceType {

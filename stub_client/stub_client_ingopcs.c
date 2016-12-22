@@ -33,7 +33,7 @@ int noResp = 1;
 int disconnect = 0;
 int connected = 0;
 
-SOPC_EncodeableType* newEncType;
+SOPC_EncodeableType* newEncType = NULL;
 
 SOPC_StatusCode StubClient_ConnectionEvent_Callback(SOPC_Channel       channel,
                                                     void*              callbackData,
@@ -98,7 +98,8 @@ int main(void){
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
-    SOPC_Channel hChannel;
+    SOPC_Channel hChannel = NULL;
+
     // Endpoint URL
     SOPC_String stEndpointUrl;
     SOPC_String_Initialize(&stEndpointUrl);
@@ -260,13 +261,16 @@ int main(void){
     KeyManager_AsymmetricKey_Free(priv_cli);
     SOPC_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
-
+    if(newEncType != NULL)
+        free(newEncType);
     return status;
 
     Error:
     SOPC_String_Clear(&stEndpointUrl);
     SOPC_Channel_Delete(&hChannel);
     StackConfiguration_Clear();
+    if(newEncType != NULL)
+        free(newEncType);
 
     printf ("Error status: %d\n", status);
     if(status != 0){

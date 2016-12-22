@@ -65,7 +65,7 @@ typedef struct {
     const Certificate*        runningAppPublicKeyCert; // Pointer on upper level param: do not manage allocation on it
     const AsymmetricKey*      runningAppPrivateKey; // Pointer on upper level param: do not manage allocation on it
     SOPC_ByteString           otherAppCertificate;
-    const Certificate*        otherAppPublicKeyCert; // Pointer on upper level param: do not manage allocation on it
+    const Certificate*        otherAppPublicKeyCert; // Pointer on upper level param: manage allocation on it only on server side (check connection flag)
     SOPC_MsgBuffer*           sendingBuffer;
     uint32_t                  sendingMaxBodySize;
     SOPC_MsgBuffers*          receptionBuffers;
