@@ -6,7 +6,7 @@ ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      EXCLUDE_DIR="*win*"
      PLATFORM_DIR="*linux*"
      PFLAGS=-std=c99 -pedantic -D_XOPEN_SOURCE=600
-     LIBS=$(LIBS_MBEDTLS) -lssl -lcrypto -lrt -lpthread
+     LIBS=$(LIBS_MBEDTLS)
      COPY_SSL=@cat /dev/null
 else
     CC=i686-w64-mingw32-gcc #i686-pc-mingw32-gcc
@@ -15,7 +15,7 @@ else
     PFLAGS=""
     OPEN_SSL_FILES=$(WORKSPACE_DIR)/lib/openssl/include
     INCLUDES_SSL=-I$(OPEN_SSL_FILES)
-    LIBS=$(LIBS_MBEDTLS) -lcrypt32 -lrpcrt4 -lws2_32 -llibeay32 -lssleay32
+    LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32
     SSL_DLL_DIR=$(WORKSPACE_DIR)/lib/openssl/bin/vs2008
     SSL_DIR=$(WORKSPACE_DIR)/lib/openssl/lib/win32/
     LIBS_DIR=-L$(SSL_DIR)
