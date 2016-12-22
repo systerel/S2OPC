@@ -312,7 +312,7 @@ SOPC_StatusCode Socket_Read(Socket     sock,
 
 void Socket_Close(Socket*  sock)
 {
-    if(sock != NULL){
+    if(sock != NULL && *sock != -1){
         if(close(*sock) != -1){
             *sock = -1;
         }
