@@ -78,7 +78,6 @@ typedef struct SC_ServerEndpoint
     SOPC_SecurityPolicy*   securityPolicies;
     uint8_t                nbSecurityPolicies;
     SC_EndpointState       state;
-    uint32_t               lastSecureChannelId;
     uint32_t               lastSecureConnectionId; // internal use only (used in secureChannelConnections)
     SLinkedList*           secureChannelConnections;
     TCP_UA_Listener*       transportListener;

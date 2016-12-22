@@ -188,6 +188,7 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
                                                  uint32_t*          requestId,
                                                  uint32_t*          requestHandle)
 {
+    Mutex_Lock(&sEndpoint->mutex);
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t validateSenderCertificateTrue = 1; // True: mandatory
     const uint32_t isSymmetricFalse = FALSE;
@@ -320,13 +321,37 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
     // Set the secure channel id
     if(STATUS_OK == status){
         if(secureChannelId == 0 && scConnection->secureChannelId == 0){
-            //TODO: on server side, randomize secure channel ids (table 26 part 6)!
-            // TODO: ensure ++ is not still in use ?
-            uint32_t decl = NULL;
-            // A server cannot attribute 0 as secure channel id:
-            //  not so clear but implied by 6.7.6 part 6: "may be 0 if the Message is an OPN"
-            sEndpoint->lastSecureChannelId++;
-            scConnection->secureChannelId = sEndpoint->lastSecureChannelId;
+            // Randomize secure channel ids (table 26 part 6)
+            uint32_t newSecureChannelId = 0;
+            uint8_t occupiedId = FALSE;
+            uint8_t attempts = 5; // attempts to find a non conflicting secure Id
+            SLinkedListIterator it = NULL;
+            SC_Connection* otherConnection = NULL;
+            while(scConnection->secureChannelId == 0 && attempts > 0){
+                attempts--;
+                CryptoProvider_GenerateRandomID(scConnection->currentCryptoProvider, &newSecureChannelId);
+                occupiedId = FALSE;
+                // A server cannot attribute 0 as secure channel id:
+                //  not so clear but implied by 6.7.6 part 6: "may be 0 if the Message is an OPN"
+                if(newSecureChannelId != 0){
+                    // Check if other channels already use the random id in existing connections
+                    it = SLinkedList_GetIterator(sEndpoint->secureChannelConnections);
+                    otherConnection = SLinkedList_Next(&it);
+                    while(occupiedId == FALSE && otherConnection != NULL){
+                        if(otherConnection->secureChannelId == newSecureChannelId){
+                            occupiedId = 1; // TRUE
+                        }
+                        otherConnection = SLinkedList_Next(&it);
+                    }
+                    if(occupiedId == FALSE){
+                        // Id is not used by another channel in the endpoint:
+                        scConnection->secureChannelId = newSecureChannelId;
+                    }
+                }
+            }
+            if(scConnection->secureChannelId == 0){
+                status = STATUS_NOK;
+            }
         }else if(scConnection->secureChannelId != secureChannelId){
             // Different Id between client and server: invalid case (id never changes on same connection instance)
             status = STATUS_INVALID_RCV_PARAMETER;
@@ -342,9 +367,22 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
 
     // TODO: in case of renew: when moving from current to prec ?
     if(STATUS_OK == status && scConnection->currentSecuToken.tokenId == 0){
-        // TODO: generate token Id
-        uint32_t decl2 = NULL;
-        scConnection->currentSecuToken.tokenId = sEndpoint->lastSecureChannelId;
+        // Generate token Id
+        uint32_t newTokenId = 0;
+        CryptoProvider_GenerateRandomID(scConnection->currentCryptoProvider, &newTokenId);
+        if(newTokenId != scConnection->precSecuToken.tokenId){
+            scConnection->currentSecuToken.tokenId = newTokenId;
+        }else{
+            // Second attempt and last !
+            CryptoProvider_GenerateRandomID(scConnection->currentCryptoProvider, &newTokenId);
+            if(newTokenId != scConnection->precSecuToken.tokenId){
+                scConnection->currentSecuToken.tokenId = newTokenId;
+            }
+        }
+
+        if(scConnection->currentSecuToken.tokenId == 0){
+            status = STATUS_NOK;
+        }
     }else{
         status = STATUS_NOK;
     }
@@ -360,6 +398,7 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
 
     SOPC_String_Clear(&strSecuPolicy);
 
+    Mutex_Unlock(&sEndpoint->mutex);
     return status;
 }
 
@@ -469,7 +508,6 @@ SOPC_StatusCode Receive_ServiceRequest(SC_Connection*        scConnection,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint8_t  abortReqPresence = 0;
     uint32_t abortedRequestId = 0;
-    SOPC_StatusCode abortReqStatus = STATUS_NOK;
     SOPC_String reason;
     SOPC_String_Initialize(&reason);
 
@@ -485,8 +523,7 @@ SOPC_StatusCode Receive_ServiceRequest(SC_Connection*        scConnection,
         abortedRequestId = *requestId;
 
         if(status != STATUS_OK){
-            abortReqStatus = status;
-            //TODO: report (trace)
+            //TODO: report (trace with status)
         }
     }
 
@@ -651,7 +688,7 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                     }
                 }
                 scConnection->state = SC_Connection_Disconnected;
-                // Add as a new secure connection to the endpoint
+                // Remove secure connection from the endpoint
                 if(scConnection ==  SLinkedList_Remove(sEndpoint->secureChannelConnections,
                                                        teventCbData->scConnectionId)){
                     SC_Delete(scConnection);
