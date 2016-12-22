@@ -290,7 +290,7 @@ int32_t Socket_Write(Socket   sock,
 SOPC_StatusCode Socket_Read(Socket     sock,
                             uint8_t*   data,
                             uint32_t   dataSize,
-                            uint32_t*  readCount)
+                            int32_t*   readCount)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
         if(sock != -1 && data != NULL && dataSize > 0){
@@ -298,10 +298,13 @@ SOPC_StatusCode Socket_Read(Socket     sock,
             if(*readCount > 0){
                 status = STATUS_OK;
             }else if(*readCount == 0){
-                status = STATUS_NOK;//OpcUa_BadDisconnect;
+                status = OpcUa_BadDisconnect;
+            }else if(*readCount == -1){
+                if(errno == EAGAIN || errno == EWOULDBLOCK){
+                    status = OpcUa_BadWouldBlock;
+                }
             }else{
                 status = STATUS_NOK;
-                //TODO: OpcUa_BadWouldBlock, etc.
             }
         }
         return status;

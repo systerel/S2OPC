@@ -646,7 +646,7 @@ SOPC_StatusCode OnTransportEvent_CB(void*           connection,
             retStatus = cConnection->callback(cConnection,
                                               cConnection->callbackData,
                                               SOPC_ConnectionEvent_Disconnected,
-                                              retStatus);
+                                              OpcUa_BadSecureChannelClosed);
             break;
 
         case ConnectionEvent_Message:

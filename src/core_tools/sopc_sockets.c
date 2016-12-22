@@ -503,7 +503,7 @@ int32_t SOPC_Socket_Write (SOPC_Socket* socket,
 SOPC_StatusCode SOPC_Socket_Read (SOPC_Socket* socket,
                                   uint8_t*     data,
                                   uint32_t     dataSize,
-                                  uint32_t*    readCount){
+                                  int32_t*     readCount){
     return Socket_Read(socket->sock, data, dataSize, readCount);
 }
 

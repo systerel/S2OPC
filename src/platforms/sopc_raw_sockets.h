@@ -22,6 +22,7 @@
 #include "p_sockets.h"
 
 #include "sopc_base_types.h"
+#include "opcua_statuscodes.h"
 
 /**
  *  \brief Initialize the network communication allowing to use sockets
@@ -200,7 +201,7 @@ int32_t Socket_Write(Socket   sock,
 SOPC_StatusCode Socket_Read(Socket     sock,
                             uint8_t*   data,
                             uint32_t   dataSize,
-                            uint32_t*  readCount);
+                            int32_t*   readCount);
 
 
 /**

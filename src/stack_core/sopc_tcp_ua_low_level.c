@@ -86,7 +86,7 @@ SOPC_StatusCode TCP_UA_FinalizeHeader(SOPC_MsgBuffer* msgBuffer){
 SOPC_StatusCode TCP_UA_ReadData(SOPC_Socket*    socket,
                                 SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_NOK;
-    uint32_t readBytes;
+    int32_t readBytes;
 
     if(msgBuffer->buffers->length >= TCP_UA_HEADER_LENGTH){
         assert(msgBuffer->currentChunkSize > 0);

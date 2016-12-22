@@ -393,9 +393,11 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket*    socket,
                             break;
                     default:
                         // Erase content since incorrect reading
-                        // TODO: add trace with reason Invalid header ? => more precise erorrs
+                        // TODO: add trace with reason Invalid header ? => more precise errors
                         MsgBuffer_Reset(connection->inputMsgBuffer);
                 }
+            }else if(OpcUa_BadDisconnect == status){
+                OnSocketEvent_CB(socket, SOCKET_CLOSE_EVENT, callbackData);
             }
 
             break;
