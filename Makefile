@@ -155,7 +155,7 @@ $(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/ch
 	@echo "Linking $@..."
 	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
-client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server
+client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs
 	./run_client_server_test.sh
 
 mbedtls:

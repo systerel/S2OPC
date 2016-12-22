@@ -5,7 +5,7 @@ EXEC_DIR=$WORKSPACE_DIR/out
 cd $EXEC_DIR
 # Create script for running stub_server in background and store exit code
 echo "#!/bin/bash
-./stub_server
+./stub_server_ingopcs
 echo \$? > server.exitcode" > test_server.sh
 chmod +x test_server.sh
 
@@ -25,9 +25,9 @@ SERVER_EXITCODE=`cat server.exitcode`
 
 # Fullfil TAP result
 if [[ $CLIENT_EXITCODE -eq 0 && $SERVER_EXITCODE -eq 0 ]]; then
-    echo "ok 1 - test: stub_client_ingopcs / stub_server: Passed" > client_server_result.tap
+    echo "ok 1 - test: stub_client_ingopcs / stub_server_ingopcs: Passed" > client_server_result.tap
 else
-    echo "not ok 1 - test: stub_client_ingopcs / stub_server exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" > client_server_result.tap
+    echo "not ok 1 - test: stub_client_ingopcs / stub_server_ingopcs exit codes: $CLIENT_EXITCODE / $SERVER_EXITCODE" > client_server_result.tap
 fi
 echo "1..1" >> client_server_result.tap
 # Clean created files
