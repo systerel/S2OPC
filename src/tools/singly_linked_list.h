@@ -31,6 +31,8 @@
  */
 typedef struct SLinkedList SLinkedList;
 
+typedef void* SLinkedListIterator;
+
 /**
  *  \brief            Create and allocate a new singly linked list containing 0 elements with a size limit of the given size.
  *
@@ -98,8 +100,27 @@ void SLinkedList_Delete(SLinkedList* list);
 
 /**
  * \brief           Frees the value of an element of the SLinkedList.
+ *
+ *  \param id       Unique identifier associated with the element
+ *  \param val      Element to be freed
  */
 void SLinkedList_EltGenericFree(uint32_t id, void *val);
 
+
+/**
+ * \brief           Get an iterator on a linked list to could iterate on elements (LIFO behavior)
+ *
+ * \param list      Pointer to the list for which an iterator is requested
+ *
+ * \return          An iterator on the given linked list
+ */
+SLinkedListIterator SLinkedList_GetIterator(SLinkedList* list);
+
+/**
+ * \brief           Return the next element pointed by iterator in the linked list  (LIFO behavior)
+ *
+ * \param it        An iterator on a linked list
+ */
+void* SLinkedList_Next(SLinkedListIterator it);
 
 #endif /* SOPC_SINGLE_LINKED_LIST_H_ */

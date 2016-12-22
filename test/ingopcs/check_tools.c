@@ -503,6 +503,7 @@ START_TEST(test_linked_list)
     void* value = NULL;
 
     SLinkedList* list = NULL;
+    SLinkedListIterator it = NULL;
 
     // Test creation
     //// Test nominal case
@@ -519,6 +520,17 @@ START_TEST(test_linked_list)
     ck_assert(value == &value1);
     value = SLinkedList_Add(list, 2, &value2);
     ck_assert(value == &value2);
+
+    /// Test iterator nominal case
+    it = SLinkedList_GetIterator(list);
+    ck_assert(it != NULL);
+    value = SLinkedList_Next(&it);
+    ck_assert(value == &value2);
+    value = SLinkedList_Next(&it);
+    ck_assert(value == &value1);
+    value = SLinkedList_Next(&it);
+    ck_assert(value == NULL);
+
     //// Test degraded case: add in full linked list
     value = SLinkedList_Add(list, 3, &value3);
     ck_assert(value == NULL);
@@ -531,6 +543,14 @@ START_TEST(test_linked_list)
     // Test find and remove
     list = SLinkedList_Create(4);
     ck_assert(list != NULL);
+
+    /// (Test iterator degraded case)
+    it = SLinkedList_GetIterator(list);
+    ck_assert(it == NULL);
+    value = SLinkedList_Next(&it);
+    ck_assert(value == NULL);
+
+    /// (Continue initial test)
     value = SLinkedList_Add(list, 0, &value1);
     ck_assert(value == &value1);
     value = SLinkedList_Add(list, 2, &value2);

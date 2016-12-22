@@ -32,6 +32,8 @@ typedef struct SLinkedList {
     size_t           maxLength;
 } SLinkedList;
 
+typedef SLinkedList_Elt* SLinkedListIterator;
+
 SLinkedList* SLinkedList_Create(size_t sizeMax){
     SLinkedList* result = malloc(sizeof(SLinkedList));
     memset(result, 0, sizeof(SLinkedList));
@@ -170,4 +172,19 @@ void SLinkedList_EltGenericFree(uint32_t id, void *val)
 {
     (void)(id);
     free(val);
+}
+
+SLinkedListIterator SLinkedList_GetIterator(SLinkedList* list){
+    return list->first;
+}
+
+void* SLinkedList_Next(SLinkedListIterator* it){
+    SLinkedList_Elt* elt = NULL;
+    void* value = NULL;
+    if(it != NULL && *it != NULL){
+        elt = *it;
+        value = elt->value;
+        *it = elt->next;
+    }
+    return value;
 }
