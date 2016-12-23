@@ -48,8 +48,9 @@
 /*============================================================================
  * OpcUa_Node_Initialize
  *===========================================================================*/
-void OpcUa_Node_Initialize(OpcUa_Node* a_pValue)
+void OpcUa_Node_Initialize(void* pValue)
 {
+    OpcUa_Node* a_pValue = (OpcUa_Node*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -67,8 +68,9 @@ void OpcUa_Node_Initialize(OpcUa_Node* a_pValue)
 /*============================================================================
  * OpcUa_Node_Clear
  *===========================================================================*/
-void OpcUa_Node_Clear(OpcUa_Node* a_pValue)
+void OpcUa_Node_Clear(void* pValue)
 {
+    OpcUa_Node* a_pValue = (OpcUa_Node*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -86,9 +88,10 @@ void OpcUa_Node_Clear(OpcUa_Node* a_pValue)
 /*============================================================================
  * OpcUa_Node_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_Node_Encode(OpcUa_Node* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Node_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_Node* a_pValue = (OpcUa_Node*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -118,9 +121,10 @@ SOPC_StatusCode OpcUa_Node_Encode(OpcUa_Node* a_pValue, SOPC_MsgBuffer* msgBuf)
 /*============================================================================
  * OpcUa_Node_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_Node_Decode(OpcUa_Node* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Node_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_Node* a_pValue = (OpcUa_Node*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -166,11 +170,11 @@ struct SOPC_EncodeableType OpcUa_Node_EncodeableType =
     OpcUaId_Node_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_Node),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_Node_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_Node_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_Node_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_Node_Decode
+    OpcUa_Node_Initialize,
+    OpcUa_Node_Clear,
+    NULL,
+    OpcUa_Node_Encode,
+    OpcUa_Node_Decode
 };
 #endif
 
@@ -178,8 +182,9 @@ struct SOPC_EncodeableType OpcUa_Node_EncodeableType =
 /*============================================================================
  * OpcUa_InstanceNode_Initialize
  *===========================================================================*/
-void OpcUa_InstanceNode_Initialize(OpcUa_InstanceNode* a_pValue)
+void OpcUa_InstanceNode_Initialize(void* pValue)
 {
+    OpcUa_InstanceNode* a_pValue = (OpcUa_InstanceNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -197,8 +202,9 @@ void OpcUa_InstanceNode_Initialize(OpcUa_InstanceNode* a_pValue)
 /*============================================================================
  * OpcUa_InstanceNode_Clear
  *===========================================================================*/
-void OpcUa_InstanceNode_Clear(OpcUa_InstanceNode* a_pValue)
+void OpcUa_InstanceNode_Clear(void* pValue)
 {
+    OpcUa_InstanceNode* a_pValue = (OpcUa_InstanceNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -216,9 +222,10 @@ void OpcUa_InstanceNode_Clear(OpcUa_InstanceNode* a_pValue)
 /*============================================================================
  * OpcUa_InstanceNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_InstanceNode_Encode(OpcUa_InstanceNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_InstanceNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_InstanceNode* a_pValue = (OpcUa_InstanceNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -248,9 +255,10 @@ SOPC_StatusCode OpcUa_InstanceNode_Encode(OpcUa_InstanceNode* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_InstanceNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_InstanceNode_Decode(OpcUa_InstanceNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_InstanceNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_InstanceNode* a_pValue = (OpcUa_InstanceNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -296,11 +304,11 @@ struct SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType =
     OpcUaId_InstanceNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_InstanceNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_InstanceNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_InstanceNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_InstanceNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_InstanceNode_Decode
+    OpcUa_InstanceNode_Initialize,
+    OpcUa_InstanceNode_Clear,
+    NULL,
+    OpcUa_InstanceNode_Encode,
+    OpcUa_InstanceNode_Decode
 };
 #endif
 
@@ -308,8 +316,9 @@ struct SOPC_EncodeableType OpcUa_InstanceNode_EncodeableType =
 /*============================================================================
  * OpcUa_TypeNode_Initialize
  *===========================================================================*/
-void OpcUa_TypeNode_Initialize(OpcUa_TypeNode* a_pValue)
+void OpcUa_TypeNode_Initialize(void* pValue)
 {
+    OpcUa_TypeNode* a_pValue = (OpcUa_TypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -327,8 +336,9 @@ void OpcUa_TypeNode_Initialize(OpcUa_TypeNode* a_pValue)
 /*============================================================================
  * OpcUa_TypeNode_Clear
  *===========================================================================*/
-void OpcUa_TypeNode_Clear(OpcUa_TypeNode* a_pValue)
+void OpcUa_TypeNode_Clear(void* pValue)
 {
+    OpcUa_TypeNode* a_pValue = (OpcUa_TypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -346,9 +356,10 @@ void OpcUa_TypeNode_Clear(OpcUa_TypeNode* a_pValue)
 /*============================================================================
  * OpcUa_TypeNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TypeNode_Encode(OpcUa_TypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TypeNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TypeNode* a_pValue = (OpcUa_TypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -378,9 +389,10 @@ SOPC_StatusCode OpcUa_TypeNode_Encode(OpcUa_TypeNode* a_pValue, SOPC_MsgBuffer* 
 /*============================================================================
  * OpcUa_TypeNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TypeNode_Decode(OpcUa_TypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TypeNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TypeNode* a_pValue = (OpcUa_TypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -426,11 +438,11 @@ struct SOPC_EncodeableType OpcUa_TypeNode_EncodeableType =
     OpcUaId_TypeNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_TypeNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_TypeNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_TypeNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_TypeNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_TypeNode_Decode
+    OpcUa_TypeNode_Initialize,
+    OpcUa_TypeNode_Clear,
+    NULL,
+    OpcUa_TypeNode_Encode,
+    OpcUa_TypeNode_Decode
 };
 #endif
 
@@ -438,8 +450,9 @@ struct SOPC_EncodeableType OpcUa_TypeNode_EncodeableType =
 /*============================================================================
  * OpcUa_ObjectNode_Initialize
  *===========================================================================*/
-void OpcUa_ObjectNode_Initialize(OpcUa_ObjectNode* a_pValue)
+void OpcUa_ObjectNode_Initialize(void* pValue)
 {
+    OpcUa_ObjectNode* a_pValue = (OpcUa_ObjectNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -458,8 +471,9 @@ void OpcUa_ObjectNode_Initialize(OpcUa_ObjectNode* a_pValue)
 /*============================================================================
  * OpcUa_ObjectNode_Clear
  *===========================================================================*/
-void OpcUa_ObjectNode_Clear(OpcUa_ObjectNode* a_pValue)
+void OpcUa_ObjectNode_Clear(void* pValue)
 {
+    OpcUa_ObjectNode* a_pValue = (OpcUa_ObjectNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -478,9 +492,10 @@ void OpcUa_ObjectNode_Clear(OpcUa_ObjectNode* a_pValue)
 /*============================================================================
  * OpcUa_ObjectNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ObjectNode_Encode(OpcUa_ObjectNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ObjectNode* a_pValue = (OpcUa_ObjectNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -512,9 +527,10 @@ SOPC_StatusCode OpcUa_ObjectNode_Encode(OpcUa_ObjectNode* a_pValue, SOPC_MsgBuff
 /*============================================================================
  * OpcUa_ObjectNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ObjectNode_Decode(OpcUa_ObjectNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ObjectNode* a_pValue = (OpcUa_ObjectNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -562,11 +578,11 @@ struct SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType =
     OpcUaId_ObjectNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ObjectNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ObjectNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ObjectNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ObjectNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ObjectNode_Decode
+    OpcUa_ObjectNode_Initialize,
+    OpcUa_ObjectNode_Clear,
+    NULL,
+    OpcUa_ObjectNode_Encode,
+    OpcUa_ObjectNode_Decode
 };
 #endif
 
@@ -574,8 +590,9 @@ struct SOPC_EncodeableType OpcUa_ObjectNode_EncodeableType =
 /*============================================================================
  * OpcUa_ObjectTypeNode_Initialize
  *===========================================================================*/
-void OpcUa_ObjectTypeNode_Initialize(OpcUa_ObjectTypeNode* a_pValue)
+void OpcUa_ObjectTypeNode_Initialize(void* pValue)
 {
+    OpcUa_ObjectTypeNode* a_pValue = (OpcUa_ObjectTypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -594,8 +611,9 @@ void OpcUa_ObjectTypeNode_Initialize(OpcUa_ObjectTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_ObjectTypeNode_Clear
  *===========================================================================*/
-void OpcUa_ObjectTypeNode_Clear(OpcUa_ObjectTypeNode* a_pValue)
+void OpcUa_ObjectTypeNode_Clear(void* pValue)
 {
+    OpcUa_ObjectTypeNode* a_pValue = (OpcUa_ObjectTypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -614,9 +632,10 @@ void OpcUa_ObjectTypeNode_Clear(OpcUa_ObjectTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_ObjectTypeNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ObjectTypeNode_Encode(OpcUa_ObjectTypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectTypeNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ObjectTypeNode* a_pValue = (OpcUa_ObjectTypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -648,9 +667,10 @@ SOPC_StatusCode OpcUa_ObjectTypeNode_Encode(OpcUa_ObjectTypeNode* a_pValue, SOPC
 /*============================================================================
  * OpcUa_ObjectTypeNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ObjectTypeNode_Decode(OpcUa_ObjectTypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ObjectTypeNode* a_pValue = (OpcUa_ObjectTypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -698,11 +718,11 @@ struct SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType =
     OpcUaId_ObjectTypeNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ObjectTypeNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ObjectTypeNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ObjectTypeNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ObjectTypeNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ObjectTypeNode_Decode
+    OpcUa_ObjectTypeNode_Initialize,
+    OpcUa_ObjectTypeNode_Clear,
+    NULL,
+    OpcUa_ObjectTypeNode_Encode,
+    OpcUa_ObjectTypeNode_Decode
 };
 #endif
 
@@ -710,8 +730,9 @@ struct SOPC_EncodeableType OpcUa_ObjectTypeNode_EncodeableType =
 /*============================================================================
  * OpcUa_VariableNode_Initialize
  *===========================================================================*/
-void OpcUa_VariableNode_Initialize(OpcUa_VariableNode* a_pValue)
+void OpcUa_VariableNode_Initialize(void* pValue)
 {
+    OpcUa_VariableNode* a_pValue = (OpcUa_VariableNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -738,8 +759,9 @@ void OpcUa_VariableNode_Initialize(OpcUa_VariableNode* a_pValue)
 /*============================================================================
  * OpcUa_VariableNode_Clear
  *===========================================================================*/
-void OpcUa_VariableNode_Clear(OpcUa_VariableNode* a_pValue)
+void OpcUa_VariableNode_Clear(void* pValue)
 {
+    OpcUa_VariableNode* a_pValue = (OpcUa_VariableNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -766,9 +788,10 @@ void OpcUa_VariableNode_Clear(OpcUa_VariableNode* a_pValue)
 /*============================================================================
  * OpcUa_VariableNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_VariableNode_Encode(OpcUa_VariableNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_VariableNode* a_pValue = (OpcUa_VariableNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -815,9 +838,10 @@ SOPC_StatusCode OpcUa_VariableNode_Encode(OpcUa_VariableNode* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_VariableNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_VariableNode_Decode(OpcUa_VariableNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_VariableNode* a_pValue = (OpcUa_VariableNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -882,11 +906,11 @@ struct SOPC_EncodeableType OpcUa_VariableNode_EncodeableType =
     OpcUaId_VariableNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_VariableNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_VariableNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_VariableNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_VariableNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_VariableNode_Decode
+    OpcUa_VariableNode_Initialize,
+    OpcUa_VariableNode_Clear,
+    NULL,
+    OpcUa_VariableNode_Encode,
+    OpcUa_VariableNode_Decode
 };
 #endif
 
@@ -894,8 +918,9 @@ struct SOPC_EncodeableType OpcUa_VariableNode_EncodeableType =
 /*============================================================================
  * OpcUa_VariableTypeNode_Initialize
  *===========================================================================*/
-void OpcUa_VariableTypeNode_Initialize(OpcUa_VariableTypeNode* a_pValue)
+void OpcUa_VariableTypeNode_Initialize(void* pValue)
 {
+    OpcUa_VariableTypeNode* a_pValue = (OpcUa_VariableTypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -919,8 +944,9 @@ void OpcUa_VariableTypeNode_Initialize(OpcUa_VariableTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_VariableTypeNode_Clear
  *===========================================================================*/
-void OpcUa_VariableTypeNode_Clear(OpcUa_VariableTypeNode* a_pValue)
+void OpcUa_VariableTypeNode_Clear(void* pValue)
 {
+    OpcUa_VariableTypeNode* a_pValue = (OpcUa_VariableTypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -944,9 +970,10 @@ void OpcUa_VariableTypeNode_Clear(OpcUa_VariableTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_VariableTypeNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_VariableTypeNode_Encode(OpcUa_VariableTypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableTypeNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_VariableTypeNode* a_pValue = (OpcUa_VariableTypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -987,9 +1014,10 @@ SOPC_StatusCode OpcUa_VariableTypeNode_Encode(OpcUa_VariableTypeNode* a_pValue, 
 /*============================================================================
  * OpcUa_VariableTypeNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_VariableTypeNode_Decode(OpcUa_VariableTypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_VariableTypeNode* a_pValue = (OpcUa_VariableTypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1048,11 +1076,11 @@ struct SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType =
     OpcUaId_VariableTypeNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_VariableTypeNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_VariableTypeNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_VariableTypeNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_VariableTypeNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_VariableTypeNode_Decode
+    OpcUa_VariableTypeNode_Initialize,
+    OpcUa_VariableTypeNode_Clear,
+    NULL,
+    OpcUa_VariableTypeNode_Encode,
+    OpcUa_VariableTypeNode_Decode
 };
 #endif
 
@@ -1060,8 +1088,9 @@ struct SOPC_EncodeableType OpcUa_VariableTypeNode_EncodeableType =
 /*============================================================================
  * OpcUa_ReferenceTypeNode_Initialize
  *===========================================================================*/
-void OpcUa_ReferenceTypeNode_Initialize(OpcUa_ReferenceTypeNode* a_pValue)
+void OpcUa_ReferenceTypeNode_Initialize(void* pValue)
 {
+    OpcUa_ReferenceTypeNode* a_pValue = (OpcUa_ReferenceTypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -1082,8 +1111,9 @@ void OpcUa_ReferenceTypeNode_Initialize(OpcUa_ReferenceTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_ReferenceTypeNode_Clear
  *===========================================================================*/
-void OpcUa_ReferenceTypeNode_Clear(OpcUa_ReferenceTypeNode* a_pValue)
+void OpcUa_ReferenceTypeNode_Clear(void* pValue)
 {
+    OpcUa_ReferenceTypeNode* a_pValue = (OpcUa_ReferenceTypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -1104,9 +1134,10 @@ void OpcUa_ReferenceTypeNode_Clear(OpcUa_ReferenceTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_ReferenceTypeNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReferenceTypeNode_Encode(OpcUa_ReferenceTypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceTypeNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReferenceTypeNode* a_pValue = (OpcUa_ReferenceTypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1142,9 +1173,10 @@ SOPC_StatusCode OpcUa_ReferenceTypeNode_Encode(OpcUa_ReferenceTypeNode* a_pValue
 /*============================================================================
  * OpcUa_ReferenceTypeNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReferenceTypeNode_Decode(OpcUa_ReferenceTypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReferenceTypeNode* a_pValue = (OpcUa_ReferenceTypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1196,11 +1228,11 @@ struct SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType =
     OpcUaId_ReferenceTypeNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReferenceTypeNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReferenceTypeNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReferenceTypeNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReferenceTypeNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReferenceTypeNode_Decode
+    OpcUa_ReferenceTypeNode_Initialize,
+    OpcUa_ReferenceTypeNode_Clear,
+    NULL,
+    OpcUa_ReferenceTypeNode_Encode,
+    OpcUa_ReferenceTypeNode_Decode
 };
 #endif
 
@@ -1208,8 +1240,9 @@ struct SOPC_EncodeableType OpcUa_ReferenceTypeNode_EncodeableType =
 /*============================================================================
  * OpcUa_MethodNode_Initialize
  *===========================================================================*/
-void OpcUa_MethodNode_Initialize(OpcUa_MethodNode* a_pValue)
+void OpcUa_MethodNode_Initialize(void* pValue)
 {
+    OpcUa_MethodNode* a_pValue = (OpcUa_MethodNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -1229,8 +1262,9 @@ void OpcUa_MethodNode_Initialize(OpcUa_MethodNode* a_pValue)
 /*============================================================================
  * OpcUa_MethodNode_Clear
  *===========================================================================*/
-void OpcUa_MethodNode_Clear(OpcUa_MethodNode* a_pValue)
+void OpcUa_MethodNode_Clear(void* pValue)
 {
+    OpcUa_MethodNode* a_pValue = (OpcUa_MethodNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -1250,9 +1284,10 @@ void OpcUa_MethodNode_Clear(OpcUa_MethodNode* a_pValue)
 /*============================================================================
  * OpcUa_MethodNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MethodNode_Encode(OpcUa_MethodNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MethodNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MethodNode* a_pValue = (OpcUa_MethodNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1286,9 +1321,10 @@ SOPC_StatusCode OpcUa_MethodNode_Encode(OpcUa_MethodNode* a_pValue, SOPC_MsgBuff
 /*============================================================================
  * OpcUa_MethodNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MethodNode_Decode(OpcUa_MethodNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MethodNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MethodNode* a_pValue = (OpcUa_MethodNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1338,11 +1374,11 @@ struct SOPC_EncodeableType OpcUa_MethodNode_EncodeableType =
     OpcUaId_MethodNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_MethodNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_MethodNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_MethodNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_MethodNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_MethodNode_Decode
+    OpcUa_MethodNode_Initialize,
+    OpcUa_MethodNode_Clear,
+    NULL,
+    OpcUa_MethodNode_Encode,
+    OpcUa_MethodNode_Decode
 };
 #endif
 
@@ -1350,8 +1386,9 @@ struct SOPC_EncodeableType OpcUa_MethodNode_EncodeableType =
 /*============================================================================
  * OpcUa_ViewNode_Initialize
  *===========================================================================*/
-void OpcUa_ViewNode_Initialize(OpcUa_ViewNode* a_pValue)
+void OpcUa_ViewNode_Initialize(void* pValue)
 {
+    OpcUa_ViewNode* a_pValue = (OpcUa_ViewNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -1371,8 +1408,9 @@ void OpcUa_ViewNode_Initialize(OpcUa_ViewNode* a_pValue)
 /*============================================================================
  * OpcUa_ViewNode_Clear
  *===========================================================================*/
-void OpcUa_ViewNode_Clear(OpcUa_ViewNode* a_pValue)
+void OpcUa_ViewNode_Clear(void* pValue)
 {
+    OpcUa_ViewNode* a_pValue = (OpcUa_ViewNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -1392,9 +1430,10 @@ void OpcUa_ViewNode_Clear(OpcUa_ViewNode* a_pValue)
 /*============================================================================
  * OpcUa_ViewNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ViewNode_Encode(OpcUa_ViewNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ViewNode* a_pValue = (OpcUa_ViewNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1428,9 +1467,10 @@ SOPC_StatusCode OpcUa_ViewNode_Encode(OpcUa_ViewNode* a_pValue, SOPC_MsgBuffer* 
 /*============================================================================
  * OpcUa_ViewNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ViewNode_Decode(OpcUa_ViewNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ViewNode* a_pValue = (OpcUa_ViewNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1480,11 +1520,11 @@ struct SOPC_EncodeableType OpcUa_ViewNode_EncodeableType =
     OpcUaId_ViewNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ViewNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ViewNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ViewNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ViewNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ViewNode_Decode
+    OpcUa_ViewNode_Initialize,
+    OpcUa_ViewNode_Clear,
+    NULL,
+    OpcUa_ViewNode_Encode,
+    OpcUa_ViewNode_Decode
 };
 #endif
 
@@ -1492,8 +1532,9 @@ struct SOPC_EncodeableType OpcUa_ViewNode_EncodeableType =
 /*============================================================================
  * OpcUa_DataTypeNode_Initialize
  *===========================================================================*/
-void OpcUa_DataTypeNode_Initialize(OpcUa_DataTypeNode* a_pValue)
+void OpcUa_DataTypeNode_Initialize(void* pValue)
 {
+    OpcUa_DataTypeNode* a_pValue = (OpcUa_DataTypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -1512,8 +1553,9 @@ void OpcUa_DataTypeNode_Initialize(OpcUa_DataTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_DataTypeNode_Clear
  *===========================================================================*/
-void OpcUa_DataTypeNode_Clear(OpcUa_DataTypeNode* a_pValue)
+void OpcUa_DataTypeNode_Clear(void* pValue)
 {
+    OpcUa_DataTypeNode* a_pValue = (OpcUa_DataTypeNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -1532,9 +1574,10 @@ void OpcUa_DataTypeNode_Clear(OpcUa_DataTypeNode* a_pValue)
 /*============================================================================
  * OpcUa_DataTypeNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DataTypeNode_Encode(OpcUa_DataTypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataTypeNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DataTypeNode* a_pValue = (OpcUa_DataTypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1566,9 +1609,10 @@ SOPC_StatusCode OpcUa_DataTypeNode_Encode(OpcUa_DataTypeNode* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_DataTypeNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DataTypeNode_Decode(OpcUa_DataTypeNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataTypeNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DataTypeNode* a_pValue = (OpcUa_DataTypeNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1616,11 +1660,11 @@ struct SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType =
     OpcUaId_DataTypeNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DataTypeNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DataTypeNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DataTypeNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DataTypeNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DataTypeNode_Decode
+    OpcUa_DataTypeNode_Initialize,
+    OpcUa_DataTypeNode_Clear,
+    NULL,
+    OpcUa_DataTypeNode_Encode,
+    OpcUa_DataTypeNode_Decode
 };
 #endif
 
@@ -1628,8 +1672,9 @@ struct SOPC_EncodeableType OpcUa_DataTypeNode_EncodeableType =
 /*============================================================================
  * OpcUa_ReferenceNode_Initialize
  *===========================================================================*/
-void OpcUa_ReferenceNode_Initialize(OpcUa_ReferenceNode* a_pValue)
+void OpcUa_ReferenceNode_Initialize(void* pValue)
 {
+    OpcUa_ReferenceNode* a_pValue = (OpcUa_ReferenceNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->ReferenceTypeId);
@@ -1641,8 +1686,9 @@ void OpcUa_ReferenceNode_Initialize(OpcUa_ReferenceNode* a_pValue)
 /*============================================================================
  * OpcUa_ReferenceNode_Clear
  *===========================================================================*/
-void OpcUa_ReferenceNode_Clear(OpcUa_ReferenceNode* a_pValue)
+void OpcUa_ReferenceNode_Clear(void* pValue)
 {
+    OpcUa_ReferenceNode* a_pValue = (OpcUa_ReferenceNode*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->ReferenceTypeId);
@@ -1654,9 +1700,10 @@ void OpcUa_ReferenceNode_Clear(OpcUa_ReferenceNode* a_pValue)
 /*============================================================================
  * OpcUa_ReferenceNode_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReferenceNode_Encode(OpcUa_ReferenceNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceNode_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReferenceNode* a_pValue = (OpcUa_ReferenceNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1675,9 +1722,10 @@ SOPC_StatusCode OpcUa_ReferenceNode_Encode(OpcUa_ReferenceNode* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_ReferenceNode_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReferenceNode_Decode(OpcUa_ReferenceNode* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReferenceNode* a_pValue = (OpcUa_ReferenceNode*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1710,11 +1758,11 @@ struct SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType =
     OpcUaId_ReferenceNode_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReferenceNode),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReferenceNode_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReferenceNode_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReferenceNode_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReferenceNode_Decode
+    OpcUa_ReferenceNode_Initialize,
+    OpcUa_ReferenceNode_Clear,
+    NULL,
+    OpcUa_ReferenceNode_Encode,
+    OpcUa_ReferenceNode_Decode
 };
 #endif
 
@@ -1722,8 +1770,9 @@ struct SOPC_EncodeableType OpcUa_ReferenceNode_EncodeableType =
 /*============================================================================
  * OpcUa_Argument_Initialize
  *===========================================================================*/
-void OpcUa_Argument_Initialize(OpcUa_Argument* a_pValue)
+void OpcUa_Argument_Initialize(void* pValue)
 {
+    OpcUa_Argument* a_pValue = (OpcUa_Argument*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->Name);
@@ -1738,8 +1787,9 @@ void OpcUa_Argument_Initialize(OpcUa_Argument* a_pValue)
 /*============================================================================
  * OpcUa_Argument_Clear
  *===========================================================================*/
-void OpcUa_Argument_Clear(OpcUa_Argument* a_pValue)
+void OpcUa_Argument_Clear(void* pValue)
 {
+    OpcUa_Argument* a_pValue = (OpcUa_Argument*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->Name);
@@ -1754,9 +1804,10 @@ void OpcUa_Argument_Clear(OpcUa_Argument* a_pValue)
 /*============================================================================
  * OpcUa_Argument_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_Argument_Encode(OpcUa_Argument* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Argument_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_Argument* a_pValue = (OpcUa_Argument*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1780,9 +1831,10 @@ SOPC_StatusCode OpcUa_Argument_Encode(OpcUa_Argument* a_pValue, SOPC_MsgBuffer* 
 /*============================================================================
  * OpcUa_Argument_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_Argument_Decode(OpcUa_Argument* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Argument_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_Argument* a_pValue = (OpcUa_Argument*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1822,11 +1874,11 @@ struct SOPC_EncodeableType OpcUa_Argument_EncodeableType =
     OpcUaId_Argument_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_Argument),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_Argument_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_Argument_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_Argument_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_Argument_Decode
+    OpcUa_Argument_Initialize,
+    OpcUa_Argument_Clear,
+    NULL,
+    OpcUa_Argument_Encode,
+    OpcUa_Argument_Decode
 };
 #endif
 
@@ -1834,8 +1886,9 @@ struct SOPC_EncodeableType OpcUa_Argument_EncodeableType =
 /*============================================================================
  * OpcUa_EnumValueType_Initialize
  *===========================================================================*/
-void OpcUa_EnumValueType_Initialize(OpcUa_EnumValueType* a_pValue)
+void OpcUa_EnumValueType_Initialize(void* pValue)
 {
+    OpcUa_EnumValueType* a_pValue = (OpcUa_EnumValueType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Int64_Initialize(&a_pValue->Value);
@@ -1847,8 +1900,9 @@ void OpcUa_EnumValueType_Initialize(OpcUa_EnumValueType* a_pValue)
 /*============================================================================
  * OpcUa_EnumValueType_Clear
  *===========================================================================*/
-void OpcUa_EnumValueType_Clear(OpcUa_EnumValueType* a_pValue)
+void OpcUa_EnumValueType_Clear(void* pValue)
 {
+    OpcUa_EnumValueType* a_pValue = (OpcUa_EnumValueType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Int64_Clear(&a_pValue->Value);
@@ -1860,9 +1914,10 @@ void OpcUa_EnumValueType_Clear(OpcUa_EnumValueType* a_pValue)
 /*============================================================================
  * OpcUa_EnumValueType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EnumValueType_Encode(OpcUa_EnumValueType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EnumValueType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EnumValueType* a_pValue = (OpcUa_EnumValueType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1881,9 +1936,10 @@ SOPC_StatusCode OpcUa_EnumValueType_Encode(OpcUa_EnumValueType* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_EnumValueType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EnumValueType_Decode(OpcUa_EnumValueType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EnumValueType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EnumValueType* a_pValue = (OpcUa_EnumValueType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1916,11 +1972,11 @@ struct SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType =
     OpcUaId_EnumValueType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EnumValueType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EnumValueType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EnumValueType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EnumValueType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EnumValueType_Decode
+    OpcUa_EnumValueType_Initialize,
+    OpcUa_EnumValueType_Clear,
+    NULL,
+    OpcUa_EnumValueType_Encode,
+    OpcUa_EnumValueType_Decode
 };
 #endif
 
@@ -1928,8 +1984,9 @@ struct SOPC_EncodeableType OpcUa_EnumValueType_EncodeableType =
 /*============================================================================
  * OpcUa_EnumField_Initialize
  *===========================================================================*/
-void OpcUa_EnumField_Initialize(OpcUa_EnumField* a_pValue)
+void OpcUa_EnumField_Initialize(void* pValue)
 {
+    OpcUa_EnumField* a_pValue = (OpcUa_EnumField*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Int64_Initialize(&a_pValue->Value);
@@ -1942,8 +1999,9 @@ void OpcUa_EnumField_Initialize(OpcUa_EnumField* a_pValue)
 /*============================================================================
  * OpcUa_EnumField_Clear
  *===========================================================================*/
-void OpcUa_EnumField_Clear(OpcUa_EnumField* a_pValue)
+void OpcUa_EnumField_Clear(void* pValue)
 {
+    OpcUa_EnumField* a_pValue = (OpcUa_EnumField*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Int64_Clear(&a_pValue->Value);
@@ -1956,9 +2014,10 @@ void OpcUa_EnumField_Clear(OpcUa_EnumField* a_pValue)
 /*============================================================================
  * OpcUa_EnumField_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EnumField_Encode(OpcUa_EnumField* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EnumField_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EnumField* a_pValue = (OpcUa_EnumField*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -1979,9 +2038,10 @@ SOPC_StatusCode OpcUa_EnumField_Encode(OpcUa_EnumField* a_pValue, SOPC_MsgBuffer
 /*============================================================================
  * OpcUa_EnumField_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EnumField_Decode(OpcUa_EnumField* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EnumField_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EnumField* a_pValue = (OpcUa_EnumField*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2016,11 +2076,11 @@ struct SOPC_EncodeableType OpcUa_EnumField_EncodeableType =
     OpcUaId_EnumField_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EnumField),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EnumField_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EnumField_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EnumField_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EnumField_Decode
+    OpcUa_EnumField_Initialize,
+    OpcUa_EnumField_Clear,
+    NULL,
+    OpcUa_EnumField_Encode,
+    OpcUa_EnumField_Decode
 };
 #endif
 
@@ -2028,8 +2088,9 @@ struct SOPC_EncodeableType OpcUa_EnumField_EncodeableType =
 /*============================================================================
  * OpcUa_OptionSet_Initialize
  *===========================================================================*/
-void OpcUa_OptionSet_Initialize(OpcUa_OptionSet* a_pValue)
+void OpcUa_OptionSet_Initialize(void* pValue)
 {
+    OpcUa_OptionSet* a_pValue = (OpcUa_OptionSet*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ByteString_Initialize(&a_pValue->Value);
@@ -2040,8 +2101,9 @@ void OpcUa_OptionSet_Initialize(OpcUa_OptionSet* a_pValue)
 /*============================================================================
  * OpcUa_OptionSet_Clear
  *===========================================================================*/
-void OpcUa_OptionSet_Clear(OpcUa_OptionSet* a_pValue)
+void OpcUa_OptionSet_Clear(void* pValue)
 {
+    OpcUa_OptionSet* a_pValue = (OpcUa_OptionSet*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ByteString_Clear(&a_pValue->Value);
@@ -2052,9 +2114,10 @@ void OpcUa_OptionSet_Clear(OpcUa_OptionSet* a_pValue)
 /*============================================================================
  * OpcUa_OptionSet_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_OptionSet_Encode(OpcUa_OptionSet* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OptionSet_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_OptionSet* a_pValue = (OpcUa_OptionSet*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2071,9 +2134,10 @@ SOPC_StatusCode OpcUa_OptionSet_Encode(OpcUa_OptionSet* a_pValue, SOPC_MsgBuffer
 /*============================================================================
  * OpcUa_OptionSet_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_OptionSet_Decode(OpcUa_OptionSet* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OptionSet_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_OptionSet* a_pValue = (OpcUa_OptionSet*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2104,11 +2168,11 @@ struct SOPC_EncodeableType OpcUa_OptionSet_EncodeableType =
     OpcUaId_OptionSet_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_OptionSet),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_OptionSet_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_OptionSet_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_OptionSet_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_OptionSet_Decode
+    OpcUa_OptionSet_Initialize,
+    OpcUa_OptionSet_Clear,
+    NULL,
+    OpcUa_OptionSet_Encode,
+    OpcUa_OptionSet_Decode
 };
 #endif
 
@@ -2116,8 +2180,9 @@ struct SOPC_EncodeableType OpcUa_OptionSet_EncodeableType =
 /*============================================================================
  * OpcUa_TimeZoneDataType_Initialize
  *===========================================================================*/
-void OpcUa_TimeZoneDataType_Initialize(OpcUa_TimeZoneDataType* a_pValue)
+void OpcUa_TimeZoneDataType_Initialize(void* pValue)
 {
+    OpcUa_TimeZoneDataType* a_pValue = (OpcUa_TimeZoneDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Int16_Initialize(&a_pValue->Offset);
@@ -2128,8 +2193,9 @@ void OpcUa_TimeZoneDataType_Initialize(OpcUa_TimeZoneDataType* a_pValue)
 /*============================================================================
  * OpcUa_TimeZoneDataType_Clear
  *===========================================================================*/
-void OpcUa_TimeZoneDataType_Clear(OpcUa_TimeZoneDataType* a_pValue)
+void OpcUa_TimeZoneDataType_Clear(void* pValue)
 {
+    OpcUa_TimeZoneDataType* a_pValue = (OpcUa_TimeZoneDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Int16_Clear(&a_pValue->Offset);
@@ -2140,9 +2206,10 @@ void OpcUa_TimeZoneDataType_Clear(OpcUa_TimeZoneDataType* a_pValue)
 /*============================================================================
  * OpcUa_TimeZoneDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TimeZoneDataType_Encode(OpcUa_TimeZoneDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TimeZoneDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TimeZoneDataType* a_pValue = (OpcUa_TimeZoneDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2159,9 +2226,10 @@ SOPC_StatusCode OpcUa_TimeZoneDataType_Encode(OpcUa_TimeZoneDataType* a_pValue, 
 /*============================================================================
  * OpcUa_TimeZoneDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TimeZoneDataType_Decode(OpcUa_TimeZoneDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TimeZoneDataType* a_pValue = (OpcUa_TimeZoneDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2192,11 +2260,11 @@ struct SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType =
     OpcUaId_TimeZoneDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_TimeZoneDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_TimeZoneDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_TimeZoneDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_TimeZoneDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_TimeZoneDataType_Decode
+    OpcUa_TimeZoneDataType_Initialize,
+    OpcUa_TimeZoneDataType_Clear,
+    NULL,
+    OpcUa_TimeZoneDataType_Encode,
+    OpcUa_TimeZoneDataType_Decode
 };
 #endif
 
@@ -2205,8 +2273,9 @@ struct SOPC_EncodeableType OpcUa_TimeZoneDataType_EncodeableType =
 /*============================================================================
  * OpcUa_ApplicationDescription_Initialize
  *===========================================================================*/
-void OpcUa_ApplicationDescription_Initialize(OpcUa_ApplicationDescription* a_pValue)
+void OpcUa_ApplicationDescription_Initialize(void* pValue)
 {
+    OpcUa_ApplicationDescription* a_pValue = (OpcUa_ApplicationDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->ApplicationUri);
@@ -2223,8 +2292,9 @@ void OpcUa_ApplicationDescription_Initialize(OpcUa_ApplicationDescription* a_pVa
 /*============================================================================
  * OpcUa_ApplicationDescription_Clear
  *===========================================================================*/
-void OpcUa_ApplicationDescription_Clear(OpcUa_ApplicationDescription* a_pValue)
+void OpcUa_ApplicationDescription_Clear(void* pValue)
 {
+    OpcUa_ApplicationDescription* a_pValue = (OpcUa_ApplicationDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->ApplicationUri);
@@ -2241,9 +2311,10 @@ void OpcUa_ApplicationDescription_Clear(OpcUa_ApplicationDescription* a_pValue)
 /*============================================================================
  * OpcUa_ApplicationDescription_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ApplicationDescription_Encode(OpcUa_ApplicationDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ApplicationDescription_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ApplicationDescription* a_pValue = (OpcUa_ApplicationDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2271,9 +2342,10 @@ SOPC_StatusCode OpcUa_ApplicationDescription_Encode(OpcUa_ApplicationDescription
 /*============================================================================
  * OpcUa_ApplicationDescription_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ApplicationDescription_Decode(OpcUa_ApplicationDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ApplicationDescription* a_pValue = (OpcUa_ApplicationDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2317,11 +2389,11 @@ struct SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType =
     OpcUaId_ApplicationDescription_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ApplicationDescription),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ApplicationDescription_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ApplicationDescription_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ApplicationDescription_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ApplicationDescription_Decode
+    OpcUa_ApplicationDescription_Initialize,
+    OpcUa_ApplicationDescription_Clear,
+    NULL,
+    OpcUa_ApplicationDescription_Encode,
+    OpcUa_ApplicationDescription_Decode
 };
 #endif
 
@@ -2329,8 +2401,9 @@ struct SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType =
 /*============================================================================
  * OpcUa_RequestHeader_Initialize
  *===========================================================================*/
-void OpcUa_RequestHeader_Initialize(OpcUa_RequestHeader* a_pValue)
+void OpcUa_RequestHeader_Initialize(void* pValue)
 {
+    OpcUa_RequestHeader* a_pValue = (OpcUa_RequestHeader*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->AuthenticationToken);
@@ -2346,8 +2419,9 @@ void OpcUa_RequestHeader_Initialize(OpcUa_RequestHeader* a_pValue)
 /*============================================================================
  * OpcUa_RequestHeader_Clear
  *===========================================================================*/
-void OpcUa_RequestHeader_Clear(OpcUa_RequestHeader* a_pValue)
+void OpcUa_RequestHeader_Clear(void* pValue)
 {
+    OpcUa_RequestHeader* a_pValue = (OpcUa_RequestHeader*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->AuthenticationToken);
@@ -2363,9 +2437,10 @@ void OpcUa_RequestHeader_Clear(OpcUa_RequestHeader* a_pValue)
 /*============================================================================
  * OpcUa_RequestHeader_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RequestHeader_Encode(OpcUa_RequestHeader* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RequestHeader_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RequestHeader* a_pValue = (OpcUa_RequestHeader*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2392,9 +2467,10 @@ SOPC_StatusCode OpcUa_RequestHeader_Encode(OpcUa_RequestHeader* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_RequestHeader_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RequestHeader_Decode(OpcUa_RequestHeader* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RequestHeader_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RequestHeader* a_pValue = (OpcUa_RequestHeader*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2435,11 +2511,11 @@ struct SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType =
     OpcUaId_RequestHeader_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RequestHeader),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RequestHeader_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RequestHeader_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RequestHeader_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RequestHeader_Decode
+    OpcUa_RequestHeader_Initialize,
+    OpcUa_RequestHeader_Clear,
+    NULL,
+    OpcUa_RequestHeader_Encode,
+    OpcUa_RequestHeader_Decode
 };
 #endif
 
@@ -2447,8 +2523,9 @@ struct SOPC_EncodeableType OpcUa_RequestHeader_EncodeableType =
 /*============================================================================
  * OpcUa_ResponseHeader_Initialize
  *===========================================================================*/
-void OpcUa_ResponseHeader_Initialize(OpcUa_ResponseHeader* a_pValue)
+void OpcUa_ResponseHeader_Initialize(void* pValue)
 {
+    OpcUa_ResponseHeader* a_pValue = (OpcUa_ResponseHeader*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Initialize(&a_pValue->Timestamp);
@@ -2464,8 +2541,9 @@ void OpcUa_ResponseHeader_Initialize(OpcUa_ResponseHeader* a_pValue)
 /*============================================================================
  * OpcUa_ResponseHeader_Clear
  *===========================================================================*/
-void OpcUa_ResponseHeader_Clear(OpcUa_ResponseHeader* a_pValue)
+void OpcUa_ResponseHeader_Clear(void* pValue)
 {
+    OpcUa_ResponseHeader* a_pValue = (OpcUa_ResponseHeader*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Clear(&a_pValue->Timestamp);
@@ -2481,9 +2559,10 @@ void OpcUa_ResponseHeader_Clear(OpcUa_ResponseHeader* a_pValue)
 /*============================================================================
  * OpcUa_ResponseHeader_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ResponseHeader_Encode(OpcUa_ResponseHeader* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ResponseHeader_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ResponseHeader* a_pValue = (OpcUa_ResponseHeader*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2509,9 +2588,10 @@ SOPC_StatusCode OpcUa_ResponseHeader_Encode(OpcUa_ResponseHeader* a_pValue, SOPC
 /*============================================================================
  * OpcUa_ResponseHeader_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ResponseHeader_Decode(OpcUa_ResponseHeader* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ResponseHeader_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ResponseHeader* a_pValue = (OpcUa_ResponseHeader*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2553,11 +2633,11 @@ struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType =
     OpcUaId_ResponseHeader_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ResponseHeader),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ResponseHeader_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ResponseHeader_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ResponseHeader_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ResponseHeader_Decode
+    OpcUa_ResponseHeader_Initialize,
+    OpcUa_ResponseHeader_Clear,
+    NULL,
+    OpcUa_ResponseHeader_Encode,
+    OpcUa_ResponseHeader_Decode
 };
 #endif
 
@@ -2565,8 +2645,9 @@ struct SOPC_EncodeableType OpcUa_ResponseHeader_EncodeableType =
 /*============================================================================
  * OpcUa_ServiceFault_Initialize
  *===========================================================================*/
-void OpcUa_ServiceFault_Initialize(OpcUa_ServiceFault* a_pValue)
+void OpcUa_ServiceFault_Initialize(void* pValue)
 {
+    OpcUa_ServiceFault* a_pValue = (OpcUa_ServiceFault*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -2576,8 +2657,9 @@ void OpcUa_ServiceFault_Initialize(OpcUa_ServiceFault* a_pValue)
 /*============================================================================
  * OpcUa_ServiceFault_Clear
  *===========================================================================*/
-void OpcUa_ServiceFault_Clear(OpcUa_ServiceFault* a_pValue)
+void OpcUa_ServiceFault_Clear(void* pValue)
 {
+    OpcUa_ServiceFault* a_pValue = (OpcUa_ServiceFault*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -2587,9 +2669,10 @@ void OpcUa_ServiceFault_Clear(OpcUa_ServiceFault* a_pValue)
 /*============================================================================
  * OpcUa_ServiceFault_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServiceFault_Encode(OpcUa_ServiceFault* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServiceFault_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServiceFault* a_pValue = (OpcUa_ServiceFault*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2604,9 +2687,10 @@ SOPC_StatusCode OpcUa_ServiceFault_Encode(OpcUa_ServiceFault* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_ServiceFault_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServiceFault_Decode(OpcUa_ServiceFault* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServiceFault_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServiceFault* a_pValue = (OpcUa_ServiceFault*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2635,11 +2719,11 @@ struct SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType =
     OpcUaId_ServiceFault_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ServiceFault),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ServiceFault_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ServiceFault_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ServiceFault_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ServiceFault_Decode
+    OpcUa_ServiceFault_Initialize,
+    OpcUa_ServiceFault_Clear,
+    NULL,
+    OpcUa_ServiceFault_Encode,
+    OpcUa_ServiceFault_Decode
 };
 #endif
 
@@ -2648,8 +2732,9 @@ struct SOPC_EncodeableType OpcUa_ServiceFault_EncodeableType =
 /*============================================================================
  * OpcUa_FindServersRequest_Initialize
  *===========================================================================*/
-void OpcUa_FindServersRequest_Initialize(OpcUa_FindServersRequest* a_pValue)
+void OpcUa_FindServersRequest_Initialize(void* pValue)
 {
+    OpcUa_FindServersRequest* a_pValue = (OpcUa_FindServersRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -2664,8 +2749,9 @@ void OpcUa_FindServersRequest_Initialize(OpcUa_FindServersRequest* a_pValue)
 /*============================================================================
  * OpcUa_FindServersRequest_Clear
  *===========================================================================*/
-void OpcUa_FindServersRequest_Clear(OpcUa_FindServersRequest* a_pValue)
+void OpcUa_FindServersRequest_Clear(void* pValue)
 {
+    OpcUa_FindServersRequest* a_pValue = (OpcUa_FindServersRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -2680,9 +2766,10 @@ void OpcUa_FindServersRequest_Clear(OpcUa_FindServersRequest* a_pValue)
 /*============================================================================
  * OpcUa_FindServersRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_FindServersRequest_Encode(OpcUa_FindServersRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_FindServersRequest* a_pValue = (OpcUa_FindServersRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2705,9 +2792,10 @@ SOPC_StatusCode OpcUa_FindServersRequest_Encode(OpcUa_FindServersRequest* a_pVal
 /*============================================================================
  * OpcUa_FindServersRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_FindServersRequest_Decode(OpcUa_FindServersRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_FindServersRequest* a_pValue = (OpcUa_FindServersRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2748,11 +2836,11 @@ struct SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType =
     OpcUaId_FindServersRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_FindServersRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_FindServersRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_FindServersRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_FindServersRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_FindServersRequest_Decode
+    OpcUa_FindServersRequest_Initialize,
+    OpcUa_FindServersRequest_Clear,
+    NULL,
+    OpcUa_FindServersRequest_Encode,
+    OpcUa_FindServersRequest_Decode
 };
 #endif
 
@@ -2760,8 +2848,9 @@ struct SOPC_EncodeableType OpcUa_FindServersRequest_EncodeableType =
 /*============================================================================
  * OpcUa_FindServersResponse_Initialize
  *===========================================================================*/
-void OpcUa_FindServersResponse_Initialize(OpcUa_FindServersResponse* a_pValue)
+void OpcUa_FindServersResponse_Initialize(void* pValue)
 {
+    OpcUa_FindServersResponse* a_pValue = (OpcUa_FindServersResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -2773,8 +2862,9 @@ void OpcUa_FindServersResponse_Initialize(OpcUa_FindServersResponse* a_pValue)
 /*============================================================================
  * OpcUa_FindServersResponse_Clear
  *===========================================================================*/
-void OpcUa_FindServersResponse_Clear(OpcUa_FindServersResponse* a_pValue)
+void OpcUa_FindServersResponse_Clear(void* pValue)
 {
+    OpcUa_FindServersResponse* a_pValue = (OpcUa_FindServersResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -2786,9 +2876,10 @@ void OpcUa_FindServersResponse_Clear(OpcUa_FindServersResponse* a_pValue)
 /*============================================================================
  * OpcUa_FindServersResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_FindServersResponse_Encode(OpcUa_FindServersResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_FindServersResponse* a_pValue = (OpcUa_FindServersResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2806,9 +2897,10 @@ SOPC_StatusCode OpcUa_FindServersResponse_Encode(OpcUa_FindServersResponse* a_pV
 /*============================================================================
  * OpcUa_FindServersResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_FindServersResponse_Decode(OpcUa_FindServersResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_FindServersResponse* a_pValue = (OpcUa_FindServersResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2842,11 +2934,11 @@ struct SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType =
     OpcUaId_FindServersResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_FindServersResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_FindServersResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_FindServersResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_FindServersResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_FindServersResponse_Decode
+    OpcUa_FindServersResponse_Initialize,
+    OpcUa_FindServersResponse_Clear,
+    NULL,
+    OpcUa_FindServersResponse_Encode,
+    OpcUa_FindServersResponse_Decode
 };
 #endif
 #endif
@@ -2855,8 +2947,9 @@ struct SOPC_EncodeableType OpcUa_FindServersResponse_EncodeableType =
 /*============================================================================
  * OpcUa_ServerOnNetwork_Initialize
  *===========================================================================*/
-void OpcUa_ServerOnNetwork_Initialize(OpcUa_ServerOnNetwork* a_pValue)
+void OpcUa_ServerOnNetwork_Initialize(void* pValue)
 {
+    OpcUa_ServerOnNetwork* a_pValue = (OpcUa_ServerOnNetwork*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->RecordId);
@@ -2870,8 +2963,9 @@ void OpcUa_ServerOnNetwork_Initialize(OpcUa_ServerOnNetwork* a_pValue)
 /*============================================================================
  * OpcUa_ServerOnNetwork_Clear
  *===========================================================================*/
-void OpcUa_ServerOnNetwork_Clear(OpcUa_ServerOnNetwork* a_pValue)
+void OpcUa_ServerOnNetwork_Clear(void* pValue)
 {
+    OpcUa_ServerOnNetwork* a_pValue = (OpcUa_ServerOnNetwork*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->RecordId);
@@ -2885,9 +2979,10 @@ void OpcUa_ServerOnNetwork_Clear(OpcUa_ServerOnNetwork* a_pValue)
 /*============================================================================
  * OpcUa_ServerOnNetwork_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServerOnNetwork_Encode(OpcUa_ServerOnNetwork* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerOnNetwork_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServerOnNetwork* a_pValue = (OpcUa_ServerOnNetwork*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2909,9 +3004,10 @@ SOPC_StatusCode OpcUa_ServerOnNetwork_Encode(OpcUa_ServerOnNetwork* a_pValue, SO
 /*============================================================================
  * OpcUa_ServerOnNetwork_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServerOnNetwork_Decode(OpcUa_ServerOnNetwork* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServerOnNetwork* a_pValue = (OpcUa_ServerOnNetwork*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -2949,11 +3045,11 @@ struct SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType =
     OpcUaId_ServerOnNetwork_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ServerOnNetwork),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ServerOnNetwork_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ServerOnNetwork_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ServerOnNetwork_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ServerOnNetwork_Decode
+    OpcUa_ServerOnNetwork_Initialize,
+    OpcUa_ServerOnNetwork_Clear,
+    NULL,
+    OpcUa_ServerOnNetwork_Encode,
+    OpcUa_ServerOnNetwork_Decode
 };
 #endif
 
@@ -2962,8 +3058,9 @@ struct SOPC_EncodeableType OpcUa_ServerOnNetwork_EncodeableType =
 /*============================================================================
  * OpcUa_FindServersOnNetworkRequest_Initialize
  *===========================================================================*/
-void OpcUa_FindServersOnNetworkRequest_Initialize(OpcUa_FindServersOnNetworkRequest* a_pValue)
+void OpcUa_FindServersOnNetworkRequest_Initialize(void* pValue)
 {
+    OpcUa_FindServersOnNetworkRequest* a_pValue = (OpcUa_FindServersOnNetworkRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -2977,8 +3074,9 @@ void OpcUa_FindServersOnNetworkRequest_Initialize(OpcUa_FindServersOnNetworkRequ
 /*============================================================================
  * OpcUa_FindServersOnNetworkRequest_Clear
  *===========================================================================*/
-void OpcUa_FindServersOnNetworkRequest_Clear(OpcUa_FindServersOnNetworkRequest* a_pValue)
+void OpcUa_FindServersOnNetworkRequest_Clear(void* pValue)
 {
+    OpcUa_FindServersOnNetworkRequest* a_pValue = (OpcUa_FindServersOnNetworkRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -2992,9 +3090,10 @@ void OpcUa_FindServersOnNetworkRequest_Clear(OpcUa_FindServersOnNetworkRequest* 
 /*============================================================================
  * OpcUa_FindServersOnNetworkRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Encode(OpcUa_FindServersOnNetworkRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_FindServersOnNetworkRequest* a_pValue = (OpcUa_FindServersOnNetworkRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3016,9 +3115,10 @@ SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Encode(OpcUa_FindServersOnNetw
 /*============================================================================
  * OpcUa_FindServersOnNetworkRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Decode(OpcUa_FindServersOnNetworkRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_FindServersOnNetworkRequest* a_pValue = (OpcUa_FindServersOnNetworkRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3056,11 +3156,11 @@ struct SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType =
     OpcUaId_FindServersOnNetworkRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_FindServersOnNetworkRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_FindServersOnNetworkRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_FindServersOnNetworkRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_FindServersOnNetworkRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_FindServersOnNetworkRequest_Decode
+    OpcUa_FindServersOnNetworkRequest_Initialize,
+    OpcUa_FindServersOnNetworkRequest_Clear,
+    NULL,
+    OpcUa_FindServersOnNetworkRequest_Encode,
+    OpcUa_FindServersOnNetworkRequest_Decode
 };
 #endif
 
@@ -3068,8 +3168,9 @@ struct SOPC_EncodeableType OpcUa_FindServersOnNetworkRequest_EncodeableType =
 /*============================================================================
  * OpcUa_FindServersOnNetworkResponse_Initialize
  *===========================================================================*/
-void OpcUa_FindServersOnNetworkResponse_Initialize(OpcUa_FindServersOnNetworkResponse* a_pValue)
+void OpcUa_FindServersOnNetworkResponse_Initialize(void* pValue)
 {
+    OpcUa_FindServersOnNetworkResponse* a_pValue = (OpcUa_FindServersOnNetworkResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -3082,8 +3183,9 @@ void OpcUa_FindServersOnNetworkResponse_Initialize(OpcUa_FindServersOnNetworkRes
 /*============================================================================
  * OpcUa_FindServersOnNetworkResponse_Clear
  *===========================================================================*/
-void OpcUa_FindServersOnNetworkResponse_Clear(OpcUa_FindServersOnNetworkResponse* a_pValue)
+void OpcUa_FindServersOnNetworkResponse_Clear(void* pValue)
 {
+    OpcUa_FindServersOnNetworkResponse* a_pValue = (OpcUa_FindServersOnNetworkResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -3096,9 +3198,10 @@ void OpcUa_FindServersOnNetworkResponse_Clear(OpcUa_FindServersOnNetworkResponse
 /*============================================================================
  * OpcUa_FindServersOnNetworkResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Encode(OpcUa_FindServersOnNetworkResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_FindServersOnNetworkResponse* a_pValue = (OpcUa_FindServersOnNetworkResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3118,9 +3221,10 @@ SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Encode(OpcUa_FindServersOnNet
 /*============================================================================
  * OpcUa_FindServersOnNetworkResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Decode(OpcUa_FindServersOnNetworkResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_FindServersOnNetworkResponse* a_pValue = (OpcUa_FindServersOnNetworkResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3156,11 +3260,11 @@ struct SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType =
     OpcUaId_FindServersOnNetworkResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_FindServersOnNetworkResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_FindServersOnNetworkResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_FindServersOnNetworkResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_FindServersOnNetworkResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_FindServersOnNetworkResponse_Decode
+    OpcUa_FindServersOnNetworkResponse_Initialize,
+    OpcUa_FindServersOnNetworkResponse_Clear,
+    NULL,
+    OpcUa_FindServersOnNetworkResponse_Encode,
+    OpcUa_FindServersOnNetworkResponse_Decode
 };
 #endif
 #endif
@@ -3171,8 +3275,9 @@ struct SOPC_EncodeableType OpcUa_FindServersOnNetworkResponse_EncodeableType =
 /*============================================================================
  * OpcUa_UserTokenPolicy_Initialize
  *===========================================================================*/
-void OpcUa_UserTokenPolicy_Initialize(OpcUa_UserTokenPolicy* a_pValue)
+void OpcUa_UserTokenPolicy_Initialize(void* pValue)
 {
+    OpcUa_UserTokenPolicy* a_pValue = (OpcUa_UserTokenPolicy*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->PolicyId);
@@ -3186,8 +3291,9 @@ void OpcUa_UserTokenPolicy_Initialize(OpcUa_UserTokenPolicy* a_pValue)
 /*============================================================================
  * OpcUa_UserTokenPolicy_Clear
  *===========================================================================*/
-void OpcUa_UserTokenPolicy_Clear(OpcUa_UserTokenPolicy* a_pValue)
+void OpcUa_UserTokenPolicy_Clear(void* pValue)
 {
+    OpcUa_UserTokenPolicy* a_pValue = (OpcUa_UserTokenPolicy*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->PolicyId);
@@ -3201,9 +3307,10 @@ void OpcUa_UserTokenPolicy_Clear(OpcUa_UserTokenPolicy* a_pValue)
 /*============================================================================
  * OpcUa_UserTokenPolicy_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UserTokenPolicy_Encode(OpcUa_UserTokenPolicy* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserTokenPolicy_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UserTokenPolicy* a_pValue = (OpcUa_UserTokenPolicy*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3226,9 +3333,10 @@ SOPC_StatusCode OpcUa_UserTokenPolicy_Encode(OpcUa_UserTokenPolicy* a_pValue, SO
 /*============================================================================
  * OpcUa_UserTokenPolicy_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UserTokenPolicy_Decode(OpcUa_UserTokenPolicy* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UserTokenPolicy* a_pValue = (OpcUa_UserTokenPolicy*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3265,11 +3373,11 @@ struct SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType =
     OpcUaId_UserTokenPolicy_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_UserTokenPolicy),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_UserTokenPolicy_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_UserTokenPolicy_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_UserTokenPolicy_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_UserTokenPolicy_Decode
+    OpcUa_UserTokenPolicy_Initialize,
+    OpcUa_UserTokenPolicy_Clear,
+    NULL,
+    OpcUa_UserTokenPolicy_Encode,
+    OpcUa_UserTokenPolicy_Decode
 };
 #endif
 
@@ -3277,8 +3385,9 @@ struct SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType =
 /*============================================================================
  * OpcUa_EndpointDescription_Initialize
  *===========================================================================*/
-void OpcUa_EndpointDescription_Initialize(OpcUa_EndpointDescription* a_pValue)
+void OpcUa_EndpointDescription_Initialize(void* pValue)
 {
+    OpcUa_EndpointDescription* a_pValue = (OpcUa_EndpointDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->EndpointUrl);
@@ -3296,8 +3405,9 @@ void OpcUa_EndpointDescription_Initialize(OpcUa_EndpointDescription* a_pValue)
 /*============================================================================
  * OpcUa_EndpointDescription_Clear
  *===========================================================================*/
-void OpcUa_EndpointDescription_Clear(OpcUa_EndpointDescription* a_pValue)
+void OpcUa_EndpointDescription_Clear(void* pValue)
 {
+    OpcUa_EndpointDescription* a_pValue = (OpcUa_EndpointDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->EndpointUrl);
@@ -3315,9 +3425,10 @@ void OpcUa_EndpointDescription_Clear(OpcUa_EndpointDescription* a_pValue)
 /*============================================================================
  * OpcUa_EndpointDescription_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EndpointDescription_Encode(OpcUa_EndpointDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointDescription_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EndpointDescription* a_pValue = (OpcUa_EndpointDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3347,9 +3458,10 @@ SOPC_StatusCode OpcUa_EndpointDescription_Encode(OpcUa_EndpointDescription* a_pV
 /*============================================================================
  * OpcUa_EndpointDescription_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EndpointDescription_Decode(OpcUa_EndpointDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointDescription_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EndpointDescription* a_pValue = (OpcUa_EndpointDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3395,11 +3507,11 @@ struct SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType =
     OpcUaId_EndpointDescription_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EndpointDescription),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EndpointDescription_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EndpointDescription_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EndpointDescription_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EndpointDescription_Decode
+    OpcUa_EndpointDescription_Initialize,
+    OpcUa_EndpointDescription_Clear,
+    NULL,
+    OpcUa_EndpointDescription_Encode,
+    OpcUa_EndpointDescription_Decode
 };
 #endif
 
@@ -3408,8 +3520,9 @@ struct SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType =
 /*============================================================================
  * OpcUa_GetEndpointsRequest_Initialize
  *===========================================================================*/
-void OpcUa_GetEndpointsRequest_Initialize(OpcUa_GetEndpointsRequest* a_pValue)
+void OpcUa_GetEndpointsRequest_Initialize(void* pValue)
 {
+    OpcUa_GetEndpointsRequest* a_pValue = (OpcUa_GetEndpointsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -3424,8 +3537,9 @@ void OpcUa_GetEndpointsRequest_Initialize(OpcUa_GetEndpointsRequest* a_pValue)
 /*============================================================================
  * OpcUa_GetEndpointsRequest_Clear
  *===========================================================================*/
-void OpcUa_GetEndpointsRequest_Clear(OpcUa_GetEndpointsRequest* a_pValue)
+void OpcUa_GetEndpointsRequest_Clear(void* pValue)
 {
+    OpcUa_GetEndpointsRequest* a_pValue = (OpcUa_GetEndpointsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -3440,9 +3554,10 @@ void OpcUa_GetEndpointsRequest_Clear(OpcUa_GetEndpointsRequest* a_pValue)
 /*============================================================================
  * OpcUa_GetEndpointsRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_GetEndpointsRequest_Encode(OpcUa_GetEndpointsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_GetEndpointsRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_GetEndpointsRequest* a_pValue = (OpcUa_GetEndpointsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3465,9 +3580,10 @@ SOPC_StatusCode OpcUa_GetEndpointsRequest_Encode(OpcUa_GetEndpointsRequest* a_pV
 /*============================================================================
  * OpcUa_GetEndpointsRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_GetEndpointsRequest_Decode(OpcUa_GetEndpointsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_GetEndpointsRequest* a_pValue = (OpcUa_GetEndpointsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3508,11 +3624,11 @@ struct SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType =
     OpcUaId_GetEndpointsRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_GetEndpointsRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_GetEndpointsRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_GetEndpointsRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_GetEndpointsRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_GetEndpointsRequest_Decode
+    OpcUa_GetEndpointsRequest_Initialize,
+    OpcUa_GetEndpointsRequest_Clear,
+    NULL,
+    OpcUa_GetEndpointsRequest_Encode,
+    OpcUa_GetEndpointsRequest_Decode
 };
 #endif
 
@@ -3520,8 +3636,9 @@ struct SOPC_EncodeableType OpcUa_GetEndpointsRequest_EncodeableType =
 /*============================================================================
  * OpcUa_GetEndpointsResponse_Initialize
  *===========================================================================*/
-void OpcUa_GetEndpointsResponse_Initialize(OpcUa_GetEndpointsResponse* a_pValue)
+void OpcUa_GetEndpointsResponse_Initialize(void* pValue)
 {
+    OpcUa_GetEndpointsResponse* a_pValue = (OpcUa_GetEndpointsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -3533,8 +3650,9 @@ void OpcUa_GetEndpointsResponse_Initialize(OpcUa_GetEndpointsResponse* a_pValue)
 /*============================================================================
  * OpcUa_GetEndpointsResponse_Clear
  *===========================================================================*/
-void OpcUa_GetEndpointsResponse_Clear(OpcUa_GetEndpointsResponse* a_pValue)
+void OpcUa_GetEndpointsResponse_Clear(void* pValue)
 {
+    OpcUa_GetEndpointsResponse* a_pValue = (OpcUa_GetEndpointsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -3546,9 +3664,10 @@ void OpcUa_GetEndpointsResponse_Clear(OpcUa_GetEndpointsResponse* a_pValue)
 /*============================================================================
  * OpcUa_GetEndpointsResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_GetEndpointsResponse_Encode(OpcUa_GetEndpointsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_GetEndpointsResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_GetEndpointsResponse* a_pValue = (OpcUa_GetEndpointsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3566,9 +3685,10 @@ SOPC_StatusCode OpcUa_GetEndpointsResponse_Encode(OpcUa_GetEndpointsResponse* a_
 /*============================================================================
  * OpcUa_GetEndpointsResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_GetEndpointsResponse_Decode(OpcUa_GetEndpointsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_GetEndpointsResponse* a_pValue = (OpcUa_GetEndpointsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3602,11 +3722,11 @@ struct SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType =
     OpcUaId_GetEndpointsResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_GetEndpointsResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_GetEndpointsResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_GetEndpointsResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_GetEndpointsResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_GetEndpointsResponse_Decode
+    OpcUa_GetEndpointsResponse_Initialize,
+    OpcUa_GetEndpointsResponse_Clear,
+    NULL,
+    OpcUa_GetEndpointsResponse_Encode,
+    OpcUa_GetEndpointsResponse_Decode
 };
 #endif
 #endif
@@ -3615,8 +3735,9 @@ struct SOPC_EncodeableType OpcUa_GetEndpointsResponse_EncodeableType =
 /*============================================================================
  * OpcUa_RegisteredServer_Initialize
  *===========================================================================*/
-void OpcUa_RegisteredServer_Initialize(OpcUa_RegisteredServer* a_pValue)
+void OpcUa_RegisteredServer_Initialize(void* pValue)
 {
+    OpcUa_RegisteredServer* a_pValue = (OpcUa_RegisteredServer*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->ServerUri);
@@ -3635,8 +3756,9 @@ void OpcUa_RegisteredServer_Initialize(OpcUa_RegisteredServer* a_pValue)
 /*============================================================================
  * OpcUa_RegisteredServer_Clear
  *===========================================================================*/
-void OpcUa_RegisteredServer_Clear(OpcUa_RegisteredServer* a_pValue)
+void OpcUa_RegisteredServer_Clear(void* pValue)
 {
+    OpcUa_RegisteredServer* a_pValue = (OpcUa_RegisteredServer*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->ServerUri);
@@ -3655,9 +3777,10 @@ void OpcUa_RegisteredServer_Clear(OpcUa_RegisteredServer* a_pValue)
 /*============================================================================
  * OpcUa_RegisteredServer_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisteredServer_Encode(OpcUa_RegisteredServer* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisteredServer_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisteredServer* a_pValue = (OpcUa_RegisteredServer*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3688,9 +3811,10 @@ SOPC_StatusCode OpcUa_RegisteredServer_Encode(OpcUa_RegisteredServer* a_pValue, 
 /*============================================================================
  * OpcUa_RegisteredServer_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisteredServer_Decode(OpcUa_RegisteredServer* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisteredServer_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisteredServer* a_pValue = (OpcUa_RegisteredServer*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3739,11 +3863,11 @@ struct SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType =
     OpcUaId_RegisteredServer_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RegisteredServer),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RegisteredServer_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RegisteredServer_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RegisteredServer_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RegisteredServer_Decode
+    OpcUa_RegisteredServer_Initialize,
+    OpcUa_RegisteredServer_Clear,
+    NULL,
+    OpcUa_RegisteredServer_Encode,
+    OpcUa_RegisteredServer_Decode
 };
 #endif
 
@@ -3752,8 +3876,9 @@ struct SOPC_EncodeableType OpcUa_RegisteredServer_EncodeableType =
 /*============================================================================
  * OpcUa_RegisterServerRequest_Initialize
  *===========================================================================*/
-void OpcUa_RegisterServerRequest_Initialize(OpcUa_RegisterServerRequest* a_pValue)
+void OpcUa_RegisterServerRequest_Initialize(void* pValue)
 {
+    OpcUa_RegisterServerRequest* a_pValue = (OpcUa_RegisterServerRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -3764,8 +3889,9 @@ void OpcUa_RegisterServerRequest_Initialize(OpcUa_RegisterServerRequest* a_pValu
 /*============================================================================
  * OpcUa_RegisterServerRequest_Clear
  *===========================================================================*/
-void OpcUa_RegisterServerRequest_Clear(OpcUa_RegisterServerRequest* a_pValue)
+void OpcUa_RegisterServerRequest_Clear(void* pValue)
 {
+    OpcUa_RegisterServerRequest* a_pValue = (OpcUa_RegisterServerRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -3776,9 +3902,10 @@ void OpcUa_RegisterServerRequest_Clear(OpcUa_RegisterServerRequest* a_pValue)
 /*============================================================================
  * OpcUa_RegisterServerRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterServerRequest_Encode(OpcUa_RegisterServerRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServerRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterServerRequest* a_pValue = (OpcUa_RegisterServerRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3795,9 +3922,10 @@ SOPC_StatusCode OpcUa_RegisterServerRequest_Encode(OpcUa_RegisterServerRequest* 
 /*============================================================================
  * OpcUa_RegisterServerRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterServerRequest_Decode(OpcUa_RegisterServerRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterServerRequest* a_pValue = (OpcUa_RegisterServerRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3828,11 +3956,11 @@ struct SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType =
     OpcUaId_RegisterServerRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RegisterServerRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RegisterServerRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RegisterServerRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RegisterServerRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RegisterServerRequest_Decode
+    OpcUa_RegisterServerRequest_Initialize,
+    OpcUa_RegisterServerRequest_Clear,
+    NULL,
+    OpcUa_RegisterServerRequest_Encode,
+    OpcUa_RegisterServerRequest_Decode
 };
 #endif
 
@@ -3840,8 +3968,9 @@ struct SOPC_EncodeableType OpcUa_RegisterServerRequest_EncodeableType =
 /*============================================================================
  * OpcUa_RegisterServerResponse_Initialize
  *===========================================================================*/
-void OpcUa_RegisterServerResponse_Initialize(OpcUa_RegisterServerResponse* a_pValue)
+void OpcUa_RegisterServerResponse_Initialize(void* pValue)
 {
+    OpcUa_RegisterServerResponse* a_pValue = (OpcUa_RegisterServerResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -3851,8 +3980,9 @@ void OpcUa_RegisterServerResponse_Initialize(OpcUa_RegisterServerResponse* a_pVa
 /*============================================================================
  * OpcUa_RegisterServerResponse_Clear
  *===========================================================================*/
-void OpcUa_RegisterServerResponse_Clear(OpcUa_RegisterServerResponse* a_pValue)
+void OpcUa_RegisterServerResponse_Clear(void* pValue)
 {
+    OpcUa_RegisterServerResponse* a_pValue = (OpcUa_RegisterServerResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -3862,9 +3992,10 @@ void OpcUa_RegisterServerResponse_Clear(OpcUa_RegisterServerResponse* a_pValue)
 /*============================================================================
  * OpcUa_RegisterServerResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterServerResponse_Encode(OpcUa_RegisterServerResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServerResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterServerResponse* a_pValue = (OpcUa_RegisterServerResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3879,9 +4010,10 @@ SOPC_StatusCode OpcUa_RegisterServerResponse_Encode(OpcUa_RegisterServerResponse
 /*============================================================================
  * OpcUa_RegisterServerResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterServerResponse_Decode(OpcUa_RegisterServerResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterServerResponse* a_pValue = (OpcUa_RegisterServerResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3910,11 +4042,11 @@ struct SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType =
     OpcUaId_RegisterServerResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RegisterServerResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RegisterServerResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RegisterServerResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RegisterServerResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RegisterServerResponse_Decode
+    OpcUa_RegisterServerResponse_Initialize,
+    OpcUa_RegisterServerResponse_Clear,
+    NULL,
+    OpcUa_RegisterServerResponse_Encode,
+    OpcUa_RegisterServerResponse_Decode
 };
 #endif
 #endif
@@ -3923,8 +4055,9 @@ struct SOPC_EncodeableType OpcUa_RegisterServerResponse_EncodeableType =
 /*============================================================================
  * OpcUa_MdnsDiscoveryConfiguration_Initialize
  *===========================================================================*/
-void OpcUa_MdnsDiscoveryConfiguration_Initialize(OpcUa_MdnsDiscoveryConfiguration* a_pValue)
+void OpcUa_MdnsDiscoveryConfiguration_Initialize(void* pValue)
 {
+    OpcUa_MdnsDiscoveryConfiguration* a_pValue = (OpcUa_MdnsDiscoveryConfiguration*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->MdnsServerName);
@@ -3936,8 +4069,9 @@ void OpcUa_MdnsDiscoveryConfiguration_Initialize(OpcUa_MdnsDiscoveryConfiguratio
 /*============================================================================
  * OpcUa_MdnsDiscoveryConfiguration_Clear
  *===========================================================================*/
-void OpcUa_MdnsDiscoveryConfiguration_Clear(OpcUa_MdnsDiscoveryConfiguration* a_pValue)
+void OpcUa_MdnsDiscoveryConfiguration_Clear(void* pValue)
 {
+    OpcUa_MdnsDiscoveryConfiguration* a_pValue = (OpcUa_MdnsDiscoveryConfiguration*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->MdnsServerName);
@@ -3949,9 +4083,10 @@ void OpcUa_MdnsDiscoveryConfiguration_Clear(OpcUa_MdnsDiscoveryConfiguration* a_
 /*============================================================================
  * OpcUa_MdnsDiscoveryConfiguration_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Encode(OpcUa_MdnsDiscoveryConfiguration* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MdnsDiscoveryConfiguration* a_pValue = (OpcUa_MdnsDiscoveryConfiguration*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -3969,9 +4104,10 @@ SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Encode(OpcUa_MdnsDiscoveryConfi
 /*============================================================================
  * OpcUa_MdnsDiscoveryConfiguration_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Decode(OpcUa_MdnsDiscoveryConfiguration* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MdnsDiscoveryConfiguration* a_pValue = (OpcUa_MdnsDiscoveryConfiguration*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4005,11 +4141,11 @@ struct SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType =
     OpcUaId_MdnsDiscoveryConfiguration_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_MdnsDiscoveryConfiguration),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_MdnsDiscoveryConfiguration_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_MdnsDiscoveryConfiguration_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_MdnsDiscoveryConfiguration_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_MdnsDiscoveryConfiguration_Decode
+    OpcUa_MdnsDiscoveryConfiguration_Initialize,
+    OpcUa_MdnsDiscoveryConfiguration_Clear,
+    NULL,
+    OpcUa_MdnsDiscoveryConfiguration_Encode,
+    OpcUa_MdnsDiscoveryConfiguration_Decode
 };
 #endif
 
@@ -4018,8 +4154,9 @@ struct SOPC_EncodeableType OpcUa_MdnsDiscoveryConfiguration_EncodeableType =
 /*============================================================================
  * OpcUa_RegisterServer2Request_Initialize
  *===========================================================================*/
-void OpcUa_RegisterServer2Request_Initialize(OpcUa_RegisterServer2Request* a_pValue)
+void OpcUa_RegisterServer2Request_Initialize(void* pValue)
 {
+    OpcUa_RegisterServer2Request* a_pValue = (OpcUa_RegisterServer2Request*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -4032,8 +4169,9 @@ void OpcUa_RegisterServer2Request_Initialize(OpcUa_RegisterServer2Request* a_pVa
 /*============================================================================
  * OpcUa_RegisterServer2Request_Clear
  *===========================================================================*/
-void OpcUa_RegisterServer2Request_Clear(OpcUa_RegisterServer2Request* a_pValue)
+void OpcUa_RegisterServer2Request_Clear(void* pValue)
 {
+    OpcUa_RegisterServer2Request* a_pValue = (OpcUa_RegisterServer2Request*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -4046,9 +4184,10 @@ void OpcUa_RegisterServer2Request_Clear(OpcUa_RegisterServer2Request* a_pValue)
 /*============================================================================
  * OpcUa_RegisterServer2Request_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterServer2Request_Encode(OpcUa_RegisterServer2Request* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServer2Request_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterServer2Request* a_pValue = (OpcUa_RegisterServer2Request*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4068,9 +4207,10 @@ SOPC_StatusCode OpcUa_RegisterServer2Request_Encode(OpcUa_RegisterServer2Request
 /*============================================================================
  * OpcUa_RegisterServer2Request_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterServer2Request_Decode(OpcUa_RegisterServer2Request* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterServer2Request* a_pValue = (OpcUa_RegisterServer2Request*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4106,11 +4246,11 @@ struct SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType =
     OpcUaId_RegisterServer2Request_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RegisterServer2Request),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RegisterServer2Request_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RegisterServer2Request_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RegisterServer2Request_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RegisterServer2Request_Decode
+    OpcUa_RegisterServer2Request_Initialize,
+    OpcUa_RegisterServer2Request_Clear,
+    NULL,
+    OpcUa_RegisterServer2Request_Encode,
+    OpcUa_RegisterServer2Request_Decode
 };
 #endif
 
@@ -4118,8 +4258,9 @@ struct SOPC_EncodeableType OpcUa_RegisterServer2Request_EncodeableType =
 /*============================================================================
  * OpcUa_RegisterServer2Response_Initialize
  *===========================================================================*/
-void OpcUa_RegisterServer2Response_Initialize(OpcUa_RegisterServer2Response* a_pValue)
+void OpcUa_RegisterServer2Response_Initialize(void* pValue)
 {
+    OpcUa_RegisterServer2Response* a_pValue = (OpcUa_RegisterServer2Response*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -4133,8 +4274,9 @@ void OpcUa_RegisterServer2Response_Initialize(OpcUa_RegisterServer2Response* a_p
 /*============================================================================
  * OpcUa_RegisterServer2Response_Clear
  *===========================================================================*/
-void OpcUa_RegisterServer2Response_Clear(OpcUa_RegisterServer2Response* a_pValue)
+void OpcUa_RegisterServer2Response_Clear(void* pValue)
 {
+    OpcUa_RegisterServer2Response* a_pValue = (OpcUa_RegisterServer2Response*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -4148,9 +4290,10 @@ void OpcUa_RegisterServer2Response_Clear(OpcUa_RegisterServer2Response* a_pValue
 /*============================================================================
  * OpcUa_RegisterServer2Response_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterServer2Response_Encode(OpcUa_RegisterServer2Response* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServer2Response_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterServer2Response* a_pValue = (OpcUa_RegisterServer2Response*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4171,9 +4314,10 @@ SOPC_StatusCode OpcUa_RegisterServer2Response_Encode(OpcUa_RegisterServer2Respon
 /*============================================================================
  * OpcUa_RegisterServer2Response_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterServer2Response_Decode(OpcUa_RegisterServer2Response* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterServer2Response* a_pValue = (OpcUa_RegisterServer2Response*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4212,11 +4356,11 @@ struct SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType =
     OpcUaId_RegisterServer2Response_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RegisterServer2Response),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RegisterServer2Response_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RegisterServer2Response_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RegisterServer2Response_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RegisterServer2Response_Decode
+    OpcUa_RegisterServer2Response_Initialize,
+    OpcUa_RegisterServer2Response_Clear,
+    NULL,
+    OpcUa_RegisterServer2Response_Encode,
+    OpcUa_RegisterServer2Response_Decode
 };
 #endif
 #endif
@@ -4226,8 +4370,9 @@ struct SOPC_EncodeableType OpcUa_RegisterServer2Response_EncodeableType =
 /*============================================================================
  * OpcUa_ChannelSecurityToken_Initialize
  *===========================================================================*/
-void OpcUa_ChannelSecurityToken_Initialize(OpcUa_ChannelSecurityToken* a_pValue)
+void OpcUa_ChannelSecurityToken_Initialize(void* pValue)
 {
+    OpcUa_ChannelSecurityToken* a_pValue = (OpcUa_ChannelSecurityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->ChannelId);
@@ -4240,8 +4385,9 @@ void OpcUa_ChannelSecurityToken_Initialize(OpcUa_ChannelSecurityToken* a_pValue)
 /*============================================================================
  * OpcUa_ChannelSecurityToken_Clear
  *===========================================================================*/
-void OpcUa_ChannelSecurityToken_Clear(OpcUa_ChannelSecurityToken* a_pValue)
+void OpcUa_ChannelSecurityToken_Clear(void* pValue)
 {
+    OpcUa_ChannelSecurityToken* a_pValue = (OpcUa_ChannelSecurityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->ChannelId);
@@ -4254,9 +4400,10 @@ void OpcUa_ChannelSecurityToken_Clear(OpcUa_ChannelSecurityToken* a_pValue)
 /*============================================================================
  * OpcUa_ChannelSecurityToken_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ChannelSecurityToken_Encode(OpcUa_ChannelSecurityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ChannelSecurityToken_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ChannelSecurityToken* a_pValue = (OpcUa_ChannelSecurityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4277,9 +4424,10 @@ SOPC_StatusCode OpcUa_ChannelSecurityToken_Encode(OpcUa_ChannelSecurityToken* a_
 /*============================================================================
  * OpcUa_ChannelSecurityToken_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ChannelSecurityToken_Decode(OpcUa_ChannelSecurityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ChannelSecurityToken* a_pValue = (OpcUa_ChannelSecurityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4314,11 +4462,11 @@ struct SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType =
     OpcUaId_ChannelSecurityToken_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ChannelSecurityToken),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ChannelSecurityToken_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ChannelSecurityToken_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ChannelSecurityToken_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ChannelSecurityToken_Decode
+    OpcUa_ChannelSecurityToken_Initialize,
+    OpcUa_ChannelSecurityToken_Clear,
+    NULL,
+    OpcUa_ChannelSecurityToken_Encode,
+    OpcUa_ChannelSecurityToken_Decode
 };
 #endif
 
@@ -4327,8 +4475,9 @@ struct SOPC_EncodeableType OpcUa_ChannelSecurityToken_EncodeableType =
 /*============================================================================
  * OpcUa_OpenSecureChannelRequest_Initialize
  *===========================================================================*/
-void OpcUa_OpenSecureChannelRequest_Initialize(OpcUa_OpenSecureChannelRequest* a_pValue)
+void OpcUa_OpenSecureChannelRequest_Initialize(void* pValue)
 {
+    OpcUa_OpenSecureChannelRequest* a_pValue = (OpcUa_OpenSecureChannelRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -4343,8 +4492,9 @@ void OpcUa_OpenSecureChannelRequest_Initialize(OpcUa_OpenSecureChannelRequest* a
 /*============================================================================
  * OpcUa_OpenSecureChannelRequest_Clear
  *===========================================================================*/
-void OpcUa_OpenSecureChannelRequest_Clear(OpcUa_OpenSecureChannelRequest* a_pValue)
+void OpcUa_OpenSecureChannelRequest_Clear(void* pValue)
 {
+    OpcUa_OpenSecureChannelRequest* a_pValue = (OpcUa_OpenSecureChannelRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -4359,9 +4509,10 @@ void OpcUa_OpenSecureChannelRequest_Clear(OpcUa_OpenSecureChannelRequest* a_pVal
 /*============================================================================
  * OpcUa_OpenSecureChannelRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Encode(OpcUa_OpenSecureChannelRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_OpenSecureChannelRequest* a_pValue = (OpcUa_OpenSecureChannelRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4386,9 +4537,10 @@ SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Encode(OpcUa_OpenSecureChannelReq
 /*============================================================================
  * OpcUa_OpenSecureChannelRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Decode(OpcUa_OpenSecureChannelRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_OpenSecureChannelRequest* a_pValue = (OpcUa_OpenSecureChannelRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4427,11 +4579,11 @@ struct SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType =
     OpcUaId_OpenSecureChannelRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_OpenSecureChannelRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_OpenSecureChannelRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_OpenSecureChannelRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_OpenSecureChannelRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_OpenSecureChannelRequest_Decode
+    OpcUa_OpenSecureChannelRequest_Initialize,
+    OpcUa_OpenSecureChannelRequest_Clear,
+    NULL,
+    OpcUa_OpenSecureChannelRequest_Encode,
+    OpcUa_OpenSecureChannelRequest_Decode
 };
 #endif
 
@@ -4439,8 +4591,9 @@ struct SOPC_EncodeableType OpcUa_OpenSecureChannelRequest_EncodeableType =
 /*============================================================================
  * OpcUa_OpenSecureChannelResponse_Initialize
  *===========================================================================*/
-void OpcUa_OpenSecureChannelResponse_Initialize(OpcUa_OpenSecureChannelResponse* a_pValue)
+void OpcUa_OpenSecureChannelResponse_Initialize(void* pValue)
 {
+    OpcUa_OpenSecureChannelResponse* a_pValue = (OpcUa_OpenSecureChannelResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -4453,8 +4606,9 @@ void OpcUa_OpenSecureChannelResponse_Initialize(OpcUa_OpenSecureChannelResponse*
 /*============================================================================
  * OpcUa_OpenSecureChannelResponse_Clear
  *===========================================================================*/
-void OpcUa_OpenSecureChannelResponse_Clear(OpcUa_OpenSecureChannelResponse* a_pValue)
+void OpcUa_OpenSecureChannelResponse_Clear(void* pValue)
 {
+    OpcUa_OpenSecureChannelResponse* a_pValue = (OpcUa_OpenSecureChannelResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -4467,9 +4621,10 @@ void OpcUa_OpenSecureChannelResponse_Clear(OpcUa_OpenSecureChannelResponse* a_pV
 /*============================================================================
  * OpcUa_OpenSecureChannelResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Encode(OpcUa_OpenSecureChannelResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_OpenSecureChannelResponse* a_pValue = (OpcUa_OpenSecureChannelResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4490,9 +4645,10 @@ SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Encode(OpcUa_OpenSecureChannelRe
 /*============================================================================
  * OpcUa_OpenSecureChannelResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Decode(OpcUa_OpenSecureChannelResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_OpenSecureChannelResponse* a_pValue = (OpcUa_OpenSecureChannelResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4527,11 +4683,11 @@ struct SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType =
     OpcUaId_OpenSecureChannelResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_OpenSecureChannelResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_OpenSecureChannelResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_OpenSecureChannelResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_OpenSecureChannelResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_OpenSecureChannelResponse_Decode
+    OpcUa_OpenSecureChannelResponse_Initialize,
+    OpcUa_OpenSecureChannelResponse_Clear,
+    NULL,
+    OpcUa_OpenSecureChannelResponse_Encode,
+    OpcUa_OpenSecureChannelResponse_Decode
 };
 #endif
 #endif
@@ -4541,8 +4697,9 @@ struct SOPC_EncodeableType OpcUa_OpenSecureChannelResponse_EncodeableType =
 /*============================================================================
  * OpcUa_CloseSecureChannelRequest_Initialize
  *===========================================================================*/
-void OpcUa_CloseSecureChannelRequest_Initialize(OpcUa_CloseSecureChannelRequest* a_pValue)
+void OpcUa_CloseSecureChannelRequest_Initialize(void* pValue)
 {
+    OpcUa_CloseSecureChannelRequest* a_pValue = (OpcUa_CloseSecureChannelRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -4552,8 +4709,9 @@ void OpcUa_CloseSecureChannelRequest_Initialize(OpcUa_CloseSecureChannelRequest*
 /*============================================================================
  * OpcUa_CloseSecureChannelRequest_Clear
  *===========================================================================*/
-void OpcUa_CloseSecureChannelRequest_Clear(OpcUa_CloseSecureChannelRequest* a_pValue)
+void OpcUa_CloseSecureChannelRequest_Clear(void* pValue)
 {
+    OpcUa_CloseSecureChannelRequest* a_pValue = (OpcUa_CloseSecureChannelRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -4563,9 +4721,10 @@ void OpcUa_CloseSecureChannelRequest_Clear(OpcUa_CloseSecureChannelRequest* a_pV
 /*============================================================================
  * OpcUa_CloseSecureChannelRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Encode(OpcUa_CloseSecureChannelRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CloseSecureChannelRequest* a_pValue = (OpcUa_CloseSecureChannelRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4580,9 +4739,10 @@ SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Encode(OpcUa_CloseSecureChannelR
 /*============================================================================
  * OpcUa_CloseSecureChannelRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Decode(OpcUa_CloseSecureChannelRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CloseSecureChannelRequest* a_pValue = (OpcUa_CloseSecureChannelRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4611,11 +4771,11 @@ struct SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType =
     OpcUaId_CloseSecureChannelRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CloseSecureChannelRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CloseSecureChannelRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CloseSecureChannelRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CloseSecureChannelRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CloseSecureChannelRequest_Decode
+    OpcUa_CloseSecureChannelRequest_Initialize,
+    OpcUa_CloseSecureChannelRequest_Clear,
+    NULL,
+    OpcUa_CloseSecureChannelRequest_Encode,
+    OpcUa_CloseSecureChannelRequest_Decode
 };
 #endif
 
@@ -4623,8 +4783,9 @@ struct SOPC_EncodeableType OpcUa_CloseSecureChannelRequest_EncodeableType =
 /*============================================================================
  * OpcUa_CloseSecureChannelResponse_Initialize
  *===========================================================================*/
-void OpcUa_CloseSecureChannelResponse_Initialize(OpcUa_CloseSecureChannelResponse* a_pValue)
+void OpcUa_CloseSecureChannelResponse_Initialize(void* pValue)
 {
+    OpcUa_CloseSecureChannelResponse* a_pValue = (OpcUa_CloseSecureChannelResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -4634,8 +4795,9 @@ void OpcUa_CloseSecureChannelResponse_Initialize(OpcUa_CloseSecureChannelRespons
 /*============================================================================
  * OpcUa_CloseSecureChannelResponse_Clear
  *===========================================================================*/
-void OpcUa_CloseSecureChannelResponse_Clear(OpcUa_CloseSecureChannelResponse* a_pValue)
+void OpcUa_CloseSecureChannelResponse_Clear(void* pValue)
 {
+    OpcUa_CloseSecureChannelResponse* a_pValue = (OpcUa_CloseSecureChannelResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -4645,9 +4807,10 @@ void OpcUa_CloseSecureChannelResponse_Clear(OpcUa_CloseSecureChannelResponse* a_
 /*============================================================================
  * OpcUa_CloseSecureChannelResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Encode(OpcUa_CloseSecureChannelResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CloseSecureChannelResponse* a_pValue = (OpcUa_CloseSecureChannelResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4662,9 +4825,10 @@ SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Encode(OpcUa_CloseSecureChannel
 /*============================================================================
  * OpcUa_CloseSecureChannelResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Decode(OpcUa_CloseSecureChannelResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CloseSecureChannelResponse* a_pValue = (OpcUa_CloseSecureChannelResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4693,11 +4857,11 @@ struct SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType =
     OpcUaId_CloseSecureChannelResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CloseSecureChannelResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CloseSecureChannelResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CloseSecureChannelResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CloseSecureChannelResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CloseSecureChannelResponse_Decode
+    OpcUa_CloseSecureChannelResponse_Initialize,
+    OpcUa_CloseSecureChannelResponse_Clear,
+    NULL,
+    OpcUa_CloseSecureChannelResponse_Encode,
+    OpcUa_CloseSecureChannelResponse_Decode
 };
 #endif
 #endif
@@ -4706,8 +4870,9 @@ struct SOPC_EncodeableType OpcUa_CloseSecureChannelResponse_EncodeableType =
 /*============================================================================
  * OpcUa_SignedSoftwareCertificate_Initialize
  *===========================================================================*/
-void OpcUa_SignedSoftwareCertificate_Initialize(OpcUa_SignedSoftwareCertificate* a_pValue)
+void OpcUa_SignedSoftwareCertificate_Initialize(void* pValue)
 {
+    OpcUa_SignedSoftwareCertificate* a_pValue = (OpcUa_SignedSoftwareCertificate*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ByteString_Initialize(&a_pValue->CertificateData);
@@ -4718,8 +4883,9 @@ void OpcUa_SignedSoftwareCertificate_Initialize(OpcUa_SignedSoftwareCertificate*
 /*============================================================================
  * OpcUa_SignedSoftwareCertificate_Clear
  *===========================================================================*/
-void OpcUa_SignedSoftwareCertificate_Clear(OpcUa_SignedSoftwareCertificate* a_pValue)
+void OpcUa_SignedSoftwareCertificate_Clear(void* pValue)
 {
+    OpcUa_SignedSoftwareCertificate* a_pValue = (OpcUa_SignedSoftwareCertificate*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ByteString_Clear(&a_pValue->CertificateData);
@@ -4730,9 +4896,10 @@ void OpcUa_SignedSoftwareCertificate_Clear(OpcUa_SignedSoftwareCertificate* a_pV
 /*============================================================================
  * OpcUa_SignedSoftwareCertificate_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Encode(OpcUa_SignedSoftwareCertificate* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SignedSoftwareCertificate* a_pValue = (OpcUa_SignedSoftwareCertificate*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4749,9 +4916,10 @@ SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Encode(OpcUa_SignedSoftwareCerti
 /*============================================================================
  * OpcUa_SignedSoftwareCertificate_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Decode(OpcUa_SignedSoftwareCertificate* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SignedSoftwareCertificate* a_pValue = (OpcUa_SignedSoftwareCertificate*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4782,11 +4950,11 @@ struct SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType =
     OpcUaId_SignedSoftwareCertificate_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SignedSoftwareCertificate),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SignedSoftwareCertificate_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SignedSoftwareCertificate_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SignedSoftwareCertificate_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SignedSoftwareCertificate_Decode
+    OpcUa_SignedSoftwareCertificate_Initialize,
+    OpcUa_SignedSoftwareCertificate_Clear,
+    NULL,
+    OpcUa_SignedSoftwareCertificate_Encode,
+    OpcUa_SignedSoftwareCertificate_Decode
 };
 #endif
 
@@ -4794,8 +4962,9 @@ struct SOPC_EncodeableType OpcUa_SignedSoftwareCertificate_EncodeableType =
 /*============================================================================
  * OpcUa_SignatureData_Initialize
  *===========================================================================*/
-void OpcUa_SignatureData_Initialize(OpcUa_SignatureData* a_pValue)
+void OpcUa_SignatureData_Initialize(void* pValue)
 {
+    OpcUa_SignatureData* a_pValue = (OpcUa_SignatureData*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->Algorithm);
@@ -4806,8 +4975,9 @@ void OpcUa_SignatureData_Initialize(OpcUa_SignatureData* a_pValue)
 /*============================================================================
  * OpcUa_SignatureData_Clear
  *===========================================================================*/
-void OpcUa_SignatureData_Clear(OpcUa_SignatureData* a_pValue)
+void OpcUa_SignatureData_Clear(void* pValue)
 {
+    OpcUa_SignatureData* a_pValue = (OpcUa_SignatureData*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->Algorithm);
@@ -4818,9 +4988,10 @@ void OpcUa_SignatureData_Clear(OpcUa_SignatureData* a_pValue)
 /*============================================================================
  * OpcUa_SignatureData_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SignatureData_Encode(OpcUa_SignatureData* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SignatureData_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SignatureData* a_pValue = (OpcUa_SignatureData*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4837,9 +5008,10 @@ SOPC_StatusCode OpcUa_SignatureData_Encode(OpcUa_SignatureData* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_SignatureData_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SignatureData_Decode(OpcUa_SignatureData* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SignatureData_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SignatureData* a_pValue = (OpcUa_SignatureData*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4870,11 +5042,11 @@ struct SOPC_EncodeableType OpcUa_SignatureData_EncodeableType =
     OpcUaId_SignatureData_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SignatureData),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SignatureData_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SignatureData_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SignatureData_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SignatureData_Decode
+    OpcUa_SignatureData_Initialize,
+    OpcUa_SignatureData_Clear,
+    NULL,
+    OpcUa_SignatureData_Encode,
+    OpcUa_SignatureData_Decode
 };
 #endif
 
@@ -4883,8 +5055,9 @@ struct SOPC_EncodeableType OpcUa_SignatureData_EncodeableType =
 /*============================================================================
  * OpcUa_CreateSessionRequest_Initialize
  *===========================================================================*/
-void OpcUa_CreateSessionRequest_Initialize(OpcUa_CreateSessionRequest* a_pValue)
+void OpcUa_CreateSessionRequest_Initialize(void* pValue)
 {
+    OpcUa_CreateSessionRequest* a_pValue = (OpcUa_CreateSessionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -4902,8 +5075,9 @@ void OpcUa_CreateSessionRequest_Initialize(OpcUa_CreateSessionRequest* a_pValue)
 /*============================================================================
  * OpcUa_CreateSessionRequest_Clear
  *===========================================================================*/
-void OpcUa_CreateSessionRequest_Clear(OpcUa_CreateSessionRequest* a_pValue)
+void OpcUa_CreateSessionRequest_Clear(void* pValue)
 {
+    OpcUa_CreateSessionRequest* a_pValue = (OpcUa_CreateSessionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -4921,9 +5095,10 @@ void OpcUa_CreateSessionRequest_Clear(OpcUa_CreateSessionRequest* a_pValue)
 /*============================================================================
  * OpcUa_CreateSessionRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateSessionRequest_Encode(OpcUa_CreateSessionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSessionRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateSessionRequest* a_pValue = (OpcUa_CreateSessionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -4954,9 +5129,10 @@ SOPC_StatusCode OpcUa_CreateSessionRequest_Encode(OpcUa_CreateSessionRequest* a_
 /*============================================================================
  * OpcUa_CreateSessionRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateSessionRequest_Decode(OpcUa_CreateSessionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateSessionRequest* a_pValue = (OpcUa_CreateSessionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5001,11 +5177,11 @@ struct SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType =
     OpcUaId_CreateSessionRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CreateSessionRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CreateSessionRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CreateSessionRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CreateSessionRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CreateSessionRequest_Decode
+    OpcUa_CreateSessionRequest_Initialize,
+    OpcUa_CreateSessionRequest_Clear,
+    NULL,
+    OpcUa_CreateSessionRequest_Encode,
+    OpcUa_CreateSessionRequest_Decode
 };
 #endif
 
@@ -5013,8 +5189,9 @@ struct SOPC_EncodeableType OpcUa_CreateSessionRequest_EncodeableType =
 /*============================================================================
  * OpcUa_CreateSessionResponse_Initialize
  *===========================================================================*/
-void OpcUa_CreateSessionResponse_Initialize(OpcUa_CreateSessionResponse* a_pValue)
+void OpcUa_CreateSessionResponse_Initialize(void* pValue)
 {
+    OpcUa_CreateSessionResponse* a_pValue = (OpcUa_CreateSessionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -5035,8 +5212,9 @@ void OpcUa_CreateSessionResponse_Initialize(OpcUa_CreateSessionResponse* a_pValu
 /*============================================================================
  * OpcUa_CreateSessionResponse_Clear
  *===========================================================================*/
-void OpcUa_CreateSessionResponse_Clear(OpcUa_CreateSessionResponse* a_pValue)
+void OpcUa_CreateSessionResponse_Clear(void* pValue)
 {
+    OpcUa_CreateSessionResponse* a_pValue = (OpcUa_CreateSessionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -5057,9 +5235,10 @@ void OpcUa_CreateSessionResponse_Clear(OpcUa_CreateSessionResponse* a_pValue)
 /*============================================================================
  * OpcUa_CreateSessionResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateSessionResponse_Encode(OpcUa_CreateSessionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSessionResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateSessionResponse* a_pValue = (OpcUa_CreateSessionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5094,9 +5273,10 @@ SOPC_StatusCode OpcUa_CreateSessionResponse_Encode(OpcUa_CreateSessionResponse* 
 /*============================================================================
  * OpcUa_CreateSessionResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateSessionResponse_Decode(OpcUa_CreateSessionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateSessionResponse* a_pValue = (OpcUa_CreateSessionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5149,11 +5329,11 @@ struct SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType =
     OpcUaId_CreateSessionResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CreateSessionResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CreateSessionResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CreateSessionResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CreateSessionResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CreateSessionResponse_Decode
+    OpcUa_CreateSessionResponse_Initialize,
+    OpcUa_CreateSessionResponse_Clear,
+    NULL,
+    OpcUa_CreateSessionResponse_Encode,
+    OpcUa_CreateSessionResponse_Decode
 };
 #endif
 #endif
@@ -5162,8 +5342,9 @@ struct SOPC_EncodeableType OpcUa_CreateSessionResponse_EncodeableType =
 /*============================================================================
  * OpcUa_UserIdentityToken_Initialize
  *===========================================================================*/
-void OpcUa_UserIdentityToken_Initialize(OpcUa_UserIdentityToken* a_pValue)
+void OpcUa_UserIdentityToken_Initialize(void* pValue)
 {
+    OpcUa_UserIdentityToken* a_pValue = (OpcUa_UserIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->PolicyId);
@@ -5173,8 +5354,9 @@ void OpcUa_UserIdentityToken_Initialize(OpcUa_UserIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_UserIdentityToken_Clear
  *===========================================================================*/
-void OpcUa_UserIdentityToken_Clear(OpcUa_UserIdentityToken* a_pValue)
+void OpcUa_UserIdentityToken_Clear(void* pValue)
 {
+    OpcUa_UserIdentityToken* a_pValue = (OpcUa_UserIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->PolicyId);
@@ -5184,9 +5366,10 @@ void OpcUa_UserIdentityToken_Clear(OpcUa_UserIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_UserIdentityToken_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UserIdentityToken_Encode(OpcUa_UserIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserIdentityToken_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UserIdentityToken* a_pValue = (OpcUa_UserIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5201,9 +5384,10 @@ SOPC_StatusCode OpcUa_UserIdentityToken_Encode(OpcUa_UserIdentityToken* a_pValue
 /*============================================================================
  * OpcUa_UserIdentityToken_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UserIdentityToken_Decode(OpcUa_UserIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UserIdentityToken* a_pValue = (OpcUa_UserIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5232,11 +5416,11 @@ struct SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType =
     OpcUaId_UserIdentityToken_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_UserIdentityToken),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_UserIdentityToken_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_UserIdentityToken_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_UserIdentityToken_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_UserIdentityToken_Decode
+    OpcUa_UserIdentityToken_Initialize,
+    OpcUa_UserIdentityToken_Clear,
+    NULL,
+    OpcUa_UserIdentityToken_Encode,
+    OpcUa_UserIdentityToken_Decode
 };
 #endif
 
@@ -5244,8 +5428,9 @@ struct SOPC_EncodeableType OpcUa_UserIdentityToken_EncodeableType =
 /*============================================================================
  * OpcUa_AnonymousIdentityToken_Initialize
  *===========================================================================*/
-void OpcUa_AnonymousIdentityToken_Initialize(OpcUa_AnonymousIdentityToken* a_pValue)
+void OpcUa_AnonymousIdentityToken_Initialize(void* pValue)
 {
+    OpcUa_AnonymousIdentityToken* a_pValue = (OpcUa_AnonymousIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->PolicyId);
@@ -5255,8 +5440,9 @@ void OpcUa_AnonymousIdentityToken_Initialize(OpcUa_AnonymousIdentityToken* a_pVa
 /*============================================================================
  * OpcUa_AnonymousIdentityToken_Clear
  *===========================================================================*/
-void OpcUa_AnonymousIdentityToken_Clear(OpcUa_AnonymousIdentityToken* a_pValue)
+void OpcUa_AnonymousIdentityToken_Clear(void* pValue)
 {
+    OpcUa_AnonymousIdentityToken* a_pValue = (OpcUa_AnonymousIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->PolicyId);
@@ -5266,9 +5452,10 @@ void OpcUa_AnonymousIdentityToken_Clear(OpcUa_AnonymousIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_AnonymousIdentityToken_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AnonymousIdentityToken_Encode(OpcUa_AnonymousIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AnonymousIdentityToken_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AnonymousIdentityToken* a_pValue = (OpcUa_AnonymousIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5283,9 +5470,10 @@ SOPC_StatusCode OpcUa_AnonymousIdentityToken_Encode(OpcUa_AnonymousIdentityToken
 /*============================================================================
  * OpcUa_AnonymousIdentityToken_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AnonymousIdentityToken_Decode(OpcUa_AnonymousIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AnonymousIdentityToken* a_pValue = (OpcUa_AnonymousIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5314,11 +5502,11 @@ struct SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType =
     OpcUaId_AnonymousIdentityToken_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AnonymousIdentityToken),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AnonymousIdentityToken_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AnonymousIdentityToken_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AnonymousIdentityToken_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AnonymousIdentityToken_Decode
+    OpcUa_AnonymousIdentityToken_Initialize,
+    OpcUa_AnonymousIdentityToken_Clear,
+    NULL,
+    OpcUa_AnonymousIdentityToken_Encode,
+    OpcUa_AnonymousIdentityToken_Decode
 };
 #endif
 
@@ -5326,8 +5514,9 @@ struct SOPC_EncodeableType OpcUa_AnonymousIdentityToken_EncodeableType =
 /*============================================================================
  * OpcUa_UserNameIdentityToken_Initialize
  *===========================================================================*/
-void OpcUa_UserNameIdentityToken_Initialize(OpcUa_UserNameIdentityToken* a_pValue)
+void OpcUa_UserNameIdentityToken_Initialize(void* pValue)
 {
+    OpcUa_UserNameIdentityToken* a_pValue = (OpcUa_UserNameIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->PolicyId);
@@ -5340,8 +5529,9 @@ void OpcUa_UserNameIdentityToken_Initialize(OpcUa_UserNameIdentityToken* a_pValu
 /*============================================================================
  * OpcUa_UserNameIdentityToken_Clear
  *===========================================================================*/
-void OpcUa_UserNameIdentityToken_Clear(OpcUa_UserNameIdentityToken* a_pValue)
+void OpcUa_UserNameIdentityToken_Clear(void* pValue)
 {
+    OpcUa_UserNameIdentityToken* a_pValue = (OpcUa_UserNameIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->PolicyId);
@@ -5354,9 +5544,10 @@ void OpcUa_UserNameIdentityToken_Clear(OpcUa_UserNameIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_UserNameIdentityToken_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UserNameIdentityToken_Encode(OpcUa_UserNameIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserNameIdentityToken_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UserNameIdentityToken* a_pValue = (OpcUa_UserNameIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5377,9 +5568,10 @@ SOPC_StatusCode OpcUa_UserNameIdentityToken_Encode(OpcUa_UserNameIdentityToken* 
 /*============================================================================
  * OpcUa_UserNameIdentityToken_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UserNameIdentityToken_Decode(OpcUa_UserNameIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UserNameIdentityToken* a_pValue = (OpcUa_UserNameIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5414,11 +5606,11 @@ struct SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType =
     OpcUaId_UserNameIdentityToken_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_UserNameIdentityToken),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_UserNameIdentityToken_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_UserNameIdentityToken_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_UserNameIdentityToken_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_UserNameIdentityToken_Decode
+    OpcUa_UserNameIdentityToken_Initialize,
+    OpcUa_UserNameIdentityToken_Clear,
+    NULL,
+    OpcUa_UserNameIdentityToken_Encode,
+    OpcUa_UserNameIdentityToken_Decode
 };
 #endif
 
@@ -5426,8 +5618,9 @@ struct SOPC_EncodeableType OpcUa_UserNameIdentityToken_EncodeableType =
 /*============================================================================
  * OpcUa_X509IdentityToken_Initialize
  *===========================================================================*/
-void OpcUa_X509IdentityToken_Initialize(OpcUa_X509IdentityToken* a_pValue)
+void OpcUa_X509IdentityToken_Initialize(void* pValue)
 {
+    OpcUa_X509IdentityToken* a_pValue = (OpcUa_X509IdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->PolicyId);
@@ -5438,8 +5631,9 @@ void OpcUa_X509IdentityToken_Initialize(OpcUa_X509IdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_X509IdentityToken_Clear
  *===========================================================================*/
-void OpcUa_X509IdentityToken_Clear(OpcUa_X509IdentityToken* a_pValue)
+void OpcUa_X509IdentityToken_Clear(void* pValue)
 {
+    OpcUa_X509IdentityToken* a_pValue = (OpcUa_X509IdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->PolicyId);
@@ -5450,9 +5644,10 @@ void OpcUa_X509IdentityToken_Clear(OpcUa_X509IdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_X509IdentityToken_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_X509IdentityToken_Encode(OpcUa_X509IdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_X509IdentityToken_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_X509IdentityToken* a_pValue = (OpcUa_X509IdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5469,9 +5664,10 @@ SOPC_StatusCode OpcUa_X509IdentityToken_Encode(OpcUa_X509IdentityToken* a_pValue
 /*============================================================================
  * OpcUa_X509IdentityToken_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_X509IdentityToken_Decode(OpcUa_X509IdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_X509IdentityToken* a_pValue = (OpcUa_X509IdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5502,11 +5698,11 @@ struct SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType =
     OpcUaId_X509IdentityToken_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_X509IdentityToken),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_X509IdentityToken_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_X509IdentityToken_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_X509IdentityToken_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_X509IdentityToken_Decode
+    OpcUa_X509IdentityToken_Initialize,
+    OpcUa_X509IdentityToken_Clear,
+    NULL,
+    OpcUa_X509IdentityToken_Encode,
+    OpcUa_X509IdentityToken_Decode
 };
 #endif
 
@@ -5514,8 +5710,9 @@ struct SOPC_EncodeableType OpcUa_X509IdentityToken_EncodeableType =
 /*============================================================================
  * OpcUa_KerberosIdentityToken_Initialize
  *===========================================================================*/
-void OpcUa_KerberosIdentityToken_Initialize(OpcUa_KerberosIdentityToken* a_pValue)
+void OpcUa_KerberosIdentityToken_Initialize(void* pValue)
 {
+    OpcUa_KerberosIdentityToken* a_pValue = (OpcUa_KerberosIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->PolicyId);
@@ -5526,8 +5723,9 @@ void OpcUa_KerberosIdentityToken_Initialize(OpcUa_KerberosIdentityToken* a_pValu
 /*============================================================================
  * OpcUa_KerberosIdentityToken_Clear
  *===========================================================================*/
-void OpcUa_KerberosIdentityToken_Clear(OpcUa_KerberosIdentityToken* a_pValue)
+void OpcUa_KerberosIdentityToken_Clear(void* pValue)
 {
+    OpcUa_KerberosIdentityToken* a_pValue = (OpcUa_KerberosIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->PolicyId);
@@ -5538,9 +5736,10 @@ void OpcUa_KerberosIdentityToken_Clear(OpcUa_KerberosIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_KerberosIdentityToken_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_KerberosIdentityToken_Encode(OpcUa_KerberosIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_KerberosIdentityToken_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_KerberosIdentityToken* a_pValue = (OpcUa_KerberosIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5557,9 +5756,10 @@ SOPC_StatusCode OpcUa_KerberosIdentityToken_Encode(OpcUa_KerberosIdentityToken* 
 /*============================================================================
  * OpcUa_KerberosIdentityToken_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_KerberosIdentityToken_Decode(OpcUa_KerberosIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_KerberosIdentityToken* a_pValue = (OpcUa_KerberosIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5590,11 +5790,11 @@ struct SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType =
     OpcUaId_KerberosIdentityToken_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_KerberosIdentityToken),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_KerberosIdentityToken_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_KerberosIdentityToken_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_KerberosIdentityToken_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_KerberosIdentityToken_Decode
+    OpcUa_KerberosIdentityToken_Initialize,
+    OpcUa_KerberosIdentityToken_Clear,
+    NULL,
+    OpcUa_KerberosIdentityToken_Encode,
+    OpcUa_KerberosIdentityToken_Decode
 };
 #endif
 
@@ -5602,8 +5802,9 @@ struct SOPC_EncodeableType OpcUa_KerberosIdentityToken_EncodeableType =
 /*============================================================================
  * OpcUa_IssuedIdentityToken_Initialize
  *===========================================================================*/
-void OpcUa_IssuedIdentityToken_Initialize(OpcUa_IssuedIdentityToken* a_pValue)
+void OpcUa_IssuedIdentityToken_Initialize(void* pValue)
 {
+    OpcUa_IssuedIdentityToken* a_pValue = (OpcUa_IssuedIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->PolicyId);
@@ -5615,8 +5816,9 @@ void OpcUa_IssuedIdentityToken_Initialize(OpcUa_IssuedIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_IssuedIdentityToken_Clear
  *===========================================================================*/
-void OpcUa_IssuedIdentityToken_Clear(OpcUa_IssuedIdentityToken* a_pValue)
+void OpcUa_IssuedIdentityToken_Clear(void* pValue)
 {
+    OpcUa_IssuedIdentityToken* a_pValue = (OpcUa_IssuedIdentityToken*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->PolicyId);
@@ -5628,9 +5830,10 @@ void OpcUa_IssuedIdentityToken_Clear(OpcUa_IssuedIdentityToken* a_pValue)
 /*============================================================================
  * OpcUa_IssuedIdentityToken_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_IssuedIdentityToken_Encode(OpcUa_IssuedIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_IssuedIdentityToken_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_IssuedIdentityToken* a_pValue = (OpcUa_IssuedIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5649,9 +5852,10 @@ SOPC_StatusCode OpcUa_IssuedIdentityToken_Encode(OpcUa_IssuedIdentityToken* a_pV
 /*============================================================================
  * OpcUa_IssuedIdentityToken_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_IssuedIdentityToken_Decode(OpcUa_IssuedIdentityToken* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_IssuedIdentityToken* a_pValue = (OpcUa_IssuedIdentityToken*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5684,11 +5888,11 @@ struct SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType =
     OpcUaId_IssuedIdentityToken_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_IssuedIdentityToken),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_IssuedIdentityToken_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_IssuedIdentityToken_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_IssuedIdentityToken_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_IssuedIdentityToken_Decode
+    OpcUa_IssuedIdentityToken_Initialize,
+    OpcUa_IssuedIdentityToken_Clear,
+    NULL,
+    OpcUa_IssuedIdentityToken_Encode,
+    OpcUa_IssuedIdentityToken_Decode
 };
 #endif
 
@@ -5697,8 +5901,9 @@ struct SOPC_EncodeableType OpcUa_IssuedIdentityToken_EncodeableType =
 /*============================================================================
  * OpcUa_ActivateSessionRequest_Initialize
  *===========================================================================*/
-void OpcUa_ActivateSessionRequest_Initialize(OpcUa_ActivateSessionRequest* a_pValue)
+void OpcUa_ActivateSessionRequest_Initialize(void* pValue)
 {
+    OpcUa_ActivateSessionRequest* a_pValue = (OpcUa_ActivateSessionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -5715,8 +5920,9 @@ void OpcUa_ActivateSessionRequest_Initialize(OpcUa_ActivateSessionRequest* a_pVa
 /*============================================================================
  * OpcUa_ActivateSessionRequest_Clear
  *===========================================================================*/
-void OpcUa_ActivateSessionRequest_Clear(OpcUa_ActivateSessionRequest* a_pValue)
+void OpcUa_ActivateSessionRequest_Clear(void* pValue)
 {
+    OpcUa_ActivateSessionRequest* a_pValue = (OpcUa_ActivateSessionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -5733,9 +5939,10 @@ void OpcUa_ActivateSessionRequest_Clear(OpcUa_ActivateSessionRequest* a_pValue)
 /*============================================================================
  * OpcUa_ActivateSessionRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ActivateSessionRequest_Encode(OpcUa_ActivateSessionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ActivateSessionRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ActivateSessionRequest* a_pValue = (OpcUa_ActivateSessionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5762,9 +5969,10 @@ SOPC_StatusCode OpcUa_ActivateSessionRequest_Encode(OpcUa_ActivateSessionRequest
 /*============================================================================
  * OpcUa_ActivateSessionRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ActivateSessionRequest_Decode(OpcUa_ActivateSessionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ActivateSessionRequest* a_pValue = (OpcUa_ActivateSessionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5809,11 +6017,11 @@ struct SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType =
     OpcUaId_ActivateSessionRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ActivateSessionRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ActivateSessionRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ActivateSessionRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ActivateSessionRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ActivateSessionRequest_Decode
+    OpcUa_ActivateSessionRequest_Initialize,
+    OpcUa_ActivateSessionRequest_Clear,
+    NULL,
+    OpcUa_ActivateSessionRequest_Encode,
+    OpcUa_ActivateSessionRequest_Decode
 };
 #endif
 
@@ -5821,8 +6029,9 @@ struct SOPC_EncodeableType OpcUa_ActivateSessionRequest_EncodeableType =
 /*============================================================================
  * OpcUa_ActivateSessionResponse_Initialize
  *===========================================================================*/
-void OpcUa_ActivateSessionResponse_Initialize(OpcUa_ActivateSessionResponse* a_pValue)
+void OpcUa_ActivateSessionResponse_Initialize(void* pValue)
 {
+    OpcUa_ActivateSessionResponse* a_pValue = (OpcUa_ActivateSessionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -5837,8 +6046,9 @@ void OpcUa_ActivateSessionResponse_Initialize(OpcUa_ActivateSessionResponse* a_p
 /*============================================================================
  * OpcUa_ActivateSessionResponse_Clear
  *===========================================================================*/
-void OpcUa_ActivateSessionResponse_Clear(OpcUa_ActivateSessionResponse* a_pValue)
+void OpcUa_ActivateSessionResponse_Clear(void* pValue)
 {
+    OpcUa_ActivateSessionResponse* a_pValue = (OpcUa_ActivateSessionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -5853,9 +6063,10 @@ void OpcUa_ActivateSessionResponse_Clear(OpcUa_ActivateSessionResponse* a_pValue
 /*============================================================================
  * OpcUa_ActivateSessionResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ActivateSessionResponse_Encode(OpcUa_ActivateSessionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ActivateSessionResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ActivateSessionResponse* a_pValue = (OpcUa_ActivateSessionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5878,9 +6089,10 @@ SOPC_StatusCode OpcUa_ActivateSessionResponse_Encode(OpcUa_ActivateSessionRespon
 /*============================================================================
  * OpcUa_ActivateSessionResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ActivateSessionResponse_Decode(OpcUa_ActivateSessionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ActivateSessionResponse* a_pValue = (OpcUa_ActivateSessionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5921,11 +6133,11 @@ struct SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType =
     OpcUaId_ActivateSessionResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ActivateSessionResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ActivateSessionResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ActivateSessionResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ActivateSessionResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ActivateSessionResponse_Decode
+    OpcUa_ActivateSessionResponse_Initialize,
+    OpcUa_ActivateSessionResponse_Clear,
+    NULL,
+    OpcUa_ActivateSessionResponse_Encode,
+    OpcUa_ActivateSessionResponse_Decode
 };
 #endif
 #endif
@@ -5935,8 +6147,9 @@ struct SOPC_EncodeableType OpcUa_ActivateSessionResponse_EncodeableType =
 /*============================================================================
  * OpcUa_CloseSessionRequest_Initialize
  *===========================================================================*/
-void OpcUa_CloseSessionRequest_Initialize(OpcUa_CloseSessionRequest* a_pValue)
+void OpcUa_CloseSessionRequest_Initialize(void* pValue)
 {
+    OpcUa_CloseSessionRequest* a_pValue = (OpcUa_CloseSessionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -5947,8 +6160,9 @@ void OpcUa_CloseSessionRequest_Initialize(OpcUa_CloseSessionRequest* a_pValue)
 /*============================================================================
  * OpcUa_CloseSessionRequest_Clear
  *===========================================================================*/
-void OpcUa_CloseSessionRequest_Clear(OpcUa_CloseSessionRequest* a_pValue)
+void OpcUa_CloseSessionRequest_Clear(void* pValue)
 {
+    OpcUa_CloseSessionRequest* a_pValue = (OpcUa_CloseSessionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -5959,9 +6173,10 @@ void OpcUa_CloseSessionRequest_Clear(OpcUa_CloseSessionRequest* a_pValue)
 /*============================================================================
  * OpcUa_CloseSessionRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CloseSessionRequest_Encode(OpcUa_CloseSessionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSessionRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CloseSessionRequest* a_pValue = (OpcUa_CloseSessionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -5978,9 +6193,10 @@ SOPC_StatusCode OpcUa_CloseSessionRequest_Encode(OpcUa_CloseSessionRequest* a_pV
 /*============================================================================
  * OpcUa_CloseSessionRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CloseSessionRequest_Decode(OpcUa_CloseSessionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CloseSessionRequest* a_pValue = (OpcUa_CloseSessionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6011,11 +6227,11 @@ struct SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType =
     OpcUaId_CloseSessionRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CloseSessionRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CloseSessionRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CloseSessionRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CloseSessionRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CloseSessionRequest_Decode
+    OpcUa_CloseSessionRequest_Initialize,
+    OpcUa_CloseSessionRequest_Clear,
+    NULL,
+    OpcUa_CloseSessionRequest_Encode,
+    OpcUa_CloseSessionRequest_Decode
 };
 #endif
 
@@ -6023,8 +6239,9 @@ struct SOPC_EncodeableType OpcUa_CloseSessionRequest_EncodeableType =
 /*============================================================================
  * OpcUa_CloseSessionResponse_Initialize
  *===========================================================================*/
-void OpcUa_CloseSessionResponse_Initialize(OpcUa_CloseSessionResponse* a_pValue)
+void OpcUa_CloseSessionResponse_Initialize(void* pValue)
 {
+    OpcUa_CloseSessionResponse* a_pValue = (OpcUa_CloseSessionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -6034,8 +6251,9 @@ void OpcUa_CloseSessionResponse_Initialize(OpcUa_CloseSessionResponse* a_pValue)
 /*============================================================================
  * OpcUa_CloseSessionResponse_Clear
  *===========================================================================*/
-void OpcUa_CloseSessionResponse_Clear(OpcUa_CloseSessionResponse* a_pValue)
+void OpcUa_CloseSessionResponse_Clear(void* pValue)
 {
+    OpcUa_CloseSessionResponse* a_pValue = (OpcUa_CloseSessionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -6045,9 +6263,10 @@ void OpcUa_CloseSessionResponse_Clear(OpcUa_CloseSessionResponse* a_pValue)
 /*============================================================================
  * OpcUa_CloseSessionResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CloseSessionResponse_Encode(OpcUa_CloseSessionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSessionResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CloseSessionResponse* a_pValue = (OpcUa_CloseSessionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6062,9 +6281,10 @@ SOPC_StatusCode OpcUa_CloseSessionResponse_Encode(OpcUa_CloseSessionResponse* a_
 /*============================================================================
  * OpcUa_CloseSessionResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CloseSessionResponse_Decode(OpcUa_CloseSessionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CloseSessionResponse* a_pValue = (OpcUa_CloseSessionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6093,11 +6313,11 @@ struct SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType =
     OpcUaId_CloseSessionResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CloseSessionResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CloseSessionResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CloseSessionResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CloseSessionResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CloseSessionResponse_Decode
+    OpcUa_CloseSessionResponse_Initialize,
+    OpcUa_CloseSessionResponse_Clear,
+    NULL,
+    OpcUa_CloseSessionResponse_Encode,
+    OpcUa_CloseSessionResponse_Decode
 };
 #endif
 #endif
@@ -6107,8 +6327,9 @@ struct SOPC_EncodeableType OpcUa_CloseSessionResponse_EncodeableType =
 /*============================================================================
  * OpcUa_CancelRequest_Initialize
  *===========================================================================*/
-void OpcUa_CancelRequest_Initialize(OpcUa_CancelRequest* a_pValue)
+void OpcUa_CancelRequest_Initialize(void* pValue)
 {
+    OpcUa_CancelRequest* a_pValue = (OpcUa_CancelRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -6119,8 +6340,9 @@ void OpcUa_CancelRequest_Initialize(OpcUa_CancelRequest* a_pValue)
 /*============================================================================
  * OpcUa_CancelRequest_Clear
  *===========================================================================*/
-void OpcUa_CancelRequest_Clear(OpcUa_CancelRequest* a_pValue)
+void OpcUa_CancelRequest_Clear(void* pValue)
 {
+    OpcUa_CancelRequest* a_pValue = (OpcUa_CancelRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -6131,9 +6353,10 @@ void OpcUa_CancelRequest_Clear(OpcUa_CancelRequest* a_pValue)
 /*============================================================================
  * OpcUa_CancelRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CancelRequest_Encode(OpcUa_CancelRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CancelRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CancelRequest* a_pValue = (OpcUa_CancelRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6150,9 +6373,10 @@ SOPC_StatusCode OpcUa_CancelRequest_Encode(OpcUa_CancelRequest* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_CancelRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CancelRequest_Decode(OpcUa_CancelRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CancelRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CancelRequest* a_pValue = (OpcUa_CancelRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6183,11 +6407,11 @@ struct SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType =
     OpcUaId_CancelRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CancelRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CancelRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CancelRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CancelRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CancelRequest_Decode
+    OpcUa_CancelRequest_Initialize,
+    OpcUa_CancelRequest_Clear,
+    NULL,
+    OpcUa_CancelRequest_Encode,
+    OpcUa_CancelRequest_Decode
 };
 #endif
 
@@ -6195,8 +6419,9 @@ struct SOPC_EncodeableType OpcUa_CancelRequest_EncodeableType =
 /*============================================================================
  * OpcUa_CancelResponse_Initialize
  *===========================================================================*/
-void OpcUa_CancelResponse_Initialize(OpcUa_CancelResponse* a_pValue)
+void OpcUa_CancelResponse_Initialize(void* pValue)
 {
+    OpcUa_CancelResponse* a_pValue = (OpcUa_CancelResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -6207,8 +6432,9 @@ void OpcUa_CancelResponse_Initialize(OpcUa_CancelResponse* a_pValue)
 /*============================================================================
  * OpcUa_CancelResponse_Clear
  *===========================================================================*/
-void OpcUa_CancelResponse_Clear(OpcUa_CancelResponse* a_pValue)
+void OpcUa_CancelResponse_Clear(void* pValue)
 {
+    OpcUa_CancelResponse* a_pValue = (OpcUa_CancelResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -6219,9 +6445,10 @@ void OpcUa_CancelResponse_Clear(OpcUa_CancelResponse* a_pValue)
 /*============================================================================
  * OpcUa_CancelResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CancelResponse_Encode(OpcUa_CancelResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CancelResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CancelResponse* a_pValue = (OpcUa_CancelResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6238,9 +6465,10 @@ SOPC_StatusCode OpcUa_CancelResponse_Encode(OpcUa_CancelResponse* a_pValue, SOPC
 /*============================================================================
  * OpcUa_CancelResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CancelResponse_Decode(OpcUa_CancelResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CancelResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CancelResponse* a_pValue = (OpcUa_CancelResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6271,11 +6499,11 @@ struct SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType =
     OpcUaId_CancelResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CancelResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CancelResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CancelResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CancelResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CancelResponse_Decode
+    OpcUa_CancelResponse_Initialize,
+    OpcUa_CancelResponse_Clear,
+    NULL,
+    OpcUa_CancelResponse_Encode,
+    OpcUa_CancelResponse_Decode
 };
 #endif
 #endif
@@ -6285,8 +6513,9 @@ struct SOPC_EncodeableType OpcUa_CancelResponse_EncodeableType =
 /*============================================================================
  * OpcUa_NodeAttributes_Initialize
  *===========================================================================*/
-void OpcUa_NodeAttributes_Initialize(OpcUa_NodeAttributes* a_pValue)
+void OpcUa_NodeAttributes_Initialize(void* pValue)
 {
+    OpcUa_NodeAttributes* a_pValue = (OpcUa_NodeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SpecifiedAttributes);
@@ -6300,8 +6529,9 @@ void OpcUa_NodeAttributes_Initialize(OpcUa_NodeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_NodeAttributes_Clear
  *===========================================================================*/
-void OpcUa_NodeAttributes_Clear(OpcUa_NodeAttributes* a_pValue)
+void OpcUa_NodeAttributes_Clear(void* pValue)
 {
+    OpcUa_NodeAttributes* a_pValue = (OpcUa_NodeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SpecifiedAttributes);
@@ -6315,9 +6545,10 @@ void OpcUa_NodeAttributes_Clear(OpcUa_NodeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_NodeAttributes_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NodeAttributes_Encode(OpcUa_NodeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeAttributes_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NodeAttributes* a_pValue = (OpcUa_NodeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6340,9 +6571,10 @@ SOPC_StatusCode OpcUa_NodeAttributes_Encode(OpcUa_NodeAttributes* a_pValue, SOPC
 /*============================================================================
  * OpcUa_NodeAttributes_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NodeAttributes_Decode(OpcUa_NodeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NodeAttributes* a_pValue = (OpcUa_NodeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6379,11 +6611,11 @@ struct SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType =
     OpcUaId_NodeAttributes_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_NodeAttributes),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_NodeAttributes_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_NodeAttributes_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_NodeAttributes_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_NodeAttributes_Decode
+    OpcUa_NodeAttributes_Initialize,
+    OpcUa_NodeAttributes_Clear,
+    NULL,
+    OpcUa_NodeAttributes_Encode,
+    OpcUa_NodeAttributes_Decode
 };
 #endif
 
@@ -6391,8 +6623,9 @@ struct SOPC_EncodeableType OpcUa_NodeAttributes_EncodeableType =
 /*============================================================================
  * OpcUa_ObjectAttributes_Initialize
  *===========================================================================*/
-void OpcUa_ObjectAttributes_Initialize(OpcUa_ObjectAttributes* a_pValue)
+void OpcUa_ObjectAttributes_Initialize(void* pValue)
 {
+    OpcUa_ObjectAttributes* a_pValue = (OpcUa_ObjectAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SpecifiedAttributes);
@@ -6407,8 +6640,9 @@ void OpcUa_ObjectAttributes_Initialize(OpcUa_ObjectAttributes* a_pValue)
 /*============================================================================
  * OpcUa_ObjectAttributes_Clear
  *===========================================================================*/
-void OpcUa_ObjectAttributes_Clear(OpcUa_ObjectAttributes* a_pValue)
+void OpcUa_ObjectAttributes_Clear(void* pValue)
 {
+    OpcUa_ObjectAttributes* a_pValue = (OpcUa_ObjectAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SpecifiedAttributes);
@@ -6423,9 +6657,10 @@ void OpcUa_ObjectAttributes_Clear(OpcUa_ObjectAttributes* a_pValue)
 /*============================================================================
  * OpcUa_ObjectAttributes_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ObjectAttributes_Encode(OpcUa_ObjectAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectAttributes_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ObjectAttributes* a_pValue = (OpcUa_ObjectAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6450,9 +6685,10 @@ SOPC_StatusCode OpcUa_ObjectAttributes_Encode(OpcUa_ObjectAttributes* a_pValue, 
 /*============================================================================
  * OpcUa_ObjectAttributes_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ObjectAttributes_Decode(OpcUa_ObjectAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ObjectAttributes* a_pValue = (OpcUa_ObjectAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6491,11 +6727,11 @@ struct SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType =
     OpcUaId_ObjectAttributes_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ObjectAttributes),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ObjectAttributes_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ObjectAttributes_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ObjectAttributes_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ObjectAttributes_Decode
+    OpcUa_ObjectAttributes_Initialize,
+    OpcUa_ObjectAttributes_Clear,
+    NULL,
+    OpcUa_ObjectAttributes_Encode,
+    OpcUa_ObjectAttributes_Decode
 };
 #endif
 
@@ -6503,8 +6739,9 @@ struct SOPC_EncodeableType OpcUa_ObjectAttributes_EncodeableType =
 /*============================================================================
  * OpcUa_VariableAttributes_Initialize
  *===========================================================================*/
-void OpcUa_VariableAttributes_Initialize(OpcUa_VariableAttributes* a_pValue)
+void OpcUa_VariableAttributes_Initialize(void* pValue)
 {
+    OpcUa_VariableAttributes* a_pValue = (OpcUa_VariableAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SpecifiedAttributes);
@@ -6527,8 +6764,9 @@ void OpcUa_VariableAttributes_Initialize(OpcUa_VariableAttributes* a_pValue)
 /*============================================================================
  * OpcUa_VariableAttributes_Clear
  *===========================================================================*/
-void OpcUa_VariableAttributes_Clear(OpcUa_VariableAttributes* a_pValue)
+void OpcUa_VariableAttributes_Clear(void* pValue)
 {
+    OpcUa_VariableAttributes* a_pValue = (OpcUa_VariableAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SpecifiedAttributes);
@@ -6551,9 +6789,10 @@ void OpcUa_VariableAttributes_Clear(OpcUa_VariableAttributes* a_pValue)
 /*============================================================================
  * OpcUa_VariableAttributes_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_VariableAttributes_Encode(OpcUa_VariableAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableAttributes_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_VariableAttributes* a_pValue = (OpcUa_VariableAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6593,9 +6832,10 @@ SOPC_StatusCode OpcUa_VariableAttributes_Encode(OpcUa_VariableAttributes* a_pVal
 /*============================================================================
  * OpcUa_VariableAttributes_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_VariableAttributes_Decode(OpcUa_VariableAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_VariableAttributes* a_pValue = (OpcUa_VariableAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6651,11 +6891,11 @@ struct SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType =
     OpcUaId_VariableAttributes_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_VariableAttributes),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_VariableAttributes_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_VariableAttributes_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_VariableAttributes_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_VariableAttributes_Decode
+    OpcUa_VariableAttributes_Initialize,
+    OpcUa_VariableAttributes_Clear,
+    NULL,
+    OpcUa_VariableAttributes_Encode,
+    OpcUa_VariableAttributes_Decode
 };
 #endif
 
@@ -6663,8 +6903,9 @@ struct SOPC_EncodeableType OpcUa_VariableAttributes_EncodeableType =
 /*============================================================================
  * OpcUa_MethodAttributes_Initialize
  *===========================================================================*/
-void OpcUa_MethodAttributes_Initialize(OpcUa_MethodAttributes* a_pValue)
+void OpcUa_MethodAttributes_Initialize(void* pValue)
 {
+    OpcUa_MethodAttributes* a_pValue = (OpcUa_MethodAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SpecifiedAttributes);
@@ -6680,8 +6921,9 @@ void OpcUa_MethodAttributes_Initialize(OpcUa_MethodAttributes* a_pValue)
 /*============================================================================
  * OpcUa_MethodAttributes_Clear
  *===========================================================================*/
-void OpcUa_MethodAttributes_Clear(OpcUa_MethodAttributes* a_pValue)
+void OpcUa_MethodAttributes_Clear(void* pValue)
 {
+    OpcUa_MethodAttributes* a_pValue = (OpcUa_MethodAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SpecifiedAttributes);
@@ -6697,9 +6939,10 @@ void OpcUa_MethodAttributes_Clear(OpcUa_MethodAttributes* a_pValue)
 /*============================================================================
  * OpcUa_MethodAttributes_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MethodAttributes_Encode(OpcUa_MethodAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MethodAttributes_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MethodAttributes* a_pValue = (OpcUa_MethodAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6726,9 +6969,10 @@ SOPC_StatusCode OpcUa_MethodAttributes_Encode(OpcUa_MethodAttributes* a_pValue, 
 /*============================================================================
  * OpcUa_MethodAttributes_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MethodAttributes_Decode(OpcUa_MethodAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MethodAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MethodAttributes* a_pValue = (OpcUa_MethodAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6769,11 +7013,11 @@ struct SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType =
     OpcUaId_MethodAttributes_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_MethodAttributes),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_MethodAttributes_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_MethodAttributes_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_MethodAttributes_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_MethodAttributes_Decode
+    OpcUa_MethodAttributes_Initialize,
+    OpcUa_MethodAttributes_Clear,
+    NULL,
+    OpcUa_MethodAttributes_Encode,
+    OpcUa_MethodAttributes_Decode
 };
 #endif
 
@@ -6781,8 +7025,9 @@ struct SOPC_EncodeableType OpcUa_MethodAttributes_EncodeableType =
 /*============================================================================
  * OpcUa_ObjectTypeAttributes_Initialize
  *===========================================================================*/
-void OpcUa_ObjectTypeAttributes_Initialize(OpcUa_ObjectTypeAttributes* a_pValue)
+void OpcUa_ObjectTypeAttributes_Initialize(void* pValue)
 {
+    OpcUa_ObjectTypeAttributes* a_pValue = (OpcUa_ObjectTypeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SpecifiedAttributes);
@@ -6797,8 +7042,9 @@ void OpcUa_ObjectTypeAttributes_Initialize(OpcUa_ObjectTypeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_ObjectTypeAttributes_Clear
  *===========================================================================*/
-void OpcUa_ObjectTypeAttributes_Clear(OpcUa_ObjectTypeAttributes* a_pValue)
+void OpcUa_ObjectTypeAttributes_Clear(void* pValue)
 {
+    OpcUa_ObjectTypeAttributes* a_pValue = (OpcUa_ObjectTypeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SpecifiedAttributes);
@@ -6813,9 +7059,10 @@ void OpcUa_ObjectTypeAttributes_Clear(OpcUa_ObjectTypeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_ObjectTypeAttributes_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ObjectTypeAttributes_Encode(OpcUa_ObjectTypeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectTypeAttributes_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ObjectTypeAttributes* a_pValue = (OpcUa_ObjectTypeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6840,9 +7087,10 @@ SOPC_StatusCode OpcUa_ObjectTypeAttributes_Encode(OpcUa_ObjectTypeAttributes* a_
 /*============================================================================
  * OpcUa_ObjectTypeAttributes_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ObjectTypeAttributes_Decode(OpcUa_ObjectTypeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ObjectTypeAttributes* a_pValue = (OpcUa_ObjectTypeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6881,11 +7129,11 @@ struct SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType =
     OpcUaId_ObjectTypeAttributes_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ObjectTypeAttributes),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ObjectTypeAttributes_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ObjectTypeAttributes_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ObjectTypeAttributes_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ObjectTypeAttributes_Decode
+    OpcUa_ObjectTypeAttributes_Initialize,
+    OpcUa_ObjectTypeAttributes_Clear,
+    NULL,
+    OpcUa_ObjectTypeAttributes_Encode,
+    OpcUa_ObjectTypeAttributes_Decode
 };
 #endif
 
@@ -6893,8 +7141,9 @@ struct SOPC_EncodeableType OpcUa_ObjectTypeAttributes_EncodeableType =
 /*============================================================================
  * OpcUa_VariableTypeAttributes_Initialize
  *===========================================================================*/
-void OpcUa_VariableTypeAttributes_Initialize(OpcUa_VariableTypeAttributes* a_pValue)
+void OpcUa_VariableTypeAttributes_Initialize(void* pValue)
 {
+    OpcUa_VariableTypeAttributes* a_pValue = (OpcUa_VariableTypeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SpecifiedAttributes);
@@ -6914,8 +7163,9 @@ void OpcUa_VariableTypeAttributes_Initialize(OpcUa_VariableTypeAttributes* a_pVa
 /*============================================================================
  * OpcUa_VariableTypeAttributes_Clear
  *===========================================================================*/
-void OpcUa_VariableTypeAttributes_Clear(OpcUa_VariableTypeAttributes* a_pValue)
+void OpcUa_VariableTypeAttributes_Clear(void* pValue)
 {
+    OpcUa_VariableTypeAttributes* a_pValue = (OpcUa_VariableTypeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SpecifiedAttributes);
@@ -6935,9 +7185,10 @@ void OpcUa_VariableTypeAttributes_Clear(OpcUa_VariableTypeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_VariableTypeAttributes_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_VariableTypeAttributes_Encode(OpcUa_VariableTypeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableTypeAttributes_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_VariableTypeAttributes* a_pValue = (OpcUa_VariableTypeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -6971,9 +7222,10 @@ SOPC_StatusCode OpcUa_VariableTypeAttributes_Encode(OpcUa_VariableTypeAttributes
 /*============================================================================
  * OpcUa_VariableTypeAttributes_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_VariableTypeAttributes_Decode(OpcUa_VariableTypeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_VariableTypeAttributes* a_pValue = (OpcUa_VariableTypeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7023,11 +7275,11 @@ struct SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType =
     OpcUaId_VariableTypeAttributes_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_VariableTypeAttributes),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_VariableTypeAttributes_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_VariableTypeAttributes_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_VariableTypeAttributes_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_VariableTypeAttributes_Decode
+    OpcUa_VariableTypeAttributes_Initialize,
+    OpcUa_VariableTypeAttributes_Clear,
+    NULL,
+    OpcUa_VariableTypeAttributes_Encode,
+    OpcUa_VariableTypeAttributes_Decode
 };
 #endif
 
@@ -7035,8 +7287,9 @@ struct SOPC_EncodeableType OpcUa_VariableTypeAttributes_EncodeableType =
 /*============================================================================
  * OpcUa_ReferenceTypeAttributes_Initialize
  *===========================================================================*/
-void OpcUa_ReferenceTypeAttributes_Initialize(OpcUa_ReferenceTypeAttributes* a_pValue)
+void OpcUa_ReferenceTypeAttributes_Initialize(void* pValue)
 {
+    OpcUa_ReferenceTypeAttributes* a_pValue = (OpcUa_ReferenceTypeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SpecifiedAttributes);
@@ -7053,8 +7306,9 @@ void OpcUa_ReferenceTypeAttributes_Initialize(OpcUa_ReferenceTypeAttributes* a_p
 /*============================================================================
  * OpcUa_ReferenceTypeAttributes_Clear
  *===========================================================================*/
-void OpcUa_ReferenceTypeAttributes_Clear(OpcUa_ReferenceTypeAttributes* a_pValue)
+void OpcUa_ReferenceTypeAttributes_Clear(void* pValue)
 {
+    OpcUa_ReferenceTypeAttributes* a_pValue = (OpcUa_ReferenceTypeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SpecifiedAttributes);
@@ -7071,9 +7325,10 @@ void OpcUa_ReferenceTypeAttributes_Clear(OpcUa_ReferenceTypeAttributes* a_pValue
 /*============================================================================
  * OpcUa_ReferenceTypeAttributes_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Encode(OpcUa_ReferenceTypeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReferenceTypeAttributes* a_pValue = (OpcUa_ReferenceTypeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7102,9 +7357,10 @@ SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Encode(OpcUa_ReferenceTypeAttribut
 /*============================================================================
  * OpcUa_ReferenceTypeAttributes_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Decode(OpcUa_ReferenceTypeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReferenceTypeAttributes* a_pValue = (OpcUa_ReferenceTypeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7147,11 +7403,11 @@ struct SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType =
     OpcUaId_ReferenceTypeAttributes_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReferenceTypeAttributes),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReferenceTypeAttributes_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReferenceTypeAttributes_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReferenceTypeAttributes_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReferenceTypeAttributes_Decode
+    OpcUa_ReferenceTypeAttributes_Initialize,
+    OpcUa_ReferenceTypeAttributes_Clear,
+    NULL,
+    OpcUa_ReferenceTypeAttributes_Encode,
+    OpcUa_ReferenceTypeAttributes_Decode
 };
 #endif
 
@@ -7159,8 +7415,9 @@ struct SOPC_EncodeableType OpcUa_ReferenceTypeAttributes_EncodeableType =
 /*============================================================================
  * OpcUa_DataTypeAttributes_Initialize
  *===========================================================================*/
-void OpcUa_DataTypeAttributes_Initialize(OpcUa_DataTypeAttributes* a_pValue)
+void OpcUa_DataTypeAttributes_Initialize(void* pValue)
 {
+    OpcUa_DataTypeAttributes* a_pValue = (OpcUa_DataTypeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SpecifiedAttributes);
@@ -7175,8 +7432,9 @@ void OpcUa_DataTypeAttributes_Initialize(OpcUa_DataTypeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_DataTypeAttributes_Clear
  *===========================================================================*/
-void OpcUa_DataTypeAttributes_Clear(OpcUa_DataTypeAttributes* a_pValue)
+void OpcUa_DataTypeAttributes_Clear(void* pValue)
 {
+    OpcUa_DataTypeAttributes* a_pValue = (OpcUa_DataTypeAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SpecifiedAttributes);
@@ -7191,9 +7449,10 @@ void OpcUa_DataTypeAttributes_Clear(OpcUa_DataTypeAttributes* a_pValue)
 /*============================================================================
  * OpcUa_DataTypeAttributes_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DataTypeAttributes_Encode(OpcUa_DataTypeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataTypeAttributes_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DataTypeAttributes* a_pValue = (OpcUa_DataTypeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7218,9 +7477,10 @@ SOPC_StatusCode OpcUa_DataTypeAttributes_Encode(OpcUa_DataTypeAttributes* a_pVal
 /*============================================================================
  * OpcUa_DataTypeAttributes_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DataTypeAttributes_Decode(OpcUa_DataTypeAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DataTypeAttributes* a_pValue = (OpcUa_DataTypeAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7259,11 +7519,11 @@ struct SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType =
     OpcUaId_DataTypeAttributes_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DataTypeAttributes),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DataTypeAttributes_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DataTypeAttributes_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DataTypeAttributes_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DataTypeAttributes_Decode
+    OpcUa_DataTypeAttributes_Initialize,
+    OpcUa_DataTypeAttributes_Clear,
+    NULL,
+    OpcUa_DataTypeAttributes_Encode,
+    OpcUa_DataTypeAttributes_Decode
 };
 #endif
 
@@ -7271,8 +7531,9 @@ struct SOPC_EncodeableType OpcUa_DataTypeAttributes_EncodeableType =
 /*============================================================================
  * OpcUa_ViewAttributes_Initialize
  *===========================================================================*/
-void OpcUa_ViewAttributes_Initialize(OpcUa_ViewAttributes* a_pValue)
+void OpcUa_ViewAttributes_Initialize(void* pValue)
 {
+    OpcUa_ViewAttributes* a_pValue = (OpcUa_ViewAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SpecifiedAttributes);
@@ -7288,8 +7549,9 @@ void OpcUa_ViewAttributes_Initialize(OpcUa_ViewAttributes* a_pValue)
 /*============================================================================
  * OpcUa_ViewAttributes_Clear
  *===========================================================================*/
-void OpcUa_ViewAttributes_Clear(OpcUa_ViewAttributes* a_pValue)
+void OpcUa_ViewAttributes_Clear(void* pValue)
 {
+    OpcUa_ViewAttributes* a_pValue = (OpcUa_ViewAttributes*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SpecifiedAttributes);
@@ -7305,9 +7567,10 @@ void OpcUa_ViewAttributes_Clear(OpcUa_ViewAttributes* a_pValue)
 /*============================================================================
  * OpcUa_ViewAttributes_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ViewAttributes_Encode(OpcUa_ViewAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewAttributes_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ViewAttributes* a_pValue = (OpcUa_ViewAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7334,9 +7597,10 @@ SOPC_StatusCode OpcUa_ViewAttributes_Encode(OpcUa_ViewAttributes* a_pValue, SOPC
 /*============================================================================
  * OpcUa_ViewAttributes_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ViewAttributes_Decode(OpcUa_ViewAttributes* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ViewAttributes* a_pValue = (OpcUa_ViewAttributes*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7377,11 +7641,11 @@ struct SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType =
     OpcUaId_ViewAttributes_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ViewAttributes),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ViewAttributes_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ViewAttributes_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ViewAttributes_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ViewAttributes_Decode
+    OpcUa_ViewAttributes_Initialize,
+    OpcUa_ViewAttributes_Clear,
+    NULL,
+    OpcUa_ViewAttributes_Encode,
+    OpcUa_ViewAttributes_Decode
 };
 #endif
 
@@ -7389,8 +7653,9 @@ struct SOPC_EncodeableType OpcUa_ViewAttributes_EncodeableType =
 /*============================================================================
  * OpcUa_AddNodesItem_Initialize
  *===========================================================================*/
-void OpcUa_AddNodesItem_Initialize(OpcUa_AddNodesItem* a_pValue)
+void OpcUa_AddNodesItem_Initialize(void* pValue)
 {
+    OpcUa_AddNodesItem* a_pValue = (OpcUa_AddNodesItem*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ExpandedNodeId_Initialize(&a_pValue->ParentNodeId);
@@ -7406,8 +7671,9 @@ void OpcUa_AddNodesItem_Initialize(OpcUa_AddNodesItem* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesItem_Clear
  *===========================================================================*/
-void OpcUa_AddNodesItem_Clear(OpcUa_AddNodesItem* a_pValue)
+void OpcUa_AddNodesItem_Clear(void* pValue)
 {
+    OpcUa_AddNodesItem* a_pValue = (OpcUa_AddNodesItem*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ExpandedNodeId_Clear(&a_pValue->ParentNodeId);
@@ -7423,9 +7689,10 @@ void OpcUa_AddNodesItem_Clear(OpcUa_AddNodesItem* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesItem_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddNodesItem_Encode(OpcUa_AddNodesItem* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesItem_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddNodesItem* a_pValue = (OpcUa_AddNodesItem*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7452,9 +7719,10 @@ SOPC_StatusCode OpcUa_AddNodesItem_Encode(OpcUa_AddNodesItem* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_AddNodesItem_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddNodesItem_Decode(OpcUa_AddNodesItem* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesItem_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddNodesItem* a_pValue = (OpcUa_AddNodesItem*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7495,11 +7763,11 @@ struct SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType =
     OpcUaId_AddNodesItem_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AddNodesItem),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AddNodesItem_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AddNodesItem_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AddNodesItem_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AddNodesItem_Decode
+    OpcUa_AddNodesItem_Initialize,
+    OpcUa_AddNodesItem_Clear,
+    NULL,
+    OpcUa_AddNodesItem_Encode,
+    OpcUa_AddNodesItem_Decode
 };
 #endif
 
@@ -7507,8 +7775,9 @@ struct SOPC_EncodeableType OpcUa_AddNodesItem_EncodeableType =
 /*============================================================================
  * OpcUa_AddNodesResult_Initialize
  *===========================================================================*/
-void OpcUa_AddNodesResult_Initialize(OpcUa_AddNodesResult* a_pValue)
+void OpcUa_AddNodesResult_Initialize(void* pValue)
 {
+    OpcUa_AddNodesResult* a_pValue = (OpcUa_AddNodesResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -7519,8 +7788,9 @@ void OpcUa_AddNodesResult_Initialize(OpcUa_AddNodesResult* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesResult_Clear
  *===========================================================================*/
-void OpcUa_AddNodesResult_Clear(OpcUa_AddNodesResult* a_pValue)
+void OpcUa_AddNodesResult_Clear(void* pValue)
 {
+    OpcUa_AddNodesResult* a_pValue = (OpcUa_AddNodesResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -7531,9 +7801,10 @@ void OpcUa_AddNodesResult_Clear(OpcUa_AddNodesResult* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddNodesResult_Encode(OpcUa_AddNodesResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddNodesResult* a_pValue = (OpcUa_AddNodesResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7550,9 +7821,10 @@ SOPC_StatusCode OpcUa_AddNodesResult_Encode(OpcUa_AddNodesResult* a_pValue, SOPC
 /*============================================================================
  * OpcUa_AddNodesResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddNodesResult_Decode(OpcUa_AddNodesResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddNodesResult* a_pValue = (OpcUa_AddNodesResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7583,11 +7855,11 @@ struct SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType =
     OpcUaId_AddNodesResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AddNodesResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AddNodesResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AddNodesResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AddNodesResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AddNodesResult_Decode
+    OpcUa_AddNodesResult_Initialize,
+    OpcUa_AddNodesResult_Clear,
+    NULL,
+    OpcUa_AddNodesResult_Encode,
+    OpcUa_AddNodesResult_Decode
 };
 #endif
 
@@ -7596,8 +7868,9 @@ struct SOPC_EncodeableType OpcUa_AddNodesResult_EncodeableType =
 /*============================================================================
  * OpcUa_AddNodesRequest_Initialize
  *===========================================================================*/
-void OpcUa_AddNodesRequest_Initialize(OpcUa_AddNodesRequest* a_pValue)
+void OpcUa_AddNodesRequest_Initialize(void* pValue)
 {
+    OpcUa_AddNodesRequest* a_pValue = (OpcUa_AddNodesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -7609,8 +7882,9 @@ void OpcUa_AddNodesRequest_Initialize(OpcUa_AddNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesRequest_Clear
  *===========================================================================*/
-void OpcUa_AddNodesRequest_Clear(OpcUa_AddNodesRequest* a_pValue)
+void OpcUa_AddNodesRequest_Clear(void* pValue)
 {
+    OpcUa_AddNodesRequest* a_pValue = (OpcUa_AddNodesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -7622,9 +7896,10 @@ void OpcUa_AddNodesRequest_Clear(OpcUa_AddNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddNodesRequest_Encode(OpcUa_AddNodesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddNodesRequest* a_pValue = (OpcUa_AddNodesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7642,9 +7917,10 @@ SOPC_StatusCode OpcUa_AddNodesRequest_Encode(OpcUa_AddNodesRequest* a_pValue, SO
 /*============================================================================
  * OpcUa_AddNodesRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddNodesRequest_Decode(OpcUa_AddNodesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddNodesRequest* a_pValue = (OpcUa_AddNodesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7678,11 +7954,11 @@ struct SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType =
     OpcUaId_AddNodesRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AddNodesRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AddNodesRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AddNodesRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AddNodesRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AddNodesRequest_Decode
+    OpcUa_AddNodesRequest_Initialize,
+    OpcUa_AddNodesRequest_Clear,
+    NULL,
+    OpcUa_AddNodesRequest_Encode,
+    OpcUa_AddNodesRequest_Decode
 };
 #endif
 
@@ -7690,8 +7966,9 @@ struct SOPC_EncodeableType OpcUa_AddNodesRequest_EncodeableType =
 /*============================================================================
  * OpcUa_AddNodesResponse_Initialize
  *===========================================================================*/
-void OpcUa_AddNodesResponse_Initialize(OpcUa_AddNodesResponse* a_pValue)
+void OpcUa_AddNodesResponse_Initialize(void* pValue)
 {
+    OpcUa_AddNodesResponse* a_pValue = (OpcUa_AddNodesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -7705,8 +7982,9 @@ void OpcUa_AddNodesResponse_Initialize(OpcUa_AddNodesResponse* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesResponse_Clear
  *===========================================================================*/
-void OpcUa_AddNodesResponse_Clear(OpcUa_AddNodesResponse* a_pValue)
+void OpcUa_AddNodesResponse_Clear(void* pValue)
 {
+    OpcUa_AddNodesResponse* a_pValue = (OpcUa_AddNodesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -7720,9 +7998,10 @@ void OpcUa_AddNodesResponse_Clear(OpcUa_AddNodesResponse* a_pValue)
 /*============================================================================
  * OpcUa_AddNodesResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddNodesResponse_Encode(OpcUa_AddNodesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddNodesResponse* a_pValue = (OpcUa_AddNodesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7743,9 +8022,10 @@ SOPC_StatusCode OpcUa_AddNodesResponse_Encode(OpcUa_AddNodesResponse* a_pValue, 
 /*============================================================================
  * OpcUa_AddNodesResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddNodesResponse_Decode(OpcUa_AddNodesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddNodesResponse* a_pValue = (OpcUa_AddNodesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7784,11 +8064,11 @@ struct SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType =
     OpcUaId_AddNodesResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AddNodesResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AddNodesResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AddNodesResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AddNodesResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AddNodesResponse_Decode
+    OpcUa_AddNodesResponse_Initialize,
+    OpcUa_AddNodesResponse_Clear,
+    NULL,
+    OpcUa_AddNodesResponse_Encode,
+    OpcUa_AddNodesResponse_Decode
 };
 #endif
 #endif
@@ -7797,8 +8077,9 @@ struct SOPC_EncodeableType OpcUa_AddNodesResponse_EncodeableType =
 /*============================================================================
  * OpcUa_AddReferencesItem_Initialize
  *===========================================================================*/
-void OpcUa_AddReferencesItem_Initialize(OpcUa_AddReferencesItem* a_pValue)
+void OpcUa_AddReferencesItem_Initialize(void* pValue)
 {
+    OpcUa_AddReferencesItem* a_pValue = (OpcUa_AddReferencesItem*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->SourceNodeId);
@@ -7813,8 +8094,9 @@ void OpcUa_AddReferencesItem_Initialize(OpcUa_AddReferencesItem* a_pValue)
 /*============================================================================
  * OpcUa_AddReferencesItem_Clear
  *===========================================================================*/
-void OpcUa_AddReferencesItem_Clear(OpcUa_AddReferencesItem* a_pValue)
+void OpcUa_AddReferencesItem_Clear(void* pValue)
 {
+    OpcUa_AddReferencesItem* a_pValue = (OpcUa_AddReferencesItem*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->SourceNodeId);
@@ -7829,9 +8111,10 @@ void OpcUa_AddReferencesItem_Clear(OpcUa_AddReferencesItem* a_pValue)
 /*============================================================================
  * OpcUa_AddReferencesItem_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddReferencesItem_Encode(OpcUa_AddReferencesItem* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesItem_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddReferencesItem* a_pValue = (OpcUa_AddReferencesItem*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7856,9 +8139,10 @@ SOPC_StatusCode OpcUa_AddReferencesItem_Encode(OpcUa_AddReferencesItem* a_pValue
 /*============================================================================
  * OpcUa_AddReferencesItem_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddReferencesItem_Decode(OpcUa_AddReferencesItem* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddReferencesItem* a_pValue = (OpcUa_AddReferencesItem*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7897,11 +8181,11 @@ struct SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType =
     OpcUaId_AddReferencesItem_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AddReferencesItem),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AddReferencesItem_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AddReferencesItem_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AddReferencesItem_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AddReferencesItem_Decode
+    OpcUa_AddReferencesItem_Initialize,
+    OpcUa_AddReferencesItem_Clear,
+    NULL,
+    OpcUa_AddReferencesItem_Encode,
+    OpcUa_AddReferencesItem_Decode
 };
 #endif
 
@@ -7910,8 +8194,9 @@ struct SOPC_EncodeableType OpcUa_AddReferencesItem_EncodeableType =
 /*============================================================================
  * OpcUa_AddReferencesRequest_Initialize
  *===========================================================================*/
-void OpcUa_AddReferencesRequest_Initialize(OpcUa_AddReferencesRequest* a_pValue)
+void OpcUa_AddReferencesRequest_Initialize(void* pValue)
 {
+    OpcUa_AddReferencesRequest* a_pValue = (OpcUa_AddReferencesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -7923,8 +8208,9 @@ void OpcUa_AddReferencesRequest_Initialize(OpcUa_AddReferencesRequest* a_pValue)
 /*============================================================================
  * OpcUa_AddReferencesRequest_Clear
  *===========================================================================*/
-void OpcUa_AddReferencesRequest_Clear(OpcUa_AddReferencesRequest* a_pValue)
+void OpcUa_AddReferencesRequest_Clear(void* pValue)
 {
+    OpcUa_AddReferencesRequest* a_pValue = (OpcUa_AddReferencesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -7936,9 +8222,10 @@ void OpcUa_AddReferencesRequest_Clear(OpcUa_AddReferencesRequest* a_pValue)
 /*============================================================================
  * OpcUa_AddReferencesRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddReferencesRequest_Encode(OpcUa_AddReferencesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddReferencesRequest* a_pValue = (OpcUa_AddReferencesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7956,9 +8243,10 @@ SOPC_StatusCode OpcUa_AddReferencesRequest_Encode(OpcUa_AddReferencesRequest* a_
 /*============================================================================
  * OpcUa_AddReferencesRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddReferencesRequest_Decode(OpcUa_AddReferencesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddReferencesRequest* a_pValue = (OpcUa_AddReferencesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -7992,11 +8280,11 @@ struct SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType =
     OpcUaId_AddReferencesRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AddReferencesRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AddReferencesRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AddReferencesRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AddReferencesRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AddReferencesRequest_Decode
+    OpcUa_AddReferencesRequest_Initialize,
+    OpcUa_AddReferencesRequest_Clear,
+    NULL,
+    OpcUa_AddReferencesRequest_Encode,
+    OpcUa_AddReferencesRequest_Decode
 };
 #endif
 
@@ -8004,8 +8292,9 @@ struct SOPC_EncodeableType OpcUa_AddReferencesRequest_EncodeableType =
 /*============================================================================
  * OpcUa_AddReferencesResponse_Initialize
  *===========================================================================*/
-void OpcUa_AddReferencesResponse_Initialize(OpcUa_AddReferencesResponse* a_pValue)
+void OpcUa_AddReferencesResponse_Initialize(void* pValue)
 {
+    OpcUa_AddReferencesResponse* a_pValue = (OpcUa_AddReferencesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -8019,8 +8308,9 @@ void OpcUa_AddReferencesResponse_Initialize(OpcUa_AddReferencesResponse* a_pValu
 /*============================================================================
  * OpcUa_AddReferencesResponse_Clear
  *===========================================================================*/
-void OpcUa_AddReferencesResponse_Clear(OpcUa_AddReferencesResponse* a_pValue)
+void OpcUa_AddReferencesResponse_Clear(void* pValue)
 {
+    OpcUa_AddReferencesResponse* a_pValue = (OpcUa_AddReferencesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -8034,9 +8324,10 @@ void OpcUa_AddReferencesResponse_Clear(OpcUa_AddReferencesResponse* a_pValue)
 /*============================================================================
  * OpcUa_AddReferencesResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddReferencesResponse_Encode(OpcUa_AddReferencesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddReferencesResponse* a_pValue = (OpcUa_AddReferencesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8057,9 +8348,10 @@ SOPC_StatusCode OpcUa_AddReferencesResponse_Encode(OpcUa_AddReferencesResponse* 
 /*============================================================================
  * OpcUa_AddReferencesResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AddReferencesResponse_Decode(OpcUa_AddReferencesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AddReferencesResponse* a_pValue = (OpcUa_AddReferencesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8098,11 +8390,11 @@ struct SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType =
     OpcUaId_AddReferencesResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AddReferencesResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AddReferencesResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AddReferencesResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AddReferencesResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AddReferencesResponse_Decode
+    OpcUa_AddReferencesResponse_Initialize,
+    OpcUa_AddReferencesResponse_Clear,
+    NULL,
+    OpcUa_AddReferencesResponse_Encode,
+    OpcUa_AddReferencesResponse_Decode
 };
 #endif
 #endif
@@ -8111,8 +8403,9 @@ struct SOPC_EncodeableType OpcUa_AddReferencesResponse_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteNodesItem_Initialize
  *===========================================================================*/
-void OpcUa_DeleteNodesItem_Initialize(OpcUa_DeleteNodesItem* a_pValue)
+void OpcUa_DeleteNodesItem_Initialize(void* pValue)
 {
+    OpcUa_DeleteNodesItem* a_pValue = (OpcUa_DeleteNodesItem*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -8123,8 +8416,9 @@ void OpcUa_DeleteNodesItem_Initialize(OpcUa_DeleteNodesItem* a_pValue)
 /*============================================================================
  * OpcUa_DeleteNodesItem_Clear
  *===========================================================================*/
-void OpcUa_DeleteNodesItem_Clear(OpcUa_DeleteNodesItem* a_pValue)
+void OpcUa_DeleteNodesItem_Clear(void* pValue)
 {
+    OpcUa_DeleteNodesItem* a_pValue = (OpcUa_DeleteNodesItem*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -8135,9 +8429,10 @@ void OpcUa_DeleteNodesItem_Clear(OpcUa_DeleteNodesItem* a_pValue)
 /*============================================================================
  * OpcUa_DeleteNodesItem_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteNodesItem_Encode(OpcUa_DeleteNodesItem* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesItem_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteNodesItem* a_pValue = (OpcUa_DeleteNodesItem*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8154,9 +8449,10 @@ SOPC_StatusCode OpcUa_DeleteNodesItem_Encode(OpcUa_DeleteNodesItem* a_pValue, SO
 /*============================================================================
  * OpcUa_DeleteNodesItem_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteNodesItem_Decode(OpcUa_DeleteNodesItem* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteNodesItem* a_pValue = (OpcUa_DeleteNodesItem*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8187,11 +8483,11 @@ struct SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType =
     OpcUaId_DeleteNodesItem_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteNodesItem),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteNodesItem_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteNodesItem_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteNodesItem_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteNodesItem_Decode
+    OpcUa_DeleteNodesItem_Initialize,
+    OpcUa_DeleteNodesItem_Clear,
+    NULL,
+    OpcUa_DeleteNodesItem_Encode,
+    OpcUa_DeleteNodesItem_Decode
 };
 #endif
 
@@ -8200,8 +8496,9 @@ struct SOPC_EncodeableType OpcUa_DeleteNodesItem_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteNodesRequest_Initialize
  *===========================================================================*/
-void OpcUa_DeleteNodesRequest_Initialize(OpcUa_DeleteNodesRequest* a_pValue)
+void OpcUa_DeleteNodesRequest_Initialize(void* pValue)
 {
+    OpcUa_DeleteNodesRequest* a_pValue = (OpcUa_DeleteNodesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -8213,8 +8510,9 @@ void OpcUa_DeleteNodesRequest_Initialize(OpcUa_DeleteNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_DeleteNodesRequest_Clear
  *===========================================================================*/
-void OpcUa_DeleteNodesRequest_Clear(OpcUa_DeleteNodesRequest* a_pValue)
+void OpcUa_DeleteNodesRequest_Clear(void* pValue)
 {
+    OpcUa_DeleteNodesRequest* a_pValue = (OpcUa_DeleteNodesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -8226,9 +8524,10 @@ void OpcUa_DeleteNodesRequest_Clear(OpcUa_DeleteNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_DeleteNodesRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteNodesRequest_Encode(OpcUa_DeleteNodesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteNodesRequest* a_pValue = (OpcUa_DeleteNodesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8246,9 +8545,10 @@ SOPC_StatusCode OpcUa_DeleteNodesRequest_Encode(OpcUa_DeleteNodesRequest* a_pVal
 /*============================================================================
  * OpcUa_DeleteNodesRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteNodesRequest_Decode(OpcUa_DeleteNodesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteNodesRequest* a_pValue = (OpcUa_DeleteNodesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8282,11 +8582,11 @@ struct SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType =
     OpcUaId_DeleteNodesRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteNodesRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteNodesRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteNodesRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteNodesRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteNodesRequest_Decode
+    OpcUa_DeleteNodesRequest_Initialize,
+    OpcUa_DeleteNodesRequest_Clear,
+    NULL,
+    OpcUa_DeleteNodesRequest_Encode,
+    OpcUa_DeleteNodesRequest_Decode
 };
 #endif
 
@@ -8294,8 +8594,9 @@ struct SOPC_EncodeableType OpcUa_DeleteNodesRequest_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteNodesResponse_Initialize
  *===========================================================================*/
-void OpcUa_DeleteNodesResponse_Initialize(OpcUa_DeleteNodesResponse* a_pValue)
+void OpcUa_DeleteNodesResponse_Initialize(void* pValue)
 {
+    OpcUa_DeleteNodesResponse* a_pValue = (OpcUa_DeleteNodesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -8309,8 +8610,9 @@ void OpcUa_DeleteNodesResponse_Initialize(OpcUa_DeleteNodesResponse* a_pValue)
 /*============================================================================
  * OpcUa_DeleteNodesResponse_Clear
  *===========================================================================*/
-void OpcUa_DeleteNodesResponse_Clear(OpcUa_DeleteNodesResponse* a_pValue)
+void OpcUa_DeleteNodesResponse_Clear(void* pValue)
 {
+    OpcUa_DeleteNodesResponse* a_pValue = (OpcUa_DeleteNodesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -8324,9 +8626,10 @@ void OpcUa_DeleteNodesResponse_Clear(OpcUa_DeleteNodesResponse* a_pValue)
 /*============================================================================
  * OpcUa_DeleteNodesResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteNodesResponse_Encode(OpcUa_DeleteNodesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteNodesResponse* a_pValue = (OpcUa_DeleteNodesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8347,9 +8650,10 @@ SOPC_StatusCode OpcUa_DeleteNodesResponse_Encode(OpcUa_DeleteNodesResponse* a_pV
 /*============================================================================
  * OpcUa_DeleteNodesResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteNodesResponse_Decode(OpcUa_DeleteNodesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteNodesResponse* a_pValue = (OpcUa_DeleteNodesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8388,11 +8692,11 @@ struct SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType =
     OpcUaId_DeleteNodesResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteNodesResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteNodesResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteNodesResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteNodesResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteNodesResponse_Decode
+    OpcUa_DeleteNodesResponse_Initialize,
+    OpcUa_DeleteNodesResponse_Clear,
+    NULL,
+    OpcUa_DeleteNodesResponse_Encode,
+    OpcUa_DeleteNodesResponse_Decode
 };
 #endif
 #endif
@@ -8401,8 +8705,9 @@ struct SOPC_EncodeableType OpcUa_DeleteNodesResponse_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteReferencesItem_Initialize
  *===========================================================================*/
-void OpcUa_DeleteReferencesItem_Initialize(OpcUa_DeleteReferencesItem* a_pValue)
+void OpcUa_DeleteReferencesItem_Initialize(void* pValue)
 {
+    OpcUa_DeleteReferencesItem* a_pValue = (OpcUa_DeleteReferencesItem*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->SourceNodeId);
@@ -8416,8 +8721,9 @@ void OpcUa_DeleteReferencesItem_Initialize(OpcUa_DeleteReferencesItem* a_pValue)
 /*============================================================================
  * OpcUa_DeleteReferencesItem_Clear
  *===========================================================================*/
-void OpcUa_DeleteReferencesItem_Clear(OpcUa_DeleteReferencesItem* a_pValue)
+void OpcUa_DeleteReferencesItem_Clear(void* pValue)
 {
+    OpcUa_DeleteReferencesItem* a_pValue = (OpcUa_DeleteReferencesItem*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->SourceNodeId);
@@ -8431,9 +8737,10 @@ void OpcUa_DeleteReferencesItem_Clear(OpcUa_DeleteReferencesItem* a_pValue)
 /*============================================================================
  * OpcUa_DeleteReferencesItem_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteReferencesItem_Encode(OpcUa_DeleteReferencesItem* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesItem_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteReferencesItem* a_pValue = (OpcUa_DeleteReferencesItem*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8456,9 +8763,10 @@ SOPC_StatusCode OpcUa_DeleteReferencesItem_Encode(OpcUa_DeleteReferencesItem* a_
 /*============================================================================
  * OpcUa_DeleteReferencesItem_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteReferencesItem_Decode(OpcUa_DeleteReferencesItem* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteReferencesItem* a_pValue = (OpcUa_DeleteReferencesItem*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8495,11 +8803,11 @@ struct SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType =
     OpcUaId_DeleteReferencesItem_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteReferencesItem),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteReferencesItem_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteReferencesItem_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteReferencesItem_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteReferencesItem_Decode
+    OpcUa_DeleteReferencesItem_Initialize,
+    OpcUa_DeleteReferencesItem_Clear,
+    NULL,
+    OpcUa_DeleteReferencesItem_Encode,
+    OpcUa_DeleteReferencesItem_Decode
 };
 #endif
 
@@ -8508,8 +8816,9 @@ struct SOPC_EncodeableType OpcUa_DeleteReferencesItem_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteReferencesRequest_Initialize
  *===========================================================================*/
-void OpcUa_DeleteReferencesRequest_Initialize(OpcUa_DeleteReferencesRequest* a_pValue)
+void OpcUa_DeleteReferencesRequest_Initialize(void* pValue)
 {
+    OpcUa_DeleteReferencesRequest* a_pValue = (OpcUa_DeleteReferencesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -8521,8 +8830,9 @@ void OpcUa_DeleteReferencesRequest_Initialize(OpcUa_DeleteReferencesRequest* a_p
 /*============================================================================
  * OpcUa_DeleteReferencesRequest_Clear
  *===========================================================================*/
-void OpcUa_DeleteReferencesRequest_Clear(OpcUa_DeleteReferencesRequest* a_pValue)
+void OpcUa_DeleteReferencesRequest_Clear(void* pValue)
 {
+    OpcUa_DeleteReferencesRequest* a_pValue = (OpcUa_DeleteReferencesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -8534,9 +8844,10 @@ void OpcUa_DeleteReferencesRequest_Clear(OpcUa_DeleteReferencesRequest* a_pValue
 /*============================================================================
  * OpcUa_DeleteReferencesRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteReferencesRequest_Encode(OpcUa_DeleteReferencesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteReferencesRequest* a_pValue = (OpcUa_DeleteReferencesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8554,9 +8865,10 @@ SOPC_StatusCode OpcUa_DeleteReferencesRequest_Encode(OpcUa_DeleteReferencesReque
 /*============================================================================
  * OpcUa_DeleteReferencesRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteReferencesRequest_Decode(OpcUa_DeleteReferencesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteReferencesRequest* a_pValue = (OpcUa_DeleteReferencesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8590,11 +8902,11 @@ struct SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType =
     OpcUaId_DeleteReferencesRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteReferencesRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteReferencesRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteReferencesRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteReferencesRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteReferencesRequest_Decode
+    OpcUa_DeleteReferencesRequest_Initialize,
+    OpcUa_DeleteReferencesRequest_Clear,
+    NULL,
+    OpcUa_DeleteReferencesRequest_Encode,
+    OpcUa_DeleteReferencesRequest_Decode
 };
 #endif
 
@@ -8602,8 +8914,9 @@ struct SOPC_EncodeableType OpcUa_DeleteReferencesRequest_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteReferencesResponse_Initialize
  *===========================================================================*/
-void OpcUa_DeleteReferencesResponse_Initialize(OpcUa_DeleteReferencesResponse* a_pValue)
+void OpcUa_DeleteReferencesResponse_Initialize(void* pValue)
 {
+    OpcUa_DeleteReferencesResponse* a_pValue = (OpcUa_DeleteReferencesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -8617,8 +8930,9 @@ void OpcUa_DeleteReferencesResponse_Initialize(OpcUa_DeleteReferencesResponse* a
 /*============================================================================
  * OpcUa_DeleteReferencesResponse_Clear
  *===========================================================================*/
-void OpcUa_DeleteReferencesResponse_Clear(OpcUa_DeleteReferencesResponse* a_pValue)
+void OpcUa_DeleteReferencesResponse_Clear(void* pValue)
 {
+    OpcUa_DeleteReferencesResponse* a_pValue = (OpcUa_DeleteReferencesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -8632,9 +8946,10 @@ void OpcUa_DeleteReferencesResponse_Clear(OpcUa_DeleteReferencesResponse* a_pVal
 /*============================================================================
  * OpcUa_DeleteReferencesResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteReferencesResponse_Encode(OpcUa_DeleteReferencesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteReferencesResponse* a_pValue = (OpcUa_DeleteReferencesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8655,9 +8970,10 @@ SOPC_StatusCode OpcUa_DeleteReferencesResponse_Encode(OpcUa_DeleteReferencesResp
 /*============================================================================
  * OpcUa_DeleteReferencesResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteReferencesResponse_Decode(OpcUa_DeleteReferencesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteReferencesResponse* a_pValue = (OpcUa_DeleteReferencesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8696,11 +9012,11 @@ struct SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType =
     OpcUaId_DeleteReferencesResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteReferencesResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteReferencesResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteReferencesResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteReferencesResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteReferencesResponse_Decode
+    OpcUa_DeleteReferencesResponse_Initialize,
+    OpcUa_DeleteReferencesResponse_Clear,
+    NULL,
+    OpcUa_DeleteReferencesResponse_Encode,
+    OpcUa_DeleteReferencesResponse_Decode
 };
 #endif
 #endif
@@ -8711,8 +9027,9 @@ struct SOPC_EncodeableType OpcUa_DeleteReferencesResponse_EncodeableType =
 /*============================================================================
  * OpcUa_ViewDescription_Initialize
  *===========================================================================*/
-void OpcUa_ViewDescription_Initialize(OpcUa_ViewDescription* a_pValue)
+void OpcUa_ViewDescription_Initialize(void* pValue)
 {
+    OpcUa_ViewDescription* a_pValue = (OpcUa_ViewDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->ViewId);
@@ -8724,8 +9041,9 @@ void OpcUa_ViewDescription_Initialize(OpcUa_ViewDescription* a_pValue)
 /*============================================================================
  * OpcUa_ViewDescription_Clear
  *===========================================================================*/
-void OpcUa_ViewDescription_Clear(OpcUa_ViewDescription* a_pValue)
+void OpcUa_ViewDescription_Clear(void* pValue)
 {
+    OpcUa_ViewDescription* a_pValue = (OpcUa_ViewDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->ViewId);
@@ -8737,9 +9055,10 @@ void OpcUa_ViewDescription_Clear(OpcUa_ViewDescription* a_pValue)
 /*============================================================================
  * OpcUa_ViewDescription_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ViewDescription_Encode(OpcUa_ViewDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewDescription_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ViewDescription* a_pValue = (OpcUa_ViewDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8758,9 +9077,10 @@ SOPC_StatusCode OpcUa_ViewDescription_Encode(OpcUa_ViewDescription* a_pValue, SO
 /*============================================================================
  * OpcUa_ViewDescription_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ViewDescription_Decode(OpcUa_ViewDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ViewDescription_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ViewDescription* a_pValue = (OpcUa_ViewDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8793,11 +9113,11 @@ struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType =
     OpcUaId_ViewDescription_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ViewDescription),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ViewDescription_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ViewDescription_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ViewDescription_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ViewDescription_Decode
+    OpcUa_ViewDescription_Initialize,
+    OpcUa_ViewDescription_Clear,
+    NULL,
+    OpcUa_ViewDescription_Encode,
+    OpcUa_ViewDescription_Decode
 };
 #endif
 
@@ -8805,8 +9125,9 @@ struct SOPC_EncodeableType OpcUa_ViewDescription_EncodeableType =
 /*============================================================================
  * OpcUa_BrowseDescription_Initialize
  *===========================================================================*/
-void OpcUa_BrowseDescription_Initialize(OpcUa_BrowseDescription* a_pValue)
+void OpcUa_BrowseDescription_Initialize(void* pValue)
 {
+    OpcUa_BrowseDescription* a_pValue = (OpcUa_BrowseDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -8821,8 +9142,9 @@ void OpcUa_BrowseDescription_Initialize(OpcUa_BrowseDescription* a_pValue)
 /*============================================================================
  * OpcUa_BrowseDescription_Clear
  *===========================================================================*/
-void OpcUa_BrowseDescription_Clear(OpcUa_BrowseDescription* a_pValue)
+void OpcUa_BrowseDescription_Clear(void* pValue)
 {
+    OpcUa_BrowseDescription* a_pValue = (OpcUa_BrowseDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -8837,9 +9159,10 @@ void OpcUa_BrowseDescription_Clear(OpcUa_BrowseDescription* a_pValue)
 /*============================================================================
  * OpcUa_BrowseDescription_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseDescription_Encode(OpcUa_BrowseDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseDescription_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseDescription* a_pValue = (OpcUa_BrowseDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8864,9 +9187,10 @@ SOPC_StatusCode OpcUa_BrowseDescription_Encode(OpcUa_BrowseDescription* a_pValue
 /*============================================================================
  * OpcUa_BrowseDescription_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseDescription_Decode(OpcUa_BrowseDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseDescription_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseDescription* a_pValue = (OpcUa_BrowseDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8905,11 +9229,11 @@ struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType =
     OpcUaId_BrowseDescription_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BrowseDescription),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BrowseDescription_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BrowseDescription_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BrowseDescription_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BrowseDescription_Decode
+    OpcUa_BrowseDescription_Initialize,
+    OpcUa_BrowseDescription_Clear,
+    NULL,
+    OpcUa_BrowseDescription_Encode,
+    OpcUa_BrowseDescription_Decode
 };
 #endif
 
@@ -8918,8 +9242,9 @@ struct SOPC_EncodeableType OpcUa_BrowseDescription_EncodeableType =
 /*============================================================================
  * OpcUa_ReferenceDescription_Initialize
  *===========================================================================*/
-void OpcUa_ReferenceDescription_Initialize(OpcUa_ReferenceDescription* a_pValue)
+void OpcUa_ReferenceDescription_Initialize(void* pValue)
 {
+    OpcUa_ReferenceDescription* a_pValue = (OpcUa_ReferenceDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->ReferenceTypeId);
@@ -8935,8 +9260,9 @@ void OpcUa_ReferenceDescription_Initialize(OpcUa_ReferenceDescription* a_pValue)
 /*============================================================================
  * OpcUa_ReferenceDescription_Clear
  *===========================================================================*/
-void OpcUa_ReferenceDescription_Clear(OpcUa_ReferenceDescription* a_pValue)
+void OpcUa_ReferenceDescription_Clear(void* pValue)
 {
+    OpcUa_ReferenceDescription* a_pValue = (OpcUa_ReferenceDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->ReferenceTypeId);
@@ -8952,9 +9278,10 @@ void OpcUa_ReferenceDescription_Clear(OpcUa_ReferenceDescription* a_pValue)
 /*============================================================================
  * OpcUa_ReferenceDescription_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReferenceDescription_Encode(OpcUa_ReferenceDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceDescription_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReferenceDescription* a_pValue = (OpcUa_ReferenceDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -8981,9 +9308,10 @@ SOPC_StatusCode OpcUa_ReferenceDescription_Encode(OpcUa_ReferenceDescription* a_
 /*============================================================================
  * OpcUa_ReferenceDescription_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReferenceDescription_Decode(OpcUa_ReferenceDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReferenceDescription* a_pValue = (OpcUa_ReferenceDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9024,11 +9352,11 @@ struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType =
     OpcUaId_ReferenceDescription_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReferenceDescription),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReferenceDescription_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReferenceDescription_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReferenceDescription_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReferenceDescription_Decode
+    OpcUa_ReferenceDescription_Initialize,
+    OpcUa_ReferenceDescription_Clear,
+    NULL,
+    OpcUa_ReferenceDescription_Encode,
+    OpcUa_ReferenceDescription_Decode
 };
 #endif
 
@@ -9036,8 +9364,9 @@ struct SOPC_EncodeableType OpcUa_ReferenceDescription_EncodeableType =
 /*============================================================================
  * OpcUa_BrowseResult_Initialize
  *===========================================================================*/
-void OpcUa_BrowseResult_Initialize(OpcUa_BrowseResult* a_pValue)
+void OpcUa_BrowseResult_Initialize(void* pValue)
 {
+    OpcUa_BrowseResult* a_pValue = (OpcUa_BrowseResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -9050,8 +9379,9 @@ void OpcUa_BrowseResult_Initialize(OpcUa_BrowseResult* a_pValue)
 /*============================================================================
  * OpcUa_BrowseResult_Clear
  *===========================================================================*/
-void OpcUa_BrowseResult_Clear(OpcUa_BrowseResult* a_pValue)
+void OpcUa_BrowseResult_Clear(void* pValue)
 {
+    OpcUa_BrowseResult* a_pValue = (OpcUa_BrowseResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -9064,9 +9394,10 @@ void OpcUa_BrowseResult_Clear(OpcUa_BrowseResult* a_pValue)
 /*============================================================================
  * OpcUa_BrowseResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseResult_Encode(OpcUa_BrowseResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseResult* a_pValue = (OpcUa_BrowseResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9086,9 +9417,10 @@ SOPC_StatusCode OpcUa_BrowseResult_Encode(OpcUa_BrowseResult* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_BrowseResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseResult_Decode(OpcUa_BrowseResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseResult* a_pValue = (OpcUa_BrowseResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9124,11 +9456,11 @@ struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType =
     OpcUaId_BrowseResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BrowseResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BrowseResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BrowseResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BrowseResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BrowseResult_Decode
+    OpcUa_BrowseResult_Initialize,
+    OpcUa_BrowseResult_Clear,
+    NULL,
+    OpcUa_BrowseResult_Encode,
+    OpcUa_BrowseResult_Decode
 };
 #endif
 
@@ -9137,8 +9469,9 @@ struct SOPC_EncodeableType OpcUa_BrowseResult_EncodeableType =
 /*============================================================================
  * OpcUa_BrowseRequest_Initialize
  *===========================================================================*/
-void OpcUa_BrowseRequest_Initialize(OpcUa_BrowseRequest* a_pValue)
+void OpcUa_BrowseRequest_Initialize(void* pValue)
 {
+    OpcUa_BrowseRequest* a_pValue = (OpcUa_BrowseRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -9152,8 +9485,9 @@ void OpcUa_BrowseRequest_Initialize(OpcUa_BrowseRequest* a_pValue)
 /*============================================================================
  * OpcUa_BrowseRequest_Clear
  *===========================================================================*/
-void OpcUa_BrowseRequest_Clear(OpcUa_BrowseRequest* a_pValue)
+void OpcUa_BrowseRequest_Clear(void* pValue)
 {
+    OpcUa_BrowseRequest* a_pValue = (OpcUa_BrowseRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -9167,9 +9501,10 @@ void OpcUa_BrowseRequest_Clear(OpcUa_BrowseRequest* a_pValue)
 /*============================================================================
  * OpcUa_BrowseRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseRequest_Encode(OpcUa_BrowseRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseRequest* a_pValue = (OpcUa_BrowseRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9191,9 +9526,10 @@ SOPC_StatusCode OpcUa_BrowseRequest_Encode(OpcUa_BrowseRequest* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_BrowseRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseRequest_Decode(OpcUa_BrowseRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseRequest* a_pValue = (OpcUa_BrowseRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9231,11 +9567,11 @@ struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType =
     OpcUaId_BrowseRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BrowseRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BrowseRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BrowseRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BrowseRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BrowseRequest_Decode
+    OpcUa_BrowseRequest_Initialize,
+    OpcUa_BrowseRequest_Clear,
+    NULL,
+    OpcUa_BrowseRequest_Encode,
+    OpcUa_BrowseRequest_Decode
 };
 #endif
 
@@ -9243,8 +9579,9 @@ struct SOPC_EncodeableType OpcUa_BrowseRequest_EncodeableType =
 /*============================================================================
  * OpcUa_BrowseResponse_Initialize
  *===========================================================================*/
-void OpcUa_BrowseResponse_Initialize(OpcUa_BrowseResponse* a_pValue)
+void OpcUa_BrowseResponse_Initialize(void* pValue)
 {
+    OpcUa_BrowseResponse* a_pValue = (OpcUa_BrowseResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -9258,8 +9595,9 @@ void OpcUa_BrowseResponse_Initialize(OpcUa_BrowseResponse* a_pValue)
 /*============================================================================
  * OpcUa_BrowseResponse_Clear
  *===========================================================================*/
-void OpcUa_BrowseResponse_Clear(OpcUa_BrowseResponse* a_pValue)
+void OpcUa_BrowseResponse_Clear(void* pValue)
 {
+    OpcUa_BrowseResponse* a_pValue = (OpcUa_BrowseResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -9273,9 +9611,10 @@ void OpcUa_BrowseResponse_Clear(OpcUa_BrowseResponse* a_pValue)
 /*============================================================================
  * OpcUa_BrowseResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseResponse_Encode(OpcUa_BrowseResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseResponse* a_pValue = (OpcUa_BrowseResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9296,9 +9635,10 @@ SOPC_StatusCode OpcUa_BrowseResponse_Encode(OpcUa_BrowseResponse* a_pValue, SOPC
 /*============================================================================
  * OpcUa_BrowseResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseResponse_Decode(OpcUa_BrowseResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseResponse* a_pValue = (OpcUa_BrowseResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9337,11 +9677,11 @@ struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType =
     OpcUaId_BrowseResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BrowseResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BrowseResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BrowseResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BrowseResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BrowseResponse_Decode
+    OpcUa_BrowseResponse_Initialize,
+    OpcUa_BrowseResponse_Clear,
+    NULL,
+    OpcUa_BrowseResponse_Encode,
+    OpcUa_BrowseResponse_Decode
 };
 #endif
 #endif
@@ -9351,8 +9691,9 @@ struct SOPC_EncodeableType OpcUa_BrowseResponse_EncodeableType =
 /*============================================================================
  * OpcUa_BrowseNextRequest_Initialize
  *===========================================================================*/
-void OpcUa_BrowseNextRequest_Initialize(OpcUa_BrowseNextRequest* a_pValue)
+void OpcUa_BrowseNextRequest_Initialize(void* pValue)
 {
+    OpcUa_BrowseNextRequest* a_pValue = (OpcUa_BrowseNextRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -9365,8 +9706,9 @@ void OpcUa_BrowseNextRequest_Initialize(OpcUa_BrowseNextRequest* a_pValue)
 /*============================================================================
  * OpcUa_BrowseNextRequest_Clear
  *===========================================================================*/
-void OpcUa_BrowseNextRequest_Clear(OpcUa_BrowseNextRequest* a_pValue)
+void OpcUa_BrowseNextRequest_Clear(void* pValue)
 {
+    OpcUa_BrowseNextRequest* a_pValue = (OpcUa_BrowseNextRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -9379,9 +9721,10 @@ void OpcUa_BrowseNextRequest_Clear(OpcUa_BrowseNextRequest* a_pValue)
 /*============================================================================
  * OpcUa_BrowseNextRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseNextRequest_Encode(OpcUa_BrowseNextRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseNextRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseNextRequest* a_pValue = (OpcUa_BrowseNextRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9401,9 +9744,10 @@ SOPC_StatusCode OpcUa_BrowseNextRequest_Encode(OpcUa_BrowseNextRequest* a_pValue
 /*============================================================================
  * OpcUa_BrowseNextRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseNextRequest_Decode(OpcUa_BrowseNextRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseNextRequest* a_pValue = (OpcUa_BrowseNextRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9439,11 +9783,11 @@ struct SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType =
     OpcUaId_BrowseNextRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BrowseNextRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BrowseNextRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BrowseNextRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BrowseNextRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BrowseNextRequest_Decode
+    OpcUa_BrowseNextRequest_Initialize,
+    OpcUa_BrowseNextRequest_Clear,
+    NULL,
+    OpcUa_BrowseNextRequest_Encode,
+    OpcUa_BrowseNextRequest_Decode
 };
 #endif
 
@@ -9451,8 +9795,9 @@ struct SOPC_EncodeableType OpcUa_BrowseNextRequest_EncodeableType =
 /*============================================================================
  * OpcUa_BrowseNextResponse_Initialize
  *===========================================================================*/
-void OpcUa_BrowseNextResponse_Initialize(OpcUa_BrowseNextResponse* a_pValue)
+void OpcUa_BrowseNextResponse_Initialize(void* pValue)
 {
+    OpcUa_BrowseNextResponse* a_pValue = (OpcUa_BrowseNextResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -9466,8 +9811,9 @@ void OpcUa_BrowseNextResponse_Initialize(OpcUa_BrowseNextResponse* a_pValue)
 /*============================================================================
  * OpcUa_BrowseNextResponse_Clear
  *===========================================================================*/
-void OpcUa_BrowseNextResponse_Clear(OpcUa_BrowseNextResponse* a_pValue)
+void OpcUa_BrowseNextResponse_Clear(void* pValue)
 {
+    OpcUa_BrowseNextResponse* a_pValue = (OpcUa_BrowseNextResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -9481,9 +9827,10 @@ void OpcUa_BrowseNextResponse_Clear(OpcUa_BrowseNextResponse* a_pValue)
 /*============================================================================
  * OpcUa_BrowseNextResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseNextResponse_Encode(OpcUa_BrowseNextResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseNextResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseNextResponse* a_pValue = (OpcUa_BrowseNextResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9504,9 +9851,10 @@ SOPC_StatusCode OpcUa_BrowseNextResponse_Encode(OpcUa_BrowseNextResponse* a_pVal
 /*============================================================================
  * OpcUa_BrowseNextResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowseNextResponse_Decode(OpcUa_BrowseNextResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowseNextResponse* a_pValue = (OpcUa_BrowseNextResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9545,11 +9893,11 @@ struct SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType =
     OpcUaId_BrowseNextResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BrowseNextResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BrowseNextResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BrowseNextResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BrowseNextResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BrowseNextResponse_Decode
+    OpcUa_BrowseNextResponse_Initialize,
+    OpcUa_BrowseNextResponse_Clear,
+    NULL,
+    OpcUa_BrowseNextResponse_Encode,
+    OpcUa_BrowseNextResponse_Decode
 };
 #endif
 #endif
@@ -9558,8 +9906,9 @@ struct SOPC_EncodeableType OpcUa_BrowseNextResponse_EncodeableType =
 /*============================================================================
  * OpcUa_RelativePathElement_Initialize
  *===========================================================================*/
-void OpcUa_RelativePathElement_Initialize(OpcUa_RelativePathElement* a_pValue)
+void OpcUa_RelativePathElement_Initialize(void* pValue)
 {
+    OpcUa_RelativePathElement* a_pValue = (OpcUa_RelativePathElement*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->ReferenceTypeId);
@@ -9572,8 +9921,9 @@ void OpcUa_RelativePathElement_Initialize(OpcUa_RelativePathElement* a_pValue)
 /*============================================================================
  * OpcUa_RelativePathElement_Clear
  *===========================================================================*/
-void OpcUa_RelativePathElement_Clear(OpcUa_RelativePathElement* a_pValue)
+void OpcUa_RelativePathElement_Clear(void* pValue)
 {
+    OpcUa_RelativePathElement* a_pValue = (OpcUa_RelativePathElement*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->ReferenceTypeId);
@@ -9586,9 +9936,10 @@ void OpcUa_RelativePathElement_Clear(OpcUa_RelativePathElement* a_pValue)
 /*============================================================================
  * OpcUa_RelativePathElement_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RelativePathElement_Encode(OpcUa_RelativePathElement* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RelativePathElement_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RelativePathElement* a_pValue = (OpcUa_RelativePathElement*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9609,9 +9960,10 @@ SOPC_StatusCode OpcUa_RelativePathElement_Encode(OpcUa_RelativePathElement* a_pV
 /*============================================================================
  * OpcUa_RelativePathElement_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RelativePathElement_Decode(OpcUa_RelativePathElement* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RelativePathElement_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RelativePathElement* a_pValue = (OpcUa_RelativePathElement*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9646,11 +9998,11 @@ struct SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType =
     OpcUaId_RelativePathElement_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RelativePathElement),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RelativePathElement_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RelativePathElement_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RelativePathElement_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RelativePathElement_Decode
+    OpcUa_RelativePathElement_Initialize,
+    OpcUa_RelativePathElement_Clear,
+    NULL,
+    OpcUa_RelativePathElement_Encode,
+    OpcUa_RelativePathElement_Decode
 };
 #endif
 
@@ -9658,8 +10010,9 @@ struct SOPC_EncodeableType OpcUa_RelativePathElement_EncodeableType =
 /*============================================================================
  * OpcUa_RelativePath_Initialize
  *===========================================================================*/
-void OpcUa_RelativePath_Initialize(OpcUa_RelativePath* a_pValue)
+void OpcUa_RelativePath_Initialize(void* pValue)
 {
+    OpcUa_RelativePath* a_pValue = (OpcUa_RelativePath*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
@@ -9670,8 +10023,9 @@ void OpcUa_RelativePath_Initialize(OpcUa_RelativePath* a_pValue)
 /*============================================================================
  * OpcUa_RelativePath_Clear
  *===========================================================================*/
-void OpcUa_RelativePath_Clear(OpcUa_RelativePath* a_pValue)
+void OpcUa_RelativePath_Clear(void* pValue)
 {
+    OpcUa_RelativePath* a_pValue = (OpcUa_RelativePath*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
@@ -9682,9 +10036,10 @@ void OpcUa_RelativePath_Clear(OpcUa_RelativePath* a_pValue)
 /*============================================================================
  * OpcUa_RelativePath_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RelativePath_Encode(OpcUa_RelativePath* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RelativePath_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RelativePath* a_pValue = (OpcUa_RelativePath*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9700,9 +10055,10 @@ SOPC_StatusCode OpcUa_RelativePath_Encode(OpcUa_RelativePath* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_RelativePath_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RelativePath_Decode(OpcUa_RelativePath* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RelativePath_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RelativePath* a_pValue = (OpcUa_RelativePath*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9734,11 +10090,11 @@ struct SOPC_EncodeableType OpcUa_RelativePath_EncodeableType =
     OpcUaId_RelativePath_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RelativePath),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RelativePath_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RelativePath_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RelativePath_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RelativePath_Decode
+    OpcUa_RelativePath_Initialize,
+    OpcUa_RelativePath_Clear,
+    NULL,
+    OpcUa_RelativePath_Encode,
+    OpcUa_RelativePath_Decode
 };
 #endif
 
@@ -9746,8 +10102,9 @@ struct SOPC_EncodeableType OpcUa_RelativePath_EncodeableType =
 /*============================================================================
  * OpcUa_BrowsePath_Initialize
  *===========================================================================*/
-void OpcUa_BrowsePath_Initialize(OpcUa_BrowsePath* a_pValue)
+void OpcUa_BrowsePath_Initialize(void* pValue)
 {
+    OpcUa_BrowsePath* a_pValue = (OpcUa_BrowsePath*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->StartingNode);
@@ -9758,8 +10115,9 @@ void OpcUa_BrowsePath_Initialize(OpcUa_BrowsePath* a_pValue)
 /*============================================================================
  * OpcUa_BrowsePath_Clear
  *===========================================================================*/
-void OpcUa_BrowsePath_Clear(OpcUa_BrowsePath* a_pValue)
+void OpcUa_BrowsePath_Clear(void* pValue)
 {
+    OpcUa_BrowsePath* a_pValue = (OpcUa_BrowsePath*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->StartingNode);
@@ -9770,9 +10128,10 @@ void OpcUa_BrowsePath_Clear(OpcUa_BrowsePath* a_pValue)
 /*============================================================================
  * OpcUa_BrowsePath_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowsePath_Encode(OpcUa_BrowsePath* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePath_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowsePath* a_pValue = (OpcUa_BrowsePath*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9789,9 +10148,10 @@ SOPC_StatusCode OpcUa_BrowsePath_Encode(OpcUa_BrowsePath* a_pValue, SOPC_MsgBuff
 /*============================================================================
  * OpcUa_BrowsePath_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowsePath_Decode(OpcUa_BrowsePath* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePath_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowsePath* a_pValue = (OpcUa_BrowsePath*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9822,11 +10182,11 @@ struct SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType =
     OpcUaId_BrowsePath_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BrowsePath),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BrowsePath_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BrowsePath_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BrowsePath_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BrowsePath_Decode
+    OpcUa_BrowsePath_Initialize,
+    OpcUa_BrowsePath_Clear,
+    NULL,
+    OpcUa_BrowsePath_Encode,
+    OpcUa_BrowsePath_Decode
 };
 #endif
 
@@ -9834,8 +10194,9 @@ struct SOPC_EncodeableType OpcUa_BrowsePath_EncodeableType =
 /*============================================================================
  * OpcUa_BrowsePathTarget_Initialize
  *===========================================================================*/
-void OpcUa_BrowsePathTarget_Initialize(OpcUa_BrowsePathTarget* a_pValue)
+void OpcUa_BrowsePathTarget_Initialize(void* pValue)
 {
+    OpcUa_BrowsePathTarget* a_pValue = (OpcUa_BrowsePathTarget*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ExpandedNodeId_Initialize(&a_pValue->TargetId);
@@ -9846,8 +10207,9 @@ void OpcUa_BrowsePathTarget_Initialize(OpcUa_BrowsePathTarget* a_pValue)
 /*============================================================================
  * OpcUa_BrowsePathTarget_Clear
  *===========================================================================*/
-void OpcUa_BrowsePathTarget_Clear(OpcUa_BrowsePathTarget* a_pValue)
+void OpcUa_BrowsePathTarget_Clear(void* pValue)
 {
+    OpcUa_BrowsePathTarget* a_pValue = (OpcUa_BrowsePathTarget*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ExpandedNodeId_Clear(&a_pValue->TargetId);
@@ -9858,9 +10220,10 @@ void OpcUa_BrowsePathTarget_Clear(OpcUa_BrowsePathTarget* a_pValue)
 /*============================================================================
  * OpcUa_BrowsePathTarget_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowsePathTarget_Encode(OpcUa_BrowsePathTarget* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePathTarget_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowsePathTarget* a_pValue = (OpcUa_BrowsePathTarget*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9877,9 +10240,10 @@ SOPC_StatusCode OpcUa_BrowsePathTarget_Encode(OpcUa_BrowsePathTarget* a_pValue, 
 /*============================================================================
  * OpcUa_BrowsePathTarget_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowsePathTarget_Decode(OpcUa_BrowsePathTarget* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowsePathTarget* a_pValue = (OpcUa_BrowsePathTarget*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9910,11 +10274,11 @@ struct SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType =
     OpcUaId_BrowsePathTarget_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BrowsePathTarget),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BrowsePathTarget_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BrowsePathTarget_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BrowsePathTarget_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BrowsePathTarget_Decode
+    OpcUa_BrowsePathTarget_Initialize,
+    OpcUa_BrowsePathTarget_Clear,
+    NULL,
+    OpcUa_BrowsePathTarget_Encode,
+    OpcUa_BrowsePathTarget_Decode
 };
 #endif
 
@@ -9922,8 +10286,9 @@ struct SOPC_EncodeableType OpcUa_BrowsePathTarget_EncodeableType =
 /*============================================================================
  * OpcUa_BrowsePathResult_Initialize
  *===========================================================================*/
-void OpcUa_BrowsePathResult_Initialize(OpcUa_BrowsePathResult* a_pValue)
+void OpcUa_BrowsePathResult_Initialize(void* pValue)
 {
+    OpcUa_BrowsePathResult* a_pValue = (OpcUa_BrowsePathResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -9935,8 +10300,9 @@ void OpcUa_BrowsePathResult_Initialize(OpcUa_BrowsePathResult* a_pValue)
 /*============================================================================
  * OpcUa_BrowsePathResult_Clear
  *===========================================================================*/
-void OpcUa_BrowsePathResult_Clear(OpcUa_BrowsePathResult* a_pValue)
+void OpcUa_BrowsePathResult_Clear(void* pValue)
 {
+    OpcUa_BrowsePathResult* a_pValue = (OpcUa_BrowsePathResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -9948,9 +10314,10 @@ void OpcUa_BrowsePathResult_Clear(OpcUa_BrowsePathResult* a_pValue)
 /*============================================================================
  * OpcUa_BrowsePathResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowsePathResult_Encode(OpcUa_BrowsePathResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePathResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowsePathResult* a_pValue = (OpcUa_BrowsePathResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -9968,9 +10335,10 @@ SOPC_StatusCode OpcUa_BrowsePathResult_Encode(OpcUa_BrowsePathResult* a_pValue, 
 /*============================================================================
  * OpcUa_BrowsePathResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BrowsePathResult_Decode(OpcUa_BrowsePathResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BrowsePathResult* a_pValue = (OpcUa_BrowsePathResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10004,11 +10372,11 @@ struct SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType =
     OpcUaId_BrowsePathResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BrowsePathResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BrowsePathResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BrowsePathResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BrowsePathResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BrowsePathResult_Decode
+    OpcUa_BrowsePathResult_Initialize,
+    OpcUa_BrowsePathResult_Clear,
+    NULL,
+    OpcUa_BrowsePathResult_Encode,
+    OpcUa_BrowsePathResult_Decode
 };
 #endif
 
@@ -10017,8 +10385,9 @@ struct SOPC_EncodeableType OpcUa_BrowsePathResult_EncodeableType =
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize
  *===========================================================================*/
-void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue)
+void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(void* pValue)
 {
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -10030,8 +10399,9 @@ void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize(OpcUa_TranslateBrowse
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear
  *===========================================================================*/
-void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue)
+void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(void* pValue)
 {
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -10043,9 +10413,10 @@ void OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(OpcUa_TranslateBrowsePaths
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10063,9 +10434,10 @@ SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode(OpcUa_Translat
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10099,11 +10471,11 @@ struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encodeable
     OpcUaId_TranslateBrowsePathsToNodeIdsRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_TranslateBrowsePathsToNodeIdsRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Initialize,
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear,
+    NULL,
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encode,
+    OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode
 };
 #endif
 
@@ -10111,8 +10483,9 @@ struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsRequest_Encodeable
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize
  *===========================================================================*/
-void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize(OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue)
+void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize(void* pValue)
 {
+    OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -10126,8 +10499,9 @@ void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize(OpcUa_TranslateBrows
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear
  *===========================================================================*/
-void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue)
+void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(void* pValue)
 {
+    OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -10141,9 +10515,10 @@ void OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(OpcUa_TranslateBrowsePath
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10164,9 +10539,10 @@ SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode(OpcUa_Transla
 /*============================================================================
  * OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TranslateBrowsePathsToNodeIdsResponse* a_pValue = (OpcUa_TranslateBrowsePathsToNodeIdsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10205,11 +10581,11 @@ struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encodeabl
     OpcUaId_TranslateBrowsePathsToNodeIdsResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_TranslateBrowsePathsToNodeIdsResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode
+    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Initialize,
+    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear,
+    NULL,
+    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encode,
+    OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode
 };
 #endif
 #endif
@@ -10219,8 +10595,9 @@ struct SOPC_EncodeableType OpcUa_TranslateBrowsePathsToNodeIdsResponse_Encodeabl
 /*============================================================================
  * OpcUa_RegisterNodesRequest_Initialize
  *===========================================================================*/
-void OpcUa_RegisterNodesRequest_Initialize(OpcUa_RegisterNodesRequest* a_pValue)
+void OpcUa_RegisterNodesRequest_Initialize(void* pValue)
 {
+    OpcUa_RegisterNodesRequest* a_pValue = (OpcUa_RegisterNodesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -10232,8 +10609,9 @@ void OpcUa_RegisterNodesRequest_Initialize(OpcUa_RegisterNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_RegisterNodesRequest_Clear
  *===========================================================================*/
-void OpcUa_RegisterNodesRequest_Clear(OpcUa_RegisterNodesRequest* a_pValue)
+void OpcUa_RegisterNodesRequest_Clear(void* pValue)
 {
+    OpcUa_RegisterNodesRequest* a_pValue = (OpcUa_RegisterNodesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -10245,9 +10623,10 @@ void OpcUa_RegisterNodesRequest_Clear(OpcUa_RegisterNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_RegisterNodesRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterNodesRequest_Encode(OpcUa_RegisterNodesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterNodesRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterNodesRequest* a_pValue = (OpcUa_RegisterNodesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10265,9 +10644,10 @@ SOPC_StatusCode OpcUa_RegisterNodesRequest_Encode(OpcUa_RegisterNodesRequest* a_
 /*============================================================================
  * OpcUa_RegisterNodesRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterNodesRequest_Decode(OpcUa_RegisterNodesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterNodesRequest* a_pValue = (OpcUa_RegisterNodesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10301,11 +10681,11 @@ struct SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType =
     OpcUaId_RegisterNodesRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RegisterNodesRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RegisterNodesRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RegisterNodesRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RegisterNodesRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RegisterNodesRequest_Decode
+    OpcUa_RegisterNodesRequest_Initialize,
+    OpcUa_RegisterNodesRequest_Clear,
+    NULL,
+    OpcUa_RegisterNodesRequest_Encode,
+    OpcUa_RegisterNodesRequest_Decode
 };
 #endif
 
@@ -10313,8 +10693,9 @@ struct SOPC_EncodeableType OpcUa_RegisterNodesRequest_EncodeableType =
 /*============================================================================
  * OpcUa_RegisterNodesResponse_Initialize
  *===========================================================================*/
-void OpcUa_RegisterNodesResponse_Initialize(OpcUa_RegisterNodesResponse* a_pValue)
+void OpcUa_RegisterNodesResponse_Initialize(void* pValue)
 {
+    OpcUa_RegisterNodesResponse* a_pValue = (OpcUa_RegisterNodesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -10326,8 +10707,9 @@ void OpcUa_RegisterNodesResponse_Initialize(OpcUa_RegisterNodesResponse* a_pValu
 /*============================================================================
  * OpcUa_RegisterNodesResponse_Clear
  *===========================================================================*/
-void OpcUa_RegisterNodesResponse_Clear(OpcUa_RegisterNodesResponse* a_pValue)
+void OpcUa_RegisterNodesResponse_Clear(void* pValue)
 {
+    OpcUa_RegisterNodesResponse* a_pValue = (OpcUa_RegisterNodesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -10339,9 +10721,10 @@ void OpcUa_RegisterNodesResponse_Clear(OpcUa_RegisterNodesResponse* a_pValue)
 /*============================================================================
  * OpcUa_RegisterNodesResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterNodesResponse_Encode(OpcUa_RegisterNodesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterNodesResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterNodesResponse* a_pValue = (OpcUa_RegisterNodesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10359,9 +10742,10 @@ SOPC_StatusCode OpcUa_RegisterNodesResponse_Encode(OpcUa_RegisterNodesResponse* 
 /*============================================================================
  * OpcUa_RegisterNodesResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RegisterNodesResponse_Decode(OpcUa_RegisterNodesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RegisterNodesResponse* a_pValue = (OpcUa_RegisterNodesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10395,11 +10779,11 @@ struct SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType =
     OpcUaId_RegisterNodesResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RegisterNodesResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RegisterNodesResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RegisterNodesResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RegisterNodesResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RegisterNodesResponse_Decode
+    OpcUa_RegisterNodesResponse_Initialize,
+    OpcUa_RegisterNodesResponse_Clear,
+    NULL,
+    OpcUa_RegisterNodesResponse_Encode,
+    OpcUa_RegisterNodesResponse_Decode
 };
 #endif
 #endif
@@ -10409,8 +10793,9 @@ struct SOPC_EncodeableType OpcUa_RegisterNodesResponse_EncodeableType =
 /*============================================================================
  * OpcUa_UnregisterNodesRequest_Initialize
  *===========================================================================*/
-void OpcUa_UnregisterNodesRequest_Initialize(OpcUa_UnregisterNodesRequest* a_pValue)
+void OpcUa_UnregisterNodesRequest_Initialize(void* pValue)
 {
+    OpcUa_UnregisterNodesRequest* a_pValue = (OpcUa_UnregisterNodesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -10422,8 +10807,9 @@ void OpcUa_UnregisterNodesRequest_Initialize(OpcUa_UnregisterNodesRequest* a_pVa
 /*============================================================================
  * OpcUa_UnregisterNodesRequest_Clear
  *===========================================================================*/
-void OpcUa_UnregisterNodesRequest_Clear(OpcUa_UnregisterNodesRequest* a_pValue)
+void OpcUa_UnregisterNodesRequest_Clear(void* pValue)
 {
+    OpcUa_UnregisterNodesRequest* a_pValue = (OpcUa_UnregisterNodesRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -10435,9 +10821,10 @@ void OpcUa_UnregisterNodesRequest_Clear(OpcUa_UnregisterNodesRequest* a_pValue)
 /*============================================================================
  * OpcUa_UnregisterNodesRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UnregisterNodesRequest_Encode(OpcUa_UnregisterNodesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UnregisterNodesRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UnregisterNodesRequest* a_pValue = (OpcUa_UnregisterNodesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10455,9 +10842,10 @@ SOPC_StatusCode OpcUa_UnregisterNodesRequest_Encode(OpcUa_UnregisterNodesRequest
 /*============================================================================
  * OpcUa_UnregisterNodesRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UnregisterNodesRequest_Decode(OpcUa_UnregisterNodesRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UnregisterNodesRequest* a_pValue = (OpcUa_UnregisterNodesRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10491,11 +10879,11 @@ struct SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType =
     OpcUaId_UnregisterNodesRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_UnregisterNodesRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_UnregisterNodesRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_UnregisterNodesRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_UnregisterNodesRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_UnregisterNodesRequest_Decode
+    OpcUa_UnregisterNodesRequest_Initialize,
+    OpcUa_UnregisterNodesRequest_Clear,
+    NULL,
+    OpcUa_UnregisterNodesRequest_Encode,
+    OpcUa_UnregisterNodesRequest_Decode
 };
 #endif
 
@@ -10503,8 +10891,9 @@ struct SOPC_EncodeableType OpcUa_UnregisterNodesRequest_EncodeableType =
 /*============================================================================
  * OpcUa_UnregisterNodesResponse_Initialize
  *===========================================================================*/
-void OpcUa_UnregisterNodesResponse_Initialize(OpcUa_UnregisterNodesResponse* a_pValue)
+void OpcUa_UnregisterNodesResponse_Initialize(void* pValue)
 {
+    OpcUa_UnregisterNodesResponse* a_pValue = (OpcUa_UnregisterNodesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -10514,8 +10903,9 @@ void OpcUa_UnregisterNodesResponse_Initialize(OpcUa_UnregisterNodesResponse* a_p
 /*============================================================================
  * OpcUa_UnregisterNodesResponse_Clear
  *===========================================================================*/
-void OpcUa_UnregisterNodesResponse_Clear(OpcUa_UnregisterNodesResponse* a_pValue)
+void OpcUa_UnregisterNodesResponse_Clear(void* pValue)
 {
+    OpcUa_UnregisterNodesResponse* a_pValue = (OpcUa_UnregisterNodesResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -10525,9 +10915,10 @@ void OpcUa_UnregisterNodesResponse_Clear(OpcUa_UnregisterNodesResponse* a_pValue
 /*============================================================================
  * OpcUa_UnregisterNodesResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UnregisterNodesResponse_Encode(OpcUa_UnregisterNodesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UnregisterNodesResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UnregisterNodesResponse* a_pValue = (OpcUa_UnregisterNodesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10542,9 +10933,10 @@ SOPC_StatusCode OpcUa_UnregisterNodesResponse_Encode(OpcUa_UnregisterNodesRespon
 /*============================================================================
  * OpcUa_UnregisterNodesResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UnregisterNodesResponse_Decode(OpcUa_UnregisterNodesResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UnregisterNodesResponse* a_pValue = (OpcUa_UnregisterNodesResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10573,11 +10965,11 @@ struct SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType =
     OpcUaId_UnregisterNodesResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_UnregisterNodesResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_UnregisterNodesResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_UnregisterNodesResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_UnregisterNodesResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_UnregisterNodesResponse_Decode
+    OpcUa_UnregisterNodesResponse_Initialize,
+    OpcUa_UnregisterNodesResponse_Clear,
+    NULL,
+    OpcUa_UnregisterNodesResponse_Encode,
+    OpcUa_UnregisterNodesResponse_Decode
 };
 #endif
 #endif
@@ -10586,8 +10978,9 @@ struct SOPC_EncodeableType OpcUa_UnregisterNodesResponse_EncodeableType =
 /*============================================================================
  * OpcUa_EndpointConfiguration_Initialize
  *===========================================================================*/
-void OpcUa_EndpointConfiguration_Initialize(OpcUa_EndpointConfiguration* a_pValue)
+void OpcUa_EndpointConfiguration_Initialize(void* pValue)
 {
+    OpcUa_EndpointConfiguration* a_pValue = (OpcUa_EndpointConfiguration*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Int32_Initialize(&a_pValue->OperationTimeout);
@@ -10605,8 +10998,9 @@ void OpcUa_EndpointConfiguration_Initialize(OpcUa_EndpointConfiguration* a_pValu
 /*============================================================================
  * OpcUa_EndpointConfiguration_Clear
  *===========================================================================*/
-void OpcUa_EndpointConfiguration_Clear(OpcUa_EndpointConfiguration* a_pValue)
+void OpcUa_EndpointConfiguration_Clear(void* pValue)
 {
+    OpcUa_EndpointConfiguration* a_pValue = (OpcUa_EndpointConfiguration*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Int32_Clear(&a_pValue->OperationTimeout);
@@ -10624,9 +11018,10 @@ void OpcUa_EndpointConfiguration_Clear(OpcUa_EndpointConfiguration* a_pValue)
 /*============================================================================
  * OpcUa_EndpointConfiguration_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EndpointConfiguration_Encode(OpcUa_EndpointConfiguration* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointConfiguration_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EndpointConfiguration* a_pValue = (OpcUa_EndpointConfiguration*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10657,9 +11052,10 @@ SOPC_StatusCode OpcUa_EndpointConfiguration_Encode(OpcUa_EndpointConfiguration* 
 /*============================================================================
  * OpcUa_EndpointConfiguration_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EndpointConfiguration_Decode(OpcUa_EndpointConfiguration* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EndpointConfiguration* a_pValue = (OpcUa_EndpointConfiguration*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10704,11 +11100,11 @@ struct SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType =
     OpcUaId_EndpointConfiguration_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EndpointConfiguration),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EndpointConfiguration_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EndpointConfiguration_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EndpointConfiguration_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EndpointConfiguration_Decode
+    OpcUa_EndpointConfiguration_Initialize,
+    OpcUa_EndpointConfiguration_Clear,
+    NULL,
+    OpcUa_EndpointConfiguration_Encode,
+    OpcUa_EndpointConfiguration_Decode
 };
 #endif
 
@@ -10717,8 +11113,9 @@ struct SOPC_EncodeableType OpcUa_EndpointConfiguration_EncodeableType =
 /*============================================================================
  * OpcUa_SupportedProfile_Initialize
  *===========================================================================*/
-void OpcUa_SupportedProfile_Initialize(OpcUa_SupportedProfile* a_pValue)
+void OpcUa_SupportedProfile_Initialize(void* pValue)
 {
+    OpcUa_SupportedProfile* a_pValue = (OpcUa_SupportedProfile*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->OrganizationUri);
@@ -10734,8 +11131,9 @@ void OpcUa_SupportedProfile_Initialize(OpcUa_SupportedProfile* a_pValue)
 /*============================================================================
  * OpcUa_SupportedProfile_Clear
  *===========================================================================*/
-void OpcUa_SupportedProfile_Clear(OpcUa_SupportedProfile* a_pValue)
+void OpcUa_SupportedProfile_Clear(void* pValue)
 {
+    OpcUa_SupportedProfile* a_pValue = (OpcUa_SupportedProfile*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->OrganizationUri);
@@ -10751,9 +11149,10 @@ void OpcUa_SupportedProfile_Clear(OpcUa_SupportedProfile* a_pValue)
 /*============================================================================
  * OpcUa_SupportedProfile_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SupportedProfile_Encode(OpcUa_SupportedProfile* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SupportedProfile_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SupportedProfile* a_pValue = (OpcUa_SupportedProfile*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10779,9 +11178,10 @@ SOPC_StatusCode OpcUa_SupportedProfile_Encode(OpcUa_SupportedProfile* a_pValue, 
 /*============================================================================
  * OpcUa_SupportedProfile_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SupportedProfile_Decode(OpcUa_SupportedProfile* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SupportedProfile_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SupportedProfile* a_pValue = (OpcUa_SupportedProfile*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10823,11 +11223,11 @@ struct SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType =
     OpcUaId_SupportedProfile_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SupportedProfile),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SupportedProfile_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SupportedProfile_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SupportedProfile_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SupportedProfile_Decode
+    OpcUa_SupportedProfile_Initialize,
+    OpcUa_SupportedProfile_Clear,
+    NULL,
+    OpcUa_SupportedProfile_Encode,
+    OpcUa_SupportedProfile_Decode
 };
 #endif
 
@@ -10835,8 +11235,9 @@ struct SOPC_EncodeableType OpcUa_SupportedProfile_EncodeableType =
 /*============================================================================
  * OpcUa_SoftwareCertificate_Initialize
  *===========================================================================*/
-void OpcUa_SoftwareCertificate_Initialize(OpcUa_SoftwareCertificate* a_pValue)
+void OpcUa_SoftwareCertificate_Initialize(void* pValue)
 {
+    OpcUa_SoftwareCertificate* a_pValue = (OpcUa_SoftwareCertificate*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->ProductName);
@@ -10856,8 +11257,9 @@ void OpcUa_SoftwareCertificate_Initialize(OpcUa_SoftwareCertificate* a_pValue)
 /*============================================================================
  * OpcUa_SoftwareCertificate_Clear
  *===========================================================================*/
-void OpcUa_SoftwareCertificate_Clear(OpcUa_SoftwareCertificate* a_pValue)
+void OpcUa_SoftwareCertificate_Clear(void* pValue)
 {
+    OpcUa_SoftwareCertificate* a_pValue = (OpcUa_SoftwareCertificate*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->ProductName);
@@ -10877,9 +11279,10 @@ void OpcUa_SoftwareCertificate_Clear(OpcUa_SoftwareCertificate* a_pValue)
 /*============================================================================
  * OpcUa_SoftwareCertificate_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SoftwareCertificate_Encode(OpcUa_SoftwareCertificate* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SoftwareCertificate_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SoftwareCertificate* a_pValue = (OpcUa_SoftwareCertificate*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10913,9 +11316,10 @@ SOPC_StatusCode OpcUa_SoftwareCertificate_Encode(OpcUa_SoftwareCertificate* a_pV
 /*============================================================================
  * OpcUa_SoftwareCertificate_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SoftwareCertificate_Decode(OpcUa_SoftwareCertificate* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SoftwareCertificate* a_pValue = (OpcUa_SoftwareCertificate*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -10965,11 +11369,11 @@ struct SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType =
     OpcUaId_SoftwareCertificate_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SoftwareCertificate),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SoftwareCertificate_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SoftwareCertificate_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SoftwareCertificate_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SoftwareCertificate_Decode
+    OpcUa_SoftwareCertificate_Initialize,
+    OpcUa_SoftwareCertificate_Clear,
+    NULL,
+    OpcUa_SoftwareCertificate_Encode,
+    OpcUa_SoftwareCertificate_Decode
 };
 #endif
 
@@ -10977,8 +11381,9 @@ struct SOPC_EncodeableType OpcUa_SoftwareCertificate_EncodeableType =
 /*============================================================================
  * OpcUa_QueryDataDescription_Initialize
  *===========================================================================*/
-void OpcUa_QueryDataDescription_Initialize(OpcUa_QueryDataDescription* a_pValue)
+void OpcUa_QueryDataDescription_Initialize(void* pValue)
 {
+    OpcUa_QueryDataDescription* a_pValue = (OpcUa_QueryDataDescription*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RelativePath_Initialize(&a_pValue->RelativePath);
@@ -10990,8 +11395,9 @@ void OpcUa_QueryDataDescription_Initialize(OpcUa_QueryDataDescription* a_pValue)
 /*============================================================================
  * OpcUa_QueryDataDescription_Clear
  *===========================================================================*/
-void OpcUa_QueryDataDescription_Clear(OpcUa_QueryDataDescription* a_pValue)
+void OpcUa_QueryDataDescription_Clear(void* pValue)
 {
+    OpcUa_QueryDataDescription* a_pValue = (OpcUa_QueryDataDescription*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RelativePath_Clear(&a_pValue->RelativePath);
@@ -11003,9 +11409,10 @@ void OpcUa_QueryDataDescription_Clear(OpcUa_QueryDataDescription* a_pValue)
 /*============================================================================
  * OpcUa_QueryDataDescription_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryDataDescription_Encode(OpcUa_QueryDataDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryDataDescription_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryDataDescription* a_pValue = (OpcUa_QueryDataDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11024,9 +11431,10 @@ SOPC_StatusCode OpcUa_QueryDataDescription_Encode(OpcUa_QueryDataDescription* a_
 /*============================================================================
  * OpcUa_QueryDataDescription_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryDataDescription_Decode(OpcUa_QueryDataDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryDataDescription* a_pValue = (OpcUa_QueryDataDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11059,11 +11467,11 @@ struct SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType =
     OpcUaId_QueryDataDescription_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_QueryDataDescription),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_QueryDataDescription_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_QueryDataDescription_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_QueryDataDescription_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_QueryDataDescription_Decode
+    OpcUa_QueryDataDescription_Initialize,
+    OpcUa_QueryDataDescription_Clear,
+    NULL,
+    OpcUa_QueryDataDescription_Encode,
+    OpcUa_QueryDataDescription_Decode
 };
 #endif
 
@@ -11071,8 +11479,9 @@ struct SOPC_EncodeableType OpcUa_QueryDataDescription_EncodeableType =
 /*============================================================================
  * OpcUa_NodeTypeDescription_Initialize
  *===========================================================================*/
-void OpcUa_NodeTypeDescription_Initialize(OpcUa_NodeTypeDescription* a_pValue)
+void OpcUa_NodeTypeDescription_Initialize(void* pValue)
 {
+    OpcUa_NodeTypeDescription* a_pValue = (OpcUa_NodeTypeDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ExpandedNodeId_Initialize(&a_pValue->TypeDefinitionNode);
@@ -11085,8 +11494,9 @@ void OpcUa_NodeTypeDescription_Initialize(OpcUa_NodeTypeDescription* a_pValue)
 /*============================================================================
  * OpcUa_NodeTypeDescription_Clear
  *===========================================================================*/
-void OpcUa_NodeTypeDescription_Clear(OpcUa_NodeTypeDescription* a_pValue)
+void OpcUa_NodeTypeDescription_Clear(void* pValue)
 {
+    OpcUa_NodeTypeDescription* a_pValue = (OpcUa_NodeTypeDescription*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ExpandedNodeId_Clear(&a_pValue->TypeDefinitionNode);
@@ -11099,9 +11509,10 @@ void OpcUa_NodeTypeDescription_Clear(OpcUa_NodeTypeDescription* a_pValue)
 /*============================================================================
  * OpcUa_NodeTypeDescription_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NodeTypeDescription_Encode(OpcUa_NodeTypeDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeTypeDescription_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NodeTypeDescription* a_pValue = (OpcUa_NodeTypeDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11121,9 +11532,10 @@ SOPC_StatusCode OpcUa_NodeTypeDescription_Encode(OpcUa_NodeTypeDescription* a_pV
 /*============================================================================
  * OpcUa_NodeTypeDescription_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NodeTypeDescription_Decode(OpcUa_NodeTypeDescription* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NodeTypeDescription* a_pValue = (OpcUa_NodeTypeDescription*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11159,11 +11571,11 @@ struct SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType =
     OpcUaId_NodeTypeDescription_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_NodeTypeDescription),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_NodeTypeDescription_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_NodeTypeDescription_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_NodeTypeDescription_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_NodeTypeDescription_Decode
+    OpcUa_NodeTypeDescription_Initialize,
+    OpcUa_NodeTypeDescription_Clear,
+    NULL,
+    OpcUa_NodeTypeDescription_Encode,
+    OpcUa_NodeTypeDescription_Decode
 };
 #endif
 
@@ -11172,8 +11584,9 @@ struct SOPC_EncodeableType OpcUa_NodeTypeDescription_EncodeableType =
 /*============================================================================
  * OpcUa_QueryDataSet_Initialize
  *===========================================================================*/
-void OpcUa_QueryDataSet_Initialize(OpcUa_QueryDataSet* a_pValue)
+void OpcUa_QueryDataSet_Initialize(void* pValue)
 {
+    OpcUa_QueryDataSet* a_pValue = (OpcUa_QueryDataSet*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ExpandedNodeId_Initialize(&a_pValue->NodeId);
@@ -11186,8 +11599,9 @@ void OpcUa_QueryDataSet_Initialize(OpcUa_QueryDataSet* a_pValue)
 /*============================================================================
  * OpcUa_QueryDataSet_Clear
  *===========================================================================*/
-void OpcUa_QueryDataSet_Clear(OpcUa_QueryDataSet* a_pValue)
+void OpcUa_QueryDataSet_Clear(void* pValue)
 {
+    OpcUa_QueryDataSet* a_pValue = (OpcUa_QueryDataSet*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_ExpandedNodeId_Clear(&a_pValue->NodeId);
@@ -11200,9 +11614,10 @@ void OpcUa_QueryDataSet_Clear(OpcUa_QueryDataSet* a_pValue)
 /*============================================================================
  * OpcUa_QueryDataSet_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryDataSet_Encode(OpcUa_QueryDataSet* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryDataSet_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryDataSet* a_pValue = (OpcUa_QueryDataSet*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11222,9 +11637,10 @@ SOPC_StatusCode OpcUa_QueryDataSet_Encode(OpcUa_QueryDataSet* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_QueryDataSet_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryDataSet_Decode(OpcUa_QueryDataSet* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryDataSet_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryDataSet* a_pValue = (OpcUa_QueryDataSet*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11260,11 +11676,11 @@ struct SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType =
     OpcUaId_QueryDataSet_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_QueryDataSet),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_QueryDataSet_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_QueryDataSet_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_QueryDataSet_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_QueryDataSet_Decode
+    OpcUa_QueryDataSet_Initialize,
+    OpcUa_QueryDataSet_Clear,
+    NULL,
+    OpcUa_QueryDataSet_Encode,
+    OpcUa_QueryDataSet_Decode
 };
 #endif
 
@@ -11272,8 +11688,9 @@ struct SOPC_EncodeableType OpcUa_QueryDataSet_EncodeableType =
 /*============================================================================
  * OpcUa_NodeReference_Initialize
  *===========================================================================*/
-void OpcUa_NodeReference_Initialize(OpcUa_NodeReference* a_pValue)
+void OpcUa_NodeReference_Initialize(void* pValue)
 {
+    OpcUa_NodeReference* a_pValue = (OpcUa_NodeReference*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -11287,8 +11704,9 @@ void OpcUa_NodeReference_Initialize(OpcUa_NodeReference* a_pValue)
 /*============================================================================
  * OpcUa_NodeReference_Clear
  *===========================================================================*/
-void OpcUa_NodeReference_Clear(OpcUa_NodeReference* a_pValue)
+void OpcUa_NodeReference_Clear(void* pValue)
 {
+    OpcUa_NodeReference* a_pValue = (OpcUa_NodeReference*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -11302,9 +11720,10 @@ void OpcUa_NodeReference_Clear(OpcUa_NodeReference* a_pValue)
 /*============================================================================
  * OpcUa_NodeReference_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NodeReference_Encode(OpcUa_NodeReference* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeReference_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NodeReference* a_pValue = (OpcUa_NodeReference*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11326,9 +11745,10 @@ SOPC_StatusCode OpcUa_NodeReference_Encode(OpcUa_NodeReference* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_NodeReference_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NodeReference_Decode(OpcUa_NodeReference* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NodeReference_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NodeReference* a_pValue = (OpcUa_NodeReference*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11366,11 +11786,11 @@ struct SOPC_EncodeableType OpcUa_NodeReference_EncodeableType =
     OpcUaId_NodeReference_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_NodeReference),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_NodeReference_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_NodeReference_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_NodeReference_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_NodeReference_Decode
+    OpcUa_NodeReference_Initialize,
+    OpcUa_NodeReference_Clear,
+    NULL,
+    OpcUa_NodeReference_Encode,
+    OpcUa_NodeReference_Decode
 };
 #endif
 
@@ -11378,8 +11798,9 @@ struct SOPC_EncodeableType OpcUa_NodeReference_EncodeableType =
 /*============================================================================
  * OpcUa_ContentFilterElement_Initialize
  *===========================================================================*/
-void OpcUa_ContentFilterElement_Initialize(OpcUa_ContentFilterElement* a_pValue)
+void OpcUa_ContentFilterElement_Initialize(void* pValue)
 {
+    OpcUa_ContentFilterElement* a_pValue = (OpcUa_ContentFilterElement*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_EnumeratedType((int32_t*) &a_pValue->FilterOperator);
@@ -11391,8 +11812,9 @@ void OpcUa_ContentFilterElement_Initialize(OpcUa_ContentFilterElement* a_pValue)
 /*============================================================================
  * OpcUa_ContentFilterElement_Clear
  *===========================================================================*/
-void OpcUa_ContentFilterElement_Clear(OpcUa_ContentFilterElement* a_pValue)
+void OpcUa_ContentFilterElement_Clear(void* pValue)
 {
+    OpcUa_ContentFilterElement* a_pValue = (OpcUa_ContentFilterElement*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_EnumeratedType((int32_t*) &a_pValue->FilterOperator);
@@ -11404,9 +11826,10 @@ void OpcUa_ContentFilterElement_Clear(OpcUa_ContentFilterElement* a_pValue)
 /*============================================================================
  * OpcUa_ContentFilterElement_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ContentFilterElement_Encode(OpcUa_ContentFilterElement* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterElement_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ContentFilterElement* a_pValue = (OpcUa_ContentFilterElement*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11424,9 +11847,10 @@ SOPC_StatusCode OpcUa_ContentFilterElement_Encode(OpcUa_ContentFilterElement* a_
 /*============================================================================
  * OpcUa_ContentFilterElement_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ContentFilterElement_Decode(OpcUa_ContentFilterElement* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ContentFilterElement* a_pValue = (OpcUa_ContentFilterElement*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11460,11 +11884,11 @@ struct SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType =
     OpcUaId_ContentFilterElement_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ContentFilterElement),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ContentFilterElement_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ContentFilterElement_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ContentFilterElement_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ContentFilterElement_Decode
+    OpcUa_ContentFilterElement_Initialize,
+    OpcUa_ContentFilterElement_Clear,
+    NULL,
+    OpcUa_ContentFilterElement_Encode,
+    OpcUa_ContentFilterElement_Decode
 };
 #endif
 
@@ -11472,8 +11896,9 @@ struct SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType =
 /*============================================================================
  * OpcUa_ContentFilter_Initialize
  *===========================================================================*/
-void OpcUa_ContentFilter_Initialize(OpcUa_ContentFilter* a_pValue)
+void OpcUa_ContentFilter_Initialize(void* pValue)
 {
+    OpcUa_ContentFilter* a_pValue = (OpcUa_ContentFilter*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
@@ -11484,8 +11909,9 @@ void OpcUa_ContentFilter_Initialize(OpcUa_ContentFilter* a_pValue)
 /*============================================================================
  * OpcUa_ContentFilter_Clear
  *===========================================================================*/
-void OpcUa_ContentFilter_Clear(OpcUa_ContentFilter* a_pValue)
+void OpcUa_ContentFilter_Clear(void* pValue)
 {
+    OpcUa_ContentFilter* a_pValue = (OpcUa_ContentFilter*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfElements, (void**) &a_pValue->Elements, 
@@ -11496,9 +11922,10 @@ void OpcUa_ContentFilter_Clear(OpcUa_ContentFilter* a_pValue)
 /*============================================================================
  * OpcUa_ContentFilter_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ContentFilter_Encode(OpcUa_ContentFilter* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilter_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ContentFilter* a_pValue = (OpcUa_ContentFilter*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11514,9 +11941,10 @@ SOPC_StatusCode OpcUa_ContentFilter_Encode(OpcUa_ContentFilter* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_ContentFilter_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ContentFilter_Decode(OpcUa_ContentFilter* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilter_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ContentFilter* a_pValue = (OpcUa_ContentFilter*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11548,11 +11976,11 @@ struct SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType =
     OpcUaId_ContentFilter_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ContentFilter),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ContentFilter_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ContentFilter_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ContentFilter_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ContentFilter_Decode
+    OpcUa_ContentFilter_Initialize,
+    OpcUa_ContentFilter_Clear,
+    NULL,
+    OpcUa_ContentFilter_Encode,
+    OpcUa_ContentFilter_Decode
 };
 #endif
 
@@ -11560,8 +11988,9 @@ struct SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType =
 /*============================================================================
  * OpcUa_ElementOperand_Initialize
  *===========================================================================*/
-void OpcUa_ElementOperand_Initialize(OpcUa_ElementOperand* a_pValue)
+void OpcUa_ElementOperand_Initialize(void* pValue)
 {
+    OpcUa_ElementOperand* a_pValue = (OpcUa_ElementOperand*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->Index);
@@ -11571,8 +12000,9 @@ void OpcUa_ElementOperand_Initialize(OpcUa_ElementOperand* a_pValue)
 /*============================================================================
  * OpcUa_ElementOperand_Clear
  *===========================================================================*/
-void OpcUa_ElementOperand_Clear(OpcUa_ElementOperand* a_pValue)
+void OpcUa_ElementOperand_Clear(void* pValue)
 {
+    OpcUa_ElementOperand* a_pValue = (OpcUa_ElementOperand*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->Index);
@@ -11582,9 +12012,10 @@ void OpcUa_ElementOperand_Clear(OpcUa_ElementOperand* a_pValue)
 /*============================================================================
  * OpcUa_ElementOperand_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ElementOperand_Encode(OpcUa_ElementOperand* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ElementOperand_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ElementOperand* a_pValue = (OpcUa_ElementOperand*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11599,9 +12030,10 @@ SOPC_StatusCode OpcUa_ElementOperand_Encode(OpcUa_ElementOperand* a_pValue, SOPC
 /*============================================================================
  * OpcUa_ElementOperand_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ElementOperand_Decode(OpcUa_ElementOperand* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ElementOperand_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ElementOperand* a_pValue = (OpcUa_ElementOperand*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11630,11 +12062,11 @@ struct SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType =
     OpcUaId_ElementOperand_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ElementOperand),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ElementOperand_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ElementOperand_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ElementOperand_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ElementOperand_Decode
+    OpcUa_ElementOperand_Initialize,
+    OpcUa_ElementOperand_Clear,
+    NULL,
+    OpcUa_ElementOperand_Encode,
+    OpcUa_ElementOperand_Decode
 };
 #endif
 
@@ -11642,8 +12074,9 @@ struct SOPC_EncodeableType OpcUa_ElementOperand_EncodeableType =
 /*============================================================================
  * OpcUa_LiteralOperand_Initialize
  *===========================================================================*/
-void OpcUa_LiteralOperand_Initialize(OpcUa_LiteralOperand* a_pValue)
+void OpcUa_LiteralOperand_Initialize(void* pValue)
 {
+    OpcUa_LiteralOperand* a_pValue = (OpcUa_LiteralOperand*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Variant_Initialize(&a_pValue->Value);
@@ -11653,8 +12086,9 @@ void OpcUa_LiteralOperand_Initialize(OpcUa_LiteralOperand* a_pValue)
 /*============================================================================
  * OpcUa_LiteralOperand_Clear
  *===========================================================================*/
-void OpcUa_LiteralOperand_Clear(OpcUa_LiteralOperand* a_pValue)
+void OpcUa_LiteralOperand_Clear(void* pValue)
 {
+    OpcUa_LiteralOperand* a_pValue = (OpcUa_LiteralOperand*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Variant_Clear(&a_pValue->Value);
@@ -11664,9 +12098,10 @@ void OpcUa_LiteralOperand_Clear(OpcUa_LiteralOperand* a_pValue)
 /*============================================================================
  * OpcUa_LiteralOperand_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_LiteralOperand_Encode(OpcUa_LiteralOperand* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_LiteralOperand_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_LiteralOperand* a_pValue = (OpcUa_LiteralOperand*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11681,9 +12116,10 @@ SOPC_StatusCode OpcUa_LiteralOperand_Encode(OpcUa_LiteralOperand* a_pValue, SOPC
 /*============================================================================
  * OpcUa_LiteralOperand_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_LiteralOperand_Decode(OpcUa_LiteralOperand* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_LiteralOperand_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_LiteralOperand* a_pValue = (OpcUa_LiteralOperand*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11712,11 +12148,11 @@ struct SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType =
     OpcUaId_LiteralOperand_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_LiteralOperand),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_LiteralOperand_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_LiteralOperand_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_LiteralOperand_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_LiteralOperand_Decode
+    OpcUa_LiteralOperand_Initialize,
+    OpcUa_LiteralOperand_Clear,
+    NULL,
+    OpcUa_LiteralOperand_Encode,
+    OpcUa_LiteralOperand_Decode
 };
 #endif
 
@@ -11724,8 +12160,9 @@ struct SOPC_EncodeableType OpcUa_LiteralOperand_EncodeableType =
 /*============================================================================
  * OpcUa_AttributeOperand_Initialize
  *===========================================================================*/
-void OpcUa_AttributeOperand_Initialize(OpcUa_AttributeOperand* a_pValue)
+void OpcUa_AttributeOperand_Initialize(void* pValue)
 {
+    OpcUa_AttributeOperand* a_pValue = (OpcUa_AttributeOperand*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -11739,8 +12176,9 @@ void OpcUa_AttributeOperand_Initialize(OpcUa_AttributeOperand* a_pValue)
 /*============================================================================
  * OpcUa_AttributeOperand_Clear
  *===========================================================================*/
-void OpcUa_AttributeOperand_Clear(OpcUa_AttributeOperand* a_pValue)
+void OpcUa_AttributeOperand_Clear(void* pValue)
 {
+    OpcUa_AttributeOperand* a_pValue = (OpcUa_AttributeOperand*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -11754,9 +12192,10 @@ void OpcUa_AttributeOperand_Clear(OpcUa_AttributeOperand* a_pValue)
 /*============================================================================
  * OpcUa_AttributeOperand_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AttributeOperand_Encode(OpcUa_AttributeOperand* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AttributeOperand_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AttributeOperand* a_pValue = (OpcUa_AttributeOperand*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11779,9 +12218,10 @@ SOPC_StatusCode OpcUa_AttributeOperand_Encode(OpcUa_AttributeOperand* a_pValue, 
 /*============================================================================
  * OpcUa_AttributeOperand_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AttributeOperand_Decode(OpcUa_AttributeOperand* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AttributeOperand_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AttributeOperand* a_pValue = (OpcUa_AttributeOperand*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11818,11 +12258,11 @@ struct SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType =
     OpcUaId_AttributeOperand_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AttributeOperand),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AttributeOperand_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AttributeOperand_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AttributeOperand_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AttributeOperand_Decode
+    OpcUa_AttributeOperand_Initialize,
+    OpcUa_AttributeOperand_Clear,
+    NULL,
+    OpcUa_AttributeOperand_Encode,
+    OpcUa_AttributeOperand_Decode
 };
 #endif
 
@@ -11830,8 +12270,9 @@ struct SOPC_EncodeableType OpcUa_AttributeOperand_EncodeableType =
 /*============================================================================
  * OpcUa_SimpleAttributeOperand_Initialize
  *===========================================================================*/
-void OpcUa_SimpleAttributeOperand_Initialize(OpcUa_SimpleAttributeOperand* a_pValue)
+void OpcUa_SimpleAttributeOperand_Initialize(void* pValue)
 {
+    OpcUa_SimpleAttributeOperand* a_pValue = (OpcUa_SimpleAttributeOperand*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->TypeDefinitionId);
@@ -11845,8 +12286,9 @@ void OpcUa_SimpleAttributeOperand_Initialize(OpcUa_SimpleAttributeOperand* a_pVa
 /*============================================================================
  * OpcUa_SimpleAttributeOperand_Clear
  *===========================================================================*/
-void OpcUa_SimpleAttributeOperand_Clear(OpcUa_SimpleAttributeOperand* a_pValue)
+void OpcUa_SimpleAttributeOperand_Clear(void* pValue)
 {
+    OpcUa_SimpleAttributeOperand* a_pValue = (OpcUa_SimpleAttributeOperand*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->TypeDefinitionId);
@@ -11860,9 +12302,10 @@ void OpcUa_SimpleAttributeOperand_Clear(OpcUa_SimpleAttributeOperand* a_pValue)
 /*============================================================================
  * OpcUa_SimpleAttributeOperand_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SimpleAttributeOperand_Encode(OpcUa_SimpleAttributeOperand* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SimpleAttributeOperand_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SimpleAttributeOperand* a_pValue = (OpcUa_SimpleAttributeOperand*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11884,9 +12327,10 @@ SOPC_StatusCode OpcUa_SimpleAttributeOperand_Encode(OpcUa_SimpleAttributeOperand
 /*============================================================================
  * OpcUa_SimpleAttributeOperand_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SimpleAttributeOperand_Decode(OpcUa_SimpleAttributeOperand* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SimpleAttributeOperand* a_pValue = (OpcUa_SimpleAttributeOperand*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11924,11 +12368,11 @@ struct SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType =
     OpcUaId_SimpleAttributeOperand_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SimpleAttributeOperand),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SimpleAttributeOperand_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SimpleAttributeOperand_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SimpleAttributeOperand_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SimpleAttributeOperand_Decode
+    OpcUa_SimpleAttributeOperand_Initialize,
+    OpcUa_SimpleAttributeOperand_Clear,
+    NULL,
+    OpcUa_SimpleAttributeOperand_Encode,
+    OpcUa_SimpleAttributeOperand_Decode
 };
 #endif
 
@@ -11936,8 +12380,9 @@ struct SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType =
 /*============================================================================
  * OpcUa_ContentFilterElementResult_Initialize
  *===========================================================================*/
-void OpcUa_ContentFilterElementResult_Initialize(OpcUa_ContentFilterElementResult* a_pValue)
+void OpcUa_ContentFilterElementResult_Initialize(void* pValue)
 {
+    OpcUa_ContentFilterElementResult* a_pValue = (OpcUa_ContentFilterElementResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -11951,8 +12396,9 @@ void OpcUa_ContentFilterElementResult_Initialize(OpcUa_ContentFilterElementResul
 /*============================================================================
  * OpcUa_ContentFilterElementResult_Clear
  *===========================================================================*/
-void OpcUa_ContentFilterElementResult_Clear(OpcUa_ContentFilterElementResult* a_pValue)
+void OpcUa_ContentFilterElementResult_Clear(void* pValue)
 {
+    OpcUa_ContentFilterElementResult* a_pValue = (OpcUa_ContentFilterElementResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -11966,9 +12412,10 @@ void OpcUa_ContentFilterElementResult_Clear(OpcUa_ContentFilterElementResult* a_
 /*============================================================================
  * OpcUa_ContentFilterElementResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ContentFilterElementResult_Encode(OpcUa_ContentFilterElementResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterElementResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ContentFilterElementResult* a_pValue = (OpcUa_ContentFilterElementResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -11989,9 +12436,10 @@ SOPC_StatusCode OpcUa_ContentFilterElementResult_Encode(OpcUa_ContentFilterEleme
 /*============================================================================
  * OpcUa_ContentFilterElementResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ContentFilterElementResult_Decode(OpcUa_ContentFilterElementResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ContentFilterElementResult* a_pValue = (OpcUa_ContentFilterElementResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12030,11 +12478,11 @@ struct SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType =
     OpcUaId_ContentFilterElementResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ContentFilterElementResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ContentFilterElementResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ContentFilterElementResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ContentFilterElementResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ContentFilterElementResult_Decode
+    OpcUa_ContentFilterElementResult_Initialize,
+    OpcUa_ContentFilterElementResult_Clear,
+    NULL,
+    OpcUa_ContentFilterElementResult_Encode,
+    OpcUa_ContentFilterElementResult_Decode
 };
 #endif
 
@@ -12042,8 +12490,9 @@ struct SOPC_EncodeableType OpcUa_ContentFilterElementResult_EncodeableType =
 /*============================================================================
  * OpcUa_ContentFilterResult_Initialize
  *===========================================================================*/
-void OpcUa_ContentFilterResult_Initialize(OpcUa_ContentFilterResult* a_pValue)
+void OpcUa_ContentFilterResult_Initialize(void* pValue)
 {
+    OpcUa_ContentFilterResult* a_pValue = (OpcUa_ContentFilterResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfElementResults, (void**) &a_pValue->ElementResults, 
@@ -12056,8 +12505,9 @@ void OpcUa_ContentFilterResult_Initialize(OpcUa_ContentFilterResult* a_pValue)
 /*============================================================================
  * OpcUa_ContentFilterResult_Clear
  *===========================================================================*/
-void OpcUa_ContentFilterResult_Clear(OpcUa_ContentFilterResult* a_pValue)
+void OpcUa_ContentFilterResult_Clear(void* pValue)
 {
+    OpcUa_ContentFilterResult* a_pValue = (OpcUa_ContentFilterResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfElementResults, (void**) &a_pValue->ElementResults, 
@@ -12070,9 +12520,10 @@ void OpcUa_ContentFilterResult_Clear(OpcUa_ContentFilterResult* a_pValue)
 /*============================================================================
  * OpcUa_ContentFilterResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ContentFilterResult_Encode(OpcUa_ContentFilterResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ContentFilterResult* a_pValue = (OpcUa_ContentFilterResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12091,9 +12542,10 @@ SOPC_StatusCode OpcUa_ContentFilterResult_Encode(OpcUa_ContentFilterResult* a_pV
 /*============================================================================
  * OpcUa_ContentFilterResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ContentFilterResult_Decode(OpcUa_ContentFilterResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ContentFilterResult* a_pValue = (OpcUa_ContentFilterResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12130,11 +12582,11 @@ struct SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType =
     OpcUaId_ContentFilterResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ContentFilterResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ContentFilterResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ContentFilterResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ContentFilterResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ContentFilterResult_Decode
+    OpcUa_ContentFilterResult_Initialize,
+    OpcUa_ContentFilterResult_Clear,
+    NULL,
+    OpcUa_ContentFilterResult_Encode,
+    OpcUa_ContentFilterResult_Decode
 };
 #endif
 
@@ -12142,8 +12594,9 @@ struct SOPC_EncodeableType OpcUa_ContentFilterResult_EncodeableType =
 /*============================================================================
  * OpcUa_ParsingResult_Initialize
  *===========================================================================*/
-void OpcUa_ParsingResult_Initialize(OpcUa_ParsingResult* a_pValue)
+void OpcUa_ParsingResult_Initialize(void* pValue)
 {
+    OpcUa_ParsingResult* a_pValue = (OpcUa_ParsingResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -12157,8 +12610,9 @@ void OpcUa_ParsingResult_Initialize(OpcUa_ParsingResult* a_pValue)
 /*============================================================================
  * OpcUa_ParsingResult_Clear
  *===========================================================================*/
-void OpcUa_ParsingResult_Clear(OpcUa_ParsingResult* a_pValue)
+void OpcUa_ParsingResult_Clear(void* pValue)
 {
+    OpcUa_ParsingResult* a_pValue = (OpcUa_ParsingResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -12172,9 +12626,10 @@ void OpcUa_ParsingResult_Clear(OpcUa_ParsingResult* a_pValue)
 /*============================================================================
  * OpcUa_ParsingResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ParsingResult_Encode(OpcUa_ParsingResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ParsingResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ParsingResult* a_pValue = (OpcUa_ParsingResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12195,9 +12650,10 @@ SOPC_StatusCode OpcUa_ParsingResult_Encode(OpcUa_ParsingResult* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_ParsingResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ParsingResult_Decode(OpcUa_ParsingResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ParsingResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ParsingResult* a_pValue = (OpcUa_ParsingResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12236,11 +12692,11 @@ struct SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType =
     OpcUaId_ParsingResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ParsingResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ParsingResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ParsingResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ParsingResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ParsingResult_Decode
+    OpcUa_ParsingResult_Initialize,
+    OpcUa_ParsingResult_Clear,
+    NULL,
+    OpcUa_ParsingResult_Encode,
+    OpcUa_ParsingResult_Decode
 };
 #endif
 
@@ -12249,8 +12705,9 @@ struct SOPC_EncodeableType OpcUa_ParsingResult_EncodeableType =
 /*============================================================================
  * OpcUa_QueryFirstRequest_Initialize
  *===========================================================================*/
-void OpcUa_QueryFirstRequest_Initialize(OpcUa_QueryFirstRequest* a_pValue)
+void OpcUa_QueryFirstRequest_Initialize(void* pValue)
 {
+    OpcUa_QueryFirstRequest* a_pValue = (OpcUa_QueryFirstRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -12266,8 +12723,9 @@ void OpcUa_QueryFirstRequest_Initialize(OpcUa_QueryFirstRequest* a_pValue)
 /*============================================================================
  * OpcUa_QueryFirstRequest_Clear
  *===========================================================================*/
-void OpcUa_QueryFirstRequest_Clear(OpcUa_QueryFirstRequest* a_pValue)
+void OpcUa_QueryFirstRequest_Clear(void* pValue)
 {
+    OpcUa_QueryFirstRequest* a_pValue = (OpcUa_QueryFirstRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -12283,9 +12741,10 @@ void OpcUa_QueryFirstRequest_Clear(OpcUa_QueryFirstRequest* a_pValue)
 /*============================================================================
  * OpcUa_QueryFirstRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryFirstRequest_Encode(OpcUa_QueryFirstRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryFirstRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryFirstRequest* a_pValue = (OpcUa_QueryFirstRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12311,9 +12770,10 @@ SOPC_StatusCode OpcUa_QueryFirstRequest_Encode(OpcUa_QueryFirstRequest* a_pValue
 /*============================================================================
  * OpcUa_QueryFirstRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryFirstRequest_Decode(OpcUa_QueryFirstRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryFirstRequest* a_pValue = (OpcUa_QueryFirstRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12355,11 +12815,11 @@ struct SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType =
     OpcUaId_QueryFirstRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_QueryFirstRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_QueryFirstRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_QueryFirstRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_QueryFirstRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_QueryFirstRequest_Decode
+    OpcUa_QueryFirstRequest_Initialize,
+    OpcUa_QueryFirstRequest_Clear,
+    NULL,
+    OpcUa_QueryFirstRequest_Encode,
+    OpcUa_QueryFirstRequest_Decode
 };
 #endif
 
@@ -12367,8 +12827,9 @@ struct SOPC_EncodeableType OpcUa_QueryFirstRequest_EncodeableType =
 /*============================================================================
  * OpcUa_QueryFirstResponse_Initialize
  *===========================================================================*/
-void OpcUa_QueryFirstResponse_Initialize(OpcUa_QueryFirstResponse* a_pValue)
+void OpcUa_QueryFirstResponse_Initialize(void* pValue)
 {
+    OpcUa_QueryFirstResponse* a_pValue = (OpcUa_QueryFirstResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -12386,8 +12847,9 @@ void OpcUa_QueryFirstResponse_Initialize(OpcUa_QueryFirstResponse* a_pValue)
 /*============================================================================
  * OpcUa_QueryFirstResponse_Clear
  *===========================================================================*/
-void OpcUa_QueryFirstResponse_Clear(OpcUa_QueryFirstResponse* a_pValue)
+void OpcUa_QueryFirstResponse_Clear(void* pValue)
 {
+    OpcUa_QueryFirstResponse* a_pValue = (OpcUa_QueryFirstResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -12405,9 +12867,10 @@ void OpcUa_QueryFirstResponse_Clear(OpcUa_QueryFirstResponse* a_pValue)
 /*============================================================================
  * OpcUa_QueryFirstResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryFirstResponse_Encode(OpcUa_QueryFirstResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryFirstResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryFirstResponse* a_pValue = (OpcUa_QueryFirstResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12435,9 +12898,10 @@ SOPC_StatusCode OpcUa_QueryFirstResponse_Encode(OpcUa_QueryFirstResponse* a_pVal
 /*============================================================================
  * OpcUa_QueryFirstResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryFirstResponse_Decode(OpcUa_QueryFirstResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryFirstResponse* a_pValue = (OpcUa_QueryFirstResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12485,11 +12949,11 @@ struct SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType =
     OpcUaId_QueryFirstResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_QueryFirstResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_QueryFirstResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_QueryFirstResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_QueryFirstResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_QueryFirstResponse_Decode
+    OpcUa_QueryFirstResponse_Initialize,
+    OpcUa_QueryFirstResponse_Clear,
+    NULL,
+    OpcUa_QueryFirstResponse_Encode,
+    OpcUa_QueryFirstResponse_Decode
 };
 #endif
 #endif
@@ -12499,8 +12963,9 @@ struct SOPC_EncodeableType OpcUa_QueryFirstResponse_EncodeableType =
 /*============================================================================
  * OpcUa_QueryNextRequest_Initialize
  *===========================================================================*/
-void OpcUa_QueryNextRequest_Initialize(OpcUa_QueryNextRequest* a_pValue)
+void OpcUa_QueryNextRequest_Initialize(void* pValue)
 {
+    OpcUa_QueryNextRequest* a_pValue = (OpcUa_QueryNextRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -12512,8 +12977,9 @@ void OpcUa_QueryNextRequest_Initialize(OpcUa_QueryNextRequest* a_pValue)
 /*============================================================================
  * OpcUa_QueryNextRequest_Clear
  *===========================================================================*/
-void OpcUa_QueryNextRequest_Clear(OpcUa_QueryNextRequest* a_pValue)
+void OpcUa_QueryNextRequest_Clear(void* pValue)
 {
+    OpcUa_QueryNextRequest* a_pValue = (OpcUa_QueryNextRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -12525,9 +12991,10 @@ void OpcUa_QueryNextRequest_Clear(OpcUa_QueryNextRequest* a_pValue)
 /*============================================================================
  * OpcUa_QueryNextRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryNextRequest_Encode(OpcUa_QueryNextRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryNextRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryNextRequest* a_pValue = (OpcUa_QueryNextRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12546,9 +13013,10 @@ SOPC_StatusCode OpcUa_QueryNextRequest_Encode(OpcUa_QueryNextRequest* a_pValue, 
 /*============================================================================
  * OpcUa_QueryNextRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryNextRequest_Decode(OpcUa_QueryNextRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryNextRequest* a_pValue = (OpcUa_QueryNextRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12581,11 +13049,11 @@ struct SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType =
     OpcUaId_QueryNextRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_QueryNextRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_QueryNextRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_QueryNextRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_QueryNextRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_QueryNextRequest_Decode
+    OpcUa_QueryNextRequest_Initialize,
+    OpcUa_QueryNextRequest_Clear,
+    NULL,
+    OpcUa_QueryNextRequest_Encode,
+    OpcUa_QueryNextRequest_Decode
 };
 #endif
 
@@ -12593,8 +13061,9 @@ struct SOPC_EncodeableType OpcUa_QueryNextRequest_EncodeableType =
 /*============================================================================
  * OpcUa_QueryNextResponse_Initialize
  *===========================================================================*/
-void OpcUa_QueryNextResponse_Initialize(OpcUa_QueryNextResponse* a_pValue)
+void OpcUa_QueryNextResponse_Initialize(void* pValue)
 {
+    OpcUa_QueryNextResponse* a_pValue = (OpcUa_QueryNextResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -12607,8 +13076,9 @@ void OpcUa_QueryNextResponse_Initialize(OpcUa_QueryNextResponse* a_pValue)
 /*============================================================================
  * OpcUa_QueryNextResponse_Clear
  *===========================================================================*/
-void OpcUa_QueryNextResponse_Clear(OpcUa_QueryNextResponse* a_pValue)
+void OpcUa_QueryNextResponse_Clear(void* pValue)
 {
+    OpcUa_QueryNextResponse* a_pValue = (OpcUa_QueryNextResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -12621,9 +13091,10 @@ void OpcUa_QueryNextResponse_Clear(OpcUa_QueryNextResponse* a_pValue)
 /*============================================================================
  * OpcUa_QueryNextResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryNextResponse_Encode(OpcUa_QueryNextResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryNextResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryNextResponse* a_pValue = (OpcUa_QueryNextResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12643,9 +13114,10 @@ SOPC_StatusCode OpcUa_QueryNextResponse_Encode(OpcUa_QueryNextResponse* a_pValue
 /*============================================================================
  * OpcUa_QueryNextResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_QueryNextResponse_Decode(OpcUa_QueryNextResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_QueryNextResponse* a_pValue = (OpcUa_QueryNextResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12681,11 +13153,11 @@ struct SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType =
     OpcUaId_QueryNextResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_QueryNextResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_QueryNextResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_QueryNextResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_QueryNextResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_QueryNextResponse_Decode
+    OpcUa_QueryNextResponse_Initialize,
+    OpcUa_QueryNextResponse_Clear,
+    NULL,
+    OpcUa_QueryNextResponse_Encode,
+    OpcUa_QueryNextResponse_Decode
 };
 #endif
 #endif
@@ -12695,8 +13167,9 @@ struct SOPC_EncodeableType OpcUa_QueryNextResponse_EncodeableType =
 /*============================================================================
  * OpcUa_ReadValueId_Initialize
  *===========================================================================*/
-void OpcUa_ReadValueId_Initialize(OpcUa_ReadValueId* a_pValue)
+void OpcUa_ReadValueId_Initialize(void* pValue)
 {
+    OpcUa_ReadValueId* a_pValue = (OpcUa_ReadValueId*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -12709,8 +13182,9 @@ void OpcUa_ReadValueId_Initialize(OpcUa_ReadValueId* a_pValue)
 /*============================================================================
  * OpcUa_ReadValueId_Clear
  *===========================================================================*/
-void OpcUa_ReadValueId_Clear(OpcUa_ReadValueId* a_pValue)
+void OpcUa_ReadValueId_Clear(void* pValue)
 {
+    OpcUa_ReadValueId* a_pValue = (OpcUa_ReadValueId*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -12723,9 +13197,10 @@ void OpcUa_ReadValueId_Clear(OpcUa_ReadValueId* a_pValue)
 /*============================================================================
  * OpcUa_ReadValueId_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadValueId_Encode(OpcUa_ReadValueId* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadValueId_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadValueId* a_pValue = (OpcUa_ReadValueId*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12746,9 +13221,10 @@ SOPC_StatusCode OpcUa_ReadValueId_Encode(OpcUa_ReadValueId* a_pValue, SOPC_MsgBu
 /*============================================================================
  * OpcUa_ReadValueId_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadValueId_Decode(OpcUa_ReadValueId* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadValueId_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadValueId* a_pValue = (OpcUa_ReadValueId*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12783,11 +13259,11 @@ struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType =
     OpcUaId_ReadValueId_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReadValueId),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReadValueId_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReadValueId_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReadValueId_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReadValueId_Decode
+    OpcUa_ReadValueId_Initialize,
+    OpcUa_ReadValueId_Clear,
+    NULL,
+    OpcUa_ReadValueId_Encode,
+    OpcUa_ReadValueId_Decode
 };
 #endif
 
@@ -12796,8 +13272,9 @@ struct SOPC_EncodeableType OpcUa_ReadValueId_EncodeableType =
 /*============================================================================
  * OpcUa_ReadRequest_Initialize
  *===========================================================================*/
-void OpcUa_ReadRequest_Initialize(OpcUa_ReadRequest* a_pValue)
+void OpcUa_ReadRequest_Initialize(void* pValue)
 {
+    OpcUa_ReadRequest* a_pValue = (OpcUa_ReadRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -12811,8 +13288,9 @@ void OpcUa_ReadRequest_Initialize(OpcUa_ReadRequest* a_pValue)
 /*============================================================================
  * OpcUa_ReadRequest_Clear
  *===========================================================================*/
-void OpcUa_ReadRequest_Clear(OpcUa_ReadRequest* a_pValue)
+void OpcUa_ReadRequest_Clear(void* pValue)
 {
+    OpcUa_ReadRequest* a_pValue = (OpcUa_ReadRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -12826,9 +13304,10 @@ void OpcUa_ReadRequest_Clear(OpcUa_ReadRequest* a_pValue)
 /*============================================================================
  * OpcUa_ReadRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadRequest_Encode(OpcUa_ReadRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadRequest* a_pValue = (OpcUa_ReadRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12850,9 +13329,10 @@ SOPC_StatusCode OpcUa_ReadRequest_Encode(OpcUa_ReadRequest* a_pValue, SOPC_MsgBu
 /*============================================================================
  * OpcUa_ReadRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadRequest_Decode(OpcUa_ReadRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadRequest* a_pValue = (OpcUa_ReadRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12890,11 +13370,11 @@ struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType =
     OpcUaId_ReadRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReadRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReadRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReadRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReadRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReadRequest_Decode
+    OpcUa_ReadRequest_Initialize,
+    OpcUa_ReadRequest_Clear,
+    NULL,
+    OpcUa_ReadRequest_Encode,
+    OpcUa_ReadRequest_Decode
 };
 #endif
 
@@ -12902,8 +13382,9 @@ struct SOPC_EncodeableType OpcUa_ReadRequest_EncodeableType =
 /*============================================================================
  * OpcUa_ReadResponse_Initialize
  *===========================================================================*/
-void OpcUa_ReadResponse_Initialize(OpcUa_ReadResponse* a_pValue)
+void OpcUa_ReadResponse_Initialize(void* pValue)
 {
+    OpcUa_ReadResponse* a_pValue = (OpcUa_ReadResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -12917,8 +13398,9 @@ void OpcUa_ReadResponse_Initialize(OpcUa_ReadResponse* a_pValue)
 /*============================================================================
  * OpcUa_ReadResponse_Clear
  *===========================================================================*/
-void OpcUa_ReadResponse_Clear(OpcUa_ReadResponse* a_pValue)
+void OpcUa_ReadResponse_Clear(void* pValue)
 {
+    OpcUa_ReadResponse* a_pValue = (OpcUa_ReadResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -12932,9 +13414,10 @@ void OpcUa_ReadResponse_Clear(OpcUa_ReadResponse* a_pValue)
 /*============================================================================
  * OpcUa_ReadResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadResponse_Encode(OpcUa_ReadResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadResponse* a_pValue = (OpcUa_ReadResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12955,9 +13438,10 @@ SOPC_StatusCode OpcUa_ReadResponse_Encode(OpcUa_ReadResponse* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_ReadResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadResponse_Decode(OpcUa_ReadResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadResponse* a_pValue = (OpcUa_ReadResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -12996,11 +13480,11 @@ struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType =
     OpcUaId_ReadResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReadResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReadResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReadResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReadResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReadResponse_Decode
+    OpcUa_ReadResponse_Initialize,
+    OpcUa_ReadResponse_Clear,
+    NULL,
+    OpcUa_ReadResponse_Encode,
+    OpcUa_ReadResponse_Decode
 };
 #endif
 #endif
@@ -13009,8 +13493,9 @@ struct SOPC_EncodeableType OpcUa_ReadResponse_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryReadValueId_Initialize
  *===========================================================================*/
-void OpcUa_HistoryReadValueId_Initialize(OpcUa_HistoryReadValueId* a_pValue)
+void OpcUa_HistoryReadValueId_Initialize(void* pValue)
 {
+    OpcUa_HistoryReadValueId* a_pValue = (OpcUa_HistoryReadValueId*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -13023,8 +13508,9 @@ void OpcUa_HistoryReadValueId_Initialize(OpcUa_HistoryReadValueId* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadValueId_Clear
  *===========================================================================*/
-void OpcUa_HistoryReadValueId_Clear(OpcUa_HistoryReadValueId* a_pValue)
+void OpcUa_HistoryReadValueId_Clear(void* pValue)
 {
+    OpcUa_HistoryReadValueId* a_pValue = (OpcUa_HistoryReadValueId*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -13037,9 +13523,10 @@ void OpcUa_HistoryReadValueId_Clear(OpcUa_HistoryReadValueId* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadValueId_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryReadValueId_Encode(OpcUa_HistoryReadValueId* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadValueId_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryReadValueId* a_pValue = (OpcUa_HistoryReadValueId*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13060,9 +13547,10 @@ SOPC_StatusCode OpcUa_HistoryReadValueId_Encode(OpcUa_HistoryReadValueId* a_pVal
 /*============================================================================
  * OpcUa_HistoryReadValueId_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryReadValueId_Decode(OpcUa_HistoryReadValueId* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryReadValueId* a_pValue = (OpcUa_HistoryReadValueId*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13097,11 +13585,11 @@ struct SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType =
     OpcUaId_HistoryReadValueId_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryReadValueId),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryReadValueId_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryReadValueId_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryReadValueId_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryReadValueId_Decode
+    OpcUa_HistoryReadValueId_Initialize,
+    OpcUa_HistoryReadValueId_Clear,
+    NULL,
+    OpcUa_HistoryReadValueId_Encode,
+    OpcUa_HistoryReadValueId_Decode
 };
 #endif
 
@@ -13109,8 +13597,9 @@ struct SOPC_EncodeableType OpcUa_HistoryReadValueId_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryReadResult_Initialize
  *===========================================================================*/
-void OpcUa_HistoryReadResult_Initialize(OpcUa_HistoryReadResult* a_pValue)
+void OpcUa_HistoryReadResult_Initialize(void* pValue)
 {
+    OpcUa_HistoryReadResult* a_pValue = (OpcUa_HistoryReadResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -13122,8 +13611,9 @@ void OpcUa_HistoryReadResult_Initialize(OpcUa_HistoryReadResult* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadResult_Clear
  *===========================================================================*/
-void OpcUa_HistoryReadResult_Clear(OpcUa_HistoryReadResult* a_pValue)
+void OpcUa_HistoryReadResult_Clear(void* pValue)
 {
+    OpcUa_HistoryReadResult* a_pValue = (OpcUa_HistoryReadResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -13135,9 +13625,10 @@ void OpcUa_HistoryReadResult_Clear(OpcUa_HistoryReadResult* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryReadResult_Encode(OpcUa_HistoryReadResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryReadResult* a_pValue = (OpcUa_HistoryReadResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13156,9 +13647,10 @@ SOPC_StatusCode OpcUa_HistoryReadResult_Encode(OpcUa_HistoryReadResult* a_pValue
 /*============================================================================
  * OpcUa_HistoryReadResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryReadResult_Decode(OpcUa_HistoryReadResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryReadResult* a_pValue = (OpcUa_HistoryReadResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13191,11 +13683,11 @@ struct SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType =
     OpcUaId_HistoryReadResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryReadResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryReadResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryReadResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryReadResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryReadResult_Decode
+    OpcUa_HistoryReadResult_Initialize,
+    OpcUa_HistoryReadResult_Clear,
+    NULL,
+    OpcUa_HistoryReadResult_Encode,
+    OpcUa_HistoryReadResult_Decode
 };
 #endif
 
@@ -13203,8 +13695,9 @@ struct SOPC_EncodeableType OpcUa_HistoryReadResult_EncodeableType =
 /*============================================================================
  * OpcUa_ReadEventDetails_Initialize
  *===========================================================================*/
-void OpcUa_ReadEventDetails_Initialize(OpcUa_ReadEventDetails* a_pValue)
+void OpcUa_ReadEventDetails_Initialize(void* pValue)
 {
+    OpcUa_ReadEventDetails* a_pValue = (OpcUa_ReadEventDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->NumValuesPerNode);
@@ -13217,8 +13710,9 @@ void OpcUa_ReadEventDetails_Initialize(OpcUa_ReadEventDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadEventDetails_Clear
  *===========================================================================*/
-void OpcUa_ReadEventDetails_Clear(OpcUa_ReadEventDetails* a_pValue)
+void OpcUa_ReadEventDetails_Clear(void* pValue)
 {
+    OpcUa_ReadEventDetails* a_pValue = (OpcUa_ReadEventDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->NumValuesPerNode);
@@ -13231,9 +13725,10 @@ void OpcUa_ReadEventDetails_Clear(OpcUa_ReadEventDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadEventDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadEventDetails_Encode(OpcUa_ReadEventDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadEventDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadEventDetails* a_pValue = (OpcUa_ReadEventDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13254,9 +13749,10 @@ SOPC_StatusCode OpcUa_ReadEventDetails_Encode(OpcUa_ReadEventDetails* a_pValue, 
 /*============================================================================
  * OpcUa_ReadEventDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadEventDetails_Decode(OpcUa_ReadEventDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadEventDetails* a_pValue = (OpcUa_ReadEventDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13291,11 +13787,11 @@ struct SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType =
     OpcUaId_ReadEventDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReadEventDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReadEventDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReadEventDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReadEventDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReadEventDetails_Decode
+    OpcUa_ReadEventDetails_Initialize,
+    OpcUa_ReadEventDetails_Clear,
+    NULL,
+    OpcUa_ReadEventDetails_Encode,
+    OpcUa_ReadEventDetails_Decode
 };
 #endif
 
@@ -13303,8 +13799,9 @@ struct SOPC_EncodeableType OpcUa_ReadEventDetails_EncodeableType =
 /*============================================================================
  * OpcUa_ReadRawModifiedDetails_Initialize
  *===========================================================================*/
-void OpcUa_ReadRawModifiedDetails_Initialize(OpcUa_ReadRawModifiedDetails* a_pValue)
+void OpcUa_ReadRawModifiedDetails_Initialize(void* pValue)
 {
+    OpcUa_ReadRawModifiedDetails* a_pValue = (OpcUa_ReadRawModifiedDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Boolean_Initialize(&a_pValue->IsReadModified);
@@ -13318,8 +13815,9 @@ void OpcUa_ReadRawModifiedDetails_Initialize(OpcUa_ReadRawModifiedDetails* a_pVa
 /*============================================================================
  * OpcUa_ReadRawModifiedDetails_Clear
  *===========================================================================*/
-void OpcUa_ReadRawModifiedDetails_Clear(OpcUa_ReadRawModifiedDetails* a_pValue)
+void OpcUa_ReadRawModifiedDetails_Clear(void* pValue)
 {
+    OpcUa_ReadRawModifiedDetails* a_pValue = (OpcUa_ReadRawModifiedDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Boolean_Clear(&a_pValue->IsReadModified);
@@ -13333,9 +13831,10 @@ void OpcUa_ReadRawModifiedDetails_Clear(OpcUa_ReadRawModifiedDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadRawModifiedDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Encode(OpcUa_ReadRawModifiedDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadRawModifiedDetails* a_pValue = (OpcUa_ReadRawModifiedDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13358,9 +13857,10 @@ SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Encode(OpcUa_ReadRawModifiedDetails
 /*============================================================================
  * OpcUa_ReadRawModifiedDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Decode(OpcUa_ReadRawModifiedDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadRawModifiedDetails* a_pValue = (OpcUa_ReadRawModifiedDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13397,11 +13897,11 @@ struct SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType =
     OpcUaId_ReadRawModifiedDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReadRawModifiedDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReadRawModifiedDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReadRawModifiedDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReadRawModifiedDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReadRawModifiedDetails_Decode
+    OpcUa_ReadRawModifiedDetails_Initialize,
+    OpcUa_ReadRawModifiedDetails_Clear,
+    NULL,
+    OpcUa_ReadRawModifiedDetails_Encode,
+    OpcUa_ReadRawModifiedDetails_Decode
 };
 #endif
 
@@ -13409,8 +13909,9 @@ struct SOPC_EncodeableType OpcUa_ReadRawModifiedDetails_EncodeableType =
 /*============================================================================
  * OpcUa_ReadProcessedDetails_Initialize
  *===========================================================================*/
-void OpcUa_ReadProcessedDetails_Initialize(OpcUa_ReadProcessedDetails* a_pValue)
+void OpcUa_ReadProcessedDetails_Initialize(void* pValue)
 {
+    OpcUa_ReadProcessedDetails* a_pValue = (OpcUa_ReadProcessedDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Initialize(&a_pValue->StartTime);
@@ -13425,8 +13926,9 @@ void OpcUa_ReadProcessedDetails_Initialize(OpcUa_ReadProcessedDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadProcessedDetails_Clear
  *===========================================================================*/
-void OpcUa_ReadProcessedDetails_Clear(OpcUa_ReadProcessedDetails* a_pValue)
+void OpcUa_ReadProcessedDetails_Clear(void* pValue)
 {
+    OpcUa_ReadProcessedDetails* a_pValue = (OpcUa_ReadProcessedDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Clear(&a_pValue->StartTime);
@@ -13441,9 +13943,10 @@ void OpcUa_ReadProcessedDetails_Clear(OpcUa_ReadProcessedDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadProcessedDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadProcessedDetails_Encode(OpcUa_ReadProcessedDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadProcessedDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadProcessedDetails* a_pValue = (OpcUa_ReadProcessedDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13467,9 +13970,10 @@ SOPC_StatusCode OpcUa_ReadProcessedDetails_Encode(OpcUa_ReadProcessedDetails* a_
 /*============================================================================
  * OpcUa_ReadProcessedDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadProcessedDetails_Decode(OpcUa_ReadProcessedDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadProcessedDetails* a_pValue = (OpcUa_ReadProcessedDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13509,11 +14013,11 @@ struct SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType =
     OpcUaId_ReadProcessedDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReadProcessedDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReadProcessedDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReadProcessedDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReadProcessedDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReadProcessedDetails_Decode
+    OpcUa_ReadProcessedDetails_Initialize,
+    OpcUa_ReadProcessedDetails_Clear,
+    NULL,
+    OpcUa_ReadProcessedDetails_Encode,
+    OpcUa_ReadProcessedDetails_Decode
 };
 #endif
 
@@ -13521,8 +14025,9 @@ struct SOPC_EncodeableType OpcUa_ReadProcessedDetails_EncodeableType =
 /*============================================================================
  * OpcUa_ReadAtTimeDetails_Initialize
  *===========================================================================*/
-void OpcUa_ReadAtTimeDetails_Initialize(OpcUa_ReadAtTimeDetails* a_pValue)
+void OpcUa_ReadAtTimeDetails_Initialize(void* pValue)
 {
+    OpcUa_ReadAtTimeDetails* a_pValue = (OpcUa_ReadAtTimeDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
@@ -13534,8 +14039,9 @@ void OpcUa_ReadAtTimeDetails_Initialize(OpcUa_ReadAtTimeDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadAtTimeDetails_Clear
  *===========================================================================*/
-void OpcUa_ReadAtTimeDetails_Clear(OpcUa_ReadAtTimeDetails* a_pValue)
+void OpcUa_ReadAtTimeDetails_Clear(void* pValue)
 {
+    OpcUa_ReadAtTimeDetails* a_pValue = (OpcUa_ReadAtTimeDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfReqTimes, (void**) &a_pValue->ReqTimes, 
@@ -13547,9 +14053,10 @@ void OpcUa_ReadAtTimeDetails_Clear(OpcUa_ReadAtTimeDetails* a_pValue)
 /*============================================================================
  * OpcUa_ReadAtTimeDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadAtTimeDetails_Encode(OpcUa_ReadAtTimeDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadAtTimeDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadAtTimeDetails* a_pValue = (OpcUa_ReadAtTimeDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13567,9 +14074,10 @@ SOPC_StatusCode OpcUa_ReadAtTimeDetails_Encode(OpcUa_ReadAtTimeDetails* a_pValue
 /*============================================================================
  * OpcUa_ReadAtTimeDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ReadAtTimeDetails_Decode(OpcUa_ReadAtTimeDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ReadAtTimeDetails* a_pValue = (OpcUa_ReadAtTimeDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13603,11 +14111,11 @@ struct SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType =
     OpcUaId_ReadAtTimeDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ReadAtTimeDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ReadAtTimeDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ReadAtTimeDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ReadAtTimeDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ReadAtTimeDetails_Decode
+    OpcUa_ReadAtTimeDetails_Initialize,
+    OpcUa_ReadAtTimeDetails_Clear,
+    NULL,
+    OpcUa_ReadAtTimeDetails_Encode,
+    OpcUa_ReadAtTimeDetails_Decode
 };
 #endif
 
@@ -13615,8 +14123,9 @@ struct SOPC_EncodeableType OpcUa_ReadAtTimeDetails_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryData_Initialize
  *===========================================================================*/
-void OpcUa_HistoryData_Initialize(OpcUa_HistoryData* a_pValue)
+void OpcUa_HistoryData_Initialize(void* pValue)
 {
+    OpcUa_HistoryData* a_pValue = (OpcUa_HistoryData*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
@@ -13627,8 +14136,9 @@ void OpcUa_HistoryData_Initialize(OpcUa_HistoryData* a_pValue)
 /*============================================================================
  * OpcUa_HistoryData_Clear
  *===========================================================================*/
-void OpcUa_HistoryData_Clear(OpcUa_HistoryData* a_pValue)
+void OpcUa_HistoryData_Clear(void* pValue)
 {
+    OpcUa_HistoryData* a_pValue = (OpcUa_HistoryData*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
@@ -13639,9 +14149,10 @@ void OpcUa_HistoryData_Clear(OpcUa_HistoryData* a_pValue)
 /*============================================================================
  * OpcUa_HistoryData_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryData_Encode(OpcUa_HistoryData* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryData_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryData* a_pValue = (OpcUa_HistoryData*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13657,9 +14168,10 @@ SOPC_StatusCode OpcUa_HistoryData_Encode(OpcUa_HistoryData* a_pValue, SOPC_MsgBu
 /*============================================================================
  * OpcUa_HistoryData_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryData_Decode(OpcUa_HistoryData* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryData_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryData* a_pValue = (OpcUa_HistoryData*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13691,11 +14203,11 @@ struct SOPC_EncodeableType OpcUa_HistoryData_EncodeableType =
     OpcUaId_HistoryData_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryData),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryData_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryData_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryData_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryData_Decode
+    OpcUa_HistoryData_Initialize,
+    OpcUa_HistoryData_Clear,
+    NULL,
+    OpcUa_HistoryData_Encode,
+    OpcUa_HistoryData_Decode
 };
 #endif
 
@@ -13703,8 +14215,9 @@ struct SOPC_EncodeableType OpcUa_HistoryData_EncodeableType =
 /*============================================================================
  * OpcUa_ModificationInfo_Initialize
  *===========================================================================*/
-void OpcUa_ModificationInfo_Initialize(OpcUa_ModificationInfo* a_pValue)
+void OpcUa_ModificationInfo_Initialize(void* pValue)
 {
+    OpcUa_ModificationInfo* a_pValue = (OpcUa_ModificationInfo*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Initialize(&a_pValue->ModificationTime);
@@ -13716,8 +14229,9 @@ void OpcUa_ModificationInfo_Initialize(OpcUa_ModificationInfo* a_pValue)
 /*============================================================================
  * OpcUa_ModificationInfo_Clear
  *===========================================================================*/
-void OpcUa_ModificationInfo_Clear(OpcUa_ModificationInfo* a_pValue)
+void OpcUa_ModificationInfo_Clear(void* pValue)
 {
+    OpcUa_ModificationInfo* a_pValue = (OpcUa_ModificationInfo*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Clear(&a_pValue->ModificationTime);
@@ -13729,9 +14243,10 @@ void OpcUa_ModificationInfo_Clear(OpcUa_ModificationInfo* a_pValue)
 /*============================================================================
  * OpcUa_ModificationInfo_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModificationInfo_Encode(OpcUa_ModificationInfo* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModificationInfo_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModificationInfo* a_pValue = (OpcUa_ModificationInfo*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13750,9 +14265,10 @@ SOPC_StatusCode OpcUa_ModificationInfo_Encode(OpcUa_ModificationInfo* a_pValue, 
 /*============================================================================
  * OpcUa_ModificationInfo_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModificationInfo_Decode(OpcUa_ModificationInfo* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModificationInfo_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModificationInfo* a_pValue = (OpcUa_ModificationInfo*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13785,11 +14301,11 @@ struct SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType =
     OpcUaId_ModificationInfo_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ModificationInfo),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ModificationInfo_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ModificationInfo_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ModificationInfo_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ModificationInfo_Decode
+    OpcUa_ModificationInfo_Initialize,
+    OpcUa_ModificationInfo_Clear,
+    NULL,
+    OpcUa_ModificationInfo_Encode,
+    OpcUa_ModificationInfo_Decode
 };
 #endif
 
@@ -13797,8 +14313,9 @@ struct SOPC_EncodeableType OpcUa_ModificationInfo_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryModifiedData_Initialize
  *===========================================================================*/
-void OpcUa_HistoryModifiedData_Initialize(OpcUa_HistoryModifiedData* a_pValue)
+void OpcUa_HistoryModifiedData_Initialize(void* pValue)
 {
+    OpcUa_HistoryModifiedData* a_pValue = (OpcUa_HistoryModifiedData*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
@@ -13811,8 +14328,9 @@ void OpcUa_HistoryModifiedData_Initialize(OpcUa_HistoryModifiedData* a_pValue)
 /*============================================================================
  * OpcUa_HistoryModifiedData_Clear
  *===========================================================================*/
-void OpcUa_HistoryModifiedData_Clear(OpcUa_HistoryModifiedData* a_pValue)
+void OpcUa_HistoryModifiedData_Clear(void* pValue)
 {
+    OpcUa_HistoryModifiedData* a_pValue = (OpcUa_HistoryModifiedData*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfDataValues, (void**) &a_pValue->DataValues, 
@@ -13825,9 +14343,10 @@ void OpcUa_HistoryModifiedData_Clear(OpcUa_HistoryModifiedData* a_pValue)
 /*============================================================================
  * OpcUa_HistoryModifiedData_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryModifiedData_Encode(OpcUa_HistoryModifiedData* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryModifiedData_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryModifiedData* a_pValue = (OpcUa_HistoryModifiedData*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13846,9 +14365,10 @@ SOPC_StatusCode OpcUa_HistoryModifiedData_Encode(OpcUa_HistoryModifiedData* a_pV
 /*============================================================================
  * OpcUa_HistoryModifiedData_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryModifiedData_Decode(OpcUa_HistoryModifiedData* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryModifiedData* a_pValue = (OpcUa_HistoryModifiedData*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13885,11 +14405,11 @@ struct SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType =
     OpcUaId_HistoryModifiedData_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryModifiedData),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryModifiedData_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryModifiedData_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryModifiedData_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryModifiedData_Decode
+    OpcUa_HistoryModifiedData_Initialize,
+    OpcUa_HistoryModifiedData_Clear,
+    NULL,
+    OpcUa_HistoryModifiedData_Encode,
+    OpcUa_HistoryModifiedData_Decode
 };
 #endif
 
@@ -13897,8 +14417,9 @@ struct SOPC_EncodeableType OpcUa_HistoryModifiedData_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryEvent_Initialize
  *===========================================================================*/
-void OpcUa_HistoryEvent_Initialize(OpcUa_HistoryEvent* a_pValue)
+void OpcUa_HistoryEvent_Initialize(void* pValue)
 {
+    OpcUa_HistoryEvent* a_pValue = (OpcUa_HistoryEvent*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
@@ -13909,8 +14430,9 @@ void OpcUa_HistoryEvent_Initialize(OpcUa_HistoryEvent* a_pValue)
 /*============================================================================
  * OpcUa_HistoryEvent_Clear
  *===========================================================================*/
-void OpcUa_HistoryEvent_Clear(OpcUa_HistoryEvent* a_pValue)
+void OpcUa_HistoryEvent_Clear(void* pValue)
 {
+    OpcUa_HistoryEvent* a_pValue = (OpcUa_HistoryEvent*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
@@ -13921,9 +14443,10 @@ void OpcUa_HistoryEvent_Clear(OpcUa_HistoryEvent* a_pValue)
 /*============================================================================
  * OpcUa_HistoryEvent_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryEvent_Encode(OpcUa_HistoryEvent* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryEvent_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryEvent* a_pValue = (OpcUa_HistoryEvent*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13939,9 +14462,10 @@ SOPC_StatusCode OpcUa_HistoryEvent_Encode(OpcUa_HistoryEvent* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_HistoryEvent_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryEvent_Decode(OpcUa_HistoryEvent* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryEvent_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryEvent* a_pValue = (OpcUa_HistoryEvent*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -13973,11 +14497,11 @@ struct SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType =
     OpcUaId_HistoryEvent_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryEvent),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryEvent_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryEvent_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryEvent_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryEvent_Decode
+    OpcUa_HistoryEvent_Initialize,
+    OpcUa_HistoryEvent_Clear,
+    NULL,
+    OpcUa_HistoryEvent_Encode,
+    OpcUa_HistoryEvent_Decode
 };
 #endif
 
@@ -13986,8 +14510,9 @@ struct SOPC_EncodeableType OpcUa_HistoryEvent_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryReadRequest_Initialize
  *===========================================================================*/
-void OpcUa_HistoryReadRequest_Initialize(OpcUa_HistoryReadRequest* a_pValue)
+void OpcUa_HistoryReadRequest_Initialize(void* pValue)
 {
+    OpcUa_HistoryReadRequest* a_pValue = (OpcUa_HistoryReadRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -14002,8 +14527,9 @@ void OpcUa_HistoryReadRequest_Initialize(OpcUa_HistoryReadRequest* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadRequest_Clear
  *===========================================================================*/
-void OpcUa_HistoryReadRequest_Clear(OpcUa_HistoryReadRequest* a_pValue)
+void OpcUa_HistoryReadRequest_Clear(void* pValue)
 {
+    OpcUa_HistoryReadRequest* a_pValue = (OpcUa_HistoryReadRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -14018,9 +14544,10 @@ void OpcUa_HistoryReadRequest_Clear(OpcUa_HistoryReadRequest* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryReadRequest_Encode(OpcUa_HistoryReadRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryReadRequest* a_pValue = (OpcUa_HistoryReadRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14044,9 +14571,10 @@ SOPC_StatusCode OpcUa_HistoryReadRequest_Encode(OpcUa_HistoryReadRequest* a_pVal
 /*============================================================================
  * OpcUa_HistoryReadRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryReadRequest_Decode(OpcUa_HistoryReadRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryReadRequest* a_pValue = (OpcUa_HistoryReadRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14086,11 +14614,11 @@ struct SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType =
     OpcUaId_HistoryReadRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryReadRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryReadRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryReadRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryReadRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryReadRequest_Decode
+    OpcUa_HistoryReadRequest_Initialize,
+    OpcUa_HistoryReadRequest_Clear,
+    NULL,
+    OpcUa_HistoryReadRequest_Encode,
+    OpcUa_HistoryReadRequest_Decode
 };
 #endif
 
@@ -14098,8 +14626,9 @@ struct SOPC_EncodeableType OpcUa_HistoryReadRequest_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryReadResponse_Initialize
  *===========================================================================*/
-void OpcUa_HistoryReadResponse_Initialize(OpcUa_HistoryReadResponse* a_pValue)
+void OpcUa_HistoryReadResponse_Initialize(void* pValue)
 {
+    OpcUa_HistoryReadResponse* a_pValue = (OpcUa_HistoryReadResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -14113,8 +14642,9 @@ void OpcUa_HistoryReadResponse_Initialize(OpcUa_HistoryReadResponse* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadResponse_Clear
  *===========================================================================*/
-void OpcUa_HistoryReadResponse_Clear(OpcUa_HistoryReadResponse* a_pValue)
+void OpcUa_HistoryReadResponse_Clear(void* pValue)
 {
+    OpcUa_HistoryReadResponse* a_pValue = (OpcUa_HistoryReadResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -14128,9 +14658,10 @@ void OpcUa_HistoryReadResponse_Clear(OpcUa_HistoryReadResponse* a_pValue)
 /*============================================================================
  * OpcUa_HistoryReadResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryReadResponse_Encode(OpcUa_HistoryReadResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryReadResponse* a_pValue = (OpcUa_HistoryReadResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14151,9 +14682,10 @@ SOPC_StatusCode OpcUa_HistoryReadResponse_Encode(OpcUa_HistoryReadResponse* a_pV
 /*============================================================================
  * OpcUa_HistoryReadResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryReadResponse_Decode(OpcUa_HistoryReadResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryReadResponse* a_pValue = (OpcUa_HistoryReadResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14192,11 +14724,11 @@ struct SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType =
     OpcUaId_HistoryReadResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryReadResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryReadResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryReadResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryReadResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryReadResponse_Decode
+    OpcUa_HistoryReadResponse_Initialize,
+    OpcUa_HistoryReadResponse_Clear,
+    NULL,
+    OpcUa_HistoryReadResponse_Encode,
+    OpcUa_HistoryReadResponse_Decode
 };
 #endif
 #endif
@@ -14205,8 +14737,9 @@ struct SOPC_EncodeableType OpcUa_HistoryReadResponse_EncodeableType =
 /*============================================================================
  * OpcUa_WriteValue_Initialize
  *===========================================================================*/
-void OpcUa_WriteValue_Initialize(OpcUa_WriteValue* a_pValue)
+void OpcUa_WriteValue_Initialize(void* pValue)
 {
+    OpcUa_WriteValue* a_pValue = (OpcUa_WriteValue*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -14219,8 +14752,9 @@ void OpcUa_WriteValue_Initialize(OpcUa_WriteValue* a_pValue)
 /*============================================================================
  * OpcUa_WriteValue_Clear
  *===========================================================================*/
-void OpcUa_WriteValue_Clear(OpcUa_WriteValue* a_pValue)
+void OpcUa_WriteValue_Clear(void* pValue)
 {
+    OpcUa_WriteValue* a_pValue = (OpcUa_WriteValue*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -14233,9 +14767,10 @@ void OpcUa_WriteValue_Clear(OpcUa_WriteValue* a_pValue)
 /*============================================================================
  * OpcUa_WriteValue_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_WriteValue_Encode(OpcUa_WriteValue* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteValue_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_WriteValue* a_pValue = (OpcUa_WriteValue*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14256,9 +14791,10 @@ SOPC_StatusCode OpcUa_WriteValue_Encode(OpcUa_WriteValue* a_pValue, SOPC_MsgBuff
 /*============================================================================
  * OpcUa_WriteValue_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_WriteValue_Decode(OpcUa_WriteValue* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteValue_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_WriteValue* a_pValue = (OpcUa_WriteValue*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14293,11 +14829,11 @@ struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType =
     OpcUaId_WriteValue_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_WriteValue),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_WriteValue_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_WriteValue_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_WriteValue_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_WriteValue_Decode
+    OpcUa_WriteValue_Initialize,
+    OpcUa_WriteValue_Clear,
+    NULL,
+    OpcUa_WriteValue_Encode,
+    OpcUa_WriteValue_Decode
 };
 #endif
 
@@ -14306,8 +14842,9 @@ struct SOPC_EncodeableType OpcUa_WriteValue_EncodeableType =
 /*============================================================================
  * OpcUa_WriteRequest_Initialize
  *===========================================================================*/
-void OpcUa_WriteRequest_Initialize(OpcUa_WriteRequest* a_pValue)
+void OpcUa_WriteRequest_Initialize(void* pValue)
 {
+    OpcUa_WriteRequest* a_pValue = (OpcUa_WriteRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -14319,8 +14856,9 @@ void OpcUa_WriteRequest_Initialize(OpcUa_WriteRequest* a_pValue)
 /*============================================================================
  * OpcUa_WriteRequest_Clear
  *===========================================================================*/
-void OpcUa_WriteRequest_Clear(OpcUa_WriteRequest* a_pValue)
+void OpcUa_WriteRequest_Clear(void* pValue)
 {
+    OpcUa_WriteRequest* a_pValue = (OpcUa_WriteRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -14332,9 +14870,10 @@ void OpcUa_WriteRequest_Clear(OpcUa_WriteRequest* a_pValue)
 /*============================================================================
  * OpcUa_WriteRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_WriteRequest_Encode(OpcUa_WriteRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_WriteRequest* a_pValue = (OpcUa_WriteRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14352,9 +14891,10 @@ SOPC_StatusCode OpcUa_WriteRequest_Encode(OpcUa_WriteRequest* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_WriteRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_WriteRequest_Decode(OpcUa_WriteRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_WriteRequest* a_pValue = (OpcUa_WriteRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14388,11 +14928,11 @@ struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType =
     OpcUaId_WriteRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_WriteRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_WriteRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_WriteRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_WriteRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_WriteRequest_Decode
+    OpcUa_WriteRequest_Initialize,
+    OpcUa_WriteRequest_Clear,
+    NULL,
+    OpcUa_WriteRequest_Encode,
+    OpcUa_WriteRequest_Decode
 };
 #endif
 
@@ -14400,8 +14940,9 @@ struct SOPC_EncodeableType OpcUa_WriteRequest_EncodeableType =
 /*============================================================================
  * OpcUa_WriteResponse_Initialize
  *===========================================================================*/
-void OpcUa_WriteResponse_Initialize(OpcUa_WriteResponse* a_pValue)
+void OpcUa_WriteResponse_Initialize(void* pValue)
 {
+    OpcUa_WriteResponse* a_pValue = (OpcUa_WriteResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -14415,8 +14956,9 @@ void OpcUa_WriteResponse_Initialize(OpcUa_WriteResponse* a_pValue)
 /*============================================================================
  * OpcUa_WriteResponse_Clear
  *===========================================================================*/
-void OpcUa_WriteResponse_Clear(OpcUa_WriteResponse* a_pValue)
+void OpcUa_WriteResponse_Clear(void* pValue)
 {
+    OpcUa_WriteResponse* a_pValue = (OpcUa_WriteResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -14430,9 +14972,10 @@ void OpcUa_WriteResponse_Clear(OpcUa_WriteResponse* a_pValue)
 /*============================================================================
  * OpcUa_WriteResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_WriteResponse_Encode(OpcUa_WriteResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_WriteResponse* a_pValue = (OpcUa_WriteResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14453,9 +14996,10 @@ SOPC_StatusCode OpcUa_WriteResponse_Encode(OpcUa_WriteResponse* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_WriteResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_WriteResponse_Decode(OpcUa_WriteResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_WriteResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_WriteResponse* a_pValue = (OpcUa_WriteResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14494,11 +15038,11 @@ struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType =
     OpcUaId_WriteResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_WriteResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_WriteResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_WriteResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_WriteResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_WriteResponse_Decode
+    OpcUa_WriteResponse_Initialize,
+    OpcUa_WriteResponse_Clear,
+    NULL,
+    OpcUa_WriteResponse_Encode,
+    OpcUa_WriteResponse_Decode
 };
 #endif
 #endif
@@ -14507,8 +15051,9 @@ struct SOPC_EncodeableType OpcUa_WriteResponse_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryUpdateDetails_Initialize
  *===========================================================================*/
-void OpcUa_HistoryUpdateDetails_Initialize(OpcUa_HistoryUpdateDetails* a_pValue)
+void OpcUa_HistoryUpdateDetails_Initialize(void* pValue)
 {
+    OpcUa_HistoryUpdateDetails* a_pValue = (OpcUa_HistoryUpdateDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -14518,8 +15063,9 @@ void OpcUa_HistoryUpdateDetails_Initialize(OpcUa_HistoryUpdateDetails* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateDetails_Clear
  *===========================================================================*/
-void OpcUa_HistoryUpdateDetails_Clear(OpcUa_HistoryUpdateDetails* a_pValue)
+void OpcUa_HistoryUpdateDetails_Clear(void* pValue)
 {
+    OpcUa_HistoryUpdateDetails* a_pValue = (OpcUa_HistoryUpdateDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -14529,9 +15075,10 @@ void OpcUa_HistoryUpdateDetails_Clear(OpcUa_HistoryUpdateDetails* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryUpdateDetails_Encode(OpcUa_HistoryUpdateDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryUpdateDetails* a_pValue = (OpcUa_HistoryUpdateDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14546,9 +15093,10 @@ SOPC_StatusCode OpcUa_HistoryUpdateDetails_Encode(OpcUa_HistoryUpdateDetails* a_
 /*============================================================================
  * OpcUa_HistoryUpdateDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryUpdateDetails_Decode(OpcUa_HistoryUpdateDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryUpdateDetails* a_pValue = (OpcUa_HistoryUpdateDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14577,11 +15125,11 @@ struct SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType =
     OpcUaId_HistoryUpdateDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryUpdateDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryUpdateDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryUpdateDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryUpdateDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryUpdateDetails_Decode
+    OpcUa_HistoryUpdateDetails_Initialize,
+    OpcUa_HistoryUpdateDetails_Clear,
+    NULL,
+    OpcUa_HistoryUpdateDetails_Encode,
+    OpcUa_HistoryUpdateDetails_Decode
 };
 #endif
 
@@ -14591,8 +15139,9 @@ struct SOPC_EncodeableType OpcUa_HistoryUpdateDetails_EncodeableType =
 /*============================================================================
  * OpcUa_UpdateDataDetails_Initialize
  *===========================================================================*/
-void OpcUa_UpdateDataDetails_Initialize(OpcUa_UpdateDataDetails* a_pValue)
+void OpcUa_UpdateDataDetails_Initialize(void* pValue)
 {
+    OpcUa_UpdateDataDetails* a_pValue = (OpcUa_UpdateDataDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -14605,8 +15154,9 @@ void OpcUa_UpdateDataDetails_Initialize(OpcUa_UpdateDataDetails* a_pValue)
 /*============================================================================
  * OpcUa_UpdateDataDetails_Clear
  *===========================================================================*/
-void OpcUa_UpdateDataDetails_Clear(OpcUa_UpdateDataDetails* a_pValue)
+void OpcUa_UpdateDataDetails_Clear(void* pValue)
 {
+    OpcUa_UpdateDataDetails* a_pValue = (OpcUa_UpdateDataDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -14619,9 +15169,10 @@ void OpcUa_UpdateDataDetails_Clear(OpcUa_UpdateDataDetails* a_pValue)
 /*============================================================================
  * OpcUa_UpdateDataDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UpdateDataDetails_Encode(OpcUa_UpdateDataDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateDataDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UpdateDataDetails* a_pValue = (OpcUa_UpdateDataDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14641,9 +15192,10 @@ SOPC_StatusCode OpcUa_UpdateDataDetails_Encode(OpcUa_UpdateDataDetails* a_pValue
 /*============================================================================
  * OpcUa_UpdateDataDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UpdateDataDetails_Decode(OpcUa_UpdateDataDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UpdateDataDetails* a_pValue = (OpcUa_UpdateDataDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14679,11 +15231,11 @@ struct SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType =
     OpcUaId_UpdateDataDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_UpdateDataDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_UpdateDataDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_UpdateDataDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_UpdateDataDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_UpdateDataDetails_Decode
+    OpcUa_UpdateDataDetails_Initialize,
+    OpcUa_UpdateDataDetails_Clear,
+    NULL,
+    OpcUa_UpdateDataDetails_Encode,
+    OpcUa_UpdateDataDetails_Decode
 };
 #endif
 
@@ -14691,8 +15243,9 @@ struct SOPC_EncodeableType OpcUa_UpdateDataDetails_EncodeableType =
 /*============================================================================
  * OpcUa_UpdateStructureDataDetails_Initialize
  *===========================================================================*/
-void OpcUa_UpdateStructureDataDetails_Initialize(OpcUa_UpdateStructureDataDetails* a_pValue)
+void OpcUa_UpdateStructureDataDetails_Initialize(void* pValue)
 {
+    OpcUa_UpdateStructureDataDetails* a_pValue = (OpcUa_UpdateStructureDataDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -14705,8 +15258,9 @@ void OpcUa_UpdateStructureDataDetails_Initialize(OpcUa_UpdateStructureDataDetail
 /*============================================================================
  * OpcUa_UpdateStructureDataDetails_Clear
  *===========================================================================*/
-void OpcUa_UpdateStructureDataDetails_Clear(OpcUa_UpdateStructureDataDetails* a_pValue)
+void OpcUa_UpdateStructureDataDetails_Clear(void* pValue)
 {
+    OpcUa_UpdateStructureDataDetails* a_pValue = (OpcUa_UpdateStructureDataDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -14719,9 +15273,10 @@ void OpcUa_UpdateStructureDataDetails_Clear(OpcUa_UpdateStructureDataDetails* a_
 /*============================================================================
  * OpcUa_UpdateStructureDataDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Encode(OpcUa_UpdateStructureDataDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UpdateStructureDataDetails* a_pValue = (OpcUa_UpdateStructureDataDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14741,9 +15296,10 @@ SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Encode(OpcUa_UpdateStructureDat
 /*============================================================================
  * OpcUa_UpdateStructureDataDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Decode(OpcUa_UpdateStructureDataDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UpdateStructureDataDetails* a_pValue = (OpcUa_UpdateStructureDataDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14779,11 +15335,11 @@ struct SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType =
     OpcUaId_UpdateStructureDataDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_UpdateStructureDataDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_UpdateStructureDataDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_UpdateStructureDataDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_UpdateStructureDataDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_UpdateStructureDataDetails_Decode
+    OpcUa_UpdateStructureDataDetails_Initialize,
+    OpcUa_UpdateStructureDataDetails_Clear,
+    NULL,
+    OpcUa_UpdateStructureDataDetails_Encode,
+    OpcUa_UpdateStructureDataDetails_Decode
 };
 #endif
 
@@ -14791,8 +15347,9 @@ struct SOPC_EncodeableType OpcUa_UpdateStructureDataDetails_EncodeableType =
 /*============================================================================
  * OpcUa_UpdateEventDetails_Initialize
  *===========================================================================*/
-void OpcUa_UpdateEventDetails_Initialize(OpcUa_UpdateEventDetails* a_pValue)
+void OpcUa_UpdateEventDetails_Initialize(void* pValue)
 {
+    OpcUa_UpdateEventDetails* a_pValue = (OpcUa_UpdateEventDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -14806,8 +15363,9 @@ void OpcUa_UpdateEventDetails_Initialize(OpcUa_UpdateEventDetails* a_pValue)
 /*============================================================================
  * OpcUa_UpdateEventDetails_Clear
  *===========================================================================*/
-void OpcUa_UpdateEventDetails_Clear(OpcUa_UpdateEventDetails* a_pValue)
+void OpcUa_UpdateEventDetails_Clear(void* pValue)
 {
+    OpcUa_UpdateEventDetails* a_pValue = (OpcUa_UpdateEventDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -14821,9 +15379,10 @@ void OpcUa_UpdateEventDetails_Clear(OpcUa_UpdateEventDetails* a_pValue)
 /*============================================================================
  * OpcUa_UpdateEventDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UpdateEventDetails_Encode(OpcUa_UpdateEventDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateEventDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UpdateEventDetails* a_pValue = (OpcUa_UpdateEventDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14845,9 +15404,10 @@ SOPC_StatusCode OpcUa_UpdateEventDetails_Encode(OpcUa_UpdateEventDetails* a_pVal
 /*============================================================================
  * OpcUa_UpdateEventDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_UpdateEventDetails_Decode(OpcUa_UpdateEventDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_UpdateEventDetails* a_pValue = (OpcUa_UpdateEventDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14885,11 +15445,11 @@ struct SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType =
     OpcUaId_UpdateEventDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_UpdateEventDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_UpdateEventDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_UpdateEventDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_UpdateEventDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_UpdateEventDetails_Decode
+    OpcUa_UpdateEventDetails_Initialize,
+    OpcUa_UpdateEventDetails_Clear,
+    NULL,
+    OpcUa_UpdateEventDetails_Encode,
+    OpcUa_UpdateEventDetails_Decode
 };
 #endif
 
@@ -14897,8 +15457,9 @@ struct SOPC_EncodeableType OpcUa_UpdateEventDetails_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteRawModifiedDetails_Initialize
  *===========================================================================*/
-void OpcUa_DeleteRawModifiedDetails_Initialize(OpcUa_DeleteRawModifiedDetails* a_pValue)
+void OpcUa_DeleteRawModifiedDetails_Initialize(void* pValue)
 {
+    OpcUa_DeleteRawModifiedDetails* a_pValue = (OpcUa_DeleteRawModifiedDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -14911,8 +15472,9 @@ void OpcUa_DeleteRawModifiedDetails_Initialize(OpcUa_DeleteRawModifiedDetails* a
 /*============================================================================
  * OpcUa_DeleteRawModifiedDetails_Clear
  *===========================================================================*/
-void OpcUa_DeleteRawModifiedDetails_Clear(OpcUa_DeleteRawModifiedDetails* a_pValue)
+void OpcUa_DeleteRawModifiedDetails_Clear(void* pValue)
 {
+    OpcUa_DeleteRawModifiedDetails* a_pValue = (OpcUa_DeleteRawModifiedDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -14925,9 +15487,10 @@ void OpcUa_DeleteRawModifiedDetails_Clear(OpcUa_DeleteRawModifiedDetails* a_pVal
 /*============================================================================
  * OpcUa_DeleteRawModifiedDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Encode(OpcUa_DeleteRawModifiedDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteRawModifiedDetails* a_pValue = (OpcUa_DeleteRawModifiedDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14948,9 +15511,10 @@ SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Encode(OpcUa_DeleteRawModifiedDet
 /*============================================================================
  * OpcUa_DeleteRawModifiedDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Decode(OpcUa_DeleteRawModifiedDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteRawModifiedDetails* a_pValue = (OpcUa_DeleteRawModifiedDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -14985,11 +15549,11 @@ struct SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType =
     OpcUaId_DeleteRawModifiedDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteRawModifiedDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteRawModifiedDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteRawModifiedDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteRawModifiedDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteRawModifiedDetails_Decode
+    OpcUa_DeleteRawModifiedDetails_Initialize,
+    OpcUa_DeleteRawModifiedDetails_Clear,
+    NULL,
+    OpcUa_DeleteRawModifiedDetails_Encode,
+    OpcUa_DeleteRawModifiedDetails_Decode
 };
 #endif
 
@@ -14997,8 +15561,9 @@ struct SOPC_EncodeableType OpcUa_DeleteRawModifiedDetails_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteAtTimeDetails_Initialize
  *===========================================================================*/
-void OpcUa_DeleteAtTimeDetails_Initialize(OpcUa_DeleteAtTimeDetails* a_pValue)
+void OpcUa_DeleteAtTimeDetails_Initialize(void* pValue)
 {
+    OpcUa_DeleteAtTimeDetails* a_pValue = (OpcUa_DeleteAtTimeDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -15010,8 +15575,9 @@ void OpcUa_DeleteAtTimeDetails_Initialize(OpcUa_DeleteAtTimeDetails* a_pValue)
 /*============================================================================
  * OpcUa_DeleteAtTimeDetails_Clear
  *===========================================================================*/
-void OpcUa_DeleteAtTimeDetails_Clear(OpcUa_DeleteAtTimeDetails* a_pValue)
+void OpcUa_DeleteAtTimeDetails_Clear(void* pValue)
 {
+    OpcUa_DeleteAtTimeDetails* a_pValue = (OpcUa_DeleteAtTimeDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -15023,9 +15589,10 @@ void OpcUa_DeleteAtTimeDetails_Clear(OpcUa_DeleteAtTimeDetails* a_pValue)
 /*============================================================================
  * OpcUa_DeleteAtTimeDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Encode(OpcUa_DeleteAtTimeDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteAtTimeDetails* a_pValue = (OpcUa_DeleteAtTimeDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15043,9 +15610,10 @@ SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Encode(OpcUa_DeleteAtTimeDetails* a_pV
 /*============================================================================
  * OpcUa_DeleteAtTimeDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Decode(OpcUa_DeleteAtTimeDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteAtTimeDetails* a_pValue = (OpcUa_DeleteAtTimeDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15079,11 +15647,11 @@ struct SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType =
     OpcUaId_DeleteAtTimeDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteAtTimeDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteAtTimeDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteAtTimeDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteAtTimeDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteAtTimeDetails_Decode
+    OpcUa_DeleteAtTimeDetails_Initialize,
+    OpcUa_DeleteAtTimeDetails_Clear,
+    NULL,
+    OpcUa_DeleteAtTimeDetails_Encode,
+    OpcUa_DeleteAtTimeDetails_Decode
 };
 #endif
 
@@ -15091,8 +15659,9 @@ struct SOPC_EncodeableType OpcUa_DeleteAtTimeDetails_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteEventDetails_Initialize
  *===========================================================================*/
-void OpcUa_DeleteEventDetails_Initialize(OpcUa_DeleteEventDetails* a_pValue)
+void OpcUa_DeleteEventDetails_Initialize(void* pValue)
 {
+    OpcUa_DeleteEventDetails* a_pValue = (OpcUa_DeleteEventDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->NodeId);
@@ -15104,8 +15673,9 @@ void OpcUa_DeleteEventDetails_Initialize(OpcUa_DeleteEventDetails* a_pValue)
 /*============================================================================
  * OpcUa_DeleteEventDetails_Clear
  *===========================================================================*/
-void OpcUa_DeleteEventDetails_Clear(OpcUa_DeleteEventDetails* a_pValue)
+void OpcUa_DeleteEventDetails_Clear(void* pValue)
 {
+    OpcUa_DeleteEventDetails* a_pValue = (OpcUa_DeleteEventDetails*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->NodeId);
@@ -15117,9 +15687,10 @@ void OpcUa_DeleteEventDetails_Clear(OpcUa_DeleteEventDetails* a_pValue)
 /*============================================================================
  * OpcUa_DeleteEventDetails_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteEventDetails_Encode(OpcUa_DeleteEventDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteEventDetails_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteEventDetails* a_pValue = (OpcUa_DeleteEventDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15137,9 +15708,10 @@ SOPC_StatusCode OpcUa_DeleteEventDetails_Encode(OpcUa_DeleteEventDetails* a_pVal
 /*============================================================================
  * OpcUa_DeleteEventDetails_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteEventDetails_Decode(OpcUa_DeleteEventDetails* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteEventDetails* a_pValue = (OpcUa_DeleteEventDetails*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15173,11 +15745,11 @@ struct SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType =
     OpcUaId_DeleteEventDetails_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteEventDetails),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteEventDetails_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteEventDetails_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteEventDetails_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteEventDetails_Decode
+    OpcUa_DeleteEventDetails_Initialize,
+    OpcUa_DeleteEventDetails_Clear,
+    NULL,
+    OpcUa_DeleteEventDetails_Encode,
+    OpcUa_DeleteEventDetails_Decode
 };
 #endif
 
@@ -15185,8 +15757,9 @@ struct SOPC_EncodeableType OpcUa_DeleteEventDetails_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryUpdateResult_Initialize
  *===========================================================================*/
-void OpcUa_HistoryUpdateResult_Initialize(OpcUa_HistoryUpdateResult* a_pValue)
+void OpcUa_HistoryUpdateResult_Initialize(void* pValue)
 {
+    OpcUa_HistoryUpdateResult* a_pValue = (OpcUa_HistoryUpdateResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -15200,8 +15773,9 @@ void OpcUa_HistoryUpdateResult_Initialize(OpcUa_HistoryUpdateResult* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateResult_Clear
  *===========================================================================*/
-void OpcUa_HistoryUpdateResult_Clear(OpcUa_HistoryUpdateResult* a_pValue)
+void OpcUa_HistoryUpdateResult_Clear(void* pValue)
 {
+    OpcUa_HistoryUpdateResult* a_pValue = (OpcUa_HistoryUpdateResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -15215,9 +15789,10 @@ void OpcUa_HistoryUpdateResult_Clear(OpcUa_HistoryUpdateResult* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryUpdateResult_Encode(OpcUa_HistoryUpdateResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryUpdateResult* a_pValue = (OpcUa_HistoryUpdateResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15238,9 +15813,10 @@ SOPC_StatusCode OpcUa_HistoryUpdateResult_Encode(OpcUa_HistoryUpdateResult* a_pV
 /*============================================================================
  * OpcUa_HistoryUpdateResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryUpdateResult_Decode(OpcUa_HistoryUpdateResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryUpdateResult* a_pValue = (OpcUa_HistoryUpdateResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15279,11 +15855,11 @@ struct SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType =
     OpcUaId_HistoryUpdateResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryUpdateResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryUpdateResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryUpdateResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryUpdateResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryUpdateResult_Decode
+    OpcUa_HistoryUpdateResult_Initialize,
+    OpcUa_HistoryUpdateResult_Clear,
+    NULL,
+    OpcUa_HistoryUpdateResult_Encode,
+    OpcUa_HistoryUpdateResult_Decode
 };
 #endif
 
@@ -15292,8 +15868,9 @@ struct SOPC_EncodeableType OpcUa_HistoryUpdateResult_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryUpdateRequest_Initialize
  *===========================================================================*/
-void OpcUa_HistoryUpdateRequest_Initialize(OpcUa_HistoryUpdateRequest* a_pValue)
+void OpcUa_HistoryUpdateRequest_Initialize(void* pValue)
 {
+    OpcUa_HistoryUpdateRequest* a_pValue = (OpcUa_HistoryUpdateRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -15305,8 +15882,9 @@ void OpcUa_HistoryUpdateRequest_Initialize(OpcUa_HistoryUpdateRequest* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateRequest_Clear
  *===========================================================================*/
-void OpcUa_HistoryUpdateRequest_Clear(OpcUa_HistoryUpdateRequest* a_pValue)
+void OpcUa_HistoryUpdateRequest_Clear(void* pValue)
 {
+    OpcUa_HistoryUpdateRequest* a_pValue = (OpcUa_HistoryUpdateRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -15318,9 +15896,10 @@ void OpcUa_HistoryUpdateRequest_Clear(OpcUa_HistoryUpdateRequest* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryUpdateRequest_Encode(OpcUa_HistoryUpdateRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryUpdateRequest* a_pValue = (OpcUa_HistoryUpdateRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15338,9 +15917,10 @@ SOPC_StatusCode OpcUa_HistoryUpdateRequest_Encode(OpcUa_HistoryUpdateRequest* a_
 /*============================================================================
  * OpcUa_HistoryUpdateRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryUpdateRequest_Decode(OpcUa_HistoryUpdateRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryUpdateRequest* a_pValue = (OpcUa_HistoryUpdateRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15374,11 +15954,11 @@ struct SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType =
     OpcUaId_HistoryUpdateRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryUpdateRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryUpdateRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryUpdateRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryUpdateRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryUpdateRequest_Decode
+    OpcUa_HistoryUpdateRequest_Initialize,
+    OpcUa_HistoryUpdateRequest_Clear,
+    NULL,
+    OpcUa_HistoryUpdateRequest_Encode,
+    OpcUa_HistoryUpdateRequest_Decode
 };
 #endif
 
@@ -15386,8 +15966,9 @@ struct SOPC_EncodeableType OpcUa_HistoryUpdateRequest_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryUpdateResponse_Initialize
  *===========================================================================*/
-void OpcUa_HistoryUpdateResponse_Initialize(OpcUa_HistoryUpdateResponse* a_pValue)
+void OpcUa_HistoryUpdateResponse_Initialize(void* pValue)
 {
+    OpcUa_HistoryUpdateResponse* a_pValue = (OpcUa_HistoryUpdateResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -15401,8 +15982,9 @@ void OpcUa_HistoryUpdateResponse_Initialize(OpcUa_HistoryUpdateResponse* a_pValu
 /*============================================================================
  * OpcUa_HistoryUpdateResponse_Clear
  *===========================================================================*/
-void OpcUa_HistoryUpdateResponse_Clear(OpcUa_HistoryUpdateResponse* a_pValue)
+void OpcUa_HistoryUpdateResponse_Clear(void* pValue)
 {
+    OpcUa_HistoryUpdateResponse* a_pValue = (OpcUa_HistoryUpdateResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -15416,9 +15998,10 @@ void OpcUa_HistoryUpdateResponse_Clear(OpcUa_HistoryUpdateResponse* a_pValue)
 /*============================================================================
  * OpcUa_HistoryUpdateResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryUpdateResponse_Encode(OpcUa_HistoryUpdateResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryUpdateResponse* a_pValue = (OpcUa_HistoryUpdateResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15439,9 +16022,10 @@ SOPC_StatusCode OpcUa_HistoryUpdateResponse_Encode(OpcUa_HistoryUpdateResponse* 
 /*============================================================================
  * OpcUa_HistoryUpdateResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryUpdateResponse_Decode(OpcUa_HistoryUpdateResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryUpdateResponse* a_pValue = (OpcUa_HistoryUpdateResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15480,11 +16064,11 @@ struct SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType =
     OpcUaId_HistoryUpdateResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryUpdateResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryUpdateResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryUpdateResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryUpdateResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryUpdateResponse_Decode
+    OpcUa_HistoryUpdateResponse_Initialize,
+    OpcUa_HistoryUpdateResponse_Clear,
+    NULL,
+    OpcUa_HistoryUpdateResponse_Encode,
+    OpcUa_HistoryUpdateResponse_Decode
 };
 #endif
 #endif
@@ -15493,8 +16077,9 @@ struct SOPC_EncodeableType OpcUa_HistoryUpdateResponse_EncodeableType =
 /*============================================================================
  * OpcUa_CallMethodRequest_Initialize
  *===========================================================================*/
-void OpcUa_CallMethodRequest_Initialize(OpcUa_CallMethodRequest* a_pValue)
+void OpcUa_CallMethodRequest_Initialize(void* pValue)
 {
+    OpcUa_CallMethodRequest* a_pValue = (OpcUa_CallMethodRequest*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->ObjectId);
@@ -15507,8 +16092,9 @@ void OpcUa_CallMethodRequest_Initialize(OpcUa_CallMethodRequest* a_pValue)
 /*============================================================================
  * OpcUa_CallMethodRequest_Clear
  *===========================================================================*/
-void OpcUa_CallMethodRequest_Clear(OpcUa_CallMethodRequest* a_pValue)
+void OpcUa_CallMethodRequest_Clear(void* pValue)
 {
+    OpcUa_CallMethodRequest* a_pValue = (OpcUa_CallMethodRequest*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->ObjectId);
@@ -15521,9 +16107,10 @@ void OpcUa_CallMethodRequest_Clear(OpcUa_CallMethodRequest* a_pValue)
 /*============================================================================
  * OpcUa_CallMethodRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CallMethodRequest_Encode(OpcUa_CallMethodRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallMethodRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CallMethodRequest* a_pValue = (OpcUa_CallMethodRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15543,9 +16130,10 @@ SOPC_StatusCode OpcUa_CallMethodRequest_Encode(OpcUa_CallMethodRequest* a_pValue
 /*============================================================================
  * OpcUa_CallMethodRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CallMethodRequest_Decode(OpcUa_CallMethodRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CallMethodRequest* a_pValue = (OpcUa_CallMethodRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15581,11 +16169,11 @@ struct SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType =
     OpcUaId_CallMethodRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CallMethodRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CallMethodRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CallMethodRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CallMethodRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CallMethodRequest_Decode
+    OpcUa_CallMethodRequest_Initialize,
+    OpcUa_CallMethodRequest_Clear,
+    NULL,
+    OpcUa_CallMethodRequest_Encode,
+    OpcUa_CallMethodRequest_Decode
 };
 #endif
 
@@ -15593,8 +16181,9 @@ struct SOPC_EncodeableType OpcUa_CallMethodRequest_EncodeableType =
 /*============================================================================
  * OpcUa_CallMethodResult_Initialize
  *===========================================================================*/
-void OpcUa_CallMethodResult_Initialize(OpcUa_CallMethodResult* a_pValue)
+void OpcUa_CallMethodResult_Initialize(void* pValue)
 {
+    OpcUa_CallMethodResult* a_pValue = (OpcUa_CallMethodResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -15610,8 +16199,9 @@ void OpcUa_CallMethodResult_Initialize(OpcUa_CallMethodResult* a_pValue)
 /*============================================================================
  * OpcUa_CallMethodResult_Clear
  *===========================================================================*/
-void OpcUa_CallMethodResult_Clear(OpcUa_CallMethodResult* a_pValue)
+void OpcUa_CallMethodResult_Clear(void* pValue)
 {
+    OpcUa_CallMethodResult* a_pValue = (OpcUa_CallMethodResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -15627,9 +16217,10 @@ void OpcUa_CallMethodResult_Clear(OpcUa_CallMethodResult* a_pValue)
 /*============================================================================
  * OpcUa_CallMethodResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CallMethodResult_Encode(OpcUa_CallMethodResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallMethodResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CallMethodResult* a_pValue = (OpcUa_CallMethodResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15653,9 +16244,10 @@ SOPC_StatusCode OpcUa_CallMethodResult_Encode(OpcUa_CallMethodResult* a_pValue, 
 /*============================================================================
  * OpcUa_CallMethodResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CallMethodResult_Decode(OpcUa_CallMethodResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallMethodResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CallMethodResult* a_pValue = (OpcUa_CallMethodResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15699,11 +16291,11 @@ struct SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType =
     OpcUaId_CallMethodResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CallMethodResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CallMethodResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CallMethodResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CallMethodResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CallMethodResult_Decode
+    OpcUa_CallMethodResult_Initialize,
+    OpcUa_CallMethodResult_Clear,
+    NULL,
+    OpcUa_CallMethodResult_Encode,
+    OpcUa_CallMethodResult_Decode
 };
 #endif
 
@@ -15712,8 +16304,9 @@ struct SOPC_EncodeableType OpcUa_CallMethodResult_EncodeableType =
 /*============================================================================
  * OpcUa_CallRequest_Initialize
  *===========================================================================*/
-void OpcUa_CallRequest_Initialize(OpcUa_CallRequest* a_pValue)
+void OpcUa_CallRequest_Initialize(void* pValue)
 {
+    OpcUa_CallRequest* a_pValue = (OpcUa_CallRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -15725,8 +16318,9 @@ void OpcUa_CallRequest_Initialize(OpcUa_CallRequest* a_pValue)
 /*============================================================================
  * OpcUa_CallRequest_Clear
  *===========================================================================*/
-void OpcUa_CallRequest_Clear(OpcUa_CallRequest* a_pValue)
+void OpcUa_CallRequest_Clear(void* pValue)
 {
+    OpcUa_CallRequest* a_pValue = (OpcUa_CallRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -15738,9 +16332,10 @@ void OpcUa_CallRequest_Clear(OpcUa_CallRequest* a_pValue)
 /*============================================================================
  * OpcUa_CallRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CallRequest_Encode(OpcUa_CallRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CallRequest* a_pValue = (OpcUa_CallRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15758,9 +16353,10 @@ SOPC_StatusCode OpcUa_CallRequest_Encode(OpcUa_CallRequest* a_pValue, SOPC_MsgBu
 /*============================================================================
  * OpcUa_CallRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CallRequest_Decode(OpcUa_CallRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CallRequest* a_pValue = (OpcUa_CallRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15794,11 +16390,11 @@ struct SOPC_EncodeableType OpcUa_CallRequest_EncodeableType =
     OpcUaId_CallRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CallRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CallRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CallRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CallRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CallRequest_Decode
+    OpcUa_CallRequest_Initialize,
+    OpcUa_CallRequest_Clear,
+    NULL,
+    OpcUa_CallRequest_Encode,
+    OpcUa_CallRequest_Decode
 };
 #endif
 
@@ -15806,8 +16402,9 @@ struct SOPC_EncodeableType OpcUa_CallRequest_EncodeableType =
 /*============================================================================
  * OpcUa_CallResponse_Initialize
  *===========================================================================*/
-void OpcUa_CallResponse_Initialize(OpcUa_CallResponse* a_pValue)
+void OpcUa_CallResponse_Initialize(void* pValue)
 {
+    OpcUa_CallResponse* a_pValue = (OpcUa_CallResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -15821,8 +16418,9 @@ void OpcUa_CallResponse_Initialize(OpcUa_CallResponse* a_pValue)
 /*============================================================================
  * OpcUa_CallResponse_Clear
  *===========================================================================*/
-void OpcUa_CallResponse_Clear(OpcUa_CallResponse* a_pValue)
+void OpcUa_CallResponse_Clear(void* pValue)
 {
+    OpcUa_CallResponse* a_pValue = (OpcUa_CallResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -15836,9 +16434,10 @@ void OpcUa_CallResponse_Clear(OpcUa_CallResponse* a_pValue)
 /*============================================================================
  * OpcUa_CallResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CallResponse_Encode(OpcUa_CallResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CallResponse* a_pValue = (OpcUa_CallResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15859,9 +16458,10 @@ SOPC_StatusCode OpcUa_CallResponse_Encode(OpcUa_CallResponse* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_CallResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CallResponse_Decode(OpcUa_CallResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CallResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CallResponse* a_pValue = (OpcUa_CallResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15900,11 +16500,11 @@ struct SOPC_EncodeableType OpcUa_CallResponse_EncodeableType =
     OpcUaId_CallResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CallResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CallResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CallResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CallResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CallResponse_Decode
+    OpcUa_CallResponse_Initialize,
+    OpcUa_CallResponse_Clear,
+    NULL,
+    OpcUa_CallResponse_Encode,
+    OpcUa_CallResponse_Decode
 };
 #endif
 #endif
@@ -15916,8 +16516,9 @@ struct SOPC_EncodeableType OpcUa_CallResponse_EncodeableType =
 /*============================================================================
  * OpcUa_DataChangeFilter_Initialize
  *===========================================================================*/
-void OpcUa_DataChangeFilter_Initialize(OpcUa_DataChangeFilter* a_pValue)
+void OpcUa_DataChangeFilter_Initialize(void* pValue)
 {
+    OpcUa_DataChangeFilter* a_pValue = (OpcUa_DataChangeFilter*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_EnumeratedType((int32_t*) &a_pValue->Trigger);
@@ -15929,8 +16530,9 @@ void OpcUa_DataChangeFilter_Initialize(OpcUa_DataChangeFilter* a_pValue)
 /*============================================================================
  * OpcUa_DataChangeFilter_Clear
  *===========================================================================*/
-void OpcUa_DataChangeFilter_Clear(OpcUa_DataChangeFilter* a_pValue)
+void OpcUa_DataChangeFilter_Clear(void* pValue)
 {
+    OpcUa_DataChangeFilter* a_pValue = (OpcUa_DataChangeFilter*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_EnumeratedType((int32_t*) &a_pValue->Trigger);
@@ -15942,9 +16544,10 @@ void OpcUa_DataChangeFilter_Clear(OpcUa_DataChangeFilter* a_pValue)
 /*============================================================================
  * OpcUa_DataChangeFilter_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DataChangeFilter_Encode(OpcUa_DataChangeFilter* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataChangeFilter_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DataChangeFilter* a_pValue = (OpcUa_DataChangeFilter*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15963,9 +16566,10 @@ SOPC_StatusCode OpcUa_DataChangeFilter_Encode(OpcUa_DataChangeFilter* a_pValue, 
 /*============================================================================
  * OpcUa_DataChangeFilter_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DataChangeFilter_Decode(OpcUa_DataChangeFilter* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DataChangeFilter* a_pValue = (OpcUa_DataChangeFilter*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -15998,11 +16602,11 @@ struct SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType =
     OpcUaId_DataChangeFilter_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DataChangeFilter),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DataChangeFilter_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DataChangeFilter_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DataChangeFilter_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DataChangeFilter_Decode
+    OpcUa_DataChangeFilter_Initialize,
+    OpcUa_DataChangeFilter_Clear,
+    NULL,
+    OpcUa_DataChangeFilter_Encode,
+    OpcUa_DataChangeFilter_Decode
 };
 #endif
 
@@ -16010,8 +16614,9 @@ struct SOPC_EncodeableType OpcUa_DataChangeFilter_EncodeableType =
 /*============================================================================
  * OpcUa_EventFilter_Initialize
  *===========================================================================*/
-void OpcUa_EventFilter_Initialize(OpcUa_EventFilter* a_pValue)
+void OpcUa_EventFilter_Initialize(void* pValue)
 {
+    OpcUa_EventFilter* a_pValue = (OpcUa_EventFilter*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfSelectClauses, (void**) &a_pValue->SelectClauses, 
@@ -16023,8 +16628,9 @@ void OpcUa_EventFilter_Initialize(OpcUa_EventFilter* a_pValue)
 /*============================================================================
  * OpcUa_EventFilter_Clear
  *===========================================================================*/
-void OpcUa_EventFilter_Clear(OpcUa_EventFilter* a_pValue)
+void OpcUa_EventFilter_Clear(void* pValue)
 {
+    OpcUa_EventFilter* a_pValue = (OpcUa_EventFilter*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfSelectClauses, (void**) &a_pValue->SelectClauses, 
@@ -16036,9 +16642,10 @@ void OpcUa_EventFilter_Clear(OpcUa_EventFilter* a_pValue)
 /*============================================================================
  * OpcUa_EventFilter_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EventFilter_Encode(OpcUa_EventFilter* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFilter_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EventFilter* a_pValue = (OpcUa_EventFilter*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16056,9 +16663,10 @@ SOPC_StatusCode OpcUa_EventFilter_Encode(OpcUa_EventFilter* a_pValue, SOPC_MsgBu
 /*============================================================================
  * OpcUa_EventFilter_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EventFilter_Decode(OpcUa_EventFilter* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFilter_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EventFilter* a_pValue = (OpcUa_EventFilter*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16092,11 +16700,11 @@ struct SOPC_EncodeableType OpcUa_EventFilter_EncodeableType =
     OpcUaId_EventFilter_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EventFilter),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EventFilter_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EventFilter_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EventFilter_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EventFilter_Decode
+    OpcUa_EventFilter_Initialize,
+    OpcUa_EventFilter_Clear,
+    NULL,
+    OpcUa_EventFilter_Encode,
+    OpcUa_EventFilter_Decode
 };
 #endif
 
@@ -16104,8 +16712,9 @@ struct SOPC_EncodeableType OpcUa_EventFilter_EncodeableType =
 /*============================================================================
  * OpcUa_AggregateConfiguration_Initialize
  *===========================================================================*/
-void OpcUa_AggregateConfiguration_Initialize(OpcUa_AggregateConfiguration* a_pValue)
+void OpcUa_AggregateConfiguration_Initialize(void* pValue)
 {
+    OpcUa_AggregateConfiguration* a_pValue = (OpcUa_AggregateConfiguration*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Boolean_Initialize(&a_pValue->UseServerCapabilitiesDefaults);
@@ -16119,8 +16728,9 @@ void OpcUa_AggregateConfiguration_Initialize(OpcUa_AggregateConfiguration* a_pVa
 /*============================================================================
  * OpcUa_AggregateConfiguration_Clear
  *===========================================================================*/
-void OpcUa_AggregateConfiguration_Clear(OpcUa_AggregateConfiguration* a_pValue)
+void OpcUa_AggregateConfiguration_Clear(void* pValue)
 {
+    OpcUa_AggregateConfiguration* a_pValue = (OpcUa_AggregateConfiguration*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Boolean_Clear(&a_pValue->UseServerCapabilitiesDefaults);
@@ -16134,9 +16744,10 @@ void OpcUa_AggregateConfiguration_Clear(OpcUa_AggregateConfiguration* a_pValue)
 /*============================================================================
  * OpcUa_AggregateConfiguration_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AggregateConfiguration_Encode(OpcUa_AggregateConfiguration* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateConfiguration_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AggregateConfiguration* a_pValue = (OpcUa_AggregateConfiguration*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16159,9 +16770,10 @@ SOPC_StatusCode OpcUa_AggregateConfiguration_Encode(OpcUa_AggregateConfiguration
 /*============================================================================
  * OpcUa_AggregateConfiguration_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AggregateConfiguration_Decode(OpcUa_AggregateConfiguration* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AggregateConfiguration* a_pValue = (OpcUa_AggregateConfiguration*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16198,11 +16810,11 @@ struct SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType =
     OpcUaId_AggregateConfiguration_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AggregateConfiguration),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AggregateConfiguration_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AggregateConfiguration_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AggregateConfiguration_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AggregateConfiguration_Decode
+    OpcUa_AggregateConfiguration_Initialize,
+    OpcUa_AggregateConfiguration_Clear,
+    NULL,
+    OpcUa_AggregateConfiguration_Encode,
+    OpcUa_AggregateConfiguration_Decode
 };
 #endif
 
@@ -16210,8 +16822,9 @@ struct SOPC_EncodeableType OpcUa_AggregateConfiguration_EncodeableType =
 /*============================================================================
  * OpcUa_AggregateFilter_Initialize
  *===========================================================================*/
-void OpcUa_AggregateFilter_Initialize(OpcUa_AggregateFilter* a_pValue)
+void OpcUa_AggregateFilter_Initialize(void* pValue)
 {
+    OpcUa_AggregateFilter* a_pValue = (OpcUa_AggregateFilter*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Initialize(&a_pValue->StartTime);
@@ -16224,8 +16837,9 @@ void OpcUa_AggregateFilter_Initialize(OpcUa_AggregateFilter* a_pValue)
 /*============================================================================
  * OpcUa_AggregateFilter_Clear
  *===========================================================================*/
-void OpcUa_AggregateFilter_Clear(OpcUa_AggregateFilter* a_pValue)
+void OpcUa_AggregateFilter_Clear(void* pValue)
 {
+    OpcUa_AggregateFilter* a_pValue = (OpcUa_AggregateFilter*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Clear(&a_pValue->StartTime);
@@ -16238,9 +16852,10 @@ void OpcUa_AggregateFilter_Clear(OpcUa_AggregateFilter* a_pValue)
 /*============================================================================
  * OpcUa_AggregateFilter_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AggregateFilter_Encode(OpcUa_AggregateFilter* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateFilter_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AggregateFilter* a_pValue = (OpcUa_AggregateFilter*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16261,9 +16876,10 @@ SOPC_StatusCode OpcUa_AggregateFilter_Encode(OpcUa_AggregateFilter* a_pValue, SO
 /*============================================================================
  * OpcUa_AggregateFilter_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AggregateFilter_Decode(OpcUa_AggregateFilter* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateFilter_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AggregateFilter* a_pValue = (OpcUa_AggregateFilter*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16298,11 +16914,11 @@ struct SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType =
     OpcUaId_AggregateFilter_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AggregateFilter),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AggregateFilter_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AggregateFilter_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AggregateFilter_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AggregateFilter_Decode
+    OpcUa_AggregateFilter_Initialize,
+    OpcUa_AggregateFilter_Clear,
+    NULL,
+    OpcUa_AggregateFilter_Encode,
+    OpcUa_AggregateFilter_Decode
 };
 #endif
 
@@ -16310,8 +16926,9 @@ struct SOPC_EncodeableType OpcUa_AggregateFilter_EncodeableType =
 /*============================================================================
  * OpcUa_EventFilterResult_Initialize
  *===========================================================================*/
-void OpcUa_EventFilterResult_Initialize(OpcUa_EventFilterResult* a_pValue)
+void OpcUa_EventFilterResult_Initialize(void* pValue)
 {
+    OpcUa_EventFilterResult* a_pValue = (OpcUa_EventFilterResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
@@ -16325,8 +16942,9 @@ void OpcUa_EventFilterResult_Initialize(OpcUa_EventFilterResult* a_pValue)
 /*============================================================================
  * OpcUa_EventFilterResult_Clear
  *===========================================================================*/
-void OpcUa_EventFilterResult_Clear(OpcUa_EventFilterResult* a_pValue)
+void OpcUa_EventFilterResult_Clear(void* pValue)
 {
+    OpcUa_EventFilterResult* a_pValue = (OpcUa_EventFilterResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfSelectClauseResults, (void**) &a_pValue->SelectClauseResults, 
@@ -16340,9 +16958,10 @@ void OpcUa_EventFilterResult_Clear(OpcUa_EventFilterResult* a_pValue)
 /*============================================================================
  * OpcUa_EventFilterResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EventFilterResult_Encode(OpcUa_EventFilterResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFilterResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EventFilterResult* a_pValue = (OpcUa_EventFilterResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16363,9 +16982,10 @@ SOPC_StatusCode OpcUa_EventFilterResult_Encode(OpcUa_EventFilterResult* a_pValue
 /*============================================================================
  * OpcUa_EventFilterResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EventFilterResult_Decode(OpcUa_EventFilterResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFilterResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EventFilterResult* a_pValue = (OpcUa_EventFilterResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16404,11 +17024,11 @@ struct SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType =
     OpcUaId_EventFilterResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EventFilterResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EventFilterResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EventFilterResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EventFilterResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EventFilterResult_Decode
+    OpcUa_EventFilterResult_Initialize,
+    OpcUa_EventFilterResult_Clear,
+    NULL,
+    OpcUa_EventFilterResult_Encode,
+    OpcUa_EventFilterResult_Decode
 };
 #endif
 
@@ -16416,8 +17036,9 @@ struct SOPC_EncodeableType OpcUa_EventFilterResult_EncodeableType =
 /*============================================================================
  * OpcUa_AggregateFilterResult_Initialize
  *===========================================================================*/
-void OpcUa_AggregateFilterResult_Initialize(OpcUa_AggregateFilterResult* a_pValue)
+void OpcUa_AggregateFilterResult_Initialize(void* pValue)
 {
+    OpcUa_AggregateFilterResult* a_pValue = (OpcUa_AggregateFilterResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Initialize(&a_pValue->RevisedStartTime);
@@ -16429,8 +17050,9 @@ void OpcUa_AggregateFilterResult_Initialize(OpcUa_AggregateFilterResult* a_pValu
 /*============================================================================
  * OpcUa_AggregateFilterResult_Clear
  *===========================================================================*/
-void OpcUa_AggregateFilterResult_Clear(OpcUa_AggregateFilterResult* a_pValue)
+void OpcUa_AggregateFilterResult_Clear(void* pValue)
 {
+    OpcUa_AggregateFilterResult* a_pValue = (OpcUa_AggregateFilterResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Clear(&a_pValue->RevisedStartTime);
@@ -16442,9 +17064,10 @@ void OpcUa_AggregateFilterResult_Clear(OpcUa_AggregateFilterResult* a_pValue)
 /*============================================================================
  * OpcUa_AggregateFilterResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AggregateFilterResult_Encode(OpcUa_AggregateFilterResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateFilterResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AggregateFilterResult* a_pValue = (OpcUa_AggregateFilterResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16463,9 +17086,10 @@ SOPC_StatusCode OpcUa_AggregateFilterResult_Encode(OpcUa_AggregateFilterResult* 
 /*============================================================================
  * OpcUa_AggregateFilterResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AggregateFilterResult_Decode(OpcUa_AggregateFilterResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AggregateFilterResult* a_pValue = (OpcUa_AggregateFilterResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16498,11 +17122,11 @@ struct SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType =
     OpcUaId_AggregateFilterResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AggregateFilterResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AggregateFilterResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AggregateFilterResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AggregateFilterResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AggregateFilterResult_Decode
+    OpcUa_AggregateFilterResult_Initialize,
+    OpcUa_AggregateFilterResult_Clear,
+    NULL,
+    OpcUa_AggregateFilterResult_Encode,
+    OpcUa_AggregateFilterResult_Decode
 };
 #endif
 
@@ -16510,8 +17134,9 @@ struct SOPC_EncodeableType OpcUa_AggregateFilterResult_EncodeableType =
 /*============================================================================
  * OpcUa_MonitoringParameters_Initialize
  *===========================================================================*/
-void OpcUa_MonitoringParameters_Initialize(OpcUa_MonitoringParameters* a_pValue)
+void OpcUa_MonitoringParameters_Initialize(void* pValue)
 {
+    OpcUa_MonitoringParameters* a_pValue = (OpcUa_MonitoringParameters*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->ClientHandle);
@@ -16525,8 +17150,9 @@ void OpcUa_MonitoringParameters_Initialize(OpcUa_MonitoringParameters* a_pValue)
 /*============================================================================
  * OpcUa_MonitoringParameters_Clear
  *===========================================================================*/
-void OpcUa_MonitoringParameters_Clear(OpcUa_MonitoringParameters* a_pValue)
+void OpcUa_MonitoringParameters_Clear(void* pValue)
 {
+    OpcUa_MonitoringParameters* a_pValue = (OpcUa_MonitoringParameters*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->ClientHandle);
@@ -16540,9 +17166,10 @@ void OpcUa_MonitoringParameters_Clear(OpcUa_MonitoringParameters* a_pValue)
 /*============================================================================
  * OpcUa_MonitoringParameters_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoringParameters_Encode(OpcUa_MonitoringParameters* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoringParameters_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoringParameters* a_pValue = (OpcUa_MonitoringParameters*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16565,9 +17192,10 @@ SOPC_StatusCode OpcUa_MonitoringParameters_Encode(OpcUa_MonitoringParameters* a_
 /*============================================================================
  * OpcUa_MonitoringParameters_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoringParameters_Decode(OpcUa_MonitoringParameters* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoringParameters* a_pValue = (OpcUa_MonitoringParameters*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16604,11 +17232,11 @@ struct SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType =
     OpcUaId_MonitoringParameters_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_MonitoringParameters),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_MonitoringParameters_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_MonitoringParameters_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_MonitoringParameters_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_MonitoringParameters_Decode
+    OpcUa_MonitoringParameters_Initialize,
+    OpcUa_MonitoringParameters_Clear,
+    NULL,
+    OpcUa_MonitoringParameters_Encode,
+    OpcUa_MonitoringParameters_Decode
 };
 #endif
 
@@ -16616,8 +17244,9 @@ struct SOPC_EncodeableType OpcUa_MonitoringParameters_EncodeableType =
 /*============================================================================
  * OpcUa_MonitoredItemCreateRequest_Initialize
  *===========================================================================*/
-void OpcUa_MonitoredItemCreateRequest_Initialize(OpcUa_MonitoredItemCreateRequest* a_pValue)
+void OpcUa_MonitoredItemCreateRequest_Initialize(void* pValue)
 {
+    OpcUa_MonitoredItemCreateRequest* a_pValue = (OpcUa_MonitoredItemCreateRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ReadValueId_Initialize(&a_pValue->ItemToMonitor);
@@ -16629,8 +17258,9 @@ void OpcUa_MonitoredItemCreateRequest_Initialize(OpcUa_MonitoredItemCreateReques
 /*============================================================================
  * OpcUa_MonitoredItemCreateRequest_Clear
  *===========================================================================*/
-void OpcUa_MonitoredItemCreateRequest_Clear(OpcUa_MonitoredItemCreateRequest* a_pValue)
+void OpcUa_MonitoredItemCreateRequest_Clear(void* pValue)
 {
+    OpcUa_MonitoredItemCreateRequest* a_pValue = (OpcUa_MonitoredItemCreateRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ReadValueId_Clear(&a_pValue->ItemToMonitor);
@@ -16642,9 +17272,10 @@ void OpcUa_MonitoredItemCreateRequest_Clear(OpcUa_MonitoredItemCreateRequest* a_
 /*============================================================================
  * OpcUa_MonitoredItemCreateRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Encode(OpcUa_MonitoredItemCreateRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemCreateRequest* a_pValue = (OpcUa_MonitoredItemCreateRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16663,9 +17294,10 @@ SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Encode(OpcUa_MonitoredItemCreat
 /*============================================================================
  * OpcUa_MonitoredItemCreateRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Decode(OpcUa_MonitoredItemCreateRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemCreateRequest* a_pValue = (OpcUa_MonitoredItemCreateRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16698,11 +17330,11 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType =
     OpcUaId_MonitoredItemCreateRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_MonitoredItemCreateRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_MonitoredItemCreateRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_MonitoredItemCreateRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_MonitoredItemCreateRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_MonitoredItemCreateRequest_Decode
+    OpcUa_MonitoredItemCreateRequest_Initialize,
+    OpcUa_MonitoredItemCreateRequest_Clear,
+    NULL,
+    OpcUa_MonitoredItemCreateRequest_Encode,
+    OpcUa_MonitoredItemCreateRequest_Decode
 };
 #endif
 
@@ -16710,8 +17342,9 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemCreateRequest_EncodeableType =
 /*============================================================================
  * OpcUa_MonitoredItemCreateResult_Initialize
  *===========================================================================*/
-void OpcUa_MonitoredItemCreateResult_Initialize(OpcUa_MonitoredItemCreateResult* a_pValue)
+void OpcUa_MonitoredItemCreateResult_Initialize(void* pValue)
 {
+    OpcUa_MonitoredItemCreateResult* a_pValue = (OpcUa_MonitoredItemCreateResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -16725,8 +17358,9 @@ void OpcUa_MonitoredItemCreateResult_Initialize(OpcUa_MonitoredItemCreateResult*
 /*============================================================================
  * OpcUa_MonitoredItemCreateResult_Clear
  *===========================================================================*/
-void OpcUa_MonitoredItemCreateResult_Clear(OpcUa_MonitoredItemCreateResult* a_pValue)
+void OpcUa_MonitoredItemCreateResult_Clear(void* pValue)
 {
+    OpcUa_MonitoredItemCreateResult* a_pValue = (OpcUa_MonitoredItemCreateResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -16740,9 +17374,10 @@ void OpcUa_MonitoredItemCreateResult_Clear(OpcUa_MonitoredItemCreateResult* a_pV
 /*============================================================================
  * OpcUa_MonitoredItemCreateResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Encode(OpcUa_MonitoredItemCreateResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemCreateResult* a_pValue = (OpcUa_MonitoredItemCreateResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16765,9 +17400,10 @@ SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Encode(OpcUa_MonitoredItemCreate
 /*============================================================================
  * OpcUa_MonitoredItemCreateResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Decode(OpcUa_MonitoredItemCreateResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemCreateResult* a_pValue = (OpcUa_MonitoredItemCreateResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16804,11 +17440,11 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType =
     OpcUaId_MonitoredItemCreateResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_MonitoredItemCreateResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_MonitoredItemCreateResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_MonitoredItemCreateResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_MonitoredItemCreateResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_MonitoredItemCreateResult_Decode
+    OpcUa_MonitoredItemCreateResult_Initialize,
+    OpcUa_MonitoredItemCreateResult_Clear,
+    NULL,
+    OpcUa_MonitoredItemCreateResult_Encode,
+    OpcUa_MonitoredItemCreateResult_Decode
 };
 #endif
 
@@ -16817,8 +17453,9 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemCreateResult_EncodeableType =
 /*============================================================================
  * OpcUa_CreateMonitoredItemsRequest_Initialize
  *===========================================================================*/
-void OpcUa_CreateMonitoredItemsRequest_Initialize(OpcUa_CreateMonitoredItemsRequest* a_pValue)
+void OpcUa_CreateMonitoredItemsRequest_Initialize(void* pValue)
 {
+    OpcUa_CreateMonitoredItemsRequest* a_pValue = (OpcUa_CreateMonitoredItemsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -16832,8 +17469,9 @@ void OpcUa_CreateMonitoredItemsRequest_Initialize(OpcUa_CreateMonitoredItemsRequ
 /*============================================================================
  * OpcUa_CreateMonitoredItemsRequest_Clear
  *===========================================================================*/
-void OpcUa_CreateMonitoredItemsRequest_Clear(OpcUa_CreateMonitoredItemsRequest* a_pValue)
+void OpcUa_CreateMonitoredItemsRequest_Clear(void* pValue)
 {
+    OpcUa_CreateMonitoredItemsRequest* a_pValue = (OpcUa_CreateMonitoredItemsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -16847,9 +17485,10 @@ void OpcUa_CreateMonitoredItemsRequest_Clear(OpcUa_CreateMonitoredItemsRequest* 
 /*============================================================================
  * OpcUa_CreateMonitoredItemsRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Encode(OpcUa_CreateMonitoredItemsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateMonitoredItemsRequest* a_pValue = (OpcUa_CreateMonitoredItemsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16871,9 +17510,10 @@ SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Encode(OpcUa_CreateMonitoredIt
 /*============================================================================
  * OpcUa_CreateMonitoredItemsRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Decode(OpcUa_CreateMonitoredItemsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateMonitoredItemsRequest* a_pValue = (OpcUa_CreateMonitoredItemsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16911,11 +17551,11 @@ struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType =
     OpcUaId_CreateMonitoredItemsRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CreateMonitoredItemsRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CreateMonitoredItemsRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CreateMonitoredItemsRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CreateMonitoredItemsRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CreateMonitoredItemsRequest_Decode
+    OpcUa_CreateMonitoredItemsRequest_Initialize,
+    OpcUa_CreateMonitoredItemsRequest_Clear,
+    NULL,
+    OpcUa_CreateMonitoredItemsRequest_Encode,
+    OpcUa_CreateMonitoredItemsRequest_Decode
 };
 #endif
 
@@ -16923,8 +17563,9 @@ struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsRequest_EncodeableType =
 /*============================================================================
  * OpcUa_CreateMonitoredItemsResponse_Initialize
  *===========================================================================*/
-void OpcUa_CreateMonitoredItemsResponse_Initialize(OpcUa_CreateMonitoredItemsResponse* a_pValue)
+void OpcUa_CreateMonitoredItemsResponse_Initialize(void* pValue)
 {
+    OpcUa_CreateMonitoredItemsResponse* a_pValue = (OpcUa_CreateMonitoredItemsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -16938,8 +17579,9 @@ void OpcUa_CreateMonitoredItemsResponse_Initialize(OpcUa_CreateMonitoredItemsRes
 /*============================================================================
  * OpcUa_CreateMonitoredItemsResponse_Clear
  *===========================================================================*/
-void OpcUa_CreateMonitoredItemsResponse_Clear(OpcUa_CreateMonitoredItemsResponse* a_pValue)
+void OpcUa_CreateMonitoredItemsResponse_Clear(void* pValue)
 {
+    OpcUa_CreateMonitoredItemsResponse* a_pValue = (OpcUa_CreateMonitoredItemsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -16953,9 +17595,10 @@ void OpcUa_CreateMonitoredItemsResponse_Clear(OpcUa_CreateMonitoredItemsResponse
 /*============================================================================
  * OpcUa_CreateMonitoredItemsResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Encode(OpcUa_CreateMonitoredItemsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateMonitoredItemsResponse* a_pValue = (OpcUa_CreateMonitoredItemsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -16976,9 +17619,10 @@ SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Encode(OpcUa_CreateMonitoredI
 /*============================================================================
  * OpcUa_CreateMonitoredItemsResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Decode(OpcUa_CreateMonitoredItemsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateMonitoredItemsResponse* a_pValue = (OpcUa_CreateMonitoredItemsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17017,11 +17661,11 @@ struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType =
     OpcUaId_CreateMonitoredItemsResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CreateMonitoredItemsResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CreateMonitoredItemsResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CreateMonitoredItemsResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CreateMonitoredItemsResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CreateMonitoredItemsResponse_Decode
+    OpcUa_CreateMonitoredItemsResponse_Initialize,
+    OpcUa_CreateMonitoredItemsResponse_Clear,
+    NULL,
+    OpcUa_CreateMonitoredItemsResponse_Encode,
+    OpcUa_CreateMonitoredItemsResponse_Decode
 };
 #endif
 #endif
@@ -17030,8 +17674,9 @@ struct SOPC_EncodeableType OpcUa_CreateMonitoredItemsResponse_EncodeableType =
 /*============================================================================
  * OpcUa_MonitoredItemModifyRequest_Initialize
  *===========================================================================*/
-void OpcUa_MonitoredItemModifyRequest_Initialize(OpcUa_MonitoredItemModifyRequest* a_pValue)
+void OpcUa_MonitoredItemModifyRequest_Initialize(void* pValue)
 {
+    OpcUa_MonitoredItemModifyRequest* a_pValue = (OpcUa_MonitoredItemModifyRequest*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->MonitoredItemId);
@@ -17042,8 +17687,9 @@ void OpcUa_MonitoredItemModifyRequest_Initialize(OpcUa_MonitoredItemModifyReques
 /*============================================================================
  * OpcUa_MonitoredItemModifyRequest_Clear
  *===========================================================================*/
-void OpcUa_MonitoredItemModifyRequest_Clear(OpcUa_MonitoredItemModifyRequest* a_pValue)
+void OpcUa_MonitoredItemModifyRequest_Clear(void* pValue)
 {
+    OpcUa_MonitoredItemModifyRequest* a_pValue = (OpcUa_MonitoredItemModifyRequest*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->MonitoredItemId);
@@ -17054,9 +17700,10 @@ void OpcUa_MonitoredItemModifyRequest_Clear(OpcUa_MonitoredItemModifyRequest* a_
 /*============================================================================
  * OpcUa_MonitoredItemModifyRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Encode(OpcUa_MonitoredItemModifyRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemModifyRequest* a_pValue = (OpcUa_MonitoredItemModifyRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17073,9 +17720,10 @@ SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Encode(OpcUa_MonitoredItemModif
 /*============================================================================
  * OpcUa_MonitoredItemModifyRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Decode(OpcUa_MonitoredItemModifyRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemModifyRequest* a_pValue = (OpcUa_MonitoredItemModifyRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17106,11 +17754,11 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType =
     OpcUaId_MonitoredItemModifyRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_MonitoredItemModifyRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_MonitoredItemModifyRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_MonitoredItemModifyRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_MonitoredItemModifyRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_MonitoredItemModifyRequest_Decode
+    OpcUa_MonitoredItemModifyRequest_Initialize,
+    OpcUa_MonitoredItemModifyRequest_Clear,
+    NULL,
+    OpcUa_MonitoredItemModifyRequest_Encode,
+    OpcUa_MonitoredItemModifyRequest_Decode
 };
 #endif
 
@@ -17118,8 +17766,9 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemModifyRequest_EncodeableType =
 /*============================================================================
  * OpcUa_MonitoredItemModifyResult_Initialize
  *===========================================================================*/
-void OpcUa_MonitoredItemModifyResult_Initialize(OpcUa_MonitoredItemModifyResult* a_pValue)
+void OpcUa_MonitoredItemModifyResult_Initialize(void* pValue)
 {
+    OpcUa_MonitoredItemModifyResult* a_pValue = (OpcUa_MonitoredItemModifyResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -17132,8 +17781,9 @@ void OpcUa_MonitoredItemModifyResult_Initialize(OpcUa_MonitoredItemModifyResult*
 /*============================================================================
  * OpcUa_MonitoredItemModifyResult_Clear
  *===========================================================================*/
-void OpcUa_MonitoredItemModifyResult_Clear(OpcUa_MonitoredItemModifyResult* a_pValue)
+void OpcUa_MonitoredItemModifyResult_Clear(void* pValue)
 {
+    OpcUa_MonitoredItemModifyResult* a_pValue = (OpcUa_MonitoredItemModifyResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -17146,9 +17796,10 @@ void OpcUa_MonitoredItemModifyResult_Clear(OpcUa_MonitoredItemModifyResult* a_pV
 /*============================================================================
  * OpcUa_MonitoredItemModifyResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Encode(OpcUa_MonitoredItemModifyResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemModifyResult* a_pValue = (OpcUa_MonitoredItemModifyResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17169,9 +17820,10 @@ SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Encode(OpcUa_MonitoredItemModify
 /*============================================================================
  * OpcUa_MonitoredItemModifyResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Decode(OpcUa_MonitoredItemModifyResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemModifyResult* a_pValue = (OpcUa_MonitoredItemModifyResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17206,11 +17858,11 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType =
     OpcUaId_MonitoredItemModifyResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_MonitoredItemModifyResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_MonitoredItemModifyResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_MonitoredItemModifyResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_MonitoredItemModifyResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_MonitoredItemModifyResult_Decode
+    OpcUa_MonitoredItemModifyResult_Initialize,
+    OpcUa_MonitoredItemModifyResult_Clear,
+    NULL,
+    OpcUa_MonitoredItemModifyResult_Encode,
+    OpcUa_MonitoredItemModifyResult_Decode
 };
 #endif
 
@@ -17219,8 +17871,9 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemModifyResult_EncodeableType =
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsRequest_Initialize
  *===========================================================================*/
-void OpcUa_ModifyMonitoredItemsRequest_Initialize(OpcUa_ModifyMonitoredItemsRequest* a_pValue)
+void OpcUa_ModifyMonitoredItemsRequest_Initialize(void* pValue)
 {
+    OpcUa_ModifyMonitoredItemsRequest* a_pValue = (OpcUa_ModifyMonitoredItemsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -17234,8 +17887,9 @@ void OpcUa_ModifyMonitoredItemsRequest_Initialize(OpcUa_ModifyMonitoredItemsRequ
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsRequest_Clear
  *===========================================================================*/
-void OpcUa_ModifyMonitoredItemsRequest_Clear(OpcUa_ModifyMonitoredItemsRequest* a_pValue)
+void OpcUa_ModifyMonitoredItemsRequest_Clear(void* pValue)
 {
+    OpcUa_ModifyMonitoredItemsRequest* a_pValue = (OpcUa_ModifyMonitoredItemsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -17249,9 +17903,10 @@ void OpcUa_ModifyMonitoredItemsRequest_Clear(OpcUa_ModifyMonitoredItemsRequest* 
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Encode(OpcUa_ModifyMonitoredItemsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModifyMonitoredItemsRequest* a_pValue = (OpcUa_ModifyMonitoredItemsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17273,9 +17928,10 @@ SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Encode(OpcUa_ModifyMonitoredIt
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Decode(OpcUa_ModifyMonitoredItemsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModifyMonitoredItemsRequest* a_pValue = (OpcUa_ModifyMonitoredItemsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17313,11 +17969,11 @@ struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType =
     OpcUaId_ModifyMonitoredItemsRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ModifyMonitoredItemsRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ModifyMonitoredItemsRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ModifyMonitoredItemsRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ModifyMonitoredItemsRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ModifyMonitoredItemsRequest_Decode
+    OpcUa_ModifyMonitoredItemsRequest_Initialize,
+    OpcUa_ModifyMonitoredItemsRequest_Clear,
+    NULL,
+    OpcUa_ModifyMonitoredItemsRequest_Encode,
+    OpcUa_ModifyMonitoredItemsRequest_Decode
 };
 #endif
 
@@ -17325,8 +17981,9 @@ struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsRequest_EncodeableType =
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsResponse_Initialize
  *===========================================================================*/
-void OpcUa_ModifyMonitoredItemsResponse_Initialize(OpcUa_ModifyMonitoredItemsResponse* a_pValue)
+void OpcUa_ModifyMonitoredItemsResponse_Initialize(void* pValue)
 {
+    OpcUa_ModifyMonitoredItemsResponse* a_pValue = (OpcUa_ModifyMonitoredItemsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -17340,8 +17997,9 @@ void OpcUa_ModifyMonitoredItemsResponse_Initialize(OpcUa_ModifyMonitoredItemsRes
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsResponse_Clear
  *===========================================================================*/
-void OpcUa_ModifyMonitoredItemsResponse_Clear(OpcUa_ModifyMonitoredItemsResponse* a_pValue)
+void OpcUa_ModifyMonitoredItemsResponse_Clear(void* pValue)
 {
+    OpcUa_ModifyMonitoredItemsResponse* a_pValue = (OpcUa_ModifyMonitoredItemsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -17355,9 +18013,10 @@ void OpcUa_ModifyMonitoredItemsResponse_Clear(OpcUa_ModifyMonitoredItemsResponse
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Encode(OpcUa_ModifyMonitoredItemsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModifyMonitoredItemsResponse* a_pValue = (OpcUa_ModifyMonitoredItemsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17378,9 +18037,10 @@ SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Encode(OpcUa_ModifyMonitoredI
 /*============================================================================
  * OpcUa_ModifyMonitoredItemsResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Decode(OpcUa_ModifyMonitoredItemsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModifyMonitoredItemsResponse* a_pValue = (OpcUa_ModifyMonitoredItemsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17419,11 +18079,11 @@ struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType =
     OpcUaId_ModifyMonitoredItemsResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ModifyMonitoredItemsResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ModifyMonitoredItemsResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ModifyMonitoredItemsResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ModifyMonitoredItemsResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ModifyMonitoredItemsResponse_Decode
+    OpcUa_ModifyMonitoredItemsResponse_Initialize,
+    OpcUa_ModifyMonitoredItemsResponse_Clear,
+    NULL,
+    OpcUa_ModifyMonitoredItemsResponse_Encode,
+    OpcUa_ModifyMonitoredItemsResponse_Decode
 };
 #endif
 #endif
@@ -17433,8 +18093,9 @@ struct SOPC_EncodeableType OpcUa_ModifyMonitoredItemsResponse_EncodeableType =
 /*============================================================================
  * OpcUa_SetMonitoringModeRequest_Initialize
  *===========================================================================*/
-void OpcUa_SetMonitoringModeRequest_Initialize(OpcUa_SetMonitoringModeRequest* a_pValue)
+void OpcUa_SetMonitoringModeRequest_Initialize(void* pValue)
 {
+    OpcUa_SetMonitoringModeRequest* a_pValue = (OpcUa_SetMonitoringModeRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -17448,8 +18109,9 @@ void OpcUa_SetMonitoringModeRequest_Initialize(OpcUa_SetMonitoringModeRequest* a
 /*============================================================================
  * OpcUa_SetMonitoringModeRequest_Clear
  *===========================================================================*/
-void OpcUa_SetMonitoringModeRequest_Clear(OpcUa_SetMonitoringModeRequest* a_pValue)
+void OpcUa_SetMonitoringModeRequest_Clear(void* pValue)
 {
+    OpcUa_SetMonitoringModeRequest* a_pValue = (OpcUa_SetMonitoringModeRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -17463,9 +18125,10 @@ void OpcUa_SetMonitoringModeRequest_Clear(OpcUa_SetMonitoringModeRequest* a_pVal
 /*============================================================================
  * OpcUa_SetMonitoringModeRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Encode(OpcUa_SetMonitoringModeRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetMonitoringModeRequest* a_pValue = (OpcUa_SetMonitoringModeRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17487,9 +18150,10 @@ SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Encode(OpcUa_SetMonitoringModeReq
 /*============================================================================
  * OpcUa_SetMonitoringModeRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Decode(OpcUa_SetMonitoringModeRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetMonitoringModeRequest* a_pValue = (OpcUa_SetMonitoringModeRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17527,11 +18191,11 @@ struct SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType =
     OpcUaId_SetMonitoringModeRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SetMonitoringModeRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SetMonitoringModeRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SetMonitoringModeRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SetMonitoringModeRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SetMonitoringModeRequest_Decode
+    OpcUa_SetMonitoringModeRequest_Initialize,
+    OpcUa_SetMonitoringModeRequest_Clear,
+    NULL,
+    OpcUa_SetMonitoringModeRequest_Encode,
+    OpcUa_SetMonitoringModeRequest_Decode
 };
 #endif
 
@@ -17539,8 +18203,9 @@ struct SOPC_EncodeableType OpcUa_SetMonitoringModeRequest_EncodeableType =
 /*============================================================================
  * OpcUa_SetMonitoringModeResponse_Initialize
  *===========================================================================*/
-void OpcUa_SetMonitoringModeResponse_Initialize(OpcUa_SetMonitoringModeResponse* a_pValue)
+void OpcUa_SetMonitoringModeResponse_Initialize(void* pValue)
 {
+    OpcUa_SetMonitoringModeResponse* a_pValue = (OpcUa_SetMonitoringModeResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -17554,8 +18219,9 @@ void OpcUa_SetMonitoringModeResponse_Initialize(OpcUa_SetMonitoringModeResponse*
 /*============================================================================
  * OpcUa_SetMonitoringModeResponse_Clear
  *===========================================================================*/
-void OpcUa_SetMonitoringModeResponse_Clear(OpcUa_SetMonitoringModeResponse* a_pValue)
+void OpcUa_SetMonitoringModeResponse_Clear(void* pValue)
 {
+    OpcUa_SetMonitoringModeResponse* a_pValue = (OpcUa_SetMonitoringModeResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -17569,9 +18235,10 @@ void OpcUa_SetMonitoringModeResponse_Clear(OpcUa_SetMonitoringModeResponse* a_pV
 /*============================================================================
  * OpcUa_SetMonitoringModeResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Encode(OpcUa_SetMonitoringModeResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetMonitoringModeResponse* a_pValue = (OpcUa_SetMonitoringModeResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17592,9 +18259,10 @@ SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Encode(OpcUa_SetMonitoringModeRe
 /*============================================================================
  * OpcUa_SetMonitoringModeResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Decode(OpcUa_SetMonitoringModeResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetMonitoringModeResponse* a_pValue = (OpcUa_SetMonitoringModeResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17633,11 +18301,11 @@ struct SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType =
     OpcUaId_SetMonitoringModeResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SetMonitoringModeResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SetMonitoringModeResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SetMonitoringModeResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SetMonitoringModeResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SetMonitoringModeResponse_Decode
+    OpcUa_SetMonitoringModeResponse_Initialize,
+    OpcUa_SetMonitoringModeResponse_Clear,
+    NULL,
+    OpcUa_SetMonitoringModeResponse_Encode,
+    OpcUa_SetMonitoringModeResponse_Decode
 };
 #endif
 #endif
@@ -17647,8 +18315,9 @@ struct SOPC_EncodeableType OpcUa_SetMonitoringModeResponse_EncodeableType =
 /*============================================================================
  * OpcUa_SetTriggeringRequest_Initialize
  *===========================================================================*/
-void OpcUa_SetTriggeringRequest_Initialize(OpcUa_SetTriggeringRequest* a_pValue)
+void OpcUa_SetTriggeringRequest_Initialize(void* pValue)
 {
+    OpcUa_SetTriggeringRequest* a_pValue = (OpcUa_SetTriggeringRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -17664,8 +18333,9 @@ void OpcUa_SetTriggeringRequest_Initialize(OpcUa_SetTriggeringRequest* a_pValue)
 /*============================================================================
  * OpcUa_SetTriggeringRequest_Clear
  *===========================================================================*/
-void OpcUa_SetTriggeringRequest_Clear(OpcUa_SetTriggeringRequest* a_pValue)
+void OpcUa_SetTriggeringRequest_Clear(void* pValue)
 {
+    OpcUa_SetTriggeringRequest* a_pValue = (OpcUa_SetTriggeringRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -17681,9 +18351,10 @@ void OpcUa_SetTriggeringRequest_Clear(OpcUa_SetTriggeringRequest* a_pValue)
 /*============================================================================
  * OpcUa_SetTriggeringRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetTriggeringRequest_Encode(OpcUa_SetTriggeringRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetTriggeringRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetTriggeringRequest* a_pValue = (OpcUa_SetTriggeringRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17708,9 +18379,10 @@ SOPC_StatusCode OpcUa_SetTriggeringRequest_Encode(OpcUa_SetTriggeringRequest* a_
 /*============================================================================
  * OpcUa_SetTriggeringRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetTriggeringRequest_Decode(OpcUa_SetTriggeringRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetTriggeringRequest* a_pValue = (OpcUa_SetTriggeringRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17753,11 +18425,11 @@ struct SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType =
     OpcUaId_SetTriggeringRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SetTriggeringRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SetTriggeringRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SetTriggeringRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SetTriggeringRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SetTriggeringRequest_Decode
+    OpcUa_SetTriggeringRequest_Initialize,
+    OpcUa_SetTriggeringRequest_Clear,
+    NULL,
+    OpcUa_SetTriggeringRequest_Encode,
+    OpcUa_SetTriggeringRequest_Decode
 };
 #endif
 
@@ -17765,8 +18437,9 @@ struct SOPC_EncodeableType OpcUa_SetTriggeringRequest_EncodeableType =
 /*============================================================================
  * OpcUa_SetTriggeringResponse_Initialize
  *===========================================================================*/
-void OpcUa_SetTriggeringResponse_Initialize(OpcUa_SetTriggeringResponse* a_pValue)
+void OpcUa_SetTriggeringResponse_Initialize(void* pValue)
 {
+    OpcUa_SetTriggeringResponse* a_pValue = (OpcUa_SetTriggeringResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -17784,8 +18457,9 @@ void OpcUa_SetTriggeringResponse_Initialize(OpcUa_SetTriggeringResponse* a_pValu
 /*============================================================================
  * OpcUa_SetTriggeringResponse_Clear
  *===========================================================================*/
-void OpcUa_SetTriggeringResponse_Clear(OpcUa_SetTriggeringResponse* a_pValue)
+void OpcUa_SetTriggeringResponse_Clear(void* pValue)
 {
+    OpcUa_SetTriggeringResponse* a_pValue = (OpcUa_SetTriggeringResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -17803,9 +18477,10 @@ void OpcUa_SetTriggeringResponse_Clear(OpcUa_SetTriggeringResponse* a_pValue)
 /*============================================================================
  * OpcUa_SetTriggeringResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetTriggeringResponse_Encode(OpcUa_SetTriggeringResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetTriggeringResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetTriggeringResponse* a_pValue = (OpcUa_SetTriggeringResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17832,9 +18507,10 @@ SOPC_StatusCode OpcUa_SetTriggeringResponse_Encode(OpcUa_SetTriggeringResponse* 
 /*============================================================================
  * OpcUa_SetTriggeringResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetTriggeringResponse_Decode(OpcUa_SetTriggeringResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetTriggeringResponse* a_pValue = (OpcUa_SetTriggeringResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17883,11 +18559,11 @@ struct SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType =
     OpcUaId_SetTriggeringResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SetTriggeringResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SetTriggeringResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SetTriggeringResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SetTriggeringResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SetTriggeringResponse_Decode
+    OpcUa_SetTriggeringResponse_Initialize,
+    OpcUa_SetTriggeringResponse_Clear,
+    NULL,
+    OpcUa_SetTriggeringResponse_Encode,
+    OpcUa_SetTriggeringResponse_Decode
 };
 #endif
 #endif
@@ -17897,8 +18573,9 @@ struct SOPC_EncodeableType OpcUa_SetTriggeringResponse_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsRequest_Initialize
  *===========================================================================*/
-void OpcUa_DeleteMonitoredItemsRequest_Initialize(OpcUa_DeleteMonitoredItemsRequest* a_pValue)
+void OpcUa_DeleteMonitoredItemsRequest_Initialize(void* pValue)
 {
+    OpcUa_DeleteMonitoredItemsRequest* a_pValue = (OpcUa_DeleteMonitoredItemsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -17911,8 +18588,9 @@ void OpcUa_DeleteMonitoredItemsRequest_Initialize(OpcUa_DeleteMonitoredItemsRequ
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsRequest_Clear
  *===========================================================================*/
-void OpcUa_DeleteMonitoredItemsRequest_Clear(OpcUa_DeleteMonitoredItemsRequest* a_pValue)
+void OpcUa_DeleteMonitoredItemsRequest_Clear(void* pValue)
 {
+    OpcUa_DeleteMonitoredItemsRequest* a_pValue = (OpcUa_DeleteMonitoredItemsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -17925,9 +18603,10 @@ void OpcUa_DeleteMonitoredItemsRequest_Clear(OpcUa_DeleteMonitoredItemsRequest* 
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Encode(OpcUa_DeleteMonitoredItemsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteMonitoredItemsRequest* a_pValue = (OpcUa_DeleteMonitoredItemsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17947,9 +18626,10 @@ SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Encode(OpcUa_DeleteMonitoredIt
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Decode(OpcUa_DeleteMonitoredItemsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteMonitoredItemsRequest* a_pValue = (OpcUa_DeleteMonitoredItemsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -17985,11 +18665,11 @@ struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType =
     OpcUaId_DeleteMonitoredItemsRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteMonitoredItemsRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteMonitoredItemsRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteMonitoredItemsRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteMonitoredItemsRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteMonitoredItemsRequest_Decode
+    OpcUa_DeleteMonitoredItemsRequest_Initialize,
+    OpcUa_DeleteMonitoredItemsRequest_Clear,
+    NULL,
+    OpcUa_DeleteMonitoredItemsRequest_Encode,
+    OpcUa_DeleteMonitoredItemsRequest_Decode
 };
 #endif
 
@@ -17997,8 +18677,9 @@ struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsRequest_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsResponse_Initialize
  *===========================================================================*/
-void OpcUa_DeleteMonitoredItemsResponse_Initialize(OpcUa_DeleteMonitoredItemsResponse* a_pValue)
+void OpcUa_DeleteMonitoredItemsResponse_Initialize(void* pValue)
 {
+    OpcUa_DeleteMonitoredItemsResponse* a_pValue = (OpcUa_DeleteMonitoredItemsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -18012,8 +18693,9 @@ void OpcUa_DeleteMonitoredItemsResponse_Initialize(OpcUa_DeleteMonitoredItemsRes
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsResponse_Clear
  *===========================================================================*/
-void OpcUa_DeleteMonitoredItemsResponse_Clear(OpcUa_DeleteMonitoredItemsResponse* a_pValue)
+void OpcUa_DeleteMonitoredItemsResponse_Clear(void* pValue)
 {
+    OpcUa_DeleteMonitoredItemsResponse* a_pValue = (OpcUa_DeleteMonitoredItemsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -18027,9 +18709,10 @@ void OpcUa_DeleteMonitoredItemsResponse_Clear(OpcUa_DeleteMonitoredItemsResponse
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(OpcUa_DeleteMonitoredItemsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteMonitoredItemsResponse* a_pValue = (OpcUa_DeleteMonitoredItemsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18050,9 +18733,10 @@ SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Encode(OpcUa_DeleteMonitoredI
 /*============================================================================
  * OpcUa_DeleteMonitoredItemsResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Decode(OpcUa_DeleteMonitoredItemsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteMonitoredItemsResponse* a_pValue = (OpcUa_DeleteMonitoredItemsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18091,11 +18775,11 @@ struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType =
     OpcUaId_DeleteMonitoredItemsResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteMonitoredItemsResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteMonitoredItemsResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteMonitoredItemsResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteMonitoredItemsResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteMonitoredItemsResponse_Decode
+    OpcUa_DeleteMonitoredItemsResponse_Initialize,
+    OpcUa_DeleteMonitoredItemsResponse_Clear,
+    NULL,
+    OpcUa_DeleteMonitoredItemsResponse_Encode,
+    OpcUa_DeleteMonitoredItemsResponse_Decode
 };
 #endif
 #endif
@@ -18105,8 +18789,9 @@ struct SOPC_EncodeableType OpcUa_DeleteMonitoredItemsResponse_EncodeableType =
 /*============================================================================
  * OpcUa_CreateSubscriptionRequest_Initialize
  *===========================================================================*/
-void OpcUa_CreateSubscriptionRequest_Initialize(OpcUa_CreateSubscriptionRequest* a_pValue)
+void OpcUa_CreateSubscriptionRequest_Initialize(void* pValue)
 {
+    OpcUa_CreateSubscriptionRequest* a_pValue = (OpcUa_CreateSubscriptionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -18122,8 +18807,9 @@ void OpcUa_CreateSubscriptionRequest_Initialize(OpcUa_CreateSubscriptionRequest*
 /*============================================================================
  * OpcUa_CreateSubscriptionRequest_Clear
  *===========================================================================*/
-void OpcUa_CreateSubscriptionRequest_Clear(OpcUa_CreateSubscriptionRequest* a_pValue)
+void OpcUa_CreateSubscriptionRequest_Clear(void* pValue)
 {
+    OpcUa_CreateSubscriptionRequest* a_pValue = (OpcUa_CreateSubscriptionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -18139,9 +18825,10 @@ void OpcUa_CreateSubscriptionRequest_Clear(OpcUa_CreateSubscriptionRequest* a_pV
 /*============================================================================
  * OpcUa_CreateSubscriptionRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Encode(OpcUa_CreateSubscriptionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateSubscriptionRequest* a_pValue = (OpcUa_CreateSubscriptionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18168,9 +18855,10 @@ SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Encode(OpcUa_CreateSubscriptionR
 /*============================================================================
  * OpcUa_CreateSubscriptionRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Decode(OpcUa_CreateSubscriptionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateSubscriptionRequest* a_pValue = (OpcUa_CreateSubscriptionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18211,11 +18899,11 @@ struct SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType =
     OpcUaId_CreateSubscriptionRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CreateSubscriptionRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CreateSubscriptionRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CreateSubscriptionRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CreateSubscriptionRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CreateSubscriptionRequest_Decode
+    OpcUa_CreateSubscriptionRequest_Initialize,
+    OpcUa_CreateSubscriptionRequest_Clear,
+    NULL,
+    OpcUa_CreateSubscriptionRequest_Encode,
+    OpcUa_CreateSubscriptionRequest_Decode
 };
 #endif
 
@@ -18223,8 +18911,9 @@ struct SOPC_EncodeableType OpcUa_CreateSubscriptionRequest_EncodeableType =
 /*============================================================================
  * OpcUa_CreateSubscriptionResponse_Initialize
  *===========================================================================*/
-void OpcUa_CreateSubscriptionResponse_Initialize(OpcUa_CreateSubscriptionResponse* a_pValue)
+void OpcUa_CreateSubscriptionResponse_Initialize(void* pValue)
 {
+    OpcUa_CreateSubscriptionResponse* a_pValue = (OpcUa_CreateSubscriptionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -18238,8 +18927,9 @@ void OpcUa_CreateSubscriptionResponse_Initialize(OpcUa_CreateSubscriptionRespons
 /*============================================================================
  * OpcUa_CreateSubscriptionResponse_Clear
  *===========================================================================*/
-void OpcUa_CreateSubscriptionResponse_Clear(OpcUa_CreateSubscriptionResponse* a_pValue)
+void OpcUa_CreateSubscriptionResponse_Clear(void* pValue)
 {
+    OpcUa_CreateSubscriptionResponse* a_pValue = (OpcUa_CreateSubscriptionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -18253,9 +18943,10 @@ void OpcUa_CreateSubscriptionResponse_Clear(OpcUa_CreateSubscriptionResponse* a_
 /*============================================================================
  * OpcUa_CreateSubscriptionResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Encode(OpcUa_CreateSubscriptionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateSubscriptionResponse* a_pValue = (OpcUa_CreateSubscriptionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18278,9 +18969,10 @@ SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Encode(OpcUa_CreateSubscription
 /*============================================================================
  * OpcUa_CreateSubscriptionResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Decode(OpcUa_CreateSubscriptionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_CreateSubscriptionResponse* a_pValue = (OpcUa_CreateSubscriptionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18317,11 +19009,11 @@ struct SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType =
     OpcUaId_CreateSubscriptionResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_CreateSubscriptionResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_CreateSubscriptionResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_CreateSubscriptionResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_CreateSubscriptionResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_CreateSubscriptionResponse_Decode
+    OpcUa_CreateSubscriptionResponse_Initialize,
+    OpcUa_CreateSubscriptionResponse_Clear,
+    NULL,
+    OpcUa_CreateSubscriptionResponse_Encode,
+    OpcUa_CreateSubscriptionResponse_Decode
 };
 #endif
 #endif
@@ -18331,8 +19023,9 @@ struct SOPC_EncodeableType OpcUa_CreateSubscriptionResponse_EncodeableType =
 /*============================================================================
  * OpcUa_ModifySubscriptionRequest_Initialize
  *===========================================================================*/
-void OpcUa_ModifySubscriptionRequest_Initialize(OpcUa_ModifySubscriptionRequest* a_pValue)
+void OpcUa_ModifySubscriptionRequest_Initialize(void* pValue)
 {
+    OpcUa_ModifySubscriptionRequest* a_pValue = (OpcUa_ModifySubscriptionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -18348,8 +19041,9 @@ void OpcUa_ModifySubscriptionRequest_Initialize(OpcUa_ModifySubscriptionRequest*
 /*============================================================================
  * OpcUa_ModifySubscriptionRequest_Clear
  *===========================================================================*/
-void OpcUa_ModifySubscriptionRequest_Clear(OpcUa_ModifySubscriptionRequest* a_pValue)
+void OpcUa_ModifySubscriptionRequest_Clear(void* pValue)
 {
+    OpcUa_ModifySubscriptionRequest* a_pValue = (OpcUa_ModifySubscriptionRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -18365,9 +19059,10 @@ void OpcUa_ModifySubscriptionRequest_Clear(OpcUa_ModifySubscriptionRequest* a_pV
 /*============================================================================
  * OpcUa_ModifySubscriptionRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Encode(OpcUa_ModifySubscriptionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModifySubscriptionRequest* a_pValue = (OpcUa_ModifySubscriptionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18394,9 +19089,10 @@ SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Encode(OpcUa_ModifySubscriptionR
 /*============================================================================
  * OpcUa_ModifySubscriptionRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Decode(OpcUa_ModifySubscriptionRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModifySubscriptionRequest* a_pValue = (OpcUa_ModifySubscriptionRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18437,11 +19133,11 @@ struct SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType =
     OpcUaId_ModifySubscriptionRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ModifySubscriptionRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ModifySubscriptionRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ModifySubscriptionRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ModifySubscriptionRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ModifySubscriptionRequest_Decode
+    OpcUa_ModifySubscriptionRequest_Initialize,
+    OpcUa_ModifySubscriptionRequest_Clear,
+    NULL,
+    OpcUa_ModifySubscriptionRequest_Encode,
+    OpcUa_ModifySubscriptionRequest_Decode
 };
 #endif
 
@@ -18449,8 +19145,9 @@ struct SOPC_EncodeableType OpcUa_ModifySubscriptionRequest_EncodeableType =
 /*============================================================================
  * OpcUa_ModifySubscriptionResponse_Initialize
  *===========================================================================*/
-void OpcUa_ModifySubscriptionResponse_Initialize(OpcUa_ModifySubscriptionResponse* a_pValue)
+void OpcUa_ModifySubscriptionResponse_Initialize(void* pValue)
 {
+    OpcUa_ModifySubscriptionResponse* a_pValue = (OpcUa_ModifySubscriptionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -18463,8 +19160,9 @@ void OpcUa_ModifySubscriptionResponse_Initialize(OpcUa_ModifySubscriptionRespons
 /*============================================================================
  * OpcUa_ModifySubscriptionResponse_Clear
  *===========================================================================*/
-void OpcUa_ModifySubscriptionResponse_Clear(OpcUa_ModifySubscriptionResponse* a_pValue)
+void OpcUa_ModifySubscriptionResponse_Clear(void* pValue)
 {
+    OpcUa_ModifySubscriptionResponse* a_pValue = (OpcUa_ModifySubscriptionResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -18477,9 +19175,10 @@ void OpcUa_ModifySubscriptionResponse_Clear(OpcUa_ModifySubscriptionResponse* a_
 /*============================================================================
  * OpcUa_ModifySubscriptionResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Encode(OpcUa_ModifySubscriptionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModifySubscriptionResponse* a_pValue = (OpcUa_ModifySubscriptionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18500,9 +19199,10 @@ SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Encode(OpcUa_ModifySubscription
 /*============================================================================
  * OpcUa_ModifySubscriptionResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Decode(OpcUa_ModifySubscriptionResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModifySubscriptionResponse* a_pValue = (OpcUa_ModifySubscriptionResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18537,11 +19237,11 @@ struct SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType =
     OpcUaId_ModifySubscriptionResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ModifySubscriptionResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ModifySubscriptionResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ModifySubscriptionResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ModifySubscriptionResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ModifySubscriptionResponse_Decode
+    OpcUa_ModifySubscriptionResponse_Initialize,
+    OpcUa_ModifySubscriptionResponse_Clear,
+    NULL,
+    OpcUa_ModifySubscriptionResponse_Encode,
+    OpcUa_ModifySubscriptionResponse_Decode
 };
 #endif
 #endif
@@ -18551,8 +19251,9 @@ struct SOPC_EncodeableType OpcUa_ModifySubscriptionResponse_EncodeableType =
 /*============================================================================
  * OpcUa_SetPublishingModeRequest_Initialize
  *===========================================================================*/
-void OpcUa_SetPublishingModeRequest_Initialize(OpcUa_SetPublishingModeRequest* a_pValue)
+void OpcUa_SetPublishingModeRequest_Initialize(void* pValue)
 {
+    OpcUa_SetPublishingModeRequest* a_pValue = (OpcUa_SetPublishingModeRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -18565,8 +19266,9 @@ void OpcUa_SetPublishingModeRequest_Initialize(OpcUa_SetPublishingModeRequest* a
 /*============================================================================
  * OpcUa_SetPublishingModeRequest_Clear
  *===========================================================================*/
-void OpcUa_SetPublishingModeRequest_Clear(OpcUa_SetPublishingModeRequest* a_pValue)
+void OpcUa_SetPublishingModeRequest_Clear(void* pValue)
 {
+    OpcUa_SetPublishingModeRequest* a_pValue = (OpcUa_SetPublishingModeRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -18579,9 +19281,10 @@ void OpcUa_SetPublishingModeRequest_Clear(OpcUa_SetPublishingModeRequest* a_pVal
 /*============================================================================
  * OpcUa_SetPublishingModeRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetPublishingModeRequest_Encode(OpcUa_SetPublishingModeRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetPublishingModeRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetPublishingModeRequest* a_pValue = (OpcUa_SetPublishingModeRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18601,9 +19304,10 @@ SOPC_StatusCode OpcUa_SetPublishingModeRequest_Encode(OpcUa_SetPublishingModeReq
 /*============================================================================
  * OpcUa_SetPublishingModeRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetPublishingModeRequest_Decode(OpcUa_SetPublishingModeRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetPublishingModeRequest* a_pValue = (OpcUa_SetPublishingModeRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18639,11 +19343,11 @@ struct SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType =
     OpcUaId_SetPublishingModeRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SetPublishingModeRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SetPublishingModeRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SetPublishingModeRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SetPublishingModeRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SetPublishingModeRequest_Decode
+    OpcUa_SetPublishingModeRequest_Initialize,
+    OpcUa_SetPublishingModeRequest_Clear,
+    NULL,
+    OpcUa_SetPublishingModeRequest_Encode,
+    OpcUa_SetPublishingModeRequest_Decode
 };
 #endif
 
@@ -18651,8 +19355,9 @@ struct SOPC_EncodeableType OpcUa_SetPublishingModeRequest_EncodeableType =
 /*============================================================================
  * OpcUa_SetPublishingModeResponse_Initialize
  *===========================================================================*/
-void OpcUa_SetPublishingModeResponse_Initialize(OpcUa_SetPublishingModeResponse* a_pValue)
+void OpcUa_SetPublishingModeResponse_Initialize(void* pValue)
 {
+    OpcUa_SetPublishingModeResponse* a_pValue = (OpcUa_SetPublishingModeResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -18666,8 +19371,9 @@ void OpcUa_SetPublishingModeResponse_Initialize(OpcUa_SetPublishingModeResponse*
 /*============================================================================
  * OpcUa_SetPublishingModeResponse_Clear
  *===========================================================================*/
-void OpcUa_SetPublishingModeResponse_Clear(OpcUa_SetPublishingModeResponse* a_pValue)
+void OpcUa_SetPublishingModeResponse_Clear(void* pValue)
 {
+    OpcUa_SetPublishingModeResponse* a_pValue = (OpcUa_SetPublishingModeResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -18681,9 +19387,10 @@ void OpcUa_SetPublishingModeResponse_Clear(OpcUa_SetPublishingModeResponse* a_pV
 /*============================================================================
  * OpcUa_SetPublishingModeResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetPublishingModeResponse_Encode(OpcUa_SetPublishingModeResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetPublishingModeResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetPublishingModeResponse* a_pValue = (OpcUa_SetPublishingModeResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18704,9 +19411,10 @@ SOPC_StatusCode OpcUa_SetPublishingModeResponse_Encode(OpcUa_SetPublishingModeRe
 /*============================================================================
  * OpcUa_SetPublishingModeResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SetPublishingModeResponse_Decode(OpcUa_SetPublishingModeResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SetPublishingModeResponse* a_pValue = (OpcUa_SetPublishingModeResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18745,11 +19453,11 @@ struct SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType =
     OpcUaId_SetPublishingModeResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SetPublishingModeResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SetPublishingModeResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SetPublishingModeResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SetPublishingModeResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SetPublishingModeResponse_Decode
+    OpcUa_SetPublishingModeResponse_Initialize,
+    OpcUa_SetPublishingModeResponse_Clear,
+    NULL,
+    OpcUa_SetPublishingModeResponse_Encode,
+    OpcUa_SetPublishingModeResponse_Decode
 };
 #endif
 #endif
@@ -18758,8 +19466,9 @@ struct SOPC_EncodeableType OpcUa_SetPublishingModeResponse_EncodeableType =
 /*============================================================================
  * OpcUa_NotificationMessage_Initialize
  *===========================================================================*/
-void OpcUa_NotificationMessage_Initialize(OpcUa_NotificationMessage* a_pValue)
+void OpcUa_NotificationMessage_Initialize(void* pValue)
 {
+    OpcUa_NotificationMessage* a_pValue = (OpcUa_NotificationMessage*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SequenceNumber);
@@ -18772,8 +19481,9 @@ void OpcUa_NotificationMessage_Initialize(OpcUa_NotificationMessage* a_pValue)
 /*============================================================================
  * OpcUa_NotificationMessage_Clear
  *===========================================================================*/
-void OpcUa_NotificationMessage_Clear(OpcUa_NotificationMessage* a_pValue)
+void OpcUa_NotificationMessage_Clear(void* pValue)
 {
+    OpcUa_NotificationMessage* a_pValue = (OpcUa_NotificationMessage*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SequenceNumber);
@@ -18786,9 +19496,10 @@ void OpcUa_NotificationMessage_Clear(OpcUa_NotificationMessage* a_pValue)
 /*============================================================================
  * OpcUa_NotificationMessage_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NotificationMessage_Encode(OpcUa_NotificationMessage* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NotificationMessage_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NotificationMessage* a_pValue = (OpcUa_NotificationMessage*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18808,9 +19519,10 @@ SOPC_StatusCode OpcUa_NotificationMessage_Encode(OpcUa_NotificationMessage* a_pV
 /*============================================================================
  * OpcUa_NotificationMessage_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NotificationMessage_Decode(OpcUa_NotificationMessage* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NotificationMessage_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NotificationMessage* a_pValue = (OpcUa_NotificationMessage*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18846,11 +19558,11 @@ struct SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType =
     OpcUaId_NotificationMessage_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_NotificationMessage),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_NotificationMessage_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_NotificationMessage_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_NotificationMessage_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_NotificationMessage_Decode
+    OpcUa_NotificationMessage_Initialize,
+    OpcUa_NotificationMessage_Clear,
+    NULL,
+    OpcUa_NotificationMessage_Encode,
+    OpcUa_NotificationMessage_Decode
 };
 #endif
 
@@ -18858,8 +19570,9 @@ struct SOPC_EncodeableType OpcUa_NotificationMessage_EncodeableType =
 /*============================================================================
  * OpcUa_DataChangeNotification_Initialize
  *===========================================================================*/
-void OpcUa_DataChangeNotification_Initialize(OpcUa_DataChangeNotification* a_pValue)
+void OpcUa_DataChangeNotification_Initialize(void* pValue)
 {
+    OpcUa_DataChangeNotification* a_pValue = (OpcUa_DataChangeNotification*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfMonitoredItems, (void**) &a_pValue->MonitoredItems, 
@@ -18872,8 +19585,9 @@ void OpcUa_DataChangeNotification_Initialize(OpcUa_DataChangeNotification* a_pVa
 /*============================================================================
  * OpcUa_DataChangeNotification_Clear
  *===========================================================================*/
-void OpcUa_DataChangeNotification_Clear(OpcUa_DataChangeNotification* a_pValue)
+void OpcUa_DataChangeNotification_Clear(void* pValue)
 {
+    OpcUa_DataChangeNotification* a_pValue = (OpcUa_DataChangeNotification*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfMonitoredItems, (void**) &a_pValue->MonitoredItems, 
@@ -18886,9 +19600,10 @@ void OpcUa_DataChangeNotification_Clear(OpcUa_DataChangeNotification* a_pValue)
 /*============================================================================
  * OpcUa_DataChangeNotification_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DataChangeNotification_Encode(OpcUa_DataChangeNotification* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataChangeNotification_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DataChangeNotification* a_pValue = (OpcUa_DataChangeNotification*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18907,9 +19622,10 @@ SOPC_StatusCode OpcUa_DataChangeNotification_Encode(OpcUa_DataChangeNotification
 /*============================================================================
  * OpcUa_DataChangeNotification_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DataChangeNotification_Decode(OpcUa_DataChangeNotification* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DataChangeNotification* a_pValue = (OpcUa_DataChangeNotification*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -18946,11 +19662,11 @@ struct SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType =
     OpcUaId_DataChangeNotification_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DataChangeNotification),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DataChangeNotification_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DataChangeNotification_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DataChangeNotification_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DataChangeNotification_Decode
+    OpcUa_DataChangeNotification_Initialize,
+    OpcUa_DataChangeNotification_Clear,
+    NULL,
+    OpcUa_DataChangeNotification_Encode,
+    OpcUa_DataChangeNotification_Decode
 };
 #endif
 
@@ -18958,8 +19674,9 @@ struct SOPC_EncodeableType OpcUa_DataChangeNotification_EncodeableType =
 /*============================================================================
  * OpcUa_MonitoredItemNotification_Initialize
  *===========================================================================*/
-void OpcUa_MonitoredItemNotification_Initialize(OpcUa_MonitoredItemNotification* a_pValue)
+void OpcUa_MonitoredItemNotification_Initialize(void* pValue)
 {
+    OpcUa_MonitoredItemNotification* a_pValue = (OpcUa_MonitoredItemNotification*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->ClientHandle);
@@ -18970,8 +19687,9 @@ void OpcUa_MonitoredItemNotification_Initialize(OpcUa_MonitoredItemNotification*
 /*============================================================================
  * OpcUa_MonitoredItemNotification_Clear
  *===========================================================================*/
-void OpcUa_MonitoredItemNotification_Clear(OpcUa_MonitoredItemNotification* a_pValue)
+void OpcUa_MonitoredItemNotification_Clear(void* pValue)
 {
+    OpcUa_MonitoredItemNotification* a_pValue = (OpcUa_MonitoredItemNotification*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->ClientHandle);
@@ -18982,9 +19700,10 @@ void OpcUa_MonitoredItemNotification_Clear(OpcUa_MonitoredItemNotification* a_pV
 /*============================================================================
  * OpcUa_MonitoredItemNotification_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemNotification_Encode(OpcUa_MonitoredItemNotification* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemNotification_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemNotification* a_pValue = (OpcUa_MonitoredItemNotification*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19001,9 +19720,10 @@ SOPC_StatusCode OpcUa_MonitoredItemNotification_Encode(OpcUa_MonitoredItemNotifi
 /*============================================================================
  * OpcUa_MonitoredItemNotification_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_MonitoredItemNotification_Decode(OpcUa_MonitoredItemNotification* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_MonitoredItemNotification* a_pValue = (OpcUa_MonitoredItemNotification*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19034,11 +19754,11 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType =
     OpcUaId_MonitoredItemNotification_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_MonitoredItemNotification),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_MonitoredItemNotification_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_MonitoredItemNotification_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_MonitoredItemNotification_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_MonitoredItemNotification_Decode
+    OpcUa_MonitoredItemNotification_Initialize,
+    OpcUa_MonitoredItemNotification_Clear,
+    NULL,
+    OpcUa_MonitoredItemNotification_Encode,
+    OpcUa_MonitoredItemNotification_Decode
 };
 #endif
 
@@ -19046,8 +19766,9 @@ struct SOPC_EncodeableType OpcUa_MonitoredItemNotification_EncodeableType =
 /*============================================================================
  * OpcUa_EventNotificationList_Initialize
  *===========================================================================*/
-void OpcUa_EventNotificationList_Initialize(OpcUa_EventNotificationList* a_pValue)
+void OpcUa_EventNotificationList_Initialize(void* pValue)
 {
+    OpcUa_EventNotificationList* a_pValue = (OpcUa_EventNotificationList*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
@@ -19058,8 +19779,9 @@ void OpcUa_EventNotificationList_Initialize(OpcUa_EventNotificationList* a_pValu
 /*============================================================================
  * OpcUa_EventNotificationList_Clear
  *===========================================================================*/
-void OpcUa_EventNotificationList_Clear(OpcUa_EventNotificationList* a_pValue)
+void OpcUa_EventNotificationList_Clear(void* pValue)
 {
+    OpcUa_EventNotificationList* a_pValue = (OpcUa_EventNotificationList*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfEvents, (void**) &a_pValue->Events, 
@@ -19070,9 +19792,10 @@ void OpcUa_EventNotificationList_Clear(OpcUa_EventNotificationList* a_pValue)
 /*============================================================================
  * OpcUa_EventNotificationList_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EventNotificationList_Encode(OpcUa_EventNotificationList* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventNotificationList_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EventNotificationList* a_pValue = (OpcUa_EventNotificationList*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19088,9 +19811,10 @@ SOPC_StatusCode OpcUa_EventNotificationList_Encode(OpcUa_EventNotificationList* 
 /*============================================================================
  * OpcUa_EventNotificationList_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EventNotificationList_Decode(OpcUa_EventNotificationList* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventNotificationList_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EventNotificationList* a_pValue = (OpcUa_EventNotificationList*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19122,11 +19846,11 @@ struct SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType =
     OpcUaId_EventNotificationList_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EventNotificationList),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EventNotificationList_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EventNotificationList_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EventNotificationList_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EventNotificationList_Decode
+    OpcUa_EventNotificationList_Initialize,
+    OpcUa_EventNotificationList_Clear,
+    NULL,
+    OpcUa_EventNotificationList_Encode,
+    OpcUa_EventNotificationList_Decode
 };
 #endif
 
@@ -19134,8 +19858,9 @@ struct SOPC_EncodeableType OpcUa_EventNotificationList_EncodeableType =
 /*============================================================================
  * OpcUa_EventFieldList_Initialize
  *===========================================================================*/
-void OpcUa_EventFieldList_Initialize(OpcUa_EventFieldList* a_pValue)
+void OpcUa_EventFieldList_Initialize(void* pValue)
 {
+    OpcUa_EventFieldList* a_pValue = (OpcUa_EventFieldList*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->ClientHandle);
@@ -19147,8 +19872,9 @@ void OpcUa_EventFieldList_Initialize(OpcUa_EventFieldList* a_pValue)
 /*============================================================================
  * OpcUa_EventFieldList_Clear
  *===========================================================================*/
-void OpcUa_EventFieldList_Clear(OpcUa_EventFieldList* a_pValue)
+void OpcUa_EventFieldList_Clear(void* pValue)
 {
+    OpcUa_EventFieldList* a_pValue = (OpcUa_EventFieldList*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->ClientHandle);
@@ -19160,9 +19886,10 @@ void OpcUa_EventFieldList_Clear(OpcUa_EventFieldList* a_pValue)
 /*============================================================================
  * OpcUa_EventFieldList_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EventFieldList_Encode(OpcUa_EventFieldList* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFieldList_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EventFieldList* a_pValue = (OpcUa_EventFieldList*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19180,9 +19907,10 @@ SOPC_StatusCode OpcUa_EventFieldList_Encode(OpcUa_EventFieldList* a_pValue, SOPC
 /*============================================================================
  * OpcUa_EventFieldList_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EventFieldList_Decode(OpcUa_EventFieldList* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EventFieldList_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EventFieldList* a_pValue = (OpcUa_EventFieldList*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19216,11 +19944,11 @@ struct SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType =
     OpcUaId_EventFieldList_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EventFieldList),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EventFieldList_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EventFieldList_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EventFieldList_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EventFieldList_Decode
+    OpcUa_EventFieldList_Initialize,
+    OpcUa_EventFieldList_Clear,
+    NULL,
+    OpcUa_EventFieldList_Encode,
+    OpcUa_EventFieldList_Decode
 };
 #endif
 
@@ -19228,8 +19956,9 @@ struct SOPC_EncodeableType OpcUa_EventFieldList_EncodeableType =
 /*============================================================================
  * OpcUa_HistoryEventFieldList_Initialize
  *===========================================================================*/
-void OpcUa_HistoryEventFieldList_Initialize(OpcUa_HistoryEventFieldList* a_pValue)
+void OpcUa_HistoryEventFieldList_Initialize(void* pValue)
 {
+    OpcUa_HistoryEventFieldList* a_pValue = (OpcUa_HistoryEventFieldList*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
@@ -19240,8 +19969,9 @@ void OpcUa_HistoryEventFieldList_Initialize(OpcUa_HistoryEventFieldList* a_pValu
 /*============================================================================
  * OpcUa_HistoryEventFieldList_Clear
  *===========================================================================*/
-void OpcUa_HistoryEventFieldList_Clear(OpcUa_HistoryEventFieldList* a_pValue)
+void OpcUa_HistoryEventFieldList_Clear(void* pValue)
 {
+    OpcUa_HistoryEventFieldList* a_pValue = (OpcUa_HistoryEventFieldList*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfEventFields, (void**) &a_pValue->EventFields, 
@@ -19252,9 +19982,10 @@ void OpcUa_HistoryEventFieldList_Clear(OpcUa_HistoryEventFieldList* a_pValue)
 /*============================================================================
  * OpcUa_HistoryEventFieldList_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryEventFieldList_Encode(OpcUa_HistoryEventFieldList* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryEventFieldList_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryEventFieldList* a_pValue = (OpcUa_HistoryEventFieldList*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19270,9 +20001,10 @@ SOPC_StatusCode OpcUa_HistoryEventFieldList_Encode(OpcUa_HistoryEventFieldList* 
 /*============================================================================
  * OpcUa_HistoryEventFieldList_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_HistoryEventFieldList_Decode(OpcUa_HistoryEventFieldList* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_HistoryEventFieldList* a_pValue = (OpcUa_HistoryEventFieldList*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19304,11 +20036,11 @@ struct SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType =
     OpcUaId_HistoryEventFieldList_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_HistoryEventFieldList),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_HistoryEventFieldList_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_HistoryEventFieldList_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_HistoryEventFieldList_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_HistoryEventFieldList_Decode
+    OpcUa_HistoryEventFieldList_Initialize,
+    OpcUa_HistoryEventFieldList_Clear,
+    NULL,
+    OpcUa_HistoryEventFieldList_Encode,
+    OpcUa_HistoryEventFieldList_Decode
 };
 #endif
 
@@ -19316,8 +20048,9 @@ struct SOPC_EncodeableType OpcUa_HistoryEventFieldList_EncodeableType =
 /*============================================================================
  * OpcUa_StatusChangeNotification_Initialize
  *===========================================================================*/
-void OpcUa_StatusChangeNotification_Initialize(OpcUa_StatusChangeNotification* a_pValue)
+void OpcUa_StatusChangeNotification_Initialize(void* pValue)
 {
+    OpcUa_StatusChangeNotification* a_pValue = (OpcUa_StatusChangeNotification*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->Status);
@@ -19328,8 +20061,9 @@ void OpcUa_StatusChangeNotification_Initialize(OpcUa_StatusChangeNotification* a
 /*============================================================================
  * OpcUa_StatusChangeNotification_Clear
  *===========================================================================*/
-void OpcUa_StatusChangeNotification_Clear(OpcUa_StatusChangeNotification* a_pValue)
+void OpcUa_StatusChangeNotification_Clear(void* pValue)
 {
+    OpcUa_StatusChangeNotification* a_pValue = (OpcUa_StatusChangeNotification*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->Status);
@@ -19340,9 +20074,10 @@ void OpcUa_StatusChangeNotification_Clear(OpcUa_StatusChangeNotification* a_pVal
 /*============================================================================
  * OpcUa_StatusChangeNotification_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_StatusChangeNotification_Encode(OpcUa_StatusChangeNotification* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_StatusChangeNotification_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_StatusChangeNotification* a_pValue = (OpcUa_StatusChangeNotification*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19359,9 +20094,10 @@ SOPC_StatusCode OpcUa_StatusChangeNotification_Encode(OpcUa_StatusChangeNotifica
 /*============================================================================
  * OpcUa_StatusChangeNotification_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_StatusChangeNotification_Decode(OpcUa_StatusChangeNotification* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_StatusChangeNotification* a_pValue = (OpcUa_StatusChangeNotification*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19392,11 +20128,11 @@ struct SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType =
     OpcUaId_StatusChangeNotification_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_StatusChangeNotification),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_StatusChangeNotification_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_StatusChangeNotification_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_StatusChangeNotification_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_StatusChangeNotification_Decode
+    OpcUa_StatusChangeNotification_Initialize,
+    OpcUa_StatusChangeNotification_Clear,
+    NULL,
+    OpcUa_StatusChangeNotification_Encode,
+    OpcUa_StatusChangeNotification_Decode
 };
 #endif
 
@@ -19404,8 +20140,9 @@ struct SOPC_EncodeableType OpcUa_StatusChangeNotification_EncodeableType =
 /*============================================================================
  * OpcUa_SubscriptionAcknowledgement_Initialize
  *===========================================================================*/
-void OpcUa_SubscriptionAcknowledgement_Initialize(OpcUa_SubscriptionAcknowledgement* a_pValue)
+void OpcUa_SubscriptionAcknowledgement_Initialize(void* pValue)
 {
+    OpcUa_SubscriptionAcknowledgement* a_pValue = (OpcUa_SubscriptionAcknowledgement*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->SubscriptionId);
@@ -19416,8 +20153,9 @@ void OpcUa_SubscriptionAcknowledgement_Initialize(OpcUa_SubscriptionAcknowledgem
 /*============================================================================
  * OpcUa_SubscriptionAcknowledgement_Clear
  *===========================================================================*/
-void OpcUa_SubscriptionAcknowledgement_Clear(OpcUa_SubscriptionAcknowledgement* a_pValue)
+void OpcUa_SubscriptionAcknowledgement_Clear(void* pValue)
 {
+    OpcUa_SubscriptionAcknowledgement* a_pValue = (OpcUa_SubscriptionAcknowledgement*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->SubscriptionId);
@@ -19428,9 +20166,10 @@ void OpcUa_SubscriptionAcknowledgement_Clear(OpcUa_SubscriptionAcknowledgement* 
 /*============================================================================
  * OpcUa_SubscriptionAcknowledgement_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Encode(OpcUa_SubscriptionAcknowledgement* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SubscriptionAcknowledgement* a_pValue = (OpcUa_SubscriptionAcknowledgement*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19447,9 +20186,10 @@ SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Encode(OpcUa_SubscriptionAckno
 /*============================================================================
  * OpcUa_SubscriptionAcknowledgement_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Decode(OpcUa_SubscriptionAcknowledgement* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SubscriptionAcknowledgement* a_pValue = (OpcUa_SubscriptionAcknowledgement*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19480,11 +20220,11 @@ struct SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType =
     OpcUaId_SubscriptionAcknowledgement_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SubscriptionAcknowledgement),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SubscriptionAcknowledgement_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SubscriptionAcknowledgement_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SubscriptionAcknowledgement_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SubscriptionAcknowledgement_Decode
+    OpcUa_SubscriptionAcknowledgement_Initialize,
+    OpcUa_SubscriptionAcknowledgement_Clear,
+    NULL,
+    OpcUa_SubscriptionAcknowledgement_Encode,
+    OpcUa_SubscriptionAcknowledgement_Decode
 };
 #endif
 
@@ -19493,8 +20233,9 @@ struct SOPC_EncodeableType OpcUa_SubscriptionAcknowledgement_EncodeableType =
 /*============================================================================
  * OpcUa_PublishRequest_Initialize
  *===========================================================================*/
-void OpcUa_PublishRequest_Initialize(OpcUa_PublishRequest* a_pValue)
+void OpcUa_PublishRequest_Initialize(void* pValue)
 {
+    OpcUa_PublishRequest* a_pValue = (OpcUa_PublishRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -19506,8 +20247,9 @@ void OpcUa_PublishRequest_Initialize(OpcUa_PublishRequest* a_pValue)
 /*============================================================================
  * OpcUa_PublishRequest_Clear
  *===========================================================================*/
-void OpcUa_PublishRequest_Clear(OpcUa_PublishRequest* a_pValue)
+void OpcUa_PublishRequest_Clear(void* pValue)
 {
+    OpcUa_PublishRequest* a_pValue = (OpcUa_PublishRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -19519,9 +20261,10 @@ void OpcUa_PublishRequest_Clear(OpcUa_PublishRequest* a_pValue)
 /*============================================================================
  * OpcUa_PublishRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_PublishRequest_Encode(OpcUa_PublishRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_PublishRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_PublishRequest* a_pValue = (OpcUa_PublishRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19539,9 +20282,10 @@ SOPC_StatusCode OpcUa_PublishRequest_Encode(OpcUa_PublishRequest* a_pValue, SOPC
 /*============================================================================
  * OpcUa_PublishRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_PublishRequest_Decode(OpcUa_PublishRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_PublishRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_PublishRequest* a_pValue = (OpcUa_PublishRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19575,11 +20319,11 @@ struct SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType =
     OpcUaId_PublishRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_PublishRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_PublishRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_PublishRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_PublishRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_PublishRequest_Decode
+    OpcUa_PublishRequest_Initialize,
+    OpcUa_PublishRequest_Clear,
+    NULL,
+    OpcUa_PublishRequest_Encode,
+    OpcUa_PublishRequest_Decode
 };
 #endif
 
@@ -19587,8 +20331,9 @@ struct SOPC_EncodeableType OpcUa_PublishRequest_EncodeableType =
 /*============================================================================
  * OpcUa_PublishResponse_Initialize
  *===========================================================================*/
-void OpcUa_PublishResponse_Initialize(OpcUa_PublishResponse* a_pValue)
+void OpcUa_PublishResponse_Initialize(void* pValue)
 {
+    OpcUa_PublishResponse* a_pValue = (OpcUa_PublishResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -19607,8 +20352,9 @@ void OpcUa_PublishResponse_Initialize(OpcUa_PublishResponse* a_pValue)
 /*============================================================================
  * OpcUa_PublishResponse_Clear
  *===========================================================================*/
-void OpcUa_PublishResponse_Clear(OpcUa_PublishResponse* a_pValue)
+void OpcUa_PublishResponse_Clear(void* pValue)
 {
+    OpcUa_PublishResponse* a_pValue = (OpcUa_PublishResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -19627,9 +20373,10 @@ void OpcUa_PublishResponse_Clear(OpcUa_PublishResponse* a_pValue)
 /*============================================================================
  * OpcUa_PublishResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_PublishResponse_Encode(OpcUa_PublishResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_PublishResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_PublishResponse* a_pValue = (OpcUa_PublishResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19659,9 +20406,10 @@ SOPC_StatusCode OpcUa_PublishResponse_Encode(OpcUa_PublishResponse* a_pValue, SO
 /*============================================================================
  * OpcUa_PublishResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_PublishResponse_Decode(OpcUa_PublishResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_PublishResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_PublishResponse* a_pValue = (OpcUa_PublishResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19711,11 +20459,11 @@ struct SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType =
     OpcUaId_PublishResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_PublishResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_PublishResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_PublishResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_PublishResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_PublishResponse_Decode
+    OpcUa_PublishResponse_Initialize,
+    OpcUa_PublishResponse_Clear,
+    NULL,
+    OpcUa_PublishResponse_Encode,
+    OpcUa_PublishResponse_Decode
 };
 #endif
 #endif
@@ -19725,8 +20473,9 @@ struct SOPC_EncodeableType OpcUa_PublishResponse_EncodeableType =
 /*============================================================================
  * OpcUa_RepublishRequest_Initialize
  *===========================================================================*/
-void OpcUa_RepublishRequest_Initialize(OpcUa_RepublishRequest* a_pValue)
+void OpcUa_RepublishRequest_Initialize(void* pValue)
 {
+    OpcUa_RepublishRequest* a_pValue = (OpcUa_RepublishRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -19738,8 +20487,9 @@ void OpcUa_RepublishRequest_Initialize(OpcUa_RepublishRequest* a_pValue)
 /*============================================================================
  * OpcUa_RepublishRequest_Clear
  *===========================================================================*/
-void OpcUa_RepublishRequest_Clear(OpcUa_RepublishRequest* a_pValue)
+void OpcUa_RepublishRequest_Clear(void* pValue)
 {
+    OpcUa_RepublishRequest* a_pValue = (OpcUa_RepublishRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -19751,9 +20501,10 @@ void OpcUa_RepublishRequest_Clear(OpcUa_RepublishRequest* a_pValue)
 /*============================================================================
  * OpcUa_RepublishRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RepublishRequest_Encode(OpcUa_RepublishRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RepublishRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RepublishRequest* a_pValue = (OpcUa_RepublishRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19772,9 +20523,10 @@ SOPC_StatusCode OpcUa_RepublishRequest_Encode(OpcUa_RepublishRequest* a_pValue, 
 /*============================================================================
  * OpcUa_RepublishRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RepublishRequest_Decode(OpcUa_RepublishRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RepublishRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RepublishRequest* a_pValue = (OpcUa_RepublishRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19807,11 +20559,11 @@ struct SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType =
     OpcUaId_RepublishRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RepublishRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RepublishRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RepublishRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RepublishRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RepublishRequest_Decode
+    OpcUa_RepublishRequest_Initialize,
+    OpcUa_RepublishRequest_Clear,
+    NULL,
+    OpcUa_RepublishRequest_Encode,
+    OpcUa_RepublishRequest_Decode
 };
 #endif
 
@@ -19819,8 +20571,9 @@ struct SOPC_EncodeableType OpcUa_RepublishRequest_EncodeableType =
 /*============================================================================
  * OpcUa_RepublishResponse_Initialize
  *===========================================================================*/
-void OpcUa_RepublishResponse_Initialize(OpcUa_RepublishResponse* a_pValue)
+void OpcUa_RepublishResponse_Initialize(void* pValue)
 {
+    OpcUa_RepublishResponse* a_pValue = (OpcUa_RepublishResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -19831,8 +20584,9 @@ void OpcUa_RepublishResponse_Initialize(OpcUa_RepublishResponse* a_pValue)
 /*============================================================================
  * OpcUa_RepublishResponse_Clear
  *===========================================================================*/
-void OpcUa_RepublishResponse_Clear(OpcUa_RepublishResponse* a_pValue)
+void OpcUa_RepublishResponse_Clear(void* pValue)
 {
+    OpcUa_RepublishResponse* a_pValue = (OpcUa_RepublishResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -19843,9 +20597,10 @@ void OpcUa_RepublishResponse_Clear(OpcUa_RepublishResponse* a_pValue)
 /*============================================================================
  * OpcUa_RepublishResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RepublishResponse_Encode(OpcUa_RepublishResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RepublishResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RepublishResponse* a_pValue = (OpcUa_RepublishResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19862,9 +20617,10 @@ SOPC_StatusCode OpcUa_RepublishResponse_Encode(OpcUa_RepublishResponse* a_pValue
 /*============================================================================
  * OpcUa_RepublishResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RepublishResponse_Decode(OpcUa_RepublishResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RepublishResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RepublishResponse* a_pValue = (OpcUa_RepublishResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19895,11 +20651,11 @@ struct SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType =
     OpcUaId_RepublishResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RepublishResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RepublishResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RepublishResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RepublishResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RepublishResponse_Decode
+    OpcUa_RepublishResponse_Initialize,
+    OpcUa_RepublishResponse_Clear,
+    NULL,
+    OpcUa_RepublishResponse_Encode,
+    OpcUa_RepublishResponse_Decode
 };
 #endif
 #endif
@@ -19908,8 +20664,9 @@ struct SOPC_EncodeableType OpcUa_RepublishResponse_EncodeableType =
 /*============================================================================
  * OpcUa_TransferResult_Initialize
  *===========================================================================*/
-void OpcUa_TransferResult_Initialize(OpcUa_TransferResult* a_pValue)
+void OpcUa_TransferResult_Initialize(void* pValue)
 {
+    OpcUa_TransferResult* a_pValue = (OpcUa_TransferResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -19921,8 +20678,9 @@ void OpcUa_TransferResult_Initialize(OpcUa_TransferResult* a_pValue)
 /*============================================================================
  * OpcUa_TransferResult_Clear
  *===========================================================================*/
-void OpcUa_TransferResult_Clear(OpcUa_TransferResult* a_pValue)
+void OpcUa_TransferResult_Clear(void* pValue)
 {
+    OpcUa_TransferResult* a_pValue = (OpcUa_TransferResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -19934,9 +20692,10 @@ void OpcUa_TransferResult_Clear(OpcUa_TransferResult* a_pValue)
 /*============================================================================
  * OpcUa_TransferResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TransferResult_Encode(OpcUa_TransferResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TransferResult* a_pValue = (OpcUa_TransferResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19954,9 +20713,10 @@ SOPC_StatusCode OpcUa_TransferResult_Encode(OpcUa_TransferResult* a_pValue, SOPC
 /*============================================================================
  * OpcUa_TransferResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TransferResult_Decode(OpcUa_TransferResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TransferResult* a_pValue = (OpcUa_TransferResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -19990,11 +20750,11 @@ struct SOPC_EncodeableType OpcUa_TransferResult_EncodeableType =
     OpcUaId_TransferResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_TransferResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_TransferResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_TransferResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_TransferResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_TransferResult_Decode
+    OpcUa_TransferResult_Initialize,
+    OpcUa_TransferResult_Clear,
+    NULL,
+    OpcUa_TransferResult_Encode,
+    OpcUa_TransferResult_Decode
 };
 #endif
 
@@ -20003,8 +20763,9 @@ struct SOPC_EncodeableType OpcUa_TransferResult_EncodeableType =
 /*============================================================================
  * OpcUa_TransferSubscriptionsRequest_Initialize
  *===========================================================================*/
-void OpcUa_TransferSubscriptionsRequest_Initialize(OpcUa_TransferSubscriptionsRequest* a_pValue)
+void OpcUa_TransferSubscriptionsRequest_Initialize(void* pValue)
 {
+    OpcUa_TransferSubscriptionsRequest* a_pValue = (OpcUa_TransferSubscriptionsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -20017,8 +20778,9 @@ void OpcUa_TransferSubscriptionsRequest_Initialize(OpcUa_TransferSubscriptionsRe
 /*============================================================================
  * OpcUa_TransferSubscriptionsRequest_Clear
  *===========================================================================*/
-void OpcUa_TransferSubscriptionsRequest_Clear(OpcUa_TransferSubscriptionsRequest* a_pValue)
+void OpcUa_TransferSubscriptionsRequest_Clear(void* pValue)
 {
+    OpcUa_TransferSubscriptionsRequest* a_pValue = (OpcUa_TransferSubscriptionsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -20031,9 +20793,10 @@ void OpcUa_TransferSubscriptionsRequest_Clear(OpcUa_TransferSubscriptionsRequest
 /*============================================================================
  * OpcUa_TransferSubscriptionsRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Encode(OpcUa_TransferSubscriptionsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TransferSubscriptionsRequest* a_pValue = (OpcUa_TransferSubscriptionsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20053,9 +20816,10 @@ SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Encode(OpcUa_TransferSubscrip
 /*============================================================================
  * OpcUa_TransferSubscriptionsRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Decode(OpcUa_TransferSubscriptionsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TransferSubscriptionsRequest* a_pValue = (OpcUa_TransferSubscriptionsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20091,11 +20855,11 @@ struct SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType =
     OpcUaId_TransferSubscriptionsRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_TransferSubscriptionsRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_TransferSubscriptionsRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_TransferSubscriptionsRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_TransferSubscriptionsRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_TransferSubscriptionsRequest_Decode
+    OpcUa_TransferSubscriptionsRequest_Initialize,
+    OpcUa_TransferSubscriptionsRequest_Clear,
+    NULL,
+    OpcUa_TransferSubscriptionsRequest_Encode,
+    OpcUa_TransferSubscriptionsRequest_Decode
 };
 #endif
 
@@ -20103,8 +20867,9 @@ struct SOPC_EncodeableType OpcUa_TransferSubscriptionsRequest_EncodeableType =
 /*============================================================================
  * OpcUa_TransferSubscriptionsResponse_Initialize
  *===========================================================================*/
-void OpcUa_TransferSubscriptionsResponse_Initialize(OpcUa_TransferSubscriptionsResponse* a_pValue)
+void OpcUa_TransferSubscriptionsResponse_Initialize(void* pValue)
 {
+    OpcUa_TransferSubscriptionsResponse* a_pValue = (OpcUa_TransferSubscriptionsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -20118,8 +20883,9 @@ void OpcUa_TransferSubscriptionsResponse_Initialize(OpcUa_TransferSubscriptionsR
 /*============================================================================
  * OpcUa_TransferSubscriptionsResponse_Clear
  *===========================================================================*/
-void OpcUa_TransferSubscriptionsResponse_Clear(OpcUa_TransferSubscriptionsResponse* a_pValue)
+void OpcUa_TransferSubscriptionsResponse_Clear(void* pValue)
 {
+    OpcUa_TransferSubscriptionsResponse* a_pValue = (OpcUa_TransferSubscriptionsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -20133,9 +20899,10 @@ void OpcUa_TransferSubscriptionsResponse_Clear(OpcUa_TransferSubscriptionsRespon
 /*============================================================================
  * OpcUa_TransferSubscriptionsResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Encode(OpcUa_TransferSubscriptionsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TransferSubscriptionsResponse* a_pValue = (OpcUa_TransferSubscriptionsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20156,9 +20923,10 @@ SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Encode(OpcUa_TransferSubscri
 /*============================================================================
  * OpcUa_TransferSubscriptionsResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Decode(OpcUa_TransferSubscriptionsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_TransferSubscriptionsResponse* a_pValue = (OpcUa_TransferSubscriptionsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20197,11 +20965,11 @@ struct SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType =
     OpcUaId_TransferSubscriptionsResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_TransferSubscriptionsResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_TransferSubscriptionsResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_TransferSubscriptionsResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_TransferSubscriptionsResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_TransferSubscriptionsResponse_Decode
+    OpcUa_TransferSubscriptionsResponse_Initialize,
+    OpcUa_TransferSubscriptionsResponse_Clear,
+    NULL,
+    OpcUa_TransferSubscriptionsResponse_Encode,
+    OpcUa_TransferSubscriptionsResponse_Decode
 };
 #endif
 #endif
@@ -20211,8 +20979,9 @@ struct SOPC_EncodeableType OpcUa_TransferSubscriptionsResponse_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteSubscriptionsRequest_Initialize
  *===========================================================================*/
-void OpcUa_DeleteSubscriptionsRequest_Initialize(OpcUa_DeleteSubscriptionsRequest* a_pValue)
+void OpcUa_DeleteSubscriptionsRequest_Initialize(void* pValue)
 {
+    OpcUa_DeleteSubscriptionsRequest* a_pValue = (OpcUa_DeleteSubscriptionsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Initialize(&a_pValue->RequestHeader);
@@ -20224,8 +20993,9 @@ void OpcUa_DeleteSubscriptionsRequest_Initialize(OpcUa_DeleteSubscriptionsReques
 /*============================================================================
  * OpcUa_DeleteSubscriptionsRequest_Clear
  *===========================================================================*/
-void OpcUa_DeleteSubscriptionsRequest_Clear(OpcUa_DeleteSubscriptionsRequest* a_pValue)
+void OpcUa_DeleteSubscriptionsRequest_Clear(void* pValue)
 {
+    OpcUa_DeleteSubscriptionsRequest* a_pValue = (OpcUa_DeleteSubscriptionsRequest*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_RequestHeader_Clear(&a_pValue->RequestHeader);
@@ -20237,9 +21007,10 @@ void OpcUa_DeleteSubscriptionsRequest_Clear(OpcUa_DeleteSubscriptionsRequest* a_
 /*============================================================================
  * OpcUa_DeleteSubscriptionsRequest_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Encode(OpcUa_DeleteSubscriptionsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteSubscriptionsRequest* a_pValue = (OpcUa_DeleteSubscriptionsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20257,9 +21028,10 @@ SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Encode(OpcUa_DeleteSubscription
 /*============================================================================
  * OpcUa_DeleteSubscriptionsRequest_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Decode(OpcUa_DeleteSubscriptionsRequest* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteSubscriptionsRequest* a_pValue = (OpcUa_DeleteSubscriptionsRequest*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20293,11 +21065,11 @@ struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType =
     OpcUaId_DeleteSubscriptionsRequest_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteSubscriptionsRequest),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteSubscriptionsRequest_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteSubscriptionsRequest_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteSubscriptionsRequest_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteSubscriptionsRequest_Decode
+    OpcUa_DeleteSubscriptionsRequest_Initialize,
+    OpcUa_DeleteSubscriptionsRequest_Clear,
+    NULL,
+    OpcUa_DeleteSubscriptionsRequest_Encode,
+    OpcUa_DeleteSubscriptionsRequest_Decode
 };
 #endif
 
@@ -20305,8 +21077,9 @@ struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsRequest_EncodeableType =
 /*============================================================================
  * OpcUa_DeleteSubscriptionsResponse_Initialize
  *===========================================================================*/
-void OpcUa_DeleteSubscriptionsResponse_Initialize(OpcUa_DeleteSubscriptionsResponse* a_pValue)
+void OpcUa_DeleteSubscriptionsResponse_Initialize(void* pValue)
 {
+    OpcUa_DeleteSubscriptionsResponse* a_pValue = (OpcUa_DeleteSubscriptionsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Initialize(&a_pValue->ResponseHeader);
@@ -20320,8 +21093,9 @@ void OpcUa_DeleteSubscriptionsResponse_Initialize(OpcUa_DeleteSubscriptionsRespo
 /*============================================================================
  * OpcUa_DeleteSubscriptionsResponse_Clear
  *===========================================================================*/
-void OpcUa_DeleteSubscriptionsResponse_Clear(OpcUa_DeleteSubscriptionsResponse* a_pValue)
+void OpcUa_DeleteSubscriptionsResponse_Clear(void* pValue)
 {
+    OpcUa_DeleteSubscriptionsResponse* a_pValue = (OpcUa_DeleteSubscriptionsResponse*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_ResponseHeader_Clear(&a_pValue->ResponseHeader);
@@ -20335,9 +21109,10 @@ void OpcUa_DeleteSubscriptionsResponse_Clear(OpcUa_DeleteSubscriptionsResponse* 
 /*============================================================================
  * OpcUa_DeleteSubscriptionsResponse_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(OpcUa_DeleteSubscriptionsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteSubscriptionsResponse* a_pValue = (OpcUa_DeleteSubscriptionsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20358,9 +21133,10 @@ SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Encode(OpcUa_DeleteSubscriptio
 /*============================================================================
  * OpcUa_DeleteSubscriptionsResponse_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Decode(OpcUa_DeleteSubscriptionsResponse* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DeleteSubscriptionsResponse* a_pValue = (OpcUa_DeleteSubscriptionsResponse*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20399,11 +21175,11 @@ struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType =
     OpcUaId_DeleteSubscriptionsResponse_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DeleteSubscriptionsResponse),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DeleteSubscriptionsResponse_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DeleteSubscriptionsResponse_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DeleteSubscriptionsResponse_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DeleteSubscriptionsResponse_Decode
+    OpcUa_DeleteSubscriptionsResponse_Initialize,
+    OpcUa_DeleteSubscriptionsResponse_Clear,
+    NULL,
+    OpcUa_DeleteSubscriptionsResponse_Encode,
+    OpcUa_DeleteSubscriptionsResponse_Decode
 };
 #endif
 #endif
@@ -20413,8 +21189,9 @@ struct SOPC_EncodeableType OpcUa_DeleteSubscriptionsResponse_EncodeableType =
 /*============================================================================
  * OpcUa_BuildInfo_Initialize
  *===========================================================================*/
-void OpcUa_BuildInfo_Initialize(OpcUa_BuildInfo* a_pValue)
+void OpcUa_BuildInfo_Initialize(void* pValue)
 {
+    OpcUa_BuildInfo* a_pValue = (OpcUa_BuildInfo*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->ProductUri);
@@ -20429,8 +21206,9 @@ void OpcUa_BuildInfo_Initialize(OpcUa_BuildInfo* a_pValue)
 /*============================================================================
  * OpcUa_BuildInfo_Clear
  *===========================================================================*/
-void OpcUa_BuildInfo_Clear(OpcUa_BuildInfo* a_pValue)
+void OpcUa_BuildInfo_Clear(void* pValue)
 {
+    OpcUa_BuildInfo* a_pValue = (OpcUa_BuildInfo*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->ProductUri);
@@ -20445,9 +21223,10 @@ void OpcUa_BuildInfo_Clear(OpcUa_BuildInfo* a_pValue)
 /*============================================================================
  * OpcUa_BuildInfo_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BuildInfo_Encode(OpcUa_BuildInfo* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BuildInfo_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BuildInfo* a_pValue = (OpcUa_BuildInfo*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20472,9 +21251,10 @@ SOPC_StatusCode OpcUa_BuildInfo_Encode(OpcUa_BuildInfo* a_pValue, SOPC_MsgBuffer
 /*============================================================================
  * OpcUa_BuildInfo_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_BuildInfo_Decode(OpcUa_BuildInfo* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_BuildInfo_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_BuildInfo* a_pValue = (OpcUa_BuildInfo*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20513,11 +21293,11 @@ struct SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType =
     OpcUaId_BuildInfo_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_BuildInfo),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_BuildInfo_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_BuildInfo_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_BuildInfo_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_BuildInfo_Decode
+    OpcUa_BuildInfo_Initialize,
+    OpcUa_BuildInfo_Clear,
+    NULL,
+    OpcUa_BuildInfo_Encode,
+    OpcUa_BuildInfo_Decode
 };
 #endif
 
@@ -20527,8 +21307,9 @@ struct SOPC_EncodeableType OpcUa_BuildInfo_EncodeableType =
 /*============================================================================
  * OpcUa_RedundantServerDataType_Initialize
  *===========================================================================*/
-void OpcUa_RedundantServerDataType_Initialize(OpcUa_RedundantServerDataType* a_pValue)
+void OpcUa_RedundantServerDataType_Initialize(void* pValue)
 {
+    OpcUa_RedundantServerDataType* a_pValue = (OpcUa_RedundantServerDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->ServerId);
@@ -20540,8 +21321,9 @@ void OpcUa_RedundantServerDataType_Initialize(OpcUa_RedundantServerDataType* a_p
 /*============================================================================
  * OpcUa_RedundantServerDataType_Clear
  *===========================================================================*/
-void OpcUa_RedundantServerDataType_Clear(OpcUa_RedundantServerDataType* a_pValue)
+void OpcUa_RedundantServerDataType_Clear(void* pValue)
 {
+    OpcUa_RedundantServerDataType* a_pValue = (OpcUa_RedundantServerDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->ServerId);
@@ -20553,9 +21335,10 @@ void OpcUa_RedundantServerDataType_Clear(OpcUa_RedundantServerDataType* a_pValue
 /*============================================================================
  * OpcUa_RedundantServerDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RedundantServerDataType_Encode(OpcUa_RedundantServerDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RedundantServerDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RedundantServerDataType* a_pValue = (OpcUa_RedundantServerDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20574,9 +21357,10 @@ SOPC_StatusCode OpcUa_RedundantServerDataType_Encode(OpcUa_RedundantServerDataTy
 /*============================================================================
  * OpcUa_RedundantServerDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_RedundantServerDataType_Decode(OpcUa_RedundantServerDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RedundantServerDataType* a_pValue = (OpcUa_RedundantServerDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20609,11 +21393,11 @@ struct SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType =
     OpcUaId_RedundantServerDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_RedundantServerDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_RedundantServerDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_RedundantServerDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_RedundantServerDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_RedundantServerDataType_Decode
+    OpcUa_RedundantServerDataType_Initialize,
+    OpcUa_RedundantServerDataType_Clear,
+    NULL,
+    OpcUa_RedundantServerDataType_Encode,
+    OpcUa_RedundantServerDataType_Decode
 };
 #endif
 
@@ -20621,8 +21405,9 @@ struct SOPC_EncodeableType OpcUa_RedundantServerDataType_EncodeableType =
 /*============================================================================
  * OpcUa_EndpointUrlListDataType_Initialize
  *===========================================================================*/
-void OpcUa_EndpointUrlListDataType_Initialize(OpcUa_EndpointUrlListDataType* a_pValue)
+void OpcUa_EndpointUrlListDataType_Initialize(void* pValue)
 {
+    OpcUa_EndpointUrlListDataType* a_pValue = (OpcUa_EndpointUrlListDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Initialize_Array(&a_pValue->NoOfEndpointUrlList, (void**) &a_pValue->EndpointUrlList, 
@@ -20633,8 +21418,9 @@ void OpcUa_EndpointUrlListDataType_Initialize(OpcUa_EndpointUrlListDataType* a_p
 /*============================================================================
  * OpcUa_EndpointUrlListDataType_Clear
  *===========================================================================*/
-void OpcUa_EndpointUrlListDataType_Clear(OpcUa_EndpointUrlListDataType* a_pValue)
+void OpcUa_EndpointUrlListDataType_Clear(void* pValue)
 {
+    OpcUa_EndpointUrlListDataType* a_pValue = (OpcUa_EndpointUrlListDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Clear_Array(&a_pValue->NoOfEndpointUrlList, (void**) &a_pValue->EndpointUrlList, 
@@ -20645,9 +21431,10 @@ void OpcUa_EndpointUrlListDataType_Clear(OpcUa_EndpointUrlListDataType* a_pValue
 /*============================================================================
  * OpcUa_EndpointUrlListDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EndpointUrlListDataType_Encode(OpcUa_EndpointUrlListDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointUrlListDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EndpointUrlListDataType* a_pValue = (OpcUa_EndpointUrlListDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20663,9 +21450,10 @@ SOPC_StatusCode OpcUa_EndpointUrlListDataType_Encode(OpcUa_EndpointUrlListDataTy
 /*============================================================================
  * OpcUa_EndpointUrlListDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EndpointUrlListDataType_Decode(OpcUa_EndpointUrlListDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EndpointUrlListDataType* a_pValue = (OpcUa_EndpointUrlListDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20697,11 +21485,11 @@ struct SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType =
     OpcUaId_EndpointUrlListDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EndpointUrlListDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EndpointUrlListDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EndpointUrlListDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EndpointUrlListDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EndpointUrlListDataType_Decode
+    OpcUa_EndpointUrlListDataType_Initialize,
+    OpcUa_EndpointUrlListDataType_Clear,
+    NULL,
+    OpcUa_EndpointUrlListDataType_Encode,
+    OpcUa_EndpointUrlListDataType_Decode
 };
 #endif
 
@@ -20709,8 +21497,9 @@ struct SOPC_EncodeableType OpcUa_EndpointUrlListDataType_EncodeableType =
 /*============================================================================
  * OpcUa_NetworkGroupDataType_Initialize
  *===========================================================================*/
-void OpcUa_NetworkGroupDataType_Initialize(OpcUa_NetworkGroupDataType* a_pValue)
+void OpcUa_NetworkGroupDataType_Initialize(void* pValue)
 {
+    OpcUa_NetworkGroupDataType* a_pValue = (OpcUa_NetworkGroupDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->ServerUri);
@@ -20722,8 +21511,9 @@ void OpcUa_NetworkGroupDataType_Initialize(OpcUa_NetworkGroupDataType* a_pValue)
 /*============================================================================
  * OpcUa_NetworkGroupDataType_Clear
  *===========================================================================*/
-void OpcUa_NetworkGroupDataType_Clear(OpcUa_NetworkGroupDataType* a_pValue)
+void OpcUa_NetworkGroupDataType_Clear(void* pValue)
 {
+    OpcUa_NetworkGroupDataType* a_pValue = (OpcUa_NetworkGroupDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->ServerUri);
@@ -20735,9 +21525,10 @@ void OpcUa_NetworkGroupDataType_Clear(OpcUa_NetworkGroupDataType* a_pValue)
 /*============================================================================
  * OpcUa_NetworkGroupDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NetworkGroupDataType_Encode(OpcUa_NetworkGroupDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NetworkGroupDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NetworkGroupDataType* a_pValue = (OpcUa_NetworkGroupDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20755,9 +21546,10 @@ SOPC_StatusCode OpcUa_NetworkGroupDataType_Encode(OpcUa_NetworkGroupDataType* a_
 /*============================================================================
  * OpcUa_NetworkGroupDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_NetworkGroupDataType_Decode(OpcUa_NetworkGroupDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_NetworkGroupDataType* a_pValue = (OpcUa_NetworkGroupDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20791,11 +21583,11 @@ struct SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType =
     OpcUaId_NetworkGroupDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_NetworkGroupDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_NetworkGroupDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_NetworkGroupDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_NetworkGroupDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_NetworkGroupDataType_Decode
+    OpcUa_NetworkGroupDataType_Initialize,
+    OpcUa_NetworkGroupDataType_Clear,
+    NULL,
+    OpcUa_NetworkGroupDataType_Encode,
+    OpcUa_NetworkGroupDataType_Decode
 };
 #endif
 
@@ -20803,8 +21595,9 @@ struct SOPC_EncodeableType OpcUa_NetworkGroupDataType_EncodeableType =
 /*============================================================================
  * OpcUa_SamplingIntervalDiagnosticsDataType_Initialize
  *===========================================================================*/
-void OpcUa_SamplingIntervalDiagnosticsDataType_Initialize(OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue)
+void OpcUa_SamplingIntervalDiagnosticsDataType_Initialize(void* pValue)
 {
+    OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue = (OpcUa_SamplingIntervalDiagnosticsDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Double_Initialize(&a_pValue->SamplingInterval);
@@ -20817,8 +21610,9 @@ void OpcUa_SamplingIntervalDiagnosticsDataType_Initialize(OpcUa_SamplingInterval
 /*============================================================================
  * OpcUa_SamplingIntervalDiagnosticsDataType_Clear
  *===========================================================================*/
-void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue)
+void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(void* pValue)
 {
+    OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue = (OpcUa_SamplingIntervalDiagnosticsDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Double_Clear(&a_pValue->SamplingInterval);
@@ -20831,9 +21625,10 @@ void OpcUa_SamplingIntervalDiagnosticsDataType_Clear(OpcUa_SamplingIntervalDiagn
 /*============================================================================
  * OpcUa_SamplingIntervalDiagnosticsDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Encode(OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue = (OpcUa_SamplingIntervalDiagnosticsDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20854,9 +21649,10 @@ SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Encode(OpcUa_SamplingI
 /*============================================================================
  * OpcUa_SamplingIntervalDiagnosticsDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Decode(OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SamplingIntervalDiagnosticsDataType* a_pValue = (OpcUa_SamplingIntervalDiagnosticsDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20891,11 +21687,11 @@ struct SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableT
     OpcUaId_SamplingIntervalDiagnosticsDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SamplingIntervalDiagnosticsDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SamplingIntervalDiagnosticsDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SamplingIntervalDiagnosticsDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SamplingIntervalDiagnosticsDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SamplingIntervalDiagnosticsDataType_Decode
+    OpcUa_SamplingIntervalDiagnosticsDataType_Initialize,
+    OpcUa_SamplingIntervalDiagnosticsDataType_Clear,
+    NULL,
+    OpcUa_SamplingIntervalDiagnosticsDataType_Encode,
+    OpcUa_SamplingIntervalDiagnosticsDataType_Decode
 };
 #endif
 
@@ -20903,8 +21699,9 @@ struct SOPC_EncodeableType OpcUa_SamplingIntervalDiagnosticsDataType_EncodeableT
 /*============================================================================
  * OpcUa_ServerDiagnosticsSummaryDataType_Initialize
  *===========================================================================*/
-void OpcUa_ServerDiagnosticsSummaryDataType_Initialize(OpcUa_ServerDiagnosticsSummaryDataType* a_pValue)
+void OpcUa_ServerDiagnosticsSummaryDataType_Initialize(void* pValue)
 {
+    OpcUa_ServerDiagnosticsSummaryDataType* a_pValue = (OpcUa_ServerDiagnosticsSummaryDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->ServerViewCount);
@@ -20925,8 +21722,9 @@ void OpcUa_ServerDiagnosticsSummaryDataType_Initialize(OpcUa_ServerDiagnosticsSu
 /*============================================================================
  * OpcUa_ServerDiagnosticsSummaryDataType_Clear
  *===========================================================================*/
-void OpcUa_ServerDiagnosticsSummaryDataType_Clear(OpcUa_ServerDiagnosticsSummaryDataType* a_pValue)
+void OpcUa_ServerDiagnosticsSummaryDataType_Clear(void* pValue)
 {
+    OpcUa_ServerDiagnosticsSummaryDataType* a_pValue = (OpcUa_ServerDiagnosticsSummaryDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->ServerViewCount);
@@ -20947,9 +21745,10 @@ void OpcUa_ServerDiagnosticsSummaryDataType_Clear(OpcUa_ServerDiagnosticsSummary
 /*============================================================================
  * OpcUa_ServerDiagnosticsSummaryDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Encode(OpcUa_ServerDiagnosticsSummaryDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServerDiagnosticsSummaryDataType* a_pValue = (OpcUa_ServerDiagnosticsSummaryDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -20986,9 +21785,10 @@ SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Encode(OpcUa_ServerDiagno
 /*============================================================================
  * OpcUa_ServerDiagnosticsSummaryDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Decode(OpcUa_ServerDiagnosticsSummaryDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServerDiagnosticsSummaryDataType* a_pValue = (OpcUa_ServerDiagnosticsSummaryDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21039,11 +21839,11 @@ struct SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType
     OpcUaId_ServerDiagnosticsSummaryDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ServerDiagnosticsSummaryDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ServerDiagnosticsSummaryDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ServerDiagnosticsSummaryDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ServerDiagnosticsSummaryDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ServerDiagnosticsSummaryDataType_Decode
+    OpcUa_ServerDiagnosticsSummaryDataType_Initialize,
+    OpcUa_ServerDiagnosticsSummaryDataType_Clear,
+    NULL,
+    OpcUa_ServerDiagnosticsSummaryDataType_Encode,
+    OpcUa_ServerDiagnosticsSummaryDataType_Decode
 };
 #endif
 
@@ -21051,8 +21851,9 @@ struct SOPC_EncodeableType OpcUa_ServerDiagnosticsSummaryDataType_EncodeableType
 /*============================================================================
  * OpcUa_ServerStatusDataType_Initialize
  *===========================================================================*/
-void OpcUa_ServerStatusDataType_Initialize(OpcUa_ServerStatusDataType* a_pValue)
+void OpcUa_ServerStatusDataType_Initialize(void* pValue)
 {
+    OpcUa_ServerStatusDataType* a_pValue = (OpcUa_ServerStatusDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Initialize(&a_pValue->StartTime);
@@ -21067,8 +21868,9 @@ void OpcUa_ServerStatusDataType_Initialize(OpcUa_ServerStatusDataType* a_pValue)
 /*============================================================================
  * OpcUa_ServerStatusDataType_Clear
  *===========================================================================*/
-void OpcUa_ServerStatusDataType_Clear(OpcUa_ServerStatusDataType* a_pValue)
+void OpcUa_ServerStatusDataType_Clear(void* pValue)
 {
+    OpcUa_ServerStatusDataType* a_pValue = (OpcUa_ServerStatusDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_DateTime_Clear(&a_pValue->StartTime);
@@ -21083,9 +21885,10 @@ void OpcUa_ServerStatusDataType_Clear(OpcUa_ServerStatusDataType* a_pValue)
 /*============================================================================
  * OpcUa_ServerStatusDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServerStatusDataType_Encode(OpcUa_ServerStatusDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerStatusDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServerStatusDataType* a_pValue = (OpcUa_ServerStatusDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21110,9 +21913,10 @@ SOPC_StatusCode OpcUa_ServerStatusDataType_Encode(OpcUa_ServerStatusDataType* a_
 /*============================================================================
  * OpcUa_ServerStatusDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServerStatusDataType_Decode(OpcUa_ServerStatusDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServerStatusDataType* a_pValue = (OpcUa_ServerStatusDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21151,11 +21955,11 @@ struct SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType =
     OpcUaId_ServerStatusDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ServerStatusDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ServerStatusDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ServerStatusDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ServerStatusDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ServerStatusDataType_Decode
+    OpcUa_ServerStatusDataType_Initialize,
+    OpcUa_ServerStatusDataType_Clear,
+    NULL,
+    OpcUa_ServerStatusDataType_Encode,
+    OpcUa_ServerStatusDataType_Decode
 };
 #endif
 
@@ -21163,8 +21967,9 @@ struct SOPC_EncodeableType OpcUa_ServerStatusDataType_EncodeableType =
 /*============================================================================
  * OpcUa_SessionDiagnosticsDataType_Initialize
  *===========================================================================*/
-void OpcUa_SessionDiagnosticsDataType_Initialize(OpcUa_SessionDiagnosticsDataType* a_pValue)
+void OpcUa_SessionDiagnosticsDataType_Initialize(void* pValue)
 {
+    OpcUa_SessionDiagnosticsDataType* a_pValue = (OpcUa_SessionDiagnosticsDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->SessionId);
@@ -21217,8 +22022,9 @@ void OpcUa_SessionDiagnosticsDataType_Initialize(OpcUa_SessionDiagnosticsDataTyp
 /*============================================================================
  * OpcUa_SessionDiagnosticsDataType_Clear
  *===========================================================================*/
-void OpcUa_SessionDiagnosticsDataType_Clear(OpcUa_SessionDiagnosticsDataType* a_pValue)
+void OpcUa_SessionDiagnosticsDataType_Clear(void* pValue)
 {
+    OpcUa_SessionDiagnosticsDataType* a_pValue = (OpcUa_SessionDiagnosticsDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->SessionId);
@@ -21271,9 +22077,10 @@ void OpcUa_SessionDiagnosticsDataType_Clear(OpcUa_SessionDiagnosticsDataType* a_
 /*============================================================================
  * OpcUa_SessionDiagnosticsDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Encode(OpcUa_SessionDiagnosticsDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SessionDiagnosticsDataType* a_pValue = (OpcUa_SessionDiagnosticsDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21373,9 +22180,10 @@ SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Encode(OpcUa_SessionDiagnostics
 /*============================================================================
  * OpcUa_SessionDiagnosticsDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Decode(OpcUa_SessionDiagnosticsDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SessionDiagnosticsDataType* a_pValue = (OpcUa_SessionDiagnosticsDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21491,11 +22299,11 @@ struct SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType =
     OpcUaId_SessionDiagnosticsDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SessionDiagnosticsDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SessionDiagnosticsDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SessionDiagnosticsDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SessionDiagnosticsDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SessionDiagnosticsDataType_Decode
+    OpcUa_SessionDiagnosticsDataType_Initialize,
+    OpcUa_SessionDiagnosticsDataType_Clear,
+    NULL,
+    OpcUa_SessionDiagnosticsDataType_Encode,
+    OpcUa_SessionDiagnosticsDataType_Decode
 };
 #endif
 
@@ -21503,8 +22311,9 @@ struct SOPC_EncodeableType OpcUa_SessionDiagnosticsDataType_EncodeableType =
 /*============================================================================
  * OpcUa_SessionSecurityDiagnosticsDataType_Initialize
  *===========================================================================*/
-void OpcUa_SessionSecurityDiagnosticsDataType_Initialize(OpcUa_SessionSecurityDiagnosticsDataType* a_pValue)
+void OpcUa_SessionSecurityDiagnosticsDataType_Initialize(void* pValue)
 {
+    OpcUa_SessionSecurityDiagnosticsDataType* a_pValue = (OpcUa_SessionSecurityDiagnosticsDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->SessionId);
@@ -21523,8 +22332,9 @@ void OpcUa_SessionSecurityDiagnosticsDataType_Initialize(OpcUa_SessionSecurityDi
 /*============================================================================
  * OpcUa_SessionSecurityDiagnosticsDataType_Clear
  *===========================================================================*/
-void OpcUa_SessionSecurityDiagnosticsDataType_Clear(OpcUa_SessionSecurityDiagnosticsDataType* a_pValue)
+void OpcUa_SessionSecurityDiagnosticsDataType_Clear(void* pValue)
 {
+    OpcUa_SessionSecurityDiagnosticsDataType* a_pValue = (OpcUa_SessionSecurityDiagnosticsDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->SessionId);
@@ -21543,9 +22353,10 @@ void OpcUa_SessionSecurityDiagnosticsDataType_Clear(OpcUa_SessionSecurityDiagnos
 /*============================================================================
  * OpcUa_SessionSecurityDiagnosticsDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Encode(OpcUa_SessionSecurityDiagnosticsDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SessionSecurityDiagnosticsDataType* a_pValue = (OpcUa_SessionSecurityDiagnosticsDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21577,9 +22388,10 @@ SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Encode(OpcUa_SessionSec
 /*============================================================================
  * OpcUa_SessionSecurityDiagnosticsDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Decode(OpcUa_SessionSecurityDiagnosticsDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SessionSecurityDiagnosticsDataType* a_pValue = (OpcUa_SessionSecurityDiagnosticsDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21627,11 +22439,11 @@ struct SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableTy
     OpcUaId_SessionSecurityDiagnosticsDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SessionSecurityDiagnosticsDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SessionSecurityDiagnosticsDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SessionSecurityDiagnosticsDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SessionSecurityDiagnosticsDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SessionSecurityDiagnosticsDataType_Decode
+    OpcUa_SessionSecurityDiagnosticsDataType_Initialize,
+    OpcUa_SessionSecurityDiagnosticsDataType_Clear,
+    NULL,
+    OpcUa_SessionSecurityDiagnosticsDataType_Encode,
+    OpcUa_SessionSecurityDiagnosticsDataType_Decode
 };
 #endif
 
@@ -21639,8 +22451,9 @@ struct SOPC_EncodeableType OpcUa_SessionSecurityDiagnosticsDataType_EncodeableTy
 /*============================================================================
  * OpcUa_ServiceCounterDataType_Initialize
  *===========================================================================*/
-void OpcUa_ServiceCounterDataType_Initialize(OpcUa_ServiceCounterDataType* a_pValue)
+void OpcUa_ServiceCounterDataType_Initialize(void* pValue)
 {
+    OpcUa_ServiceCounterDataType* a_pValue = (OpcUa_ServiceCounterDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Initialize(&a_pValue->TotalCount);
@@ -21651,8 +22464,9 @@ void OpcUa_ServiceCounterDataType_Initialize(OpcUa_ServiceCounterDataType* a_pVa
 /*============================================================================
  * OpcUa_ServiceCounterDataType_Clear
  *===========================================================================*/
-void OpcUa_ServiceCounterDataType_Clear(OpcUa_ServiceCounterDataType* a_pValue)
+void OpcUa_ServiceCounterDataType_Clear(void* pValue)
 {
+    OpcUa_ServiceCounterDataType* a_pValue = (OpcUa_ServiceCounterDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_UInt32_Clear(&a_pValue->TotalCount);
@@ -21663,9 +22477,10 @@ void OpcUa_ServiceCounterDataType_Clear(OpcUa_ServiceCounterDataType* a_pValue)
 /*============================================================================
  * OpcUa_ServiceCounterDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServiceCounterDataType_Encode(OpcUa_ServiceCounterDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServiceCounterDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServiceCounterDataType* a_pValue = (OpcUa_ServiceCounterDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21682,9 +22497,10 @@ SOPC_StatusCode OpcUa_ServiceCounterDataType_Encode(OpcUa_ServiceCounterDataType
 /*============================================================================
  * OpcUa_ServiceCounterDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ServiceCounterDataType_Decode(OpcUa_ServiceCounterDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ServiceCounterDataType* a_pValue = (OpcUa_ServiceCounterDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21715,11 +22531,11 @@ struct SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType =
     OpcUaId_ServiceCounterDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ServiceCounterDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ServiceCounterDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ServiceCounterDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ServiceCounterDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ServiceCounterDataType_Decode
+    OpcUa_ServiceCounterDataType_Initialize,
+    OpcUa_ServiceCounterDataType_Clear,
+    NULL,
+    OpcUa_ServiceCounterDataType_Encode,
+    OpcUa_ServiceCounterDataType_Decode
 };
 #endif
 
@@ -21727,8 +22543,9 @@ struct SOPC_EncodeableType OpcUa_ServiceCounterDataType_EncodeableType =
 /*============================================================================
  * OpcUa_StatusResult_Initialize
  *===========================================================================*/
-void OpcUa_StatusResult_Initialize(OpcUa_StatusResult* a_pValue)
+void OpcUa_StatusResult_Initialize(void* pValue)
 {
+    OpcUa_StatusResult* a_pValue = (OpcUa_StatusResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Initialize(&a_pValue->StatusCode);
@@ -21739,8 +22556,9 @@ void OpcUa_StatusResult_Initialize(OpcUa_StatusResult* a_pValue)
 /*============================================================================
  * OpcUa_StatusResult_Clear
  *===========================================================================*/
-void OpcUa_StatusResult_Clear(OpcUa_StatusResult* a_pValue)
+void OpcUa_StatusResult_Clear(void* pValue)
 {
+    OpcUa_StatusResult* a_pValue = (OpcUa_StatusResult*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_StatusCode_Clear(&a_pValue->StatusCode);
@@ -21751,9 +22569,10 @@ void OpcUa_StatusResult_Clear(OpcUa_StatusResult* a_pValue)
 /*============================================================================
  * OpcUa_StatusResult_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_StatusResult_Encode(OpcUa_StatusResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_StatusResult_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_StatusResult* a_pValue = (OpcUa_StatusResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21770,9 +22589,10 @@ SOPC_StatusCode OpcUa_StatusResult_Encode(OpcUa_StatusResult* a_pValue, SOPC_Msg
 /*============================================================================
  * OpcUa_StatusResult_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_StatusResult_Decode(OpcUa_StatusResult* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_StatusResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_StatusResult* a_pValue = (OpcUa_StatusResult*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21803,11 +22623,11 @@ struct SOPC_EncodeableType OpcUa_StatusResult_EncodeableType =
     OpcUaId_StatusResult_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_StatusResult),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_StatusResult_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_StatusResult_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_StatusResult_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_StatusResult_Decode
+    OpcUa_StatusResult_Initialize,
+    OpcUa_StatusResult_Clear,
+    NULL,
+    OpcUa_StatusResult_Encode,
+    OpcUa_StatusResult_Decode
 };
 #endif
 
@@ -21815,8 +22635,9 @@ struct SOPC_EncodeableType OpcUa_StatusResult_EncodeableType =
 /*============================================================================
  * OpcUa_SubscriptionDiagnosticsDataType_Initialize
  *===========================================================================*/
-void OpcUa_SubscriptionDiagnosticsDataType_Initialize(OpcUa_SubscriptionDiagnosticsDataType* a_pValue)
+void OpcUa_SubscriptionDiagnosticsDataType_Initialize(void* pValue)
 {
+    OpcUa_SubscriptionDiagnosticsDataType* a_pValue = (OpcUa_SubscriptionDiagnosticsDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->SessionId);
@@ -21856,8 +22677,9 @@ void OpcUa_SubscriptionDiagnosticsDataType_Initialize(OpcUa_SubscriptionDiagnost
 /*============================================================================
  * OpcUa_SubscriptionDiagnosticsDataType_Clear
  *===========================================================================*/
-void OpcUa_SubscriptionDiagnosticsDataType_Clear(OpcUa_SubscriptionDiagnosticsDataType* a_pValue)
+void OpcUa_SubscriptionDiagnosticsDataType_Clear(void* pValue)
 {
+    OpcUa_SubscriptionDiagnosticsDataType* a_pValue = (OpcUa_SubscriptionDiagnosticsDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->SessionId);
@@ -21897,9 +22719,10 @@ void OpcUa_SubscriptionDiagnosticsDataType_Clear(OpcUa_SubscriptionDiagnosticsDa
 /*============================================================================
  * OpcUa_SubscriptionDiagnosticsDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Encode(OpcUa_SubscriptionDiagnosticsDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SubscriptionDiagnosticsDataType* a_pValue = (OpcUa_SubscriptionDiagnosticsDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -21974,9 +22797,10 @@ SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Encode(OpcUa_SubscriptionD
 /*============================================================================
  * OpcUa_SubscriptionDiagnosticsDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Decode(OpcUa_SubscriptionDiagnosticsDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SubscriptionDiagnosticsDataType* a_pValue = (OpcUa_SubscriptionDiagnosticsDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22065,11 +22889,11 @@ struct SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType 
     OpcUaId_SubscriptionDiagnosticsDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SubscriptionDiagnosticsDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SubscriptionDiagnosticsDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SubscriptionDiagnosticsDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SubscriptionDiagnosticsDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SubscriptionDiagnosticsDataType_Decode
+    OpcUa_SubscriptionDiagnosticsDataType_Initialize,
+    OpcUa_SubscriptionDiagnosticsDataType_Clear,
+    NULL,
+    OpcUa_SubscriptionDiagnosticsDataType_Encode,
+    OpcUa_SubscriptionDiagnosticsDataType_Decode
 };
 #endif
 
@@ -22078,8 +22902,9 @@ struct SOPC_EncodeableType OpcUa_SubscriptionDiagnosticsDataType_EncodeableType 
 /*============================================================================
  * OpcUa_ModelChangeStructureDataType_Initialize
  *===========================================================================*/
-void OpcUa_ModelChangeStructureDataType_Initialize(OpcUa_ModelChangeStructureDataType* a_pValue)
+void OpcUa_ModelChangeStructureDataType_Initialize(void* pValue)
 {
+    OpcUa_ModelChangeStructureDataType* a_pValue = (OpcUa_ModelChangeStructureDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->Affected);
@@ -22091,8 +22916,9 @@ void OpcUa_ModelChangeStructureDataType_Initialize(OpcUa_ModelChangeStructureDat
 /*============================================================================
  * OpcUa_ModelChangeStructureDataType_Clear
  *===========================================================================*/
-void OpcUa_ModelChangeStructureDataType_Clear(OpcUa_ModelChangeStructureDataType* a_pValue)
+void OpcUa_ModelChangeStructureDataType_Clear(void* pValue)
 {
+    OpcUa_ModelChangeStructureDataType* a_pValue = (OpcUa_ModelChangeStructureDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->Affected);
@@ -22104,9 +22930,10 @@ void OpcUa_ModelChangeStructureDataType_Clear(OpcUa_ModelChangeStructureDataType
 /*============================================================================
  * OpcUa_ModelChangeStructureDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Encode(OpcUa_ModelChangeStructureDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModelChangeStructureDataType* a_pValue = (OpcUa_ModelChangeStructureDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22125,9 +22952,10 @@ SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Encode(OpcUa_ModelChangeStruc
 /*============================================================================
  * OpcUa_ModelChangeStructureDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Decode(OpcUa_ModelChangeStructureDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ModelChangeStructureDataType* a_pValue = (OpcUa_ModelChangeStructureDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22160,11 +22988,11 @@ struct SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType =
     OpcUaId_ModelChangeStructureDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ModelChangeStructureDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ModelChangeStructureDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ModelChangeStructureDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ModelChangeStructureDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ModelChangeStructureDataType_Decode
+    OpcUa_ModelChangeStructureDataType_Initialize,
+    OpcUa_ModelChangeStructureDataType_Clear,
+    NULL,
+    OpcUa_ModelChangeStructureDataType_Encode,
+    OpcUa_ModelChangeStructureDataType_Decode
 };
 #endif
 
@@ -22172,8 +23000,9 @@ struct SOPC_EncodeableType OpcUa_ModelChangeStructureDataType_EncodeableType =
 /*============================================================================
  * OpcUa_SemanticChangeStructureDataType_Initialize
  *===========================================================================*/
-void OpcUa_SemanticChangeStructureDataType_Initialize(OpcUa_SemanticChangeStructureDataType* a_pValue)
+void OpcUa_SemanticChangeStructureDataType_Initialize(void* pValue)
 {
+    OpcUa_SemanticChangeStructureDataType* a_pValue = (OpcUa_SemanticChangeStructureDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->Affected);
@@ -22184,8 +23013,9 @@ void OpcUa_SemanticChangeStructureDataType_Initialize(OpcUa_SemanticChangeStruct
 /*============================================================================
  * OpcUa_SemanticChangeStructureDataType_Clear
  *===========================================================================*/
-void OpcUa_SemanticChangeStructureDataType_Clear(OpcUa_SemanticChangeStructureDataType* a_pValue)
+void OpcUa_SemanticChangeStructureDataType_Clear(void* pValue)
 {
+    OpcUa_SemanticChangeStructureDataType* a_pValue = (OpcUa_SemanticChangeStructureDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->Affected);
@@ -22196,9 +23026,10 @@ void OpcUa_SemanticChangeStructureDataType_Clear(OpcUa_SemanticChangeStructureDa
 /*============================================================================
  * OpcUa_SemanticChangeStructureDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Encode(OpcUa_SemanticChangeStructureDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SemanticChangeStructureDataType* a_pValue = (OpcUa_SemanticChangeStructureDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22215,9 +23046,10 @@ SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Encode(OpcUa_SemanticChang
 /*============================================================================
  * OpcUa_SemanticChangeStructureDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Decode(OpcUa_SemanticChangeStructureDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_SemanticChangeStructureDataType* a_pValue = (OpcUa_SemanticChangeStructureDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22248,11 +23080,11 @@ struct SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType 
     OpcUaId_SemanticChangeStructureDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_SemanticChangeStructureDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_SemanticChangeStructureDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_SemanticChangeStructureDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_SemanticChangeStructureDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_SemanticChangeStructureDataType_Decode
+    OpcUa_SemanticChangeStructureDataType_Initialize,
+    OpcUa_SemanticChangeStructureDataType_Clear,
+    NULL,
+    OpcUa_SemanticChangeStructureDataType_Encode,
+    OpcUa_SemanticChangeStructureDataType_Decode
 };
 #endif
 
@@ -22260,8 +23092,9 @@ struct SOPC_EncodeableType OpcUa_SemanticChangeStructureDataType_EncodeableType 
 /*============================================================================
  * OpcUa_Range_Initialize
  *===========================================================================*/
-void OpcUa_Range_Initialize(OpcUa_Range* a_pValue)
+void OpcUa_Range_Initialize(void* pValue)
 {
+    OpcUa_Range* a_pValue = (OpcUa_Range*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Double_Initialize(&a_pValue->Low);
@@ -22272,8 +23105,9 @@ void OpcUa_Range_Initialize(OpcUa_Range* a_pValue)
 /*============================================================================
  * OpcUa_Range_Clear
  *===========================================================================*/
-void OpcUa_Range_Clear(OpcUa_Range* a_pValue)
+void OpcUa_Range_Clear(void* pValue)
 {
+    OpcUa_Range* a_pValue = (OpcUa_Range*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Double_Clear(&a_pValue->Low);
@@ -22284,9 +23118,10 @@ void OpcUa_Range_Clear(OpcUa_Range* a_pValue)
 /*============================================================================
  * OpcUa_Range_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_Range_Encode(OpcUa_Range* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Range_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_Range* a_pValue = (OpcUa_Range*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22303,9 +23138,10 @@ SOPC_StatusCode OpcUa_Range_Encode(OpcUa_Range* a_pValue, SOPC_MsgBuffer* msgBuf
 /*============================================================================
  * OpcUa_Range_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_Range_Decode(OpcUa_Range* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Range_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_Range* a_pValue = (OpcUa_Range*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22336,11 +23172,11 @@ struct SOPC_EncodeableType OpcUa_Range_EncodeableType =
     OpcUaId_Range_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_Range),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_Range_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_Range_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_Range_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_Range_Decode
+    OpcUa_Range_Initialize,
+    OpcUa_Range_Clear,
+    NULL,
+    OpcUa_Range_Encode,
+    OpcUa_Range_Decode
 };
 #endif
 
@@ -22348,8 +23184,9 @@ struct SOPC_EncodeableType OpcUa_Range_EncodeableType =
 /*============================================================================
  * OpcUa_EUInformation_Initialize
  *===========================================================================*/
-void OpcUa_EUInformation_Initialize(OpcUa_EUInformation* a_pValue)
+void OpcUa_EUInformation_Initialize(void* pValue)
 {
+    OpcUa_EUInformation* a_pValue = (OpcUa_EUInformation*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->NamespaceUri);
@@ -22362,8 +23199,9 @@ void OpcUa_EUInformation_Initialize(OpcUa_EUInformation* a_pValue)
 /*============================================================================
  * OpcUa_EUInformation_Clear
  *===========================================================================*/
-void OpcUa_EUInformation_Clear(OpcUa_EUInformation* a_pValue)
+void OpcUa_EUInformation_Clear(void* pValue)
 {
+    OpcUa_EUInformation* a_pValue = (OpcUa_EUInformation*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->NamespaceUri);
@@ -22376,9 +23214,10 @@ void OpcUa_EUInformation_Clear(OpcUa_EUInformation* a_pValue)
 /*============================================================================
  * OpcUa_EUInformation_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EUInformation_Encode(OpcUa_EUInformation* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EUInformation_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EUInformation* a_pValue = (OpcUa_EUInformation*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22399,9 +23238,10 @@ SOPC_StatusCode OpcUa_EUInformation_Encode(OpcUa_EUInformation* a_pValue, SOPC_M
 /*============================================================================
  * OpcUa_EUInformation_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_EUInformation_Decode(OpcUa_EUInformation* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_EUInformation_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_EUInformation* a_pValue = (OpcUa_EUInformation*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22436,11 +23276,11 @@ struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType =
     OpcUaId_EUInformation_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_EUInformation),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_EUInformation_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_EUInformation_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_EUInformation_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_EUInformation_Decode
+    OpcUa_EUInformation_Initialize,
+    OpcUa_EUInformation_Clear,
+    NULL,
+    OpcUa_EUInformation_Encode,
+    OpcUa_EUInformation_Decode
 };
 #endif
 
@@ -22449,8 +23289,9 @@ struct SOPC_EncodeableType OpcUa_EUInformation_EncodeableType =
 /*============================================================================
  * OpcUa_ComplexNumberType_Initialize
  *===========================================================================*/
-void OpcUa_ComplexNumberType_Initialize(OpcUa_ComplexNumberType* a_pValue)
+void OpcUa_ComplexNumberType_Initialize(void* pValue)
 {
+    OpcUa_ComplexNumberType* a_pValue = (OpcUa_ComplexNumberType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Float_Initialize(&a_pValue->Real);
@@ -22461,8 +23302,9 @@ void OpcUa_ComplexNumberType_Initialize(OpcUa_ComplexNumberType* a_pValue)
 /*============================================================================
  * OpcUa_ComplexNumberType_Clear
  *===========================================================================*/
-void OpcUa_ComplexNumberType_Clear(OpcUa_ComplexNumberType* a_pValue)
+void OpcUa_ComplexNumberType_Clear(void* pValue)
 {
+    OpcUa_ComplexNumberType* a_pValue = (OpcUa_ComplexNumberType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Float_Clear(&a_pValue->Real);
@@ -22473,9 +23315,10 @@ void OpcUa_ComplexNumberType_Clear(OpcUa_ComplexNumberType* a_pValue)
 /*============================================================================
  * OpcUa_ComplexNumberType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ComplexNumberType_Encode(OpcUa_ComplexNumberType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ComplexNumberType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ComplexNumberType* a_pValue = (OpcUa_ComplexNumberType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22492,9 +23335,10 @@ SOPC_StatusCode OpcUa_ComplexNumberType_Encode(OpcUa_ComplexNumberType* a_pValue
 /*============================================================================
  * OpcUa_ComplexNumberType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ComplexNumberType_Decode(OpcUa_ComplexNumberType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ComplexNumberType* a_pValue = (OpcUa_ComplexNumberType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22525,11 +23369,11 @@ struct SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType =
     OpcUaId_ComplexNumberType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ComplexNumberType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ComplexNumberType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ComplexNumberType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ComplexNumberType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ComplexNumberType_Decode
+    OpcUa_ComplexNumberType_Initialize,
+    OpcUa_ComplexNumberType_Clear,
+    NULL,
+    OpcUa_ComplexNumberType_Encode,
+    OpcUa_ComplexNumberType_Decode
 };
 #endif
 
@@ -22537,8 +23381,9 @@ struct SOPC_EncodeableType OpcUa_ComplexNumberType_EncodeableType =
 /*============================================================================
  * OpcUa_DoubleComplexNumberType_Initialize
  *===========================================================================*/
-void OpcUa_DoubleComplexNumberType_Initialize(OpcUa_DoubleComplexNumberType* a_pValue)
+void OpcUa_DoubleComplexNumberType_Initialize(void* pValue)
 {
+    OpcUa_DoubleComplexNumberType* a_pValue = (OpcUa_DoubleComplexNumberType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Double_Initialize(&a_pValue->Real);
@@ -22549,8 +23394,9 @@ void OpcUa_DoubleComplexNumberType_Initialize(OpcUa_DoubleComplexNumberType* a_p
 /*============================================================================
  * OpcUa_DoubleComplexNumberType_Clear
  *===========================================================================*/
-void OpcUa_DoubleComplexNumberType_Clear(OpcUa_DoubleComplexNumberType* a_pValue)
+void OpcUa_DoubleComplexNumberType_Clear(void* pValue)
 {
+    OpcUa_DoubleComplexNumberType* a_pValue = (OpcUa_DoubleComplexNumberType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Double_Clear(&a_pValue->Real);
@@ -22561,9 +23407,10 @@ void OpcUa_DoubleComplexNumberType_Clear(OpcUa_DoubleComplexNumberType* a_pValue
 /*============================================================================
  * OpcUa_DoubleComplexNumberType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DoubleComplexNumberType_Encode(OpcUa_DoubleComplexNumberType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DoubleComplexNumberType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DoubleComplexNumberType* a_pValue = (OpcUa_DoubleComplexNumberType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22580,9 +23427,10 @@ SOPC_StatusCode OpcUa_DoubleComplexNumberType_Encode(OpcUa_DoubleComplexNumberTy
 /*============================================================================
  * OpcUa_DoubleComplexNumberType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_DoubleComplexNumberType_Decode(OpcUa_DoubleComplexNumberType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_DoubleComplexNumberType* a_pValue = (OpcUa_DoubleComplexNumberType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22613,11 +23461,11 @@ struct SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType =
     OpcUaId_DoubleComplexNumberType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_DoubleComplexNumberType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_DoubleComplexNumberType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_DoubleComplexNumberType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_DoubleComplexNumberType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_DoubleComplexNumberType_Decode
+    OpcUa_DoubleComplexNumberType_Initialize,
+    OpcUa_DoubleComplexNumberType_Clear,
+    NULL,
+    OpcUa_DoubleComplexNumberType_Encode,
+    OpcUa_DoubleComplexNumberType_Decode
 };
 #endif
 
@@ -22625,8 +23473,9 @@ struct SOPC_EncodeableType OpcUa_DoubleComplexNumberType_EncodeableType =
 /*============================================================================
  * OpcUa_AxisInformation_Initialize
  *===========================================================================*/
-void OpcUa_AxisInformation_Initialize(OpcUa_AxisInformation* a_pValue)
+void OpcUa_AxisInformation_Initialize(void* pValue)
 {
+    OpcUa_AxisInformation* a_pValue = (OpcUa_AxisInformation*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_EUInformation_Initialize(&a_pValue->EngineeringUnits);
@@ -22641,8 +23490,9 @@ void OpcUa_AxisInformation_Initialize(OpcUa_AxisInformation* a_pValue)
 /*============================================================================
  * OpcUa_AxisInformation_Clear
  *===========================================================================*/
-void OpcUa_AxisInformation_Clear(OpcUa_AxisInformation* a_pValue)
+void OpcUa_AxisInformation_Clear(void* pValue)
 {
+    OpcUa_AxisInformation* a_pValue = (OpcUa_AxisInformation*) pValue;
     if (a_pValue != NULL)
     {
         OpcUa_EUInformation_Clear(&a_pValue->EngineeringUnits);
@@ -22657,9 +23507,10 @@ void OpcUa_AxisInformation_Clear(OpcUa_AxisInformation* a_pValue)
 /*============================================================================
  * OpcUa_AxisInformation_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AxisInformation_Encode(OpcUa_AxisInformation* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AxisInformation_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AxisInformation* a_pValue = (OpcUa_AxisInformation*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22683,9 +23534,10 @@ SOPC_StatusCode OpcUa_AxisInformation_Encode(OpcUa_AxisInformation* a_pValue, SO
 /*============================================================================
  * OpcUa_AxisInformation_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_AxisInformation_Decode(OpcUa_AxisInformation* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_AxisInformation_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_AxisInformation* a_pValue = (OpcUa_AxisInformation*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22725,11 +23577,11 @@ struct SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType =
     OpcUaId_AxisInformation_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_AxisInformation),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_AxisInformation_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_AxisInformation_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_AxisInformation_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_AxisInformation_Decode
+    OpcUa_AxisInformation_Initialize,
+    OpcUa_AxisInformation_Clear,
+    NULL,
+    OpcUa_AxisInformation_Encode,
+    OpcUa_AxisInformation_Decode
 };
 #endif
 
@@ -22737,8 +23589,9 @@ struct SOPC_EncodeableType OpcUa_AxisInformation_EncodeableType =
 /*============================================================================
  * OpcUa_XVType_Initialize
  *===========================================================================*/
-void OpcUa_XVType_Initialize(OpcUa_XVType* a_pValue)
+void OpcUa_XVType_Initialize(void* pValue)
 {
+    OpcUa_XVType* a_pValue = (OpcUa_XVType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Double_Initialize(&a_pValue->X);
@@ -22749,8 +23602,9 @@ void OpcUa_XVType_Initialize(OpcUa_XVType* a_pValue)
 /*============================================================================
  * OpcUa_XVType_Clear
  *===========================================================================*/
-void OpcUa_XVType_Clear(OpcUa_XVType* a_pValue)
+void OpcUa_XVType_Clear(void* pValue)
 {
+    OpcUa_XVType* a_pValue = (OpcUa_XVType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_Double_Clear(&a_pValue->X);
@@ -22761,9 +23615,10 @@ void OpcUa_XVType_Clear(OpcUa_XVType* a_pValue)
 /*============================================================================
  * OpcUa_XVType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_XVType_Encode(OpcUa_XVType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_XVType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_XVType* a_pValue = (OpcUa_XVType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22780,9 +23635,10 @@ SOPC_StatusCode OpcUa_XVType_Encode(OpcUa_XVType* a_pValue, SOPC_MsgBuffer* msgB
 /*============================================================================
  * OpcUa_XVType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_XVType_Decode(OpcUa_XVType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_XVType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_XVType* a_pValue = (OpcUa_XVType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22813,11 +23669,11 @@ struct SOPC_EncodeableType OpcUa_XVType_EncodeableType =
     OpcUaId_XVType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_XVType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_XVType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_XVType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_XVType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_XVType_Decode
+    OpcUa_XVType_Initialize,
+    OpcUa_XVType_Clear,
+    NULL,
+    OpcUa_XVType_Encode,
+    OpcUa_XVType_Decode
 };
 #endif
 
@@ -22825,8 +23681,9 @@ struct SOPC_EncodeableType OpcUa_XVType_EncodeableType =
 /*============================================================================
  * OpcUa_ProgramDiagnosticDataType_Initialize
  *===========================================================================*/
-void OpcUa_ProgramDiagnosticDataType_Initialize(OpcUa_ProgramDiagnosticDataType* a_pValue)
+void OpcUa_ProgramDiagnosticDataType_Initialize(void* pValue)
 {
+    OpcUa_ProgramDiagnosticDataType* a_pValue = (OpcUa_ProgramDiagnosticDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Initialize(&a_pValue->CreateSessionId);
@@ -22847,8 +23704,9 @@ void OpcUa_ProgramDiagnosticDataType_Initialize(OpcUa_ProgramDiagnosticDataType*
 /*============================================================================
  * OpcUa_ProgramDiagnosticDataType_Clear
  *===========================================================================*/
-void OpcUa_ProgramDiagnosticDataType_Clear(OpcUa_ProgramDiagnosticDataType* a_pValue)
+void OpcUa_ProgramDiagnosticDataType_Clear(void* pValue)
 {
+    OpcUa_ProgramDiagnosticDataType* a_pValue = (OpcUa_ProgramDiagnosticDataType*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_NodeId_Clear(&a_pValue->CreateSessionId);
@@ -22869,9 +23727,10 @@ void OpcUa_ProgramDiagnosticDataType_Clear(OpcUa_ProgramDiagnosticDataType* a_pV
 /*============================================================================
  * OpcUa_ProgramDiagnosticDataType_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Encode(OpcUa_ProgramDiagnosticDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ProgramDiagnosticDataType* a_pValue = (OpcUa_ProgramDiagnosticDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22906,9 +23765,10 @@ SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Encode(OpcUa_ProgramDiagnosticDa
 /*============================================================================
  * OpcUa_ProgramDiagnosticDataType_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Decode(OpcUa_ProgramDiagnosticDataType* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_ProgramDiagnosticDataType* a_pValue = (OpcUa_ProgramDiagnosticDataType*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -22961,11 +23821,11 @@ struct SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType =
     OpcUaId_ProgramDiagnosticDataType_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_ProgramDiagnosticDataType),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_ProgramDiagnosticDataType_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_ProgramDiagnosticDataType_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_ProgramDiagnosticDataType_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_ProgramDiagnosticDataType_Decode
+    OpcUa_ProgramDiagnosticDataType_Initialize,
+    OpcUa_ProgramDiagnosticDataType_Clear,
+    NULL,
+    OpcUa_ProgramDiagnosticDataType_Encode,
+    OpcUa_ProgramDiagnosticDataType_Decode
 };
 #endif
 
@@ -22973,8 +23833,9 @@ struct SOPC_EncodeableType OpcUa_ProgramDiagnosticDataType_EncodeableType =
 /*============================================================================
  * OpcUa_Annotation_Initialize
  *===========================================================================*/
-void OpcUa_Annotation_Initialize(OpcUa_Annotation* a_pValue)
+void OpcUa_Annotation_Initialize(void* pValue)
 {
+    OpcUa_Annotation* a_pValue = (OpcUa_Annotation*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Initialize(&a_pValue->Message);
@@ -22986,8 +23847,9 @@ void OpcUa_Annotation_Initialize(OpcUa_Annotation* a_pValue)
 /*============================================================================
  * OpcUa_Annotation_Clear
  *===========================================================================*/
-void OpcUa_Annotation_Clear(OpcUa_Annotation* a_pValue)
+void OpcUa_Annotation_Clear(void* pValue)
 {
+    OpcUa_Annotation* a_pValue = (OpcUa_Annotation*) pValue;
     if (a_pValue != NULL)
     {
         SOPC_String_Clear(&a_pValue->Message);
@@ -22999,9 +23861,10 @@ void OpcUa_Annotation_Clear(OpcUa_Annotation* a_pValue)
 /*============================================================================
  * OpcUa_Annotation_Encode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_Annotation_Encode(OpcUa_Annotation* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Annotation_Encode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_Annotation* a_pValue = (OpcUa_Annotation*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -23020,9 +23883,10 @@ SOPC_StatusCode OpcUa_Annotation_Encode(OpcUa_Annotation* a_pValue, SOPC_MsgBuff
 /*============================================================================
  * OpcUa_Annotation_Decode
  *===========================================================================*/
-SOPC_StatusCode OpcUa_Annotation_Decode(OpcUa_Annotation* a_pValue, SOPC_MsgBuffer* msgBuf)
+SOPC_StatusCode OpcUa_Annotation_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_Annotation* a_pValue = (OpcUa_Annotation*) pValue;
     
     if(a_pValue != NULL){
         status = STATUS_OK;
@@ -23055,11 +23919,11 @@ struct SOPC_EncodeableType OpcUa_Annotation_EncodeableType =
     OpcUaId_Annotation_Encoding_DefaultXml,
     NULL,
     sizeof(OpcUa_Annotation),
-    (SOPC_EncodeableObject_PfnInitialize*)OpcUa_Annotation_Initialize,
-    (SOPC_EncodeableObject_PfnClear*)OpcUa_Annotation_Clear,
-    (SOPC_EncodeableObject_PfnGetSize*)NULL,
-    (SOPC_EncodeableObject_PfnEncode*)OpcUa_Annotation_Encode,
-    (SOPC_EncodeableObject_PfnDecode*)OpcUa_Annotation_Decode
+    OpcUa_Annotation_Initialize,
+    OpcUa_Annotation_Clear,
+    NULL,
+    OpcUa_Annotation_Encode,
+    OpcUa_Annotation_Decode
 };
 #endif
 

@@ -209,6 +209,8 @@ SOPC_StatusCode OpcUa_ClientApi_FindServersOnNetwork(
        &&  a_pNoOfServers != NULL
        &&  a_pServers != NULL)
         status = STATUS_OK;
+    (void) a_nStartingRecordId;
+    (void) a_nMaxRecordsToReturn;
 
 
     if(status == STATUS_OK){
@@ -283,6 +285,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginFindServersOnNetwork(
     if( a_pRequestHeader != NULL
        &&  (a_pServerCapabilityFilter != NULL || a_nNoOfServerCapabilityFilter <= 0))
         status = STATUS_OK;
+    (void) a_nStartingRecordId;
+    (void) a_nMaxRecordsToReturn;
 
 
     if(status == STATUS_OK){
@@ -739,6 +743,8 @@ SOPC_StatusCode OpcUa_ClientApi_CreateSession(
        &&  a_pServerSignature != NULL
        &&  a_pMaxRequestMessageSize != NULL)
         status = STATUS_OK;
+    (void) a_nRequestedSessionTimeout;
+    (void) a_nMaxResponseMessageSize;
 
 
     if(status == STATUS_OK){
@@ -834,6 +840,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCreateSession(
        &&  a_pClientNonce != NULL
        &&  a_pClientCertificate != NULL)
         status = STATUS_OK;
+    (void) a_nRequestedSessionTimeout;
+    (void) a_nMaxResponseMessageSize;
 
 
     if(status == STATUS_OK){
@@ -1040,6 +1048,7 @@ SOPC_StatusCode OpcUa_ClientApi_CloseSession(
     if( a_pRequestHeader != NULL
        &&  a_pResponseHeader != NULL)
         status = STATUS_OK;
+    (void) a_bDeleteSubscriptions;
 
 
     if(status == STATUS_OK){
@@ -1104,6 +1113,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCloseSession(
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
         status = STATUS_OK;
+    (void) a_bDeleteSubscriptions;
 
 
     if(status == STATUS_OK){
@@ -1149,6 +1159,7 @@ SOPC_StatusCode OpcUa_ClientApi_Cancel(
        &&  a_pResponseHeader != NULL
        &&  a_pCancelCount != NULL)
         status = STATUS_OK;
+    (void) a_nRequestHandle;
 
 
     if(status == STATUS_OK){
@@ -1214,6 +1225,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCancel(
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
         status = STATUS_OK;
+    (void) a_nRequestHandle;
 
 
     if(status == STATUS_OK){
@@ -1770,6 +1782,7 @@ SOPC_StatusCode OpcUa_ClientApi_Browse(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_nRequestedMaxReferencesPerNode;
 
 
     if(status == STATUS_OK){
@@ -1846,6 +1859,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginBrowse(
        &&  a_pView != NULL
        &&  (a_pNodesToBrowse != NULL || a_nNoOfNodesToBrowse <= 0))
         status = STATUS_OK;
+    (void) a_nRequestedMaxReferencesPerNode;
 
 
     if(status == STATUS_OK){
@@ -1903,6 +1917,7 @@ SOPC_StatusCode OpcUa_ClientApi_BrowseNext(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_bReleaseContinuationPoints;
 
 
     if(status == STATUS_OK){
@@ -1976,6 +1991,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginBrowseNext(
     if( a_pRequestHeader != NULL
        &&  (a_pContinuationPoints != NULL || a_nNoOfContinuationPoints <= 0))
         status = STATUS_OK;
+    (void) a_bReleaseContinuationPoints;
 
 
     if(status == STATUS_OK){
@@ -2402,6 +2418,8 @@ SOPC_StatusCode OpcUa_ClientApi_QueryFirst(
        &&  a_pDiagnosticInfos != NULL
        &&  a_pFilterResult != NULL)
         status = STATUS_OK;
+    (void) a_nMaxDataSetsToReturn;
+    (void) a_nMaxReferencesToReturn;
 
 
     if(status == STATUS_OK){
@@ -2487,6 +2505,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginQueryFirst(
        &&  (a_pNodeTypes != NULL || a_nNoOfNodeTypes <= 0)
        &&  a_pFilter != NULL)
         status = STATUS_OK;
+    (void) a_nMaxDataSetsToReturn;
+    (void) a_nMaxReferencesToReturn;
 
 
     if(status == STATUS_OK){
@@ -2543,6 +2563,7 @@ SOPC_StatusCode OpcUa_ClientApi_QueryNext(
        &&  a_pQueryDataSets != NULL
        &&  a_pRevisedContinuationPoint != NULL)
         status = STATUS_OK;
+    (void) a_bReleaseContinuationPoint;
 
 
     if(status == STATUS_OK){
@@ -2613,6 +2634,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginQueryNext(
     if( a_pRequestHeader != NULL
        &&  a_pContinuationPoint != NULL)
         status = STATUS_OK;
+    (void) a_bReleaseContinuationPoint;
 
 
     if(status == STATUS_OK){
@@ -2669,6 +2691,8 @@ SOPC_StatusCode OpcUa_ClientApi_Read(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_nMaxAge;
+    (void) a_eTimestampsToReturn;
 
 
     if(status == STATUS_OK){
@@ -2744,6 +2768,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRead(
     if( a_pRequestHeader != NULL
        &&  (a_pNodesToRead != NULL || a_nNoOfNodesToRead <= 0))
         status = STATUS_OK;
+    (void) a_nMaxAge;
+    (void) a_eTimestampsToReturn;
 
 
     if(status == STATUS_OK){
@@ -2804,6 +2830,8 @@ SOPC_StatusCode OpcUa_ClientApi_HistoryRead(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_eTimestampsToReturn;
+    (void) a_bReleaseContinuationPoints;
 
 
     if(status == STATUS_OK){
@@ -2882,6 +2910,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginHistoryRead(
        &&  a_pHistoryReadDetails != NULL
        &&  (a_pNodesToRead != NULL || a_nNoOfNodesToRead <= 0))
         status = STATUS_OK;
+    (void) a_eTimestampsToReturn;
+    (void) a_bReleaseContinuationPoints;
 
 
     if(status == STATUS_OK){
@@ -3316,6 +3346,8 @@ SOPC_StatusCode OpcUa_ClientApi_CreateMonitoredItems(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_eTimestampsToReturn;
 
 
     if(status == STATUS_OK){
@@ -3391,6 +3423,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCreateMonitoredItems(
     if( a_pRequestHeader != NULL
        &&  (a_pItemsToCreate != NULL || a_nNoOfItemsToCreate <= 0))
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_eTimestampsToReturn;
 
 
     if(status == STATUS_OK){
@@ -3449,6 +3483,8 @@ SOPC_StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_eTimestampsToReturn;
 
 
     if(status == STATUS_OK){
@@ -3524,6 +3560,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginModifyMonitoredItems(
     if( a_pRequestHeader != NULL
        &&  (a_pItemsToModify != NULL || a_nNoOfItemsToModify <= 0))
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_eTimestampsToReturn;
 
 
     if(status == STATUS_OK){
@@ -3582,6 +3620,8 @@ SOPC_StatusCode OpcUa_ClientApi_SetMonitoringMode(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_eMonitoringMode;
 
 
     if(status == STATUS_OK){
@@ -3657,6 +3697,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginSetMonitoringMode(
     if( a_pRequestHeader != NULL
        &&  (a_pMonitoredItemIds != NULL || a_nNoOfMonitoredItemIds <= 0))
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_eMonitoringMode;
 
 
     if(status == STATUS_OK){
@@ -3726,6 +3768,8 @@ SOPC_StatusCode OpcUa_ClientApi_SetTriggering(
        &&  a_pNoOfRemoveDiagnosticInfos != NULL
        &&  a_pRemoveDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_nTriggeringItemId;
 
 
     if(status == STATUS_OK){
@@ -3810,6 +3854,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginSetTriggering(
        &&  (a_pLinksToAdd != NULL || a_nNoOfLinksToAdd <= 0)
        &&  (a_pLinksToRemove != NULL || a_nNoOfLinksToRemove <= 0))
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_nTriggeringItemId;
 
 
     if(status == STATUS_OK){
@@ -3869,6 +3915,7 @@ SOPC_StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
 
 
     if(status == STATUS_OK){
@@ -3942,6 +3989,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginDeleteMonitoredItems(
     if( a_pRequestHeader != NULL
        &&  (a_pMonitoredItemIds != NULL || a_nNoOfMonitoredItemIds <= 0))
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
 
 
     if(status == STATUS_OK){
@@ -4000,6 +4048,12 @@ SOPC_StatusCode OpcUa_ClientApi_CreateSubscription(
        &&  a_pRevisedLifetimeCount != NULL
        &&  a_pRevisedMaxKeepAliveCount != NULL)
         status = STATUS_OK;
+    (void) a_nRequestedPublishingInterval;
+    (void) a_nRequestedLifetimeCount;
+    (void) a_nRequestedMaxKeepAliveCount;
+    (void) a_nMaxNotificationsPerPublish;
+    (void) a_bPublishingEnabled;
+    (void) a_nPriority;
 
 
     if(status == STATUS_OK){
@@ -4078,6 +4132,12 @@ SOPC_StatusCode OpcUa_ClientApi_BeginCreateSubscription(
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
         status = STATUS_OK;
+    (void) a_nRequestedPublishingInterval;
+    (void) a_nRequestedLifetimeCount;
+    (void) a_nRequestedMaxKeepAliveCount;
+    (void) a_nMaxNotificationsPerPublish;
+    (void) a_bPublishingEnabled;
+    (void) a_nPriority;
 
 
     if(status == STATUS_OK){
@@ -4137,6 +4197,12 @@ SOPC_StatusCode OpcUa_ClientApi_ModifySubscription(
        &&  a_pRevisedLifetimeCount != NULL
        &&  a_pRevisedMaxKeepAliveCount != NULL)
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_nRequestedPublishingInterval;
+    (void) a_nRequestedLifetimeCount;
+    (void) a_nRequestedMaxKeepAliveCount;
+    (void) a_nMaxNotificationsPerPublish;
+    (void) a_nPriority;
 
 
     if(status == STATUS_OK){
@@ -4214,6 +4280,12 @@ SOPC_StatusCode OpcUa_ClientApi_BeginModifySubscription(
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_nRequestedPublishingInterval;
+    (void) a_nRequestedLifetimeCount;
+    (void) a_nRequestedMaxKeepAliveCount;
+    (void) a_nMaxNotificationsPerPublish;
+    (void) a_nPriority;
 
 
     if(status == STATUS_OK){
@@ -4273,6 +4345,7 @@ SOPC_StatusCode OpcUa_ClientApi_SetPublishingMode(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_bPublishingEnabled;
 
 
     if(status == STATUS_OK){
@@ -4346,6 +4419,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginSetPublishingMode(
     if( a_pRequestHeader != NULL
        &&  (a_pSubscriptionIds != NULL || a_nNoOfSubscriptionIds <= 0))
         status = STATUS_OK;
+    (void) a_bPublishingEnabled;
 
 
     if(status == STATUS_OK){
@@ -4534,6 +4608,8 @@ SOPC_StatusCode OpcUa_ClientApi_Republish(
        &&  a_pResponseHeader != NULL
        &&  a_pNotificationMessage != NULL)
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_nRetransmitSequenceNumber;
 
 
     if(status == STATUS_OK){
@@ -4601,6 +4677,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginRepublish(
     /* validate arguments. */
     if( a_pRequestHeader != NULL)
         status = STATUS_OK;
+    (void) a_nSubscriptionId;
+    (void) a_nRetransmitSequenceNumber;
 
 
     if(status == STATUS_OK){
@@ -4656,6 +4734,7 @@ SOPC_StatusCode OpcUa_ClientApi_TransferSubscriptions(
        &&  a_pNoOfDiagnosticInfos != NULL
        &&  a_pDiagnosticInfos != NULL)
         status = STATUS_OK;
+    (void) a_bSendInitialValues;
 
 
     if(status == STATUS_OK){
@@ -4729,6 +4808,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginTransferSubscriptions(
     if( a_pRequestHeader != NULL
        &&  (a_pSubscriptionIds != NULL || a_nNoOfSubscriptionIds <= 0))
         status = STATUS_OK;
+    (void) a_bSendInitialValues;
 
 
     if(status == STATUS_OK){
