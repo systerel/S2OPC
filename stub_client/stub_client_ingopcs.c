@@ -49,6 +49,7 @@ SOPC_StatusCode StubClient_ConnectionEvent_Callback(SOPC_Channel       channel,
 	}
 	if (event == SOPC_ChannelEvent_Disconnected){
 		disconnect = 1;
+        noEvent = 0;
 	}
     return 0;
 }
