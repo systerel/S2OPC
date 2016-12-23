@@ -155,7 +155,7 @@ SOPC_StatusCode Socket_Connect(Socket              sock,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int connectStatus = -1;
     if(addr != NULL && sock != -1){
-        connectStatus = connect(sock, addr->ai_addr, sizeof(Socket_AddressInfo));
+        connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
         if(connectStatus < 0){
             if(errno == EINPROGRESS){
                 // Non blocking connection started
