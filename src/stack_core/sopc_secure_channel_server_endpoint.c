@@ -188,7 +188,6 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
                                                  uint32_t*          requestId,
                                                  uint32_t*          requestHandle)
 {
-    Mutex_Lock(&sEndpoint->mutex);
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t validateSenderCertificateTrue = 1; // True: mandatory
     const uint32_t isSymmetricFalse = FALSE;
@@ -398,7 +397,6 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
 
     SOPC_String_Clear(&strSecuPolicy);
 
-    Mutex_Unlock(&sEndpoint->mutex);
     return status;
 }
 
@@ -584,6 +582,7 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
             case ConnectionEvent_Connected:
                 if(SC_Connection_Disconnected == scConnection->state){
                     // Configure secure connection for encoding / decoding messages
+                    Mutex_Lock(&sEndpoint->mutex);
 					if(status == STATUS_OK){
 						// Set only server side identity for now
                     	status = SC_InitApplicationIdentities(scConnection,
@@ -604,6 +603,7 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                     if(STATUS_OK == status){
                         scConnection->state = SC_Connection_Connecting_Secure;
                     }
+                    Mutex_Unlock(&sEndpoint->mutex);
                 }
                 break;
             case ConnectionEvent_Message:
@@ -612,6 +612,8 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                         if(SC_Connection_Connecting_Secure == scConnection->state){
                             uint32_t requestId = 0;
                             uint32_t requestHandle = 0;
+
+                            Mutex_Lock(&sEndpoint->mutex);
                             // Receive Open Secure Channel request
                             retStatus = Receive_OpenSecureChannelRequest(sEndpoint, scConnection, msgBuffer,
                                                                          &requestId, &requestHandle);
@@ -620,6 +622,7 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                                 retStatus = Send_OpenSecureChannelResponse(scConnection,
                                                                            requestId, requestHandle);
                             }
+                            Mutex_Unlock(&sEndpoint->mutex);
 
                             if(STATUS_OK == retStatus){
                                 scConnection->state = SC_Connection_Connected;
@@ -654,8 +657,11 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                         break;
                     case SOPC_SecureMessage:
                         if(SC_Connection_Connected == scConnection->state){
+
+                            Mutex_Lock(&sEndpoint->mutex);
                             retStatus = Receive_ServiceRequest(scConnection, msgBuffer, &requestId,
                                                                &receivedEncType, &receivedEncObj);
+                            Mutex_Unlock(&sEndpoint->mutex);
 
                             // TODO: Manage partial request / abort
                             if(NULL != sEndpoint->callback){
@@ -689,6 +695,7 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                 }
                 scConnection->state = SC_Connection_Disconnected;
                 // Remove secure connection from the endpoint
+                Mutex_Lock(&sEndpoint->mutex);
                 if(scConnection ==  SLinkedList_Remove(sEndpoint->secureChannelConnections,
                                                        teventCbData->scConnectionId)){
                     SC_Delete(scConnection);
@@ -697,6 +704,7 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                     // Connection not found !
                     assert(FALSE);
                 }
+                Mutex_Unlock(&sEndpoint->mutex);
 
                 Delete_TransportEventCbData(teventCbData);
                 break;

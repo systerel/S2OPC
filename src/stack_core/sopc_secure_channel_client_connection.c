@@ -636,6 +636,7 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
         case ConnectionEvent_Connected:
             assert(status == STATUS_OK);
             assert(cConnection->instance->state == SC_Connection_Connecting_Transport);
+            Mutex_Lock(&cConnection->mutex);
             retStatus = SC_InitApplicationIdentities
                          (cConnection->instance,
                           cConnection->clientCertificate,
@@ -657,6 +658,8 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                 cConnection->instance->state = SC_Connection_Connecting_Secure;
                 status = Send_OpenSecureChannelRequest(cConnection);
             }
+            Mutex_Unlock(&cConnection->mutex);
+
             break;
 
         case ConnectionEvent_Disconnected:
@@ -674,8 +677,10 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                 switch(msgBuffer->secureType){
                     case SOPC_OpenSecureChannel:
                         if(cConnection->instance->state == SC_Connection_Connecting_Secure){
+                            Mutex_Lock(&cConnection->mutex);
                             // Receive Open Secure Channel response
                             retStatus = Receive_OpenSecureChannelResponse(cConnection, msgBuffer);
+                            Mutex_Unlock(&cConnection->mutex);
                             if(retStatus == STATUS_OK){
                                 cConnection->instance->state = SC_Connection_Connected;
                                 // TODO: cases in which retStatus != OK should be sent ?
@@ -697,7 +702,9 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                         break;
                     case SOPC_SecureMessage:
                         if(cConnection->instance->state == SC_Connection_Connected){
+                            Mutex_Lock(&cConnection->mutex);
                             retStatus = Receive_ServiceResponse(cConnection, msgBuffer);
+                            Mutex_Unlock(&cConnection->mutex);
                         }else{
                             retStatus = STATUS_INVALID_RCV_PARAMETER;
                         }
@@ -801,7 +808,6 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
         }else{
             status = STATUS_INVALID_STATE;
         }
-
         Mutex_Unlock(&connection->mutex);
     }
     return status;
