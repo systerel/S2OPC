@@ -88,15 +88,6 @@ SOPC_StatusCode SOPC_Channel_Create(SOPC_Channel*               channel,
                                     SOPC_Channel_SerializerType serialType);
 
 /**
- *  \brief Create a new channel by initializing the provided channel
- *
- *  \param channel     The channel to disconnect and deallocate
- *  \return            STATUS_OK if channel is correctly deleted, STATUS_NOK otherwise (NULL pointer)
- *
- */
-SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel);
-
-/**
  *  \brief Start the channel connection establishment (TCP connection, TCP UA Hello message)
  *         and the secure channel establishement (TCP UA OpenSecureChannel request) on server acknowledgment
  *         (TCP UA Ack message).
@@ -115,7 +106,7 @@ SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel);
  *  \param cb                 Connection state changed callback function to be called
  *  \param cbData             Data to be provided to the connection state changed callback function on call
  *
- *  \return                   STATUS_OK if channel connection step succeeded, STATUS_NOK otherwise
+ *  \return                   STATUS_OK if channel connection start step succeeded, STATUS_NOK otherwise
  *
  */
 SOPC_StatusCode SOPC_Channel_BeginConnect(SOPC_Channel                            channel,
@@ -131,7 +122,27 @@ SOPC_StatusCode SOPC_Channel_BeginConnect(SOPC_Channel                          
                                           SOPC_Channel_PfnConnectionStateChanged* cb,
                                           void*                                   cbData);
 
-
+/**
+ *  \brief Start the channel connection establishment (TCP connection, TCP UA Hello message)
+ *         and the secure channel establishement (TCP UA OpenSecureChannel request) on server acknowledgment
+ *         (TCP UA Ack message). Then waits for connection success or failure before returning.
+ *
+ *  \param channel            The channel to connect
+ *  \param url                Endpoint address for establishing the connection
+ *  \param crt_cli            Client certificate to use for establishing the connection (or NULL for None security mode)
+ *  \param key_priv_cli       Client private key to use for establishing the connection (or NULL for None security mode)
+ *  \param crt_srv            Server certificate of the endpoint server to connect (or NULL for None security mode)
+ *  \param pki                The Public Key Infrastructure to use for validating certificates (or NULL for None security mode)
+ *  \param reqSecuPolicyUri   URI of the requested security policy
+ *  \param requestedLifetime  Lifetime requested for the channel connection
+ *  \param msgSecurityMode    Security mode to use for the messages exchanged through the connection
+ *  \param networkTimeout     Network timeout to establish the connection (in milliseconds)
+ *  \param cb                 Connection state changed callback function to be called
+ *  \param cbData             Data to be provided to the connection state changed callback function on call
+ *
+ *  \return                   STATUS_OK if channel connection succeeded, STATUS_NOK otherwise
+ *
+ */
 SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            channel,
                                      const char*                             url,
                                      const Certificate*                      crt_cli,
@@ -198,6 +209,16 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
  *
  */
 SOPC_StatusCode SOPC_Channel_Disconnect(SOPC_Channel channel);
+
+
+/**
+ *  \brief Disconnect and deallocate the channel
+ *
+ *  \param channel     The channel to disconnect and deallocate
+ *  \return            STATUS_OK if channel is correctly deleted, STATUS_NOK otherwise (NULL pointer)
+ *
+ */
+SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel);
 
 #endif /* CLIENT_API */
 

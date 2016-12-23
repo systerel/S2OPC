@@ -1,3 +1,8 @@
+/**
+ *  \file sopc_endpoitn.h
+ *
+ *  \brief High level API to manipulate an OPC-UA Endpoint and define OPC UA services for the endpoint
+ */
 /*
  *  Copyright (C) 2016 Systerel and others.
  *
@@ -26,6 +31,16 @@
 #include "sopc_encodeabletype.h"
 
 /**
+ *  \brief Endpoint type definition
+ */
+typedef void* SOPC_Endpoint;
+
+/**
+ *  \brief Request context type necessary to for sending service Response
+ */
+struct SOPC_RequestContext;
+
+/**
  *  \brief Endpoint serialization enumeration type
  *  Note: only binary serialization is available in INGPOCS
  */
@@ -34,10 +49,9 @@ typedef enum {
     SOPC_EndpointSerializer_Binary = 0x01
 } SOPC_Endpoint_SerializerType;
 
-typedef void* SOPC_Endpoint;
-
-struct SOPC_RequestContext;
-
+/**
+ *  \brief Endpoint event enumeration type
+ */
 typedef enum SOPC_EndpointEvent
 {
     SOPC_EndpointEvent_Invalid,
@@ -49,6 +63,9 @@ typedef enum SOPC_EndpointEvent
     SOPC_EndpointEvent_EndpointClosed
 } SOPC_EndpointEvent;
 
+/**
+ *  \brief Endpoint event notification function callback type
+ */
 typedef SOPC_StatusCode (SOPC_EndpointEvent_CB) (SOPC_Endpoint      endpoint,
                                                  void*              cbData,
                                                  SOPC_EndpointEvent event,
@@ -57,24 +74,66 @@ typedef SOPC_StatusCode (SOPC_EndpointEvent_CB) (SOPC_Endpoint      endpoint,
                                                  const Certificate* clientCertificate,
                                                  const SOPC_String* securityPolicy);
 
+/**
+ *  \brief Endpoint invoke service treatment function type
+ */
 typedef SOPC_StatusCode (SOPC_InvokeService) (SOPC_Endpoint endpoint, ...);
 
+/**
+ *  \brief Endpoint invoke service and send response function type
+ */
 typedef SOPC_StatusCode (SOPC_BeginInvokeService) (SOPC_Endpoint               endpoint,
                                                    struct SOPC_RequestContext* requestContext,
                                                    void**                      a_ppRequest,
                                                    SOPC_EncodeableType*        a_pRequestType);
 
+/**
+ *  \brief Service treatment type structure definition. An instance define the way to respond to a service request.
+ */
 typedef struct SOPC_ServiceType {
-    uint32_t                 RequestTypeId;
-    SOPC_EncodeableType*     ResponseEncType;
-    SOPC_BeginInvokeService* BeginInvokeService;
-    SOPC_InvokeService*      InvokeService;
+    uint32_t                 RequestTypeId;      /**< OPC UA service request type Id */
+    SOPC_EncodeableType*     ResponseEncType;    /**< Service response encodeable type */
+    SOPC_BeginInvokeService* BeginInvokeService; /**< Service treatment and response sending function */
+    SOPC_InvokeService*      InvokeService;      /**< maximum size (allocated bytes) */
 } SOPC_ServiceType;
 
+/**
+ *  \brief Create a new endpoint by initializing the provided endpoint and setting the given services treatments.
+ *
+ *  \param endpoint    The endpoint to initialize and to configure with the given services
+ *  \param serialType  The channel serialization type to send data
+ *                     (only ChannelSerializer_Binary is valid)
+ *  \param services    A NULL terminated array of SOPC_ServiceType pointers.
+ *                     If NULL is provided the default services treatments are used
+ *                     (see opcua_serverapi module: response to any service request is then a Service Fault response)
+ *
+ *  \return            STATUS_OK if endpoint is correctly initialized, STATUS_NOK otherwise
+ *                     (NULL pointer, invalid serialization value)
+ */
 SOPC_StatusCode SOPC_Endpoint_Create(SOPC_Endpoint*               endpoint,
                                      SOPC_Endpoint_SerializerType serialType,
                                      SOPC_ServiceType**           services); // Null terminated table
 
+/**
+ *  \brief Open the endpoint and listen for connections from clients (TCP listener),
+ *         then wait for TCP UA connection (TCP UA Hello reception and TCP UA Ack response)
+ *         and secure channel establishement
+ *         (TCP UA OpenSecureChannel request reception and send TCP UA OpenSecureChannel response)
+ *         Note: in single threaded mode, it is necessary to call the socket manager loop to receive messages.
+ *
+ *  \param endpoint           The channel to connect
+ *  \param url                Endpoint address of the connection point
+ *  \param callback           Endpoint events callback function to be called
+ *  \param callbackData       Data to be provided to the endpoint event callback function on call
+ *  \param serverCertificate  Server certificate to use for responding to clients connections (or NULL for None security mode)
+ *  \param serverKey          Server private key to use for responding to clients connections (or NULL for None security mode)
+ *  \param pki                The Public Key Infrastructure to use for validating certificates (or NULL for None security mode)
+ *  \param nbSecuConfigs      Number of security policy supported and presents in secuConfigurations
+ *  \param secuConfigurations Array of security policies supported with nbSecuConfigs length
+ *
+ *  \return                   STATUS_OK if endpoint opening succeeded, STATUS_NOK otherwise
+ *
+ */
 SOPC_StatusCode SOPC_Endpoint_Open(SOPC_Endpoint          endpoint,
                                    char*                  endpointURL,
                                    SOPC_EndpointEvent_CB* callback,
@@ -85,15 +144,51 @@ SOPC_StatusCode SOPC_Endpoint_Open(SOPC_Endpoint          endpoint,
                                    uint8_t                nbSecuConfigs,
                                    SOPC_SecurityPolicy*   secuConfigurations);
 
+/**
+ *  \brief Send a service response message to the client which sent a request
+ *
+ *  \param endpoint       The endpoint which sends a response
+ *  \param responseType   The encodeable type of the response to send
+ *  \param response       The instance of response message to send
+ *  \param requestContext The request context to use for sending the response
+ *                        (provided by the call to SOPC_BeginInvokeService function instance)
+ *
+ *  \return            STATUS_OK if response was sent correctly, STATUS_NOK otherwise
+ */
 SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint,
                                            SOPC_EncodeableType*         responseType,
                                            void*                        response,
                                            struct SOPC_RequestContext** requestContext);
 
+/**
+ *  \brief Close the endpoint. The endpoint closes the active connections and does not listen
+ *         for new connections anymore.
+ *
+ *  \param endpoint    The endpoint to close
+ *
+ *  \return            STATUS_OK if endpoint was closed correctly, STATUS_NOK otherwise
+ */
 SOPC_StatusCode SOPC_Endpoint_Close(SOPC_Endpoint endpoint);
 
+/**
+ *  \brief Close and deallocate the endpoint.
+ *
+ *  \param endpoint    The endpoint to close and deallocate
+ *
+ *  \return            STATUS_OK if endpoint was closed and deallocated correctly, STATUS_NOK otherwise
+ */
 SOPC_StatusCode SOPC_Endpoint_Delete(SOPC_Endpoint* endpoint);
 
+/**
+ *  \brief Return the invoke service function for the given endpoint and request context
+ *
+ *  \param endpoint        The endpoint on which service is called
+ *  \param requestContext  The request context to use for returning the invoke service function
+ *                         (provided by the call to SOPC_BeginInvokeService function instance)
+ *  \param serviceFunction The returned service function in case of success
+ *
+ *  \return                STATUS_OK if service function was returned correctly, STATUS_NOK otherwise
+ */
 SOPC_StatusCode SOPC_Endpoint_GetServiceFunction(SOPC_Endpoint               endpoint,
                                                  struct SOPC_RequestContext* requestContext,
                                                  SOPC_InvokeService**        serviceFunction);

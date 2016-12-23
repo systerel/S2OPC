@@ -51,10 +51,13 @@ typedef enum SC_EndpointEvent
 #define SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
 #define SECURITY_MODE_ANY_MASK 0x07
 
+/**
+ *  \brief Definition of a security policy supported by endpoint
+ */
 typedef struct SOPC_SecurityPolicy
 {
-    uint16_t    securityModes;
-    SOPC_String securityPolicy; // TODO: Replace by secu policy ID provided by crypto module
+    uint16_t    securityModes;  /**< Mask of security modes supported (use combination of SECURITY_MODE_*_MASK values) */
+    SOPC_String securityPolicy; /**< Security policy URI supported */
 } SOPC_SecurityPolicy;
 
 struct SC_ServerEndpoint;
