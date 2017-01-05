@@ -29,30 +29,6 @@
 
 const uint32_t scProtocolVersion = 0;
 
-static const SOPC_String SOPC_String_Security_Policy_None = {
-        .Length = 47,
-        .Data = (SOPC_Byte*) SECURITY_POLICY_NONE,
-        .DoNotClear = 1
-};
-
-static const SOPC_String SOPC_String_Security_Policy_Basic128Rsa15 = {
-        .Length = 56,
-        .Data = (SOPC_Byte*) SECURITY_POLICY_BASIC128RSA15,
-        .DoNotClear = 1
-};
-
-static const SOPC_String SOPC_String_Security_Policy_Basic256 = {
-        .Length = 51,
-        .Data = (SOPC_Byte*) SECURITY_POLICY_BASIC256,
-        .DoNotClear = 1
-};
-
-static const SOPC_String SOPC_String_Security_Policy_Basic256Sha256 = {
-        .Length = 57,
-        .Data = (SOPC_Byte*) SECURITY_POLICY_BASIC256SHA256,
-        .DoNotClear = 1
-};
-
 SC_Connection* SC_Create (TCP_UA_Connection* connection){
     SC_Connection* sConnection = NULL;
 
@@ -253,57 +229,6 @@ uint8_t Is_ExtraPaddingSizePresent(uint32_t plainBlockSize){
     // => padding max value is plainBlockSize regarding the formula of padding size
     //    (whereas spec part 6 indicates it depends on the key size which is incorrect)
     return plainBlockSize > 256;
-}
-
-SOPC_StatusCode GetAsymmBlocksSizes(SOPC_String* securityPolicyUri,
-                                    uint32_t   keySize,
-                                    uint32_t*  cipherTextBlockSize,
-                                    uint32_t*  plainTextBlockSize){
-    SOPC_StatusCode status = STATUS_OK;
-    const uint32_t sha1outputLength = 20; // bytes (160 bits)
-
-    if(SOPC_String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_None) != FALSE)
-    {
-        *cipherTextBlockSize = 1;
-        *plainTextBlockSize = 1;
-    }else if(SOPC_String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic128Rsa15) != FALSE){
-        // RSA 1.5: RSA spec 7.2.1 (https://tools.ietf.org/html/rfc3447)
-        *cipherTextBlockSize = keySize;
-        *plainTextBlockSize = keySize - 11;
-    }else if(SOPC_String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic256) != FALSE){
-        // RSA OAEP: RSA spec 7.1.1 (https://tools.ietf.org/html/rfc3447)
-        // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
-        *cipherTextBlockSize = keySize;
-        *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
-   }else if(SOPC_String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic256Sha256) != FALSE){
-       // RSA OAEP: RSA spec 7.1.1 (https://tools.ietf.org/html/rfc3447)
-       // + RSA spec 10.1 : "For the EME-OAEP encoding method, only SHA-1 is recommended."
-       *cipherTextBlockSize = keySize;
-       *plainTextBlockSize = keySize - 2 -2*sha1outputLength;
-   }else{
-       status = STATUS_INVALID_PARAMETERS;
-   }
-   return status;
-}
-
-uint32_t GetAsymmSignatureSize(SOPC_String* securityPolicyUri,
-                               uint32_t   privateKeySize)
-{
-    uint32_t signatureSize = 0;
-    if(SOPC_String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_None) != FALSE)
-    {
-        signatureSize = 0;
-    }else if(SOPC_String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic128Rsa15) != FALSE){
-        // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
-        signatureSize = privateKeySize;
-    }else if(SOPC_String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic256) != FALSE){
-        // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
-        signatureSize = privateKeySize;
-    }else if(SOPC_String_Equal(securityPolicyUri, &SOPC_String_Security_Policy_Basic256Sha256) != FALSE){
-        // Regarding RSA spec 5.2.1 (https://tools.ietf.org/html/rfc3447), signature size = key size
-        signatureSize = privateKeySize;
-    }
-    return signatureSize;
 }
 
 uint32_t GetMaxBodySize(SOPC_MsgBuffer* msgBuffer,
