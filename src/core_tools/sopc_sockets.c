@@ -241,6 +241,31 @@ SOPC_Socket* GetFreeSocket(SOPC_SocketManager* socketMgr){
     return result;
 }
 
+SOPC_StatusCode SOPC_SocketManager_InternalConnectClient(SOPC_Socket*        connectSocket,
+                                                         Socket_AddressInfo* addr){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(connectSocket != NULL && addr != NULL){
+        status = Socket_CreateNew(addr,
+                                  FALSE, // Do not reuse
+                                  1,     // Non blocking socket
+                                  &connectSocket->sock);
+
+        if (status == STATUS_OK){
+            status = Socket_Connect(connectSocket->sock, addr);
+        }
+
+        if(status == STATUS_OK){
+            connectSocket->state = SOCKET_CONNECTING;
+        }
+
+        if(status != STATUS_OK){
+            Socket_Close(&connectSocket->sock);
+            connectSocket->state = SOCKET_DISCONNECTED;
+        }
+    }
+    return status;
+}
+
 SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager* socketManager,
                                                       const char*         uri,
                                                       SOPC_Socket_EventCB socketCallback,
@@ -271,45 +296,41 @@ SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager* socket
         if(status == STATUS_OK){
             // Try to connect on IP addresses provided (IPV4 and IPV6)
             for(p = res;p != NULL && connectStatus != STATUS_OK; p = Socket_AddrInfo_IterNext(p)) {
-
-
-                status = Socket_CreateNew(p,
-                                          FALSE, // Do not reuse
-                                          1,     // Non blocking socket
-                                          &freeSocket->sock);
-
-                if (status == STATUS_OK){
-                    connectStatus = Socket_Connect(freeSocket->sock, p);
-                }
-
-                if(connectStatus == STATUS_OK){
-                    freeSocket->state = SOCKET_CONNECTING;
-                }
-
-                if(connectStatus != STATUS_OK){
-                    SOPC_Socket_Close(freeSocket);
-                }
+                connectStatus = SOPC_SocketManager_InternalConnectClient(freeSocket, p);
             }
             status = connectStatus;
-        }
-        if(port != NULL){
-            free(port);
-        }
-        if(hostname != NULL){
-            free(hostname);
         }
 
         if(status == STATUS_OK){
             freeSocket->isUsed = 1;
             freeSocket->eventCallback = socketCallback;
             freeSocket->cbData = callbackData;
+            if(p != NULL){
+                // Next attempts addresses for connections remaining: store to use in case of async. connection failure
+                freeSocket->nextConnectAttemptAddr = p;
+                freeSocket->connectAddrs = res;
+            }
+
             *clientSocket = freeSocket;
+        }
+
+
+        if(port != NULL){
+            free(port);
+        }
+
+        if(hostname != NULL){
+            free(hostname);
         }
 
         Mutex_Unlock(&socketManager->mutex);
     }
 
-    Socket_AddrInfoDelete(&res);
+    if(status != STATUS_OK || // connection already failed => do not keep addresses for next attempts
+       (res != NULL && freeSocket->connectAddrs == NULL)) // async connecting but NO next attempts remaining (if current fails)
+    {
+        Socket_AddrInfoDelete(&res);
+    }
 
     return status;
 }
@@ -480,15 +501,45 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                         if(SocketSet_IsPresent(uaSock->sock, &writeSet) != FALSE){
                             // Check connection erros: mandatory when non blocking connection
                             if(STATUS_OK != Socket_CheckAckConnect(uaSock->sock)){
-                                callback(uaSock,
-                                         SOCKET_CLOSE_EVENT,
-                                         uaSock->cbData);
-                                SOPC_Socket_Close(uaSock);
+                                SOPC_StatusCode newAttempt = STATUS_NOK;
+
+                                // Check if next connection attempt available
+                                Socket_AddressInfo* nextAddr = (Socket_AddressInfo*) uaSock->nextConnectAttemptAddr;
+                                if(nextAddr != NULL){
+                                    newAttempt = SOPC_SocketManager_InternalConnectClient(uaSock,
+                                                                                          nextAddr);
+                                    if(newAttempt != STATUS_OK){
+                                        uaSock->nextConnectAttemptAddr = NULL;
+                                    }else{
+                                        uaSock->nextConnectAttemptAddr = Socket_AddrInfo_IterNext(nextAddr);
+                                    }
+
+                                    // No more attempts possible: free the attempts addresses
+                                    if(uaSock->nextConnectAttemptAddr == NULL){
+                                        Socket_AddrInfoDelete((Socket_AddressInfo**) &uaSock->connectAddrs);
+                                        uaSock->connectAddrs = NULL;
+                                    }
+                                }
+
+                                if(newAttempt != STATUS_OK){
+                                    // No new attempt available, close socket
+                                    callback(uaSock,
+                                             SOCKET_CLOSE_EVENT,
+                                             uaSock->cbData);
+                                    SOPC_Socket_Close(uaSock);
+                                }
                             }else{
                                 callback(uaSock,
                                          SOCKET_CONNECT_EVENT,
                                          uaSock->cbData);
                                 uaSock->state = SOCKET_CONNECTED;
+
+                                // No more attempts expected: free the attempts addresses
+                                if(uaSock->connectAddrs != NULL){
+                                    Socket_AddrInfoDelete((Socket_AddressInfo**) &uaSock->connectAddrs);
+                                    uaSock->connectAddrs = NULL;
+                                    uaSock->nextConnectAttemptAddr = NULL;
+                                }
                             }
                         }
                     }else{
@@ -555,6 +606,11 @@ void SOPC_Socket_Close(SOPC_Socket* socket){
         socket->state = SOCKET_DISCONNECTED;
         socket->eventCallback = NULL;
         socket->cbData = NULL;
+        if(socket->connectAddrs != NULL){
+            Socket_AddrInfoDelete((Socket_AddressInfo**) &socket->connectAddrs);
+        }
+        socket->connectAddrs = NULL;
+        socket->nextConnectAttemptAddr = NULL;
     }
 }
 

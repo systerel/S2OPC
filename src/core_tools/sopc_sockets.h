@@ -55,6 +55,9 @@ typedef struct SOPC_Socket {
     SOPC_Socket_State    state;
     SOPC_Socket_EventCB* eventCallback; // SOPC_Socket_EventCB Type
     void*                cbData;
+    void*                connectAddrs; // Possible connection addresses (to free on connection)
+    void*                nextConnectAttemptAddr; // Next connection attempt address
+
 } SOPC_Socket;
 
 typedef struct {
