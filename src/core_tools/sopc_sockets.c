@@ -40,6 +40,7 @@ SOPC_StatusCode Internal_CheckURI(const char* uri,
     uint8_t hasPort = FALSE;
     uint8_t hasName = FALSE;
     uint8_t invalid = FALSE;
+    uint8_t startIPv6 = FALSE;
     if(uri != NULL && hostnameLength != NULL && portLength != NULL){
 
         if(strlen(uri) + 4  > TCP_UA_MAX_URL_LENGTH){
@@ -71,9 +72,17 @@ SOPC_StatusCode Internal_CheckURI(const char* uri,
                         }
                     }
                 }else{
-                    if(uri[idx] == ':'){
+                     if(uri[idx] == ':' && startIPv6 == FALSE){
                         *hostnameLength = idx - 10;
                         isPort = 1;
+                    }else if(uri[idx] == '['){
+                        startIPv6 = 1;
+                    }else if(uri[idx] == ']'){
+                        if(startIPv6 == FALSE){
+                            invalid = 1;
+                        }else{
+                            startIPv6 = FALSE;
+                        }
                     }
                 }
             }
