@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "base_tools.h"
 #include "sopc_builtintypes.h"
 
 const char* OPCUA_NAMESPACE_NAME = "http://opcfoundation.org/UA/";
@@ -88,7 +89,7 @@ SOPC_StatusCode Namespace_GetIndex(SOPC_NamespaceTable* namespaceTable,
             uint32_t idx = 0;
             for (idx = 0; idx <= namespaceTable->lastIdx; idx++){
                 namespaceEntry = namespaceTable->namespaceArray[idx];
-                if(strncmp(namespaceEntry.namespaceName, namespaceName, strlen(namespaceName) + 1) == 0){
+                if(strncmp_ignore_case(namespaceEntry.namespaceName, namespaceName, strlen(namespaceName) + 1) == 0){
                     status = STATUS_OK;
                     *index = namespaceEntry.namespaceIndex;
                 }

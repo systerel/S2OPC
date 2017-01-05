@@ -1360,7 +1360,7 @@ SOPC_StatusCode SC_DecodeAsymmSecurityHeader(SC_Connection*     scConnection,
         int32_t secuPolicyComparison = 0;
         status = SOPC_String_Compare(&scConnection->currentSecuPolicy,
                                      &securityPolicy,
-                                     FALSE,
+                                     1,
                                      &secuPolicyComparison);
 
         if(status != STATUS_OK || secuPolicyComparison != 0){

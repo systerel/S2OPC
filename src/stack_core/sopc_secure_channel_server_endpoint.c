@@ -232,7 +232,7 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
             secuPolicy = &sEndpoint->securityPolicies[idx];
             if(STATUS_OK == SOPC_String_Compare(&strSecuPolicy,
                                                 &secuPolicy->securityPolicy,
-                                                FALSE,
+                                                1,
                                                 &secuPolicyComparison)){
             }else{
                 // Do not consider result

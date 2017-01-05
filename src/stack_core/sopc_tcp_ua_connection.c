@@ -346,9 +346,12 @@ SOPC_StatusCode ReceiveHelloMsg(TCP_UA_Connection* connection){
             if(STATUS_OK == status){
                 status = SOPC_String_Read(&url, connection->inputMsgBuffer);
                 if(STATUS_OK == status){
+                    int32_t urlCompare = -1;
                     //TODO: check URL need to check for equivalent services ?
                     if(url.Length > TCP_UA_MAX_URL_LENGTH ||
-                       SOPC_String_Equal(&url, &connection->url) == FALSE){
+                       STATUS_OK != SOPC_String_Compare(&url, &connection->url, 1, &urlCompare) ||
+                       urlCompare != 0)
+                    {
                         status = STATUS_INVALID_RCV_PARAMETER; // TcpEndpointUrlInvalid
                     }
                     SOPC_String_Clear(&url);
