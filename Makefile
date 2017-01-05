@@ -105,7 +105,6 @@ ifneq ($(MAKECMDGOALS),cleanall)
 ifneq ($(MAKECMDGOALS),doc)
 -include .depend
 -include .pdepend
--include .fdepend
 endif
 endif
 endif
@@ -116,7 +115,7 @@ doc:
 
 config: mbedtls
 	@echo "Configuring build dirs..."
-	@\mkdir -p $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR)
+	@\mkdir -p $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
 	@\mkdir -p $(EXEC_DIR)/revoked $(EXEC_DIR)/untrusted $(EXEC_DIR)/trusted \
 	 $(EXEC_DIR)/client_private $(EXEC_DIR)/server_private \
 	 $(EXEC_DIR)/client_public $(EXEC_DIR)/server_public
@@ -160,7 +159,7 @@ client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingo
 
 mbedtls:
 	@echo "Building mbedtls..."
-	@$(MAKE) $(MBED_SHARED) -C $(MBEDTLS_DIR)
+	@$(MAKE) $(MBED_SHARED) -C $(MBEDTLS_DIR) programs tests
 
 check: $(EXEC_DIR)/check_stack
 	@echo "Executing tests..."
@@ -172,12 +171,7 @@ clean_mbedtls:
 
 clean:
 	@echo "Cleaning..."
-	@\rm -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) $(FBUILD_DIR) apidoc
-	@\rm -f .depend.tmp .depend .pdepend .fdepend
+	@\rm -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) apidoc
+	@\rm -f .depend.tmp .depend .pdepend
 
 cleanall: clean clean_mbedtls
-
-################################## TEMPORARY FOUNDATION code compilation ####################
-$(FBUILD_DIR)/%.o:
-	@echo "  CC $@"
-	$(CC) $(CFLAGS) $(FINCLUDES) $< -o $@ $(DEFS)
