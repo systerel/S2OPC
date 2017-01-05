@@ -60,6 +60,10 @@ Socket_AddressInfo* Socket_AddrInfo_IterNext(Socket_AddressInfo* addr){
     return res;
 }
 
+uint8_t Socket_AddrInfo_IsIPV6(Socket_AddressInfo* addr){
+    return addr->ai_family == PF_INET6;
+}
+
 void Socket_AddrInfoDelete(Socket_AddressInfo** addrs){
     if(addrs != NULL){
         freeaddrinfo(*addrs);
@@ -101,6 +105,12 @@ SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
 
             if(setOptStatus != -1 && setNonBlocking != FALSE){
                 setOptStatus = fcntl(*sock, F_SETFL, O_NONBLOCK);
+            }
+
+            // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
+            if(setOptStatus != -1 && addr->ai_family == AF_INET6){
+                int false = FALSE;
+                setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&false, sizeof(int));
             }
         }
         if(setOptStatus < 0){

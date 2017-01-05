@@ -319,16 +319,17 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
                                                       uint8_t             listenAllItfs,
                                                       SOPC_Socket_EventCB socketCallback,
                                                       void*               callbackData,
-                                                      SOPC_Socket**       clientSocket)
+                                                      SOPC_Socket**       listeningSocket)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    Socket_AddressInfo *res, *p;
+    Socket_AddressInfo *res, *p, *initIPV6;
+    uint8_t initWithIPV6 = FALSE;
     SOPC_Socket* freeSocket;
     SOPC_StatusCode listenStatus = STATUS_NOK;
     char *hostname = NULL;
     char *port = NULL;
 
-    if(socketManager != NULL && uri != NULL && clientSocket != NULL){
+    if(socketManager != NULL && uri != NULL && listeningSocket != NULL){
         Mutex_Lock(&socketManager->mutex);
         status = ParseURI(uri, &hostname, &port);
         if(status == STATUS_OK){
@@ -347,9 +348,23 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
         }
 
         if(status == STATUS_OK){
-            // Try to connect on IP addresses provided (IPV4 and IPV6)
-            for(p = res;p != NULL && listenStatus != STATUS_OK; p = Socket_AddrInfo_IterNext(p)) {
+            // Retrieve IPV6 addrinfo if possible
+            initIPV6 = NULL;
+            for(p = res;p != NULL && initIPV6 == NULL; p = Socket_AddrInfo_IterNext(p)) {
+                if(Socket_AddrInfo_IsIPV6(p) != FALSE){
+                    initIPV6 = p;
+                    initWithIPV6 = 1;
+                }
+            }
 
+            if(initWithIPV6 == FALSE){
+                p = res;
+            }else{
+                p = initIPV6;
+            }
+
+            // Try to connect on IP addresses provided (IPV4 and IPV6)
+            while(p != NULL && listenStatus != STATUS_OK){
 
                 status = Socket_CreateNew(p,
                                           1, // Reuse
@@ -369,8 +384,17 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
                 }else{
                     listenStatus = STATUS_OK;
                 }
+
+                if(initWithIPV6 == FALSE){
+                    // Try next address info in list
+                    p = Socket_AddrInfo_IterNext(p);
+                }else{
+                    initWithIPV6 = FALSE;
+                    p = res;
+                }
             }
         }
+
         if(port != NULL){
             free(port);
         }
@@ -383,7 +407,7 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
             freeSocket->isUsed = 1;
             freeSocket->eventCallback = socketCallback;
             freeSocket->cbData = callbackData;
-            *clientSocket = freeSocket;
+            *listeningSocket = freeSocket;
         }
 
         Mutex_Unlock(&socketManager->mutex);

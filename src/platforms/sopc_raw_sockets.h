@@ -56,6 +56,17 @@ SOPC_StatusCode Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressIn
  */
 Socket_AddressInfo* Socket_AddrInfo_IterNext(Socket_AddressInfo* addr);
 
+
+/**
+ *  \brief Given a socket addressing information element,
+ *   returns 0 if address is not IPV6 and not 0 value otherwise.
+ *
+ *  \param addr    A socket addressing information element
+ *
+ *  \return        0 if address is not IPV6 and not 0 value otherwise.
+ */
+uint8_t Socket_AddrInfo_IsIPV6(Socket_AddressInfo* addr);
+
 /**
  *  \brief Deallocate a linked list of socket addressing information.
  *
