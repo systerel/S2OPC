@@ -145,11 +145,11 @@ $(PLATFORM_BUILD_DIR)/%.o:
 
 $(EXEC_DIR)/stub_client_ingopcs: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o
 	@echo "Linking $@..."
-	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
+	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
 
 $(EXEC_DIR)/stub_server_ingopcs: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server_ingopcs.o
 	@echo "Linking $@..."
-	$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
+	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
 
 $(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/check_stack.o
 	@echo "Linking $@..."
