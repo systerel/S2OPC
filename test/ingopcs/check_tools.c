@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <check.h>
+#include "base_tools.h"
 #include "buffer.h"
 #include "singly_linked_list.h"
 #include "sopc_base_types.h"
@@ -628,12 +629,100 @@ START_TEST(test_linked_list)
 }
 END_TEST
 
+START_TEST(test_base_tools)
+{
+    char test1[] = "te";
+    char test2[] = "Te";
+    char test3[] = "tE";
+    char test4[] = "TE";
+    char ntest1[] = "de";
+    char ntest2[] = "De";
+    char ntest3[] = "ta";
+    char ntest4[] = "tA";
+
+    // Test nominal case (equality result)
+    //// Each possible size class
+    ck_assert(0 == strncmp_ignore_case(test1, test2, 0));
+    ck_assert(0 == strncmp_ignore_case(test1, test2, 1));
+    ck_assert(0 == strncmp_ignore_case(test1, test2, 2));
+    ck_assert(0 == strncmp_ignore_case(test1, test2, 3));
+    ck_assert(0 == strncmp_ignore_case(test1, test2, 4));
+    //// Each possible combination of case
+    ck_assert(0 == strncmp_ignore_case(test1, test1, 2));
+    ck_assert(0 == strncmp_ignore_case(test1, test2, 2));
+    ck_assert(0 == strncmp_ignore_case(test1, test3, 2));
+    ck_assert(0 == strncmp_ignore_case(test1, test4, 2));
+    ck_assert(0 == strncmp_ignore_case(test2, test1, 2));
+    ck_assert(0 == strncmp_ignore_case(test2, test2, 2));
+    ck_assert(0 == strncmp_ignore_case(test2, test3, 2));
+    ck_assert(0 == strncmp_ignore_case(test2, test4, 2));
+    ck_assert(0 == strncmp_ignore_case(test3, test1, 2));
+    ck_assert(0 == strncmp_ignore_case(test3, test2, 2));
+    ck_assert(0 == strncmp_ignore_case(test3, test3, 2));
+    ck_assert(0 == strncmp_ignore_case(test3, test4, 2));
+    ck_assert(0 == strncmp_ignore_case(test4, test1, 2));
+    ck_assert(0 == strncmp_ignore_case(test4, test2, 2));
+    ck_assert(0 == strncmp_ignore_case(test4, test3, 2));
+    ck_assert(0 == strncmp_ignore_case(test4, test4, 2));
+
+    // Test nominal case (non equality result)
+    //// Each possible size class
+    ck_assert(0 == strncmp_ignore_case(test1, ntest1, 0));
+    ck_assert(+1 == strncmp_ignore_case(test1, ntest1, 1));
+    ck_assert(-1 == strncmp_ignore_case(ntest1, test1, 1));
+    ck_assert(+1 == strncmp_ignore_case(test1, ntest1, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest1, test1, 2));
+    ck_assert(+1 == strncmp_ignore_case(test1, ntest1, 3));
+    ck_assert(-1 == strncmp_ignore_case(ntest1, test1, 3));
+    ck_assert(+1 == strncmp_ignore_case(test1, ntest1, 4));
+    ck_assert(-1 == strncmp_ignore_case(ntest1, test1, 4));
+
+    //// Each possible combination of case
+    ck_assert(+1 == strncmp_ignore_case(test1, ntest1, 2));
+    ck_assert(+1 == strncmp_ignore_case(test1, ntest2, 2));
+    ck_assert(+1 == strncmp_ignore_case(test1, ntest3, 2));
+    ck_assert(+1 == strncmp_ignore_case(test1, ntest4, 2));
+    ck_assert(+1 == strncmp_ignore_case(test2, ntest1, 2));
+    ck_assert(+1 == strncmp_ignore_case(test2, ntest2, 2));
+    ck_assert(+1 == strncmp_ignore_case(test2, ntest3, 2));
+    ck_assert(+1 == strncmp_ignore_case(test2, ntest4, 2));
+    ck_assert(+1 == strncmp_ignore_case(test3, ntest1, 2));
+    ck_assert(+1 == strncmp_ignore_case(test3, ntest2, 2));
+    ck_assert(+1 == strncmp_ignore_case(test3, ntest3, 2));
+    ck_assert(+1 == strncmp_ignore_case(test3, ntest4, 2));
+    ck_assert(+1 == strncmp_ignore_case(test4, ntest1, 2));
+    ck_assert(+1 == strncmp_ignore_case(test4, ntest2, 2));
+    ck_assert(+1 == strncmp_ignore_case(test4, ntest3, 2));
+    ck_assert(+1 == strncmp_ignore_case(test4, ntest4, 2));
+
+    ck_assert(-1 == strncmp_ignore_case(ntest1, test1, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest1, test2, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest1, test3, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest1, test4, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest2, test1, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest2, test2, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest2, test3, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest2, test4, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest3, test1, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest3, test2, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest3, test3, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest3, test4, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest4, test1, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest4, test2, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest4, test3, 2));
+    ck_assert(-1 == strncmp_ignore_case(ntest4, test4, 2));
+}
+END_TEST
+
 Suite *tests_make_suite_tools(void)
 {
     Suite *s;
-    TCase *tc_hexlify, *tc_buffer, *tc_linkedlist;
+    TCase *tc_hexlify, *tc_basetools, *tc_buffer, *tc_linkedlist;
 
     s = suite_create("Tools");
+    tc_basetools = tcase_create("Base tools");
+    tcase_add_test(tc_basetools, test_base_tools);
+    suite_add_tcase(s, tc_basetools);
     tc_buffer = tcase_create("Buffer");
     tcase_add_test(tc_buffer, test_buffer_create);
     tcase_add_test(tc_buffer, test_buffer_read_write);

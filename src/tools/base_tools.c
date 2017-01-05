@@ -23,7 +23,7 @@ int strncmp_ignore_case(const char *s1, const char *s2, size_t size){
     int lc1, lc2;
     size_t idx;
     int res = 0;
-    for(idx = 0; idx < size && idx < size && res == 0; idx ++){
+    for(idx = 0; idx < size && res == 0; idx ++){
         lc1 = tolower(s1[idx]);
         lc2 = tolower(s2[idx]);
         if(lc1 < lc2){

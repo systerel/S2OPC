@@ -15,11 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC__BASE_TOOLS_H_
-#define SOPC__BASE_TOOLS_H_
+#ifndef SOPC_BASE_TOOLS_H_
+#define SOPC_BASE_TOOLS_H_
 
 #include <stdlib.h>
 
+/**
+ *  \brief Compare 2 string in a case-insensitive manner.
+ *  Comparison returns 0 if <size> characters were considered identical
+ *  or s1/s2 were identical and terminated by a '\0' character.
+ *
+ *  \param s1    A non null string terminated by '\0' character
+ *  \param s2    A non null string terminated by '\0' character
+ *  \param size  Maximum number of characters compared for computing result.
+ *
+ *  \return      0 if string are identical in a case-insensitive way, -1 if s1 < s2 and +1 if s1 > s2
+ *              (based on first lower case character value comparison).
+ */
 int strncmp_ignore_case(const char *s1, const char *s2, size_t size);
 
 #endif /* SOPC__BASE_TOOLS_H_ */
