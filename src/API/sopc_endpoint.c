@@ -75,7 +75,8 @@ void SOPC_Delete_EndpointCallbackData(SOPC_InternalEndpoint_CallbackData* chCbDa
     }
 }
 
-SOPC_ServiceType* SOPC_Endpoint_FindService(SC_ServerEndpoint* sEndpoint, uint32_t requestTypeId){
+SOPC_ServiceType* SOPC_Endpoint_FindService(SC_ServerEndpoint* sEndpoint,
+                                            uint32_t requestTypeId){
     SOPC_ServiceType** serviceTable = NULL;
     SOPC_ServiceType* current = NULL;
     SOPC_ServiceType* result = NULL;
@@ -110,6 +111,8 @@ SOPC_StatusCode SecureChannelEndpointEvent_CB(struct SC_ServerEndpoint* sEndpoin
     SOPC_ServiceType* service = NULL;
     SOPC_RequestContext* reqContext = NULL;
     SOPC_InternalEndpoint_CallbackData* endpointCBdata = (SOPC_InternalEndpoint_CallbackData*) cbData;
+    SOPC_String secuPol; // To avoid giving possibility of security policy modification
+    SOPC_String_Initialize(&secuPol);
     switch(event){
         case SC_EndpointListenerEvent_Opened:
             break;
@@ -119,13 +122,18 @@ SOPC_StatusCode SecureChannelEndpointEvent_CB(struct SC_ServerEndpoint* sEndpoin
             break;
         case SC_EndpointConnectionEvent_New:
             if(NULL != endpointCBdata->callback){
-                retStatus = endpointCBdata->callback((SOPC_Endpoint) sEndpoint,
-                                                     endpointCBdata->callbackData,
-                                                     SOPC_EndpointEvent_SecureChannelOpened,
-                                                     status,
-                                                     scConnection->secureChannelId,
-                                                     scConnection->otherAppPublicKeyCert,
-                                                     &scConnection->currentSecuPolicy);
+                retStatus = SOPC_String_Copy(&secuPol, &scConnection->currentSecuPolicy);
+                if(STATUS_OK == retStatus){
+                    retStatus = endpointCBdata->callback((SOPC_Endpoint) sEndpoint,
+                                                         endpointCBdata->callbackData,
+                                                         SOPC_EndpointEvent_SecureChannelOpened,
+                                                         status,
+                                                         scConnection->secureChannelId,
+                                                         scConnection->otherAppPublicKeyCert,
+                                                         &secuPol,
+                                                         scConnection->currentSecuMode);
+                }
+                SOPC_String_Clear(&secuPol);
             }
             break;
         case SC_EndpointConnectionEvent_Renewed:
@@ -133,13 +141,18 @@ SOPC_StatusCode SecureChannelEndpointEvent_CB(struct SC_ServerEndpoint* sEndpoin
             break;
         case SC_EndpointConnectionEvent_Disconnected:
             if(NULL != endpointCBdata->callback){
-                retStatus = endpointCBdata->callback((SOPC_Endpoint) sEndpoint,
-                                                     endpointCBdata->callbackData,
-                                                     SOPC_EndpointEvent_SecureChannelClosed,
-                                                     status,
-                                                     scConnection->secureChannelId,
-                                                     scConnection->otherAppPublicKeyCert,
-                                                     &scConnection->currentSecuPolicy);
+                retStatus = SOPC_String_Copy(&secuPol, &scConnection->currentSecuPolicy);
+                if(STATUS_OK == retStatus){
+                    retStatus = endpointCBdata->callback((SOPC_Endpoint) sEndpoint,
+                                                         endpointCBdata->callbackData,
+                                                         SOPC_EndpointEvent_SecureChannelClosed,
+                                                         status,
+                                                         scConnection->secureChannelId,
+                                                         scConnection->otherAppPublicKeyCert,
+                                                         &secuPol,
+                                                         scConnection->currentSecuMode);
+                }
+                SOPC_String_Clear(&secuPol);
             }
             break;
         case SC_EndpointConnectionEvent_Request:
@@ -153,7 +166,8 @@ SOPC_StatusCode SecureChannelEndpointEvent_CB(struct SC_ServerEndpoint* sEndpoin
                                                          OpcUa_BadServiceUnsupported,
                                                          scConnection->secureChannelId,
                                                          NULL,
-                                                         NULL);
+                                                         NULL,
+                                                         OpcUa_MessageSecurityMode_Invalid);
                 }
             }else{
                 if(requestId != NULL && reqEncObj != NULL && reqEncType != NULL){
@@ -296,5 +310,38 @@ SOPC_StatusCode SOPC_Endpoint_GetServiceFunction(SOPC_Endpoint               end
     }
     return status;
 }
+
+SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelId(struct SOPC_RequestContext* context,
+                                                        uint32_t*                   secureChannelId){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(secureChannelId != NULL && context != NULL && context->scConnection != NULL){
+        *secureChannelId = context->scConnection->secureChannelId;
+        status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelSecurityPolicy(struct SOPC_RequestContext* context,
+                                                                    SOPC_String*                securityPolicy,
+                                                                    OpcUa_MessageSecurityMode*  securityMode){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+     if(securityPolicy != NULL && securityMode != NULL && context != NULL && context->scConnection != NULL)
+     {
+         status = SOPC_String_Copy(securityPolicy, &context->scConnection->currentSecuPolicy);
+         *securityMode = context->scConnection->currentSecuMode;
+     }
+     return status;
+}
+
+SOPC_StatusCode SOPC_Endpoint_GetContextResponseType(struct SOPC_RequestContext* context,
+                                                     SOPC_EncodeableType**       respType){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(context != NULL && respType != NULL){
+        *respType = context->service->ResponseEncType;
+        status = STATUS_OK;
+    }
+    return status;
+}
+
 
 #endif // SERVER API

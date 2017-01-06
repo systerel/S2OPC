@@ -30,18 +30,20 @@
 int connectionClosed = 0;
 int connected = 0;
 
-SOPC_StatusCode StubServer_EndpointEvent_Callback(SOPC_Endpoint      endpoint,
-                                                  void*              cbData,
-                                                  SOPC_EndpointEvent event,
-                                                  SOPC_StatusCode    status,
-                                                  uint32_t           secureChannelId,
-                                                  const Certificate* clientCertificate,
-                                                  const SOPC_String* securityPolicy){
+SOPC_StatusCode StubServer_EndpointEvent_Callback(SOPC_Endpoint             endpoint,
+                                                  void*                     cbData,
+                                                  SOPC_EndpointEvent        event,
+                                                  SOPC_StatusCode           status,
+                                                  uint32_t                  secureChannelId,
+                                                  const Certificate*        clientCertificate,
+                                                  const SOPC_String*        securityPolicy,
+                                                  OpcUa_MessageSecurityMode securityMode){
     (void) endpoint;
     (void) cbData;
     (void) secureChannelId;
     (void) clientCertificate;
     (void) securityPolicy;
+    (void) securityMode;
     printf ("\nEndpoint CALLBACK called with event %d and status %x !\n", event, status);
     if (event == SOPC_EndpointEvent_SecureChannelClosed){
     	connectionClosed = 1;

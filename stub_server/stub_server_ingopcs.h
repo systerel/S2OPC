@@ -25,12 +25,13 @@ typedef struct {
     int Stub;
 } StubServer_Endpoint;
 
-SOPC_StatusCode StubServer_EndpointEvent_Callback(SOPC_Endpoint      endpoint,
-											      void*              cbData,
-											      SOPC_EndpointEvent event,
-											      SOPC_StatusCode    status,
-											      uint32_t           secureChannelId,
-											      const Certificate* clientCertificate,
-											      const SOPC_String* securityPolicy);
+SOPC_StatusCode StubServer_EndpointEvent_Callback(SOPC_Endpoint             endpoint,
+											      void*                     cbData,
+											      SOPC_EndpointEvent        event,
+											      SOPC_StatusCode           status,
+											      uint32_t                  secureChannelId,
+											      const Certificate*        clientCertificate,
+											      const SOPC_String*        securityPolicy,
+											      OpcUa_MessageSecurityMode securityMode);
 
 #endif /* STUB_SERVER_STUB_SERVER_H_ */

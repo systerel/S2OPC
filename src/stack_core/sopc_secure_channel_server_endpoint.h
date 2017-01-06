@@ -56,8 +56,9 @@ typedef enum SC_EndpointEvent
  */
 typedef struct SOPC_SecurityPolicy
 {
-    uint16_t    securityModes;  /**< Mask of security modes supported (use combination of SECURITY_MODE_*_MASK values) */
     SOPC_String securityPolicy; /**< Security policy URI supported */
+    uint16_t    securityModes;  /**< Mask of security modes supported (use combination of SECURITY_MODE_*_MASK values) */
+    void*       padding;        /**< Binary compatibility */
 } SOPC_SecurityPolicy;
 
 struct SC_ServerEndpoint;

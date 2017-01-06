@@ -66,13 +66,14 @@ typedef enum SOPC_EndpointEvent
 /**
  *  \brief Endpoint event notification function callback type
  */
-typedef SOPC_StatusCode (SOPC_EndpointEvent_CB) (SOPC_Endpoint      endpoint,
-                                                 void*              cbData,
-                                                 SOPC_EndpointEvent event,
-                                                 SOPC_StatusCode    status,
-                                                 uint32_t           secureChannelId,
-                                                 const Certificate* clientCertificate,
-                                                 const SOPC_String* securityPolicy);
+typedef SOPC_StatusCode (SOPC_EndpointEvent_CB) (SOPC_Endpoint             endpoint,
+                                                 void*                     cbData,
+                                                 SOPC_EndpointEvent        event,
+                                                 SOPC_StatusCode           status,
+                                                 uint32_t                  secureChannelId,
+                                                 const Certificate*        clientCertificate,
+                                                 const SOPC_String*        securityPolicy,
+                                                 OpcUa_MessageSecurityMode securityMode);
 
 /**
  *  \brief Endpoint invoke service treatment function type
@@ -192,6 +193,44 @@ SOPC_StatusCode SOPC_Endpoint_Delete(SOPC_Endpoint* endpoint);
 SOPC_StatusCode SOPC_Endpoint_GetServiceFunction(SOPC_Endpoint               endpoint,
                                                  struct SOPC_RequestContext* requestContext,
                                                  SOPC_InvokeService**        serviceFunction);
+
+/**
+ *  \brief Return the secure channel Id given the request context
+ *
+ *  \param context         The request context to use for returning the secure channel Id
+ *                         (provided by the call to SOPC_BeginInvokeService function instance)
+ *  \param secureChannelId The returned secure channel id in case of success
+ *
+ *  \return                STATUS_OK if secure channel id was returned correctly, STATUS_NOK in case of invalid context
+ */
+SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelId(struct SOPC_RequestContext* context,
+                                                        uint32_t*                   secureChannelId);
+
+/**
+ *  \brief Return the security policy and mode given the request context
+ *
+ *  \param context         The request context to use for returning the security policy and mode
+ *                         (provided by the call to SOPC_BeginInvokeService function instance)
+ *  \param securityPolicy  The returned security policy in case of success
+ *  \param securityMode    The returned security mode in case of success
+ *
+ *  \return                STATUS_OK if security policy and mode was returned correctly, STATUS_NOK in case of invalid context
+ */
+SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelSecurityPolicy(struct SOPC_RequestContext* context,
+                                                                    SOPC_String*                securityPolicy,
+                                                                    OpcUa_MessageSecurityMode*  securityMode);
+
+/**
+ *  \brief Return the reponse encodeable type given the request context
+ *
+ *  \param context         The request context to use for returning the response encodeable type
+ *                         (provided by the call to SOPC_BeginInvokeService function instance)
+ *  \param respType        The returned response encodeable type in case of success
+ *
+ *  \return                STATUS_OK if response encodeable type was returned correctly, STATUS_NOK in case of invalid context
+ */
+SOPC_StatusCode SOPC_Endpoint_GetContextResponseType(struct SOPC_RequestContext* context,
+                                                     SOPC_EncodeableType**       respType);
 
 #endif /* SERVER API */
 
