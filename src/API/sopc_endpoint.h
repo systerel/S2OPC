@@ -162,6 +162,23 @@ SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint
                                            struct SOPC_RequestContext** requestContext);
 
 /**
+ *  \brief Abort a service response to the client which sent a request.
+ *  In case chunks for the service response were already sent, it sends an abort chunk message.
+ *
+ *  \param endpoint       The endpoint which aborts a response
+ *  \param errorCode      The error that caused the abort response
+ *  \param reason         The string reason indicating the abort response cause
+ *  \param requestContext The request context of the response to abort
+ *                        (provided by the call to SOPC_BeginInvokeService function instance)
+ *
+ *  \return            STATUS_OK if abort was successful, STATUS_NOK otherwise
+ */
+SOPC_StatusCode SOPC_Endpoint_AbortResponse(SOPC_Endpoint                endpoint,
+                                            SOPC_StatusCode              errorCode,
+                                            SOPC_String*                 reason,
+                                            struct SOPC_RequestContext** requestContext);
+
+/**
  *  \brief Close the endpoint. The endpoint closes the active connections and does not listen
  *         for new connections anymore.
  *

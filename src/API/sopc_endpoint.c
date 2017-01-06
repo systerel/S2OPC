@@ -276,6 +276,25 @@ SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint
     return status;
 }
 
+SOPC_StatusCode SOPC_Endpoint_AbortResponse(SOPC_Endpoint                endpoint,
+                                            SOPC_StatusCode              errorCode,
+                                            SOPC_String*                 reason,
+                                            struct SOPC_RequestContext** requestContext){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_RequestContext* context = NULL;
+    SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
+    if(sEndpoint != NULL && requestContext != NULL && *requestContext != NULL && reason != NULL){
+        context = (SOPC_RequestContext*) *requestContext;
+        status = SC_AbortMsg(context->scConnection->sendingBuffer,
+                             errorCode,
+                             reason);
+        // Deallocate request context now response is aborted
+        SOPC_Delete_EndpointRequestContext(context);
+        *requestContext = NULL;
+    }
+    return status;
+}
+
 SOPC_StatusCode SOPC_Endpoint_Close(SOPC_Endpoint endpoint){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;

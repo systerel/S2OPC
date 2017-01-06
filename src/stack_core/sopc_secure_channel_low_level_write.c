@@ -24,6 +24,7 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                                         const SOPC_Byte* data_src,
                                         uint32_t         count){
     SOPC_StatusCode status = STATUS_NOK;
+    SOPC_String reason;
     SC_Connection* scConnection = NULL;
     if(msgBuffer == NULL){
         return STATUS_INVALID_PARAMETERS;
@@ -51,8 +52,13 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                         UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
                         scConnection->sendingMaxBodySize >= msgBuffer->buffers->position);
                 if(msgBuffer->maxChunks != 0 && msgBuffer->nbChunks + 1 > msgBuffer->maxChunks){
-                    // TODO: send an abort message instead of message !!!
-                    status = STATUS_INVALID_STATE;
+                    if(scConnection->transportConnection->serverSideConnection == FALSE){
+                        status = OpcUa_BadRequestTooLarge;
+                    }else{
+                        status = OpcUa_BadResponseTooLarge;
+                    }
+                    SOPC_String_Initialize(&reason);
+                    SC_AbortMsg(msgBuffer, status, &reason);
                 }else{
                     // Fulfill buffer with maximum amount of bytes
                     uint32_t tmpCount = // Maximum Count - Precedent Count => Count to write

@@ -1022,7 +1022,7 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*     msgBuffer,
     uint32_t encryptedLength = 0;
 
     if(msgBuffer == NULL || msgBuffer->flushData == NULL ||
-       (chunkType != SOPC_Msg_Chunk_Final && msgBuffer->secureType != SOPC_SecureMessage))
+       (chunkType != SOPC_Msg_Chunk_Final && msgBuffer->secureType != SOPC_SecureMessage)) // Multi chunk only possible in secure message
     {
         status = STATUS_INVALID_PARAMETERS;
     }else{
@@ -1134,13 +1134,45 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*     msgBuffer,
             status = TCP_UA_FlushMsgBuffer(scConnection->transportConnection->outputMsgBuffer);
         }
 
-        if(status == STATUS_OK && chunkType == SOPC_Msg_Chunk_Final){
+        if(status == STATUS_OK && (chunkType == SOPC_Msg_Chunk_Final || chunkType == SOPC_Msg_Chunk_Abort)){
             // Reset buffer for next sending
             MsgBuffer_Reset(scConnection->sendingBuffer);
         }
     }
     return status;
 }
+
+SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
+                            SOPC_StatusCode errorCode,
+                            SOPC_String*    reason)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(msgBuffer != NULL && reason != NULL){
+        if(msgBuffer->nbChunks > 1){
+            // At least one chunk has already been sent => abort message necessary
+            // Set buffer position to body start (in case data was already written in it)
+            status = Buffer_SetPosition(msgBuffer->buffers,
+                                        (msgBuffer->sequenceNumberPosition +
+                                         UA_SECURE_MESSAGE_SEQUENCE_LENGTH));
+            if(STATUS_OK == status){
+                status = SOPC_StatusCode_Write(&errorCode, msgBuffer);
+            }
+            if(STATUS_OK == status){
+                status = SOPC_String_Write(reason, msgBuffer);
+            }
+            if(STATUS_OK == status){
+                status = SC_FlushSecureMsgBuffer(msgBuffer, SOPC_Msg_Chunk_Abort);
+            }
+        }else{
+            // If no chunk sent, no need to send an abort message
+            status = STATUS_OK;
+            // Reset buffer for next sending
+            MsgBuffer_Reset(msgBuffer);
+        }
+    }
+    return status;
+}
+
 
 SOPC_StatusCode SC_DecodeSecureMsgSCid(SC_Connection*  scConnection,
                                        SOPC_MsgBuffer* transportBuffer)

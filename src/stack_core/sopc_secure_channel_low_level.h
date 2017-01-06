@@ -119,6 +119,10 @@ SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffer*      msgBuffer,
                                  SOPC_EncodeableType* encType,
                                  void*                msgBody);
 
+SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
+                            SOPC_StatusCode errorCode,
+                            SOPC_String*    reason);
+
 SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                                         const SOPC_Byte* data_src,
                                         uint32_t         count);
