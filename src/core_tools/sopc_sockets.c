@@ -352,8 +352,8 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
                                                       SOPC_Socket**       listeningSocket)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    Socket_AddressInfo *res, *p, *initIPV6;
-    uint8_t initWithIPV6 = FALSE;
+    Socket_AddressInfo *res, *p;
+    uint8_t attemptWithIPV6 = 1;
     SOPC_Socket* freeSocket;
     SOPC_StatusCode listenStatus = STATUS_NOK;
     char *hostname = NULL;
@@ -378,49 +378,39 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
         }
 
         if(status == STATUS_OK){
-            // Retrieve IPV6 addrinfo if possible
-            initIPV6 = NULL;
-            for(p = res;p != NULL && initIPV6 == NULL; p = Socket_AddrInfo_IterNext(p)) {
-                if(Socket_AddrInfo_IsIPV6(p) != FALSE){
-                    initIPV6 = p;
-                    initWithIPV6 = 1;
-                }
-            }
-
-            if(initWithIPV6 == FALSE){
-                p = res;
-            }else{
-                p = initIPV6;
-            }
 
             // Try to connect on IP addresses provided (IPV4 and IPV6)
-            while(p != NULL && listenStatus != STATUS_OK){
+            p = res;
+            attemptWithIPV6 = 1; // IPV6 first since it supports IPV4
+            while((p != NULL || attemptWithIPV6 != FALSE) && listenStatus != STATUS_OK){
 
-                status = Socket_CreateNew(p,
-                                          1, // Reuse
-                                          1, // Non blocking socket
-                                          &freeSocket->sock);
-
-                if (status == STATUS_OK){
-                    status = Socket_Listen(freeSocket->sock, p);
-                }
-
-                if(status == STATUS_OK){
-                    freeSocket->state = SOCKET_LISTENING;
-                }
-
-                if(status != STATUS_OK){
-                    SOPC_Socket_Close(freeSocket);
-                }else{
-                    listenStatus = STATUS_OK;
-                }
-
-                if(initWithIPV6 == FALSE){
-                    // Try next address info in list
-                    p = Socket_AddrInfo_IterNext(p);
-                }else{
-                    initWithIPV6 = FALSE;
+                if(p == NULL && attemptWithIPV6 != FALSE){
+                    // Failed with IPV6 addresses (or none was present), now try with not IPV6 addresses
+                    attemptWithIPV6 = FALSE;
                     p = res;
+                }else{
+                    if((attemptWithIPV6 != FALSE && Socket_AddrInfo_IsIPV6(p) != FALSE) ||
+                       (attemptWithIPV6 == FALSE && Socket_AddrInfo_IsIPV6(p) == FALSE)){
+                        status = Socket_CreateNew(p,
+                                                  1, // Reuse
+                                                  1, // Non blocking socket
+                                                  &freeSocket->sock);
+
+                        if (status == STATUS_OK){
+                            status = Socket_Listen(freeSocket->sock, p);
+                        }
+
+                        if(status == STATUS_OK){
+                            freeSocket->state = SOCKET_LISTENING;
+                        }
+
+                        if(status != STATUS_OK){
+                            SOPC_Socket_Close(freeSocket);
+                        }else{
+                            listenStatus = STATUS_OK;
+                        }
+                    }
+                    p = Socket_AddrInfo_IterNext(p);
                 }
             }
         }
