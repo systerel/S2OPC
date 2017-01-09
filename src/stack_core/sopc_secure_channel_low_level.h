@@ -146,7 +146,7 @@ SOPC_StatusCode SC_DecodeAsymSecurityHeader_Certificates(SC_Connection*     scCo
                                                          SOPC_MsgBuffer*    transportBuffer,
                                                          const PKIProvider* pkiProvider,
                                                          uint32_t           validateSenderCert,
-                                                         uint8_t            enforceOnSecuMode,
+                                                         uint8_t            enforceSecuMode,
                                                          uint32_t*          sequenceNumberPosition,
                                                          uint8_t*           senderCertificatePresence,
                                                          uint8_t*           receiverCertificatePresense);

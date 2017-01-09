@@ -1218,7 +1218,7 @@ SOPC_StatusCode SC_DecodeAsymSecurityHeader_Certificates(SC_Connection*     scCo
                                                          SOPC_MsgBuffer*    transportBuffer,
                                                          const PKIProvider* pkiProvider,
                                                          uint32_t           validateSenderCert,
-                                                         uint8_t            enforceOnSecuMode,
+                                                         uint8_t            enforceSecuMode,
                                                          uint32_t*          sequenceNumberPosition,
                                                          uint8_t*           senderCertificatePresence,
                                                          uint8_t*           receiverCertificatePresense)
@@ -1236,7 +1236,7 @@ SOPC_StatusCode SC_DecodeAsymSecurityHeader_Certificates(SC_Connection*     scCo
        senderCertificatePresence != NULL &&
        receiverCertificatePresense != NULL)
     {
-        if(enforceOnSecuMode != FALSE){
+        if(enforceSecuMode != FALSE){
             // Asymmetric security header must use current security parameters
             // (TODO: add guarantee we are treating last OPN sent: using pending requests ?)
             toEncrypt = IsMsgEncrypted(scConnection->currentSecuMode,
@@ -1294,7 +1294,7 @@ SOPC_StatusCode SC_DecodeAsymSecurityHeader_Certificates(SC_Connection*     scCo
                         }
                     }
                 }
-            }else if(enforceOnSecuMode == FALSE){
+            }else if(enforceSecuMode == FALSE || toSign == FALSE){
                 // Without security mode to enforce, absence could be normal
                 *senderCertificatePresence = FALSE;
             }else{
@@ -1354,7 +1354,7 @@ SOPC_StatusCode SC_DecodeAsymSecurityHeader_Certificates(SC_Connection*     scCo
 
                 SOPC_ByteString_Clear(&curAppCertThumbprint);
 
-            }else if(enforceOnSecuMode == FALSE){ // if toEncrypt
+            }else if(enforceSecuMode == FALSE || toEncrypt == FALSE){ // if toEncrypt
                 // Without security mode to enforce, absence could be normal
                 *receiverCertificatePresense = FALSE;
             }else{
