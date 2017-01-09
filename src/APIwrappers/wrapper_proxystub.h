@@ -34,6 +34,12 @@ SOPC_StatusCode OpcUa_ProxyStub_AddTypes(SOPC_EncodeableType** types);
 
 SOPC_StatusCode OpcUa_ProxyStub_SetNamespaceUris(char** namespaceUris);
 
+char* OpcUa_ProxyStub_GetVersion();
+
+char* OpcUa_ProxyStub_GetConfigString();
+
+char* OpcUa_ProxyStub_GetStaticConfigString();
+
 END_EXTERN_C
 
 #endif /* SOPC_WRAPPER_PROXYSTUB_H_ */

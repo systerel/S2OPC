@@ -79,3 +79,15 @@ SOPC_StatusCode OpcUa_ProxyStub_SetNamespaceUris(char** namespaceUris)
     }
     return StackConfiguration_SetNamespaceUris(gNsTable);
 }
+
+char* OpcUa_ProxyStub_GetVersion(){
+    return "INGOPCS";
+}
+
+char* OpcUa_ProxyStub_GetConfigString(){
+    return "INGOPCS";
+}
+
+char* OpcUa_ProxyStub_GetStaticConfigString(){
+    return "INGOPCS";
+}
