@@ -181,6 +181,15 @@ SOPC_StatusCode SOPC_Endpoint_Close(SOPC_Endpoint endpoint);
 SOPC_StatusCode SOPC_Endpoint_Delete(SOPC_Endpoint* endpoint);
 
 /**
+ *  \brief Returns the callback data provided on endpoint open function call
+ *
+ *  \param endpoint    The endpoint for which callback data is requested
+ *
+ *  \return            The callback data provided on endpoint open function call, NULL otherwise
+ */
+void* SOPC_Endpoint_GetCallbackData(SOPC_Endpoint endpoint);
+
+/**
  *  \brief Return the invoke service function for the given endpoint and request context
  *
  *  \param endpoint        The endpoint on which service is called

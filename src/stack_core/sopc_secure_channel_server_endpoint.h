@@ -118,4 +118,6 @@ SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint);
 
 void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint);
 
+void* SC_ServerEndpoint_GetCallbackData(SC_ServerEndpoint* endpoint);
+
 #endif /* SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_ */

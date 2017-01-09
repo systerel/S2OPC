@@ -973,3 +973,7 @@ void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint){
         free(endpoint);
     }
 }
+
+void* SC_ServerEndpoint_GetCallbackData(SC_ServerEndpoint* endpoint){
+    return endpoint->callbackData;
+}
