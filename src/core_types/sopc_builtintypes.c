@@ -211,12 +211,16 @@ void SOPC_ByteString_Delete(SOPC_ByteString* bstring){
 }
 
 void SOPC_String_Initialize(SOPC_String* string){
-    SOPC_ByteString_Initialize((SOPC_ByteString*) string);
+    string->Length = -1;
+    string->Data = NULL;
     string->DoNotClear = FALSE; // False unless characters attached
 }
 
 SOPC_String* SOPC_String_Create(){
-    return (SOPC_String*) SOPC_ByteString_Create();
+    SOPC_String* string = NULL;
+    string = (SOPC_String*) malloc(sizeof(SOPC_String));
+    SOPC_String_Initialize(string);
+    return string;
 }
 
 SOPC_StatusCode SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src){
@@ -664,83 +668,83 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj){
 }
 
 void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                       SOPC_VariantValue val,
+                                       SOPC_VariantValue* val,
                                        BuiltInFunction* builtInFunction){
     switch(builtInTypeId){
         case SOPC_Boolean_Id:
-            builtInFunction(&val.Boolean);
+            builtInFunction(&val->Boolean);
             break;
         case SOPC_SByte_Id:
-            builtInFunction(&val.Sbyte);
+            builtInFunction(&val->Sbyte);
             break;
         case SOPC_Byte_Id:
-            builtInFunction(&val.Byte);
+            builtInFunction(&val->Byte);
             break;
         case SOPC_Int16_Id:
-            builtInFunction(&val.Int16);
+            builtInFunction(&val->Int16);
             break;
         case SOPC_UInt16_Id:
-            builtInFunction(&val.Uint16);
+            builtInFunction(&val->Uint16);
             break;
         case SOPC_Int32_Id:
-            builtInFunction(&val.Int32);
+            builtInFunction(&val->Int32);
             break;
         case SOPC_UInt32_Id:
-            builtInFunction(&val.Uint32);
+            builtInFunction(&val->Uint32);
             break;
         case SOPC_Int64_Id:
-            builtInFunction(&val.Int64);
+            builtInFunction(&val->Int64);
             break;
         case SOPC_UInt64_Id:
-            builtInFunction(&val.Uint64);
+            builtInFunction(&val->Uint64);
             break;
         case SOPC_Float_Id:
-            builtInFunction(&val.Floatv);
+            builtInFunction(&val->Floatv);
             break;
         case SOPC_Double_Id:
-            builtInFunction(&val.Doublev);
+            builtInFunction(&val->Doublev);
             break;
         case SOPC_String_Id:
-            builtInFunction(&val.String);
+            builtInFunction(&val->String);
             break;
         case SOPC_DateTime_Id:
-            builtInFunction(&val.Date);
+            builtInFunction(&val->Date);
             break;
         case SOPC_Guid_Id:
-            builtInFunction(val.Guid);
+            builtInFunction(val->Guid);
             break;
         case SOPC_ByteString_Id:
-            builtInFunction(&val.Bstring);
+            builtInFunction(&val->Bstring);
             break;
         case SOPC_XmlElement_Id:
-            builtInFunction(&val.XmlElt);
+            builtInFunction(&val->XmlElt);
             break;
         case SOPC_NodeId_Id:
-            builtInFunction(val.NodeId);
+            builtInFunction(val->NodeId);
             break;
         case SOPC_ExpandedNodeId_Id:
-            builtInFunction(val.ExpNodeId);
+            builtInFunction(val->ExpNodeId);
             break;
         case SOPC_StatusCode_Id:
-            builtInFunction(&val.Status);
+            builtInFunction(&val->Status);
             break;
         case SOPC_QualifiedName_Id:
-            builtInFunction(val.Qname);
+            builtInFunction(val->Qname);
             break;
         case SOPC_LocalizedText_Id:
-            builtInFunction(val.LocalizedText);
+            builtInFunction(val->LocalizedText);
             break;
         case SOPC_ExtensionObject_Id:
-            builtInFunction(val.ExtObject);
+            builtInFunction(val->ExtObject);
             break;
         case SOPC_DataValue_Id:
-            builtInFunction(val.DataValue);
+            builtInFunction(val->DataValue);
             break;
         case SOPC_Variant_Id:
             assert(FALSE);
             break;
         case SOPC_DiagnosticInfo_Id:
-            builtInFunction(val.DiagInfo);
+            builtInFunction(val->DiagInfo);
             break;
         default:
             break;
@@ -1132,8 +1136,8 @@ void FreeVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
     }
 }
 
-void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
-                                    SOPC_VariantValue *val)
+void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId     builtInTypeId,
+                                    SOPC_VariantValue* val)
 {
     switch(builtInTypeId){
         case SOPC_Null_Id:
@@ -1211,7 +1215,7 @@ void SOPC_Variant_Clear(SOPC_Variant* variant){
         switch(variant->ArrayType){
             case SOPC_VariantArrayType_SingleValue:
                 ApplyToVariantNonArrayBuiltInType(variant->BuiltInTypeId,
-                                                  variant->Value,
+                                                  &variant->Value,
                                                   clearFunction);
                 FreeVariantNonArrayBuiltInType(variant->BuiltInTypeId,
                                                &variant->Value);
