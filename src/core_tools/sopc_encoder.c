@@ -1040,7 +1040,8 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
                                                                 extObj->TypeId.NodeId.Data.Numeric);
             }
             if(nsFound == FALSE || encType == NULL){
-                status = STATUS_NOK;
+                // Keep as a byte string since it is unknown object
+                encodingByte = SOPC_ExtObjBodyEncoding_ByteString;
             }else{
                 encodingByte = SOPC_ExtObjBodyEncoding_Object;
                 extObj->Body.Object.ObjType = encType;
