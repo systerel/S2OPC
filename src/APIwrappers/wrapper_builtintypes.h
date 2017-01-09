@@ -67,6 +67,7 @@ void OpcUa_Guid_Clear(SOPC_Guid* guid);
 
 void OpcUa_NodeId_Initialize(SOPC_NodeId* nodeId);
 void OpcUa_NodeId_Clear(SOPC_NodeId* nodeId);
+int OpcUa_NodeId_IsNull(SOPC_NodeId* nodeId);
 
 void OpcUa_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId);
 void OpcUa_ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId);

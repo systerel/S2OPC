@@ -17,6 +17,9 @@
 
 #include "wrapper_builtintypes.h"
 
+#include <assert.h>
+#include <string.h>
+
 void OpcUa_SByte_Initialize(SOPC_SByte* sbyte){
     SOPC_SByte_Initialize(sbyte);
 }
@@ -106,6 +109,15 @@ void OpcUa_NodeId_Initialize(SOPC_NodeId* nodeId){
 }
 void OpcUa_NodeId_Clear(SOPC_NodeId* nodeId){
     SOPC_NodeId_Clear(nodeId);
+}
+int OpcUa_NodeId_IsNull(SOPC_NodeId* nodeId){
+    SOPC_Byte nullBytes[sizeof(SOPC_NodeId)];
+    if(nodeId != NULL){
+        assert(nullBytes == memset(nullBytes, 0, sizeof(SOPC_NodeId)));
+        return memcmp(nullBytes, nodeId, sizeof(SOPC_NodeId));
+    }else{
+        return 1;
+    }
 }
 void OpcUa_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId){
     SOPC_ExpandedNodeId_Initialize(expNodeId);
