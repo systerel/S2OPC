@@ -15,24 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "singly_linked_list.h"
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
 
-typedef struct SLinkedList_Elt{
+struct SLinkedList_Elt{
     uint32_t                id;
     void*                   value;
     struct SLinkedList_Elt* next;
-} SLinkedList_Elt;
+};
 
-typedef struct SLinkedList {
+struct SLinkedList {
     SLinkedList_Elt* first;
     size_t           length;
     size_t           maxLength;
-} SLinkedList;
-
-typedef SLinkedList_Elt* SLinkedListIterator;
+};
 
 SLinkedList* SLinkedList_Create(size_t sizeMax){
     SLinkedList* result = malloc(sizeof(SLinkedList));

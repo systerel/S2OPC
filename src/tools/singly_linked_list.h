@@ -31,7 +31,9 @@
  */
 typedef struct SLinkedList SLinkedList;
 
-typedef void* SLinkedListIterator;
+typedef struct SLinkedList_Elt SLinkedList_Elt;
+
+typedef SLinkedList_Elt* SLinkedListIterator;
 
 /**
  *  \brief            Create and allocate a new singly linked list containing 0 elements with a size limit of the given size.
@@ -121,6 +123,6 @@ SLinkedListIterator SLinkedList_GetIterator(SLinkedList* list);
  *
  * \param it        An iterator on a linked list
  */
-void* SLinkedList_Next(SLinkedListIterator it);
+void* SLinkedList_Next(SLinkedListIterator* it);
 
 #endif /* SOPC_SINGLE_LINKED_LIST_H_ */
