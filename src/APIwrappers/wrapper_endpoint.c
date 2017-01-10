@@ -100,16 +100,18 @@ SOPC_StatusCode SOPC_WrapperEndpointEvent_CB(SOPC_Endpoint             endpoint,
                 break;
         }
 
-        retStatus = KeyManager_Certificate_CopyDER(clientCertificate, &sCert.Data, &certLength);
-    }
-
-    if(STATUS_OK == retStatus){
-        if(certLength > INT32_MAX){
-            retStatus = STATUS_NOK;
-        }else{
-            sCert.Length = (int32_t) certLength;
+        if(clientCertificate != NULL){
+            retStatus = KeyManager_Certificate_CopyDER(clientCertificate, &sCert.Data, &certLength);
+            if(STATUS_OK == retStatus){
+                if(certLength > INT32_MAX){
+                    retStatus = STATUS_NOK;
+                }else{
+                    sCert.Length = (int32_t) certLength;
+                }
+            }
         }
     }
+
     if(STATUS_OK == retStatus){
         retStatus = iCbData->callback(endpoint,
                                       iCbData->callbackData,
@@ -127,7 +129,8 @@ SOPC_StatusCode SOPC_WrapperEndpointEvent_CB(SOPC_Endpoint             endpoint,
 SOPC_StatusCode OpcUa_Endpoint_Create(SOPC_Endpoint*               endpoint,
                                       SOPC_Endpoint_SerializerType serializerType,
                                       SOPC_ServiceType**           supportedServices){
-    return SOPC_Endpoint_Create(endpoint, serializerType, supportedServices);
+    SOPC_StatusCode status = SOPC_Endpoint_Create(endpoint, serializerType, supportedServices);
+    return status;
 }
 
 void OpcUa_Endpoint_Delete(SOPC_Endpoint* endpoint){
@@ -197,6 +200,7 @@ SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
         return STATUS_INVALID_PARAMETERS;
     }
 #endif
+    // IF RECEPTION THREAD ACTIVE
     internalCbData = OpcUa_Create_EndpointCallbackData(endpointCallback, endpointCallbackData);
     if(serverCertificate != NULL && serverCertificate->Length > 0 &&
        serverPrivateKey != NULL && serverPrivateKey->key.Length > 0 &&
@@ -257,25 +261,35 @@ SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
             sEndpoint->callbackData = NULL;
         }
     }
+
     return status;
 }
 
 SOPC_StatusCode OpcUa_Endpoint_Close(SOPC_Endpoint endpoint){
-    OpcUa_Delete_EndpointCallbackData(SOPC_Endpoint_GetCallbackData(endpoint));
-    SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
-    SOPC_StatusCode status = SOPC_Endpoint_Close(endpoint);
-    if(sEndpoint != NULL){
-        if(sEndpoint->pkiProvider != NULL){
-            KeyManager_Certificate_Free(sEndpoint->pkiProvider->pUserCertAuthList);
-            PKIProviderStack_Free((PKIProvider*) sEndpoint->pkiProvider);
-        }
-        sEndpoint->pkiProvider = NULL;
-        KeyManager_Certificate_Free((Certificate*) sEndpoint->serverCertificate);
-        sEndpoint->serverCertificate = NULL;
-        KeyManager_AsymmetricKey_Free((AsymmetricKey*) sEndpoint->serverKey);
-        sEndpoint->serverKey = NULL;
-        sEndpoint->callbackData = NULL;
+    OpcUa_InternalEndpoint_CallbackData* iCbData = (OpcUa_InternalEndpoint_CallbackData*) SOPC_Endpoint_GetCallbackData(endpoint);
+    Certificate* cert = NULL;
+    AsymmetricKey* key = NULL;
+    PKIProvider *pki = NULL;
+
+    if(iCbData != NULL){
+        OpcUa_Delete_EndpointCallbackData(iCbData);
     }
+    SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(sEndpoint != NULL){
+        pki = (PKIProvider*) sEndpoint->pkiProvider;
+        cert = (Certificate*) sEndpoint->serverCertificate;
+        key = (AsymmetricKey*) sEndpoint->serverKey;
+        status = SOPC_Endpoint_Close(endpoint);
+        if(pki != NULL){
+            KeyManager_Certificate_Free(pki->pUserCertAuthList);
+            PKIProviderStack_Free(pki);
+        }
+        pki = NULL;
+        KeyManager_Certificate_Free(cert);
+        KeyManager_AsymmetricKey_Free(key);
+    }
+
     return status;
 }
 
@@ -295,7 +309,7 @@ SOPC_StatusCode OpcUa_Endpoint_BeginSendResponse(SOPC_Endpoint         endpoint,
 }
 
 SOPC_StatusCode OpcUa_Endpoint_EndSendResponse(SOPC_Endpoint        endpoint,
-                                               void*                context,
+                                               void**               context,
                                                SOPC_StatusCode      statusCode,
                                                void*                response,
                                                SOPC_EncodeableType* responseType){
@@ -304,7 +318,7 @@ SOPC_StatusCode OpcUa_Endpoint_EndSendResponse(SOPC_Endpoint        endpoint,
         status = SOPC_Endpoint_SendResponse(endpoint,
                                             responseType,
                                             response,
-                                            (struct SOPC_RequestContext**) &context);
+                                            (struct SOPC_RequestContext**) context);
     }
 
     if(status != STATUS_OK){
@@ -319,9 +333,9 @@ SOPC_StatusCode OpcUa_Endpoint_EndSendResponse(SOPC_Endpoint        endpoint,
 SOPC_StatusCode OpcUa_Endpoint_CancelSendResponse(SOPC_Endpoint        endpoint,
                                                   SOPC_StatusCode      statusCode,
                                                   SOPC_String*         reason,
-                                                  void*                context){
+                                                  void**               context){
 
-    return SOPC_Endpoint_AbortResponse(endpoint, statusCode, reason, context);
+    return SOPC_Endpoint_AbortResponse(endpoint, statusCode, reason, (struct SOPC_RequestContext**) context);
 }
 
 SOPC_StatusCode OpcUa_Endpoint_GetServiceFunction(SOPC_Endpoint        endpoint,

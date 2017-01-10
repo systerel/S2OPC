@@ -71,7 +71,7 @@ SOPC_StatusCode OpcUa_Endpoint_BeginSendResponse(SOPC_Endpoint         endpoint,
                                                  SOPC_EncodeableType** responseType);
 
 SOPC_StatusCode OpcUa_Endpoint_EndSendResponse(SOPC_Endpoint        endpoint,
-                                               void*                context,
+                                               void**               context,
                                                SOPC_StatusCode      statusCode,
                                                void*                response,
                                                SOPC_EncodeableType* responseType);
@@ -79,7 +79,7 @@ SOPC_StatusCode OpcUa_Endpoint_EndSendResponse(SOPC_Endpoint        endpoint,
 SOPC_StatusCode OpcUa_Endpoint_CancelSendResponse(SOPC_Endpoint        endpoint,
                                                   SOPC_StatusCode      statusCode,
                                                   SOPC_String*         reason,
-                                                  void*                context);
+                                                  void**               context);
 
 // NOT IMPLEMENTED ?
 //void OpcUa_Endpoint_SendErrorResponse(SOPC_Endpoint   endpoint,
