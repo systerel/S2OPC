@@ -16,6 +16,7 @@
  */
 
 #include "sopc_mutexes.h"
+#include "sopc_threads.h"
 
 SOPC_StatusCode Mutex_Inititalization(Mutex* mut){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -72,3 +73,20 @@ SOPC_StatusCode Mutex_Unlock(Mutex* mut){
     }
     return status;
 }
+
+SOPC_StatusCode Thread_Create(Thread* thread, void *(*startFct) (void *), void *startArgs){
+    SOPC_StatusCode status = STATUS_NOK;
+    if(pthread_create(thread, NULL, startFct, startArgs) == 0){
+        status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode Thread_Join(Thread thread){
+    SOPC_StatusCode status = STATUS_NOK;
+    if(pthread_join(thread, NULL) == 0){
+        status = STATUS_OK;
+    }
+    return status;
+}
+

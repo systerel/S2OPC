@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_P_THREADS_H_
-#define SOPC_P_THREADS_H_
+#ifndef SOPC_THREADS_H_
+#define SOPC_THREADS_H_
 
-#include <pthread.h>
+#include "sopc_base_types.h"
 
-typedef pthread_mutex_t Mutex;
+// Import Mutex type from platform dependent code
+#include "p_threads.h"
 
-typedef pthread_t Thread;
+SOPC_StatusCode Thread_Create(Thread* thread, void *(*startFct) (void *), void *startArgs);
+SOPC_StatusCode Thread_Join(Thread thread);
 
-#endif /* SOPC_P_THREADS_H_ */
+#endif /* SOPC_THREADS_H_ */
