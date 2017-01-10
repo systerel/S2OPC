@@ -1162,36 +1162,43 @@ void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId     builtInTypeId,
             if(NULL != val->Guid){
                 free(val->Guid);
             }
+            val->Guid = NULL;
             break;
         case SOPC_NodeId_Id:
             if(NULL != val->NodeId){
                 free(val->NodeId);
             }
+            val->NodeId = NULL;
             break;
         case SOPC_ExpandedNodeId_Id:
             if(NULL != val->ExpNodeId){
                 free(val->ExpNodeId);
             }
+            val->ExpNodeId = NULL;
             break;
         case SOPC_QualifiedName_Id:
             if(NULL != val->Qname){
                 free(val->Qname);
             }
+            val->Qname = NULL;
             break;
         case SOPC_LocalizedText_Id:
             if(NULL != val->LocalizedText){
                 free(val->LocalizedText);
             }
+            val->LocalizedText = NULL;
             break;
         case SOPC_ExtensionObject_Id:
             if(NULL != val->ExtObject){
                 free(val->ExtObject);
             }
+            val->ExtObject = NULL;
             break;
         case SOPC_DataValue_Id:
             if(NULL != val->DataValue){
                 free(val->DataValue);
             }
+            val->DataValue = NULL;
             break;
         case SOPC_Variant_Id:
             assert(FALSE);
@@ -1200,6 +1207,7 @@ void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId     builtInTypeId,
             if(NULL != val->DiagInfo){
                 free(val->DiagInfo);
             }
+            val->DiagInfo = NULL;
             break;
     }
 }
@@ -1227,21 +1235,26 @@ void SOPC_Variant_Clear(SOPC_Variant* variant){
                                                clearFunction);
                 FreeVariantArrayBuiltInType(variant->BuiltInTypeId,
                                             &variant->Value.Array.Content);
-
+                variant->Value.Array.Length = 0;
                 break;
             case SOPC_VariantArrayType_Matrix:
                 for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
                     length *= variant->Value.Matrix.ArrayDimensions[idx];
                 }
                 free(variant->Value.Matrix.ArrayDimensions);
+                variant->Value.Matrix.ArrayDimensions = NULL;
                 ApplyToVariantArrayBuiltInType(variant->BuiltInTypeId,
                                                variant->Value.Matrix.Content,
                                                length,
                                                clearFunction);
                 FreeVariantArrayBuiltInType(variant->BuiltInTypeId,
                                             &variant->Value.Matrix.Content);
+                variant->Value.Matrix.Dimensions = 0;
                 break;
         }
+
+        // Reset internal properties
+        SOPC_Variant_Initialize(variant);
     }
 }
 
