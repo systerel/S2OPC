@@ -439,18 +439,21 @@ SOPC_StatusCode Write_OpenSecureChannelResponse(SC_Connection* scConnection,
     SOPC_DateTime_FromInt64(&openResponse.SecurityToken.CreatedAt, scConnection->currentSecuToken.createdAt);
     openResponse.SecurityToken.RevisedLifetime = scConnection->currentSecuToken.revisedLifetime;
     // Server nonce
-    bytes = SecretBuffer_Expose(scConnection->currentNonce);
-    status = SOPC_ByteString_CopyFromBytes(&openResponse.ServerNonce,
-                                           bytes,
-                                           SecretBuffer_GetLength(scConnection->currentNonce));
-
+    if(scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
+        bytes = SecretBuffer_Expose(scConnection->currentNonce);
+        status = SOPC_ByteString_CopyFromBytes(&openResponse.ServerNonce,
+                                               bytes,
+                                               SecretBuffer_GetLength(scConnection->currentNonce));
+    }
     if(status == STATUS_OK){
         status = SC_EncodeMsgBody(sendBuf,
                                   &OpcUa_OpenSecureChannelResponse_EncodeableType,
                                   &openResponse);
     }
 
-    SecretBuffer_Unexpose(openResponse.ServerNonce.Data);
+    if(scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
+        SecretBuffer_Unexpose(openResponse.ServerNonce.Data);
+    }
     OpcUa_OpenSecureChannelResponse_Clear(&openResponse);
 
     return status;
@@ -911,10 +914,11 @@ SOPC_StatusCode SC_ServerEndpoint_Open(SC_ServerEndpoint*   endpoint,
         if(STATUS_OK == status){
             endpoint->nbSecurityPolicies = nbSecurityPolicies;
             endpoint->securityPolicies = malloc(sizeof(SOPC_SecurityPolicy) * nbSecurityPolicies);
-            if(endpoint->securityPolicies != NULL){
-                memcpy(endpoint->securityPolicies, securityPolicies, sizeof(SOPC_SecurityPolicy) * nbSecurityPolicies);
-            }else{
-                status = STATUS_NOK;
+            for(idx = 0; idx < nbSecurityPolicies && STATUS_OK == status; idx++){
+                SOPC_String_Initialize(&endpoint->securityPolicies[idx].securityPolicy);
+                status = SOPC_String_Copy(&endpoint->securityPolicies[idx].securityPolicy, &securityPolicies[idx].securityPolicy);
+                endpoint->securityPolicies[idx].securityModes = securityPolicies[idx].securityModes;
+                endpoint->securityPolicies[idx].padding = NULL;
             }
         }
 
