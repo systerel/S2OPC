@@ -174,7 +174,9 @@ SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelSecurityPolicy(SOPC_Endpoi
 
 SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
                                     char*                              url,
+#ifdef STACK_1_03
                                     uint8_t                            listenOnAllInterfaces,
+#endif
                                     SOPC_Endpoint_PfnEndpointCallback* endpointCallback,
                                     void*                              endpointCallbackData,
                                     SOPC_ByteString*                   serverCertificate,
@@ -190,9 +192,11 @@ SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
     PKIProvider *pki;
     PKIConfig *pPKIConfig = pkiConfig;
     SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
+#ifdef STACK_1_03
     if(listenOnAllInterfaces == FALSE){
         return STATUS_INVALID_PARAMETERS;
     }
+#endif
     internalCbData = OpcUa_Create_EndpointCallbackData(endpointCallback, endpointCallbackData);
     if(serverCertificate != NULL && serverCertificate->Length > 0 &&
        serverPrivateKey != NULL && serverPrivateKey->key.Length > 0 &&

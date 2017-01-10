@@ -190,7 +190,7 @@ int32_t OpcUa_String_StrnCmp(const SOPC_String* str1,
     int32_t res = -1;
     assert(CHAR_BIT == 8);
     if(str1->Length == str2->Length ||
-       (str1->Length >= (int32_t) length && str2->Length >= (int32_t) length))
+       (str1->Length >= (int64_t) length && str2->Length >= (int64_t) length))
     {
         if((str1->Length <= 0 && str2->Length <= 0) || length == 0){
             res = 0;

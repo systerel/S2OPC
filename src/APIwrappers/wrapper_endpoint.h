@@ -52,7 +52,9 @@ SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelSecurityPolicy(SOPC_Endpoi
 
 SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
                                     char*                              url,
+#ifdef STACK_1_03
                                     uint8_t                            listenOnAllInterfaces,
+#endif
                                     SOPC_Endpoint_PfnEndpointCallback* endpointCallback,
                                     void*                              endpointCallbackData,
                                     SOPC_ByteString*                   serverCertificate,

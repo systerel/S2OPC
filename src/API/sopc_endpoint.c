@@ -318,11 +318,13 @@ SOPC_StatusCode SOPC_Endpoint_Delete(SOPC_Endpoint* endpoint){
 void* SOPC_Endpoint_GetCallbackData(SOPC_Endpoint endpoint){
     SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
     SOPC_InternalEndpoint_CallbackData* iCbData = NULL;
+    void* result = NULL;
     if(sEndpoint != NULL){
         iCbData = (SOPC_InternalEndpoint_CallbackData*) SC_ServerEndpoint_GetCallbackData(sEndpoint);
-        return iCbData->callbackData;
+        if(iCbData != NULL)
+            result = iCbData->callbackData;
     }
-    return NULL;
+    return result;
 }
 
 SOPC_StatusCode SOPC_Endpoint_GetServiceFunction(SOPC_Endpoint               endpoint,

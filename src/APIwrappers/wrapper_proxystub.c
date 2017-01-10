@@ -48,7 +48,7 @@ void OpcUa_ProxyStub_Clear(void)
 
 SOPC_StatusCode OpcUa_ProxyStub_ReInitialize(void* pConfig){
     OpcUa_ProxyStub_Clear();
-    return OpcUa_ProxyStub_Initialize(NULL, pConfig);
+    return OpcUa_ProxyStub_Initialize(OpcUa_ProxyStub_g_PlatformLayerCalltable, pConfig);
 }
 
 SOPC_StatusCode OpcUa_ProxyStub_AddTypes(SOPC_EncodeableType** types)
