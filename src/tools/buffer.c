@@ -57,6 +57,7 @@ void Buffer_Clear(Buffer* buffer)
     if(buffer != NULL){
         if(buffer->data != NULL){
             free(buffer->data);
+            buffer->data = NULL;
         }
     }
 }
