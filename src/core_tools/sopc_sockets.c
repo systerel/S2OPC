@@ -42,7 +42,9 @@ SOPC_StatusCode Internal_CheckURI(const char* uri,
     uint8_t invalid = FALSE;
     uint8_t startIPv6 = FALSE;
     if(uri != NULL && hostnameLength != NULL && portLength != NULL){
-
+        *hostnameLength = 0;
+        *portIdx = 0;
+        *portLength = 0;
         if(strlen(uri) + 4  > TCP_UA_MAX_URL_LENGTH){
             // Encoded value shall be less than 4096 bytes
             status = STATUS_INVALID_PARAMETERS;
