@@ -103,6 +103,7 @@ SOPC_StatusCode OpcUa_ClientApi_FindServers(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -238,6 +239,7 @@ SOPC_StatusCode OpcUa_ClientApi_FindServersOnNetwork(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -372,6 +374,7 @@ SOPC_StatusCode OpcUa_ClientApi_GetEndpoints(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -493,6 +496,7 @@ SOPC_StatusCode OpcUa_ClientApi_RegisterServer(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -615,6 +619,7 @@ SOPC_StatusCode OpcUa_ClientApi_RegisterServer2(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -776,6 +781,7 @@ SOPC_StatusCode OpcUa_ClientApi_CreateSession(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -943,6 +949,7 @@ SOPC_StatusCode OpcUa_ClientApi_ActivateSession(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -1073,6 +1080,7 @@ SOPC_StatusCode OpcUa_ClientApi_CloseSession(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -1184,6 +1192,7 @@ SOPC_StatusCode OpcUa_ClientApi_Cancel(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -1304,6 +1313,7 @@ SOPC_StatusCode OpcUa_ClientApi_AddNodes(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -1429,6 +1439,7 @@ SOPC_StatusCode OpcUa_ClientApi_AddReferences(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -1554,6 +1565,7 @@ SOPC_StatusCode OpcUa_ClientApi_DeleteNodes(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -1679,6 +1691,7 @@ SOPC_StatusCode OpcUa_ClientApi_DeleteReferences(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -1810,6 +1823,7 @@ SOPC_StatusCode OpcUa_ClientApi_Browse(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -1944,6 +1958,7 @@ SOPC_StatusCode OpcUa_ClientApi_BrowseNext(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -2072,6 +2087,7 @@ SOPC_StatusCode OpcUa_ClientApi_TranslateBrowsePathsToNodeIds(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -2193,6 +2209,7 @@ SOPC_StatusCode OpcUa_ClientApi_RegisterNodes(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -2308,6 +2325,7 @@ SOPC_StatusCode OpcUa_ClientApi_UnregisterNodes(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -2449,6 +2467,7 @@ SOPC_StatusCode OpcUa_ClientApi_QueryFirst(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -2589,6 +2608,7 @@ SOPC_StatusCode OpcUa_ClientApi_QueryNext(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -2720,6 +2740,7 @@ SOPC_StatusCode OpcUa_ClientApi_Read(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -2860,6 +2881,7 @@ SOPC_StatusCode OpcUa_ClientApi_HistoryRead(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -2994,6 +3016,7 @@ SOPC_StatusCode OpcUa_ClientApi_Write(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -3119,6 +3142,7 @@ SOPC_StatusCode OpcUa_ClientApi_HistoryUpdate(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -3244,6 +3268,7 @@ SOPC_StatusCode OpcUa_ClientApi_Call(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -3375,6 +3400,7 @@ SOPC_StatusCode OpcUa_ClientApi_CreateMonitoredItems(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -3512,6 +3538,7 @@ SOPC_StatusCode OpcUa_ClientApi_ModifyMonitoredItems(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -3649,6 +3676,7 @@ SOPC_StatusCode OpcUa_ClientApi_SetMonitoringMode(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -3799,6 +3827,7 @@ SOPC_StatusCode OpcUa_ClientApi_SetTriggering(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -3942,6 +3971,7 @@ SOPC_StatusCode OpcUa_ClientApi_DeleteMonitoredItems(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -4083,6 +4113,7 @@ SOPC_StatusCode OpcUa_ClientApi_CreateSubscription(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -4232,6 +4263,7 @@ SOPC_StatusCode OpcUa_ClientApi_ModifySubscription(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -4372,6 +4404,7 @@ SOPC_StatusCode OpcUa_ClientApi_SetPublishingMode(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -4510,6 +4543,7 @@ SOPC_StatusCode OpcUa_ClientApi_Publish(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -4635,6 +4669,7 @@ SOPC_StatusCode OpcUa_ClientApi_Republish(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -4761,6 +4796,7 @@ SOPC_StatusCode OpcUa_ClientApi_TransferSubscriptions(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
@@ -4889,6 +4925,7 @@ SOPC_StatusCode OpcUa_ClientApi_DeleteSubscriptions(
         {
             *a_pResponseHeader = ((OpcUa_ServiceFault*)pResponse)->ResponseHeader;
             free(pResponse);
+            pResponse = NULL;
         }
 
         /* check response type */
