@@ -112,12 +112,12 @@ void OpcUa_NodeId_Clear(SOPC_NodeId* nodeId){
 }
 int OpcUa_NodeId_IsNull(SOPC_NodeId* nodeId){
     SOPC_Byte nullBytes[sizeof(SOPC_NodeId)];
+    int result = 1;
     if(nodeId != NULL){
         assert(nullBytes == memset(nullBytes, 0, sizeof(SOPC_NodeId)));
-        return memcmp(nullBytes, nodeId, sizeof(SOPC_NodeId));
-    }else{
-        return 1;
+        result = (memcmp(nullBytes, nodeId, sizeof(SOPC_NodeId)) == 0);
     }
+    return result;
 }
 void OpcUa_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId){
     SOPC_ExpandedNodeId_Initialize(expNodeId);
