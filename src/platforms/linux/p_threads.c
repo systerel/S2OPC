@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
@@ -90,3 +92,6 @@ SOPC_StatusCode Thread_Join(Thread thread){
     return status;
 }
 
+void Sleep(unsigned int millisecs){
+    usleep(millisecs*1000);
+}

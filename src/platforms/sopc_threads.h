@@ -25,5 +25,6 @@
 
 SOPC_StatusCode Thread_Create(Thread* thread, void *(*startFct) (void *), void *startArgs);
 SOPC_StatusCode Thread_Join(Thread thread);
+void Sleep(unsigned int millisecs);
 
 #endif /* SOPC_THREADS_H_ */
