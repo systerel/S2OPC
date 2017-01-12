@@ -795,7 +795,7 @@ START_TEST(test_crypto_asym_crypt_B256)
 
     // Encryption/Decryption
     // a) Single message (< 214)
-    memset(input, 0, 856);
+    memset(input, 0, 688);
     memset(output, 0, 1024);
     strncpy((char *)input, "Test INGOPCS Test", 32); // And test padding btw...
     ck_assert(CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 128) == STATUS_OK);

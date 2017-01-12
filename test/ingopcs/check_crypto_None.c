@@ -455,7 +455,7 @@ START_TEST(test_crypto_asym_crypt_None)
     uint32_t len = 0;
 
     // Encryption/Decryption
-    memset(input, 0, 856);
+    memset(input, 0, 688);
     memset(output, 0, 1024);
     strncpy((char *)input, "Test INGOPCS Test", 32);
     ck_assert(CryptoProvider_AsymmetricEncrypt(crypto, input, 32, key_pub, output, 128) == STATUS_INVALID_PARAMETERS);
