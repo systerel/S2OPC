@@ -211,9 +211,11 @@ void SOPC_ByteString_Delete(SOPC_ByteString* bstring){
 }
 
 void SOPC_String_Initialize(SOPC_String* string){
-    string->Length = -1;
-    string->Data = NULL;
-    string->DoNotClear = FALSE; // False unless characters attached
+    if(string != NULL){
+        string->Length = -1;
+        string->Data = NULL;
+        string->DoNotClear = FALSE; // False unless characters attached
+    }
 }
 
 SOPC_String* SOPC_String_Create(){
