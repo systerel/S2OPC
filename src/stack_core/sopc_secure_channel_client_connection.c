@@ -291,10 +291,6 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     }
 
     if(status == STATUS_OK){
-        status = SC_FlushSecureMsgBuffer(cConnection->instance->sendingBuffer, SOPC_Msg_Chunk_Final);
-    }
-
-    if(status == STATUS_OK){
         // TODO: remove precedent OPN request if existing => before flush ?
         PendingRequest* pRequest = SC_PendingRequestCreate(requestId,
                                                            &OpcUa_OpenSecureChannelResponse_EncodeableType,
@@ -305,6 +301,15 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
         if(pRequest != SLinkedList_Add(cConnection->pendingRequests, requestId, pRequest)){
             status = STATUS_NOK;
         }
+    }
+
+    if(status == STATUS_OK){
+        status = SC_FlushSecureMsgBuffer(cConnection->instance->sendingBuffer, SOPC_Msg_Chunk_Final);
+    }
+
+    if(status != STATUS_OK){
+        // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
+        SC_AbortMsg(cConnection->instance->sendingBuffer, OpcUa_BadEncodingError, NULL);
     }
 
     return status;
@@ -874,6 +879,24 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
 
         if(status == STATUS_OK){
             status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, SOPC_Msg_Chunk_Final);
+        }
+
+        if(status != STATUS_OK){
+            SOPC_String reason;
+            SOPC_String_Initialize(&reason);
+            char* cType = NULL;
+            if(requestType->TypeName != NULL){
+                cType = requestType->TypeName;
+            }else{
+                cType = "";
+            }
+            char cReason[strlen("Error encoding chunk for request of type ''")+strlen(cType)];
+            if(sprintf(cReason, "Error encoding chunk for request of type '%s'", requestType->TypeName) < 0){
+                cReason[0] = '\0';
+            }
+            SOPC_String_AttachFromCstring(&reason, cReason);
+            SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, &reason);
+            SOPC_String_Clear(&reason);
         }
 
         Mutex_Unlock(&connection->mutex);

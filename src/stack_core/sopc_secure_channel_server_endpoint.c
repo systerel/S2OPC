@@ -497,6 +497,11 @@ SOPC_StatusCode Send_OpenSecureChannelResponse(SC_Connection*     scConnection,
         status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final);
     }
 
+    if(status != STATUS_OK){
+        // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
+        SC_AbortMsg(scConnection->sendingBuffer, OpcUa_BadEncodingError, NULL);
+    }
+
     return status;
 }
 
@@ -738,6 +743,25 @@ SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
 
         if(status == STATUS_OK){
             status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final);
+        }
+
+        if(status != STATUS_OK){
+            SOPC_String reason;
+            SOPC_String_Initialize(&reason);
+
+            char* cType = NULL;
+            if(responseType->TypeName != NULL){
+                cType = responseType->TypeName;
+            }else{
+                cType = "";
+            }
+            char cReason[strlen("Error encoding chunk for request of type ''")+strlen(cType)];
+            if(sprintf(cReason, "Error encoding chunk for request of type '%s'", responseType->TypeName) < 0){
+                cReason[0] = '\0';
+            }
+            SOPC_String_AttachFromCstring(&reason, cReason);
+            SC_AbortMsg(scConnection->sendingBuffer, OpcUa_BadEncodingError, &reason);
+            SOPC_String_Clear(&reason);
         }
 
         Mutex_Unlock(&sEndpoint->mutex);

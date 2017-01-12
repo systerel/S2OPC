@@ -73,11 +73,13 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                                                          SOPC_Msg_Chunk_Intermediate);
                     }
 
-                    if(status == STATUS_OK){
-                        status = MsgBuffer_ResetNextChunk
-                                  (msgBuffer,
-                                   msgBuffer->sequenceNumberPosition +
-                                    UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+                    if(status != STATUS_OK){
+                        // TODO: Should send flush error in case of too many chunks ?
+                        SOPC_String reason;
+                        SOPC_String_Initialize(&reason);
+                        SOPC_String_AttachFromCstring(&reason, "Error encoding intermediate chunk");
+                        SC_AbortMsg(msgBuffer, OpcUa_BadEncodingError, &reason);
+                        SOPC_String_Clear(&reason);
                     }
                 }
             }

@@ -180,6 +180,8 @@ SOPC_StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection);
 SOPC_StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
                                                 uint32_t       scProtocolVersion);
 
+// Caller must call SC_AbortMsg in case of encode secure message failure
+// in order to at least reset buffer and send an abort message if necessary (chunks already sent)
 SOPC_StatusCode SC_EncodeSecureMessage(SC_Connection*       scConnection,
                                        SOPC_EncodeableType* encType,
                                        void*                value,
