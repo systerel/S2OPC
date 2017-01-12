@@ -743,11 +743,11 @@ SOPC_StatusCode Set_Sequence_Number(SOPC_MsgBuffer* msgBuffer){
        originPosition = msgBuffer->buffers->position;
        status = Buffer_SetPosition(msgBuffer->buffers, msgBuffer->sequenceNumberPosition);
        if(status == STATUS_OK){
-           SOPC_UInt32_Write(&scConnection->lastSeqNumSent, msgBuffer);
+           status = SOPC_UInt32_Write(&scConnection->lastSeqNumSent, msgBuffer);
        }
 
        if(status == STATUS_OK){
-               status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
+           status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
        }
 
     }
