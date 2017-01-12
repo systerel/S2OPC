@@ -485,6 +485,7 @@ SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffer*        msgBuffer,
                                          uint32_t               secureChannelId)
 {
     SOPC_StatusCode status = STATUS_NOK;
+    assert(msgBuffer->buffers->position == 0);
     SOPC_Byte fByte = 'F';
     if(msgBuffer != NULL){
         status = STATUS_OK;
@@ -1134,7 +1135,9 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*     msgBuffer,
             status = TCP_UA_FlushMsgBuffer(scConnection->transportConnection->outputMsgBuffer);
         }
 
-        if(status == STATUS_OK && (chunkType == SOPC_Msg_Chunk_Final || chunkType == SOPC_Msg_Chunk_Abort)){
+        if(status == STATUS_OK && chunkType == SOPC_Msg_Chunk_Intermediate){
+            // Do not reset the buffer
+        }else{
             // Reset buffer for next sending
             MsgBuffer_Reset(scConnection->sendingBuffer);
         }
