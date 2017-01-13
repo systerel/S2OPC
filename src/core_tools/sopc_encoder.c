@@ -1319,6 +1319,7 @@ SOPC_StatusCode WriteVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
             }
             break;
         default:
+            status = STATUS_INVALID_PARAMETERS;
             break;
     }
     return status;
@@ -1511,6 +1512,7 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
             }
             break;
         default:
+            status = STATUS_NOK;
             break;
     }
     return status;
@@ -1788,6 +1790,7 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
             }
             break;
         default:
+	        status = STATUS_NOK;
             break;
     }
     return status;
