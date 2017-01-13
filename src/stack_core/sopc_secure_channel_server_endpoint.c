@@ -966,12 +966,25 @@ SOPC_StatusCode SC_ServerEndpoint_Open(SC_ServerEndpoint*   endpoint,
 
 SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t idx = 0;
     if(endpoint != NULL){
         if(endpoint->state != SC_Endpoint_Opened){
             status = STATUS_INVALID_STATE;
         }else{
             TCP_UA_Listener_Close(endpoint->transportListener);
         }
+        if(endpoint->securityPolicies != NULL){
+            for(idx = 0; idx < endpoint->nbSecurityPolicies; idx++){
+                SOPC_String_Clear(&endpoint->securityPolicies[idx].securityPolicy);
+                endpoint->securityPolicies[idx].securityModes = 0;
+            }
+            endpoint->nbSecurityPolicies = 0;
+        }
+        endpoint->pkiProvider = NULL;
+        endpoint->serverCertificate = NULL;
+        endpoint->serverKey = NULL;
+        endpoint->callback = NULL;
+        endpoint->callbackData = NULL;
     }
     return status;
 }
