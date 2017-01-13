@@ -1215,7 +1215,7 @@ void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId     builtInTypeId,
 }
 
 void SOPC_Variant_Clear(SOPC_Variant* variant){
-    int32_t length = 0;
+    int32_t length = 1; // For multiplication to compute from dimensions values
     int32_t idx = 0;
     if(variant != NULL){
         BuiltInFunction* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeId);
