@@ -679,10 +679,7 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                                                     retStatus,
                                                     &requestId, receivedEncType, receivedEncObj);
                             }
-                            // Clear encodeable object
-                            receivedEncType->Clear(receivedEncObj);
-                            free(receivedEncObj);
-                            receivedEncObj = NULL;
+                            // Note: receivedEncObj to be cleared by application (SDK)
                         }else{
                             retStatus = STATUS_INVALID_RCV_PARAMETER;
                         }
