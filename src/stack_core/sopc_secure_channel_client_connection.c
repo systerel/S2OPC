@@ -124,6 +124,7 @@ void Timer_Delete(P_Timer* timer){
 void SC_Client_Delete(SC_ClientConnection* scConnection)
 {
     if(scConnection != NULL){
+        SC_Client_Disconnect(scConnection);
         Mutex_Lock(&scConnection->mutex);
         scConnection->pkiProvider = NULL;
         scConnection->serverCertificate = NULL;
@@ -239,6 +240,7 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t requestId = 0;
+    PendingRequest* pRequest = NULL;
 
     if(cConnection != NULL){
         status = STATUS_OK;
@@ -292,13 +294,14 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
 
     if(status == STATUS_OK){
         // TODO: remove precedent OPN request if existing => before flush ?
-        PendingRequest* pRequest = SC_PendingRequestCreate(requestId,
-                                                           &OpcUa_OpenSecureChannelResponse_EncodeableType,
-                                                           0, // Not managed now
-                                                           0, // Not managed now
-                                                           NULL, // No callback, specifc message header used (OPN)
-                                                           NULL);
-        if(pRequest != SLinkedList_Add(cConnection->pendingRequests, requestId, pRequest)){
+        pRequest = SC_PendingRequestCreate(requestId,
+                                           &OpcUa_OpenSecureChannelResponse_EncodeableType,
+                                           0, // Not managed now
+                                           0, // Not managed now
+                                           NULL, // No callback, specifc message header used (OPN)
+                                           NULL);
+        if(pRequest == NULL ||
+           pRequest != SLinkedList_Add(cConnection->pendingRequests, requestId, pRequest)){
             status = STATUS_NOK;
         }
     }
@@ -310,6 +313,10 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     if(status != STATUS_OK){
         // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
         SC_AbortMsg(cConnection->instance->sendingBuffer, OpcUa_BadEncodingError, NULL);
+        if(pRequest != NULL){
+            SLinkedList_Remove(cConnection->pendingRequests,requestId);
+            SC_PendingRequestDelete(pRequest);
+        }
     }
 
     return status;
