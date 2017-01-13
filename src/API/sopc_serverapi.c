@@ -40,6 +40,7 @@
 #include "sopc_types.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_encodeable.h"
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 
@@ -178,6 +179,10 @@ SOPC_StatusCode OpcUa_Server_BeginFindServers(
                                             &OpcUa_FindServersResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_FindServersRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -325,6 +330,10 @@ SOPC_StatusCode OpcUa_Server_BeginFindServersOnNetwork(
                                             &OpcUa_FindServersOnNetworkResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_FindServersOnNetworkRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -471,6 +480,10 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
                                             &OpcUa_GetEndpointsResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_GetEndpointsRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -595,6 +608,10 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterServer(
                                             &OpcUa_RegisterServerResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_RegisterServerRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -742,6 +759,10 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterServer2(
                                             &OpcUa_RegisterServer2Response_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_RegisterServer2Request_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -938,6 +959,10 @@ SOPC_StatusCode OpcUa_Server_BeginCreateSession(
                                             &OpcUa_CreateSessionResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_CreateSessionRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -1104,6 +1129,10 @@ SOPC_StatusCode OpcUa_Server_BeginActivateSession(
                                             &OpcUa_ActivateSessionResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_ActivateSessionRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -1228,6 +1257,10 @@ SOPC_StatusCode OpcUa_Server_BeginCloseSession(
                                             &OpcUa_CloseSessionResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_CloseSessionRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -1356,6 +1389,10 @@ SOPC_StatusCode OpcUa_Server_BeginCancel(
                                             &OpcUa_CancelResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_CancelRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -1499,6 +1536,10 @@ SOPC_StatusCode OpcUa_Server_BeginAddNodes(
                                             &OpcUa_AddNodesResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_AddNodesRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -1642,6 +1683,10 @@ SOPC_StatusCode OpcUa_Server_BeginAddReferences(
                                             &OpcUa_AddReferencesResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_AddReferencesRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -1785,6 +1830,10 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteNodes(
                                             &OpcUa_DeleteNodesResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_DeleteNodesRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -1928,6 +1977,10 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteReferences(
                                             &OpcUa_DeleteReferencesResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_DeleteReferencesRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -2079,6 +2132,10 @@ SOPC_StatusCode OpcUa_Server_BeginBrowse(
                                             &OpcUa_BrowseResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_BrowseRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -2226,6 +2283,10 @@ SOPC_StatusCode OpcUa_Server_BeginBrowseNext(
                                             &OpcUa_BrowseNextResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_BrowseNextRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -2369,6 +2430,10 @@ SOPC_StatusCode OpcUa_Server_BeginTranslateBrowsePathsToNodeIds(
                                             &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -2504,6 +2569,10 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterNodes(
                                             &OpcUa_RegisterNodesResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_RegisterNodesRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -2631,6 +2700,10 @@ SOPC_StatusCode OpcUa_Server_BeginUnregisterNodes(
                                             &OpcUa_UnregisterNodesResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_UnregisterNodesRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -2806,6 +2879,10 @@ SOPC_StatusCode OpcUa_Server_BeginQueryFirst(
                                             &OpcUa_QueryFirstResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_QueryFirstRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -2946,6 +3023,10 @@ SOPC_StatusCode OpcUa_Server_BeginQueryNext(
                                             &OpcUa_QueryNextResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_QueryNextRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -3097,6 +3178,10 @@ SOPC_StatusCode OpcUa_Server_BeginRead(
                                             &OpcUa_ReadResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_ReadRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -3252,6 +3337,10 @@ SOPC_StatusCode OpcUa_Server_BeginHistoryRead(
                                             &OpcUa_HistoryReadResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_HistoryReadRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -3395,6 +3484,10 @@ SOPC_StatusCode OpcUa_Server_BeginWrite(
                                             &OpcUa_WriteResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_WriteRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -3538,6 +3631,10 @@ SOPC_StatusCode OpcUa_Server_BeginHistoryUpdate(
                                             &OpcUa_HistoryUpdateResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_HistoryUpdateRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -3681,6 +3778,10 @@ SOPC_StatusCode OpcUa_Server_BeginCall(
                                             &OpcUa_CallResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -3832,6 +3933,10 @@ SOPC_StatusCode OpcUa_Server_BeginCreateMonitoredItems(
                                             &OpcUa_CreateMonitoredItemsResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -3983,6 +4088,10 @@ SOPC_StatusCode OpcUa_Server_BeginModifyMonitoredItems(
                                             &OpcUa_ModifyMonitoredItemsResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -4134,6 +4243,10 @@ SOPC_StatusCode OpcUa_Server_BeginSetMonitoringMode(
                                             &OpcUa_SetMonitoringModeResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_SetMonitoringModeRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -4308,6 +4421,10 @@ SOPC_StatusCode OpcUa_Server_BeginSetTriggering(
                                             &OpcUa_SetTriggeringResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_SetTriggeringRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -4455,6 +4572,10 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteMonitoredItems(
                                             &OpcUa_DeleteMonitoredItemsResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -4615,6 +4736,10 @@ SOPC_StatusCode OpcUa_Server_BeginCreateSubscription(
                                             &OpcUa_CreateSubscriptionResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_CreateSubscriptionRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -4771,6 +4896,10 @@ SOPC_StatusCode OpcUa_Server_BeginModifySubscription(
                                             &OpcUa_ModifySubscriptionResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_ModifySubscriptionRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -4918,6 +5047,10 @@ SOPC_StatusCode OpcUa_Server_BeginSetPublishingMode(
                                             &OpcUa_SetPublishingModeResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_SetPublishingModeRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -5081,6 +5214,10 @@ SOPC_StatusCode OpcUa_Server_BeginPublish(
                                             &OpcUa_PublishResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_PublishRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -5213,6 +5350,10 @@ SOPC_StatusCode OpcUa_Server_BeginRepublish(
                                             &OpcUa_RepublishResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_RepublishRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -5360,6 +5501,10 @@ SOPC_StatusCode OpcUa_Server_BeginTransferSubscriptions(
                                             &OpcUa_TransferSubscriptionsResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_TransferSubscriptionsRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
@@ -5503,6 +5648,10 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteSubscriptions(
                                             &OpcUa_DeleteSubscriptionsResponse_EncodeableType, &pResponse,
                                             &a_hContext);
     }
+    
+    // Clear and free the request object
+    SOPC_Encodeable_Delete(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, a_ppRequest);
+    
     return status;
 }
 
