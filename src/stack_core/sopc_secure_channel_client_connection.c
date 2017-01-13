@@ -63,6 +63,11 @@ void SC_PendingRequestDelete(PendingRequest* pRequest){
     }
 }
 
+void SC_PendingRequestDeleteListElt(uint32_t id, void* request){
+    (void) id;
+    SC_PendingRequestDelete((PendingRequest*) request);
+}
+
 SC_ClientConnection* SC_Client_Create(){
     SC_ClientConnection* scClientConnection = NULL;
     TCP_UA_Connection* connection = TCP_UA_Connection_Create(scProtocolVersion, FALSE); // Server side connection == FALSE
@@ -490,10 +495,11 @@ SOPC_StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnecti
         status = Read_OpenSecureChannelReponse(cConnection, pRequest);
     }
 
+    // Free the request
+    SC_PendingRequestDelete(pRequest);
+    pRequest = NULL;
+
     if(status == STATUS_OK){
-        SC_PendingRequestDelete(pRequest);
-        pRequest = NULL;
-    }else{
         // Trace / channel CB
     }
 
@@ -841,6 +847,7 @@ SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
         cConnection->serverCertificate = NULL;
         cConnection->clientCertificate = NULL;
         cConnection->clientKey = NULL;
+        SLinkedList_Apply(cConnection->pendingRequests, SC_PendingRequestDeleteListElt);
         SLinkedList_Clear(cConnection->pendingRequests);
         SOPC_String_Clear(&cConnection->securityPolicy);
         TCP_UA_Connection_Disconnect(cConnection->instance->transportConnection);
@@ -858,6 +865,7 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
                                 void*                callbackData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    PendingRequest* pRequest = NULL;
     uint32_t requestId = 0;
     if(connection != NULL &&
        requestType != NULL &&
@@ -873,13 +881,14 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
 
         if(status == STATUS_OK){
             // Create associated pending request
-            PendingRequest* pRequest = SC_PendingRequestCreate(requestId,
-                                                               responseType,
-                                                               timeout,
-                                                               0, // Not managed now
-                                                               callback,
-                                                               callbackData);
-            if(pRequest != SLinkedList_Add(connection->pendingRequests, requestId, pRequest)){
+            pRequest = SC_PendingRequestCreate(requestId,
+                                               responseType,
+                                               timeout,
+                                               0, // Not managed now
+                                               callback,
+                                               callbackData);
+            if(pRequest == NULL ||
+               pRequest != SLinkedList_Add(connection->pendingRequests, requestId, pRequest)){
                 status = STATUS_NOK;
             }
         }
@@ -904,6 +913,11 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
             SOPC_String_AttachFromCstring(&reason, cReason);
             SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, &reason);
             SOPC_String_Clear(&reason);
+
+            if(pRequest != NULL){
+                SLinkedList_Remove(connection->pendingRequests,requestId);
+                SC_PendingRequestDelete(pRequest);
+            }
         }
 
         Mutex_Unlock(&connection->mutex);
