@@ -23,13 +23,17 @@ else
 endif
 
 ifdef STACK_1_01
-    DEF_STACK=-DSTACK_1_01
+    DEF_STACK=-DSTACK_1_01 
 else
     ifdef STACK_1_02
-       DEF_STACK=-DSTACK_1_02
+       DEF_STACK=-DSTACK_1_02 
     else
-       DEF_STACK=-DSTACK_1_03
+       DEF_STACK=-DSTACK_1_03 
     endif
+endif
+
+ifdef WRAPPER_RECEPTION_THREAD
+    DEF_THREAD=-DWRAPPER_RECEPTION_THREAD
 endif
 
 ifdef SHARED
@@ -89,7 +93,7 @@ CFLAGS=-c -g -Wall -Wextra -O0 $(SHARED_FLAG)
 C99FLAGS=-std=c99 -pedantic
 LFLAGS=-g
 INCLUDES=$(INCLUDES_MBEDTLS) $(INCLUDES_SSL) $(addprefix -I, $(INCLUDES_UASTACK))
-DEFS=$(DEF_STACK)
+DEFS=$(DEF_STACK) $(DEF_THREAD)
 
 # MAKEFILE CONTENT
 

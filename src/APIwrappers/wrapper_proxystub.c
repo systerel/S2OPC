@@ -18,15 +18,67 @@
 #include "wrapper_proxystub.h"
 
 #include "sopc_stack_config.h"
+#include "sopc_threads.h"
+#include "sopc_mutexes.h"
+#include "sopc_sockets.h"
 
 void* OpcUa_ProxyStub_g_PlatformLayerCalltable = NULL;
 void* OpcUa_ProxyStub_g_Configuration = NULL;
 
 static SOPC_NamespaceTable* gNsTable = NULL;
 
+static struct
+{
+    uint8_t  initDone;
+    uint8_t  stopFlag;
+    Mutex    tMutex;
+    Thread   thread;
+} receptionThread = {
+    .initDone = FALSE,
+    .stopFlag = FALSE,
+};
+
+void* OpcUa_ThreadStartReception(void* nullData){
+    (void) nullData;
+    const uint32_t sleepTimeout = 500;
+    SOPC_StatusCode status = STATUS_OK;
+    Mutex_Lock(&receptionThread.tMutex);
+    while(STATUS_OK == status && receptionThread.stopFlag == FALSE){
+        Mutex_Unlock(&receptionThread.tMutex);
+        status = SOPC_SocketManager_Loop(SOPC_SocketManager_GetGlobal(), sleepTimeout);
+        Sleep(50);
+        Mutex_Lock(&receptionThread.tMutex);
+    }
+    Mutex_Unlock(&receptionThread.tMutex);
+    return NULL;
+}
+
+void OpcUa_ReceptionThread_Start(){
+    if(receptionThread.initDone == FALSE){
+        Mutex_Inititalization(&receptionThread.tMutex);
+        Mutex_Lock(&receptionThread.tMutex);
+        receptionThread.initDone = 1;
+        Thread_Create(&receptionThread.thread, OpcUa_ThreadStartReception, NULL);
+        Mutex_Unlock(&receptionThread.tMutex);
+    }
+
+}
+
+void OpcUa_ReceptionThread_Stop(){
+    if(receptionThread.initDone != FALSE){
+        Mutex_Lock(&receptionThread.tMutex);
+        // stop the reception thread
+        receptionThread.stopFlag = 1;
+        Mutex_Unlock(&receptionThread.tMutex);
+        Thread_Join(receptionThread.thread);
+    }
+}
+
+
 SOPC_StatusCode OpcUa_ProxyStub_Initialize(void* pCalltable,
                                            void* pConfig)
 {
+    SOPC_StatusCode status = STATUS_OK;
     gNsTable = NULL;
     OpcUa_ProxyStub_g_PlatformLayerCalltable = NULL;
     OpcUa_ProxyStub_g_Configuration = NULL;
@@ -34,7 +86,11 @@ SOPC_StatusCode OpcUa_ProxyStub_Initialize(void* pCalltable,
         OpcUa_ProxyStub_g_PlatformLayerCalltable = pCalltable;
     }
     OpcUa_ProxyStub_g_Configuration = pConfig;
-    return StackConfiguration_Initialize();
+    status = StackConfiguration_Initialize();
+#ifdef WRAPPER_RECEPTION_THREAD
+    OpcUa_ReceptionThread_Start();
+#endif
+    return status;
 }
 
 void OpcUa_ProxyStub_Clear(void)
@@ -44,10 +100,18 @@ void OpcUa_ProxyStub_Clear(void)
         gNsTable = NULL;
     }
     StackConfiguration_Clear();
+#ifdef WRAPPER_RECEPTION_THREAD
+    OpcUa_ReceptionThread_Stop();
+#endif
 }
 
 SOPC_StatusCode OpcUa_ProxyStub_ReInitialize(void* pConfig){
-    OpcUa_ProxyStub_Clear();
+    // Clear without thread stop
+    if(gNsTable != NULL){
+        Namespace_Delete(gNsTable);
+        gNsTable = NULL;
+    }
+    StackConfiguration_Clear();
     return OpcUa_ProxyStub_Initialize(OpcUa_ProxyStub_g_PlatformLayerCalltable, pConfig);
 }
 
