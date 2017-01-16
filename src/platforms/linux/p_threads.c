@@ -92,6 +92,6 @@ SOPC_StatusCode Thread_Join(Thread thread){
     return status;
 }
 
-void Sleep(unsigned int millisecs){
-    usleep(millisecs*1000);
+void Sleep(unsigned int microsecs){
+    usleep(microsecs);
 }
