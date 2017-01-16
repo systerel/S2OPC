@@ -614,6 +614,13 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
                 status = SOPC_String_InitializeFromCString(&connection->url, uri);
             }
 
+            if(STATUS_OK == status){
+                status = InitSendBuffer(connection);
+            }
+            if(STATUS_OK == status){
+                status = InitReceiveBuffer(connection);
+            }
+
             if(status == STATUS_OK){
                 connection->state = TCP_UA_Connection_Connecting;
                 connection->callback = callback;
@@ -630,12 +637,6 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
 #else
                 assert(FALSE);
 #endif //OPCUA_MULTITHREADED
-            }
-            if(STATUS_OK == status){
-                status = InitSendBuffer(connection);
-            }
-            if(STATUS_OK == status){
-                status = InitReceiveBuffer(connection);
             }
         }else{
             status = STATUS_INVALID_STATE;

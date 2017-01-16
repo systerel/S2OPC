@@ -27,25 +27,32 @@ const uint32_t tcpProtocolVersion = 0;
 
 SOPC_StatusCode TCP_UA_EncodeHeader(SOPC_MsgBuffer* msgBuffer,
                                     TCP_UA_MsgType  type){
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte fByte = 'F';
-    assert(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH);
-    switch(type){
-        case TCP_UA_Message_Hello:
-            status = Buffer_Write(msgBuffer->buffers, HEL, 3);
-            break;
-        case TCP_UA_Message_Acknowledge:
-            status = Buffer_Write(msgBuffer->buffers, ACK, 3);
-            break;
-        case TCP_UA_Message_Error:
-            status = Buffer_Write(msgBuffer->buffers, ERR, 3);
-            break;
-        case TCP_UA_Message_SecureMessage:
-            // Managed by secure channel layer
-            break;
-        default:
-            // Error case (Invalid or Unknown)
-            status = STATUS_NOK;
+
+    if(msgBuffer != NULL){
+        status = STATUS_OK;
+    }
+
+    if(STATUS_OK == status){
+        assert(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH);
+        switch(type){
+            case TCP_UA_Message_Hello:
+                status = Buffer_Write(msgBuffer->buffers, HEL, 3);
+                break;
+            case TCP_UA_Message_Acknowledge:
+                status = Buffer_Write(msgBuffer->buffers, ACK, 3);
+                break;
+            case TCP_UA_Message_Error:
+                status = Buffer_Write(msgBuffer->buffers, ERR, 3);
+                break;
+            case TCP_UA_Message_SecureMessage:
+                // Managed by secure channel layer
+                break;
+            default:
+                // Error case (Invalid or Unknown)
+                status = STATUS_NOK;
+        }
     }
     if(status == STATUS_OK){
         // reserved byte
