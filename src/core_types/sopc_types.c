@@ -23951,16 +23951,20 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
 {
     int32_t idx = 0;
     uint32_t pos = 0;
-    SOPC_Byte* byteArray = *eltsArray;
-    for (idx = 0; idx < *noOfElts; idx ++){
-        pos = idx * sizeOfElt;
-        clearFct(&(byteArray[pos]));
+    SOPC_Byte* byteArray = NULL;
+    if(noOfElts != NULL && eltsArray != NULL){
+        byteArray = *eltsArray;
+        if(byteArray != NULL){
+            for (idx = 0; idx < *noOfElts; idx ++){
+                pos = idx * sizeOfElt;
+                clearFct(&(byteArray[pos]));
+            }
+
+            free(*eltsArray);
+        }
+        *noOfElts = 0;
+        *eltsArray = NULL;
     }
-    
-    free(*eltsArray);
-    
-    *noOfElts = 0;
-    *eltsArray = NULL;
 }
 
 SOPC_StatusCode SOPC_Read_EnumeratedType(SOPC_MsgBuffer* msgBuffer, int32_t* enumerationValue){
