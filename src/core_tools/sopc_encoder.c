@@ -1022,35 +1022,40 @@ SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Msg
         status = SOPC_Byte_Read(&encodingByte, msgBuffer);
     }
 
-    if(status == STATUS_OK &&
-       encodingByte == SOPC_ExtObjBodyEncoding_ByteString){
-        if(extObj->TypeId.NodeId.IdentifierType == IdentifierType_Numeric){
-            if(extObj->TypeId.NodeId.Namespace != OPCUA_NAMESPACE_INDEX){
-                nsName = Namespace_GetName(&msgBuffer->nsTable, extObj->TypeId.NodeId.Namespace);
-                if(nsName != NULL){
+    if(status == STATUS_OK){
+        // Manage Object body decoding
+        if(encodingByte == SOPC_ExtObjBodyEncoding_ByteString){
+            // Object provided as a byte string, check if encoded object is a known type
+            if(extObj->TypeId.NodeId.IdentifierType == IdentifierType_Numeric){
+                if(extObj->TypeId.NodeId.Namespace != OPCUA_NAMESPACE_INDEX){
+                    nsName = Namespace_GetName(&msgBuffer->nsTable, extObj->TypeId.NodeId.Namespace);
+                    if(nsName != NULL){
+                        nsFound = 1; // TRUE
+                    }
+                }else{
+                    nsName = NULL; // <=> OPCUA_NAMESPACE_NAME in GetEncodeableType
                     nsFound = 1; // TRUE
                 }
+                if(nsFound != FALSE){
+                    encType = SOPC_EncodeableType_GetEncodeableType(msgBuffer->encTypesTable,
+                                                                    nsName,
+                                                                    extObj->TypeId.NodeId.Data.Numeric);
+                }
+                if(nsFound == FALSE || encType == NULL){
+                    // Keep as a byte string since it is unknown object
+                    encodingByte = SOPC_ExtObjBodyEncoding_ByteString;
+                }else{
+                    encodingByte = SOPC_ExtObjBodyEncoding_Object;
+                    extObj->Body.Object.ObjType = encType;
+                    SOPC_String_AttachFromCstring(&extObj->TypeId.NamespaceUri, encType->NamespaceUri);
+                }
             }else{
-                nsName = NULL; // <=> OPCUA_NAMESPACE_NAME in GetEncodeableType
-                nsFound = 1; // TRUE
+                status = STATUS_INVALID_RCV_PARAMETER;
             }
-            if(nsFound != FALSE){
-                encType = SOPC_EncodeableType_GetEncodeableType(msgBuffer->encTypesTable,
-                                                                nsName,
-                                                                extObj->TypeId.NodeId.Data.Numeric);
-            }
-            if(nsFound == FALSE || encType == NULL){
-                // Keep as a byte string since it is unknown object
-                encodingByte = SOPC_ExtObjBodyEncoding_ByteString;
-            }else{
-                encodingByte = SOPC_ExtObjBodyEncoding_Object;
-                extObj->Body.Object.ObjType = encType;
-                SOPC_String_AttachFromCstring(&extObj->TypeId.NamespaceUri, encType->NamespaceUri);
-            }
-        }else{
+        }else if(encodingByte == SOPC_ExtObjBodyEncoding_Object){
+            // Invalid value encoded, it does not exist as a valid binary encoding value
             status = STATUS_INVALID_RCV_PARAMETER;
         }
-
     }
 
     if(status == STATUS_OK){
