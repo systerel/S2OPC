@@ -1104,9 +1104,10 @@ SOPC_Byte GetVariantEncodingMask(const SOPC_Variant* variant){
     return encodingByte;
 }
 
-SOPC_StatusCode WriteVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
-                                           SOPC_BuiltinId builtInTypeId,
-                                           const SOPC_VariantValue *val){
+SOPC_StatusCode WriteVariantNonArrayBuiltInType(SOPC_MsgBuffer*         msgBuffer,
+                                                SOPC_BuiltinId          builtInTypeId,
+                                                const SOPC_VariantValue *val)
+{
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     switch(builtInTypeId){
         case SOPC_Boolean_Id:
@@ -1179,21 +1180,24 @@ SOPC_StatusCode WriteVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
             status = SOPC_DataValue_Write(val->DataValue, msgBuffer);
             break;
         case SOPC_Variant_Id:
-            assert(FALSE);
+            // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+            //                           but it could be an array of Variants."
+            status = STATUS_INVALID_PARAMETERS;
             break;
         case SOPC_DiagnosticInfo_Id:
             status = SOPC_DiagnosticInfo_Write(val->DiagInfo, msgBuffer);
             break;
         default:
+            // STATUS = INVALID PARAM
             break;
     }
     return status;
 }
 
-SOPC_StatusCode WriteVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
-                                        SOPC_BuiltinId builtInTypeId,
-                                        const SOPC_VariantArrayValue* array,
-                                        int32_t length)
+SOPC_StatusCode WriteVariantArrayBuiltInType(SOPC_MsgBuffer*               msgBuffer,
+                                             SOPC_BuiltinId                builtInTypeId,
+                                             const SOPC_VariantArrayValue* array,
+                                             int32_t                       length)
 {
     SOPC_StatusCode status = STATUS_OK;
     int32_t idx = 0;
@@ -1388,9 +1392,10 @@ SOPC_StatusCode SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_MsgBuffer* 
     return status;
 }
 
-SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
-                                           SOPC_BuiltinId builtInTypeId,
-                                           SOPC_VariantValue *val){
+SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer*   msgBuffer,
+                                               SOPC_BuiltinId    builtInTypeId,
+                                               SOPC_VariantValue *val)
+{
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     switch(builtInTypeId){
         case SOPC_Boolean_Id:
@@ -1505,7 +1510,9 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
             }
             break;
         case SOPC_Variant_Id:
-            assert(FALSE);
+            // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+            //                           but it could be an array of Variants."
+            status = STATUS_INVALID_RCV_PARAMETER;
             break;
         case SOPC_DiagnosticInfo_Id:
             val->DiagInfo = malloc(sizeof(SOPC_DiagnosticInfo));
@@ -1523,10 +1530,10 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
     return status;
 }
 
-SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer* msgBuffer,
-                                        SOPC_BuiltinId builtInTypeId,
-                                        SOPC_VariantArrayValue* array,
-                                        int32_t length)
+SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer*         msgBuffer,
+                                            SOPC_BuiltinId          builtInTypeId,
+                                            SOPC_VariantArrayValue* array,
+                                            int32_t                 length)
 {
     SOPC_StatusCode status = STATUS_OK;
     int32_t idx = 0;

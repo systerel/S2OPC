@@ -669,9 +669,9 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj){
     }
 }
 
-void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
+void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId     builtInTypeId,
                                        SOPC_VariantValue* val,
-                                       BuiltInFunction* builtInFunction){
+                                       BuiltInFunction*   builtInFunction){
     switch(builtInTypeId){
         case SOPC_Boolean_Id:
             builtInFunction(&val->Boolean);
@@ -742,11 +742,13 @@ void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
         case SOPC_DataValue_Id:
             builtInFunction(val->DataValue);
             break;
-        case SOPC_Variant_Id:
-            assert(FALSE);
-            break;
         case SOPC_DiagnosticInfo_Id:
             builtInFunction(val->DiagInfo);
+            break;
+        case SOPC_Variant_Id:
+            // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+            //                           but it could be an array of Variants."
+            //Note: Variant is not encoded in INGOPCS stack for this case
             break;
         default:
             break;
@@ -760,128 +762,178 @@ void ApplyToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
     int32_t idx = 0;
     switch(builtInTypeId){
         case SOPC_Boolean_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.BooleanArr[idx]);
+            if(array.BooleanArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.BooleanArr[idx]);
+                }
             }
             break;
         case SOPC_SByte_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.SbyteArr[idx]);
+            if(array.SbyteArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.SbyteArr[idx]);
+                }
             }
             break;
         case SOPC_Byte_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.ByteArr[idx]);
+            if(array.ByteArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.ByteArr[idx]);
+                }
             }
             break;
         case SOPC_Int16_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.Int16Arr[idx]);
+            if(array.Int16Arr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.Int16Arr[idx]);
+                }
             }
             break;
         case SOPC_UInt16_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.Uint16Arr[idx]);
+            if(array.Uint16Arr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.Uint16Arr[idx]);
+                }
             }
             break;
         case SOPC_Int32_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.Int32Arr[idx]);
+            if(array.Int32Arr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.Int32Arr[idx]);
+                }
             }
             break;
         case SOPC_UInt32_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.Uint32Arr[idx]);
+            if(array.Uint32Arr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.Uint32Arr[idx]);
+                }
             }
             break;
         case SOPC_Int64_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.Int64Arr[idx]);
+            if(array.Int64Arr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.Int64Arr[idx]);
+                }
             }
             break;
         case SOPC_UInt64_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.Uint64Arr[idx]);
+            if(array.Uint64Arr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.Uint64Arr[idx]);
+                }
             }
             break;
         case SOPC_Float_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.FloatvArr[idx]);
+            if(array.FloatvArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.FloatvArr[idx]);
+                }
             }
             break;
         case SOPC_Double_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.DoublevArr[idx]);
+            if(array.DoublevArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.DoublevArr[idx]);
+                }
             }
             break;
         case SOPC_String_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.StringArr[idx]);
+            if(array.StringArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.StringArr[idx]);
+                }
             }
             break;
         case SOPC_DateTime_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.DateArr[idx]);
+            if(array.DateArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.DateArr[idx]);
+                }
             }
             break;
         case SOPC_Guid_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.GuidArr[idx]);
+            if(array.GuidArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.GuidArr[idx]);
+                }
             }
             break;
         case SOPC_ByteString_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.BstringArr[idx]);
+            if(array.BstringArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.BstringArr[idx]);
+                }
             }
             break;
         case SOPC_XmlElement_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.XmlEltArr[idx]);
+            if(array.XmlEltArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.XmlEltArr[idx]);
+                }
             }
             break;
         case SOPC_NodeId_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.NodeIdArr[idx]);
+            if(array.NodeIdArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.NodeIdArr[idx]);
+                }
             }
             break;
         case SOPC_ExpandedNodeId_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.ExpNodeIdArr[idx]);
+            if(array.ExpNodeIdArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.ExpNodeIdArr[idx]);
+                }
             }
             break;
         case SOPC_StatusCode_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.StatusArr[idx]);
+            if(array.StatusArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.StatusArr[idx]);
+                }
             }
             break;
         case SOPC_QualifiedName_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.QnameArr[idx]);
+            if(array.QnameArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.QnameArr[idx]);
+                }
             }
             break;
         case SOPC_LocalizedText_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.LocalizedTextArr[idx]);
+            if(array.LocalizedTextArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.LocalizedTextArr[idx]);
+                }
             }
             break;
         case SOPC_ExtensionObject_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.ExtObjectArr[idx]);
+            if(array.ExtObjectArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.ExtObjectArr[idx]);
+                }
             }
             break;
         case SOPC_DataValue_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.DataValueArr[idx]);
+            if(array.DataValueArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.DataValueArr[idx]);
+                }
             }
             break;
         case SOPC_Variant_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.VariantArr[idx]);
+            if(array.VariantArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.VariantArr[idx]);
+                }
             }
             break;
         case SOPC_DiagnosticInfo_Id:
-            for(idx = 0; idx < length; idx++){
-                builtInFunction(&array.DiagInfoArr[idx]);
+            if(array.DiagInfoArr != NULL){
+                for(idx = 0; idx < length; idx++){
+                    builtInFunction(&array.DiagInfoArr[idx]);
+                }
             }
             break;
         default:
@@ -1202,14 +1254,16 @@ void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId     builtInTypeId,
             }
             val->DataValue = NULL;
             break;
-        case SOPC_Variant_Id:
-            assert(FALSE);
-            break;
         case SOPC_DiagnosticInfo_Id:
             if(NULL != val->DiagInfo){
                 free(val->DiagInfo);
             }
             val->DiagInfo = NULL;
+            break;
+        case SOPC_Variant_Id:
+            // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+            //                           but it could be an array of Variants."
+            //Note: Variant is not encoded in INGOPCS stack for this case
             break;
     }
 }
