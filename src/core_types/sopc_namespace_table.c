@@ -103,7 +103,7 @@ const char* Namespace_GetName(SOPC_NamespaceTable* namespaceTable,
                               uint16_t index){
     SOPC_Namespace namespaceEntry;
     char* result = NULL;
-    if(namespaceTable != NULL){
+    if(namespaceTable != NULL && namespaceTable->namespaceArray != NULL){
         uint32_t idx = 0;
         for (idx = 0; idx <= namespaceTable->lastIdx; idx++){
             namespaceEntry = namespaceTable->namespaceArray[idx];
