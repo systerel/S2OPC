@@ -24,6 +24,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_secure_channel_client_connection.h"
 #include "sopc_stack_config.h"
+#include "sopc_threads.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -396,10 +397,9 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
            loopCpt * sleepTimeout <= timeout)
     {
         loopCpt++;
-#if OPCUA_MULTITHREADED
+#if OPCUA_MULTITHREADED || WRAPPER_RECEPTION_THREAD
         // just wait for callback called
-        //Sleep (sleepTimeout);
-        return OpcUa_BadNotImplemented;
+        Sleep (sleepTimeout);
 #else
         // TODO: will retrieve any message: is it a problem ?
         // Retrieve received messages on socket
