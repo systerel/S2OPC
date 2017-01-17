@@ -68,6 +68,7 @@ typedef struct TCP_UA_Connection {
     SOPC_MsgBuffer*             sendingQueue;
     TCP_UA_Connection_Event_CB* callback;
     void*                       callbackData;
+    Mutex                       mutex;
 
 } TCP_UA_Connection;
 
@@ -96,5 +97,10 @@ void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection);
 // return FALSE if no protocol version (for non TCP protocol only: must be generic)
 uint32_t TCP_UA_Connection_GetReceiveProtocolVersion(TCP_UA_Connection* connection,
                                                      uint32_t*          protocolVersion);
+
+// Socket events treatment
+SOPC_StatusCode OnSocketEvent_CB(SOPC_Socket* socket,
+                                 uint32_t     socketEvent,
+                                 void*        callbackData);
 
 #endif /* SOPC_TCP_UA_CONNECTION_H_ */
