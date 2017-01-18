@@ -26,9 +26,19 @@
 
 typedef void (BuiltInFunction) (void*);
 
+
+void SOPC_Boolean_InitializeAux(void* value){
+    SOPC_Boolean_Initialize((SOPC_Boolean*) value);
+}
+
 void SOPC_Boolean_Initialize(SOPC_Boolean* b){
     if(b != NULL)
         *b = FALSE;
+}
+
+
+void SOPC_Boolean_ClearAux(void* value){
+    SOPC_Boolean_Clear((SOPC_Boolean*) value);
 }
 
 void SOPC_Boolean_Clear(SOPC_Boolean* b){
@@ -36,9 +46,19 @@ void SOPC_Boolean_Clear(SOPC_Boolean* b){
         *b = FALSE;
 }
 
+
+void SOPC_SByte_InitializeAux(void* value){
+    SOPC_SByte_Initialize((SOPC_SByte*) value);
+}
+
 void SOPC_SByte_Initialize(SOPC_SByte* sbyte){
     if(sbyte != NULL)
         *sbyte = 0;
+}
+
+
+void SOPC_SByte_ClearAux(void* value){
+    SOPC_SByte_Clear((SOPC_SByte*) value);
 }
 
 void SOPC_SByte_Clear(SOPC_SByte* sbyte){
@@ -46,9 +66,19 @@ void SOPC_SByte_Clear(SOPC_SByte* sbyte){
         *sbyte = 0;
 }
 
+
+void SOPC_Byte_InitializeAux(void* value){
+    SOPC_Byte_Initialize((SOPC_Byte*) value);
+}
+
 void SOPC_Byte_Initialize(SOPC_Byte* byte){
     if(byte != NULL)
         *byte = 0;
+}
+
+
+void SOPC_Byte_ClearAux(void* value){
+    SOPC_Byte_Clear((SOPC_Byte*) value);
 }
 
 void SOPC_Byte_Clear(SOPC_Byte* byte){
@@ -56,9 +86,19 @@ void SOPC_Byte_Clear(SOPC_Byte* byte){
         *byte = 0;
 }
 
+
+void SOPC_Int16_InitializeAux(void* value){
+    SOPC_Int16_Initialize((int16_t*) value);
+}
+
 void SOPC_Int16_Initialize(int16_t* intv){
     if(intv != NULL)
         *intv = 0;
+}
+
+
+void SOPC_Int16_ClearAux(void* value){
+    SOPC_Int16_Clear((int16_t*) value);
 }
 
 void SOPC_Int16_Clear(int16_t* intv){
@@ -66,49 +106,99 @@ void SOPC_Int16_Clear(int16_t* intv){
         *intv = 0;
 }
 
+
+void SOPC_UInt16_InitializeAux(void* value){
+    SOPC_UInt16_Initialize((uint16_t*) value);
+}
+
 void SOPC_UInt16_Initialize(uint16_t* uint){
     if(uint != NULL)
         *uint = 0;
+}
+
+void SOPC_UInt16_ClearAux(void* value){
+    SOPC_UInt16_Clear((uint16_t*) value);
 }
 void SOPC_UInt16_Clear(uint16_t* uint){
     if(uint != NULL)
         *uint = 0;
 }
 
+
+void SOPC_Int32_InitializeAux(void* value){
+    SOPC_Int32_Initialize((int32_t*) value);
+}
+
 void SOPC_Int32_Initialize(int32_t* intv){
     if(intv != NULL)
         *intv = 0;
+}
+
+void SOPC_Int32_ClearAux(void* value){
+    SOPC_Int32_Clear((int32_t*) value);
 }
 void SOPC_Int32_Clear(int32_t* intv){
     if(intv != NULL)
         *intv = 0;
 }
 
+
+void SOPC_UInt32_InitializeAux(void* value){
+    SOPC_UInt32_Initialize((uint32_t*) value);
+}
+
 void SOPC_UInt32_Initialize(uint32_t* uint){
     if(uint != NULL)
         *uint = 0;
+}
+
+void SOPC_UInt32_ClearAux(void* value){
+    SOPC_UInt32_Clear((uint32_t*) value);
 }
 void SOPC_UInt32_Clear(uint32_t* uint){
     if(uint != NULL)
         *uint = 0;
 }
 
+
+void SOPC_Int64_InitializeAux(void* value){
+    SOPC_Int64_Initialize((int64_t*) value);
+}
+
 void SOPC_Int64_Initialize(int64_t* intv){
     if(intv != NULL)
         *intv = 0;
+}
+
+void SOPC_Int64_ClearAux(void* value){
+    SOPC_Int64_Clear((int64_t*) value);
 }
 void SOPC_Int64_Clear(int64_t* intv){
     if(intv != NULL)
         *intv = 0;
 }
 
+
+void SOPC_UInt64_InitializeAux(void* value){
+    SOPC_UInt64_Initialize((uint64_t*) value);
+}
+
 void SOPC_UInt64_Initialize(uint64_t* uint){
     if(uint != NULL)
         *uint = 0;
 }
+
+void SOPC_UInt64_ClearAux(void* value){
+    SOPC_UInt64_Clear((uint64_t*) value);
+}
 void SOPC_UInt64_Clear(uint64_t* uint){
     if(uint != NULL)
         *uint = 0;
+}
+
+
+void SOPC_Float_InitializeAux(void* value){
+    SOPC_Float_Initialize((float*) value);
 }
 
 void SOPC_Float_Initialize(float* f){
@@ -116,9 +206,19 @@ void SOPC_Float_Initialize(float* f){
         *f = 0.0;
 }
 
+
+void SOPC_Float_ClearAux(void* value){
+    SOPC_Float_Clear((float*) value);
+}
+
 void SOPC_Float_Clear(float* f){
     if(f != NULL)
         *f = 0.0;
+}
+
+
+void SOPC_Double_InitializeAux(void* value){
+    SOPC_Double_Initialize((double*) value);
 }
 
 void SOPC_Double_Initialize(double* d){
@@ -126,9 +226,19 @@ void SOPC_Double_Initialize(double* d){
         *d = 0.0;
 }
 
+
+void SOPC_Double_ClearAux(void* value){
+    SOPC_Double_Clear((double*) value);
+}
+
 void SOPC_Double_Clear(double* d){
     if(d != NULL)
         *d = 0.0;
+}
+
+
+void SOPC_ByteString_InitializeAux(void* value){
+    SOPC_ByteString_Initialize((SOPC_ByteString*) value);
 }
 
 void SOPC_ByteString_Initialize(SOPC_ByteString* bstring){
@@ -193,6 +303,11 @@ SOPC_StatusCode SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteStrin
     return status;
 }
 
+
+void SOPC_ByteString_ClearAux(void* value){
+    SOPC_ByteString_Clear((SOPC_ByteString*) value);
+}
+
 void SOPC_ByteString_Clear(SOPC_ByteString* bstring){
     if(bstring != NULL){
         if(bstring->Data != NULL){
@@ -208,6 +323,11 @@ void SOPC_ByteString_Delete(SOPC_ByteString* bstring){
         SOPC_ByteString_Clear(bstring);
         free(bstring);
     }
+}
+
+
+void SOPC_String_InitializeAux(void* value){
+    SOPC_String_Initialize((SOPC_String*) value);
 }
 
 void SOPC_String_Initialize(SOPC_String* string){
@@ -269,6 +389,11 @@ SOPC_StatusCode SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src){
         }
     }
     return status;
+}
+
+
+void SOPC_String_ClearAux(void* value){
+    SOPC_String_Clear((SOPC_String*) value);
 }
 
 void SOPC_String_Clear(SOPC_String* string){
@@ -450,14 +575,30 @@ uint32_t SOPC_String_Equal(const SOPC_String* left,
                               (SOPC_ByteString*) right);
 }
 
+
+void SOPC_XmlElement_InitializeAux(void* value){
+    SOPC_XmlElement_Initialize((SOPC_XmlElement*) value);
+}
+
 void SOPC_XmlElement_Initialize(SOPC_XmlElement* xmlElt){
     if(xmlElt != NULL){
         SOPC_ByteString_Initialize((SOPC_ByteString*) xmlElt);
     }
 }
 
+
+void SOPC_XmlElement_ClearAux(void* value){
+    SOPC_XmlElement_Clear((SOPC_XmlElement*) value);
+}
+
 void SOPC_XmlElement_Clear(SOPC_XmlElement* xmlElt){
     SOPC_ByteString_Clear((SOPC_ByteString*) xmlElt);
+}
+
+
+
+void SOPC_DateTime_InitializeAux(void* value){
+    SOPC_DateTime_Initialize((SOPC_DateTime*) value);
 }
 
 
@@ -466,6 +607,11 @@ void SOPC_DateTime_Initialize(SOPC_DateTime* dateTime){
         dateTime->Low32 = 0;
         dateTime->High32 = 0;
     }
+}
+
+
+void SOPC_DateTime_ClearAux(void* value){
+    SOPC_DateTime_Clear((SOPC_DateTime*) value);
 }
 
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime){
@@ -489,16 +635,31 @@ void SOPC_DateTime_FromInt64(SOPC_DateTime* dateTime, int64_t date){
     }
 }
 
+
+void SOPC_Guid_InitializeAux(void* value){
+    SOPC_Guid_Initialize((SOPC_Guid*) value);
+}
+
 void SOPC_Guid_Initialize(SOPC_Guid* guid){
     if(guid != NULL){
         memset(guid, 0, sizeof(SOPC_Guid));
     }
 }
 
+
+void SOPC_Guid_ClearAux(void* value){
+    SOPC_Guid_Clear((SOPC_Guid*) value);
+}
+
 void SOPC_Guid_Clear(SOPC_Guid* guid){
     if(guid != NULL){
         memset(guid, 0, sizeof(SOPC_Guid));
     }
+}
+
+
+void SOPC_NodeId_InitializeAux(void* value){
+    SOPC_NodeId_Initialize((SOPC_NodeId*) value);
 }
 
 void SOPC_NodeId_Initialize(SOPC_NodeId* nodeId){
@@ -529,6 +690,11 @@ void SOPC_NodeId_InitType(SOPC_NodeId* nodeId, SOPC_IdentifierType knownIdType){
     }
 }
 
+
+void SOPC_NodeId_ClearAux(void* value){
+    SOPC_NodeId_Clear((SOPC_NodeId*) value);
+}
+
 void SOPC_NodeId_Clear(SOPC_NodeId* nodeId){
     if(nodeId != NULL){
         nodeId->Namespace = 0; // OPCUA namespace
@@ -554,12 +720,22 @@ void SOPC_NodeId_Clear(SOPC_NodeId* nodeId){
     }
 }
 
+
+void SOPC_ExpandedNodeId_InitializeAux(void* value){
+    SOPC_ExpandedNodeId_Initialize((SOPC_ExpandedNodeId*) value);
+}
+
 void SOPC_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId){
     if(expNodeId != NULL){
         SOPC_String_Initialize(&expNodeId->NamespaceUri);
         SOPC_NodeId_Initialize(&expNodeId->NodeId);
         SOPC_UInt32_Initialize(&expNodeId->ServerIndex);
     }
+}
+
+
+void SOPC_ExpandedNodeId_ClearAux(void* value){
+    SOPC_ExpandedNodeId_Clear((SOPC_ExpandedNodeId*) value);
 }
 
 void SOPC_ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId){
@@ -570,16 +746,31 @@ void SOPC_ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId){
     }
 }
 
+
+void SOPC_StatusCode_InitializeAux(void* value){
+    SOPC_StatusCode_Initialize((SOPC_StatusCode*) value);
+}
+
 void SOPC_StatusCode_Initialize(SOPC_StatusCode* status){
     if(status != NULL){
         *status = STATUS_OK;
     }
 }
 
+
+void SOPC_StatusCode_ClearAux(void* value){
+    SOPC_StatusCode_Clear((SOPC_StatusCode*) value);
+}
+
 void SOPC_StatusCode_Clear(SOPC_StatusCode* status){
     if(status != NULL){
         *status = STATUS_OK;
     }
+}
+
+
+void SOPC_DiagnosticInfo_InitializeAux(void* value){
+    SOPC_DiagnosticInfo_Initialize((SOPC_DiagnosticInfo*) value);
 }
 
 void SOPC_DiagnosticInfo_Initialize(SOPC_DiagnosticInfo* diagInfo){
@@ -592,6 +783,11 @@ void SOPC_DiagnosticInfo_Initialize(SOPC_DiagnosticInfo* diagInfo){
         diagInfo->InnerStatusCode = STATUS_OK;
         diagInfo->InnerDiagnosticInfo = NULL;
     }
+}
+
+
+void SOPC_DiagnosticInfo_ClearAux(void* value){
+    SOPC_DiagnosticInfo_Clear((SOPC_DiagnosticInfo*) value);
 }
 
 void SOPC_DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo){
@@ -611,11 +807,22 @@ void SOPC_DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo){
 }
 
 
+
+void SOPC_QualifiedName_InitializeAux(void* value){
+    SOPC_QualifiedName_Initialize((SOPC_QualifiedName*) value);
+}
+
+
 void SOPC_QualifiedName_Initialize(SOPC_QualifiedName* qname){
     if(qname != NULL){
         qname->NamespaceIndex = 0;
         SOPC_String_Initialize(&qname->Name);
     }
+}
+
+
+void SOPC_QualifiedName_ClearAux(void* value){
+    SOPC_QualifiedName_Clear((SOPC_QualifiedName*) value);
 }
 
 void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname){
@@ -625,11 +832,21 @@ void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname){
     }
 }
 
+
+void SOPC_LocalizedText_InitializeAux(void* value){
+    SOPC_LocalizedText_Initialize((SOPC_LocalizedText*) value);
+}
+
 void SOPC_LocalizedText_Initialize(SOPC_LocalizedText* localizedText){
     if(localizedText != NULL){
         SOPC_String_Initialize(&localizedText->Locale);
         SOPC_String_Initialize(&localizedText->Text);
     }
+}
+
+
+void SOPC_LocalizedText_ClearAux(void* value){
+    SOPC_LocalizedText_Clear((SOPC_LocalizedText*) value);
 }
 
 void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText){
@@ -639,12 +856,22 @@ void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText){
     }
 }
 
+
+void SOPC_ExtensionObject_InitializeAux(void* value){
+    SOPC_ExtensionObject_Initialize((SOPC_ExtensionObject*) value);
+}
+
 void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj){
     if(extObj != NULL){
         memset(extObj, 0, sizeof(SOPC_ExtensionObject));
         SOPC_ExpandedNodeId_Initialize(&extObj->TypeId);
         extObj->Length = -1;
     }
+}
+
+
+void SOPC_ExtensionObject_ClearAux(void* value){
+    SOPC_ExtensionObject_Clear((SOPC_ExtensionObject*) value);
 }
 
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj){
@@ -939,6 +1166,11 @@ void ApplyToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
         default:
             break;
     }
+}
+
+
+void SOPC_Variant_InitializeAux(void* value){
+    SOPC_Variant_Initialize((SOPC_Variant*) value);
 }
 
 void SOPC_Variant_Initialize(SOPC_Variant* variant){
@@ -1268,6 +1500,11 @@ void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId     builtInTypeId,
     }
 }
 
+
+void SOPC_Variant_ClearAux(void* value){
+    SOPC_Variant_Clear((SOPC_Variant*) value);
+}
+
 void SOPC_Variant_Clear(SOPC_Variant* variant){
     int32_t length = 1; // For multiplication to compute from dimensions values
     int32_t idx = 0;
@@ -1314,10 +1551,19 @@ void SOPC_Variant_Clear(SOPC_Variant* variant){
     }
 }
 
+
+void SOPC_DataValue_InitializeAux(void* value){
+    SOPC_DataValue_Initialize((SOPC_DataValue*) value);
+}
+
 void SOPC_DataValue_Initialize(SOPC_DataValue* dataValue){
     if(dataValue != NULL){
         memset(dataValue, 0, sizeof(SOPC_DataValue));
     }
+}
+
+void SOPC_DataValue_ClearAux(void* value){
+    SOPC_DataValue_Clear((SOPC_DataValue*) value);
 }
 void SOPC_DataValue_Clear(SOPC_DataValue* dataValue){
     if(dataValue != NULL){

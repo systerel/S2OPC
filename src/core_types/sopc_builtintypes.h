@@ -260,44 +260,68 @@ typedef struct SOPC_DataValue {
 #define SECURITY_POLICY_BASIC256SHA256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
 
 void SOPC_Boolean_Initialize(SOPC_Boolean* b);
+void SOPC_Boolean_InitializeAux(void* value);
 void SOPC_Boolean_Clear(SOPC_Boolean* b);
+void SOPC_Boolean_ClearAux(void* value);
 
 void SOPC_SByte_Initialize(SOPC_SByte* sbyte);
+void SOPC_SByte_InitializeAux(void* value);
 void SOPC_SByte_Clear(SOPC_SByte* sbyte);
+void SOPC_SByte_ClearAux(void* value);
 
 void SOPC_Byte_Initialize(SOPC_Byte* byte);
+void SOPC_Byte_InitializeAux(void* value);
 void SOPC_Byte_Clear(SOPC_Byte* byte);
+void SOPC_Byte_ClearAux(void* value);
 
 void SOPC_Int16_Initialize(int16_t* intv);
+void SOPC_Int16_InitializeAux(void* value);
 void SOPC_Int16_Clear(int16_t* intv);
+void SOPC_Int16_ClearAux(void* value);
 
 void SOPC_UInt16_Initialize(uint16_t* uint);
+void SOPC_UInt16_InitializeAux(void* value);
 void SOPC_UInt16_Clear(uint16_t* uint);
+void SOPC_UInt16_ClearAux(void* value);
 
 void SOPC_Int32_Initialize(int32_t* intv);
+void SOPC_Int32_InitializeAux(void* value);
 void SOPC_Int32_Clear(int32_t* intv);
+void SOPC_Int32_ClearAux(void* value);
 
 void SOPC_UInt32_Initialize(uint32_t* uint);
+void SOPC_UInt32_InitializeAux(void* value);
 void SOPC_UInt32_Clear(uint32_t* uint);
+void SOPC_UInt32_ClearAux(void* value);
 
 void SOPC_Int64_Initialize(int64_t* intv);
+void SOPC_Int64_InitializeAux(void* value);
 void SOPC_Int64_Clear(int64_t* intv);
+void SOPC_Int64_ClearAux(void* value);
 
 void SOPC_UInt64_Initialize(uint64_t* uint);
+void SOPC_UInt64_InitializeAux(void* value);
 void SOPC_UInt64_Clear(uint64_t* uint);
+void SOPC_UInt64_ClearAux(void* value);
 
 void SOPC_Float_Initialize(float* f);
+void SOPC_Float_InitializeAux(void* value);
 void SOPC_Float_Clear(float* f);
+void SOPC_Float_ClearAux(void* value);
 
 void SOPC_Double_Initialize(double* d);
+void SOPC_Double_InitializeAux(void* value);
 void SOPC_Double_Clear(double* d);
+void SOPC_Double_ClearAux(void* value);
 
 void SOPC_ByteString_Initialize(SOPC_ByteString* bstring);
+void SOPC_ByteString_InitializeAux(void* value);
 SOPC_ByteString* SOPC_ByteString_Create(void);
 SOPC_StatusCode SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, uint32_t size);
 SOPC_StatusCode SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, SOPC_Byte* bytes, int32_t length);
 SOPC_StatusCode SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src);
 void SOPC_ByteString_Clear(SOPC_ByteString* bstring);
+void SOPC_ByteString_ClearAux(void* value);
 void SOPC_ByteString_Delete(SOPC_ByteString* bstring);
 
 SOPC_StatusCode SOPC_ByteString_Compare(const SOPC_ByteString* left,
@@ -309,6 +333,7 @@ uint8_t SOPC_ByteString_Equal(const SOPC_ByteString* left,
                               const SOPC_ByteString* right);
 
 void SOPC_String_Initialize(SOPC_String* string);
+void SOPC_String_InitializeAux(void* value);
 SOPC_String* SOPC_String_Create(void);
 SOPC_StatusCode SOPC_String_CopyFromCString(SOPC_String* string, const char* cString);
 SOPC_StatusCode SOPC_String_InitializeFromCString(SOPC_String* string, const char* cString);
@@ -320,6 +345,7 @@ SOPC_StatusCode SOPC_String_AttachFromCstring(SOPC_String* dest, char* src);
 
 SOPC_StatusCode SOPC_String_Copy(SOPC_String* dest, const SOPC_String* src);
 void SOPC_String_Clear(SOPC_String* bstring);
+void SOPC_String_ClearAux(void* value);
 void SOPC_String_Delete(SOPC_String* bstring);
 
 SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
@@ -331,43 +357,67 @@ uint32_t SOPC_String_Equal(const SOPC_String* left,
                       const SOPC_String* right);
 
 void SOPC_XmlElement_Initialize(SOPC_XmlElement* xmlElt);
+void SOPC_XmlElement_InitializeAux(void* value);
 void SOPC_XmlElement_Clear(SOPC_XmlElement* xmlElt);
+void SOPC_XmlElement_ClearAux(void* value);
 
 void SOPC_DateTime_Initialize(SOPC_DateTime* dateTime);
+void SOPC_DateTime_InitializeAux(void* value);
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime);
+void SOPC_DateTime_ClearAux(void* value);
 int64_t SOPC_DateTime_ToInt64(const SOPC_DateTime* dateTime);
 void SOPC_DateTime_FromInt64(SOPC_DateTime* dateTime, int64_t date);
 
 void SOPC_Guid_Initialize(SOPC_Guid* guid);
+void SOPC_Guid_InitializeAux(void* value);
 void SOPC_Guid_Clear(SOPC_Guid* guid);
+void SOPC_Guid_ClearAux(void* value);
 
 void SOPC_NodeId_Initialize(SOPC_NodeId* nodeId);
+void SOPC_NodeId_InitializeAux(void* value);
 void SOPC_NodeId_InitType(SOPC_NodeId* nodeId, SOPC_IdentifierType knownIdType);
 void SOPC_NodeId_Clear(SOPC_NodeId* nodeId);
+void SOPC_NodeId_ClearAux(void* value);
 
 void SOPC_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId);
+void SOPC_ExpandedNodeId_InitializeAux(void* value);
 void SOPC_ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId);
+void SOPC_ExpandedNodeId_ClearAux(void* value);
 
 void SOPC_StatusCode_Initialize(SOPC_StatusCode* status);
+void SOPC_StatusCode_InitializeAux(void* value);
 void SOPC_StatusCode_Clear(SOPC_StatusCode* status);
+void SOPC_StatusCode_ClearAux(void* value);
 
 void SOPC_DiagnosticInfo_Initialize(SOPC_DiagnosticInfo* diagInfo);
+void SOPC_DiagnosticInfo_InitializeAux(void* value);
 void SOPC_DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo);
+void SOPC_DiagnosticInfo_ClearAux(void* value);
 
 void SOPC_QualifiedName_Initialize(SOPC_QualifiedName* qname);
+void SOPC_QualifiedName_InitializeAux(void* value);
 void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname);
+void SOPC_QualifiedName_ClearAux(void* value);
 
 void SOPC_LocalizedText_Initialize(SOPC_LocalizedText* localizedText);
+void SOPC_LocalizedText_InitializeAux(void* value);
 void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText);
+void SOPC_LocalizedText_ClearAux(void* value);
 
 void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj);
+void SOPC_ExtensionObject_InitializeAux(void* value);
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj);
+void SOPC_ExtensionObject_ClearAux(void* value);
 
 void SOPC_Variant_Initialize(SOPC_Variant* variant);
+void SOPC_Variant_InitializeAux(void* value);
 void SOPC_Variant_Clear(SOPC_Variant* variant);
+void SOPC_Variant_ClearAux(void* value);
 
 void SOPC_DataValue_Initialize(SOPC_DataValue* dataValue);
+void SOPC_DataValue_InitializeAux(void* value);
 void SOPC_DataValue_Clear(SOPC_DataValue* dataValue);
+void SOPC_DataValue_ClearAux(void* value);
 
 END_EXTERN_C
 
