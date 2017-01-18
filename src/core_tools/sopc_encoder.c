@@ -93,12 +93,23 @@ void SOPC_EncodeDecode_Double(double* doublev){
     }
 }
 
+
+SOPC_StatusCode SOPC_Byte_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Byte_Write((SOPC_Byte*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_Byte_Write(const SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
     return SC_WriteSecureMsgBuffer(msgBuffer, value, 1);
+}
+
+
+SOPC_StatusCode SOPC_Byte_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_Byte_Read((SOPC_Byte*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Byte_Read(SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
@@ -108,6 +119,11 @@ SOPC_StatusCode SOPC_Byte_Read(SOPC_Byte* value, SOPC_MsgBuffer* msgBuffer)
     }
 
     return TCP_UA_ReadMsgBuffer(value, 1, msgBuffer, 1);
+}
+
+
+SOPC_StatusCode SOPC_Boolean_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Boolean_Write((SOPC_Boolean*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_MsgBuffer* msgBuffer)
@@ -127,6 +143,12 @@ SOPC_StatusCode SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_MsgBuffer* ms
     return SOPC_Byte_Write(&encodedValue, msgBuffer);
 }
 
+
+SOPC_StatusCode SOPC_Boolean_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_Boolean_Read((SOPC_Boolean*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_NOK;
@@ -144,12 +166,23 @@ SOPC_StatusCode SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_MsgBuffer* msgBuffer
     return status;
 }
 
+
+SOPC_StatusCode SOPC_SByte_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_SByte_Write((SOPC_SByte*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_SByte_Write(const SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
 {
     if(value == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
     return SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) value, 1);
+}
+
+
+SOPC_StatusCode SOPC_SByte_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_SByte_Read((SOPC_SByte*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_SByte_Read(SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
@@ -161,6 +194,11 @@ SOPC_StatusCode SOPC_SByte_Read(SOPC_SByte* value, SOPC_MsgBuffer* msgBuffer)
     return TCP_UA_ReadMsgBuffer((SOPC_Byte*) value, 1, msgBuffer, 1);
 }
 
+
+SOPC_StatusCode SOPC_Int16_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Int16_Write((int16_t*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_Int16_Write(const int16_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -170,6 +208,12 @@ SOPC_StatusCode SOPC_Int16_Write(const int16_t* value, SOPC_MsgBuffer* msgBuffer
         status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_Int16_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_Int16_Read((int16_t*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Int16_Read(int16_t* value, SOPC_MsgBuffer* msgBuffer)
@@ -188,6 +232,11 @@ SOPC_StatusCode SOPC_Int16_Read(int16_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
+
+SOPC_StatusCode SOPC_UInt16_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_UInt16_Write((uint16_t*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_UInt16_Write(const uint16_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -197,6 +246,12 @@ SOPC_StatusCode SOPC_UInt16_Write(const uint16_t* value, SOPC_MsgBuffer* msgBuff
         status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 2);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_UInt16_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_UInt16_Read((uint16_t*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_UInt16_Read(uint16_t* value, SOPC_MsgBuffer* msgBuffer)
@@ -213,6 +268,11 @@ SOPC_StatusCode SOPC_UInt16_Read(uint16_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
+
+SOPC_StatusCode SOPC_Int32_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Int32_Write((int32_t*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_Int32_Write(const int32_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -222,6 +282,12 @@ SOPC_StatusCode SOPC_Int32_Write(const int32_t* value, SOPC_MsgBuffer* msgBuffer
         status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_Int32_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_Int32_Read((int32_t*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Int32_Read(int32_t* value, SOPC_MsgBuffer* msgBuffer)
@@ -236,6 +302,11 @@ SOPC_StatusCode SOPC_Int32_Read(int32_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
+
+SOPC_StatusCode SOPC_UInt32_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_UInt32_Write((uint32_t*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_UInt32_Write(const uint32_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -245,6 +316,12 @@ SOPC_StatusCode SOPC_UInt32_Write(const uint32_t* value, SOPC_MsgBuffer* msgBuff
         status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_UInt32_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_UInt32_Read((uint32_t*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_UInt32_Read(uint32_t* value, SOPC_MsgBuffer* msgBuffer)
@@ -259,6 +336,11 @@ SOPC_StatusCode SOPC_UInt32_Read(uint32_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
+
+SOPC_StatusCode SOPC_Int64_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Int64_Write((int64_t*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_Int64_Write(const int64_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -268,6 +350,12 @@ SOPC_StatusCode SOPC_Int64_Write(const int64_t* value, SOPC_MsgBuffer* msgBuffer
         status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_Int64_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_Int64_Read((int64_t*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Int64_Read(int64_t* value, SOPC_MsgBuffer* msgBuffer)
@@ -282,6 +370,11 @@ SOPC_StatusCode SOPC_Int64_Read(int64_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
+
+SOPC_StatusCode SOPC_UInt64_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_UInt64_Write((uint64_t*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_UInt64_Write(const uint64_t* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -291,6 +384,12 @@ SOPC_StatusCode SOPC_UInt64_Write(const uint64_t* value, SOPC_MsgBuffer* msgBuff
         status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_UInt64_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_UInt64_Read((uint64_t*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_UInt64_Read(uint64_t* value, SOPC_MsgBuffer* msgBuffer)
@@ -305,6 +404,11 @@ SOPC_StatusCode SOPC_UInt64_Read(uint64_t* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
+
+SOPC_StatusCode SOPC_Float_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Float_Write((float*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_Float_Write(const float* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -314,6 +418,12 @@ SOPC_StatusCode SOPC_Float_Write(const float* value, SOPC_MsgBuffer* msgBuffer)
         status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 4);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_Float_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_Float_Read((float*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Float_Read(float* value, SOPC_MsgBuffer* msgBuffer)
@@ -328,6 +438,11 @@ SOPC_StatusCode SOPC_Float_Read(float* value, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
+
+SOPC_StatusCode SOPC_Double_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Double_Write((double*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_Double_Write(const double* value, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -337,6 +452,12 @@ SOPC_StatusCode SOPC_Double_Write(const double* value, SOPC_MsgBuffer* msgBuffer
         status = SC_WriteSecureMsgBuffer(msgBuffer, (SOPC_Byte*) &encodedValue, 8);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_Double_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_Double_Read((double*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Double_Read(double* value, SOPC_MsgBuffer* msgBuffer)
@@ -349,6 +470,11 @@ SOPC_StatusCode SOPC_Double_Read(double* value, SOPC_MsgBuffer* msgBuffer)
         }
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_ByteString_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_ByteString_Write((SOPC_ByteString*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_MsgBuffer* msgBuffer)
@@ -371,6 +497,12 @@ SOPC_StatusCode SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_MsgBuffer
         }
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_ByteString_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_ByteString_Read((SOPC_ByteString*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_MsgBuffer* msgBuffer)
@@ -404,6 +536,11 @@ SOPC_StatusCode SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_MsgBuffer* msgBu
     return status;
 }
 
+
+SOPC_StatusCode SOPC_String_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_String_Write((SOPC_String*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_String_Write(const SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_NOK;
@@ -424,6 +561,12 @@ SOPC_StatusCode SOPC_String_Write(const SOPC_String* str, SOPC_MsgBuffer* msgBuf
         }
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_String_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_String_Read((SOPC_String*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_String_Read(SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
@@ -461,16 +604,32 @@ SOPC_StatusCode SOPC_String_Read(SOPC_String* str, SOPC_MsgBuffer* msgBuffer)
     return status;
 }
 
+
+SOPC_StatusCode SOPC_XmlElement_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_XmlElement_Write((SOPC_XmlElement*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_XmlElement_Write(const SOPC_XmlElement* xml, SOPC_MsgBuffer* msgBuffer)
 {
     // TODO: check XML validity ?
     return SOPC_ByteString_Write((SOPC_ByteString*) xml, msgBuffer);
 }
 
+
+SOPC_StatusCode SOPC_XmlElement_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_XmlElement_Read((SOPC_XmlElement*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_XmlElement_Read(SOPC_XmlElement* xml, SOPC_MsgBuffer* msgBuffer)
 {
     // TODO: parse XML ?
     return SOPC_ByteString_Read((SOPC_ByteString*) xml, msgBuffer);
+}
+
+
+SOPC_StatusCode SOPC_DateTime_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_DateTime_Write((SOPC_DateTime*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_MsgBuffer* msgBuffer)
@@ -484,6 +643,12 @@ SOPC_StatusCode SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_MsgBuffer* m
     return status;
 }
 
+
+SOPC_StatusCode SOPC_DateTime_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_DateTime_Read((SOPC_DateTime*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_DateTime_Read(SOPC_DateTime* date, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -493,6 +658,11 @@ SOPC_StatusCode SOPC_DateTime_Read(SOPC_DateTime* date, SOPC_MsgBuffer* msgBuffe
         SOPC_DateTime_FromInt64(date, dateTime);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_Guid_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Guid_Write((SOPC_Guid*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
@@ -511,6 +681,12 @@ SOPC_StatusCode SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer
         status = SC_WriteSecureMsgBuffer(msgBuffer, &(guid->Data4[0]), 8);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_Guid_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_Guid_Read((SOPC_Guid*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Guid_Read(SOPC_Guid* guid, SOPC_MsgBuffer* msgBuffer)
@@ -621,6 +797,11 @@ SOPC_StatusCode Internal_NodeId_Write(SOPC_MsgBuffer* msgBuffer,
     return status;
 }
 
+
+SOPC_StatusCode SOPC_NodeId_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_NodeId_Write((SOPC_NodeId*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_NodeId_Write(const SOPC_NodeId* nodeId, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -702,6 +883,12 @@ SOPC_StatusCode Internal_NodeId_Read(SOPC_MsgBuffer* msgBuffer,
     return status;
 }
 
+
+SOPC_StatusCode SOPC_NodeId_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer)
+{
+    return SOPC_NodeId_Read((SOPC_NodeId*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -710,6 +897,11 @@ SOPC_StatusCode SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_MsgBuffer* msgBuffer)
         status = Internal_NodeId_Read(msgBuffer, nodeId, &encodingByte);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_ExpandedNodeId_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_ExpandedNodeId_Write((SOPC_ExpandedNodeId*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId, SOPC_MsgBuffer* msgBuffer){
@@ -737,6 +929,11 @@ SOPC_StatusCode SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId, 
     return status;
 }
 
+
+SOPC_StatusCode SOPC_ExpandedNodeId_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_ExpandedNodeId_Read((SOPC_ExpandedNodeId*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
@@ -760,8 +957,18 @@ SOPC_StatusCode SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_Ms
     return status;
 }
 
+
+SOPC_StatusCode SOPC_StatusCode_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_StatusCode_Write((SOPC_StatusCode*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_StatusCode_Write(const SOPC_StatusCode* status, SOPC_MsgBuffer* msgBuffer){
     return SOPC_UInt32_Write(status, msgBuffer);
+}
+
+
+SOPC_StatusCode SOPC_StatusCode_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_StatusCode_Read((SOPC_StatusCode*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_StatusCode_Read(SOPC_StatusCode* status, SOPC_MsgBuffer* msgBuffer){
@@ -793,6 +1000,11 @@ SOPC_Byte GetDiagInfoEncodingByte(const SOPC_DiagnosticInfo* diagInfo){
         encodingByte |= DiagInfoEncoding_InnerDianosticInfo;
     }
     return encodingByte;
+}
+
+
+SOPC_StatusCode SOPC_DiagnosticInfo_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_DiagnosticInfo_Write((SOPC_DiagnosticInfo*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, SOPC_MsgBuffer* msgBuffer){
@@ -836,6 +1048,11 @@ SOPC_StatusCode SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, S
     return status;
 }
 
+
+SOPC_StatusCode SOPC_DiagnosticInfo_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_DiagnosticInfo_Read((SOPC_DiagnosticInfo*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, SOPC_MsgBuffer* msgBuffer){
     SOPC_Byte encodingByte = 0x00;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -873,6 +1090,11 @@ SOPC_StatusCode SOPC_DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, SOPC_Msg
     return status;
 }
 
+
+SOPC_StatusCode SOPC_QualifiedName_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_QualifiedName_Write((SOPC_QualifiedName*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(qname != NULL){
@@ -882,6 +1104,11 @@ SOPC_StatusCode SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname, SOPC_M
         status = SOPC_String_Write(&qname->Name, msgBuffer);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_QualifiedName_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_QualifiedName_Read((SOPC_QualifiedName*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_MsgBuffer* msgBuffer){
@@ -908,6 +1135,11 @@ SOPC_Byte GetLocalizedTextEncodingByte(const SOPC_LocalizedText* ltext){
     return encodingByte;
 }
 
+
+SOPC_StatusCode SOPC_LocalizedText_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_LocalizedText_Write((SOPC_LocalizedText*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedText, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
@@ -925,6 +1157,11 @@ SOPC_StatusCode SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedText
     return status;
 }
 
+
+SOPC_StatusCode SOPC_LocalizedText_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_LocalizedText_Read((SOPC_LocalizedText*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
@@ -938,6 +1175,11 @@ SOPC_StatusCode SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText, SOPC_
         status = SOPC_String_Read(&localizedText->Text, msgBuffer);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_ExtensionObject_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_ExtensionObject_Write((SOPC_ExtensionObject*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_MsgBuffer* msgBuffer){
@@ -1007,6 +1249,11 @@ SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, S
     }
 
     return status;
+}
+
+
+SOPC_StatusCode SOPC_ExtensionObject_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_ExtensionObject_Read((SOPC_ExtensionObject*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_MsgBuffer* msgBuffer){
@@ -1332,6 +1579,11 @@ SOPC_StatusCode WriteVariantArrayBuiltInType(SOPC_MsgBuffer*               msgBu
             break;
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_Variant_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Variant_Write((SOPC_Variant*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_MsgBuffer* msgBuffer){
@@ -1808,6 +2060,11 @@ SOPC_StatusCode ReadVariantArrayBuiltInType(SOPC_MsgBuffer*         msgBuffer,
     return status;
 }
 
+
+SOPC_StatusCode SOPC_Variant_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_Variant_Read((SOPC_Variant*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
@@ -1898,6 +2155,11 @@ SOPC_Byte GetDataValueEncodingMask(const SOPC_DataValue* dataValue){
     return mask;
 }
 
+
+SOPC_StatusCode SOPC_DataValue_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_DataValue_Write((SOPC_DataValue*) value, msgBuffer);
+}
+
 SOPC_StatusCode SOPC_DataValue_Write(const SOPC_DataValue* dataValue, SOPC_MsgBuffer* msgBuffer)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -1925,6 +2187,11 @@ SOPC_StatusCode SOPC_DataValue_Write(const SOPC_DataValue* dataValue, SOPC_MsgBu
         status = SOPC_UInt16_Write(&dataValue->ServerPicoSeconds, msgBuffer);
     }
     return status;
+}
+
+
+SOPC_StatusCode SOPC_DataValue_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer){
+    return SOPC_DataValue_Read((SOPC_DataValue*) value, msgBuffer);
 }
 
 SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* msgBuffer){
