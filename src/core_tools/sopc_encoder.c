@@ -2235,3 +2235,88 @@ SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* m
     return status;
 }
 
+SOPC_StatusCode SOPC_Read_Array(SOPC_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
+                                size_t sizeOfElt, SOPC_EncodeableObject_PfnDecode* decodeFct,
+                                SOPC_EncodeableObject_PfnInitialize* initializeFct,
+                                SOPC_EncodeableObject_PfnClear* clearFct)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_Byte* byteArray = NULL;
+    assert(msgBuffer != NULL && *eltsArray == NULL && noOfElts != NULL);
+
+    if(msgBuffer != NULL && noOfElts != NULL &&
+       eltsArray != NULL  && *eltsArray == NULL &&
+       decodeFct != NULL){
+        status = STATUS_OK;
+    }
+
+    if(STATUS_OK == status){
+        status = SOPC_Int32_Read(noOfElts, msgBuffer);
+    }
+
+    if(STATUS_OK == status && *noOfElts > 0){
+        *eltsArray = malloc (sizeOfElt * *noOfElts);
+        if(*eltsArray == NULL){
+            status = STATUS_NOK;
+        }else{
+            byteArray = *eltsArray;
+        }
+    }
+
+    if(STATUS_OK == status && *noOfElts > 0){
+        int32_t idx = 0;
+        uint32_t pos = 0;
+        for (idx = 0; status == STATUS_OK && idx < *noOfElts; idx ++){
+            pos = idx * sizeOfElt;
+            initializeFct(&(byteArray[pos]));
+            status = decodeFct(&(byteArray[pos]), msgBuffer);
+        }
+
+        if(STATUS_OK != status){
+            int32_t clearIdx = 0;
+            // idx - 1 => clear only cases in which status was ok since we don't know
+            //            the state in which byte array is in the last idx used (decode failed)
+            for (clearIdx = 0; clearIdx < (idx - 1); clearIdx ++){
+                pos = clearIdx * sizeOfElt;
+                clearFct(&(byteArray[pos]));
+            }
+            free(*eltsArray);
+            *eltsArray = NULL;
+            *noOfElts = 0;
+        }
+
+    }
+
+    return status;
+}
+
+SOPC_StatusCode SOPC_Write_Array(SOPC_MsgBuffer* msgBuffer, int32_t* noOfElts, void** eltsArray,
+                                 size_t sizeOfElt, SOPC_EncodeableObject_PfnEncode* encodeFct){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_Byte* byteArray = NULL;
+
+    if(msgBuffer != NULL && noOfElts != NULL && eltsArray != NULL && encodeFct != NULL){
+        if(*noOfElts > 0){
+            if(*eltsArray != NULL){
+                status = STATUS_OK;
+                byteArray = *eltsArray;
+            }
+        }else{
+            status = STATUS_OK;
+        }
+    }
+
+    if(STATUS_OK == status){
+        status = SOPC_Int32_Write(noOfElts, msgBuffer);
+    }
+    if(STATUS_OK == status && *noOfElts > 0){
+        int32_t idx = 0;
+        uint32_t pos = 0;
+        for (idx = 0; status == STATUS_OK && idx < *noOfElts; idx ++){
+            pos = idx * sizeOfElt;
+            status = encodeFct(&(byteArray[pos]), msgBuffer);
+        }
+    }
+    return status;
+}
+

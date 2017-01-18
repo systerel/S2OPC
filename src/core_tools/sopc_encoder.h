@@ -256,5 +256,11 @@ SOPC_StatusCode SOPC_DataValue_WriteAux(void* value, SOPC_MsgBuffer* msgBuffer);
 SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* msgBuffer);
 SOPC_StatusCode SOPC_DataValue_ReadAux(void* value, SOPC_MsgBuffer* msgBuffer);
 
+SOPC_StatusCode SOPC_Read_Array(SOPC_MsgBuffer* msgBuf, int32_t* noOfElts, void** eltsArray,
+                                size_t sizeOfElt, SOPC_EncodeableObject_PfnDecode* decodeFct,
+                                SOPC_EncodeableObject_PfnInitialize* initializeFct,
+                                SOPC_EncodeableObject_PfnClear* clearFct);
+SOPC_StatusCode SOPC_Write_Array(SOPC_MsgBuffer* msgBuf, int32_t* noOfElts, void** eltsArray,
+                                 size_t sizeOfElt, SOPC_EncodeableObject_PfnEncode* encodeFct);
 
 #endif /* SOPC_ENCODER_H_ */
