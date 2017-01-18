@@ -6032,24 +6032,13 @@ OpcUa_ExceptionDeviationFormat;
 #endif
 
 void SOPC_Initialize_EnumeratedType(int32_t* enumerationValue);
-void SOPC_Initialize_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
-                           SOPC_EncodeableObject_PfnInitialize* initFct);
 
 void SOPC_Clear_EnumeratedType(int32_t* enumerationValue);
-void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
-                      SOPC_EncodeableObject_PfnClear* clearFct);
-                    
 
 SOPC_StatusCode SOPC_Read_EnumeratedType(SOPC_MsgBuffer* msgBuf, int32_t* enumerationValue);
-SOPC_StatusCode SOPC_Read_Array(SOPC_MsgBuffer* msgBuf, int32_t* noOfElts, void** eltsArray,
-                                size_t sizeOfElt, SOPC_EncodeableObject_PfnDecode* decodeFct,
-                                SOPC_EncodeableObject_PfnInitialize* initializeFct,
-                                SOPC_EncodeableObject_PfnClear* clearFct);
                     
 
 SOPC_StatusCode SOPC_Write_EnumeratedType(SOPC_MsgBuffer* msgBuf, int32_t* enumerationValue);
-SOPC_StatusCode SOPC_Write_Array(SOPC_MsgBuffer* msgBuf, int32_t* noOfElts, void** eltsArray,
-                                 size_t sizeOfElt, SOPC_EncodeableObject_PfnEncode* encodeFct);
 
 /*============================================================================
  * Table of known types.
