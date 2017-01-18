@@ -1576,3 +1576,33 @@ void SOPC_DataValue_Clear(SOPC_DataValue* dataValue){
     }
 }
 
+
+void SOPC_Initialize_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
+                           SOPC_EncodeableObject_PfnInitialize* initFct)
+{
+    (void) initFct;
+    (void) sizeOfElt;
+    *noOfElts = 0;
+    *eltsArray = NULL;
+}
+
+void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
+                      SOPC_EncodeableObject_PfnClear* clearFct)
+{
+    int32_t idx = 0;
+    uint32_t pos = 0;
+    SOPC_Byte* byteArray = NULL;
+    if(noOfElts != NULL && eltsArray != NULL){
+        byteArray = *eltsArray;
+        if(byteArray != NULL){
+            for (idx = 0; idx < *noOfElts; idx ++){
+                pos = idx * sizeOfElt;
+                clearFct(&(byteArray[pos]));
+            }
+
+            free(*eltsArray);
+        }
+        *noOfElts = 0;
+        *eltsArray = NULL;
+    }
+}

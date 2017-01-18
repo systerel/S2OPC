@@ -419,6 +419,11 @@ void SOPC_DataValue_InitializeAux(void* value);
 void SOPC_DataValue_Clear(SOPC_DataValue* dataValue);
 void SOPC_DataValue_ClearAux(void* value);
 
+void SOPC_Initialize_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
+                           SOPC_EncodeableObject_PfnInitialize* initFct);
+void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
+                      SOPC_EncodeableObject_PfnClear* clearFct);
+
 END_EXTERN_C
 
 #endif /* SOPC_SOPC_BUILTINTYPES_H_ */
