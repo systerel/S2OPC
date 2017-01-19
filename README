@@ -36,6 +36,18 @@ Compilation (Linux, tested under Ubuntu 14.04):
 - To compile the stack as a simple client use case, and unit tests:
   execute the "make" command
 
+Compilation options:
+- STACK_1_01 or STACK_1_02 or STACK_1_03 (active by default): one of
+  the options could be activated to adapt wrapper for foundation API
+  on foundation stack version (1.01, 1.02 or 1.03) 
+- WRAPPER_RECEPTION_THREAD (not active by default): activate a global
+  reception thread in the stack in charge of calling the socket
+  manager loop to treat received data on sockets. Necessary when using
+  a multi-threaded server SDK on top of the INGOPCS stack.
+To use those options, it is necessary to define thoses options 
+as variables on compilation, e.g.: 
+"make STACK_1_01=ANY WRAPPER_RECEPTION_THREAD=VALUE"
+
 Documentation generation:
 - Pre-requesite: doxygen
 - To generate the documentation: execute the "make doc" command
