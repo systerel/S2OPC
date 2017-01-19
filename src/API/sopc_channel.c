@@ -367,8 +367,11 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
                                            SOPC_EncodeableType*  expResponseType,
                                            void**                response,
                                            SOPC_EncodeableType** responseType){
-    const uint32_t sleepTimeout = 500;
-    uint32_t loopCpt = 0;
+    const uint32_t waitTimeoutMilliSecs = 500;
+    const uint32_t sleepTimeoutMicroSecs = 500;
+    const uint32_t sleepFactor = (waitTimeoutMilliSecs * 1000) / sleepTimeoutMicroSecs;
+    uint32_t loopCptWait = 0;
+    uint32_t loopCptSleep = 0;
     uint8_t receivedEvent = FALSE;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
@@ -394,17 +397,24 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
 
     while (status == STATUS_OK &&
            receivedEvent == FALSE &&
-           loopCpt * sleepTimeout <= timeout)
+           loopCptWait * waitTimeoutMilliSecs <= timeout)
     {
-        loopCpt++;
 #if OPCUA_MULTITHREADED || WRAPPER_RECEPTION_THREAD
         // just wait for callback called
-        Sleep (sleepTimeout);
+        loopCptSleep++;
+        if((loopCptSleep % sleepFactor) == 0){
+            loopCptWait++;
+        }
+        Sleep (sleepTimeoutMicroSecs);
 #else
+        (void) loopCptSleep;
+        (void) sleepFactor;
+        loopCptWait++;
         // TODO: will retrieve any message: is it a problem ?
+        // TODO: time waited is not valid anymore if we receive other messages than expected !
         // Retrieve received messages on socket
         status = SOPC_SocketManager_Loop (SOPC_SocketManager_GetGlobal(),
-                                          sleepTimeout);
+                                          waitTimeoutMilliSecs);
 #endif //OPCUA_MULTITHREADED
         status = Get_InvokeCallbackData(invCallbackData,
                                         response,
@@ -414,7 +424,7 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
         }
     }
 
-    if(loopCpt * sleepTimeout > timeout){
+    if(loopCptWait * waitTimeoutMilliSecs > timeout){
         status = OpcUa_BadTimeout;
     }
 
