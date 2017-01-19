@@ -152,7 +152,7 @@ SOPC_StatusCode OpcUa_Node_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_ReferenceNode_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_ReferenceNode_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_Node_Clear(a_pValue);
     }
 
@@ -286,7 +286,7 @@ SOPC_StatusCode OpcUa_InstanceNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_ReferenceNode_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_ReferenceNode_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_InstanceNode_Clear(a_pValue);
     }
 
@@ -420,7 +420,7 @@ SOPC_StatusCode OpcUa_TypeNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_ReferenceNode_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_ReferenceNode_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_TypeNode_Clear(a_pValue);
     }
 
@@ -560,7 +560,7 @@ SOPC_StatusCode OpcUa_ObjectNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_Byte_Read(&a_pValue->EventNotifier, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ObjectNode_Clear(a_pValue);
     }
 
@@ -700,7 +700,7 @@ SOPC_StatusCode OpcUa_ObjectTypeNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ObjectTypeNode_Clear(a_pValue);
     }
 
@@ -888,7 +888,7 @@ SOPC_StatusCode OpcUa_VariableNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->Historizing, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_VariableNode_Clear(a_pValue);
     }
 
@@ -1058,7 +1058,7 @@ SOPC_StatusCode OpcUa_VariableTypeNode_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_VariableTypeNode_Clear(a_pValue);
     }
 
@@ -1210,7 +1210,7 @@ SOPC_StatusCode OpcUa_ReferenceTypeNode_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_LocalizedText_Read(&a_pValue->InverseName, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReferenceTypeNode_Clear(a_pValue);
     }
 
@@ -1356,7 +1356,7 @@ SOPC_StatusCode OpcUa_MethodNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->UserExecutable, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_MethodNode_Clear(a_pValue);
     }
 
@@ -1502,7 +1502,7 @@ SOPC_StatusCode OpcUa_ViewNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_Byte_Read(&a_pValue->EventNotifier, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ViewNode_Clear(a_pValue);
     }
 
@@ -1642,7 +1642,7 @@ SOPC_StatusCode OpcUa_DataTypeNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DataTypeNode_Clear(a_pValue);
     }
 
@@ -1740,7 +1740,7 @@ SOPC_StatusCode OpcUa_ReferenceNode_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_ExpandedNodeId_Read(&a_pValue->TargetId, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReferenceNode_Clear(a_pValue);
     }
 
@@ -1856,7 +1856,7 @@ SOPC_StatusCode OpcUa_Argument_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_LocalizedText_Read(&a_pValue->Description, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_Argument_Clear(a_pValue);
     }
 
@@ -1954,7 +1954,7 @@ SOPC_StatusCode OpcUa_EnumValueType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_LocalizedText_Read(&a_pValue->Description, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EnumValueType_Clear(a_pValue);
     }
 
@@ -2058,7 +2058,7 @@ SOPC_StatusCode OpcUa_EnumField_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->Name, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EnumField_Clear(a_pValue);
     }
 
@@ -2150,7 +2150,7 @@ SOPC_StatusCode OpcUa_OptionSet_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->ValidBits, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_OptionSet_Clear(a_pValue);
     }
 
@@ -2242,7 +2242,7 @@ SOPC_StatusCode OpcUa_TimeZoneDataType_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->DaylightSavingInOffset, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_TimeZoneDataType_Clear(a_pValue);
     }
 
@@ -2371,7 +2371,7 @@ SOPC_StatusCode OpcUa_ApplicationDescription_Decode(void* pValue, SOPC_MsgBuffer
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_String_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_String_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ApplicationDescription_Clear(a_pValue);
     }
 
@@ -2493,7 +2493,7 @@ SOPC_StatusCode OpcUa_RequestHeader_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_ExtensionObject_Read(&a_pValue->AdditionalHeader, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RequestHeader_Clear(a_pValue);
     }
 
@@ -2615,7 +2615,7 @@ SOPC_StatusCode OpcUa_ResponseHeader_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
     if(STATUS_OK == status)
         status = SOPC_ExtensionObject_Read(&a_pValue->AdditionalHeader, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ResponseHeader_Clear(a_pValue);
     }
 
@@ -2701,7 +2701,7 @@ SOPC_StatusCode OpcUa_ServiceFault_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ServiceFault_Clear(a_pValue);
     }
 
@@ -2818,7 +2818,7 @@ SOPC_StatusCode OpcUa_FindServersRequest_Decode(void* pValue, SOPC_MsgBuffer* ms
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_String_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_String_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_FindServersRequest_Clear(a_pValue);
     }
 
@@ -2916,7 +2916,7 @@ SOPC_StatusCode OpcUa_FindServersResponse_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_ApplicationDescription_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_ApplicationDescription_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_FindServersResponse_Clear(a_pValue);
     }
 
@@ -3027,7 +3027,7 @@ SOPC_StatusCode OpcUa_ServerOnNetwork_Decode(void* pValue, SOPC_MsgBuffer* msgBu
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_String_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_String_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ServerOnNetwork_Clear(a_pValue);
     }
 
@@ -3138,7 +3138,7 @@ SOPC_StatusCode OpcUa_FindServersOnNetworkRequest_Decode(void* pValue, SOPC_MsgB
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_String_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_String_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_FindServersOnNetworkRequest_Clear(a_pValue);
     }
 
@@ -3242,7 +3242,7 @@ SOPC_StatusCode OpcUa_FindServersOnNetworkResponse_Decode(void* pValue, SOPC_Msg
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_ServerOnNetwork_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_ServerOnNetwork_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_FindServersOnNetworkResponse_Clear(a_pValue);
     }
 
@@ -3355,7 +3355,7 @@ SOPC_StatusCode OpcUa_UserTokenPolicy_Decode(void* pValue, SOPC_MsgBuffer* msgBu
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->SecurityPolicyUri, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_UserTokenPolicy_Clear(a_pValue);
     }
 
@@ -3489,7 +3489,7 @@ SOPC_StatusCode OpcUa_EndpointDescription_Decode(void* pValue, SOPC_MsgBuffer* m
     if(STATUS_OK == status)
         status = SOPC_Byte_Read(&a_pValue->SecurityLevel, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EndpointDescription_Clear(a_pValue);
     }
 
@@ -3606,7 +3606,7 @@ SOPC_StatusCode OpcUa_GetEndpointsRequest_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_String_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_String_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_GetEndpointsRequest_Clear(a_pValue);
     }
 
@@ -3704,7 +3704,7 @@ SOPC_StatusCode OpcUa_GetEndpointsResponse_Decode(void* pValue, SOPC_MsgBuffer* 
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_EndpointDescription_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_EndpointDescription_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_GetEndpointsResponse_Clear(a_pValue);
     }
 
@@ -3845,7 +3845,7 @@ SOPC_StatusCode OpcUa_RegisteredServer_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->IsOnline, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RegisteredServer_Clear(a_pValue);
     }
 
@@ -3938,7 +3938,7 @@ SOPC_StatusCode OpcUa_RegisterServerRequest_Decode(void* pValue, SOPC_MsgBuffer*
     if(STATUS_OK == status)
         status = OpcUa_RegisteredServer_Decode(&a_pValue->Server, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RegisterServerRequest_Clear(a_pValue);
     }
 
@@ -4024,7 +4024,7 @@ SOPC_StatusCode OpcUa_RegisterServerResponse_Decode(void* pValue, SOPC_MsgBuffer
     if(STATUS_OK == status)
         status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RegisterServerResponse_Clear(a_pValue);
     }
 
@@ -4123,7 +4123,7 @@ SOPC_StatusCode OpcUa_MdnsDiscoveryConfiguration_Decode(void* pValue, SOPC_MsgBu
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_String_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_String_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_MdnsDiscoveryConfiguration_Clear(a_pValue);
     }
 
@@ -4228,7 +4228,7 @@ SOPC_StatusCode OpcUa_RegisterServer2Request_Decode(void* pValue, SOPC_MsgBuffer
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_ExtensionObject_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_ExtensionObject_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RegisterServer2Request_Clear(a_pValue);
     }
 
@@ -4338,7 +4338,7 @@ SOPC_StatusCode OpcUa_RegisterServer2Response_Decode(void* pValue, SOPC_MsgBuffe
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RegisterServer2Response_Clear(a_pValue);
     }
 
@@ -4444,7 +4444,7 @@ SOPC_StatusCode OpcUa_ChannelSecurityToken_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->RevisedLifetime, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ChannelSecurityToken_Clear(a_pValue);
     }
 
@@ -4561,7 +4561,7 @@ SOPC_StatusCode OpcUa_OpenSecureChannelRequest_Decode(void* pValue, SOPC_MsgBuff
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->RequestedLifetime, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_OpenSecureChannelRequest_Clear(a_pValue);
     }
 
@@ -4665,7 +4665,7 @@ SOPC_StatusCode OpcUa_OpenSecureChannelResponse_Decode(void* pValue, SOPC_MsgBuf
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->ServerNonce, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_OpenSecureChannelResponse_Clear(a_pValue);
     }
 
@@ -4753,7 +4753,7 @@ SOPC_StatusCode OpcUa_CloseSecureChannelRequest_Decode(void* pValue, SOPC_MsgBuf
     if(STATUS_OK == status)
         status = OpcUa_RequestHeader_Decode(&a_pValue->RequestHeader, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CloseSecureChannelRequest_Clear(a_pValue);
     }
 
@@ -4839,7 +4839,7 @@ SOPC_StatusCode OpcUa_CloseSecureChannelResponse_Decode(void* pValue, SOPC_MsgBu
     if(STATUS_OK == status)
         status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CloseSecureChannelResponse_Clear(a_pValue);
     }
 
@@ -4932,7 +4932,7 @@ SOPC_StatusCode OpcUa_SignedSoftwareCertificate_Decode(void* pValue, SOPC_MsgBuf
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->Signature, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SignedSoftwareCertificate_Clear(a_pValue);
     }
 
@@ -5024,7 +5024,7 @@ SOPC_StatusCode OpcUa_SignatureData_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->Signature, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SignatureData_Clear(a_pValue);
     }
 
@@ -5159,7 +5159,7 @@ SOPC_StatusCode OpcUa_CreateSessionRequest_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->MaxResponseMessageSize, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CreateSessionRequest_Clear(a_pValue);
     }
 
@@ -5311,7 +5311,7 @@ SOPC_StatusCode OpcUa_CreateSessionResponse_Decode(void* pValue, SOPC_MsgBuffer*
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->MaxRequestMessageSize, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CreateSessionResponse_Clear(a_pValue);
     }
 
@@ -5398,7 +5398,7 @@ SOPC_StatusCode OpcUa_UserIdentityToken_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->PolicyId, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_UserIdentityToken_Clear(a_pValue);
     }
 
@@ -5484,7 +5484,7 @@ SOPC_StatusCode OpcUa_AnonymousIdentityToken_Decode(void* pValue, SOPC_MsgBuffer
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->PolicyId, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AnonymousIdentityToken_Clear(a_pValue);
     }
 
@@ -5588,7 +5588,7 @@ SOPC_StatusCode OpcUa_UserNameIdentityToken_Decode(void* pValue, SOPC_MsgBuffer*
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->EncryptionAlgorithm, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_UserNameIdentityToken_Clear(a_pValue);
     }
 
@@ -5680,7 +5680,7 @@ SOPC_StatusCode OpcUa_X509IdentityToken_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->CertificateData, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_X509IdentityToken_Clear(a_pValue);
     }
 
@@ -5772,7 +5772,7 @@ SOPC_StatusCode OpcUa_KerberosIdentityToken_Decode(void* pValue, SOPC_MsgBuffer*
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->TicketData, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_KerberosIdentityToken_Clear(a_pValue);
     }
 
@@ -5870,7 +5870,7 @@ SOPC_StatusCode OpcUa_IssuedIdentityToken_Decode(void* pValue, SOPC_MsgBuffer* m
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->EncryptionAlgorithm, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_IssuedIdentityToken_Clear(a_pValue);
     }
 
@@ -5999,7 +5999,7 @@ SOPC_StatusCode OpcUa_ActivateSessionRequest_Decode(void* pValue, SOPC_MsgBuffer
     if(STATUS_OK == status)
         status = OpcUa_SignatureData_Decode(&a_pValue->UserTokenSignature, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ActivateSessionRequest_Clear(a_pValue);
     }
 
@@ -6115,7 +6115,7 @@ SOPC_StatusCode OpcUa_ActivateSessionResponse_Decode(void* pValue, SOPC_MsgBuffe
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ActivateSessionResponse_Clear(a_pValue);
     }
 
@@ -6209,7 +6209,7 @@ SOPC_StatusCode OpcUa_CloseSessionRequest_Decode(void* pValue, SOPC_MsgBuffer* m
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->DeleteSubscriptions, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CloseSessionRequest_Clear(a_pValue);
     }
 
@@ -6295,7 +6295,7 @@ SOPC_StatusCode OpcUa_CloseSessionResponse_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CloseSessionResponse_Clear(a_pValue);
     }
 
@@ -6389,7 +6389,7 @@ SOPC_StatusCode OpcUa_CancelRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->RequestHandle, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CancelRequest_Clear(a_pValue);
     }
 
@@ -6481,7 +6481,7 @@ SOPC_StatusCode OpcUa_CancelResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->CancelCount, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CancelResponse_Clear(a_pValue);
     }
 
@@ -6593,7 +6593,7 @@ SOPC_StatusCode OpcUa_NodeAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->UserWriteMask, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_NodeAttributes_Clear(a_pValue);
     }
 
@@ -6709,7 +6709,7 @@ SOPC_StatusCode OpcUa_ObjectAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_Byte_Read(&a_pValue->EventNotifier, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ObjectAttributes_Clear(a_pValue);
     }
 
@@ -6873,7 +6873,7 @@ SOPC_StatusCode OpcUa_VariableAttributes_Decode(void* pValue, SOPC_MsgBuffer* ms
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->Historizing, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_VariableAttributes_Clear(a_pValue);
     }
 
@@ -6995,7 +6995,7 @@ SOPC_StatusCode OpcUa_MethodAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->UserExecutable, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_MethodAttributes_Clear(a_pValue);
     }
 
@@ -7111,7 +7111,7 @@ SOPC_StatusCode OpcUa_ObjectTypeAttributes_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ObjectTypeAttributes_Clear(a_pValue);
     }
 
@@ -7257,7 +7257,7 @@ SOPC_StatusCode OpcUa_VariableTypeAttributes_Decode(void* pValue, SOPC_MsgBuffer
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_VariableTypeAttributes_Clear(a_pValue);
     }
 
@@ -7385,7 +7385,7 @@ SOPC_StatusCode OpcUa_ReferenceTypeAttributes_Decode(void* pValue, SOPC_MsgBuffe
     if(STATUS_OK == status)
         status = SOPC_LocalizedText_Read(&a_pValue->InverseName, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReferenceTypeAttributes_Clear(a_pValue);
     }
 
@@ -7501,7 +7501,7 @@ SOPC_StatusCode OpcUa_DataTypeAttributes_Decode(void* pValue, SOPC_MsgBuffer* ms
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->IsAbstract, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DataTypeAttributes_Clear(a_pValue);
     }
 
@@ -7623,7 +7623,7 @@ SOPC_StatusCode OpcUa_ViewAttributes_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
     if(STATUS_OK == status)
         status = SOPC_Byte_Read(&a_pValue->EventNotifier, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ViewAttributes_Clear(a_pValue);
     }
 
@@ -7745,7 +7745,7 @@ SOPC_StatusCode OpcUa_AddNodesItem_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_ExpandedNodeId_Read(&a_pValue->TypeDefinition, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AddNodesItem_Clear(a_pValue);
     }
 
@@ -7837,7 +7837,7 @@ SOPC_StatusCode OpcUa_AddNodesResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
     if(STATUS_OK == status)
         status = SOPC_NodeId_Read(&a_pValue->AddedNodeId, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AddNodesResult_Clear(a_pValue);
     }
 
@@ -7936,7 +7936,7 @@ SOPC_StatusCode OpcUa_AddNodesRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBu
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_AddNodesItem_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_AddNodesItem_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AddNodesRequest_Clear(a_pValue);
     }
 
@@ -8046,7 +8046,7 @@ SOPC_StatusCode OpcUa_AddNodesResponse_Decode(void* pValue, SOPC_MsgBuffer* msgB
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AddNodesResponse_Clear(a_pValue);
     }
 
@@ -8163,7 +8163,7 @@ SOPC_StatusCode OpcUa_AddReferencesItem_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->TargetNodeClass);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AddReferencesItem_Clear(a_pValue);
     }
 
@@ -8262,7 +8262,7 @@ SOPC_StatusCode OpcUa_AddReferencesRequest_Decode(void* pValue, SOPC_MsgBuffer* 
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_AddReferencesItem_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_AddReferencesItem_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AddReferencesRequest_Clear(a_pValue);
     }
 
@@ -8372,7 +8372,7 @@ SOPC_StatusCode OpcUa_AddReferencesResponse_Decode(void* pValue, SOPC_MsgBuffer*
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AddReferencesResponse_Clear(a_pValue);
     }
 
@@ -8465,7 +8465,7 @@ SOPC_StatusCode OpcUa_DeleteNodesItem_Decode(void* pValue, SOPC_MsgBuffer* msgBu
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->DeleteTargetReferences, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteNodesItem_Clear(a_pValue);
     }
 
@@ -8564,7 +8564,7 @@ SOPC_StatusCode OpcUa_DeleteNodesRequest_Decode(void* pValue, SOPC_MsgBuffer* ms
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_DeleteNodesItem_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_DeleteNodesItem_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteNodesRequest_Clear(a_pValue);
     }
 
@@ -8674,7 +8674,7 @@ SOPC_StatusCode OpcUa_DeleteNodesResponse_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteNodesResponse_Clear(a_pValue);
     }
 
@@ -8785,7 +8785,7 @@ SOPC_StatusCode OpcUa_DeleteReferencesItem_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->DeleteBidirectional, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteReferencesItem_Clear(a_pValue);
     }
 
@@ -8884,7 +8884,7 @@ SOPC_StatusCode OpcUa_DeleteReferencesRequest_Decode(void* pValue, SOPC_MsgBuffe
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_DeleteReferencesItem_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_DeleteReferencesItem_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteReferencesRequest_Clear(a_pValue);
     }
 
@@ -8994,7 +8994,7 @@ SOPC_StatusCode OpcUa_DeleteReferencesResponse_Decode(void* pValue, SOPC_MsgBuff
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteReferencesResponse_Clear(a_pValue);
     }
 
@@ -9095,7 +9095,7 @@ SOPC_StatusCode OpcUa_ViewDescription_Decode(void* pValue, SOPC_MsgBuffer* msgBu
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->ViewVersion, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ViewDescription_Clear(a_pValue);
     }
 
@@ -9211,7 +9211,7 @@ SOPC_StatusCode OpcUa_BrowseDescription_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->ResultMask, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BrowseDescription_Clear(a_pValue);
     }
 
@@ -9334,7 +9334,7 @@ SOPC_StatusCode OpcUa_ReferenceDescription_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = SOPC_ExpandedNodeId_Read(&a_pValue->TypeDefinition, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReferenceDescription_Clear(a_pValue);
     }
 
@@ -9438,7 +9438,7 @@ SOPC_StatusCode OpcUa_BrowseResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_ReferenceDescription_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_ReferenceDescription_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BrowseResult_Clear(a_pValue);
     }
 
@@ -9549,7 +9549,7 @@ SOPC_StatusCode OpcUa_BrowseRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_BrowseDescription_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_BrowseDescription_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BrowseRequest_Clear(a_pValue);
     }
 
@@ -9659,7 +9659,7 @@ SOPC_StatusCode OpcUa_BrowseResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BrowseResponse_Clear(a_pValue);
     }
 
@@ -9765,7 +9765,7 @@ SOPC_StatusCode OpcUa_BrowseNextRequest_Decode(void* pValue, SOPC_MsgBuffer* msg
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_ByteString_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_ByteString_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BrowseNextRequest_Clear(a_pValue);
     }
 
@@ -9875,7 +9875,7 @@ SOPC_StatusCode OpcUa_BrowseNextResponse_Decode(void* pValue, SOPC_MsgBuffer* ms
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BrowseNextResponse_Clear(a_pValue);
     }
 
@@ -9980,7 +9980,7 @@ SOPC_StatusCode OpcUa_RelativePathElement_Decode(void* pValue, SOPC_MsgBuffer* m
     if(STATUS_OK == status)
         status = SOPC_QualifiedName_Read(&a_pValue->TargetName, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RelativePathElement_Clear(a_pValue);
     }
 
@@ -10072,7 +10072,7 @@ SOPC_StatusCode OpcUa_RelativePath_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_RelativePathElement_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_RelativePathElement_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RelativePath_Clear(a_pValue);
     }
 
@@ -10164,7 +10164,7 @@ SOPC_StatusCode OpcUa_BrowsePath_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = OpcUa_RelativePath_Decode(&a_pValue->RelativePath, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BrowsePath_Clear(a_pValue);
     }
 
@@ -10256,7 +10256,7 @@ SOPC_StatusCode OpcUa_BrowsePathTarget_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->RemainingPathIndex, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BrowsePathTarget_Clear(a_pValue);
     }
 
@@ -10354,7 +10354,7 @@ SOPC_StatusCode OpcUa_BrowsePathResult_Decode(void* pValue, SOPC_MsgBuffer* msgB
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_BrowsePathTarget_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_BrowsePathTarget_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BrowsePathResult_Clear(a_pValue);
     }
 
@@ -10453,7 +10453,7 @@ SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsRequest_Decode(void* pValue, 
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_BrowsePath_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_BrowsePath_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_TranslateBrowsePathsToNodeIdsRequest_Clear(a_pValue);
     }
 
@@ -10563,7 +10563,7 @@ SOPC_StatusCode OpcUa_TranslateBrowsePathsToNodeIdsResponse_Decode(void* pValue,
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_TranslateBrowsePathsToNodeIdsResponse_Clear(a_pValue);
     }
 
@@ -10663,7 +10663,7 @@ SOPC_StatusCode OpcUa_RegisterNodesRequest_Decode(void* pValue, SOPC_MsgBuffer* 
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_NodeId_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_NodeId_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RegisterNodesRequest_Clear(a_pValue);
     }
 
@@ -10761,7 +10761,7 @@ SOPC_StatusCode OpcUa_RegisterNodesResponse_Decode(void* pValue, SOPC_MsgBuffer*
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_NodeId_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_NodeId_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RegisterNodesResponse_Clear(a_pValue);
     }
 
@@ -10861,7 +10861,7 @@ SOPC_StatusCode OpcUa_UnregisterNodesRequest_Decode(void* pValue, SOPC_MsgBuffer
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_NodeId_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_NodeId_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_UnregisterNodesRequest_Clear(a_pValue);
     }
 
@@ -10947,7 +10947,7 @@ SOPC_StatusCode OpcUa_UnregisterNodesResponse_Decode(void* pValue, SOPC_MsgBuffe
     if(STATUS_OK == status)
         status = OpcUa_ResponseHeader_Decode(&a_pValue->ResponseHeader, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_UnregisterNodesResponse_Clear(a_pValue);
     }
 
@@ -11082,7 +11082,7 @@ SOPC_StatusCode OpcUa_EndpointConfiguration_Decode(void* pValue, SOPC_MsgBuffer*
     if(STATUS_OK == status)
         status = SOPC_Int32_Read(&a_pValue->SecurityTokenLifetime, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EndpointConfiguration_Clear(a_pValue);
     }
 
@@ -11205,7 +11205,7 @@ SOPC_StatusCode OpcUa_SupportedProfile_Decode(void* pValue, SOPC_MsgBuffer* msgB
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_String_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_String_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SupportedProfile_Clear(a_pValue);
     }
 
@@ -11351,7 +11351,7 @@ SOPC_StatusCode OpcUa_SoftwareCertificate_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_SupportedProfile_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_SupportedProfile_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SoftwareCertificate_Clear(a_pValue);
     }
 
@@ -11449,7 +11449,7 @@ SOPC_StatusCode OpcUa_QueryDataDescription_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->IndexRange, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_QueryDataDescription_Clear(a_pValue);
     }
 
@@ -11553,7 +11553,7 @@ SOPC_StatusCode OpcUa_NodeTypeDescription_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_QueryDataDescription_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_QueryDataDescription_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_NodeTypeDescription_Clear(a_pValue);
     }
 
@@ -11658,7 +11658,7 @@ SOPC_StatusCode OpcUa_QueryDataSet_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_Variant_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_Variant_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_QueryDataSet_Clear(a_pValue);
     }
 
@@ -11768,7 +11768,7 @@ SOPC_StatusCode OpcUa_NodeReference_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_NodeId_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_NodeId_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_NodeReference_Clear(a_pValue);
     }
 
@@ -11866,7 +11866,7 @@ SOPC_StatusCode OpcUa_ContentFilterElement_Decode(void* pValue, SOPC_MsgBuffer* 
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_ExtensionObject_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_ExtensionObject_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ContentFilterElement_Clear(a_pValue);
     }
 
@@ -11958,7 +11958,7 @@ SOPC_StatusCode OpcUa_ContentFilter_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_ContentFilterElement_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_ContentFilterElement_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ContentFilter_Clear(a_pValue);
     }
 
@@ -12044,7 +12044,7 @@ SOPC_StatusCode OpcUa_ElementOperand_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->Index, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ElementOperand_Clear(a_pValue);
     }
 
@@ -12130,7 +12130,7 @@ SOPC_StatusCode OpcUa_LiteralOperand_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
     if(STATUS_OK == status)
         status = SOPC_Variant_Read(&a_pValue->Value, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_LiteralOperand_Clear(a_pValue);
     }
 
@@ -12240,7 +12240,7 @@ SOPC_StatusCode OpcUa_AttributeOperand_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->IndexRange, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AttributeOperand_Clear(a_pValue);
     }
 
@@ -12350,7 +12350,7 @@ SOPC_StatusCode OpcUa_SimpleAttributeOperand_Decode(void* pValue, SOPC_MsgBuffer
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->IndexRange, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SimpleAttributeOperand_Clear(a_pValue);
     }
 
@@ -12460,7 +12460,7 @@ SOPC_StatusCode OpcUa_ContentFilterElementResult_Decode(void* pValue, SOPC_MsgBu
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ContentFilterElementResult_Clear(a_pValue);
     }
 
@@ -12564,7 +12564,7 @@ SOPC_StatusCode OpcUa_ContentFilterResult_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ContentFilterResult_Clear(a_pValue);
     }
 
@@ -12674,7 +12674,7 @@ SOPC_StatusCode OpcUa_ParsingResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ParsingResult_Clear(a_pValue);
     }
 
@@ -12797,7 +12797,7 @@ SOPC_StatusCode OpcUa_QueryFirstRequest_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->MaxReferencesToReturn, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_QueryFirstRequest_Clear(a_pValue);
     }
 
@@ -12931,7 +12931,7 @@ SOPC_StatusCode OpcUa_QueryFirstResponse_Decode(void* pValue, SOPC_MsgBuffer* ms
     if(STATUS_OK == status)
         status = OpcUa_ContentFilterResult_Decode(&a_pValue->FilterResult, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_QueryFirstResponse_Clear(a_pValue);
     }
 
@@ -13031,7 +13031,7 @@ SOPC_StatusCode OpcUa_QueryNextRequest_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->ContinuationPoint, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_QueryNextRequest_Clear(a_pValue);
     }
 
@@ -13135,7 +13135,7 @@ SOPC_StatusCode OpcUa_QueryNextResponse_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->RevisedContinuationPoint, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_QueryNextResponse_Clear(a_pValue);
     }
 
@@ -13241,7 +13241,7 @@ SOPC_StatusCode OpcUa_ReadValueId_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_QualifiedName_Read(&a_pValue->DataEncoding, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReadValueId_Clear(a_pValue);
     }
 
@@ -13352,7 +13352,7 @@ SOPC_StatusCode OpcUa_ReadRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_ReadValueId_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_ReadValueId_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReadRequest_Clear(a_pValue);
     }
 
@@ -13462,7 +13462,7 @@ SOPC_StatusCode OpcUa_ReadResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReadResponse_Clear(a_pValue);
     }
 
@@ -13567,7 +13567,7 @@ SOPC_StatusCode OpcUa_HistoryReadValueId_Decode(void* pValue, SOPC_MsgBuffer* ms
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->ContinuationPoint, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryReadValueId_Clear(a_pValue);
     }
 
@@ -13665,7 +13665,7 @@ SOPC_StatusCode OpcUa_HistoryReadResult_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_ExtensionObject_Read(&a_pValue->HistoryData, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryReadResult_Clear(a_pValue);
     }
 
@@ -13769,7 +13769,7 @@ SOPC_StatusCode OpcUa_ReadEventDetails_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = OpcUa_EventFilter_Decode(&a_pValue->Filter, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReadEventDetails_Clear(a_pValue);
     }
 
@@ -13879,7 +13879,7 @@ SOPC_StatusCode OpcUa_ReadRawModifiedDetails_Decode(void* pValue, SOPC_MsgBuffer
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->ReturnBounds, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReadRawModifiedDetails_Clear(a_pValue);
     }
 
@@ -13995,7 +13995,7 @@ SOPC_StatusCode OpcUa_ReadProcessedDetails_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = OpcUa_AggregateConfiguration_Decode(&a_pValue->AggregateConfiguration, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReadProcessedDetails_Clear(a_pValue);
     }
 
@@ -14093,7 +14093,7 @@ SOPC_StatusCode OpcUa_ReadAtTimeDetails_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->UseSimpleBounds, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ReadAtTimeDetails_Clear(a_pValue);
     }
 
@@ -14185,7 +14185,7 @@ SOPC_StatusCode OpcUa_HistoryData_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DataValue_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DataValue_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryData_Clear(a_pValue);
     }
 
@@ -14283,7 +14283,7 @@ SOPC_StatusCode OpcUa_ModificationInfo_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_String_Read(&a_pValue->UserName, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ModificationInfo_Clear(a_pValue);
     }
 
@@ -14387,7 +14387,7 @@ SOPC_StatusCode OpcUa_HistoryModifiedData_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_ModificationInfo_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_ModificationInfo_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryModifiedData_Clear(a_pValue);
     }
 
@@ -14479,7 +14479,7 @@ SOPC_StatusCode OpcUa_HistoryEvent_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_HistoryEventFieldList_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_HistoryEventFieldList_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryEvent_Clear(a_pValue);
     }
 
@@ -14596,7 +14596,7 @@ SOPC_StatusCode OpcUa_HistoryReadRequest_Decode(void* pValue, SOPC_MsgBuffer* ms
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_HistoryReadValueId_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_HistoryReadValueId_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryReadRequest_Clear(a_pValue);
     }
 
@@ -14706,7 +14706,7 @@ SOPC_StatusCode OpcUa_HistoryReadResponse_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryReadResponse_Clear(a_pValue);
     }
 
@@ -14811,7 +14811,7 @@ SOPC_StatusCode OpcUa_WriteValue_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_DataValue_Read(&a_pValue->Value, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_WriteValue_Clear(a_pValue);
     }
 
@@ -14910,7 +14910,7 @@ SOPC_StatusCode OpcUa_WriteRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_WriteValue_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_WriteValue_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_WriteRequest_Clear(a_pValue);
     }
 
@@ -15020,7 +15020,7 @@ SOPC_StatusCode OpcUa_WriteResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_WriteResponse_Clear(a_pValue);
     }
 
@@ -15107,7 +15107,7 @@ SOPC_StatusCode OpcUa_HistoryUpdateDetails_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = SOPC_NodeId_Read(&a_pValue->NodeId, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryUpdateDetails_Clear(a_pValue);
     }
 
@@ -15213,7 +15213,7 @@ SOPC_StatusCode OpcUa_UpdateDataDetails_Decode(void* pValue, SOPC_MsgBuffer* msg
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DataValue_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DataValue_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_UpdateDataDetails_Clear(a_pValue);
     }
 
@@ -15317,7 +15317,7 @@ SOPC_StatusCode OpcUa_UpdateStructureDataDetails_Decode(void* pValue, SOPC_MsgBu
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DataValue_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DataValue_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_UpdateStructureDataDetails_Clear(a_pValue);
     }
 
@@ -15427,7 +15427,7 @@ SOPC_StatusCode OpcUa_UpdateEventDetails_Decode(void* pValue, SOPC_MsgBuffer* ms
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_HistoryEventFieldList_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_HistoryEventFieldList_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_UpdateEventDetails_Clear(a_pValue);
     }
 
@@ -15531,7 +15531,7 @@ SOPC_StatusCode OpcUa_DeleteRawModifiedDetails_Decode(void* pValue, SOPC_MsgBuff
     if(STATUS_OK == status)
         status = SOPC_DateTime_Read(&a_pValue->EndTime, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteRawModifiedDetails_Clear(a_pValue);
     }
 
@@ -15629,7 +15629,7 @@ SOPC_StatusCode OpcUa_DeleteAtTimeDetails_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DateTime_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DateTime_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteAtTimeDetails_Clear(a_pValue);
     }
 
@@ -15727,7 +15727,7 @@ SOPC_StatusCode OpcUa_DeleteEventDetails_Decode(void* pValue, SOPC_MsgBuffer* ms
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_ByteString_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_ByteString_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteEventDetails_Clear(a_pValue);
     }
 
@@ -15837,7 +15837,7 @@ SOPC_StatusCode OpcUa_HistoryUpdateResult_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryUpdateResult_Clear(a_pValue);
     }
 
@@ -15936,7 +15936,7 @@ SOPC_StatusCode OpcUa_HistoryUpdateRequest_Decode(void* pValue, SOPC_MsgBuffer* 
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_ExtensionObject_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_ExtensionObject_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryUpdateRequest_Clear(a_pValue);
     }
 
@@ -16046,7 +16046,7 @@ SOPC_StatusCode OpcUa_HistoryUpdateResponse_Decode(void* pValue, SOPC_MsgBuffer*
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryUpdateResponse_Clear(a_pValue);
     }
 
@@ -16151,7 +16151,7 @@ SOPC_StatusCode OpcUa_CallMethodRequest_Decode(void* pValue, SOPC_MsgBuffer* msg
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_Variant_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_Variant_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CallMethodRequest_Clear(a_pValue);
     }
 
@@ -16273,7 +16273,7 @@ SOPC_StatusCode OpcUa_CallMethodResult_Decode(void* pValue, SOPC_MsgBuffer* msgB
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_Variant_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_Variant_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CallMethodResult_Clear(a_pValue);
     }
 
@@ -16372,7 +16372,7 @@ SOPC_StatusCode OpcUa_CallRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_CallMethodRequest_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_CallMethodRequest_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CallRequest_Clear(a_pValue);
     }
 
@@ -16482,7 +16482,7 @@ SOPC_StatusCode OpcUa_CallResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CallResponse_Clear(a_pValue);
     }
 
@@ -16584,7 +16584,7 @@ SOPC_StatusCode OpcUa_DataChangeFilter_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_Double_Read(&a_pValue->DeadbandValue, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DataChangeFilter_Clear(a_pValue);
     }
 
@@ -16682,7 +16682,7 @@ SOPC_StatusCode OpcUa_EventFilter_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = OpcUa_ContentFilter_Decode(&a_pValue->WhereClause, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EventFilter_Clear(a_pValue);
     }
 
@@ -16792,7 +16792,7 @@ SOPC_StatusCode OpcUa_AggregateConfiguration_Decode(void* pValue, SOPC_MsgBuffer
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->UseSlopedExtrapolation, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AggregateConfiguration_Clear(a_pValue);
     }
 
@@ -16896,7 +16896,7 @@ SOPC_StatusCode OpcUa_AggregateFilter_Decode(void* pValue, SOPC_MsgBuffer* msgBu
     if(STATUS_OK == status)
         status = OpcUa_AggregateConfiguration_Decode(&a_pValue->AggregateConfiguration, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AggregateFilter_Clear(a_pValue);
     }
 
@@ -17006,7 +17006,7 @@ SOPC_StatusCode OpcUa_EventFilterResult_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = OpcUa_ContentFilterResult_Decode(&a_pValue->WhereClauseResult, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EventFilterResult_Clear(a_pValue);
     }
 
@@ -17104,7 +17104,7 @@ SOPC_StatusCode OpcUa_AggregateFilterResult_Decode(void* pValue, SOPC_MsgBuffer*
     if(STATUS_OK == status)
         status = OpcUa_AggregateConfiguration_Decode(&a_pValue->RevisedAggregateConfiguration, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AggregateFilterResult_Clear(a_pValue);
     }
 
@@ -17214,7 +17214,7 @@ SOPC_StatusCode OpcUa_MonitoringParameters_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->DiscardOldest, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_MonitoringParameters_Clear(a_pValue);
     }
 
@@ -17312,7 +17312,7 @@ SOPC_StatusCode OpcUa_MonitoredItemCreateRequest_Decode(void* pValue, SOPC_MsgBu
     if(STATUS_OK == status)
         status = OpcUa_MonitoringParameters_Decode(&a_pValue->RequestedParameters, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_MonitoredItemCreateRequest_Clear(a_pValue);
     }
 
@@ -17422,7 +17422,7 @@ SOPC_StatusCode OpcUa_MonitoredItemCreateResult_Decode(void* pValue, SOPC_MsgBuf
     if(STATUS_OK == status)
         status = SOPC_ExtensionObject_Read(&a_pValue->FilterResult, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_MonitoredItemCreateResult_Clear(a_pValue);
     }
 
@@ -17533,7 +17533,7 @@ SOPC_StatusCode OpcUa_CreateMonitoredItemsRequest_Decode(void* pValue, SOPC_MsgB
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_MonitoredItemCreateRequest_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_MonitoredItemCreateRequest_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CreateMonitoredItemsRequest_Clear(a_pValue);
     }
 
@@ -17643,7 +17643,7 @@ SOPC_StatusCode OpcUa_CreateMonitoredItemsResponse_Decode(void* pValue, SOPC_Msg
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CreateMonitoredItemsResponse_Clear(a_pValue);
     }
 
@@ -17736,7 +17736,7 @@ SOPC_StatusCode OpcUa_MonitoredItemModifyRequest_Decode(void* pValue, SOPC_MsgBu
     if(STATUS_OK == status)
         status = OpcUa_MonitoringParameters_Decode(&a_pValue->RequestedParameters, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_MonitoredItemModifyRequest_Clear(a_pValue);
     }
 
@@ -17840,7 +17840,7 @@ SOPC_StatusCode OpcUa_MonitoredItemModifyResult_Decode(void* pValue, SOPC_MsgBuf
     if(STATUS_OK == status)
         status = SOPC_ExtensionObject_Read(&a_pValue->FilterResult, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_MonitoredItemModifyResult_Clear(a_pValue);
     }
 
@@ -17951,7 +17951,7 @@ SOPC_StatusCode OpcUa_ModifyMonitoredItemsRequest_Decode(void* pValue, SOPC_MsgB
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_MonitoredItemModifyRequest_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_MonitoredItemModifyRequest_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ModifyMonitoredItemsRequest_Clear(a_pValue);
     }
 
@@ -18061,7 +18061,7 @@ SOPC_StatusCode OpcUa_ModifyMonitoredItemsResponse_Decode(void* pValue, SOPC_Msg
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ModifyMonitoredItemsResponse_Clear(a_pValue);
     }
 
@@ -18173,7 +18173,7 @@ SOPC_StatusCode OpcUa_SetMonitoringModeRequest_Decode(void* pValue, SOPC_MsgBuff
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_UInt32_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_UInt32_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SetMonitoringModeRequest_Clear(a_pValue);
     }
 
@@ -18283,7 +18283,7 @@ SOPC_StatusCode OpcUa_SetMonitoringModeResponse_Decode(void* pValue, SOPC_MsgBuf
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SetMonitoringModeResponse_Clear(a_pValue);
     }
 
@@ -18407,7 +18407,7 @@ SOPC_StatusCode OpcUa_SetTriggeringRequest_Decode(void* pValue, SOPC_MsgBuffer* 
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_UInt32_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_UInt32_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SetTriggeringRequest_Clear(a_pValue);
     }
 
@@ -18541,7 +18541,7 @@ SOPC_StatusCode OpcUa_SetTriggeringResponse_Decode(void* pValue, SOPC_MsgBuffer*
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SetTriggeringResponse_Clear(a_pValue);
     }
 
@@ -18647,7 +18647,7 @@ SOPC_StatusCode OpcUa_DeleteMonitoredItemsRequest_Decode(void* pValue, SOPC_MsgB
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_UInt32_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_UInt32_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteMonitoredItemsRequest_Clear(a_pValue);
     }
 
@@ -18757,7 +18757,7 @@ SOPC_StatusCode OpcUa_DeleteMonitoredItemsResponse_Decode(void* pValue, SOPC_Msg
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteMonitoredItemsResponse_Clear(a_pValue);
     }
 
@@ -18881,7 +18881,7 @@ SOPC_StatusCode OpcUa_CreateSubscriptionRequest_Decode(void* pValue, SOPC_MsgBuf
     if(STATUS_OK == status)
         status = SOPC_Byte_Read(&a_pValue->Priority, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CreateSubscriptionRequest_Clear(a_pValue);
     }
 
@@ -18991,7 +18991,7 @@ SOPC_StatusCode OpcUa_CreateSubscriptionResponse_Decode(void* pValue, SOPC_MsgBu
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->RevisedMaxKeepAliveCount, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_CreateSubscriptionResponse_Clear(a_pValue);
     }
 
@@ -19115,7 +19115,7 @@ SOPC_StatusCode OpcUa_ModifySubscriptionRequest_Decode(void* pValue, SOPC_MsgBuf
     if(STATUS_OK == status)
         status = SOPC_Byte_Read(&a_pValue->Priority, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ModifySubscriptionRequest_Clear(a_pValue);
     }
 
@@ -19219,7 +19219,7 @@ SOPC_StatusCode OpcUa_ModifySubscriptionResponse_Decode(void* pValue, SOPC_MsgBu
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->RevisedMaxKeepAliveCount, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ModifySubscriptionResponse_Clear(a_pValue);
     }
 
@@ -19325,7 +19325,7 @@ SOPC_StatusCode OpcUa_SetPublishingModeRequest_Decode(void* pValue, SOPC_MsgBuff
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_UInt32_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_UInt32_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SetPublishingModeRequest_Clear(a_pValue);
     }
 
@@ -19435,7 +19435,7 @@ SOPC_StatusCode OpcUa_SetPublishingModeResponse_Decode(void* pValue, SOPC_MsgBuf
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SetPublishingModeResponse_Clear(a_pValue);
     }
 
@@ -19540,7 +19540,7 @@ SOPC_StatusCode OpcUa_NotificationMessage_Decode(void* pValue, SOPC_MsgBuffer* m
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_ExtensionObject_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_ExtensionObject_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_NotificationMessage_Clear(a_pValue);
     }
 
@@ -19644,7 +19644,7 @@ SOPC_StatusCode OpcUa_DataChangeNotification_Decode(void* pValue, SOPC_MsgBuffer
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DataChangeNotification_Clear(a_pValue);
     }
 
@@ -19736,7 +19736,7 @@ SOPC_StatusCode OpcUa_MonitoredItemNotification_Decode(void* pValue, SOPC_MsgBuf
     if(STATUS_OK == status)
         status = SOPC_DataValue_Read(&a_pValue->Value, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_MonitoredItemNotification_Clear(a_pValue);
     }
 
@@ -19828,7 +19828,7 @@ SOPC_StatusCode OpcUa_EventNotificationList_Decode(void* pValue, SOPC_MsgBuffer*
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_EventFieldList_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_EventFieldList_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EventNotificationList_Clear(a_pValue);
     }
 
@@ -19926,7 +19926,7 @@ SOPC_StatusCode OpcUa_EventFieldList_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_Variant_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_Variant_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EventFieldList_Clear(a_pValue);
     }
 
@@ -20018,7 +20018,7 @@ SOPC_StatusCode OpcUa_HistoryEventFieldList_Decode(void* pValue, SOPC_MsgBuffer*
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_Variant_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_Variant_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_HistoryEventFieldList_Clear(a_pValue);
     }
 
@@ -20110,7 +20110,7 @@ SOPC_StatusCode OpcUa_StatusChangeNotification_Decode(void* pValue, SOPC_MsgBuff
     if(STATUS_OK == status)
         status = SOPC_DiagnosticInfo_Read(&a_pValue->DiagnosticInfo, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_StatusChangeNotification_Clear(a_pValue);
     }
 
@@ -20202,7 +20202,7 @@ SOPC_StatusCode OpcUa_SubscriptionAcknowledgement_Decode(void* pValue, SOPC_MsgB
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->SequenceNumber, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SubscriptionAcknowledgement_Clear(a_pValue);
     }
 
@@ -20301,7 +20301,7 @@ SOPC_StatusCode OpcUa_PublishRequest_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_SubscriptionAcknowledgement_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_SubscriptionAcknowledgement_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_PublishRequest_Clear(a_pValue);
     }
 
@@ -20441,7 +20441,7 @@ SOPC_StatusCode OpcUa_PublishResponse_Decode(void* pValue, SOPC_MsgBuffer* msgBu
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_PublishResponse_Clear(a_pValue);
     }
 
@@ -20541,7 +20541,7 @@ SOPC_StatusCode OpcUa_RepublishRequest_Decode(void* pValue, SOPC_MsgBuffer* msgB
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->RetransmitSequenceNumber, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RepublishRequest_Clear(a_pValue);
     }
 
@@ -20633,7 +20633,7 @@ SOPC_StatusCode OpcUa_RepublishResponse_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = OpcUa_NotificationMessage_Decode(&a_pValue->NotificationMessage, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RepublishResponse_Clear(a_pValue);
     }
 
@@ -20732,7 +20732,7 @@ SOPC_StatusCode OpcUa_TransferResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_UInt32_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_UInt32_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_TransferResult_Clear(a_pValue);
     }
 
@@ -20837,7 +20837,7 @@ SOPC_StatusCode OpcUa_TransferSubscriptionsRequest_Decode(void* pValue, SOPC_Msg
     if(STATUS_OK == status)
         status = SOPC_Boolean_Read(&a_pValue->SendInitialValues, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_TransferSubscriptionsRequest_Clear(a_pValue);
     }
 
@@ -20947,7 +20947,7 @@ SOPC_StatusCode OpcUa_TransferSubscriptionsResponse_Decode(void* pValue, SOPC_Ms
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_TransferSubscriptionsResponse_Clear(a_pValue);
     }
 
@@ -21047,7 +21047,7 @@ SOPC_StatusCode OpcUa_DeleteSubscriptionsRequest_Decode(void* pValue, SOPC_MsgBu
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_UInt32_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_UInt32_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteSubscriptionsRequest_Clear(a_pValue);
     }
 
@@ -21157,7 +21157,7 @@ SOPC_StatusCode OpcUa_DeleteSubscriptionsResponse_Decode(void* pValue, SOPC_MsgB
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_DiagnosticInfo_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_DiagnosticInfo_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DeleteSubscriptionsResponse_Clear(a_pValue);
     }
 
@@ -21275,7 +21275,7 @@ SOPC_StatusCode OpcUa_BuildInfo_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_DateTime_Read(&a_pValue->BuildDate, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_BuildInfo_Clear(a_pValue);
     }
 
@@ -21375,7 +21375,7 @@ SOPC_StatusCode OpcUa_RedundantServerDataType_Decode(void* pValue, SOPC_MsgBuffe
     if(STATUS_OK == status)
         status = SOPC_Read_EnumeratedType(msgBuf, (int32_t*) &a_pValue->ServerState);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_RedundantServerDataType_Clear(a_pValue);
     }
 
@@ -21467,7 +21467,7 @@ SOPC_StatusCode OpcUa_EndpointUrlListDataType_Decode(void* pValue, SOPC_MsgBuffe
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_String_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_String_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EndpointUrlListDataType_Clear(a_pValue);
     }
 
@@ -21565,7 +21565,7 @@ SOPC_StatusCode OpcUa_NetworkGroupDataType_Decode(void* pValue, SOPC_MsgBuffer* 
                                  (SOPC_EncodeableObject_PfnInitialize*) OpcUa_EndpointUrlListDataType_Initialize, 
                                  (SOPC_EncodeableObject_PfnClear*) OpcUa_EndpointUrlListDataType_Clear);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_NetworkGroupDataType_Clear(a_pValue);
     }
 
@@ -21669,7 +21669,7 @@ SOPC_StatusCode OpcUa_SamplingIntervalDiagnosticsDataType_Decode(void* pValue, S
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->DisabledMonitoredItemCount, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SamplingIntervalDiagnosticsDataType_Clear(a_pValue);
     }
 
@@ -21821,7 +21821,7 @@ SOPC_StatusCode OpcUa_ServerDiagnosticsSummaryDataType_Decode(void* pValue, SOPC
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->RejectedRequestsCount, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ServerDiagnosticsSummaryDataType_Clear(a_pValue);
     }
 
@@ -21937,7 +21937,7 @@ SOPC_StatusCode OpcUa_ServerStatusDataType_Decode(void* pValue, SOPC_MsgBuffer* 
     if(STATUS_OK == status)
         status = SOPC_LocalizedText_Read(&a_pValue->ShutdownReason, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ServerStatusDataType_Clear(a_pValue);
     }
 
@@ -22281,7 +22281,7 @@ SOPC_StatusCode OpcUa_SessionDiagnosticsDataType_Decode(void* pValue, SOPC_MsgBu
     if(STATUS_OK == status)
         status = OpcUa_ServiceCounterDataType_Decode(&a_pValue->UnregisterNodesCount, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SessionDiagnosticsDataType_Clear(a_pValue);
     }
 
@@ -22421,7 +22421,7 @@ SOPC_StatusCode OpcUa_SessionSecurityDiagnosticsDataType_Decode(void* pValue, SO
     if(STATUS_OK == status)
         status = SOPC_ByteString_Read(&a_pValue->ClientCertificate, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SessionSecurityDiagnosticsDataType_Clear(a_pValue);
     }
 
@@ -22513,7 +22513,7 @@ SOPC_StatusCode OpcUa_ServiceCounterDataType_Decode(void* pValue, SOPC_MsgBuffer
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->ErrorCount, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ServiceCounterDataType_Clear(a_pValue);
     }
 
@@ -22605,7 +22605,7 @@ SOPC_StatusCode OpcUa_StatusResult_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_DiagnosticInfo_Read(&a_pValue->DiagnosticInfo, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_StatusResult_Clear(a_pValue);
     }
 
@@ -22871,7 +22871,7 @@ SOPC_StatusCode OpcUa_SubscriptionDiagnosticsDataType_Decode(void* pValue, SOPC_
     if(STATUS_OK == status)
         status = SOPC_UInt32_Read(&a_pValue->EventQueueOverFlowCount, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SubscriptionDiagnosticsDataType_Clear(a_pValue);
     }
 
@@ -22970,7 +22970,7 @@ SOPC_StatusCode OpcUa_ModelChangeStructureDataType_Decode(void* pValue, SOPC_Msg
     if(STATUS_OK == status)
         status = SOPC_Byte_Read(&a_pValue->Verb, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ModelChangeStructureDataType_Clear(a_pValue);
     }
 
@@ -23062,7 +23062,7 @@ SOPC_StatusCode OpcUa_SemanticChangeStructureDataType_Decode(void* pValue, SOPC_
     if(STATUS_OK == status)
         status = SOPC_NodeId_Read(&a_pValue->AffectedType, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_SemanticChangeStructureDataType_Clear(a_pValue);
     }
 
@@ -23154,7 +23154,7 @@ SOPC_StatusCode OpcUa_Range_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_Double_Read(&a_pValue->High, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_Range_Clear(a_pValue);
     }
 
@@ -23258,7 +23258,7 @@ SOPC_StatusCode OpcUa_EUInformation_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_LocalizedText_Read(&a_pValue->Description, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_EUInformation_Clear(a_pValue);
     }
 
@@ -23351,7 +23351,7 @@ SOPC_StatusCode OpcUa_ComplexNumberType_Decode(void* pValue, SOPC_MsgBuffer* msg
     if(STATUS_OK == status)
         status = SOPC_Float_Read(&a_pValue->Imaginary, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ComplexNumberType_Clear(a_pValue);
     }
 
@@ -23443,7 +23443,7 @@ SOPC_StatusCode OpcUa_DoubleComplexNumberType_Decode(void* pValue, SOPC_MsgBuffe
     if(STATUS_OK == status)
         status = SOPC_Double_Read(&a_pValue->Imaginary, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_DoubleComplexNumberType_Clear(a_pValue);
     }
 
@@ -23559,7 +23559,7 @@ SOPC_StatusCode OpcUa_AxisInformation_Decode(void* pValue, SOPC_MsgBuffer* msgBu
                                  (SOPC_EncodeableObject_PfnInitialize*) SOPC_Double_InitializeAux, 
                                  (SOPC_EncodeableObject_PfnClear*) SOPC_Double_ClearAux);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_AxisInformation_Clear(a_pValue);
     }
 
@@ -23651,7 +23651,7 @@ SOPC_StatusCode OpcUa_XVType_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_Float_Read(&a_pValue->Value, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_XVType_Clear(a_pValue);
     }
 
@@ -23803,7 +23803,7 @@ SOPC_StatusCode OpcUa_ProgramDiagnosticDataType_Decode(void* pValue, SOPC_MsgBuf
     if(STATUS_OK == status)
         status = OpcUa_StatusResult_Decode(&a_pValue->LastMethodReturnStatus, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_ProgramDiagnosticDataType_Clear(a_pValue);
     }
 
@@ -23901,7 +23901,7 @@ SOPC_StatusCode OpcUa_Annotation_Decode(void* pValue, SOPC_MsgBuffer* msgBuf)
     if(STATUS_OK == status)
         status = SOPC_DateTime_Read(&a_pValue->AnnotationTime, msgBuf);
 
-    if(status != STATUS_OK){
+    if(status != STATUS_OK && a_pValue != NULL){
         OpcUa_Annotation_Clear(a_pValue);
     }
 
