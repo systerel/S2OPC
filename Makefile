@@ -7,19 +7,12 @@ ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      PLATFORM_DIR="*linux*"
      PFLAGS=-std=c99 -pedantic -D_XOPEN_SOURCE=600
      LIBS=$(LIBS_MBEDTLS) -lpthread
-     COPY_SSL=@cat /dev/null
 else
     CC=i686-w64-mingw32-gcc #i686-pc-mingw32-gcc
     EXCLUDE_DIR="*linux*"
     PLATFORM_DIR="*win*"
     PFLAGS=""
-    OPEN_SSL_FILES=$(WORKSPACE_DIR)/lib/openssl/include
-    INCLUDES_SSL=-I$(OPEN_SSL_FILES)
     LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32
-    SSL_DLL_DIR=$(WORKSPACE_DIR)/lib/openssl/bin/vs2008
-    SSL_DIR=$(WORKSPACE_DIR)/lib/openssl/lib/win32/
-    LIBS_DIR=-L$(SSL_DIR)
-    COPY_SSL=cp $(SSL_DLL_DIR)/* ../out/
 endif
 
 ifdef STACK_1_01
@@ -92,7 +85,7 @@ LIBS_MBEDTLS=-L$(MBEDTLS_DIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
 CFLAGS=-c -g -Wall -Wextra -O0 $(SHARED_FLAG)
 C99FLAGS=-std=c99 -pedantic
 LFLAGS=-g
-INCLUDES=$(INCLUDES_MBEDTLS) $(INCLUDES_SSL) $(addprefix -I, $(INCLUDES_UASTACK))
+INCLUDES=$(INCLUDES_MBEDTLS) $(addprefix -I, $(INCLUDES_UASTACK))
 DEFS=$(DEF_STACK) $(DEF_THREAD)
 
 # MAKEFILE CONTENT
