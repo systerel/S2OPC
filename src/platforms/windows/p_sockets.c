@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2016 Systerel and others.
+ *  Copyright (C) 2017 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -17,20 +17,28 @@
 
 #include "sopc_raw_sockets.h"
 
-#include <unistd.h>
-#include <string.h>
-#include <netinet/tcp.h>
-#include <fcntl.h>
-#include <errno.h>
-
 #include "sopc_stack_csts.h"
+#include <unistd.h>
+
+
+static WSADATA wsaData;
 
 SOPC_StatusCode Socket_Network_Initialize(){
-    return STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
+    int result = WSAStartup(MAKEWORD(2,2), &wsaData);
+    if(result != 0){
+        status = STATUS_NOK;
+    }
+    return status;
 }
 
 SOPC_StatusCode Socket_Network_Clear(){
-    return STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
+    int result = WSACleanup();
+    if(result != 0){
+        status = STATUS_NOK;
+    }
+    return status;
 }
 
 SOPC_StatusCode Socket_AddrInfo_Get(char* hostname, char* port, Socket_AddressInfo** addrs){
@@ -61,7 +69,7 @@ Socket_AddressInfo* Socket_AddrInfo_IterNext(Socket_AddressInfo* addr){
 }
 
 uint8_t Socket_AddrInfo_IsIPV6(Socket_AddressInfo* addr){
-    return addr->ai_family == PF_INET6;
+    return addr->ai_family == AF_INET6;
 }
 
 void Socket_AddrInfoDelete(Socket_AddressInfo** addrs){
@@ -81,39 +89,40 @@ SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
                                  Socket*             sock){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int true = 1;
+	u_long ltrue = 1;
     int setOptStatus = -1;
     if(addr != NULL && sock != NULL){
         status = STATUS_OK;
         *sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-        if(*sock != -1){
+        if(*sock != INVALID_SOCKET){
             // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
-            setOptStatus = setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY, &true, sizeof(int));
+            setOptStatus = setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY, (char*) &true, sizeof(int));
 
-            if(setOptStatus != -1){
+            if(setOptStatus != SOCKET_ERROR){
                 int rcvbufsize = OPCUA_P_TCPRCVBUFFERSIZE;
-                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, &rcvbufsize, sizeof(int));
+                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, (char*) &rcvbufsize, sizeof(int));
             }
 
-            if(setOptStatus != -1){
+            if(setOptStatus != SOCKET_ERROR){
                 int sndbufsize = OPCUA_P_TCPSNDBUFFERSIZE;
-                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, &sndbufsize, sizeof(int));
+                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, (char*) &sndbufsize, sizeof(int));
             }
 
-            if(setOptStatus != -1 && setReuseAddr != FALSE){
-                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(int));
+            if(setOptStatus != SOCKET_ERROR && setReuseAddr != FALSE){
+                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (char*) &true, sizeof(int));
             }
 
-            if(setOptStatus != -1 && setNonBlocking != FALSE){
-                setOptStatus = fcntl(*sock, F_SETFL, O_NONBLOCK);
+            if(setOptStatus != SOCKET_ERROR && setNonBlocking != FALSE){
+                setOptStatus = ioctlsocket(*sock, FIONBIO, &ltrue); // True => Non blocking
             }
 
             // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
-            if(setOptStatus != -1 && addr->ai_family == AF_INET6){
+            if(setOptStatus != SOCKET_ERROR && addr->ai_family == AF_INET6){
                 int false = FALSE;
-                setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&false, sizeof(int));
+                setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &false, sizeof(int));
             }
         }
-        if(setOptStatus < 0){
+        if(setOptStatus == SOCKET_ERROR){
             status = STATUS_NOK;
         }
     }
@@ -127,11 +136,11 @@ SOPC_StatusCode Socket_Listen(Socket              sock,
     int bindListenStatus = -1;
     if(addr != NULL){
         bindListenStatus = bind(sock, addr->ai_addr, addr->ai_addrlen);
-        if(bindListenStatus != -1){
+        if(bindListenStatus != SOCKET_ERROR){
             bindListenStatus = listen(sock, SOMAXCONN);
         }
     }
-    if(bindListenStatus != -1){
+    if(bindListenStatus != SOCKET_ERROR){
         status = STATUS_OK;
     }
     return status;
@@ -141,18 +150,9 @@ SOPC_StatusCode Socket_Accept(Socket  listeningSock,
                               Socket* acceptedSock)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    struct sockaddr remoteAddr;
-    socklen_t addrLen = 0;
-    if(listeningSock != -1 && acceptedSock != NULL){
-        *acceptedSock = accept(listeningSock,
-                               &remoteAddr,
-                               &addrLen);
-//        printf("selectserver: new connection from %s on socket %d\n",
-//                inet_ntop(remoteaddr.sa_family,
-//                    get_in_addr((struct sockaddr*)&remoteaddr),
-//                    remoteIP, INET6_ADDRSTRLEN),
-//                acceptSock);
-        if(*acceptedSock != -1){
+    if(listeningSock != SOPC_INVALID_SOCKET && acceptedSock != NULL){
+        *acceptedSock = accept(listeningSock, NULL, NULL);
+        if(*acceptedSock != INVALID_SOCKET){
             status = STATUS_OK;
         }
     }
@@ -164,10 +164,12 @@ SOPC_StatusCode Socket_Connect(Socket              sock,
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int connectStatus = -1;
-    if(addr != NULL && sock != -1){
+    int wsaError = 0;
+    if(addr != NULL && sock != SOPC_INVALID_SOCKET){
         connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
-        if(connectStatus < 0){
-            if(errno == EINPROGRESS){
+        if(connectStatus == SOCKET_ERROR){
+        	wsaError = WSAGetLastError();
+            if(wsaError == WSAEWOULDBLOCK){
                 // Non blocking connection started
                 connectStatus = 0;
             }
@@ -183,8 +185,8 @@ SOPC_StatusCode Socket_CheckAckConnect(Socket sock){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int error = 0;
     socklen_t len = sizeof(int);
-    if(sock != -1){
-        if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0 ||
+    if(sock != SOPC_INVALID_SOCKET){
+        if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (char*) &error, &len) < 0 ||
             error != 0)
         {
             status = STATUS_NOK;
@@ -198,19 +200,16 @@ SOPC_StatusCode Socket_CheckAckConnect(Socket sock){
 void SocketSet_Add(Socket     sock,
                    SocketSet* sockSet)
 {
-    if(sock != -1 && sockSet != NULL){
-        FD_SET(sock, &sockSet->set);
-        if(sock > sockSet->fdmax){
-            sockSet->fdmax = sock;
-        }
+    if(sock != SOPC_INVALID_SOCKET && sockSet != NULL){
+        FD_SET(sock, sockSet);
     }
 }
 
 int8_t SocketSet_IsPresent(Socket     sock,
                            SocketSet* sockSet)
 {
-    if(sock != -1 && sockSet != NULL){
-        if(FD_ISSET(sock, &sockSet->set) == FALSE){
+    if(sock != SOPC_INVALID_SOCKET && sockSet != NULL){
+        if(FD_ISSET(sock, sockSet) == FALSE){
             return FALSE;
         }else{
             return 1;
@@ -222,8 +221,7 @@ int8_t SocketSet_IsPresent(Socket     sock,
 void SocketSet_Clear(SocketSet* sockSet)
 {
     if(sockSet != NULL){
-        FD_ZERO(&sockSet->set);
-        sockSet->fdmax = 0;
+        FD_ZERO(sockSet);
     }
 }
 
@@ -234,17 +232,9 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet,
                                 uint32_t   waitMs)
 {
     int32_t nbReady = 0;
+    const int ignored = 0; // ignored in winsocks
     struct timeval timeout;
     struct timeval* val;
-    int fdmax = 0;
-    if(readSet->fdmax > writeSet->fdmax){
-        fdmax = readSet->fdmax;
-    }else{
-        fdmax = writeSet->fdmax;
-    }
-    if(exceptSet->fdmax > fdmax){
-        fdmax = exceptSet->fdmax;
-    }
 
     if(waitMs == 0){
         val = NULL;
@@ -253,7 +243,7 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet,
         timeout.tv_usec = 1000 * (waitMs % 1000);
         val = &timeout;
     }
-    nbReady = select(fdmax+1, &readSet->set, &writeSet->set, &exceptSet->set, val);
+    nbReady = select(ignored, readSet, writeSet, exceptSet, val);
     if(nbReady > INT32_MAX || nbReady < INT32_MIN)
         return -1;
     return (int32_t) nbReady;
@@ -266,8 +256,9 @@ int32_t Socket_Write(Socket   sock,
     uint32_t sentBytes = 0;
     int res = 0;
     int8_t error = FALSE;
+    int wsaError = 0;
     uint8_t nbAttempt = 0;
-    if(sock != -1 &&
+    if(sock != SOPC_INVALID_SOCKET &&
        data != NULL &&
        count <= INT32_MAX)
     {
@@ -278,16 +269,19 @@ int32_t Socket_Write(Socket   sock,
                 usleep(SLEEP_NEXT_SEND_ATTEMP);
             }
             nbAttempt++;
-            res = send(sock, data, count, 0);
-            if(res >= 0){
-                sentBytes += res;
-            }else{
+            res = send(sock, (char*) data, count, 0);
+            if(res == SOCKET_ERROR){
+            	wsaError = WSAGetLastError();
                 // ERROR CASE
-                if(errno == EAGAIN || errno == EWOULDBLOCK){
+                if(wsaError == WSAEWOULDBLOCK){
                     // Try again in those cases
                 }else{
                     error = 1; // TRUE
                 }
+            }else if(res >= 0){
+                sentBytes += res;
+            }else{
+                error = 1; // should be an error or >= 0
             }
         } while(sentBytes < count && error == FALSE && nbAttempt < MAX_SEND_ATTEMPTS);
         return sentBytes;
@@ -303,14 +297,14 @@ SOPC_StatusCode Socket_Read(Socket     sock,
                             int32_t*   readCount)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-        if(sock != -1 && data != NULL && dataSize > 0){
-            *readCount = recv(sock, data, dataSize, 0);
+        if(sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0){
+            *readCount = recv(sock, (char*) data, dataSize, 0);
             if(*readCount > 0){
                 status = STATUS_OK;
             }else if(*readCount == 0){
                 status = OpcUa_BadDisconnect;
             }else if(*readCount == -1){
-                if(errno == EAGAIN || errno == EWOULDBLOCK){
+                if(WSAGetLastError() == WSAEWOULDBLOCK){
                     status = OpcUa_BadWouldBlock;
                 }
             }else{
@@ -322,8 +316,8 @@ SOPC_StatusCode Socket_Read(Socket     sock,
 
 void Socket_Close(Socket*  sock)
 {
-    if(sock != NULL && *sock != -1){
-        if(close(*sock) != -1){
+    if(sock != NULL && *sock != SOPC_INVALID_SOCKET){
+        if(closesocket(*sock) != SOCKET_ERROR){
             *sock = -1;
         }
     }

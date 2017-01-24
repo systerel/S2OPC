@@ -4,7 +4,7 @@
  *  \brief Platform independent socket interface with a platform dependent implementation.
  */
 /*
- *  Copyright (C) 2016 Systerel and others.
+ *  Copyright (C) 2017 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -23,18 +23,18 @@
 #ifndef SOPC_P_SOCKETS_H_
 #define SOPC_P_SOCKETS_H_
 
-#include <netdb.h>
-#include <sys/select.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
 #define MAX_SEND_ATTEMPTS 20
 #define SLEEP_NEXT_SEND_ATTEMP 50000 // micro seconds
 
-#define SOPC_INVALID_SOCKET -1
+#define SOPC_INVALID_SOCKET INVALID_SOCKET
 
 /**
  *  \brief Socket base type
  */
-typedef int Socket;
+typedef SOCKET Socket;
 
 /**
  *  \brief Socket addressing information for listening or connecting operation type
@@ -44,9 +44,6 @@ typedef struct addrinfo Socket_AddressInfo;
 /**
  *  \brief Set of sockets type
  */
-typedef struct {
-    int    fdmax; /**< max of the set */
-    fd_set set;   /**< set */
-} SocketSet;
+typedef fd_set SocketSet;
 
 #endif /* SOPC_P_SOCKETS_H_ */
