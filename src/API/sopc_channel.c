@@ -405,7 +405,7 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
         if((loopCptSleep % sleepFactor) == 0){
             loopCptWait++;
         }
-        Sleep (sleepTimeoutMicroSecs);
+        SOPC_Sleep (sleepTimeoutMicroSecs);
 #else
         (void) loopCptSleep;
         (void) sleepFactor;

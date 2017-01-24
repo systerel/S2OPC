@@ -23,8 +23,8 @@
 // Import Mutex type from platform dependent code
 #include "p_threads.h"
 
-SOPC_StatusCode Thread_Create(Thread* thread, void *(*startFct) (void *), void *startArgs);
-SOPC_StatusCode Thread_Join(Thread thread);
-void Sleep(unsigned int microsecs);
+SOPC_StatusCode SOPC_Thread_Create(Thread* thread, void *(*startFct) (void *), void *startArgs);
+SOPC_StatusCode SOPC_Thread_Join(Thread thread);
+void SOPC_Sleep(unsigned int microsecs);
 
 #endif /* SOPC_THREADS_H_ */

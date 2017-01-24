@@ -46,7 +46,7 @@ void* OpcUa_ThreadStartReception(void* nullData){
     while(STATUS_OK == status && receptionThread.stopFlag == FALSE){
         Mutex_Unlock(&receptionThread.tMutex);
         status = SOPC_SocketManager_Loop(SOPC_SocketManager_GetGlobal(), sleepTimeout);
-        Sleep(50);
+        SOPC_Sleep(50);
         Mutex_Lock(&receptionThread.tMutex);
     }
     Mutex_Unlock(&receptionThread.tMutex);
@@ -58,7 +58,7 @@ void OpcUa_ReceptionThread_Start(){
         Mutex_Inititalization(&receptionThread.tMutex);
         Mutex_Lock(&receptionThread.tMutex);
         receptionThread.initDone = 1;
-        Thread_Create(&receptionThread.thread, OpcUa_ThreadStartReception, NULL);
+        SOPC_Thread_Create(&receptionThread.thread, OpcUa_ThreadStartReception, NULL);
         Mutex_Unlock(&receptionThread.tMutex);
     }
 
@@ -70,7 +70,7 @@ void OpcUa_ReceptionThread_Stop(){
         // stop the reception thread
         receptionThread.stopFlag = 1;
         Mutex_Unlock(&receptionThread.tMutex);
-        Thread_Join(receptionThread.thread);
+        SOPC_Thread_Join(receptionThread.thread);
     }
 }
 
