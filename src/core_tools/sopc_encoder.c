@@ -1480,6 +1480,10 @@ SOPC_StatusCode WriteVariantNonArrayBuiltInType(SOPC_MsgBuffer*         msgBuffe
         case SOPC_DiagnosticInfo_Id:
             status = SOPC_DiagnosticInfo_Write(val->DiagInfo, msgBuffer);
             break;
+        case SOPC_Null_Id:
+            // mantis #0003682: errata for 1.03: NULL value encoding (no value to encode)
+            status = STATUS_OK;
+            break;
         default:
             // STATUS = INVALID PARAM
             break;
@@ -1800,6 +1804,10 @@ SOPC_StatusCode ReadVariantNonArrayBuiltInType(SOPC_MsgBuffer*   msgBuffer,
             }else{
                 status = STATUS_NOK;
             }
+            break;
+        case SOPC_Null_Id:
+            // mantis #0003682: errata for 1.03: NULL value encoding (no value to decode)
+            status = STATUS_OK;
             break;
         default:
             status = STATUS_NOK;
