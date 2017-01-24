@@ -11,7 +11,7 @@ else
     CC=i686-w64-mingw32-gcc #i686-pc-mingw32-gcc
     EXCLUDE_DIR="*linux*"
     PLATFORM_DIR="*win*"
-    PFLAGS=""
+    PFLAGS=
     LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32
 endif
 
@@ -113,15 +113,15 @@ doc:
 
 config: mbedtls
 	@echo "Configuring build dirs..."
-	@\mkdir -p $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
-	@\mkdir -p $(EXEC_DIR)/revoked $(EXEC_DIR)/untrusted $(EXEC_DIR)/trusted \
+	@"mkdir" -p $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
+	@"mkdir" -p $(EXEC_DIR)/revoked $(EXEC_DIR)/untrusted $(EXEC_DIR)/trusted \
 	 $(EXEC_DIR)/client_private $(EXEC_DIR)/server_private \
 	 $(EXEC_DIR)/client_public $(EXEC_DIR)/server_public
-	@\cp $(CERT_DIR)/cacert.der $(EXEC_DIR)/trusted
-	@\cp $(CERT_DIR)/client.key $(EXEC_DIR)/client_private
-	@\cp $(CERT_DIR)/client.der $(EXEC_DIR)/client_public
-	@\cp $(CERT_DIR)/server.key $(EXEC_DIR)/server_private
-	@\cp $(CERT_DIR)/server.der $(EXEC_DIR)/server_public
+	@"cp" $(CERT_DIR)/cacert.der $(EXEC_DIR)/trusted
+	@"cp" $(CERT_DIR)/client.key $(EXEC_DIR)/client_private
+	@"cp" $(CERT_DIR)/client.der $(EXEC_DIR)/client_public
+	@"cp" $(CERT_DIR)/server.key $(EXEC_DIR)/server_private
+	@"cp" $(CERT_DIR)/server.der $(EXEC_DIR)/server_public
 
 $(BUILD_DIR)/%.o:
 	@echo "  CC $@"
