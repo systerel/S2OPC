@@ -20,12 +20,12 @@
 #include <assert.h>
 #include <stdlib.h>
 
-const SOPC_Byte HEL[3] = {'H','E','L'};
-const SOPC_Byte ACK[3] = {'A','C','K'};
-const SOPC_Byte ERR[3] = {'E','R','R'};
-const SOPC_Byte MSG[3] = {'M','S','G'};
-const SOPC_Byte OPN[3] = {'O','P','N'};
-const SOPC_Byte CLO[3] = {'C','L','O'};
+const SOPC_Byte SOPC_HEL[3] = {'H','E','L'};
+const SOPC_Byte SOPC_ACK[3] = {'A','C','K'};
+const SOPC_Byte SOPC_ERR[3] = {'E','R','R'};
+const SOPC_Byte SOPC_MSG[3] = {'M','S','G'};
+const SOPC_Byte SOPC_OPN[3] = {'O','P','N'};
+const SOPC_Byte SOPC_CLO[3] = {'C','L','O'};
 
 SOPC_MsgBuffer* MsgBuffer_Create(Buffer*               buffer,
                                  uint32_t              maxChunks,

@@ -38,13 +38,13 @@ SOPC_StatusCode TCP_UA_EncodeHeader(SOPC_MsgBuffer* msgBuffer,
         assert(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH);
         switch(type){
             case TCP_UA_Message_Hello:
-                status = Buffer_Write(msgBuffer->buffers, HEL, 3);
+                status = Buffer_Write(msgBuffer->buffers, SOPC_HEL, 3);
                 break;
             case TCP_UA_Message_Acknowledge:
-                status = Buffer_Write(msgBuffer->buffers, ACK, 3);
+                status = Buffer_Write(msgBuffer->buffers, SOPC_ACK, 3);
                 break;
             case TCP_UA_Message_Error:
-                status = Buffer_Write(msgBuffer->buffers, ERR, 3);
+                status = Buffer_Write(msgBuffer->buffers, SOPC_ERR, 3);
                 break;
             case TCP_UA_Message_SecureMessage:
                 // Managed by secure channel layer
@@ -177,23 +177,23 @@ SOPC_StatusCode TCP_UA_ReadHeader(SOPC_MsgBuffer* msgBuffer){
         // READ message type
         status = Buffer_Read(msgType, msgBuffer->buffers, 3);
         if(status == STATUS_OK){
-            if(memcmp(msgType, HEL, 3) == 0){
+            if(memcmp(msgType, SOPC_HEL, 3) == 0){
                 msgBuffer->type = TCP_UA_Message_Hello;
-            }else if(memcmp(msgType, ACK, 3) == 0){
+            }else if(memcmp(msgType, SOPC_ACK, 3) == 0){
                 msgBuffer->type = TCP_UA_Message_Acknowledge;
-            }else if(memcmp(msgType, ERR, 3) == 0){
+            }else if(memcmp(msgType, SOPC_ERR, 3) == 0){
                 msgBuffer->type = TCP_UA_Message_Error;
             }
 
             if(msgBuffer->type == TCP_UA_Message_Unknown){
                 // should be a secure message
-                if(memcmp(msgType, MSG, 3) == 0){
+                if(memcmp(msgType, SOPC_MSG, 3) == 0){
                     msgBuffer->type = TCP_UA_Message_SecureMessage;
                     msgBuffer->secureType = SOPC_SecureMessage;
-                }else if(memcmp(msgType, OPN, 3) == 0){
+                }else if(memcmp(msgType, SOPC_OPN, 3) == 0){
                     msgBuffer->type = TCP_UA_Message_SecureMessage;
                     msgBuffer->secureType = SOPC_OpenSecureChannel;
-                }else if(memcmp(msgType, CLO, 3) == 0){
+                }else if(memcmp(msgType, SOPC_CLO, 3) == 0){
                     msgBuffer->type = TCP_UA_Message_SecureMessage;
                     msgBuffer->secureType = SOPC_CloseSecureChannel;
                 }else{

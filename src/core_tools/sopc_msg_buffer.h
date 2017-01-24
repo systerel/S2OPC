@@ -47,12 +47,12 @@
 /** Length of an UA secure message chunk sequence header */
 #define UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
 
-extern const SOPC_Byte HEL[3]; /**< TCP UA Hello Message type constant */
-extern const SOPC_Byte ACK[3]; /**< TCP UA Ack Message type constant */
-extern const SOPC_Byte ERR[3]; /**< TCP UA Error Message type constant */
-extern const SOPC_Byte MSG[3]; /**< UA Secure Message type constant */
-extern const SOPC_Byte OPN[3]; /**< UA OpenSecureChannel Message type constant */
-extern const SOPC_Byte CLO[3]; /**< UA CloseSecureChannel Message type constant */
+extern const SOPC_Byte SOPC_HEL[3]; /**< TCP UA Hello Message type constant */
+extern const SOPC_Byte SOPC_ACK[3]; /**< TCP UA Ack Message type constant */
+extern const SOPC_Byte SOPC_ERR[3]; /**< TCP UA Error Message type constant */
+extern const SOPC_Byte SOPC_MSG[3]; /**< UA Secure Message type constant */
+extern const SOPC_Byte SOPC_OPN[3]; /**< UA OpenSecureChannel Message type constant */
+extern const SOPC_Byte SOPC_CLO[3]; /**< UA CloseSecureChannel Message type constant */
 
 /**
  *  \brief UA Secure Message types

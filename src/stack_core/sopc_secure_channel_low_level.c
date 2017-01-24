@@ -491,13 +491,13 @@ SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffer*        msgBuffer,
         status = STATUS_OK;
         switch(smType){
                 case SOPC_SecureMessage:
-                    status = Buffer_Write(msgBuffer->buffers, MSG, 3);
+                    status = Buffer_Write(msgBuffer->buffers, SOPC_MSG, 3);
                     break;
                 case SOPC_OpenSecureChannel:
-                    status = Buffer_Write(msgBuffer->buffers, OPN, 3);
+                    status = Buffer_Write(msgBuffer->buffers, SOPC_OPN, 3);
                     break;
                 case SOPC_CloseSecureChannel:
-                    status = Buffer_Write(msgBuffer->buffers, CLO, 3);
+                    status = Buffer_Write(msgBuffer->buffers, SOPC_CLO, 3);
                     break;
         }
         status = MsgBuffer_SetSecureMsgType(msgBuffer, smType);
