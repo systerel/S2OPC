@@ -15,6 +15,8 @@ else
     LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32
 endif
 
+export CC
+
 ifdef STACK_1_01
     DEF_STACK=-DSTACK_1_01 
 else
