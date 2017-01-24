@@ -13,6 +13,8 @@ else
     PLATFORM_DIR="*win*"
     PFLAGS=
     LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32
+	WINDOWS=1
+	export WINDOWS
 endif
 
 export CC
