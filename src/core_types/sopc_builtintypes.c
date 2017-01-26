@@ -568,8 +568,14 @@ SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
 uint32_t SOPC_String_Equal(const SOPC_String* left,
                            const SOPC_String* right)
 {
-    return SOPC_ByteString_Equal((SOPC_ByteString*) left,
-                              (SOPC_ByteString*) right);
+    int32_t compare = 0;
+    uint8_t result = FALSE;
+
+    if(SOPC_String_Compare(left, right, FALSE, &compare) == STATUS_OK){
+        result = compare == 0;
+    }
+
+    return result;
 }
 
 
