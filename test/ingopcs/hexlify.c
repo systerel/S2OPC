@@ -47,6 +47,7 @@ int hexlify(const unsigned char *src, char *dst, size_t n)
 // Returns n the number of translated couples (< 0 for errors)
 int unhexlify(const char *src, unsigned char *dst, size_t n)
 {
+    static unsigned int buf;
     size_t i;
 
     if(! src || ! dst)
@@ -54,8 +55,11 @@ int unhexlify(const char *src, unsigned char *dst, size_t n)
 
     for(i=0; i<n; ++i)
     {
-        if(sscanf(&src[2*i], "%02hhx", &dst[i]) < 1)
+        if(sscanf(&src[2*i], "%02x", &buf) < 1){
             return i;
+        }else{
+        	dst[i] = (char)buf;
+        }
     }
 
     return n;
