@@ -1,5 +1,10 @@
 # OS DEPENDENCIES
+
 OSTYPE=$(shell echo $$OSTYPE)
+
+ifdef CROSS_COMPILE_WIN
+     OSTYPE=win
+endif
 
 ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      CC=gcc
@@ -7,14 +12,17 @@ ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      PLATFORM_DIR="*linux*"
      PFLAGS=-std=c99 -pedantic -D_XOPEN_SOURCE=600
      LIBS=$(LIBS_MBEDTLS) -lpthread
+     INCLUDES_OTHERS=
 else
-    CC=i686-w64-mingw32-gcc #i686-pc-mingw32-gcc
+    CC=i686-w64-mingw32-gcc
     EXCLUDE_DIR="*linux*"
     PLATFORM_DIR="*win*"
     PFLAGS=
-    LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32
-	WINDOWS=1
-	export WINDOWS
+    LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32 -L$(LIB_CHECK)
+    INCLUDES_OTHERS=-I$(INCLUDE_CHECK)
+    DEF_WINDOWS=-D_WIN32_WINNT=0x0600 # minimum Vista for IPV6 support
+    WINDOWS=1
+    export WINDOWS
 endif
 
 export CC
@@ -90,8 +98,8 @@ LIBS_MBEDTLS=-L$(MBEDTLS_DIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
 CFLAGS=-c -g -Wall -Wextra -O0 $(SHARED_FLAG)
 C99FLAGS=-std=c99 -pedantic
 LFLAGS=-g
-INCLUDES=$(INCLUDES_MBEDTLS) $(addprefix -I, $(INCLUDES_UASTACK))
-DEFS=$(DEF_STACK) $(DEF_THREAD)
+INCLUDES=$(INCLUDES_MBEDTLS) $(addprefix -I, $(INCLUDES_UASTACK)) $(INCLUDES_OTHERS)
+DEFS=$(DEF_STACK) $(DEF_THREAD) $(DEF_WINDOWS)
 
 # MAKEFILE CONTENT
 
