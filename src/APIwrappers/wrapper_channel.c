@@ -163,7 +163,7 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     Certificate *cli = NULL, *srv = NULL, *crt_ca = NULL;
     AsymmetricKey *pKeyCli = NULL;
-    PKIProvider *pki;
+    PKIProvider *pki = NULL;
     PKIConfig *pPKIConfig = pkiConfig;
     if(clientCertificate != NULL && clientPrivateKey != NULL &&
        serverCertificate != NULL && pkiConfig != NULL){
@@ -181,14 +181,19 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
         //TODO: CA folder != CA cert: how to deal with that ?
         if(STATUS_OK == status){
             const char* cacertname = "/cacert.der";
-            char cacert[strlen(pPKIConfig->trustListLocation) + strlen(cacertname) + 1];
-            if(cacert != memcpy(cacert, pPKIConfig->trustListLocation, strlen(pPKIConfig->trustListLocation)))
+            char* cacert = malloc(sizeof(char)*(strlen(pPKIConfig->trustListLocation) + strlen(cacertname) + 1));
+            if(cacert == NULL ||
+               cacert != memcpy(cacert, pPKIConfig->trustListLocation, strlen(pPKIConfig->trustListLocation))){
                 status = STATUS_NOK;
-            if(&cacert[strlen(pPKIConfig->trustListLocation)] !=
-                memcpy(&cacert[strlen(pPKIConfig->trustListLocation)], cacertname, strlen(cacertname) + 1))
+            }else if(&cacert[strlen(pPKIConfig->trustListLocation)] !=
+                     memcpy(&cacert[strlen(pPKIConfig->trustListLocation)], cacertname, strlen(cacertname) + 1)){
                 status = STATUS_NOK;
+            }
             if(STATUS_OK == status){
                 status = KeyManager_Certificate_CreateFromFile(cacert, &crt_ca);
+            }
+            if(cacert != NULL){
+                free(cacert);
             }
         }
         if(STATUS_OK == status){
@@ -271,14 +276,19 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
         //TODO: CA folder != CA cert: how to deal with that ?
         if(STATUS_OK == status){
             const char* cacertname = "/cacert.der";
-            char cacert[strlen(pPKIConfig->trustListLocation) + strlen(cacertname) + 1];
-            if(cacert != memcpy(cacert, pPKIConfig->trustListLocation, strlen(pPKIConfig->trustListLocation)))
+            char* cacert = malloc(sizeof(char)*(strlen(pPKIConfig->trustListLocation) + strlen(cacertname) + 1));
+            if(cacert == NULL ||
+               cacert != memcpy(cacert, pPKIConfig->trustListLocation, strlen(pPKIConfig->trustListLocation))){
                 status = STATUS_NOK;
-            if(&cacert[strlen(pPKIConfig->trustListLocation)] !=
-                memcpy(&cacert[strlen(pPKIConfig->trustListLocation)], cacertname, strlen(cacertname) + 1))
+            }else if(&cacert[strlen(pPKIConfig->trustListLocation)] !=
+                     memcpy(&cacert[strlen(pPKIConfig->trustListLocation)], cacertname, strlen(cacertname) + 1)){
                 status = STATUS_NOK;
+            }
             if(STATUS_OK == status){
                 status = KeyManager_Certificate_CreateFromFile(cacert, &crt_ca);
+            }
+            if(cacert != NULL){
+                free(cacert);
             }
         }
         if(STATUS_OK == status){

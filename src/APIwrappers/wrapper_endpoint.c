@@ -192,7 +192,7 @@ SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
     Certificate* cert = NULL;
     Certificate* crt_ca = NULL;
     AsymmetricKey* key = NULL;
-    PKIProvider *pki;
+    PKIProvider *pki = NULL;
     PKIConfig *pPKIConfig = pkiConfig;
     SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
 #ifdef STACK_1_03
@@ -218,14 +218,19 @@ SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
         //TODO: CA folder != CA cert: how to deal with that ?
         if(STATUS_OK == status){
             const char* cacertname = "/cacert.der";
-            char cacert[strlen(pPKIConfig->trustListLocation) + strlen(cacertname) + 1];
-            if(cacert != memcpy(cacert, pPKIConfig->trustListLocation, strlen(pPKIConfig->trustListLocation)))
+            char* cacert = malloc(sizeof(char)*(strlen(pPKIConfig->trustListLocation) + strlen(cacertname) + 1));
+            if(cacert == NULL ||
+               cacert != memcpy(cacert, pPKIConfig->trustListLocation, strlen(pPKIConfig->trustListLocation))){
                 status = STATUS_NOK;
-            if(&cacert[strlen(pPKIConfig->trustListLocation)] !=
-                memcpy(&cacert[strlen(pPKIConfig->trustListLocation)], cacertname, strlen(cacertname) + 1))
+            }else if(&cacert[strlen(pPKIConfig->trustListLocation)] !=
+                     memcpy(&cacert[strlen(pPKIConfig->trustListLocation)], cacertname, strlen(cacertname) + 1)){
                 status = STATUS_NOK;
+            }
             if(STATUS_OK == status){
                 status = KeyManager_Certificate_CreateFromFile(cacert, &crt_ca);
+            }
+            if(cacert != NULL){
+                free(cacert);
             }
         }
         if(STATUS_OK == status){

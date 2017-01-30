@@ -752,13 +752,29 @@ SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
             }else{
                 cType = "";
             }
-            char cReason[strlen("Error encoding chunk for request of type ''")+strlen(cType)];
-            if(sprintf(cReason, "Error encoding chunk for request of type '%s'", responseType->TypeName) < 0){
-                cReason[0] = '\0';
+
+            char* genericReason = "Error encoding chunk for response of type: ";
+            char* cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
+            if(cReason != NULL){
+                if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
+                   &cReason[strlen(genericReason)] ==
+                    memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
+                    cReason[0] = '\0';
+                }else{
+                    free(cReason);
+                    cReason = NULL;
+                }
             }
-            SOPC_String_AttachFromCstring(&reason, cReason);
-            SC_AbortMsg(scConnection->sendingBuffer, OpcUa_BadEncodingError, &reason);
-            SOPC_String_Clear(&reason);
+            if(cReason != NULL){
+                status = SOPC_String_AttachFromCstring(&reason, cReason);
+                free(cReason);
+                cReason = NULL;
+            }
+
+            if(STATUS_OK == status){
+                SC_AbortMsg(scConnection->sendingBuffer, OpcUa_BadEncodingError, &reason);
+                SOPC_String_Clear(&reason);
+            }
         }
 
         Mutex_Unlock(&sEndpoint->mutex);

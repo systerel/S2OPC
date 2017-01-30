@@ -155,7 +155,9 @@ SOPC_StatusCode OpcUa_String_StrnCat(SOPC_String*       dest,
                                      const SOPC_String* src,
                                      uint32_t           length)
 {
+    SOPC_StatusCode status = STATUS_OK;
     uint32_t len = 0;
+    char* concat = NULL;
     if(dest->Length > 0 && src->Length > 0){
         len = dest->Length + src->Length;
     }else if(src->Length > 0){
@@ -163,23 +165,43 @@ SOPC_StatusCode OpcUa_String_StrnCat(SOPC_String*       dest,
     }else if(dest->Length > 0){
         len = dest->Length;
     }else{
-        return STATUS_INVALID_PARAMETERS;
+        status = STATUS_INVALID_PARAMETERS;
     }
-    assert(CHAR_BIT == 8);
-    assert(length == NOLENGTH || length == len); // Do not accept length != concat length
-    char concat[len+1];
-    if(dest->Length > 0){
-        if(concat != memcpy(concat, dest->Data, dest->Length))
-            return STATUS_NOK;
-    }
-    if(src->Length > 0){
-        if((concat+len-src->Length) != memcpy((concat+len-src->Length), src->Data, src->Length))
-            return STATUS_NOK;
-    }
-    concat[len] = '\0';
+    if(STATUS_OK == status){
+        assert(CHAR_BIT == 8);
+        assert(length == NOLENGTH || length == len); // Do not accept length != concat length
+        concat = malloc(sizeof(char)*(len+1));
+        if(concat == NULL){
+            status = STATUS_NOK;
+        }
+        if(STATUS_OK == status &&
+           dest->Length > 0){
+            if(concat != memcpy(concat, dest->Data, dest->Length)){
+                status = STATUS_NOK;
+            }
+        }
 
-    SOPC_String_Clear(dest); // Clear destination
-    return SOPC_String_InitializeFromCString(dest, concat);
+        if(STATUS_OK == status &&
+           src->Length > 0){
+            if((concat+len-src->Length) != memcpy((concat+len-src->Length), src->Data, src->Length)){
+                return STATUS_NOK;
+            }
+        }
+
+        if(STATUS_OK == status){
+            concat[len] = '\0';
+        }
+
+        if(STATUS_OK == status){
+            SOPC_String_Clear(dest); // Clear destination
+            status = SOPC_String_InitializeFromCString(dest, concat);
+        }
+
+        if(concat != NULL){
+            free(concat);
+        }
+    }
+    return status;
 }
 
 int32_t OpcUa_String_StrnCmp(const SOPC_String* str1,

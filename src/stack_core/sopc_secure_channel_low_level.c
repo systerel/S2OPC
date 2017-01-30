@@ -818,9 +818,15 @@ SOPC_StatusCode EncodePadding(SC_Connection* scConnection,
 
         if(status == STATUS_OK){
             // The value of each byte of the padding is equal to paddingSize:
-            SOPC_Byte paddingBytes[*realPaddingLength];
-            memset(paddingBytes, paddingSizeField, *realPaddingLength);
-            status = Buffer_Write(msgBuffer->buffers, paddingBytes, *realPaddingLength);
+            SOPC_Byte* paddingBytes = malloc(sizeof(SOPC_Byte)*(*realPaddingLength));
+            if(paddingBytes != NULL){
+                memset(paddingBytes, paddingSizeField, *realPaddingLength);
+                status = Buffer_Write(msgBuffer->buffers, paddingBytes, *realPaddingLength);
+                free(paddingBytes);
+                paddingBytes = NULL;
+            }else{
+                status = STATUS_NOK;
+            }
         }
 
         // Extra-padding necessary if padding could be greater 256 bytes

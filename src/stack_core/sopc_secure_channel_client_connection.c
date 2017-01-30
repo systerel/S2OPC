@@ -900,20 +900,36 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
         if(status != STATUS_OK){
             SOPC_String reason;
             SOPC_String_Initialize(&reason);
+
             char* cType = NULL;
             if(requestType->TypeName != NULL){
                 cType = requestType->TypeName;
             }else{
                 cType = "";
             }
-            char cReason[strlen("Error encoding chunk for request of type ''")+strlen(cType)];
-            if(sprintf(cReason, "Error encoding chunk for request of type '%s'", requestType->TypeName) < 0){
-                cReason[0] = '\0';
-            }
-            SOPC_String_AttachFromCstring(&reason, cReason);
-            SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, &reason);
-            SOPC_String_Clear(&reason);
 
+            char* genericReason = "Error encoding chunk for request of type: ";
+            char* cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
+            if(cReason != NULL){
+                if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
+                   &cReason[strlen(genericReason)] ==
+                    memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
+                    cReason[0] = '\0';
+                }else{
+                    free(cReason);
+                    cReason = NULL;
+                }
+            }
+            if(cReason != NULL){
+                status = SOPC_String_AttachFromCstring(&reason, cReason);
+                free(cReason);
+                cReason = NULL;
+            }
+
+            if(STATUS_OK == status){
+                SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, &reason);
+                SOPC_String_Clear(&reason);
+            }
             if(pRequest != NULL){
                 SLinkedList_Remove(connection->pendingRequests,requestId);
                 SC_PendingRequestDelete(pRequest);
