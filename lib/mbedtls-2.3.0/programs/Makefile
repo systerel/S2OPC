@@ -278,11 +278,11 @@ x509/req_app$(EXEXT): x509/req_app.c $(DEP)
 	$(CC) $(LOCAL_CFLAGS) $(CFLAGS) x509/req_app.c    $(LOCAL_LDFLAGS) $(LDFLAGS) -o $@
 
 clean:
-ifndef WINDOWS
+#ifndef WINDOWS
 	rm -f $(APPS)
-else
-	del /S /Q /F *.o *.exe
-endif
+#else
+#	del /Q /F *.o *.exe
+#endif
 
 list:
 	echo $(APPS)
