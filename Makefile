@@ -17,7 +17,7 @@ else
     CC=i686-w64-mingw32-gcc
     EXCLUDE_DIR="*linux*"
     PLATFORM_DIR="*win*"
-    PFLAGS=
+    PFLAGS=-std=c99 -pedantic
     LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32 -L$(LIB_CHECK)
     INCLUDES_OTHERS=-I$(INCLUDE_CHECK)
     DEF_WINDOWS=-D_WIN32_WINNT=0x0600 # minimum Vista for IPV6 support
