@@ -68,7 +68,7 @@ typedef struct SOPC_EncodeableType {
     uint32_t                             BinaryEncodingTypeId;
     uint32_t                             XmlEncodingTypeId;
     char*                                NamespaceUri;
-    uint32_t                             AllocationSize;
+    size_t                               AllocationSize;
     SOPC_EncodeableObject_PfnInitialize* Initialize;
     SOPC_EncodeableObject_PfnClear*      Clear;
     SOPC_EncodeableObject_PfnGetSize*    GetSize;
