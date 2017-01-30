@@ -284,8 +284,8 @@ SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager* socket
                                                       SOPC_Socket**       clientSocket)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    Socket_AddressInfo *res, *p;
-    SOPC_Socket* freeSocket;
+    Socket_AddressInfo *res = NULL, *p = NULL;
+    SOPC_Socket* freeSocket = NULL;
     SOPC_StatusCode connectStatus = STATUS_NOK;
     char *hostname = NULL;
     char *port = NULL;
@@ -354,9 +354,9 @@ SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socket
                                                       SOPC_Socket**       listeningSocket)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    Socket_AddressInfo *res, *p;
+    Socket_AddressInfo *res = NULL, *p = NULL;
     uint8_t attemptWithIPV6 = 1;
-    SOPC_Socket* freeSocket;
+    SOPC_Socket* freeSocket = NULL;
     SOPC_StatusCode listenStatus = STATUS_NOK;
     char *hostname = NULL;
     char *port = NULL;

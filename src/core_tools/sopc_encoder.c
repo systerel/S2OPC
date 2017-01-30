@@ -1299,7 +1299,7 @@ SOPC_StatusCode SOPC_ExtensionObject_ReadAux(void* value, SOPC_MsgBuffer* msgBuf
 
 SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SOPC_EncodeableType* encType;
+    SOPC_EncodeableType* encType = NULL;
     const char* nsName;
     uint8_t nsFound = FALSE;
     SOPC_Byte encodingByte = 0;

@@ -198,7 +198,7 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
     uint8_t receiverCertPresence = FALSE;
     SOPC_String strSecuPolicy;
     SOPC_String_Initialize(&strSecuPolicy);
-    SOPC_SecurityPolicy* secuPolicy;
+    SOPC_SecurityPolicy* secuPolicy = NULL;
     uint32_t secureChannelId = 0;
     uint32_t snPosition = 0;
 

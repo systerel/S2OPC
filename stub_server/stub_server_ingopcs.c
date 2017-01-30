@@ -59,6 +59,7 @@ SOPC_StatusCode StubServer_EndpointEvent_Callback(SOPC_Endpoint             endp
 
 int main(void){
     SOPC_StatusCode status = STATUS_OK;
+    PKIProvider *pki = NULL;
 
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
@@ -119,7 +120,6 @@ int main(void){
 
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
-    PKIProvider *pki = NULL;
     if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki))
         printf("Failed to create PKI\n");
 
