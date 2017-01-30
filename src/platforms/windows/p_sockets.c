@@ -18,7 +18,7 @@
 #include "sopc_raw_sockets.h"
 
 #include "sopc_stack_csts.h"
-#include <unistd.h>
+#include "sopc_threads.h"
 
 
 static WSADATA wsaData;
@@ -266,7 +266,7 @@ int32_t Socket_Write(Socket   sock,
         do
         {
             if(nbAttempt > 0){
-                usleep(SLEEP_NEXT_SEND_ATTEMP);
+                SOPC_Sleep(SLEEP_NEXT_SEND_ATTEMP);
             }
             nbAttempt++;
             res = send(sock, (char*) data, count, 0);

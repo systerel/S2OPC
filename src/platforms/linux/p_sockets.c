@@ -24,6 +24,7 @@
 #include <errno.h>
 
 #include "sopc_stack_csts.h"
+#include "sopc_threads.h"
 
 SOPC_StatusCode Socket_Network_Initialize(){
     return STATUS_OK;
@@ -275,7 +276,7 @@ int32_t Socket_Write(Socket   sock,
         do
         {
             if(nbAttempt > 0){
-                usleep(SLEEP_NEXT_SEND_ATTEMP);
+                SOPC_Sleep(SLEEP_NEXT_SEND_ATTEMP);
             }
             nbAttempt++;
             res = send(sock, data, count, 0);

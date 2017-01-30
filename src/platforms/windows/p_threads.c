@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <unistd.h>
-
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 

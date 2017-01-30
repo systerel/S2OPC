@@ -27,7 +27,7 @@
 #include <ws2tcpip.h>
 
 #define MAX_SEND_ATTEMPTS 20
-#define SLEEP_NEXT_SEND_ATTEMP 50000 // micro seconds
+#define SLEEP_NEXT_SEND_ATTEMP 50 // milliseconds
 
 #define SOPC_INVALID_SOCKET INVALID_SOCKET
 
