@@ -3,7 +3,8 @@
 OSTYPE=$(shell echo $$OSTYPE)
 
 ifdef CROSS_COMPILE_WIN
-     OSTYPE=win
+     OSTYPE=cc_win
+     export CROSS_COMPILE_WIN
 endif
 
 ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
@@ -14,7 +15,9 @@ ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      LIBS=$(LIBS_MBEDTLS) -lpthread
      INCLUDES_OTHERS=
 else
-    CC=i686-w64-mingw32-gcc
+    # PREFIX_CHECK must be defined for windows: path to libcheck installation
+    LIB_CHECK=$(PREFIX_CHECK)/lib
+    INCLUDE_CHECK=$(PREFIX_CHECK)/include
     EXCLUDE_DIR="*linux*"
     PLATFORM_DIR="*win*"
     PFLAGS=-std=c99 -pedantic
@@ -23,6 +26,11 @@ else
     DEF_WINDOWS=-D_WIN32_WINNT=0x0600 # minimum Vista for IPV6 support
     WINDOWS=1
     export WINDOWS
+ifdef CROSS_COMPILE_WIN
+    CC=i686-w64-mingw32-gcc
+else
+    CC=gcc
+endif
 endif
 
 export CC
@@ -112,9 +120,11 @@ all: config lib/libingopcs.a $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_se
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
+ifneq ($(MAKECMDGOALS),config)
 ifneq ($(MAKECMDGOALS),doc)
 -include .depend
 -include .pdepend
+endif
 endif
 endif
 endif
