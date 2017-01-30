@@ -763,7 +763,7 @@ SOPC_StatusCode Internal_NodeId_Write(SOPC_MsgBuffer* msgBuffer,
             case  NodeIdEncoding_FourByte:
                 twoBytes = (uint16_t) nodeId->Data.Numeric;
                 if(nodeId->Namespace <= UINT8_MAX){
-                    const SOPC_Byte namespace = nodeId->Namespace;
+                    const SOPC_Byte namespace = (SOPC_Byte) nodeId->Namespace;
                     status = SOPC_Byte_Write(&namespace, msgBuffer);
                 }else{
                     status = STATUS_INVALID_PARAMETERS;
@@ -2108,7 +2108,8 @@ SOPC_StatusCode SOPC_Read_Array(SOPC_MsgBuffer* msgBuffer, int32_t* noOfElts, vo
     SOPC_Byte* byteArray = NULL;
     assert(msgBuffer != NULL && *eltsArray == NULL && noOfElts != NULL);
 
-    if(msgBuffer != NULL && noOfElts != NULL &&
+    if(msgBuffer != NULL && noOfElts != NULL && *noOfElts >= 0 &&
+       (size_t) *noOfElts <= SIZE_MAX &&
        eltsArray != NULL  && *eltsArray == NULL &&
        decodeFct != NULL){
         status = STATUS_OK;
@@ -2119,25 +2120,25 @@ SOPC_StatusCode SOPC_Read_Array(SOPC_MsgBuffer* msgBuffer, int32_t* noOfElts, vo
     }
 
     if(STATUS_OK == status && *noOfElts > 0){
-        *eltsArray = malloc (sizeOfElt * *noOfElts);
+        *eltsArray = malloc (sizeOfElt * (size_t) *noOfElts);
         if(*eltsArray == NULL){
             status = STATUS_NOK;
         }else{
-            byteArray = *eltsArray;
+            byteArray = (SOPC_Byte*) *eltsArray;
         }
     }
 
     if(STATUS_OK == status && *noOfElts > 0){
-        int32_t idx = 0;
-        uint32_t pos = 0;
-        for (idx = 0; status == STATUS_OK && idx < *noOfElts; idx ++){
+        size_t idx = 0;
+        size_t pos = 0;
+        for (idx = 0; status == STATUS_OK && idx < (size_t) *noOfElts; idx ++){
             pos = idx * sizeOfElt;
             initializeFct(&(byteArray[pos]));
             status = decodeFct(&(byteArray[pos]), msgBuffer);
         }
 
         if(STATUS_OK != status){
-            int32_t clearIdx = 0;
+            size_t clearIdx = 0;
             // idx - 1 => clear only cases in which status was ok since we don't know
             //            the state in which byte array is in the last idx used (decode failed)
             for (clearIdx = 0; clearIdx < (idx - 1); clearIdx ++){
@@ -2174,9 +2175,9 @@ SOPC_StatusCode SOPC_Write_Array(SOPC_MsgBuffer* msgBuffer, int32_t* noOfElts, v
         status = SOPC_Int32_Write(noOfElts, msgBuffer);
     }
     if(STATUS_OK == status && *noOfElts > 0){
-        int32_t idx = 0;
-        uint32_t pos = 0;
-        for (idx = 0; status == STATUS_OK && idx < *noOfElts; idx ++){
+        size_t idx = 0;
+        size_t pos = 0;
+        for (idx = 0; status == STATUS_OK && idx < (size_t) *noOfElts; idx ++){
             pos = idx * sizeOfElt;
             status = encodeFct(&(byteArray[pos]), msgBuffer);
         }

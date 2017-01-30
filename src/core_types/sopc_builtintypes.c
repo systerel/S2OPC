@@ -356,12 +356,17 @@ SOPC_StatusCode SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src){
 
 SOPC_StatusCode SOPC_String_AttachFromCstring(SOPC_String* dest, char* src){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    size_t stringLength = 0;
     if(dest != NULL && dest->Data == NULL && src != NULL){
         assert(CHAR_BIT == 8);
-        status = STATUS_OK;
-        dest->Length = strlen(src);
-        dest->Data = (uint8_t*) src;
-        dest->DoNotClear = 1; // dest->characters will not be freed on clear
+        stringLength = strlen(src);
+        if(stringLength <= INT32_MAX)
+        {
+            status = STATUS_OK;
+            dest->Length = (int32_t) stringLength;
+            dest->Data = (uint8_t*) src;
+            dest->DoNotClear = 1; // dest->characters will not be freed on clear
+        }
     }
     return status;
 }
@@ -424,7 +429,7 @@ SOPC_StatusCode SOPC_String_CopyFromCString(SOPC_String* string, const char* cSt
            stringLength <= INT32_MAX)
         {
             // length without null terminator
-            string->Length = stringLength;
+            string->Length = (int32_t) stringLength;
             // keep terminator for compatibility with char* strings
             string->Data = (SOPC_Byte*) malloc(sizeof(SOPC_Byte)*(stringLength+1));
             if(string->Data != NULL){
@@ -1327,13 +1332,15 @@ void SOPC_Initialize_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt
 void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
                       SOPC_EncodeableObject_PfnClear* clearFct)
 {
-    int32_t idx = 0;
-    uint32_t pos = 0;
+    size_t idx = 0;
+    size_t pos = 0;
     SOPC_Byte* byteArray = NULL;
-    if(noOfElts != NULL && eltsArray != NULL){
+    if(noOfElts != NULL && *noOfElts >= 0 &&
+       (size_t) *noOfElts <= SIZE_MAX &&
+       eltsArray != NULL){
         byteArray = *eltsArray;
         if(byteArray != NULL){
-            for (idx = 0; idx < *noOfElts; idx ++){
+            for (idx = 0; idx < (size_t) *noOfElts; idx ++){
                 pos = idx * sizeOfElt;
                 clearFct(&(byteArray[pos]));
             }

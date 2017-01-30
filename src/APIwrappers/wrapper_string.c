@@ -132,7 +132,8 @@ uint32_t OpcUa_String_StrLen(const SOPC_String*  str)
     if(str == NULL || str->Data == NULL){
         return 0;
     }
-    return strlen((char*)str->Data);
+    // uint32_t conversion ensured by SOPC_String construction (max length = INT32_MAX)
+    return (uint32_t) strlen((char*)str->Data);
 }
 
 uint32_t OpcUa_String_StrSize(const SOPC_String*  str)
