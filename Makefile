@@ -111,7 +111,7 @@ DEFS=$(DEF_STACK) $(DEF_THREAD) $(DEF_WINDOWS)
 
 # MAKEFILE CONTENT
 
-.PHONY : all doc config mbedtls check clean clean_mbedtls cleanall
+.PHONY : all doc config mbedtls check clean clean_doc clean_config clean_mbedtls cleanall
 .DELETE_ON_ERROR : .depend.tmp .depend .pdepend
 
 default: all
@@ -119,11 +119,17 @@ default: all
 all: config lib/libingopcs.a $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs $(EXEC_DIR)/check_stack
 
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),clean_doc)
+ifneq ($(MAKECMDGOALS),clean_config)
+ifneq ($(MAKECMDGOALS),clean_mbedtls)
 ifneq ($(MAKECMDGOALS),cleanall)
 ifneq ($(MAKECMDGOALS),config)
 ifneq ($(MAKECMDGOALS),doc)
 -include .depend
 -include .pdepend
+endif
+endif
+endif
 endif
 endif
 endif
@@ -197,10 +203,18 @@ clean_mbedtls:
 	@echo "Cleaning mbedtls"
 	@$(MAKE) -C $(MBEDTLS_DIR) clean
 
+clean_config:
+	@echo "Cleaning configuration..."
+	@"rm" -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
+
+clean_doc:
+	@echo "Cleaning documentation..."
+	@"rm" -rf apidoc
+
 clean:
 	@echo "Cleaning..."
-	@"rm" -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) apidoc
+	@"rm" -rf $(BUILD_DIR)/* $(PLATFORM_BUILD_DIR)/* $(EXEC_DIR)/check_stack $(EXEC_DIR)/stub_*
 	@"rm" -rf include lib/libingopcs.a
 	@"rm" -f .depend.tmp .depend .pdepend
 
-cleanall: clean clean_mbedtls
+cleanall: clean clean_config clean_doc clean_mbedtls
