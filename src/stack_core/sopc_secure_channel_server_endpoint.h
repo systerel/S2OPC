@@ -46,22 +46,9 @@ typedef enum SC_EndpointEvent
     SC_EndpointConnectionEvent_DecoderError
 } SC_EndpointEvent;
 
-#define SECURITY_MODE_NONE_MASK 0x01
-#define SECURITY_MODE_SIGN_MASK 0x02
-#define SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
-#define SECURITY_MODE_ANY_MASK 0x07
-
-/**
- *  \brief Definition of a security policy supported by endpoint
- */
-typedef struct SOPC_SecurityPolicy
-{
-    SOPC_String securityPolicy; /**< Security policy URI supported */
-    uint16_t    securityModes;  /**< Mask of security modes supported (use combination of SECURITY_MODE_*_MASK values) */
-    void*       padding;        /**< Binary compatibility */
-} SOPC_SecurityPolicy;
-
 struct SC_ServerEndpoint;
+
+struct SOPC_SecurityPolicy;
 
 typedef SOPC_StatusCode (SC_EndpointEvent_CB) (struct SC_ServerEndpoint* sEndpoint,
                                                SC_Connection*            scConnection,
@@ -79,7 +66,7 @@ typedef struct SC_ServerEndpoint
     const PKIProvider*     pkiProvider;
     const Certificate*     serverCertificate;
     const AsymmetricKey*   serverKey;
-    SOPC_SecurityPolicy*   securityPolicies;
+    struct SOPC_SecurityPolicy*   securityPolicies;
     uint8_t                nbSecurityPolicies;
     SC_EndpointState       state;
     uint32_t               lastSecureConnectionId; // internal use only (used in secureChannelConnections)
@@ -104,7 +91,7 @@ SOPC_StatusCode SC_ServerEndpoint_Open(SC_ServerEndpoint*   endpoint,
                                        const Certificate*   serverCertificate,
                                        const AsymmetricKey* serverKey,
                                        uint8_t              nbSecurityPolicies,
-                                       SOPC_SecurityPolicy* securityPolicies,
+                                       struct SOPC_SecurityPolicy* securityPolicies,
                                        SC_EndpointEvent_CB* callback,
                                        void*                callbackData);
 

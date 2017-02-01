@@ -21,6 +21,7 @@
 
 #include <assert.h>
 
+#include "sopc_secure_channel_server_endpoint.h"
 #include "sopc_stack_config.h"
 #include "sopc_serverapi.h"
 #include "opcua_statuscodes.h"

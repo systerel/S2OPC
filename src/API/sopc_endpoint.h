@@ -27,8 +27,9 @@
 
 #ifdef OPCUA_HAVE_SERVERAPI
 
-#include "sopc_secure_channel_server_endpoint.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_types.h"
+#include "key_manager.h"
 
 /**
  *  \brief Endpoint type definition
@@ -48,6 +49,22 @@ typedef enum {
     SOPC_EndpointSerializer_Invalid = 0x00,
     SOPC_EndpointSerializer_Binary = 0x01
 } SOPC_Endpoint_SerializerType;
+
+
+#define SECURITY_MODE_NONE_MASK 0x01
+#define SECURITY_MODE_SIGN_MASK 0x02
+#define SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
+#define SECURITY_MODE_ANY_MASK 0x07
+
+/**
+ *  \brief Definition of a security policy supported by endpoint
+ */
+typedef struct SOPC_SecurityPolicy
+{
+    SOPC_String securityPolicy; /**< Security policy URI supported */
+    uint16_t    securityModes;  /**< Mask of security modes supported (use combination of SECURITY_MODE_*_MASK values) */
+    void*       padding;        /**< Binary compatibility */
+} SOPC_SecurityPolicy;
 
 /**
  *  \brief Endpoint event enumeration type

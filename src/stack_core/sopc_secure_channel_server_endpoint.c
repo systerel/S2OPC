@@ -16,6 +16,7 @@
  */
 
 #include "sopc_secure_channel_server_endpoint.h"
+#include "sopc_endpoint.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -18,8 +18,10 @@
 #include "wrapper_endpoint.h"
 #include "wrapper_encodeableobject.h"
 
+#include <stdlib.h>
 #include <string.h>
 
+#include "sopc_secure_channel_server_endpoint.h"
 #include "pki_stack.h"
 #include "sopc_threads.h"
 
@@ -254,7 +256,6 @@ SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
     AsymmetricKey* key = NULL;
     PKIProvider *pki = NULL;
     PKIConfig *pPKIConfig = pkiConfig;
-    SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
 #ifdef STACK_1_03
     if(listenOnAllInterfaces == FALSE){
         return STATUS_INVALID_PARAMETERS;
@@ -319,12 +320,8 @@ SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
         if(internalCbData != NULL){
             OpcUa_Delete_EndpointCallbackData(internalCbData);
         }
-        if(sEndpoint != NULL){
-            sEndpoint->pkiProvider = NULL;
-            sEndpoint->serverCertificate = NULL;
-            sEndpoint->serverKey = NULL;
-            sEndpoint->callbackData = NULL;
-        }
+        SOPC_Endpoint_Close(endpoint);
+
     }else{
 #ifdef WRAPPER_RECEPTION_THREAD
         OpcUa_ReceptionThread_Start();
@@ -450,11 +447,10 @@ SOPC_StatusCode OpcUa_Endpoint_UpdateServiceFunctions(SOPC_Endpoint            e
 SOPC_StatusCode OpcUa_Endpoint_GetCallbackData(SOPC_Endpoint  endpoint,
                                                void**         callbackData){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
-    if(sEndpoint != NULL && callbackData != NULL){
-        if(sEndpoint->callbackData != NULL){
-            *callbackData = ((OpcUa_InternalEndpoint_CallbackData*) sEndpoint->callbackData)->callbackData;
-        }
+    void* cbData = SOPC_Endpoint_GetCallbackData(endpoint);
+    if(cbData != NULL){
+        *callbackData = ((OpcUa_InternalEndpoint_CallbackData*) cbData)->callbackData;
+        status = STATUS_OK;
     }
     return status;
 }
