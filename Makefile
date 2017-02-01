@@ -75,7 +75,7 @@ TESTS_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(TESTS_SRC_FILES))
 ## All .c and .h files to compute dependencies
 C_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.c")
 H_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.h")
-H_INCLUDE_PATHS=$(shell find $(UASTACK_DIR)/API $(UASTACK_DIR)/APIwrappers $(UASTACK_DIR)/core_types -type f -name "*.h")
+H_INCLUDE_PATHS=$(shell find $(UASTACK_DIR)/API $(UASTACK_DIR)/APIwrappers $(UASTACK_DIR)/core_types $(UASTACK_DIR)/core_types -type f -name "*.h")
 
 # MBEDTLS INPUTS
 MBEDTLS_DIR=$(WORKSPACE_DIR)/lib/mbedtls-2.3.0
