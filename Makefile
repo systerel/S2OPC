@@ -75,6 +75,7 @@ TESTS_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(TESTS_SRC_FILES))
 ## All .c and .h files to compute dependencies
 C_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.c")
 H_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.h")
+H_INCLUDE_PATHS=$(shell find $(UASTACK_DIR)/API $(UASTACK_DIR)/APIwrappers $(UASTACK_DIR)/core_types -type f -name "*.h")
 
 # MBEDTLS INPUTS
 MBEDTLS_DIR=$(WORKSPACE_DIR)/lib/mbedtls-2.3.0
@@ -95,7 +96,7 @@ DEFS=$(DEF_STACK) $(DEF_THREAD)
 
 default: all
 
-all: config $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs $(EXEC_DIR)/check_stack
+all: config lib/libingopcs.a $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs $(EXEC_DIR)/check_stack
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),cleanall)
@@ -151,6 +152,14 @@ $(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/ch
 	@echo "Linking $@..."
 	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
+lib/libingopcs.a: $(UASTACK_OBJ_FILES)
+	@echo "Generating static library"
+	@ar -rc $@ $^
+	@ar -s $@
+	@echo "Copying headers to includes in include"
+	@"mkdir" -p include
+	@"cp" $(H_INCLUDE_PATHS) include/
+
 client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs
 	./run_client_server_test.sh
 
@@ -168,7 +177,8 @@ clean_mbedtls:
 
 clean:
 	@echo "Cleaning..."
-	@\rm -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) apidoc
-	@\rm -f .depend.tmp .depend .pdepend
+	@"rm" -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR) apidoc
+	@"rm" -rf include lib/libingopcs.a
+	@"rm" -f .depend.tmp .depend .pdepend
 
 cleanall: clean clean_mbedtls
