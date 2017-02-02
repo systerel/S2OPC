@@ -7,29 +7,38 @@ ifdef CROSS_COMPILE_WIN
      export CROSS_COMPILE_WIN
 endif
 
+ifdef CHECK_PREFIX
+    # CHECK_PREFIX must be defined for windows: path to libcheck installation
+    LIB_CHECK=-L$(CHECK_PREFIX)/lib
+    INCLUDE_CHECK=$(CHECK_PREFIX)/include
+    INCLUDES_OTHERS=-I$(INCLUDE_CHECK)
+else
+    LIB_CHECK=
+    INCLUDE_CHECK=
+    INCLUDES_OTHERS=
+endif
+
 ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      CC=gcc
+     AR=ar
      EXCLUDE_DIR="*win*"
      PLATFORM_DIR="*linux*"
      PFLAGS=-std=c99 -pedantic -D_XOPEN_SOURCE=600
-     LIBS=$(LIBS_MBEDTLS) -lpthread
-     INCLUDES_OTHERS=
+     LIBS=$(LIBS_MBEDTLS) -lpthread $(LIB_CHECK)
 else
-    # PREFIX_CHECK must be defined for windows: path to libcheck installation
-    LIB_CHECK=$(PREFIX_CHECK)/lib
-    INCLUDE_CHECK=$(PREFIX_CHECK)/include
     EXCLUDE_DIR="*linux*"
     PLATFORM_DIR="*win*"
     PFLAGS=-std=c99 -pedantic
-    LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32 -L$(LIB_CHECK)
-    INCLUDES_OTHERS=-I$(INCLUDE_CHECK)
+    LIBS=$(LIBS_MBEDTLS) -lrpcrt4 -lws2_32 $(LIB_CHECK)
     DEF_WINDOWS=-D_WIN32_WINNT=0x0600 # minimum Vista for IPV6 support
     WINDOWS=1
     export WINDOWS
 ifdef CROSS_COMPILE_WIN
     CC=i686-w64-mingw32-gcc
+    AR=i686-w64-mingw32-ar
 else
     CC=gcc
+    AR=ar
 endif
 endif
 
