@@ -135,7 +135,7 @@ SOPC_StatusCode Socket_Listen(Socket              sock,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int bindListenStatus = -1;
     if(addr != NULL){
-        bindListenStatus = bind(sock, addr->ai_addr, addr->ai_addrlen);
+        bindListenStatus = bind(sock, addr->ai_addr, (int) addr->ai_addrlen);
         if(bindListenStatus != SOCKET_ERROR){
             bindListenStatus = listen(sock, SOMAXCONN);
         }
@@ -166,7 +166,7 @@ SOPC_StatusCode Socket_Connect(Socket              sock,
     int connectStatus = -1;
     int wsaError = 0;
     if(addr != NULL && sock != SOPC_INVALID_SOCKET){
-        connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
+        connectStatus = connect(sock, addr->ai_addr, (int) addr->ai_addrlen);
         if(connectStatus == SOCKET_ERROR){
         	wsaError = WSAGetLastError();
             if(wsaError == WSAEWOULDBLOCK){
