@@ -54,13 +54,13 @@ ifdef SHARED
     MBED_SHARED="SHARED=yes"
 endif
 
-
 # OUTPUTS
 WORKSPACE_DIR=.
 CERT_DIR=$(WORKSPACE_DIR)/cert
 EXEC_DIR=$(WORKSPACE_DIR)/out
 BUILD_DIR=$(WORKSPACE_DIR)/build
 BUILD_DIR_SED=$(subst /,\/,$(BUILD_DIR))
+LOCAL_INSTALL_DIR=$(WORKSPACE_DIR)/install
 
 # INPUTS
 
@@ -111,13 +111,14 @@ DEFS=$(DEF_STACK) $(DEF_THREAD) $(DEF_WINDOWS)
 
 # MAKEFILE CONTENT
 
-.PHONY : all doc config mbedtls check clean clean_doc clean_config clean_mbedtls cleanall
+.PHONY : all doc config mbedtls library install check clean clean_doc clean_config clean_mbedtls cleanall
 .DELETE_ON_ERROR : .depend.tmp .depend .pdepend
 
 default: all
 
-all: config lib/libingopcs.a $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs $(EXEC_DIR)/check_stack
+all: config library $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs $(EXEC_DIR)/check_stack
 
+# TODO: replace by unique filter
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),clean_doc)
 ifneq ($(MAKECMDGOALS),clean_config)
@@ -125,8 +126,10 @@ ifneq ($(MAKECMDGOALS),clean_mbedtls)
 ifneq ($(MAKECMDGOALS),cleanall)
 ifneq ($(MAKECMDGOALS),config)
 ifneq ($(MAKECMDGOALS),doc)
+ifneq ($(MAKECMDGOALS),install)
 -include .depend
 -include .pdepend
+endif
 endif
 endif
 endif
@@ -180,13 +183,18 @@ $(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/ch
 	@echo "Linking $@..."
 	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
-lib/libingopcs.a: $(UASTACK_OBJ_FILES)
-	@echo "Generating static library"
-	@ar -rc $@ $^
-	@ar -s $@
-	@echo "Copying headers to includes in include"
-	@"mkdir" -p include
-	@"cp" $(H_INCLUDE_PATHS) include/
+library: $(UASTACK_OBJ_FILES)
+	@echo "Generating static library in $(LOCAL_INSTALL_DIR)/lib"
+	@"mkdir" -p $(LOCAL_INSTALL_DIR)/lib
+	@ar -rc $(LOCAL_INSTALL_DIR)/lib/libingopcs.a $^
+	@ar -s $(LOCAL_INSTALL_DIR)/lib/libingopcs.a
+	@echo "Copying headers to includes in $(LOCAL_INSTALL_DIR)/include"
+	@"mkdir" -p $(LOCAL_INSTALL_DIR)/include
+	@"cp" $(H_INCLUDE_PATHS) $(LOCAL_INSTALL_DIR)/include
+
+install: 
+	@echo "Install INGOPCS library files into $INSTALL_PREFIX"
+	@"cp" -r $(LOCAL_INSTALL_DIR)/* $(INSTALL_PREFIX)/
 
 client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs
 	./run_client_server_test.sh
@@ -214,7 +222,7 @@ clean_doc:
 clean:
 	@echo "Cleaning..."
 	@"rm" -rf $(BUILD_DIR)/* $(PLATFORM_BUILD_DIR)/* $(EXEC_DIR)/check_stack $(EXEC_DIR)/stub_*
-	@"rm" -rf include lib/libingopcs.a
+	@"rm" -rf $(LOCAL_INSTALL_DIR)
 	@"rm" -f .depend.tmp .depend .pdepend
 
 cleanall: clean clean_config clean_doc clean_mbedtls
