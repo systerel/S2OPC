@@ -399,7 +399,7 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
            receivedEvent == FALSE &&
            loopCptWait * waitTimeoutMilliSecs <= timeout)
     {
-#if OPCUA_MULTITHREADED || WRAPPER_RECEPTION_THREAD
+#if OPCUA_MULTITHREADED
         // just wait for callback called
         loopCptSleep++;
         if((loopCptSleep % sleepFactor) == 0){

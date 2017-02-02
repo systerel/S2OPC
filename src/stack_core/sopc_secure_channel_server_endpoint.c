@@ -984,7 +984,9 @@ SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint){
         if(endpoint->state != SC_Endpoint_Opened){
             status = STATUS_INVALID_STATE;
         }else{
+            status = STATUS_OK;
             TCP_UA_Listener_Close(endpoint->transportListener);
+            endpoint->state = SC_Endpoint_Closed;
         }
         if(endpoint->securityPolicies != NULL){
             for(idx = 0; idx < endpoint->nbSecurityPolicies; idx++){

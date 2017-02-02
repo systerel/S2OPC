@@ -21,6 +21,66 @@
 #include <string.h>
 
 #include "pki_stack.h"
+#include "sopc_threads.h"
+
+
+// Reception thread (required for server SDK with several threads)
+
+static struct
+{
+    uint8_t  initDone;
+    uint32_t openEndpoints;
+    uint8_t  stopFlag;
+    Mutex    tMutex;
+    Thread   thread;
+} receptionThread = {
+    .initDone = FALSE,
+    .stopFlag = FALSE,
+    .openEndpoints = 0,
+};
+
+void* OpcUa_ThreadStartReception(void* nullData){
+    (void) nullData;
+    const uint32_t sleepTimeout = 500;
+    SOPC_StatusCode status = STATUS_OK;
+    while(STATUS_OK == status && receptionThread.stopFlag == FALSE){
+        status = SOPC_SocketManager_Loop(SOPC_SocketManager_GetGlobal(), sleepTimeout);
+        SOPC_Sleep(1);
+    }
+    return NULL;
+}
+
+void OpcUa_ReceptionThread_Start(){
+    if(receptionThread.initDone == FALSE){
+        Mutex_Inititalization(&receptionThread.tMutex);
+        Mutex_Lock(&receptionThread.tMutex);
+        receptionThread.initDone = 1;
+        receptionThread.openEndpoints = 1;
+        SOPC_Thread_Create(&receptionThread.thread, OpcUa_ThreadStartReception, NULL);
+        Mutex_Unlock(&receptionThread.tMutex);
+    }else{
+        Mutex_Lock(&receptionThread.tMutex);
+        receptionThread.openEndpoints += 1;
+        Mutex_Unlock(&receptionThread.tMutex);
+    }
+}
+
+void OpcUa_ReceptionThread_Stop(){
+    if(receptionThread.initDone != FALSE){
+        Mutex_Lock(&receptionThread.tMutex);
+        // stop the reception thread
+        receptionThread.openEndpoints -= 1;
+        if(receptionThread.openEndpoints == 0){
+            receptionThread.stopFlag = 1;
+        }
+        Mutex_Unlock(&receptionThread.tMutex);
+        if(receptionThread.stopFlag != FALSE){
+            SOPC_Thread_Join(receptionThread.thread);
+        }
+    }
+}
+
+////
 
 typedef enum
 {
@@ -265,6 +325,10 @@ SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
             sEndpoint->serverKey = NULL;
             sEndpoint->callbackData = NULL;
         }
+    }else{
+#ifdef WRAPPER_RECEPTION_THREAD
+        OpcUa_ReceptionThread_Start();
+#endif
     }
 
     return status;
@@ -293,6 +357,12 @@ SOPC_StatusCode OpcUa_Endpoint_Close(SOPC_Endpoint endpoint){
         pki = NULL;
         KeyManager_Certificate_Free(cert);
         KeyManager_AsymmetricKey_Free(key);
+    }
+
+    if(status == STATUS_OK){
+#ifdef WRAPPER_RECEPTION_THREAD
+        OpcUa_ReceptionThread_Stop();
+#endif
     }
 
     return status;
