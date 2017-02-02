@@ -21,11 +21,13 @@ endif
 ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      CC=gcc
      AR=ar
+     STATIC_LIB_EXT=".a"
      EXCLUDE_DIR="*win*"
      PLATFORM_DIR="*linux*"
      PFLAGS=-std=c99 -pedantic -D_XOPEN_SOURCE=600
      LIBS=$(LIBS_MBEDTLS) -lpthread $(LIB_CHECK)
 else
+    STATIC_LIB_EXT=".a"
     EXCLUDE_DIR="*linux*"
     PLATFORM_DIR="*win*"
     PFLAGS=-std=c99 -pedantic
@@ -43,6 +45,7 @@ endif
 endif
 
 export CC
+export AR
 
 ifdef STACK_1_01
     DEF_STACK=-DSTACK_1_01 
@@ -184,8 +187,8 @@ $(EXEC_DIR)/check_stack: config $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES)
 library: config $(UASTACK_OBJ_FILES)
 	@echo "Generating static library in $(LOCAL_INSTALL_DIR)/lib"
 	@"mkdir" -p $(LOCAL_INSTALL_DIR)/lib
-	@ar -rc $(LOCAL_INSTALL_DIR)/lib/libingopcs.a $(UASTACK_OBJ_FILES)
-	@ar -s $(LOCAL_INSTALL_DIR)/lib/libingopcs.a
+	@$(AR) -rc $(LOCAL_INSTALL_DIR)/lib/libingopcs$(STATIC_LIB_EXT) $(UASTACK_OBJ_FILES)
+	@$(AR) -s $(LOCAL_INSTALL_DIR)/lib/libingopcs$(STATIC_LIB_EXT)
 	@echo "Copying headers to includes in $(LOCAL_INSTALL_DIR)/include"
 	@"mkdir" -p $(LOCAL_INSTALL_DIR)/include
 	@"cp" $(H_INCLUDE_PATHS) $(LOCAL_INSTALL_DIR)/include
