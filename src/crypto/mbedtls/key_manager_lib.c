@@ -178,7 +178,9 @@ SOPC_StatusCode KeyManager_Certificate_CreateFromDER(const uint8_t *bufferDER, u
     if(mbedtls_x509_crt_parse(crt, bufferDER, lenDER) == 0)
     {
         certif->crt_der = certif->crt.raw.p;
-        certif->len_der = certif->crt.raw.len;
+        if(certif->crt.raw.len > UINT32_MAX)
+            return STATUS_NOK;
+        certif->len_der = (uint32_t)certif->crt.raw.len;
         *ppCert = certif;
         return STATUS_OK;
     }
@@ -219,7 +221,9 @@ SOPC_StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
     if(mbedtls_x509_crt_parse_file(crt, szPath) == 0)
     {
         certif->crt_der = certif->crt.raw.p;
-        certif->len_der = certif->crt.raw.len;
+        if(certif->crt.raw.len > UINT32_MAX)
+            return STATUS_NOK;
+        certif->len_der = (uint32_t)certif->crt.raw.len;
         *ppCert = certif;
         return STATUS_OK;
     }

@@ -403,8 +403,11 @@ SOPC_StatusCode CryptoProvider_AsymDecrypt_RSA_OAEP(const CryptoProvider *pProvi
             break;
         }
 
-        if(NULL != pLenWritten)
-            *pLenWritten += lenDeciphed;
+        if(NULL != pLenWritten) {
+            if(lenDeciphed > UINT32_MAX)
+                return STATUS_NOK;
+            *pLenWritten += (uint32_t) lenDeciphed;
+        }
 
         // Advance pointers
         lenCipherText -= lenMsgCiph;

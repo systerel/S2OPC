@@ -84,12 +84,18 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider 
                                                       const AsymmetricKey *pKey,
                                                       uint32_t *lenKeyBits)
 {
+    size_t lenBits = 0;
+
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == lenKeyBits)
         return STATUS_INVALID_PARAMETERS;
     if(SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
         return STATUS_INVALID_PARAMETERS;
 
-    *lenKeyBits = mbedtls_pk_get_bitlen(&pKey->pk);
+    lenBits = mbedtls_pk_get_bitlen(&pKey->pk);
+    if(lenBits > UINT32_MAX)
+        return STATUS_NOK;
+
+    *lenKeyBits = (uint32_t) lenBits;
 
     return STATUS_OK;
 }
@@ -100,13 +106,18 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgPlainText(const CryptoProv
                                                            uint32_t *pLenMsg)
 {
     uint32_t lenHash = 0;
+    size_t lenMessage = 0;
 
     if(NULL == pProvider || NULL == pProvider->pProfile || NULL == pKey || NULL == pLenMsg)
         return STATUS_INVALID_PARAMETERS;
     if(SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
         return STATUS_INVALID_PARAMETERS;
 
-    *pLenMsg = mbedtls_pk_get_len(&pKey->pk);
+    lenMessage = mbedtls_pk_get_len(&pKey->pk);
+    if(lenMessage > UINT32_MAX)
+        return STATUS_NOK;
+
+    *pLenMsg = (uint32_t)lenMessage;
     if(pLenMsg == 0)
         return STATUS_NOK;
 
@@ -136,11 +147,16 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_MsgCipherText(const CryptoPro
                                                             uint32_t *pLenMsg)
 {
     (void)(pProvider);
+    size_t lenMessage = 0;
 
     if(NULL == pKey || NULL == pLenMsg)
         return STATUS_INVALID_PARAMETERS;
 
-    *pLenMsg = mbedtls_pk_get_len(&pKey->pk);
+    lenMessage = mbedtls_pk_get_len(&pKey->pk);
+    if(lenMessage > UINT32_MAX)
+        return STATUS_NOK;
+
+    *pLenMsg = (uint32_t)lenMessage;
     if(pLenMsg == 0)
         return STATUS_NOK;
 
