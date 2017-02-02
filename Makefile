@@ -140,7 +140,7 @@ endif
 
 doc:
 	@echo "Generating documentation in apidoc/ with doxygen"
-	@doxygen doxygen/ingopcs-stack.doxyfile -DOPCUA_HAVE_CLIENTAPI=1
+	@doxygen doxygen/ingopcs-stack.doxyfile -DOPCUA_HAVE_CLIENTAPI=1 -DOPCUA_HAVE_SERVERAPI=1
 
 config: mbedtls
 	@echo "Configuring build dirs..."
