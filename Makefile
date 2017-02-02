@@ -1,7 +1,26 @@
+################################################################################
+#     INGOPCS Stack Makefile
+#
+#     Specific variables that could be used (optional): "make <VAR>=<value> ..."
+#     - CHECK_PREFIX=<path-to-checklib-install> (containing include/ and lib/) 
+#        => no need if installed in system standard path
+#     - INSTALL_PREFIX=<path-install> (that will contain include/ and lib/):
+#       * make library                               => library generation
+#       * (sudo) make INSTALL_PREFIX=<path> install  => library installation
+#     - STACK_1_01=<any-value> or STACK_1_02=<any-value>
+#       or STACK_1_03=<any-value> (default): set API wrapper version to use
+#     - WRAPPER_THREAD_RECEPTION=<any-value>: activate an additional thread
+#       which treat received messages for an endpoint server
+#     - CROSS_COMPILE_WIN=<any-value>: compilation with i686-w64-mingw32 compiler
+#
+#     Library generation and installation (linux only):
+#     - make library
+#     - sudo make
+################################################################################
+
 # OS DEPENDENCIES
 
 OSTYPE=$(shell echo $$OSTYPE)
-
 ifdef CROSS_COMPILE_WIN
      OSTYPE=cc_win
      export CROSS_COMPILE_WIN
@@ -81,9 +100,10 @@ LOCAL_INSTALL_DIR=$(WORKSPACE_DIR)/install
 UASTACK_DIR=$(WORKSPACE_DIR)/src
 STUBCLIENT_DIR=$(WORKSPACE_DIR)/stub_client
 STUBSERVER_DIR=$(WORKSPACE_DIR)/stub_server
-TESTS_DIR=$(WORKSPACE_DIR)/test/ingopcs
+INTERNAL_TESTS_DIR=$(WORKSPACE_DIR)/test/ingopcs
 ### concatenate all srcs directories
-C_SRC_DIRS=$(UASTACK_DIR) $(STUBCLIENT_DIR) $(STUBSERVER_DIR) $(TESTS_DIR)
+C_SRC_DIRS=$(UASTACK_DIR) $(INTERNAL_TESTS_DIR) # source files with access to any headers
+C_STUBS_DIRS=$(STUBCLIENT_DIR) $(STUBSERVER_DIR) # source files with access to public headers only
 
 ## Stack
 ### includes stack
@@ -97,15 +117,19 @@ PLATFORM_BUILD_DIR_SED=$(subst /,\/,$(PLATFORM_BUILD_DIR))
 PLATFORM_SRC_FILES=$(shell find $(UASTACK_DIR) -path $(PLATFORM_DIR) -type f -name "*.c" -exec basename "{}" \;)
 PLATFORM_OBJ_FILES=$(patsubst %.c,$(PLATFORM_BUILD_DIR)/%.o,$(PLATFORM_SRC_FILES))
 
+BUILD_STUBS_DIR=$(BUILD_DIR)_stubs
+BUILD_STUBS_DIR_SED=$(subst /,\/,$(BUILD_STUBS_DIR))
+
 # add platform objs prior to stack objs
 UASTACK_OBJ_FILES=$(PLATFORM_OBJ_FILES) $(STACK_OBJ_FILES)
 
 ## Tests object files
-TESTS_SRC_FILES=$(shell find $(TESTS_DIR) -type f -name "*.c" -exec basename "{}" \;)
-TESTS_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(TESTS_SRC_FILES))
+INTERNAL_TESTS_SRC_FILES=$(shell find $(INTERNAL_TESTS_DIR) -type f -name "*.c" -exec basename "{}" \;)
+INTERNAL_TESTS_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(INTERNAL_TESTS_SRC_FILES))
 
 ## All .c and .h files to compute dependencies
 C_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.c")
+C_STUBS_SRC_PATHS=$(shell find $(C_STUBS_DIRS) -type f -name "*.c")
 H_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.h")
 H_INCLUDE_PATHS=$(shell find $(UASTACK_DIR)/API $(UASTACK_DIR)/APIwrappers $(UASTACK_DIR)/crypto $(UASTACK_DIR)/core_types -maxdepth 1 -type f -name "*.h")
 
@@ -130,9 +154,13 @@ default: all
 
 all: config library $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs $(EXEC_DIR)/check_stack
 
-ifneq ($(MAKECMDGOALS),$(filter clean% config% doc install,$(MAKECMDGOALS)))
+ifndef MAKECMDGOALS
+    MAKECMDGOALS=default
+endif
+ifneq ($(MAKECMDGOALS),$(filter $(MAKECMDGOALS), clean clean_doc clean_mbedtls cleanall config config_stubs doc install))
 -include .depend
 -include .pdepend
+-include .tdepend
 endif
 
 doc:
@@ -141,7 +169,7 @@ doc:
 
 config: mbedtls
 	@echo "Configuring build and output directory..."
-	@"mkdir" -p $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
+	@"mkdir" -p $(BUILD_DIR) $(BUILD_STUBS_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
 
 config_stubs: config
 	@echo "Configuring stubs tests data..."
@@ -159,6 +187,10 @@ $(BUILD_DIR)/%.o:
 	@echo "  CC $@"
 	@$(CC) $(CFLAGS) $(C99FLAGS) $(INCLUDES) $< -o $@ $(DEFS)
 
+$(BUILD_STUBS_DIR)/%.o:
+	@echo "  CC $@"
+	@$(CC) $(CFLAGS) $(C99FLAGS) -I$(LOCAL_INSTALL_DIR)/include $< -o $@ $(DEFS)
+
 $(PLATFORM_BUILD_DIR)/%.o:
 	@echo "  CC $@"
 	@$(CC) $(CFLAGS) $(PFLAGS) $(INCLUDES) $< -o $@ $(DEFS)
@@ -172,17 +204,22 @@ $(PLATFORM_BUILD_DIR)/%.o:
 	@echo "Building platform dependencies..."
 	@sed 's/^\(.*\)\.o:/$(PLATFORM_BUILD_DIR_SED)\/\1.o:/g' $^.tmp > $@
 
-$(EXEC_DIR)/stub_client_ingopcs: config_stubs $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o
-	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(INCLUDES) $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o -o $@ $(LIBS_DIR) $(LIBS)
+.tdepend: $(C_STUBS_SRC_PATHS)
+	@echo "Building stub tests dependencies..."
+	@$(CC) $(CFLAGS) $(DEFS) $(INCLUDES) -MM $(C_STUBS_SRC_PATHS) > $@.tmp
+	@sed 's/^\(.*\)\.o:/$(BUILD_STUBS_DIR_SED)\/\1.o:/g' $@.tmp > $@
 
-$(EXEC_DIR)/stub_server_ingopcs: config_stubs $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server_ingopcs.o
+$(EXEC_DIR)/stub_client_ingopcs: config_stubs library $(BUILD_STUBS_DIR)/stub_client_ingopcs.o
 	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(INCLUDES) $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server_ingopcs.o -o $@ $(LIBS_DIR) $(LIBS)
+	@$(CC) $(LFLAGS) -I $(LOCAL_INSTALL_DIR)/include $(BUILD_STUBS_DIR)/stub_client_ingopcs.o -o $@ -L$(LOCAL_INSTALL_DIR)/lib -lingopcs $(LIBS)
 
-$(EXEC_DIR)/check_stack: config $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES)
+$(EXEC_DIR)/stub_server_ingopcs: config_stubs library $(BUILD_STUBS_DIR)/stub_server_ingopcs.o
 	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(INCLUDES) $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
+	@$(CC) $(LFLAGS) -I $(LOCAL_INSTALL_DIR)/include $(BUILD_STUBS_DIR)/stub_server_ingopcs.o -o $@ -L$(LOCAL_INSTALL_DIR)/lib -lingopcs $(LIBS)
+
+$(EXEC_DIR)/check_stack: config $(INTERNAL_TESTS_OBJ_FILES)
+	@echo "Linking $@..."
+	@$(CC) $(LFLAGS) $(INCLUDES) $(UASTACK_OBJ_FILES) $(INTERNAL_TESTS_OBJ_FILES) -o $@ $(LIBS) -lcheck
 
 library: config $(UASTACK_OBJ_FILES)
 	@echo "Generating static library in $(LOCAL_INSTALL_DIR)/lib"
@@ -218,8 +255,8 @@ clean_doc:
 
 clean:
 	@echo "Cleaning..."
-	@"rm" -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
+	@"rm" -rf $(BUILD_DIR) $(BUILD_STUBS_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
 	@"rm" -rf $(LOCAL_INSTALL_DIR)
-	@"rm" -f .depend.tmp .depend .pdepend
+	@"rm" -f .depend.tmp .depend .pdepend .tdepend.tmp .tdepend
 
 cleanall: clean clean_doc clean_mbedtls
