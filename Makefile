@@ -111,31 +111,16 @@ DEFS=$(DEF_STACK) $(DEF_THREAD) $(DEF_WINDOWS)
 
 # MAKEFILE CONTENT
 
-.PHONY : all doc config mbedtls library install check clean clean_doc clean_config clean_mbedtls cleanall
+.PHONY : all doc config config_stubs mbedtls library install check clean clean_doc clean_mbedtls cleanall
 .DELETE_ON_ERROR : .depend.tmp .depend .pdepend
 
 default: all
 
 all: config library $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs $(EXEC_DIR)/check_stack
 
-# TODO: replace by unique filter
-ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(MAKECMDGOALS),clean_doc)
-ifneq ($(MAKECMDGOALS),clean_config)
-ifneq ($(MAKECMDGOALS),clean_mbedtls)
-ifneq ($(MAKECMDGOALS),cleanall)
-ifneq ($(MAKECMDGOALS),config)
-ifneq ($(MAKECMDGOALS),doc)
-ifneq ($(MAKECMDGOALS),install)
+ifneq ($(MAKECMDGOALS),$(filter clean% config% doc install,$(MAKECMDGOALS)))
 -include .depend
 -include .pdepend
-endif
-endif
-endif
-endif
-endif
-endif
-endif
 endif
 
 doc:
@@ -143,8 +128,11 @@ doc:
 	@doxygen doxygen/ingopcs-stack.doxyfile -DOPCUA_HAVE_CLIENTAPI=1 -DOPCUA_HAVE_SERVERAPI=1
 
 config: mbedtls
-	@echo "Configuring build dirs..."
+	@echo "Configuring build and output directory..."
 	@"mkdir" -p $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
+
+config_stubs: config
+	@echo "Configuring stubs tests data..."
 	@"mkdir" -p $(EXEC_DIR)/revoked $(EXEC_DIR)/untrusted $(EXEC_DIR)/trusted \
 	 $(EXEC_DIR)/client_private $(EXEC_DIR)/server_private \
 	 $(EXEC_DIR)/client_public $(EXEC_DIR)/server_public
@@ -153,6 +141,7 @@ config: mbedtls
 	@"cp" $(CERT_DIR)/client.der $(EXEC_DIR)/client_public
 	@"cp" $(CERT_DIR)/server.key $(EXEC_DIR)/server_private
 	@"cp" $(CERT_DIR)/server.der $(EXEC_DIR)/server_public
+
 
 $(BUILD_DIR)/%.o:
 	@echo "  CC $@"
@@ -171,22 +160,22 @@ $(PLATFORM_BUILD_DIR)/%.o:
 	@echo "Building platform dependencies..."
 	@sed 's/^\(.*\)\.o:/$(PLATFORM_BUILD_DIR_SED)\/\1.o:/g' $^.tmp > $@
 
-$(EXEC_DIR)/stub_client_ingopcs: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o
+$(EXEC_DIR)/stub_client_ingopcs: config_stubs $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o
 	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
+	@$(CC) $(LFLAGS) $(INCLUDES) $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_client_ingopcs.o -o $@ $(LIBS_DIR) $(LIBS)
 
-$(EXEC_DIR)/stub_server_ingopcs: $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server_ingopcs.o
+$(EXEC_DIR)/stub_server_ingopcs: config_stubs $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server_ingopcs.o
 	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS)
+	@$(CC) $(LFLAGS) $(INCLUDES) $(UASTACK_OBJ_FILES) $(BUILD_DIR)/stub_server_ingopcs.o -o $@ $(LIBS_DIR) $(LIBS)
 
-$(EXEC_DIR)/check_stack: $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) $(BUILD_DIR)/check_stack.o
+$(EXEC_DIR)/check_stack: config $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES)
 	@echo "Linking $@..."
-	@$(CC) $(LFLAGS) $(INCLUDES) $^ -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
+	@$(CC) $(LFLAGS) $(INCLUDES) $(UASTACK_OBJ_FILES) $(TESTS_OBJ_FILES) -o $@ $(LIBS_DIR) $(LIBS) -lcheck -lm
 
-library: $(UASTACK_OBJ_FILES)
+library: config $(UASTACK_OBJ_FILES)
 	@echo "Generating static library in $(LOCAL_INSTALL_DIR)/lib"
 	@"mkdir" -p $(LOCAL_INSTALL_DIR)/lib
-	@ar -rc $(LOCAL_INSTALL_DIR)/lib/libingopcs.a $^
+	@ar -rc $(LOCAL_INSTALL_DIR)/lib/libingopcs.a $(UASTACK_OBJ_FILES)
 	@ar -s $(LOCAL_INSTALL_DIR)/lib/libingopcs.a
 	@echo "Copying headers to includes in $(LOCAL_INSTALL_DIR)/include"
 	@"mkdir" -p $(LOCAL_INSTALL_DIR)/include
@@ -211,18 +200,14 @@ clean_mbedtls:
 	@echo "Cleaning mbedtls"
 	@$(MAKE) -C $(MBEDTLS_DIR) clean
 
-clean_config:
-	@echo "Cleaning configuration..."
-	@"rm" -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
-
 clean_doc:
 	@echo "Cleaning documentation..."
 	@"rm" -rf apidoc
 
 clean:
 	@echo "Cleaning..."
-	@"rm" -rf $(BUILD_DIR)/* $(PLATFORM_BUILD_DIR)/* $(EXEC_DIR)/check_stack $(EXEC_DIR)/stub_*
+	@"rm" -rf $(BUILD_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
 	@"rm" -rf $(LOCAL_INSTALL_DIR)
 	@"rm" -f .depend.tmp .depend .pdepend
 
-cleanall: clean clean_config clean_doc clean_mbedtls
+cleanall: clean clean_doc clean_mbedtls
