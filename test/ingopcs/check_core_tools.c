@@ -27,6 +27,7 @@
 #include "sopc_encoder.h"
 #include "sopc_msg_buffer.h"
 #include "check_stack.h"
+#include "platform_deps.h"
 
 
 START_TEST(test_ua_msg_buffer_create_set_type)

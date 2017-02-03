@@ -21,6 +21,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include "platform_deps.h"
+#include "sopc_msg_buffer.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_tcp_ua_low_level.h"
 #include "sopc_secure_channel_low_level.h"

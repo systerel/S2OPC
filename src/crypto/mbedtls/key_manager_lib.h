@@ -35,6 +35,7 @@
  */
 struct AsymmetricKey {
     mbedtls_pk_context pk;
+    uint8_t            doNotClear;
 };
 
 /**

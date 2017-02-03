@@ -30,9 +30,6 @@
 
 #include "sopc_base_types.h"
 #include "crypto_decl.h"
-#include "key_manager_lib.h"
-
-
 
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API
@@ -44,7 +41,8 @@
  *
  *                  \p buffer is \p lenBuf long, and describes the key in the DER of PEM format.
  *
- *                  Public keys are usually extracted from Certificate, see KeyManager_Certificate_GetPublicKey().
+ *                  Public keys are usually extracted from Certificate, see KeyManager_Certificate_GetPublicKey() or
+ *                  KeyManager_AsymmetricKey_CreateFromCertificate().
  *
  * \param buffer    A valid pointer to the buffer containing the DER or PEM description.
  * \param lenBuf    The length in bytes of the DER/PEM description of the key.
@@ -64,7 +62,8 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer,
  *                  \p szPath is the path to the file containing the key. It should be zero-terminated.
  *                  The key may be described in the DER of PEM format.
  *
- *                  Public keys are usually extracted from Certificate, see KeyManager_Certificate_GetPublicKey().
+ *                  Public keys are usually extracted from Certificate, see KeyManager_Certificate_GetPublicKey() or
+ *                  KeyManager_AsymmetricKey_CreateFromCertificate().
  *
  * \param szPath    The path to the DER/PEM file.
  * \param ppKey     A handle to the created key. This object must be freed with a call to KeyManager_AsymmetricKey_Free().
@@ -81,6 +80,25 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
                                                    AsymmetricKey **ppKey,
                                                    char *password,
                                                    uint32_t lenPassword);
+
+/**
+ * \brief           Returns the public key of the signed public key.
+ *
+ * \warning         The returned AsymmetricKey must not be used after the Certificate is freed
+ *                  by KeyManager_Certificate_Free().
+ *
+ * \param pCert     A valid pointer to the signed public key.
+ * \param pKey      A handle to the created key structure, the AsymmetricKey will then be rewritten to contain the public key.
+ *                  This is not a deep copy, and the key is not valid anymore when the certificate is not valid.
+ *                  This object must be freed with a call to KeyManager_AsymmetricKey_Free() which will only deallocate the structure.
+ *
+ * \note            Content of the certificate is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *                  and STATUS_NOK when there was an error.
+ */
+SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromCertificate(const Certificate *pCert,
+                                                               AsymmetricKey     **pKey);
 
 /**
  * \brief           Frees a previously created asymmetric key created with KeyManager_AsymmetricKey_CreateFromBuffer() or

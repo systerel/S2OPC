@@ -296,21 +296,20 @@ SOPC_StatusCode GetEncryptedDataLength(SC_Connection* scConnection,
            status = STATUS_INVALID_STATE;
         }else{
 
-            AsymmetricKey otherAppPublicKey;
+            AsymmetricKey* otherAppPublicKey = NULL;
 
-            // Retrieve other app public key from certificate
-            // TODO integration: see if and how it was avoided previously
-
-            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
-                                                         &otherAppPublicKey);
+            status = KeyManager_AsymmetricKey_CreateFromCertificate(scConnection->otherAppPublicKeyCert,
+                                                                    &otherAppPublicKey);
 
             // Retrieve cipher length
             if(status == STATUS_OK){
                 status = CryptoProvider_AsymmetricGetLength_Encryption(scConnection->currentCryptoProvider,
-                                                                       &otherAppPublicKey,
+                                                                       otherAppPublicKey,
                                                                        plainDataLength,
                                                                        cipherDataLength);
             }
+
+            KeyManager_AsymmetricKey_Free(otherAppPublicKey);
         }
     }else if (status == STATUS_OK){
         if(scConnection->currentSecuKeySets.senderKeySet == NULL){
@@ -413,27 +412,32 @@ SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
         if(isSymmetric == FALSE){
 
             if(scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
-                AsymmetricKey publicKey;
+                AsymmetricKey* publicKey = NULL;
+
+
                 // Asymmetric case: used only for opening channel, signature AND encryption mandatory in this case
                 toEncrypt = 1; // TRUE
                 toSign = 1; // TRUE
 
-                status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
-                                                             &publicKey);
+                status = KeyManager_AsymmetricKey_CreateFromCertificate(scConnection->otherAppPublicKeyCert,
+                                                                        &publicKey);
 
                 if(status == STATUS_OK){
                     // Compute block sizes
                     status = CryptoProvider_AsymmetricGetLength_Msgs(scConnection->currentCryptoProvider,
-                                                                     &publicKey,
+                                                                     publicKey,
                                                                      &cipherBlockSize,
                                                                      &plainBlockSize);
                 }
                 if(status == STATUS_OK){
                     // Compute signature size
                     status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
-                                                                           &publicKey,
+                                                                           publicKey,
                                                                            &signatureSize);
                 }
+
+                KeyManager_AsymmetricKey_Free(publicKey);
+
             }else{
                 toEncrypt = FALSE; // No data encryption
                 toSign = FALSE;    // No signature
@@ -774,21 +778,24 @@ SOPC_StatusCode EncodePadding(SC_Connection* scConnection,
            scConnection->otherAppCertificate.Length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
-            AsymmetricKey publicKey;
-            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
-                                                         &publicKey);
+            AsymmetricKey* publicKey = NULL;
+
+            status = KeyManager_AsymmetricKey_CreateFromCertificate(scConnection->otherAppPublicKeyCert,
+                                                                    &publicKey);
 
             if(status == STATUS_OK){
                 status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
-                                                                      &publicKey,
+                                                                      publicKey,
                                                                       signatureSize);
             }
             if(status == STATUS_OK){
                 status = CryptoProvider_AsymmetricGetLength_Msgs(scConnection->currentCryptoProvider,
-                                                                 &publicKey,
+                                                                 publicKey,
                                                                  &cipherBlockSize,
                                                                  &plainBlockSize);
             }
+
+            KeyManager_AsymmetricKey_Free(publicKey);
         }
     }else{
         if(scConnection->currentSecuKeySets.senderKeySet == NULL ||
@@ -923,13 +930,13 @@ SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
            scConnection->otherAppCertificate.Length <= 0){
            status = STATUS_INVALID_STATE;
         }else{
-            AsymmetricKey otherAppPublicKey;
+            AsymmetricKey* otherAppPublicKey = NULL;
             SOPC_Byte* encryptedData = NULL;
 
             if(status == STATUS_OK){
                 // Retrieve other app public key from certificate
-                status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
-                                                             &otherAppPublicKey);
+                status = KeyManager_AsymmetricKey_CreateFromCertificate(scConnection->otherAppPublicKeyCert,
+                                                                        &otherAppPublicKey);
             }
 
             // Check size of encrypted data array
@@ -967,10 +974,12 @@ SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
                           (scConnection->currentCryptoProvider,
                            dataToEncrypt,
                            dataToEncryptLength,
-                           &otherAppPublicKey,
+                           otherAppPublicKey,
                            &encryptedData[msgBuffer->sequenceNumberPosition],
                            encryptedDataLength);
             }
+
+            KeyManager_AsymmetricKey_Free(otherAppPublicKey);
 
         } // End valid asymmetric encryption data
     }else if (status == STATUS_OK){
@@ -1707,14 +1716,15 @@ SOPC_StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
 
     if(toVerify != FALSE){
         if(isSymmetric == FALSE){
-            AsymmetricKey publicKey;
+            AsymmetricKey* publicKey = NULL;
 
-            status = KeyManager_Certificate_GetPublicKey(scConnection->otherAppPublicKeyCert,
-                                                         &publicKey);
+
+            status = KeyManager_AsymmetricKey_CreateFromCertificate(scConnection->otherAppPublicKeyCert,
+                                                                    &publicKey);
 
             if(status == STATUS_OK){
                 status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
-                                                                    &publicKey,
+                                                                    publicKey,
                                                                     &signatureSize);
             }
 
@@ -1724,10 +1734,12 @@ SOPC_StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                 status = CryptoProvider_AsymmetricVerify(cryptoProvider,
                                                          receptionBuffer->data,
                                                          signaturePosition,
-                                                         &publicKey,
+                                                         publicKey,
                                                          &(receptionBuffer->data[signaturePosition]),
                                                          signatureSize);
             }
+
+            KeyManager_AsymmetricKey_Free(publicKey);
         }else{
             SC_SecurityKeySet* receiverKeySet = NULL;
             if(isPrecCryptoData == FALSE){

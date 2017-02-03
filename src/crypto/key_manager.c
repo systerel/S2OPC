@@ -31,8 +31,7 @@
 #include "crypto_decl.h"
 #include "crypto_profiles.h"
 #include "key_manager.h"
-
-
+#include "key_manager_lib.h"
 
 
 /* ------------------------------------------------------------------------------------------------

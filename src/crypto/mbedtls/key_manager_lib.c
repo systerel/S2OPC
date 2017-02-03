@@ -26,6 +26,7 @@
 #include "crypto_profiles.h"
 #include "crypto_provider.h"
 #include "key_manager.h"
+#include "key_manager_lib.h"
 
 #include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
@@ -50,6 +51,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer,
     key = malloc(sizeof(AsymmetricKey));
     if(NULL == key)
         return STATUS_NOK;
+    key->doNotClear = FALSE;
     mbedtls_pk_init(&key->pk);
 
     if(mbedtls_pk_parse_key(&key->pk, buffer, lenBuf, NULL, 0) != 0) // This should also parse PEM keys.
@@ -88,6 +90,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
     key = malloc(sizeof(AsymmetricKey));
     if(NULL == key)
         return STATUS_NOK;
+    key->doNotClear = FALSE;
     mbedtls_pk_init(&key->pk);
 
     if(mbedtls_pk_parse_keyfile(&key->pk, szPath, password) != 0)
@@ -101,6 +104,19 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
     return STATUS_OK;
 }
 
+SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromCertificate(const Certificate *pCert,
+                                                               AsymmetricKey **pKey)
+{
+    if(NULL == pCert || NULL == pKey)
+        return STATUS_INVALID_PARAMETERS;
+    *pKey = malloc(sizeof(AsymmetricKey));
+    if(NULL == *pKey)
+        return STATUS_NOK;
+    (*pKey)->doNotClear = 1;
+    mbedtls_pk_init(&(*pKey)->pk);
+
+    return KeyManager_Certificate_GetPublicKey(pCert, *pKey);
+}
 
 /**
  * Frees an asymmetric key created with KeyManager_AsymmetricKey_Create*().
@@ -111,8 +127,9 @@ void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey)
 {
     if(NULL == pKey)
         return;
-
-    mbedtls_pk_free(&pKey->pk);
+    if(FALSE == pKey->doNotClear){
+        mbedtls_pk_free(&pKey->pk);
+    }
     free(pKey);
 }
 
@@ -306,7 +323,7 @@ SOPC_StatusCode KeyManager_Certificate_GetPublicKey(const Certificate *pCert,
     if(NULL == pCert || NULL == pKey)
         return STATUS_INVALID_PARAMETERS;
 
-    memcpy(pKey, &pCert->crt.pk, sizeof(mbedtls_pk_context));
+    memcpy(&pKey->pk, &pCert->crt.pk, sizeof(mbedtls_pk_context));
 
     return STATUS_OK;
 }

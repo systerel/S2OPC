@@ -31,6 +31,7 @@
 #include "key_manager.h"
 #include "pki.h"
 
+struct CertificateRevList;
 
 /**
  * \brief           Creates the minimal validation implementation provided by the stack, which fulfills the PKIProvider interface.
@@ -52,7 +53,7 @@
  *                  and STATUS_NOK when there was an error.
  */
 SOPC_StatusCode PKIProviderStack_Create(Certificate *pCertAuth,
-                                   CertificateRevList *pRevocationList,
+                                   struct CertificateRevList *pRevocationList,
                                    PKIProvider **ppPKI);
 
 /**

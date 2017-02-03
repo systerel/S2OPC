@@ -666,10 +666,10 @@ END_TEST
 
 START_TEST(test_cert_loadkey_B256)
 {
-    AsymmetricKey key_pub;
+    AsymmetricKey* key_pub = NULL;
 
     // Loads the public key from cert
-    ck_assert(KeyManager_Certificate_GetPublicKey(crt_pub, &key_pub) == STATUS_OK);
+    ck_assert(KeyManager_AsymmetricKey_CreateFromCertificate(crt_pub, &key_pub) == STATUS_OK);
 
     // Note: as the AsymmetricKey is not malloc-ed, it is not free-d, so it is not cleared neither
 }
@@ -715,9 +715,7 @@ static inline void setup_asym_keys(void)
     ck_assert(KeyManager_Certificate_CreateFromDER(der_cert, DER_ASYM_PUB_LENG, &crt_pub) == STATUS_OK);//*/
 
     // Loads the public key from cert
-    key_pub = malloc(sizeof(AsymmetricKey));
-    ck_assert(NULL != key_pub);
-    ck_assert(KeyManager_Certificate_GetPublicKey(crt_pub, key_pub) == STATUS_OK);
+    ck_assert(KeyManager_AsymmetricKey_CreateFromCertificate(crt_pub, &key_pub) == STATUS_OK);
 
     // Loads the corresponding private key
     ck_assert(unhexlify(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG) == DER_ASYM_PRIV_LENG);

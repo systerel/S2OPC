@@ -32,6 +32,7 @@
 #include "crypto_profiles.h"
 #include "crypto_provider.h"
 #include "crypto_provider_lib.h"
+#include "key_manager_lib.h"
 
 #include "mbedtls/aes.h"
 #include "mbedtls/md.h"
