@@ -43,7 +43,19 @@ SOPC_StatusCode StubClient_ConnectionEvent_Callback(SOPC_Channel       channel,
 {
     (void) callbackData;
     (void) channel;
-    printf ("\nConnection event: channel event=%d and status=%x\n", event, status);
+    char* cevent = NULL;
+    switch(event){
+        case SOPC_ChannelEvent_Invalid:
+            cevent = "SOPC_ChannelEvent_Invalid";
+            break;
+        case SOPC_ChannelEvent_Connected:
+            cevent = "SOPC_ChannelEvent_Connected";
+            break;
+        case SOPC_ChannelEvent_Disconnected:
+            cevent = "SOPC_ChannelEvent_Disconnected";
+            break;
+    }
+    printf(">>Stub_Client: Connection event: channel event '%s' and status '%x'\n", cevent, status);
 	if (status == STATUS_OK){
 	    connected = 1;
 		noEvent = 0;
@@ -63,25 +75,24 @@ SOPC_StatusCode StubClient_ResponseEvent_Callback(SOPC_Channel         channel,
     (void) callbackData;
     (void) channel;
     (void) status;
-    printf ("\nResponse event\n");
 	noResp = 0;
 
     /* check for fault */
     if (responseType->TypeId == OpcUaId_ServiceFault)
     {
-    	printf ("\nService fault response\n");
+    	printf(">>Stub_Client: Service fault response: OK (not implemented in server)\n");
     }
 
     /* check response type */
     else if (OpcUa_GetEndpointsResponse_EncodeableType.TypeId != responseType->TypeId)
     {
-    	printf ("\nIncorrect response type !\n");
+    	printf(">>Stub_Client: Incorrect response type !\n");
     }
 
     /* copy parameters from response object into return parameters. */
     else
     {
-    	printf("\n Endpoints response: %d\n",((OpcUa_GetEndpointsResponse*) response)->NoOfEndpoints);
+    	printf(">>Stub_Client: Endpoints response: %d\n",((OpcUa_GetEndpointsResponse*) response)->NoOfEndpoints);
     }
 
     // Free the allocated response message
@@ -101,11 +112,25 @@ int main(void){
     uint32_t loopCpt = 0;
 
     SOPC_Channel hChannel = NULL;
+    PKIProvider *pki = NULL;
+    Certificate *crt_cli = NULL, *crt_srv = NULL;
+    Certificate *crt_ca = NULL;
+    AsymmetricKey *priv_cli = NULL;
+
+    // Empty callback data
+    StubClient_CallbackData Callback_Data;
 
     // Endpoint URL
     SOPC_String stEndpointUrl;
     SOPC_String_Initialize(&stEndpointUrl);
     char* sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
+
+    // Policy security:
+    char* pRequestedSecurityPolicyUri = SecurityPolicy_Basic256Sha256_URI;
+
+    // Message security mode: None
+    OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;//OpcUa_MessageSecurityMode_None;
+
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
@@ -116,90 +141,102 @@ int main(void){
     char* keyLocation = "./client_private/client.key";
 
     // The certificates: load
-    Certificate *crt_cli = NULL, *crt_srv = NULL;
     status = KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
-    if(STATUS_OK == status)
-        status = KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
-    if(STATUS_OK != status)
-        printf("Failed to load certificate(s)\n");
+    if(STATUS_OK != status){
+        printf(">>Stub_Client: Failed to load client certificate\n");
+    }else{
+        printf(">>Stub_Client: Client certificate loaded\n");
+    }
 
-    // Private key: load
-    AsymmetricKey *priv_cli = NULL;
-    status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
-    if(STATUS_OK != status)
-        printf("Failed to load private key\n");
+    if(STATUS_OK == status){
+        status = KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+        if(STATUS_OK != status){
+            printf(">>Stub_Client: Failed to load server certificate\n");
+        }else{
+            printf(">>Stub_Client: Server certificate loaded\n");
+        }
+    }
+
+    if(STATUS_OK == status){
+        // Private key: load
+        status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
+        if(STATUS_OK != status){
+            printf(">>Stub_Client: Failed to load private key\n");
+        }else{
+            printf(">>Stub_Client: Server private key loaded\n");
+        }
+    }
 
     // Certificate Authority: load
-    Certificate *crt_ca = NULL;
-    if(STATUS_OK != KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca))
-        printf("Failed to load CA\n");
-
-    // Empty callback data
-    StubClient_CallbackData Callback_Data;
-
-    // Policy security: None
-    char* pRequestedSecurityPolicyUri = SecurityPolicy_Basic256Sha256_URI;
-    if(STATUS_OK != status) goto Error;
-
-    // Message security mode: None
-    OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;//OpcUa_MessageSecurityMode_None;
+    if(STATUS_OK == status){
+        if(STATUS_OK != KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca)){
+            printf(">>Stub_Client: Failed to load CA\n");
+        }else{
+            printf(">>Stub_Client: CA certificate loaded\n");
+        }
+    }
 
 	// Init stack configuration
-	StackConfiguration_Initialize();
-	if(STATUS_OK != status) goto Error;
+    if(STATUS_OK == status){
+        status = StackConfiguration_Initialize();
+        if(STATUS_OK != status){
+            printf(">>Stub_Client: Failed initializing stack\n");
+        }else{
+            printf(">>Stub_Client: Stack initialized\n");
+        }
+    }
 
-	// Add types
-	newEncType = malloc(sizeof(SOPC_EncodeableType));
-	if(newEncType == NULL){
-	    return STATUS_NOK;
-	}
-	memset(newEncType, 0, sizeof(SOPC_EncodeableType));
-	StackConfiguration_AddTypes(&newEncType, 1);
+    if(STATUS_OK == status){
+        // Add types
+        newEncType = malloc(sizeof(SOPC_EncodeableType));
+        if(newEncType == NULL){
+            return STATUS_NOK;
+        }
+        memset(newEncType, 0, sizeof(SOPC_EncodeableType));
+        status = StackConfiguration_AddTypes(&newEncType, 1);
+    }
 
     // Create channel object
-    status = SOPC_Channel_Create(&hChannel, SOPC_ChannelSerializer_Binary);
-	if(STATUS_OK != status) goto Error;
-
-    printf ("%d\n", status);
-
-    if(STATUS_OK != status) goto Error;
+    if(STATUS_OK == status){
+        status = SOPC_Channel_Create(&hChannel, SOPC_ChannelSerializer_Binary);
+    }
 
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
-    PKIProvider *pki = NULL;
-    if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki))
-        printf("Failed to create PKI\n");
+    if(STATUS_OK == status){
+        if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki)){
+            printf(">>Stub_Client: Failed to create PKI\n");
+        }else{
+            printf(">>Stub_Client: PKI created\n");
+        }
+    }
 
     // Start connection to server
-    status = SOPC_Channel_BeginConnect(hChannel,
-                                      sEndpointUrl,
-                                      //sTransportProfileUri,
-                                      crt_cli,                      /* Client Certificate       */
-                                      priv_cli,                     /* Private Key              */
-                                      crt_srv,                      /* Server Certificate       */
-                                      pki,                          /* PKI Config               */
-                                      pRequestedSecurityPolicyUri, /* Request secu policy */
-                                      5,                            /* Request lifetime */
-                                      messageSecurityMode,          /* Message secu mode */
-                                      10,                           /* Network timeout */
-                                      (SOPC_Channel_PfnConnectionStateChanged*) StubClient_ConnectionEvent_Callback,
-                                      &Callback_Data);              /* Connect Callback Data   */
-
-    if(STATUS_OK != status) goto Error;
-
-    // Request header
-    OpcUa_RequestHeader rHeader;
-
-    // Local configuration: empty
-    SOPC_String localId, profileUri;
-    // Endpoint URL in OPC UA string format
-    status = SOPC_String_AttachFromCstring(&stEndpointUrl, sEndpointUrl);
-    if(STATUS_OK != status) goto Error;
+    if(STATUS_OK == status){
+        status = SOPC_Channel_BeginConnect(hChannel,
+                                          sEndpointUrl,
+                                          //sTransportProfileUri,
+                                          crt_cli,                      /* Client Certificate       */
+                                          priv_cli,                     /* Private Key              */
+                                          crt_srv,                      /* Server Certificate       */
+                                          pki,                          /* PKI Config               */
+                                          pRequestedSecurityPolicyUri, /* Request secu policy */
+                                          5,                            /* Request lifetime */
+                                          messageSecurityMode,          /* Message secu mode */
+                                          10,                           /* Network timeout */
+                                          (SOPC_Channel_PfnConnectionStateChanged*) StubClient_ConnectionEvent_Callback,
+                                          &Callback_Data);              /* Connect Callback Data   */
+        if(STATUS_OK != status){
+            printf(">>Stub_Client: Failed to start connection to server\n");
+        }else{
+            printf(">>Stub_Client: Establishing connection to server...\n");
+        }
+    }
 
     // Empty callback data
     StubClient_CallbackData Callback_Data_Get;
 
-    while (noEvent && loopCpt * sleepTimeout <= loopTimeout)
+    while (STATUS_OK == status && noEvent && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
 #if OPCUA_MULTITHREADED
@@ -208,33 +245,54 @@ int main(void){
 #else
     	// Retrieve received messages on socket
     	status = SOPC_TreatReceivedMessages(sleepTimeout);
-        printf ("ServerLoop status: %d\n", status);
-        if(STATUS_OK != status) goto Error;
 #endif //OPCUA_MULTITHREADED
     }
     loopCpt = 0;
 
-    if (disconnect != 0 || connected == 0){
-        status = STATUS_NOK;
-    	goto Error;
+    if(STATUS_OK == status){
+        if (disconnect != 0 || connected == 0){
+            status = STATUS_NOK;
+            printf(">>Stub_Client: Failed to establish connection to server\n");
+        }else{
+            printf(">>Stub_Client: Connection to server established\n");
+        }
     }
 
-    // Initialization of empty request header
-    OpcUa_RequestHeader_Initialize (&rHeader);
+    // Request header
+    OpcUa_RequestHeader rHeader;
 
-    // To retrieve response from callback
+    // Local configuration: empty
+    SOPC_String localId, profileUri;
 
-    status = OpcUa_ClientApi_BeginGetEndpoints(hChannel,     // Channel
-                                                &rHeader,      // Request header
-                                                &stEndpointUrl, // Endpoint
-                                                0,            // No of local id
-                                                &localId,           // local id
-                                                0,            // No of profile URI
-                                                &profileUri,           // profile uri
-                                                (SOPC_Channel_PfnRequestComplete*) StubClient_ResponseEvent_Callback, // response call back
-                                                &Callback_Data_Get); // call back data
+    if(STATUS_OK == status){
+        // Endpoint URL in OPC UA string format
+        status = SOPC_String_AttachFromCstring(&stEndpointUrl, sEndpointUrl);
+    }
 
-    while (noResp && loopCpt * sleepTimeout <= loopTimeout)
+    if(STATUS_OK == status){
+        // Initialization of empty request header
+        OpcUa_RequestHeader_Initialize (&rHeader);
+
+        // To retrieve response from callback
+
+        status = OpcUa_ClientApi_BeginGetEndpoints(hChannel,     // Channel
+                                                    &rHeader,      // Request header
+                                                    &stEndpointUrl, // Endpoint
+                                                    0,            // No of local id
+                                                    &localId,           // local id
+                                                    0,            // No of profile URI
+                                                    &profileUri,           // profile uri
+                                                    (SOPC_Channel_PfnRequestComplete*) StubClient_ResponseEvent_Callback, // response call back
+                                                    &Callback_Data_Get); // call back data
+
+        if(STATUS_OK != status){
+            printf(">>Stub_Client: Failed to call GetEndpoint service\n");
+        }else{
+            printf(">>Stub_Client: Calling GetEndpoint service...\n");
+        }
+    }
+
+    while (STATUS_OK == status && noResp != FALSE && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
 #if OPCUA_MULTITHREADED
@@ -243,18 +301,20 @@ int main(void){
 #else
     	// Retrieve received messages on socket
     	status = SOPC_TreatReceivedMessages(sleepTimeout);
-        printf ("ServerLoop status: %d\n", status);
-        if(STATUS_OK != status) goto Error;
 #endif //OPCUA_MULTITHREADED
     }
     loopCpt = 0;
 
-    if (disconnect != 0 || noResp != 0){
-        status = STATUS_NOK;
-    	goto Error;
+    if (STATUS_OK == status){
+        if(disconnect != 0 || noResp != 0){
+            status = STATUS_NOK;
+            printf(">>Stub_Client: GetEndpoint service call failed\n");
+        }else{
+            printf(">>Stub_Client: GetEndpoint service call succeeded\n");
+        }
     }
 
-    printf ("Final status: %d\n", status);
+    printf(">>Stub_Client: Final status: %x\n", status);
     PKIProviderStack_Free(pki);
     SOPC_String_Clear(&stEndpointUrl);
     KeyManager_Certificate_Free(crt_cli);
@@ -265,16 +325,11 @@ int main(void){
     StackConfiguration_Clear();
     if(newEncType != NULL)
         free(newEncType);
-    return status;
-
-    Error:
-    SOPC_String_Clear(&stEndpointUrl);
-    SOPC_Channel_Delete(&hChannel);
-    StackConfiguration_Clear();
-    if(newEncType != NULL)
-        free(newEncType);
-
-    printf ("Error status: %d\n", status);
+    if(STATUS_OK == status){
+        printf(">>Stub_Client: Stub_Client test: OK\n");
+    }else{
+        printf(">>Stub_Client: Stub_Client test: NOK\n");
+    }
     if(status != 0){
         return -1;
     }

@@ -44,7 +44,31 @@ SOPC_StatusCode StubServer_EndpointEvent_Callback(SOPC_Endpoint             endp
     (void) clientCertificate;
     (void) securityPolicy;
     (void) securityMode;
-    printf ("\nEndpoint CALLBACK called with event %d and status %x !\n", event, status);
+    char* cevent = NULL;
+    switch(event){
+        case SOPC_EndpointEvent_Invalid:
+            cevent = "SOPC_EndpointEvent_Invalid";
+            break;
+        case SOPC_EndpointEvent_SecureChannelOpened:
+            cevent = "SOPC_EndpointEvent_SecureChannelOpened";
+            break;
+        case SOPC_EndpointEvent_SecureChannelClosed:
+            cevent = "SOPC_EndpointEvent_SecureChannelClosed";
+            break;
+        case SOPC_EndpointEvent_Renewed:
+            cevent = "SOPC_EndpointEvent_Renewed";
+            break;
+        case SOPC_EndpointEvent_UnsupportedServiceRequested:
+            cevent = "SOPC_EndpointEvent_UnsupportedServiceRequested";
+            break;
+        case SOPC_EndpointEvent_DecoderError:
+            cevent = "SOPC_EndpointEvent_Renewed";
+            break;
+        case SOPC_EndpointEvent_EndpointClosed:
+            cevent = "SOPC_EndpointEvent_UnsupportedServiceRequested";
+            break;
+    }
+    printf("<Stub_Server: Endpoint CALLBACK called with event '%s' and status '%x' !\n", cevent, status);
     if (event == SOPC_EndpointEvent_SecureChannelClosed){
     	connectionClosed = 1;
     }
@@ -69,36 +93,9 @@ int main(void){
     uint32_t loopCpt = 0;
 
     SOPC_Endpoint endpoint = NULL;
-    // Endpoint URL
-    char* endpointUrl = "opc.tcp://localhost:8888/myEndPoint";
-
-    // Paths to client certificate/key and server certificate
-    // Server certificate name
-    char* certificateSrvLocation = "./server_public/server.der";
-    // Server private key
-    char* keyLocation = "./server_private/server.key";
-
-    // The certificates: load
     Certificate *crt_srv = NULL;
-    status = KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
-
-    if(STATUS_OK != status)
-        printf("Failed to load certificate(s)\n");
-
-    // Private key: load
     AsymmetricKey *priv_srv = NULL;
-    status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_srv, NULL, 0);
-    if(STATUS_OK != status)
-        printf("Failed to load private key\n");
-
-    // Certificate Authority: load
     Certificate *crt_ca = NULL;
-    if(STATUS_OK != KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca))
-        printf("Failed to load CA\n");
-
-    // Init stack configuration
-    status = StackConfiguration_Initialize();
-    if(STATUS_OK != status) goto Error;
 
     // Empty callback data
     StubServer_Endpoint Callback_Data;
@@ -109,34 +106,90 @@ int main(void){
     // Secu policy configuration: empty
     SOPC_SecurityPolicy secuConfig[1];
     SOPC_String_Initialize(&secuConfig[0].securityPolicy);
-    status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SecurityPolicy_Basic256Sha256_URI);
-    if(STATUS_OK != status) goto Error;
-    secuConfig[0].securityModes = SECURITY_MODE_SIGN_MASK | SECURITY_MODE_SIGNANDENCRYPT_MASK;
 
-    status = SOPC_Endpoint_Create (&endpoint, SOPC_EndpointSerializer_Binary, NULL); //Services
-    if(STATUS_OK != status) goto Error;
+    // Endpoint URL
+    char* endpointUrl = "opc.tcp://localhost:8888/myEndPoint";
 
-    printf ("%d\n", status);
+    // Paths to client certificate/key and server certificate
+    // Server certificate name
+    char* certificateSrvLocation = "./server_public/server.der";
+    // Server private key
+    char* keyLocation = "./server_private/server.key";
+
+    // The certificates: load
+    status = KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+
+    if(STATUS_OK != status){
+        printf("<Stub_Server: Failed to load certificate\n");
+    }else{
+        printf("<Stub_Server: Server certificate loaded\n");
+    }
+
+    // Private key: load
+    if(STATUS_OK == status){
+        status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_srv, NULL, 0);
+        if(STATUS_OK != status){
+            printf("<Stub_Server: Failed to load private key\n");
+        }else{
+            printf("<Stub_Server: Server private key loaded\n");
+        }
+    }
+
+    // Certificate Authority: load
+    if(STATUS_OK != KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca)){
+        printf("<Stub_Server: Failed to load CA\n");
+    }else{
+        printf("<Stub_Server: CA certificate loaded\n");
+    }
+
+    // Init stack configuration
+    if(STATUS_OK == status){
+        status = StackConfiguration_Initialize();
+        if(STATUS_OK != status){
+            printf("<Stub_Server: Failed to initialize stack\n");
+        }else{
+            printf("<Stub_Server: Stack initialized\n");
+        }
+    }
+
+    if(STATUS_OK == status){
+        status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SecurityPolicy_Basic256Sha256_URI);
+        secuConfig[0].securityModes = SECURITY_MODE_SIGN_MASK | SECURITY_MODE_SIGNANDENCRYPT_MASK;
+    }
+
+    if(STATUS_OK == status){
+        status = SOPC_Endpoint_Create (&endpoint, SOPC_EndpointSerializer_Binary, NULL); //Services
+    }
 
     // Init PKI provider and parse certificate and private key
     // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
-    if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki))
-        printf("Failed to create PKI\n");
+    if(STATUS_OK == status){
+        if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki)){
+            printf("<Stub_Server: Failed to create PKI\n");
+        }else{
+            printf("<Stub_Server: PKI created\n");
+        }
+    }
 
     // Start the server code (connection and default management on secu channel)
-    status = SOPC_Endpoint_Open(endpoint,                          // Endpoint
-                                endpointUrl,                       // URL
-                                StubServer_EndpointEvent_Callback, // Endpoint Callback
-                                &Callback_Data,                    // Endpoint Callback Data
-                                crt_srv,                           // Server Certificate
-                                priv_srv,                          // Private Key
-                                pki,                               // PKI Config
-                                nbOfSecurityPolicyConfigurations,  // NoOf SecurityPolicies
-	   						    secuConfig);                       // SecurityPolicies
-    printf ("%d\n", status);
-    if(STATUS_OK != status) goto Error;
+    if(STATUS_OK == status){
+        status = SOPC_Endpoint_Open(endpoint,                          // Endpoint
+                                    endpointUrl,                       // URL
+                                    StubServer_EndpointEvent_Callback, // Endpoint Callback
+                                    &Callback_Data,                    // Endpoint Callback Data
+                                    crt_srv,                           // Server Certificate
+                                    priv_srv,                          // Private Key
+                                    pki,                               // PKI Config
+                                    nbOfSecurityPolicyConfigurations,  // NoOf SecurityPolicies
+                                    secuConfig);                       // SecurityPolicies
+        if(STATUS_OK != status){
+            printf("<Stub_Server: Failed to open the endpoint\n");
+        }else{
+            printf("<Stub_Server: Opening endpoint with success\n");
+        }
+    }
 
-    while (connectionClosed == FALSE && STATUS_OK == status && loopCpt * sleepTimeout <= loopTimeout)
+    while (STATUS_OK == status && connectionClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
 #if OPCUA_MULTITHREADED
@@ -145,36 +198,37 @@ int main(void){
 #else
     	// Retrieve received messages on socket
         status = SOPC_TreatReceivedMessages(sleepTimeout);
-        printf ("ServerLoop status: %d\n", status);
-        if(STATUS_OK != status) goto Error;
 #endif //OPCUA_MULTITHREADED
 
     }
     loopCpt = 0;
-    if(connected == FALSE){
-        status = STATUS_NOK;
-        goto Error;
+    if(STATUS_OK == status){
+        if(connected == FALSE){
+            status = STATUS_NOK;
+            printf("<Stub_Server: No connection established from client\n");
+        }else if(connectionClosed != FALSE){
+            printf("<Stub_Server: Client connection established and then closed\n");
+        }else{
+            printf("<Stub_Server: Timeout before client closed connection\n");
+        }
     }
 
-    printf ("Final status: %d\n", status);
+    printf ("<Stub_Server: Final status: %x\n", status);
     PKIProviderStack_Free(pki);
     KeyManager_Certificate_Free(crt_srv);
     KeyManager_Certificate_Free(crt_ca);
     KeyManager_AsymmetricKey_Free(priv_srv);
     SOPC_Endpoint_Delete(&endpoint);
     StackConfiguration_Clear();
-
-    return status;
-
-    Error:
-    printf ("Error status: %d\n", status);
-    PKIProviderStack_Free(pki);
-    KeyManager_Certificate_Free(crt_srv);
-    KeyManager_Certificate_Free(crt_ca);
-    KeyManager_AsymmetricKey_Free(priv_srv);
-    SOPC_Endpoint_Delete(&endpoint);
-    StackConfiguration_Clear();
+    if(STATUS_OK == status){
+        printf("<Stub_Server: Stub_Server test: OK\n");
+    }else{
+        printf("<Stub_Server: Stub_Server test: NOK\n");
+    }
     if(status != 0){
         return -1;
+    }else{
+
     }
+    return status;
 }
