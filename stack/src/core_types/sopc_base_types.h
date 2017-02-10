@@ -29,6 +29,8 @@
 # define END_EXTERN_C
 #endif
 
+#include "opcua_statuscodes.h"
+
 BEGIN_EXTERN_C
 
 typedef uint32_t SOPC_StatusCode;

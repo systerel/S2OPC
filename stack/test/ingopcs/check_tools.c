@@ -23,7 +23,9 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <check.h>
+#include <sopc_action_queue.h>
 #include "base_tools.h"
 #include "buffer.h"
 #include "singly_linked_list.h"
@@ -731,10 +733,48 @@ START_TEST(test_base_tools)
 }
 END_TEST
 
+void IsNegative (void* arg){
+    int* res = (int*) arg;
+    if(*res < 0){
+        *res = 0;
+    }else{
+        *res = -1;
+    }
+}
+
+START_TEST(test_msg_queue)
+{
+    SOPC_ActionFunction* af = NULL;
+    void* arg = NULL;
+    const char* txt = NULL;
+    SOPC_ActionQueue* queue = NULL;
+    int paramAndRes = -10;
+    int paramAndRes2 = 0;
+    SOPC_StatusCode status = SOPC_ActionQueue_Init(&queue);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_Action_BlockingEnqueue(queue, IsNegative, (void*) &paramAndRes, NULL);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_Action_BlockingEnqueue(queue, IsNegative, (void*) &paramAndRes2, NULL);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_Action_BlockingDequeue(queue, &af, &arg, &txt);
+    ck_assert(status == STATUS_OK);
+    af(arg);
+    ck_assert(paramAndRes == 0);
+    af(arg);
+    ck_assert(paramAndRes == -1);
+    status = SOPC_Action_BlockingDequeue(queue, &af, &arg, &txt);
+    ck_assert(status == STATUS_OK);
+    af(arg);
+    ck_assert(paramAndRes2 == -1);
+    af(arg);
+    ck_assert(paramAndRes2 == 0);
+}
+END_TEST
+
 Suite *tests_make_suite_tools(void)
 {
     Suite *s;
-    TCase *tc_hexlify, *tc_basetools, *tc_buffer, *tc_linkedlist;
+    TCase *tc_hexlify, *tc_msg_queue, *tc_basetools, *tc_buffer, *tc_linkedlist;
 
     s = suite_create("Tools");
     tc_basetools = tcase_create("Base tools");
@@ -754,6 +794,10 @@ Suite *tests_make_suite_tools(void)
     tc_hexlify = tcase_create("Hexlify (tests only)");
     tcase_add_test(tc_hexlify, test_hexlify);
     suite_add_tcase(s, tc_hexlify);
+
+    tc_msg_queue = tcase_create("Action queue");
+    tcase_add_test(tc_msg_queue, test_msg_queue);
+    suite_add_tcase(s, tc_msg_queue);
 
     return s;
 }
