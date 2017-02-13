@@ -29,6 +29,14 @@
 
 const uint32_t scProtocolVersion = 0;
 
+typedef struct SOPC_OperationEnd_FlushSecureMsg_Data {
+    SOPC_MsgBuffer*              msgBuffer;
+    SOPC_MsgFinalChunk           chunkType;
+    uint32_t                     precSeqNum;
+    SOPC_Socket_EndOperation_CB* callback;
+    void*                        callbackData;
+} SOPC_OperationEnd_FlushSecureMsg_Data;
+
 SC_Connection* SC_Create (TCP_UA_Connection* connection){
     SC_Connection* sConnection = NULL;
 
@@ -1025,11 +1033,44 @@ SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
     return status;
 }
 
+void SOPC_OperationEnd_FlushSecureMsg_CB(void*           arg,
+                                         SOPC_StatusCode sendingStatus){
+    SOPC_OperationEnd_FlushSecureMsg_Data* data = (SOPC_OperationEnd_FlushSecureMsg_Data*) arg;
+    if(NULL != data){
+        if(sendingStatus == STATUS_OK){
+            if(data->chunkType == SOPC_Msg_Chunk_Intermediate){
+                // Reset buffer for next sending
+                sendingStatus = MsgBuffer_ResetNextChunk(data->msgBuffer,
+                                                         data->msgBuffer->sequenceNumberPosition +
+                                                          UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+            }else{
+                // Reset buffer for next sending
+                MsgBuffer_Reset(data->msgBuffer);
+            }
+        }else{
+            SC_Connection* scConnection = (SC_Connection*) data->msgBuffer->flushData;
+            if(NULL != scConnection){
+                // Restore last sequence number sent
+                scConnection->lastSeqNumSent = data->precSeqNum;
+            }
+        }
+
+        if(NULL != data->callback){
+            data->callback(data->callbackData, sendingStatus);
+        }
+
+        free(data);
+    }
+}
+
 // Caution: in case of failure returned, caller must call SC_AbortMsg to
 // manage abort with multi-chunk + reset the message buffer
-SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*     msgBuffer,
-                                        SOPC_MsgFinalChunk  chunkType){
+SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*              msgBuffer,
+                                        SOPC_MsgFinalChunk           chunkType,
+                                        SOPC_Socket_EndOperation_CB* callback,
+                                        void*                        callbackData){
     SC_Connection* scConnection = NULL;
+    SOPC_OperationEnd_FlushSecureMsg_Data* data = NULL;
     SOPC_StatusCode status = STATUS_NOK;
     uint8_t toEncrypt = 1; // True
     uint8_t toSign = 1; // True
@@ -1155,28 +1196,38 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*     msgBuffer,
         }
 
         if(status == STATUS_OK){
-            // TODO: detach transport buffer ?
-            status = TCP_UA_FlushMsgBuffer(scConnection->transportConnection->outputMsgBuffer);
+            data = malloc(sizeof(SOPC_OperationEnd_FlushSecureMsg_Data));
+            if(NULL != data){
+                data->msgBuffer = msgBuffer;
+                data->chunkType = chunkType;
+                data->precSeqNum = precSeqNum;
+                data->callback = callback;
+                data->callbackData = callbackData;
+
+                status = TCP_UA_FlushMsgBuffer(scConnection->transportConnection->outputMsgBuffer,
+                                               SOPC_OperationEnd_FlushSecureMsg_CB,
+                                               (void*) data);
+            }else{
+                status = STATUS_NOK;
+            }
         }
 
-        if(status == STATUS_OK){
-            if(chunkType == SOPC_Msg_Chunk_Intermediate){
-                // Reset buffer for next sending
-                status = MsgBuffer_ResetNextChunk(msgBuffer,
-                                                  msgBuffer->sequenceNumberPosition +
-                                                   UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
-            }else{
-                // Reset buffer for next sending
-                MsgBuffer_Reset(scConnection->sendingBuffer);
+        if(STATUS_OK != status){
+            if(NULL != data){
+                SOPC_OperationEnd_FlushSecureMsg_CB(data, status);
             }
-        }else{
-            // Restore last sequence number sent
-            scConnection->lastSeqNumSent = precSeqNum;
-            // Note: buffer management must be done by caller to avoid recursive call
-            // (possible sending of abort message during this phase calling flush)
         }
     }
     return status;
+}
+
+void SOPC_OperationEnd_AbortMsg_CB(void* arg,
+                                   SOPC_StatusCode sendingStatus)
+{
+    SOPC_MsgBuffer* msgBuffer = (SOPC_MsgBuffer*) arg;
+    if(STATUS_OK != sendingStatus && msgBuffer != NULL){
+        MsgBuffer_Reset(msgBuffer);
+    }
 }
 
 SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
@@ -1198,7 +1249,9 @@ SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
                 status = SOPC_String_Write(reason, msgBuffer);
             }
             if(STATUS_OK == status){
-                status = SC_FlushSecureMsgBuffer(msgBuffer, SOPC_Msg_Chunk_Abort);
+                status = SC_FlushSecureMsgBuffer(msgBuffer, SOPC_Msg_Chunk_Abort,
+                                                 SOPC_OperationEnd_AbortMsg_CB,
+                                                 (void*) msgBuffer);
             }
             if(STATUS_OK != status){
                 MsgBuffer_Reset(msgBuffer);

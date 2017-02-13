@@ -22,11 +22,55 @@
 
 #include "sopc_tcp_ua_low_level.h"
 
+typedef struct SOPC_Action_ListenerEventParameter {
+    SOPC_StatusCode           prevStatus;
+    TCP_UA_ListenerEvent_CB*  callback;
+    struct SC_ServerEndpoint* callbackData;
+    TCP_ListenerEvent         event;
+    TCP_UA_Connection*        newTcpConnection;
+} SOPC_Action_ListenerEventParameter;
+
+
+void TCP_UA_Listener_EndSocketCreation_CB(void*           cbData,
+                                          SOPC_StatusCode creationStatus,
+                                          SOPC_Socket*    newSocket)
+{
+    TCP_UA_Listener* listener = (TCP_UA_Listener*) cbData;
+    if(NULL != listener){
+        if(STATUS_OK == creationStatus){
+            listener->socket = newSocket;
+            listener->callback(listener->callbackData,
+                               TCP_ListenerEvent_Opened,
+                               creationStatus,
+                               NULL);
+        }
+    }
+}
+
+SOPC_Action_ListenerEventParameter* SOPC_CreateActionParameter_ListenerEvent(SOPC_StatusCode    prevStatus,
+                                                                             TCP_UA_Listener*   listener,
+                                                                             TCP_ListenerEvent  event,
+                                                                             TCP_UA_Connection* newTcpConnection)
+{
+    SOPC_Action_ListenerEventParameter* param = NULL;
+    if(listener != NULL){
+        param = malloc(sizeof(SOPC_Action_ListenerEventParameter));
+        if(param != NULL){
+            param->prevStatus = prevStatus;
+            param->callback = listener->callback;
+            param->callbackData = listener->callbackData;
+            param->event = event;
+            param->newTcpConnection = newTcpConnection;
+        }
+    }
+    return param;
+}
+
 SOPC_StatusCode OnSocketListenEvent_CB (SOPC_Socket* socket,
                                         uint32_t     socketEvent,
                                         void*        callbackData)
 {
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     TCP_UA_Listener* listener = (TCP_UA_Listener*) callbackData;
     TCP_UA_Connection* newConnection = NULL;
     if(NULL != listener){
@@ -45,9 +89,6 @@ SOPC_StatusCode OnSocketListenEvent_CB (SOPC_Socket* socket,
                                                     status,
                                                     newConnection);
                     }
-                }
-                if(STATUS_OK != status){
-                    TCP_UA_Connection_Delete(newConnection);
                 }
                 break;
             case SOCKET_CONNECT_EVENT:
@@ -109,23 +150,11 @@ SOPC_StatusCode TCP_UA_Listener_Open(TCP_UA_Listener*             listener,
                 listener->callback = callback;
                 listener->callbackData = callbackData;
 
-#if OPCUA_MULTITHREADED == FALSE
-                status = SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager_GetGlobal(),
-                                                               uri,
-                                                               1, // listen all interfaces
-                                                               OnSocketListenEvent_CB,
-                                                               (void*) listener,
-                                                               &(listener->socket));
-#else
-                assert(FALSE);
-#endif //OPCUA_MULTITHREADED
-
-                if(STATUS_OK == status){
-                    listener->callback(listener->callbackData,
-                                       TCP_ListenerEvent_Opened,
-                                       status,
-                                       NULL);
-                }
+                status = SOPC_CreateAction_SocketCreateServer(uri,
+                                                              OnSocketListenEvent_CB,
+                                                              (void*) listener,
+                                                              TCP_UA_Listener_EndSocketCreation_CB,
+                                                              (void*) listener);
             }
         }else{
             status = STATUS_INVALID_STATE;
@@ -140,10 +169,10 @@ void TCP_UA_Listener_Close(TCP_UA_Listener* listener){
             SOPC_Socket_Close(listener->socket);
         }
         if(NULL != listener->callback){
-            listener->callback(listener->callbackData,
-                               TCP_ListenerEvent_Closed,
-                               STATUS_OK,
-                               NULL);
+           listener->callback(listener->callbackData,
+                              TCP_ListenerEvent_Closed,
+                              STATUS_OK,
+                              NULL);
         }
         SOPC_String_Clear(&listener->url);
         listener->callback = NULL;

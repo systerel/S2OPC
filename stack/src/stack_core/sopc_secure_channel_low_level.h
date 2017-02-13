@@ -128,8 +128,10 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                                         const SOPC_Byte* data_src,
                                         uint32_t         count);
 
-SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*    msgBuffer,
-                                        SOPC_MsgFinalChunk chunkType);
+SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*              msgBuffer,
+                                        SOPC_MsgFinalChunk           chunkType,
+                                        SOPC_Socket_EndOperation_CB* fctPointer,
+                                        void*                        fctArgument);
 
 SOPC_StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
                                          uint32_t       receivedTokenId,

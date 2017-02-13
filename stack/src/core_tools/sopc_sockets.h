@@ -19,6 +19,7 @@
 #include "sopc_raw_sockets.h"
 #include "sopc_base_types.h"
 #include "sopc_mutexes.h"
+#include "sopc_action_queue.h"
 
 #ifndef SOPC_SOCKETS_H_
 #define SOPC_SOCKETS_H_
@@ -51,6 +52,8 @@ typedef SOPC_StatusCode (SOPC_Socket_EventCB) (struct SOPC_Socket* socket,
 
 typedef struct SOPC_Socket {
     Socket               sock;
+    SOPC_ActionQueue*    writeQueue;
+    uint8_t              isNotWritable;
     uint8_t              isUsed;
     SOPC_Socket_State    state;
     SOPC_Socket_EventCB* eventCallback; // SOPC_Socket_EventCB Type
@@ -66,6 +69,15 @@ typedef struct {
     Mutex       mutex;
 }
 SOPC_SocketManager;
+
+// Callback called after socket operation indicating success or failure
+typedef void SOPC_Socket_EndOperation_CB(void*           callbackData,
+                                         SOPC_StatusCode createStatus);
+
+// Callback called after socket creation indicating success or failure
+typedef void SOPC_Socket_EndCreate_CB(void*           callbackData,
+                                      SOPC_StatusCode createStatus,
+                                      SOPC_Socket*    newSocket);
 
 // Check TCP UA URI format
 SOPC_StatusCode SOPC_Check_TCP_UA_URI(const char* uri);
@@ -91,12 +103,24 @@ SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager* socket
                                                       void*               callbackData,
                                                       SOPC_Socket**       clientSocket);
 
+SOPC_StatusCode SOPC_CreateAction_SocketCreateClient(const char*                  uri,
+                                                     SOPC_Socket_EventCB*         socketCallback,
+                                                     void*                        callbackData,
+                                                     SOPC_Socket_EndCreate_CB*    endCreateCb,
+                                                     void*                        endCreateCbData);
+
 SOPC_StatusCode SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager* socketManager,
                                                       const char*         uri,
                                                       uint8_t             listenAllItfs,
                                                       SOPC_Socket_EventCB socketCallback,
                                                       void*               callbackData,
                                                       SOPC_Socket**       listenerSocket);
+
+SOPC_StatusCode SOPC_CreateAction_SocketCreateServer(const char*                  uri,
+                                                     SOPC_Socket_EventCB*         socketCallback,
+                                                     void*                        callbackData,
+                                                     SOPC_Socket_EndCreate_CB*    endCreateCb,
+                                                     void*                        endCreateCbData);
 
 SOPC_StatusCode SOPC_SocketManager_ConfigureAcceptedSocket(SOPC_Socket*        acceptedSocket,
                                                            SOPC_Socket_EventCB socketCallback,
@@ -105,14 +129,24 @@ SOPC_StatusCode SOPC_SocketManager_ConfigureAcceptedSocket(SOPC_Socket*        a
 SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                                         uint32_t            msecTimeout);
 
-int32_t SOPC_Socket_Write (SOPC_Socket* socket,
-                           uint8_t*     data,
-                           uint32_t     count);
+SOPC_StatusCode SOPC_CreateAction_SocketWrite (SOPC_Socket*                 socket,
+                                               uint8_t*                     data,
+                                               uint32_t                     count,
+                                               SOPC_Socket_EndOperation_CB* endWriteCb,
+                                               void*                        endWriteCbData);
+
+SOPC_StatusCode SOPC_CreateAction_SocketWriteEvent(SOPC_Socket* socket);
 
 SOPC_StatusCode SOPC_Socket_Read (SOPC_Socket* socket,
                                   uint8_t*     data,
                                   uint32_t     dataSize,
                                   int32_t*     readCount);
+
+
+SOPC_StatusCode SOPC_CreateAction_SocketEvent(SOPC_Socket_EventCB* callback,
+                                              SOPC_Socket*         socket,
+                                              SOPC_Socket_Event    event,
+                                              void*                callbackData);
 
 void SOPC_Socket_Close(SOPC_Socket* socket);
 

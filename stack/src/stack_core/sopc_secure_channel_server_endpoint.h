@@ -107,4 +107,10 @@ void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint);
 
 void* SC_ServerEndpoint_GetCallbackData(SC_ServerEndpoint* endpoint);
 
+// For internal use
+SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
+                                              ConnectionEvent event,
+                                              SOPC_MsgBuffer* msgBuffer,
+                                              SOPC_StatusCode status);
+
 #endif /* SOPC_SECURE_CHANNEL_SERVER_ENDPOINT_H_ */

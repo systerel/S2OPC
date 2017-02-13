@@ -95,7 +95,7 @@ SOPC_StatusCode TCP_UA_ReadData(SOPC_Socket*    socket,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int32_t readBytes;
 
-    if(socket != NULL && msgBuffer != NULL){
+    if(socket != NULL && socket->sock != SOPC_INVALID_SOCKET && msgBuffer != NULL){
         status = STATUS_NOK;
         if(msgBuffer->buffers->length >= TCP_UA_HEADER_LENGTH){
             assert(msgBuffer->currentChunkSize > 0);
@@ -286,17 +286,14 @@ SOPC_StatusCode TCP_UA_ReadMsgBuffer(SOPC_Byte*      data_dest,
     return status;
 }
 
-SOPC_StatusCode TCP_UA_FlushMsgBuffer(SOPC_MsgBuffer* msgBuffer){
-    SOPC_StatusCode status = STATUS_NOK;
-    uint32_t writtenBytes = 0;
-    writtenBytes = SOPC_Socket_Write((SOPC_Socket*) msgBuffer->flushData,
-                                   msgBuffer->buffers->data,
-                                   msgBuffer->buffers->length);
-    if(writtenBytes == msgBuffer->buffers->length){
-        status = STATUS_OK;
-    }
-    // Manage different cases ? (socket error, blocked sending)
-    return status;
+SOPC_StatusCode TCP_UA_FlushMsgBuffer(SOPC_MsgBuffer*              msgBuffer,
+                                      SOPC_Socket_EndOperation_CB* callback,
+                                      void*                        callbackData){
+    return SOPC_CreateAction_SocketWrite((SOPC_Socket*) msgBuffer->flushData,
+                                         msgBuffer->buffers->data,
+                                         msgBuffer->buffers->length,
+                                         callback,
+                                         callbackData);
 }
 
 

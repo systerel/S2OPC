@@ -20,6 +20,18 @@
 
 #include <assert.h>
 
+void SOPC_OperationEnd_WriteSecure_CB(void*           arg,
+                                      SOPC_StatusCode writeStatus){
+    SOPC_MsgBuffer* msgBuffer = (SOPC_MsgBuffer*) arg;
+    if(STATUS_OK != writeStatus){
+        SOPC_String reason;
+        SOPC_String_Initialize(&reason);
+        SOPC_String_AttachFromCstring(&reason, "Error encoding intermediate chunk");
+        SC_AbortMsg(msgBuffer, OpcUa_BadEncodingError, &reason);
+        SOPC_String_Clear(&reason);
+    }
+}
+
 SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                                         const SOPC_Byte* data_src,
                                         uint32_t         count){
@@ -60,6 +72,7 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                     }
                     SOPC_String_Initialize(&reason);
                     SC_AbortMsg(msgBuffer, status, &reason);
+                    SOPC_String_Clear(&reason);
                 }else{
                     // Fill buffer with maximum amount of bytes
                     uint32_t tmpCount = // Maximum Count - Precedent Count => Count to write
@@ -73,17 +86,16 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                         count = count - tmpCount;
                         data_src = data_src + tmpCount;
 
+                        // For now no next action to the socket writing to provide (except error ? => more for previous steps in Flush)
                         status = SC_FlushSecureMsgBuffer(msgBuffer,
-                                                         SOPC_Msg_Chunk_Intermediate);
+                                                         SOPC_Msg_Chunk_Intermediate,
+                                                         SOPC_OperationEnd_WriteSecure_CB,
+                                                         (void*) msgBuffer);
                     }
 
                     if(status != STATUS_OK){
-                        // TODO: Should send flush error in case of too many chunks ?
-                        SOPC_String reason;
-                        SOPC_String_Initialize(&reason);
-                        SOPC_String_AttachFromCstring(&reason, "Error encoding intermediate chunk");
-                        SC_AbortMsg(msgBuffer, OpcUa_BadEncodingError, &reason);
-                        SOPC_String_Clear(&reason);
+                        SOPC_OperationEnd_WriteSecure_CB((void*) msgBuffer,
+                                                         status);
                     }
                 }
             } // While not fitting in current buffer, fill and flush current buffer

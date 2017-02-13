@@ -66,6 +66,33 @@ SOPC_StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
     return status;
 }
 
+void TCP_UA_Connection_EndSocketCreation_CB(void*           cbData,
+                                            SOPC_StatusCode creationStatus,
+                                            SOPC_Socket*    newSocket)
+{
+    TCP_UA_Connection* connection = (TCP_UA_Connection*) cbData;
+    if(NULL != connection){
+        if(STATUS_OK == creationStatus){
+            connection->socket = newSocket;
+        }
+        if(STATUS_OK == creationStatus){
+            creationStatus = InitSendBuffer(connection);
+        }
+        if(STATUS_OK == creationStatus){
+            creationStatus = InitReceiveBuffer(connection);
+        }
+
+        if(STATUS_OK != creationStatus && connection->callback != NULL){
+            // Notify only in case of connection creation failure,
+            // in case of success we are waiting for the TCP UA handshake (HEL, ACK)
+            connection->callback(connection->callbackData,
+                                 ConnectionEvent_Disconnected,
+                                 NULL,
+                                 creationStatus);
+        }
+    }
+}
+
 TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion,
                                             uint8_t  serverSideConnection)
 {
@@ -131,7 +158,9 @@ void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
     }
 }
 
-SOPC_StatusCode SendHelloMsg(TCP_UA_Connection* connection){
+SOPC_StatusCode SendHelloMsg(TCP_UA_Connection*           connection,
+                             SOPC_Socket_EndOperation_CB* cb,
+                             void*                        cbData){
     SOPC_StatusCode status = STATUS_OK;
     if(status == STATUS_OK){
         // encode message
@@ -166,7 +195,8 @@ SOPC_StatusCode SendHelloMsg(TCP_UA_Connection* connection){
         status = TCP_UA_FinalizeHeader(connection->outputMsgBuffer);
     }
     if(status == STATUS_OK){
-        status = TCP_UA_FlushMsgBuffer(connection->outputMsgBuffer);
+        status = TCP_UA_FlushMsgBuffer(connection->outputMsgBuffer,
+                                       cb, cbData);
     }
 
     return status;
@@ -377,7 +407,49 @@ SOPC_StatusCode ReceiveHelloMsg(TCP_UA_Connection* connection){
     return status;
 }
 
-SOPC_StatusCode SendAckMsg(TCP_UA_Connection* connection){
+void SOPC_OperationEnd_TCP_UA_ConnectionError(void*           arg,
+                                              SOPC_StatusCode status)
+{
+    TCP_UA_Connection* connection = (TCP_UA_Connection*) arg;
+    TCP_UA_Connection_Event_CB* cb = NULL;
+    void* cbData = NULL;
+    if(STATUS_OK != status){
+        cb = connection->callback;
+        cbData = connection->callbackData;
+        TCP_UA_Connection_Disconnect(connection);
+        if(cb != NULL){
+            cb(cbData,
+               ConnectionEvent_Error,
+               NULL,
+               status);
+        }
+    }
+}
+
+void SOPC_OperationEnd_TCP_UA_Connection(void*           arg,
+                                         SOPC_StatusCode status)
+{
+    TCP_UA_Connection* connection = (TCP_UA_Connection*) arg;
+    if(STATUS_OK == status){
+        Mutex_Lock(&connection->mutex);
+        connection->state = TCP_UA_Connection_Connected;
+        Mutex_Unlock(&connection->mutex);
+
+        if(connection->callback != NULL){
+            connection->callback(connection->callbackData,
+                                 ConnectionEvent_Connected,
+                                 NULL,
+                                 STATUS_OK);
+        }
+    }else{
+        SOPC_OperationEnd_TCP_UA_ConnectionError(arg, status);
+    }
+}
+
+SOPC_StatusCode SendAckMsg(TCP_UA_Connection*           connection,
+                           SOPC_Socket_EndOperation_CB* cb,
+                           void*                        cbData)
+{
     SOPC_StatusCode status = STATUS_OK;
     if(status == STATUS_OK){
         // encode message
@@ -410,7 +482,9 @@ SOPC_StatusCode SendAckMsg(TCP_UA_Connection* connection){
     }
 
     if(status == STATUS_OK){
-        status = TCP_UA_FlushMsgBuffer(connection->outputMsgBuffer);
+        status = TCP_UA_FlushMsgBuffer(connection->outputMsgBuffer,
+                                       cb,
+                                       cbData);
     }
     return status;
 }
@@ -450,11 +524,14 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
         switch(socketEvent){
             case SOCKET_ACCEPT_EVENT:
                 status = STATUS_INVALID_STATE;
-                if(connection->callback != NULL){
-                    connection->callback(connection->callbackData,
-                                         ConnectionEvent_Error,
-                                         NULL,
-                                         status);
+                cb = connection->callback;
+                cbData = connection->callbackData;
+                TCP_UA_Connection_Disconnect(connection);
+                if(cb != NULL){
+                    cb(cbData,
+                       ConnectionEvent_Error,
+                       NULL,
+                       status);
                 }
                 TCP_UA_Connection_Disconnect(connection);
                 break;
@@ -479,22 +556,17 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
                 // Lock mutex to guarantee connection internal properties are set
                 Mutex_Lock(&connection->mutex);
                 assert(connection->socket == socket);
-                status = SendHelloMsg(connection);
+                status = SendHelloMsg(connection,
+                                      SOPC_OperationEnd_TCP_UA_ConnectionError,
+                                      (void*) connection);
                 Mutex_Unlock(&connection->mutex);
 
                 if(status != STATUS_OK){
-                    if(connection->callback != NULL){
-                        connection->callback(connection->callbackData,
-                                             ConnectionEvent_Error,
-                                             NULL,
-                                             status);
-                    }
-                    TCP_UA_Connection_Disconnect(connection);
+                    SOPC_OperationEnd_TCP_UA_ConnectionError((void*) connection, status);
                 }
                 break;
             case SOCKET_READ_EVENT:
                 // Manage message reception
-
                 Mutex_Lock(&connection->mutex);
                 status = TCP_UA_ReadData(socket, connection->inputMsgBuffer);
                 Mutex_Unlock(&connection->mutex);
@@ -508,26 +580,13 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
                                 Mutex_Lock(&connection->mutex);
                                 status = ReceiveHelloMsg(connection);
                                 if(STATUS_OK == status){
-                                    status = SendAckMsg(connection);
+                                    status = SendAckMsg(connection,
+                                                        SOPC_OperationEnd_TCP_UA_Connection,
+                                                        (void*) connection);
                                 }
                                 Mutex_Unlock(&connection->mutex);
-
-                                if(STATUS_OK == status){
-                                    connection->state = TCP_UA_Connection_Connected;
-                                    if(connection->callback != NULL){
-                                        connection->callback(connection->callbackData,
-                                                             ConnectionEvent_Connected,
-                                                             NULL,
-                                                             status);
-                                    }
-                                }else{
-                                    if(connection->callback != NULL){
-                                        connection->callback(connection->callbackData,
-                                                             ConnectionEvent_Error,
-                                                             NULL,
-                                                             status);
-                                    }
-                                    TCP_UA_Connection_Disconnect(connection);
+                                if(STATUS_OK != status){
+                                    SOPC_OperationEnd_TCP_UA_Connection((void*) connection, status);
                                 }
                             }
                             break;
@@ -537,23 +596,7 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
                                 status = ReceiveAckMsg(connection);
                                 Mutex_Unlock(&connection->mutex);
 
-                                if(status == STATUS_OK){
-                                    connection->state = TCP_UA_Connection_Connected;
-                                    if(connection->callback != NULL){
-                                        connection->callback(connection->callbackData,
-                                                             ConnectionEvent_Connected,
-                                                             NULL,
-                                                             status);
-                                    }
-                                }else{
-                                    if(connection->callback != NULL){
-                                        connection->callback(connection->callbackData,
-                                                             ConnectionEvent_Error,
-                                                             NULL,
-                                                             status);
-                                    }
-                                    TCP_UA_Connection_Disconnect(connection);
-                                }
+                                SOPC_OperationEnd_TCP_UA_Connection((void*) connection, status);
                             }else{
                                 status = STATUS_INVALID_RCV_PARAMETER;
                             }
@@ -645,23 +688,13 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
                 // Initialize send & receive buffers necessary for sending & receiving first messages
                 // Note: those buffers are resized after reception of the ACK message
 
-#if OPCUA_MULTITHREADED == FALSE
-                status = SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager_GetGlobal(),
-                                                               uri,
-                                                               OnSocketEvent_CB,
-                                                               (void*) connection,
-                                                               &(connection->socket));
-#else
-                assert(FALSE);
-#endif //OPCUA_MULTITHREADED
+                status = SOPC_CreateAction_SocketCreateClient(uri,
+                                                              OnSocketEvent_CB,
+                                                              (void*) connection,
+                                                              TCP_UA_Connection_EndSocketCreation_CB,
+                                                              (void*) connection);
             }
 
-            if(STATUS_OK == status){
-                status = InitSendBuffer(connection);
-            }
-            if(STATUS_OK == status){
-                status = InitReceiveBuffer(connection);
-            }
         }else{
             status = STATUS_INVALID_STATE;
         }

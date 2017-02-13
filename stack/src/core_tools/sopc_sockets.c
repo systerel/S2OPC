@@ -23,12 +23,39 @@
 
 #include "base_tools.h"
 #include "sopc_stack_csts.h"
+#include "sopc_action_queue.h"
+#include "sopc_action_queue_manager.h"
 
 SOPC_SocketManager globalSocketMgr;
 uint8_t            globalInitialized = FALSE;
 
 // Counter to check <= OPCUA_MAXCONNECTIONS
 static uint32_t globalNbSockets = 0;
+
+typedef struct SOPC_Action_WriteParameter {
+    SOPC_Socket*                 socket;
+    uint8_t                      isOnlyWriteEvent;
+    uint8_t*                     data;
+    uint32_t                     count;
+    uint32_t                     posIdx;
+    SOPC_Socket_EndOperation_CB* endWriteCb; // run after succesfull write (not as an Action in queue !) => atomicity
+    void*                        endWriteCbData;
+} SOPC_Action_WriteParameter;
+
+typedef struct SOPC_Action_SocketEventParameter {
+    SOPC_Socket_EventCB* callback;
+    SOPC_Socket*         socket;
+    SOPC_Socket_Event    event;
+    void*                callbackData;
+} SOPC_Action_SocketEventParameter;
+
+typedef struct SOPC_Action_CreateSocketParameter {
+    const char*                  uri;
+    SOPC_Socket_EventCB*         socketCallback;
+    void*                        callbackData;
+    SOPC_Socket_EndCreate_CB*    endCreateCb;
+    void*                        endCreateCbData;
+} SOPC_Action_CreateSocketParameter;
 
 SOPC_StatusCode Internal_CheckURI(const char* uri,
                                   size_t* hostnameLength,
@@ -245,7 +272,10 @@ SOPC_Socket* GetFreeSocket(SOPC_SocketManager* socketMgr){
     if(socketMgr != NULL){
         for(idx = 0; idx < socketMgr->nbSockets; idx++){
             if(result == NULL && socketMgr->sockets[idx].isUsed == FALSE){
-                result = &(socketMgr->sockets[idx]);
+                // Initialize local write socket buffer
+                if(STATUS_OK == SOPC_ActionQueue_Init(&socketMgr->sockets[idx].writeQueue)){
+                    result = &(socketMgr->sockets[idx]);
+                }
             }
         }
     }
@@ -272,6 +302,49 @@ SOPC_StatusCode SOPC_SocketManager_InternalConnectClient(SOPC_Socket*        con
         if(status != STATUS_OK){
             Socket_Close(&connectSocket->sock);
             connectSocket->state = SOCKET_DISCONNECTED;
+        }
+    }
+    return status;
+}
+
+void SOPC_Action_SocketCreateClient(void* arg){
+    SOPC_Action_CreateSocketParameter* param = (SOPC_Action_CreateSocketParameter*) arg;
+    SOPC_Socket* newSocket = NULL;
+    if(param != NULL){
+        // Non blocking connection attempt
+        SOPC_StatusCode status = SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager_GetGlobal(),
+                                                                       param->uri,
+                                                                       param->socketCallback,
+                                                                       param->callbackData,
+                                                                       &newSocket);
+        param->endCreateCb(param->endCreateCbData,
+                           status,
+                           newSocket);
+        free(param);
+    }
+}
+
+SOPC_StatusCode SOPC_CreateAction_SocketCreateClient(const char*                  uri,
+                                                     SOPC_Socket_EventCB*         socketCallback,
+                                                     void*                        callbackData,
+                                                     SOPC_Socket_EndCreate_CB*    endCreateCb,
+                                                     void*                        endCreateCbData)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_Action_CreateSocketParameter* param = NULL;
+    if(NULL != uri){
+        param = malloc(sizeof(SOPC_Action_CreateSocketParameter));
+        status = STATUS_NOK;
+        if(NULL != param){
+            param->uri = uri;
+            param->socketCallback = socketCallback;
+            param->callbackData = callbackData;
+            param->endCreateCb = endCreateCb;
+            param->endCreateCbData = endCreateCbData;
+            status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                                       SOPC_Action_SocketCreateClient,
+                                                       param,
+                                                       "Create client socket");
         }
     }
     return status;
@@ -343,6 +416,48 @@ SOPC_StatusCode SOPC_SocketManager_CreateClientSocket(SOPC_SocketManager* socket
         Socket_AddrInfoDelete(&res);
     }
 
+    return status;
+}
+
+void SOPC_Action_SocketCreateServer(void* arg){
+    SOPC_Action_CreateSocketParameter* param = (SOPC_Action_CreateSocketParameter*) arg;
+    SOPC_Socket* newSocket = NULL;
+    if(param != NULL){
+        // Non blocking connection attempt
+        SOPC_StatusCode status = SOPC_SocketManager_CreateServerSocket(SOPC_SocketManager_GetGlobal(),
+                                                                       param->uri,
+                                                                       1, // listen all interfaces
+                                                                       param->socketCallback,
+                                                                       param->callbackData,
+                                                                       &newSocket);
+        param->endCreateCb(param->endCreateCbData, status, newSocket);
+        free(param);
+    }
+}
+
+SOPC_StatusCode SOPC_CreateAction_SocketCreateServer(const char*                  uri,
+                                                     SOPC_Socket_EventCB*         socketCallback,
+                                                     void*                        callbackData,
+                                                     SOPC_Socket_EndCreate_CB*    endCreateCb,
+                                                     void*                        endCreateCbData)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_Action_CreateSocketParameter* param = NULL;
+    if(NULL != uri){
+        param = malloc(sizeof(SOPC_Action_CreateSocketParameter));
+        status = STATUS_NOK;
+        if(NULL != param){
+            param->uri = uri;
+            param->socketCallback = socketCallback;
+            param->callbackData = callbackData;
+            param->endCreateCb = endCreateCb;
+            param->endCreateCbData = endCreateCbData;
+            status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                                       SOPC_Action_SocketCreateServer,
+                                                       param,
+                                                       "Create server socket");
+        }
+    }
     return status;
 }
 
@@ -462,7 +577,9 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
     SOPC_Socket* uaSock = NULL;
     SOPC_Socket* acceptSock = NULL;
     SOPC_Socket_EventCB*  callback = NULL;
+    void*                 cbData   = NULL;
     SocketSet readSet, writeSet, exceptSet;
+    uint8_t error = FALSE;
 
     SocketSet_Clear(&readSet);
     SocketSet_Clear(&writeSet);
@@ -498,10 +615,11 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
         if(nbReady < 0){
             status =  STATUS_NOK;
         }else if(nbReady > 0){
-            for(idx = 0; idx < socketManager->nbSockets; idx++){
+            for(idx = 0; idx < socketManager->nbSockets && error == FALSE; idx++){
                 uaSock = &(socketManager->sockets[idx]);
                 if(uaSock->isUsed != FALSE){
                     callback = (SOPC_Socket_EventCB*) uaSock->eventCallback;
+                    cbData = uaSock->cbData;
                     if(uaSock->state == SOCKET_CONNECTING){
                         if(SocketSet_IsPresent(uaSock->sock, &writeSet) != FALSE){
                             // Check connection erros: mandatory when non blocking connection
@@ -528,31 +646,33 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
 
                                 if(newAttempt != STATUS_OK){
                                     // No new attempt available, close socket
-                                    callback(uaSock,
-                                             SOCKET_CLOSE_EVENT,
-                                             uaSock->cbData);
-                                    SOPC_Socket_Close(uaSock);
+                                    status = SOPC_CreateAction_SocketEvent(callback,
+                                                                           uaSock,
+                                                                           SOCKET_CLOSE_EVENT,
+                                                                           cbData);
                                 }
                             }else{
-                                callback(uaSock,
-                                         SOCKET_CONNECT_EVENT,
-                                         uaSock->cbData);
                                 uaSock->state = SOCKET_CONNECTED;
-
                                 // No more attempts expected: free the attempts addresses
                                 if(uaSock->connectAddrs != NULL){
                                     Socket_AddrInfoDelete((Socket_AddressInfo**) &uaSock->connectAddrs);
                                     uaSock->connectAddrs = NULL;
                                     uaSock->nextConnectAttemptAddr = NULL;
                                 }
+
+                                status = SOPC_CreateAction_SocketEvent(callback,
+                                                                       uaSock,
+                                                                       SOCKET_CONNECT_EVENT,
+                                                                       cbData);
                             }
                         }
                     }else{
                         if(SocketSet_IsPresent(uaSock->sock, &readSet) != FALSE){
                             if(uaSock->state == SOCKET_CONNECTED){
-                                callback(uaSock,
-                                         SOCKET_READ_EVENT,
-                                         uaSock->cbData);
+                                status = SOPC_CreateAction_SocketEvent(callback,
+                                                                       uaSock,
+                                                                       SOCKET_READ_EVENT,
+                                                                       cbData);
                             }else if(uaSock->state == SOCKET_LISTENING){
                                 acceptSock = GetFreeSocket(socketManager);
                                 if(acceptSock == NULL){
@@ -565,22 +685,33 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                                     if(status == STATUS_OK){
                                         acceptSock->isUsed = 1;
                                         acceptSock->state = SOCKET_CONNECTED;
-                                        callback(acceptSock,
-                                                 SOCKET_ACCEPT_EVENT,
-                                                 uaSock->cbData);
+                                        status = SOPC_CreateAction_SocketEvent(callback,
+                                                                               acceptSock,
+                                                                               SOCKET_ACCEPT_EVENT,
+                                                                               cbData);
                                     }
                                 }
                             }else{
-                                Mutex_Unlock(&socketManager->mutex);
-                                return STATUS_INVALID_STATE;
+                                error = 1; // Stop loop
+                                status = STATUS_INVALID_STATE;
+                            }
+                        }else if(SocketSet_IsPresent(uaSock->sock, &writeSet) != FALSE){
+                            if(uaSock->state == SOCKET_CONNECTED){
+                                // Indicates that socket is writable again
+                                status = SOPC_CreateAction_SocketWriteEvent(uaSock);
+                            }else{
+                                error = 1; // Stop loop
+                                status = STATUS_INVALID_STATE;
                             }
                         }
+
                     }
 
                     if(SocketSet_IsPresent(uaSock->sock, &exceptSet) != FALSE){
-                        callback(uaSock,
-                                 SOCKET_EXCEPT_EVENT,
-                                 uaSock->cbData);
+                        status = SOPC_CreateAction_SocketEvent(callback,
+                                                               acceptSock,
+                                                               SOCKET_EXCEPT_EVENT,
+                                                               cbData);
                     }
                 }
             }
@@ -592,10 +723,192 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
     return status;
 }
 
-int32_t SOPC_Socket_Write (SOPC_Socket* socket,
-                           uint8_t*     data,
-                           uint32_t     count){
-    return Socket_Write(socket->sock, data, count);
+void SOPC_Socket_TreatWriteActions(SOPC_ActionQueue* queue){
+    SOPC_StatusCode writeQueueStatus = STATUS_OK;
+    SOPC_StatusCode status = STATUS_OK;
+    uint8_t writeBlocked = FALSE;
+    SOPC_ActionFunction* nullFct = NULL;
+    void* arg = NULL;
+    const char* txt = NULL;
+    SOPC_Action_WriteParameter* param = NULL;
+    uint32_t sentBytes = 0;
+
+    while(STATUS_OK == status && STATUS_OK == writeQueueStatus && writeBlocked == FALSE){
+        writeQueueStatus = SOPC_Action_NonBlockingDequeue(queue, &nullFct, &arg, &txt);
+        param = (SOPC_Action_WriteParameter*) arg;
+        if(STATUS_OK == writeQueueStatus && param->socket->sock != SOPC_INVALID_SOCKET){
+            if(param->socket->sock != SOPC_INVALID_SOCKET){
+                sentBytes = 0;
+                status = Socket_Write(param->socket->sock, param->data, param->count, &sentBytes);
+                if(STATUS_OK == status){
+                    if(NULL != param->endWriteCb){
+                        // Ignore status ? Or call error (but should be same callback...)
+                        param->endWriteCb(param->endWriteCbData, status);
+                    }
+                    free(param->data);
+                    free(param);
+                }else if(status == OpcUa_BadWouldBlock){
+                    writeBlocked = 1;
+                }else{
+                    free(param->data);
+                    free(param);
+                }
+            }else{
+                status = STATUS_INVALID_STATE;
+            }
+        }
+    }
+
+    if(writeBlocked != FALSE){
+        SOPC_ActionFunction* unusedFct = NULL;
+        void* unusedArg = NULL;
+        // TODO: manage this case in the future ? (it means a blocking write occurred when recovering from precedent)
+        // => It is necessary to replace current action as next to be done (i.e. reorganize the queue to do so)
+        assert(SOPC_Action_NonBlockingDequeue(queue, &unusedFct, &unusedArg, &txt) == OpcUa_BadWouldBlock);
+        param->count = param->count - sentBytes;
+        param->posIdx = param->posIdx + sentBytes;
+        param->socket->isNotWritable = 1;
+        writeQueueStatus = SOPC_Action_BlockingEnqueue(queue, NULL, (void*) param, NULL);
+    }else{
+        assert(status != STATUS_OK || writeQueueStatus == OpcUa_BadWouldBlock);
+        status = STATUS_OK;
+    }
+    // TODO: if status != STATUS_OK => SOPC_CreatAction_SocketError (transport event CB with error)
+}
+
+void SOPC_Action_SocketWrite(void* arg){
+    SOPC_Action_WriteParameter* param = (SOPC_Action_WriteParameter*) arg;
+    SOPC_StatusCode status = STATUS_INVALID_STATE;
+    SOPC_ActionQueue* writeQueue = param->socket->writeQueue;
+    if(param->isOnlyWriteEvent == FALSE){
+        // Store data to write
+        status = SOPC_Action_BlockingEnqueue(writeQueue, NULL, arg, NULL);
+    }else if(param->socket->isNotWritable == FALSE){
+        // It is only an event to indicate new attempt to write data
+        status = STATUS_OK;
+        param->socket->isNotWritable = 1;
+        // No data to keep in param, and will not be freed in TreatWriteActions
+        free(param);
+    }
+    if(STATUS_OK == status && param->socket->isNotWritable == FALSE){
+        SOPC_Socket_TreatWriteActions(writeQueue);
+    }
+    return;
+}
+
+SOPC_StatusCode SOPC_CreateAction_SocketWrite(SOPC_Socket*                 socket,
+                                              uint8_t*                     data,
+                                              uint32_t                     count,
+                                              SOPC_Socket_EndOperation_CB* endWriteCb,
+                                              void*                        endWriteCbData)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_Action_WriteParameter* param = NULL;
+    if(NULL != socket && data != NULL && count > 0){
+        status = STATUS_NOK;
+        param = malloc(sizeof(SOPC_Action_WriteParameter));
+        if(NULL != param){
+            status = STATUS_OK;
+            param->socket = socket;
+            param->isOnlyWriteEvent = FALSE;
+            param->count = count;
+            param->posIdx = 0;
+            param->endWriteCb = endWriteCb;
+            param->endWriteCbData = endWriteCbData;
+        }
+        // Copy buffer to be written
+        if(STATUS_OK == status){
+            param->data = malloc(sizeof(uint8_t) * count);
+            if(param->data == NULL){
+                status = STATUS_NOK;
+            }else{
+                if(param->data != memcpy(param->data, data, count)){
+                    status = STATUS_NOK;
+                }
+            }
+        }
+        if(STATUS_OK == status){
+            status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                                       SOPC_Action_SocketWrite,
+                                                       param,
+                                                       "Write action");
+        }
+    }
+    return status;
+}
+
+// To be used when socket write blocked precedently and socket in in write set on select
+SOPC_StatusCode SOPC_CreateAction_SocketWriteEvent(SOPC_Socket* socket){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_Action_WriteParameter* param = NULL;
+    if(NULL != socket){
+        // Socket must be in a non writable state due to precedent attempt to write
+        if(socket->isNotWritable == 1)
+        {
+            param = malloc(sizeof(SOPC_Action_WriteParameter));
+            if(NULL != param){
+                status = STATUS_OK;
+                memset(param, 0, sizeof(SOPC_Action_WriteParameter));
+                param->socket = socket;
+                param->isOnlyWriteEvent = 1;
+            }
+        }else{
+            status = STATUS_INVALID_STATE;
+        }
+        if(STATUS_OK == status){
+            status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                                       SOPC_Action_SocketWrite,
+                                                       param,
+                                                       "Write event action");
+        }
+    }
+    return status;
+}
+
+void SOPC_Action_SocketEvent(void* arg){
+    SOPC_Action_SocketEventParameter* param = (SOPC_Action_SocketEventParameter*) arg;
+    if(param != NULL){
+        if(param->callback != NULL &&
+           param->socket != NULL &&
+           param->socket->sock != SOPC_INVALID_SOCKET)
+        {
+            param->callback(param->socket,
+                            param->event,
+                            param->callbackData);
+        }
+        free(param);
+    }
+    return;
+}
+
+// To be used when socket write blocked precedently and socket in in write set on select
+SOPC_StatusCode SOPC_CreateAction_SocketEvent(SOPC_Socket_EventCB* callback,
+                                              SOPC_Socket*         socket,
+                                              SOPC_Socket_Event    event,
+                                              void*                callbackData)
+{
+    // TODO ? : callback can be static, only 2 differents.
+    // 1 for connection socket / 1 for listener socket (only accept event managed)
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_Action_SocketEventParameter* param = NULL;
+    if(NULL != callback && NULL != socket){
+        status = STATUS_NOK;
+        param = malloc(sizeof(SOPC_Action_SocketEventParameter));
+        if(NULL != param){
+            status = STATUS_OK;
+            param->callback = callback;
+            param->socket = socket;
+            param->event = event;
+            param->callbackData = callbackData;
+        }
+        if(STATUS_OK == status){
+            status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                                       SOPC_Action_SocketEvent,
+                                                       param,
+                                                       "Socket event");
+        }
+    }
+    return status;
 }
 
 SOPC_StatusCode SOPC_Socket_Read (SOPC_Socket* socket,
@@ -617,6 +930,7 @@ void SOPC_Socket_Close(SOPC_Socket* socket){
         }
         socket->connectAddrs = NULL;
         socket->nextConnectAttemptAddr = NULL;
+        SOPC_ActionQueue_Free(&socket->writeQueue);
     }
 }
 

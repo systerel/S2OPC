@@ -34,23 +34,29 @@ typedef SOPC_StatusCode (SC_ConnectionEvent_CB)(struct SC_ClientConnection* cCon
                                                 SC_ConnectionEvent          event,
                                                 SOPC_StatusCode             status);
 
+typedef struct SC_LatestRequestResponseInfo {
+    uint32_t             requestId;
+    SOPC_EncodeableType* requestType;
+} SC_LatestPendingRequestInfo;
+
 typedef struct SC_ClientConnection
 {
-    SOPC_NamespaceTable       namespaces;
-    SOPC_EncodeableType**     encodeableTypes;
-    const PKIProvider*        pkiProvider;
-    const Certificate*        serverCertificate;
-    const Certificate*        clientCertificate;
-    AsymmetricKey*            clientKey;
-    SLinkedList*              pendingRequests;
-    OpcUa_MessageSecurityMode securityMode;
-    SOPC_String               securityPolicy;
-    uint32_t                  requestedLifetime;
-    SC_Connection*            instance;
-    P_Timer                   watchdogTimer;
-    SC_ConnectionEvent_CB*    callback;
-    void*                     callbackData;
-    Mutex                     mutex;
+    SOPC_NamespaceTable         namespaces;
+    SOPC_EncodeableType**       encodeableTypes;
+    const PKIProvider*          pkiProvider;
+    const Certificate*          serverCertificate;
+    const Certificate*          clientCertificate;
+    AsymmetricKey*              clientKey;
+    SLinkedList*                pendingRequests;
+    SC_LatestPendingRequestInfo lastPendingRequestInfo;
+    OpcUa_MessageSecurityMode   securityMode;
+    SOPC_String                 securityPolicy;
+    uint32_t                    requestedLifetime;
+    SC_Connection*              instance;
+    P_Timer                     watchdogTimer;
+    SC_ConnectionEvent_CB*      callback;
+    void*                       callbackData;
+    Mutex                       mutex;
 
 } SC_ClientConnection;
 

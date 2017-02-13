@@ -163,6 +163,97 @@ uint32_t GetNextRequestId(SC_Connection* scConnection){
     return requestId;
 }
 
+void SOPC_OperationEnd_RequestError(SC_ClientConnection* connection,
+                                    SOPC_String*         reason,
+                                    uint8_t              removeRequest,
+                                    uint32_t             requestId)
+{
+    PendingRequest* pRequest = NULL;
+    // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
+    SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, reason);
+    if(FALSE != removeRequest){
+        pRequest = SLinkedList_RemoveFromId(connection->pendingRequests,requestId);
+        SC_PendingRequestDelete(pRequest);
+    }
+}
+
+void SOPC_OperationEnd_OpenSecureChannelRequest_CB(void*           arg,
+                                                   SOPC_StatusCode sendingReqStatus)
+{
+    SC_ClientConnection* connection = (SC_ClientConnection*) arg;
+    if(STATUS_OK != sendingReqStatus && NULL != connection){
+        SOPC_OperationEnd_RequestError(connection,
+                                       NULL, // No reason necessary there is only 1 chunk for OPN => no abort chunk to send
+                                       1, // remove request
+                                       connection->lastPendingRequestInfo.requestId);
+    }
+}
+
+void SOPC_OperationEnd_ServiceRequestError(SC_ClientConnection* connection,
+                                           SOPC_EncodeableType* requestType,
+                                           uint8_t              removeRequest,
+                                           uint32_t             requestId)
+{
+    SOPC_StatusCode localStatus = STATUS_OK;
+    if(NULL != connection){
+        SOPC_String reason;
+        SOPC_String* pReason = NULL;
+        SOPC_String_Initialize(&reason);
+
+        char* cType = NULL;
+        if(requestType->TypeName != NULL){
+            cType = requestType->TypeName;
+        }else{
+            cType = "";
+        }
+
+        char* genericReason = "Error encoding chunk for request of type: ";
+        char* cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
+        if(cReason != NULL){
+            if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
+               &cReason[strlen(genericReason)] ==
+                memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
+                cReason[0] = '\0';
+            }else{
+                free(cReason);
+                cReason = NULL;
+            }
+        }
+        if(cReason != NULL){
+            localStatus = SOPC_String_AttachFromCstring(&reason, cReason);
+        }
+
+        if(STATUS_OK == localStatus){
+            pReason = &reason;
+        }
+
+        SOPC_OperationEnd_RequestError(connection,
+                                       pReason, // No reason necessary there is only 1 chunk for OPN => no abort chunk to send
+                                       removeRequest, // remove request
+                                       requestId);
+
+        SOPC_String_Clear(&reason);
+
+        if(cReason != NULL){
+            free(cReason);
+            cReason = NULL;
+        }
+
+    }
+}
+
+void SOPC_OperationEnd_ServiceRequest_CB(void*           arg,
+                                         SOPC_StatusCode sendingReqStatus)
+{
+    SC_ClientConnection* connection = (SC_ClientConnection*) arg;
+    if(STATUS_OK != sendingReqStatus){
+        SOPC_OperationEnd_ServiceRequestError(connection,
+                                              connection->lastPendingRequestInfo.requestType,
+                                              1,
+                                              connection->lastPendingRequestInfo.requestId);
+    }
+}
+
 SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
                                                uint32_t             requestId)
 {
@@ -311,20 +402,30 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
         if(pRequest == NULL ||
            pRequest != SLinkedList_Prepend(cConnection->pendingRequests, requestId, pRequest)){
             status = STATUS_NOK;
+        }else{
+            cConnection->lastPendingRequestInfo.requestId = requestId; // For end of sending operation callback use
+            cConnection->lastPendingRequestInfo.requestType = &OpcUa_OpenSecureChannelRequest_EncodeableType;
         }
     }
 
     if(status == STATUS_OK){
-        status = SC_FlushSecureMsgBuffer(cConnection->instance->sendingBuffer, SOPC_Msg_Chunk_Final);
+        // For now no next action to the socket writing to provide (except error ? => more for previous steps in Flush)
+        // TODO: timeout should be managed by indep. timer
+        status = SC_FlushSecureMsgBuffer(cConnection->instance->sendingBuffer,
+                                         SOPC_Msg_Chunk_Final,
+                                         SOPC_OperationEnd_OpenSecureChannelRequest_CB,
+                                         (void*) cConnection);
     }
 
     if(status != STATUS_OK){
-        // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
-        SC_AbortMsg(cConnection->instance->sendingBuffer, OpcUa_BadEncodingError, NULL);
+        uint8_t removeRequest = FALSE;
         if(pRequest != NULL){
-            SLinkedList_RemoveFromId(cConnection->pendingRequests,requestId);
-            SC_PendingRequestDelete(pRequest);
+            removeRequest = 1;
         }
+        SOPC_OperationEnd_RequestError(cConnection,
+                                       NULL, // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
+                                       removeRequest,
+                                       requestId);
     }
 
     return status;
@@ -682,20 +783,19 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                 cConnection->instance->state = SC_Connection_Connecting_Secure;
                 status = Send_OpenSecureChannelRequest(cConnection);
             }
+
             Mutex_Unlock(&cConnection->mutex);
 
-            break;
+            if(STATUS_OK != status){
+                // Connection failed, upper level must be notified
+                TCP_UA_Connection_Disconnect(tcpConnection);
+                OnTransportEvent_CB(callbackData,
+                                    ConnectionEvent_Disconnected,
+                                    msgBuffer,
+                                    status);
+            }
 
-        case ConnectionEvent_Disconnected:
-            //log ?
-            TCP_UA_Connection_Disconnect(tcpConnection);
-            cConnection->instance->state = SC_Connection_Disconnected;
-            retStatus = cConnection->callback(cConnection,
-                                              cConnection->callbackData,
-                                              SOPC_ConnectionEvent_Disconnected,
-                                              OpcUa_BadSecureChannelClosed);
             break;
-
         case ConnectionEvent_Message:
             if(STATUS_OK == status){
                 switch(msgBuffer->secureType){
@@ -738,11 +838,18 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                 retStatus = status;
             }
             break;
+        case ConnectionEvent_Disconnected:
         case ConnectionEvent_Error:
             //log ?
-            TCP_UA_Connection_Disconnect(tcpConnection);
+            Mutex_Lock(&cConnection->mutex);
             cConnection->instance->state = SC_Connection_Disconnected;
-            //scConnection->callback: TODO: incompatible types to modify in foundation code
+            Mutex_Unlock(&cConnection->mutex);
+
+            retStatus = cConnection->callback(cConnection,
+                                              cConnection->callbackData,
+                                              SOPC_ConnectionEvent_Disconnected,
+                                              OpcUa_BadSecureChannelClosed);
+
             break;
     }
     return retStatus;
@@ -823,10 +930,6 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
                                                    uri,
                                                    OnTransportEvent_CB,
                                                    (void*) connection);
-
-                if(status != STATUS_OK){
-                    connection->instance->state = SC_Connection_Disconnected;
-                }
             }
 
         }else{
@@ -896,53 +999,29 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
                 if(pRequest == NULL ||
                    pRequest != SLinkedList_Prepend(connection->pendingRequests, requestId, pRequest)){
                     status = STATUS_NOK;
+                }else{
+                    // For end of sending operation callback use
+                    connection->lastPendingRequestInfo.requestId = requestId;
+                    connection->lastPendingRequestInfo.requestType = requestType;
                 }
             }
 
             if(status == STATUS_OK){
-                status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, SOPC_Msg_Chunk_Final);
+                status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, SOPC_Msg_Chunk_Final,
+                        SOPC_OperationEnd_ServiceRequest_CB, (void*) connection);
             }
 
             if(status != STATUS_OK){
-                SOPC_String reason;
-                SOPC_String_Initialize(&reason);
-
-                char* cType = NULL;
-                if(requestType->TypeName != NULL){
-                    cType = requestType->TypeName;
-                }else{
-                    cType = "";
+                uint8_t removeRequest = FALSE;
+                if(NULL != pRequest){
+                    removeRequest = 1;
                 }
 
-                char* genericReason = "Error encoding chunk for request of type: ";
-                char* cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
-                if(cReason != NULL){
-                    if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
-                       &cReason[strlen(genericReason)] ==
-                        memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
-                        cReason[0] = '\0';
-                    }else{
-                        free(cReason);
-                        cReason = NULL;
-                    }
-                }
-                if(cReason != NULL){
-                    status = SOPC_String_AttachFromCstring(&reason, cReason);
-                    free(cReason);
-                    cReason = NULL;
-                }
-
-                if(STATUS_OK == status){
-                    SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, &reason);
-                    SOPC_String_Clear(&reason);
-                }
-                if(pRequest != NULL){
-                    SLinkedList_RemoveFromId(connection->pendingRequests,requestId);
-                    SC_PendingRequestDelete(pRequest);
-                }
+                SOPC_OperationEnd_ServiceRequestError(connection,
+                        requestType,
+                        removeRequest,
+                        requestId);
             }
-        }else{
-            status = OpcUa_BadSecureChannelClosed;
         }
         Mutex_Unlock(&connection->mutex);
     }

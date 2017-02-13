@@ -27,6 +27,11 @@
 #include "sopc_encoder.h"
 #include "crypto_profiles.h"
 
+typedef struct SOPC_ServiceResponse_EndErrorData {
+    SC_Connection*       connection;
+    SOPC_EncodeableType* responseType;
+} SOPC_ServiceResponse_EndErrorData;
+
 typedef struct TransportEvent_CallbackData {
     SC_ServerEndpoint* endpoint;
     SC_Connection*     scConnection;
@@ -460,9 +465,11 @@ SOPC_StatusCode Write_OpenSecureChannelResponse(SC_Connection* scConnection,
     return status;
 }
 
-SOPC_StatusCode Send_OpenSecureChannelResponse(SC_Connection*     scConnection,
-                                               uint32_t           requestId,
-                                               uint32_t           requestHandle)
+SOPC_StatusCode Send_OpenSecureChannelResponse(SC_Connection*               scConnection,
+                                               uint32_t                     requestId,
+                                               uint32_t                     requestHandle,
+                                               SOPC_Socket_EndOperation_CB* callback,
+                                               void*                        callbackData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
 
@@ -495,7 +502,8 @@ SOPC_StatusCode Send_OpenSecureChannelResponse(SC_Connection*     scConnection,
     }
 
     if(status == STATUS_OK){
-        status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final);
+        status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final,
+                                         callback, callbackData);
     }
 
     if(status != STATUS_OK){
@@ -569,6 +577,39 @@ SOPC_StatusCode Receive_ServiceRequest(SC_Connection*        scConnection,
     return status;
 }
 
+void SOPC_OpenSecureChannelResponse_Sent_CB(void*           arg,
+                                            SOPC_StatusCode sendingStatus)
+{
+    TransportEvent_CallbackData* teventCbData = (TransportEvent_CallbackData*) arg;
+    SC_ServerEndpoint* sEndpoint = NULL;
+    SC_Connection* scConnection = NULL;
+    if(STATUS_OK == sendingStatus){
+        if(NULL != teventCbData &&
+           NULL != teventCbData->endpoint && NULL != teventCbData->scConnection)
+        {
+            sEndpoint = teventCbData->endpoint;
+            scConnection = teventCbData->scConnection;
+            Mutex_Lock(&sEndpoint->mutex);
+            scConnection->state = SC_Connection_Connected;
+            Mutex_Unlock(&sEndpoint->mutex);
+
+            // TODO: differentiate renew from new ...
+            if(NULL != sEndpoint->callback){
+                sEndpoint->callback(sEndpoint, scConnection,
+                                    sEndpoint->callbackData,
+                                    SC_EndpointConnectionEvent_New,
+                                    STATUS_OK, // TODO: manage other cases in same ActionFunction ? Other ?
+                                    NULL, NULL, NULL);
+            }
+        }
+    }else{
+        OnConnectionTransportEvent_CB(arg,
+                                      ConnectionEvent_Error,
+                                      NULL,
+                                      sendingStatus);
+    }
+}
+
 SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                                               ConnectionEvent event,
                                               SOPC_MsgBuffer* msgBuffer,
@@ -640,21 +681,13 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
 
                             if(STATUS_OK == retStatus){
                                 retStatus = Send_OpenSecureChannelResponse(scConnection,
-                                                                           requestId, requestHandle);
+                                                                           requestId, requestHandle,
+                                                                           SOPC_OpenSecureChannelResponse_Sent_CB,
+                                                                           teventCbData);
                             }
                             Mutex_Unlock(&sEndpoint->mutex);
 
-                            if(STATUS_OK == retStatus){
-                                scConnection->state = SC_Connection_Connected;
-                                // TODO: differentiate renew from new ...
-                                if(NULL != sEndpoint->callback){
-                                    sEndpoint->callback(sEndpoint, scConnection,
-                                                        sEndpoint->callbackData,
-                                                        SC_EndpointConnectionEvent_New,
-                                                        retStatus,
-                                                        NULL, NULL, NULL);
-                                }
-                            }else{
+                            if(STATUS_OK != retStatus){
                                 // TODO: Regarding status and if it is before secu verif or after
                                 //       a transport error (before) or a service fault (after) must be sent
                                 OnConnectionTransportEvent_CB(callbackData,
@@ -730,6 +763,68 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
     return retStatus;
 }
 
+void SOPC_OperationEnd_ServiceResponseError(SC_Connection*       connection,
+                                            SOPC_EncodeableType* responseType)
+{
+    SOPC_StatusCode localStatus = STATUS_OK;
+    if(NULL != connection){
+        SOPC_String reason;
+        SOPC_String* pReason = NULL;
+        SOPC_String_Initialize(&reason);
+
+        char* cType = NULL;
+        if(responseType->TypeName != NULL){
+            cType = responseType->TypeName;
+        }else{
+            cType = "";
+        }
+
+        char* genericReason = "Error encoding chunk for response of type: ";
+        char* cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
+        if(cReason != NULL){
+            if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
+               &cReason[strlen(genericReason)] ==
+                memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
+                cReason[0] = '\0';
+            }else{
+                free(cReason);
+                cReason = NULL;
+            }
+        }
+        if(cReason != NULL){
+            localStatus = SOPC_String_AttachFromCstring(&reason, cReason);
+        }
+
+        if(STATUS_OK == localStatus){
+            pReason = &reason;
+        }
+
+        SC_AbortMsg(connection->sendingBuffer, OpcUa_BadEncodingError, pReason);
+
+        SOPC_String_Clear(&reason);
+
+        if(cReason != NULL){
+            free(cReason);
+            cReason = NULL;
+        }
+
+    }
+}
+
+void SOPC_OperationEnd_ServiceResponse_CB(void*           arg,
+                                          SOPC_StatusCode sendingRespStatus)
+{
+    SOPC_ServiceResponse_EndErrorData* data = (SOPC_ServiceResponse_EndErrorData*) arg;
+    if(NULL != data){
+        if(STATUS_OK != sendingRespStatus){
+            SOPC_OperationEnd_ServiceResponseError(data->connection,
+                                                   data->responseType);
+        }
+    free(data);
+    }
+}
+
+
 SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
                                  SC_Connection*       scConnection,
                                  uint32_t             requestId,
@@ -737,6 +832,7 @@ SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
                                  void*                response)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_ServiceResponse_EndErrorData* data = NULL;
     if(sEndpoint != NULL &&
        scConnection != NULL &&
        responseType != NULL &&
@@ -751,41 +847,25 @@ SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
                                         requestId);
 
         if(status == STATUS_OK){
-            status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final);
+            data = malloc(sizeof(SOPC_ServiceResponse_EndErrorData));
+            if(NULL != data){
+                data->connection = scConnection;
+                data->responseType = responseType;
+            }
+
+            // For now no next action to the socket writing to provide (except error ? => more for previous steps in Flush)
+            status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final,
+                                             SOPC_OperationEnd_ServiceResponse_CB,
+                                             (void*) data);
         }
 
         if(status != STATUS_OK){
-            SOPC_String reason;
-            SOPC_String_Initialize(&reason);
-
-            char* cType = NULL;
-            if(responseType->TypeName != NULL){
-                cType = responseType->TypeName;
-            }else{
-                cType = "";
-            }
-
-            char* genericReason = "Error encoding chunk for response of type: ";
-            char* cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
-            if(cReason != NULL){
-                if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
-                   &cReason[strlen(genericReason)] ==
-                    memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
-                    cReason[0] = '\0';
-                }else{
-                    free(cReason);
-                    cReason = NULL;
-                }
-            }
-            if(cReason != NULL){
-                status = SOPC_String_AttachFromCstring(&reason, cReason);
-                free(cReason);
-                cReason = NULL;
-            }
-
-            if(STATUS_OK == status){
-                SC_AbortMsg(scConnection->sendingBuffer, OpcUa_BadEncodingError, &reason);
-                SOPC_String_Clear(&reason);
+            SOPC_OperationEnd_ServiceResponseError(scConnection,
+                                                   responseType);
+            if(NULL != data){
+                // Only freed if status is OK since SOPC_OperationEnd_ServiceResponse_CB
+                // is called asynchronously later if status is OK
+                free(data);
             }
         }
 
@@ -873,6 +953,9 @@ SOPC_StatusCode OnListenerEvent_CB(SC_ServerEndpoint* sEndpoint,
                 retStatus = AcceptedNewConnection(sEndpoint, newTcpConnection);
             }else{
                 retStatus = STATUS_INVALID_PARAMETERS;
+            }
+            if(STATUS_OK != retStatus){
+                TCP_UA_Connection_Delete(newTcpConnection);
             }
             break;
     }

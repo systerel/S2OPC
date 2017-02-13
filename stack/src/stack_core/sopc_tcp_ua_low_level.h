@@ -20,6 +20,7 @@
 
 #include "sopc_msg_buffer.h"
 #include "sopc_sockets.h"
+#include "sopc_action_queue_manager.h"
 
 extern const uint32_t tcpProtocolVersion;
 
@@ -32,7 +33,9 @@ SOPC_StatusCode TCP_UA_ReadMsgBuffer(SOPC_Byte*      data_dest,
                                      SOPC_MsgBuffer* msgBuffer,
                                      uint32_t        count);
 
-SOPC_StatusCode TCP_UA_FlushMsgBuffer(SOPC_MsgBuffer* msgBuffer);
+SOPC_StatusCode TCP_UA_FlushMsgBuffer(SOPC_MsgBuffer*              msgBuffer,
+                                      SOPC_Socket_EndOperation_CB* fctPointer,
+                                      void*                        fctArgument);
 
 SOPC_StatusCode TCP_UA_EncodeHeader(SOPC_MsgBuffer* msgBuffer,
                                     TCP_UA_MsgType  type);
