@@ -26,9 +26,6 @@
 #include <netdb.h>
 #include <sys/select.h>
 
-#define MAX_SEND_ATTEMPTS 20
-#define SLEEP_NEXT_SEND_ATTEMP 50 // milliseconds
-
 #define SOPC_INVALID_SOCKET -1
 
 /**

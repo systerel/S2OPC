@@ -191,15 +191,19 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet,
 /**
  *  \brief Write data through the socket
  *
- *  \param sock     The socket on which data must be written
- *  \param data     The data bytes to write on socket
- *  \param count    The number of bytes to write
+ *  \param sock      The socket on which data must be written
+ *  \param data      The data bytes to write on socket
+ *  \param count     The number of bytes to write
+ *  \param sentBytes Pointer to the number of bytes sent on socket after call
  *
- *  \return         The number of bytes really written (should always be = to count)
+ *  \return          STATUS_OK if all bytes were written,
+ *                   OpcUa_BadWouldBlock if socket write operation would block,
+ *                   STATUS_NOK if it failed and
  */
-int32_t Socket_Write(Socket   sock,
-                     uint8_t* data,
-                     uint32_t count);
+SOPC_StatusCode Socket_Write(Socket    sock,
+                             uint8_t*  data,
+                             uint32_t  count,
+                             uint32_t* sentBytes);
 
 /**
  *  \brief Read data through the socket

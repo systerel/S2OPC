@@ -273,45 +273,34 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet,
     return (int32_t) nbReady;
 }
 
-int32_t Socket_Write(Socket   sock,
-                     uint8_t* data,
-                     uint32_t count)
+SOPC_StatusCode Socket_Write(Socket    sock,
+                             uint8_t*  data,
+                             uint32_t  count,
+                             uint32_t* sentBytes)
 {
-    uint32_t sentBytes = 0;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int res = 0;
-    int8_t error = FALSE;
     int wsaError = 0;
-    uint8_t nbAttempt = 0;
     if(sock != SOPC_INVALID_SOCKET &&
-       data != NULL &&
-       count <= INT32_MAX)
+            data != NULL &&
+            count <= INT32_MAX &&
+            sentBytes != NULL)
     {
-        // TODO: Use write event to write later ?
-        do
-        {
-            if(nbAttempt > 0){
-                SOPC_Sleep(SLEEP_NEXT_SEND_ATTEMP);
-            }
-            nbAttempt++;
-            res = send(sock, (char*) data, count, 0);
-            if(res == SOCKET_ERROR){
-            	wsaError = WSAGetLastError();
-                // ERROR CASE
-                if(wsaError == WSAEWOULDBLOCK){
-                    // Try again in those cases
-                }else{
-                    error = 1; // TRUE
-                }
-            }else if(res >= 0){
-                sentBytes += res;
-            }else{
-                error = 1; // should be an error or >= 0
-            }
-        } while(sentBytes < count && error == FALSE && nbAttempt < MAX_SEND_ATTEMPTS);
-        return sentBytes;
-    }else{
-        return -1;
+        status = STATUS_NOK;
+        res = send(sock, (char*) data, count, 0);
+        *sentBytes = (uint32_t) res;
+        if(res == SOCKET_ERROR){
+            wsaError = WSAGetLastError();
+            // ERROR CASE
+            if(wsaError == WSAEWOULDBLOCK){
+                // Try again in those cases
+                status = OpcUa_BadWouldBlock;
+            } // keep STATUS_NOK
+        }else if(res >= 0 && (uint32_t) res == count){
+            status = STATUS_OK;
+        } //else STATUS_NOK
     }
+    return status;
 }
 
 
