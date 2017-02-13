@@ -23,14 +23,15 @@
 #include "sopc_types.h"
 #include "sopc_sockets.h"
 #include "platform_deps.h"
+#include "sopc_action_queue_manager.h"
 
 typedef struct SOPC_StackConfiguration {
-    SOPC_NamespaceTable*  nsTable;
-    SOPC_EncodeableType** encTypesTable;
-    uint32_t              nbEncTypesTable;
+    SOPC_NamespaceTable*     nsTable;
+    SOPC_EncodeableType**    encTypesTable;
+    uint32_t                 nbEncTypesTable;
 } SOPC_StackConfiguration;
 
-SOPC_StackConfiguration g_stackConfiguration;
+static SOPC_StackConfiguration g_stackConfiguration;
 uint8_t g_lockedConfig = FALSE;
 
 static uint8_t initDone = FALSE;
@@ -43,8 +44,21 @@ SOPC_StatusCode StackConfiguration_Initialize(){
     }
     Namespace_Initialize(g_stackConfiguration.nsTable);
     status = Socket_Network_Initialize();
-    if(STATUS_OK == status)
+    if(STATUS_OK == status){
         status = SOPC_SocketManager_Config_Init();
+    }
+    if(STATUS_OK == status){
+        appCallbackQueueMgr = SOPC_ActionQueueManager_CreateAndStart();
+        if(NULL == appCallbackQueueMgr){
+            status = STATUS_NOK;
+        }
+    }
+    if(STATUS_OK == status){
+        stackActionQueueMgr = SOPC_ActionQueueManager_CreateAndStart();
+        if(NULL == stackActionQueueMgr){
+            status = STATUS_NOK;
+        }
+    }
     InitPlatformDependencies();
     return status;
 }
@@ -66,6 +80,8 @@ void StackConfiguration_Clear(){
     g_stackConfiguration.nbEncTypesTable = 0;
     SOPC_SocketManager_Config_Clear();
     Socket_Network_Clear();
+    SOPC_ActionQueueManager_StopAndDelete(&stackActionQueueMgr);
+    SOPC_ActionQueueManager_StopAndDelete(&appCallbackQueueMgr);
     StackConfiguration_Unlocked();
     initDone = FALSE;
 }
