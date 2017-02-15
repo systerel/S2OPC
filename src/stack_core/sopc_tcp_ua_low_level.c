@@ -92,47 +92,50 @@ SOPC_StatusCode TCP_UA_FinalizeHeader(SOPC_MsgBuffer* msgBuffer){
 
 SOPC_StatusCode TCP_UA_ReadData(SOPC_Socket*    socket,
                                 SOPC_MsgBuffer* msgBuffer){
-    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int32_t readBytes;
 
-    if(msgBuffer->buffers->length >= TCP_UA_HEADER_LENGTH){
-        assert(msgBuffer->currentChunkSize > 0);
+    if(socket != NULL && msgBuffer != NULL){
+        status = STATUS_NOK;
+        if(msgBuffer->buffers->length >= TCP_UA_HEADER_LENGTH){
+            assert(msgBuffer->currentChunkSize > 0);
 
-        if(msgBuffer->buffers->length < msgBuffer->currentChunkSize){
-            //incomplete message, continue to read it
-            status = STATUS_OK;
-        }else if(msgBuffer->buffers->length == msgBuffer->currentChunkSize){
-            if(msgBuffer->isFinal == SOPC_Msg_Chunk_Intermediate){
-                status = MsgBuffer_ResetNextChunk(msgBuffer, 0);
-            }else{
-                MsgBuffer_Reset(msgBuffer);
-                // status will be set reading the header
-            }
-        }else{
-            // constraint error: header length <= buffer length <= message size
-            status = STATUS_INVALID_PARAMETERS;
-        }
-    }
-
-    if(msgBuffer->buffers->length < TCP_UA_HEADER_LENGTH){
-
-        // Attempt to read header
-        if(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH){
-            readBytes = TCP_UA_HEADER_LENGTH - msgBuffer->buffers->length;
-            status = SOPC_Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
-            if(status == STATUS_OK && readBytes > 0){
-                Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
-
-                if(msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH){
-                    status = TCP_UA_ReadHeader(msgBuffer);
-                }else if(msgBuffer->buffers->length > TCP_UA_HEADER_LENGTH){
-                    status = STATUS_INVALID_STATE;
+            if(msgBuffer->buffers->length < msgBuffer->currentChunkSize){
+                //incomplete message, continue to read it
+                status = STATUS_OK;
+            }else if(msgBuffer->buffers->length == msgBuffer->currentChunkSize){
+                if(msgBuffer->isFinal == SOPC_Msg_Chunk_Intermediate){
+                    status = MsgBuffer_ResetNextChunk(msgBuffer, 0);
                 }else{
-                    // Incomplete header: Wait for new read event !
-                    status = STATUS_OK_INCOMPLETE;
+                    MsgBuffer_Reset(msgBuffer);
+                    // status will be set reading the header
                 }
             }else{
-                // TODO: manage other statuses disconnect, etc.
+                // constraint error: header length <= buffer length <= message size
+                status = STATUS_INVALID_PARAMETERS;
+            }
+        }
+
+        if(msgBuffer->buffers->length < TCP_UA_HEADER_LENGTH){
+
+            // Attempt to read header
+            if(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH){
+                readBytes = TCP_UA_HEADER_LENGTH - msgBuffer->buffers->length;
+                status = SOPC_Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
+                if(status == STATUS_OK && readBytes > 0){
+                    Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
+
+                    if(msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH){
+                        status = TCP_UA_ReadHeader(msgBuffer);
+                    }else if(msgBuffer->buffers->length > TCP_UA_HEADER_LENGTH){
+                        status = STATUS_INVALID_STATE;
+                    }else{
+                        // Incomplete header: Wait for new read event !
+                        status = STATUS_OK_INCOMPLETE;
+                    }
+                }else{
+                    // TODO: manage other statuses disconnect, etc.
+                }
             }
         }
     }
