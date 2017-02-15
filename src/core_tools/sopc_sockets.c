@@ -488,8 +488,12 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
             }
         }
 
+        Mutex_Unlock(&socketManager->mutex);
+
         // Returns number of ready descriptor or -1 in case of error
         nbReady = Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, msecTimeout);
+
+        Mutex_Lock(&socketManager->mutex);
 
         if(nbReady < 0){
             status =  STATUS_NOK;
