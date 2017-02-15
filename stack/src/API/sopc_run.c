@@ -16,6 +16,7 @@
  */
 
 #include "sopc_run.h"
+#include "sopc_threads.h"
 #include "sopc_base_types.h"
 #include "sopc_sockets.h"
 
@@ -27,6 +28,9 @@ SOPC_StatusCode SOPC_TreatReceivedMessages(uint32_t msecTimeout){
 #else
     status = SOPC_SocketManager_Loop(SOPC_SocketManager_GetGlobal(),
                                      msecTimeout);
+    if(STATUS_OK == status){
+        SOPC_Sleep(1);
+    }
 #endif //OPCUA_MULTITHREADED
     return status;
 }
