@@ -41,10 +41,11 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                     UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
                     scConnection->sendingMaxBodySize >= msgBuffer->buffers->position);
 
-            if(msgBuffer->buffers->position + count >
-                msgBuffer->sequenceNumberPosition +
-                UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
-                scConnection->sendingMaxBodySize)
+            while(STATUS_OK == status && // if not enough space in current buffer, create an intermediary chunk
+                  (msgBuffer->buffers->position + count >
+                   msgBuffer->sequenceNumberPosition +
+                   UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+                   scConnection->sendingMaxBodySize))
             {
                 // Precedent position cannot be greater than message size:
                 //  otherwise it means size has not been checked precedent time (it could occurs only when writing headers)
@@ -60,15 +61,18 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                     SOPC_String_Initialize(&reason);
                     SC_AbortMsg(msgBuffer, status, &reason);
                 }else{
-                    // Fulfill buffer with maximum amount of bytes
+                    // Fill buffer with maximum amount of bytes
                     uint32_t tmpCount = // Maximum Count - Precedent Count => Count to write
                      (msgBuffer->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
                       scConnection->sendingMaxBodySize) - msgBuffer->buffers->position;
-                    count = count - tmpCount;
                     status = Buffer_Write(msgBuffer->buffers, data_src, tmpCount);
 
                     // Flush it !
                     if(status == STATUS_OK){
+                        // Update count and pointer to data to write
+                        count = count - tmpCount;
+                        data_src = data_src + tmpCount;
+
                         status = SC_FlushSecureMsgBuffer(msgBuffer,
                                                          SOPC_Msg_Chunk_Intermediate);
                     }
@@ -82,7 +86,8 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                         SOPC_String_Clear(&reason);
                     }
                 }
-            }
+            } // While not fitting in current buffer, fill and flush current buffer
+
             if(status == STATUS_OK){
                 status = Buffer_Write(msgBuffer->buffers, data_src, count);
             }
