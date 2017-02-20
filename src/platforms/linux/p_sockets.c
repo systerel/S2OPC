@@ -76,6 +76,41 @@ void Socket_Clear(Socket* sock){
     *sock = SOPC_INVALID_SOCKET;
 }
 
+SOPC_StatusCode Socket_Configure(Socket  sock,
+                                 uint8_t setNonBlocking)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    int true = 1;
+    int setOptStatus = -1;
+
+    if(sock != SOPC_INVALID_SOCKET){
+        status = STATUS_OK;
+
+        // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
+        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &true, sizeof(int));
+
+        if(setOptStatus != -1){
+            int rcvbufsize = OPCUA_P_TCPRCVBUFFERSIZE;
+            setOptStatus = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &rcvbufsize, sizeof(int));
+        }
+
+        if(setOptStatus != -1){
+            int sndbufsize = OPCUA_P_TCPSNDBUFFERSIZE;
+            setOptStatus = setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &sndbufsize, sizeof(int));
+        }
+
+        if(setOptStatus != -1 && setNonBlocking != FALSE){
+            setOptStatus = fcntl(sock, F_SETFL, O_NONBLOCK);
+        }
+
+        if(setOptStatus < 0){
+            status = STATUS_NOK;
+        }
+    }
+
+    return status;
+}
+
 SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
                                  uint8_t             setReuseAddr,
                                  uint8_t             setNonBlocking,
@@ -84,39 +119,32 @@ SOPC_StatusCode Socket_CreateNew(Socket_AddressInfo* addr,
     int true = 1;
     int setOptStatus = -1;
     if(addr != NULL && sock != NULL){
-        status = STATUS_OK;
         *sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-        if(*sock != -1){
-            // Deactivate Nagle's algorithm since we always write a TCP UA binary message (and not just few bytes)
-            setOptStatus = setsockopt(*sock, IPPROTO_TCP, TCP_NODELAY, &true, sizeof(int));
 
-            if(setOptStatus != -1){
-                int rcvbufsize = OPCUA_P_TCPRCVBUFFERSIZE;
-                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, &rcvbufsize, sizeof(int));
-            }
-
-            if(setOptStatus != -1){
-                int sndbufsize = OPCUA_P_TCPSNDBUFFERSIZE;
-                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, &sndbufsize, sizeof(int));
-            }
-
-            if(setOptStatus != -1 && setReuseAddr != FALSE){
-                setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(int));
-            }
-
-            if(setOptStatus != -1 && setNonBlocking != FALSE){
-                setOptStatus = fcntl(*sock, F_SETFL, O_NONBLOCK);
-            }
-
-            // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
-            if(setOptStatus != -1 && addr->ai_family == AF_INET6){
-                int false = FALSE;
-                setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&false, sizeof(int));
-            }
+        if(*sock != SOPC_INVALID_SOCKET){
+            status = Socket_Configure(*sock, setNonBlocking);
+        }else{
+            status = STATUS_NOK;
         }
+
+        if(STATUS_OK == status){
+            setOptStatus = 0;
+        }// else -1 due to init
+
+        if(setOptStatus != -1 && setReuseAddr != FALSE){
+            setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, &true, sizeof(int));
+        }
+
+        // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
+        if(setOptStatus != -1 && addr->ai_family == AF_INET6){
+            int false = FALSE;
+            setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&false, sizeof(int));
+        }
+
         if(setOptStatus < 0){
             status = STATUS_NOK;
         }
+
     }
     return status;
 }
@@ -139,6 +167,7 @@ SOPC_StatusCode Socket_Listen(Socket              sock,
 }
 
 SOPC_StatusCode Socket_Accept(Socket  listeningSock,
+                              uint8_t setNonBlocking,
                               Socket* acceptedSock)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -153,8 +182,8 @@ SOPC_StatusCode Socket_Accept(Socket  listeningSock,
 //                    get_in_addr((struct sockaddr*)&remoteaddr),
 //                    remoteIP, INET6_ADDRSTRLEN),
 //                acceptSock);
-        if(*acceptedSock != -1){
-            status = STATUS_OK;
+        if(*acceptedSock != SOPC_INVALID_SOCKET){
+            status = Socket_Configure(*acceptedSock, setNonBlocking);
         }
     }
     return status;

@@ -560,6 +560,7 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                                     status = STATUS_NOK;
                                 }else{
                                     status = Socket_Accept(uaSock->sock,
+                                                           1, // Non blocking socket
                                                            &acceptSock->sock);
                                     if(status == STATUS_OK){
                                         acceptSock->isUsed = 1;

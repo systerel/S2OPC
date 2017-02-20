@@ -113,11 +113,13 @@ SOPC_StatusCode Socket_Listen(Socket              sock,
  *  Connection on a listening socket is detected when receiving a read event on the socket.
  *
  *  \param listeningSock    The listening socket on which a read event has been received.
+ *  \param setNonBlocking   If value is not zero the connection socket is configured to be non blocking
  *  \param acceptedSock     (Out) Value pointed is set with the newly created socket for accepted connection
  *
  *  \return        GOOD if operation succeeded, BAD otherwise.
  */
 SOPC_StatusCode Socket_Accept(Socket  listeningSock,
+                              uint8_t setNonBlocking,
                               Socket* acceptedSock);
 
 /**
