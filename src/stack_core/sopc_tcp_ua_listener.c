@@ -29,36 +29,45 @@ SOPC_StatusCode OnSocketListenEvent_CB (SOPC_Socket* socket,
     SOPC_StatusCode status = STATUS_NOK;
     TCP_UA_Listener* listener = (TCP_UA_Listener*) callbackData;
     TCP_UA_Connection* newConnection = NULL;
-    switch(socketEvent){
-        case SOCKET_ACCEPT_EVENT:
-            newConnection = TCP_UA_Connection_Create(listener->protocolVersion,
-                                                     1); // Server side connection == TRUE
-            if(NULL != newConnection){
-                // Configure socket in new connection
-                status = TCP_UA_Connection_AcceptedSetSocket(newConnection,
-                                                             &listener->url,
-                                                             socket);
-                if(STATUS_OK == status && NULL != listener->callback){
-                    status = listener->callback(listener->callbackData,
-                                                TCP_ListenerEvent_Connect,
-                                                status,
-                                                newConnection);
+    if(NULL != listener){
+        switch(socketEvent){
+            case SOCKET_ACCEPT_EVENT:
+                newConnection = TCP_UA_Connection_Create(listener->protocolVersion,
+                                                         1); // Server side connection == TRUE
+                if(NULL != newConnection){
+                    // Configure socket in new connection
+                    status = TCP_UA_Connection_AcceptedSetSocket(newConnection,
+                                                                 &listener->url,
+                                                                 socket);
+                    if(STATUS_OK == status && NULL != listener->callback){
+                        status = listener->callback(listener->callbackData,
+                                                    TCP_ListenerEvent_Connect,
+                                                    status,
+                                                    newConnection);
+                    }
                 }
-            }
-            if(STATUS_OK != status){
-                TCP_UA_Connection_Delete(newConnection);
-            }
-            break;
-        case SOCKET_CONNECT_EVENT:
-        case SOCKET_CLOSE_EVENT:
-        case SOCKET_EXCEPT_EVENT:
-        case SOCKET_WRITE_EVENT:
-        case SOCKET_READ_EVENT:
-            status = STATUS_INVALID_PARAMETERS;
-            SOPC_Socket_Close(listener->socket);
-            break;
-        default:
-            break;
+                if(STATUS_OK != status){
+                    TCP_UA_Connection_Delete(newConnection);
+                }
+                break;
+            case SOCKET_CONNECT_EVENT:
+            case SOCKET_CLOSE_EVENT:
+            case SOCKET_EXCEPT_EVENT:
+            case SOCKET_WRITE_EVENT:
+            case SOCKET_READ_EVENT:
+                if(NULL != listener->socket){
+                    SOPC_Socket_Close(listener->socket);
+                }
+                if(NULL != listener->callback){
+                   listener->callback(listener->callbackData,
+                                      TCP_ListenerEvent_Closed,
+                                      STATUS_OK,
+                                      NULL);
+                }
+                break;
+            default:
+                break;
+        }
     }
     return status;
 }
