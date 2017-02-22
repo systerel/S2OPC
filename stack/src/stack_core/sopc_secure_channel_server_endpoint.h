@@ -95,11 +95,13 @@ SOPC_StatusCode SC_ServerEndpoint_Open(SC_ServerEndpoint*   endpoint,
                                        SC_EndpointEvent_CB* callback,
                                        void*                callbackData);
 
-SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
-                                 SC_Connection*       scConnection,
-                                 uint32_t             requestId,
-                                 SOPC_EncodeableType* responseType,
-                                 void*                response);
+SOPC_StatusCode SC_CreateAction_Send_Response(SC_ServerEndpoint*          sEndpoint,
+                                             SC_Connection*               scConnection,
+                                             uint32_t                     requestId,
+                                             SOPC_EncodeableType*         responseType,
+                                             void*                        response,
+                                             SOPC_Socket_EndOperation_CB* endSendCallback,
+                                             void*                        endSendCallbackData);
 
 SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint);
 

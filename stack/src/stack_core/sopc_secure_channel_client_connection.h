@@ -87,13 +87,14 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
 
 SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection);
 
-SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
-                                SOPC_EncodeableType* requestType,
-                                void*                request,
-                                SOPC_EncodeableType* responseType,
-                                uint32_t             timeout,
-                                SC_ResponseEvent_CB* callback,
-                                void*                callbackData);
-
+SOPC_StatusCode SC_CreateAction_Send_Request(SC_ClientConnection*         connection,
+                                             SOPC_EncodeableType*         requestType,
+                                             void*                        request,
+                                             SOPC_EncodeableType*         responseType,
+                                             uint32_t                     timeout,
+                                             SC_ResponseEvent_CB*         callback,
+                                             void*                        callbackData,
+                                             SOPC_Socket_EndOperation_CB* endSendCallback,
+                                             void*                        endSendCallbackData);
 
 #endif /* SOPC_SECURE_CHANNEL_CLIENT_CONNECTION_H_ */

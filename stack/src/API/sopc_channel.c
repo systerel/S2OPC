@@ -36,6 +36,11 @@ typedef struct {
     uint8_t                                 disconnectedFlag;
 } SOPC_InternalChannel_CallbackData;
 
+typedef struct {
+    Mutex           endSendMutex;
+    SOPC_StatusCode sendingStatus;
+} SOPC_InternalChannel_EndBeginInvokeData;
+
 SOPC_InternalChannel_CallbackData* SOPC_Create_ChannelCallbackData(SOPC_Channel_PfnConnectionStateChanged* callback,
                                                                    void*                                   callbackData)
 {
@@ -309,6 +314,14 @@ SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            cha
     return status;
 }
 
+void SOPC_Channel_BeginInvokeService_EndOperation_CB(void*           callbackData,
+                                                     SOPC_StatusCode status){
+    assert(callbackData != NULL);
+    SOPC_InternalChannel_EndBeginInvokeData* sentEndData = (SOPC_InternalChannel_EndBeginInvokeData*) callbackData;
+    sentEndData->sendingStatus = status;
+    Mutex_Unlock(&sentEndData->endSendMutex);
+}
+
 SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                     channel,
                                                 char*                            debugName,
                                                 void*                            request,
@@ -321,6 +334,8 @@ SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                    
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     uint32_t timeout = 0;
     (void) debugName;
+    SOPC_InternalChannel_EndBeginInvokeData sentEndData;
+    sentEndData.sendingStatus = STATUS_NOK;
 
     if(cConnection != NULL &&
        request != NULL && requestType != NULL &&
@@ -330,16 +345,32 @@ SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                    
             // TODO: warning on efficiency ?
         }
 
-        // There is always a request header as first struct field in a request (safe cast)
-        timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
-        status = SC_Send_Request(cConnection,
-                                 requestType,
-                                 request,
-                                 responseType,
-                                 timeout,
-                                 (SC_ResponseEvent_CB*) cb,
-                                 cbData);
+        status = Mutex_Initialization(&sentEndData.endSendMutex);
+        if(STATUS_OK == status){
+            status = Mutex_Lock(&sentEndData.endSendMutex);
+        }
+        if(STATUS_OK == status){
+            // There is always a request header as first struct field in a request (safe cast)
+            timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
+            status = SC_CreateAction_Send_Request(cConnection,
+                                                  requestType,
+                                                  request,
+                                                  responseType,
+                                                  timeout,
+                                                  (SC_ResponseEvent_CB*) cb,
+                                                  cbData,
+                                                  SOPC_Channel_BeginInvokeService_EndOperation_CB,
+                                                  (void*) &sentEndData);
+        }
     }
+
+    if(STATUS_OK == status){
+        Mutex_Lock(&sentEndData.endSendMutex);
+        status = sentEndData.sendingStatus;
+    }
+    Mutex_Unlock(&sentEndData.endSendMutex);
+    Mutex_Clear(&sentEndData.endSendMutex);
+
     return status;
 }
 

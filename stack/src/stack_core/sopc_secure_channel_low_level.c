@@ -52,6 +52,8 @@ SC_Connection* SC_Create (TCP_UA_Connection* connection){
             SOPC_String_Initialize(&sConnection->currentSecuPolicy);
             SOPC_String_Initialize(&sConnection->precSecuPolicy);
 
+            SOPC_ActionQueue_Init(&sConnection->msgQueue);
+            sConnection->msgQueueToken = 1;
         }else{
             TCP_UA_Connection_Delete(connection);
         }
@@ -95,8 +97,44 @@ void SC_Delete (SC_Connection* scConnection){
         KeySet_Delete(scConnection->precSecuKeySets.senderKeySet);
         CryptoProvider_Free(scConnection->currentCryptoProvider);
         CryptoProvider_Free(scConnection->precCryptoProvider);
+        SOPC_ActionQueue_Free(&scConnection->msgQueue);
         free(scConnection);
     }
+}
+
+// SINGLE FUNCTION TO TAKE TOKEN
+void SC_Action_TreateMsgQueue(void* arg){
+    SC_Connection* scConnection = (SC_Connection*) arg;
+    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_ActionFunction* fctPointer = NULL;
+    void*                fctArgument = NULL;
+    const char*          actionText = NULL;
+    assert(NULL != scConnection);
+    if(FALSE != scConnection->msgQueueToken){
+        status = SOPC_Action_NonBlockingDequeue(scConnection->msgQueue,
+                                                &fctPointer,
+                                                &fctArgument,
+                                                &actionText);
+        if(STATUS_OK == status){
+            scConnection->msgQueueToken = FALSE; // Take the token
+            fctPointer(fctArgument); // Call the message treatment => treatment must call
+        }else if(OpcUa_BadWouldBlock == status){
+            status = STATUS_OK; // Nothing to treat, SC_TreatMsgQueue will be called once a new action is enqueued
+        }else{
+            status = STATUS_NOK;
+        }
+    } // else nothing to do, SC_TreatMsgQueue will be called once token is returned
+}
+
+// SINGLE FUNCTION TO RELEASE TOKEN
+void SC_CreateAction_ReleaseToken(SC_Connection* scConnection){
+    assert(NULL != scConnection);
+    assert(scConnection->msgQueueToken == FALSE);
+    scConnection->msgQueueToken = 1;
+    SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                      SC_Action_TreateMsgQueue,
+                                      (void*) scConnection,
+                                      "Releasing message queue token");
 }
 
 SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
@@ -1225,17 +1263,23 @@ void SOPC_OperationEnd_AbortMsg_CB(void* arg,
                                    SOPC_StatusCode sendingStatus)
 {
     SOPC_MsgBuffer* msgBuffer = (SOPC_MsgBuffer*) arg;
-    if(STATUS_OK != sendingStatus && msgBuffer != NULL){
+    assert(NULL != msgBuffer);
+    if(STATUS_OK != sendingStatus){
         MsgBuffer_Reset(msgBuffer);
     }
+    // In any case (success or failure of abort msg sending),
+    // release the request/response token
+    SC_CreateAction_ReleaseToken((SC_Connection*) msgBuffer->flushData);
 }
 
 SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
                             SOPC_StatusCode errorCode,
-                            SOPC_String*    reason)
+                            SOPC_String*    reason,
+                            uint8_t*        willReleaseMsgQueueToken)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(msgBuffer != NULL){
+    if(msgBuffer != NULL && willReleaseMsgQueueToken != NULL){
+        *willReleaseMsgQueueToken = FALSE;
         if(msgBuffer->nbChunks > 1 && reason != NULL){
             // At least one chunk has already been sent => abort message necessary
             // Set buffer position to body start (in case data was already written in it)
@@ -1254,6 +1298,7 @@ SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
                                                  (void*) msgBuffer);
             }
             if(STATUS_OK != status){
+                *willReleaseMsgQueueToken = 1; // Token will be released by SOPC_OperationEnd_AbortMsg_CB
                 MsgBuffer_Reset(msgBuffer);
             }
         }else{

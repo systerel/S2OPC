@@ -23,11 +23,12 @@
 void SOPC_OperationEnd_WriteSecure_CB(void*           arg,
                                       SOPC_StatusCode writeStatus){
     SOPC_MsgBuffer* msgBuffer = (SOPC_MsgBuffer*) arg;
+    uint8_t willReleaseMsgQueueToken = FALSE;
     if(STATUS_OK != writeStatus){
         SOPC_String reason;
         SOPC_String_Initialize(&reason);
         SOPC_String_AttachFromCstring(&reason, "Error encoding intermediate chunk");
-        SC_AbortMsg(msgBuffer, OpcUa_BadEncodingError, &reason);
+        SC_AbortMsg(msgBuffer, OpcUa_BadEncodingError, &reason, &willReleaseMsgQueueToken);
         SOPC_String_Clear(&reason);
     }
 }
@@ -38,6 +39,7 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
     SOPC_StatusCode status = STATUS_NOK;
     SOPC_String reason;
     SC_Connection* scConnection = NULL;
+    uint8_t willReleaseMsgQueueToken = FALSE;
     if(msgBuffer == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
@@ -71,7 +73,8 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                         status = OpcUa_BadResponseTooLarge;
                     }
                     SOPC_String_Initialize(&reason);
-                    SC_AbortMsg(msgBuffer, status, &reason);
+                    SC_AbortMsg(msgBuffer, status, &reason, &willReleaseMsgQueueToken);
+                    assert(willReleaseMsgQueueToken != FALSE);
                     SOPC_String_Clear(&reason);
                 }else{
                     // Fill buffer with maximum amount of bytes

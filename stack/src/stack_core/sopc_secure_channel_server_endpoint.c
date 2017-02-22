@@ -26,17 +26,23 @@
 #include "sopc_types.h"
 #include "sopc_encoder.h"
 #include "crypto_profiles.h"
-
-typedef struct SOPC_ServiceResponse_EndErrorData {
-    SC_Connection*       connection;
-    SOPC_EncodeableType* responseType;
-} SOPC_ServiceResponse_EndErrorData;
+#include "sopc_action_queue_manager.h"
 
 typedef struct TransportEvent_CallbackData {
     SC_ServerEndpoint* endpoint;
     SC_Connection*     scConnection;
     uint32_t           scConnectionId;
 } TransportEvent_CallbackData;
+
+typedef struct SOPC_Action_ServiceResponseSendData {
+    SC_ServerEndpoint*           sEndpoint;
+    SC_Connection*               scConnection;
+    uint32_t                     requestId;
+    SOPC_EncodeableType*         responseType;
+    void*                        response;
+    SOPC_Socket_EndOperation_CB* endSendCallback;
+    void*                        endSendCallbackData;
+} SOPC_Action_ServiceResponseSendData;
 
 TransportEvent_CallbackData* Create_TransportEventCbData(SC_ServerEndpoint* endpoint,
                                                          SC_Connection*     scConnection,
@@ -472,6 +478,7 @@ SOPC_StatusCode Send_OpenSecureChannelResponse(SC_Connection*               scCo
                                                void*                        callbackData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint8_t willReleaseMsgQueueToken = FALSE;
 
     if(scConnection != NULL){
         status = STATUS_OK;
@@ -508,7 +515,8 @@ SOPC_StatusCode Send_OpenSecureChannelResponse(SC_Connection*               scCo
 
     if(status != STATUS_OK){
         // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
-        SC_AbortMsg(scConnection->sendingBuffer, OpcUa_BadEncodingError, NULL);
+        SC_AbortMsg(scConnection->sendingBuffer, OpcUa_BadEncodingError, NULL, &willReleaseMsgQueueToken);
+        assert(willReleaseMsgQueueToken == FALSE); // Single chunk, no abort message to send
     }
 
     return status;
@@ -764,7 +772,8 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
 }
 
 void SOPC_OperationEnd_ServiceResponseError(SC_Connection*       connection,
-                                            SOPC_EncodeableType* responseType)
+                                            SOPC_EncodeableType* responseType,
+                                            uint8_t*             willReleaseToken)
 {
     SOPC_StatusCode localStatus = STATUS_OK;
     if(NULL != connection){
@@ -799,7 +808,7 @@ void SOPC_OperationEnd_ServiceResponseError(SC_Connection*       connection,
             pReason = &reason;
         }
 
-        SC_AbortMsg(connection->sendingBuffer, OpcUa_BadEncodingError, pReason);
+        SC_AbortMsg(connection->sendingBuffer, OpcUa_BadEncodingError, pReason, willReleaseToken);
 
         SOPC_String_Clear(&reason);
 
@@ -814,25 +823,42 @@ void SOPC_OperationEnd_ServiceResponseError(SC_Connection*       connection,
 void SOPC_OperationEnd_ServiceResponse_CB(void*           arg,
                                           SOPC_StatusCode sendingRespStatus)
 {
-    SOPC_ServiceResponse_EndErrorData* data = (SOPC_ServiceResponse_EndErrorData*) arg;
+    SOPC_Action_ServiceResponseSendData* data = (SOPC_Action_ServiceResponseSendData*) arg;
+    uint8_t willReleaseToken = FALSE;
     if(NULL != data){
         if(STATUS_OK != sendingRespStatus){
-            SOPC_OperationEnd_ServiceResponseError(data->connection,
-                                                   data->responseType);
+            SOPC_OperationEnd_ServiceResponseError(data->scConnection,
+                                                   data->responseType,
+                                                   &willReleaseToken);
         }
-    free(data);
+        if(FALSE == willReleaseToken){
+            SC_CreateAction_ReleaseToken((void*)data->scConnection);
+        }
+        data->endSendCallback(data->endSendCallbackData,
+                              sendingRespStatus);
+        free(data);
     }
 }
 
-
-SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
-                                 SC_Connection*       scConnection,
-                                 uint32_t             requestId,
-                                 SOPC_EncodeableType* responseType,
-                                 void*                response)
+void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SOPC_ServiceResponse_EndErrorData* data = NULL;
+    uint8_t willReleaseToken = FALSE;
+
+    SC_ServerEndpoint*   sEndpoint = NULL;
+    SC_Connection*       scConnection = NULL;
+    uint32_t             requestId = NULL;
+    SOPC_EncodeableType* responseType = NULL;
+    void*                response = NULL;
+
+    if(NULL != sendData){
+        sEndpoint = sendData->sEndpoint;
+        scConnection = sendData->scConnection;
+        requestId = sendData->requestId;
+        responseType = sendData->responseType;
+        response = sendData->response;
+    }
+
     if(sEndpoint != NULL &&
        scConnection != NULL &&
        responseType != NULL &&
@@ -847,33 +873,75 @@ SOPC_StatusCode SC_Send_Response(SC_ServerEndpoint*   sEndpoint,
                                         requestId);
 
         if(status == STATUS_OK){
-            data = malloc(sizeof(SOPC_ServiceResponse_EndErrorData));
-            if(NULL != data){
-                data->connection = scConnection;
-                data->responseType = responseType;
-            }
-
             // For now no next action to the socket writing to provide (except error ? => more for previous steps in Flush)
             status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final,
                                              SOPC_OperationEnd_ServiceResponse_CB,
-                                             (void*) data);
+                                             (void*) sendData);
         }
 
-        if(status != STATUS_OK){
+        if(STATUS_OK == status){
+            // Token will be released by SOPC_OperationEnd_ServiceResponse_CB
+            willReleaseToken = 1;
+        }else{
             SOPC_OperationEnd_ServiceResponseError(scConnection,
-                                                   responseType);
-            if(NULL != data){
-                // Only freed if status is OK since SOPC_OperationEnd_ServiceResponse_CB
-                // is called asynchronously later if status is OK
-                free(data);
-            }
+                                                   responseType,
+                                                   &willReleaseToken);
         }
 
         Mutex_Unlock(&sEndpoint->mutex);
     }
 
-    return status;
+    if(FALSE == willReleaseToken){
+        SC_CreateAction_ReleaseToken((void*)scConnection);
+    }
+}
 
+void SC_Action_Send_Response(void* arg){
+    SOPC_Action_ServiceResponseSendData* data = (SOPC_Action_ServiceResponseSendData*) arg;
+    assert(NULL != data);
+    SC_Send_Response(data);
+}
+
+SOPC_StatusCode SC_CreateAction_Send_Response(SC_ServerEndpoint*           sEndpoint,
+                                              SC_Connection*               scConnection,
+                                              uint32_t                     requestId,
+                                              SOPC_EncodeableType*         responseType,
+                                              void*                        response,
+                                              SOPC_Socket_EndOperation_CB* endSendCallback,
+                                              void*                        endSendCallbackData)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_Action_ServiceResponseSendData* data = NULL;
+    if(sEndpoint != NULL &&
+       scConnection != NULL &&
+       responseType != NULL &&
+       response != NULL)
+    {
+        status = STATUS_NOK;
+        data = malloc(sizeof(SOPC_Action_ServiceResponseSendData));
+        if(data != NULL){
+            data->sEndpoint = sEndpoint;
+            data->scConnection = scConnection;
+            data->requestId = requestId;
+            data->responseType = responseType;
+            data->response = response;
+            data->endSendCallback = endSendCallback;
+            data->endSendCallbackData = endSendCallbackData;
+            status = SOPC_Action_BlockingEnqueue(scConnection->msgQueue,
+                                                 SC_Action_Send_Response,
+                                                 (void*) data,
+                                                 "Send response");
+            if(STATUS_OK == status){
+                status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                                           SC_Action_TreateMsgQueue,
+                                                           (void*) scConnection,
+                                                           "Treat message queue due to new 'Send repsonse'");
+            }else{
+                free(data);
+            }
+        }
+    }
+    return status;
 }
 
 SOPC_StatusCode AcceptedNewConnection(SC_ServerEndpoint* sEndpoint,

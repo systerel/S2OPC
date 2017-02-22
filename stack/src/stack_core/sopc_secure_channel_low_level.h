@@ -84,6 +84,9 @@ typedef struct {
     uint32_t                  lastSeqNumReceived;
     uint32_t                  lastRequestIdSent;
     uint32_t                  secureChannelId;
+    /* Ensuring message sending atomicity on a connection */
+    SOPC_ActionQueue*         msgQueue;
+    uint8_t                   msgQueueToken; // Must be accessed by an action only (no concurrency): FALSE => not available / !=FALSE => available
 } SC_Connection;
 
 SC_Connection* SC_Create (TCP_UA_Connection* connection);
@@ -122,7 +125,8 @@ SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffer*      msgBuffer,
 
 SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
                             SOPC_StatusCode errorCode,
-                            SOPC_String*    reason);
+                            SOPC_String*    reason,
+                            uint8_t*        willReleaseMsgQueueToken);
 
 SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                                         const SOPC_Byte* data_src,
@@ -219,5 +223,10 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
                                SOPC_EncodeableType*  errEncType,
                                SOPC_EncodeableType** recEncType,
                                void**                encObj);
+
+// Added to treat messages to send through actions
+void SC_Action_TreateMsgQueue(void* arg);
+
+void SC_CreateAction_ReleaseToken(SC_Connection* scConnection);
 
 #endif /* SOPC_SECURE_CHANNEL_LOW_LEVEL_H_ */

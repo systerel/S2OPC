@@ -25,6 +25,7 @@
 #include "sopc_encoder.h"
 #include "sopc_types.h"
 #include "sopc_secure_channel_low_level.h"
+#include "sopc_action_queue_manager.h"
 
 typedef struct PendingRequest
 {
@@ -35,6 +36,20 @@ typedef struct PendingRequest
     SC_ResponseEvent_CB* callback;
     void*                callbackData;
 } PendingRequest;
+
+
+typedef struct SOPC_Action_ServiceRequestSendData {
+    SC_ClientConnection*         connection;
+    SOPC_EncodeableType*         requestType;
+    void*                        request;
+    SOPC_EncodeableType*         responseType;
+    uint32_t                     timeout;
+    SC_ResponseEvent_CB*         responseCallback;
+    void*                        responseCallbackData;
+    SOPC_Socket_EndOperation_CB* endSendCallback;
+    void*                        endSendCallbackData;
+} SOPC_Action_ServiceRequestSendData;
+
 
 PendingRequest* SC_PendingRequestCreate(uint32_t             requestId,
                                         SOPC_EncodeableType* responseType,
@@ -166,14 +181,30 @@ uint32_t GetNextRequestId(SC_Connection* scConnection){
 void SOPC_OperationEnd_RequestError(SC_ClientConnection* connection,
                                     SOPC_String*         reason,
                                     uint8_t              removeRequest,
-                                    uint32_t             requestId)
+                                    uint32_t             requestId,
+                                    SC_ResponseEvent_CB* callback,
+                                    void*                callbackData,
+                                    SOPC_StatusCode      status,
+                                    uint8_t*             willReleaseToken)
 {
     PendingRequest* pRequest = NULL;
     // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
-    SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, reason);
+    SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, reason, willReleaseToken);
     if(FALSE != removeRequest){
         pRequest = SLinkedList_RemoveFromId(connection->pendingRequests,requestId);
+        if(NULL == callback && NULL == callbackData){
+            //Retrieve from request
+            callback = pRequest->callback;
+            callbackData = pRequest->callbackData;
+        }
         SC_PendingRequestDelete(pRequest);
+    }
+
+    if(NULL != callback){
+        callback(connection,
+                 NULL, NULL,
+                 callbackData,
+                 status);
     }
 }
 
@@ -181,56 +212,72 @@ void SOPC_OperationEnd_OpenSecureChannelRequest_CB(void*           arg,
                                                    SOPC_StatusCode sendingReqStatus)
 {
     SC_ClientConnection* connection = (SC_ClientConnection*) arg;
+    uint8_t falseNoTokenReleaseNeeded = FALSE; // Only used once SC connected
+
     if(STATUS_OK != sendingReqStatus && NULL != connection){
         SOPC_OperationEnd_RequestError(connection,
                                        NULL, // No reason necessary there is only 1 chunk for OPN => no abort chunk to send
                                        1, // remove request
-                                       connection->lastPendingRequestInfo.requestId);
+                                       connection->lastPendingRequestInfo.requestId,
+                                       NULL, NULL, sendingReqStatus,
+                                       &falseNoTokenReleaseNeeded);
+        assert(falseNoTokenReleaseNeeded == FALSE);
     }
 }
 
 void SOPC_OperationEnd_ServiceRequestError(SC_ClientConnection* connection,
                                            SOPC_EncodeableType* requestType,
                                            uint8_t              removeRequest,
-                                           uint32_t             requestId)
+                                           uint32_t             requestId,
+                                           SC_ResponseEvent_CB* callback,
+                                           void*                callbackData,
+                                           SOPC_StatusCode      status,
+                                           uint8_t*             willReleaseToken)
 {
     SOPC_StatusCode localStatus = STATUS_OK;
     if(NULL != connection){
         SOPC_String reason;
         SOPC_String* pReason = NULL;
+        char* cReason = NULL;
         SOPC_String_Initialize(&reason);
 
-        char* cType = NULL;
-        if(requestType->TypeName != NULL){
-            cType = requestType->TypeName;
-        }else{
-            cType = "";
-        }
-
-        char* genericReason = "Error encoding chunk for request of type: ";
-        char* cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
-        if(cReason != NULL){
-            if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
-               &cReason[strlen(genericReason)] ==
-                memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
-                cReason[0] = '\0';
+        if(NULL != requestType){
+            char* cType = NULL;
+            if(requestType->TypeName != NULL){
+                cType = requestType->TypeName;
             }else{
-                free(cReason);
-                cReason = NULL;
+                cType = "";
             }
-        }
-        if(cReason != NULL){
-            localStatus = SOPC_String_AttachFromCstring(&reason, cReason);
-        }
 
-        if(STATUS_OK == localStatus){
-            pReason = &reason;
+            char* genericReason = "Error encoding chunk for request of type: ";
+            cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
+            if(cReason != NULL){
+                if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
+                   &cReason[strlen(genericReason)] ==
+                    memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
+                    cReason[0] = '\0';
+                }else{
+                    free(cReason);
+                    cReason = NULL;
+                }
+            }
+            if(cReason != NULL){
+                localStatus = SOPC_String_AttachFromCstring(&reason, cReason);
+            }
+
+            if(STATUS_OK == localStatus){
+                pReason = &reason;
+            }
         }
 
         SOPC_OperationEnd_RequestError(connection,
                                        pReason, // No reason necessary there is only 1 chunk for OPN => no abort chunk to send
                                        removeRequest, // remove request
-                                       requestId);
+                                       requestId,
+                                       callback,
+                                       callbackData,
+                                       status,
+                                       willReleaseToken);
 
         SOPC_String_Clear(&reason);
 
@@ -245,13 +292,25 @@ void SOPC_OperationEnd_ServiceRequestError(SC_ClientConnection* connection,
 void SOPC_OperationEnd_ServiceRequest_CB(void*           arg,
                                          SOPC_StatusCode sendingReqStatus)
 {
-    SC_ClientConnection* connection = (SC_ClientConnection*) arg;
+    assert(arg != NULL);
+    SOPC_Action_ServiceRequestSendData* sendRequestData = (SOPC_Action_ServiceRequestSendData*) arg;
+    SC_ClientConnection* connection = sendRequestData->connection;
+    uint8_t willReleaseToken = FALSE;
     if(STATUS_OK != sendingReqStatus){
         SOPC_OperationEnd_ServiceRequestError(connection,
                                               connection->lastPendingRequestInfo.requestType,
                                               1,
-                                              connection->lastPendingRequestInfo.requestId);
+                                              connection->lastPendingRequestInfo.requestId,
+                                              NULL, NULL, // callback and data to retrieve in pending request
+                                              sendingReqStatus,
+                                              &willReleaseToken);
     }
+    if(FALSE == willReleaseToken){
+        SC_CreateAction_ReleaseToken((void*)connection->instance);
+    }
+    sendRequestData->endSendCallback(sendRequestData->endSendCallbackData,
+                                     sendingReqStatus);
+    free(sendRequestData);
 }
 
 SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
@@ -340,6 +399,7 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t requestId = 0;
     PendingRequest* pRequest = NULL;
+    uint8_t falseNoTokenReleaseNeeded = FALSE; // Only used once SC connected
 
     if(cConnection != NULL){
         status = STATUS_OK;
@@ -425,7 +485,11 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
         SOPC_OperationEnd_RequestError(cConnection,
                                        NULL, // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
                                        removeRequest,
-                                       requestId);
+                                       requestId,
+                                       NULL, NULL,
+                                       status,
+                                       &falseNoTokenReleaseNeeded);
+        assert(falseNoTokenReleaseNeeded == FALSE);
     }
 
     return status;
@@ -965,17 +1029,30 @@ SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
     return status;
 }
 
-SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
-                                SOPC_EncodeableType* requestType,
-                                void*                request,
-                                SOPC_EncodeableType* responseType,
-                                uint32_t             timeout,
-                                SC_ResponseEvent_CB* callback,
-                                void*                callbackData)
+void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     PendingRequest* pRequest = NULL;
+    uint8_t willReleaseToken = FALSE;
     uint32_t requestId = 0;
+    SC_ClientConnection* connection = NULL;
+    SOPC_EncodeableType* requestType = NULL;
+    void*                request = NULL;
+    SOPC_EncodeableType* responseType = NULL;
+    uint32_t             timeout = NULL;
+    SC_ResponseEvent_CB* callback = NULL;
+    void*                callbackData = NULL;
+
+    if(NULL != sendRequestData){
+        connection = sendRequestData->connection;
+        requestType = sendRequestData->requestType;
+        request = sendRequestData->request;
+        responseType = sendRequestData->responseType;
+        timeout = sendRequestData->timeout;
+        callback = sendRequestData->responseCallback;
+        callbackData = sendRequestData->responseCallbackData;
+    }
+
     if(connection != NULL &&
        requestType != NULL &&
        request != NULL)
@@ -1008,24 +1085,92 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
 
             if(status == STATUS_OK){
                 status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, SOPC_Msg_Chunk_Final,
-                        SOPC_OperationEnd_ServiceRequest_CB, (void*) connection);
+                                                 SOPC_OperationEnd_ServiceRequest_CB, (void*) sendRequestData);
             }
 
-            if(status != STATUS_OK){
+            if(STATUS_OK == status){
+                // Token will be released by SOPC_OperationEnd_ServiceRequest_CB
+                willReleaseToken = 1;
+            }else{
                 uint8_t removeRequest = FALSE;
                 if(NULL != pRequest){
                     removeRequest = 1;
                 }
 
                 SOPC_OperationEnd_ServiceRequestError(connection,
-                        requestType,
-                        removeRequest,
-                        requestId);
+                                                      requestType,
+                                                      removeRequest,
+                                                      requestId,
+                                                      callback,
+                                                      callbackData,
+                                                      status,
+                                                      &willReleaseToken);
             }
+        }else{
+            // != Connected
+            status = OpcUa_BadServerNotConnected;
+            callback(connection,
+                     NULL, NULL,
+                     callbackData,
+                     status);
         }
+
         Mutex_Unlock(&connection->mutex);
     }
 
-    return status;
-
+    if(FALSE == willReleaseToken){
+        SC_CreateAction_ReleaseToken((void*)connection->instance);
+    }
 }
+
+void SC_Action_Send_Request(void* arg){
+    SOPC_Action_ServiceRequestSendData* data = (SOPC_Action_ServiceRequestSendData*) arg;
+    assert(NULL != data);
+    SC_Send_Request(data);
+}
+
+SOPC_StatusCode SC_CreateAction_Send_Request(SC_ClientConnection*         connection,
+                                             SOPC_EncodeableType*         requestType,
+                                             void*                        request,
+                                             SOPC_EncodeableType*         responseType,
+                                             uint32_t                     timeout,
+                                             SC_ResponseEvent_CB*         callback,
+                                             void*                        callbackData,
+                                             SOPC_Socket_EndOperation_CB* endSendCallback,
+                                             void*                        endSendCallbackData)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_Action_ServiceRequestSendData* data = NULL;
+    if(connection != NULL &&
+            requestType != NULL &&
+            request != NULL)
+    {
+        status = STATUS_NOK;
+        data = malloc(sizeof(SOPC_Action_ServiceRequestSendData));
+        if(data != NULL){
+            data->connection = connection;
+            data->requestType = requestType;
+            data->request = request;
+            data->responseType = responseType;
+            data->timeout = timeout;
+            data->responseCallback = callback;
+            data->responseCallbackData = callbackData;
+            data->endSendCallback = endSendCallback;
+            data->endSendCallbackData = endSendCallbackData;
+            status = SOPC_Action_BlockingEnqueue(connection->instance->msgQueue,
+                                                 SC_Action_Send_Request,
+                                                 (void*) data,
+                                                 "Send request");
+            if(STATUS_OK == status){
+                status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                                           SC_Action_TreateMsgQueue,
+                                                           (void*) connection->instance,
+                                                           "Treat message queue due to new 'Send request'");
+            }else{
+                free(data);
+            }
+        }
+    }
+    return status;
+}
+
