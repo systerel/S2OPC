@@ -168,7 +168,7 @@ SOPC_StatusCode OpcUa_Server_BeginFindServers(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -319,7 +319,7 @@ SOPC_StatusCode OpcUa_Server_BeginFindServersOnNetwork(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -469,7 +469,7 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -597,7 +597,7 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterServer(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -748,7 +748,7 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterServer2(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -948,7 +948,7 @@ SOPC_StatusCode OpcUa_Server_BeginCreateSession(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -1118,7 +1118,7 @@ SOPC_StatusCode OpcUa_Server_BeginActivateSession(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -1246,7 +1246,7 @@ SOPC_StatusCode OpcUa_Server_BeginCloseSession(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -1378,7 +1378,7 @@ SOPC_StatusCode OpcUa_Server_BeginCancel(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -1525,7 +1525,7 @@ SOPC_StatusCode OpcUa_Server_BeginAddNodes(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -1672,7 +1672,7 @@ SOPC_StatusCode OpcUa_Server_BeginAddReferences(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -1819,7 +1819,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteNodes(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -1966,7 +1966,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteReferences(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -2121,7 +2121,7 @@ SOPC_StatusCode OpcUa_Server_BeginBrowse(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -2272,7 +2272,7 @@ SOPC_StatusCode OpcUa_Server_BeginBrowseNext(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -2419,7 +2419,7 @@ SOPC_StatusCode OpcUa_Server_BeginTranslateBrowsePathsToNodeIds(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -2558,7 +2558,7 @@ SOPC_StatusCode OpcUa_Server_BeginRegisterNodes(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -2689,7 +2689,7 @@ SOPC_StatusCode OpcUa_Server_BeginUnregisterNodes(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -2868,7 +2868,7 @@ SOPC_StatusCode OpcUa_Server_BeginQueryFirst(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -3012,7 +3012,7 @@ SOPC_StatusCode OpcUa_Server_BeginQueryNext(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -3167,7 +3167,7 @@ SOPC_StatusCode OpcUa_Server_BeginRead(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -3326,7 +3326,7 @@ SOPC_StatusCode OpcUa_Server_BeginHistoryRead(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -3473,7 +3473,7 @@ SOPC_StatusCode OpcUa_Server_BeginWrite(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -3620,7 +3620,7 @@ SOPC_StatusCode OpcUa_Server_BeginHistoryUpdate(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -3767,7 +3767,7 @@ SOPC_StatusCode OpcUa_Server_BeginCall(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -3922,7 +3922,7 @@ SOPC_StatusCode OpcUa_Server_BeginCreateMonitoredItems(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -4077,7 +4077,7 @@ SOPC_StatusCode OpcUa_Server_BeginModifyMonitoredItems(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -4232,7 +4232,7 @@ SOPC_StatusCode OpcUa_Server_BeginSetMonitoringMode(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -4410,7 +4410,7 @@ SOPC_StatusCode OpcUa_Server_BeginSetTriggering(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -4561,7 +4561,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteMonitoredItems(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -4725,7 +4725,7 @@ SOPC_StatusCode OpcUa_Server_BeginCreateSubscription(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -4885,7 +4885,7 @@ SOPC_StatusCode OpcUa_Server_BeginModifySubscription(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -5036,7 +5036,7 @@ SOPC_StatusCode OpcUa_Server_BeginSetPublishingMode(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -5203,7 +5203,7 @@ SOPC_StatusCode OpcUa_Server_BeginPublish(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -5339,7 +5339,7 @@ SOPC_StatusCode OpcUa_Server_BeginRepublish(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -5490,7 +5490,7 @@ SOPC_StatusCode OpcUa_Server_BeginTransferSubscriptions(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
@@ -5637,7 +5637,7 @@ SOPC_StatusCode OpcUa_Server_BeginDeleteSubscriptions(
         if(faultStatus == STATUS_OK){
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &pResponse,
+                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
                                                      &a_hContext);
         }
     }
