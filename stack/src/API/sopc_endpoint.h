@@ -39,7 +39,7 @@ typedef void* SOPC_Endpoint;
 /**
  *  \brief Request context type necessary to for sending service Response
  */
-struct SOPC_RequestContext;
+typedef struct SOPC_RequestContext SOPC_RequestContext;
 
 /**
  *  \brief Endpoint serialization enumeration type
@@ -163,6 +163,21 @@ SOPC_StatusCode SOPC_Endpoint_Open(SOPC_Endpoint          endpoint,
                                    SOPC_SecurityPolicy*   secuConfigurations);
 
 /**
+ *  \brief Instantiate a response and set response type for the given request context
+ *
+ *  \param endpoint       The endpoint which sends a response
+ *  \param context        The request context to use for response elements instantiation
+ *  \param responseType   The encodeable type of the response to send
+ *  \param response       The instance of response message to send
+ *
+ *  \return               STATUS_OK if response elements instantiation succeeded, STATUS_NOK otherwise
+ */
+SOPC_StatusCode SOPC_Endpoint_CreateResponse(SOPC_Endpoint         endpoint,
+                                             SOPC_RequestContext*  context,
+                                             void**                response,
+                                             SOPC_EncodeableType** responseType);
+
+/**
  *  \brief Send a service response message to the client which sent a request
  *
  *  \param endpoint       The endpoint which sends a response
@@ -171,7 +186,7 @@ SOPC_StatusCode SOPC_Endpoint_Open(SOPC_Endpoint          endpoint,
  *  \param requestContext The request context to use for sending the response
  *                        (provided by the call to SOPC_BeginInvokeService function instance)
  *
- *  \return            STATUS_OK if response was sent correctly, STATUS_NOK otherwise
+ *  \return               STATUS_OK if response sending is in progression, STATUS_NOK otherwise
  */
 SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint,
                                            SOPC_EncodeableType*         responseType,
@@ -179,8 +194,8 @@ SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint
                                            struct SOPC_RequestContext** requestContext);
 
 /**
- *  \brief Abort a service response to the client which sent a request.
- *  In case chunks for the service response were already sent, it sends an abort chunk message.
+ *  \brief Cancel sending response to client. Must be called before call to SOPC_Endpoint_EndSendResponse.
+ *  Note: only used to free the request context correctly.
  *
  *  \param endpoint       The endpoint which aborts a response
  *  \param errorCode      The error that caused the abort response
@@ -190,10 +205,10 @@ SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint
  *
  *  \return            STATUS_OK if abort was successful, STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_Endpoint_AbortResponse(SOPC_Endpoint                endpoint,
-                                            SOPC_StatusCode              errorCode,
-                                            SOPC_String*                 reason,
-                                            struct SOPC_RequestContext** requestContext);
+SOPC_StatusCode SOPC_Endpoint_CancelSendResponse(SOPC_Endpoint         endpoint,
+                                                 SOPC_StatusCode       errorCode,
+                                                 SOPC_String*          reason,
+                                                 SOPC_RequestContext** requestContext);
 
 /**
  *  \brief Close the endpoint. The endpoint closes the active connections and does not listen

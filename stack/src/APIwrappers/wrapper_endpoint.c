@@ -201,14 +201,14 @@ void OpcUa_Endpoint_Delete(SOPC_Endpoint* endpoint){
 }
 
 SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelId(SOPC_Endpoint               endpoint,
-                                                         struct SOPC_RequestContext* context,
+                                                         SOPC_RequestContext* context,
                                                          uint32_t*                   secureChannelId){
     (void) endpoint;
     return SOPC_Endpoint_GetContextSecureChannelId(context, secureChannelId);
 }
 
 SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelSecurityPolicy(SOPC_Endpoint               endpoint,
-                                                                     struct SOPC_RequestContext* context,
+                                                                     SOPC_RequestContext* context,
                                                                      SOPC_SecurityPolicy*        securityPolicy){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_MessageSecurityMode secuMode = OpcUa_MessageSecurityMode_Invalid;
@@ -369,15 +369,10 @@ SOPC_StatusCode OpcUa_Endpoint_BeginSendResponse(SOPC_Endpoint         endpoint,
                                                  void*                 context,
                                                  void**                response,
                                                  SOPC_EncodeableType** responseType){
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    (void) endpoint;
-    if(context != NULL && response != NULL && responseType != NULL){
-        status = SOPC_Endpoint_GetContextResponseType(context, responseType);
-        if(STATUS_OK == status){
-            status = OpcUa_EncodeableObject_Create(*responseType, response);
-        }
-    }
-    return status;
+    return SOPC_Endpoint_CreateResponse(endpoint,
+                                        (SOPC_RequestContext*) context,
+                                        response,
+                                        responseType);
 }
 
 SOPC_StatusCode OpcUa_Endpoint_EndSendResponse(SOPC_Endpoint        endpoint,
@@ -390,10 +385,8 @@ SOPC_StatusCode OpcUa_Endpoint_EndSendResponse(SOPC_Endpoint        endpoint,
         status = SOPC_Endpoint_SendResponse(endpoint,
                                             responseType,
                                             response,
-                                            (struct SOPC_RequestContext**) context);
-    }
-
-    if(status != STATUS_OK){
+                                            (SOPC_RequestContext**) context);
+    }else{
         OpcUa_Endpoint_CancelSendResponse(endpoint,
                                           statusCode,
                                           NULL,
@@ -407,13 +400,13 @@ SOPC_StatusCode OpcUa_Endpoint_CancelSendResponse(SOPC_Endpoint        endpoint,
                                                   SOPC_String*         reason,
                                                   void**               context){
 
-    return SOPC_Endpoint_AbortResponse(endpoint, statusCode, reason, (struct SOPC_RequestContext**) context);
+    return SOPC_Endpoint_CancelSendResponse(endpoint, statusCode, reason, (SOPC_RequestContext**) context);
 }
 
 SOPC_StatusCode OpcUa_Endpoint_GetServiceFunction(SOPC_Endpoint        endpoint,
                                                   void*                context,
                                                   SOPC_InvokeService** invokeService){
-    return SOPC_Endpoint_GetServiceFunction(endpoint, (struct SOPC_RequestContext*) context, invokeService);
+    return SOPC_Endpoint_GetServiceFunction(endpoint, (SOPC_RequestContext*) context, invokeService);
 }
 
 SOPC_StatusCode OpcUa_Endpoint_UpdateServiceFunctions(SOPC_Endpoint            endpoint,

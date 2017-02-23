@@ -24,6 +24,7 @@
 #include "sopc_secure_channel_server_endpoint.h"
 #include "sopc_stack_config.h"
 #include "sopc_serverapi.h"
+#include "sopc_encodeable.h"
 #include "opcua_statuscodes.h"
 
 typedef struct {
@@ -31,11 +32,11 @@ typedef struct {
     void*                  callbackData;
 } SOPC_InternalEndpoint_CallbackData;
 
-typedef struct SOPC_RequestContext {
+struct SOPC_RequestContext {
     SC_Connection*    scConnection;
     uint32_t          requestId;
     SOPC_ServiceType* service;
-} SOPC_RequestContext;
+};
 
 typedef struct {
     Mutex           endSendMutex;
@@ -274,10 +275,29 @@ void SOPC_Endpoint_EndSendResponse_CB(void*           callbackData,
     Mutex_Unlock(&sentEndData->endSendMutex);
 }
 
-SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint,
-                                           SOPC_EncodeableType*         responseType,
-                                           void*                        response,
-                                           struct SOPC_RequestContext** requestContext){
+SOPC_StatusCode SOPC_Endpoint_CreateResponse(SOPC_Endpoint         endpoint,
+                                             SOPC_RequestContext*  context,
+                                             void**                response,
+                                             SOPC_EncodeableType** responseType){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    (void) endpoint;
+    if(context != NULL && response != NULL && responseType != NULL){
+        status = STATUS_OK;
+        if(NULL == *responseType){
+            status = SOPC_Endpoint_GetContextResponseType(context, responseType);
+        }
+        if(STATUS_OK == status){
+            status = SOPC_Encodeable_Create(*responseType, response);
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint         endpoint,
+                                           SOPC_EncodeableType*  responseType,
+                                           void*                 response,
+                                           SOPC_RequestContext** requestContext)
+{
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_RequestContext* context = NULL;
     SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
@@ -294,12 +314,12 @@ SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint
 
         if(STATUS_OK == status){
             status = SC_CreateAction_Send_Response(sEndpoint,
-                                                  context->scConnection,
-                                                  context->requestId,
-                                                  responseType,
-                                                  response,
-                                                  SOPC_Endpoint_EndSendResponse_CB,
-                                                  (void*) &endSendResponse);
+                                                   context->scConnection,
+                                                   context->requestId,
+                                                   responseType,
+                                                   response,
+                                                   SOPC_Endpoint_EndSendResponse_CB,
+                                                   (void*) &endSendResponse);
         }
         // Deallocate request context now send response is sent
         SOPC_Delete_EndpointRequestContext(context);
@@ -316,26 +336,17 @@ SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint
     return status;
 }
 
-SOPC_StatusCode SOPC_Endpoint_AbortResponse(SOPC_Endpoint                endpoint,
-                                            SOPC_StatusCode              errorCode,
-                                            SOPC_String*                 reason,
-                                            struct SOPC_RequestContext** requestContext){
-    // TODO: check what to do, we do not need to send an abort msg since we send a msg atomically.
-    //       Only deleting context ?
-    return STATUS_NOK;
-//    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-//    SOPC_RequestContext* context = NULL;
-//    SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
-//    if(sEndpoint != NULL && requestContext != NULL && *requestContext != NULL && reason != NULL){
-//        context = (SOPC_RequestContext*) *requestContext;
-//        status = SC_AbortMsg(context->scConnection->sendingBuffer,
-//                             errorCode,
-//                             reason);
-//        // Deallocate request context now response is aborted
-//        SOPC_Delete_EndpointRequestContext(context);
-//        *requestContext = NULL;
-//    }
-//    return status;
+SOPC_StatusCode SOPC_Endpoint_CancelSendResponse(SOPC_Endpoint                endpoint,
+                                                 SOPC_StatusCode              errorCode,
+                                                 SOPC_String*                 reason,
+                                                 SOPC_RequestContext**        requestContext)
+{
+    (void) endpoint;
+    (void) errorCode;
+    (void) reason;
+    SOPC_Delete_EndpointRequestContext(*requestContext);
+    *requestContext = NULL;
+    return STATUS_OK;
 }
 
 SOPC_StatusCode SOPC_Endpoint_Close(SOPC_Endpoint endpoint){
