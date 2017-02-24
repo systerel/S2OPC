@@ -25,6 +25,7 @@
 #include "sopc_secure_channel_client_connection.h"
 #include "sopc_stack_config.h"
 #include "sopc_run.h"
+#include "sopc_action_queue_manager.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -32,6 +33,10 @@
 typedef struct {
     SOPC_Channel_PfnConnectionStateChanged* callback;
     void*                                   callbackData;
+    SOPC_Channel                            channel;
+    SOPC_Channel_Event                      event;
+    SOPC_StatusCode                         status;
+    // Internal use for synchronous connect
     uint8_t                                 connectedFlag;
     uint8_t                                 disconnectedFlag;
 } SOPC_InternalChannel_CallbackData;
@@ -42,12 +47,18 @@ typedef struct {
 } SOPC_InternalChannel_EndBeginInvokeData;
 
 SOPC_InternalChannel_CallbackData* SOPC_Create_ChannelCallbackData(SOPC_Channel_PfnConnectionStateChanged* callback,
-                                                                   void*                                   callbackData)
+                                                                   void*                                   callbackData,
+                                                                   SOPC_Channel                            channel,
+                                                                   SOPC_Channel_Event                      event,
+                                                                   SOPC_StatusCode                         status)
 {
     SOPC_InternalChannel_CallbackData* result = malloc(sizeof(SOPC_InternalChannel_CallbackData));
     if(result != NULL){
         result->callback = callback;
         result->callbackData = callbackData;
+        result->channel = channel;
+        result->event = event;
+        result->status = status;
         result->connectedFlag = FALSE;
         result->disconnectedFlag = FALSE;
     }
@@ -60,18 +71,38 @@ void SOPC_Delete_ChannelCallbackData(SOPC_InternalChannel_CallbackData* chCbData
     }
 }
 
+void SOPC_Action_ChannelCallback(void* arg){
+    assert(NULL != arg);
+    SOPC_InternalChannel_CallbackData* cbData = (SOPC_InternalChannel_CallbackData*) arg;
+    cbData->callback(cbData->channel,
+                     cbData->callbackData,
+                     cbData->event,
+#ifdef STACK_1_02
+                           NULL,
+#endif
+                     cbData->status);
+}
+
 // TODO: "atomic" callbackData for multithreading
 typedef struct {
-    void*                response;
-    SOPC_EncodeableType* responseType;
-    SOPC_StatusCode      status;
+    SOPC_Channel                     channel;
+    void*                            response;
+    SOPC_EncodeableType*             responseType;
+    SOPC_Channel_PfnRequestComplete* cb;
+    void*                            cbData;
+    SOPC_StatusCode                  status;
 } InvokeCallbackData;
 
-InvokeCallbackData* Create_InvokeCallbackData(){
+InvokeCallbackData* Create_InvokeCallbackData(SOPC_Channel                     channel,
+                                              SOPC_Channel_PfnRequestComplete* cb,
+                                              void*                            cbData){
     InvokeCallbackData* result = malloc(sizeof(InvokeCallbackData));
+    result->channel = channel;
+    result->cb = cb;
+    result->cbData =cbData;
     result->response = NULL;
     result->responseType = NULL;
-    result->status = STATUS_OK;
+    result->status = STATUS_NOK;
     return result;
 }
 
@@ -99,6 +130,38 @@ void Delete_InvokeCallbackData(InvokeCallbackData* invCbData){
     }
 }
 
+
+void SOPC_Action_AppCallback(void* arg){
+    assert(NULL != arg);
+    InvokeCallbackData* appCbData = (InvokeCallbackData*) arg;
+    appCbData->cb(appCbData->channel,
+                  appCbData->response,
+                  appCbData->responseType,
+                  appCbData->cbData,
+                  appCbData->status);
+    Delete_InvokeCallbackData(appCbData);
+}
+
+SOPC_StatusCode SOPC_CreateAction_AppCallback(SOPC_Channel         channel,
+                                              void*                response,
+                                              SOPC_EncodeableType* responseType,
+                                              void*                cbData,
+                                              SOPC_StatusCode      status){
+    SOPC_StatusCode retStatus = STATUS_INVALID_PARAMETERS;
+    (void) channel;
+    InvokeCallbackData* appCbData = (InvokeCallbackData*) cbData;
+    if(appCbData != NULL){
+        retStatus = STATUS_OK;
+        Set_InvokeCallbackData(appCbData,
+                               response, responseType,
+                               status);
+        retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
+                                                      SOPC_Action_AppCallback,
+                                                      (void*) appCbData,
+                                                      "Channel invoke service response applicative callback");
+    }
+    return retStatus;
+}
 
 SOPC_StatusCode SOPC_Channel_Create(SOPC_Channel*               channel,
                                     SOPC_Channel_SerializerType serialType){
@@ -132,8 +195,8 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
                                     void*                cbData,
                                     SC_ConnectionEvent   event,
                                     SOPC_StatusCode      status){
+    (void) cConnection;
     SOPC_StatusCode retStatus = STATUS_INVALID_PARAMETERS;
-    SOPC_Channel channel = (SOPC_Channel) cConnection;
     SOPC_InternalChannel_CallbackData* callbackData = cbData;
     SOPC_Channel_Event channelConnectionEvent = SOPC_ChannelEvent_Invalid;
 
@@ -171,13 +234,12 @@ SOPC_StatusCode ChannelConnectionCB(SC_ClientConnection* cConnection,
         case SOPC_ChannelEvent_Disconnected:
             if(callbackData != NULL && callbackData->callback != NULL)
             {
-                retStatus = callbackData->callback(channel,
-                                                   callbackData->callbackData,
-                                                   channelConnectionEvent,
-#ifdef STACK_1_02
-                                                   NULL,
-#endif
-                                                   status);
+                callbackData->event = channelConnectionEvent;
+                callbackData->status = status;
+                retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
+                                                              SOPC_Action_ChannelCallback,
+                                                              (void*) callbackData,
+                                                              "Channel event applicative callback");
             }
     }
     return retStatus;
@@ -195,7 +257,7 @@ SOPC_StatusCode SOPC_Channel_InternalBeginConnect(SOPC_Channel                  
                                                   uint32_t                                networkTimeout,
                                                   SOPC_Channel_PfnConnectionStateChanged* cb,
                                                   void*                                   cbData,
-                                                  SOPC_InternalChannel_CallbackData**                  channelCbData)
+                                                  SOPC_InternalChannel_CallbackData**     channelCbData)
 {
     assert(channelCbData != NULL);
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -219,7 +281,11 @@ SOPC_StatusCode SOPC_Channel_InternalBeginConnect(SOPC_Channel                  
                                          StackConfiguration_GetNamespaces(),
                                          StackConfiguration_GetEncodeableTypes());
             if(status == STATUS_OK){
-                *channelCbData = SOPC_Create_ChannelCallbackData(cb, cbData);
+                *channelCbData = SOPC_Create_ChannelCallbackData(cb,
+                                                                 cbData,
+                                                                 channel,
+                                                                 SOPC_ChannelEvent_Invalid,
+                                                                 STATUS_NOK);
                 if(*channelCbData == NULL){
                     status = STATUS_NOK;
                 }
@@ -232,7 +298,8 @@ SOPC_StatusCode SOPC_Channel_InternalBeginConnect(SOPC_Channel                  
                                            msgSecurityMode,
                                            reqSecuPolicyUri,
                                            requestedLifetime,
-                                           ChannelConnectionCB, *channelCbData);
+                                           ChannelConnectionCB,
+                                           *channelCbData);
             }
         }
     }
@@ -321,13 +388,13 @@ void SOPC_Channel_BeginInvokeService_EndOperation_CB(void*           callbackDat
     Mutex_Unlock(&sentEndData->endSendMutex);
 }
 
-SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                     channel,
-                                                char*                            debugName,
-                                                void*                            request,
-                                                SOPC_EncodeableType*             requestType,
-                                                SOPC_EncodeableType*             responseType,
-                                                SOPC_Channel_PfnRequestComplete* cb,
-                                                void*                            cbData)
+SOPC_StatusCode SOPC_Channel_InternalBeginInvokeService(SOPC_Channel                     channel,
+                                                        char*                            debugName,
+                                                        void*                            request,
+                                                        SOPC_EncodeableType*             requestType,
+                                                        SOPC_EncodeableType*             responseType,
+                                                        SOPC_Channel_PfnRequestComplete* cb,// Must create an action if applicative callback to call
+                                                        void*                            cbData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
@@ -373,6 +440,32 @@ SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                    
     return status;
 }
 
+
+SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                     channel,
+                                                char*                            debugName,
+                                                void*                            request,
+                                                SOPC_EncodeableType*             requestType,
+                                                SOPC_EncodeableType*             responseType,
+                                                SOPC_Channel_PfnRequestComplete* cb,
+                                                void*                            cbData)
+{
+    SOPC_StatusCode status = STATUS_NOK;
+    InvokeCallbackData* appCallbackData = Create_InvokeCallbackData(channel,
+                                                                    cb,
+                                                                    cbData);
+    if(NULL != appCallbackData){
+        status = SOPC_Channel_InternalBeginInvokeService(channel,
+                                                         debugName,
+                                                         request,
+                                                         requestType,
+                                                         responseType,
+                                                         SOPC_CreateAction_AppCallback,
+                                                         appCallbackData);
+    }
+
+    return status;
+}
+
 SOPC_StatusCode InvokeRequestCompleteCallback(SOPC_Channel         channel,
                                               void*                response,
                                               SOPC_EncodeableType* responseType,
@@ -406,7 +499,9 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     uint32_t timeout = 0;
-    InvokeCallbackData* invCallbackData = Create_InvokeCallbackData();
+    InvokeCallbackData* invCallbackData = Create_InvokeCallbackData(channel,
+                                                                    NULL, // No application callback here, only need receive "flag" to stop
+                                                                    NULL);
 
     if(cConnection != NULL &&
        request != NULL && requestType != NULL &&
@@ -414,12 +509,12 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
         if(invCallbackData != NULL){
             // There is always a request header as first struct field in a request (safe cast)
             timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
-            status = SOPC_Channel_BeginInvokeService(channel,
-                                                     debugName,
-                                                     request, requestType,
-                                                     expResponseType,
-                                                     InvokeRequestCompleteCallback,
-                                                     invCallbackData);
+            status = SOPC_Channel_InternalBeginInvokeService(channel,
+                                                             debugName,
+                                                             request, requestType,
+                                                             expResponseType,
+                                                             InvokeRequestCompleteCallback,
+                                                             invCallbackData);
         }else{
             status = STATUS_NOK;
         }
