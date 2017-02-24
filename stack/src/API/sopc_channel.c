@@ -24,7 +24,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_secure_channel_client_connection.h"
 #include "sopc_stack_config.h"
-#include "sopc_threads.h"
+#include "sopc_run.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -296,8 +296,7 @@ SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            cha
 #else
         // TODO: will retrieve any message: is it a problem ?
         // Retrieve received messages on socket
-        status = SOPC_SocketManager_Loop (SOPC_SocketManager_GetGlobal(),
-                                          sleepTimeout);
+        status = SOPC_TreatReceivedMessages(sleepTimeout);
 #endif //OPCUA_MULTITHREADED
         if(internalCbData->connectedFlag != FALSE){
             receivedEvent = 1; // True
@@ -444,8 +443,7 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
         // TODO: will retrieve any message: is it a problem ?
         // TODO: time waited is not valid anymore if we receive other messages than expected !
         // Retrieve received messages on socket
-        status = SOPC_SocketManager_Loop (SOPC_SocketManager_GetGlobal(),
-                                          waitTimeoutMilliSecs);
+        status = SOPC_TreatReceivedMessages(waitTimeoutMilliSecs);
 #endif //OPCUA_MULTITHREADED
         status = Get_InvokeCallbackData(invCallbackData,
                                         response,
