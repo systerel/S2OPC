@@ -28,7 +28,7 @@ void SOPC_OperationEnd_WriteSecure_CB(void*           arg,
         SOPC_String reason;
         SOPC_String_Initialize(&reason);
         SOPC_String_AttachFromCstring(&reason, "Error encoding intermediate chunk");
-        SC_AbortMsg(msgBuffer, OpcUa_BadEncodingError, &reason, &willReleaseMsgQueueToken);
+        SC_AbortMsg(msgBuffer, msgBuffer->msgRequestId, OpcUa_BadEncodingError, &reason, &willReleaseMsgQueueToken);
         SOPC_String_Clear(&reason);
     }
 }
@@ -40,6 +40,8 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
     SOPC_String reason;
     SC_Connection* scConnection = NULL;
     uint8_t willReleaseMsgQueueToken = FALSE;
+    SOPC_Socket_Transaction_Event transactionEvent = SOCKET_TRANSACTION_START; // For first chunk
+
     if(msgBuffer == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
@@ -73,7 +75,7 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                         status = OpcUa_BadResponseTooLarge;
                     }
                     SOPC_String_Initialize(&reason);
-                    SC_AbortMsg(msgBuffer, status, &reason, &willReleaseMsgQueueToken);
+                    SC_AbortMsg(msgBuffer, msgBuffer->msgRequestId, status, &reason, &willReleaseMsgQueueToken);
                     assert(willReleaseMsgQueueToken != FALSE);
                     SOPC_String_Clear(&reason);
                 }else{
@@ -89,9 +91,13 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                         count = count - tmpCount;
                         data_src = data_src + tmpCount;
 
-                        // For now no next action to the socket writing to provide (except error ? => more for previous steps in Flush)
+                        if(msgBuffer->nbChunks > 1){
+                            transactionEvent = SOCKET_TRANSACTION_CONTINUE; // Not the first chunk, nor the last
+                        }
+
                         status = SC_FlushSecureMsgBuffer(msgBuffer,
                                                          SOPC_Msg_Chunk_Intermediate,
+                                                         transactionEvent, msgBuffer->msgRequestId,
                                                          SOPC_OperationEnd_WriteSecure_CB,
                                                          (void*) msgBuffer);
                     }

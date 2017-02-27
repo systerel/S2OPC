@@ -50,16 +50,34 @@ typedef SOPC_StatusCode (SOPC_Socket_EventCB) (struct SOPC_Socket* socket,
                                                uint32_t            socketEvent,
                                                void*               cbData);
 
+typedef enum {
+    SOCKET_TRANSACTION_START,
+    SOCKET_TRANSACTION_CONTINUE,
+    SOCKET_TRANSACTION_END,
+    SOCKET_TRANSACTION_SOCKET_ERROR, // on socket use
+    SOCKET_TRANSACTION_END_ERROR, // error message that ends transaction
+    SOCKET_TRANSACTION_START_END
+} SOPC_Socket_Transaction_Event;
+
+typedef enum {
+    SOCKET_TRANSACTION_STATE_NONE // event START => state STARTED | event START_END or ERROR => state NONE
+    = 0x00, // Guarantee that init to 0 value is expected enum value
+    SOCKET_TRANSACTION_STATE_STARTED, // event END or END_ERROR => state NONE | event ERROR => state ERROR
+    SOCKET_TRANSACTION_STATE_ERROR // event END_ERROR => state NONE
+} SOPC_Socket_Transaction_State; // other cases are write refuse cases
+
 typedef struct SOPC_Socket {
-    Socket               sock;
-    SOPC_ActionQueue*    writeQueue;
-    uint8_t              isNotWritable;
-    uint8_t              isUsed;
-    SOPC_Socket_State    state;
-    SOPC_Socket_EventCB* eventCallback; // SOPC_Socket_EventCB Type
-    void*                cbData;
-    void*                connectAddrs; // Possible connection addresses (to free on connection)
-    void*                nextConnectAttemptAddr; // Next connection attempt address
+    Socket                        sock;
+    SOPC_ActionQueue*             writeQueue;
+    uint8_t                       isNotWritable;
+    uint8_t                       isUsed;
+    SOPC_Socket_State             state;
+    SOPC_Socket_EventCB*          eventCallback; // SOPC_Socket_EventCB Type
+    SOPC_Socket_Transaction_State transactionState;
+    uint32_t                      transactionId;
+    void*                         cbData;
+    void*                         connectAddrs; // Possible connection addresses (to free on connection)
+    void*                         nextConnectAttemptAddr; // Next connection attempt address
 
 } SOPC_Socket;
 
@@ -129,11 +147,13 @@ SOPC_StatusCode SOPC_SocketManager_ConfigureAcceptedSocket(SOPC_Socket*        a
 SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
                                         uint32_t            msecTimeout);
 
-SOPC_StatusCode SOPC_CreateAction_SocketWrite (SOPC_Socket*                 socket,
-                                               uint8_t*                     data,
-                                               uint32_t                     count,
-                                               SOPC_Socket_EndOperation_CB* endWriteCb,
-                                               void*                        endWriteCbData);
+SOPC_StatusCode SOPC_CreateAction_SocketWrite(SOPC_Socket*                  socket,
+                                              uint8_t*                      data,
+                                              uint32_t                      count,
+                                              SOPC_Socket_Transaction_Event transactionEvent,
+                                              uint32_t                      transactionId,
+                                              SOPC_Socket_EndOperation_CB*  endWriteCb,
+                                              void*                         endWriteCbData);
 
 SOPC_StatusCode SOPC_CreateAction_SocketWriteEvent(SOPC_Socket* socket);
 

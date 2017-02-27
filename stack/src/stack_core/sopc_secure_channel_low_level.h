@@ -124,6 +124,7 @@ SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffer*      msgBuffer,
                                  void*                msgBody);
 
 SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
+                            uint32_t        requestId,
                             SOPC_StatusCode errorCode,
                             SOPC_String*    reason,
                             uint8_t*        willReleaseMsgQueueToken);
@@ -132,10 +133,12 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
                                         const SOPC_Byte* data_src,
                                         uint32_t         count);
 
-SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*              msgBuffer,
-                                        SOPC_MsgFinalChunk           chunkType,
-                                        SOPC_Socket_EndOperation_CB* fctPointer,
-                                        void*                        fctArgument);
+SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
+                                        SOPC_MsgFinalChunk            chunkType,
+                                        SOPC_Socket_Transaction_Event transactionEvent,
+                                        uint32_t                      transactionId,
+                                        SOPC_Socket_EndOperation_CB*  fctPointer,
+                                        void*                         fctArgument);
 
 SOPC_StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
                                          uint32_t       receivedTokenId,

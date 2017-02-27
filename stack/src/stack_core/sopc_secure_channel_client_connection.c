@@ -189,7 +189,7 @@ void SOPC_OperationEnd_RequestError(SC_ClientConnection* connection,
 {
     PendingRequest* pRequest = NULL;
     // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
-    SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, reason, willReleaseToken);
+    SC_AbortMsg(connection->instance->sendingBuffer, requestId, OpcUa_BadEncodingError, reason, willReleaseToken);
     if(FALSE != removeRequest){
         pRequest = SLinkedList_RemoveFromId(connection->pendingRequests,requestId);
         if(NULL == callback && NULL == callbackData){
@@ -408,11 +408,12 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
     if(status == STATUS_OK){
         // Generate next request id
         requestId = GetNextRequestId(cConnection->instance);
+        cConnection->instance->sendingBuffer->msgRequestId = requestId;
 
         // Set security configuration for secure channel request
         cConnection->instance->currentSecuMode = cConnection->securityMode;
         status = SOPC_String_AttachFrom(&cConnection->instance->currentSecuPolicy,
-                                   &cConnection->securityPolicy);
+                                        &cConnection->securityPolicy);
     }
 	
     // TODO: manage prec and current crypto provider here if necessary
@@ -473,6 +474,8 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
         // TODO: timeout should be managed by indep. timer
         status = SC_FlushSecureMsgBuffer(cConnection->instance->sendingBuffer,
                                          SOPC_Msg_Chunk_Final,
+                                         SOCKET_TRANSACTION_START_END, // It is a one message transaction (OPN must not have several chunks)
+                                         requestId,
                                          SOPC_OperationEnd_OpenSecureChannelRequest_CB,
                                          (void*) cConnection);
     }
@@ -1042,6 +1045,7 @@ void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)
     uint32_t             timeout = NULL;
     SC_ResponseEvent_CB* callback = NULL;
     void*                callbackData = NULL;
+    SOPC_Socket_Transaction_Event transactionEvent = SOCKET_TRANSACTION_START_END; // 1 chunk only transaction case
 
     if(NULL != sendRequestData){
         connection = sendRequestData->connection;
@@ -1060,6 +1064,9 @@ void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)
         Mutex_Lock(&connection->mutex);
         if(connection->instance->state == SC_Connection_Connected){
             requestId = GetNextRequestId(connection->instance);
+            // Set request Id to be used as socket transaction Id
+            connection->instance->sendingBuffer->msgRequestId = requestId;
+
             status = SC_EncodeSecureMessage(connection->instance,
                                             requestType,
                                             request,
@@ -1084,7 +1091,13 @@ void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)
             }
 
             if(status == STATUS_OK){
+                if(connection->instance->sendingBuffer->nbChunks > 1){
+                    // If nbChunks > 1, it means chunks were sent before end of message encoding:
+                    //  event is then END instead of START_END (1 chunk transaction case)
+                    transactionEvent = SOCKET_TRANSACTION_END;
+                }
                 status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, SOPC_Msg_Chunk_Final,
+                                                 transactionEvent, requestId,
                                                  SOPC_OperationEnd_ServiceRequest_CB, (void*) sendRequestData);
             }
 

@@ -196,6 +196,8 @@ SOPC_StatusCode SendHelloMsg(TCP_UA_Connection*           connection,
     }
     if(status == STATUS_OK){
         status = TCP_UA_FlushMsgBuffer(connection->outputMsgBuffer,
+                                       SOCKET_TRANSACTION_START_END,
+                                       0, // No transaction id necessary, it is a one message transaction
                                        cb, cbData);
     }
 
@@ -483,6 +485,8 @@ SOPC_StatusCode SendAckMsg(TCP_UA_Connection*           connection,
 
     if(status == STATUS_OK){
         status = TCP_UA_FlushMsgBuffer(connection->outputMsgBuffer,
+                                       SOCKET_TRANSACTION_START_END,
+                                       0, // No transaction id necessary, it is a one message transaction
                                        cb,
                                        cbData);
     }

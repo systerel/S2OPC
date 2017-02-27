@@ -94,14 +94,14 @@ typedef enum {
 typedef struct SOPC_MsgBuffer {
     uint32_t               nbBuffers;              /**< Number of buffers allocated (one per chunk) */
     Buffer*                buffers;                /**< Pointers on buffers for the UA Message (nbBuffers buffers) */
-    TCP_UA_MsgType    type;                   /**< Type of the TCP UA Message stored */
+    TCP_UA_MsgType         type;                   /**< Type of the TCP UA Message stored */
     SOPC_SecureMessageType secureType;             /**< Type of the UA Secure Message stored (only valid if type = SecureMessage) */
     uint32_t               currentChunkSize;       /**< MessageSize of the current message chunk (current is chunk corresponding to nbChunks) */
     uint32_t               nbChunks;               /**< Current number of message chunks received or sent for the current message */
     uint32_t               maxChunks;              /**< Maximum number of message chunks allowed (by UA connection configuration) */
     uint32_t               sequenceNumberPosition; /**< Position of sequence number (data to encrypt start point) */
     SOPC_MsgFinalChunk     isFinal;                /**< IsFinal value of the current message chunk */
-    uint32_t               receivedReqId;          /**< Request Id of the received message chunks (ensure all chunks have same id). Valid when nbChunks > 1 */
+    uint32_t               msgRequestId;           /**< Request Id of the current message chunks (ensure all chunks have same id / used for socket transaction Id). Valid when nbChunks > 1 */
     void*                  flushData;              /**< Data stored by structure user and that could be used to flush a message chunk */
     SOPC_NamespaceTable    nsTable;                /**< Namespace table to be used for encoding / decoding UA messages */
     SOPC_EncodeableType**  encTypesTable;          /**< EncodeableType table to be used for encoding / decoding UA messages */

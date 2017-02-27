@@ -286,12 +286,16 @@ SOPC_StatusCode TCP_UA_ReadMsgBuffer(SOPC_Byte*      data_dest,
     return status;
 }
 
-SOPC_StatusCode TCP_UA_FlushMsgBuffer(SOPC_MsgBuffer*              msgBuffer,
-                                      SOPC_Socket_EndOperation_CB* callback,
-                                      void*                        callbackData){
+SOPC_StatusCode TCP_UA_FlushMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
+                                      SOPC_Socket_Transaction_Event transactionEvent,
+                                      uint32_t                      transactionId,
+                                      SOPC_Socket_EndOperation_CB*  callback,
+                                      void*                         callbackData){
     return SOPC_CreateAction_SocketWrite((SOPC_Socket*) msgBuffer->flushData,
                                          msgBuffer->buffers->data,
                                          msgBuffer->buffers->length,
+                                         transactionEvent,
+                                         transactionId,
                                          callback,
                                          callbackData);
 }

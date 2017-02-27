@@ -296,7 +296,7 @@ SOPC_StatusCode Socket_Write(Socket    sock,
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int res = 0;
-    if(sock != -1 &&
+    if(sock != SOPC_INVALID_SOCKET &&
        data != NULL &&
        count <= INT32_MAX &&
        sentBytes != NULL)
@@ -324,7 +324,7 @@ SOPC_StatusCode Socket_Read(Socket     sock,
                             int32_t*   readCount)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-        if(sock != -1 && data != NULL && dataSize > 0){
+        if(sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0){
             *readCount = recv(sock, data, dataSize, 0);
             if(*readCount > 0){
                 status = STATUS_OK;
@@ -343,9 +343,9 @@ SOPC_StatusCode Socket_Read(Socket     sock,
 
 void Socket_Close(Socket*  sock)
 {
-    if(sock != NULL && *sock != -1){
+    if(sock != NULL && *sock != SOPC_INVALID_SOCKET){
         if(close(*sock) != -1){
-            *sock = -1;
+            *sock = SOPC_INVALID_SOCKET;
         }
     }
 }

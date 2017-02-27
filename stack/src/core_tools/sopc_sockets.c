@@ -33,13 +33,15 @@ uint8_t            globalInitialized = FALSE;
 static uint32_t globalNbSockets = 0;
 
 typedef struct SOPC_Action_WriteParameter {
-    SOPC_Socket*                 socket;
-    uint8_t                      isOnlyWriteEvent;
-    uint8_t*                     data;
-    uint32_t                     count;
-    uint32_t                     posIdx;
-    SOPC_Socket_EndOperation_CB* endWriteCb; // run after succesfull write (not as an Action in queue !) => atomicity
-    void*                        endWriteCbData;
+    SOPC_Socket*                  socket;
+    uint8_t                       isOnlyWriteEvent;
+    uint8_t*                      data;
+    uint32_t                      count;
+    uint32_t                      posIdx;
+    SOPC_Socket_Transaction_Event transactionEvent;
+    uint32_t                      transactionId;
+    SOPC_Socket_EndOperation_CB*  endWriteCb; // run after succesfull write (not as an Action in queue !) => atomicity
+    void*                         endWriteCbData;
 } SOPC_Action_WriteParameter;
 
 typedef struct SOPC_Action_SocketEventParameter {
@@ -723,6 +725,84 @@ SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
     return status;
 }
 
+SOPC_StatusCode SOPC_Socket_CheckAndUpdateTransaction(SOPC_Socket*                  socket,
+                                                      SOPC_Socket_Transaction_Event transactionEvent,
+                                                      uint32_t                      transactionId)
+{
+    SOPC_StatusCode status = STATUS_INVALID_STATE;
+    assert(NULL != socket);
+    switch(socket->transactionState){
+        case SOCKET_TRANSACTION_STATE_NONE:
+            switch(transactionEvent){
+                case SOCKET_TRANSACTION_START:
+                    status = STATUS_OK;
+                    socket->transactionState = SOCKET_TRANSACTION_STATE_STARTED;
+                    socket->transactionId = transactionId;
+                    break;
+                case SOCKET_TRANSACTION_START_END:
+                    status = STATUS_OK;
+                    // no change: even in case of error, atomic transaction is terminated (no error message to send)
+                    break;
+                case SOCKET_TRANSACTION_CONTINUE:
+                case SOCKET_TRANSACTION_END:
+                case SOCKET_TRANSACTION_END_ERROR:
+                    break; // invalid state
+                case SOCKET_TRANSACTION_SOCKET_ERROR:
+                    status = STATUS_OK;
+                    break; // no state update: atomic transaction is terminated (no error message to send)
+            }
+            break;
+        case SOCKET_TRANSACTION_STATE_STARTED:
+            switch(transactionEvent){
+                case SOCKET_TRANSACTION_START:
+                case SOCKET_TRANSACTION_START_END:
+                    break; // invalid state
+                case SOCKET_TRANSACTION_CONTINUE:
+                    if(socket->transactionId == transactionId){
+                        status = STATUS_OK;
+                        // no state change change
+                    }
+                    break;
+                case SOCKET_TRANSACTION_END:
+                case SOCKET_TRANSACTION_END_ERROR:
+                    if(socket->transactionId == transactionId){
+                        status = STATUS_OK;
+                        socket->transactionState = SOCKET_TRANSACTION_STATE_NONE;
+                        socket->transactionId = 0;
+                    }
+                    break;
+                case SOCKET_TRANSACTION_SOCKET_ERROR:
+                    if(socket->transactionId == transactionId){
+                        status = STATUS_OK;
+                        socket->transactionState = SOCKET_TRANSACTION_STATE_ERROR;
+                    }
+                    break; // invalid state
+            }
+            break;
+        case SOCKET_TRANSACTION_STATE_ERROR:
+            switch(transactionEvent){
+                case SOCKET_TRANSACTION_START:
+                case SOCKET_TRANSACTION_START_END:
+                case SOCKET_TRANSACTION_CONTINUE:
+                case SOCKET_TRANSACTION_END:
+                    break; // invalid state
+                case SOCKET_TRANSACTION_END_ERROR:
+                    if(socket->transactionId == transactionId){
+                        status = STATUS_OK;
+                        socket->transactionState = SOCKET_TRANSACTION_STATE_NONE;
+                        socket->transactionId = 0;
+                    }
+                    break;
+                case SOCKET_TRANSACTION_SOCKET_ERROR:
+                    status = STATUS_OK;
+                    // no change
+                    break;
+            }
+            break;
+    }
+    return status;
+}
+
 void SOPC_Socket_TreatWriteActions(SOPC_ActionQueue* queue){
     SOPC_StatusCode writeQueueStatus = STATUS_OK;
     SOPC_StatusCode status = STATUS_OK;
@@ -738,20 +818,36 @@ void SOPC_Socket_TreatWriteActions(SOPC_ActionQueue* queue){
         param = (SOPC_Action_WriteParameter*) arg;
         if(STATUS_OK == writeQueueStatus && param->socket->sock != SOPC_INVALID_SOCKET){
             if(param->socket->sock != SOPC_INVALID_SOCKET){
-                sentBytes = 0;
-                status = Socket_Write(param->socket->sock, param->data, param->count, &sentBytes);
-                if(STATUS_OK == status){
-                    if(NULL != param->endWriteCb){
-                        // Ignore status ? Or call error (but should be same callback...)
-                        param->endWriteCb(param->endWriteCbData, status);
-                    }
+                SOPC_StatusCode transactionStatus = SOPC_Socket_CheckAndUpdateTransaction(param->socket,
+                                                                                          param->transactionEvent,
+                                                                                          param->transactionId);
+                if(STATUS_OK != transactionStatus){
+                    // ignore write operation
                     free(param->data);
                     free(param);
-                }else if(status == OpcUa_BadWouldBlock){
-                    writeBlocked = 1;
                 }else{
-                    free(param->data);
-                    free(param);
+                    sentBytes = 0;
+                    status = Socket_Write(param->socket->sock, param->data, param->count, &sentBytes);
+                    if(STATUS_OK == status){
+                        if(NULL != param->endWriteCb){
+                            // Ignore status ? Or call error (but should be same callback...)
+                            param->endWriteCb(param->endWriteCbData, status);
+                        }
+                        free(param->data);
+                        free(param);
+                    }else if(status == OpcUa_BadWouldBlock){
+                        writeBlocked = 1;
+                    }else{
+                        transactionStatus = SOPC_Socket_CheckAndUpdateTransaction(param->socket,
+                                                                                  SOCKET_TRANSACTION_SOCKET_ERROR,
+                                                                                  param->transactionId);
+                        if(NULL != param->endWriteCb){
+                            // Ignore status ? Or call error (but should be same callback...)
+                            param->endWriteCb(param->endWriteCbData, status);
+                        }
+                        free(param->data);
+                        free(param);
+                    }
                 }
             }else{
                 status = STATUS_INVALID_STATE;
@@ -796,11 +892,13 @@ void SOPC_Action_SocketWrite(void* arg){
     return;
 }
 
-SOPC_StatusCode SOPC_CreateAction_SocketWrite(SOPC_Socket*                 socket,
-                                              uint8_t*                     data,
-                                              uint32_t                     count,
-                                              SOPC_Socket_EndOperation_CB* endWriteCb,
-                                              void*                        endWriteCbData)
+SOPC_StatusCode SOPC_CreateAction_SocketWrite(SOPC_Socket*                  socket,
+                                              uint8_t*                      data,
+                                              uint32_t                      count,
+                                              SOPC_Socket_Transaction_Event transactionEvent,
+                                              uint32_t                      transactionId,
+                                              SOPC_Socket_EndOperation_CB*  endWriteCb,
+                                              void*                         endWriteCbData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Action_WriteParameter* param = NULL;
@@ -813,6 +911,8 @@ SOPC_StatusCode SOPC_CreateAction_SocketWrite(SOPC_Socket*                 socke
             param->isOnlyWriteEvent = FALSE;
             param->count = count;
             param->posIdx = 0;
+            param->transactionEvent = transactionEvent;
+            param->transactionId = transactionId;
             param->endWriteCb = endWriteCb;
             param->endWriteCbData = endWriteCbData;
         }

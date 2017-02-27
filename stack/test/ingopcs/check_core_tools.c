@@ -53,7 +53,7 @@ START_TEST(test_ua_msg_buffer_create_set_type)
     ck_assert(msgBuf->maxChunks == 1);
     ck_assert(msgBuf->sequenceNumberPosition == 0);
     ck_assert(msgBuf->isFinal == SOPC_Msg_Chunk_Unknown);
-    ck_assert(msgBuf->receivedReqId == 0);
+    ck_assert(msgBuf->msgRequestId == 0);
     ck_assert(msgBuf->flushData == &flushData);
     ck_assert(msgBuf->nsTable.namespaceArray == table.namespaceArray);
     ck_assert(msgBuf->encTypesTable == encTypes);
@@ -118,7 +118,7 @@ START_TEST(test_ua_msg_buffer_reset)
     msgBuf->maxChunks = 3;
     msgBuf->sequenceNumberPosition = 2;
     msgBuf->isFinal = SOPC_Msg_Chunk_Final;
-    msgBuf->receivedReqId = 1;
+    msgBuf->msgRequestId = 1;
     msgBuf->flushData = NULL;
     msgBuf->nsTable.namespaceArray = NULL;
     msgBuf->encTypesTable = NULL;
@@ -138,7 +138,7 @@ START_TEST(test_ua_msg_buffer_reset)
     ck_assert(msgBuf->nbChunks == 1);
     ck_assert(msgBuf->sequenceNumberPosition == 0);
     ck_assert(msgBuf->isFinal == SOPC_Msg_Chunk_Unknown);
-    ck_assert(msgBuf->receivedReqId == 0);
+    ck_assert(msgBuf->msgRequestId == 0);
 
     /////// Check properties not reset
     ck_assert(msgBuf->maxChunks == 3);
@@ -157,7 +157,7 @@ START_TEST(test_ua_msg_buffer_reset)
     msgBuf->currentChunkSize = 9;
     msgBuf->sequenceNumberPosition = 2;
     msgBuf->isFinal = SOPC_Msg_Chunk_Final;
-    msgBuf->receivedReqId = 1;
+    msgBuf->msgRequestId = 1;
 
     ck_assert(msgBuf->buffers->data[0] == flushData);
     ck_assert(msgBuf->buffers->data[1] == flushData);
@@ -177,7 +177,7 @@ START_TEST(test_ua_msg_buffer_reset)
     ck_assert(msgBuf->secureType == SOPC_CloseSecureChannel);
     ck_assert(msgBuf->sequenceNumberPosition == 2);
     ck_assert(msgBuf->isFinal == SOPC_Msg_Chunk_Final);
-    ck_assert(msgBuf->receivedReqId == 1);
+    ck_assert(msgBuf->msgRequestId == 1);
 
 
     //// Test degraded case
@@ -214,7 +214,7 @@ START_TEST(test_ua_msg_buffer_copy)
     msgBuf->maxChunks = 3;
     msgBuf->sequenceNumberPosition = 2;
     msgBuf->isFinal = SOPC_Msg_Chunk_Final;
-    msgBuf->receivedReqId = 1;
+    msgBuf->msgRequestId = 1;
     ////// Check modified properties
     ck_assert(msgBuf->buffers->data[0] == flushData);
     ck_assert(msgBuf->buffers->length == 1);
@@ -235,7 +235,7 @@ START_TEST(test_ua_msg_buffer_copy)
     ck_assert(msgBufDest->nbChunks == 2);
     ck_assert(msgBufDest->sequenceNumberPosition == 2);
     ck_assert(msgBufDest->isFinal == SOPC_Msg_Chunk_Final);
-    ck_assert(msgBufDest->receivedReqId == 1);
+    ck_assert(msgBufDest->msgRequestId == 1);
     /////// Check not concerned fields were not copied
     ck_assert(msgBufDest->maxChunks == 2);
     ck_assert(msgBufDest->flushData == NULL);
@@ -283,7 +283,7 @@ START_TEST(test_ua_msg_buffers_create)
     ck_assert(msgBuf->maxChunks == 3);
     ck_assert(msgBuf->sequenceNumberPosition == 0);
     ck_assert(msgBuf->isFinal == SOPC_Msg_Chunk_Unknown);
-    ck_assert(msgBuf->receivedReqId == 0);
+    ck_assert(msgBuf->msgRequestId == 0);
     ck_assert(msgBuf->nsTable.namespaceArray == table.namespaceArray);
     ck_assert(msgBuf->encTypesTable == encTypes);
     MsgBuffers_Delete(&msgBuf);
@@ -407,7 +407,7 @@ START_TEST(test_ua_msg_buffers_copy)
     msgBuf->maxChunks = 3;
     msgBuf->sequenceNumberPosition = 2;
     msgBuf->isFinal = SOPC_Msg_Chunk_Final;
-    msgBuf->receivedReqId = 1;
+    msgBuf->msgRequestId = 1;
     ////// Check modified properties
     ck_assert(msgBuf->buffers->data[0] == flushData);
     ck_assert(msgBuf->buffers->length == 1);
@@ -428,7 +428,7 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBufsDest->nbChunks == 2);
     ck_assert(msgBufsDest->sequenceNumberPosition == 2);
     ck_assert(msgBufsDest->isFinal == SOPC_Msg_Chunk_Final);
-    ck_assert(msgBufsDest->receivedReqId == 1);
+    ck_assert(msgBufsDest->msgRequestId == 1);
     /////// Check not concerned fields were not copied
     ck_assert(msgBufsDest->maxChunks == 3);
     ck_assert(msgBufsDest->flushData == NULL);
@@ -448,7 +448,7 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBufsDest->nbChunks == 2);
     ck_assert(msgBufsDest->sequenceNumberPosition == 2);
     ck_assert(msgBufsDest->isFinal == SOPC_Msg_Chunk_Final);
-    ck_assert(msgBufsDest->receivedReqId == 1);
+    ck_assert(msgBufsDest->msgRequestId == 1);
     /////// Check not concerned fields were not copied
     ck_assert(msgBufsDest->maxChunks == 3);
     ck_assert(msgBufsDest->flushData == NULL);

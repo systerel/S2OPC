@@ -510,12 +510,14 @@ SOPC_StatusCode Send_OpenSecureChannelResponse(SC_Connection*               scCo
 
     if(status == STATUS_OK){
         status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final,
+                                         SOCKET_TRANSACTION_START_END, // Only 1 chunk must be sent for OPN
+                                         requestId,
                                          callback, callbackData);
     }
 
     if(status != STATUS_OK){
         // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
-        SC_AbortMsg(scConnection->sendingBuffer, OpcUa_BadEncodingError, NULL, &willReleaseMsgQueueToken);
+        SC_AbortMsg(scConnection->sendingBuffer, requestId, OpcUa_BadEncodingError, NULL, &willReleaseMsgQueueToken);
         assert(willReleaseMsgQueueToken == FALSE); // Single chunk, no abort message to send
     }
 
@@ -808,7 +810,8 @@ void SOPC_OperationEnd_ServiceResponseError(SC_Connection*       connection,
             pReason = &reason;
         }
 
-        SC_AbortMsg(connection->sendingBuffer, OpcUa_BadEncodingError, pReason, willReleaseToken);
+        SC_AbortMsg(connection->sendingBuffer, connection->sendingBuffer->msgRequestId,
+                    OpcUa_BadEncodingError, pReason, willReleaseToken);
 
         SOPC_String_Clear(&reason);
 
@@ -851,6 +854,8 @@ void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
     SOPC_EncodeableType* responseType = NULL;
     void*                response = NULL;
 
+    SOPC_Socket_Transaction_Event transactionEvent = SOCKET_TRANSACTION_START_END; // 1 chunk only transaction case
+
     if(NULL != sendData){
         sEndpoint = sendData->sEndpoint;
         scConnection = sendData->scConnection;
@@ -866,6 +871,9 @@ void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
     {
         Mutex_Lock(&sEndpoint->mutex);
 
+        // Set request Id, used for socket transaction
+        scConnection->sendingBuffer->msgRequestId = requestId;
+
         // TODO: check response handle <=> request handle ? Or resp. application ?
         status = SC_EncodeSecureMessage(scConnection,
                                         responseType,
@@ -873,8 +881,15 @@ void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
                                         requestId);
 
         if(status == STATUS_OK){
+            if(scConnection->sendingBuffer->nbChunks > 1){
+                // If nbChunks > 1, it means chunks were sent before end of message encoding:
+                //  event is then END instead of START_END (1 chunk transaction case)
+                transactionEvent = SOCKET_TRANSACTION_END;
+            }
             // For now no next action to the socket writing to provide (except error ? => more for previous steps in Flush)
             status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final,
+                                             transactionEvent,
+                                             requestId,
                                              SOPC_OperationEnd_ServiceResponse_CB,
                                              (void*) sendData);
         }

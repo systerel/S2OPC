@@ -45,7 +45,7 @@ SOPC_MsgBuffer* MsgBuffer_Create(Buffer*               buffer,
         mBuffer->maxChunks = maxChunks;
         mBuffer->sequenceNumberPosition = 0;
         mBuffer->isFinal = SOPC_Msg_Chunk_Unknown;
-        mBuffer->receivedReqId = 0;
+        mBuffer->msgRequestId = 0;
         mBuffer->flushData = flushData;
         Namespace_Initialize(&mBuffer->nsTable);
         Namespace_AttachTable(&mBuffer->nsTable, nsTable);
@@ -74,7 +74,7 @@ void MsgBuffer_Reset(SOPC_MsgBuffer* mBuffer){
         mBuffer->currentChunkSize = 0;
         mBuffer->nbChunks = 1;
         mBuffer->isFinal = SOPC_Msg_Chunk_Unknown;
-        mBuffer->receivedReqId = 0;
+        mBuffer->msgRequestId = 0;
         mBuffer->sequenceNumberPosition = 0;
     }
 }
@@ -122,7 +122,7 @@ void MsgBuffer_InternalCopyProperties(SOPC_MsgBuffer* destMsgBuffer,
     destMsgBuffer->nbChunks = srcMsgBuffer->nbChunks;
     destMsgBuffer->sequenceNumberPosition = srcMsgBuffer->sequenceNumberPosition;
     destMsgBuffer->isFinal = srcMsgBuffer->isFinal;
-    destMsgBuffer->receivedReqId = srcMsgBuffer->receivedReqId;
+    destMsgBuffer->msgRequestId = srcMsgBuffer->msgRequestId;
 }
 
 SOPC_StatusCode MsgBuffer_CopyBuffer(SOPC_MsgBuffer* destMsgBuffer,
@@ -183,7 +183,7 @@ SOPC_MsgBuffers* MsgBuffers_Create(uint32_t              maxChunks,
                 mBuffers->maxChunks = maxChunks;
                 mBuffers->sequenceNumberPosition = 0;
                 mBuffers->isFinal = SOPC_Msg_Chunk_Unknown;
-                mBuffers->receivedReqId = 0;
+                mBuffers->msgRequestId = 0;
                 mBuffers->flushData = NULL;
                 Namespace_Initialize(&mBuffers->nsTable);
                 Namespace_AttachTable(&mBuffers->nsTable, nsTable);
@@ -207,7 +207,7 @@ void MsgBuffers_Reset(SOPC_MsgBuffers* mBuffer){
         mBuffer->currentChunkSize = 0;
         mBuffer->nbChunks = 0;
         mBuffer->isFinal = SOPC_Msg_Chunk_Unknown;
-        mBuffer->receivedReqId = 0;
+        mBuffer->msgRequestId = 0;
         mBuffer->sequenceNumberPosition = 0;
     }
 }

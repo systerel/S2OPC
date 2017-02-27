@@ -1103,10 +1103,12 @@ void SOPC_OperationEnd_FlushSecureMsg_CB(void*           arg,
 
 // Caution: in case of failure returned, caller must call SC_AbortMsg to
 // manage abort with multi-chunk + reset the message buffer
-SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*              msgBuffer,
-                                        SOPC_MsgFinalChunk           chunkType,
-                                        SOPC_Socket_EndOperation_CB* callback,
-                                        void*                        callbackData){
+SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
+                                        SOPC_MsgFinalChunk            chunkType,
+                                        SOPC_Socket_Transaction_Event transactionEvent,
+                                        uint32_t                      transactionId,
+                                        SOPC_Socket_EndOperation_CB*  callback,
+                                        void*                         callbackData){
     SC_Connection* scConnection = NULL;
     SOPC_OperationEnd_FlushSecureMsg_Data* data = NULL;
     SOPC_StatusCode status = STATUS_NOK;
@@ -1243,6 +1245,8 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*              msgBuffer,
                 data->callbackData = callbackData;
 
                 status = TCP_UA_FlushMsgBuffer(scConnection->transportConnection->outputMsgBuffer,
+                                               transactionEvent,
+                                               transactionId,
                                                SOPC_OperationEnd_FlushSecureMsg_CB,
                                                (void*) data);
             }else{
@@ -1273,6 +1277,7 @@ void SOPC_OperationEnd_AbortMsg_CB(void* arg,
 }
 
 SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
+                            uint32_t        requestId,
                             SOPC_StatusCode errorCode,
                             SOPC_String*    reason,
                             uint8_t*        willReleaseMsgQueueToken)
@@ -1294,6 +1299,8 @@ SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
             }
             if(STATUS_OK == status){
                 status = SC_FlushSecureMsgBuffer(msgBuffer, SOPC_Msg_Chunk_Abort,
+                                                 SOCKET_TRANSACTION_END_ERROR,
+                                                 requestId,
                                                  SOPC_OperationEnd_AbortMsg_CB,
                                                  (void*) msgBuffer);
             }
@@ -2123,10 +2130,10 @@ SOPC_StatusCode SC_CheckPrecChunk(SOPC_MsgBuffers* msgBuffer,
         // Check if we received a new request id related message before
         //  precedent treatment end
         if(msgBuffer->nbChunks > 1 &&
-           msgBuffer->receivedReqId != requestId)
+           msgBuffer->msgRequestId != requestId)
         {
             *abortReqPresence = 1;
-            *abortReqId = msgBuffer->receivedReqId;
+            *abortReqId = msgBuffer->msgRequestId;
             status = MsgBuffers_SetCurrentChunkFirst(msgBuffer);
         }else{
             *abortReqPresence = FALSE;
@@ -2231,8 +2238,8 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
             case SOPC_Msg_Chunk_Intermediate:
                 assert(msgBuffers->nbChunks >= 1);
                 if(msgBuffers->nbChunks == 1){
-                    msgBuffers->receivedReqId = requestId;
-                }else if(msgBuffers->receivedReqId != requestId){
+                    msgBuffers->msgRequestId = requestId;
+                }else if(msgBuffers->msgRequestId != requestId){
                     status = STATUS_NOK;
                     assert(FALSE);
                 }
