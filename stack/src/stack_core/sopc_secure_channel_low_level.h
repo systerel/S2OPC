@@ -38,7 +38,6 @@ typedef enum SC_ConnectionState
     SC_Connection_Connecting_Transport,
     SC_Connection_Connecting_Secure,
     SC_Connection_Connected,
-    SC_Connection_Disconnecting,
     SC_Connection_Disconnected,
     SC_Connection_Error
 } SC_ConnectionState;
@@ -53,7 +52,8 @@ typedef enum {
     SOPC_ConnectionEvent_SecureMessageChunk = 0x04,
     SOPC_ConnectionEvent_SecureMessageAbort = 0x05,
 //    SOPC_ConnectionEvent_RefillSendQueue, => to be evaluated, socket behavior
-    SOPC_ConnectionEvent_UnexpectedError = 0x06
+    SOPC_ConnectionEvent_UnexpectedError = 0x06,
+    SOPC_ConnectionEvent_ConnectionFailed
 } SC_ConnectionEvent;
 
 
@@ -90,6 +90,7 @@ typedef struct {
 } SC_Connection;
 
 SC_Connection* SC_Create (TCP_UA_Connection* connection);
+void SC_Disconnect(SC_Connection* scConnection);
 void SC_Delete (SC_Connection* scConnection);
 
 SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,

@@ -87,7 +87,7 @@ SC_ClientConnection* SC_Client_Create(){
     SC_ClientConnection* scClientConnection = NULL;
     TCP_UA_Connection* connection = TCP_UA_Connection_Create(scProtocolVersion, FALSE); // Server side connection == FALSE
     SC_Connection* sConnection = SC_Create(connection);
-    SOPC_StatusCode status = STATUS_OK;
+    SOPC_StatusCode status = STATUS_NOK;
 
     if(sConnection != NULL){
         scClientConnection = (SC_ClientConnection *) malloc (sizeof(SC_ClientConnection));
@@ -103,8 +103,9 @@ SC_ClientConnection* SC_Client_Create(){
 
             // TODO: limit set by configuration ingopc_stacks_csts ?
             scClientConnection->pendingRequests = SLinkedList_Create(255);
-            if(scClientConnection->pendingRequests == NULL){
-                status = STATUS_NOK;
+
+            if(NULL != scClientConnection->pendingRequests){
+                status = STATUS_OK;
             }
 
             if(STATUS_OK == status){
@@ -116,7 +117,9 @@ SC_ClientConnection* SC_Client_Create(){
                 scClientConnection = NULL;
             }
         }
-    }else{
+    }
+
+    if(STATUS_OK != status){
         TCP_UA_Connection_Delete(connection);
         SC_Delete(sConnection);
     }
@@ -146,17 +149,18 @@ void Timer_Delete(P_Timer* timer){
 
 void SC_Client_Delete(SC_ClientConnection* scConnection)
 {
-    if(scConnection != NULL){
-        SC_Client_Disconnect(scConnection);
+    if(NULL != scConnection){
         Mutex_Lock(&scConnection->mutex);
         scConnection->pkiProvider = NULL;
         scConnection->serverCertificate = NULL;
         scConnection->clientCertificate = NULL;
         scConnection->clientKey = NULL;
         SLinkedList_Delete(scConnection->pendingRequests);
+        scConnection->pendingRequests = NULL;
         SOPC_String_Clear(&scConnection->securityPolicy);
         if(scConnection->instance != NULL){
             SC_Delete(scConnection->instance);
+            scConnection->instance = NULL;
         }
         Timer_Delete(&scConnection->watchdogTimer);
         Mutex_Unlock(&scConnection->mutex);
@@ -816,6 +820,7 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
     SOPC_StatusCode retStatus = STATUS_OK;
     const uint8_t noneSecurityMode = (cConnection->instance->currentSecuMode ==
                                       OpcUa_MessageSecurityMode_None);
+    SC_ConnectionEvent scEvent  = SOPC_ConnectionEvent_Invalid;
 
     if(NULL == cConnection || NULL == cConnection->instance ||
        NULL == cConnection->instance->transportConnection)
@@ -909,12 +914,16 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
         case ConnectionEvent_Error:
             //log ?
             Mutex_Lock(&cConnection->mutex);
+            if(cConnection->instance->state == SC_Connection_Connected){
+                scEvent = SOPC_ConnectionEvent_Disconnected;
+            }else{
+                scEvent = SOPC_ConnectionEvent_ConnectionFailed;
+            }
             cConnection->instance->state = SC_Connection_Disconnected;
             Mutex_Unlock(&cConnection->mutex);
-
             retStatus = cConnection->callback(cConnection,
                                               cConnection->callbackData,
-                                              SOPC_ConnectionEvent_Disconnected,
+                                              scEvent,
                                               OpcUa_BadSecureChannelClosed);
 
             break;
@@ -1007,15 +1016,14 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
     return status;
 }
 
-SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
+void SC_Client_Disconnect(SC_ClientConnection* cConnection)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(cConnection != NULL && cConnection->instance != NULL &&
-       cConnection->instance->transportConnection != NULL)
+    if(NULL != cConnection && NULL != cConnection->instance &&
+       NULL != cConnection->instance->transportConnection)
     {
         Mutex_Lock(&cConnection->mutex);
         status = STATUS_OK;
-        cConnection->instance->state = SC_Connection_Disconnected;
         cConnection->securityMode = OpcUa_MessageSecurityMode_Invalid;
         cConnection->callback = NULL;
         cConnection->callbackData = NULL;
@@ -1023,13 +1031,20 @@ SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection)
         cConnection->serverCertificate = NULL;
         cConnection->clientCertificate = NULL;
         cConnection->clientKey = NULL;
-        SLinkedList_Apply(cConnection->pendingRequests, SC_PendingRequestDeleteListElt);
-        SLinkedList_Clear(cConnection->pendingRequests);
+        if(cConnection->pendingRequests != NULL){
+            SLinkedList_Apply(cConnection->pendingRequests, SC_PendingRequestDeleteListElt);
+            SLinkedList_Clear(cConnection->pendingRequests);
+        }
         SOPC_String_Clear(&cConnection->securityPolicy);
-        TCP_UA_Connection_Disconnect(cConnection->instance->transportConnection);
+        SC_Disconnect(cConnection->instance);
         Mutex_Unlock(&cConnection->mutex);
     }
-    return status;
+    if(NULL != cConnection->callback){
+        cConnection->callback(cConnection,
+                              cConnection->callbackData,
+                              SOPC_ConnectionEvent_Disconnected,
+                              status);
+    }
 }
 
 void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)

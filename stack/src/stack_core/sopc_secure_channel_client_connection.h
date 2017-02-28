@@ -85,7 +85,7 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
                                   SC_ConnectionEvent_CB*    callback,
                                   void*                     callbackData);
 
-SOPC_StatusCode SC_Client_Disconnect(SC_ClientConnection* cConnection);
+void SC_Client_Disconnect(SC_ClientConnection*   cConnection);
 
 SOPC_StatusCode SC_CreateAction_Send_Request(SC_ClientConnection*         connection,
                                              SOPC_EncodeableType*         requestType,

@@ -104,8 +104,10 @@ SOPC_StatusCode SC_CreateAction_Send_Response(SC_ServerEndpoint*          sEndpo
                                              void*                        endSendCallbackData);
 
 SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint);
+void SC_ServerEndpoint_CloseAux(void* endpoint);
 
 void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint);
+void SC_ServerEndpoint_DeleteAux(void* endpoint);
 
 void* SC_ServerEndpoint_GetCallbackData(SC_ServerEndpoint* endpoint);
 

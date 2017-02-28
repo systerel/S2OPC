@@ -61,6 +61,14 @@ SC_Connection* SC_Create (TCP_UA_Connection* connection){
     return sConnection;
 }
 
+void SC_Disconnect(SC_Connection* scConnection){
+    if(scConnection != NULL && scConnection->state != SC_Connection_Disconnected)
+    {
+        scConnection->state = SC_Connection_Disconnected;
+        TCP_UA_Connection_Disconnect(scConnection->transportConnection);
+    }
+}
+
 void SC_Delete (SC_Connection* scConnection){
     if(scConnection != NULL){
         // Do not delete runningAppCertificate, runnigAppPrivateKey and otherAppCertificate:

@@ -50,8 +50,8 @@ typedef enum {
  */
 typedef enum {
     SOPC_ChannelEvent_Invalid = 0x00,
-    SOPC_ChannelEvent_Connected = 0x01,
-    SOPC_ChannelEvent_Disconnected = 0x02
+    SOPC_ChannelEvent_Connected = 0x01, // Note: only in async mode
+    SOPC_ChannelEvent_Disconnected = 0x02,
 } SOPC_Channel_Event;
 
 /**
@@ -73,6 +73,23 @@ typedef SOPC_StatusCode (SOPC_Channel_PfnRequestComplete)(SOPC_Channel         c
                                                           SOPC_EncodeableType* responseType,
                                                           void*                cbData,
                                                           SOPC_StatusCode      status);
+
+/**
+ *  \brief Channel asynchronous operation result event enumeration type
+ */
+typedef enum SOPC_ChannelEvent_AsyncOperationResult {
+    SOPC_ChannelAsync_ConnectResult, // Only in case of failure during connect for now
+    SOPC_ChannelAsync_InvokeResult,
+    SOPC_ChannelAsync_DisconnectResult
+} SOPC_ChannelEvent_AsyncOperationResult;
+
+/**
+ *  \brief Channel asynchronous operation result callback type
+ */
+typedef void (SOPC_Channel_AsyncResult_CB) (SOPC_Channel                           channel,
+                                            void*                                  cbData,
+                                            SOPC_ChannelEvent_AsyncOperationResult cEvent,
+                                            SOPC_StatusCode                        status);
 
 /**
  *  \brief Create a new channel by initializing the provided channel
@@ -121,6 +138,44 @@ SOPC_StatusCode SOPC_Channel_BeginConnect(SOPC_Channel                          
                                           uint32_t                                networkTimeout,
                                           SOPC_Channel_PfnConnectionStateChanged* cb,
                                           void*                                   cbData);
+
+/**
+ *  \brief Register action to start the channel connection establishment (TCP connection, TCP UA Hello message)
+ *         and the secure channel establishement (TCP UA OpenSecureChannel request) on server acknowledgment
+ *         (TCP UA Ack message).
+ *
+ *  \param channel            The channel to connect
+ *  \param url                Endpoint address for establishing the connection
+ *  \param crt_cli            Client certificate to use for establishing the connection (or NULL for None security mode)
+ *  \param key_priv           Client private key to use for establishing the connection (or NULL for None security mode)
+ *  \param crt_srv            Server certificate of the endpoint server to connect (or NULL for None security mode)
+ *  \param pki                The Public Key Infrastructure to use for validating certificates (or NULL for None security mode)
+ *  \param reqSecuPolicyUri   URI of the requested security policy
+ *  \param requestedLifetime  Lifetime requested for the channel connection
+ *  \param msgSecurityMode    Security mode to use for the messages exchanged through the connection
+ *  \param networkTimeout     Network timeout to establish the connection (in milliseconds)
+ *  \param eventCb            Connection state changed callback function to be called (connection established, disconnection)
+ *  \param eventCbData        Data to be provided to the connection state changed callback function on call
+ *  \param connectCb          Asynchronous connect result callback function called on connection failure or success
+ *  \param connectCbData      Asynchronous connect result callback data provided to callback function on call
+ *
+ *  \return                   STATUS_OK if channel connection start step succeeded, STATUS_NOK otherwise
+ *
+ */
+SOPC_StatusCode SOPC_Channel_AsyncConnect(SOPC_Channel                            channel,
+                                          const char*                             url,
+                                          const Certificate*                      crt_cli,
+                                          const AsymmetricKey*                    key_priv,
+                                          const Certificate*                      crt_srv,
+                                          const PKIProvider*                      pki,
+                                          const char*                             reqSecuPolicyUri,
+                                          int32_t                                 requestedLifetime,
+                                          OpcUa_MessageSecurityMode               msgSecurityMode,
+                                          uint32_t                                networkTimeout,
+                                          SOPC_Channel_PfnConnectionStateChanged* eventCb,
+                                          void*                                   eventCbData,
+                                          SOPC_Channel_AsyncResult_CB*            connectCb,
+                                          void*                                   connectCbData);
 
 /**
  *  \brief Start the channel connection establishment (TCP connection, TCP UA Hello message)
@@ -202,14 +257,37 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
                                            SOPC_EncodeableType** responseType);
 
 /**
+ *  \brief Start action of disconnecting the given channel connection
+ *
+ *  \param channel           The channel to disconnect
+ *  \param disconnectCb      Asynchronous disconnect result callback function called on connection failure or success
+ *  \param disconnectCbData  Asynchronous disconnect result callback data provided to callback function on call
+ *
+ *  \return            STATUS_OK if channel disconnection action is recorded, STATUS_NOK otherwise
+ *
+ */
+SOPC_StatusCode SOPC_Channel_AsyncDisconnect(SOPC_Channel                 channel,
+                                             SOPC_Channel_AsyncResult_CB* disconnect,
+                                             void*                        disconnectData);
+
+/**
  *  \brief Disconnect the given channel connection
  *
  *  \param channel     The channel to disconnect
  *  \return            STATUS_OK if channel is correctly disconnected, STATUS_NOK otherwise (NULL pointer)
  *
  */
+
 SOPC_StatusCode SOPC_Channel_Disconnect(SOPC_Channel channel);
 
+/**
+*  \brief Start action of deleting the given channel connection
+*
+*  \param channel     The channel to delete. Note: channel must be considered freed after return (it will be done asynchronously).
+*  \return            STATUS_OK if channel delete action is recorded, STATUS_NOK otherwise
+*
+*/
+SOPC_StatusCode SOPC_Channel_AsyncDelete(SOPC_Channel channel);
 
 /**
  *  \brief Disconnect and deallocate the channel

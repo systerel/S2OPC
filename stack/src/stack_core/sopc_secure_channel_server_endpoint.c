@@ -1159,6 +1159,10 @@ SOPC_StatusCode SC_ServerEndpoint_Open(SC_ServerEndpoint*   endpoint,
     return status;
 }
 
+void SC_ServerEndpoint_CloseAux(void* endpoint){
+    SC_ServerEndpoint_Close((SC_ServerEndpoint*) endpoint);
+}
+
 SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
@@ -1189,6 +1193,10 @@ SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint){
 void Internal_SLinkedList_Delete_Connection(uint32_t id, void *val){
     (void) id;
     SC_Delete((SC_Connection*) val);
+}
+
+void SC_ServerEndpoint_DeleteAux(void* endpoint){
+    SC_ServerEndpoint_Delete((SC_ServerEndpoint*) endpoint);
 }
 
 void SC_ServerEndpoint_Delete(SC_ServerEndpoint* endpoint){

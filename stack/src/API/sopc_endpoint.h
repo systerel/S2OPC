@@ -77,8 +77,24 @@ typedef enum SOPC_EndpointEvent
     SOPC_EndpointEvent_Renewed,
     SOPC_EndpointEvent_UnsupportedServiceRequested,
     SOPC_EndpointEvent_DecoderError,
-    SOPC_EndpointEvent_EndpointClosed
+    SOPC_EndpointEvent_EndpointClosed,
 } SOPC_EndpointEvent;
+
+/**
+ *  \brief Endpoint asynchronous operation result event enumeration type
+ */
+typedef enum SOPC_EndpointEvent_AsyncOperationResult {
+    SOPC_EndpointAsync_OpenResult,
+    SOPC_EndpointAsync_CloseResult
+} SOPC_EndpointEvent_AsyncOperationResult;
+
+/**
+ *  \brief Endpoint asynchronous operation result callback type
+ */
+typedef void (SOPC_Endpoint_AsyncResult_CB) (SOPC_Endpoint                           endpoint,
+                                             void*                                   cbData,
+                                             SOPC_EndpointEvent_AsyncOperationResult cEvent,
+                                             SOPC_StatusCode                         status);
 
 /**
  *  \brief Endpoint event notification function callback type
@@ -131,6 +147,39 @@ typedef struct SOPC_ServiceType {
 SOPC_StatusCode SOPC_Endpoint_Create(SOPC_Endpoint*               endpoint,
                                      SOPC_Endpoint_SerializerType serialType,
                                      SOPC_ServiceType**           services); // Null terminated table
+
+/**
+ *  \brief Register action to open the endpoint and listen for connections from clients (TCP listener),
+ *         then wait for TCP UA connection (TCP UA Hello reception and TCP UA Ack response)
+ *         and secure channel establishement
+ *         (TCP UA OpenSecureChannel request reception and send TCP UA OpenSecureChannel response)
+ *
+ *  \param endpoint           The channel to connect
+ *  \param url                Endpoint address of the connection point
+ *  \param callback           Endpoint events callback function to be called
+ *  \param callbackData       Data to be provided to the endpoint event callback function on call
+ *  \param serverCertificate  Server certificate to use for responding to clients connections (or NULL for None security mode)
+ *  \param serverKey          Server private key to use for responding to clients connections (or NULL for None security mode)
+ *  \param pki                The Public Key Infrastructure to use for validating certificates (or NULL for None security mode)
+ *  \param nbSecuConfigs      Number of security policy supported and presents in secuConfigurations
+ *  \param secuConfigurations Array of security policies supported with nbSecuConfigs length
+ *  \param asyncCb            Asynchronous open result callback function called on endpoint opening failure or success
+ *  \param asyncCbData        Asynchronous open result callback data provided to callback function on call
+ *
+ *  \return                   STATUS_OK if endpoint opening action registration succeeded, STATUS_NOK otherwise
+ *
+ */
+SOPC_StatusCode SOPC_Endpoint_AsyncOpen(SOPC_Endpoint                 endpoint,
+                                        char*                         endpointURL,
+                                        SOPC_EndpointEvent_CB*        callback,
+                                        void*                         callbackData,
+                                        Certificate*                  serverCertificate,
+                                        AsymmetricKey*                serverKey,
+                                        PKIProvider*                  pki,
+                                        uint8_t                       nbSecuConfigs,
+                                        SOPC_SecurityPolicy*          secuConfigurations,
+                                        SOPC_Endpoint_AsyncResult_CB* asyncCb,
+                                        void*                         asyncCbData);
 
 /**
  *  \brief Open the endpoint and listen for connections from clients (TCP listener),
@@ -211,6 +260,15 @@ SOPC_StatusCode SOPC_Endpoint_CancelSendResponse(SOPC_Endpoint         endpoint,
                                                  SOPC_RequestContext** requestContext);
 
 /**
+ *  \brief Start action to close the endpoint
+ *
+ *  \param endpoint    The endpoint to close
+ *
+ *  \return            STATUS_OK if endpoint action to close was recorded correctly, STATUS_NOK otherwise
+ */
+SOPC_StatusCode SOPC_Endpoint_BeginClose(SOPC_Endpoint endpoint);
+
+/**
  *  \brief Close the endpoint. The endpoint closes the active connections and does not listen
  *         for new connections anymore.
  *
@@ -219,6 +277,16 @@ SOPC_StatusCode SOPC_Endpoint_CancelSendResponse(SOPC_Endpoint         endpoint,
  *  \return            STATUS_OK if endpoint was closed correctly, STATUS_NOK otherwise
  */
 SOPC_StatusCode SOPC_Endpoint_Close(SOPC_Endpoint endpoint);
+
+
+/**
+ *  \brief Start action to close and deallocate the endpoint
+ *
+ *  \param endpoint    The endpoint to close and deallocate
+ *
+ *  \return            STATUS_OK if endpoint action to close and deallocate was recorded correctly, STATUS_NOK otherwise
+ */
+SOPC_StatusCode SOPC_Endpoint_BeginDelete(SOPC_Endpoint endpoint);
 
 /**
  *  \brief Close and deallocate the endpoint.
