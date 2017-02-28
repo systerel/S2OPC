@@ -54,9 +54,9 @@ struct SOPC_RequestContext {
 };
 
 typedef struct {
-    Mutex           endSendMutex;
-    SOPC_StatusCode sendingStatus;
-} SOPC_InternalEndpoint_EndSendResponseData;
+    Mutex           endOperationMutex;
+    SOPC_StatusCode operationStatus;
+} SOPC_InternalEndpoint_EndOperationData;
 
 SOPC_RequestContext* SOPC_Create_EndpointRequestContext(SOPC_Endpoint        endpoint,
                                                         SC_Connection*       scConnection,
@@ -365,9 +365,9 @@ SOPC_StatusCode SOPC_Endpoint_Open(SOPC_Endpoint          endpoint,
 void SOPC_Endpoint_EndSendResponse_CB(void*           callbackData,
                                       SOPC_StatusCode status){
     assert(callbackData != NULL);
-    SOPC_InternalEndpoint_EndSendResponseData* sentEndData = (SOPC_InternalEndpoint_EndSendResponseData*) callbackData;
-    sentEndData->sendingStatus = status;
-    Mutex_Unlock(&sentEndData->endSendMutex);
+    SOPC_InternalEndpoint_EndOperationData* sentEndData = (SOPC_InternalEndpoint_EndOperationData*) callbackData;
+    sentEndData->operationStatus = status;
+    Mutex_Unlock(&sentEndData->endOperationMutex);
 }
 
 SOPC_StatusCode SOPC_Endpoint_CreateResponse(SOPC_Endpoint         endpoint,
@@ -396,15 +396,15 @@ SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint         endpoint,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_RequestContext* context = NULL;
     SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
-    SOPC_InternalEndpoint_EndSendResponseData endSendResponse;
-    endSendResponse.sendingStatus = STATUS_NOK;
+    SOPC_InternalEndpoint_EndOperationData endSendResponse;
+    endSendResponse.operationStatus = STATUS_NOK;
     if(sEndpoint != NULL && requestContext != NULL && *requestContext != NULL){
         context = (SOPC_RequestContext*) *requestContext;
 
-        status = Mutex_Initialization(&endSendResponse.endSendMutex);
+        status = Mutex_Initialization(&endSendResponse.endOperationMutex);
 
         if(STATUS_OK == status){
-            Mutex_Lock(&endSendResponse.endSendMutex);
+            Mutex_Lock(&endSendResponse.endOperationMutex);
         }
 
         if(STATUS_OK == status){
@@ -422,11 +422,11 @@ SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint         endpoint,
     }
 
     if(STATUS_OK == status){
-        Mutex_Lock(&endSendResponse.endSendMutex);
-        status = endSendResponse.sendingStatus;
+        Mutex_Lock(&endSendResponse.endOperationMutex);
+        status = endSendResponse.operationStatus;
     }
-    Mutex_Unlock(&endSendResponse.endSendMutex);
-    Mutex_Clear(&endSendResponse.endSendMutex);
+    Mutex_Unlock(&endSendResponse.endOperationMutex);
+    Mutex_Clear(&endSendResponse.endOperationMutex);
 
     return status;
 }
