@@ -184,7 +184,6 @@ SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel){
         // Ensure disconnect called for deallocation
         status = SOPC_Channel_Disconnect(*channel);
         cConnection = (SC_ClientConnection*) *channel;
-        Delete_InvokeCallbackData(cConnection->callbackData);
         SC_Client_Delete(cConnection);
         *channel = NULL;
     }
