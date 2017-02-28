@@ -495,6 +495,7 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
     uint32_t loopCptWait = 0;
     uint32_t loopCptSleep = 0;
     uint8_t receivedEvent = FALSE;
+    SOPC_StatusCode localStatus = STATUS_NOK;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     uint32_t timeout = 0;
@@ -539,11 +540,12 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
         // Retrieve received messages on socket
         status = SOPC_TreatReceivedMessages(waitTimeoutMilliSecs);
 #endif //OPCUA_MULTITHREADED
-        status = Get_InvokeCallbackData(invCallbackData,
-                                        response,
-                                        responseType);
+        localStatus = Get_InvokeCallbackData(invCallbackData,
+                                             response,
+                                             responseType);
         if(*response != NULL){
             receivedEvent = 1; // True
+            status = localStatus;
         }
     }
 
