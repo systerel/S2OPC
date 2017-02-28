@@ -32,13 +32,17 @@ typedef struct {
     SOPC_EndpointEvent_CB*    callback;
     void*                     callbackData;
     SOPC_Endpoint             endpoint;
-    SOPC_EndpointEvent        event;
-    SOPC_StatusCode           status;
-    uint32_t                  secureChannelId;
-    const Certificate*        clientCertificate;
-    SOPC_String               securityPolicy;
-    OpcUa_MessageSecurityMode securityMode;
 } SOPC_InternalEndpoint_CallbackData;
+
+typedef struct {
+    SOPC_InternalEndpoint_CallbackData* endpointData;
+    SOPC_EndpointEvent                  event;
+    SOPC_StatusCode                     status;
+    uint32_t                            secureChannelId;
+    const Certificate*                  clientCertificate;
+    SOPC_String                         securityPolicy;
+    OpcUa_MessageSecurityMode           securityMode;
+} SOPC_InternalEndpoint_ConnectionEventData;
 
 struct SOPC_RequestContext {
     SOPC_Endpoint        endpoint;
@@ -86,6 +90,7 @@ void SOPC_Action_BeginInvokeCallback(void* arg){
     assert(NULL != arg);
     SOPC_RequestContext* requestContext = (SOPC_RequestContext*) arg;
     void* localRequest = requestContext->request; // Necessary to comply with parameter type (void **) and validity scope (exec of BeginInvoke)
+    // TODO: action in case of failure ?
     requestContext->service->BeginInvokeService(requestContext->endpoint,
                                                 requestContext,
                                                 &localRequest,
@@ -94,29 +99,49 @@ void SOPC_Action_BeginInvokeCallback(void* arg){
 
 SOPC_InternalEndpoint_CallbackData* SOPC_Create_EndpointCallbackData(SOPC_EndpointEvent_CB*    callback,
                                                                      void*                     callbackData,
-                                                                     SOPC_Endpoint             endpoint,
-                                                                     SOPC_EndpointEvent        event,
-                                                                     SOPC_StatusCode           status,
-                                                                     uint32_t                  secureChannelId,
-                                                                     const Certificate*        clientCertificate,
-                                                                     OpcUa_MessageSecurityMode securityMode)
+                                                                     SOPC_Endpoint             endpoint)
 {
     SOPC_InternalEndpoint_CallbackData* result = malloc(sizeof(SOPC_InternalEndpoint_CallbackData));
     if(result != NULL){
         result->callback = callback;
         result->callbackData = callbackData;
         result->endpoint = endpoint;
-        result->event = event;
-        result->status = status;
-        result->secureChannelId = secureChannelId;
-        result->clientCertificate = clientCertificate;
-        SOPC_String_Initialize(&result->securityPolicy);
-        result->securityMode = securityMode;
     }
     return result;
 }
 
 void SOPC_Delete_EndpointCallbackData(SOPC_InternalEndpoint_CallbackData* chCbData){
+    if(chCbData != NULL){
+        free(chCbData);
+    }
+}
+
+
+SOPC_InternalEndpoint_ConnectionEventData* SOPC_Create_EndpointConnectionEventData(SOPC_InternalEndpoint_CallbackData* endpointCbData,
+                                                                                   SOPC_EndpointEvent                  event,
+                                                                                   SOPC_StatusCode                     status,
+                                                                                   uint32_t                            secureChannelId,
+                                                                                   const Certificate*                  clientCertificate,
+                                                                                   SOPC_String*                        securityPolicy,
+                                                                                   OpcUa_MessageSecurityMode           securityMode)
+{
+    SOPC_InternalEndpoint_ConnectionEventData* result = malloc(sizeof(SOPC_InternalEndpoint_ConnectionEventData));
+    if(result != NULL){
+        result->endpointData = endpointCbData;
+        result->event = event;
+        result->status = status;
+        result->secureChannelId = secureChannelId;
+        result->clientCertificate = clientCertificate;
+        SOPC_String_Initialize(&result->securityPolicy);
+        if(NULL != securityPolicy){
+            SOPC_String_Copy(&result->securityPolicy, securityPolicy);
+        }
+        result->securityMode = securityMode;
+    }
+    return result;
+}
+
+void SOPC_Delete_EndpointConnectionEventData(SOPC_InternalEndpoint_ConnectionEventData* chCbData){
     if(chCbData != NULL){
         SOPC_String_Clear(&chCbData->securityPolicy);
         free(chCbData);
@@ -125,15 +150,17 @@ void SOPC_Delete_EndpointCallbackData(SOPC_InternalEndpoint_CallbackData* chCbDa
 
 void SOPC_Action_EndpointCallback(void* arg){
     assert(NULL != arg);
-    SOPC_InternalEndpoint_CallbackData* endpointCBdata = (SOPC_InternalEndpoint_CallbackData*) arg;
+    SOPC_InternalEndpoint_ConnectionEventData* connectionEventData = (SOPC_InternalEndpoint_ConnectionEventData*) arg;
+    SOPC_InternalEndpoint_CallbackData* endpointCBdata = connectionEventData->endpointData;
     endpointCBdata->callback(endpointCBdata->endpoint,
                              endpointCBdata->callbackData,
-                             endpointCBdata->event,
-                             endpointCBdata->status,
-                             endpointCBdata->secureChannelId,
-                             endpointCBdata->clientCertificate,
-                             &endpointCBdata->securityPolicy,
-                             endpointCBdata->securityMode);
+                             connectionEventData->event,
+                             connectionEventData->status,
+                             connectionEventData->secureChannelId,
+                             connectionEventData->clientCertificate,
+                             &connectionEventData->securityPolicy,
+                             connectionEventData->securityMode);
+    SOPC_Delete_EndpointConnectionEventData(connectionEventData);
 }
 
 SOPC_ServiceType* SOPC_Endpoint_FindService(SC_ServerEndpoint* sEndpoint,
@@ -174,6 +201,7 @@ SOPC_StatusCode SecureChannelEndpointEvent_CB(SC_ServerEndpoint*        sEndpoin
     SOPC_ServiceType* service = NULL;
     SOPC_RequestContext* reqContext = NULL;
     SOPC_InternalEndpoint_CallbackData* endpointCBdata = (SOPC_InternalEndpoint_CallbackData*) cbData;
+    SOPC_InternalEndpoint_ConnectionEventData* connectionEventData = NULL;
     switch(event){
         case SC_EndpointListenerEvent_Opened:
             break;
@@ -183,18 +211,18 @@ SOPC_StatusCode SecureChannelEndpointEvent_CB(SC_ServerEndpoint*        sEndpoin
             break;
         case SC_EndpointConnectionEvent_New:
             if(NULL != endpointCBdata->callback){
-                // Note: copy only on connection since it will not change after
-                retStatus = SOPC_String_Copy(&endpointCBdata->securityPolicy, &scConnection->currentSecuPolicy);
-                if(STATUS_OK == retStatus){
-                    endpointCBdata->event = SOPC_EndpointEvent_SecureChannelOpened;
-                    endpointCBdata->status = status;
-                    endpointCBdata->secureChannelId = scConnection->secureChannelId;
-                    // TODO: copy certificate and secu policy: no guarantee it will stay allocated
-                    endpointCBdata->clientCertificate = scConnection->otherAppPublicKeyCert;
-                    endpointCBdata->securityMode = scConnection->currentSecuMode;
+                // TODO: copy certificate and secu policy: no guarantee it will stay allocated
+                connectionEventData = SOPC_Create_EndpointConnectionEventData(endpointCBdata,
+                                                                              SOPC_EndpointEvent_SecureChannelOpened,
+                                                                              status,
+                                                                              scConnection->secureChannelId,
+                                                                              scConnection->otherAppPublicKeyCert,
+                                                                              &scConnection->currentSecuPolicy,
+                                                                              scConnection->currentSecuMode);
+                if(NULL != connectionEventData){
                     retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
                                                                   SOPC_Action_EndpointCallback,
-                                                                  (void*) endpointCBdata,
+                                                                  (void*) connectionEventData,
                                                                   "Endpoint applicative callback event 'SecureChannelOpened'");
                 }
             }
@@ -204,15 +232,19 @@ SOPC_StatusCode SecureChannelEndpointEvent_CB(SC_ServerEndpoint*        sEndpoin
             break;
         case SC_EndpointConnectionEvent_Disconnected:
             if(NULL != endpointCBdata->callback){
-                endpointCBdata->event = SOPC_EndpointEvent_SecureChannelClosed;
-                endpointCBdata->status = status;
-                endpointCBdata->secureChannelId = scConnection->secureChannelId;
-                endpointCBdata->clientCertificate = NULL;
-                endpointCBdata->securityMode = scConnection->currentSecuMode;
-                retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                                              SOPC_Action_EndpointCallback,
-                                                              (void*) endpointCBdata,
-                                                              "Endpoint applicative callback event 'SecureChannelClosed'");
+                connectionEventData = SOPC_Create_EndpointConnectionEventData(endpointCBdata,
+                                                                              SOPC_EndpointEvent_SecureChannelClosed,
+                                                                              status,
+                                                                              scConnection->secureChannelId,
+                                                                              NULL,
+                                                                              NULL,
+                                                                              OpcUa_MessageSecurityMode_Invalid);
+                if(NULL != connectionEventData){
+                    retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
+                                                                  SOPC_Action_EndpointCallback,
+                                                                  (void*) connectionEventData,
+                                                                  "Endpoint applicative callback event 'SecureChannelClosed'");
+                }
             }
             break;
         case SC_EndpointConnectionEvent_Request:
@@ -220,15 +252,19 @@ SOPC_StatusCode SecureChannelEndpointEvent_CB(SC_ServerEndpoint*        sEndpoin
             if(NULL == service){
                 if(NULL != endpointCBdata->callback){
                     // TODO: report the encodeable type ?
-                    endpointCBdata->event = SOPC_EndpointEvent_UnsupportedServiceRequested;
-                    endpointCBdata->status = OpcUa_BadServiceUnsupported;
-                    endpointCBdata->secureChannelId = scConnection->secureChannelId;
-                    endpointCBdata->clientCertificate = NULL;
-                    endpointCBdata->securityMode = OpcUa_MessageSecurityMode_Invalid;
-                    retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                                                  SOPC_Action_EndpointCallback,
-                                                                  (void*) endpointCBdata,
-                                                                  "Endpoint applicative callback event 'UnsupportedServiceRequested'");
+                    connectionEventData = SOPC_Create_EndpointConnectionEventData(endpointCBdata,
+                                                                                  SOPC_EndpointEvent_UnsupportedServiceRequested,
+                                                                                  OpcUa_BadServiceUnsupported,
+                                                                                  scConnection->secureChannelId,
+                                                                                  NULL,
+                                                                                  NULL,
+                                                                                  OpcUa_MessageSecurityMode_Invalid);
+                    if(NULL != connectionEventData){
+                        retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
+                                                                      SOPC_Action_EndpointCallback,
+                                                                      (void*) connectionEventData,
+                                                                      "Endpoint applicative callback event 'UnsupportedServiceRequested'");
+                    }
                 }
             }else{
                 if(requestId != NULL && reqEncObj != NULL && reqEncType != NULL){
@@ -309,12 +345,7 @@ SOPC_StatusCode SOPC_Endpoint_Open(SOPC_Endpoint          endpoint,
             if(status == STATUS_OK){
                 endpointCbData = SOPC_Create_EndpointCallbackData(callback,
                                                                   callbackData,
-                                                                  endpoint,
-                                                                  SOPC_EndpointEvent_Invalid,
-                                                                  STATUS_NOK,
-                                                                  0,
-                                                                  NULL,
-                                                                  OpcUa_MessageSecurityMode_Invalid);
+                                                                  endpoint);
                 if(endpointCbData == NULL){
                     status = STATUS_NOK;
                 }
