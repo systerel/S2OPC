@@ -65,11 +65,12 @@ SOPC_StatusCode StubServer_EndpointEvent_Callback(SOPC_Endpoint             endp
             cevent = "SOPC_EndpointEvent_Renewed";
             break;
         case SOPC_EndpointEvent_EndpointClosed:
-            cevent = "SOPC_EndpointEvent_UnsupportedServiceRequested";
+            cevent = "SOPC_EndpointEvent_Closed";
             break;
     }
     printf("<Stub_Server: Endpoint CALLBACK called with event '%s' and status '%x' !\n", cevent, status);
-    if (event == SOPC_EndpointEvent_SecureChannelClosed){
+    if (event == SOPC_EndpointEvent_SecureChannelClosed)
+    {
     	connectionClosed = 1;
     }
     else if (event == SOPC_EndpointEvent_SecureChannelOpened){
@@ -212,6 +213,7 @@ int main(void){
         }else if(connectionClosed != FALSE){
             printf("<Stub_Server: Client connection established and then closed\n");
         }else{
+            status = STATUS_NOK;
             printf("<Stub_Server: Timeout before client closed connection\n");
         }
     }
