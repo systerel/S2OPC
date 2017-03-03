@@ -1591,6 +1591,7 @@ SOPC_StatusCode SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_MsgBuffer* 
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     int32_t arrayLength = 0;
+    int64_t matrixLength = 1;
     int32_t idx = 0;
 
     if(variant != NULL){
@@ -1608,19 +1609,32 @@ SOPC_StatusCode SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_MsgBuffer* 
                 arrayLength = variant->Value.Array.Length;
                 // Note: array length written in WriteVariantArrayBuiltInType
                 if(STATUS_OK == status){
-                    status = WriteVariantArrayBuiltInType(msgBuffer,
-                                                          variant->BuiltInTypeId,
-                                                          &variant->Value.Array.Content,
-                                                          &arrayLength);
+                    if(arrayLength < 0){
+                        status = OpcUa_BadEncodingError;
+                    }else{
+                        status = WriteVariantArrayBuiltInType(msgBuffer,
+                                                              variant->BuiltInTypeId,
+                                                              &variant->Value.Array.Content,
+                                                              &arrayLength);
+                    }
                 }
                 break;
             case SOPC_VariantArrayType_Matrix:
-                arrayLength = 1;
-                for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
-                    arrayLength *= variant->Value.Matrix.ArrayDimensions[idx];
+                matrixLength = 1;
+                if(variant->Value.Matrix.Dimensions == 0){
+                    matrixLength = 0;
+                }
+                for(idx = 0; idx < variant->Value.Matrix.Dimensions && STATUS_OK == status; idx ++){
+                    if(variant->Value.Matrix.ArrayDimensions[idx] > 0 &&
+                       matrixLength * variant->Value.Matrix.ArrayDimensions[idx] <= INT32_MAX){
+                        matrixLength *= variant->Value.Matrix.ArrayDimensions[idx];
+                    }else{
+                        status = OpcUa_BadEncodingError;
+                    }
                 }
                 // Note: array length written in WriteVariantArrayBuiltInType
                 if(STATUS_OK == status){
+                    arrayLength = (int32_t) matrixLength;
                     status = WriteVariantArrayBuiltInType(msgBuffer,
                                                           variant->BuiltInTypeId,
                                                           &variant->Value.Matrix.Content,
@@ -1916,10 +1930,11 @@ SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuff
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Byte encodingByte = 0;
     int32_t arrayLength = 0;
+    int64_t matrixLength = 1;
     if(variant != NULL){
         status = SOPC_Byte_Read(&encodingByte, msgBuffer);
     }
-    if(status == STATUS_OK){
+    if(STATUS_OK == status){
         // Retrieve array flags
         if((encodingByte & SOPC_VariantArrayValueFlag) != 0){
             if((encodingByte & SOPC_VariantArrayMatrixFlag) != 0){
@@ -1935,7 +1950,7 @@ SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuff
         variant->BuiltInTypeId = 0x3F & encodingByte;
     }
 
-    if(status == STATUS_OK){
+    if(STATUS_OK == status){
         switch(variant->ArrayType){
             case SOPC_VariantArrayType_SingleValue:
                 status = ReadVariantNonArrayBuiltInType(msgBuffer,
@@ -1954,20 +1969,42 @@ SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuff
                                                      variant->BuiltInTypeId,
                                                      &variant->Value.Matrix.Content,
                                                      &arrayLength);
+
+                if(STATUS_OK == status && arrayLength < 0){
+                    status = OpcUa_BadDecodingError;
+                }
+
                 // Decode dimension array
-                if(status == STATUS_OK){
-                    // length
+                if(STATUS_OK == status){
+                    // length of array
                     status = SOPC_Int32_Read(&variant->Value.Matrix.Dimensions, msgBuffer);
                 }
-                if(status == STATUS_OK){
+
+                if(STATUS_OK == status && variant->Value.Matrix.Dimensions < 0){
+                    status = OpcUa_BadDecodingError;
+                }
+
+                if(STATUS_OK == status){
                     // array
                     variant->Value.Matrix.ArrayDimensions = malloc(sizeof(int32_t) * variant->Value.Matrix.Dimensions);
+                    if(variant->Value.Matrix.Dimensions == 0){
+                        matrixLength = 0;
+                    }
                     if(variant->Value.Matrix.ArrayDimensions != NULL){
                         int32_t idx = 0;
-                        for(idx = 0; idx < variant->Value.Matrix.Dimensions && status == STATUS_OK; idx ++){
+                        for(idx = 0; idx < variant->Value.Matrix.Dimensions && STATUS_OK == status; idx ++){
                             status = SOPC_Int32_Read(&variant->Value.Matrix.ArrayDimensions[idx], msgBuffer);
+                            if(variant->Value.Matrix.ArrayDimensions[idx] > 0){
+                                // valid value
+                                matrixLength *= variant->Value.Matrix.ArrayDimensions[idx];
+                                if(matrixLength > arrayLength){
+                                    status = OpcUa_BadDecodingError;
+                                }
+                            }else{
+                                status = OpcUa_BadDecodingError;
+                            }
                         }
-                        if(status != STATUS_OK){
+                        if(STATUS_OK != status){
                             free(variant->Value.Matrix.ArrayDimensions);
                             variant->Value.Matrix.ArrayDimensions = NULL;
                         }
@@ -1975,6 +2012,12 @@ SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_MsgBuffer* msgBuff
                         status = STATUS_NOK;
                     }
                 }
+
+                if(STATUS_OK == status && matrixLength != arrayLength){
+                    // Dimensions length and total length are not equal
+                    status = OpcUa_BadDecodingError;
+                }
+
                 break;
         }
     }

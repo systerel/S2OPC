@@ -1254,7 +1254,8 @@ void SOPC_Variant_ClearAux(void* value){
 }
 
 void SOPC_Variant_Clear(SOPC_Variant* variant){
-    int32_t length = 1; // For multiplication to compute from dimensions values
+    uint8_t error = FALSE;
+    int64_t matrixLength = 1; // For multiplication to compute from dimensions values
     int32_t idx = 0;
     if(variant != NULL){
         SOPC_EncodeableObject_PfnClear* clearFunction = GetBuiltInTypeClearFunction(variant->BuiltInTypeId);
@@ -1276,16 +1277,27 @@ void SOPC_Variant_Clear(SOPC_Variant* variant){
                                                clearFunction);
                 break;
             case SOPC_VariantArrayType_Matrix:
-                for(idx = 0; idx < variant->Value.Matrix.Dimensions; idx ++){
-                    length *= variant->Value.Matrix.ArrayDimensions[idx];
+                if(variant->Value.Matrix.Dimensions == 0){
+                    matrixLength = 0;
                 }
-                free(variant->Value.Matrix.ArrayDimensions);
-                variant->Value.Matrix.ArrayDimensions = NULL;
-                ApplyToVariantArrayBuiltInType(variant->BuiltInTypeId,
-                                               variant->Value.Matrix.Content,
-                                               &length,
-                                               clearFunction);
-                variant->Value.Matrix.Dimensions = 0;
+                for(idx = 0; idx < variant->Value.Matrix.Dimensions && FALSE == error; idx ++){
+                    if(variant->Value.Matrix.ArrayDimensions[idx] > 0 &&
+                       matrixLength * variant->Value.Matrix.ArrayDimensions[idx] <= INT32_MAX)
+                    {
+                        matrixLength *= variant->Value.Matrix.ArrayDimensions[idx];
+                    }else{
+                        error = 1;
+                    }
+                }
+                if(FALSE == error){
+                    free(variant->Value.Matrix.ArrayDimensions);
+                    variant->Value.Matrix.ArrayDimensions = NULL;
+                    ApplyToVariantArrayBuiltInType(variant->BuiltInTypeId,
+                                                   variant->Value.Matrix.Content,
+                                                   (int32_t*) &matrixLength,
+                                                   clearFunction);
+                    variant->Value.Matrix.Dimensions = 0;
+                }
                 break;
         }
 
