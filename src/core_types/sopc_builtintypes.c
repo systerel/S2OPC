@@ -400,10 +400,10 @@ void SOPC_String_ClearAux(void* value){
 
 void SOPC_String_Clear(SOPC_String* string){
     if(string != NULL){
-        if(string->Data != NULL &&
-           string->DoNotClear == FALSE){
-            free(string->Data);
-            string->Data = NULL;
+        if(string->DoNotClear == FALSE){
+           if(string->Data != NULL){
+               free(string->Data);
+           }
         }
         SOPC_String_Initialize(string);
     }
