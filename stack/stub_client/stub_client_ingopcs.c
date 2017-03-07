@@ -27,7 +27,6 @@
 #include "crypto_profiles.h"
 #include "pki_stack.h"
 #include "sopc_clientapi.h"
-#include "sopc_run.h"
 
 int noEvent = 1;
 int noResp = 1;
@@ -178,7 +177,7 @@ int main(void){
 
 	// Init stack configuration
     if(STATUS_OK == status){
-        status = StackConfiguration_Initialize();
+        status = SOPC_StackConfiguration_Initialize();
         if(STATUS_OK != status){
             printf(">>Stub_Client: Failed initializing stack\n");
         }else{
@@ -193,7 +192,7 @@ int main(void){
             return STATUS_NOK;
         }
         memset(newEncType, 0, sizeof(SOPC_EncodeableType));
-        status = StackConfiguration_AddTypes(&newEncType, 1);
+        status = SOPC_StackConfiguration_AddTypes(&newEncType, 1);
     }
 
     // Create channel object
@@ -239,13 +238,7 @@ int main(void){
     while (STATUS_OK == status && noEvent && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
-#if OPCUA_MULTITHREADED
-    	// just wait for callback called
-    	assert(FALSE);
-#else
-    	// Retrieve received messages on socket
-    	status = SOPC_TreatReceivedMessages(sleepTimeout);
-#endif //OPCUA_MULTITHREADED
+    	SOPC_Sleep(sleepTimeout);
     }
     loopCpt = 0;
 
@@ -295,13 +288,7 @@ int main(void){
     while (STATUS_OK == status && noResp != FALSE && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
-#if OPCUA_MULTITHREADED
-    	// just wait for callback
-        assert(FALSE);
-#else
-    	// Retrieve received messages on socket
-    	status = SOPC_TreatReceivedMessages(sleepTimeout);
-#endif //OPCUA_MULTITHREADED
+    	SOPC_Sleep(sleepTimeout);
     }
     loopCpt = 0;
 
@@ -322,7 +309,7 @@ int main(void){
     KeyManager_Certificate_Free(crt_ca);
     KeyManager_AsymmetricKey_Free(priv_cli);
     SOPC_Channel_Delete(&hChannel);
-    StackConfiguration_Clear();
+    SOPC_StackConfiguration_Clear();
     if(newEncType != NULL)
         free(newEncType);
     if(STATUS_OK == status){

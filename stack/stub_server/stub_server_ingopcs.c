@@ -21,7 +21,6 @@
 #include <stdio.h>
 
 #include "sopc_stack_config.h"
-#include "sopc_run.h"
 #include "crypto_profiles.h"
 #include "key_manager.h"
 #include "pki_stack.h"
@@ -148,7 +147,7 @@ int main(void){
 
     // Init stack configuration
     if(STATUS_OK == status){
-        status = StackConfiguration_Initialize();
+        status = SOPC_StackConfiguration_Initialize();
         if(STATUS_OK != status){
             printf("<Stub_Server: Failed to initialize stack\n");
         }else{
@@ -196,14 +195,7 @@ int main(void){
     while (STATUS_OK == status && connectionClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
-#if OPCUA_MULTITHREADED
-    	// just wait for callback
-    	assert(FALSE);
-#else
-    	// Retrieve received messages on socket
-        status = SOPC_TreatReceivedMessages(sleepTimeout);
-#endif //OPCUA_MULTITHREADED
-
+        SOPC_Sleep(sleepTimeout);
     }
     loopCpt = 0;
     if(STATUS_OK == status){
@@ -224,7 +216,7 @@ int main(void){
     KeyManager_Certificate_Free(crt_ca);
     KeyManager_AsymmetricKey_Free(priv_srv);
     SOPC_Endpoint_Delete(&endpoint);
-    StackConfiguration_Clear();
+    SOPC_StackConfiguration_Clear();
     if(STATUS_OK == status){
         printf("<Stub_Server: Stub_Server test: OK\n");
     }else{
