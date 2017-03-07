@@ -23,6 +23,8 @@
 
 typedef SRWLOCK Mutex;
 
+typedef CONDITION_VARIABLE Condition;
+
 typedef void* (SOPCThreadStartFct) (void *);
 
 typedef struct Thread {

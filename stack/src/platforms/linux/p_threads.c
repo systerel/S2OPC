@@ -16,9 +16,52 @@
  */
 
 #include <unistd.h>
+#include <errno.h>
 
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
+
+SOPC_StatusCode Condition_Init(Condition* cond){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    int retCode = 0;
+    if(cond != NULL){
+        retCode = pthread_cond_init(cond, NULL);
+        if(retCode == 0){
+            status = STATUS_OK;
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode Condition_Clear(Condition* cond){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    int retCode = 0;
+    if(cond != NULL){
+        retCode = pthread_cond_destroy(cond);
+        if(retCode == 0){
+            status = STATUS_OK;
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode Condition_SignalAll(Condition* cond){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    int retCode = 0;
+    if(cond != NULL){
+        retCode = pthread_cond_broadcast(cond);
+        if(retCode == 0){
+            status = STATUS_OK;
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+    return status;
+}
 
 SOPC_StatusCode Mutex_Initialization(Mutex* mut){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -69,6 +112,43 @@ SOPC_StatusCode Mutex_Unlock(Mutex* mut){
         retCode = pthread_mutex_unlock(mut);
         if(retCode == 0){
             status = STATUS_OK;
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    int retCode = 0;
+    if(NULL != cond && NULL != mut){
+        retCode = pthread_cond_wait(cond, mut);
+        if(retCode == 0){
+            status = STATUS_OK;
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    struct timespec absoluteTimeout;
+
+    int retCode = 0;
+    if(NULL != cond && NULL != mut && milliSecs > 0){
+        // Retrieve current time
+        clock_gettime(CLOCK_REALTIME, &absoluteTimeout);
+        absoluteTimeout.tv_sec = absoluteTimeout.tv_sec+(milliSecs/1000);
+        absoluteTimeout.tv_nsec = absoluteTimeout.tv_nsec+(milliSecs%1000);
+
+        retCode = pthread_cond_timedwait(cond, mut, &absoluteTimeout);
+        if(retCode == 0){
+            status = STATUS_OK;
+        }else if(ETIMEDOUT == retCode){
+            status = OpcUa_BadTimeout;
         }else{
             status = STATUS_NOK;
         }

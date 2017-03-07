@@ -22,6 +22,8 @@
 
 typedef pthread_mutex_t Mutex;
 
+typedef pthread_cond_t Condition;
+
 typedef pthread_t Thread;
 
 #endif /* SOPC_P_THREADS_H_ */

@@ -18,6 +18,32 @@
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
+SOPC_StatusCode Condition_Init(Condition* cond){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(cond != NULL){
+        InitializeConditionVariable(cond);
+        status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode Condition_Clear(Condition* cond){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(cond != NULL){
+        status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode Condition_SignalAll(Condition* cond){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(cond != NULL){
+        WakeAllConditionVariable(cond);
+        status = STATUS_OK;
+    }
+    return status;
+}
+
 SOPC_StatusCode Mutex_Initialization(Mutex* mut){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(mut != NULL){
@@ -49,6 +75,36 @@ SOPC_StatusCode Mutex_Unlock(Mutex* mut){
     if(mut != NULL){
         ReleaseSRWLockExclusive(mut);
         status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(cond != NULL && mut != NULL){
+        BOOL res = SleepConditionVariableSRW (cond, mut, INFINITE, 0);
+        if(res == 0){
+            // Possible to retrieve error with GetLastError (see msdn doc)
+            status = STATUS_NOK;
+        }else{
+            status = STATUS_OK;
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(cond != NULL && mut != NULL && milliSecs > 0){
+        BOOL res = SleepConditionVariableSRW (cond, mut, (DWORD) milliSecs, 0);
+        if(res == 0){
+            status = STATUS_NOK;
+            if(ERROR_TIMEOUT == GetLastError()){
+                status = OpcUa_BadTimeout;
+            }
+        }else{
+            status = STATUS_OK;
+        }
     }
     return status;
 }
