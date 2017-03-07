@@ -37,7 +37,7 @@ SOPC_StatusCode OpcUa_ProxyStub_Initialize(void* pCalltable,
         OpcUa_ProxyStub_g_PlatformLayerCalltable = pCalltable;
     }
     OpcUa_ProxyStub_g_Configuration = pConfig;
-    status = StackConfiguration_Initialize();
+    status = SOPC_StackConfiguration_Initialize();
     return status;
 }
 
@@ -47,7 +47,7 @@ void OpcUa_ProxyStub_Clear(void)
         Namespace_Delete(gNsTable);
         gNsTable = NULL;
     }
-    StackConfiguration_Clear();
+    SOPC_StackConfiguration_Clear();
 }
 
 SOPC_StatusCode OpcUa_ProxyStub_ReInitialize(void* pConfig){
@@ -56,7 +56,7 @@ SOPC_StatusCode OpcUa_ProxyStub_ReInitialize(void* pConfig){
         Namespace_Delete(gNsTable);
         gNsTable = NULL;
     }
-    StackConfiguration_Clear();
+    SOPC_StackConfiguration_Clear();
     return OpcUa_ProxyStub_Initialize(OpcUa_ProxyStub_g_PlatformLayerCalltable, pConfig);
 }
 
@@ -67,7 +67,7 @@ SOPC_StatusCode OpcUa_ProxyStub_AddTypes(SOPC_EncodeableType** types)
     for(idx = 1; idx < UINT32_MAX && encType != NULL; idx++){
         encType = types[idx];
     }
-    return StackConfiguration_AddTypes(types, idx);
+    return SOPC_StackConfiguration_AddTypes(types, idx);
 }
 
 SOPC_StatusCode OpcUa_ProxyStub_SetNamespaceUris(char** namespaceUris)
@@ -86,7 +86,7 @@ SOPC_StatusCode OpcUa_ProxyStub_SetNamespaceUris(char** namespaceUris)
         gNsTable->namespaceArray[idx].namespaceIndex = idx;
         gNsTable->namespaceArray[idx].namespaceName = namespaceUris[idx];
     }
-    return StackConfiguration_SetNamespaceUris(gNsTable);
+    return SOPC_StackConfiguration_SetNamespaceUris(gNsTable);
 }
 
 char* OpcUa_ProxyStub_GetVersion(){

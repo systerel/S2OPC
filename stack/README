@@ -29,10 +29,6 @@ Compilation options:
 - STACK_1_01 or STACK_1_02 or STACK_1_03 (active by default): one of
   the options could be activated to adapt wrapper for foundation API
   on foundation stack version (1.01, 1.02 or 1.03) 
-- WRAPPER_RECEPTION_THREAD (not active by default): activate a global
-  reception thread in the stack in charge of calling the socket
-  manager loop to treat received data on sockets. Necessary when using
-  a multi-threaded server SDK on top of the INGOPCS stack.
 - CROSS_COMPILE_WIN (not active by default): activate use of the
 windows cross compiler i686-w64-mingw32-gcc
 - CHECK_PREFIX=<checklib_install_path>: set path to the checklib
@@ -41,7 +37,7 @@ windows cross compiler i686-w64-mingw32-gcc
   binaries (./out by default)
 To use those options, it is necessary to define thoses options 
 as variables on compilation, e.g.: 
-"make STACK_1_01=ANY WRAPPER_RECEPTION_THREAD=VALUE"
+"make STACK_1_01=ANY"
 
 Documentation generation:
 - Pre-requesite: doxygen

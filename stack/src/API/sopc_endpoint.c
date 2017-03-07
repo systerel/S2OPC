@@ -409,10 +409,10 @@ void SOPC_IntEndpoint_Action_BeginOpen(void* arg){
     if(sEndpoint->state != SC_Endpoint_Closed){
         status = STATUS_INVALID_STATE;
     }else{
-        StackConfiguration_Locked();
+        SOPC_StackConfiguration_Locked();
         status = SC_ServerEndpoint_Configure(sEndpoint,
-                                             StackConfiguration_GetNamespaces(),
-                                             StackConfiguration_GetEncodeableTypes());
+                                             SOPC_StackConfiguration_GetNamespaces(),
+                                             SOPC_StackConfiguration_GetEncodeableTypes());
         if(status == STATUS_OK){
             status = SC_ServerEndpoint_Open(openData->endpoint, openData->endpointURL,
                                             openData->pki,

@@ -19,11 +19,13 @@
 
 #include <stdlib.h>
 #include <string.h>
+
 #include "sopc_raw_sockets.h"
 #include "sopc_types.h"
 #include "sopc_sockets.h"
 #include "platform_deps.h"
 #include "sopc_action_queue_manager.h"
+#include "sopc_threads.h"
 
 typedef struct SOPC_StackConfiguration {
     SOPC_NamespaceTable*     nsTable;
@@ -36,42 +38,99 @@ uint8_t g_lockedConfig = FALSE;
 
 static uint8_t initDone = FALSE;
 
-SOPC_StatusCode StackConfiguration_Initialize(){
+static struct
+{
+    uint8_t  initDone;
+    uint8_t  stopFlag;
+    Mutex    tMutex;
+    Thread   thread;
+} receptionThread = {
+    .initDone = FALSE,
+    .stopFlag = FALSE,
+};
+
+void* SOPC_Stack_ReceptionThread_Loop(void* nullData){
+    (void) nullData;
+    const uint32_t sleepTimeout = 500;
     SOPC_StatusCode status = STATUS_OK;
-    if(initDone == FALSE){
-        StackConfiguration_Clear();
-        initDone = 1;
-    }
-    Namespace_Initialize(g_stackConfiguration.nsTable);
-    status = Socket_Network_Initialize();
-    if(STATUS_OK == status){
-        status = SOPC_SocketManager_Config_Init();
-    }
-    if(STATUS_OK == status){
-        appCallbackQueueMgr = SOPC_ActionQueueManager_CreateAndStart();
-        if(NULL == appCallbackQueueMgr){
-            status = STATUS_NOK;
+    while(STATUS_OK == status && receptionThread.stopFlag == FALSE){
+        status = SOPC_SocketManager_TreatSocketsEvents(SOPC_SocketManager_GetGlobal(),
+                                         sleepTimeout);
+        if(STATUS_OK == status){
+            SOPC_Sleep(1);
         }
     }
-    if(STATUS_OK == status){
-        stackActionQueueMgr = SOPC_ActionQueueManager_CreateAndStart();
-        if(NULL == stackActionQueueMgr){
-            status = STATUS_NOK;
-        }
+
+    return NULL;
+}
+
+SOPC_StatusCode SOPC_Stack_ReceptionThread_Start(){
+    SOPC_StatusCode status = STATUS_INVALID_STATE;
+    if(receptionThread.initDone == FALSE){
+        status = STATUS_OK;
+        Mutex_Initialization(&receptionThread.tMutex);
+        Mutex_Lock(&receptionThread.tMutex);
+        receptionThread.initDone = 1;
+        receptionThread.stopFlag = FALSE;
+        SOPC_Thread_Create(&receptionThread.thread, SOPC_Stack_ReceptionThread_Loop, NULL);
+        Mutex_Unlock(&receptionThread.tMutex);
     }
-    InitPlatformDependencies();
     return status;
 }
 
-void StackConfiguration_Locked(){
+void SOPC_Stack_ReceptionThread_Stop(){
+    if(receptionThread.initDone != FALSE){
+        Mutex_Lock(&receptionThread.tMutex);
+        // stop the reception thread
+        receptionThread.stopFlag = 1;
+        if(receptionThread.stopFlag != FALSE){
+            SOPC_Thread_Join(receptionThread.thread);
+        }
+        Mutex_Unlock(&receptionThread.tMutex);
+        Mutex_Clear(&receptionThread.tMutex);
+        receptionThread.initDone = FALSE;
+    }
+}
+
+SOPC_StatusCode SOPC_StackConfiguration_Initialize(){
+    SOPC_StatusCode status = STATUS_INVALID_STATE;
+    if(initDone == FALSE){
+        SOPC_StackConfiguration_Clear();
+        Namespace_Initialize(g_stackConfiguration.nsTable);
+        status = Socket_Network_Initialize();
+        if(STATUS_OK == status){
+            status = SOPC_SocketManager_Config_Init();
+        }
+        if(STATUS_OK == status){
+            appCallbackQueueMgr = SOPC_ActionQueueManager_CreateAndStart();
+            if(NULL == appCallbackQueueMgr){
+                status = STATUS_NOK;
+            }
+        }
+        if(STATUS_OK == status){
+            stackActionQueueMgr = SOPC_ActionQueueManager_CreateAndStart();
+            if(NULL == stackActionQueueMgr){
+                status = STATUS_NOK;
+            }
+        }
+        if(STATUS_OK == status){
+            status = SOPC_Stack_ReceptionThread_Start();
+        }
+        InitPlatformDependencies();
+        initDone = 1;
+    }
+    return status;
+}
+
+void SOPC_StackConfiguration_Locked(){
     g_lockedConfig = 1;
 }
 
-void StackConfiguration_Unlocked(){
+void SOPC_StackConfiguration_Unlocked(){
     g_lockedConfig = FALSE;
 }
 
-void StackConfiguration_Clear(){
+void SOPC_StackConfiguration_Clear(){
     if(g_stackConfiguration.encTypesTable != NULL){
         free(g_stackConfiguration.encTypesTable);
     }
@@ -82,11 +141,12 @@ void StackConfiguration_Clear(){
     Socket_Network_Clear();
     SOPC_ActionQueueManager_StopAndDelete(&stackActionQueueMgr);
     SOPC_ActionQueueManager_StopAndDelete(&appCallbackQueueMgr);
-    StackConfiguration_Unlocked();
+    SOPC_Stack_ReceptionThread_Stop();
+    SOPC_StackConfiguration_Unlocked();
     initDone = FALSE;
 }
 
-SOPC_StatusCode StackConfiguration_SetNamespaceUris(SOPC_NamespaceTable* nsTable){
+SOPC_StatusCode SOPC_StackConfiguration_SetNamespaceUris(SOPC_NamespaceTable* nsTable){
     SOPC_StatusCode status = STATUS_INVALID_STATE;
     if(initDone != FALSE && g_lockedConfig == FALSE){
         if(nsTable == NULL){
@@ -104,7 +164,7 @@ static uint32_t GetKnownEncodeableTypesLength(){
     return result + 1;
 }
 
-SOPC_StatusCode StackConfiguration_AddTypes(SOPC_EncodeableType** encTypesTable,
+SOPC_StatusCode SOPC_StackConfiguration_AddTypes(SOPC_EncodeableType** encTypesTable,
                                             uint32_t              nbTypes){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
@@ -154,7 +214,7 @@ SOPC_StatusCode StackConfiguration_AddTypes(SOPC_EncodeableType** encTypesTable,
     return status;
 }
 
-SOPC_EncodeableType** StackConfiguration_GetEncodeableTypes()
+SOPC_EncodeableType** SOPC_StackConfiguration_GetEncodeableTypes()
 {
     if (g_stackConfiguration.encTypesTable != NULL && g_stackConfiguration.nbEncTypesTable > 0){
         // Additional types are present: contains known types + additional
@@ -165,7 +225,7 @@ SOPC_EncodeableType** StackConfiguration_GetEncodeableTypes()
     }
 }
 
-SOPC_NamespaceTable* StackConfiguration_GetNamespaces()
+SOPC_NamespaceTable* SOPC_StackConfiguration_GetNamespaces()
 {
     return g_stackConfiguration.nsTable;
 }

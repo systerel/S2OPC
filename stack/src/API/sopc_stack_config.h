@@ -32,12 +32,12 @@
  *
  *  \return STATUS_OK if initialization succeeded, STATUS_NOK otherwise
  */
-SOPC_StatusCode StackConfiguration_Initialize();
+SOPC_StatusCode SOPC_StackConfiguration_Initialize();
 
 /**
  *  \brief  Clear the stack configuration (namespaces and encodeable types).
  */
-void StackConfiguration_Clear();
+void SOPC_StackConfiguration_Clear();
 
 /**
  *  \brief Set the given namespace table to the configuration of the stack
@@ -46,14 +46,14 @@ void StackConfiguration_Clear();
  *
  *  \return STATUS_OK if configuration succeeded, STATUS_NOK otherwise (NULL pointer or invalid state)
  */
-SOPC_StatusCode StackConfiguration_SetNamespaceUris(SOPC_NamespaceTable* nsTable);
+SOPC_StatusCode SOPC_StackConfiguration_SetNamespaceUris(SOPC_NamespaceTable* nsTable);
 
 /**
  *  \brief Return the encodeable types table configuration used by the stack
  *
  *  \return Encodeable types table (terminated by NULL value)
  */
-SOPC_EncodeableType** StackConfiguration_GetEncodeableTypes();
+SOPC_EncodeableType** SOPC_StackConfiguration_GetEncodeableTypes();
 
 
 /**
@@ -64,7 +64,7 @@ SOPC_EncodeableType** StackConfiguration_GetEncodeableTypes();
  *
  *  \return STATUS_OK if configuration succeeded, STATUS_NOK otherwise
  */
-SOPC_StatusCode StackConfiguration_AddTypes(SOPC_EncodeableType** encTypesTable,
+SOPC_StatusCode SOPC_StackConfiguration_AddTypes(SOPC_EncodeableType** encTypesTable,
                                             uint32_t              nbTypes);
 
 /**
@@ -72,20 +72,20 @@ SOPC_StatusCode StackConfiguration_AddTypes(SOPC_EncodeableType** encTypesTable,
  *
  *  \return Namespace table
  */
-SOPC_NamespaceTable* StackConfiguration_GetNamespaces();
+SOPC_NamespaceTable* SOPC_StackConfiguration_GetNamespaces();
 
 
 /**
  *  \brief  (Managed by SOPC_Channel on connection) Lock modifications of the stack configuration
  *          (namespaces and encodeable types)
  */
-void StackConfiguration_Locked();
+void SOPC_StackConfiguration_Locked();
 
 /**
  *  \brief  (Managed by SOPC_Channel on disconnection) Unlock modifications of the stack configuration
  *          (namespaces and encodeable types)
  */
-void StackConfiguration_Unlocked();
+void SOPC_StackConfiguration_Unlocked();
 
 
 #endif /* SOPC_STACK_CONFIG_H_ */

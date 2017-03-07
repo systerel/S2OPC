@@ -116,14 +116,8 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion,
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
         Mutex_Initialization(&connection->mutex);
-#if OPCUA_MULTITHREADED == FALSE
         // Will use the global socket manager
         connection->socketManager = NULL;
-#else
-        // No multithread implemented
-        assert(FALSE);
-#endif //OPCUA_MULTITHREADED
-
     }
 
     return connection;

@@ -144,8 +144,9 @@ SOPC_StatusCode SOPC_SocketManager_ConfigureAcceptedSocket(SOPC_Socket*        a
                                                            SOPC_Socket_EventCB socketCallback,
                                                            void*               callbackData);
 
-SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
-                                        uint32_t            msecTimeout);
+// Treat sockets events if some are present or wait for events (until timeout)
+SOPC_StatusCode SOPC_SocketManager_TreatSocketsEvents(SOPC_SocketManager* socketManager,
+                                                      uint32_t            msecTimeout);
 
 SOPC_StatusCode SOPC_CreateAction_SocketWrite(SOPC_Socket*                  socket,
                                               uint8_t*                      data,

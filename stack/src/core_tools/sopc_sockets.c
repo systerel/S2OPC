@@ -188,21 +188,12 @@ SOPC_SocketManager* SOPC_SocketManager_GetGlobal(){
 SOPC_StatusCode SOPC_SocketManager_Config_Init(){
     SOPC_StatusCode status = STATUS_NOK;
     globalNbSockets = 0;
-#if OPCUA_MULTITHREADED == FALSE
     status = SOPC_SocketManager_Initialize(SOPC_SocketManager_GetGlobal(), OPCUA_MAXCONNECTIONS);
-#else
-    status = STATUS_OK;
-#endif //OPCUA_MULTITHREADED
     return status;
 }
 
 void SOPC_SocketManager_Config_Clear(){
-#if OPCUA_MULTITHREADED == FALSE
     SOPC_SocketManager_Clear(SOPC_SocketManager_GetGlobal());
-#else
-    NULL;
-#endif //OPCUA_MULTITHREADED
-    return;
 }
 
 SOPC_SocketManager* SOPC_SocketManager_Create(uint32_t nbSockets){
@@ -571,8 +562,8 @@ SOPC_StatusCode SOPC_SocketManager_ConfigureAcceptedSocket(SOPC_Socket*        a
     return status;
 }
 
-SOPC_StatusCode SOPC_SocketManager_Loop(SOPC_SocketManager* socketManager,
-                                        uint32_t            msecTimeout){
+SOPC_StatusCode SOPC_SocketManager_TreatSocketsEvents(SOPC_SocketManager* socketManager,
+                                                      uint32_t            msecTimeout){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
     int32_t nbReady = 0;

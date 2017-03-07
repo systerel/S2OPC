@@ -24,7 +24,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_secure_channel_client_connection.h"
 #include "sopc_stack_config.h"
-#include "sopc_run.h"
+#include "sopc_threads.h"
 #include "sopc_action_queue_manager.h"
 
 #include <assert.h>
@@ -507,10 +507,10 @@ void SOPC_Channel_Action_BeginConnect(void* arg){
     if(connectData->cConnection->instance->state != SC_Connection_Disconnected){
         status = STATUS_INVALID_STATE;
     }else{
-        StackConfiguration_Locked();
+        SOPC_StackConfiguration_Locked();
         status = SC_Client_Configure(connectData->cConnection,
-                                     StackConfiguration_GetNamespaces(),
-                                     StackConfiguration_GetEncodeableTypes());
+                                     SOPC_StackConfiguration_GetNamespaces(),
+                                     SOPC_StackConfiguration_GetEncodeableTypes());
 
         if(status == STATUS_OK){
             status = SC_Client_Connect(connectData->cConnection,
@@ -695,7 +695,7 @@ SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            cha
 {
     SOPC_IntChannel_CallbackData* internalCbData = NULL;
     uint8_t receivedEvent = FALSE;
-    const uint32_t sleepTimeout = 500;
+    const uint32_t sleepTimeout = 10;
     uint32_t timeout = networkTimeout;
     uint32_t loopCpt = 0;
 
@@ -719,15 +719,7 @@ SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            cha
            loopCpt * sleepTimeout <= timeout)
     {
         loopCpt++;
-#if OPCUA_MULTITHREADED
-        // just wait for callback called
-        //Sleep (sleepTimeout);
-        return OpcUa_BadNotImplemented;
-#else
-        // TODO: will retrieve any message: is it a problem ?
-        // Retrieve received messages on socket
-        status = SOPC_TreatReceivedMessages(sleepTimeout);
-#endif //OPCUA_MULTITHREADED
+        SOPC_Sleep(sleepTimeout);
         Mutex_Lock(&asynResultData->dataMutex);
         if(asynResultData->flag != FALSE){
             receivedEvent = 1; // True
@@ -867,11 +859,8 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
                                            SOPC_EncodeableType*  expResponseType,
                                            void**                response,
                                            SOPC_EncodeableType** responseType){
-    const uint32_t waitTimeoutMilliSecs = 500;
-    const uint32_t sleepTimeoutMicroSecs = 500;
-    const uint32_t sleepFactor = (waitTimeoutMilliSecs * 1000) / sleepTimeoutMicroSecs;
+    const uint32_t waitTimeoutMilliSecs = 1;
     uint32_t loopCptWait = 0;
-    uint32_t loopCptSleep = 0;
     uint8_t receivedEvent = FALSE;
     SOPC_StatusCode localStatus = STATUS_NOK;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -902,22 +891,10 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
            receivedEvent == FALSE &&
            loopCptWait * waitTimeoutMilliSecs <= timeout)
     {
-#if OPCUA_MULTITHREADED
-        // just wait for callback called
-        loopCptSleep++;
-        if((loopCptSleep % sleepFactor) == 0){
-            loopCptWait++;
-        }
-        SOPC_Sleep (sleepTimeoutMicroSecs);
-#else
-        (void) loopCptSleep;
-        (void) sleepFactor;
         loopCptWait++;
-        // TODO: will retrieve any message: is it a problem ?
         // TODO: time waited is not valid anymore if we receive other messages than expected !
         // Retrieve received messages on socket
-        status = SOPC_TreatReceivedMessages(waitTimeoutMilliSecs);
-#endif //OPCUA_MULTITHREADED
+        SOPC_Sleep(waitTimeoutMilliSecs);
         localStatus = SOPC_IntChannel_InvokeCallbackData_Get(invCallbackData,
                                              response,
                                              responseType);
@@ -942,7 +919,7 @@ void SOPC_Channel_Action_AsyncDisconnect(void* arg){
     SOPC_IntChannel_AppChannelAsyncResultCbData* appCallbackData = NULL;
     SOPC_IntChannel_CallbackData_Delete(discoData->cConnection->callbackData);
     SC_Client_Disconnect(discoData->cConnection);
-    StackConfiguration_Unlocked();
+    SOPC_StackConfiguration_Unlocked();
     appCallbackData = SOPC_IntChannel_AppChannelAsyncResutlCbData_Create(discoData->disconnectCb,
                                                                          discoData->disconnectCbData,
                                                                          discoData->cConnection,

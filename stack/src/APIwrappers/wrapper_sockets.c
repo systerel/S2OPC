@@ -16,6 +16,7 @@
  */
 
 #include "wrapper_sockets.h"
+#include "assert.h"
 
 SOPC_StatusCode OpcUa_P_SocketManager_Create(SOPC_SocketManager* sManager,
                                              uint32_t            nbSockets,
@@ -23,34 +24,26 @@ SOPC_StatusCode OpcUa_P_SocketManager_Create(SOPC_SocketManager* sManager,
     (void) sManager;
     (void) nbSockets;
     (void) flags;
-    // Done internally in ingopcs: no need to creation outside of the stack
-    return STATUS_OK;
+    // Note: assumption that SDK never uses this function
+    assert(FALSE);
+    return STATUS_NOK;
 }
 
 void OpcUa_P_SocketManager_Delete(SOPC_SocketManager* sManager){
     (void) sManager;
+    // Note: assumption that SDK never uses this function
+    assert(FALSE);
 }
 
 SOPC_StatusCode OpcUa_P_SocketManager_ServeLoop(SOPC_SocketManager* sManager,
                                                 uint32_t            msTimeout,
                                                 uint8_t             runOnce){
-    SOPC_StatusCode status = STATUS_OK;
-    if(sManager == NULL){
-#if OPCUA_MULTITHREADED
-        return STATUS_NOK;
-#else
-        sManager = SOPC_SocketManager_GetGlobal();
-#endif //OPCUA_MULTITHREADED
-    }
-    /* the serving loop */
-    do
-    {
-        status |= SOPC_SocketManager_Loop(sManager, msTimeout);
-    } while(!runOnce);
-    if(STATUS_OK != status){
-        status = STATUS_NOK;
-    }
-    return status;
+    (void) sManager;
+    (void) msTimeout;
+    (void) runOnce;
+    // Note: assumption that SDK never uses this function
+    assert(FALSE);
+    return STATUS_NOK;
 }
 
 void OpcUa_P_Socket_InetAddr(){}

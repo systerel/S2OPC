@@ -31,9 +31,6 @@
 // Validate the server certificate provided by client application during treatment of the open secure channel response,
 #define OPCUA_SECURECONNECTION_VALIDATE_SERVERCERT 1
 
-// Run in multi thread mode. Allow to manage sockets with several threads when activated,
-#define OPCUA_MULTITHREADED 0
-
 // Maximum size of a TCP UA message (max representable in binary is UINT32_MAX),
 #define OPCUA_ENCODER_MAXMESSAGELENGTH (uint32_t) UINT16_MAX
 

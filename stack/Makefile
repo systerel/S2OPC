@@ -9,8 +9,6 @@
 #       * (sudo) make INSTALL_PREFIX=<path> install  => library installation
 #     - STACK_1_01=<any-value> or STACK_1_02=<any-value>
 #       or STACK_1_03=<any-value> (default): set API wrapper version to use
-#     - WRAPPER_THREAD_RECEPTION=<any-value>: activate an additional thread
-#       which treat received messages for an endpoint server
 #     - CROSS_COMPILE_WIN=<any-value>: compilation with i686-w64-mingw32 compiler
 #
 #     Library generation and installation (linux only):
@@ -76,10 +74,6 @@ else
     else
        DEF_STACK=-DSTACK_1_03 
     endif
-endif
-
-ifdef WRAPPER_RECEPTION_THREAD
-    DEF_THREAD=-DWRAPPER_RECEPTION_THREAD
 endif
 
 ifdef SHARED
