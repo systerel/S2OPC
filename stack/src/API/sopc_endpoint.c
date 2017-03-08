@@ -38,7 +38,7 @@ typedef struct SOPC_IntEndpoint_EventCallbackData {
     void*                         openResultCbData;
 } SOPC_IntEndpoint_EventCallbackData;
 
-typedef struct {
+typedef struct SOPC_IntEndpoint_ConnectionEventData {
     SOPC_IntEndpoint_EventCallbackData* endpointData;
     SOPC_EndpointEvent                  event;
     SOPC_StatusCode                     status;
@@ -57,13 +57,7 @@ struct SOPC_RequestContext {
     SOPC_ServiceType*    service;
 };
 
-typedef struct {
-    SOPC_Endpoint   endpoint;
-    Mutex           endOperationMutex;
-    SOPC_StatusCode operationStatus;
-} SOPC_IntEndpoint_EndOperationData;
-
-typedef struct {
+typedef struct SOPC_IntEndpoint_OpenData {
     SOPC_Endpoint                       endpoint;
     char*                               endpointURL;
     Certificate*                        serverCertificate;
@@ -83,6 +77,16 @@ typedef struct SOPC_IntEndpoint_AppEndpointAsyncResultCbData {
     SOPC_EndpointEvent_AsyncOperationResult event;
     SOPC_StatusCode                         status;
 } SOPC_IntEndpoint_AppEndpointAsyncResultCbData;
+
+// Could be used as callbackData in SOPC_IntEndpoint_AppEndpointAsyncResultCbData
+// when using a (timed) condition waiting on async result is needed
+typedef struct SOPC_IntEndpoint_AsyncResultCondData {
+    Mutex           mutex;
+    Condition       cond;
+    uint8_t         flag;
+    uint8_t         freeInCallback;
+    SOPC_StatusCode status;
+} SOPC_IntEndpoint_AsyncResultCondData;
 
 SOPC_RequestContext* SOPC_RequestContext_Create(SOPC_Endpoint        endpoint,
                                                 SC_Connection*       scConnection,
@@ -140,7 +144,7 @@ SOPC_IntEndpoint_EventCallbackData* SOPC_IntEndpoint_EventCallbackData_Create(SO
     return result;
 }
 
-void SOPC_Delete_EndpointCallbackData(SOPC_IntEndpoint_EventCallbackData* chCbData){
+void SOPC_IntEndpoint_EndpointCallbackData_Delete(SOPC_IntEndpoint_EventCallbackData* chCbData){
     if(chCbData != NULL){
         free(chCbData);
     }
@@ -193,7 +197,7 @@ void SOPC_Endpoint_Action_EndpointEventCallback(void* arg){
     SOPC_IntEndpoint_ConnectionEventData_Delete(connectionEventData);
 }
 
-SOPC_IntEndpoint_AppEndpointAsyncResultCbData* SOPC_IntEndpoint_AppEndpointAsyncResutlCbData_Create
+SOPC_IntEndpoint_AppEndpointAsyncResultCbData* SOPC_IntEndpoint_AppEndpointAsyncResultCbData_Create
     (SOPC_Endpoint_AsyncResult_CB*           callback,
      void*                                   callbackData,
      SOPC_Endpoint                           endpoint,
@@ -226,6 +230,73 @@ void SOPC_Endpoint_Action_AppEndpointAsyncResutlCallback(void* arg){
                      cbData->status);
     SOPC_IntEndpoint_AppEndpointAsyncResutlCbData_Delete(cbData);
 }
+
+SOPC_StatusCode SOPC_IntEndpoint_AsyncResultCondData_Init(SOPC_IntEndpoint_AsyncResultCondData* asyncData){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != asyncData){
+        asyncData->flag = FALSE;
+        asyncData->freeInCallback = FALSE;
+        asyncData->status = STATUS_NOK;
+        status = Mutex_Initialization(&asyncData->mutex);
+        if(STATUS_OK == status){
+            status = Condition_Init(&asyncData->cond);
+        }
+    }
+    return status;
+}
+
+SOPC_IntEndpoint_AsyncResultCondData* SOPC_IntEndpoint_AsyncResultCondData_Create()
+{
+    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_IntEndpoint_AsyncResultCondData* result = malloc(sizeof(SOPC_IntEndpoint_AsyncResultCondData));
+    if(NULL != result){
+        status = SOPC_IntEndpoint_AsyncResultCondData_Init(result);
+        if(STATUS_OK != status){
+            free(result);
+            result = NULL;
+        }
+    }
+    return result;
+}
+
+void SOPC_IntEndpoint_AsyncResultCondData_Clear(SOPC_IntEndpoint_AsyncResultCondData* data){
+    Mutex_Clear(&data->mutex);
+    Condition_Clear(&data->cond);
+}
+
+
+void SOPC_IntEndpoint_AsyncResultCondData_Delete(SOPC_IntEndpoint_AsyncResultCondData* data)
+{
+    if(NULL != data){
+        SOPC_IntEndpoint_AsyncResultCondData_Clear(data);
+        free(data);
+    }
+}
+
+// Manage the async result flag for notifying the sync function waiting for it
+void SOPC_IntEndpoint_AsyncResultCondDataCB(SOPC_Endpoint                           endpoint,
+                                            void*                                   cbData,
+                                            SOPC_EndpointEvent_AsyncOperationResult cEvent,
+                                            SOPC_StatusCode                         status)
+{
+    (void) cEvent;
+    (void) endpoint;
+    uint8_t freeDataHere = FALSE;
+    SOPC_IntEndpoint_AsyncResultCondData* asynResultData = (SOPC_IntEndpoint_AsyncResultCondData*) cbData;
+    Mutex_Lock(&asynResultData->mutex);
+    asynResultData->flag = 1;
+    asynResultData->status = status;
+    freeDataHere = asynResultData->freeInCallback;
+    Condition_SignalAll(&asynResultData->cond);
+    Mutex_Unlock(&asynResultData->mutex);
+
+    if(FALSE != freeDataHere){
+        // Sync function using the flag has stopped before callback
+        // data must be freed here
+        SOPC_IntEndpoint_AsyncResultCondData_Delete(asynResultData);
+    }
+}
+
 
 SOPC_ServiceType* SOPC_Endpoint_FindService(SC_ServerEndpoint* sEndpoint,
                                             uint32_t requestTypeId){
@@ -270,7 +341,7 @@ SOPC_StatusCode SOPC_IntEndpoint_SecureChannelEvent_CB(SC_ServerEndpoint*       
     switch(event){
         case SC_EndpointListenerEvent_Opened:
             if(NULL != endpointCBdata->openResultCb){
-                asynResultData = SOPC_IntEndpoint_AppEndpointAsyncResutlCbData_Create(endpointCBdata->openResultCb,
+                asynResultData = SOPC_IntEndpoint_AppEndpointAsyncResultCbData_Create(endpointCBdata->openResultCb,
                                                                                       endpointCBdata->openResultCbData,
                                                                                       sEndpoint,
                                                                                       SOPC_EndpointAsync_OpenResult,
@@ -284,12 +355,12 @@ SOPC_StatusCode SOPC_IntEndpoint_SecureChannelEvent_CB(SC_ServerEndpoint*       
             }
             if(STATUS_OK != status){
                 // It means open operation failed => closed state
-                SOPC_Delete_EndpointCallbackData(endpointCBdata);
+                SOPC_IntEndpoint_EndpointCallbackData_Delete(endpointCBdata);
             }
             break;
         case SC_EndpointListenerEvent_Closed:
             // Deallocation of the endpoint cb data
-            SOPC_Delete_EndpointCallbackData(endpointCBdata);
+            SOPC_IntEndpoint_EndpointCallbackData_Delete(endpointCBdata);
             break;
         case SC_EndpointConnectionEvent_New:
             if(NULL != endpointCBdata->callback){
@@ -488,7 +559,7 @@ SOPC_StatusCode SOPC_Endpoint_AsyncOpen(SOPC_Endpoint                 endpoint,
                                                        (void*) openData,
                                                        "Begin open endpoint");
             if(STATUS_OK != status){
-                SOPC_Delete_EndpointCallbackData(endpointCbData);
+                SOPC_IntEndpoint_EndpointCallbackData_Delete(endpointCbData);
                 free(openData);
             }
         }
@@ -497,17 +568,6 @@ SOPC_StatusCode SOPC_Endpoint_AsyncOpen(SOPC_Endpoint                 endpoint,
     return status;
 }
 
-void SOPC_IntEndpoint_AsyncOpenCB(SOPC_Endpoint                           endpoint,
-                                  void*                                   cbData,
-                                  SOPC_EndpointEvent_AsyncOperationResult cEvent,
-                                  SOPC_StatusCode                         status)
-{
-    (void) endpoint;
-    assert(cEvent == SOPC_EndpointAsync_OpenResult);
-    SOPC_IntEndpoint_EndOperationData* endOpenData = (SOPC_IntEndpoint_EndOperationData*) cbData;
-    endOpenData->operationStatus = status;
-    Mutex_Unlock(&endOpenData->endOperationMutex);
-}
 
 SOPC_StatusCode SOPC_Endpoint_Open(SOPC_Endpoint          endpoint,
                                    char*                  endpointURL,
@@ -519,19 +579,13 @@ SOPC_StatusCode SOPC_Endpoint_Open(SOPC_Endpoint          endpoint,
                                    uint8_t                nbSecuConfigs,
                                    SOPC_SecurityPolicy*   secuConfigurations)
 {
-    // Temporarly used of a mutex, must use a barrier to have a timeout value
-    SOPC_IntEndpoint_EndOperationData endOpenData;
+    SOPC_IntEndpoint_AsyncResultCondData asyncData;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(endpoint != NULL && endpointURL != NULL &&
        callback != NULL &&
        nbSecuConfigs > 0 && secuConfigurations != NULL)
     {
-        status = Mutex_Initialization(&endOpenData.endOperationMutex);
-        endOpenData.operationStatus = STATUS_NOK;
-        endOpenData.endpoint = endpoint;
-        if(STATUS_OK == status){
-            status = Mutex_Lock(&endOpenData.endOperationMutex);
-        }
+        status = SOPC_IntEndpoint_AsyncResultCondData_Init(&asyncData);
 
         if(STATUS_OK == status){
             status = SOPC_Endpoint_AsyncOpen(endpoint,
@@ -543,30 +597,28 @@ SOPC_StatusCode SOPC_Endpoint_Open(SOPC_Endpoint          endpoint,
                                              pki,
                                              nbSecuConfigs,
                                              secuConfigurations,
-                                             SOPC_IntEndpoint_AsyncOpenCB,
-                                             (void*) &endOpenData);
+                                             SOPC_IntEndpoint_AsyncResultCondDataCB,
+                                             (void*) &asyncData);
         }
 
         if(STATUS_OK == status){
-            status = Mutex_Lock(&endOpenData.endOperationMutex);
+            status = Mutex_Lock(&asyncData.mutex);
+
+            while(STATUS_OK == status && asyncData.flag == FALSE){
+                status = Mutex_UnlockAndWaitCond(&asyncData.cond, &asyncData.mutex);
+            }
+
+            if(STATUS_OK == status){
+                status = asyncData.status;
+            }
+            Mutex_Unlock(&asyncData.mutex);
         }
 
-        if(STATUS_OK == status){
-            status = endOpenData.operationStatus;
-        }
-
-        Mutex_Clear(&endOpenData.endOperationMutex);
+        SOPC_IntEndpoint_AsyncResultCondData_Clear(&asyncData);
     }
     return status;
 }
 
-void SOPC_IntEndpoint_EndOperation_CB(void*           callbackData,
-                                      SOPC_StatusCode status){
-    assert(callbackData != NULL);
-    SOPC_IntEndpoint_EndOperationData* operationEndData = (SOPC_IntEndpoint_EndOperationData*) callbackData;
-    operationEndData->operationStatus = status;
-    Mutex_Unlock(&operationEndData->endOperationMutex);
-}
 
 SOPC_StatusCode SOPC_Endpoint_CreateResponse(SOPC_Endpoint         endpoint,
                                              SOPC_RequestContext*  context,
@@ -586,24 +638,60 @@ SOPC_StatusCode SOPC_Endpoint_CreateResponse(SOPC_Endpoint         endpoint,
     return status;
 }
 
-SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint         endpoint,
-                                           SOPC_EncodeableType*  responseType,
-                                           void*                 response,
-                                           SOPC_RequestContext** requestContext)
+void SOPC_IntEndpoint_SendResponseResultCB(void*           callbackData,
+                                           SOPC_StatusCode status)
+{
+    assert(callbackData != NULL);
+    SOPC_IntEndpoint_AppEndpointAsyncResultCbData* operationEndData = (SOPC_IntEndpoint_AppEndpointAsyncResultCbData*) callbackData;
+    operationEndData->status = status;
+    SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
+                                      SOPC_Endpoint_Action_AppEndpointAsyncResutlCallback,
+                                      callbackData,
+                                      "Channel async invoke send request result event applicative callback");
+}
+
+SOPC_StatusCode SOPC_Endpoint_AsyncSendResponse(SOPC_Endpoint                endpoint,
+                                                SOPC_EncodeableType*         responseType,
+                                                void*                        response,
+                                                SOPC_RequestContext**        requestContext,
+                                                SOPC_Endpoint_AsyncResult_CB* sendReqResultCb,
+                                                void*                         sendReqResultCbData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_RequestContext* context = NULL;
     SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
-    SOPC_IntEndpoint_EndOperationData endSendResponse;
-    endSendResponse.endpoint = endpoint;
-    endSendResponse.operationStatus = STATUS_NOK;
+    SOPC_IntEndpoint_AppEndpointAsyncResultCbData* appSendReqResultCbData = NULL;
+    SOPC_Socket_EndOperation_CB* endSendCallback = NULL;
+
     if(sEndpoint != NULL && requestContext != NULL && *requestContext != NULL){
         context = (SOPC_RequestContext*) *requestContext;
 
-        status = Mutex_Initialization(&endSendResponse.endOperationMutex);
+        if(responseType == NULL){
+            // TODO: warning on efficiency ?
+        }
 
-        if(STATUS_OK == status){
-            status = Mutex_Lock(&endSendResponse.endOperationMutex);
+        // TODO: do not use end send request callback at this level
+        //       anymore since error will be triggered in SOPC_Endpoint_PfnRequestComplete callback
+        // => wait for encoding to be done by applicative code
+        if(NULL != sendReqResultCb){
+            appSendReqResultCbData = SOPC_IntEndpoint_AppEndpointAsyncResultCbData_Create(sendReqResultCb,
+                                                                                          sendReqResultCbData,
+                                                                                          endpoint,
+                                                                                          SOPC_EndpointAsync_SendResponseResult,
+                                                                                          STATUS_NOK);
+            if(NULL != appSendReqResultCbData){
+                endSendCallback = SOPC_IntEndpoint_SendResponseResultCB;
+            }
+        }
+
+        if(NULL != appSendReqResultCbData || NULL == sendReqResultCb){
+            status = STATUS_OK;
+        }else{
+            status = STATUS_NOK;
+            if(NULL != appSendReqResultCbData){
+                SOPC_IntEndpoint_AppEndpointAsyncResutlCbData_Delete(appSendReqResultCbData);
+                appSendReqResultCbData = NULL;
+            }
         }
 
         if(STATUS_OK == status){
@@ -612,25 +700,55 @@ SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint         endpoint,
                                                    context->requestId,
                                                    responseType,
                                                    response,
-                                                   SOPC_IntEndpoint_EndOperation_CB,
-                                                   (void*) &endSendResponse);
+                                                   endSendCallback,
+                                                   (void*) appSendReqResultCbData);
         }
         // Deallocate request context now send response is sent
         SOPC_RequestContext_Delete(context);
         *requestContext = NULL;
+
     }
+
+    return status;
+}
+
+SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint         endpoint,
+                                           SOPC_EncodeableType*  responseType,
+                                           void*                 response,
+                                           SOPC_RequestContext** requestContext)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
+    SOPC_IntEndpoint_AsyncResultCondData asyncData;
+
+    if(sEndpoint != NULL && requestContext != NULL && *requestContext != NULL){
+
+        status = SOPC_IntEndpoint_AsyncResultCondData_Init(&asyncData);
+
+        if(STATUS_OK == status){
+            status = SOPC_Endpoint_AsyncSendResponse(sEndpoint,
+                                                     responseType, response,
+                                                     requestContext,
+                                                     SOPC_IntEndpoint_AsyncResultCondDataCB,
+                                                     (void*) &asyncData);
+        }
+    }
+
 
     if(STATUS_OK == status){
-        status = Mutex_Lock(&endSendResponse.endOperationMutex);
+        status = Mutex_Lock(&asyncData.mutex);
+
+        while(STATUS_OK == status && asyncData.flag == FALSE){
+            status = Mutex_UnlockAndWaitCond(&asyncData.cond, &asyncData.mutex);
+        }
+
+        if(STATUS_OK == status){
+            status = asyncData.status;
+        }
+        Mutex_Unlock(&asyncData.mutex);
     }
 
-    if(STATUS_OK == status){
-        status = endSendResponse.operationStatus;
-    }
-
-    Mutex_Unlock(&endSendResponse.endOperationMutex);
-    Mutex_Clear(&endSendResponse.endOperationMutex);
-
+    SOPC_IntEndpoint_AsyncResultCondData_Clear(&asyncData);
     return status;
 }
 
@@ -647,110 +765,92 @@ SOPC_StatusCode SOPC_Endpoint_CancelSendResponse(SOPC_Endpoint                en
     return STATUS_OK;
 }
 
-
-
-SOPC_StatusCode SOPC_Endpoint_BeginClose(SOPC_Endpoint endpoint){
-    return SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
-                                             SC_ServerEndpoint_CloseAux,
-                                             (void*) endpoint,
-                                             "Begin close endpoint");
+void SOPC_Endpoint_Action_AsyncClose(void* arg){
+    SOPC_IntEndpoint_AppEndpointAsyncResultCbData* asyncData = (SOPC_IntEndpoint_AppEndpointAsyncResultCbData*) arg;
+    asyncData->status = SC_ServerEndpoint_Close(asyncData->endpoint);
+    SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
+                                      SOPC_Endpoint_Action_AppEndpointAsyncResutlCallback,
+                                      (void*) asyncData,
+                                      "Endpoint applicative callback close result");
 }
 
-void SOPC_Endpoint_Action_EndpointClose(void* arg){
-    SOPC_IntEndpoint_EndOperationData* closeData = (SOPC_IntEndpoint_EndOperationData*) arg;
-    assert(NULL != closeData && NULL != closeData->endpoint);
-    SOPC_StatusCode status = SC_ServerEndpoint_Close(closeData->endpoint);
-    // Call end operation callback
-    SOPC_IntEndpoint_EndOperation_CB(arg,
-                                     status);
+SOPC_StatusCode SOPC_Endpoint_AsyncClose(SOPC_Endpoint                 endpoint,
+                                         SOPC_Endpoint_AsyncResult_CB* asyncCb,
+                                         void*                         asyncCbData)
+{
+    SOPC_IntEndpoint_AppEndpointAsyncResultCbData* asyncCloseData = SOPC_IntEndpoint_AppEndpointAsyncResultCbData_Create(asyncCb,
+                                                                                                                         asyncCbData,
+                                                                                                                         endpoint,
+                                                                                                                         SOPC_EndpointAsync_CloseResult,
+                                                                                                                         STATUS_NOK);
+
+    return SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                             SOPC_Endpoint_Action_AsyncClose,
+                                             (void*) asyncCloseData,
+                                             "Begin close endpoint");
 }
 
 SOPC_StatusCode SOPC_Endpoint_Close(SOPC_Endpoint endpoint){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-
-    SOPC_IntEndpoint_EndOperationData endCloseData;
-    endCloseData.operationStatus = STATUS_NOK;
+    SOPC_IntEndpoint_AsyncResultCondData asyncData;
 
     if(endpoint != NULL){
 
-        endCloseData.endpoint = endpoint;
-
-        status = Mutex_Initialization(&endCloseData.endOperationMutex);
+        status = SOPC_IntEndpoint_AsyncResultCondData_Init(&asyncData);
 
         if(STATUS_OK == status){
-            status = Mutex_Lock(&endCloseData.endOperationMutex);
-        }
-
-        if(STATUS_OK == status){
-            status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
-                                                       SOPC_Endpoint_Action_EndpointClose,
-                                                       (void*) &endCloseData,
-                                                       "Delete endpoint");
+            status = SOPC_Endpoint_AsyncClose(endpoint,
+                                              SOPC_IntEndpoint_AsyncResultCondDataCB,
+                                              (void*) &asyncData);
         }
     }
 
     if(STATUS_OK == status){
-        Mutex_Lock(&endCloseData.endOperationMutex);
-        status = endCloseData.operationStatus;
+        status = Mutex_Lock(&asyncData.mutex);
+
+        while(STATUS_OK == status && asyncData.flag == FALSE){
+            status = Mutex_UnlockAndWaitCond(&asyncData.cond, &asyncData.mutex);
+        }
+
+        if(STATUS_OK == status){
+            status = asyncData.status;
+        }
+        Mutex_Unlock(&asyncData.mutex);
     }
 
-    Mutex_Unlock(&endCloseData.endOperationMutex);
-    Mutex_Clear(&endCloseData.endOperationMutex);
+    SOPC_IntEndpoint_AsyncResultCondData_Clear(&asyncData);
 
     return status;
 }
 
-SOPC_StatusCode SOPC_Endpoint_BeginDelete(SOPC_Endpoint endpoint){
-    return SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
-                                             SC_ServerEndpoint_DeleteAux,
-                                             (void*) endpoint,
-                                             "Begin delete endpoint");
+void SOPC_IntEndpoint_AsyncDeleteDiscoResultCB(SOPC_Endpoint                           endpoint,
+                                               void*                                   cbData,
+                                               SOPC_EndpointEvent_AsyncOperationResult cEvent,
+                                               SOPC_StatusCode                         status)
+{
+    assert(cEvent == SOPC_EndpointAsync_CloseResult);
+    (void) cbData;
+    if(STATUS_OK == status){
+        SC_ServerEndpoint_Delete(endpoint);
+    }
 }
 
-void SOPC_Endpoint_Action_EndpointDelete(void* arg){
-    SOPC_IntEndpoint_EndOperationData* deleteData = (SOPC_IntEndpoint_EndOperationData*) arg;
-    assert(NULL != deleteData && NULL != deleteData->endpoint);
-    SC_ServerEndpoint_Delete(deleteData->endpoint);
-    // Call end operation callback
-    SOPC_IntEndpoint_EndOperation_CB(arg,
-                                  STATUS_OK);
+SOPC_StatusCode SOPC_Endpoint_AsyncDelete(SOPC_Endpoint endpoint){
+    return SOPC_Endpoint_AsyncClose(endpoint,
+                                    SOPC_IntEndpoint_AsyncDeleteDiscoResultCB,
+                                    NULL);
 }
 
 SOPC_StatusCode SOPC_Endpoint_Delete(SOPC_Endpoint* endpoint){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
 
-    SOPC_IntEndpoint_EndOperationData endDeleteData;
-    endDeleteData.operationStatus = STATUS_NOK;
-
     if(endpoint != NULL && *endpoint != NULL){
-
-        endDeleteData.endpoint = *endpoint;
-
-        status = Mutex_Initialization(&endDeleteData.endOperationMutex);
-
+        status = SOPC_Endpoint_Close(*endpoint);
         if(STATUS_OK == status){
-            status = Mutex_Lock(&endDeleteData.endOperationMutex);
-        }
-
-        if(STATUS_OK == status){
-            status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
-                                                       SOPC_Endpoint_Action_EndpointDelete,
-                                                       (void*) &endDeleteData,
-                                                       "Delete endpoint");
+            SC_ServerEndpoint_Delete(*endpoint);
+            *endpoint = NULL;
         }
     }
-
-    if(STATUS_OK == status){
-        Mutex_Lock(&endDeleteData.endOperationMutex);
-        status = endDeleteData.operationStatus;
-    }
-
-    if(STATUS_OK == status){
-        *endpoint = NULL;
-    }
-
-    Mutex_Unlock(&endDeleteData.endOperationMutex);
-    Mutex_Clear(&endDeleteData.endOperationMutex);
 
     return status;
 }

@@ -79,7 +79,7 @@ typedef SOPC_StatusCode (SOPC_Channel_PfnRequestComplete)(SOPC_Channel         c
  */
 typedef enum SOPC_ChannelEvent_AsyncOperationResult {
     SOPC_ChannelAsync_ConnectResult, // Only in case of failure during connect for now
-    SOPC_ChannelAsync_InvokeResult,
+    SOPC_ChannelAsync_InvokeSendRequestResult,
     SOPC_ChannelAsync_DisconnectResult
 } SOPC_ChannelEvent_AsyncOperationResult;
 

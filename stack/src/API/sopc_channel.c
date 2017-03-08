@@ -60,20 +60,14 @@ typedef struct SOPC_IntChannel_AppChannelAsyncResultCbData {
 } SOPC_IntChannel_AppChannelAsyncResultCbData;
 
 // Could be used as callbackData in SOPC_IntChannel_AppChannelAsyncResultCbData
-// when a flag change on async result event is needed
-typedef struct SOPC_IntChannel_AsyncResultFlagData {
-    Mutex           dataMutex;
-    uint8_t         freeInCallback;
+// when using a (timed) condition waiting on async result is needed
+typedef struct SOPC_IntChannel_AsyncResultCondData {
+    Mutex           mutex;
+    Condition       cond;
     uint8_t         flag;
+    uint8_t         freeInCallback;
     SOPC_StatusCode status;
-} SOPC_IntChannel_AsyncResultFlagData;
-
-typedef struct SOPC_IntChannel_EndOperationData {
-    SOPC_Channel    channel;
-    uint8_t         endOperationFlag;
-    Mutex           endOperationMutex;
-    SOPC_StatusCode operationStatus;
-} SOPC_IntChannel_EndOperationData;
+} SOPC_IntChannel_AsyncResultCondData;
 
 typedef struct SOPC_IntChannel_ConnectData {
     SC_ClientConnection*                    cConnection;
@@ -97,7 +91,6 @@ typedef struct SOPC_IntChannel_DisconnectData {
     void*                                   disconnectCbData;
 } SOPC_IntChannel_DisconnectData;
 
-// TODO: "atomic" callbackData for multithreading
 typedef struct SOPC_IntChannel_InvokeCallbackData {
     SOPC_Channel                     channel;
     void*                            response;
@@ -202,46 +195,69 @@ void SOPC_Channel_Action_AppChannelAsyncResutlCallback(void* arg){
     SOPC_IntChannel_AppChannelAsyncResutlCbData_Delete(cbData);
 }
 
-SOPC_IntChannel_AsyncResultFlagData* SOPC_IntChannel_AsyncResultFlagData_Create()
+SOPC_StatusCode SOPC_IntChannel_AsyncResultCondData_Init(SOPC_IntChannel_AsyncResultCondData* asyncData){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != asyncData){
+        asyncData->flag = FALSE;
+        asyncData->freeInCallback = FALSE;
+        asyncData->status = STATUS_NOK;
+        status = Mutex_Initialization(&asyncData->mutex);
+        if(STATUS_OK == status){
+            status = Condition_Init(&asyncData->cond);
+        }
+    }
+    return status;
+}
+
+SOPC_IntChannel_AsyncResultCondData* SOPC_IntChannel_AsyncResultCondData_Create()
 {
-    SOPC_IntChannel_AsyncResultFlagData* result = malloc(sizeof(SOPC_IntChannel_AsyncResultFlagData));
+    SOPC_StatusCode status = STATUS_NOK;
+    SOPC_IntChannel_AsyncResultCondData* result = malloc(sizeof(SOPC_IntChannel_AsyncResultCondData));
     if(NULL != result){
-        Mutex_Initialization(&result->dataMutex);
-        result->freeInCallback = FALSE;
-        result->flag = FALSE;
-        result->status = STATUS_NOK;
+        status = SOPC_IntChannel_AsyncResultCondData_Init(result);
+        if(STATUS_OK != status){
+            free(result);
+            result = NULL;
+        }
     }
     return result;
 }
 
-void SOPC_IntChannel_AsyncResultFlagData_Delete(SOPC_IntChannel_AsyncResultFlagData* data)
+void SOPC_IntChannel_AsyncResultCondData_Clear(SOPC_IntChannel_AsyncResultCondData* data){
+    Mutex_Clear(&data->mutex);
+    Condition_Clear(&data->cond);
+}
+
+
+void SOPC_IntChannel_AsyncResultCondData_Delete(SOPC_IntChannel_AsyncResultCondData* data)
 {
     if(NULL != data){
-        Mutex_Clear(&data->dataMutex);
+        SOPC_IntChannel_AsyncResultCondData_Clear(data);
         free(data);
     }
 }
 
 // Manage the async result flag for notifying the sync function waiting for it
-void SOPC_IntChannel_AsyncResultFlagCB(SOPC_Channel                           channel,
-                                       void*                                  cbData,
-                                       SOPC_ChannelEvent_AsyncOperationResult cEvent,
-                                       SOPC_StatusCode                        status)
+void SOPC_IntChannel_AsyncResultCondDataCB(SOPC_Channel                           channel,
+                                           void*                                  cbData,
+                                           SOPC_ChannelEvent_AsyncOperationResult cEvent,
+                                           SOPC_StatusCode                        status)
 {
     (void) cEvent;
-    assert(NULL != channel);
+    (void) channel;
     uint8_t freeDataHere = FALSE;
-    SOPC_IntChannel_AsyncResultFlagData* asynResultData = (SOPC_IntChannel_AsyncResultFlagData*) cbData;
-    Mutex_Lock(&asynResultData->dataMutex);
-    asynResultData->status = status;
+    SOPC_IntChannel_AsyncResultCondData* asynResultData = (SOPC_IntChannel_AsyncResultCondData*) cbData;
+    Mutex_Lock(&asynResultData->mutex);
     asynResultData->flag = 1;
+    asynResultData->status = status;
     freeDataHere = asynResultData->freeInCallback;
-    Mutex_Unlock(&asynResultData->dataMutex);
+    Condition_SignalAll(&asynResultData->cond);
+    Mutex_Unlock(&asynResultData->mutex);
 
     if(FALSE != freeDataHere){
         // Sync function using the flag has stopped before callback
         // data must be freed here
-        SOPC_IntChannel_AsyncResultFlagData_Delete(asynResultData);
+        SOPC_IntChannel_AsyncResultCondData_Delete(asynResultData);
     }
 }
 
@@ -308,8 +324,8 @@ SOPC_StatusCode SOPC_Channel_CreateAction_AppInvokeCallback(SOPC_Channel        
     if(appCbData != NULL){
         retStatus = STATUS_OK;
         SOPC_IntChannel_InvokeCallbackData_Set(appCbData,
-                               response, responseType,
-                               status);
+                                               response, responseType,
+                                               status);
         retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
                                                       SOPC_Channel_Action_AppCallback,
                                                       (void*) appCbData,
@@ -332,7 +348,7 @@ SOPC_StatusCode SOPC_Channel_Create(SOPC_Channel*               channel,
     return status;
 }
 
-void SOPC_IntChannel_BeginDeleteDiscoResultCB(SOPC_Channel                           channel,
+void SOPC_IntChannel_AsyncDeleteDiscoResultCB(SOPC_Channel                           channel,
                                               void*                                  cbData,
                                               SOPC_ChannelEvent_AsyncOperationResult cEvent,
                                               SOPC_StatusCode                        status)
@@ -346,7 +362,7 @@ void SOPC_IntChannel_BeginDeleteDiscoResultCB(SOPC_Channel                      
 
 SOPC_StatusCode SOPC_Channel_AsyncDelete(SOPC_Channel channel){
     return SOPC_Channel_AsyncDisconnect(channel,
-                                        SOPC_IntChannel_BeginDeleteDiscoResultCB,
+                                        SOPC_IntChannel_AsyncDeleteDiscoResultCB,
                                         NULL);
 }
 
@@ -358,9 +374,9 @@ SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel){
         status = SOPC_Channel_Disconnect(*channel);
         if(STATUS_OK == status){
             SC_Client_Delete(*channel);
+            // No need to wait delete action terminated to set pointer to null
+            *channel = NULL;
         }
-        // No need to wait delete action terminated to set pointer to null
-        *channel = NULL;
     }
     return status;
 }
@@ -694,13 +710,10 @@ SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            cha
                                      void*                                   cbData)
 {
     SOPC_IntChannel_CallbackData* internalCbData = NULL;
-    uint8_t receivedEvent = FALSE;
-    const uint32_t sleepTimeout = 10;
     uint32_t timeout = networkTimeout;
-    uint32_t loopCpt = 0;
 
     SOPC_StatusCode status = STATUS_NOK;
-    SOPC_IntChannel_AsyncResultFlagData* asynResultData = SOPC_IntChannel_AsyncResultFlagData_Create();
+    SOPC_IntChannel_AsyncResultCondData* asynResultData = SOPC_IntChannel_AsyncResultCondData_Create();
     uint8_t freeAsyncDataHere = 1;
 
     if(NULL != asynResultData){
@@ -710,65 +723,59 @@ SOPC_StatusCode SOPC_Channel_Connect(SOPC_Channel                            cha
                                               pki, reqSecuPolicyUri,
                                               requestedLifetime, msgSecurityMode,
                                               networkTimeout, cb, cbData,
-                                              SOPC_IntChannel_AsyncResultFlagCB,
+                                              SOPC_IntChannel_AsyncResultCondDataCB,
                                               (void*) asynResultData,
                                               &internalCbData);
     }
-    while (status == STATUS_OK &&
-           receivedEvent == FALSE &&
-           loopCpt * sleepTimeout <= timeout)
-    {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-        Mutex_Lock(&asynResultData->dataMutex);
-        if(asynResultData->flag != FALSE){
-            receivedEvent = 1; // True
-            status = asynResultData->status;
-        }
-        if(loopCpt * sleepTimeout > timeout){
-            // We will not free the asyncResult here since call will terminate
-            asynResultData->freeInCallback = 1;
-        }
-        freeAsyncDataHere = asynResultData->freeInCallback == FALSE;
-        Mutex_Unlock(&asynResultData->dataMutex);
-    }
 
-    if(loopCpt * sleepTimeout > timeout){
-        status = OpcUa_BadTimeout;
+    Mutex_Lock(&asynResultData->mutex);
+    if(asynResultData->flag == FALSE){
+        Mutex_UnlockAndTimedWaitCond(&asynResultData->cond, &asynResultData->mutex, timeout);
     }
+    if(asynResultData->flag == FALSE){
+        status = OpcUa_BadTimeout;
+        // We will not free the asyncResult here since call will terminate
+        asynResultData->freeInCallback = 1;
+    }else{
+        status = asynResultData->status;
+    }
+    freeAsyncDataHere = asynResultData->freeInCallback == FALSE;
+    Mutex_Unlock(&asynResultData->mutex);
 
     if(FALSE != freeAsyncDataHere){
-        SOPC_IntChannel_AsyncResultFlagData_Delete(asynResultData);
+        SOPC_IntChannel_AsyncResultCondData_Delete(asynResultData);
     }
 
     return status;
 }
 
-void SOPC_IntChannel_EndOperation_CB(void*           callbackData,
-                                     SOPC_StatusCode status){
+void SOPC_IntChannel_InvokeSendRequestResultCB(void*           callbackData,
+                                               SOPC_StatusCode status)
+{
     assert(callbackData != NULL);
-    SOPC_IntChannel_EndOperationData* operationEndData = (SOPC_IntChannel_EndOperationData*) callbackData;
-    operationEndData->operationStatus = status;
-    operationEndData->endOperationFlag = 1;
-    Mutex_Unlock(&operationEndData->endOperationMutex);
+    SOPC_IntChannel_AppChannelAsyncResultCbData* operationEndData = (SOPC_IntChannel_AppChannelAsyncResultCbData*) callbackData;
+    operationEndData->status = status;
+    SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
+                                      SOPC_Channel_Action_AppChannelAsyncResutlCallback,
+                                      callbackData,
+                                      "Channel async invoke send request result event applicative callback");
 }
 
-SOPC_StatusCode SOPC_IntChannel_BeginInvokeService(SOPC_Channel                     channel,
-                                                        char*                            debugName,
-                                                        void*                            request,
-                                                        SOPC_EncodeableType*             requestType,
-                                                        SOPC_EncodeableType*             responseType,
-                                                        SOPC_Channel_PfnRequestComplete* cb,// Must create an action if applicative callback to call
-                                                        void*                            cbData)
+SOPC_StatusCode SOPC_Channel_AsyncInvokeService(SOPC_Channel                     channel,
+                                                void*                            request,
+                                                SOPC_EncodeableType*             requestType,
+                                                SOPC_EncodeableType*             responseType,
+                                                SOPC_Channel_PfnRequestComplete* cb,// Must create an action if applicative callback to call
+                                                void*                            cbData,
+                                                SOPC_Channel_AsyncResult_CB*     sendReqResultCb,
+                                                void*                            sendReqResultCbData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     uint32_t timeout = 0;
-    (void) debugName;
-    SOPC_IntChannel_EndOperationData sentEndData;
-    sentEndData.operationStatus = STATUS_NOK;
-    sentEndData.channel = channel;
-    sentEndData.endOperationFlag = FALSE;
+    SOPC_IntChannel_InvokeCallbackData* appCallbackData = NULL;
+    SOPC_IntChannel_AppChannelAsyncResultCbData* appSendReqResultCbData = NULL;
+    SOPC_Socket_EndOperation_CB* endSendCallback = NULL;
 
     if(cConnection != NULL &&
        request != NULL && requestType != NULL &&
@@ -778,37 +785,57 @@ SOPC_StatusCode SOPC_IntChannel_BeginInvokeService(SOPC_Channel                 
             // TODO: warning on efficiency ?
         }
 
-        status = Mutex_Initialization(&sentEndData.endOperationMutex);
-        if(STATUS_OK == status){
-            status = Mutex_Lock(&sentEndData.endOperationMutex);
+        appCallbackData = SOPC_IntChannel_InvokeCallbackData_Create(channel,
+                                                                    cb,
+                                                                    cbData);
+
+        // TODO: do not use end send request callback at this level
+        //       anymore since error will be triggered in SOPC_Channel_PfnRequestComplete callback
+        // => wait for encoding to be done by applicative code
+        if(NULL != sendReqResultCb){
+            appSendReqResultCbData = SOPC_IntChannel_AppChannelAsyncResutlCbData_Create(sendReqResultCb,
+                                                                                        sendReqResultCbData,
+                                                                                        channel,
+                                                                                        SOPC_ChannelAsync_InvokeSendRequestResult,
+                                                                                        STATUS_NOK);
+            if(NULL != appSendReqResultCbData){
+                endSendCallback = SOPC_IntChannel_InvokeSendRequestResultCB;
+            }
         }
+
+        if(NULL != appCallbackData && (NULL != appSendReqResultCbData || NULL == sendReqResultCb)){
+            status = STATUS_OK;
+        }else{
+            status = STATUS_NOK;
+            if(NULL != appCallbackData){
+                SOPC_IntChannel_InvokeCallbackData_Delete(appCallbackData);
+                appCallbackData = NULL;
+            }
+            if(NULL != appSendReqResultCbData){
+                SOPC_IntChannel_AppChannelAsyncResutlCbData_Delete(appSendReqResultCbData);
+                appSendReqResultCbData = NULL;
+            }
+        }
+
         if(STATUS_OK == status){
             // There is always a request header as first struct field in a request (safe cast)
             timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
+            // TODO: do not use end send request callback at this level
+            //       anymore since error will be triggered in SOPC_Channel_PfnRequestComplete callback
             status = SC_CreateAction_Send_Request(cConnection,
                                                   requestType,
                                                   request,
                                                   responseType,
                                                   timeout,
-                                                  (SC_ResponseEvent_CB*) cb,
-                                                  cbData,
-                                                  SOPC_IntChannel_EndOperation_CB,
-                                                  (void*) &sentEndData);
+                                                  (SC_ResponseEvent_CB*) SOPC_Channel_CreateAction_AppInvokeCallback,
+                                                  appCallbackData,
+                                                  endSendCallback,
+                                                  (void*) appSendReqResultCbData);
         }
     }
-
-    if(STATUS_OK == status){
-        if(sentEndData.endOperationFlag == FALSE){
-            Mutex_Lock(&sentEndData.endOperationMutex);
-        }
-        status = sentEndData.operationStatus;
-    }
-    Mutex_Unlock(&sentEndData.endOperationMutex);
-    Mutex_Clear(&sentEndData.endOperationMutex);
 
     return status;
 }
-
 
 SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                     channel,
                                                 char*                            debugName,
@@ -818,38 +845,73 @@ SOPC_StatusCode SOPC_Channel_BeginInvokeService(SOPC_Channel                    
                                                 SOPC_Channel_PfnRequestComplete* cb,
                                                 void*                            cbData)
 {
-    SOPC_StatusCode status = STATUS_NOK;
-    SOPC_IntChannel_InvokeCallbackData* appCallbackData = SOPC_IntChannel_InvokeCallbackData_Create(channel,
-                                                                    cb,
-                                                                    cbData);
-    if(NULL != appCallbackData){
-        status = SOPC_IntChannel_BeginInvokeService(channel,
-                                                         debugName,
-                                                         request,
-                                                         requestType,
-                                                         responseType,
-                                                         SOPC_Channel_CreateAction_AppInvokeCallback,
-                                                         appCallbackData);
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_IntChannel_AsyncResultCondData asyncData;
+    (void) debugName;
+
+    if(NULL != channel){
+        status = SOPC_IntChannel_AsyncResultCondData_Init(&asyncData);
+
+        if(STATUS_OK == status){
+            status = SOPC_Channel_AsyncInvokeService(channel,
+                                                     request,
+                                                     requestType,
+                                                     responseType,
+                                                     cb,
+                                                     cbData,
+                                                     SOPC_IntChannel_AsyncResultCondDataCB,
+                                                     (void*) &asyncData);
+        }
+
+        if(STATUS_OK == status){
+            status = Mutex_Lock(&asyncData.mutex);
+
+            while(STATUS_OK == status && asyncData.flag == FALSE){
+                status = Mutex_UnlockAndWaitCond(&asyncData.cond, &asyncData.mutex);
+            }
+
+            if(STATUS_OK == status){
+                status = asyncData.status;
+            }
+            Mutex_Unlock(&asyncData.mutex);
+        }
+
+        SOPC_IntChannel_AsyncResultCondData_Clear(&asyncData);
     }
 
     return status;
 }
 
-SOPC_StatusCode SOPC_IntChannel_InvokeRequestCompleteCallback(SOPC_Channel         channel,
-                                                              void*                response,
-                                                              SOPC_EncodeableType* responseType,
-                                                              void*                cbData,
-                                                              SOPC_StatusCode      status){
-    SOPC_StatusCode retStatus = STATUS_INVALID_PARAMETERS;
+SOPC_StatusCode SOPC_IntChannel_InvokeResponseCallback(SOPC_Channel         channel,
+                                                       void*                response,
+                                                       SOPC_EncodeableType* responseType,
+                                                       void*                cbData,
+                                                       SOPC_StatusCode      status){
+    assert(NULL != cbData);
     (void) channel;
+    uint8_t freeDataHere = FALSE;
     SOPC_IntChannel_InvokeCallbackData* invCbData = (SOPC_IntChannel_InvokeCallbackData*) cbData;
-    if(invCbData != NULL){
-        retStatus = STATUS_OK;
-        SOPC_IntChannel_InvokeCallbackData_Set(invCbData,
-                               response, responseType,
-                               status);
+    SOPC_IntChannel_AsyncResultCondData* asynResultData = (SOPC_IntChannel_AsyncResultCondData*) invCbData->cbData;
+    assert(NULL != asynResultData);
+
+    Mutex_Lock(&asynResultData->mutex);
+    // Set results in invoke callback data in order to be retrieved by Invoke sync function
+    SOPC_IntChannel_InvokeCallbackData_Set(invCbData,
+                                           response, responseType,
+                                           status);
+    asynResultData->flag = 1;
+    asynResultData->status = status;
+    freeDataHere = asynResultData->freeInCallback;
+    Condition_SignalAll(&asynResultData->cond);
+    Mutex_Unlock(&asynResultData->mutex);
+
+    if(FALSE != freeDataHere){
+        // Sync function using the flag has stopped before callback
+        // data must be freed here
+        SOPC_IntChannel_AsyncResultCondData_Delete(asynResultData);
+        SOPC_IntChannel_InvokeCallbackData_Delete(invCbData);
     }
-    return retStatus;
+    return STATUS_OK; // not used by caller
 }
 
 SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
@@ -859,56 +921,73 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
                                            SOPC_EncodeableType*  expResponseType,
                                            void**                response,
                                            SOPC_EncodeableType** responseType){
-    const uint32_t waitTimeoutMilliSecs = 1;
-    uint32_t loopCptWait = 0;
-    uint8_t receivedEvent = FALSE;
-    SOPC_StatusCode localStatus = STATUS_NOK;
+    (void) debugName;
+    uint8_t freeAsyncDataHere = FALSE;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_StatusCode responseStatus = STATUS_INVALID_PARAMETERS;
     SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
     uint32_t timeout = 0;
-    SOPC_IntChannel_InvokeCallbackData* invCallbackData = SOPC_IntChannel_InvokeCallbackData_Create(channel,
-                                                                    NULL, // No application callback here, only need receive "flag" to stop
-                                                                    NULL);
+    SOPC_IntChannel_AsyncResultCondData* asyncResultCond = NULL;
+    SOPC_IntChannel_InvokeCallbackData* asyncResultContainer = NULL;
 
     if(cConnection != NULL &&
        request != NULL && requestType != NULL &&
        response != NULL && responseType != NULL){
-        if(invCallbackData != NULL){
+
+        asyncResultCond = SOPC_IntChannel_AsyncResultCondData_Create();
+        asyncResultContainer = SOPC_IntChannel_InvokeCallbackData_Create(channel,
+                                                                         NULL,
+                                                                         asyncResultCond);
+
+        if(NULL != asyncResultCond && NULL != asyncResultContainer){
+            // TODO: manage timeout in stack only (pending request timeout) and not in sync call
+            //       => use a Cond instead of TimedCond once done
             // There is always a request header as first struct field in a request (safe cast)
             timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
-            status = SOPC_IntChannel_BeginInvokeService(channel,
-                                                             debugName,
-                                                             request, requestType,
-                                                             expResponseType,
-                                                             SOPC_IntChannel_InvokeRequestCompleteCallback,
-                                                             invCallbackData);
+
+            status = SOPC_Channel_AsyncInvokeService
+                        (channel,
+                         request,
+                         requestType,
+                         expResponseType,
+                         SOPC_IntChannel_InvokeResponseCallback, // will be called in any case of error (no need of async result function)
+                         asyncResultContainer,
+                         NULL,
+                         NULL);
         }else{
             status = STATUS_NOK;
+            if(NULL != asyncResultCond){
+                SOPC_IntChannel_AsyncResultCondData_Delete(asyncResultCond);
+            }
+            if(NULL != asyncResultContainer){
+                SOPC_IntChannel_InvokeCallbackData_Delete(asyncResultContainer);
+            }
+        }
+
+        if(STATUS_OK == status){
+            Mutex_Lock(&asyncResultCond->mutex);
+            if(asyncResultCond->flag == FALSE){
+                Mutex_UnlockAndTimedWaitCond(&asyncResultCond->cond, &asyncResultCond->mutex, timeout);
+            }
+            if(asyncResultCond->flag == FALSE){
+                status = OpcUa_BadTimeout;
+                // We will not free the asyncResult here since call will terminate
+                asyncResultCond->freeInCallback = 1;
+            }else{
+                status = asyncResultCond->status;
+                responseStatus = SOPC_IntChannel_InvokeCallbackData_Get(asyncResultContainer,
+                                                                        response, responseType);
+                assert(status == responseStatus);
+            }
+            freeAsyncDataHere = asyncResultCond->freeInCallback == FALSE;
+            Mutex_Unlock(&asyncResultCond->mutex);
+
+            if(FALSE != freeAsyncDataHere){
+                SOPC_IntChannel_AsyncResultCondData_Delete(asyncResultCond);
+                SOPC_IntChannel_InvokeCallbackData_Delete(asyncResultContainer);
+            }
         }
     }
-
-    while (status == STATUS_OK &&
-           receivedEvent == FALSE &&
-           loopCptWait * waitTimeoutMilliSecs <= timeout)
-    {
-        loopCptWait++;
-        // TODO: time waited is not valid anymore if we receive other messages than expected !
-        // Retrieve received messages on socket
-        SOPC_Sleep(waitTimeoutMilliSecs);
-        localStatus = SOPC_IntChannel_InvokeCallbackData_Get(invCallbackData,
-                                             response,
-                                             responseType);
-        if(*response != NULL){
-            receivedEvent = 1; // True
-            status = localStatus;
-        }
-    }
-
-    if(loopCptWait * waitTimeoutMilliSecs > timeout){
-        status = OpcUa_BadTimeout;
-    }
-
-    SOPC_IntChannel_InvokeCallbackData_Delete(invCallbackData);
 
     return status;
 }
@@ -956,48 +1035,33 @@ SOPC_StatusCode SOPC_Channel_AsyncDisconnect(SOPC_Channel                 channe
     return status;
 }
 
-void SOPC_IntChannel_DisconnectResultCB(SOPC_Channel                           channel,
-                                        void*                                  cbData,
-                                        SOPC_ChannelEvent_AsyncOperationResult cEvent,
-                                        SOPC_StatusCode                        status)
-{
-    assert(cEvent == SOPC_ChannelAsync_DisconnectResult);
-    (void) channel;
-    SOPC_IntChannel_EndOperation_CB(cbData,
-                                    status);
-}
-
 SOPC_StatusCode SOPC_Channel_Disconnect(SOPC_Channel channel){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SOPC_IntChannel_EndOperationData endDisconnectData;
-    endDisconnectData.operationStatus = STATUS_NOK;
-    endDisconnectData.channel = channel;
-    endDisconnectData.endOperationFlag = FALSE;
+    SOPC_IntChannel_AsyncResultCondData asyncData;
 
     if(NULL != channel){
-
-        status = Mutex_Initialization(&endDisconnectData.endOperationMutex);
-
-        if(STATUS_OK == status){
-            status = Mutex_Lock(&endDisconnectData.endOperationMutex);
-        }
+        status = SOPC_IntChannel_AsyncResultCondData_Init(&asyncData);
 
         if(STATUS_OK == status){
-            SOPC_Channel_AsyncDisconnect(channel,
-                                         SOPC_IntChannel_DisconnectResultCB,
-                                         (void*) &endDisconnectData);
-        }
-
-        if(STATUS_OK == status && FALSE == endDisconnectData.endOperationFlag){
-            status = Mutex_Lock(&endDisconnectData.endOperationMutex);
+            status = SOPC_Channel_AsyncDisconnect(channel,
+                                                  SOPC_IntChannel_AsyncResultCondDataCB,
+                                                  (void*) &asyncData);
         }
 
         if(STATUS_OK == status){
-            status = endDisconnectData.operationStatus;
+            status = Mutex_Lock(&asyncData.mutex);
+
+            while(STATUS_OK == status && asyncData.flag == FALSE){
+                status = Mutex_UnlockAndWaitCond(&asyncData.cond, &asyncData.mutex);
+            }
+
+            if(STATUS_OK == status){
+                status = asyncData.status;
+            }
+            Mutex_Unlock(&asyncData.mutex);
         }
 
-        Mutex_Unlock(&endDisconnectData.endOperationMutex);
-        Mutex_Clear(&endDisconnectData.endOperationMutex);
+        SOPC_IntChannel_AsyncResultCondData_Clear(&asyncData);
     }
     return status;
 }

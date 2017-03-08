@@ -85,6 +85,7 @@ typedef enum SOPC_EndpointEvent
  */
 typedef enum SOPC_EndpointEvent_AsyncOperationResult {
     SOPC_EndpointAsync_OpenResult,
+    SOPC_EndpointAsync_SendResponseResult,
     SOPC_EndpointAsync_CloseResult
 } SOPC_EndpointEvent_AsyncOperationResult;
 
@@ -263,10 +264,14 @@ SOPC_StatusCode SOPC_Endpoint_CancelSendResponse(SOPC_Endpoint         endpoint,
  *  \brief Start action to close the endpoint
  *
  *  \param endpoint    The endpoint to close
+ *  \param asyncCb     Asynchronous close result callback function called on endpoint closing failure or success
+ *  \param asyncCbData Asynchronous close result callback data provided to callback function on call
  *
  *  \return            STATUS_OK if endpoint action to close was recorded correctly, STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_Endpoint_BeginClose(SOPC_Endpoint endpoint);
+SOPC_StatusCode SOPC_Endpoint_AsyncClose(SOPC_Endpoint endpoint,
+                                         SOPC_Endpoint_AsyncResult_CB* asyncCb,
+                                         void*                         asyncCbData);
 
 /**
  *  \brief Close the endpoint. The endpoint closes the active connections and does not listen
@@ -286,7 +291,7 @@ SOPC_StatusCode SOPC_Endpoint_Close(SOPC_Endpoint endpoint);
  *
  *  \return            STATUS_OK if endpoint action to close and deallocate was recorded correctly, STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_Endpoint_BeginDelete(SOPC_Endpoint endpoint);
+SOPC_StatusCode SOPC_Endpoint_AsyncDelete(SOPC_Endpoint endpoint);
 
 /**
  *  \brief Close and deallocate the endpoint.

@@ -305,15 +305,17 @@ void SOPC_OperationEnd_ServiceRequest_CB(void*           arg,
                                               connection->lastPendingRequestInfo.requestType,
                                               1,
                                               connection->lastPendingRequestInfo.requestId,
-                                              NULL, NULL, // callback and data to retrieve in pending request
+                                              NULL, NULL, // callback and data will be retrieved in pending request since we asked to remove it
                                               sendingReqStatus,
                                               &willReleaseToken);
     }
     if(FALSE == willReleaseToken){
         SC_CreateAction_ReleaseToken((void*)connection->instance);
     }
-    sendRequestData->endSendCallback(sendRequestData->endSendCallbackData,
-                                     sendingReqStatus);
+    if(NULL != sendRequestData->endSendCallback){
+        sendRequestData->endSendCallback(sendRequestData->endSendCallbackData,
+                                         sendingReqStatus);
+    }
     free(sendRequestData);
 }
 
