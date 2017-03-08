@@ -914,10 +914,21 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
         case ConnectionEvent_Error:
             //log ?
             Mutex_Lock(&cConnection->mutex);
-            if(cConnection->instance->state == SC_Connection_Connected){
-                scEvent = SOPC_ConnectionEvent_Disconnected;
-            }else{
-                scEvent = SOPC_ConnectionEvent_ConnectionFailed;
+            switch(cConnection->instance->state){
+                case SC_Connection_Connected:
+                    scEvent = SOPC_ConnectionEvent_Disconnected;
+                    status = OpcUa_BadSecureChannelClosed;
+                    break;
+                case SC_Connection_Connecting_Secure:
+                case SC_Connection_Connecting_Transport:
+                    scEvent = SOPC_ConnectionEvent_ConnectionFailed;
+                    status = OpcUa_BadConnectionRejected;
+                    break;
+                case SC_Connection_Disconnected:
+                case SC_Connection_Error:
+                    scEvent = SOPC_ConnectionEvent_UnexpectedError;
+                    status = STATUS_INVALID_STATE;
+                    break;
             }
             cConnection->instance->state = SC_Connection_Disconnected;
             Mutex_Unlock(&cConnection->mutex);
