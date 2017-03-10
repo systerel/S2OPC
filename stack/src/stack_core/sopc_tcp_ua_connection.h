@@ -68,8 +68,6 @@ typedef struct TCP_UA_Connection {
     SOPC_MsgBuffer*             sendingQueue;
     TCP_UA_Connection_Event_CB* callback;
     void*                       callbackData;
-    Mutex                       mutex;
-
 } TCP_UA_Connection;
 
 TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion,

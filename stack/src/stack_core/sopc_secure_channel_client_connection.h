@@ -56,8 +56,6 @@ typedef struct SC_ClientConnection
     P_Timer                     watchdogTimer;
     SC_ConnectionEvent_CB*      callback;
     void*                       callbackData;
-    Mutex                       mutex;
-
 } SC_ClientConnection;
 
 typedef SOPC_StatusCode (SC_ResponseEvent_CB) (SC_ClientConnection* connection,

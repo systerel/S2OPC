@@ -115,7 +115,6 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion,
         connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
-        Mutex_Initialization(&connection->mutex);
         // Will use the global socket manager
         connection->socketManager = NULL;
     }
@@ -147,7 +146,6 @@ void TCP_UA_Connection_Delete(TCP_UA_Connection* connection){
         MsgBuffer_Delete(&connection->inputMsgBuffer);
         MsgBuffer_Delete(&connection->outputMsgBuffer);
         MsgBuffer_Delete(&connection->sendingQueue);
-        Mutex_Clear(&connection->mutex);
         free(connection);
     }
 }
@@ -427,9 +425,7 @@ void SOPC_OperationEnd_TCP_UA_Connection(void*           arg,
 {
     TCP_UA_Connection* connection = (TCP_UA_Connection*) arg;
     if(STATUS_OK == status){
-        Mutex_Lock(&connection->mutex);
         connection->state = TCP_UA_Connection_Connected;
-        Mutex_Unlock(&connection->mutex);
 
         if(connection->callback != NULL){
             connection->callback(connection->callbackData,
@@ -552,12 +548,10 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
                 // Manage connection
 
                 // Lock mutex to guarantee connection internal properties are set
-                Mutex_Lock(&connection->mutex);
                 assert(connection->socket == socket);
                 status = SendHelloMsg(connection,
                                       SOPC_OperationEnd_TCP_UA_ConnectionError,
                                       (void*) connection);
-                Mutex_Unlock(&connection->mutex);
 
                 if(status != STATUS_OK){
                     SOPC_OperationEnd_TCP_UA_ConnectionError((void*) connection, status);
@@ -565,9 +559,7 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
                 break;
             case SOCKET_READ_EVENT:
                 // Manage message reception
-                Mutex_Lock(&connection->mutex);
                 status = TCP_UA_ReadData(socket, connection->inputMsgBuffer);
-                Mutex_Unlock(&connection->mutex);
 
                 if(status == STATUS_OK){
                     switch(connection->inputMsgBuffer->type){
@@ -575,14 +567,12 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
                             if(connection->serverSideConnection == FALSE){
                                 status = STATUS_INVALID_RCV_PARAMETER;
                             }else{
-                                Mutex_Lock(&connection->mutex);
                                 status = ReceiveHelloMsg(connection);
                                 if(STATUS_OK == status){
                                     status = SendAckMsg(connection,
                                                         SOPC_OperationEnd_TCP_UA_Connection,
                                                         (void*) connection);
                                 }
-                                Mutex_Unlock(&connection->mutex);
                                 if(STATUS_OK != status){
                                     SOPC_OperationEnd_TCP_UA_Connection((void*) connection, status);
                                 }
@@ -590,9 +580,7 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
                             break;
                         case(TCP_UA_Message_Acknowledge):
                             if(connection->serverSideConnection == FALSE){
-                                Mutex_Lock(&connection->mutex);
                                 status = ReceiveAckMsg(connection);
-                                Mutex_Unlock(&connection->mutex);
 
                                 SOPC_OperationEnd_TCP_UA_Connection((void*) connection, status);
                             }else{
@@ -600,9 +588,7 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
                             }
                             break;
                         case(TCP_UA_Message_Error):
-                            Mutex_Lock(&connection->mutex);
                             status = ReceiveErrorMsg(connection);
-                            Mutex_Unlock(&connection->mutex);
 
                             if(connection->state != TCP_UA_Connection_Disconnected){
                                 cb = connection->callback;
@@ -641,9 +627,7 @@ SOPC_StatusCode OnSocketEvent_CB (SOPC_Socket* socket,
                         default:
                             // Erase content since incorrect reading
                             // TODO: add trace with reason Invalid header ? => more precise errors
-                            Mutex_Lock(&connection->mutex);
                             MsgBuffer_Reset(connection->inputMsgBuffer);
-                            Mutex_Unlock(&connection->mutex);
                     }
                 }else if(OpcUa_BadDisconnect == status){
                     OnSocketEvent_CB(socket, SOCKET_CLOSE_EVENT, callbackData);
@@ -668,7 +652,6 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
        uri != NULL &&
        callback != NULL)
     {
-        Mutex_Lock(&connection->mutex);
 
         if(connection->url.Length <= 0 &&
            connection->callback == NULL &&
@@ -696,8 +679,6 @@ SOPC_StatusCode TCP_UA_Connection_Connect (TCP_UA_Connection*          connectio
         }else{
             status = STATUS_INVALID_STATE;
         }
-
-        Mutex_Unlock(&connection->mutex);
     }
     return status;
 }
@@ -708,8 +689,6 @@ SOPC_StatusCode TCP_UA_Connection_AcceptedSetSocket(TCP_UA_Connection* connectio
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(connection != NULL && sURI != NULL && connectionSocket != NULL){
-
-        Mutex_Lock(&connection->mutex);
 
         if(connection->url.Length <= 0 &&
            connection->callback == NULL &&
@@ -737,8 +716,6 @@ SOPC_StatusCode TCP_UA_Connection_AcceptedSetSocket(TCP_UA_Connection* connectio
         }else{
             status = STATUS_INVALID_STATE;
         }
-
-        Mutex_Unlock(&connection->mutex);
     }
     return status;
 }
@@ -748,7 +725,6 @@ SOPC_StatusCode TCP_UA_Connection_AcceptedSetCallback(TCP_UA_Connection*        
                                                       void*                       callbackData){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(connection != NULL){
-        Mutex_Lock(&connection->mutex);
         if(connection->url.Length > 0 &&
            connection->callback == NULL &&
            connection->callbackData == NULL &&
@@ -760,20 +736,17 @@ SOPC_StatusCode TCP_UA_Connection_AcceptedSetCallback(TCP_UA_Connection*        
         }else{
             status = STATUS_INVALID_STATE;
         }
-        Mutex_Unlock(&connection->mutex);
     }
     return status;
 }
 
 void TCP_UA_Connection_Disconnect(TCP_UA_Connection* connection){
     if(connection != NULL){
-        Mutex_Lock(&connection->mutex);
         SOPC_Socket_Close(connection->socket);
         SOPC_String_Clear(&connection->url);
         connection->callback = NULL;
         connection->callbackData = NULL;
         ResetConnectionState(connection);
-        Mutex_Unlock(&connection->mutex);
     }
 }
 

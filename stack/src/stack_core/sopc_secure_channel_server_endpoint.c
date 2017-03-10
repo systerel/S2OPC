@@ -599,9 +599,7 @@ void SOPC_OpenSecureChannelResponse_Sent_CB(void*           arg,
         {
             sEndpoint = teventCbData->endpoint;
             scConnection = teventCbData->scConnection;
-            Mutex_Lock(&sEndpoint->mutex);
             scConnection->state = SC_Connection_Connected;
-            Mutex_Unlock(&sEndpoint->mutex);
 
             // TODO: differentiate renew from new ...
             if(NULL != sEndpoint->callback){
@@ -651,7 +649,6 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
             case ConnectionEvent_Connected:
                 if(SC_Connection_Disconnected == scConnection->state){
                     // Configure secure connection for encoding / decoding messages
-                    Mutex_Lock(&sEndpoint->mutex);
 					if(status == STATUS_OK){
 
 						// Set only server side identity for now
@@ -674,7 +671,6 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                     if(STATUS_OK == status){
                         scConnection->state = SC_Connection_Connecting_Secure;
                     }
-                    Mutex_Unlock(&sEndpoint->mutex);
                 }
                 break;
             case ConnectionEvent_Message:
@@ -684,7 +680,6 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                             uint32_t requestId = 0;
                             uint32_t requestHandle = 0;
 
-                            Mutex_Lock(&sEndpoint->mutex);
                             // Receive Open Secure Channel request
                             retStatus = Receive_OpenSecureChannelRequest(sEndpoint, scConnection, msgBuffer,
                                                                          &requestId, &requestHandle);
@@ -695,7 +690,6 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                                                                            SOPC_OpenSecureChannelResponse_Sent_CB,
                                                                            teventCbData);
                             }
-                            Mutex_Unlock(&sEndpoint->mutex);
 
                             if(STATUS_OK != retStatus){
                                 // TODO: Regarding status and if it is before secu verif or after
@@ -721,10 +715,8 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                     case SOPC_SecureMessage:
                         if(SC_Connection_Connected == scConnection->state){
 
-                            Mutex_Lock(&sEndpoint->mutex);
                             retStatus = Receive_ServiceRequest(scConnection, msgBuffer, &requestId,
                                                                &receivedEncType, &receivedEncObj);
-                            Mutex_Unlock(&sEndpoint->mutex);
 
                             // TODO: Manage partial request / abort
                             if(NULL != sEndpoint->callback){
@@ -755,7 +747,6 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                 }
                 scConnection->state = SC_Connection_Disconnected;
                 // Remove secure connection from the endpoint
-                Mutex_Lock(&sEndpoint->mutex);
                 if(scConnection ==  SLinkedList_RemoveFromId(sEndpoint->secureChannelConnections,
                                                        teventCbData->scConnectionId)){
                     SC_Delete(scConnection);
@@ -764,7 +755,6 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                     // Connection not found !
                     assert(FALSE);
                 }
-                Mutex_Unlock(&sEndpoint->mutex);
 
                 Delete_TransportEventCbData(teventCbData);
                 break;
@@ -870,7 +860,6 @@ void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
        response != NULL)
     {
         if(SC_Connection_Connected == scConnection->state){
-            Mutex_Lock(&sEndpoint->mutex);
 
             // Set request Id, used for socket transaction
             scConnection->sendingBuffer->msgRequestId = requestId;
@@ -904,7 +893,6 @@ void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
                                                        &willReleaseToken);
             }
 
-            Mutex_Unlock(&sEndpoint->mutex);
         }
 
         if(FALSE == willReleaseToken){
@@ -969,7 +957,6 @@ SOPC_StatusCode AcceptedNewConnection(SC_ServerEndpoint* sEndpoint,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_Connection* scConnection = NULL;
     TransportEvent_CallbackData* connectionCbData = NULL;
-    Mutex_Lock(&sEndpoint->mutex);
     if(sEndpoint != NULL && newTcpConnection != NULL){
         scConnection = SC_Create(newTcpConnection);
         if(NULL == scConnection){
@@ -998,7 +985,6 @@ SOPC_StatusCode AcceptedNewConnection(SC_ServerEndpoint* sEndpoint,
             scConnection = NULL;
         }
     }
-    Mutex_Unlock(&sEndpoint->mutex);
     return status;
 }
 
@@ -1061,8 +1047,7 @@ SC_ServerEndpoint* SC_ServerEndpoint_Create(){
             result->state = SC_Endpoint_Closed;
             result->secureChannelConnections = SLinkedList_Create(OPCUA_ENDPOINT_MAXCONNECTIONS);
 
-            if(NULL != result->secureChannelConnections &&
-               STATUS_OK != Mutex_Initialization(&result->mutex)){
+            if(NULL == result->secureChannelConnections){
                 free(result);
                 result= NULL;
             }
@@ -1076,14 +1061,12 @@ SOPC_StatusCode SC_ServerEndpoint_Configure(SC_ServerEndpoint*     endpoint,
                                             SOPC_EncodeableType**  encodeableTypes){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(endpoint != NULL){
-        Mutex_Lock(&endpoint->mutex);
         if(namespaceTable != NULL){
             status = Namespace_AttachTable(&endpoint->namespaces, namespaceTable);
         }else{
             status = STATUS_OK;
         }
         endpoint->encodeableTypes = encodeableTypes;
-        Mutex_Unlock(&endpoint->mutex);
     }
     return status;
 }

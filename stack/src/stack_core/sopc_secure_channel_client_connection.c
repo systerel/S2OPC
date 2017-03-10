@@ -108,10 +108,6 @@ SC_ClientConnection* SC_Client_Create(){
                 status = STATUS_OK;
             }
 
-            if(STATUS_OK == status){
-                status = Mutex_Initialization(&scClientConnection->mutex);
-            }
-
             if(STATUS_OK != status){
                 SC_Client_Delete(scClientConnection);
                 scClientConnection = NULL;
@@ -131,14 +127,12 @@ SOPC_StatusCode SC_Client_Configure(SC_ClientConnection*   cConnection,
                                     SOPC_EncodeableType**  encodeableTypes){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(cConnection != NULL && cConnection->instance != NULL){
-        Mutex_Lock(&cConnection->mutex);
         if(namespaceTable != NULL){
             status = Namespace_AttachTable(&cConnection->namespaces, namespaceTable);
         }else{
             status = STATUS_OK;
         }
         cConnection->encodeableTypes = encodeableTypes;
-        Mutex_Unlock(&cConnection->mutex);
     }
     return status;
 }
@@ -150,7 +144,6 @@ void Timer_Delete(P_Timer* timer){
 void SC_Client_Delete(SC_ClientConnection* scConnection)
 {
     if(NULL != scConnection){
-        Mutex_Lock(&scConnection->mutex);
         scConnection->pkiProvider = NULL;
         scConnection->serverCertificate = NULL;
         scConnection->clientCertificate = NULL;
@@ -163,8 +156,6 @@ void SC_Client_Delete(SC_ClientConnection* scConnection)
             scConnection->instance = NULL;
         }
         Timer_Delete(&scConnection->watchdogTimer);
-        Mutex_Unlock(&scConnection->mutex);
-        Mutex_Clear(&scConnection->mutex);
         free(scConnection);
     }
 }
@@ -834,7 +825,6 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
         case ConnectionEvent_Connected:
             assert(status == STATUS_OK);
             assert(cConnection->instance->state == SC_Connection_Connecting_Transport);
-            Mutex_Lock(&cConnection->mutex);
             retStatus = SC_InitApplicationIdentities
                          (cConnection->instance,
                           noneSecurityMode,
@@ -858,8 +848,6 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                 status = Send_OpenSecureChannelRequest(cConnection);
             }
 
-            Mutex_Unlock(&cConnection->mutex);
-
             if(STATUS_OK != status){
                 // Connection failed, upper level must be notified
                 TCP_UA_Connection_Disconnect(tcpConnection);
@@ -875,10 +863,8 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                 switch(msgBuffer->secureType){
                     case SOPC_OpenSecureChannel:
                         if(cConnection->instance->state == SC_Connection_Connecting_Secure){
-                            Mutex_Lock(&cConnection->mutex);
                             // Receive Open Secure Channel response
                             retStatus = Receive_OpenSecureChannelResponse(cConnection, msgBuffer);
-                            Mutex_Unlock(&cConnection->mutex);
                             if(retStatus == STATUS_OK){
                                 cConnection->instance->state = SC_Connection_Connected;
                                 // TODO: cases in which retStatus != OK should be sent ?
@@ -900,9 +886,7 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                         break;
                     case SOPC_SecureMessage:
                         if(cConnection->instance->state == SC_Connection_Connected){
-                            Mutex_Lock(&cConnection->mutex);
                             retStatus = Receive_ServiceResponse(cConnection, msgBuffer);
-                            Mutex_Unlock(&cConnection->mutex);
                         }else{
                             retStatus = STATUS_INVALID_RCV_PARAMETER;
                         }
@@ -915,7 +899,6 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
         case ConnectionEvent_Disconnected:
         case ConnectionEvent_Error:
             //log ?
-            Mutex_Lock(&cConnection->mutex);
             switch(cConnection->instance->state){
                 case SC_Connection_Connected:
                     scEvent = SOPC_ConnectionEvent_Disconnected;
@@ -933,7 +916,6 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
                     break;
             }
             cConnection->instance->state = SC_Connection_Disconnected;
-            Mutex_Unlock(&cConnection->mutex);
             retStatus = cConnection->callback(cConnection,
                                               cConnection->callbackData,
                                               scEvent,
@@ -971,7 +953,6 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
          pki != NULL)
        || securityMode == OpcUa_MessageSecurityMode_None))
     {
-        Mutex_Lock(&connection->mutex);
         if(connection->clientCertificate == NULL &&
            connection->clientKey == NULL &&
            connection->serverCertificate == NULL &&
@@ -1024,7 +1005,6 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
         }else{
             status = STATUS_INVALID_STATE;
         }
-        Mutex_Unlock(&connection->mutex);
     }
     return status;
 }
@@ -1035,7 +1015,6 @@ void SC_Client_Disconnect(SC_ClientConnection* cConnection)
     if(NULL != cConnection && NULL != cConnection->instance &&
        NULL != cConnection->instance->transportConnection)
     {
-        Mutex_Lock(&cConnection->mutex);
         status = STATUS_OK;
         cConnection->securityMode = OpcUa_MessageSecurityMode_Invalid;
         cConnection->callback = NULL;
@@ -1050,7 +1029,6 @@ void SC_Client_Disconnect(SC_ClientConnection* cConnection)
         }
         SOPC_String_Clear(&cConnection->securityPolicy);
         SC_Disconnect(cConnection->instance);
-        Mutex_Unlock(&cConnection->mutex);
     }
     if(NULL != cConnection->callback){
         cConnection->callback(cConnection,
@@ -1089,7 +1067,6 @@ void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)
        requestType != NULL &&
        request != NULL)
     {
-        Mutex_Lock(&connection->mutex);
         if(connection->instance->state == SC_Connection_Connected){
             requestId = GetNextRequestId(connection->instance);
             // Set request Id to be used as socket transaction Id
@@ -1155,8 +1132,6 @@ void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)
                      callbackData,
                      status);
         }
-
-        Mutex_Unlock(&connection->mutex);
     }
 
     if(FALSE == willReleaseToken){

@@ -76,7 +76,6 @@ typedef struct SC_ServerEndpoint
     SC_EndpointEvent_CB*   callback;
     void*                  callbackData;
     void**                 servicesTable; // Table of services defined in upper level
-    Mutex                  mutex;
 } SC_ServerEndpoint;
 
 SC_ServerEndpoint* SC_ServerEndpoint_Create();
