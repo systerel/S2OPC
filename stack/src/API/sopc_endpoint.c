@@ -297,6 +297,27 @@ void SOPC_IntEndpoint_AsyncResultCondDataCB(SOPC_Endpoint                       
     }
 }
 
+SOPC_StatusCode SOPC_IntEndpoint_CreateAction_AppEndpointAsyncResult(void*                asyncResultCBdata,
+                                                                     const char*          actionTxt)
+{
+    assert(NULL != asyncResultCBdata);
+    SOPC_IntEndpoint_AppEndpointAsyncResultCbData* cbData = (SOPC_IntEndpoint_AppEndpointAsyncResultCbData*) asyncResultCBdata;
+    SOPC_ActionQueueManager* qManager = NULL;
+    // Depending on the fact if the final callback is internal and responsible
+    //  to signal end of sync operation we use the "application callback queue manager" or
+    //  the "stack action queue manager".
+    // It is necessary since a sync call could be done through the "application callback queue manager"
+    //  and will provoke a dead lock if we enqueue the condition signal callback in the same queue.
+    if(SOPC_IntEndpoint_AsyncResultCondDataCB == cbData->callback){ // SOPC_IntEndpoint_AsyncResultCondDataCB unique function to manage condition signal
+        qManager = stackActionQueueMgr;
+    }else{
+        qManager = appCallbackQueueMgr;
+    }
+    return SOPC_ActionQueueManager_AddAction(qManager,
+                                             SOPC_Endpoint_Action_AppEndpointAsyncResutlCallback,
+                                             asyncResultCBdata,
+                                             actionTxt);
+}
 
 SOPC_ServiceType* SOPC_Endpoint_FindService(SC_ServerEndpoint* sEndpoint,
                                             uint32_t requestTypeId){
@@ -337,20 +358,18 @@ SOPC_StatusCode SOPC_IntEndpoint_SecureChannelEvent_CB(SC_ServerEndpoint*       
     SOPC_RequestContext* reqContext = NULL;
     SOPC_IntEndpoint_EventCallbackData* endpointCBdata = (SOPC_IntEndpoint_EventCallbackData*) cbData;
     SOPC_IntEndpoint_ConnectionEventData* connectionEventData = NULL;
-    SOPC_IntEndpoint_AppEndpointAsyncResultCbData* asynResultData = NULL;
+    SOPC_IntEndpoint_AppEndpointAsyncResultCbData* asyncResultData = NULL;
     switch(event){
         case SC_EndpointListenerEvent_Opened:
             if(NULL != endpointCBdata->openResultCb){
-                asynResultData = SOPC_IntEndpoint_AppEndpointAsyncResultCbData_Create(endpointCBdata->openResultCb,
+                asyncResultData = SOPC_IntEndpoint_AppEndpointAsyncResultCbData_Create(endpointCBdata->openResultCb,
                                                                                       endpointCBdata->openResultCbData,
                                                                                       sEndpoint,
                                                                                       SOPC_EndpointAsync_OpenResult,
                                                                                       status);
-                if(NULL != asynResultData){
-                    retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                                                  SOPC_Endpoint_Action_AppEndpointAsyncResutlCallback,
-                                                                  (void*) asynResultData,
-                                                                  "Endpoint applicative callback open result");
+                if(NULL != asyncResultData){
+                    retStatus = SOPC_IntEndpoint_CreateAction_AppEndpointAsyncResult((void*) asyncResultData,
+                                                                                     "Endpoint applicative callback open result");
                 }
             }
             if(STATUS_OK != status){
@@ -644,10 +663,8 @@ void SOPC_IntEndpoint_SendResponseResultCB(void*           callbackData,
     assert(callbackData != NULL);
     SOPC_IntEndpoint_AppEndpointAsyncResultCbData* operationEndData = (SOPC_IntEndpoint_AppEndpointAsyncResultCbData*) callbackData;
     operationEndData->status = status;
-    SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                      SOPC_Endpoint_Action_AppEndpointAsyncResutlCallback,
-                                      callbackData,
-                                      "Channel async invoke send request result event applicative callback");
+    SOPC_IntEndpoint_CreateAction_AppEndpointAsyncResult(callbackData,
+                                                         "Channel async invoke send request result event applicative callback");
 }
 
 SOPC_StatusCode SOPC_Endpoint_AsyncSendResponse(SOPC_Endpoint                endpoint,
@@ -768,10 +785,8 @@ SOPC_StatusCode SOPC_Endpoint_CancelSendResponse(SOPC_Endpoint                en
 void SOPC_Endpoint_Action_AsyncClose(void* arg){
     SOPC_IntEndpoint_AppEndpointAsyncResultCbData* asyncData = (SOPC_IntEndpoint_AppEndpointAsyncResultCbData*) arg;
     asyncData->status = SC_ServerEndpoint_Close(asyncData->endpoint);
-    SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                      SOPC_Endpoint_Action_AppEndpointAsyncResutlCallback,
-                                      (void*) asyncData,
-                                      "Endpoint applicative callback close result");
+    SOPC_IntEndpoint_CreateAction_AppEndpointAsyncResult(arg,
+                                                         "Endpoint applicative callback close result");
 }
 
 SOPC_StatusCode SOPC_Endpoint_AsyncClose(SOPC_Endpoint                 endpoint,

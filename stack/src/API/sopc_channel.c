@@ -261,6 +261,28 @@ void SOPC_IntChannel_AsyncResultCondDataCB(SOPC_Channel                         
     }
 }
 
+SOPC_StatusCode SOPC_IntChannel_CreateAction_AppChannelAsyncResult(void*                asyncResultCBdata,
+                                                                   const char*          actionTxt)
+{
+    assert(NULL != asyncResultCBdata);
+    SOPC_IntChannel_AppChannelAsyncResultCbData* cbData = (SOPC_IntChannel_AppChannelAsyncResultCbData*) asyncResultCBdata;
+    SOPC_ActionQueueManager* qManager = NULL;
+    // Depending on the fact if the final callback is internal and responsible
+    //  to signal end of sync operation we use the "application callback queue manager" or
+    //  the "stack action queue manager".
+    // It is necessary since a sync call could be done through the "application callback queue manager"
+    //  and will provoke a dead lock if we enqueue the condition signal callback in the same queue.
+    if(SOPC_IntChannel_AsyncResultCondDataCB == cbData->callback){ // SOPC_IntChannel_AsyncResultCondDataCB unique function to manage condition signal
+        qManager = stackActionQueueMgr;
+    }else{
+        qManager = appCallbackQueueMgr;
+    }
+    return SOPC_ActionQueueManager_AddAction(qManager,
+                                             SOPC_Channel_Action_AppChannelAsyncResutlCallback,
+                                             asyncResultCBdata,
+                                             actionTxt);
+}
+
 SOPC_IntChannel_InvokeCallbackData* SOPC_IntChannel_InvokeCallbackData_Create(SOPC_Channel                     channel,
                                                                               SOPC_Channel_PfnRequestComplete* cb,
                                                                               void*                            cbData){
@@ -446,10 +468,8 @@ SOPC_StatusCode SOPC_IntChannel_ChannelEventCB(SC_ClientConnection* cConnection,
                 if(NULL != asyncCbData){
                     // If asynchronous call to connect, we need to notify applicative layer of error
                     // otherwise it is reported internally using the errorFlag
-                    SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                                      SOPC_Channel_Action_AppChannelAsyncResutlCallback,
-                                                      (void*) asyncCbData,
-                                                      "Channel async result event applicative callback");
+                    SOPC_IntChannel_CreateAction_AppChannelAsyncResult((void*) asyncCbData,
+                                                                       "Channel connected async result event applicative callback");
                 }
             }
             break;
@@ -466,10 +486,8 @@ SOPC_StatusCode SOPC_IntChannel_ChannelEventCB(SC_ClientConnection* cConnection,
                 if(NULL != asyncCbData){
                     // If asynchronous call to connect, we need to notify applicative layer of error
                     // otherwise it is reported internally using the errorFlag
-                    SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                                      SOPC_Channel_Action_AppChannelAsyncResutlCallback,
-                                                      (void*) asyncCbData,
-                                                      "Channel async connection failure event applicative callback");
+                    SOPC_IntChannel_CreateAction_AppChannelAsyncResult((void*) asyncCbData,
+                                                                       "Channel async connection failure event applicative callback");
                 }
             }else{
                 // Unexpected disconnection
@@ -508,10 +526,8 @@ void SOPC_IntChannel_BeginConnectStatus(SOPC_IntChannel_ConnectData* connectData
         if(NULL != appCallbackData){
             // If asynchronous call to connect, we need to notify applicative layer of error
             // otherwise it is reported internally using the errorFlag
-            SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                              SOPC_Channel_Action_AppChannelAsyncResutlCallback,
-                                              (void*) appCallbackData,
-                                              "Channel async result event applicative callback");
+            SOPC_IntChannel_CreateAction_AppChannelAsyncResult((void*) appCallbackData,
+                                                               "Channel begin connect async result event applicative callback");
         }
     }
 }
@@ -755,10 +771,8 @@ void SOPC_IntChannel_InvokeSendRequestResultCB(void*           callbackData,
     assert(callbackData != NULL);
     SOPC_IntChannel_AppChannelAsyncResultCbData* operationEndData = (SOPC_IntChannel_AppChannelAsyncResultCbData*) callbackData;
     operationEndData->status = status;
-    SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                      SOPC_Channel_Action_AppChannelAsyncResutlCallback,
-                                      callbackData,
-                                      "Channel async invoke send request result event applicative callback");
+    SOPC_IntChannel_CreateAction_AppChannelAsyncResult((void*) callbackData,
+                                                       "Channel async invoke send request result event applicative callback");
 }
 
 SOPC_StatusCode SOPC_Channel_AsyncInvokeService(SOPC_Channel                     channel,
@@ -1007,10 +1021,8 @@ void SOPC_Channel_Action_AsyncDisconnect(void* arg){
     if(NULL != appCallbackData){
         // If asynchronous call to connect, we need to notify applicative layer of error
         // otherwise it is reported internally using the errorFlag
-        SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
-                                          SOPC_Channel_Action_AppChannelAsyncResutlCallback,
-                                          (void*) appCallbackData,
-                                          "Channel async result event applicative callback");
+        SOPC_IntChannel_CreateAction_AppChannelAsyncResult((void*) appCallbackData,
+                                                           "Channel disconnect async result event applicative callback");
     }
     free(discoData);
 }

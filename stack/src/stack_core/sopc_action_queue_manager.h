@@ -25,6 +25,7 @@ typedef struct SOPC_ActionQueueManager SOPC_ActionQueueManager;
 // Initialization done by stack config module
 extern SOPC_ActionQueueManager* stackActionQueueMgr; // stack actions manager
 extern SOPC_ActionQueueManager* appCallbackQueueMgr; // applicative callbacks manager
+extern SOPC_ActionQueueManager* condSignalQueueMgr; // condition signal change (unblocking sync calls) manager
 
 
 /**
