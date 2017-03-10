@@ -869,45 +869,50 @@ void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
        responseType != NULL &&
        response != NULL)
     {
-        Mutex_Lock(&sEndpoint->mutex);
+        if(SC_Connection_Connected == scConnection->state){
+            Mutex_Lock(&sEndpoint->mutex);
 
-        // Set request Id, used for socket transaction
-        scConnection->sendingBuffer->msgRequestId = requestId;
+            // Set request Id, used for socket transaction
+            scConnection->sendingBuffer->msgRequestId = requestId;
 
-        // TODO: check response handle <=> request handle ? Or resp. application ?
-        status = SC_EncodeSecureMessage(scConnection,
-                                        responseType,
-                                        response,
-                                        requestId);
+            // TODO: check response handle <=> request handle ? Or resp. application ?
+            status = SC_EncodeSecureMessage(scConnection,
+                                            responseType,
+                                            response,
+                                            requestId);
 
-        if(status == STATUS_OK){
-            if(scConnection->sendingBuffer->nbChunks > 1){
-                // If nbChunks > 1, it means chunks were sent before end of message encoding:
-                //  event is then END instead of START_END (1 chunk transaction case)
-                transactionEvent = SOCKET_TRANSACTION_END;
+            if(status == STATUS_OK){
+                if(scConnection->sendingBuffer->nbChunks > 1){
+                    // If nbChunks > 1, it means chunks were sent before end of message encoding:
+                    //  event is then END instead of START_END (1 chunk transaction case)
+                    transactionEvent = SOCKET_TRANSACTION_END;
+                }
+                // For now no next action to the socket writing to provide (except error ? => more for previous steps in Flush)
+                status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final,
+                                                 transactionEvent,
+                                                 requestId,
+                                                 SOPC_OperationEnd_ServiceResponse_CB,
+                                                 (void*) sendData);
             }
-            // For now no next action to the socket writing to provide (except error ? => more for previous steps in Flush)
-            status = SC_FlushSecureMsgBuffer(scConnection->sendingBuffer, SOPC_Msg_Chunk_Final,
-                                             transactionEvent,
-                                             requestId,
-                                             SOPC_OperationEnd_ServiceResponse_CB,
-                                             (void*) sendData);
+
+            if(STATUS_OK == status){
+                // Token will be released by SOPC_OperationEnd_ServiceResponse_CB
+                willReleaseToken = 1;
+            }else{
+                SOPC_OperationEnd_ServiceResponseError(scConnection,
+                                                       responseType,
+                                                       &willReleaseToken);
+            }
+
+            Mutex_Unlock(&sEndpoint->mutex);
         }
 
-        if(STATUS_OK == status){
-            // Token will be released by SOPC_OperationEnd_ServiceResponse_CB
-            willReleaseToken = 1;
-        }else{
-            SOPC_OperationEnd_ServiceResponseError(scConnection,
-                                                   responseType,
-                                                   &willReleaseToken);
+        if(FALSE == willReleaseToken){
+            SC_CreateAction_ReleaseToken((void*)scConnection);
         }
-
-        Mutex_Unlock(&sEndpoint->mutex);
-    }
-
-    if(FALSE == willReleaseToken){
-        SC_CreateAction_ReleaseToken((void*)scConnection);
+    }else{
+        status = STATUS_INVALID_STATE;
+        SOPC_OperationEnd_ServiceResponse_CB((void*) sendData, status);
     }
 }
 
