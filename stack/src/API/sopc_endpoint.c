@@ -861,7 +861,7 @@ SOPC_StatusCode SOPC_Endpoint_Delete(SOPC_Endpoint* endpoint){
 
     if(endpoint != NULL && *endpoint != NULL){
         status = SOPC_Endpoint_Close(*endpoint);
-        if(STATUS_OK == status){
+        if(STATUS_OK == status || STATUS_INVALID_STATE == status){
             SC_ServerEndpoint_Delete(*endpoint);
             *endpoint = NULL;
         }

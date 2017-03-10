@@ -394,7 +394,7 @@ SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel){
 
         // Ensure disconnect called for deallocation
         status = SOPC_Channel_Disconnect(*channel);
-        if(STATUS_OK == status){
+        if(STATUS_OK == status || STATUS_INVALID_STATE == status){
             SC_Client_Delete(*channel);
             // No need to wait delete action terminated to set pointer to null
             *channel = NULL;
