@@ -29,11 +29,25 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
+
+typedef struct SOPC_IntChannel {
+    // Connection instance
+    SC_ClientConnection*  cConnection;
+
+    // Configuration to store on connection event for message encoding
+    uint32_t              secureChannelId;
+    uint32_t              maxChunksSendingCfg;
+    uint32_t              maxMsgSizeSendingCfg;
+    uint32_t              bufferSizeSendingCfg;
+    SOPC_NamespaceTable*  nsTableCfg;
+    SOPC_EncodeableType** encTypesTableCfg;
+} SOPC_IntChannel;
 
 typedef struct SOPC_IntChannel_CallbackData {
     SOPC_Channel_PfnConnectionStateChanged* callback;
     void*                                   callbackData;
-    SOPC_Channel                            channel;
+    SOPC_IntChannel*                        channel;
     // Use the channel event callback data to store the connect async result callback
     //  since it is used to notify end of connect operation
     SOPC_Channel_AsyncResult_CB*            connectCb;
@@ -46,7 +60,7 @@ typedef struct SOPC_IntChannel_CallbackData {
 typedef struct SOPC_IntChannel_AppChannelEventCbData {
     SOPC_Channel_PfnConnectionStateChanged* callback;
     void*                                   callbackData;
-    SOPC_Channel                            channel;
+    SOPC_IntChannel*                        channel;
     SOPC_Channel_Event                      event;
     SOPC_StatusCode                         status;
 } SOPC_IntChannel_AppChannelEventCbData;
@@ -54,7 +68,7 @@ typedef struct SOPC_IntChannel_AppChannelEventCbData {
 typedef struct SOPC_IntChannel_AppChannelAsyncResultCbData {
     SOPC_Channel_AsyncResult_CB*           callback;
     void*                                  callbackData;
-    SOPC_Channel                           channel;
+    SOPC_IntChannel*                       channel;
     SOPC_ChannelEvent_AsyncOperationResult event;
     SOPC_StatusCode                        status;
 } SOPC_IntChannel_AppChannelAsyncResultCbData;
@@ -86,9 +100,9 @@ typedef struct SOPC_IntChannel_ConnectData {
 } SOPC_IntChannel_ConnectData;
 
 typedef struct SOPC_IntChannel_DisconnectData {
-    SC_ClientConnection*                    cConnection;
-    SOPC_Channel_AsyncResult_CB*            disconnectCb;
-    void*                                   disconnectCbData;
+    SOPC_IntChannel*              intChannel;
+    SOPC_Channel_AsyncResult_CB*  disconnectCb;
+    void*                         disconnectCbData;
 } SOPC_IntChannel_DisconnectData;
 
 typedef struct SOPC_IntChannel_InvokeCallbackData {
@@ -356,13 +370,29 @@ SOPC_StatusCode SOPC_Channel_CreateAction_AppInvokeCallback(SOPC_Channel        
     return retStatus;
 }
 
+SOPC_IntChannel* SOPC_IntChannel_Create(){
+    SOPC_IntChannel* result = malloc(sizeof(SOPC_IntChannel));
+    if(NULL != result){
+        memset(result, 0, sizeof(SOPC_IntChannel));
+    }
+    return result;
+}
+
 SOPC_StatusCode SOPC_Channel_Create(SOPC_Channel*               channel,
                                     SOPC_Channel_SerializerType serialType){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_IntChannel* intChannel = NULL;
     if(channel != NULL && serialType == SOPC_ChannelSerializer_Binary){
-        *channel = SC_Client_Create();
-        if(channel != NULL){
-            status = STATUS_OK;
+        intChannel = SOPC_IntChannel_Create();
+        if(intChannel != NULL){
+            intChannel->cConnection = SC_Client_Create();
+            if(NULL != intChannel->cConnection){
+                *channel = intChannel;
+                status = STATUS_OK;
+            }else{
+                free(intChannel);
+                status = STATUS_NOK;
+            }
         }else{
             status = STATUS_NOK;
         }
@@ -375,10 +405,13 @@ void SOPC_IntChannel_AsyncDeleteDiscoResultCB(SOPC_Channel                      
                                               SOPC_ChannelEvent_AsyncOperationResult cEvent,
                                               SOPC_StatusCode                        status)
 {
+    SOPC_IntChannel* intChannel = NULL;
     assert(cEvent == SOPC_ChannelAsync_DisconnectResult);
     (void) cbData;
     if(STATUS_OK == status){
-        SC_Client_Delete(channel);
+        intChannel = (SOPC_IntChannel*) channel;
+        SC_Client_Delete(intChannel->cConnection);
+        free(intChannel);
     }
 }
 
@@ -390,12 +423,14 @@ SOPC_StatusCode SOPC_Channel_AsyncDelete(SOPC_Channel channel){
 
 SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_IntChannel* intChannel = NULL;
     if(channel != NULL && *channel != NULL){
-
+        intChannel = (SOPC_IntChannel*) *channel;
         // Ensure disconnect called for deallocation
         status = SOPC_Channel_Disconnect(*channel);
         if(STATUS_OK == status || STATUS_INVALID_STATE == status){
-            SC_Client_Delete(*channel);
+            SC_Client_Delete(intChannel->cConnection);
+            free(intChannel);
             // No need to wait delete action terminated to set pointer to null
             *channel = NULL;
         }
@@ -412,14 +447,28 @@ SOPC_StatusCode SOPC_IntChannel_ChannelEventCB(SC_ClientConnection* cConnection,
     SOPC_IntChannel_CallbackData* callbackData = cbData;
     SOPC_IntChannel_AppChannelEventCbData* appCallbackData = NULL;
     SOPC_Channel_Event channelConnectionEvent = SOPC_ChannelEvent_Invalid;
+    SOPC_IntChannel* intChannel = (SOPC_IntChannel*) callbackData->channel;
 
     switch(event){
         case SOPC_ConnectionEvent_Connected:
             channelConnectionEvent = SOPC_ChannelEvent_Connected;
+            intChannel->secureChannelId = cConnection->instance->secureChannelId;
+            intChannel->maxChunksSendingCfg = cConnection->instance->transportConnection->maxChunkCountSnd;
+            intChannel->maxMsgSizeSendingCfg = cConnection->instance->transportConnection->maxMessageSizeSnd;
+            intChannel->bufferSizeSendingCfg = cConnection->instance->transportConnection->sendBufferSize;
+            intChannel->nsTableCfg = &cConnection->namespaces;
+            intChannel->encTypesTableCfg = cConnection->encodeableTypes;
+            // TODO: retrieve msgBuffer parameters
             break;
         case SOPC_ConnectionEvent_Disconnected:
         case SOPC_ConnectionEvent_ConnectionFailed:
             channelConnectionEvent = SOPC_ChannelEvent_Disconnected;
+            intChannel->secureChannelId = 0;
+            intChannel->maxChunksSendingCfg = 0;
+            intChannel->maxMsgSizeSendingCfg = 0;
+            intChannel->bufferSizeSendingCfg = 0;
+            intChannel->nsTableCfg = NULL;
+            intChannel->encTypesTableCfg = NULL;
             break;
         case SOPC_ConnectionEvent_SecureMessageComplete:
         case SOPC_ConnectionEvent_SecureMessageChunk:
@@ -582,11 +631,12 @@ SOPC_StatusCode SOPC_IntChannel_BeginConnect(uint8_t                            
 {
     assert(channelCbData != NULL);
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
+    SOPC_IntChannel* intChannel = (SOPC_IntChannel*) channel;
     SOPC_IntChannel_ConnectData* connectData = NULL;
     (void) networkTimeout;
 
-    if(cConnection != NULL && cConnection->instance != NULL &&
+    if(intChannel != NULL && intChannel->cConnection != NULL &&
+       intChannel->cConnection->instance != NULL &&
        url != NULL &&
        ((crt_cli != NULL && key_priv_cli != NULL &&
          crt_srv != NULL && pki != NULL)
@@ -610,7 +660,7 @@ SOPC_StatusCode SOPC_IntChannel_BeginConnect(uint8_t                            
 
         if(NULL != connectData && NULL != *channelCbData){
             status = STATUS_OK;
-            connectData->cConnection = cConnection;
+            connectData->cConnection = intChannel->cConnection;
             connectData->url = url;
             connectData->crt_cli = crt_cli;
             connectData->key_priv_cli = key_priv_cli;
@@ -650,8 +700,8 @@ void SOPC_IntChannel_BeginConnect_ConnectCB(SOPC_Channel                        
 {
     assert(NULL != channel);
     (void) cbData;
-    SC_ClientConnection* scConnection = (SC_ClientConnection*) channel;
-    SOPC_IntChannel_CallbackData* icbData = (SOPC_IntChannel_CallbackData*) scConnection->callbackData;
+    SOPC_IntChannel* intChannel = (SOPC_IntChannel*) channel;
+    SOPC_IntChannel_CallbackData* icbData = (SOPC_IntChannel_CallbackData*) intChannel->cConnection->callbackData;
     if(cEvent == SOPC_ChannelAsync_ConnectResult && STATUS_OK != status){
         icbData->callback(icbData->channel,
                           icbData->callbackData,
@@ -785,13 +835,14 @@ SOPC_StatusCode SOPC_Channel_AsyncInvokeService(SOPC_Channel                    
                                                 void*                            sendReqResultCbData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
+    SOPC_IntChannel* intChannel = (SOPC_IntChannel*) channel;
     uint32_t timeout = 0;
     SOPC_IntChannel_InvokeCallbackData* appCallbackData = NULL;
     SOPC_IntChannel_AppChannelAsyncResultCbData* appSendReqResultCbData = NULL;
     SOPC_Socket_EndOperation_CB* endSendCallback = NULL;
+    SOPC_MsgBuffers* msgBuffers = NULL;
 
-    if(cConnection != NULL &&
+    if(intChannel != NULL && intChannel->cConnection != NULL &&
        request != NULL && requestType != NULL &&
        cb != NULL)
     {
@@ -834,11 +885,27 @@ SOPC_StatusCode SOPC_Channel_AsyncInvokeService(SOPC_Channel                    
         if(STATUS_OK == status){
             // There is always a request header as first struct field in a request (safe cast)
             timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
+
+            msgBuffers = SC_CreateSendSecureBuffers(intChannel->maxChunksSendingCfg,
+                                                    intChannel->maxMsgSizeSendingCfg,
+                                                    intChannel->bufferSizeSendingCfg,
+                                                    intChannel->cConnection->instance,
+                                                    intChannel->nsTableCfg,
+                                                    intChannel->encTypesTableCfg);
+
+            if(NULL != msgBuffers){
+                status = SC_Client_EncodeRequest(intChannel->secureChannelId,
+                                                 requestType,
+                                                 request,
+                                                 msgBuffers);
+            }else{
+                status = STATUS_NOK;
+            }
             // TODO: do not use end send request callback at this level
             //       anymore since error will be triggered in SOPC_Channel_PfnRequestComplete callback
-            status = SC_CreateAction_Send_Request(cConnection,
+            status = SC_CreateAction_Send_Request(intChannel->cConnection,
                                                   requestType,
-                                                  request,
+                                                  msgBuffers,
                                                   responseType,
                                                   timeout,
                                                   (SC_ResponseEvent_CB*) SOPC_Channel_CreateAction_AppInvokeCallback,
@@ -939,12 +1006,12 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
     uint8_t freeAsyncDataHere = FALSE;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_StatusCode responseStatus = STATUS_INVALID_PARAMETERS;
-    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
+    SOPC_IntChannel* intChannel = (SOPC_IntChannel*) channel;
     uint32_t timeout = 0;
     SOPC_IntChannel_AsyncResultCondData* asyncResultCond = NULL;
     SOPC_IntChannel_InvokeCallbackData* asyncResultContainer = NULL;
 
-    if(cConnection != NULL &&
+    if(intChannel != NULL && intChannel->cConnection != NULL &&
        request != NULL && requestType != NULL &&
        response != NULL && responseType != NULL){
 
@@ -1010,12 +1077,12 @@ void SOPC_Channel_Action_AsyncDisconnect(void* arg){
     assert(NULL != arg);
     SOPC_IntChannel_DisconnectData* discoData = (SOPC_IntChannel_DisconnectData*) arg;
     SOPC_IntChannel_AppChannelAsyncResultCbData* appCallbackData = NULL;
-    SOPC_IntChannel_CallbackData_Delete(discoData->cConnection->callbackData);
-    SC_Client_Disconnect(discoData->cConnection);
+    SOPC_IntChannel_CallbackData_Delete(discoData->intChannel->cConnection->callbackData);
+    SC_Client_Disconnect(discoData->intChannel->cConnection);
     SOPC_StackConfiguration_Unlocked();
     appCallbackData = SOPC_IntChannel_AppChannelAsyncResutlCbData_Create(discoData->disconnectCb,
                                                                          discoData->disconnectCbData,
-                                                                         discoData->cConnection,
+                                                                         discoData->intChannel,
                                                                          SOPC_ChannelAsync_DisconnectResult,
                                                                          STATUS_OK);
     if(NULL != appCallbackData){
@@ -1036,7 +1103,7 @@ SOPC_StatusCode SOPC_Channel_AsyncDisconnect(SOPC_Channel                 channe
     // TODO: call the connection state change callback ? Or not necessary because voluntarily closed ?
     if(channel != NULL){
         discoData = malloc(sizeof(SOPC_IntChannel_DisconnectData));
-        discoData->cConnection = channel;
+        discoData->intChannel = (SOPC_IntChannel*) channel;
         discoData->disconnectCb = disconnect;
         discoData->disconnectCbData = disconnectData;
         status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
@@ -1076,6 +1143,10 @@ SOPC_StatusCode SOPC_Channel_Disconnect(SOPC_Channel channel){
         SOPC_IntChannel_AsyncResultCondData_Clear(&asyncData);
     }
     return status;
+}
+
+void* SOPC_Channel_GetConnection(SOPC_Channel channel){
+    return (void*) ((SOPC_IntChannel*) channel)->cConnection;
 }
 
 #endif // CLIENT_API

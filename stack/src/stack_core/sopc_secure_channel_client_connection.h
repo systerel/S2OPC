@@ -48,7 +48,6 @@ typedef struct SC_ClientConnection
     const Certificate*          clientCertificate;
     AsymmetricKey*              clientKey;
     SLinkedList*                pendingRequests;
-    SC_LatestPendingRequestInfo lastPendingRequestInfo;
     OpcUa_MessageSecurityMode   securityMode;
     SOPC_String                 securityPolicy;
     uint32_t                    requestedLifetime;
@@ -85,9 +84,14 @@ SOPC_StatusCode SC_Client_Connect(SC_ClientConnection*      connection,
 
 void SC_Client_Disconnect(SC_ClientConnection*   cConnection);
 
+SOPC_StatusCode SC_Client_EncodeRequest(uint32_t             secureChannelId,
+                                        SOPC_EncodeableType* requestType,
+                                        void*                request,
+                                        SOPC_MsgBuffers*     msgBuffers);
+
 SOPC_StatusCode SC_CreateAction_Send_Request(SC_ClientConnection*         connection,
                                              SOPC_EncodeableType*         requestType,
-                                             void*                        request,
+                                             SOPC_MsgBuffers*             requestMsgBuffers,
                                              SOPC_EncodeableType*         responseType,
                                              uint32_t                     timeout,
                                              SC_ResponseEvent_CB*         callback,

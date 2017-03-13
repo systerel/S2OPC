@@ -56,7 +56,7 @@ SOPC_StatusCode TCP_UA_EncodeHeader(SOPC_MsgBuffer* msgBuffer,
     }
     if(status == STATUS_OK){
         // reserved byte
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, &fByte, 1);
+        status = TCP_UA_WriteMsgBuffer(msgBuffer->buffers, &fByte, 1);
     }
     if(status == STATUS_OK){
         const uint32_t headerLength = TCP_UA_HEADER_LENGTH;
@@ -301,19 +301,19 @@ SOPC_StatusCode TCP_UA_FlushMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
 }
 
 
-SOPC_StatusCode TCP_UA_WriteMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
+SOPC_StatusCode TCP_UA_WriteMsgBuffer(Buffer*          buffer,
                                       const SOPC_Byte* data_src,
                                       uint32_t         count)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(data_src != NULL && msgBuffer != NULL && count > 0)
+    if(data_src != NULL && buffer != NULL && count > 0)
     {
-        if(msgBuffer->buffers->position + count > msgBuffer->buffers->max_size){
+        if(buffer->position + count > buffer->max_size){
             // Error message should be managed at secure channel level:
             //  no possible message chunks except for MSG type !
             status = STATUS_INVALID_STATE;
         }else{
-            status = Buffer_Write(msgBuffer->buffers, data_src, count);
+            status = Buffer_Write(buffer, data_src, count);
         }
     }
     return status;

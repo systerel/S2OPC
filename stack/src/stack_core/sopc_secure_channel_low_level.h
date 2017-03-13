@@ -66,7 +66,7 @@ typedef struct {
     const AsymmetricKey*      runningAppPrivateKey; // Pointer on upper level param: do not manage allocation on it
     SOPC_ByteString           otherAppCertificate;
     const Certificate*        otherAppPublicKeyCert; // Pointer on upper level param: manage allocation on it only on server side (check connection flag)
-    SOPC_MsgBuffer*           sendingBuffer;
+    //SOPC_MsgBuffer*           sendingBuffer;
     uint32_t                  sendingMaxBodySize;
     SOPC_MsgBuffers*          receptionBuffers;
     OpcUa_MessageSecurityMode currentSecuMode;
@@ -107,39 +107,43 @@ SOPC_StatusCode SC_InitSendSecureBuffer(SC_Connection*        scConnection,
                                         SOPC_NamespaceTable*  namespaceTable,
                                         SOPC_EncodeableType** encodeableTypes);
 
-SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffer*        msgBuffer,
+SOPC_MsgBuffers* SC_CreateSendSecureBuffers(uint32_t              maxChunksSendingCfg,
+                                            uint32_t              maxMsgSizeSendingCfg,
+                                            uint32_t              bufferSizeSendingCfg,
+                                            SC_Connection*        flushData,
+                                            SOPC_NamespaceTable*  nsTableCfg,
+                                            SOPC_EncodeableType** encTypesTableCfg);
+
+SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffers*       msgBuffers,
                                          SOPC_SecureMessageType smType,
                                          uint32_t               secureChannelId);
 
 SOPC_StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
+                                             SOPC_MsgBuffer* msgBuffer,
                                              SOPC_String*   securityPolicy);
 
 SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
+                                  uint32_t       nonEncryptedHeadersSize,
+                                  uint32_t       chunkSize,
                                   uint32_t       isSymmetric);
 
-SOPC_StatusCode SC_EncodeSequenceHeader(SOPC_MsgBuffer* msgBuffer,
-                                        uint32_t        requestId);
+SOPC_StatusCode SC_EncodeSequenceHeader(SOPC_MsgBuffers* msgBuffers,
+                                        uint32_t         requestId);
 
-SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffer*      msgBuffer,
+SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffers*     msgBuffers,
                                  SOPC_EncodeableType* encType,
                                  void*                msgBody);
 
-SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
-                            uint32_t        requestId,
-                            SOPC_StatusCode errorCode,
-                            SOPC_String*    reason,
-                            uint8_t*        willReleaseMsgQueueToken);
-
-SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
+SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffers* msgBuffers,
                                         const SOPC_Byte* data_src,
                                         uint32_t         count);
 
-SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
-                                        SOPC_MsgFinalChunk            chunkType,
-                                        SOPC_Socket_Transaction_Event transactionEvent,
-                                        uint32_t                      transactionId,
-                                        SOPC_Socket_EndOperation_CB*  fctPointer,
-                                        void*                         fctArgument);
+SOPC_StatusCode SC_FlushSecureMsgBuffers(SOPC_MsgBuffers*             msgBuffers,
+                                         uint32_t                     flushChunkIdx,
+                                         uint32_t                     tokenId,
+                                         uint32_t                     requestId,
+                                         SOPC_Socket_EndOperation_CB* fctPointer,
+                                         void*                        fctArgument);
 
 SOPC_StatusCode SC_IsPrecedentCryptoData(SC_Connection* scConnection,
                                          uint32_t       receivedTokenId,
@@ -193,9 +197,11 @@ SOPC_StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
 
 // Caller must call SC_AbortMsg in case of encode secure message failure
 // in order to at least reset buffer and send an abort message if necessary (chunks already sent)
-SOPC_StatusCode SC_EncodeSecureMessage(SC_Connection*       scConnection,
+SOPC_StatusCode SC_EncodeSecureMessage(SOPC_MsgBuffers*     msgBuffers,
                                        SOPC_EncodeableType* encType,
                                        void*                value,
+                                       uint32_t             secureChannelId,
+                                       uint32_t             tokenId,
                                        uint32_t             requestId);
 
 SOPC_StatusCode SC_DecodeSymmSecurityHeader(SOPC_MsgBuffer* transportBuffer,

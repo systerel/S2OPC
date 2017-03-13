@@ -61,7 +61,7 @@ void OpcUa_Channel_Clear(SOPC_Channel channel)
 void OpcUa_Channel_Delete(SOPC_Channel* channel)
 {
     if(channel != NULL){
-        SC_ClientConnection* cConnection = (SC_ClientConnection*) *channel;
+        SC_ClientConnection* cConnection = (SC_ClientConnection*) SOPC_Channel_GetConnection(*channel);
         if(cConnection != NULL){
             if(cConnection->pkiProvider != NULL){
                 KeyManager_Certificate_Free(cConnection->pkiProvider->pUserCertAuthList);
@@ -124,7 +124,7 @@ SOPC_StatusCode OpcUa_Channel_BeginDisconnect(SOPC_Channel                      
 SOPC_StatusCode OpcUa_Channel_Disconnect(SOPC_Channel channel)
 {
     SOPC_StatusCode status = STATUS_OK;
-    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
+    SC_ClientConnection* cConnection = (SC_ClientConnection*) SOPC_Channel_GetConnection(channel);
     if(cConnection->pkiProvider != NULL){
         KeyManager_Certificate_Free(cConnection->pkiProvider->pUserCertAuthList);
         PKIProviderStack_Free((PKIProvider*) cConnection->pkiProvider);
@@ -160,7 +160,7 @@ SOPC_StatusCode OpcUa_Channel_BeginConnect(SOPC_Channel                         
                                            void*                                   callbackData)
 {
     SOPC_StatusCode status = STATUS_OK;
-    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
+    SC_ClientConnection* cConnection = (SC_ClientConnection*) SOPC_Channel_GetConnection(channel);
     Certificate *cli = NULL, *srv = NULL, *crt_ca = NULL;
     AsymmetricKey *pKeyCli = NULL;
     PKIProvider *pki = NULL;
@@ -253,7 +253,7 @@ SOPC_StatusCode OpcUa_Channel_Connect(SOPC_Channel                            ch
                                       uint32_t                                networkTimeout)
 {
     SOPC_StatusCode status = STATUS_OK;
-    SC_ClientConnection* cConnection = (SC_ClientConnection*) channel;
+    SC_ClientConnection* cConnection = (SC_ClientConnection*) SOPC_Channel_GetConnection(channel);
     Certificate *cli = NULL, *srv = NULL, *crt_ca = NULL;
     AsymmetricKey *pKeyCli = NULL;
     PKIProvider *pki = NULL;

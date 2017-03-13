@@ -29,13 +29,16 @@
 
 const uint32_t scProtocolVersion = 0;
 
-typedef struct SOPC_OperationEnd_FlushSecureMsg_Data {
-    SOPC_MsgBuffer*              msgBuffer;
-    SOPC_MsgFinalChunk           chunkType;
+typedef struct SOPC_OperationEnd_FlushSecureMsgData {
+    SOPC_MsgBuffer*              msgBuffers;
+    uint32_t                     nextFlushChunkIdx;
+    uint32_t                     tokenId;
+    uint32_t                     requestId;
     uint32_t                     precSeqNum;
     SOPC_Socket_EndOperation_CB* callback;
     void*                        callbackData;
-} SOPC_OperationEnd_FlushSecureMsg_Data;
+    SOPC_StatusCode              errorStatus;
+} SOPC_OperationEnd_FlushSecureMsgData;
 
 SC_Connection* SC_Create (TCP_UA_Connection* connection){
     SC_Connection* sConnection = NULL;
@@ -83,10 +86,6 @@ void SC_Delete (SC_Connection* scConnection){
             KeyManager_Certificate_Free((Certificate*) scConnection->otherAppPublicKeyCert);
         }
         scConnection->otherAppPublicKeyCert = NULL;
-        if(scConnection->sendingBuffer != NULL)
-        {
-            MsgBuffer_Delete(&scConnection->sendingBuffer);
-        }
         if(scConnection->receptionBuffers != NULL)
         {
             MsgBuffers_Delete(&scConnection->receptionBuffers);
@@ -227,6 +226,7 @@ SOPC_StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
             scConnection->receptionBuffers = MsgBuffers_Create
              (scConnection->transportConnection->maxChunkCountRcv,
               scConnection->transportConnection->receiveBufferSize,
+              NULL,
               namespaceTable,
               encodeableTypes);
 
@@ -236,6 +236,7 @@ SOPC_StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
               (scConnection->transportConnection->maxMessageSizeRcv
                /scConnection->transportConnection->receiveBufferSize,
                scConnection->transportConnection->receiveBufferSize,
+               NULL,
                namespaceTable,
                encodeableTypes);
             // Using receive buffer size is correct over-approximation of un-encrypted size (blocks) ?
@@ -253,27 +254,33 @@ SOPC_StatusCode SC_InitReceiveSecureBuffers(SC_Connection* scConnection,
     return status;
 }
 
-SOPC_StatusCode SC_InitSendSecureBuffer(SC_Connection* scConnection,
-                                        SOPC_NamespaceTable*  namespaceTable,
-                                        SOPC_EncodeableType** encodeableTypes)
+SOPC_MsgBuffers* SC_CreateSendSecureBuffers(uint32_t              maxChunksSendingCfg,
+                                            uint32_t              maxMsgSizeSendingCfg,
+                                            uint32_t              bufferSizeSendingCfg,
+                                            SC_Connection*        flushData,
+                                            SOPC_NamespaceTable*  nsTableCfg,
+                                            SOPC_EncodeableType** encTypesTableCfg)
 {
-    SOPC_StatusCode status = STATUS_NOK;
-    SOPC_MsgBuffer* msgBuffer;
-    if(scConnection->sendingBuffer == NULL){
-        Buffer* buf = Buffer_Create(scConnection->transportConnection->sendBufferSize);
-        msgBuffer = MsgBuffer_Create(buf,
-                                     scConnection->transportConnection->maxChunkCountSnd,
-                                     scConnection,
-                                     namespaceTable,
-                                     encodeableTypes);
-        if(msgBuffer != NULL){
-            scConnection->sendingBuffer = msgBuffer;
-            status = STATUS_OK;
-        }
-    }else{
-        status = STATUS_INVALID_STATE;
+    uint32_t idx;
+    SOPC_MsgBuffers* msgBuffers = NULL;
+    if(maxChunksSendingCfg != 0)
+    {
+        msgBuffers = MsgBuffers_Create(maxChunksSendingCfg,
+                                       bufferSizeSendingCfg,
+                                       (void*) flushData,
+                                       nsTableCfg,
+                                       encTypesTableCfg);
+
+    }else if(maxMsgSizeSendingCfg != 0){
+        msgBuffers = MsgBuffers_Create(maxMsgSizeSendingCfg / bufferSizeSendingCfg,
+                                       bufferSizeSendingCfg,
+                                       (void*) flushData,
+                                       nsTableCfg,
+                                       encTypesTableCfg);
     }
-    return status;
+    // Set a current chunk
+    MsgBuffers_NextChunk(msgBuffers, &idx);
+    return msgBuffers;
 }
 
 //// Cryptographic properties helpers
@@ -286,12 +293,13 @@ uint8_t Is_ExtraPaddingSizePresent(uint32_t plainBlockSize){
     return plainBlockSize > 256;
 }
 
-uint32_t GetMaxBodySize(SOPC_MsgBuffer* msgBuffer,
-                        uint8_t         toEncrypt,
-                        uint32_t        cipherBlockSize,
-                        uint32_t        plainBlockSize,
-                        uint8_t         toSign,
-                        uint32_t        signatureSize)
+uint32_t GetMaxBodySize(uint32_t nonEncryptedHeadersSize,
+                        uint32_t chunkSize,
+                        uint8_t  toEncrypt,
+                        uint32_t cipherBlockSize,
+                        uint32_t plainBlockSize,
+                        uint8_t  toSign,
+                        uint32_t signatureSize)
 {
     uint32_t result = 0;
     uint32_t paddingSizeFields = 0;
@@ -316,8 +324,7 @@ uint32_t GetMaxBodySize(SOPC_MsgBuffer* msgBuffer,
     //  otherwise the plain size could be greater than the  buffer size regarding computation
     assert(cipherBlockSize >= plainBlockSize);
 
-    const uint32_t headersSize = msgBuffer->sequenceNumberPosition; // Non encrypted header size (sequence header encrypted)
-    const uint32_t bodyChunkSize = msgBuffer->buffers->max_size - headersSize; // Body includes sequence header (encrypted)
+    const uint32_t bodyChunkSize = chunkSize - nonEncryptedHeadersSize; // Body includes sequence header (encrypted)
 
     // Computed maxBlock and then maxBodySize based on revised formula of mantis ticket #2897
     // Spec 1.03 part 6 incoherent
@@ -328,8 +335,8 @@ uint32_t GetMaxBodySize(SOPC_MsgBuffer* msgBuffer,
     // <=> Maximum body size after adding the sequence header, padding size fields (padding could be 0) and signature in plain text available size
     result = plainBlockSize * maxBlocks - UA_SECURE_MESSAGE_SEQUENCE_LENGTH - signatureSize - paddingSizeFields;
     // Maximum body size (+headers+signature+padding size fields) cannot be greater than maximum buffer size
-    assert(msgBuffer->buffers->max_size >=
-           (msgBuffer->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+    assert(chunkSize >=
+           (nonEncryptedHeadersSize + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
             result + signatureSize + paddingSizeFields));
     return result;
 }
@@ -455,7 +462,10 @@ uint16_t GetPaddingSize(uint32_t bytesToEncrypt, // called bytesToWrite in spec 
 // Set internal properties
 
 SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
-                                  uint32_t       isSymmetric){
+                                  uint32_t       nonEncryptedHeadersSize,
+                                  uint32_t       chunkSize,
+                                  uint32_t       isSymmetric)
+{
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(scConnection != NULL){
         status = STATUS_OK;
@@ -525,7 +535,8 @@ SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
 
         // Compute the max body size regarding encryption and signature use
         if(status == STATUS_OK){
-             scConnection->sendingMaxBodySize = GetMaxBodySize(scConnection->sendingBuffer,
+             scConnection->sendingMaxBodySize = GetMaxBodySize(nonEncryptedHeadersSize,
+                                                               chunkSize,
                                                                toEncrypt,
                                                                cipherBlockSize,
                                                                plainBlockSize,
@@ -539,40 +550,43 @@ SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
 
 //// End cryptographic properties helpers
 
-SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffer*        msgBuffer,
+SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffers*       msgBuffers,
                                          SOPC_SecureMessageType smType,
                                          uint32_t               secureChannelId)
 {
+    // Important note: it is safe to consider we always write in first chunk (msgBuffers->buffers)
+    //  of message buffers since headers are encoded once for and
+    //  will then be copied for next chunks
     SOPC_StatusCode status = STATUS_NOK;
-    assert(msgBuffer->buffers->position == 0);
+    assert(msgBuffers->buffers->position == 0);
     SOPC_Byte fByte = 'F';
-    if(msgBuffer != NULL){
+    if(msgBuffers != NULL){
         status = STATUS_OK;
         switch(smType){
                 case SOPC_SecureMessage:
-                    status = Buffer_Write(msgBuffer->buffers, SOPC_MSG, 3);
+                    status = Buffer_Write(msgBuffers->buffers, SOPC_MSG, 3);
                     break;
                 case SOPC_OpenSecureChannel:
-                    status = Buffer_Write(msgBuffer->buffers, SOPC_OPN, 3);
+                    status = Buffer_Write(msgBuffers->buffers, SOPC_OPN, 3);
                     break;
                 case SOPC_CloseSecureChannel:
-                    status = Buffer_Write(msgBuffer->buffers, SOPC_CLO, 3);
+                    status = Buffer_Write(msgBuffers->buffers, SOPC_CLO, 3);
                     break;
         }
-        status = MsgBuffer_SetSecureMsgType(msgBuffer, smType);
+        status = MsgBuffer_SetSecureMsgType(msgBuffers, smType);
         if(status == STATUS_OK){
             // Default behavior: final except if too long for SOPC_SecureMessage only !
-            status = Buffer_Write(msgBuffer->buffers, &fByte, 1);
+            status = Buffer_Write(msgBuffers->buffers, &fByte, 1);
         }
         if(status == STATUS_OK){
-            msgBuffer->isFinal = SOPC_Msg_Chunk_Final;
+            msgBuffers->isFinal = SOPC_Msg_Chunk_Final;
             // Temporary message size
             const uint32_t msgHeaderLength = UA_SECURE_MESSAGE_HEADER_LENGTH;
-            status = SOPC_UInt32_Write(&msgHeaderLength, msgBuffer);
+            status = SOPC_UInt32_Write(&msgHeaderLength, msgBuffers);
         }
         if(status == STATUS_OK){
             // Secure channel Id
-            status = SOPC_UInt32_Write(&secureChannelId, msgBuffer);
+            status = SOPC_UInt32_Write(&secureChannelId, msgBuffers);
         }
 
     }else{
@@ -582,22 +596,25 @@ SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffer*        msgBuffer,
     return status;
 }
 
-SOPC_StatusCode SC_EncodeSequenceHeader(SOPC_MsgBuffer* msgBuffer,
-                                        uint32_t        requestId){
+SOPC_StatusCode SC_EncodeSequenceHeader(SOPC_MsgBuffers* msgBuffers,
+                                        uint32_t         requestId){
+    // Important note: it is safe to consider we always write in first chunk (msgBuffers->buffers->...)
+    //  of message buffers since headers are encoded once for and
+    //  will then be copied for next chunks
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     const uint32_t zero = 0;
-    if(msgBuffer != NULL){
+    if(msgBuffers != NULL){
         status = STATUS_OK;
     }
 
     // Set temporary SN value: to be set on message sending (ensure contiguous SNs)
     if(status == STATUS_OK){
-        msgBuffer->sequenceNumberPosition = msgBuffer->buffers->position;
-        SOPC_UInt32_Write(&zero, msgBuffer);
+        msgBuffers->sequenceNumberPosition = msgBuffers->buffers->position;
+        SOPC_UInt32_Write(&zero, msgBuffers);
     }
 
     if(status == STATUS_OK){
-        SOPC_UInt32_Write(&requestId, msgBuffer);
+        SOPC_UInt32_Write(&requestId, msgBuffers);
     }
 
     return status;
@@ -610,6 +627,7 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
                                           SOPC_ByteString*          senderCertificate,
                                           const Certificate*        receiverCertCrypto){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    assert(msgBuffer->nbBuffers == 1);
     uint32_t toEncrypt = 1; // True
     uint32_t toSign = 1; // True
     if(cryptoProvider != NULL && msgBuffer != NULL &&
@@ -690,13 +708,14 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
     return status;
 }
 
-SOPC_StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
-                                             SOPC_String*   securityPolicy){
+SOPC_StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection*  scConnection,
+                                             SOPC_MsgBuffer* msgBuffer,
+                                             SOPC_String*    securityPolicy){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(scConnection != NULL)
     {
         status = EncodeAsymmSecurityHeader(scConnection->currentCryptoProvider,
-                                           scConnection->sendingBuffer,
+                                           msgBuffer,
                                            scConnection->currentSecuMode,
                                            securityPolicy,
                                            &scConnection->runningAppCertificate,
@@ -706,15 +725,15 @@ SOPC_StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection* scConnection,
     return status;
 }
 
-SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffer*      msgBuffer,
-                            SOPC_EncodeableType* encType,
-                            void*              msgBody)
+SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffers*     msgBuffers,
+                                 SOPC_EncodeableType* encType,
+                                 void*                msgBody)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_NodeId nodeId;
     SOPC_NodeId_Initialize(&nodeId);
 
-    if(msgBuffer != NULL && msgBody != NULL &&
+    if(msgBuffers != NULL && msgBody != NULL &&
        encType != NULL){
         nodeId.IdentifierType = IdentifierType_Numeric;
         if(encType->NamespaceUri == NULL){
@@ -724,40 +743,79 @@ SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffer*      msgBuffer,
         }
         nodeId.Data.Numeric = encType->BinaryEncodingTypeId;
 
-        status = SOPC_NodeId_Write(&nodeId, msgBuffer);
+        status = SOPC_NodeId_Write(&nodeId, msgBuffers);
     }
     if(status == STATUS_OK){
-        status = encType->Encode(msgBody, msgBuffer);
+        status = encType->Encode(msgBody, msgBuffers);
     }
     return status;
 }
 
-SOPC_StatusCode Set_Message_Length(SOPC_MsgBuffer* msgBuffer,
-                                   uint32_t        msgLength){
+SOPC_StatusCode Set_Message_Length(SOPC_MsgBuffers* msgBuffers,
+                                   uint32_t         nbChunk, // Number of chunk in which length must be set
+                                   uint32_t         msgLength){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t originPosition = 0;
-    if(msgBuffer != NULL && msgLength < msgBuffer->buffers->max_size){
-        originPosition = msgBuffer->buffers->position;
-        status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
+    uint32_t originNbChunk = 0;
+    Buffer* buffer = NULL;
+    if(msgBuffers != NULL && msgLength < msgBuffers->buffers->max_size){
+        originPosition = msgBuffers->buffers->position;
+        originNbChunk = msgBuffers->nbChunks;
+        msgBuffers->nbChunks = nbChunk; // Mimic nbChunk is the current chunk to write into using SOPC_<Type>_Write functions
+        buffer = MsgBuffers_GetCurrentChunk(msgBuffers);
+        if(NULL != buffer && msgLength < buffer->max_size){
+            status = Buffer_SetPosition(buffer, UA_HEADER_LENGTH_POSITION);
+        }
     }
     if(status == STATUS_OK){
-        status = SOPC_UInt32_Write(&msgLength, msgBuffer);
+        status = SOPC_UInt32_Write(&msgLength, msgBuffers);
     }
     if(status == STATUS_OK){
-        status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
-        msgBuffer->currentChunkSize = msgLength;
+        status = Buffer_SetPosition(buffer, originPosition);
+        msgBuffers->nbChunks = originNbChunk;
+        msgBuffers->currentChunkSize = msgLength;
     }
     return status;
 }
 
-SOPC_StatusCode Set_Message_Chunk_Type(SOPC_MsgBuffer*    msgBuffer,
+SOPC_StatusCode Set_Message_SymmetricSecuTokenId(SOPC_MsgBuffers* msgBuffers,
+                                                 uint32_t         nbChunk, // Number of chunk in which length must be set
+                                                 uint32_t         tokenId)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t originPosition = 0;
+    uint32_t originNbChunk = 0;
+    Buffer* buffer = NULL;
+    if(msgBuffers != NULL){
+        originPosition = msgBuffers->buffers->position;
+        originNbChunk = msgBuffers->nbChunks;
+        msgBuffers->nbChunks = nbChunk; // Mimic nbChunk is the current chunk to write into using SOPC_<Type>_Write functions
+        buffer = MsgBuffers_GetCurrentChunk(msgBuffers);
+        if(NULL != buffer){
+            status = Buffer_SetPosition(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH);
+        }
+    }
+    if(status == STATUS_OK){
+        status = SOPC_UInt32_Write(&tokenId, msgBuffers);
+    }
+    if(status == STATUS_OK){
+        status = Buffer_SetPosition(buffer, originPosition);
+        msgBuffers->nbChunks = originNbChunk;
+    }
+    return status;
+}
+
+SOPC_StatusCode Set_Message_Chunk_Type(SOPC_MsgBuffers*   msgBuffers,
+                                       uint32_t           nbChunk, // Number of chunk in which length must be set
                                        SOPC_MsgFinalChunk chunkType){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    Buffer* buffer = NULL;
     uint32_t originPosition = 0;
 
-    if(msgBuffer != NULL){
-        originPosition = msgBuffer->buffers->position;
-        status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_ISFINAL_POSITION);
+    if(msgBuffers != NULL){
+        buffer = &msgBuffers->buffers[nbChunk-1];
+        originPosition = buffer->position;
+        status = Buffer_SetPosition(buffer, UA_HEADER_ISFINAL_POSITION);
     }
 
     SOPC_Byte chunkTypeByte;
@@ -776,41 +834,55 @@ SOPC_StatusCode Set_Message_Chunk_Type(SOPC_MsgBuffer*    msgBuffer,
     }
 
     if(status == STATUS_OK){
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, &chunkTypeByte, 1);
+        status = TCP_UA_WriteMsgBuffer(buffer, &chunkTypeByte, 1);
     }
 
     if(status == STATUS_OK){
-        status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
+        status = Buffer_SetPosition(buffer, originPosition);
     }
 
     return status;
 }
 
-SOPC_StatusCode Set_Sequence_Number(SOPC_MsgBuffer* msgBuffer){
+SOPC_StatusCode Set_Sequence_NumberHeader(SOPC_MsgBuffers* msgBuffers,
+                                          uint32_t         nbChunk, // Number of chunk in which length must be set
+                                          uint32_t         requestId)
+{
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SC_Connection* scConnection = NULL;
+
     uint32_t originPosition = 0;
+    uint32_t originNbChunk = 0;
+    Buffer* buffer = NULL;
+    if(msgBuffers != NULL && msgBuffers->flushData != NULL){
+        scConnection = (SC_Connection*) msgBuffers->flushData;
+        if(scConnection-> lastSeqNumSent > UINT32_MAX - 1024){ // Part 6 §6.7.2 v1.03
+            scConnection->lastSeqNumSent = 1;
+        }else{
+            scConnection->lastSeqNumSent = scConnection-> lastSeqNumSent + 1;
+        }
 
-    if(msgBuffer != NULL && msgBuffer->flushData != NULL){
-       status = STATUS_OK;
-       scConnection = (SC_Connection*) msgBuffer->flushData;
-       if(scConnection-> lastSeqNumSent > UINT32_MAX - 1024){ // Part 6 §6.7.2 v1.03
-           scConnection->lastSeqNumSent = 1;
-       }else{
-           scConnection->lastSeqNumSent = scConnection-> lastSeqNumSent + 1;
-       }
-       originPosition = msgBuffer->buffers->position;
-       status = Buffer_SetPosition(msgBuffer->buffers, msgBuffer->sequenceNumberPosition);
-       if(status == STATUS_OK){
-           status = SOPC_UInt32_Write(&scConnection->lastSeqNumSent, msgBuffer);
-       }
+        originPosition = msgBuffers->buffers->position;
+        originNbChunk = msgBuffers->nbChunks;
 
-       if(status == STATUS_OK){
-           status = Buffer_SetPosition(msgBuffer->buffers, originPosition);
-       }
+        msgBuffers->nbChunks = nbChunk; // Mimic nbChunk is the current chunk to write into using SOPC_<Type>_Write functions
+        buffer = MsgBuffers_GetCurrentChunk(msgBuffers);
 
+        if(NULL != buffer){
+            // Sequence number position is the same in any chunk (same header for all chunks of same msg)
+            status = Buffer_SetPosition(buffer, msgBuffers->sequenceNumberPosition);
+        }
     }
-
+    if(status == STATUS_OK){
+        status = SOPC_UInt32_Write(&scConnection->lastSeqNumSent, msgBuffers);
+    }
+    if(status == STATUS_OK){
+            status = SOPC_UInt32_Write(&requestId, msgBuffers);
+        }
+    if(status == STATUS_OK){
+        status = Buffer_SetPosition(buffer, originPosition);
+        msgBuffers->nbChunks = originNbChunk;
+    }
     return status;
 }
 
@@ -1079,46 +1151,169 @@ SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
     return status;
 }
 
-void SOPC_OperationEnd_FlushSecureMsg_CB(void*           arg,
-                                         SOPC_StatusCode sendingStatus){
-    SOPC_OperationEnd_FlushSecureMsg_Data* data = (SOPC_OperationEnd_FlushSecureMsg_Data*) arg;
-    if(NULL != data){
-        if(sendingStatus == STATUS_OK){
-            if(data->chunkType == SOPC_Msg_Chunk_Intermediate){
-                // Reset buffer for next sending
-                sendingStatus = MsgBuffer_ResetNextChunk(data->msgBuffer,
-                                                         data->msgBuffer->sequenceNumberPosition +
-                                                          UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
-            }else{
-                // Reset buffer for next sending
-                MsgBuffer_Reset(data->msgBuffer);
+void SOPC_OperationEnd_AbortMsg_CB(void*           arg,
+                                   SOPC_StatusCode sendingStatus)
+{
+    assert(NULL != arg);
+    (void) sendingStatus;
+    SOPC_OperationEnd_FlushSecureMsgData* flushSecureMsgData = (SOPC_OperationEnd_FlushSecureMsgData*) arg;
+    assert(NULL != arg);
+    // In any case (success or failure of abort msg sending), call the end operation callback to indicate error that cause abort
+    flushSecureMsgData->callback(flushSecureMsgData->callbackData,
+                                 flushSecureMsgData->errorStatus);
+    MsgBuffers_Delete(&flushSecureMsgData->msgBuffers);
+}
+
+// Always delete message buffers when abort sent or failed to be send
+SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffers*                      msgBuffers,
+                            uint32_t                              tokenId,
+                            uint32_t                              requestId,
+                            SOPC_StatusCode                       errorCode,
+                            SOPC_String*                          reason,
+                            SOPC_OperationEnd_FlushSecureMsgData* flushSecureMsgData)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(msgBuffers != NULL){
+        if(msgBuffers->nbChunks > 1 && reason != NULL){
+            // At least one chunk has already been sent => abort message necessary
+            // Set only one chunk for abort message
+            msgBuffers->nbChunks = 1;
+            // Set buffer position to body start (reuse header part already filled)
+            status = Buffer_SetPosition(msgBuffers->buffers,
+                                        (msgBuffers->sequenceNumberPosition +
+                                         UA_SECURE_MESSAGE_SEQUENCE_LENGTH));
+            if(STATUS_OK == status){
+                status = SOPC_StatusCode_Write(&errorCode, msgBuffers);
+            }
+            if(STATUS_OK == status){
+                status = SOPC_String_Write(reason, msgBuffers);
+            }
+            if(STATUS_OK == status){
+                flushSecureMsgData->errorStatus = errorCode; // To call the end operation function with error code
+                msgBuffers->isFinal = SOPC_Msg_Chunk_Abort;
+                status = SC_FlushSecureMsgBuffers(msgBuffers,
+                                                  0,
+                                                  tokenId,
+                                                  requestId,
+                                                  SOPC_OperationEnd_AbortMsg_CB,
+                                                  (void*) flushSecureMsgData);
+            }
+            if(STATUS_OK != status){
+                MsgBuffers_Delete(&msgBuffers);
             }
         }else{
-            SC_Connection* scConnection = (SC_Connection*) data->msgBuffer->flushData;
-            if(NULL != scConnection){
-                // Restore last sequence number sent
-                scConnection->lastSeqNumSent = data->precSeqNum;
-            }
+            // If no chunk sent, no need to send an abort message
+            status = STATUS_OK;
+            // Reset buffer for next sending
+            MsgBuffers_Delete(&msgBuffers);
         }
+    }
+    return status;
+}
 
-        if(NULL != data->callback){
-            data->callback(data->callbackData, sendingStatus);
+void SOPC_Action_AbortMsg(void* arg){
+    assert(NULL != arg);
+    SOPC_String reason;
+    SOPC_String_Initialize(&reason);
+    // TODO: manage encoding chunk number and request Id ? in reason without using a VLA (for sprintf)
+    char* genericReason = "Error encoding an intermediate chunk sending a message";
+    if(genericReason != NULL){
+        if(STATUS_OK != SOPC_String_AttachFromCstring(&reason, genericReason)){
+            SOPC_String_Clear(&reason);
         }
+    }
 
+    SOPC_OperationEnd_FlushSecureMsgData* flushSecureMsgData = (SOPC_OperationEnd_FlushSecureMsgData*) arg;
+    SC_AbortMsg(flushSecureMsgData->msgBuffers,
+                flushSecureMsgData->tokenId,
+                flushSecureMsgData->requestId,
+                flushSecureMsgData->errorStatus,
+                &reason,
+                flushSecureMsgData);
+}
+
+void SOPC_OperationEnd_FlushSecureMsg_CB(void*           arg,
+                                         SOPC_StatusCode sendingStatus);
+
+void SOPC_Action_FlushSecureMsgNextChunk(void* arg){
+    assert(NULL != arg);
+    SOPC_OperationEnd_FlushSecureMsgData* data = (SOPC_OperationEnd_FlushSecureMsgData*) arg;
+    SOPC_StatusCode status = STATUS_NOK;
+    status = SC_FlushSecureMsgBuffers(data->msgBuffers,
+                                      data->nextFlushChunkIdx,
+                                      data->tokenId,
+                                      data->requestId,
+                                      data->callback,
+                                      data->callbackData);
+    if(STATUS_OK != status){
+        // In case of failure, reuse the flush callback:
+        //  only issue to do that is that we cannot differentiate sign/encrypt failure of socket write one
+        SOPC_OperationEnd_FlushSecureMsg_CB(arg,
+                                            status);
+    }else{
         free(data);
     }
 }
 
+void SOPC_OperationEnd_FlushSecureMsg_CB(void*           arg,
+                                         SOPC_StatusCode sendingStatus)
+{
+    assert(NULL != arg);
+    SOPC_OperationEnd_FlushSecureMsgData* data = (SOPC_OperationEnd_FlushSecureMsgData*) arg;
+    if(sendingStatus == STATUS_OK){
+        if(data->nextFlushChunkIdx != 0){
+            assert(data->nextFlushChunkIdx + 1 <= data->msgBuffers->nbChunks);
+            // Creation of flush action for next chunk
+            sendingStatus = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                                              SOPC_Action_FlushSecureMsgNextChunk,
+                                                              arg,
+                                                              "Flush secure message for next chunk");
+            // In case sending status is Bad here, we will not try to send an abort message
+            // since it will use the same action queue manager which already failed
+        }
+    }else{
+        SC_Connection* scConnection = (SC_Connection*) data->msgBuffers->flushData;
+        if(NULL != scConnection){
+            // Restore last sequence number sent
+            scConnection->lastSeqNumSent = data->precSeqNum;
+        }
+        if(data->msgBuffers->nbChunks && data->nextFlushChunkIdx > 1){
+            // A chunk was already sent, abort message is necessary
+            sendingStatus = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,
+                                                              SOPC_Action_AbortMsg,
+                                                              arg,
+                                                              "Abort chunk message due to failure when sending a chunk (> first chunk)");
+        }
+    }
+
+    if(data->nextFlushChunkIdx == 0 ||
+       STATUS_OK != sendingStatus){
+        // Only when new action is not created or failed to be added:
+        //  then we have to call end operation callback, free the msg buffers and callback data
+
+        if(NULL != data->callback){
+            data->callback(data->callbackData, sendingStatus);
+        }
+        MsgBuffers_Delete(&data->msgBuffers);
+
+
+        free(data);
+    }
+
+}
+
 // Caution: in case of failure returned, caller must call SC_AbortMsg to
 // manage abort with multi-chunk + reset the message buffer
-SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
-                                        SOPC_MsgFinalChunk            chunkType,
-                                        SOPC_Socket_Transaction_Event transactionEvent,
-                                        uint32_t                      transactionId,
-                                        SOPC_Socket_EndOperation_CB*  callback,
-                                        void*                         callbackData){
+SOPC_StatusCode SC_FlushSecureMsgBuffers(SOPC_MsgBuffers*             msgBuffers,
+                                         uint32_t                     flushChunkIdx,
+                                         uint32_t                     tokenId,
+                                         uint32_t                     requestId,
+                                         SOPC_Socket_EndOperation_CB* callback,
+                                         void*                        callbackData){
     SC_Connection* scConnection = NULL;
-    SOPC_OperationEnd_FlushSecureMsg_Data* data = NULL;
+    SOPC_Socket_Transaction_Event transactionEvent = SOCKET_TRANSACTION_START; // For 1 chunk
+    SOPC_MsgFinalChunk chunkType = SOPC_Msg_Chunk_Invalid;
+    SOPC_OperationEnd_FlushSecureMsgData* data = NULL;
     SOPC_StatusCode status = STATUS_NOK;
     uint8_t toEncrypt = 1; // True
     uint8_t toSign = 1; // True
@@ -1130,25 +1325,52 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
     uint32_t encryptedLength = 0;
     uint32_t precSeqNum = 0;
 
+    uint32_t nextFlushChunkIdx = 0;
 
-    if(msgBuffer == NULL || msgBuffer->flushData == NULL ||
-       (chunkType != SOPC_Msg_Chunk_Abort &&
-        chunkType != SOPC_Msg_Chunk_Final &&
-        chunkType != SOPC_Msg_Chunk_Intermediate) ||
-       (chunkType != SOPC_Msg_Chunk_Final && msgBuffer->secureType != SOPC_SecureMessage)) // Multi chunk only possible in secure message
+
+    if(msgBuffers == NULL || msgBuffers->flushData == NULL || msgBuffers->nbChunks <= flushChunkIdx ||
+       (msgBuffers->secureType != SOPC_SecureMessage && msgBuffers->nbChunks > 1)) // Multi chunk only possible in secure message
     {
         status = STATUS_INVALID_PARAMETERS;
     }else{
         status = STATUS_OK;
-        scConnection = (SC_Connection*) msgBuffer->flushData;
+
+        // Determine chunk type and transaction event for socket layer
+        if(msgBuffers->nbChunks > 1){
+            // Abort message is only one chunk
+            assert(chunkType != SOPC_Msg_Chunk_Abort);
+            // Multi-chunk message
+            if(flushChunkIdx + 1 == msgBuffers->nbChunks){
+                // Last chunk
+                chunkType = SOPC_Msg_Chunk_Final;
+                transactionEvent = SOCKET_TRANSACTION_END;
+                nextFlushChunkIdx = 0; // 0 means no next chunk since it is last one
+            }else{
+                if(flushChunkIdx == 0){
+                    transactionEvent = SOCKET_TRANSACTION_START; // First chunk
+                }
+                // Intermediate
+                chunkType = SOPC_Msg_Chunk_Intermediate;
+                nextFlushChunkIdx = flushChunkIdx + 1;
+            }
+        }else{
+            // One chunk only message
+            if(chunkType != SOPC_Msg_Chunk_Abort){
+                chunkType = SOPC_Msg_Chunk_Final;
+            }
+            transactionEvent = SOCKET_TRANSACTION_START_END;
+            nextFlushChunkIdx = 0; // 0 means no next chunk
+        }
+
+        scConnection = (SC_Connection*) msgBuffers->flushData;
         precSeqNum = scConnection->lastSeqNumSent;
 
-        toEncrypt = IsMsgEncrypted(scConnection->currentSecuMode, msgBuffer);
+        toEncrypt = IsMsgEncrypted(scConnection->currentSecuMode, msgBuffers);
 
         toSign = IsMsgSigned(scConnection->currentSecuMode);
 
         // Determine if the asymmetric algorithms must be used
-        if(msgBuffer->secureType == SOPC_OpenSecureChannel){
+        if(msgBuffers->secureType == SOPC_OpenSecureChannel){
             symmetricAlgo = FALSE;
         }
 
@@ -1157,7 +1379,7 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
             // No padding fields
         }else{
             status = EncodePadding(scConnection,
-                                   msgBuffer,
+                                   msgBuffers,
                                    symmetricAlgo,
                                    &hasPadding,
                                    &paddingLength,
@@ -1167,14 +1389,16 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
 
         //// Set the chunk type for the given message
         if(status == STATUS_OK){
-            status = Set_Message_Chunk_Type(msgBuffer, chunkType);
+            status = Set_Message_Chunk_Type(msgBuffers,
+                                            flushChunkIdx+1,
+                                            chunkType);
         }
 
         //// Encode message length:
         // Compute final encrypted message length:
         if(status == STATUS_OK){
             const uint32_t plainDataToEncryptLength = // Already encoded message from encryption start + signature size
-             msgBuffer->buffers->length - msgBuffer->sequenceNumberPosition + signatureSize;
+             msgBuffers->buffers->length - msgBuffers->sequenceNumberPosition + signatureSize;
             if(toEncrypt == FALSE){
                 // No encryption same data length
                 encryptedLength = plainDataToEncryptLength;
@@ -1185,13 +1409,23 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
         }
         // Set final message length
         if(status == STATUS_OK){
-            status = Set_Message_Length(scConnection->sendingBuffer,
-                                        msgBuffer->sequenceNumberPosition + encryptedLength);
+            status = Set_Message_Length(msgBuffers,
+                                        flushChunkIdx+1,
+                                        msgBuffers->sequenceNumberPosition + encryptedLength);
+        }
+
+        if(status == STATUS_OK && msgBuffers->secureType == SOPC_SecureMessage){
+            // Only if it is a secure MSG (=> not OPN or CLO)
+            status = Set_Message_SymmetricSecuTokenId(msgBuffers,
+                                                      flushChunkIdx+1,
+                                                      tokenId);
         }
 
         //// Encode sequence number
         if(status == STATUS_OK){
-            status = Set_Sequence_Number(msgBuffer);
+            status = Set_Sequence_NumberHeader(msgBuffers,
+                                               flushChunkIdx+1,
+                                               requestId);
         }
 
         //// Encode signature if message signed
@@ -1199,28 +1433,18 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
             // No signature field
         }else if(status == STATUS_OK){
             status = EncodeSignature(scConnection,
-                                     msgBuffer,
+                                     msgBuffers,
                                      symmetricAlgo,
                                      signatureSize);
-
-// TODO: delete, for DEBUG only
-//            if(symmetricAlgo != FALSE){
-//                status = CryptoProvider_SymmetricVerify(scConnection->currentCryptoProvider,
-//                                                        scConnection->sendingBuffer->buffers->data,
-//                                                        scConnection->sendingBuffer->buffers->length - signatureSize,
-//                                                        scConnection->currentSecuKeySets.senderKeySet->signKey,
-//                                                        &scConnection->sendingBuffer->buffers->data[scConnection->sendingBuffer->buffers->length - signatureSize],
-//                                                        signatureSize);
-//            }
         }
 
         //// Check sender certificate size is not bigger than maximum size to be sent
         if(status == STATUS_OK &&
-           msgBuffer->secureType == SOPC_OpenSecureChannel &&
+           msgBuffers->secureType == SOPC_OpenSecureChannel &&
            toSign != FALSE)
         {
             status = CheckMaxSenderCertificateSize(&scConnection->runningAppCertificate,
-                                                   msgBuffer->buffers->max_size,
+                                                   msgBuffers->buffers->max_size,
                                                    &scConnection->currentSecuPolicy,
                                                    hasPadding,
                                                    paddingLength,
@@ -1231,12 +1455,13 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
         if(status == STATUS_OK){
             if(toEncrypt == FALSE){
                 // No encryption necessary but we need to attach buffer as transport buffer (done during encryption otherwise)
-                status = MsgBuffer_CopyBuffer(scConnection->transportConnection->outputMsgBuffer,
-                                              scConnection->sendingBuffer);
+                status = MsgBuffers_CopyBufferIdx(scConnection->transportConnection->outputMsgBuffer,
+                                                  msgBuffers,
+                                                  flushChunkIdx);
             }else{
                 // TODO: use detach / attach to control references on the transport msg buffer ?
                 status = EncryptMsg(scConnection,
-                                    msgBuffer,
+                                    msgBuffers,
                                     symmetricAlgo,
                                     encryptedLength,
                                     scConnection->transportConnection->outputMsgBuffer);
@@ -1244,88 +1469,33 @@ SOPC_StatusCode SC_FlushSecureMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
         }
 
         if(status == STATUS_OK){
-            data = malloc(sizeof(SOPC_OperationEnd_FlushSecureMsg_Data));
+            data = malloc(sizeof(SOPC_OperationEnd_FlushSecureMsgData));
             if(NULL != data){
-                data->msgBuffer = msgBuffer;
-                data->chunkType = chunkType;
+                data->msgBuffers = msgBuffers;
+                data->nextFlushChunkIdx = nextFlushChunkIdx;
+                data->tokenId = tokenId;
+                data->requestId = requestId;
                 data->precSeqNum = precSeqNum;
                 data->callback = callback;
                 data->callbackData = callbackData;
+                data->errorStatus = STATUS_OK;
 
                 status = TCP_UA_FlushMsgBuffer(scConnection->transportConnection->outputMsgBuffer,
                                                transactionEvent,
-                                               transactionId,
+                                               requestId,
                                                SOPC_OperationEnd_FlushSecureMsg_CB,
                                                (void*) data);
+
+                if(STATUS_OK != status){
+                    free(data);
+                }
             }else{
                 status = STATUS_NOK;
             }
         }
-
-        if(STATUS_OK != status){
-            if(NULL != data){
-                SOPC_OperationEnd_FlushSecureMsg_CB(data, status);
-            }
-        }
     }
     return status;
 }
-
-void SOPC_OperationEnd_AbortMsg_CB(void* arg,
-                                   SOPC_StatusCode sendingStatus)
-{
-    SOPC_MsgBuffer* msgBuffer = (SOPC_MsgBuffer*) arg;
-    assert(NULL != msgBuffer);
-    if(STATUS_OK != sendingStatus){
-        MsgBuffer_Reset(msgBuffer);
-    }
-    // In any case (success or failure of abort msg sending),
-    // release the request/response token
-    SC_CreateAction_ReleaseToken((SC_Connection*) msgBuffer->flushData);
-}
-
-SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffer* msgBuffer,
-                            uint32_t        requestId,
-                            SOPC_StatusCode errorCode,
-                            SOPC_String*    reason,
-                            uint8_t*        willReleaseMsgQueueToken)
-{
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(msgBuffer != NULL && willReleaseMsgQueueToken != NULL){
-        *willReleaseMsgQueueToken = FALSE;
-        if(msgBuffer->nbChunks > 1 && reason != NULL){
-            // At least one chunk has already been sent => abort message necessary
-            // Set buffer position to body start (in case data was already written in it)
-            status = Buffer_SetPosition(msgBuffer->buffers,
-                                        (msgBuffer->sequenceNumberPosition +
-                                         UA_SECURE_MESSAGE_SEQUENCE_LENGTH));
-            if(STATUS_OK == status){
-                status = SOPC_StatusCode_Write(&errorCode, msgBuffer);
-            }
-            if(STATUS_OK == status){
-                status = SOPC_String_Write(reason, msgBuffer);
-            }
-            if(STATUS_OK == status){
-                status = SC_FlushSecureMsgBuffer(msgBuffer, SOPC_Msg_Chunk_Abort,
-                                                 SOCKET_TRANSACTION_END_ERROR,
-                                                 requestId,
-                                                 SOPC_OperationEnd_AbortMsg_CB,
-                                                 (void*) msgBuffer);
-            }
-            if(STATUS_OK != status){
-                *willReleaseMsgQueueToken = 1; // Token will be released by SOPC_OperationEnd_AbortMsg_CB
-                MsgBuffer_Reset(msgBuffer);
-            }
-        }else{
-            // If no chunk sent, no need to send an abort message
-            status = STATUS_OK;
-            // Reset buffer for next sending
-            MsgBuffer_Reset(msgBuffer);
-        }
-    }
-    return status;
-}
-
 
 SOPC_StatusCode SC_DecodeSecureMsgSCid(SC_Connection*  scConnection,
                                        SOPC_MsgBuffer* transportBuffer)
@@ -1933,34 +2103,35 @@ SOPC_StatusCode SC_CheckReceivedProtocolVersion(SC_Connection* scConnection,
     return status;
 }
 
-SOPC_StatusCode SC_EncodeSecureMessage(SC_Connection*       scConnection,
+SOPC_StatusCode SC_EncodeSecureMessage(SOPC_MsgBuffers*     msgBuffers,
                                        SOPC_EncodeableType* encType,
                                        void*                value,
+                                       uint32_t             secureChannelId,
+                                       uint32_t             tokenId,
                                        uint32_t             requestId)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SOPC_MsgBuffer* msgBuffer = scConnection->sendingBuffer;
-    if(scConnection != NULL &&
+    if(msgBuffers != NULL &&
        encType != NULL &&
        value != NULL)
     {
         // Encode secure message header:
-        status = SC_EncodeSecureMsgHeader(msgBuffer,
+        status = SC_EncodeSecureMsgHeader(msgBuffers,
                                           SOPC_SecureMessage,
-                                          scConnection->currentSecuToken.channelId);
+                                          secureChannelId);
     }
 
     if(STATUS_OK == status){
         // Encode symmetric security header
-        status = SOPC_UInt32_Write(&scConnection->currentSecuToken.tokenId, msgBuffer);
+        status = SOPC_UInt32_Write(&tokenId, msgBuffers);
     }
 
     if(STATUS_OK == status){
-        status = SC_EncodeSequenceHeader(msgBuffer, requestId);
+        status = SC_EncodeSequenceHeader(msgBuffers, requestId);
     }
 
     if(STATUS_OK == status){
-        status = SC_EncodeMsgBody(msgBuffer, encType, value);
+        status = SC_EncodeMsgBody(msgBuffers, encType, value);
     }
 
     return status;

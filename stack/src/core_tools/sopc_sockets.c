@@ -814,7 +814,6 @@ void SOPC_Socket_TreatWriteActions(SOPC_ActionQueue* queue){
                                                                                           param->transactionId);
                 if(STATUS_OK != transactionStatus){
                     // ignore write operation
-                    free(param->data);
                     free(param);
                 }else{
                     sentBytes = 0;
@@ -824,7 +823,6 @@ void SOPC_Socket_TreatWriteActions(SOPC_ActionQueue* queue){
                             // Ignore status ? Or call error (but should be same callback...)
                             param->endWriteCb(param->endWriteCbData, status);
                         }
-                        free(param->data);
                         free(param);
                     }else if(status == OpcUa_BadWouldBlock){
                         writeBlocked = 1;
@@ -909,14 +907,7 @@ SOPC_StatusCode SOPC_CreateAction_SocketWrite(SOPC_Socket*                  sock
         }
         // Copy buffer to be written
         if(STATUS_OK == status){
-            param->data = malloc(sizeof(uint8_t) * count);
-            if(param->data == NULL){
-                status = STATUS_NOK;
-            }else{
-                if(param->data != memcpy(param->data, data, count)){
-                    status = STATUS_NOK;
-                }
-            }
+            param->data = data;
         }
         if(STATUS_OK == status){
             status = SOPC_ActionQueueManager_AddAction(stackActionQueueMgr,

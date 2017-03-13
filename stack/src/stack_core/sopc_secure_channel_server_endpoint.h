@@ -94,13 +94,18 @@ SOPC_StatusCode SC_ServerEndpoint_Open(SC_ServerEndpoint*   endpoint,
                                        SC_EndpointEvent_CB* callback,
                                        void*                callbackData);
 
-SOPC_StatusCode SC_CreateAction_Send_Response(SC_ServerEndpoint*          sEndpoint,
-                                             SC_Connection*               scConnection,
-                                             uint32_t                     requestId,
-                                             SOPC_EncodeableType*         responseType,
-                                             void*                        response,
-                                             SOPC_Socket_EndOperation_CB* endSendCallback,
-                                             void*                        endSendCallbackData);
+SOPC_StatusCode SC_CreateAction_Send_Response(SC_Connection*               scConnection,
+                                              uint32_t                     requestId,
+                                              SOPC_EncodeableType*         responseType,
+                                              SOPC_MsgBuffers*             respBuffers,
+                                              SOPC_Socket_EndOperation_CB* endSendCallback,
+                                              void*                        endSendCallbackData);
+
+SOPC_StatusCode SC_ServerEndpoint_EncodeResponse(uint32_t             secureChannelId,
+                                                 uint32_t             requestId,
+                                                 SOPC_EncodeableType* responseType,
+                                                 void*                response,
+                                                 SOPC_MsgBuffers*     msgBuffers);
 
 SOPC_StatusCode SC_ServerEndpoint_Close(SC_ServerEndpoint* endpoint);
 

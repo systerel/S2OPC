@@ -298,6 +298,16 @@ SOPC_StatusCode SOPC_Channel_AsyncDelete(SOPC_Channel channel);
  */
 SOPC_StatusCode SOPC_Channel_Delete(SOPC_Channel* channel);
 
+
+/**
+ *  \brief CAUTION: only for wrapper needs function. Retrieve the connection used by the channel.
+ *
+ *  \param channel     The channel
+ *  \return            Connection or NULL pointer
+ *
+ */
+void* SOPC_Channel_GetConnection(SOPC_Channel channel);
+
 #endif /* CLIENT_API */
 
 #endif /* SOPC_CHANNEL_H_ */

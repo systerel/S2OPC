@@ -44,6 +44,8 @@
 
 /** Length of an UA secure message chunk header */
 #define UA_SECURE_MESSAGE_HEADER_LENGTH 12
+/** Length of an UA symmetric security header chunk header */
+#define UA_SYMMETRIC_SECURITY_HEADER_LENGTH 4
 /** Length of an UA secure message chunk sequence header */
 #define UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
 
@@ -97,7 +99,7 @@ typedef struct SOPC_MsgBuffer {
     TCP_UA_MsgType         type;                   /**< Type of the TCP UA Message stored */
     SOPC_SecureMessageType secureType;             /**< Type of the UA Secure Message stored (only valid if type = SecureMessage) */
     uint32_t               currentChunkSize;       /**< MessageSize of the current message chunk (current is chunk corresponding to nbChunks) */
-    uint32_t               nbChunks;               /**< Current number of message chunks received or sent for the current message */
+    uint32_t               nbChunks;               /**< Current number of message chunks for the current message */
     uint32_t               maxChunks;              /**< Maximum number of message chunks allowed (by UA connection configuration) */
     uint32_t               sequenceNumberPosition; /**< Position of sequence number (data to encrypt start point) */
     SOPC_MsgFinalChunk     isFinal;                /**< IsFinal value of the current message chunk */
@@ -185,6 +187,7 @@ typedef struct SOPC_MsgBuffer SOPC_MsgBuffers;
  *
  *  \param maxChunks         Maximum number of chunks for an UA Message (determined by connection configuration).
  *  \param bufferSize        Size of the buffers to allocate
+ *  \param flushData         Data to store that could be used to flush a message chunk (optional)
  *  \param nsTable           Namespace table to be used for encoding / decoding UA messages (optional)
  *  \param encTypesTable     EncodeableType table to be used for encoding / decoding UA messages (optional)
  *
@@ -192,6 +195,7 @@ typedef struct SOPC_MsgBuffer SOPC_MsgBuffers;
  */
 SOPC_MsgBuffers* MsgBuffers_Create(uint32_t              maxChunks,
                                    uint32_t              bufferSize,
+                                   void*                 flushData,
                                    SOPC_NamespaceTable*  nsTable,
                                    SOPC_EncodeableType** encTypesTable);
 
@@ -228,6 +232,16 @@ Buffer* MsgBuffers_GetCurrentChunk(SOPC_MsgBuffers* mBuffer);
 Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
                              uint32_t*        bufferIdx);
 
+/**
+ *  \brief Copy content of current chunk until message body position (headers content) into next chunk, then
+ *         set the next chunk buffer of UA Message buffers as current one and returns it.
+ *
+ *  \param mBuffer       Pointer to the UA Message buffers
+ *  \param bodyPosition  Position of the message body first byte, all headers to copy are included before this position
+ *  \return              Pointer to the next chunk buffer which became current, NULL if argument was NULL or incoherent
+ */
+Buffer* MsgBuffers_NextChunkWithHeadersCopy(SOPC_MsgBuffers* mBuffers,
+                                            uint32_t         bodyPosition);
 
 /**
  *  \brief Set the current chunk buffer as first chunk and reset the next buffers
@@ -236,6 +250,19 @@ Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
  *  \return           GOOD if operation succeeded, BAD otherwise (NULL pointers, nb chunks < 2)
  */
 SOPC_StatusCode MsgBuffers_SetCurrentChunkFirst(SOPC_MsgBuffers* mBuffer);
+
+/**
+ *  \brief Copy source UA Message buffers content for given indexed buffer into destination UA Message buffer
+ *         Note: internal properties of the message buffers are also copied (including nbChunks)
+ *
+ *  \param destMsgBuffer    Pointer to destination UA Message buffer
+ *  \param srcMsgBuffer     Pointer to source UA Message buffer
+ *  \param bufferIdx        Index of the buffer to be copied into (< srcMsgBuffers->nbChunks)
+ *  \return                 GOOD if operation succeeded, BAD otherwise
+ */
+SOPC_StatusCode MsgBuffers_CopyBufferIdx(SOPC_MsgBuffer*  destMsgBuffer,
+                                         SOPC_MsgBuffers* srcMsgBuffers,
+                                         uint32_t         bufferIdx);
 
 /**
  *  \brief Copy source UA Message buffer content into destination UA Message buffers in buffer corresponding to index

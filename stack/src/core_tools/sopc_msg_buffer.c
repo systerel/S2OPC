@@ -99,14 +99,13 @@ SOPC_StatusCode MsgBuffer_ResetNextChunk(SOPC_MsgBuffer* mBuffer,
 }
 
 
-SOPC_StatusCode MsgBuffer_SetSecureMsgType(SOPC_MsgBuffer*        mBuffer,
+SOPC_StatusCode MsgBuffer_SetSecureMsgType(SOPC_MsgBuffers*        mBuffers,
                                            SOPC_SecureMessageType sType){
     SOPC_StatusCode status = STATUS_INVALID_STATE;
-    if(mBuffer != NULL &&
-        (mBuffer->type == TCP_UA_Message_Unknown || mBuffer->type == TCP_UA_Message_SecureMessage)){
-        assert(mBuffer->nbBuffers == 1);
-        mBuffer->secureType = sType;
-        mBuffer->type = TCP_UA_Message_SecureMessage;
+    if(mBuffers != NULL &&
+        (mBuffers->type == TCP_UA_Message_Unknown || mBuffers->type == TCP_UA_Message_SecureMessage)){
+        mBuffers->secureType = sType;
+        mBuffers->type = TCP_UA_Message_SecureMessage;
         status = STATUS_OK;
     }
     return status;
@@ -143,6 +142,7 @@ SOPC_StatusCode MsgBuffer_CopyBuffer(SOPC_MsgBuffer* destMsgBuffer,
 
 SOPC_MsgBuffers* MsgBuffers_Create(uint32_t              maxChunks,
                                    uint32_t              bufferSize,
+                                   void*                 flushData,
                                    SOPC_NamespaceTable*  nsTable,
                                    SOPC_EncodeableType** encTypesTable)
 {
@@ -184,7 +184,7 @@ SOPC_MsgBuffers* MsgBuffers_Create(uint32_t              maxChunks,
                 mBuffers->sequenceNumberPosition = 0;
                 mBuffers->isFinal = SOPC_Msg_Chunk_Unknown;
                 mBuffers->msgRequestId = 0;
-                mBuffers->flushData = NULL;
+                mBuffers->flushData = flushData;
                 Namespace_Initialize(&mBuffers->nsTable);
                 Namespace_AttachTable(&mBuffers->nsTable, nsTable);
                 mBuffers->encTypesTable = encTypesTable;
@@ -250,6 +250,30 @@ Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
     return buf;
 }
 
+Buffer* MsgBuffers_NextChunkWithHeadersCopy(SOPC_MsgBuffers* mBuffers,
+                                            uint32_t         bodyPosition)
+{
+    SOPC_StatusCode status = STATUS_NOK;
+    Buffer* buf = NULL;
+    if(mBuffers != NULL){
+        assert(mBuffers->nbBuffers == 1);
+        mBuffers->currentChunkSize = bodyPosition;
+        if(mBuffers->maxChunks == 0 || mBuffers->nbChunks < mBuffers->maxChunks)
+        {
+            status = Buffer_CopyWithLength(&mBuffers->buffers[mBuffers->nbChunks],
+                                           &mBuffers->buffers[mBuffers->nbChunks-1],
+                                           bodyPosition);
+            mBuffers->nbChunks = mBuffers->nbChunks + 1;
+        }else{
+            status = STATUS_INVALID_STATE;
+        }
+    }
+    if(STATUS_OK == status){
+        buf = MsgBuffers_GetCurrentChunk(mBuffers);
+    }
+    return buf;
+}
+
 SOPC_StatusCode MsgBuffers_SetCurrentChunkFirst(SOPC_MsgBuffers* mBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
@@ -271,6 +295,24 @@ SOPC_StatusCode MsgBuffers_SetCurrentChunkFirst(SOPC_MsgBuffers* mBuffer){
 void MsgBuffers_InternalCopyProperties(SOPC_MsgBuffers* destMsgBuffer,
                                        SOPC_MsgBuffer*  srcMsgBuffer){
     MsgBuffer_InternalCopyProperties((SOPC_MsgBuffer*) destMsgBuffer, srcMsgBuffer);
+}
+
+SOPC_StatusCode MsgBuffers_CopyBufferIdx(SOPC_MsgBuffer*  destMsgBuffer,
+                                         SOPC_MsgBuffers* srcMsgBuffers,
+                                         uint32_t         bufferIdx)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(destMsgBuffer != NULL && srcMsgBuffers != NULL){
+        assert(destMsgBuffer->nbBuffers == 1);
+        assert(srcMsgBuffers->nbChunks >  bufferIdx);
+        status = STATUS_OK;
+        // Copy everything except the flush data which can be used for a different flush level
+        //  and nbBuffers which is set on initialization
+        MsgBuffer_InternalCopyProperties(destMsgBuffer, srcMsgBuffers);
+
+        status = Buffer_Copy(destMsgBuffer->buffers, &srcMsgBuffers->buffers[bufferIdx]);
+    }
+    return status;
 }
 
 SOPC_StatusCode MsgBuffers_CopyBuffer(SOPC_MsgBuffers* destMsgBuffer,

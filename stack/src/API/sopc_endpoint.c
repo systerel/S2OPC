@@ -49,12 +49,21 @@ typedef struct SOPC_IntEndpoint_ConnectionEventData {
 } SOPC_IntEndpoint_ConnectionEventData;
 
 struct SOPC_RequestContext {
-    SOPC_Endpoint        endpoint;
-    SC_Connection*       scConnection;
-    uint32_t             requestId;
-    void*                request;
-    SOPC_EncodeableType* requestType;
-    SOPC_ServiceType*    service;
+    SOPC_Endpoint             endpoint;
+    SC_Connection*            scConnection;
+    uint32_t                  requestId;
+    void*                     request;
+    SOPC_EncodeableType*      requestType;
+    SOPC_ServiceType*         service;
+    OpcUa_MessageSecurityMode secuMode;
+    SOPC_String               secuPolicy;
+    // Configuration to store on connection event for message encoding
+    uint32_t              secureChannelId;
+    uint32_t              maxChunksSendingCfg;
+    uint32_t              maxMsgSizeSendingCfg;
+    uint32_t              bufferSizeSendingCfg;
+    SOPC_NamespaceTable*  nsTableCfg;
+    SOPC_EncodeableType** encTypesTableCfg;
 };
 
 typedef struct SOPC_IntEndpoint_OpenData {
@@ -88,12 +97,18 @@ typedef struct SOPC_IntEndpoint_AsyncResultCondData {
     SOPC_StatusCode status;
 } SOPC_IntEndpoint_AsyncResultCondData;
 
-SOPC_RequestContext* SOPC_RequestContext_Create(SOPC_Endpoint        endpoint,
-                                                SC_Connection*       scConnection,
-                                                uint32_t             requestId,
-                                                void*                pRequest,
-                                                SOPC_EncodeableType* pRequestType,
-                                                SOPC_ServiceType*    service)
+SOPC_RequestContext* SOPC_RequestContext_Create(SOPC_Endpoint         endpoint,
+                                                SC_Connection*        scConnection,
+                                                uint32_t              requestId,
+                                                void*                 pRequest,
+                                                SOPC_EncodeableType*  pRequestType,
+                                                SOPC_ServiceType*     service,
+                                                uint32_t              secureChannelId,
+                                                uint32_t              maxChunksSendingCfg,
+                                                uint32_t              maxMsgSizeSendingCfg,
+                                                uint32_t              bufferSizeSendingCfg,
+                                                SOPC_NamespaceTable*  nsTableCfg,
+                                                SOPC_EncodeableType** encTypesTableCfg)
 {
     SOPC_RequestContext* result = NULL;
     if(scConnection != NULL && service != NULL){
@@ -105,6 +120,16 @@ SOPC_RequestContext* SOPC_RequestContext_Create(SOPC_Endpoint        endpoint,
             result->request = pRequest;
             result->requestType = pRequestType;
             result->service = service;
+            SOPC_String_Initialize(&result->secuPolicy);
+            SOPC_String_Copy(&result->secuPolicy, &scConnection->currentSecuPolicy);
+
+            result->secuMode = scConnection->currentSecuMode;
+            result->secureChannelId = secureChannelId;
+            result->maxChunksSendingCfg = maxChunksSendingCfg;
+            result->maxMsgSizeSendingCfg = maxMsgSizeSendingCfg;
+            result->bufferSizeSendingCfg = bufferSizeSendingCfg;
+            result->nsTableCfg = nsTableCfg;
+            result->encTypesTableCfg = encTypesTableCfg;
         }
     }
     return result;
@@ -112,6 +137,7 @@ SOPC_RequestContext* SOPC_RequestContext_Create(SOPC_Endpoint        endpoint,
 
 void SOPC_RequestContext_Delete(SOPC_RequestContext* reqContext){
     if(reqContext != NULL){
+        SOPC_String_Clear(&reqContext->secuPolicy);
         free(reqContext);
     }
 }
@@ -445,7 +471,13 @@ SOPC_StatusCode SOPC_IntEndpoint_SecureChannelEvent_CB(SC_ServerEndpoint*       
                                                             *requestId,
                                                             reqEncObj,
                                                             reqEncType,
-                                                            service);
+                                                            service,
+                                                            scConnection->secureChannelId,
+                                                            scConnection->transportConnection->maxChunkCountSnd,
+                                                            scConnection->transportConnection->maxMessageSizeSnd,
+                                                            scConnection->transportConnection->sendBufferSize,
+                                                            &sEndpoint->namespaces,
+                                                            sEndpoint->encodeableTypes);
                     if(reqContext != NULL){
                         retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
                                                                       SOPC_Endpoint_Action_BeginInvokeCallback,
@@ -667,10 +699,10 @@ void SOPC_IntEndpoint_SendResponseResultCB(void*           callbackData,
                                                          "Channel async invoke send request result event applicative callback");
 }
 
-SOPC_StatusCode SOPC_Endpoint_AsyncSendResponse(SOPC_Endpoint                endpoint,
-                                                SOPC_EncodeableType*         responseType,
-                                                void*                        response,
-                                                SOPC_RequestContext**        requestContext,
+SOPC_StatusCode SOPC_Endpoint_AsyncSendResponse(SOPC_Endpoint                 endpoint,
+                                                SOPC_EncodeableType*          responseType,
+                                                void*                         response,
+                                                SOPC_RequestContext**         requestContext,
                                                 SOPC_Endpoint_AsyncResult_CB* sendReqResultCb,
                                                 void*                         sendReqResultCbData)
 {
@@ -679,6 +711,7 @@ SOPC_StatusCode SOPC_Endpoint_AsyncSendResponse(SOPC_Endpoint                end
     SC_ServerEndpoint* sEndpoint = (SC_ServerEndpoint*) endpoint;
     SOPC_IntEndpoint_AppEndpointAsyncResultCbData* appSendReqResultCbData = NULL;
     SOPC_Socket_EndOperation_CB* endSendCallback = NULL;
+    SOPC_MsgBuffers* msgBuffers = NULL;
 
     if(sEndpoint != NULL && requestContext != NULL && *requestContext != NULL){
         context = (SOPC_RequestContext*) *requestContext;
@@ -711,15 +744,33 @@ SOPC_StatusCode SOPC_Endpoint_AsyncSendResponse(SOPC_Endpoint                end
             }
         }
 
+
+        msgBuffers = SC_CreateSendSecureBuffers(context->maxChunksSendingCfg,
+                                                context->maxMsgSizeSendingCfg,
+                                                context->bufferSizeSendingCfg,
+                                                context->scConnection,
+                                                context->nsTableCfg,
+                                                context->encTypesTableCfg);
+
+        if(NULL != msgBuffers){
+            status = SC_ServerEndpoint_EncodeResponse(context->secureChannelId,
+                                                      context->requestId,
+                                                      responseType,
+                                                      response,
+                                                      msgBuffers);
+        }else{
+            status = STATUS_NOK;
+        }
+
         if(STATUS_OK == status){
-            status = SC_CreateAction_Send_Response(sEndpoint,
-                                                   context->scConnection,
+            status = SC_CreateAction_Send_Response(context->scConnection,
                                                    context->requestId,
                                                    responseType,
-                                                   response,
+                                                   msgBuffers,
                                                    endSendCallback,
                                                    (void*) appSendReqResultCbData);
         }
+
         // Deallocate request context now send response is sent
         SOPC_RequestContext_Delete(context);
         *requestContext = NULL;
@@ -900,8 +951,8 @@ SOPC_StatusCode SOPC_Endpoint_GetServiceFunction(SOPC_Endpoint        endpoint,
 SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelId(SOPC_RequestContext* context,
                                                         uint32_t*            secureChannelId){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(secureChannelId != NULL && context != NULL && context->scConnection != NULL){
-        *secureChannelId = context->scConnection->secureChannelId;
+    if(secureChannelId != NULL && context != NULL){
+        *secureChannelId = context->secureChannelId;
         status = STATUS_OK;
     }
     return status;
@@ -913,8 +964,8 @@ SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelSecurityPolicy(SOPC_Request
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
      if(securityPolicy != NULL && securityMode != NULL && context != NULL && context->scConnection != NULL)
      {
-         status = SOPC_String_Copy(securityPolicy, &context->scConnection->currentSecuPolicy);
-         *securityMode = context->scConnection->currentSecuMode;
+         status = SOPC_String_AttachFrom(securityPolicy, &context->secuPolicy);
+         *securityMode = context->secuMode;
      }
      return status;
 }

@@ -24,7 +24,7 @@
 
 extern const uint32_t tcpProtocolVersion;
 
-SOPC_StatusCode TCP_UA_WriteMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
+SOPC_StatusCode TCP_UA_WriteMsgBuffer(Buffer*          buffer,
                                       const SOPC_Byte* data_src,
                                       uint32_t         count);
 

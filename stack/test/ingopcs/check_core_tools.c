@@ -270,7 +270,7 @@ START_TEST(test_ua_msg_buffers_create)
 
     // Test creation
     //// Test nominal case
-    SOPC_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
+    SOPC_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, NULL, &table, encTypes);
     ck_assert(msgBuf != NULL);
     ck_assert(msgBuf->nbBuffers == 3);
     ck_assert(msgBuf->buffers[0].data != NULL);
@@ -289,13 +289,13 @@ START_TEST(test_ua_msg_buffers_create)
     MsgBuffers_Delete(&msgBuf);
 
     //// Test buffer creation degraded cases
-    msgBuf = MsgBuffers_Create(0, 10, &table, encTypes);
+    msgBuf = MsgBuffers_Create(0, 10, NULL, &table, encTypes);
     ck_assert(msgBuf == NULL);
-    msgBuf = MsgBuffers_Create(3, 0, &table, encTypes);
+    msgBuf = MsgBuffers_Create(3, 0, NULL, &table, encTypes);
     ck_assert(msgBuf == NULL);
-    msgBuf = MsgBuffers_Create(3, 10, NULL, encTypes);
+    msgBuf = MsgBuffers_Create(3, 10, NULL, NULL, encTypes);
     ck_assert(msgBuf == NULL);
-    msgBuf = MsgBuffers_Create(3, 10, &table, NULL);
+    msgBuf = MsgBuffers_Create(3, 10, NULL, &table, NULL);
     ck_assert(msgBuf == NULL);
 
 }
@@ -313,7 +313,7 @@ START_TEST(test_ua_msg_buffers_chunk_mgr)
 
     // Test chunks management
     //// Test nominal case
-    SOPC_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
+    SOPC_MsgBuffers* msgBuf = MsgBuffers_Create(3, 10, NULL, &table, encTypes);
 
     ////// No current chunk before NextChunk called
     buf2 = MsgBuffers_GetCurrentChunk(msgBuf);
@@ -378,7 +378,7 @@ START_TEST(test_ua_msg_buffers_chunk_mgr)
     status = MsgBuffers_SetCurrentChunkFirst(msgBuf);
     ck_assert(status != STATUS_OK);
     MsgBuffers_Delete(&msgBuf);
-    msgBuf = MsgBuffers_Create(3, 10, &table, encTypes);
+    msgBuf = MsgBuffers_Create(3, 10, NULL, &table, encTypes);
     ////// Set current chunk first with only 0 chunk
     status = MsgBuffers_SetCurrentChunkFirst(msgBuf);
     ck_assert(status != STATUS_OK);
@@ -413,7 +413,7 @@ START_TEST(test_ua_msg_buffers_copy)
     ck_assert(msgBuf->buffers->length == 1);
     ck_assert(msgBuf->secureType == SOPC_CloseSecureChannel);
 
-    SOPC_MsgBuffer* msgBufsDest = MsgBuffers_Create(3, 5, &table, encTypes);
+    SOPC_MsgBuffer* msgBufsDest = MsgBuffers_Create(3, 5, NULL, &table, encTypes);
     ////// Copy msg buffer
     status = MsgBuffers_CopyBuffer(msgBufsDest, 0,
                                    msgBuf, 1);

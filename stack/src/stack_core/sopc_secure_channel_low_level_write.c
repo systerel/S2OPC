@@ -20,102 +20,85 @@
 
 #include <assert.h>
 
-void SOPC_OperationEnd_WriteSecure_CB(void*           arg,
-                                      SOPC_StatusCode writeStatus){
-    SOPC_MsgBuffer* msgBuffer = (SOPC_MsgBuffer*) arg;
-    uint8_t willReleaseMsgQueueToken = FALSE;
-    if(STATUS_OK != writeStatus){
-        SOPC_String reason;
-        SOPC_String_Initialize(&reason);
-        SOPC_String_AttachFromCstring(&reason, "Error encoding intermediate chunk");
-        SC_AbortMsg(msgBuffer, msgBuffer->msgRequestId, OpcUa_BadEncodingError, &reason, &willReleaseMsgQueueToken);
-        SOPC_String_Clear(&reason);
-    }
-}
+//void SOPC_OperationEnd_WriteSecure_CB(void*           arg,
+//                                      SOPC_StatusCode writeStatus){
+//    SOPC_MsgBuffer* msgBuffers = (SOPC_MsgBuffer*) arg;
+//    uint8_t willReleaseMsgQueueToken = FALSE;
+//    if(STATUS_OK != writeStatus){
+//        SOPC_String reason;
+//        SOPC_String_Initialize(&reason);
+//        SOPC_String_AttachFromCstring(&reason, "Error encoding intermediate chunk");
+//        SC_AbortMsg(msgBuffers, msgBuffers->msgRequestId, OpcUa_BadEncodingError, &reason, &willReleaseMsgQueueToken);
+//        SOPC_String_Clear(&reason);
+//    }
+//}
 
-SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffer*  msgBuffer,
-                                        const SOPC_Byte* data_src,
-                                        uint32_t         count){
+SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffers*  msgBuffers,
+                                        const SOPC_Byte*  data_src,
+                                        uint32_t          count){
     SOPC_StatusCode status = STATUS_NOK;
-    SOPC_String reason;
+    Buffer* buffer = NULL;
     SC_Connection* scConnection = NULL;
-    uint8_t willReleaseMsgQueueToken = FALSE;
-    SOPC_Socket_Transaction_Event transactionEvent = SOCKET_TRANSACTION_START; // For first chunk
 
-    if(msgBuffer == NULL){
+    if(msgBuffers == NULL){
         return STATUS_INVALID_PARAMETERS;
     }
-    if(msgBuffer->type == TCP_UA_Message_SecureMessage){
+    if(msgBuffers->type == TCP_UA_Message_SecureMessage){
         // Use chunks mechanism if it is a secure message
-        if(data_src == NULL || msgBuffer == NULL || msgBuffer->flushData == NULL)
+        if(data_src == NULL || msgBuffers == NULL || msgBuffers->flushData == NULL)
         {
             status = STATUS_INVALID_PARAMETERS;
         }else{
             status = STATUS_OK;
-            scConnection = (SC_Connection*) msgBuffer->flushData;
-            assert(msgBuffer->sequenceNumberPosition +
+            scConnection = (SC_Connection*) msgBuffers->flushData;
+            buffer = MsgBuffers_GetCurrentChunk(msgBuffers);
+            assert(msgBuffers->sequenceNumberPosition +
                     UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
-                    scConnection->sendingMaxBodySize >= msgBuffer->buffers->position);
+                    scConnection->sendingMaxBodySize >= msgBuffers->buffers->position);
 
             while(STATUS_OK == status && // if not enough space in current buffer, create an intermediary chunk
-                  (msgBuffer->buffers->position + count >
-                   msgBuffer->sequenceNumberPosition +
+                  (msgBuffers->buffers->position + count >
+                   msgBuffers->sequenceNumberPosition +
                    UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
                    scConnection->sendingMaxBodySize))
             {
                 // Precedent position cannot be greater than message size:
                 //  otherwise it means size has not been checked precedent time (it could occurs only when writing headers)
-                assert(msgBuffer->sequenceNumberPosition +
+                assert(msgBuffers->sequenceNumberPosition +
                         UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
-                        scConnection->sendingMaxBodySize >= msgBuffer->buffers->position);
-                if(msgBuffer->maxChunks != 0 && msgBuffer->nbChunks + 1 > msgBuffer->maxChunks){
+                        scConnection->sendingMaxBodySize >= msgBuffers->buffers->position);
+                if(msgBuffers->maxChunks != 0 && msgBuffers->nbChunks + 1 > msgBuffers->maxChunks){
                     if(scConnection->transportConnection->serverSideConnection == FALSE){
                         status = OpcUa_BadRequestTooLarge;
                     }else{
                         status = OpcUa_BadResponseTooLarge;
                     }
-                    SOPC_String_Initialize(&reason);
-                    SC_AbortMsg(msgBuffer, msgBuffer->msgRequestId, status, &reason, &willReleaseMsgQueueToken);
-                    assert(willReleaseMsgQueueToken != FALSE);
-                    SOPC_String_Clear(&reason);
                 }else{
                     // Fill buffer with maximum amount of bytes
                     uint32_t tmpCount = // Maximum Count - Precedent Count => Count to write
-                     (msgBuffer->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
-                      scConnection->sendingMaxBodySize) - msgBuffer->buffers->position;
-                    status = Buffer_Write(msgBuffer->buffers, data_src, tmpCount);
+                     (msgBuffers->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
+                      scConnection->sendingMaxBodySize) - msgBuffers->buffers->position;
+                    status = Buffer_Write(buffer, data_src, tmpCount);
 
-                    // Flush it !
-                    if(status == STATUS_OK){
+                    // Continue in next buffer
+                    if(STATUS_OK == status){
                         // Update count and pointer to data to write
                         count = count - tmpCount;
                         data_src = data_src + tmpCount;
-
-                        if(msgBuffer->nbChunks > 1){
-                            transactionEvent = SOCKET_TRANSACTION_CONTINUE; // Not the first chunk, nor the last
-                        }
-
-                        status = SC_FlushSecureMsgBuffer(msgBuffer,
-                                                         SOPC_Msg_Chunk_Intermediate,
-                                                         transactionEvent, msgBuffer->msgRequestId,
-                                                         SOPC_OperationEnd_WriteSecure_CB,
-                                                         (void*) msgBuffer);
-                    }
-
-                    if(status != STATUS_OK){
-                        SOPC_OperationEnd_WriteSecure_CB((void*) msgBuffer,
-                                                         status);
+                        // Set next chunk as current buffer
+                        buffer = MsgBuffers_NextChunkWithHeadersCopy(msgBuffers,
+                                                                     msgBuffers->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
                     }
                 }
             } // While not fitting in current buffer, fill and flush current buffer
 
             if(status == STATUS_OK){
-                status = Buffer_Write(msgBuffer->buffers, data_src, count);
+                status = Buffer_Write(buffer, data_src, count);
             }
         }
     }else{
         // Use the simple TCP UA write, no chunk management needed
-        status = TCP_UA_WriteMsgBuffer(msgBuffer, data_src, count);
+        status = TCP_UA_WriteMsgBuffer(msgBuffers->buffers, data_src, count);
     }
     return status;
 }
