@@ -28,25 +28,25 @@
 #include "sopc_base_types.h"
 #include "sopc_namespace_table.h"
 
-/** Length of a TCP UA message Header */
+/* Length of a TCP UA message Header */
 #define TCP_UA_HEADER_LENGTH 8
-/** Length of a TCP UA ACK message */
+/* Length of a TCP UA ACK message */
 #define TCP_UA_ACK_MSG_LENGTH 28
-/** Minimum length of a TCP UA HELLO message (without including URL string content but only its size)*/
+/* Minimum length of a TCP UA HELLO message (without including URL string content but only its size)*/
 #define TCP_UA_HEL_MSG_LENGTH 32
-/** Minimum length of a TCP UA ERROR message */
+/* Minimum length of a TCP UA ERROR message */
 #define TCP_UA_ERR_MIN_MSG_LENGTH 16
 
-/** Position of MessageSize header field in a UA message chunk*/
+/* Position of MessageSize header field in a UA message chunk*/
 #define UA_HEADER_LENGTH_POSITION 4
-/** Position of IsFinal header field in a UA message chunk*/
+/* Position of IsFinal header field in a UA message chunk*/
 #define UA_HEADER_ISFINAL_POSITION 3
 
-/** Length of an UA secure message chunk header */
+/* Length of an UA secure message chunk header */
 #define UA_SECURE_MESSAGE_HEADER_LENGTH 12
-/** Length of an UA symmetric security header chunk header */
+/* Length of an UA symmetric security header chunk header */
 #define UA_SYMMETRIC_SECURITY_HEADER_LENGTH 4
-/** Length of an UA secure message chunk sequence header */
+/* Length of an UA secure message chunk sequence header */
 #define UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
 
 extern const SOPC_Byte SOPC_HEL[3]; /**< TCP UA Hello Message type constant */
@@ -236,7 +236,7 @@ Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
  *  \brief Copy content of current chunk until message body position (headers content) into next chunk, then
  *         set the next chunk buffer of UA Message buffers as current one and returns it.
  *
- *  \param mBuffer       Pointer to the UA Message buffers
+ *  \param mBuffers      Pointer to the UA Message buffers
  *  \param bodyPosition  Position of the message body first byte, all headers to copy are included before this position
  *  \return              Pointer to the next chunk buffer which became current, NULL if argument was NULL or incoherent
  */
@@ -256,7 +256,7 @@ SOPC_StatusCode MsgBuffers_SetCurrentChunkFirst(SOPC_MsgBuffers* mBuffer);
  *         Note: internal properties of the message buffers are also copied (including nbChunks)
  *
  *  \param destMsgBuffer    Pointer to destination UA Message buffer
- *  \param srcMsgBuffer     Pointer to source UA Message buffer
+ *  \param srcMsgBuffers    Pointer to source UA Message buffer
  *  \param bufferIdx        Index of the buffer to be copied into (< srcMsgBuffers->nbChunks)
  *  \return                 GOOD if operation succeeded, BAD otherwise
  */

@@ -259,9 +259,9 @@ SOPC_StatusCode SOPC_Channel_InvokeService(SOPC_Channel          channel,
 /**
  *  \brief Start action of disconnecting the given channel connection
  *
- *  \param channel           The channel to disconnect
- *  \param disconnectCb      Asynchronous disconnect result callback function called on connection failure or success
- *  \param disconnectCbData  Asynchronous disconnect result callback data provided to callback function on call
+ *  \param channel         The channel to disconnect
+ *  \param disconnect      Asynchronous disconnect result callback function called on connection failure or success
+ *  \param disconnectData  Asynchronous disconnect result callback data provided to callback function on call
  *
  *  \return            STATUS_OK if channel disconnection action is recorded, STATUS_NOK otherwise
  *

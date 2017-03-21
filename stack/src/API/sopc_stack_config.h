@@ -65,7 +65,7 @@ SOPC_EncodeableType** SOPC_StackConfiguration_GetEncodeableTypes();
  *  \return STATUS_OK if configuration succeeded, STATUS_NOK otherwise
  */
 SOPC_StatusCode SOPC_StackConfiguration_AddTypes(SOPC_EncodeableType** encTypesTable,
-                                            uint32_t              nbTypes);
+                                                 uint32_t              nbTypes);
 
 /**
  *  \brief Return the namespace table configuration used by the stack

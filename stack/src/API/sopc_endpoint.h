@@ -156,7 +156,7 @@ SOPC_StatusCode SOPC_Endpoint_Create(SOPC_Endpoint*               endpoint,
  *         (TCP UA OpenSecureChannel request reception and send TCP UA OpenSecureChannel response)
  *
  *  \param endpoint           The channel to connect
- *  \param url                Endpoint address of the connection point
+ *  \param endpointURL        Endpoint address of the connection point
  *  \param callback           Endpoint events callback function to be called
  *  \param callbackData       Data to be provided to the endpoint event callback function on call
  *  \param serverCertificate  Server certificate to use for responding to clients connections (or NULL for None security mode)

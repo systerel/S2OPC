@@ -253,9 +253,9 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider 
  *                  The main purpose of this function is to verify the length of the modulus of the
  *                  asymmetric key \p pKey with respect to the security policy.
  *
- * \param pProvider    An initialized cryptographic context.
- * \param pKey         A valid pointer to an AsymmetricKey.
- * \param lenKeyBytes  A valid pointer to the output length in bytes. Its content is unspecified when
+ * \param pProvider     An initialized cryptographic context.
+ * \param pKey          A valid pointer to an AsymmetricKey.
+ * \param pLenKeyBytes  A valid pointer to the output length in bytes. Its content is unspecified when
  *                      return value is not STATUS_OK.
  *
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
@@ -263,7 +263,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider 
  */
 SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBytes(const CryptoProvider *pProvider,
                                                        const AsymmetricKey *pKey,
-                                                       uint32_t *lenKeyBytes);
+                                                       uint32_t *pLenKeyBytes);
 
 /**
  * \brief           Provides the length of the hash used for OAEP encryption/decryption.

@@ -20,13 +20,13 @@
 
 #include <stdint.h>
 
-/** High level API activation */
+/* High level API activation */
 // Client API activation
 #define OPCUA_HAVE_CLIENTAPI 1
 // Client API activation
 #define OPCUA_HAVE_SERVERAPI 1
 
-/** Stack configuration options */
+/* Stack configuration options */
 
 // Validate the server certificate provided by client application during treatment of the open secure channel response,
 #define OPCUA_SECURECONNECTION_VALIDATE_SERVERCERT 1

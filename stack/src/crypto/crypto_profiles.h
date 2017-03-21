@@ -45,8 +45,8 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 #define SecurityPolicy_Basic256Sha256_SymmLen_SignKey       32
 #define SecurityPolicy_Basic256Sha256_SymmLen_Signature     32
 #define SecurityPolicy_Basic256Sha256_CertLen_Thumbprint    20
-#define SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash     20 /**< RSA OAEP uses SHA-1 */
-#define SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash      32 /**< RSASS PSS uses SHA-256 in this context (unused, Basic256Sha256 uses PKCS#1, not PSS) */
+#define SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash     20 /*< RSA OAEP uses SHA-1 */
+#define SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash      32 /*< RSASS PSS uses SHA-256 in this context (unused, Basic256Sha256 uses PKCS#1, not PSS) */
 #define SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits    2048
 #define SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits    4096
 
@@ -56,8 +56,8 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 #define SecurityPolicy_Basic256_SymmLen_SignKey             24
 #define SecurityPolicy_Basic256_SymmLen_Signature           20
 #define SecurityPolicy_Basic256_CertLen_Thumbprint          20
-#define SecurityPolicy_Basic256_AsymLen_OAEP_Hash           20 /**< RSA OAEP uses SHA-1 */
-#define SecurityPolicy_Basic256_AsymLen_PSS_Hash            20 /**< RSASS PSS uses SHA-1 in this context (unused, Basic256 uses PKCS#1, not PSS) */
+#define SecurityPolicy_Basic256_AsymLen_OAEP_Hash           20 /*< RSA OAEP uses SHA-1 */
+#define SecurityPolicy_Basic256_AsymLen_PSS_Hash            20 /*< RSASS PSS uses SHA-1 in this context (unused, Basic256 uses PKCS#1, not PSS) */
 #define SecurityPolicy_Basic256_AsymLen_KeyMinBits          1024
 #define SecurityPolicy_Basic256_AsymLen_KeyMaxBits          2048
 

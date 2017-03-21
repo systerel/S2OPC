@@ -42,6 +42,7 @@ SOPC_ActionQueueManager* SOPC_ActionQueueManager_CreateAndStart();
  *  \param queueMgr     Pointer of the action queue manager in which action will be added
  *  \param fctPointer   Pointer of the function to run for executing the action
  *  \param fctArgument  Argument to be used as parameter when calling the provided function
+ *  \param actionText   Indicates in a human readable string the action added to the queue
  *  \return             STATUS_OK if action added successfully,
  *                      STATUS_INVALID_PARAMETER in case action queue manager pointer is NULL,
  *                      STATUS_NOK otherwise (action queue manager not started, function pointer and argument both NULL).

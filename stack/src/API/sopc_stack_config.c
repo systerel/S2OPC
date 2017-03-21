@@ -165,7 +165,7 @@ static uint32_t GetKnownEncodeableTypesLength(){
 }
 
 SOPC_StatusCode SOPC_StackConfiguration_AddTypes(SOPC_EncodeableType** encTypesTable,
-                                            uint32_t              nbTypes){
+                                                 uint32_t              nbTypes){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
     uint32_t nbKnownTypes = 0;
