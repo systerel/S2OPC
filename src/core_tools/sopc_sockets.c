@@ -199,7 +199,7 @@ SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
         return STATUS_NOK;
 
     // TODO: set lower limit for nbSockets: INT32_MAX just to ensure select returns value <= INT32_MAX (3 sets)
-    if(socketMgr != NULL && socketMgr->nbSockets == 0 && nbSockets <= INT32_MAX/3){
+    if(socketMgr != NULL && nbSockets <= INT32_MAX/3){
         socketMgr->sockets = malloc(sizeof(SOPC_Socket) * nbSockets);
         if(socketMgr->sockets != NULL){
             status = STATUS_OK;
