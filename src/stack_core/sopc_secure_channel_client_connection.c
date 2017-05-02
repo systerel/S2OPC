@@ -872,70 +872,72 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
        request != NULL)
     {
         Mutex_Lock(&connection->mutex);
+        if(connection->instance->state == SC_Connection_Connected){
+            requestId = GetNextRequestId(connection->instance);
+            status = SC_EncodeSecureMessage(connection->instance,
+                                            requestType,
+                                            request,
+                                            requestId);
 
-        requestId = GetNextRequestId(connection->instance);
-        status = SC_EncodeSecureMessage(connection->instance,
-                                        requestType,
-                                        request,
-                                        requestId);
-
-        if(status == STATUS_OK){
-            // Create associated pending request
-            pRequest = SC_PendingRequestCreate(requestId,
-                                               responseType,
-                                               timeout,
-                                               0, // Not managed now
-                                               callback,
-                                               callbackData);
-            if(pRequest == NULL ||
-               pRequest != SLinkedList_Add(connection->pendingRequests, requestId, pRequest)){
-                status = STATUS_NOK;
-            }
-        }
-
-        if(status == STATUS_OK){
-            status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, SOPC_Msg_Chunk_Final);
-        }
-
-        if(status != STATUS_OK){
-            SOPC_String reason;
-            SOPC_String_Initialize(&reason);
-
-            char* cType = NULL;
-            if(requestType->TypeName != NULL){
-                cType = requestType->TypeName;
-            }else{
-                cType = "";
+            if(status == STATUS_OK){
+                // Create associated pending request
+                pRequest = SC_PendingRequestCreate(requestId,
+                                                   responseType,
+                                                   timeout,
+                                                   0, // Not managed now
+                                                   callback,
+                                                   callbackData);
+                if(pRequest == NULL ||
+                   pRequest != SLinkedList_Add(connection->pendingRequests, requestId, pRequest)){
+                    status = STATUS_NOK;
+                }
             }
 
-            char* genericReason = "Error encoding chunk for request of type: ";
-            char* cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
-            if(cReason != NULL){
-                if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
-                   &cReason[strlen(genericReason)] ==
-                    memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
-                    cReason[0] = '\0';
+            if(status == STATUS_OK){
+                status = SC_FlushSecureMsgBuffer(connection->instance->sendingBuffer, SOPC_Msg_Chunk_Final);
+            }
+
+            if(status != STATUS_OK){
+                SOPC_String reason;
+                SOPC_String_Initialize(&reason);
+
+                char* cType = NULL;
+                if(requestType->TypeName != NULL){
+                    cType = requestType->TypeName;
                 }else{
+                    cType = "";
+                }
+
+                char* genericReason = "Error encoding chunk for request of type: ";
+                char* cReason = malloc(sizeof(char)*strlen(genericReason)+strlen(cType) + 1);
+                if(cReason != NULL){
+                    if(cReason == memcpy(cReason, genericReason, strlen(genericReason)) &&
+                       &cReason[strlen(genericReason)] ==
+                        memcpy(&cReason[strlen(genericReason)], cType, strlen(cType))){
+                        cReason[0] = '\0';
+                    }else{
+                        free(cReason);
+                        cReason = NULL;
+                    }
+                }
+                if(cReason != NULL){
+                    status = SOPC_String_AttachFromCstring(&reason, cReason);
                     free(cReason);
                     cReason = NULL;
                 }
-            }
-            if(cReason != NULL){
-                status = SOPC_String_AttachFromCstring(&reason, cReason);
-                free(cReason);
-                cReason = NULL;
-            }
 
-            if(STATUS_OK == status){
-                SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, &reason);
-                SOPC_String_Clear(&reason);
+                if(STATUS_OK == status){
+                    SC_AbortMsg(connection->instance->sendingBuffer, OpcUa_BadEncodingError, &reason);
+                    SOPC_String_Clear(&reason);
+                }
+                if(pRequest != NULL){
+                    SLinkedList_Remove(connection->pendingRequests,requestId);
+                    SC_PendingRequestDelete(pRequest);
+                }
             }
-            if(pRequest != NULL){
-                SLinkedList_Remove(connection->pendingRequests,requestId);
-                SC_PendingRequestDelete(pRequest);
-            }
+        }else{
+            status = OpcUa_BadSecureChannelClosed;
         }
-
         Mutex_Unlock(&connection->mutex);
     }
 
