@@ -51,7 +51,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer,
     key = malloc(sizeof(AsymmetricKey));
     if(NULL == key)
         return STATUS_NOK;
-    key->doNotClear = FALSE;
+    key->isBorrowedFromCert = FALSE;
     mbedtls_pk_init(&key->pk);
 
     if(mbedtls_pk_parse_key(&key->pk, buffer, lenBuf, NULL, 0) != 0) // This should also parse PEM keys.
@@ -90,7 +90,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromFile(const char *szPath,
     key = malloc(sizeof(AsymmetricKey));
     if(NULL == key)
         return STATUS_NOK;
-    key->doNotClear = FALSE;
+    key->isBorrowedFromCert = FALSE;
     mbedtls_pk_init(&key->pk);
 
     if(mbedtls_pk_parse_keyfile(&key->pk, szPath, password) != 0)
@@ -112,7 +112,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromCertificate(const Certificate
     *pKey = malloc(sizeof(AsymmetricKey));
     if(NULL == *pKey)
         return STATUS_NOK;
-    (*pKey)->doNotClear = 1;
+    (*pKey)->isBorrowedFromCert = !FALSE;
     mbedtls_pk_init(&(*pKey)->pk);
 
     return KeyManager_Certificate_GetPublicKey(pCert, *pKey);
@@ -127,7 +127,7 @@ void KeyManager_AsymmetricKey_Free(AsymmetricKey *pKey)
 {
     if(NULL == pKey)
         return;
-    if(FALSE == pKey->doNotClear){
+    if(FALSE == pKey->isBorrowedFromCert){
         mbedtls_pk_free(&pKey->pk);
     }
     free(pKey);
