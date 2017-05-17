@@ -241,7 +241,7 @@ mbedtls:
 	@echo "Building mbedtls..."
 	@$(MAKE) $(MBED_SHARED) -C $(MBEDTLS_DIR) programs tests
 
-check: $(EXEC_DIR)/check_stack
+check: config library $(EXEC_DIR)/check_stack
 	@echo "Executing tests..."
 	@\cd $(EXEC_DIR) && ./check_stack
 
