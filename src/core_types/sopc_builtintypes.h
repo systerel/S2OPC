@@ -26,6 +26,13 @@
 
 BEGIN_EXTERN_C
 
+// TODO: integrate to encodeable type ?
+/**
+ *  \brief Copy function generic signature
+ */
+typedef SOPC_StatusCode (SOPC_EncodeableObject_PfnOp) (void* dest, void* src);
+
+
 typedef enum SOPC_BuiltinId {
     SOPC_Null_Id            = 0,
     SOPC_Boolean_Id         = 1,
@@ -261,56 +268,67 @@ typedef struct SOPC_DataValue {
 
 void SOPC_Boolean_Initialize(SOPC_Boolean* b);
 void SOPC_Boolean_InitializeAux(void* value);
+SOPC_StatusCode SOPC_Boolean_CopyAux(void* dest, void* src);
 void SOPC_Boolean_Clear(SOPC_Boolean* b);
 void SOPC_Boolean_ClearAux(void* value);
 
 void SOPC_SByte_Initialize(SOPC_SByte* sbyte);
 void SOPC_SByte_InitializeAux(void* value);
+SOPC_StatusCode SOPC_SByte_CopyAux(void* dest, void* src);
 void SOPC_SByte_Clear(SOPC_SByte* sbyte);
 void SOPC_SByte_ClearAux(void* value);
 
 void SOPC_Byte_Initialize(SOPC_Byte* byte);
 void SOPC_Byte_InitializeAux(void* value);
+SOPC_StatusCode SOPC_Byte_CopyAux(void* dest, void* src);
 void SOPC_Byte_Clear(SOPC_Byte* byte);
 void SOPC_Byte_ClearAux(void* value);
 
 void SOPC_Int16_Initialize(int16_t* intv);
 void SOPC_Int16_InitializeAux(void* value);
+SOPC_StatusCode SOPC_Int16_CopyAux(void* dest, void* src);
 void SOPC_Int16_Clear(int16_t* intv);
 void SOPC_Int16_ClearAux(void* value);
 
 void SOPC_UInt16_Initialize(uint16_t* uint);
 void SOPC_UInt16_InitializeAux(void* value);
+SOPC_StatusCode SOPC_UInt16_CopyAux(void* dest, void* src);
 void SOPC_UInt16_Clear(uint16_t* uint);
 void SOPC_UInt16_ClearAux(void* value);
 
 void SOPC_Int32_Initialize(int32_t* intv);
 void SOPC_Int32_InitializeAux(void* value);
+SOPC_StatusCode SOPC_Int32_CopyAux(void* dest, void* src);
 void SOPC_Int32_Clear(int32_t* intv);
 void SOPC_Int32_ClearAux(void* value);
 
 void SOPC_UInt32_Initialize(uint32_t* uint);
 void SOPC_UInt32_InitializeAux(void* value);
+SOPC_StatusCode SOPC_UInt32_CopyAux(void* dest, void* src);
 void SOPC_UInt32_Clear(uint32_t* uint);
 void SOPC_UInt32_ClearAux(void* value);
 
 void SOPC_Int64_Initialize(int64_t* intv);
 void SOPC_Int64_InitializeAux(void* value);
+SOPC_StatusCode SOPC_Int64_CopyAux(void* dest, void* src);
 void SOPC_Int64_Clear(int64_t* intv);
 void SOPC_Int64_ClearAux(void* value);
 
 void SOPC_UInt64_Initialize(uint64_t* uint);
 void SOPC_UInt64_InitializeAux(void* value);
+SOPC_StatusCode SOPC_UInt64_CopyAux(void* dest, void* src);
 void SOPC_UInt64_Clear(uint64_t* uint);
 void SOPC_UInt64_ClearAux(void* value);
 
 void SOPC_Float_Initialize(float* f);
 void SOPC_Float_InitializeAux(void* value);
+SOPC_StatusCode SOPC_Float_CopyAux(void* dest, void* src);
 void SOPC_Float_Clear(float* f);
 void SOPC_Float_ClearAux(void* value);
 
 void SOPC_Double_Initialize(double* d);
 void SOPC_Double_InitializeAux(void* value);
+SOPC_StatusCode SOPC_Double_CopyAux(void* dest, void* src);
 void SOPC_Double_Clear(double* d);
 void SOPC_Double_ClearAux(void* value);
 
@@ -320,6 +338,7 @@ SOPC_ByteString* SOPC_ByteString_Create(void);
 SOPC_StatusCode SOPC_ByteString_InitializeFixedSize(SOPC_ByteString* bstring, uint32_t size);
 SOPC_StatusCode SOPC_ByteString_CopyFromBytes(SOPC_ByteString* dest, SOPC_Byte* bytes, int32_t length);
 SOPC_StatusCode SOPC_ByteString_Copy(SOPC_ByteString* dest, const SOPC_ByteString* src);
+SOPC_StatusCode SOPC_ByteString_CopyAux(void* dest, void* src);
 void SOPC_ByteString_Clear(SOPC_ByteString* bstring);
 void SOPC_ByteString_ClearAux(void* value);
 void SOPC_ByteString_Delete(SOPC_ByteString* bstring);
@@ -336,6 +355,7 @@ void SOPC_String_Initialize(SOPC_String* string);
 void SOPC_String_InitializeAux(void* value);
 SOPC_String* SOPC_String_Create(void);
 SOPC_StatusCode SOPC_String_CopyFromCString(SOPC_String* string, const char* cString);
+SOPC_StatusCode SOPC_String_CopyAux(void* dest, void* src);
 SOPC_StatusCode SOPC_String_InitializeFromCString(SOPC_String* string, const char* cString);
 char* SOPC_String_GetCString(const SOPC_String* string); // Copy
 const char* SOPC_String_GetRawCString(const SOPC_String* string); // Pointer to string
@@ -358,11 +378,14 @@ uint32_t SOPC_String_Equal(const SOPC_String* left,
 
 void SOPC_XmlElement_Initialize(SOPC_XmlElement* xmlElt);
 void SOPC_XmlElement_InitializeAux(void* value);
+SOPC_StatusCode SOPC_XmlElement_Copy(SOPC_XmlElement* dest, const SOPC_XmlElement* src);
+SOPC_StatusCode SOPC_XmlElement_CopyAux(void* dest, void* src);
 void SOPC_XmlElement_Clear(SOPC_XmlElement* xmlElt);
 void SOPC_XmlElement_ClearAux(void* value);
 
 void SOPC_DateTime_Initialize(SOPC_DateTime* dateTime);
 void SOPC_DateTime_InitializeAux(void* value);
+SOPC_StatusCode SOPC_DateTime_CopyAux(void* dest, void* src);
 void SOPC_DateTime_Clear(SOPC_DateTime* dateTime);
 void SOPC_DateTime_ClearAux(void* value);
 int64_t SOPC_DateTime_ToInt64(const SOPC_DateTime* dateTime);
@@ -370,57 +393,83 @@ void SOPC_DateTime_FromInt64(SOPC_DateTime* dateTime, int64_t date);
 
 void SOPC_Guid_Initialize(SOPC_Guid* guid);
 void SOPC_Guid_InitializeAux(void* value);
+SOPC_StatusCode SOPC_Guid_Copy(SOPC_Guid* dest, const SOPC_Guid* src);
+SOPC_StatusCode SOPC_Guid_CopyAux(void* dest, void* src);
 void SOPC_Guid_Clear(SOPC_Guid* guid);
 void SOPC_Guid_ClearAux(void* value);
 
 void SOPC_NodeId_Initialize(SOPC_NodeId* nodeId);
 void SOPC_NodeId_InitializeAux(void* value);
-void SOPC_NodeId_InitType(SOPC_NodeId* nodeId, SOPC_IdentifierType knownIdType);
+SOPC_StatusCode SOPC_NodeId_Copy(SOPC_NodeId* dest, const SOPC_NodeId* src);
+SOPC_StatusCode SOPC_NodeId_CopyAux(void* dest, void* src);
 void SOPC_NodeId_Clear(SOPC_NodeId* nodeId);
 void SOPC_NodeId_ClearAux(void* value);
 
+SOPC_StatusCode SOPC_NodeId_Compare(const SOPC_NodeId* left,
+                                    const SOPC_NodeId* right,
+                                    int32_t*           comparison);
+
+
 void SOPC_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId);
 void SOPC_ExpandedNodeId_InitializeAux(void* value);
+SOPC_StatusCode SOPC_ExpandedNodeId_Copy(SOPC_ExpandedNodeId* dest, const SOPC_ExpandedNodeId* src);
+SOPC_StatusCode SOPC_ExpandedNodeId_CopyAux(void* dest, void* src);
 void SOPC_ExpandedNodeId_Clear(SOPC_ExpandedNodeId* expNodeId);
 void SOPC_ExpandedNodeId_ClearAux(void* value);
 
 void SOPC_StatusCode_Initialize(SOPC_StatusCode* status);
 void SOPC_StatusCode_InitializeAux(void* value);
+SOPC_StatusCode SOPC_StatusCode_CopyAux(void* dest, void* src);
 void SOPC_StatusCode_Clear(SOPC_StatusCode* status);
 void SOPC_StatusCode_ClearAux(void* value);
 
 void SOPC_DiagnosticInfo_Initialize(SOPC_DiagnosticInfo* diagInfo);
 void SOPC_DiagnosticInfo_InitializeAux(void* value);
+SOPC_StatusCode SOPC_DiagnosticInfo_Copy(SOPC_DiagnosticInfo* dest, SOPC_DiagnosticInfo* src);
+SOPC_StatusCode SOPC_DiagnosticInfo_CopyAux(void* dest, void* src);
 void SOPC_DiagnosticInfo_Clear(SOPC_DiagnosticInfo* diagInfo);
 void SOPC_DiagnosticInfo_ClearAux(void* value);
 
 void SOPC_QualifiedName_Initialize(SOPC_QualifiedName* qname);
 void SOPC_QualifiedName_InitializeAux(void* value);
+SOPC_StatusCode SOPC_QualifiedName_Copy(SOPC_QualifiedName* dest, const SOPC_QualifiedName* src);
+SOPC_StatusCode SOPC_QualifiedName_CopyAux(void* dest, void* src);
 void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname);
 void SOPC_QualifiedName_ClearAux(void* value);
 
 void SOPC_LocalizedText_Initialize(SOPC_LocalizedText* localizedText);
 void SOPC_LocalizedText_InitializeAux(void* value);
+SOPC_StatusCode SOPC_LocalizedText_Copy(SOPC_LocalizedText* dest, const SOPC_LocalizedText* src);
+SOPC_StatusCode SOPC_LocalizedText_CopyAux(void* dest, void* src);
 void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText);
 void SOPC_LocalizedText_ClearAux(void* value);
 
 void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_InitializeAux(void* value);
+// In case it contains an object, full copy is not possible for now => shallow copy in this case
+SOPC_StatusCode SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SOPC_ExtensionObject* src);
+SOPC_StatusCode SOPC_ExtensionObject_CopyAux(void* dest, void* src);
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_ClearAux(void* value);
 
 void SOPC_Variant_Initialize(SOPC_Variant* variant);
 void SOPC_Variant_InitializeAux(void* value);
+SOPC_StatusCode SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src);
+SOPC_StatusCode SOPC_Variant_CopyAux(void* dest, void* src);
 void SOPC_Variant_Clear(SOPC_Variant* variant);
 void SOPC_Variant_ClearAux(void* value);
 
 void SOPC_DataValue_Initialize(SOPC_DataValue* dataValue);
 void SOPC_DataValue_InitializeAux(void* value);
+SOPC_StatusCode SOPC_DataValue_Copy(SOPC_DataValue* dest, const SOPC_DataValue* src);
+SOPC_StatusCode SOPC_DataValue_CopyAux(void* dest, void* src);
 void SOPC_DataValue_Clear(SOPC_DataValue* dataValue);
 void SOPC_DataValue_ClearAux(void* value);
 
 void SOPC_Initialize_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
                            SOPC_EncodeableObject_PfnInitialize* initFct);
+SOPC_StatusCode SOPC_Op_Array(int32_t noOfElts, void* eltsArrayLeft, void* eltsArrayRight, size_t sizeOfElt,
+                              SOPC_EncodeableObject_PfnOp* opFct);
 void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt,
                       SOPC_EncodeableObject_PfnClear* clearFct);
 
