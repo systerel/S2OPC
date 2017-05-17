@@ -643,6 +643,8 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
     SC_ClientConnection* cConnection = (SC_ClientConnection*) callbackData;
     TCP_UA_Connection* tcpConnection = NULL;
     SOPC_StatusCode retStatus = STATUS_OK;
+    const uint8_t noneSecurityMode = (cConnection->instance->currentSecuMode ==
+                                      OpcUa_MessageSecurityMode_None);
 
     if(NULL == cConnection || NULL == cConnection->instance ||
        NULL == cConnection->instance->transportConnection)
@@ -657,6 +659,7 @@ SOPC_StatusCode OnTransportEvent_CB(void*           callbackData,
             Mutex_Lock(&cConnection->mutex);
             retStatus = SC_InitApplicationIdentities
                          (cConnection->instance,
+                          noneSecurityMode,
                           cConnection->clientCertificate,
                           cConnection->clientKey,
                           cConnection->serverCertificate);

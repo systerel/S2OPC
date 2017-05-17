@@ -581,20 +581,31 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
     SOPC_EncodeableType* receivedEncType = NULL;
     void* receivedEncObj = NULL;
     SOPC_StatusCode retStatus = STATUS_OK;
+    uint8_t noneSecurityMode = !FALSE;
+    uint32_t idx = 0;
     if(NULL != teventCbData &&
        NULL != teventCbData->endpoint && NULL != teventCbData->scConnection)
     {
         sEndpoint = teventCbData->endpoint;
         scConnection = teventCbData->scConnection;
         retStatus = status;
+        // Record if there are only None security modes (no certificates needed in this case only)
+        for(idx = 0; idx < sEndpoint->nbSecurityPolicies; idx++){
+            if(sEndpoint->securityPolicies[idx].securityModes != SECURITY_MODE_NONE_MASK){
+                noneSecurityMode = FALSE;
+            }
+        }
+
         switch(event){
             case ConnectionEvent_Connected:
                 if(SC_Connection_Disconnected == scConnection->state){
                     // Configure secure connection for encoding / decoding messages
                     Mutex_Lock(&sEndpoint->mutex);
 					if(status == STATUS_OK){
+
 						// Set only server side identity for now
                     	status = SC_InitApplicationIdentities(scConnection,
+                    	                                      noneSecurityMode,
                         	                                  sEndpoint->serverCertificate,
                             	                              sEndpoint->serverKey,
                                 	                          NULL);

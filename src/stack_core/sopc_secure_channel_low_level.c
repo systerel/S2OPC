@@ -92,6 +92,7 @@ void SC_Delete (SC_Connection* scConnection){
 }
 
 SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
+                                             uint8_t              noneSecurityMode,
                                              const Certificate*   runningAppCertificate,
                                              const AsymmetricKey* runningAppPrivateKey,
                                              const Certificate*   otherAppCertificate){
@@ -104,7 +105,7 @@ SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
     {
         if(runningAppCertificate == NULL && runningAppPrivateKey == NULL &&
            otherAppCertificate == NULL &&
-           scConnection->currentSecuMode == OpcUa_MessageSecurityMode_None)
+           noneSecurityMode != FALSE)
         {
             status = STATUS_OK;; // None security mode: no certificate to use
         }else if(runningAppCertificate != NULL && runningAppPrivateKey != NULL &&

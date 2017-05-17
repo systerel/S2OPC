@@ -90,6 +90,7 @@ SC_Connection* SC_Create (TCP_UA_Connection* connection);
 void SC_Delete (SC_Connection* scConnection);
 
 SOPC_StatusCode SC_InitApplicationIdentities(SC_Connection*       scConnection,
+                                             uint8_t              noneSecurityMode,
                                              const Certificate*   runningAppCertificate,
                                              const AsymmetricKey* runningAppPrivateKey,
                                              const Certificate*   otherAppCertificate);
