@@ -120,10 +120,12 @@ SOPC_StatusCode TCP_UA_Listener_Open(TCP_UA_Listener*             listener,
                 assert(FALSE);
 #endif //OPCUA_MULTITHREADED
 
-                listener->callback(listener->callbackData,
-                                   TCP_ListenerEvent_Opened,
-                                   status,
-                                   NULL);
+                if(STATUS_OK == status){
+                    listener->callback(listener->callbackData,
+                                       TCP_ListenerEvent_Opened,
+                                       status,
+                                       NULL);
+                }
             }
         }else{
             status = STATUS_INVALID_STATE;
