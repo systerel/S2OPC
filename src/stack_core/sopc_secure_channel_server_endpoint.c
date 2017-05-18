@@ -963,11 +963,15 @@ SOPC_StatusCode SC_ServerEndpoint_Open(SC_ServerEndpoint*   endpoint,
         if(STATUS_OK == status){
             endpoint->nbSecurityPolicies = nbSecurityPolicies;
             endpoint->securityPolicies = malloc(sizeof(SOPC_SecurityPolicy) * nbSecurityPolicies);
-            for(idx = 0; idx < nbSecurityPolicies && STATUS_OK == status; idx++){
-                SOPC_String_Initialize(&endpoint->securityPolicies[idx].securityPolicy);
-                status = SOPC_String_Copy(&endpoint->securityPolicies[idx].securityPolicy, &securityPolicies[idx].securityPolicy);
-                endpoint->securityPolicies[idx].securityModes = securityPolicies[idx].securityModes;
-                endpoint->securityPolicies[idx].padding = NULL;
+            if(NULL != endpoint->securityPolicies){
+                for(idx = 0; idx < nbSecurityPolicies && STATUS_OK == status; idx++){
+                    SOPC_String_Initialize(&endpoint->securityPolicies[idx].securityPolicy);
+                    status = SOPC_String_Copy(&endpoint->securityPolicies[idx].securityPolicy, &securityPolicies[idx].securityPolicy);
+                    endpoint->securityPolicies[idx].securityModes = securityPolicies[idx].securityModes;
+                    endpoint->securityPolicies[idx].padding = NULL;
+                }
+            }else{
+                status = STATUS_NOK;
             }
         }
 
