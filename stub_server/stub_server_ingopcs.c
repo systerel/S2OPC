@@ -136,10 +136,13 @@ int main(void){
     }
 
     // Certificate Authority: load
-    if(STATUS_OK != KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca)){
-        printf("<Stub_Server: Failed to load CA\n");
-    }else{
-        printf("<Stub_Server: CA certificate loaded\n");
+    if(STATUS_OK == status){
+        status = KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca);
+        if(STATUS_OK != status){
+            printf("<Stub_Server: Failed to load CA\n");
+        }else{
+            printf("<Stub_Server: CA certificate loaded\n");
+        }
     }
 
     // Init stack configuration
