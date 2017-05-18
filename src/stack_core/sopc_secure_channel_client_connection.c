@@ -72,6 +72,7 @@ SC_ClientConnection* SC_Client_Create(){
     SC_ClientConnection* scClientConnection = NULL;
     TCP_UA_Connection* connection = TCP_UA_Connection_Create(scProtocolVersion, FALSE); // Server side connection == FALSE
     SC_Connection* sConnection = SC_Create(connection);
+    SOPC_StatusCode status = STATUS_OK;
 
     if(sConnection != NULL){
         scClientConnection = (SC_ClientConnection *) malloc (sizeof(SC_ClientConnection));
@@ -83,17 +84,19 @@ SC_ClientConnection* SC_Client_Create(){
             SOPC_String_Initialize(&scClientConnection->securityPolicy);
 
             scClientConnection->instance = sConnection;
-
-            // TODO: limit set by configuration insopc_stacks_csts ?
-            scClientConnection->pendingRequests = SLinkedList_Create(255);
-            if(scClientConnection->pendingRequests == NULL){
-                free(scClientConnection);
-                scClientConnection = NULL;
-            }
-
             scClientConnection->pkiProvider = NULL;
 
-            if(STATUS_OK != Mutex_Inititalization(&scClientConnection->mutex)){
+            // TODO: limit set by configuration ingopc_stacks_csts ?
+            scClientConnection->pendingRequests = SLinkedList_Create(255);
+            if(scClientConnection->pendingRequests == NULL){
+                status = STATUS_NOK;
+            }
+
+            if(STATUS_OK == status){
+                status = Mutex_Inititalization(&scClientConnection->mutex);
+            }
+
+            if(STATUS_OK != status){
                 SC_Client_Delete(scClientConnection);
                 scClientConnection = NULL;
             }
