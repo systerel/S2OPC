@@ -36,8 +36,8 @@ struct SLinkedList {
 
 SLinkedList* SLinkedList_Create(size_t sizeMax){
     SLinkedList* result = malloc(sizeof(SLinkedList));
-    memset(result, 0, sizeof(SLinkedList));
     if(result != NULL){
+        memset(result, 0, sizeof(SLinkedList));
         result->maxLength = sizeMax;
     }
     return result;
