@@ -17,6 +17,8 @@
 
 #include "sopc_builtintypes.h"
 
+#include "opcua_statuscodes.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,6 +40,25 @@ SOPC_StatusCode SOPC_Boolean_CopyAux(void* dest, void* src){
     if(NULL != dest && NULL != src){
         *((SOPC_Boolean*) dest) = *((SOPC_Boolean*) src);
         status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_Boolean_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        SOPC_Boolean cleft = *((SOPC_Boolean*) left);
+        SOPC_Boolean cright = *((SOPC_Boolean*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
     }
     return status;
 }
@@ -70,6 +91,25 @@ SOPC_StatusCode SOPC_SByte_CopyAux(void* dest, void* src){
     return status;
 }
 
+SOPC_StatusCode SOPC_SByte_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        SOPC_SByte cleft = *((SOPC_SByte*) left);
+        SOPC_SByte cright = *((SOPC_SByte*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
+    }
+    return status;
+}
+
 void SOPC_SByte_ClearAux(void* value){
     SOPC_SByte_Clear((SOPC_SByte*) value);
 }
@@ -94,6 +134,25 @@ SOPC_StatusCode SOPC_Byte_CopyAux(void* dest, void* src){
     if(NULL != dest && NULL != src){
         *((SOPC_Byte*) dest) = *((SOPC_Byte*) src);
         status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_Byte_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        SOPC_Byte cleft = *((SOPC_Byte*) left);
+        SOPC_Byte cright = *((SOPC_Byte*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
     }
     return status;
 }
@@ -126,6 +185,25 @@ SOPC_StatusCode SOPC_Int16_CopyAux(void* dest, void* src){
     return status;
 }
 
+SOPC_StatusCode SOPC_Int16_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        int16_t cleft = *((int16_t*) left);
+        int16_t cright = *((int16_t*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
+    }
+    return status;
+}
+
 void SOPC_Int16_ClearAux(void* value){
     SOPC_Int16_Clear((int16_t*) value);
 }
@@ -150,6 +228,25 @@ SOPC_StatusCode SOPC_UInt16_CopyAux(void* dest, void* src){
     if(NULL != dest && NULL != src){
         *((uint16_t*) dest) = *((uint16_t*) src);
         status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_UInt16_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        uint16_t cleft = *((uint16_t*) left);
+        uint16_t cright = *((uint16_t*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
     }
     return status;
 }
@@ -181,6 +278,25 @@ SOPC_StatusCode SOPC_Int32_CopyAux(void* dest, void* src){
     return status;
 }
 
+SOPC_StatusCode SOPC_Int32_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        int32_t cleft = *((int32_t*) left);
+        int32_t cright = *((int32_t*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
+    }
+    return status;
+}
+
 void SOPC_Int32_ClearAux(void* value){
     SOPC_Int32_Clear((int32_t*) value);
 }
@@ -204,6 +320,25 @@ SOPC_StatusCode SOPC_UInt32_CopyAux(void* dest, void* src){
     if(NULL != dest && NULL != src){
         *((uint32_t*) dest) = *((uint32_t*) src);
         status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_UInt32_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        uint32_t cleft = *((uint32_t*) left);
+        uint32_t cright = *((uint32_t*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
     }
     return status;
 }
@@ -235,6 +370,25 @@ SOPC_StatusCode SOPC_Int64_CopyAux(void* dest, void* src){
     return status;
 }
 
+SOPC_StatusCode SOPC_Int64_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        int64_t cleft = *((int64_t*) left);
+        int64_t cright = *((int64_t*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
+    }
+    return status;
+}
+
 void SOPC_Int64_ClearAux(void* value){
     SOPC_Int64_Clear((int64_t*) value);
 }
@@ -258,6 +412,25 @@ SOPC_StatusCode SOPC_UInt64_CopyAux(void* dest, void* src){
     if(NULL != dest && NULL != src){
         *((uint64_t*) dest) = *((uint64_t*) src);
         status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_UInt64_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        uint64_t cleft = *((uint64_t*) left);
+        uint64_t cright = *((uint64_t*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
     }
     return status;
 }
@@ -289,6 +462,25 @@ SOPC_StatusCode SOPC_Float_CopyAux(void* dest, void* src){
     return status;
 }
 
+SOPC_StatusCode SOPC_Float_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        float cleft = *((float*) left);
+        float cright = *((float*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
+    }
+    return status;
+}
+
 void SOPC_Float_ClearAux(void* value){
     SOPC_Float_Clear((float*) value);
 }
@@ -313,6 +505,25 @@ SOPC_StatusCode SOPC_Double_CopyAux(void* dest, void* src){
     if(NULL != dest && NULL != src){
         *((double*) dest) = *((double*) src);
         status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_Double_CompareAux(const void* left,
+                                        const void* right,
+                                        int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        double cleft = *((double*) left);
+        double cright = *((double*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
     }
     return status;
 }
@@ -629,6 +840,14 @@ SOPC_StatusCode SOPC_ByteString_Compare(const SOPC_ByteString* left,
     return status;
 }
 
+SOPC_StatusCode SOPC_ByteString_CompareAux(const void* left,
+                                           const void* right,
+                                           int32_t*    comparison){
+    return SOPC_ByteString_Compare((SOPC_ByteString*) left,
+                                   (SOPC_ByteString*) right,
+                                   comparison);
+}
+
 uint8_t SOPC_ByteString_Equal(const SOPC_ByteString* left,
                               const SOPC_ByteString* right)
 {
@@ -669,6 +888,15 @@ SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
     return STATUS_OK;
 }
 
+SOPC_StatusCode SOPC_String_CompareAux(const void* left,
+                                           const void* right,
+                                           int32_t*    comparison){
+    return SOPC_String_Compare((SOPC_String*) left,
+                               (SOPC_String*) right,
+                               FALSE,
+                               comparison);
+}
+
 uint32_t SOPC_String_Equal(const SOPC_String* left,
                            const SOPC_String* right)
 {
@@ -701,6 +929,22 @@ SOPC_StatusCode SOPC_XmlElement_CopyAux(void* dest, void* src){
     return SOPC_XmlElement_Copy((SOPC_XmlElement*) dest, (SOPC_XmlElement*) src);
 }
 
+SOPC_StatusCode SOPC_XmlElement_Compare(const SOPC_XmlElement* left,
+                                        const SOPC_XmlElement* right,
+                                        int32_t*               comparison){
+    return SOPC_ByteString_Compare((SOPC_ByteString*) left,
+                                   (SOPC_ByteString*) right,
+                                   comparison);
+}
+
+SOPC_StatusCode SOPC_XmlElement_CompareAux(const void* left,
+                                           const void* right,
+                                           int32_t*    comparison){
+    return SOPC_ByteString_Compare((SOPC_ByteString*) left,
+                                   (SOPC_ByteString*) right,
+                                   comparison);
+}
+
 void SOPC_XmlElement_ClearAux(void* value){
     SOPC_XmlElement_Clear((SOPC_XmlElement*) value);
 }
@@ -730,6 +974,33 @@ SOPC_StatusCode SOPC_DateTime_CopyAux(void* dest, void* src){
         status = STATUS_OK;
     }
     return status;
+}
+
+SOPC_StatusCode SOPC_DateTime_Compare(const SOPC_DateTime* left,
+                                      const SOPC_DateTime* right,
+                                      int32_t*             comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        int64_t dateLeft, dateRight;
+        dateLeft = SOPC_DateTime_ToInt64(left);
+        dateRight = SOPC_DateTime_ToInt64(right);
+        if(dateLeft < dateRight){
+            *comparison = -1;
+        }else if(dateRight < dateLeft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_DateTime_CompareAux(const void* left,
+                                           const void* right,
+                                           int32_t*    comparison){
+    return SOPC_DateTime_Compare((SOPC_DateTime*) left,
+                                 (SOPC_DateTime*) right,
+                                 comparison);
 }
 
 void SOPC_DateTime_ClearAux(void* value){
@@ -779,6 +1050,56 @@ SOPC_StatusCode SOPC_Guid_Copy(SOPC_Guid* dest, const SOPC_Guid* src){
 
 SOPC_StatusCode SOPC_Guid_CopyAux(void* dest, void* src){
     return SOPC_Guid_Copy((SOPC_Guid*) dest, (SOPC_Guid*) src);
+}
+
+SOPC_StatusCode SOPC_Guid_Compare(const SOPC_Guid* left,
+                                  const SOPC_Guid* right,
+                                  int32_t*         comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint64_t* guidLeft;
+    uint64_t* guidRight;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        if(left->Data1 == right->Data1){
+            *comparison = 0;
+        }else if(left->Data1 < right->Data1){
+            *comparison = -1;
+        }else{
+            *comparison = 1;
+        }
+        if(*comparison == 0){
+            if(left->Data2 < right->Data2){
+                *comparison = -1;
+            }else if(left->Data2 > right->Data2){
+                *comparison = 1;
+            }
+        }
+        if(*comparison == 0){
+            if(left->Data3 < right->Data3){
+                *comparison = -1;
+            }else if(left->Data3 > right->Data3){
+                *comparison = 1;
+            }
+        }
+        if(*comparison == 0){
+            guidLeft = (uint64_t*) left->Data4;
+            guidRight = (uint64_t*) right->Data4;
+            if(*guidLeft < *guidRight){
+                *comparison = -1;
+            }else if(*guidLeft > *guidRight){
+                *comparison = 1;
+            }
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_Guid_CompareAux(const void* left,
+                                     const void* right,
+                                     int32_t*    comparison){
+    return SOPC_Guid_Compare((SOPC_Guid*) left,
+                             (SOPC_Guid*) right,
+                             comparison);
 }
 
 void SOPC_Guid_ClearAux(void* value){
@@ -898,6 +1219,14 @@ SOPC_StatusCode SOPC_NodeId_Compare(const SOPC_NodeId* left,
     return status;
 }
 
+SOPC_StatusCode SOPC_NodeId_CompareAux(const void* left,
+                                       const void* right,
+                                       int32_t*    comparison){
+    return SOPC_NodeId_Compare((SOPC_NodeId*) left,
+                               (SOPC_NodeId*) right,
+                               comparison);
+}
+
 void SOPC_ExpandedNodeId_InitializeAux(void* value){
     SOPC_ExpandedNodeId_Initialize((SOPC_ExpandedNodeId*) value);
 }
@@ -931,6 +1260,36 @@ SOPC_StatusCode SOPC_ExpandedNodeId_CopyAux(void* dest, void* src){
     return SOPC_ExpandedNodeId_Copy((SOPC_ExpandedNodeId*) dest, (SOPC_ExpandedNodeId*) src);
 }
 
+SOPC_StatusCode SOPC_ExpandedNodeId_Compare(const SOPC_ExpandedNodeId* left,
+                                            const SOPC_ExpandedNodeId* right,
+                                            int32_t*                   comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && comparison != NULL){
+        status = SOPC_NodeId_Compare(&left->NodeId, &right->NodeId, comparison);
+        if(STATUS_OK == status && *comparison == 0){
+            status = SOPC_String_Compare(&left->NamespaceUri, &right->NamespaceUri, FALSE, comparison);
+            if(STATUS_OK == status && *comparison == 0){
+                if(left->ServerIndex < right->ServerIndex){
+                    *comparison = -1;
+                }else if(right->ServerIndex < left->ServerIndex){
+                    *comparison = 1;
+                }else{
+                    *comparison = 0;
+                }
+            }
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_ExpandedNodeId_CompareAux(const void* left,
+                                               const void* right,
+                                               int32_t*    comparison){
+    return SOPC_ExpandedNodeId_Compare((SOPC_ExpandedNodeId*) left,
+                                       (SOPC_ExpandedNodeId*) right,
+                                       comparison);
+}
+
 void SOPC_ExpandedNodeId_ClearAux(void* value){
     SOPC_ExpandedNodeId_Clear((SOPC_ExpandedNodeId*) value);
 }
@@ -959,6 +1318,25 @@ SOPC_StatusCode SOPC_StatusCode_CopyAux(void* dest, void* src){
     if(NULL != dest && NULL != src){
         *((SOPC_StatusCode*) dest) = *((SOPC_StatusCode*) src);
         status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_StatusCode_CompareAux(const void* left,
+                                           const void* right,
+                                           int32_t*    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        SOPC_StatusCode cleft = *((SOPC_StatusCode*) left);
+        SOPC_StatusCode cright = *((SOPC_StatusCode*) right);
+        if(cleft < cright){
+            *comparison = -1;
+        }else if(cright < cleft){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
     }
     return status;
 }
@@ -1014,6 +1392,64 @@ SOPC_StatusCode SOPC_DiagnosticInfo_CopyAux(void* dest, void* src){
     return SOPC_DiagnosticInfo_Copy((SOPC_DiagnosticInfo*) dest, (SOPC_DiagnosticInfo*) src);
 }
 
+SOPC_StatusCode SOPC_DiagnosticInfo_Compare(const SOPC_DiagnosticInfo* left,
+                                            const SOPC_DiagnosticInfo* right,
+                                            int32_t*                   comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        status = STATUS_OK;
+        if(left->Locale < right->Locale){
+            *comparison = -1;
+        }else if(right->Locale < left->Locale){
+            *comparison = 1;
+        }else{
+            *comparison = 0;
+        }
+        if(STATUS_OK == status && *comparison == 0){
+            if(left->LocalizedText < right->LocalizedText){
+                *comparison = -1;
+            }else if(right->LocalizedText < left->LocalizedText){
+                *comparison = 1;
+            }
+        }
+        if(STATUS_OK == status && *comparison == 0){
+            if(left->NamespaceUri < right->NamespaceUri){
+                *comparison = -1;
+            }else if(right->NamespaceUri < left->NamespaceUri){
+                *comparison = 1;
+            }
+        }
+        if(STATUS_OK == status && *comparison == 0){
+            if(left->SymbolicId < right->SymbolicId){
+                *comparison = -1;
+            }else if(right->SymbolicId < left->SymbolicId){
+                *comparison = 1;
+            }
+        }
+        if(STATUS_OK == status && *comparison == 0){
+            status = SOPC_String_Compare(&left->AdditionalInfo, &right->AdditionalInfo, FALSE, comparison);
+        }
+        if(STATUS_OK == status && *comparison == 0){
+            if(NULL == left->InnerDiagnosticInfo && NULL == right->InnerDiagnosticInfo){
+                *comparison = 0;
+            }else{
+                status = SOPC_DiagnosticInfo_Compare(left->InnerDiagnosticInfo,
+                                                     right->InnerDiagnosticInfo,
+                                                     comparison);
+            }
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_DiagnosticInfo_CompareAux(const void* left,
+                                               const void* right,
+                                               int32_t*    comparison){
+    return SOPC_DiagnosticInfo_Compare((SOPC_DiagnosticInfo*) left,
+                                       (SOPC_DiagnosticInfo*) right,
+                                       comparison);
+}
+
 void SOPC_DiagnosticInfo_ClearAux(void* value){
     SOPC_DiagnosticInfo_Clear((SOPC_DiagnosticInfo*) value);
 }
@@ -1063,6 +1499,33 @@ SOPC_StatusCode SOPC_QualifiedName_CopyAux(void* dest, void* src){
     return SOPC_QualifiedName_Copy((SOPC_QualifiedName*) dest, (SOPC_QualifiedName*) src);
 }
 
+SOPC_StatusCode SOPC_QualifiedName_Compare(const SOPC_QualifiedName* left,
+                                           const SOPC_QualifiedName* right,
+                                           int32_t* comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right){
+        status = SOPC_String_Compare(&left->Name, &right->Name, FALSE, comparison);
+        if(STATUS_OK == status && *comparison == 0){
+            if(left->NamespaceIndex < right->NamespaceIndex){
+                *comparison = -1;
+            }else if(left->NamespaceIndex < right->NamespaceIndex){
+                *comparison = 1;
+            }else{
+                *comparison = 0;
+            }
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_QualifiedName_CompareAux(const void* left,
+                                              const void* right,
+                                              int32_t*    comparison){
+    return SOPC_QualifiedName_Compare((SOPC_QualifiedName*) left,
+                                       (SOPC_QualifiedName*) right,
+                                       comparison);
+}
+
 void SOPC_QualifiedName_ClearAux(void* value){
     SOPC_QualifiedName_Clear((SOPC_QualifiedName*) value);
 }
@@ -1098,6 +1561,27 @@ SOPC_StatusCode SOPC_LocalizedText_Copy(SOPC_LocalizedText* dest, const SOPC_Loc
         }
     }
     return status;
+}
+
+SOPC_StatusCode SOPC_LocalizedText_Compare(const SOPC_LocalizedText* left,
+                                           const SOPC_LocalizedText* right,
+                                           int32_t* comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right){
+        status = SOPC_String_Compare(&left->Locale, &right->Locale, FALSE, comparison);
+        if(STATUS_OK == status && *comparison == 0){
+            status = SOPC_String_Compare(&left->Text, &right->Text, FALSE, comparison);
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_LocalizedText_CompareAux(const void* left,
+                                              const void* right,
+                                              int32_t*    comparison){
+    return SOPC_LocalizedText_Compare((SOPC_LocalizedText*) left,
+                                       (SOPC_LocalizedText*) right,
+                                       comparison);
 }
 
 SOPC_StatusCode SOPC_LocalizedText_CopyAux(void* dest, void* src){
@@ -1171,6 +1655,46 @@ SOPC_StatusCode SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SOPC
 
 SOPC_StatusCode SOPC_ExtensionObject_CopyAux(void* dest, void* src){
     return SOPC_ExtensionObject_Copy((SOPC_ExtensionObject*) dest, (SOPC_ExtensionObject*) src);
+}
+
+SOPC_StatusCode SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
+                                             const SOPC_ExtensionObject* right,
+                                             int32_t*                    comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        if(left->Encoding < right->Encoding){
+            *comparison = -1;
+        }else if(right->Encoding < left->Encoding){
+            *comparison = 1;
+        }else{
+            status = SOPC_ExpandedNodeId_Compare(&left->TypeId, &right->TypeId, comparison);
+            if(STATUS_OK == status && *comparison == 0){
+                switch(right->Encoding){
+                case SOPC_ExtObjBodyEncoding_None:
+                    *comparison = 0;
+                    break;
+                case SOPC_ExtObjBodyEncoding_ByteString:
+                    status = SOPC_ByteString_Compare(&left->Body.Bstring, &right->Body.Bstring, comparison);
+                    break;
+                case SOPC_ExtObjBodyEncoding_XMLElement:
+                    status = SOPC_XmlElement_Compare(&left->Body.Xml, &right->Body.Xml, comparison);
+                    break;
+                case SOPC_ExtObjBodyEncoding_Object:
+                    // TODO: compare encoded values or add a compare function in encodeable types
+                    status = OpcUa_BadNotSupported;
+                }
+            }
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_ExtensionObject_CompareAux(const void* left,
+                                                const void* right,
+                                                int32_t*    comparison){
+    return SOPC_ExtensionObject_Compare((SOPC_ExtensionObject*) left,
+                                       (SOPC_ExtensionObject*) right,
+                                       comparison);
 }
 
 void SOPC_ExtensionObject_ClearAux(void* value){
@@ -1647,6 +2171,165 @@ SOPC_StatusCode ApplyOpToVariantArrayBuiltInType(SOPC_BuiltinId                b
     return status;
 }
 
+SOPC_StatusCode CompareVariantsNonArrayBuiltInType(SOPC_BuiltinId           builtInTypeId,
+                                                   const SOPC_VariantValue* left,
+                                                   const SOPC_VariantValue* right,
+                                                   int32_t*                 comparison,
+                                                   SOPC_EncodeableObject_PfnComp* compAuxFunction){
+    SOPC_StatusCode status = STATUS_OK;
+    switch(builtInTypeId){
+        case SOPC_Null_Id:
+            break; // STATUS_NOK since no operation could be applied to a NULL variant
+        case SOPC_Boolean_Id:
+            status = compAuxFunction((void*) &left->Boolean, (void*) &right->Boolean, comparison);
+            break;
+        case SOPC_SByte_Id:
+            status = compAuxFunction((void*) &left->Sbyte, (void*) &right->Sbyte, comparison);
+            break;
+        case SOPC_Byte_Id:
+            status = compAuxFunction((void*) &left->Byte, (void*) &right->Byte, comparison);
+            break;
+        case SOPC_Int16_Id:
+            status = compAuxFunction((void*) &left->Int16, (void*) &right->Int16, comparison);
+            break;
+        case SOPC_UInt16_Id:
+            status = compAuxFunction((void*) &left->Uint16, (void*) &right->Uint16, comparison);
+            break;
+        case SOPC_Int32_Id:
+            status = compAuxFunction((void*) &left->Int32, (void*) &right->Int32, comparison);
+            break;
+        case SOPC_UInt32_Id:
+            status = compAuxFunction((void*) &left->Uint32, (void*) &right->Uint32, comparison);
+            break;
+        case SOPC_Int64_Id:
+            status = compAuxFunction((void*) &left->Int64, (void*) &right->Int64, comparison);
+            break;
+        case SOPC_UInt64_Id:
+            status = compAuxFunction((void*) &left->Uint64, (void*) &right->Uint64, comparison);
+            break;
+        case SOPC_Float_Id:
+            status = compAuxFunction((void*) &left->Floatv, (void*) &right->Floatv, comparison);
+            break;
+        case SOPC_Double_Id:
+            status = compAuxFunction((void*) &left->Doublev, (void*) &right->Doublev, comparison);
+            break;
+        case SOPC_String_Id:
+            status = compAuxFunction((void*) &left->String, (void*) &right->String, comparison);
+            break;
+        case SOPC_DateTime_Id:
+            status = compAuxFunction((void*) &left->Date, (void*) &right->Date, comparison);
+            break;
+        case SOPC_Guid_Id:
+            status = compAuxFunction((void*) left->Guid, (void*) right->Guid, comparison);
+            break;
+        case SOPC_ByteString_Id:
+            status = compAuxFunction((void*) &left->Bstring, (void*) &right->Bstring, comparison);
+            break;
+        case SOPC_XmlElement_Id:
+            status = compAuxFunction((void*) &left->XmlElt, (void*) &right->XmlElt, comparison);
+            break;
+        case SOPC_NodeId_Id:
+            status = compAuxFunction((void*) left->NodeId, (void*) right->NodeId, comparison);
+            break;
+        case SOPC_ExpandedNodeId_Id:
+            status = compAuxFunction((void*) left->ExpNodeId, (void*) right->ExpNodeId, comparison);
+            break;
+        case SOPC_StatusCode_Id:
+            status = compAuxFunction((void*) &left->Status, (void*) &right->Status, comparison);
+            break;
+        case SOPC_QualifiedName_Id:
+            status = compAuxFunction((void*) left->Qname, (void*) right->Qname, comparison);
+            break;
+        case SOPC_LocalizedText_Id:
+            status = compAuxFunction((void*) left->LocalizedText, (void*) right->LocalizedText, comparison);
+            break;
+        case SOPC_ExtensionObject_Id:
+            status = compAuxFunction((void*) left->ExtObject, (void*) right->ExtObject, comparison);
+            break;
+        case SOPC_DataValue_Id:
+            status = compAuxFunction((void*) left->DataValue, (void*) right->DataValue, comparison);
+            break;
+        case SOPC_DiagnosticInfo_Id:
+            status = compAuxFunction((void*) left->DiagInfo, (void*) right->DiagInfo, comparison);
+            break;
+        case SOPC_Variant_Id:
+            // Part 6 Table 14 (v1.03): "The value shall not be a Variant
+            //                           but it could be an array of Variants."
+            //Note: Variant is not encoded in INGOPCS stack for this case
+            break;
+        default:
+            break;
+    }
+    return status;
+}
+
+SOPC_StatusCode CompareVariantArrayBuiltInType(SOPC_BuiltinId                 builtInTypeId,
+                                               const SOPC_VariantArrayValue*  arrayLeft,
+                                               const SOPC_VariantArrayValue*  arrayRight,
+                                               int32_t                        length,
+                                               SOPC_EncodeableObject_PfnComp* compAuxFunction,
+                                               int32_t*                       comparison){
+    SOPC_StatusCode status = STATUS_NOK;
+    switch(builtInTypeId){
+        case SOPC_Null_Id:
+            // mantis #0003682: errata for 1.03 but not confirmed NULL array forbidden
+            break; // STATUS_NOK since a NULL must not be an array
+        case SOPC_Boolean_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->BooleanArr, (void *) arrayRight->BooleanArr, sizeof(SOPC_Boolean), compAuxFunction, comparison);
+        case SOPC_SByte_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->SbyteArr, (void *) arrayRight->SbyteArr, sizeof(SOPC_SByte), compAuxFunction, comparison);
+        case SOPC_Byte_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->ByteArr, (void *) arrayRight->ByteArr, sizeof(SOPC_Byte), compAuxFunction, comparison);
+        case SOPC_Int16_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->Int16Arr, (void *) arrayRight->Int16Arr, sizeof(int16_t), compAuxFunction, comparison);
+        case SOPC_UInt16_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->Uint16Arr, (void *) arrayRight->Uint16Arr, sizeof(uint16_t), compAuxFunction, comparison);
+        case SOPC_Int32_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->Int32Arr, (void *) arrayRight->Int32Arr, sizeof(int32_t), compAuxFunction, comparison);
+        case SOPC_UInt32_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->Uint32Arr, (void *) arrayRight->Uint32Arr, sizeof(uint32_t), compAuxFunction, comparison);
+        case SOPC_Int64_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->Int64Arr, (void *) arrayRight->Int64Arr, sizeof(int64_t), compAuxFunction, comparison);
+        case SOPC_UInt64_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->Uint64Arr, (void *) arrayRight->Uint64Arr, sizeof(uint64_t), compAuxFunction, comparison);
+        case SOPC_Float_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->FloatvArr, (void *) arrayRight->FloatvArr, sizeof(float), compAuxFunction, comparison);
+        case SOPC_Double_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->DoublevArr, (void *) arrayRight->DoublevArr, sizeof(double), compAuxFunction, comparison);
+        case SOPC_String_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->StringArr, (void *) arrayRight->StringArr, sizeof(SOPC_String), compAuxFunction, comparison);
+        case SOPC_DateTime_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->DateArr, (void *) arrayRight->DateArr, sizeof(SOPC_DateTime), compAuxFunction, comparison);
+        case SOPC_Guid_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->GuidArr, (void *) arrayRight->GuidArr, sizeof(SOPC_Guid), compAuxFunction, comparison);
+        case SOPC_ByteString_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->BstringArr, (void *) arrayRight->BstringArr, sizeof(SOPC_ByteString), compAuxFunction, comparison);
+        case SOPC_XmlElement_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->XmlEltArr, (void *) arrayRight->XmlEltArr, sizeof(SOPC_XmlElement), compAuxFunction, comparison);
+        case SOPC_NodeId_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->NodeIdArr, (void *) arrayRight->NodeIdArr, sizeof(SOPC_NodeId), compAuxFunction, comparison);
+        case SOPC_ExpandedNodeId_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->ExpNodeIdArr, (void *) arrayRight->ExpNodeIdArr, sizeof(SOPC_ExpandedNodeId), compAuxFunction, comparison);
+        case SOPC_StatusCode_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->StatusArr, (void *) arrayRight->StatusArr, sizeof(SOPC_StatusCode), compAuxFunction, comparison);
+        case SOPC_QualifiedName_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->QnameArr, (void *) arrayRight->QnameArr, sizeof(SOPC_QualifiedName), compAuxFunction, comparison);
+        case SOPC_LocalizedText_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->LocalizedTextArr, (void *) arrayRight->LocalizedTextArr, sizeof(SOPC_LocalizedText), compAuxFunction, comparison);
+        case SOPC_ExtensionObject_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->ExtObjectArr, (void *) arrayRight->ExtObjectArr, sizeof(SOPC_ExtensionObject), compAuxFunction, comparison);
+        case SOPC_DataValue_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->DataValueArr, (void *) arrayRight->DataValueArr, sizeof(SOPC_DataValue), compAuxFunction, comparison);
+        case SOPC_Variant_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->VariantArr, (void *) arrayRight->VariantArr, sizeof(SOPC_Variant), compAuxFunction, comparison);
+        case SOPC_DiagnosticInfo_Id:
+            return SOPC_Comp_Array(length, (void *) arrayLeft->DiagInfoArr, (void *) arrayRight->DiagInfoArr, sizeof(SOPC_DiagnosticInfo), compAuxFunction, comparison);
+        default:
+            break;
+    }
+    return status;
+}
+
 void SOPC_Variant_InitializeAux(void* value){
     SOPC_Variant_Initialize((SOPC_Variant*) value);
 }
@@ -1839,6 +2522,102 @@ SOPC_EncodeableObject_PfnOp* GetBuiltInTypeCopyFunction(SOPC_BuiltinId builtInTy
                 break;
         }
     return copyFunction;
+}
+
+SOPC_StatusCode SOPC_Null_CompareAux(const void* dest, const void* src, int32_t* comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != dest && NULL != src && NULL != comparison){
+        *comparison = 0;
+        status = STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_EncodeableObject_PfnComp* GetBuiltInTypeCompFunction(SOPC_BuiltinId builtInTypeId){
+    SOPC_EncodeableObject_PfnComp* compFunction = NULL;
+    switch(builtInTypeId){
+            case SOPC_Null_Id:
+                compFunction = SOPC_Null_CompareAux;
+                break;
+            case SOPC_Boolean_Id:
+                compFunction = SOPC_Boolean_CompareAux;
+                break;
+            case SOPC_SByte_Id:
+                compFunction = SOPC_SByte_CompareAux;
+                break;
+            case SOPC_Byte_Id:
+                compFunction = SOPC_Byte_CompareAux;
+                break;
+            case SOPC_Int16_Id:
+                compFunction = SOPC_Int16_CompareAux;
+                break;
+            case SOPC_UInt16_Id:
+                compFunction = SOPC_UInt16_CompareAux;
+                break;
+            case SOPC_Int32_Id:
+                compFunction = SOPC_Int32_CompareAux;
+                break;
+            case SOPC_UInt32_Id:
+                compFunction = SOPC_UInt32_CompareAux;
+                break;
+            case SOPC_Int64_Id:
+                compFunction = SOPC_Int64_CompareAux;
+                break;
+            case SOPC_UInt64_Id:
+                compFunction = SOPC_UInt64_CompareAux;
+                break;
+            case SOPC_Float_Id:
+                compFunction = SOPC_Float_CompareAux;
+                break;
+            case SOPC_Double_Id:
+                compFunction = SOPC_Double_CompareAux;
+                break;
+            case SOPC_String_Id:
+                compFunction = SOPC_String_CompareAux;
+                break;
+            case SOPC_DateTime_Id:
+                compFunction = SOPC_DateTime_CompareAux;
+                break;
+            case SOPC_Guid_Id:
+                compFunction = SOPC_Guid_CompareAux;
+                break;
+            case SOPC_ByteString_Id:
+                compFunction = SOPC_ByteString_CompareAux;
+                break;
+            case SOPC_XmlElement_Id:
+                compFunction = SOPC_XmlElement_CompareAux;
+                break;
+            case SOPC_NodeId_Id:
+                compFunction = SOPC_NodeId_CompareAux;
+                break;
+            case SOPC_ExpandedNodeId_Id:
+                compFunction = SOPC_ExpandedNodeId_CompareAux;
+                break;
+            case SOPC_StatusCode_Id:
+                compFunction = SOPC_StatusCode_CompareAux;
+                break;
+            case SOPC_QualifiedName_Id:
+                compFunction = SOPC_QualifiedName_CompareAux;
+                break;
+            case SOPC_LocalizedText_Id:
+                compFunction = SOPC_LocalizedText_CompareAux;
+                break;
+            case SOPC_ExtensionObject_Id:
+                compFunction = SOPC_ExtensionObject_CompareAux;
+                break;
+            case SOPC_DataValue_Id:
+                compFunction = SOPC_DataValue_CompareAux;
+                break;
+            case SOPC_Variant_Id:
+                compFunction = SOPC_Variant_CompareAux;
+                break;
+            case SOPC_DiagnosticInfo_Id:
+                compFunction = SOPC_DiagnosticInfo_CompareAux;
+                break;
+            default:
+                break;
+        }
+    return compFunction;
 }
 
 SOPC_StatusCode AllocVariantNonArrayBuiltInType(SOPC_BuiltinId     builtInTypeId,
@@ -2102,6 +2881,8 @@ SOPC_StatusCode SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src){
                 }
             }
             break;
+        default:
+            break;
         }
         if(STATUS_OK == status){
             dest->BuiltInTypeId = src->BuiltInTypeId;
@@ -2112,6 +2893,104 @@ SOPC_StatusCode SOPC_Variant_Copy(SOPC_Variant* dest, const SOPC_Variant* src){
     }
 
     return status;
+}
+
+SOPC_StatusCode SOPC_Variant_Compare(const SOPC_Variant* left,
+                                     const SOPC_Variant* right,
+                                     int32_t* comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint8_t error = FALSE;
+    int64_t matrixLength = 1; // For multiplication to compute from dimensions values
+    int32_t idx = 0;
+    if(left != NULL && right != NULL && comparison != NULL){
+        if(left->BuiltInTypeId == right->BuiltInTypeId){
+            if(left->ArrayType == right->ArrayType){
+                SOPC_EncodeableObject_PfnComp* compFunction = GetBuiltInTypeCompFunction(left->BuiltInTypeId);
+                if(compFunction == NULL)
+                    return STATUS_NOK;
+
+                switch(right->ArrayType){
+                case SOPC_VariantArrayType_SingleValue:
+                    status = CompareVariantsNonArrayBuiltInType(right->BuiltInTypeId,
+                            &left->Value,
+                            &right->Value,
+                            comparison,
+                            compFunction);
+                    break;
+                case SOPC_VariantArrayType_Array:
+                    if(left->Value.Array.Length < right->Value.Array.Length){
+                        status = STATUS_OK;
+                        *comparison = -1;
+                    }else if(left->Value.Array.Length > right->Value.Array.Length){
+                        status = STATUS_OK;
+                        *comparison = 1;
+                    }else{
+                        status = CompareVariantArrayBuiltInType(left->BuiltInTypeId,
+                                                                &left->Value.Array.Content,
+                                                                &right->Value.Array.Content,
+                                                                left->Value.Array.Length,
+                                                                compFunction,
+                                                                comparison);
+                    }
+                    break;
+                case SOPC_VariantArrayType_Matrix:
+                    if(left->Value.Matrix.Dimensions < right->Value.Matrix.Dimensions){
+                        status = STATUS_OK;
+                        *comparison = -1;
+                    }else if(left->Value.Matrix.Dimensions < right->Value.Matrix.Dimensions){
+                        status = STATUS_OK;
+                        *comparison = 1;
+                    }else{
+                        *comparison = 0;
+                        for(idx = 0; idx < left->Value.Matrix.Dimensions && FALSE == error && *comparison == 0; idx ++){
+                            if(left->Value.Matrix.ArrayDimensions[idx] > 0 &&
+                                    matrixLength * left->Value.Matrix.ArrayDimensions[idx] <= INT32_MAX)
+                            {
+                                if(left->Value.Matrix.ArrayDimensions[idx] < right->Value.Matrix.ArrayDimensions[idx]){
+                                    status = STATUS_OK;
+                                    *comparison = -1;
+                                }else if(left->Value.Matrix.ArrayDimensions[idx] > right->Value.Matrix.ArrayDimensions[idx]){
+                                    status = STATUS_OK;
+                                    *comparison = 1;
+                                }else{
+                                    matrixLength *= left->Value.Matrix.ArrayDimensions[idx];
+                                }
+                            }else{
+                                error = 1;
+                            }
+                        }
+                        if(FALSE == error && *comparison == 0){
+                            status = CompareVariantArrayBuiltInType(left->BuiltInTypeId,
+                                                                    &left->Value.Matrix.Content,
+                                                                    &right->Value.Matrix.Content,
+                                                                    left->Value.Array.Length,
+                                                                    compFunction,
+                                                                    comparison);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }else{
+                status = STATUS_OK;
+                *comparison = left->ArrayType - right->ArrayType;
+            }
+        }else{
+            status = STATUS_OK;
+            *comparison = left->BuiltInTypeId - right->BuiltInTypeId;
+        }
+    }
+
+    return status;
+}
+
+SOPC_StatusCode SOPC_Variant_CompareAux(const void* left,
+                                           const void* right,
+                                           int32_t*    comparison){
+    return SOPC_Variant_Compare((SOPC_Variant*) left,
+                                   (SOPC_Variant*) right,
+                                   comparison);
 }
 
 SOPC_StatusCode SOPC_Variant_CopyAux(void* dest, void* src){
@@ -2168,6 +3047,8 @@ void SOPC_Variant_Clear(SOPC_Variant* variant){
                     variant->Value.Matrix.Dimensions = 0;
                 }
                 break;
+            default:
+                break;
         }
 
         // Reset internal properties
@@ -2199,6 +3080,56 @@ SOPC_StatusCode SOPC_DataValue_Copy(SOPC_DataValue* dest, const SOPC_DataValue* 
         }
     }
     return status;
+}
+
+SOPC_StatusCode SOPC_DataValue_Compare(const SOPC_DataValue* left,
+                                       const SOPC_DataValue* right,
+                                       int32_t*              comparison){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != left && NULL != right && NULL != comparison){
+        if(left->Status < right->Status){
+            status = STATUS_OK;
+            *comparison = -1;
+        }else if(right->Status < left->Status){
+            status = STATUS_OK;
+            *comparison = 1;
+        }else{
+            status = SOPC_DateTime_Compare(&left->ServerTimestamp, &right->ServerTimestamp, comparison);
+        }
+        if(STATUS_OK == status && *comparison == 0){
+            if(left->ServerPicoSeconds < right->ServerPicoSeconds){
+                status = STATUS_OK;
+                *comparison = -1;
+            }else if(right->ServerPicoSeconds < left->ServerPicoSeconds){
+                status = STATUS_OK;
+                *comparison = 1;
+            }
+        }
+        if(STATUS_OK == status && *comparison == 0){
+            status = SOPC_DateTime_Compare(&left->SourceTimestamp, &right->SourceTimestamp, comparison);
+        }
+        if(STATUS_OK == status && *comparison == 0){
+            if(left->SourcePicoSeconds < right->SourcePicoSeconds){
+                status = STATUS_OK;
+                *comparison = -1;
+            }else if(right->SourcePicoSeconds < left->SourcePicoSeconds){
+                status = STATUS_OK;
+                *comparison = 1;
+            }
+        }
+        if(STATUS_OK == status && *comparison == 0){
+            SOPC_Variant_Compare(&left->Value, &right->Value, comparison);
+        }
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_DataValue_CompareAux(const void* left,
+                                          const void* right,
+                                          int32_t*    comparison){
+    return SOPC_DataValue_Compare((SOPC_DataValue*) left,
+                                  (SOPC_DataValue*) right,
+                                  comparison);
 }
 
 SOPC_StatusCode SOPC_DataValue_CopyAux(void* dest, void* src){
@@ -2244,6 +3175,29 @@ SOPC_StatusCode SOPC_Op_Array(int32_t noOfElts, void* eltsArrayLeft, void* eltsA
         for (idx = 0; idx < (size_t) noOfElts && STATUS_OK == status; idx ++){
             pos = idx * sizeOfElt;
             status = opFct(&(byteArrayLeft[pos]), &(byteArrayRight[pos]));
+        }
+    }else{
+        status = STATUS_INVALID_PARAMETERS;
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_Comp_Array(int32_t noOfElts, void* eltsArrayLeft, void* eltsArrayRight, size_t sizeOfElt,
+                                SOPC_EncodeableObject_PfnComp* compFct, int32_t* comparison)
+{
+    SOPC_StatusCode status = STATUS_OK;
+    size_t idx = 0;
+    size_t pos = 0;
+    SOPC_Byte* byteArrayLeft = eltsArrayLeft;
+    SOPC_Byte* byteArrayRight = eltsArrayRight;
+    if(noOfElts >= 0 &&
+       (size_t) noOfElts <= SIZE_MAX &&
+       byteArrayLeft != NULL && byteArrayRight != NULL)
+    {
+        *comparison = 0;
+        for (idx = 0; idx < (size_t) noOfElts && STATUS_OK == status && *comparison == 0; idx ++){
+            pos = idx * sizeOfElt;
+            status = compFct(&(byteArrayLeft[pos]), &(byteArrayRight[pos]), comparison);
         }
     }else{
         status = STATUS_INVALID_PARAMETERS;
