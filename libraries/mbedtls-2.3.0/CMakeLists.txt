@@ -31,8 +31,9 @@ find_package(Perl)
 if(PERL_FOUND)
 
     # If NULL Entropy is configured, display an appropriate warning
-    execute_process(COMMAND ${PERL_EXECUTABLE} scripts/config.pl get MBEDTLS_TEST_NULL_ENTROPY
-                        RESULT_VARIABLE result)
+	execute_process(COMMAND ${PERL_EXECUTABLE} scripts/config.pl get MBEDTLS_TEST_NULL_ENTROPY
+                        RESULT_VARIABLE result
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
     if(${result} EQUAL 0)
         message(WARNING ${NULL_ENTROPY_WARNING})
 
