@@ -89,10 +89,12 @@ SOPC_ServiceType* SOPC_Endpoint_FindService(SC_ServerEndpoint* sEndpoint,
     }
     do{
         current = serviceTable[idx];
-        if(current->RequestTypeId == requestTypeId){
-            result = current;
+        if(NULL != current){
+            if(current->RequestTypeId == requestTypeId){
+                result = current;
+            }
+            idx++;
         }
-        idx++;
     }
     while(current != NULL && result == NULL);
 
