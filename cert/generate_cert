@@ -4,7 +4,7 @@
 # openssl genrsa -aes128 -out client.key 1024
 
 # OR gen key without encryption for a 2048 bit asymmetric key
-lient.crt
+openssl ca -config cassl.cnf -policy signing_policy -days 365 -in client.csr -out client.crt
 
 #gen certificate format parsed by UA stack
 openssl x509 -in client.crt -out client.der -outform DER
