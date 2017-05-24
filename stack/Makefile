@@ -136,7 +136,7 @@ H_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "
 H_INCLUDE_PATHS=$(shell find $(UASTACK_DIR)/API $(UASTACK_DIR)/APIwrappers $(UASTACK_DIR)/crypto $(UASTACK_DIR)/core_types -maxdepth 1 -type f -name "*.h")
 
 # MBEDTLS INPUTS
-MBEDTLS_DIR=$(WORKSPACE_DIR)/lib/mbedtls-2.3.0
+MBEDTLS_DIR=$(WORKSPACE_DIR)/../libraries/mbedtls-2.3.0
 INCLUDES_MBEDTLS=-I$(MBEDTLS_DIR)/include
 LIBS_MBEDTLS=-L$(MBEDTLS_DIR)/library -lmbedtls -lmbedx509 -lmbedcrypto
 
