@@ -1,0 +1,77 @@
+INGOPCS OPC UA communication Stack and Toolkit
+==============================================
+
+This project provides a C source code implementation of the OPC UA
+communication stack, B model and C source code implementation of a
+minimal OPC UA Toolkit and a cryptographic library.
+
+Those elements are provided in the following directories:
+- Stack: the OPC UA Stack source code, unit tests and example tests
+- Toolkit: the OPC UA Toolkit model, source code and example tests
+- libraries: the cryptographic libraries provided (only mbedtls)
+
+Licenses: 
+- Unless specifically indicated otherwise in a file, INGOPCS files are
+licensed under the GNU AFFERO GPL v3 license, as can be found in:
+agpl-3.0.txt
+- OPC UA Stack code generated with the OPC foundation code generator
+  tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT
+  License 1.00
+- The mbedtls library is also distributed under the Apache 2.0 license
+
+INGOPCS OPC UA Stack features
+=============================
+- Client side:
+  * Opens a TCP UA connection: sends HELLO and handles ACK reply,
+  * Opens a Secure Channel: sends a OpenSecureChanel (OPN) request,
+    handles response from server,
+  * Security modes: None, Sign or SignAndEncrypt,
+  * Sends request messages for the OPC UA services, accepts responses,
+    decrypts them, and transmit them to the application,
+  * Wrappers (binary compatibility) for foundation OPC UA foundation
+    Stack API (no wrapper for encryption services used inside the stack).
+
+- Service side:
+  * Open a TCP UA listener: wait for TCP connection, then handles
+    HELLO and sends ACK reply,
+  * Opens a Secure Channel: check received OpenSecureChanel (OPN)
+    request and sends OPN response,
+  * Security modes: None, Sign or SignAndEncrypt,
+  * Check reception of OPC UA services requests and trigger the
+    application configured service treatment and response sending,
+  * Wrappers (binary compatibility) for foundation OPC UA foundation
+    Stack API (no wrapper for encryption services used inside the stack).
+
+- Available security policy (encryption schemes):
+  * http://opcfoundation.org/UA/SecurityPolicy#None,
+  * http://opcfoundation.org/UA/SecurityPolicy#Basic256,
+  * http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256.
+
+INGOPCS OPC UA Toolkit features
+===============================
+- Client side:
+  * Create a session with an anonymous user
+  * Send a request through the created session
+
+- Server side:
+ * Static address space defined
+ * Accepts creation of a session with an anonymous user
+ * Read service
+
+- Common features:
+  * Static configuration of a unique endpoint to open or connect to
+  * Security policy and mode can be used with None only
+
+
+INGOPCS OPC UA Stack and Toolkit tests
+======================================
+Compilation (Linux, tested under Ubuntu 14.04):
+- Pre-requesites: 
+  * gcc (tested with GCC version >= 4.8.4)
+  * make (tested with GNU Make version >= 3.81)
+  * Check library (https://libcheck.github.io/check/ version >= 0.10.0)
+- To compile the INGOPCS OPC UA Stack static library and INGOPCS OPC
+  UA Toolkit: execute the "make" command
+- To run the INGOPCS OPC UA Stack and INGOPCS OPC UA Toolkit tests:
+  execute the test-all.sh script: "./test-all.sh LOCAL"
+- Tests results are provided in stack/out/*.tap and toolkit/out/*.tap files

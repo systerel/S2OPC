@@ -2,8 +2,7 @@ INGOPCS OPC UA stack
 ====================
 
 This project contains the following elements:
-- src/: source files of the INGOPCS project OPC UA stack (client side
-  only)
+- src/: source files of the INGOPCS project OPC UA stack
 - lib/mbedtls-2.3.0: source files of mbedtls cryptographic library
 - test/ingopcs: unit tests on the stack
 - stub_client: define a client side simple use case of the stack (to
@@ -18,15 +17,6 @@ This project contains the following elements:
 - out: built internal tests executables, certificates and keys
   necessary for execution
 - apidoc/html: generated code documentation in HTML format
-
-Licenses: 
-- Unless specifically indicated otherwise in a file, INGOPCS files are
-licensed under the GNU AFFERO GPL v3 license, as can be found in:
-agpl-3.0.txt
-- OPC UA stack code generated with the OPC foundation code generator
-  tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT
-  License 1.00
-- The mbedtls library is also distributed under the Apache 2.0 license
 
 Compilation (Linux, tested under Ubuntu 14.04):
 - Pre-requesites: 
