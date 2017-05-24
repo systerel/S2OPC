@@ -23,7 +23,7 @@
 // Import Mutex type from platform dependent code
 #include "p_threads.h"
 
-SOPC_StatusCode Mutex_Inititalization(Mutex* mut);
+SOPC_StatusCode Mutex_Initialization(Mutex* mut);
 SOPC_StatusCode Mutex_Clear(Mutex* mut);
 SOPC_StatusCode Mutex_Lock(Mutex* mut);
 SOPC_StatusCode Mutex_Unlock(Mutex* mut);

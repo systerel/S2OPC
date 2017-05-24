@@ -88,7 +88,7 @@ TCP_UA_Connection* TCP_UA_Connection_Create(uint32_t scProtocolVersion,
         connection->maxMessageSizeSnd = OPCUA_ENCODER_MAXMESSAGELENGTH;
         connection->maxChunkCountRcv = 0;
         connection->maxChunkCountSnd = 0;
-        Mutex_Inititalization(&connection->mutex);
+        Mutex_Initialization(&connection->mutex);
 #if OPCUA_MULTITHREADED == FALSE
         // Will use the global socket manager
         connection->socketManager = NULL;

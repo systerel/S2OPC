@@ -20,7 +20,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
-SOPC_StatusCode Mutex_Inititalization(Mutex* mut){
+SOPC_StatusCode Mutex_Initialization(Mutex* mut){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     int retCode = 0;
     if(mut != NULL){

@@ -210,7 +210,7 @@ SOPC_StatusCode SOPC_SocketManager_Initialize(SOPC_SocketManager* socketMgr,
             }
             globalNbSockets += nbSockets;
 
-            Mutex_Inititalization(&socketMgr->mutex);
+            Mutex_Initialization(&socketMgr->mutex);
         }
     }
     return status;

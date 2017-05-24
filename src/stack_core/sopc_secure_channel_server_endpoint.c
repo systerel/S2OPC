@@ -891,7 +891,7 @@ SC_ServerEndpoint* SC_ServerEndpoint_Create(){
             result->secureChannelConnections = SLinkedList_Create(OPCUA_ENDPOINT_MAXCONNECTIONS);
 
             if(NULL != result->secureChannelConnections &&
-               STATUS_OK != Mutex_Inititalization(&result->mutex)){
+               STATUS_OK != Mutex_Initialization(&result->mutex)){
                 free(result);
                 result= NULL;
             }

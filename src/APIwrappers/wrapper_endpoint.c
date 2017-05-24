@@ -54,7 +54,7 @@ void* OpcUa_ThreadStartReception(void* nullData){
 
 void OpcUa_ReceptionThread_Start(){
     if(receptionThread.initDone == FALSE){
-        Mutex_Inititalization(&receptionThread.tMutex);
+        Mutex_Initialization(&receptionThread.tMutex);
         Mutex_Lock(&receptionThread.tMutex);
         receptionThread.initDone = 1;
         receptionThread.openEndpoints = 1;

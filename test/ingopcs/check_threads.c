@@ -77,7 +77,7 @@ START_TEST(test_thread_mutex)
     Thread thread;
     uint32_t cpt = 0;
     // Nominal behavior
-    SOPC_StatusCode status = Mutex_Inititalization(&gmutex);
+    SOPC_StatusCode status = Mutex_Initialization(&gmutex);
     ck_assert(status == STATUS_OK);
     status = Mutex_Lock(&gmutex);
     ck_assert(status == STATUS_OK);
@@ -95,7 +95,7 @@ START_TEST(test_thread_mutex)
     ck_assert(status == STATUS_OK);
 
     // Degraded behavior
-    status = Mutex_Inititalization(NULL);
+    status = Mutex_Initialization(NULL);
     ck_assert(status == STATUS_INVALID_PARAMETERS);
     status = Mutex_Lock(NULL);
     ck_assert(status == STATUS_INVALID_PARAMETERS);

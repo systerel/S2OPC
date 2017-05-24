@@ -93,7 +93,7 @@ SC_ClientConnection* SC_Client_Create(){
             }
 
             if(STATUS_OK == status){
-                status = Mutex_Inititalization(&scClientConnection->mutex);
+                status = Mutex_Initialization(&scClientConnection->mutex);
             }
 
             if(STATUS_OK != status){

@@ -18,7 +18,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
-SOPC_StatusCode Mutex_Inititalization(Mutex* mut){
+SOPC_StatusCode Mutex_Initialization(Mutex* mut){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(mut != NULL && *mut == NULL){
         *mut = CreateMutex(NULL,              // default security attributes
