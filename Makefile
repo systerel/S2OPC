@@ -41,12 +41,14 @@ ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      CC=gcc
      AR=ar
      STATIC_LIB_EXT=".a"
+     DYNAMIC_LIB_EXT=".so"
      EXCLUDE_DIR="*win*"
      PLATFORM_DIR="*linux*"
      PFLAGS=-std=c99 -pedantic -D_XOPEN_SOURCE=600
      LIBS=$(LIBS_MBEDTLS) -lpthread $(LIB_CHECK)
 else
     STATIC_LIB_EXT=".a"
+    DYNAMIC_LIB_EXT=".so"
     EXCLUDE_DIR="*linux*"
     PLATFORM_DIR="*win*"
     PFLAGS=-std=c99 -pedantic
@@ -226,6 +228,9 @@ library: config $(UASTACK_OBJ_FILES)
 	@"mkdir" -p $(LOCAL_INSTALL_DIR)/lib
 	@$(AR) -rc $(LOCAL_INSTALL_DIR)/lib/libingopcs$(STATIC_LIB_EXT) $(UASTACK_OBJ_FILES)
 	@$(AR) -s $(LOCAL_INSTALL_DIR)/lib/libingopcs$(STATIC_LIB_EXT)
+ifdef SHARED
+	@$(CC) -shared -o $(LOCAL_INSTALL_DIR)/lib/libingopcs$(DYNAMIC_LIB_EXT) -Wl,--whole-archive $(LOCAL_INSTALL_DIR)/lib/libingopcs$(STATIC_LIB_EXT) -Wl,--no-whole-archiv
+endif
 	@echo "Copying headers to includes in $(LOCAL_INSTALL_DIR)/include"
 	@"mkdir" -p $(LOCAL_INSTALL_DIR)/include
 	@"cp" $(H_INCLUDE_PATHS) $(LOCAL_INSTALL_DIR)/include
