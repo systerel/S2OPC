@@ -22,7 +22,7 @@ if ! [[ $2 =~ $regexp ]] ; then
    echo "Error: '$2' is not correct version number X.Y.Z";
    exit 1
 fi
-DELIVERY_NAME=INGOPCS_Stack_$2
+DELIVERY_NAME=INGOPCS_Toolkit_$2
 
 echo "Check branch and tag does not exist: $DELIVERY_NAME"
 git show-ref refs/heads/$DELIVERY_NAME &> /dev/null
@@ -50,15 +50,30 @@ git co -b $DELIVERY_NAME || exit 1
 echo "Generate and commit version file 'VERSION' with '$2' content"
 echo "$2" > VERSION
 git add VERSION &> /dev/null || exit 1
-git commit -m "Add VERSION file" &> /dev/null || exit 1
-echo "Generate documentation with doxygen"
+git commit -S -m "Add VERSION file" &> /dev/null || exit 1
+echo "Generate Stack and Toolkit binaries (Stack library and tests, Toolkit tests)"
+make cleanall
+make all
+if [[ $? != 0 ]]; then
+    echo "Error: Generation of Stack or Toolkit binaries failed";
+    exit 1
+fi
+echo "Add Stack and Toolkit binaries"
+git add -f bin/ &>/dev/null || exit 1
+git add -f install_stack/ &>/dev/null || exit 1
+make clean || exit 1
+git co bin || exit 1
+git co install_stack || exit 1
+echo "Generate Stack documentation with doxygen"
+cd stack
 doxygen doxygen/ingopcs-stack.doxyfile &> /dev/null || exit 1
-echo "Add documentation in delivery branch"
-git add -f apidoc &> /dev/null || exit 1
-git commit -m "Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
+cd ..
+echo "Add Stack documentation in delivery branch"
+git add -f stack/apidoc &> /dev/null || exit 1
+git commit -S -m "Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
 echo "Remove delivery script, .gitignore file and commit"
-git rm delivery.sh .gitignore &> /dev/null || exit 1
-git commit -m "Remove delivery script and .gitignore file" &> /dev/null || exit 1
+git rm -f delivery.sh .gitignore &> /dev/null || exit 1
+git commit -S -m "Remove delivery script and .gitignore file" &> /dev/null || exit 1
 echo "Generation of archive of version $DELIVERY_NAME"
 git archive --prefix=$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || exit 1
 
@@ -68,6 +83,6 @@ if [ $? -eq 0 ]; then
     echo "Please tag the $DELIVERY_NAME branch on bare repository"
 else
     echo "==========================================================="
-    echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' failed"
+    echo "Creation of delivery archive '$DELIVERY_NAME.tar.gz' FAILED"
     rm -f $DELIVERY_NAME.tar.gz || exit 1
 fi
