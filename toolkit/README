@@ -1,0 +1,73 @@
+INGOPCS OPC UA Toolkit
+======================
+
+This project contains the following elements:
+- B_model: B model of the Toolkit used to generate C source files
+- src/: C source files of the INGOPCS project OPC UA Toolkit
+- src/genc: C source files generated from B_model
+- src/impl: C source files linking code generated from B_model and OPC UA stack
+- src/test: C source files implementing tests of the OPC UA Toolkit
+- Makefile: makefile compiling tests and Toolkit code (not as a
+  library)
+- build: compiled files during make execution
+- out: built tests executables and tests result files
+
+Compilation (Linux, tested under Ubuntu 14.04):
+- Pre-requesites: 
+  * gcc (tested with GCC version >= 4.8.4)
+  * make (tested with GNU Make version >= 3.81)
+  * INGOPCS OPC UA Stack compiled as a library (default)
+- To compile the Toolkit as a simple client / server use case, and unit tests:
+  execute the "make" command
+
+Current status:
+- None security policy and security mode shall be used
+- One secure channel and session with anonymous user can be opened and
+  closed
+- A statically defined address space shall be provided on server-side
+- Read service is provided on server-side
+
+Documentation: 
+- Toolkit API is provided by the file src/genc/io_dispatch_mgr.h
+- Endpoint address configuration shall be provided through
+  ENDPOINT_URL variable. It is done through src/test/config_toolkit.h
+  in the provided examples
+
+Server-side documentation:
+- Use example of the Toolkit + Stack as a server is provided by
+src/test/test_server.c
+- A statically defined address space shall be provided. In the
+example it is provided by the src/test/gen_addspace.c source file.
+
+Client-side documentation:
+- Use example of the Toolkit + Stack as a client is provided by
+  src/test/test_client.c
+- A statically defined read service callback shall be provided to
+  treat read response. In the example it is provided by
+  testlib_read_response{.h,.c} through the
+  test_results_set_read_result function.
+
+
+Tests are covering the following cases:
+- Unit tests: read service of server
+- Client/Server simple use case:
+  * Client side:
+    > Client requests to open a session on configured endpoint with
+      security policy None and in None security mode
+    > Client waits session is created and then ask to activate a
+      session with anonymous user
+    > Clients waits session is activated and then send a read request
+      to server
+    > Clients waits read response is received and close the session
+  * Server side:
+    > Server opens configured endpoint with security policy None and
+      in None security mode and wait for connections from one client
+    > On client connection and reception of an open a secure channel
+      request, it responds with an open secure channel response and
+      keep the secure channel opened
+    > On client session creation and activation request (with
+      anonymous user) on opened secure channel, it answers with
+      positive responses
+    > On client read request on an activated session, it reponds with
+      corresponding read response
+    > When secure channel connection is closed by client it stops
