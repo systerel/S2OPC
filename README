@@ -83,3 +83,10 @@ Run all tests:
   execute the test-all.sh script: "./test-all.sh LOCAL"
 - Tests results are provided in bin/*.tap files and shall indicate
   "Passed" status for each test
+Run a particular test (bin directory):
+- OPC UA Stack unit tests: execute ./check_stack
+- OPC UA Stack client/server example: execute ./stub_server_ingopcs
+  and then ./stub_client_ingopcs in parallel
+- OPC UA Toolkit read service test: execute ./test_read
+- OPC UA Toolkit client/server session and read service example:
+  execute ./test_server and then ./test_sessions in parallel

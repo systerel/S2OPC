@@ -32,5 +32,7 @@ fi
 mid -C stack EXEC_DIR=$BIN_PATH client_server_test
 # run stack unit tests
 mid -C stack EXEC_DIR=$BIN_PATH check CK_TAP_LOG_FILE_NAME=results.tap
+# run toolkit read tests
+mid -C toolkit PATHEXEC=$BIN_PATH test_read
 # run toolkit client server tests
 mid -C toolkit PATHEXEC=$BIN_PATH client_server_test

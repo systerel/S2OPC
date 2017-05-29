@@ -85,7 +85,12 @@ $(SERVER_EXEC): config $(OBJS) $(SERVER_OBJS)
 $(READ_EXEC): config $(OBJS) $(READ_OBJS)
 	gcc $(OBJS) $(READ_OBJS) $(LIBS) $(LFLAGS) -o $(READ_EXEC)
 
+test_read: $(READ_EXEC)
+	@echo "Executing Toolkit read test"
+	./run_read_test.sh $(PATHEXEC)
+
 client_server_test: $(CLIENT_EXEC) $(SERVER_EXEC)
+	@echo "Executing Toolkit client / server test"
 	./run_client_server_test.sh $(PATHEXEC)
 
 
