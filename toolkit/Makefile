@@ -3,8 +3,6 @@ PATHGENTRAD=./B_model/tradc
 PATHTRAD=./src/genc
 PATHIMPL=./src/impl
 PATHTEST=./src/test
-LIB     =libread.a
-PATHINST=./install
 
 STACK_H   =../stack/install/include
 STACK_LIB =../stack/install/lib
@@ -37,25 +35,20 @@ SERVER_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(SERVER_OBJS))
 READ_OBJS   += wrap_read.o
 READ_OBJS   :=$(patsubst %,$(PATHOBJ)/%,$(READ_OBJS))
 
-.PHONY: all config clean trad
+.PHONY: all config clean trad client_server_test
 
 default: all
 
-all: config $(OBJS) $(CLIENT_OBJS) $(SERVER_OBJS) $(READ_OBJS)
-	gcc $(OBJS) $(CLIENT_OBJS) $(LIBS) $(LFLAGS) -o $(CLIENT_EXEC)
-	gcc $(OBJS) $(SERVER_OBJS) $(LIBS) $(LFLAGS) -o $(SERVER_EXEC)
-	gcc $(OBJS) $(READ_OBJS)   $(LIBS) $(LFLAGS) -o $(READ_EXEC)
-	ar rc $(LIB) $(OBJS)
+all: config $(OBJS) $(CLIENT_EXEC) $(SERVER_EXEC) $(READ_OBJS)
+	gcc $(OBJS) $(READ_OBJS) $(LIBS) $(LFLAGS) -o $(READ_EXEC)
 
-config:
+config: 
 	@mkdir -p $(PATHOBJ)
-	@mkdir -p $(PATHINST)
 
 clean:
 	@# Protect against executing rm -r /*
-	[ -d "$(PATHINST)" ] && \rm -rf $(PATHINST) || true
 	[ -d "$(PATHOBJ)" ] && \rm -rf $(PATHOBJ) || true
-	\rm -f $(CLIENT_EXEC) $(SERVER_EXEC) $(READ_EXEC) $(LIB)
+	\rm -f $(CLIENT_EXEC) $(SERVER_EXEC) $(READ_EXEC)
 
 trad:
 	@rm -fr $(PATHTRAD)
@@ -77,8 +70,13 @@ out/%.o: $(PATHIMPL)/%.c
 out/%.o: $(PATHTEST)/%.c
 	gcc $(CFLAGS) $(INCLUDES) $< -o $@
 
-install: all
-	@echo "Copying .h and .a to $(PATHINST)"
-	@cp ./*.h $(PATHINST)
-	@cp $(PATHTRAD)/*.h $(PATHINST)
-	@cp $(LIB) $(PATHINST)
+$(CLIENT_EXEC): config $(OBJS) $(CLIENT_OBJS)
+	gcc $(OBJS) $(CLIENT_OBJS) $(LIBS) $(LFLAGS) -o $(CLIENT_EXEC)
+
+$(SERVER_EXEC): config $(OBJS) $(SERVER_OBJS)
+	gcc $(OBJS) $(SERVER_OBJS) $(LIBS) $(LFLAGS) -o $(SERVER_EXEC)
+
+client_server_test: $(CLIENT_EXEC) $(SERVER_EXEC)
+	./run_client_server_test.sh
+
+
