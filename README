@@ -6,9 +6,12 @@ communication stack, B model and C source code implementation of a
 minimal OPC UA Toolkit and a cryptographic library.
 
 Those elements are provided in the following directories:
-- Stack: the OPC UA Stack source code, unit tests and example tests
-- Toolkit: the OPC UA Toolkit model, source code and example tests
+- stack: the OPC UA Stack source code, unit tests and example tests
+- toolkit: the OPC UA Toolkit model, source code and example tests
 - libraries: the cryptographic libraries provided (only mbedtls)
+- bin: test binaries for OPC UA Stack and Toolkit (Linux 64 bits only)
+- install_stack: local installation of the OPC UA stack static library
+  and headers
 
 Licenses: 
 - Unless specifically indicated otherwise in a file, INGOPCS files are
@@ -72,6 +75,11 @@ Compilation (Linux, tested under Ubuntu 14.04):
   * Check library (https://libcheck.github.io/check/ version >= 0.10.0)
 - To compile the INGOPCS OPC UA Stack static library and INGOPCS OPC
   UA Toolkit: execute the "make" command
+- Then OPC UA stack library installation files are generated in
+  install_stack/ directory and all test binaries (and configuraiton
+  files) are generated into bin/ directory
+Run all tests:
 - To run the INGOPCS OPC UA Stack and INGOPCS OPC UA Toolkit tests:
   execute the test-all.sh script: "./test-all.sh LOCAL"
-- Tests results are provided in stack/out/*.tap and toolkit/out/*.tap files
+- Tests results are provided in bin/*.tap files and shall indicate
+  "Passed" status for each test

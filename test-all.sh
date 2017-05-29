@@ -8,6 +8,9 @@
 
 set -e
 
+BIN_DIR=bin
+BIN_PATH=../$BIN_DIR
+
 DOCKER_IMAGE=c706f497db33
 ISLOCAL=$1
 
@@ -26,8 +29,8 @@ else
     mid clean all
 fi
 # run stack client server tests
-mid -C stack client_server_test
+mid -C stack EXEC_DIR=$BIN_PATH client_server_test
 # run stack unit tests
-mid -C stack check CK_TAP_LOG_FILE_NAME=results.tap
+mid -C stack EXEC_DIR=$BIN_PATH check CK_TAP_LOG_FILE_NAME=results.tap
 # run toolkit client server tests
-mid -C toolkit client_server_test
+mid -C toolkit PATHEXEC=$BIN_PATH client_server_test

@@ -89,11 +89,15 @@ endif
 
 # OUTPUTS
 WORKSPACE_DIR=.
+ifndef EXEC_DIR
+    EXEC_DIR=$(WORKSPACE_DIR)/out
+endif
 CERT_DIR=$(WORKSPACE_DIR)/cert
-EXEC_DIR=$(WORKSPACE_DIR)/out
 BUILD_DIR=$(WORKSPACE_DIR)/build
 BUILD_DIR_SED=$(subst /,\/,$(BUILD_DIR))
-LOCAL_INSTALL_DIR=$(WORKSPACE_DIR)/install
+ifndef LOCAL_INSTALL_DIR
+    LOCAL_INSTALL_DIR=$(WORKSPACE_DIR)/install
+endif
 
 # INPUTS
 
@@ -240,7 +244,7 @@ install:
 	@"cp" -r $(LOCAL_INSTALL_DIR)/* $(INSTALL_PREFIX)/
 
 client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs
-	./run_client_server_test.sh
+	./run_client_server_test.sh $(EXEC_DIR)
 
 mbedtls:
 	@echo "Building mbedtls..."

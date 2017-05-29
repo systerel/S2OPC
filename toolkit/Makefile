@@ -1,12 +1,17 @@
 PATHOBJ =./build
-PATHEXEC =./out
+ifndef PATHEXEC
+    PATHEXEC =./out
+endif
 PATHGENTRAD=./B_model/tradc
 PATHTRAD=./src/genc
 PATHIMPL=./src/impl
 PATHTEST=./src/test
 
-STACK_H   =../stack/install/include
-STACK_LIB =../stack/install/lib
+ifndef STACK_INSTALL
+    STACK_INSTALL=../install_stack
+endif
+STACK_H   =$(STACK_INSTALL)/include
+STACK_LIB =$(STACK_INSTALL)/lib
 CRYPTO_LIB = ../libraries/mbedtls-2.3.0/library
 
 CFLAGS  =-g -c -Wall -Wextra -O0 -Wno-unused-parameter
@@ -40,8 +45,7 @@ READ_OBJS   :=$(patsubst %,$(PATHOBJ)/%,$(READ_OBJS))
 
 default: all
 
-all: config $(OBJS) $(CLIENT_EXEC) $(SERVER_EXEC) $(READ_OBJS)
-	gcc $(OBJS) $(READ_OBJS) $(LIBS) $(LFLAGS) -o $(READ_EXEC)
+all: config $(OBJS) $(CLIENT_EXEC) $(SERVER_EXEC) $(READ_EXEC)
 
 config: 
 	@mkdir -p $(PATHOBJ)
@@ -78,7 +82,10 @@ $(CLIENT_EXEC): config $(OBJS) $(CLIENT_OBJS)
 $(SERVER_EXEC): config $(OBJS) $(SERVER_OBJS)
 	gcc $(OBJS) $(SERVER_OBJS) $(LIBS) $(LFLAGS) -o $(SERVER_EXEC)
 
+$(READ_EXEC): config $(OBJS) $(READ_OBJS)
+	gcc $(OBJS) $(READ_OBJS) $(LIBS) $(LFLAGS) -o $(READ_EXEC)
+
 client_server_test: $(CLIENT_EXEC) $(SERVER_EXEC)
-	./run_client_server_test.sh
+	./run_client_server_test.sh $(PATHEXEC)
 
 
