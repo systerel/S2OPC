@@ -54,7 +54,7 @@ INGOPCS OPC UA Toolkit features
 ===============================
 - Client side:
   * Create a session with an anonymous user
-  * Send a request through the created session
+  * Send a read request through the created session
 
 - Server side:
  * Static address space defined
@@ -63,7 +63,7 @@ INGOPCS OPC UA Toolkit features
 
 - Common features:
   * Static configuration of a unique endpoint to open or connect to
-  * Security policy and mode can be used with None only
+  * Security policy and mode can be used with None value only
 
 
 INGOPCS OPC UA Stack and Toolkit tests
@@ -78,15 +78,17 @@ Compilation (Linux, tested under Ubuntu 14.04):
 - Then OPC UA stack library installation files are generated in
   install_stack/ directory and all test binaries (and configuraiton
   files) are generated into bin/ directory
+
 Run all tests:
-- To run the INGOPCS OPC UA Stack and INGOPCS OPC UA Toolkit tests:
-  execute the test-all.sh script: "./test-all.sh LOCAL"
+- To (compile and) run the INGOPCS OPC UA Stack and INGOPCS OPC UA
+  Toolkit tests: execute the test-all.sh script: "./test-all.sh LOCAL"
 - Tests results are provided in bin/*.tap files and shall indicate
   "Passed" status for each test
+
 Run a particular test (bin directory):
 - OPC UA Stack unit tests: execute ./check_stack
 - OPC UA Stack client/server example: execute ./stub_server_ingopcs
   and then ./stub_client_ingopcs in parallel
-- OPC UA Toolkit read service test: execute ./test_read
+- OPC UA Toolkit read service test: execute ./toolkit_test_read
 - OPC UA Toolkit client/server session and read service example:
-  execute ./test_server and then ./test_sessions in parallel
+  execute ./toolkit_test_server and then ./toolkit_test_client in parallel

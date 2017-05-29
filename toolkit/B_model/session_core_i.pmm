@@ -1,0 +1,72 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+THEORY User_Pass IS
+  ff(0) & mp(Tac(Simp_Delete))
+;
+  ff(0) & mp(Tac(ContradictingState))
+;
+  Pattern(#a.b or c) &
+    ff(0) & mp(Tac(Simp_Delete)) & ar(SplitOr.2,Once) & mp(Tac(Simp_Delete))
+;
+  Pattern(#a.b or c) &
+    ff(0) & mp(Tac(Simp_Delete)) & ar(SplitOr.1,Once) &
+      dd(0) & se(l_nsession$1,l_request_handle) & mp
+END
+
+&
+
+THEORY Simp_Delete IS
+
+  band(binhyp(not(x: A)),
+       binhyp(r: B +-> A)) &
+  blvar(Q) & Q\(x,r)
+  =>
+  r|>>{x} == r
+;
+  binhyp(not(x: dom(r))) &
+  band(binhyp(not(y: A)),
+       binhyp(r: B +-> A)) &
+  blvar(Q) & Q\(x,y,r)
+  =>
+  r<+{x|->y}|>>{y} == r
+;
+  band(binhyp(not(x: A)),
+       binhyp(r: A <-> B)) &
+  blvar(Q) & Q\(x,r)
+  =>
+  {x}<<|(r<+{x|->y}) == r
+;
+  band(binhyp(not(x: A)),
+       binhyp(r: A <-> B)) &
+  blvar(Q) & Q\(x,r)
+  =>
+  {x}<<|r == r
+
+END
+
+&
+
+THEORY ContradictingState IS
+
+  band(binhyp(a = b),
+  band(binhyp(a = c), bnot(bpattern(b,c)))) &  /* TODO improve */
+  not(b = c)
+  =>
+  G
+
+END

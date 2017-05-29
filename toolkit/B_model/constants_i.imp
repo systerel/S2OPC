@@ -1,0 +1,45 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION constants_i
+REFINES constants
+
+IMPORTS
+    constants_bs
+
+PROPERTIES
+    t_Node = 1..k_n_nodes_max &
+    t_ReadValue = 1..k_n_read_resp_max &
+    cast_t_ReadValue = id(t_ReadValue)
+
+VALUES
+    k_n_nodes_max = 1000+8;
+    k_n_read_resp_max = 5000;
+
+    t_Node_i = 0..k_n_nodes_max;
+    t_ReadValue_i = 0..k_n_read_resp_max;
+
+    c_Node_indet = 0;
+    c_ReadValue_indet = 0
+
+OPERATIONS
+    rvi <-- read_cast_t_ReadValue(ii) =
+    BEGIN
+        rvi := ii
+    END
+
+END

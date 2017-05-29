@@ -1,0 +1,525 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION io_dispatch_mgr_i
+REFINES io_dispatch_mgr
+    
+SEES
+    constants
+    
+IMPORTS
+    session_mgr,
+    message_in_bs,
+    message_out_bs,
+    service_read,
+    channel_mgr_bs,
+    request_handle_bs,
+    service_read_cli_cb_bs
+    
+PROMOTES
+    get_session_state_or_closed
+    
+LOCAL_OPERATIONS
+    
+    resp_msg_typ <-- get_response_type (req_msg_typ) =
+    PRE
+        req_msg_typ : t_msg_type &
+        req_msg_typ : s_req_msgs
+    THEN
+       resp_msg_typ :(resp_msg_typ : t_msg_type &
+                      resp_msg_typ : s_resp_msgs)
+    END
+    ;
+    
+    bres <-- is_request_type (msg_typ) =
+    PRE
+        msg_typ : t_msg_type
+    THEN
+        bres :: BOOL
+    END
+    
+    
+OPERATIONS
+    
+    resp_msg_typ <-- get_response_type (req_msg_typ) =
+    BEGIN
+        CASE req_msg_typ OF
+            EITHER e_msg_tcpua_hello THEN
+                resp_msg_typ := e_msg_tcpua_ack
+            OR e_msg_sc_open_channel_req THEN
+                resp_msg_typ := e_msg_sc_open_channel_resp
+            OR e_msg_sc_close_channel_req THEN
+                resp_msg_typ := e_msg_sc_close_channel_resp
+            OR e_msg_public_service_req THEN
+                resp_msg_typ := e_msg_public_service_resp
+            OR e_msg_session_create_req THEN
+                resp_msg_typ := e_msg_session_create_resp
+            OR e_msg_session_activate_req THEN
+                resp_msg_typ := e_msg_session_activate_resp
+            OR e_msg_session_close_req THEN
+                resp_msg_typ := e_msg_session_close_resp
+            OR e_msg_session_read_req THEN
+                resp_msg_typ := e_msg_session_read_resp
+            END
+        END 
+    END
+    ;
+    
+    bres <-- is_request_type (msg_typ) =
+    BEGIN
+        CASE msg_typ OF
+            EITHER e_msg_tcpua_hello,
+                e_msg_sc_open_channel_req, 
+                e_msg_sc_close_channel_req,
+                e_msg_public_service_req,
+                e_msg_session_create_req,
+                e_msg_session_activate_req,
+                e_msg_session_close_req,
+                e_msg_session_read_req
+            THEN
+                bres := TRUE
+            ELSE
+                
+                bres := FALSE
+            END
+        END
+    END
+    ;
+    
+    msgs_memory_changed =
+    BEGIN
+        msg_in_memory_changed;
+        msg_out_memory_changed
+    END
+    ;
+    
+    receive_msg (channel, msg) =
+    VAR
+        l_request_handle,
+        l_session_token,
+        l_session,
+        l_valid_msg,
+        l_msg_type,
+        l_valid_channel,
+        l_is_client,
+        l_is_req,
+        l_is_valid_req,
+        l_snd_session_err,
+        l_is_valid_resp,
+        l_status,
+        l_resp_msg_typ,
+        l_resp_msg,
+        l_to_send,
+        l_ret
+    IN
+        l_valid_channel <-- is_valid_channel (channel);
+        l_valid_msg <-- is_valid_msg_in (msg);
+        IF l_valid_channel = TRUE &
+            l_valid_msg = TRUE
+        THEN
+            l_msg_type <-- get_msg_in_type (msg);
+            CASE l_msg_type OF
+                EITHER e_msg_tcpua_hello, e_msg_tcpua_ack,
+                    e_msg_sc_open_channel_req, e_msg_sc_open_channel_resp,
+                    e_msg_sc_close_channel_req, e_msg_sc_close_channel_resp,
+                    e_msg_public_service_req, e_msg_public_service_resp
+                THEN
+                    /* TODO: no channel msg nor public service treated for now */
+                    IF l_msg_type = e_msg_tcpua_hello
+                    THEN
+                        receive_hello_msg (msg)
+                    ELSE
+                        /* message type is secure channel level message */  
+                        receive_channel_msg (channel, msg)
+                    END
+                ELSE
+                    l_is_client <-- is_client_channel (channel);
+                    l_is_req <-- is_request_type (l_msg_type);
+                    
+                    IF l_is_client = TRUE & l_is_req = FALSE
+                    THEN
+                        
+                        /* client treatment */
+                        CASE l_msg_type OF
+                            EITHER e_msg_session_create_resp, 
+                                e_msg_session_activate_resp,
+                                e_msg_session_close_resp
+                            THEN
+                                l_request_handle <-- read_msg_header_req_handle (msg);
+                                receive_session_resp (channel, l_request_handle, msg, l_msg_type);
+                                remove_req_handle (l_request_handle)
+                            OR e_msg_session_read_resp
+                            THEN
+                                l_request_handle <-- read_msg_header_req_handle (msg);
+                                l_is_valid_resp <-- cli_validate_session_service_resp (channel, l_request_handle, msg);
+                                IF l_is_valid_resp = TRUE
+                                THEN
+                                    l_status <-- read_msg_resp_header_service_status (msg);
+                                    // TODO: manage session read resp correctly
+                                    cli_service_read_response (msg, l_status)
+                                END
+                            END
+                        END
+                    ELSIF l_is_client = FALSE & l_is_req = TRUE
+                    THEN
+                        /* server treatment */
+                        CASE l_msg_type OF
+                            EITHER e_msg_session_create_req, 
+                                e_msg_session_activate_req,
+                                e_msg_session_close_req
+                            THEN
+                                l_request_handle <-- read_msg_header_req_handle (msg);
+                                l_session_token <-- read_msg_req_header_session_token (msg);
+                                l_resp_msg_typ <-- get_response_type (l_msg_type);
+                                l_resp_msg <-- alloc_msg (l_resp_msg_typ);
+                                l_valid_msg <-- is_valid_msg_out (l_resp_msg);
+                                IF l_valid_msg = TRUE
+                                THEN
+                                    /* TODO: ret value to guarantee session is valid */
+                                    l_to_send, l_session <-- receive_session_req (channel, l_request_handle, l_session_token, msg, l_msg_type, l_resp_msg);
+                                    IF l_to_send = TRUE
+                                    THEN
+                                        write_msg_out_header_req_handle (l_resp_msg, l_request_handle);
+                                        l_ret <-- send_channel_msg (channel, l_resp_msg);
+                                        IF l_ret /= e_sc_ok
+                                        THEN
+                                            cli_close_session (l_session)
+                                        END
+                                    END;
+                                    dealloc_msg_out (l_resp_msg)
+                                END
+                            OR e_msg_session_read_req
+                            THEN
+                                l_request_handle <-- read_msg_header_req_handle (msg);
+                                l_session_token <-- read_msg_req_header_session_token (msg);
+                                l_is_valid_req, l_snd_session_err <-- srv_validate_session_service_req (channel, l_request_handle, l_session_token, msg);
+                                IF l_is_valid_req = TRUE 
+                                THEN
+                                    l_resp_msg <-- alloc_msg (e_msg_session_read_resp);
+                                    l_valid_msg <-- is_valid_msg_out (l_resp_msg);
+                                    l_session <-- get_session_from_token (l_session_token);
+                                    IF l_valid_msg = TRUE
+                                    THEN
+                                        treat_read_request(msg, l_resp_msg);
+                                        l_is_valid_resp, l_snd_session_err <-- srv_validate_session_service_resp (channel, l_session, l_request_handle, msg, l_resp_msg);
+                                        IF l_is_valid_resp = TRUE THEN
+                                            write_msg_out_header_req_handle (l_resp_msg, l_request_handle);
+                                            l_ret <-- send_channel_msg (channel, l_resp_msg)
+                                        END;
+                                        dealloc_msg_out (l_resp_msg)
+                                    END
+                                    // TODO log error if any
+                                END;
+                                IF l_snd_session_err = TRUE
+                                THEN
+                                    /* Send a session closed error in response */
+                                    l_resp_msg <-- alloc_msg (e_msg_session_read_resp);
+                                    l_valid_msg <-- is_valid_msg_out (l_resp_msg);
+                                    IF l_valid_msg = TRUE
+                                    THEN
+                                        write_msg_out_header_req_handle (l_resp_msg, l_request_handle);
+                                        write_msg_resp_header_service_status (l_resp_msg, e_sc_bad_session_closed);
+                                        l_ret <-- send_channel_msg (channel, l_resp_msg);
+                                        dealloc_msg_out (l_resp_msg)
+                                    END
+                                END
+                            END
+                        END
+                    ELSE
+                        skip /* Not a request on a server channel NOR a response on a client channel */
+                    END
+                END
+            END
+        END
+    END
+    ;
+    
+    nsession <-- create_session (endpoint) =
+    VAR
+        l_channel,
+        l_valid_channel,
+        l_req_msg,
+        l_req_handle,
+        l_valid_req_handle,
+        l_valid_msg,
+        l_valid_session,
+        l_ret
+    IN
+        l_channel <-- get_valid_channel (endpoint);
+        l_valid_channel <-- is_valid_channel (l_channel);
+        IF l_valid_channel = FALSE
+        THEN
+            l_channel <-- open_secure_channel (endpoint)
+            // async operation => cannot use channel until connection is effective ?
+        END;
+        l_valid_channel <-- is_valid_channel (l_channel);
+        IF l_valid_channel = FALSE
+        THEN
+            nsession := c_session_indet
+        ELSE
+            l_req_msg <-- alloc_msg (e_msg_session_create_req);
+            l_valid_msg <-- is_valid_msg_out (l_req_msg);
+            IF l_valid_msg = TRUE
+            THEN
+                l_req_handle <-- fresh_req_handle;
+                l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+                IF l_valid_req_handle  = TRUE
+                THEN
+                    nsession <-- cli_create_req (l_channel, l_req_handle, l_req_msg);
+                    l_valid_session <-- is_valid_session (nsession);
+                    IF l_valid_session = TRUE
+                    THEN
+                        write_msg_out_header_req_handle (l_req_msg, l_req_handle);
+                        l_ret <-- send_channel_msg (l_channel, l_req_msg);
+                        IF l_ret /= e_sc_ok
+                        THEN
+                            remove_req_handle (l_req_handle);
+                            cli_close_session (nsession);
+                            nsession := c_session_indet
+                        END
+                    ELSE
+                        remove_req_handle (l_req_handle);
+                        cli_close_session (nsession)
+                    END
+                END;
+                dealloc_msg_out (l_req_msg)
+            ELSE
+                nsession := c_session_indet
+            END
+        END
+    END
+    ;
+    
+    
+    ret <-- activate_session (session, user) =
+    VAR
+        l_req_msg,
+        l_valid_msg,
+        l_ret,
+        l_channel,
+        l_req_handle,
+        l_valid_req_handle,
+        l_session_token
+    IN
+        l_req_msg <-- alloc_msg (e_msg_session_activate_req);
+        l_valid_msg <-- is_valid_msg_out (l_req_msg);
+        IF l_valid_msg = TRUE
+        THEN
+            l_req_handle <-- fresh_req_handle;
+            l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+            IF l_valid_req_handle = TRUE
+            THEN
+                l_req_handle <-- fresh_req_handle;
+                l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+                IF l_valid_req_handle = TRUE
+                THEN
+                    l_ret, l_channel, l_session_token <-- cli_user_activate_req (session, l_req_handle, user, l_req_msg);
+                    IF l_ret = e_sc_ok
+                    THEN
+                        write_msg_out_header_req_handle(l_req_msg, l_req_handle);
+                        write_msg_out_header_session_token(l_req_msg, l_session_token);
+                        l_ret <-- send_channel_msg (l_channel, l_req_msg);
+                        IF l_ret /= e_sc_ok
+                        THEN
+                            remove_req_handle (l_req_handle);
+                            cli_close_session (session)
+                        END
+                    END
+                ELSE
+                    l_ret := e_sc_bad_out_of_memory
+                END
+            ELSE
+                l_ret := e_sc_bad_out_of_memory
+            END;
+            dealloc_msg_out (l_req_msg)
+        ELSE
+            l_ret := e_sc_bad_out_of_memory
+        END;
+        ret := l_ret
+    END
+    ;
+    
+    
+    ret <-- close_session (session) =
+    VAR
+        l_req_msg,
+        l_valid_msg,
+        l_channel,
+        l_req_handle,
+        l_valid_req_handle,
+        l_session_token
+    IN
+        l_req_msg <-- alloc_msg (e_msg_session_close_req);
+        l_valid_msg <-- is_valid_msg_out (l_req_msg);
+        IF l_valid_msg = TRUE
+        THEN
+            l_req_handle <-- fresh_req_handle;
+            l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+            IF l_valid_req_handle = TRUE
+            THEN
+                
+                ret, l_channel, l_session_token <-- cli_close_req (session, l_req_handle, l_req_msg);
+                IF ret = e_sc_ok
+                THEN
+                    write_msg_out_header_req_handle(l_req_msg, l_req_handle);
+                    write_msg_out_header_session_token(l_req_msg, l_session_token);
+                    ret <-- send_channel_msg (l_channel, l_req_msg);
+                    IF ret /= e_sc_ok
+                    THEN
+                        remove_req_handle (l_req_handle);
+                        cli_close_session (session)
+                    END
+                END
+            ELSE
+                ret := e_sc_bad_out_of_memory
+            END;
+            dealloc_msg_out (l_req_msg)
+        ELSE
+            ret := e_sc_bad_out_of_memory
+        END
+    END
+    ;
+    
+    
+    secure_channel_lost (channel) =
+    VAR
+        l_valid_channel,
+        l_valid_new_channel,
+        l_is_client,
+        l_endpoint,
+        l_new_channel,
+        l_req_msg,
+        l_valid_msg,
+        l_continue,
+        l_session,
+        l_ret,
+        l_req_handle,
+        l_valid_req_handle,
+        l_session_token
+    IN
+        l_valid_channel <-- is_valid_channel (channel);
+        IF l_valid_channel = TRUE
+        THEN
+            l_is_client <-- is_client_channel (channel);
+            IF l_is_client = TRUE
+            THEN
+                l_endpoint <-- get_channel_info (channel);
+                l_new_channel <-- get_valid_channel (l_endpoint);
+                IF l_new_channel = c_channel_indet
+                THEN
+                    l_new_channel <-- open_secure_channel (l_endpoint)
+                    // async operation => cannot use channel until connection is effective ?
+                END;
+                l_valid_new_channel <-- is_valid_channel (l_new_channel);
+                
+                cli_secure_channel_lost (channel);
+                
+                IF l_valid_new_channel = TRUE
+                THEN
+                    l_continue <-- init_iter_orphaned_t_session (channel);
+                    WHILE l_continue = TRUE
+                    DO
+                        l_session, l_continue <-- continue_iter_orphaned_t_session;
+                        l_req_msg <-- alloc_msg (e_msg_session_activate_req);
+                        l_valid_msg <-- is_valid_msg_out (l_req_msg);
+                        IF l_valid_msg = TRUE
+                        THEN
+                            l_req_handle <-- fresh_req_handle;
+                            l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+                            IF l_valid_req_handle = TRUE
+                            THEN
+                            l_ret, l_session_token <-- cli_sc_activate_req (l_session, l_req_handle, l_new_channel, l_req_msg);
+                                IF l_ret = e_sc_ok
+                                THEN
+                                    write_msg_out_header_req_handle(l_req_msg, l_req_handle);
+                                    write_msg_out_header_session_token(l_req_msg, l_session_token);
+                                    l_ret <-- send_channel_msg (l_new_channel, l_req_msg);
+                                    /* TODO: something in case of failure ? */
+                                    IF l_ret /= e_sc_ok
+                                    THEN
+                                        remove_req_handle (l_req_handle);
+                                        cli_close_session (l_session)
+                                    END
+                                END
+                            END;
+                            dealloc_msg_out (l_req_msg)
+                        END
+                    INVARIANT
+                        l_continue = bool(av_sessions_to_iterate /= {}) &
+                        av_sessions_to_iterate /\ av_sessions_iterated = {} &
+                        av_sessions_to_iterate \/ av_sessions_iterated = av_sessions_orphaned
+                    VARIANT
+                        card(av_sessions_to_iterate)
+                    END
+                END
+            ELSE
+                srv_secure_channel_lost (channel)
+            END;
+            channel_lost (channel)
+        END
+    END
+    ;
+    
+    
+    ret <-- send_service_request_msg (session, req_msg) =
+    VAR
+        l_msg_typ,
+        l_valid_msg,
+        l_channel,
+        l_req_handle,
+        l_valid_req_handle,
+        l_session_token
+    IN
+        l_msg_typ <-- get_msg_in_type (req_msg);
+        CASE l_msg_typ OF
+            EITHER e_msg_session_read_req THEN /* s_service_reqs */
+                bless_msg_out (req_msg, l_msg_typ);
+                l_valid_msg <-- is_valid_msg_out (req_msg);
+                IF l_valid_msg = TRUE
+                THEN
+                    l_req_handle <-- fresh_req_handle;
+                    l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+                    IF l_valid_req_handle = TRUE
+                    THEN
+                        ret, l_channel, l_session_token <-- cli_validate_session_service_req (session, l_req_handle, req_msg);
+                        IF ret = e_sc_ok
+                        THEN
+                            write_msg_out_header_req_handle (req_msg, l_req_handle);
+                            write_msg_out_header_session_token (req_msg, l_session_token); 
+                            ret <-- send_channel_msg (l_channel, req_msg)
+                        END
+                    ELSE
+                        ret := e_sc_bad_out_of_memory
+                    END
+                ELSE
+                    ret := e_sc_bad_invalid_argument
+                END
+                /* TODO: deallocate request ? unprovable PO without it */
+                // dealloc_msg_out (req_msg)
+            ELSE
+                ret := e_sc_bad_invalid_argument
+            END
+        END
+    END;
+    
+    
+    close_all_active_connections =
+    BEGIN
+        close_all_channel
+    END
+
+END

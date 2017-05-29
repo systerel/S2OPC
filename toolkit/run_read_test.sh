@@ -7,12 +7,12 @@ else
 fi
 
 cd $EXEC_DIR
-./test_read
+./toolkit_test_read
 
 # Fullfil TAP result
 if [[ $? -eq 0 ]]; then
-    echo "ok 1 - test: test_read: Passed" > read_result.tap
+    echo "ok 1 - test: toolkit_test_read: Passed" > toolkit_read_result.tap
 else
-    echo "not ok 1 - test: test_read: exit code '$?'" > read_result.tap
+    echo "not ok 1 - test: toolkit_test_read: exit code '$?'" > toolkit_read_result.tap
 fi
-echo "1..1" >> read_result.tap
+echo "1..1" >> toolkit_read_result.tap

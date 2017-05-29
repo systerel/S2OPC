@@ -10,7 +10,7 @@ This project contains the following elements:
 - Makefile: makefile compiling tests and Toolkit code (not as a
   library)
 - build: compiled files during make execution
-- out: built tests executables and tests result files
+- out: built tests executables and tests result files (default location if not specified)
 
 Compilation (Linux, tested under Ubuntu 14.04):
 - Pre-requesites: 
@@ -20,12 +20,18 @@ Compilation (Linux, tested under Ubuntu 14.04):
 - To compile the Toolkit as a simple client / server use case, and unit tests:
   execute the "make" command
 
+Compilation options (as defined variable):
+- PATHEXEC=<binaries_path>: set a specific path for compiled test
+  binaries (./out by default)
+
+
 Current status:
 - None security policy and security mode shall be used
 - One secure channel and session with anonymous user can be opened and
   closed
 - A statically defined address space shall be provided on server-side
 - Read service is provided on server-side
+
 
 Documentation: 
 - Toolkit API is provided by the file src/genc/io_dispatch_mgr.h
@@ -35,13 +41,13 @@ Documentation:
 
 Server-side documentation:
 - Use example of the Toolkit + Stack as a server is provided by
-src/test/test_server.c
+src/test/toolkit_test_server.c
 - A statically defined address space shall be provided. In the
 example it is provided by the src/test/gen_addspace.c source file.
 
 Client-side documentation:
 - Use example of the Toolkit + Stack as a client is provided by
-  src/test/test_client.c
+  src/test/toolkit_test_client.c
 - A statically defined read service callback shall be provided to
   treat read response. In the example it is provided by
   testlib_read_response{.h,.c} through the

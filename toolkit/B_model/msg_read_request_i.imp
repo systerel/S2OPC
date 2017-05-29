@@ -1,0 +1,104 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION msg_read_request_i
+REFINES msg_read_request
+
+IMPORTS
+    msg_read_request_bs,
+    msg_read_request_it
+
+SEES
+    constants,
+    address_space, 
+    message_in_bs
+
+DEFINITIONS
+    d_inv_tab ==
+    (
+        tab_req_NodeId : t_ReadValue_i --> t_NodeId_i &
+        tab_req_AttributeId : t_ReadValue_i --> t_AttributeId_i
+    )
+
+CONCRETE_VARIABLES
+    nb_ReadValue, tab_req_NodeId, tab_req_AttributeId
+
+INVARIANT
+    d_inv_tab
+    /* TODO : invariant de collage */
+
+INITIALISATION
+    init_ok := FALSE; /* Why here ? */
+    nb_ReadValue := 0;
+    tab_req_NodeId := t_ReadValue_i * {c_NodeId_indet};
+    tab_req_AttributeId := t_ReadValue_i * {c_AttributeId_indet}
+
+OPERATIONS
+    rr <-- read_ReadRequest(msg) =
+    VAR
+        l_continue, rvi, l_nb_RV, l_nid, l_aid
+    IN
+        l_nb_RV <-- read_req_nb_ReadValue(msg);
+        init_ok := bool(0 <= l_nb_RV & l_nb_RV <= k_n_read_resp_max);
+        IF init_ok = TRUE THEN
+            nb_ReadValue := l_nb_RV;
+            l_continue <-- init_iter_reqs(l_nb_RV);
+            WHILE l_continue = TRUE DO
+                l_continue, rvi <-- continue_iter_reqs;
+                l_nid <-- read_req_ReadValue_NodeId(msg, rvi);
+                l_aid <-- read_req_ReadValue_AttributeId(msg, rvi);
+                tab_req_NodeId(rvi) := l_nid;
+                tab_req_AttributeId(rvi) := l_aid
+            INVARIANT
+                /* Why? This is exactly the post condition */
+                l_continue = bool(reqs_to_iterate /= {}) &
+                /* And this next is in the machine INVAR */
+                reqs_to_iterate /\ reqs_iterated = {} &
+                /* This next is new, ok */
+                card(reqs_to_iterate \/ reqs_iterated) = l_nb_RV
+            VARIANT
+                card(reqs_to_iterate)
+            END
+        END;
+        rr := init_ok
+    END
+    ;
+
+    rr <-- read_nb_ReadValue =
+    BEGIN
+        rr := nb_ReadValue
+    END
+    ;
+
+    isvalid, node, aid <-- readall_ReadValue_Node_AttributeId(rvi) =
+    VAR
+        l_nid_valid, l_aid_valid,
+        l_node, l_aid
+    IN
+        l_nid_valid, l_node <-- readall_AddressSpace_Node(tab_req_NodeId(rvi));
+        l_aid := tab_req_AttributeId(rvi);
+        l_aid_valid := bool(l_aid /= c_AttributeId_indet);
+        IF l_nid_valid = TRUE & l_aid_valid = TRUE THEN
+            isvalid := TRUE;
+            node := l_node;
+            aid := l_aid
+        ELSE
+            isvalid := FALSE
+        END
+    END
+
+END

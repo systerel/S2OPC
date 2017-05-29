@@ -1,0 +1,346 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+MACHINE
+    session_mgr
+    
+SEES
+    constants,
+    message_in_bs,
+    message_out_bs,
+    channel_mgr_bs,
+    request_handle_bs
+    
+DEFINITIONS
+   
+    d_var_it ==
+    /* iter */
+    av_sessions_to_iterate,
+    av_sessions_iterated,
+    av_sessions_orphaned;
+
+    d_typing_it ==
+    av_sessions_orphaned <: t_session &
+    av_sessions_to_iterate <: av_sessions_orphaned &
+    av_sessions_iterated <: av_sessions_orphaned &
+    av_sessions_to_iterate /\ av_sessions_iterated = {}
+    
+ABSTRACT_VARIABLES
+    d_var_it
+    
+INVARIANT
+    d_typing_it
+    
+INITIALISATION
+   
+    /* it */
+    av_sessions_to_iterate,
+    av_sessions_iterated,
+    av_sessions_orphaned :(av_sessions_orphaned <: t_session &
+        av_sessions_to_iterate <: av_sessions_orphaned &
+        av_sessions_iterated <: av_sessions_orphaned &
+        av_sessions_to_iterate /\ av_sessions_iterated = {})
+
+OPERATIONS
+    
+    receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel &
+        req_handle : t_request_handle_i &
+        resp_msg : t_msg_i &
+        resp_msg : t_msg &
+        resp_msg = c_msg_in &
+        resp_typ : t_msg_type &
+        resp_typ = a_msg_in_type &
+        a_msg_in_type : {e_msg_session_create_resp,
+            e_msg_session_activate_resp,
+            e_msg_session_close_resp}
+    THEN
+        skip
+    END
+    ;
+    
+    b_send_resp, session <-- receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel &
+        req_handle : t_request_handle_i &
+        session_token : t_session_token_i &
+        req_msg : t_msg_i &
+        req_msg : t_msg &
+        req_msg = c_msg_in &
+        req_typ : t_msg_type &
+        req_typ = a_msg_in_type &
+        a_msg_in_type : {e_msg_session_create_req,
+            e_msg_session_activate_req,
+            e_msg_session_close_req} &
+        resp_msg : t_msg_i &
+        resp_msg : t_msg &
+        resp_msg = c_msg_out &
+        a_msg_out_type : {e_msg_session_create_resp,
+            e_msg_session_activate_resp,
+            e_msg_session_close_resp}
+    THEN
+        b_send_resp :: BOOL ||
+        session :: t_session_i
+    END
+    ;
+    
+    ret, channel, session_token <-- cli_validate_session_service_req (session, req_handle, req_msg) =
+    PRE
+        session : t_session_i &
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
+        req_msg : t_msg_i &
+        req_msg : t_msg &
+        req_msg = c_msg_out &
+        a_msg_out_type : s_service_reqs
+    THEN
+        CHOICE
+            ret := e_sc_ok ||
+            channel :(channel : t_channel_i & channel : t_channel) ||
+            session_token :(session_token : t_session_token_i & session_token : t_session_token)
+        OR
+            ret :: {e_sc_bad_invalid_state,
+                e_sc_bad_invalid_argument,
+                e_sc_bad_out_of_memory,
+                e_sc_bad_unexpected_error} ||
+            channel := c_channel_indet
+        END
+    END
+    ;
+    
+    bres <-- cli_validate_session_service_resp (channel, req_handle, resp_msg) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel &
+        req_handle : t_request_handle_i &
+        resp_msg : t_msg_i &
+        resp_msg : t_msg &
+        resp_msg = c_msg_in &
+        a_msg_in_type : s_service_resps
+    THEN
+        bres :: BOOL
+    END
+    ;
+    
+    bres, snd_err <-- srv_validate_session_service_req (channel, req_handle, session_token, req_msg) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel &
+        req_handle : t_request_handle_i &
+        session_token : t_session_token_i &
+        req_msg : t_msg_i &
+        req_msg : t_msg &
+        req_msg = c_msg_in &
+        a_msg_in_type : s_service_reqs
+    THEN
+        CHOICE
+            bres :: {TRUE, FALSE} ||
+            snd_err := FALSE
+        OR
+            bres := FALSE ||
+            snd_err := TRUE
+        END
+    END
+    ;
+    
+    bres, snd_err <-- srv_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel   &
+        session  : t_session_i &
+        req_handle : t_request_handle_i &
+        req_msg  : t_msg_i &
+        req_msg  = c_msg_in &
+        c_msg_in : t_msg &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_out &
+        c_msg_out : t_msg  &
+        a_msg_in_type : {e_msg_session_read_req} &
+        a_msg_out_type : {e_msg_session_read_resp}
+    THEN
+        CHOICE
+            bres :: {TRUE, FALSE} ||
+            snd_err := FALSE
+        OR
+            bres := FALSE ||
+            snd_err := TRUE
+        END
+    END
+    ;
+    
+    /*PROMOTES*/
+    session <-- get_session_from_token (session_token) =
+    PRE
+        session_token : t_session_token_i
+    THEN
+        session :: t_session_i
+    END
+    ;
+    
+    nsession <-- cli_create_req (channel, req_handle, create_req_msg) = 
+    PRE
+        channel : t_channel_i &
+        channel : s_channel &
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
+        create_req_msg : t_msg_i &
+        create_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_req
+    THEN
+        nsession :: t_session_i
+    END
+    ;
+    
+    ret, channel, session_token <-- cli_user_activate_req (session, req_handle, user, activate_req_msg) =
+    PRE
+        session : t_session_i & // Here session is provided by applicative but still can point to invalid session (ref on closed session)
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
+        user : t_user_i &
+        user : t_user &
+        activate_req_msg : t_msg_i &
+        activate_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_req
+    THEN
+        CHOICE
+            ret := e_sc_ok ||
+            channel :(channel : t_channel_i & channel : s_channel) ||
+            session_token :(session_token : t_session_token_i & session_token : t_session_token)
+        OR
+            ret :: {e_sc_bad_identity_token_invalid,
+                e_sc_bad_unexpected_error,
+                e_sc_bad_out_of_memory,
+                e_sc_bad_invalid_state,
+                e_sc_bad_invalid_argument} ||
+            channel := c_channel_indet ||
+            session_token := c_session_token_indet
+        END
+    END
+    ;
+    
+    ret, session_token <-- cli_sc_activate_req (session, req_handle, channel, activate_req_msg) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
+        channel : t_channel_i &
+        channel : s_channel &
+        activate_req_msg : t_msg_i &
+        activate_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_req
+    THEN
+        ret :: {e_sc_ok, e_sc_bad_invalid_state,
+            e_sc_bad_invalid_argument,
+            e_sc_bad_identity_token_invalid,
+            e_sc_bad_unexpected_error,
+            e_sc_bad_out_of_memory} ||
+        session_token :: t_session_token_i
+    END
+    ;
+    
+    cli_secure_channel_lost (channel) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel
+    THEN
+        skip
+    END
+    ;
+    
+    srv_secure_channel_lost (channel) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel
+    THEN
+        skip
+    END
+    ;
+        
+    ret, channel, session_token <-- cli_close_req (session, req_handle, close_req_msg) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
+        close_req_msg : t_msg_i &
+        close_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_close_req
+    THEN
+        CHOICE
+            ret := e_sc_ok ||
+            channel :(channel : t_channel_i & channel : s_channel) ||
+            session_token :(session_token : t_session_token_i & session_token : t_session_token)
+        OR
+            ret :: {e_sc_bad_invalid_state,
+                e_sc_bad_invalid_argument,
+                e_sc_bad_out_of_memory, 
+                e_sc_bad_unexpected_error} ||
+            channel := c_channel_indet ||
+            session_token := c_session_token_indet
+        END
+    END
+    ;
+    
+    cli_close_session (session) =
+    PRE
+        session : t_session_i
+    THEN
+        skip
+    END
+    ;
+    
+    ret <-- is_valid_session (session) =
+    PRE
+        session : t_session_i
+    THEN
+        ret :: BOOL
+    END;
+    
+    continue <-- init_iter_orphaned_t_session (lost_channel) =
+    PRE
+        lost_channel : t_channel_i &
+        lost_channel : t_channel
+    THEN
+        continue :: BOOL
+    END
+    ;
+    
+    session, continue <-- continue_iter_orphaned_t_session =
+    PRE
+        av_sessions_to_iterate /= {}
+    THEN
+        session :(session : t_session_i & session : t_session) ||
+        continue :: BOOL
+    END
+    ;
+    
+    state <-- get_session_state_or_closed (session) =
+    PRE
+        session : t_session_i
+    THEN
+        state :: t_sessionState
+    END
+    
+END

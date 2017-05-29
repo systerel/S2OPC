@@ -1,0 +1,173 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION session_mgr_i
+REFINES session_mgr
+    
+SEES
+    constants,
+    message_in_bs,
+    message_out_bs,
+    channel_mgr_bs,
+    request_handle_bs
+    
+IMPORTS
+    session_core
+    
+PROMOTES
+    get_session_state_or_closed,
+    get_session_from_token,
+    cli_create_req,
+    cli_user_activate_req,
+    cli_sc_activate_req,
+    cli_secure_channel_lost,
+    srv_secure_channel_lost,
+    cli_close_session,
+    cli_close_req,
+    
+    is_valid_session,
+    init_iter_orphaned_t_session,
+    continue_iter_orphaned_t_session
+    
+OPERATIONS
+    
+    receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
+    VAR
+        l_session,
+        l_session_token
+    IN
+        /* TODO: validate session */
+        l_session <-- get_session_from_req_handle (req_handle);
+        CASE resp_typ OF
+            EITHER e_msg_session_create_resp THEN
+                l_session_token <-- read_create_session_msg_session_token (resp_msg);
+                cli_create_resp (channel, l_session, req_handle, l_session_token, resp_msg)
+            OR e_msg_session_activate_resp THEN
+                cli_activate_resp (channel, l_session, req_handle, resp_msg)
+            OR e_msg_session_close_resp THEN
+                cli_close_resp (channel, l_session, req_handle, resp_msg)
+            END
+        END
+    END
+    ;
+    
+    b_send_resp, session <-- receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
+    VAR
+        l_valid_session,
+        l_user,
+        l_ret
+    IN
+        CASE req_typ OF
+            EITHER e_msg_session_create_req THEN
+                session <-- srv_create_req_and_resp (channel, req_handle, req_msg, resp_msg);
+                l_valid_session <-- is_valid_session (session);
+                IF l_valid_session = TRUE
+                THEN
+                    l_ret := e_sc_ok
+                ELSE
+                    l_ret := e_sc_bad_unexpected_error
+                END
+            OR e_msg_session_activate_req THEN
+                session <-- get_session_from_token (session_token);
+                l_user <-- read_activate_msg_user (req_msg);
+                l_ret <-- srv_activate_req_and_resp (channel, session, req_handle, l_user, req_msg, resp_msg)
+                
+            OR e_msg_session_close_req THEN
+                session <-- get_session_from_token (session_token);
+                l_ret <-- srv_close_req_and_resp (channel, session, req_handle, req_msg, resp_msg)
+            ELSE
+                l_ret := e_sc_bad_unexpected_error /* guarantee by PRE but still a warning on l_ret */
+            END
+        END;
+        IF l_ret = e_sc_ok
+        THEN
+            b_send_resp := TRUE
+        ELSE
+            b_send_resp := FALSE
+        END
+    END
+    ;
+    
+    ret, channel, session_token <-- cli_validate_session_service_req (session, req_handle, req_msg) =
+    VAR
+        l_valid_session,
+        l_channel,
+        l_valid_channel,
+        l_session_token,
+        l_ret,
+        l_bres
+    IN
+        l_session_token := c_session_token_indet;
+        l_channel := c_channel_indet;
+        /* TODO: do not require req msg ? */
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE
+        THEN
+            l_channel <-- get_session_channel (session);
+            l_valid_channel <-- is_valid_channel (l_channel);
+            IF l_valid_channel = TRUE
+            THEN
+                l_bres <-- cli_is_session_valid_for_service (l_channel, session);
+                IF l_bres = TRUE
+                THEN
+                    l_ret, l_session_token <-- cli_new_session_service_req (session, req_handle)
+                ELSE
+                    l_channel := c_channel_indet;
+                    l_ret := e_sc_bad_invalid_state
+                END
+            ELSE
+                l_ret := e_sc_bad_invalid_argument
+            END
+        ELSE
+            l_ret := e_sc_bad_invalid_argument
+        END;
+        ret := l_ret;
+        channel := l_channel;
+        session_token := l_session_token
+    END;
+    
+    bres <-- cli_validate_session_service_resp (channel, req_handle, resp_msg) =
+    VAR
+        l_session
+    IN
+        /* TODO: do not require resp msg ? */
+        l_session <-- get_session_from_req_handle (req_handle);
+        bres <-- cli_is_session_valid_for_service (channel, l_session);
+        IF bres = TRUE
+        THEN
+            bres <-- cli_record_session_service_resp (l_session, resp_msg, req_handle)
+        END
+    END;
+    
+    bres, snd_err <-- srv_validate_session_service_req (channel, req_handle, session_token, req_msg) =
+    VAR
+        l_session
+    IN
+        /* TODO: req handle to be recorded on server side at session level ? => considered unique in 1 session (make possible to check req_handle on call to *_resp operation) */
+        l_session <-- get_session_from_token (session_token);
+        bres, snd_err <-- srv_is_session_valid_for_service (channel, l_session)
+    END
+    ;
+    
+    bres, snd_err <-- srv_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
+    BEGIN
+        /* Coherency of messages types done in PRE for now */
+        /* TODO: check req handle valid in given session ? */
+        bres, snd_err <-- srv_is_session_valid_for_service (channel, session)
+    END
+    
+END
