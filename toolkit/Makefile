@@ -48,7 +48,7 @@ config:
 clean:
 	@# Protect against executing rm -r /*
 	[ -d "$(PATHOBJ)" ] && \rm -rf $(PATHOBJ) || true
-	\rm -f $(CLIENT_EXEC) $(SERVER_EXEC) $(READ_EXEC)
+	[ -d "$(PATHEXEC)" ] && \rm -rf $(PATHEXEC) || true
 
 trad:
 	@rm -fr $(PATHTRAD)

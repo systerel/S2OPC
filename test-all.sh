@@ -25,7 +25,9 @@ if [[ -z $ISLOCAL || $ISLOCAL != "LOCAL" ]]; then
 else
     mid clean all
 fi
-# run client server tests
-mid client_server_test
-# run unit tests
-mid check CK_TAP_LOG_FILE_NAME=results.tap
+# run stack client server tests
+mid -C stack client_server_test
+# run stack unit tests
+mid -C stack check CK_TAP_LOG_FILE_NAME=results.tap
+# run toolkit client server tests
+mid -C toolkit client_server_test
