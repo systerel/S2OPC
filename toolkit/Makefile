@@ -1,4 +1,5 @@
-PATHOBJ =./out
+PATHOBJ =./build
+PATHEXEC =./out
 PATHGENTRAD=./B_model/tradc
 PATHTRAD=./src/genc
 PATHIMPL=./src/impl
@@ -24,9 +25,9 @@ CLIENT_OBJS =test_sessions.o
 SERVER_OBJS =test_server.o
 READ_OBJS   =test_read.o
 
-CLIENT_EXEC :=$(patsubst %.o,%,$(CLIENT_OBJS))
-SERVER_EXEC :=$(patsubst %.o,%,$(SERVER_OBJS))
-READ_EXEC   :=$(patsubst %.o,%,$(READ_OBJS))
+CLIENT_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(CLIENT_OBJS))
+SERVER_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(SERVER_OBJS))
+READ_EXEC   :=$(patsubst %.o,$(PATHEXEC)/%,$(READ_OBJS))
 OBJS        :=$(patsubst %,$(PATHOBJ)/%,$(OBJS))
 CLIENT_OBJS += wrap_read.o
 CLIENT_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(CLIENT_OBJS))
@@ -44,6 +45,7 @@ all: config $(OBJS) $(CLIENT_EXEC) $(SERVER_EXEC) $(READ_OBJS)
 
 config: 
 	@mkdir -p $(PATHOBJ)
+	@mkdir -p $(PATHEXEC)
 
 clean:
 	@# Protect against executing rm -r /*
@@ -61,13 +63,13 @@ trad:
 	    mv $(PATHTRAD)/"$$i" $(PATHTRAD)/"$$i"_; \
 	done
 
-out/%.o: $(PATHTRAD)/%.c
+$(PATHOBJ)/%.o: $(PATHTRAD)/%.c
 	gcc $(CFLAGS) $(INCLUDES) $< -o $@
 
-out/%.o: $(PATHIMPL)/%.c
+$(PATHOBJ)/%.o: $(PATHIMPL)/%.c
 	gcc $(CFLAGS) $(INCLUDES) $< -o $@
 
-out/%.o: $(PATHTEST)/%.c
+$(PATHOBJ)/%.o: $(PATHTEST)/%.c
 	gcc $(CFLAGS) $(INCLUDES) $< -o $@
 
 $(CLIENT_EXEC): config $(OBJS) $(CLIENT_OBJS)

@@ -1,6 +1,6 @@
 #!/bin/bash
 WORKSPACE_DIR=.
-EXEC_DIR=$WORKSPACE_DIR
+EXEC_DIR=$WORKSPACE_DIR/out
 
 cd $EXEC_DIR
 # Create script for running stub_server in background and store exit code
