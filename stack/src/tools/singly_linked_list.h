@@ -1,5 +1,5 @@
 /**
- * \file single_linked_list.h
+ * \file singly_linked_list.h
  *
  *  \brief A singly linked list based on elements with unique identifiers and dynamically allocated.
  */

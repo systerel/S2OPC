@@ -60,6 +60,7 @@ SOPC_EncodeableType** StackConfiguration_GetEncodeableTypes();
  *  \brief Add the given encodeable types to the configuration of the stack
  *
  *  \param encTypesTable  The encodeable types to add to the encodeable types configuration of the stack (NULL terminated)
+ *  \param nbTypes        Number of encodeable types provided in the table
  *
  *  \return STATUS_OK if configuration succeeded, STATUS_NOK otherwise
  */

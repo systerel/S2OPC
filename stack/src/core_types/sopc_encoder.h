@@ -90,7 +90,7 @@ void SOPC_EncodeDecode_Int16(int16_t* intv);
  *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
  *  (platform dependency module providing endianess information is used to determine the current case)
  *
- *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
+ *  \param uintv     Pointer to the integer value to encode or decode with correct endianess in place
  */
 void SOPC_EncodeDecode_UInt16(uint16_t* uintv);
 
@@ -110,7 +110,7 @@ void SOPC_EncodeDecode_Int32(int32_t* intv);
  *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
  *  (platform dependency module providing endianess information is used to determine the current case)
  *
- *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
+ *  \param uintv     Pointer to the integer value to encode or decode with correct endianess in place
  */
 void SOPC_EncodeDecode_UInt32(uint32_t* uintv);
 
@@ -130,7 +130,7 @@ void SOPC_EncodeDecode_Int64(int64_t* intv);
  *  Note: UA binary representation is little endian thus nothing is done if machine representaiton is little endian
  *  (platform dependency module providing endianess information is used to determine the current case)
  *
- *  \param intv     Pointer to the integer value to encode or decode with correct endianess in place
+ *  \param uintv     Pointer to the integer value to encode or decode with correct endianess in place
  */
 void SOPC_EncodeDecode_UInt64(uint64_t* uintv);
 

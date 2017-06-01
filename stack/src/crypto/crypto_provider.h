@@ -253,10 +253,10 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_KeyBits(const CryptoProvider 
  *                  The main purpose of this function is to verify the length of the modulus of the
  *                  asymmetric key \p pKey with respect to the security policy.
  *
- * \param pProvider An initialized cryptographic context.
- * \param pKey      A valid pointer to an AsymmetricKey.
- * \param pLenKeyBits  A valid pointer to the output length in bytes. Its content is unspecified when
- *                  return value is not STATUS_OK.
+ * \param pProvider    An initialized cryptographic context.
+ * \param pKey         A valid pointer to an AsymmetricKey.
+ * \param lenKeyBytes  A valid pointer to the output length in bytes. Its content is unspecified when
+ *                      return value is not STATUS_OK.
  *
  * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
  *                  \p pProvider not correctly initialized.
@@ -793,7 +793,7 @@ SOPC_StatusCode CryptoProvider_AsymmetricSign(const CryptoProvider *pProvider,
  *                  The signature is as long as a single ciphered message, which size is computed with
  *                  CryptoProvider_AsymmetricGetLength_Signature().
  *                  The asymmetric verify process first deciphers the signature which should provide
- *                  the hash of \pInput.
+ *                  the hash of \p pInput.
  *                  Usually, the unpadded plain text message is signed.
  *
  *                  The key is usually taken from a public key (Certificate,

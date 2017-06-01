@@ -22,8 +22,8 @@
 
 /**
  *  \brief Compare 2 string in a case-insensitive manner.
- *  Comparison returns 0 if <size> characters were considered identical
- *  or s1/s2 were identical and terminated by a '\0' character.
+ *  Comparison returns 0 if \p size characters were considered identical
+ *  or \p s1 and \p s2 were identical and terminated by a '\0' character.
  *
  *  \param s1    A non null string terminated by '\0' character
  *  \param s2    A non null string terminated by '\0' character

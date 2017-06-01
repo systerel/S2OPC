@@ -1,5 +1,5 @@
 /**
- *  \file sopc_endpoitn.h
+ *  \file sopc_endpoint.h
  *
  *  \brief High level API to manipulate an OPC-UA Endpoint and define OPC UA services for the endpoint
  */
@@ -140,7 +140,7 @@ SOPC_StatusCode SOPC_Endpoint_Create(SOPC_Endpoint*               endpoint,
  *         Note: in single threaded mode, it is necessary to call the socket manager loop to receive messages.
  *
  *  \param endpoint           The channel to connect
- *  \param url                Endpoint address of the connection point
+ *  \param endpointURL        Endpoint address of the connection point
  *  \param callback           Endpoint events callback function to be called
  *  \param callbackData       Data to be provided to the endpoint event callback function on call
  *  \param serverCertificate  Server certificate to use for responding to clients connections (or NULL for None security mode)
