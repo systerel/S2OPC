@@ -30,6 +30,7 @@ struct SLinkedList_Elt{
 
 struct SLinkedList {
     SLinkedList_Elt* first;
+    SLinkedList_Elt* last;
     size_t           length;
     size_t           maxLength;
 };
@@ -43,13 +44,13 @@ SLinkedList* SLinkedList_Create(size_t sizeMax){
     return result;
 }
 
-void* SLinkedList_Add(SLinkedList* list, uint32_t id, void* value){
+void* SLinkedList_Prepend(SLinkedList* list, uint32_t id, void* value){
     SLinkedList_Elt* elt = NULL;
     if(list == NULL){
         return NULL;
     }
 
-    if(list->length < list->maxLength){
+    if(list->length < list->maxLength || list->maxLength == 0){
         elt = malloc(sizeof(SLinkedList_Elt));
     }
 
@@ -57,6 +58,9 @@ void* SLinkedList_Add(SLinkedList* list, uint32_t id, void* value){
         elt->id = id;
         elt->value = value;
         elt->next = list->first;
+        if(NULL == list->last){
+            list->last = elt;
+        }
         list->first = elt;
         list->length = list->length + 1;
     }else{
@@ -64,6 +68,56 @@ void* SLinkedList_Add(SLinkedList* list, uint32_t id, void* value){
     }
 
     return value;
+}
+
+void* SLinkedList_Append(SLinkedList* list, uint32_t id, void* value){
+    SLinkedList_Elt* elt = NULL;
+    if(list == NULL){
+        return NULL;
+    }
+
+    if(list->length < list->maxLength || list->maxLength == 0){
+        elt = malloc(sizeof(SLinkedList_Elt));
+    }
+
+    if(elt != NULL){
+        elt->id = id;
+        elt->value = value;
+        elt->next = NULL;
+        if(NULL == list->first){
+            list->first = elt;
+        }else{
+            list->last->next = elt;
+        }
+        list->last = elt;
+        list->length = list->length + 1;
+    }else{
+        return NULL;
+    }
+
+    return value;
+}
+
+void* SLinkedList_PopHead(SLinkedList* list){
+    void* result = NULL;
+    SLinkedList_Elt* nextElt = NULL;
+
+    if(list == NULL || list->first == NULL){
+       return NULL;
+    }
+
+    // First element is researched element
+    list->length = list->length - 1;
+    result = list->first->value;
+    nextElt = list->first->next;
+    free(list->first);
+    list->first = nextElt;
+    // If no element remaining, last element to be updated too
+    if(NULL == list->first){
+        list->last = NULL;
+    }
+
+    return result;
 }
 
 SLinkedList_Elt* SLinkedList_InternalFind(SLinkedList* list, uint32_t id){
@@ -89,7 +143,7 @@ SLinkedList_Elt* SLinkedList_InternalFindPrec(SLinkedList* list, uint32_t id){
 }
 
 // Returns null => Not found, otherwise => elt pointer
-void* SLinkedList_Find(SLinkedList* list, uint32_t id){
+void* SLinkedList_FindFromId(SLinkedList* list, uint32_t id){
     SLinkedList_Elt* elt = SLinkedList_InternalFind(list, id);
     void* result = NULL;
     if(elt != NULL){
@@ -114,7 +168,7 @@ void SLinkedList_Apply(SLinkedList* list, void (*pFn)(uint32_t id, void *val))
 }
 
 // Returns null => Not found, otherwise => elt pointer
-void* SLinkedList_Remove(SLinkedList* list, uint32_t id){
+void* SLinkedList_RemoveFromId(SLinkedList* list, uint32_t id){
     SLinkedList_Elt* elt = NULL;
     SLinkedList_Elt* nextElt = NULL;
     void* result = NULL;
@@ -127,6 +181,10 @@ void* SLinkedList_Remove(SLinkedList* list, uint32_t id){
             nextElt = list->first->next;
             free(list->first);
             list->first = nextElt;
+            // If no element remaining, last element to be updated too
+            if(NULL == list->first){
+                list->last = NULL;
+            }
         }else{
             // Search element in rest of list
             elt = list->first;
@@ -137,6 +195,10 @@ void* SLinkedList_Remove(SLinkedList* list, uint32_t id){
                 list->length = list->length - 1;
                 result = elt->next->value;
                 nextElt = elt->next->next;
+                // If element is the last element, then set precedent element as precedent
+                if(elt->next == list->last){
+                    list->last = elt;
+                }
                 free(elt->next);
                 elt->next = nextElt;
             }
@@ -156,6 +218,7 @@ void SLinkedList_Clear(SLinkedList* list){
             elt = nextElt;
         }
         list->first = NULL;
+        list->last = NULL;
         list->length = 0;
     }
 }

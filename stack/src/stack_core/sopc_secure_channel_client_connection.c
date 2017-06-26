@@ -309,7 +309,7 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
                                            NULL, // No callback, specifc message header used (OPN)
                                            NULL);
         if(pRequest == NULL ||
-           pRequest != SLinkedList_Add(cConnection->pendingRequests, requestId, pRequest)){
+           pRequest != SLinkedList_Prepend(cConnection->pendingRequests, requestId, pRequest)){
             status = STATUS_NOK;
         }
     }
@@ -322,7 +322,7 @@ SOPC_StatusCode Send_OpenSecureChannelRequest(SC_ClientConnection* cConnection)
         // No need of reason, no possible multi chunk for OPN => no abort msg only reset buffer
         SC_AbortMsg(cConnection->instance->sendingBuffer, OpcUa_BadEncodingError, NULL);
         if(pRequest != NULL){
-            SLinkedList_Remove(cConnection->pendingRequests,requestId);
+            SLinkedList_RemoveFromId(cConnection->pendingRequests,requestId);
             SC_PendingRequestDelete(pRequest);
         }
     }
@@ -487,7 +487,7 @@ SOPC_StatusCode Receive_OpenSecureChannelResponse(SC_ClientConnection* cConnecti
 
     if(status == STATUS_OK){
         // Retrieve associated pending request
-        pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
+        pRequest = SLinkedList_RemoveFromId(cConnection->pendingRequests, requestId);
         if(pRequest == NULL){
             status = STATUS_NOK;
         }
@@ -565,7 +565,7 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     if(abortReqPresence != FALSE){
         // Note: status is OK if from a prec chunk or NOK if current chunk is abort chunk
         // Retrieve request id to be aborted and call callback if any
-        pRequest = SLinkedList_Remove(cConnection->pendingRequests, abortedRequestId);
+        pRequest = SLinkedList_RemoveFromId(cConnection->pendingRequests, abortedRequestId);
         if(pRequest != NULL){
             if(pRequest->callback != NULL){
                 pRequest->callback(cConnection,
@@ -584,7 +584,7 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
     if(status == STATUS_OK){
         if(cConnection->instance->receptionBuffers->isFinal == SOPC_Msg_Chunk_Final){
             // Retrieve associated pending request for current chunk which is final
-            pRequest = SLinkedList_Remove(cConnection->pendingRequests, requestId);
+            pRequest = SLinkedList_RemoveFromId(cConnection->pendingRequests, requestId);
             requestToRemove = 1; // True
             if(pRequest == NULL){
                 status = STATUS_NOK;
@@ -593,7 +593,7 @@ SOPC_StatusCode Receive_ServiceResponse(SC_ClientConnection* cConnection,
                 cConnection->instance->receptionBuffers->nbChunks == 1){
             // When it is the first chunk and it is intermediate we have to check request id is valid
             //  otherwise request id already validated before and not pending request not necessary
-            pRequest = SLinkedList_Find(cConnection->pendingRequests, requestId);
+            pRequest = SLinkedList_FindFromId(cConnection->pendingRequests, requestId);
             if(pRequest == NULL){
                 // Error: unknown request id !
                 // TODO: trace + callback for audit ?
@@ -894,7 +894,7 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
                                                    callback,
                                                    callbackData);
                 if(pRequest == NULL ||
-                   pRequest != SLinkedList_Add(connection->pendingRequests, requestId, pRequest)){
+                   pRequest != SLinkedList_Prepend(connection->pendingRequests, requestId, pRequest)){
                     status = STATUS_NOK;
                 }
             }
@@ -937,7 +937,7 @@ SOPC_StatusCode SC_Send_Request(SC_ClientConnection* connection,
                     SOPC_String_Clear(&reason);
                 }
                 if(pRequest != NULL){
-                    SLinkedList_Remove(connection->pendingRequests,requestId);
+                    SLinkedList_RemoveFromId(connection->pendingRequests,requestId);
                     SC_PendingRequestDelete(pRequest);
                 }
             }

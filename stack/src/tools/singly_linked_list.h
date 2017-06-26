@@ -38,21 +38,41 @@ typedef SLinkedList_Elt* SLinkedListIterator;
 /**
  *  \brief            Create and allocate a new singly linked list containing 0 elements with a size limit of the given size.
  *
- *  \param sizeMax    The maximum number of elements allowed in the new linked list
+ *  \param sizeMax    The maximum number of elements allowed in the new linked list or 0 if no limit defined
  *  \return           Pointer to the newly allocated singly linked list
  */
 SLinkedList* SLinkedList_Create(size_t sizeMax);
 
 /**
- *  \brief          Add a new element (and allocate new list element) in the given linked list.
+ *  \brief          Add a new element (and allocate new list element) before head of the given linked list.
  *
  *  \param list     Pointer on the linked list in which new element must be added
- *  \param id       Unique identifier to associate with the element (if not unique LIFO mode is applied for Find and Remove)
- *  \param value    Pointer to the value of the element to add
+ *  \param id       Unique identifier to associate with the element (if not unique prepend LIFO behavior for Find and Remove)
+ *  \param value    Pointer to the value of the element to prepend
  *
- *  \return         Pointer to the value added, provided as parameter, if succeeded, NULL otherwise
+ *  \return         Pointer to the value prepended, provided as parameter, if succeeded, NULL otherwise
  */
-void* SLinkedList_Add(SLinkedList* list, uint32_t id, void* value);
+void* SLinkedList_Prepend(SLinkedList* list, uint32_t id, void* value);
+
+/**
+ *  \brief          Add a new element (and allocate new list element) to the tail of the given linked list.
+ *
+ *  \param list     Pointer on the linked list in which new element must be added
+ *  \param id       Unique identifier to associate with the element (if not unique append FIFO behavior for Find and Remove)
+ *  \param value    Pointer to the value of the element to append
+ *
+ *  \return         Pointer to the value appended, provided as parameter, if succeeded, NULL otherwise
+ */
+void* SLinkedList_Append(SLinkedList* list, uint32_t id, void* value);
+
+/**
+ *  \brief          Get and remove the head element of the list
+ *
+ *  \param list     Pointer on the linked list from which head element must be returned and removed
+ *
+ *  \return         Pointer to the head element value of the list
+ */
+void* SLinkedList_PopHead(SLinkedList* list);
 
 /**
  *  \brief          Find the value associated to the given id in the linked list
@@ -62,7 +82,7 @@ void* SLinkedList_Add(SLinkedList* list, uint32_t id, void* value);
  *
  *  \return         Pointer to the value found if succeeded, NULL otherwise
  */
-void* SLinkedList_Find(SLinkedList* list, uint32_t id);
+void* SLinkedList_FindFromId(SLinkedList* list, uint32_t id);
 
 /**
  * \brief           Apply a function to the value of each element of the list.
@@ -83,7 +103,7 @@ void SLinkedList_Apply(SLinkedList* list, void (*pFn)(uint32_t id, void *val));
  *
  *  \return         Pointer to the value removed if succeeded, NULL otherwise
  */
-void* SLinkedList_Remove(SLinkedList* list, uint32_t id);
+void* SLinkedList_RemoveFromId(SLinkedList* list, uint32_t id);
 
 /**
  *  \brief         Delete all elements of the given linked list

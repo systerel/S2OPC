@@ -713,7 +713,7 @@ SOPC_StatusCode OnConnectionTransportEvent_CB(void*           callbackData,
                 scConnection->state = SC_Connection_Disconnected;
                 // Remove secure connection from the endpoint
                 Mutex_Lock(&sEndpoint->mutex);
-                if(scConnection ==  SLinkedList_Remove(sEndpoint->secureChannelConnections,
+                if(scConnection ==  SLinkedList_RemoveFromId(sEndpoint->secureChannelConnections,
                                                        teventCbData->scConnectionId)){
                     SC_Delete(scConnection);
                     scConnection = NULL;
@@ -819,7 +819,7 @@ SOPC_StatusCode AcceptedNewConnection(SC_ServerEndpoint* sEndpoint,
 
         if(STATUS_OK == status){
             // Add as a new secure connection to the endpoint
-            SLinkedList_Add(sEndpoint->secureChannelConnections,
+            SLinkedList_Prepend(sEndpoint->secureChannelConnections,
                             sEndpoint->lastSecureConnectionId,
                             scConnection);
         }else{
