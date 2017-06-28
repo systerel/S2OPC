@@ -20,57 +20,35 @@
 
 SOPC_StatusCode Mutex_Initialization(Mutex* mut){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(mut != NULL && *mut == NULL){
-        *mut = CreateMutex(NULL,              // default security attributes
-                           FALSE,             // initially not owned
-                           NULL);             // unnamed mutex
-        if(*mut != NULL){
-            status = STATUS_OK;
-        }else{
-            status = STATUS_NOK;
-        }
+    if(mut != NULL){
+        InitializeSRWLock(mut);
+        status = STATUS_OK;
     }
     return status;
 }
 
 SOPC_StatusCode Mutex_Clear(Mutex* mut){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    int retCode = 0;
-    if(mut != NULL && *mut != NULL){
-    	retCode = CloseHandle(*mut);
-        if(retCode != 0){
-            status = STATUS_OK;
-        }else{
-            status = STATUS_NOK;
-        }
+    if(mut != NULL){
+        status = STATUS_OK;
     }
     return status;
 }
 
 SOPC_StatusCode Mutex_Lock(Mutex* mut){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    DWORD retCode = 0;
-    if(mut != NULL && *mut != NULL){
-        retCode = WaitForSingleObject(*mut, INFINITE);
-        if(retCode == WAIT_OBJECT_0){
-            status = STATUS_OK;
-        }else{
-            status = STATUS_NOK;
-        }
+    if(mut != NULL){
+        AcquireSRWLockExclusive(mut);
+        status = STATUS_OK;
     }
     return status;
 }
 
 SOPC_StatusCode Mutex_Unlock(Mutex* mut){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    int retCode = 0;
-    if(mut != NULL && *mut != NULL){
-        retCode = ReleaseMutex(*mut);
-        if(retCode != 0){
-            status = STATUS_OK;
-        }else{
-            status = STATUS_NOK;
-        }
+    if(mut != NULL){
+        ReleaseSRWLockExclusive(mut);
+        status = STATUS_OK;
     }
     return status;
 }

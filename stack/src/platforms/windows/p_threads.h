@@ -21,7 +21,7 @@
 #include <winsock2.h>
 #include <windows.h>
 
-typedef HANDLE Mutex;
+typedef SRWLOCK Mutex;
 
 typedef void* (SOPCThreadStartFct) (void *);
 
