@@ -32,6 +32,14 @@
 #include "sopc_mutexes.h"
 
 static Mutex gmutex;
+static Condition gcond;
+
+typedef struct CondRes {
+    uint32_t protectedCondition;
+    uint32_t waitingThreadStarted;
+    uint32_t successCondition;
+    uint32_t timeoutCondition;
+} CondRes;
 
 void* test_thread_exec_fct(void* args){
     uint32_t* addr_i = (uint32_t*) args;
@@ -106,6 +114,195 @@ START_TEST(test_thread_mutex)
 }
 END_TEST
 
+void* test_thread_condvar_fct(void* args){
+    CondRes* condRes = (CondRes*) args;
+    SOPC_StatusCode status = STATUS_NOK;
+    status = Mutex_Lock(&gmutex);
+    ck_assert(STATUS_OK == status);
+    condRes->waitingThreadStarted = 1;
+    while(condRes->protectedCondition == 0){
+        status = Mutex_UnlockAndWaitCond(&gcond, &gmutex);
+        ck_assert(STATUS_OK == status);
+        if(condRes->protectedCondition == 1){
+            // Set success
+            condRes->successCondition = 1;
+        }
+    }
+    status = Mutex_Unlock(&gmutex);
+    return NULL;
+}
+
+void* test_thread_condvar_timed_fct(void* args){
+    CondRes* condRes = (CondRes*) args;
+    SOPC_StatusCode status = STATUS_NOK;
+    status = Mutex_Lock(&gmutex);
+    condRes->waitingThreadStarted = 1;
+    status = STATUS_NOK;
+    while(condRes->protectedCondition == 0 && OpcUa_BadTimeout != status){
+        status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 1000);
+    }
+    if(STATUS_OK == status && condRes->protectedCondition == 1){
+        // Set success on condition
+        condRes->successCondition = 1;
+    }else if(OpcUa_BadTimeout == status && condRes->protectedCondition == 0){
+        condRes->timeoutCondition = 1;
+    }
+    status = Mutex_Unlock(&gmutex);
+    return NULL;
+}
+
+START_TEST(test_thread_condvar)
+{
+    Thread thread;
+    CondRes condRes;
+    condRes.protectedCondition = 0; // FALSE
+    condRes.waitingThreadStarted = 0; // FALSE
+    condRes.successCondition = 0; // FALSE
+    condRes.timeoutCondition = 0; // FALSE
+
+    // Nominal behavior (non timed waiting on condition)
+    SOPC_StatusCode status = Mutex_Initialization(&gmutex);
+    ck_assert(status == STATUS_OK);
+    status = Condition_Init(&gcond);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_Thread_Create(&thread, test_thread_condvar_fct, &condRes);
+    ck_assert(status == STATUS_OK);
+    SOPC_Sleep(10);
+    status = Mutex_Lock(&gmutex);
+    ck_assert(status == STATUS_OK);
+    // Check thread is waiting and mutex is released since we locked it !
+    ck_assert(condRes.waitingThreadStarted == 1);
+    // Trigger the condition now
+    condRes.protectedCondition = 1;
+    status = Mutex_Unlock(&gmutex);
+    ck_assert(status == STATUS_OK);
+    // Signal condition has changed
+    status = Condition_SignalAll(&gcond);
+    // Wait thread termination
+    status = SOPC_Thread_Join(thread);
+    ck_assert(status == STATUS_OK);
+    // Check thread successfully terminated on condition
+    status = Mutex_Lock(&gmutex);
+    ck_assert(condRes.successCondition == 1);
+    status = Mutex_Unlock(&gmutex);
+
+    // Clear mutex and Condtion
+    status = Mutex_Clear(&gmutex);
+    ck_assert(status == STATUS_OK);
+    status = Condition_Clear(&gcond);
+    ck_assert(status == STATUS_OK);
+
+    // Nominal behavior (timed waiting on condition)
+    condRes.protectedCondition = 0; // FALSE
+    condRes.waitingThreadStarted = 0; // FALSE
+    condRes.successCondition = 0; // FALSE
+    condRes.timeoutCondition = 0; // FALSE
+    status = Mutex_Initialization(&gmutex);
+    ck_assert(status == STATUS_OK);
+    status = Condition_Init(&gcond);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes);
+    ck_assert(status == STATUS_OK);
+    SOPC_Sleep(10);
+    status = Mutex_Lock(&gmutex);
+    ck_assert(status == STATUS_OK);
+    // Check thread is waiting and mutex is released since we locked it !
+    ck_assert(condRes.waitingThreadStarted == 1);
+    // Trigger the condition now
+    condRes.protectedCondition = 1;
+    status = Mutex_Unlock(&gmutex);
+    ck_assert(status == STATUS_OK);
+    // Signal condition has changed
+    status = Condition_SignalAll(&gcond);
+    // Wait thread termination
+    status = SOPC_Thread_Join(thread);
+    ck_assert(status == STATUS_OK);
+
+    status = Mutex_Lock(&gmutex);
+    ck_assert(condRes.successCondition == 1);
+    status = Mutex_Unlock(&gmutex);
+
+    // Clear mutex and Condtion
+    status = Mutex_Clear(&gmutex);
+    ck_assert(status == STATUS_OK);
+    status = Condition_Clear(&gcond);
+    ck_assert(status == STATUS_OK);
+
+    // Degraded behavior (timed waiting on condition)
+    condRes.protectedCondition = 0; // FALSE
+    condRes.waitingThreadStarted = 0; // FALSE
+    condRes.successCondition = 0; // FALSE
+    condRes.timeoutCondition = 0; // FALSE
+    status = Mutex_Initialization(&gmutex);
+    ck_assert(status == STATUS_OK);
+    status = Condition_Init(&gcond);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes);
+    ck_assert(status == STATUS_OK);
+    SOPC_Sleep(10);
+    status = Mutex_Lock(&gmutex);
+    ck_assert(status == STATUS_OK);
+    // Check thread is waiting and mutex is released since we locked it !
+    ck_assert(condRes.waitingThreadStarted == 1);
+    // DO NOT CHANGE CONDITION
+    status = Mutex_Unlock(&gmutex);
+    ck_assert(status == STATUS_OK);
+    // DO NOT SIGNAL CONDITION CHANGE
+
+    // Wait thread termination
+    status = SOPC_Thread_Join(thread);
+    ck_assert(status == STATUS_OK);
+
+    // Check timeout on condition occured
+    status = Mutex_Lock(&gmutex);
+    ck_assert(condRes.timeoutCondition == 1);
+    status = Mutex_Unlock(&gmutex);
+
+    // Clear mutex and Condtion
+    status = Mutex_Clear(&gmutex);
+    ck_assert(status == STATUS_OK);
+    status = Condition_Clear(&gcond);
+    ck_assert(status == STATUS_OK);
+
+    // Degraded behavior (invalid parameter)
+    status = Condition_Init(NULL);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Condition_Clear(NULL);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Condition_SignalAll(NULL);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndWaitCond(NULL, &gmutex);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndWaitCond(&gcond, NULL);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndWaitCond(NULL, NULL);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+
+    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 0);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 0);
+
+    status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 100);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+
+    status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 0);
+    ck_assert(status == STATUS_INVALID_PARAMETERS);
+}
+END_TEST
+
 Suite *tests_make_suite_threads(void)
 {
     Suite *s;
@@ -117,6 +314,9 @@ Suite *tests_make_suite_threads(void)
     suite_add_tcase(s, tc_thread_mutex);
     tc_thread_mutex = tcase_create("Threads and mutexes");
     tcase_add_test(tc_thread_mutex, test_thread_mutex);
+    suite_add_tcase(s, tc_thread_mutex);
+    tc_thread_mutex = tcase_create("Threads and condition variables");
+    tcase_add_test(tc_thread_mutex, test_thread_condvar);
     suite_add_tcase(s, tc_thread_mutex);
 
     return s;
