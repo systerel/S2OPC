@@ -25,6 +25,7 @@
 #include "sopc_stack_csts.h"
 #include "sopc_action_queue.h"
 #include "sopc_action_queue_manager.h"
+#include "sopc_threads.h"
 
 SOPC_SocketManager globalSocketMgr;
 uint8_t            globalInitialized = FALSE;
@@ -566,6 +567,7 @@ SOPC_StatusCode SOPC_SocketManager_TreatSocketsEvents(SOPC_SocketManager* socket
                                                       uint32_t            msecTimeout){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
+    uint8_t socketsUsed = FALSE;
     int32_t nbReady = 0;
     SOPC_Socket* uaSock = NULL;
     SOPC_Socket* acceptSock = NULL;
@@ -589,6 +591,7 @@ SOPC_StatusCode SOPC_SocketManager_TreatSocketsEvents(SOPC_SocketManager* socket
         for(idx = 0; idx < socketManager->nbSockets; idx++){
             uaSock = &(socketManager->sockets[idx]);
             if(uaSock->isUsed != FALSE){
+               socketsUsed = !FALSE;
                if(uaSock->state == SOCKET_CONNECTING){
                    SocketSet_Add(uaSock->sock, &writeSet);
                }else{
@@ -600,8 +603,15 @@ SOPC_StatusCode SOPC_SocketManager_TreatSocketsEvents(SOPC_SocketManager* socket
 
         Mutex_Unlock(&socketManager->mutex);
 
-        // Returns number of ready descriptor or -1 in case of error
-        nbReady = Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, msecTimeout);
+        if(socketsUsed == FALSE){
+            // In case no socket is in use, do not call select (*WaitSocketEvents)
+            // since it returns an error with WinSockets
+            SOPC_Sleep(msecTimeout);
+            nbReady = 0;
+        }else{
+            // Returns number of ready descriptor or -1 in case of error
+            nbReady = Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, msecTimeout);
+        }
 
         Mutex_Lock(&socketManager->mutex);
 
@@ -652,7 +662,6 @@ SOPC_StatusCode SOPC_SocketManager_TreatSocketsEvents(SOPC_SocketManager* socket
                                     uaSock->connectAddrs = NULL;
                                     uaSock->nextConnectAttemptAddr = NULL;
                                 }
-
                                 status = SOPC_CreateAction_SocketEvent(callback,
                                                                        uaSock,
                                                                        SOCKET_CONNECT_EVENT,

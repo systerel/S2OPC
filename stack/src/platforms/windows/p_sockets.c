@@ -268,7 +268,7 @@ int32_t Socket_WaitSocketEvents(SocketSet* readSet,
         val = &timeout;
     }
     nbReady = select(ignored, readSet, writeSet, exceptSet, val);
-    if(nbReady > INT32_MAX || nbReady < INT32_MIN)
+    if(nbReady == SOCKET_ERROR || nbReady > INT32_MAX || nbReady < INT32_MIN)
         return -1;
     return (int32_t) nbReady;
 }
