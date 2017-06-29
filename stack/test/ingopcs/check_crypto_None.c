@@ -343,7 +343,7 @@ START_TEST(test_cert_loadkey_None)
     // Loads the public key from cert
     ck_assert(KeyManager_AsymmetricKey_CreateFromCertificate(crt_pub, &key_pub) == STATUS_OK);
 
-    // Note: as the AsymmetricKey is not malloc-ed, it is not free-d, so it is not cleared neither
+    KeyManager_AsymmetricKey_Free(key_pub);
 }
 END_TEST
 
