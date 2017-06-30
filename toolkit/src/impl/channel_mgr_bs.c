@@ -36,7 +36,6 @@
 #include "config_toolkit.h"
 
 static int gevent = 0;
-static int gconnected = 0;
 
 static int verbose = FALSE;
 
@@ -56,7 +55,6 @@ SOPC_StatusCode util_channel_mgr_bs__Channel_ConnectionEvent_Callback(SOPC_Chann
     break;
   case SOPC_ChannelEvent_Connected:
     cevent = "SOPC_ChannelEvent_Connected";
-    gconnected = 1;
     break;
   case SOPC_ChannelEvent_Disconnected:
     cevent = "SOPC_ChannelEvent_Disconnected";
@@ -149,7 +147,7 @@ void channel_mgr_bs__open_secure_channel(
       }
     }
 
-    if(gconnected == 0 || STATUS_OK != status){
+    if(STATUS_OK != status){
       SOPC_Channel_Delete(&unique_channel_or_endpoint->channel);
       free(unique_channel_or_endpoint);
       unique_channel_or_endpoint = NULL;

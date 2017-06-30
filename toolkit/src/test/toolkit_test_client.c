@@ -30,10 +30,9 @@
 #include "util_b2c.h"
 
 #include "sopc_stack_config.h"
-#include "sopc_base_types.h"
+#include "sopc_time.h"
 #include "sopc_types.h"
 #include "opcua_statuscodes.h"
-#include "sopc_run.h"
 
 #include "wrap_read.h"
 #include "testlib_write.h"
@@ -70,9 +69,9 @@ message__message* getReadRequest_verif_message() {
 int main(void){
 
   // Sleep timeout in milliseconds
-  const uint32_t maxSleepTimeout = 500;
+  const uint32_t sleepTimeout = 500;
   // Loop timeout in milliseconds
-  const uint32_t maxLoopTimeout = 20000;
+  const uint32_t loopTimeout = 20000;
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
@@ -92,7 +91,7 @@ int main(void){
 
   /* Init stack configuration */
   if(STATUS_OK == status){
-    status = StackConfiguration_Initialize();
+    status = SOPC_StackConfiguration_Initialize();
     if(STATUS_OK != status){
       printf(">>Test_Client_Toolkit: Failed initializing stack\n");
     }else{
@@ -119,15 +118,15 @@ int main(void){
   loopCpt = 0;
   while(STATUS_OK == status &&
         session_state != constants__e_session_created &&
-        loopCpt * maxSleepTimeout <= maxLoopTimeout){
+        loopCpt * sleepTimeout <= loopTimeout){
     loopCpt++;
     // Retrieve received messages on socket
-    status = SOPC_TreatReceivedMessages(maxSleepTimeout);
+    SOPC_Sleep(sleepTimeout);
     io_dispatch_mgr__get_session_state_or_closed(session,
                                                  &session_state);
   };
 
-  if(loopCpt * maxSleepTimeout > maxLoopTimeout){
+  if(loopCpt * sleepTimeout > loopTimeout){
     status = OpcUa_BadTimeout;
   }
 
@@ -142,7 +141,7 @@ int main(void){
     }else{
       util_status_code__B_to_C(sCode,
                                &status);
-      printf(">>Test_Client_Toolkit: Activating session: statusCode = '%d' | NOK\n", status);
+      printf(">>Test_Client_Toolkit: Activating session: statusCode = '%X' | NOK\n", status);
     }
   }
 
@@ -150,15 +149,15 @@ int main(void){
   loopCpt = 0;
   while(STATUS_OK == status &&
         session_state != constants__e_session_userActivated &&
-        loopCpt * maxSleepTimeout <= maxLoopTimeout){
+        loopCpt * sleepTimeout <= loopTimeout){
     loopCpt++;
     // Retrieve received messages on socket
-    status = SOPC_TreatReceivedMessages(maxSleepTimeout);
+    SOPC_Sleep(sleepTimeout);
     io_dispatch_mgr__get_session_state_or_closed(session,
                                                  &session_state);
   }
 
-  if(loopCpt * maxSleepTimeout > maxLoopTimeout){
+  if(loopCpt * sleepTimeout > loopTimeout){
     status = OpcUa_BadTimeout;
   }
 
@@ -186,7 +185,7 @@ int main(void){
     }else{
       util_status_code__B_to_C(sCode,
                                &status);
-      printf(">>Test_Client_Toolkit: read request sending: statusCode = '%d' | NOK\n", status);
+      printf(">>Test_Client_Toolkit: read request sending: statusCode = '%X' | NOK\n", status);
     }
   }
 
@@ -194,12 +193,12 @@ int main(void){
   loopCpt = 0;
   while(STATUS_OK == status &&
         test_results_get_service_result() == FALSE &&
-        loopCpt * maxSleepTimeout <= maxLoopTimeout){
+        loopCpt * sleepTimeout <= loopTimeout){
     loopCpt++;
-    status = SOPC_TreatReceivedMessages(100);
+    SOPC_Sleep(100);
   }
 
-  if(loopCpt * maxSleepTimeout > maxLoopTimeout){
+  if(loopCpt * sleepTimeout > loopTimeout){
     status = OpcUa_BadTimeout;
   }
 
@@ -230,12 +229,12 @@ int main(void){
   loopCpt = 0;
   while(STATUS_OK == status &&
         test_results_get_service_result() == FALSE &&
-        loopCpt * maxSleepTimeout <= maxLoopTimeout){
+        loopCpt * sleepTimeout <= loopTimeout){
     loopCpt++;
-    status = SOPC_TreatReceivedMessages(100);
+    SOPC_Sleep(100);
   }
 
-  if(loopCpt * maxSleepTimeout > maxLoopTimeout){
+  if(loopCpt * sleepTimeout > loopTimeout){
     status = OpcUa_BadTimeout;
   }
 
@@ -267,12 +266,12 @@ int main(void){
   loopCpt = 0;
   while(STATUS_OK == status &&
         test_results_get_service_result() == FALSE &&
-        loopCpt * maxSleepTimeout <= maxLoopTimeout){
+        loopCpt * sleepTimeout <= loopTimeout){
     loopCpt++;
-    status = SOPC_TreatReceivedMessages(100);
+    SOPC_Sleep(100);
   }
 
-  if(loopCpt * maxSleepTimeout > maxLoopTimeout){
+  if(loopCpt * sleepTimeout > loopTimeout){
     status = OpcUa_BadTimeout;
   }
 
@@ -294,25 +293,25 @@ int main(void){
   loopCpt = 0;
   do{
     loopCpt++;
-    status = SOPC_TreatReceivedMessages(100);
+    SOPC_Sleep(100);
     io_dispatch_mgr__get_session_state_or_closed(session,
                                                  &session_state);
   }while(STATUS_OK == status &&
          constants__e_session_closed != session_state &&
-         loopCpt * maxSleepTimeout <= maxLoopTimeout);
+         loopCpt * sleepTimeout <= loopTimeout);
 
   io_dispatch_mgr__close_all_active_connections();
 
   address_space_bs__UNINITIALISATION();
 
-  StackConfiguration_Clear();
+  SOPC_StackConfiguration_Clear();
 
   if(STATUS_OK == status && test_results_get_service_result() == (!FALSE)){
     printf(">>Test_Client_Toolkit: read request received ! \n");
     printf(">>Test_Client_Toolkit final result: OK\n");
     return 0;
   }else{
-    printf(">>Test_Client_Toolkit: read request not received or BAD status (%d) ! \n", status);
+    printf(">>Test_Client_Toolkit: read request not received or BAD status (%X) ! \n", status);
     printf(">>Test_Client_Toolkit final result: NOK\n");
     return status;
   }

@@ -22,7 +22,7 @@
 #include "io_dispatch_mgr.h"
 
 #include "sopc_stack_config.h"
-#include "sopc_run.h"
+#include "sopc_time.h"
 #include "sopc_endpoint.h"
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
@@ -182,9 +182,9 @@ int main(void)
   SOPC_StatusCode status = STATUS_OK;
 
   // Sleep timeout in milliseconds
-  const uint32_t maxSleepTimeout = 500;
+  const uint32_t sleepTimeout = 500;
   // Loop timeout in milliseconds
-  const uint32_t maxLoopTimeout = 20000;
+  const uint32_t loopTimeout = 20000;
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
@@ -209,7 +209,7 @@ int main(void)
 
   // Init stack configuration
   if(STATUS_OK == status){
-    status = StackConfiguration_Initialize();
+    status = SOPC_StackConfiguration_Initialize();
     if(STATUS_OK != status){
       printf("<Test_Server_Toolkit: Failed initializing stack\n");
     }else{
@@ -245,26 +245,26 @@ int main(void)
         }
     }
 
-  while (STATUS_OK == status && connectionClosed == FALSE && loopCpt * maxSleepTimeout <= maxLoopTimeout)
+  while (STATUS_OK == status && connectionClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
     	// Retrieve received messages on socket
-        status = SOPC_TreatReceivedMessages(maxSleepTimeout);
+        SOPC_Sleep(sleepTimeout);
     }
 
-  if(loopCpt * maxSleepTimeout > maxLoopTimeout){
+  if(loopCpt * sleepTimeout > loopTimeout){
     status = OpcUa_BadTimeout;
   }
 
   address_space_bs__UNINITIALISATION();
 
   SOPC_Endpoint_Delete(&endpoint_and_context.endpoint);
-  StackConfiguration_Clear();
+  SOPC_StackConfiguration_Clear();
 
   if(STATUS_OK == status){
     printf("<Test_Server_Toolkit final result: OK\n");
   }else{
-    printf("<Test_Server_Toolkit final result: NOK with status = '%d'\n", status);
+    printf("<Test_Server_Toolkit final result: NOK with status = '%X'\n", status);
   }
 
   return status;
