@@ -23,6 +23,7 @@
 #include "sopc_mutexes.h"
 
 struct SOPC_ActionQueue {
+    const char*  debugQueueName;
     SLinkedList* queueList;
     Condition    queueCond;
     Mutex        queueMutex;
@@ -35,12 +36,13 @@ typedef struct {
     const char*          debugTxt;
 } SOPC_ActionEvent;
 
-SOPC_StatusCode SOPC_ActionQueue_Init(SOPC_ActionQueue** queue){
+SOPC_StatusCode SOPC_ActionQueue_Init(SOPC_ActionQueue** queue, const char*  queueName){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != queue){
         *queue = malloc(sizeof(SOPC_ActionQueue));
         if(*queue != NULL){
             status = STATUS_OK;
+            (*queue)->debugQueueName = queueName;
             (*queue)->waitingThreads = 0;
             (*queue)->queueList = SLinkedList_Create(0);
             if(NULL == (*queue)->queueList){

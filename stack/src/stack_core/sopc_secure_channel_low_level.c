@@ -55,7 +55,7 @@ SC_Connection* SC_Create (TCP_UA_Connection* connection){
             SOPC_String_Initialize(&sConnection->currentSecuPolicy);
             SOPC_String_Initialize(&sConnection->precSecuPolicy);
 
-            SOPC_ActionQueue_Init(&sConnection->msgQueue);
+            SOPC_ActionQueue_Init(&sConnection->msgQueue, "Connection msgs to send");
             sConnection->msgQueueToken = 1;
         }else{
             TCP_UA_Connection_Delete(connection);

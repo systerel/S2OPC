@@ -56,12 +56,12 @@ void* SOPC_ThreadStartManager(void* pQueueMgr)
     return NULL;
 }
 
-SOPC_ActionQueueManager* SOPC_ActionQueueManager_CreateAndStart(){
+SOPC_ActionQueueManager* SOPC_ActionQueueManager_CreateAndStart(const char* name){
     SOPC_StatusCode status = STATUS_NOK;
     SOPC_ActionQueueManager* pQueueMgr = NULL;
     pQueueMgr = malloc(sizeof(SOPC_ActionQueueManager));
     if(NULL != pQueueMgr){
-        status = SOPC_ActionQueue_Init(&pQueueMgr->queue);
+        status = SOPC_ActionQueue_Init(&pQueueMgr->queue, name);
         if(STATUS_OK == status){
             pQueueMgr->stopMgr = FALSE;
             status = SOPC_Thread_Create(&pQueueMgr->mgrThread,

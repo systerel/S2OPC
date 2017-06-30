@@ -103,13 +103,13 @@ SOPC_StatusCode SOPC_StackConfiguration_Initialize(){
             status = SOPC_SocketManager_Config_Init();
         }
         if(STATUS_OK == status){
-            appCallbackQueueMgr = SOPC_ActionQueueManager_CreateAndStart();
+            appCallbackQueueMgr = SOPC_ActionQueueManager_CreateAndStart("Application callbacks manager");
             if(NULL == appCallbackQueueMgr){
                 status = STATUS_NOK;
             }
         }
         if(STATUS_OK == status){
-            stackActionQueueMgr = SOPC_ActionQueueManager_CreateAndStart();
+            stackActionQueueMgr = SOPC_ActionQueueManager_CreateAndStart("Stack actions manager");
             if(NULL == stackActionQueueMgr){
                 status = STATUS_NOK;
             }

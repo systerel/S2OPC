@@ -748,7 +748,7 @@ START_TEST(test_msg_queue)
     SOPC_ActionQueue* queue = NULL;
     int paramAndRes = -10;
     int paramAndRes2 = 0;
-    SOPC_StatusCode status = SOPC_ActionQueue_Init(&queue);
+    SOPC_StatusCode status = SOPC_ActionQueue_Init(&queue, NULL);
     ck_assert(status == STATUS_OK);
     status = SOPC_Action_BlockingEnqueue(queue, FctPointer, (void*) &paramAndRes, NULL);
     ck_assert(status == STATUS_OK);
@@ -839,7 +839,7 @@ START_TEST(test_msg_queue_threads)
     const uint8_t three = 3;
     const uint8_t four = 4;
     const uint8_t five = 5;
-    SOPC_StatusCode status = SOPC_ActionQueue_Init(&queue);
+    SOPC_StatusCode status = SOPC_ActionQueue_Init(&queue, NULL);
     params.success = FALSE;
     params.blockingDequeue = FALSE;
     params.nbMsgs = 5;

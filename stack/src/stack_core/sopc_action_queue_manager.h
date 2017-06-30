@@ -32,9 +32,11 @@ extern SOPC_ActionQueueManager* condSignalQueueMgr; // condition signal change (
  *  \brief Create and start the action queue manager treatment, then actions can be added in the action queue and
  *  will be treated sequentially as a FIFO queue.
  *
+ *  \param name  debug name for the action queue manager
+ *
  *  \return  NULL if action queue manager failed, action queue manager in case of success
  */
-SOPC_ActionQueueManager* SOPC_ActionQueueManager_CreateAndStart();
+SOPC_ActionQueueManager* SOPC_ActionQueueManager_CreateAndStart(const char* name);
 
 /**
  *  \brief Add the action to be run in the action queue. The action is provided as a function pointer and parameter to be provided.

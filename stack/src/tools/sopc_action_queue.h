@@ -24,7 +24,7 @@ typedef struct SOPC_ActionQueue SOPC_ActionQueue;
 
 typedef void SOPC_ActionFunction (void* arg);
 
-SOPC_StatusCode SOPC_ActionQueue_Init(SOPC_ActionQueue** queue);
+SOPC_StatusCode SOPC_ActionQueue_Init(SOPC_ActionQueue** queue, const char*  queueName);
 
 // queue non NULL, fctPointer or fctArgument non NULL, actionText optional
 SOPC_StatusCode SOPC_Action_BlockingEnqueue(SOPC_ActionQueue*    queue,

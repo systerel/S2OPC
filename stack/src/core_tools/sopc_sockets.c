@@ -267,7 +267,7 @@ SOPC_Socket* GetFreeSocket(SOPC_SocketManager* socketMgr){
         for(idx = 0; idx < socketMgr->nbSockets; idx++){
             if(result == NULL && socketMgr->sockets[idx].isUsed == FALSE){
                 // Initialize local write socket buffer
-                if(STATUS_OK == SOPC_ActionQueue_Init(&socketMgr->sockets[idx].writeQueue)){
+                if(STATUS_OK == SOPC_ActionQueue_Init(&socketMgr->sockets[idx].writeQueue, "Socket write msgs")){
                     result = &(socketMgr->sockets[idx]);
                 }
             }
