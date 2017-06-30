@@ -24,6 +24,7 @@
 
 #include "opcua_identifiers.h"
 #include "sopc_stack_config.h"
+#include "sopc_time.h"
 #include "crypto_profiles.h"
 #include "pki_stack.h"
 #include "sopc_clientapi.h"

@@ -131,7 +131,7 @@ INTERNAL_TESTS_OBJ_FILES=$(patsubst %.c,$(BUILD_DIR)/%.o,$(INTERNAL_TESTS_SRC_FI
 C_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.c")
 C_STUBS_SRC_PATHS=$(shell find $(C_STUBS_DIRS) -type f -name "*.c")
 H_SRC_PATHS=$(shell find $(C_SRC_DIRS) -not -path $(EXCLUDE_DIR) -type f -name "*.h")
-H_INCLUDE_PATHS=$(shell find $(UASTACK_DIR)/API $(UASTACK_DIR)/APIwrappers $(UASTACK_DIR)/crypto $(UASTACK_DIR)/core_types -maxdepth 1 -type f -name "*.h")
+H_INCLUDE_PATHS=$(shell find $(UASTACK_DIR)/API $(UASTACK_DIR)/APIwrappers $(UASTACK_DIR)/crypto $(UASTACK_DIR)/core_types $(UASTACK_DIR)/platforms/sopc_time.h -maxdepth 1 -type f -name "*.h")
 
 # MBEDTLS INPUTS
 MBEDTLS_DIR=$(WORKSPACE_DIR)/../libraries/mbedtls-2.3.0

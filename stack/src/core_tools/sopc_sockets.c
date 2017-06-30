@@ -25,7 +25,7 @@
 #include "sopc_stack_csts.h"
 #include "sopc_action_queue.h"
 #include "sopc_action_queue_manager.h"
-#include "sopc_threads.h"
+#include "sopc_time.h"
 
 SOPC_SocketManager globalSocketMgr;
 uint8_t            globalInitialized = FALSE;

@@ -21,6 +21,7 @@
 #include <stdio.h>
 
 #include "sopc_stack_config.h"
+#include "sopc_time.h"
 #include "crypto_profiles.h"
 #include "key_manager.h"
 #include "pki_stack.h"

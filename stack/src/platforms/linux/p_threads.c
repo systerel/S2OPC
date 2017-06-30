@@ -20,6 +20,7 @@
 
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
+#include "sopc_time.h"
 
 SOPC_StatusCode Condition_Init(Condition* cond){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;

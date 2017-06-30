@@ -35,7 +35,7 @@
 #include "hexlify.h"
 #include "sopc_action_queue.h"
 #include "sopc_threads.h"
-
+#include "sopc_time.h"
 
 START_TEST(test_hexlify)
 {

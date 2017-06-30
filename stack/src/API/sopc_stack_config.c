@@ -26,6 +26,7 @@
 #include "platform_deps.h"
 #include "sopc_action_queue_manager.h"
 #include "sopc_threads.h"
+#include "sopc_time.h"
 
 typedef struct SOPC_StackConfiguration {
     SOPC_NamespaceTable*     nsTable;

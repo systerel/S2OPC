@@ -30,6 +30,7 @@
 #include "sopc_base_types.h"
 #include "sopc_threads.h"
 #include "sopc_mutexes.h"
+#include "sopc_time.h"
 
 static Mutex gmutex;
 static Condition gcond;
