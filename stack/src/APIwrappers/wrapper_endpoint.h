@@ -42,13 +42,13 @@ SOPC_StatusCode OpcUa_Endpoint_Create(SOPC_Endpoint*               endpoint,
 
 void OpcUa_Endpoint_Delete(SOPC_Endpoint* endpoint);
 
-SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelId(SOPC_Endpoint               endpoint,
-                                                         struct SOPC_RequestContext* context,
-                                                         uint32_t*                   secureChannelId);
+SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelId(SOPC_Endpoint        endpoint,
+                                                         SOPC_RequestContext* context,
+                                                         uint32_t*            secureChannelId);
 
-SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelSecurityPolicy(SOPC_Endpoint               endpoint,
-                                                                     struct SOPC_RequestContext* context,
-                                                                     SOPC_SecurityPolicy*        securityPolicy);
+SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelSecurityPolicy(SOPC_Endpoint        endpoint,
+                                                                     SOPC_RequestContext* context,
+                                                                     SOPC_SecurityPolicy* securityPolicy);
 
 SOPC_StatusCode OpcUa_Endpoint_Open(SOPC_Endpoint                      endpoint,
                                     char*                              url,

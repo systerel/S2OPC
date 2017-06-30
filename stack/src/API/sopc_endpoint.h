@@ -100,10 +100,10 @@ typedef SOPC_StatusCode (SOPC_InvokeService) (SOPC_Endpoint endpoint, ...);
 /**
  *  \brief Endpoint invoke service and send response function type
  */
-typedef SOPC_StatusCode (SOPC_BeginInvokeService) (SOPC_Endpoint               endpoint,
-                                                   struct SOPC_RequestContext* requestContext,
-                                                   void**                      a_ppRequest,
-                                                   SOPC_EncodeableType*        a_pRequestType);
+typedef SOPC_StatusCode (SOPC_BeginInvokeService) (SOPC_Endpoint        endpoint,
+                                                   SOPC_RequestContext* requestContext,
+                                                   void**               a_ppRequest,
+                                                   SOPC_EncodeableType* a_pRequestType);
 
 /**
  *  \brief Service treatment type structure definition. An instance define the way to respond to a service request.
@@ -188,10 +188,10 @@ SOPC_StatusCode SOPC_Endpoint_CreateResponse(SOPC_Endpoint         endpoint,
  *
  *  \return               STATUS_OK if response sending is in progression, STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint                endpoint,
-                                           SOPC_EncodeableType*         responseType,
-                                           void*                        response,
-                                           struct SOPC_RequestContext** requestContext);
+SOPC_StatusCode SOPC_Endpoint_SendResponse(SOPC_Endpoint         endpoint,
+                                           SOPC_EncodeableType*  responseType,
+                                           void*                 response,
+                                           SOPC_RequestContext** requestContext);
 
 /**
  *  \brief Cancel sending response to client. Must be called before call to SOPC_Endpoint_EndSendResponse.
@@ -248,9 +248,9 @@ void* SOPC_Endpoint_GetCallbackData(SOPC_Endpoint endpoint);
  *
  *  \return                STATUS_OK if service function was returned correctly, STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_Endpoint_GetServiceFunction(SOPC_Endpoint               endpoint,
-                                                 struct SOPC_RequestContext* requestContext,
-                                                 SOPC_InvokeService**        serviceFunction);
+SOPC_StatusCode SOPC_Endpoint_GetServiceFunction(SOPC_Endpoint        endpoint,
+                                                 SOPC_RequestContext* requestContext,
+                                                 SOPC_InvokeService** serviceFunction);
 
 /**
  *  \brief Return the secure channel Id given the request context
@@ -261,8 +261,8 @@ SOPC_StatusCode SOPC_Endpoint_GetServiceFunction(SOPC_Endpoint               end
  *
  *  \return                STATUS_OK if secure channel id was returned correctly, STATUS_NOK in case of invalid context
  */
-SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelId(struct SOPC_RequestContext* context,
-                                                        uint32_t*                   secureChannelId);
+SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelId(SOPC_RequestContext* context,
+                                                        uint32_t*            secureChannelId);
 
 /**
  *  \brief Return the security policy and mode given the request context
@@ -274,9 +274,9 @@ SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelId(struct SOPC_RequestConte
  *
  *  \return                STATUS_OK if security policy and mode was returned correctly, STATUS_NOK in case of invalid context
  */
-SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelSecurityPolicy(struct SOPC_RequestContext* context,
-                                                                    SOPC_String*                securityPolicy,
-                                                                    OpcUa_MessageSecurityMode*  securityMode);
+SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelSecurityPolicy(SOPC_RequestContext*       context,
+                                                                    SOPC_String*               securityPolicy,
+                                                                    OpcUa_MessageSecurityMode* securityMode);
 
 /**
  *  \brief Return the reponse encodeable type given the request context
@@ -287,8 +287,8 @@ SOPC_StatusCode SOPC_Endpoint_GetContextSecureChannelSecurityPolicy(struct SOPC_
  *
  *  \return                STATUS_OK if response encodeable type was returned correctly, STATUS_NOK in case of invalid context
  */
-SOPC_StatusCode SOPC_Endpoint_GetContextResponseType(struct SOPC_RequestContext* context,
-                                                     SOPC_EncodeableType**       respType);
+SOPC_StatusCode SOPC_Endpoint_GetContextResponseType(SOPC_RequestContext*  context,
+                                                     SOPC_EncodeableType** respType);
 
 #endif /* SERVER API */
 

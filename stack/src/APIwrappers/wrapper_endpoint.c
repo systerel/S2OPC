@@ -200,16 +200,17 @@ void OpcUa_Endpoint_Delete(SOPC_Endpoint* endpoint){
     SOPC_Endpoint_Delete(endpoint);
 }
 
-SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelId(SOPC_Endpoint               endpoint,
+SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelId(SOPC_Endpoint        endpoint,
                                                          SOPC_RequestContext* context,
-                                                         uint32_t*                   secureChannelId){
+                                                         uint32_t*            secureChannelId){
     (void) endpoint;
     return SOPC_Endpoint_GetContextSecureChannelId(context, secureChannelId);
 }
 
-SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelSecurityPolicy(SOPC_Endpoint               endpoint,
+SOPC_StatusCode OpcUa_Endpoint_GetMessageSecureChannelSecurityPolicy(SOPC_Endpoint        endpoint,
                                                                      SOPC_RequestContext* context,
-                                                                     SOPC_SecurityPolicy*        securityPolicy){
+                                                                     SOPC_SecurityPolicy* securityPolicy)
+{
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_MessageSecurityMode secuMode = OpcUa_MessageSecurityMode_Invalid;
     (void) endpoint;
