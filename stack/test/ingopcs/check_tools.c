@@ -34,6 +34,7 @@
 #include "check_stack.h"
 #include "hexlify.h"
 #include "sopc_action_queue.h"
+#include "sopc_async_queue.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
@@ -891,10 +892,158 @@ START_TEST(test_msg_queue_threads)
 }
 END_TEST
 
+// Async queue
+
+START_TEST(test_async_queue)
+{
+    void* arg = NULL;
+    SOPC_AsyncQueue* queue = NULL;
+    int paramAndRes = -10;
+    int paramAndRes2 = 0;
+    SOPC_StatusCode status = SOPC_AsyncQueue_Init(&queue, NULL);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &paramAndRes);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &paramAndRes2);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingDequeue(queue, &arg);
+    ck_assert(status == STATUS_OK);
+    ck_assert(arg == &paramAndRes);
+    status = SOPC_AsyncQueue_NonBlockingDequeue(queue, &arg);
+    ck_assert(status == STATUS_OK);
+    ck_assert(arg == &paramAndRes2);
+    status = SOPC_AsyncQueue_NonBlockingDequeue(queue, &arg);
+    ck_assert(status == OpcUa_BadWouldBlock);
+    SOPC_AsyncQueue_Free(&queue);
+}
+END_TEST
+
+typedef struct AsyncQueue_Element {
+    SOPC_AsyncQueue* queue;
+    uint8_t nbMsgs;
+    uint8_t blockingDequeue;
+    uint8_t success;
+} AsyncQueue_Element;
+
+void* test_async_queue_blocking_dequeue_fct(void* args){
+    void* arg = NULL;
+    SOPC_StatusCode status;
+    AsyncQueue_Element* param = (AsyncQueue_Element*) args;
+    uint8_t nbDequeued = 0;
+    uint8_t lastValueDeq = 0;
+    uint8_t success = !FALSE;
+    // Dequeue expected number of messages with increased value sequence as action parameter
+    while(nbDequeued < param->nbMsgs && success != FALSE){
+        param->blockingDequeue = !FALSE;
+        status = SOPC_AsyncQueue_BlockingDequeue(param->queue, &arg);
+        param->blockingDequeue = FALSE;
+        nbDequeued++;
+        assert(status == STATUS_OK);
+        if(*((uint8_t*) arg) == lastValueDeq + 1){
+            lastValueDeq++;
+        }else{
+            success = FALSE;
+        }
+    }
+    param->success = success;
+    return NULL;
+}
+
+void* test_async_queue_nonblocking_dequeue_fct(void* args){
+    void* arg = NULL;
+    SOPC_StatusCode status;
+    AsyncQueue_Element* param = (AsyncQueue_Element*) args;
+    uint8_t nbDequeued = 0;
+    uint8_t lastValueDeq = 0;
+    uint8_t success = !FALSE;
+    // Dequeue expected number of messages with increased value sequence as action parameter
+    while(nbDequeued < param->nbMsgs && success != FALSE){
+        status = SOPC_AsyncQueue_NonBlockingDequeue(param->queue, &arg);
+        if(status == STATUS_OK){
+            nbDequeued++;
+            assert(status == STATUS_OK);
+            if(*((uint8_t*) arg) == lastValueDeq + 1){
+                lastValueDeq++;
+            }else{
+                success = FALSE;
+            }
+        }else{
+            if(status != OpcUa_BadWouldBlock){
+                success = FALSE;
+            }
+        }
+        SOPC_Sleep(10);
+    }
+    param->success = success;
+    return NULL;
+}
+
+START_TEST(test_async_queue_threads)
+{
+    Thread thread;
+    AsyncQueue_Element params;
+    SOPC_AsyncQueue* queue;
+    const uint8_t one = 1;
+    const uint8_t two = 2;
+    const uint8_t three = 3;
+    const uint8_t four = 4;
+    const uint8_t five = 5;
+    SOPC_StatusCode status = SOPC_AsyncQueue_Init(&queue, NULL);
+    params.success = FALSE;
+    params.blockingDequeue = FALSE;
+    params.nbMsgs = 5;
+    params.queue = queue;
+    // Nominal behavior of async queue FIFO (blocking dequeue)
+    status = SOPC_Thread_Create(&thread, test_async_queue_blocking_dequeue_fct, &params);
+    ck_assert(status == STATUS_OK);
+    SOPC_Sleep(10);
+    ck_assert(params.blockingDequeue == !FALSE);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &one);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue,(void*) &two);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue,(void*) &three);
+    ck_assert(status == STATUS_OK);
+    SOPC_Sleep(100);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue,(void*) &four);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue,(void*) &five);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_Thread_Join(thread);
+    ck_assert(status == STATUS_OK);
+    ck_assert(params.success == !FALSE);
+
+    // Nominal behavior of async queue FIFO (non blocking dequeue)
+    params.success = FALSE;
+    params.blockingDequeue = FALSE;
+    params.nbMsgs = 5;
+    params.queue = queue;
+    status = SOPC_Thread_Create(&thread, test_async_queue_nonblocking_dequeue_fct, &params);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &one);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &two);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &three);
+    ck_assert(status == STATUS_OK);
+    SOPC_Sleep(100);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &four);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &five);
+    ck_assert(status == STATUS_OK);
+    status = SOPC_Thread_Join(thread);
+    ck_assert(status == STATUS_OK);
+    ck_assert(params.success == !FALSE);
+
+    SOPC_AsyncQueue_Free(&queue);
+
+}
+END_TEST
+
 Suite *tests_make_suite_tools(void)
 {
     Suite *s;
-    TCase *tc_hexlify, *tc_msg_queue, *tc_basetools, *tc_buffer, *tc_linkedlist;
+    TCase *tc_hexlify, *tc_msg_queue, *tc_basetools, *tc_buffer, *tc_linkedlist, *tc_async_queue;
 
     s = suite_create("Tools");
     tc_basetools = tcase_create("Base tools");
@@ -919,6 +1068,11 @@ Suite *tests_make_suite_tools(void)
     tcase_add_test(tc_msg_queue, test_msg_queue);
     tcase_add_test(tc_msg_queue, test_msg_queue_threads);
     suite_add_tcase(s, tc_msg_queue);
+
+    tc_async_queue = tcase_create("Async queue");
+    tcase_add_test(tc_async_queue, test_async_queue);
+    tcase_add_test(tc_async_queue, test_async_queue_threads);
+    suite_add_tcase(s, tc_async_queue);
 
     return s;
 }
