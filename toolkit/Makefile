@@ -32,6 +32,7 @@ OBJS        += session_header.o io_dispatch_mgr.o session_mgr.o session_core.o s
                service_response_cli_cb_bs.o \
                session_core_channel_lost_it_bs.o session_core_orphaned_it_bs.o \
                util_b2c.o test_results.o
+OBJS        += sopc_toolkit_config.o
 CLIENT_OBJS =toolkit_test_client.o
 SERVER_OBJS =toolkit_test_server.o
 READ_OBJS   =toolkit_test_read.o
