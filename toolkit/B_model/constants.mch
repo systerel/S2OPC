@@ -143,9 +143,7 @@ PROPERTIES
 
     t_NodeClass = t_NodeClass_i - {c_NodeClass_indet} &
 
-    conv_NodeId_Variant : t_NodeId_i --> t_Variant_i &
     conv_NodeId_Variant : t_NodeId --> t_Variant &
-    conv_NodeClass_Variant : t_NodeClass_i --> t_Variant_i &
     conv_NodeClass_Variant : t_NodeClass --> t_Variant &
 
     k_n_nodes_max : NAT &
