@@ -29,8 +29,8 @@ DEFINITIONS
     d_inv_read == (
         nb_ReadValue : NAT &
         nb_ReadValue <= k_n_read_resp_max &
-        ReadValue_Node : t_ReadValue +-> t_Node &
-        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
+        ReadValue_Node : cast_t_ReadValue[1..nb_ReadValue] --> t_Node &
+        ReadValue_AttributeId : cast_t_ReadValue[1..nb_ReadValue] --> t_AttributeId
     )
     ;
     d_inv_response == (
@@ -71,8 +71,6 @@ OPERATIONS
         :(
             /* TODO: It would be nice to specify that a response is always sent, even when there is an error */
             d_inv_read &
-            dom(ReadValue_Node) = cast_t_ReadValue[1..nb_ReadValue] &
-            dom(ReadValue_AttributeId) = cast_t_ReadValue[1..nb_ReadValue] &
             data_Value_Value : t_ReadValue +-> t_Variant &
             data_Value_Value = % rvi. (
                 rvi : t_ReadValue &
