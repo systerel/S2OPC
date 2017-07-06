@@ -17,6 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "sopc_services_events.h"
 #include "internal_msg.h"
@@ -30,7 +31,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
                                   void*    params, 
                                   int32_t  auxParam)
 {
-  SOPC_Services_Events event = (SOPC_Services_Events) scEvent;
+  SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
   channel_and_context.isChannel = !FALSE;
   channel_and_context.channel = NULL;
   channel_and_context.endpoint = NULL;
@@ -106,5 +107,8 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
   case SE_CLOSE_SESSION:
     // id == session id
     break;
+  default:
+    assert(FALSE);
   }
 }
+

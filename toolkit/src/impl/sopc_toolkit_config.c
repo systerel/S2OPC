@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "sopc_stack_config.h"
 #include "sopc_mutexes.h"
@@ -40,26 +41,66 @@ static struct {
     .epConfigs = NULL,
 };
 
-SOPC_EventDispatcherManager* servicesEventDispatcherMgr;
+SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
 
-SOPC_StatusCode SOPC_Toolkit_Initialize(){
-    SOPC_StatusCode status = OpcUa_BadInvalidState;
-    if(tConfig.initDone == FALSE){
+static SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
+static SOPC_ComEvent_Fct* pAppFct = NULL;
+static SOPC_AddressSpaceNotif_Fct* pAddSpaceFct = NULL;
+
+void SOPC_ApplicationEventDispatcher(int32_t  appEvent, 
+                                     uint32_t eventType, 
+                                     void*    params, 
+                                     int32_t  auxParam){
+  switch((SOPC_App_Event_Type) eventType){
+  case APP_COM_EVENT:
+    if(NULL != pAppFct){
+      pAppFct((SOPC_App_Com_Event) appEvent,
+              params, // TBD
+              (SOPC_StatusCode) auxParam); // TBD             
+    }
+    break;
+  case APP_ADDRESS_SPACE_NOTIF:
+    if(NULL != pAddSpaceFct){
+      pAddSpaceFct((SOPC_App_AddSpace_Event) appEvent,
+                   params, // TBD
+                   (SOPC_StatusCode) auxParam); // TBD             
+    }
+    break;
+  default:
+    assert(FALSE);
+  }
+}
+
+SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(NULL != pAppFct){
+      status = OpcUa_BadInvalidState;
+      if(tConfig.initDone == FALSE){
         Mutex_Initialization(&tConfig.mut);
         Mutex_Lock(&tConfig.mut);
         tConfig.initDone = !FALSE;
         status = SOPC_StackConfiguration_Initialize();
         if(STATUS_OK == status){
-            tConfig.scConfigs = SLinkedList_Create(0);
+          tConfig.scConfigs = SLinkedList_Create(0);
         }
         if(STATUS_OK == status && NULL != tConfig.scConfigs){
-            tConfig.epConfigs = SLinkedList_Create(0);
+          tConfig.epConfigs = SLinkedList_Create(0);
         }
         if(STATUS_OK == status && NULL != tConfig.epConfigs){
-            servicesEventDispatcherMgr = SOPC_EventDispatcherManager_CreateAndStart(SOPC_ServicesEventDispatcher,
-                                                                                    "Services event dispatcher manager");
+          servicesEventDispatcherMgr = 
+            SOPC_EventDispatcherManager_CreateAndStart(SOPC_ServicesEventDispatcher,
+                                                       "Services event dispatcher manager");
+        }
+        if(STATUS_OK == status && NULL != tConfig.epConfigs){
+          applicationEventDispatcherMgr =
+            SOPC_EventDispatcherManager_CreateAndStart(SOPC_ApplicationEventDispatcher,
+                                                       "(Services) Application event dispatcher manager");
         }
         Mutex_Unlock(&tConfig.mut);
+        if(STATUS_OK != status){
+          SOPC_Toolkit_Clear();
+        }
+      }
     }
     return status;
 }
@@ -78,16 +119,23 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
 }
 
 void SOPC_Toolkit_Clear(){
+    SOPC_StatusCode status = STATUS_OK;
     if(tConfig.initDone != FALSE){
-        Mutex_Lock(&tConfig.mut);
-        SOPC_StackConfiguration_Clear();
-        io_dispatch_mgr__close_all_active_connections();
-        SLinkedList_Delete(tConfig.scConfigs);
-        SLinkedList_Delete(tConfig.epConfigs);
-        tConfig.locked = FALSE;
-        tConfig.initDone = FALSE;
-        Mutex_Unlock(&tConfig.mut);
-        Mutex_Clear(&tConfig.mut);
+      Mutex_Lock(&tConfig.mut);
+      SOPC_StackConfiguration_Clear();
+      status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
+      (void) status; // log
+      status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);
+      (void) status; // log 
+      io_dispatch_mgr__close_all_active_connections();
+      SLinkedList_Delete(tConfig.scConfigs);
+      SLinkedList_Delete(tConfig.epConfigs);       
+      pAppFct = NULL;
+      pAddSpaceFct = NULL;
+      tConfig.locked = FALSE;
+      tConfig.initDone = FALSE;
+      Mutex_Unlock(&tConfig.mut);
+      Mutex_Clear(&tConfig.mut);
     }
 }
 
@@ -96,7 +144,7 @@ static SOPC_StatusCode SOPC_IntToolkitConfig_AddConfig(SLinkedList* configList,
                                                        void*        config){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     void* res = SLinkedList_FindFromId(configList, idx);
-    if(res == NULL){ // Idx is unique
+    if(NULL == res && NULL != config){ // Idx is unique
         if(config == SLinkedList_Prepend(configList, idx, config)){
             status = STATUS_OK;
         }else{
@@ -113,7 +161,9 @@ SOPC_StatusCode SOPC_ToolkitConfig_AddSecureChannelConfig(uint32_t              
         status = OpcUa_BadInvalidState;
         if(tConfig.initDone != FALSE){
             Mutex_Lock(&tConfig.mut);
-            status = SOPC_IntToolkitConfig_AddConfig(tConfig.scConfigs, scConfigIdx, (void*) scConfig);
+            if(FALSE == tConfig.locked){
+              status = SOPC_IntToolkitConfig_AddConfig(tConfig.scConfigs, scConfigIdx, (void*) scConfig);
+            }
             Mutex_Unlock(&tConfig.mut);
         }
     }
@@ -139,7 +189,9 @@ SOPC_StatusCode SOPC_ToolkitConfig_AddEndpointConfig(uint32_t              epCon
         status = OpcUa_BadInvalidState;
         if(tConfig.initDone != FALSE){
             Mutex_Lock(&tConfig.mut);
-            status = SOPC_IntToolkitConfig_AddConfig(tConfig.epConfigs, epConfigIdx, (void*) epConfig);
+            if(FALSE == tConfig.locked){
+              status = SOPC_IntToolkitConfig_AddConfig(tConfig.epConfigs, epConfigIdx, (void*) epConfig);
+            }
             Mutex_Unlock(&tConfig.mut);
         }
     }
@@ -162,7 +214,9 @@ SOPC_StatusCode SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable
     SOPC_StatusCode status = OpcUa_BadInvalidState;
     if(tConfig.initDone != FALSE){
         Mutex_Lock(&tConfig.mut);
-        status = SOPC_StackConfiguration_SetNamespaceUris(nsTable);
+        if(FALSE == tConfig.locked){
+          status = SOPC_StackConfiguration_SetNamespaceUris(nsTable);
+        }
         Mutex_Unlock(&tConfig.mut);
     }
     return status;
@@ -173,7 +227,9 @@ SOPC_StatusCode SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable,
     SOPC_StatusCode status = OpcUa_BadInvalidState;
     if(tConfig.initDone != FALSE){
         Mutex_Lock(&tConfig.mut);
-        status = SOPC_StackConfiguration_AddTypes(encTypesTable, nbTypes);
+        if(FALSE == tConfig.locked){
+          status = SOPC_StackConfiguration_AddTypes(encTypesTable, nbTypes);
+        }
         Mutex_Unlock(&tConfig.mut);
     }
     return status;
