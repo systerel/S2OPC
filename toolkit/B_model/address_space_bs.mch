@@ -81,7 +81,11 @@ OPERATIONS
         aid : t_AttributeId
     THEN
         SELECT aid = e_aid_NodeId THEN
-            variant := conv_NodeId_Variant(a_NodeId(node))
+            variant
+            :(
+                variant : t_Variant_i &
+                variant = conv_NodeId_Variant(a_NodeId(node))
+            )
         WHEN aid = e_aid_NodeClass THEN
             variant := conv_NodeClass_Variant(a_NodeClass(node))
         WHEN aid = e_aid_Value THEN
