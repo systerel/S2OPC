@@ -19,7 +19,7 @@ MACHINE
     msg_read_request_bs
 
 SEES
-    constants, 
+    constants,
     message_in_bs
 
 ABSTRACT_VARIABLES

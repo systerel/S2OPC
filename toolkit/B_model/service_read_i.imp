@@ -19,8 +19,8 @@ IMPLEMENTATION service_read_i
 REFINES service_read
 
 SEES
-    constants, 
-    address_space, 
+    constants,
+    address_space,
     message_in_bs,
     message_out_bs
 

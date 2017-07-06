@@ -24,7 +24,7 @@ IMPORTS
 
 SEES
     constants,
-    address_space, 
+    address_space,
     message_in_bs
 
 DEFINITIONS
@@ -73,6 +73,8 @@ OPERATIONS
             VARIANT
                 card(reqs_to_iterate)
             END
+        ELSE
+            nb_ReadValue := 0
         END;
         rr := init_ok
     END

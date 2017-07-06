@@ -19,16 +19,16 @@ MACHINE
     msg_read_request
 
 SEES
-    constants, 
-    address_space, 
+    constants,
+    address_space,
     message_in_bs
 
 DEFINITIONS
     d_inv == (
         nb_ReadValue : NAT &
         init_ok : BOOL &
-        ReadValue_Node : t_ReadValue <-> t_Node &
-        ReadValue_AttributeId : t_ReadValue <-> t_AttributeId
+        ReadValue_Node : t_ReadValue +-> t_Node &
+        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
     )
     ;
     d_inv_init_ok == (

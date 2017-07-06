@@ -29,13 +29,13 @@ DEFINITIONS
     d_inv_read == (
         nb_ReadValue : NAT &
         nb_ReadValue <= k_n_read_resp_max &
-        ReadValue_Node : t_ReadValue <-> t_Node &
-        ReadValue_AttributeId : t_ReadValue <-> t_AttributeId
+        ReadValue_Node : t_ReadValue +-> t_Node &
+        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
     )
     ;
     d_inv_response == (
-        data_Value_Value : t_ReadValue <-> t_Variant &
-        data_Value_StatusCode : t_ReadValue <-> t_StatusCode /*&
+        data_Value_Value : t_ReadValue +-> t_Variant &
+        data_Value_StatusCode : t_ReadValue +-> t_StatusCode /*&
         data_Value_SourceTimestamp : set_read_elements +-> t_Timestamp &
         data_Value_ServerTimestamp : set_read_elements --> t_Timestamp*/
     )
@@ -71,12 +71,16 @@ OPERATIONS
         :(
             /* TODO: It would be nice to specify that a response is always sent, even when there is an error */
             d_inv_read &
+            dom(ReadValue_Node) = cast_t_ReadValue[1..nb_ReadValue] &
+            dom(ReadValue_AttributeId) = cast_t_ReadValue[1..nb_ReadValue] &
             data_Value_Value : t_ReadValue +-> t_Variant &
             data_Value_Value = % rvi. (
                 rvi : t_ReadValue &
                 /* ith node id has a node in the Address Space */
+                rvi : dom(ReadValue_Node) &
                 ReadValue_Node(rvi) : dom(a_NodeId) &
                 /* Node is in the domain of the attribute */
+                rvi : dom(ReadValue_AttributeId) &
                 ReadValue_Node(rvi) : dom(AttributeID_Node_Variant(ReadValue_AttributeId(rvi)))
                 /* TODO: add use-access levels */
                 |
