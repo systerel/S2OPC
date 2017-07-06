@@ -92,7 +92,7 @@ OPERATIONS
     IN
         l_nid_valid, node <-- readall_AddressSpace_Node(tab_req_NodeId(rvi));
         aid := tab_req_AttributeId(rvi);
-        isvalid := l_nid_valid & bool(l_aid /= c_AttributeId_indet);
+        isvalid := bool(l_nid_valid = TRUE & aid /= c_AttributeId_indet)
     END
 
 END
