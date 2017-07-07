@@ -21,7 +21,8 @@ MACHINE
 SETS
     t_NodeId_i;
     t_Variant_i;
-
+    t_ByteString_i;
+    t_UserId_i;
 
     t_channel_i;
     t_session_i;
@@ -34,7 +35,8 @@ SETS
 CONCRETE_CONSTANTS
     c_Variant_indet,
     c_NodeId_indet,
-
+    c_ByteString_indet,
+    c_UserId_indet,
 
     c_channel_indet,
     c_user_indet,
@@ -47,7 +49,8 @@ CONCRETE_CONSTANTS
 ABSTRACT_CONSTANTS
     t_Variant,
     t_NodeId,
-
+    t_ByteString,
+    t_UserId,
 
     t_channel,
     t_session,
@@ -66,6 +69,13 @@ PROPERTIES
     c_NodeId_indet : t_NodeId_i &
     c_NodeId_indet /: t_NodeId &
 
+    t_ByteString <: t_ByteString_i &
+    c_ByteString_indet : t_ByteString_i &
+    c_ByteString_indet /: t_ByteString &
+
+    t_UserId <: t_UserId_i &
+    c_UserId_indet : t_UserId_i &
+    c_UserId_indet /: t_UserId &
 
     t_channel <: t_channel_i &
     c_channel_indet : t_channel_i &

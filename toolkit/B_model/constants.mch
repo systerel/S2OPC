@@ -42,8 +42,13 @@ SETS
                       e_sc_bad_unexpected_error,
                       e_sc_bad_out_of_memory};
     /*t_Timestamp;*/
+
     /* A ReadValue of a ReadRequest. The size of that will define the nb_max_read_value. */
     t_ReadValue_i;
+    /* A WriteValue of a WriteRequest. */
+    t_WriteValue_i;
+    t_ByteString_i;
+    t_UserId_i;
 
     t_channel_i;
     t_session_i;
@@ -83,6 +88,9 @@ CONCRETE_CONSTANTS
     c_NodeId_indet,
     c_Node_indet,
     c_ReadValue_indet,
+    c_WriteValue_indet,
+    c_ByteString_indet,
+    c_UserId_indet,
 
     c_channel_indet,
     c_user_indet,
@@ -103,8 +111,12 @@ ABSTRACT_CONSTANTS
     t_NodeId,
     t_Node,
     t_ReadValue,
+    t_WriteValue,
+    t_ByteString,
+    t_UserId,
 
     cast_t_ReadValue,
+    cast_t_WriteValue,
 
     t_channel,
     t_session,
@@ -161,6 +173,20 @@ PROPERTIES
     cast_t_ReadValue : NAT +-> t_ReadValue_i &
     cast_t_ReadValue : perm(t_ReadValue) &
 
+    t_WriteValue <: t_WriteValue_i &
+    c_WriteValue_indet : t_WriteValue_i &
+    c_WriteValue_indet /: t_WriteValue &
+    cast_t_WriteValue : NAT +-> t_WriteValue_i &
+    cast_t_WriteValue : perm(t_WriteValue) &
+
+    t_ByteString <: t_ByteString_i &
+    c_ByteString_indet : t_ByteString_i &
+    c_ByteString_indet /: t_ByteString &
+
+    t_UserId <: t_UserId_i &
+    c_UserId_indet : t_UserId_i &
+    c_UserId_indet /: t_UserId &
+
     t_channel <: t_channel_i &
     c_channel_indet : t_channel_i &
     c_channel_indet /: t_channel &
@@ -216,6 +242,15 @@ OPERATIONS
         ii : dom(cast_t_ReadValue)
     THEN
         rvi := cast_t_ReadValue(ii)
+    END
+    ;
+
+    wvi <-- read_cast_t_WriteValue(ii) =
+    PRE
+        ii : NAT &
+        ii : dom(cast_t_WriteValue)
+    THEN
+        wvi := cast_t_WriteValue(ii)
     END
 
 END

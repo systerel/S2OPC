@@ -23,8 +23,12 @@ IMPORTS
 
 PROPERTIES
     t_Node = 1..k_n_nodes_max &
+
     t_ReadValue = 1..k_n_read_resp_max &
-    cast_t_ReadValue = id(t_ReadValue)
+    cast_t_ReadValue = id(t_ReadValue) &
+
+    t_WriteValue = 1..k_n_WriteResponse_max &
+    cast_t_WriteValue = id(t_WriteValue)
 
 VALUES
     k_n_nodes_max = 1000+8;
@@ -33,14 +37,22 @@ VALUES
 
     t_Node_i = 0..k_n_nodes_max;
     t_ReadValue_i = 0..k_n_read_resp_max;
+    t_WriteValue_i = 0..k_n_WriteResponse_max;
 
     c_Node_indet = 0;
-    c_ReadValue_indet = 0
+    c_ReadValue_indet = 0;
+    c_WriteValue_indet = 0
 
 OPERATIONS
     rvi <-- read_cast_t_ReadValue(ii) =
     BEGIN
         rvi := ii
+    END
+    ;
+
+    wvi <-- read_cast_t_WriteValue(ii) =
+    BEGIN
+        wvi := ii
     END
 
 END
