@@ -1,0 +1,335 @@
+/*
+ * sopc_sc_events.c
+ *
+ *  Created on: Jul 7, 2017
+ *      Author: vincent
+ */
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "sopc_base_types.h"
+#include "sopc_sc_events.h"
+#include "singly_linked_list.h"
+
+static SOPC_EventDispatcherManager* tmpToolkitMgr = NULL;
+
+typedef enum SOPC_TMP_Services_Event {
+  /* SC to Services events */
+  EP_SC_CONNECTED,
+  EP_CLOSED,
+  SC_CONNECTED,
+  SC_CONNECTION_TIMEOUT,
+  SC_DISCONNECTED,
+  SC_SERVICE_RCV_MSG,
+  /* App to Services events */
+  SE_OPEN_ENDPOINT,
+  SE_CLOSE_ENDPOINT,
+  SE_ACTIVATE_SESSION, /* Connect SC + Create Session + Activate session */
+  SE_SEND_SESSION_REQUEST, // TODO: manage buffer when session with channel lost ? Or return a send failure in this case
+  SE_CLOSE_SESSION,
+  //  SE_SEND_PUBLIC_REQUEST, => discovery services /* Connect SC */
+} SOPC_TMP_Services_Event;
+
+static SLinkedList* endpointInstList = NULL;
+static SLinkedList* secureChInstList = NULL;
+
+SOPC_EventDispatcherManager* scEventDispatcherMgr = NULL;
+
+void SOPC_TEMP_InitEventDispMgr(SOPC_EventDispatcherManager* toolkitMgr){
+    endpointInstList = SLinkedList_Create(0);
+    tmpToolkitMgr = toolkitMgr;
+    scEventDispatcherMgr =
+            SOPC_EventDispatcherManager_CreateAndStart(SOPC_SecureChannelEventDispatcher,
+                                                       "(Services) Application event dispatcher manager");
+}
+
+SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
+                                     void*                     cbData,
+                                     SOPC_EndpointEvent        event,
+                                     SOPC_StatusCode           status,
+                                     uint32_t                  secureChannelId,
+                                     const Certificate*        clientCertificate,
+                                     const SOPC_String*        securityPolicy,
+                                     OpcUa_MessageSecurityMode securityMode){
+    uint32_t* epConfigIdx = (uint32_t*) cbData;
+    SOPC_SecureChannel_ConnectedConfig* scConConfig = NULL;
+    (void) endpoint;
+    switch(event){
+    case SOPC_EndpointEvent_Invalid:
+    case SOPC_EndpointEvent_Renewed:
+    case SOPC_EndpointEvent_DecoderError:
+    case SOPC_EndpointEvent_EndpointClosed:
+        assert(epConfigIdx != NULL);
+        SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
+                                             EP_CLOSE,
+                                             *epConfigIdx,
+                                             NULL,
+                                             (int32_t) status,
+                                             "Endpoint closed for given reason");
+        break;
+    case SOPC_EndpointEvent_SecureChannelOpened:
+        // Create new secure channel config
+        scConConfig = malloc(sizeof(SOPC_SecureChannel_ConnectedConfig));
+        assert(NULL != scConConfig);
+        scConConfig->config = malloc(sizeof(SOPC_SecureChannel_Config));
+        scConConfig->config->crt_cli = clientCertificate;
+        scConConfig->config->msgSecurityMode = securityMode;
+        scConConfig->config->reqSecuPolicyUri = SOPC_String_GetRawCString(securityPolicy);
+        scConConfig->connectionId = secureChannelId; // For now we can just use scId but in the future it is better to be a shared index with Sockets !
+
+        SLinkedList_Prepend(secureChInstList, scConConfig->connectionId, (void*) scConConfig);
+        // TODO: add to toolkit config ?
+        SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                                             EP_SC_CONNECTED,
+                                             *epConfigIdx,
+                                             (void*) scConConfig,
+                                             secureChannelId,
+                                             "Secure channel connected on Endpoint");
+        break;
+    case SOPC_EndpointEvent_SecureChannelClosed:
+        scConConfig = SLinkedList_RemoveFromId(secureChInstList, secureChannelId);
+        if(NULL != scConConfig){
+            if(NULL != scConConfig->config){
+                free(scConConfig->config);
+            }
+            free(scConConfig);
+        }
+        SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                                             SC_DISCONNECTED,
+                                             secureChannelId,
+                                             NULL,
+                                             (int32_t) status,
+                                             "Secure channel disconnected from Endpoint");
+        break;
+    case SOPC_EndpointEvent_UnsupportedServiceRequested:
+    default:
+        assert(FALSE);
+    }
+    return OpcUa_BadNotImplemented;
+}
+
+void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
+                                       uint32_t id,
+                                       void*    params,
+                                       int32_t  auxParam){
+    assert(NULL != tmpToolkitMgr);
+    SOPC_Endpoint* ep = NULL;
+    SOPC_Endpoint_Config* epConfig = NULL;
+    uint32_t* idContext = NULL;
+    SOPC_StatusCode status = STATUS_OK;
+    switch((SOPC_SC_Event) scEvent){
+    /** SC external events */
+    /* Services to SC events */
+    case EP_OPEN:
+        // id ==  endpoint configuration index
+        // params = endpoint configuration pointer => TMP due to separation toolkit / stack
+        // auxParam == ?
+        epConfig = (SOPC_Endpoint_Config*) params;
+        ep = malloc(sizeof(SOPC_Endpoint));
+        idContext = malloc(sizeof(uint32_t)); // TMP memory leak necessary for scope of id
+        if(NULL != ep && NULL != idContext && NULL != epConfig){
+            status = SOPC_Endpoint_Create(ep, SOPC_EndpointSerializer_Binary, NULL); // TODO: generic service redefinition
+        }else{
+            status = STATUS_NOK;
+        }
+        if(STATUS_OK == status){
+            *idContext = id;
+            status = SOPC_Endpoint_Open(*ep,
+                    epConfig->endpointURL,
+                    TMP_EndpointEvent_CB,
+                    (void*) idContext,
+                    epConfig->serverCertificate,
+                    epConfig->serverKey,
+                    epConfig->pki,
+                    epConfig->nbSecuConfigs,
+                    epConfig->secuConfigurations);
+            if(STATUS_OK == status){
+                if(ep != SLinkedList_Prepend(endpointInstList, id, (void*) ep)){
+                    status = STATUS_NOK;
+                }
+            }
+            if(STATUS_OK != status){
+                SOPC_Endpoint_Delete(ep);
+                free(ep);
+            }
+        }
+        if(STATUS_OK != status){
+            SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                    EP_CLOSED,
+                    id,
+                    NULL,
+                    (int32_t) status,
+                    "Endpoint opening failed");
+        }
+        break;
+    case EP_CLOSE:
+        ep = (SOPC_Endpoint*) SLinkedList_RemoveFromId(endpointInstList, id);
+        if(NULL != ep){
+            SOPC_Endpoint_Delete(ep);
+            free(ep);
+            assert(NULL != tmpToolkitMgr);
+            SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                    EP_CLOSED,
+                    id,
+                    NULL,
+                    auxParam, // auxParam == status
+                    "Endpoint closed on demand");
+        }
+        break;
+    case SC_CONNECT:
+        break;
+    case SC_DISCONNECT:
+        break;
+    case SC_SERVICE_SND_MSG:
+        break;
+
+        /* Sockets to SC events */
+    case SOCKET_CONNECTION:
+        // id ==  endpoint configuration index
+        // params = NULL ?
+        // auxParam == fresh connection id
+        assert(FALSE);
+        break;
+    case SOCKET_FAILURE:
+        // id ==  endpoint config index or SC configuration index or connection Id
+        // params = NULL ?
+        // auxParam == error status
+        assert(FALSE);
+        break;
+    case SOCKET_RCV_BYTES:
+        // id ==  connection Id
+        // params = bytes buffer
+        // auxParam == ?
+        assert(FALSE);
+        break;
+        /** SC internal events */
+        /* SC mgr to EP mgr */
+    case EP_SC_DISCONNECTED:
+        // id ==  endpoint configuration index
+        // params = NULL ?
+        // auxParam == connection Id
+        assert(FALSE);
+        break;
+        /* EP mgr to SC mgr */
+    case EP_SC_CREATE:
+        // id ==  endpoint configuration index
+        // params = NULL ?
+        // auxParam == connection Id
+        assert(FALSE);
+        break;
+        /* SC mgr to Chunks mgr */
+    case ENCODE_HEL:
+        // id ==  connection Id
+        // params = params MAX TCP ?
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case ENCODE_ACK:
+        // id ==  connection Id
+        // params = params revised TCP ?
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case ENCODE_OPN_REQ:
+        // id ==  connection Id
+        // params == NULL ? => connection Id for SC config sufficient
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case ENCODE_OPN_RESP:
+        // id ==  connection Id
+        // params == NULL ? => connection Id for SC config sufficient
+        // auxParam == status ?
+        assert(FALSE);
+        break;
+    case ENCODE_CLO_REQ:
+        // id ==  connection Id
+        // params == NULL ?
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case ENCODE_CLO_RESP:
+        // id ==  connection Id
+        // params == NULL ?
+        // auxParam == status ?
+        assert(FALSE);
+        break;
+    case ENCODE_MSG_CHUNKS:
+        // id ==  connection Id
+        // params == Bytes buffer (OPC UA message: node Id + message)
+        // auxParam == ?
+        assert(FALSE);
+        break;
+        /* Chunks mgr to SC mgr */
+    case SC_RCV_HEL:
+        // id ==  connection Id
+        // params == bytes buffer with TCP HEL payload
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case SC_RCV_ACK:
+        // id ==  connection Id
+        // params == bytes buffer with TCP HEL payload
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case SC_RCV_OPN_REQ:
+        // id ==  connection Id
+        // params == bytes buffer with OPN REQ payload
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case SC_RCV_OPN_RESP:
+        // id ==  connection Id
+        // params == bytes buffer with OPN RESP payload
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case SC_RCV_CLO_REQ:
+        // id ==  connection Id
+        // params == bytes buffer with CLO REQ payload
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case SC_RCV_CLO_RESP:
+        // id ==  connection Id
+        // params == bytes buffer with CLO RESP payload
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case SC_RCV_MSG:
+        // id ==  connection Id
+        // params == bytes buffer with MSG payload
+        // auxParam == ?
+        assert(FALSE);
+        break;
+    case SC_RCV_FAILURE:
+        // id ==  connection Id
+        // params == NULL ?
+        // auxParam == status
+        assert(FALSE);
+        break;
+    case SC_ENCODE_FAILURE:
+        // id ==  connection Id
+        // params == byte buffer ?
+        // auxParam == status
+        assert(FALSE);
+        break;
+    default:
+        assert(FALSE);
+    }
+}

@@ -23,6 +23,8 @@
 #ifndef SOPC_TOOLKIT_CONFIG_H_
 #define SOPC_TOOLKIT_CONFIG_H_
 
+#include "sopc_sc_events.h" // TMP
+
 #include "sopc_builtintypes.h"
 #include "sopc_namespace_table.h"
 #include "sopc_event_dispatcher_manager.h"
@@ -30,26 +32,6 @@
 #include "key_manager.h"
 
 extern SOPC_EventDispatcherManager* servicesEventDispatcherMgr;
-
-/* Client static configuration of a Secure Channel */
-typedef struct SOPC_SecureChannel_Config {
-    const char*               url;
-    const Certificate*        crt_cli;
-    const AsymmetricKey*      key_priv_cli;
-    const Certificate*        crt_srv;
-    const PKIProvider*        pki;
-    const char*               reqSecuPolicyUri;
-    int32_t                   requestedLifetime;
-    OpcUa_MessageSecurityMode msgSecurityMode;
-} SOPC_SecureChannel_Config;
-
-/* Server static configuration of a Endpoint listener */
-typedef struct SOPC_Endpoint_Config{
-    char*          endpointURL;
-    Certificate*   serverCertificate;
-    AsymmetricKey* serverKey;
-    PKIProvider*   pki;
-} SOPC_Endpoint_Config;
 
 /* Client and Server communication events to be managed by applicative code*/
 typedef enum SOPC_App_Com_Event {

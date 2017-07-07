@@ -17,6 +17,7 @@
 
 #include "sopc_toolkit_config.h"
 #include "sopc_services_events.h"
+#include "sopc_sc_events.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -96,6 +97,7 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
             SOPC_EventDispatcherManager_CreateAndStart(SOPC_ApplicationEventDispatcher,
                                                        "(Services) Application event dispatcher manager");
         }
+        SOPC_TEMP_InitEventDispMgr(servicesEventDispatcherMgr);
         Mutex_Unlock(&tConfig.mut);
         if(STATUS_OK != status){
           SOPC_Toolkit_Clear();
@@ -111,6 +113,7 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
         Mutex_Lock(&tConfig.mut);
         if(tConfig.locked == FALSE){
             tConfig.locked = !FALSE;
+            // TODO: init B model code ?
             status = STATUS_OK;
         }
         Mutex_Unlock(&tConfig.mut);

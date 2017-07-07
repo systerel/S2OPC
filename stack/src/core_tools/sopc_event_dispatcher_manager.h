@@ -49,12 +49,12 @@ SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_Eve
  *                      STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
  *                      STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument both NULL).
  */
-SOPC_StatusCode SOPC_EventDispatcherManager_AddAction(SOPC_EventDispatcherManager* eventMgr,
-                                                      int32_t                      event,
-                                                      uint32_t                     eltId,
-                                                      void*                        params,
-                                                      int32_t                      auxParam,
-                                                      const char*                  debugName);
+SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager* eventMgr,
+                                                     int32_t                      event,
+                                                     uint32_t                     eltId,
+                                                     void*                        params,
+                                                     int32_t                      auxParam,
+                                                     const char*                  debugName);
 /**
  *  \brief Stops the event dispatcher manager treatment.
  *

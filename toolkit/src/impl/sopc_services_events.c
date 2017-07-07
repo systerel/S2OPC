@@ -46,8 +46,8 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     break;
   case EP_CLOSED:
     // id == endpoint configuration index
-    // params = SOPC_SecureChannel_Config*
-    // auxParam == endpoint configuration index
+    // params = NULL
+    // auxParam == status
     // => B model entry point to add
     break;
   case SC_CONNECTED:

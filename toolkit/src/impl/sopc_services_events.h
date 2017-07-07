@@ -37,14 +37,6 @@ typedef enum SOPC_Services_Event {
   //  SE_SEND_PUBLIC_REQUEST, => discovery services /* Connect SC */
 } SOPC_Services_Event;
 
-// TODO: move into SC impl !
-typedef enum SOPC_SC_Event {
-  /* Services to SC events */
-  SC_CONNECT,
-  SC_DISCONNECT,
-  SC_SERVICE_SND_MSG
-} SOPC_Services_To_SC_Event;
-
 void SOPC_ServicesEventDispatcher(int32_t  scEvent, 
                                   uint32_t id, 
                                   void*    params, 

@@ -88,12 +88,12 @@ SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_Eve
     return pEventMgr;
 }
 
-SOPC_StatusCode SOPC_EventDispatcherManager_AddAction(SOPC_EventDispatcherManager* eventMgr,
-                                                      int32_t                      event,
-                                                      uint32_t                     eltId,
-                                                      void*                        params,
-                                                      int32_t                      auxParam,
-                                                      const char*                  debugName)
+SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager* eventMgr,
+                                                     int32_t                      event,
+                                                     uint32_t                     eltId,
+                                                     void*                        params,
+                                                     int32_t                      auxParam,
+                                                     const char*                  debugName)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_EventDispatcherParams* pParams = NULL;
