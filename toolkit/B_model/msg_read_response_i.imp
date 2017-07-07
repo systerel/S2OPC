@@ -73,7 +73,7 @@ OPERATIONS
         continue := bool(0 < a_nb_resps);
         msg := resp_msg;
 
-        /* Pb: malloc may fail... */
+        /* TODO: malloc may fail... */
         write_read_response_init(a_nb_resps, resp_msg)
     END
     ;

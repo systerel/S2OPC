@@ -19,10 +19,9 @@ IMPLEMENTATION
    session_header_i
 REFINES
    session_header
-   
+
 IMPORTS
-	io_dispatch_mgr,
-    constants,
-    address_space
-   
+    io_dispatch_mgr,
+    constants
+
 END

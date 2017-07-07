@@ -17,40 +17,40 @@
 
 MACHINE
     io_dispatch_mgr
-    
+
 SEES
     constants
-    
+
 DEFINITIONS
     d_variables ==
     c_msg_in,
     a_msg_in_type,
     c_msg_out;
-    
-    d_typage == 
+
+    d_typage ==
     c_msg_in : t_msg_i &
     a_msg_in_type : t_msg_type &
     c_msg_out : t_msg_i
-    
+
 ABSTRACT_VARIABLES
-    d_variables 
-    
+    d_variables
+
 INVARIANT
     d_typage
-    
+
 INITIALISATION
     c_msg_in  :: t_msg_i            ||
     a_msg_in_type :: t_msg_type     ||
     c_msg_out  :: t_msg_i
 
 OPERATIONS
-    
+
     msgs_memory_changed =
     BEGIN
         d_variables :( d_typage )
     END
     ;
-    
+
     receive_msg (channel, msg) =
     PRE
         channel  : t_channel_i &
@@ -63,7 +63,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     nsession <-- create_session (endpoint) =
     PRE
         endpoint : t_endpoint_i &
@@ -73,7 +73,7 @@ OPERATIONS
         nsession :: t_session_i
     END
     ;
-    
+
     ret <-- activate_session (session, user) =
     PRE
         session : t_session_i &
@@ -82,7 +82,7 @@ OPERATIONS
         user : t_user &
         c_msg_out = c_msg_indet
     THEN
-        ret :: {e_sc_ok, 
+        ret :: {e_sc_ok,
             e_sc_bad_out_of_memory,
             e_sc_bad_invalid_argument,
             e_sc_bad_invalid_state,          /* session not in a valid state to activate a user on it */
@@ -94,7 +94,7 @@ OPERATIONS
             e_sc_bad_encoding_error}
     END
     ;
-    
+
     ret <-- close_session (session) =
     PRE
         session : t_session_i &
@@ -102,16 +102,16 @@ OPERATIONS
         c_msg_out = c_msg_indet
     THEN
         ret :: {e_sc_ok,
-            e_sc_bad_encoding_error, 
-            e_sc_bad_out_of_memory, 
-            e_sc_bad_unexpected_error, 
+            e_sc_bad_encoding_error,
+            e_sc_bad_out_of_memory,
+            e_sc_bad_unexpected_error,
             e_sc_bad_invalid_argument,
             e_sc_bad_invalid_state,
-            e_sc_bad_secure_channel_closed, 
+            e_sc_bad_secure_channel_closed,
             e_sc_bad_connection_closed}
     END
     ;
-    
+
     secure_channel_lost (channel) =
     PRE
         channel : t_channel_i &
@@ -121,7 +121,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     ret <-- send_service_request_msg (session, req_msg) =
     PRE
         session         : t_session_i &
@@ -130,7 +130,7 @@ OPERATIONS
         req_msg         = c_msg_in &
         c_msg_in        : t_msg
     THEN
-        ret :: {e_sc_ok, 
+        ret :: {e_sc_ok,
             e_sc_bad_invalid_state,  /* session is not in a valid state */
             e_sc_bad_out_of_memory,
             e_sc_bad_unexpected_error,
@@ -142,14 +142,14 @@ OPERATIONS
         c_msg_out  :: t_msg_i
     END
     ;
-    
+
     close_all_active_connections = skip;
-    
+
     state <-- get_session_state_or_closed (session) =
     PRE
         session : t_session_i
     THEN
         state :: t_sessionState
     END
-        
+
 END

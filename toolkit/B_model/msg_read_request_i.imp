@@ -74,6 +74,7 @@ OPERATIONS
                 card(reqs_to_iterate)
             END
         ELSE
+            /* TODO: The write iter should also have a service status nok */
             nb_ReadValue := 0
         END;
         rr := init_ok

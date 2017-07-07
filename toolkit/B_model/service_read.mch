@@ -29,7 +29,7 @@ DEFINITIONS
     d_inv_read == (
         nb_ReadValue : NAT &
         nb_ReadValue <= k_n_read_resp_max &
-        ReadValue_Node : cast_t_ReadValue[1..nb_ReadValue] --> t_Node &
+        ReadValue_Node : cast_t_ReadValue[1..nb_ReadValue] --> t_Node /* TODO: !!! not total, as a NodeId is always given in the ReadValue, but there may not be a Node in the AddS with this NodeId. This is a lie... It's not "such" a pb, as it is an abstract constant, the implementation is ok */ &
         ReadValue_AttributeId : cast_t_ReadValue[1..nb_ReadValue] --> t_AttributeId
     )
     ;
