@@ -70,6 +70,7 @@ typedef enum SOPC_SC_Event {
   EP_CLOSE,
   SC_CONNECT,
   SC_DISCONNECT,
+  EP_SC_SERVICE_SND_MSG, // TMP: needed to differentiate since we do not store SC same way for now
   SC_SERVICE_SND_MSG,
   /* Sockets to SC events */
   SOCKET_CONNECTION,

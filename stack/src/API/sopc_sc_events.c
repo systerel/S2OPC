@@ -330,6 +330,13 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         // id ==  connection id
         // params = byte buffer (node Id + OPC UA message)
         // auxParam == secure channel config id ? => tmp since connection defined correctly by stack
+        // TODO
+        break;
+    case EP_SC_SERVICE_SND_MSG:
+        // id ==  endpoint Id id
+        // params => message + context ???
+        // auxParam => ???
+        // TODO
         break;
 
         /* Sockets to SC events */
