@@ -14,15 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 MACHINE
     constants_bs
 
 SETS
     t_NodeId_i;
     t_Variant_i;
-    
-    
+
+
     t_channel_i;
     t_session_i;
     t_session_token_i;
@@ -34,8 +34,8 @@ SETS
 CONCRETE_CONSTANTS
     c_Variant_indet,
     c_NodeId_indet,
-    
-    
+
+
     c_channel_indet,
     c_user_indet,
     c_session_indet,
@@ -47,8 +47,8 @@ CONCRETE_CONSTANTS
 ABSTRACT_CONSTANTS
     t_Variant,
     t_NodeId,
-    
-    
+
+
     t_channel,
     t_session,
     t_session_token,
@@ -56,7 +56,7 @@ ABSTRACT_CONSTANTS
     t_msg,
     t_endpoint,
     t_request_handle
-    
+
 PROPERTIES
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
@@ -65,32 +65,32 @@ PROPERTIES
     t_NodeId <: t_NodeId_i &
     c_NodeId_indet : t_NodeId_i &
     c_NodeId_indet /: t_NodeId &
-    
-    
+
+
     t_channel <: t_channel_i &
-    c_channel_indet : t_channel_i & 
+    c_channel_indet : t_channel_i &
     c_channel_indet /: t_channel &
-    
+
     t_session <: t_session_i &
     c_session_indet : t_session_i &
     c_session_indet /: t_session &
-    
+
     t_session_token <: t_session_token_i &
     c_session_token_indet : t_session_token_i &
-    c_session_token_indet /: t_session_token &    
-    
+    c_session_token_indet /: t_session_token &
+
     t_user <: t_user_i &
-    c_user_indet : t_user_i & 
+    c_user_indet : t_user_i &
     c_user_indet /: t_user &
-    
+
     t_msg <: t_msg_i &
     c_msg_indet : t_msg_i &
     c_msg_indet /: t_msg &
-    
+
     t_request_handle <: t_request_handle_i &
     c_request_handle_indet : t_request_handle_i &
     c_request_handle_indet /: t_request_handle &
-    
+
     t_endpoint <: t_endpoint_i &
     c_endpoint_indet : t_endpoint_i &
     c_endpoint_indet /: t_endpoint

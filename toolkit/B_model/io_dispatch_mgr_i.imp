@@ -17,10 +17,10 @@
 
 IMPLEMENTATION io_dispatch_mgr_i
 REFINES io_dispatch_mgr
-    
+
 SEES
     constants
-    
+
 IMPORTS
     session_mgr,
     message_in_bs,
@@ -28,13 +28,15 @@ IMPORTS
     service_read,
     channel_mgr_bs,
     request_handle_bs,
-    service_read_cli_cb_bs
-    
+    service_read_cli_cb_bs,
+    address_space,
+    service_write_decode_bs
+
 PROMOTES
     get_session_state_or_closed
-    
+
 LOCAL_OPERATIONS
-    
+
     resp_msg_typ <-- get_response_type (req_msg_typ) =
     PRE
         req_msg_typ : t_msg_type &
@@ -44,17 +46,32 @@ LOCAL_OPERATIONS
                       resp_msg_typ : s_resp_msgs)
     END
     ;
-    
+
     bres <-- is_request_type (msg_typ) =
     PRE
         msg_typ : t_msg_type
     THEN
         bres :: BOOL
     END
-    
-    
+    ;
+
+    /* TODO: call the treat write on an encoded WriteRequest */
+    /* TODO: add constraints on userid? */
+    StatusCode_service <-- treat_write_request(req_payload, userid) =
+    PRE
+        req_payload : t_ByteString_i &
+        req_payload : t_ByteString &
+        userid : t_UserId_i &
+        userid : t_UserId
+    THEN
+        StatusCode_service
+        :(  StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode
+        )
+    END
+
 OPERATIONS
-    
+
     resp_msg_typ <-- get_response_type (req_msg_typ) =
     BEGIN
         CASE req_msg_typ OF
@@ -75,15 +92,15 @@ OPERATIONS
             OR e_msg_session_read_req THEN
                 resp_msg_typ := e_msg_session_read_resp
             END
-        END 
+        END
     END
     ;
-    
+
     bres <-- is_request_type (msg_typ) =
     BEGIN
         CASE msg_typ OF
             EITHER e_msg_tcpua_hello,
-                e_msg_sc_open_channel_req, 
+                e_msg_sc_open_channel_req,
                 e_msg_sc_close_channel_req,
                 e_msg_public_service_req,
                 e_msg_session_create_req,
@@ -93,20 +110,38 @@ OPERATIONS
             THEN
                 bres := TRUE
             ELSE
-                
+
                 bres := FALSE
             END
         END
     END
     ;
-    
+
+    StatusCode_service <-- treat_write_request(req_payload, userid) =
+    VAR
+        l_nb_req
+    IN
+        StatusCode_service <-- decode_write_request(req_payload);
+        IF StatusCode_service = e_sc_ok
+        THEN
+            l_nb_req <-- get_nb_WriteValue;
+            StatusCode_service <-- alloc_write_request_responses(l_nb_req);
+            IF StatusCode_service = e_sc_ok
+            THEN
+                StatusCode_service <-- treat_write_request_WriteValues(userid)
+            END
+        END;
+        free_write_request
+    END
+    ;
+
     msgs_memory_changed =
     BEGIN
         msg_in_memory_changed;
         msg_out_memory_changed
     END
     ;
-    
+
     receive_msg (channel, msg) =
     VAR
         l_request_handle,
@@ -143,19 +178,19 @@ OPERATIONS
                     THEN
                         receive_hello_msg (msg)
                     ELSE
-                        /* message type is secure channel level message */  
+                        /* message type is secure channel level message */
                         receive_channel_msg (channel, msg)
                     END
                 ELSE
                     l_is_client <-- is_client_channel (channel);
                     l_is_req <-- is_request_type (l_msg_type);
-                    
+
                     IF l_is_client = TRUE & l_is_req = FALSE
                     THEN
-                        
+
                         /* client treatment */
                         CASE l_msg_type OF
-                            EITHER e_msg_session_create_resp, 
+                            EITHER e_msg_session_create_resp,
                                 e_msg_session_activate_resp,
                                 e_msg_session_close_resp
                             THEN
@@ -178,7 +213,7 @@ OPERATIONS
                     THEN
                         /* server treatment */
                         CASE l_msg_type OF
-                            EITHER e_msg_session_create_req, 
+                            EITHER e_msg_session_create_req,
                                 e_msg_session_activate_req,
                                 e_msg_session_close_req
                             THEN
@@ -207,7 +242,7 @@ OPERATIONS
                                 l_request_handle <-- read_msg_header_req_handle (msg);
                                 l_session_token <-- read_msg_req_header_session_token (msg);
                                 l_is_valid_req, l_snd_session_err <-- srv_validate_session_service_req (channel, l_request_handle, l_session_token, msg);
-                                IF l_is_valid_req = TRUE 
+                                IF l_is_valid_req = TRUE
                                 THEN
                                     l_resp_msg <-- alloc_msg (e_msg_session_read_resp);
                                     l_valid_msg <-- is_valid_msg_out (l_resp_msg);
@@ -247,7 +282,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     nsession <-- create_session (endpoint) =
     VAR
         l_channel,
@@ -303,8 +338,8 @@ OPERATIONS
         END
     END
     ;
-    
-    
+
+
     ret <-- activate_session (session, user) =
     VAR
         l_req_msg,
@@ -352,8 +387,8 @@ OPERATIONS
         ret := l_ret
     END
     ;
-    
-    
+
+
     ret <-- close_session (session) =
     VAR
         l_req_msg,
@@ -371,7 +406,7 @@ OPERATIONS
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
-                
+
                 ret, l_channel, l_session_token <-- cli_close_req (session, l_req_handle, l_req_msg);
                 IF ret = e_sc_ok
                 THEN
@@ -393,8 +428,8 @@ OPERATIONS
         END
     END
     ;
-    
-    
+
+
     secure_channel_lost (channel) =
     VAR
         l_valid_channel,
@@ -425,9 +460,9 @@ OPERATIONS
                     // async operation => cannot use channel until connection is effective ?
                 END;
                 l_valid_new_channel <-- is_valid_channel (l_new_channel);
-                
+
                 cli_secure_channel_lost (channel);
-                
+
                 IF l_valid_new_channel = TRUE
                 THEN
                     l_continue <-- init_iter_orphaned_t_session (channel);
@@ -473,8 +508,8 @@ OPERATIONS
         END
     END
     ;
-    
-    
+
+
     ret <-- send_service_request_msg (session, req_msg) =
     VAR
         l_msg_typ,
@@ -499,7 +534,7 @@ OPERATIONS
                         IF ret = e_sc_ok
                         THEN
                             write_msg_out_header_req_handle (req_msg, l_req_handle);
-                            write_msg_out_header_session_token (req_msg, l_session_token); 
+                            write_msg_out_header_session_token (req_msg, l_session_token);
                             ret <-- send_channel_msg (l_channel, req_msg)
                         END
                     ELSE
@@ -515,8 +550,8 @@ OPERATIONS
             END
         END
     END;
-    
-    
+
+
     close_all_active_connections =
     BEGIN
         close_all_channel

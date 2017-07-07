@@ -16,7 +16,7 @@
  */
 
 IMPLEMENTATION address_space_i
-REFINES address_space
+REFINES address_space_r
 
 SEES
     constants

@@ -29,6 +29,7 @@ PROPERTIES
 VALUES
     k_n_nodes_max = 1000+8;
     k_n_read_resp_max = 5000;
+    k_n_WriteResponse_max = 5000;
 
     t_Node_i = 0..k_n_nodes_max;
     t_ReadValue_i = 0..k_n_read_resp_max;

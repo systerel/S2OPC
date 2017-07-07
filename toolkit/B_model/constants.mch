@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 MACHINE
     constants
 
@@ -31,20 +31,20 @@ SETS
     t_Variant_i;
     t_AttributeId_i = {c_AttributeId_indet, e_aid_NodeId, e_aid_NodeClass, e_aid_Value};
     t_StatusCode_i = {c_StatusCode_indet, e_sc_ok, e_sc_nok,
-                      e_sc_bad_secure_channel_closed, 
+                      e_sc_bad_secure_channel_closed,
                       e_sc_bad_connection_closed,
-                      e_sc_bad_invalid_state, 
-                      e_sc_bad_session_id_invalid, 
-                      e_sc_bad_session_closed, 
+                      e_sc_bad_invalid_state,
+                      e_sc_bad_session_id_invalid,
+                      e_sc_bad_session_closed,
                       e_sc_bad_identity_token_invalid,
-                      e_sc_bad_encoding_error, 
+                      e_sc_bad_encoding_error,
                       e_sc_bad_invalid_argument,
-                      e_sc_bad_unexpected_error, 
+                      e_sc_bad_unexpected_error,
                       e_sc_bad_out_of_memory};
     /*t_Timestamp;*/
     /* A ReadValue of a ReadRequest. The size of that will define the nb_max_read_value. */
     t_ReadValue_i;
-    
+
     t_channel_i;
     t_session_i;
     t_session_token_i;
@@ -52,24 +52,24 @@ SETS
     t_msg_i;
     t_request_handle_i;
     t_endpoint_i;
-    
+
     t_sessionState = {
-        e_session_creating, 
-        e_session_created, 
-        e_session_userActivating, 
-        e_session_userActivated, 
-        e_session_scActivating, 
-        e_session_scOrphaned, 
-        e_session_closing, 
+        e_session_creating,
+        e_session_created,
+        e_session_userActivating,
+        e_session_userActivated,
+        e_session_scActivating,
+        e_session_scOrphaned,
+        e_session_closing,
         e_session_closed};
-    
+
     t_msg_type = {
         e_msg_tcpua_hello, e_msg_tcpua_ack,
         e_msg_sc_open_channel_req, e_msg_sc_open_channel_resp,
         e_msg_sc_close_channel_req, e_msg_sc_close_channel_resp,
         e_msg_public_service_req, e_msg_public_service_resp,
         e_msg_session_create_req, e_msg_session_create_resp,
-        e_msg_session_activate_req, e_msg_session_activate_resp, 
+        e_msg_session_activate_req, e_msg_session_activate_resp,
         e_msg_session_close_req, e_msg_session_close_resp,
         e_msg_session_read_req, e_msg_session_read_resp}
 
@@ -77,12 +77,13 @@ CONCRETE_CONSTANTS
     /*AddS,*/
     k_n_nodes_max,
     k_n_read_resp_max,
+    k_n_WriteResponse_max,
 
     c_Variant_indet,
     c_NodeId_indet,
     c_Node_indet,
     c_ReadValue_indet,
-    
+
     c_channel_indet,
     c_user_indet,
     c_session_indet,
@@ -104,7 +105,7 @@ ABSTRACT_CONSTANTS
     t_ReadValue,
 
     cast_t_ReadValue,
-    
+
     t_channel,
     t_session,
     t_session_token,
@@ -112,7 +113,7 @@ ABSTRACT_CONSTANTS
     t_msg,
     t_endpoint,
     t_request_handle,
-    
+
     s_service_reqs,
     s_service_resps,
     s_req_msgs,
@@ -129,15 +130,15 @@ PROPERTIES
     c_NodeId_indet /: t_NodeId &
 
     t_StatusCode = {e_sc_ok, e_sc_nok,
-                      e_sc_bad_secure_channel_closed, 
+                      e_sc_bad_secure_channel_closed,
                       e_sc_bad_connection_closed,
-                      e_sc_bad_invalid_state, 
-                      e_sc_bad_session_id_invalid, 
-                      e_sc_bad_session_closed, 
+                      e_sc_bad_invalid_state,
+                      e_sc_bad_session_id_invalid,
+                      e_sc_bad_session_closed,
                       e_sc_bad_identity_token_invalid,
-                      e_sc_bad_encoding_error, 
+                      e_sc_bad_encoding_error,
                       e_sc_bad_invalid_argument,
-                      e_sc_bad_unexpected_error, 
+                      e_sc_bad_unexpected_error,
                       e_sc_bad_out_of_memory} &
     t_AttributeId = {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
 
@@ -148,6 +149,7 @@ PROPERTIES
 
     k_n_nodes_max : NAT &
     k_n_read_resp_max : NAT &
+    k_n_WriteResponse_max : NAT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -158,40 +160,40 @@ PROPERTIES
     c_ReadValue_indet /: t_ReadValue &
     cast_t_ReadValue : NAT +-> t_ReadValue_i &
     cast_t_ReadValue : perm(t_ReadValue) &
-    
+
     t_channel <: t_channel_i &
-    c_channel_indet : t_channel_i & 
+    c_channel_indet : t_channel_i &
     c_channel_indet /: t_channel &
-    
+
     t_session <: t_session_i &
     c_session_indet : t_session_i &
     c_session_indet /: t_session &
-    
+
     t_session_token <: t_session_token_i &
     c_session_token_indet : t_session_token_i &
-    c_session_token_indet /: t_session_token &    
-    
+    c_session_token_indet /: t_session_token &
+
     t_user <: t_user_i &
-    c_user_indet : t_user_i & 
+    c_user_indet : t_user_i &
     c_user_indet /: t_user &
-    
+
     t_msg <: t_msg_i &
     c_msg_indet : t_msg_i &
     c_msg_indet /: t_msg &
-    
+
     t_request_handle <: t_request_handle_i &
     c_request_handle_indet : t_request_handle_i &
     c_request_handle_indet /: t_request_handle &
-    
+
     t_endpoint <: t_endpoint_i &
     c_endpoint_indet : t_endpoint_i &
     c_endpoint_indet /: t_endpoint &
-    
-    
+
+
     s_service_reqs  = {e_msg_session_read_req} &
     s_service_resps = {e_msg_session_read_resp} &
     s_req_msgs = {e_msg_tcpua_hello,
-        e_msg_sc_open_channel_req, 
+        e_msg_sc_open_channel_req,
         e_msg_sc_close_channel_req,
         e_msg_public_service_req,
         e_msg_session_create_req,

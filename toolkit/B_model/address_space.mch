@@ -19,16 +19,22 @@ MACHINE
     address_space
 
 SEES
-    constants
-
-ABSTRACT_VARIABLES
-    a_NodeId,
-    a_NodeClass,
-    a_Value,
-    a_Value_StatusCode
+    constants,
+    service_write_decode_bs /* TODO: move to refinment */
 
 DEFINITIONS
     "definitions.def";
+    d_variables ==
+        a_NodeId,
+        a_NodeClass,
+        a_Value,
+        a_Value_StatusCode,
+
+        /* Service Write */
+        ResponseWrite_allocated,
+        ResponseWrite_StatusCode
+    ;
+
     d_inv ==
     (
         /* Attributes */
@@ -41,14 +47,27 @@ DEFINITIONS
 
         /* Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
-        dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable})
+        dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        /* Service Write */
+        ResponseWrite_allocated : BOOL &
+        ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
     )
+
+ABSTRACT_VARIABLES
+    d_variables
 
 INVARIANT
     d_inv
 
 INITIALISATION
-    a_NodeId, a_NodeClass, a_Value, a_Value_StatusCode :(d_inv)
+    d_variables
+    :(
+        d_inv &
+        /* Service Write */
+        ResponseWrite_allocated = FALSE &
+        ResponseWrite_StatusCode = {}
+    )
 
 OPERATIONS
     /* a_NodeClass(node) and any_attribute(node) */
@@ -109,6 +128,54 @@ OPERATIONS
         val : t_Variant_i
     THEN
         skip
+    END
+    ;
+
+    /* --------------------------------------------------------------------- */
+    /* Service Write */
+
+    StatusCode_service <-- treat_write_request_WriteValues(userid) =
+    PRE
+        userid : t_UserId_i &
+        userid : t_UserId &
+        ResponseWrite_allocated = TRUE /* TODO & userid /= c_user_local */
+    THEN
+        StatusCode_service,
+        ResponseWrite_StatusCode
+        :(
+            StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode &
+            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
+        )
+    END
+    ;
+
+    StatusCode_service <-- alloc_write_request_responses(nb_req) =
+    PRE
+        nb_req : NAT &
+        ResponseWrite_allocated = FALSE
+    THEN
+        StatusCode_service,
+        ResponseWrite_StatusCode,
+        ResponseWrite_allocated
+        :(
+            StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode &
+            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+            ResponseWrite_allocated : BOOL &
+            (nb_req > k_n_WriteResponse_max
+             =>
+             ResponseWrite_allocated = FALSE)
+        )
+    END
+    ;
+
+    dealloc_write_request_responses =
+    PRE
+        ResponseWrite_allocated = TRUE
+    THEN
+        ResponseWrite_allocated := FALSE ||
+        ResponseWrite_StatusCode := {}
     END
 
 END
