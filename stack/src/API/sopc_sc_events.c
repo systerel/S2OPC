@@ -24,6 +24,8 @@
 #include "sopc_base_types.h"
 #include "sopc_sc_events.h"
 #include "singly_linked_list.h"
+#include "sopc_channel.h"
+#include "sopc_secure_channel_client_connection.h"
 
 static SOPC_EventDispatcherManager* tmpToolkitMgr = NULL;
 
@@ -45,12 +47,16 @@ typedef enum SOPC_TMP_Services_Event {
 } SOPC_TMP_Services_Event;
 
 static SLinkedList* endpointInstList = NULL;
+static SLinkedList* secureChConConfigList = NULL;
 static SLinkedList* secureChInstList = NULL;
+
 
 SOPC_EventDispatcherManager* scEventDispatcherMgr = NULL;
 
 void SOPC_TEMP_InitEventDispMgr(SOPC_EventDispatcherManager* toolkitMgr){
     endpointInstList = SLinkedList_Create(0);
+    secureChConConfigList = SLinkedList_Create(0);
+    secureChInstList = SLinkedList_Create(0);
     tmpToolkitMgr = toolkitMgr;
     scEventDispatcherMgr =
             SOPC_EventDispatcherManager_CreateAndStart(SOPC_SecureChannelEventDispatcher,
@@ -90,8 +96,10 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
         scConConfig->config->msgSecurityMode = securityMode;
         scConConfig->config->reqSecuPolicyUri = SOPC_String_GetRawCString(securityPolicy);
         scConConfig->connectionId = secureChannelId; // For now we can just use scId but in the future it is better to be a shared index with Sockets !
+        scConConfig->configIdx = 0; // TODO: add to toolkit config with index ?
 
-        SLinkedList_Prepend(secureChInstList, scConConfig->connectionId, (void*) scConConfig);
+        assert(SLinkedList_FindFromId(secureChConConfigList, scConConfig->connectionId) == NULL); // must be unique id !
+        SLinkedList_Prepend(secureChConConfigList, scConConfig->connectionId, (void*) scConConfig);
         // TODO: add to toolkit config ?
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
                                              EP_SC_CONNECTED,
@@ -101,7 +109,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
                                              "Secure channel connected on Endpoint");
         break;
     case SOPC_EndpointEvent_SecureChannelClosed:
-        scConConfig = SLinkedList_RemoveFromId(secureChInstList, secureChannelId);
+        scConConfig = SLinkedList_RemoveFromId(secureChConConfigList, secureChannelId);
         if(NULL != scConConfig){
             if(NULL != scConConfig->config){
                 free(scConConfig->config);
@@ -122,6 +130,61 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
     return OpcUa_BadNotImplemented;
 }
 
+SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
+                                           void*              cbData,
+                                           SOPC_Channel_Event cEvent,
+                                           SOPC_StatusCode    status){
+    SOPC_SecureChannel_ConnectedConfig* scConConfig = NULL;
+    SOPC_Channel* ch = NULL;
+    assert(NULL != channel && NULL != cbData);
+    uint32_t* configIdx = (uint32_t*) cbData;
+    SC_ClientConnection* clientCon = (SC_ClientConnection*) SOPC_Channel_GetConnection(channel);
+    switch(cEvent){
+    case SOPC_ChannelEvent_Invalid:
+        assert(FALSE);
+        break;
+    case SOPC_ChannelEvent_Connected:
+        // Create new secure channel config
+        scConConfig = malloc(sizeof(SOPC_SecureChannel_ConnectedConfig));
+        assert(NULL != scConConfig);
+        scConConfig->config = malloc(sizeof(SOPC_SecureChannel_Config));
+        scConConfig->config->crt_cli = clientCon->clientCertificate;
+        scConConfig->config->msgSecurityMode = clientCon->securityMode;
+        scConConfig->config->reqSecuPolicyUri = SOPC_String_GetRawCString(&clientCon->securityPolicy);
+        scConConfig->connectionId = clientCon->instance->secureChannelId; // For now we can just use scId but in the future it is better to be a shared index with Sockets !
+        scConConfig->configIdx = *configIdx; // TODO: add to toolkit config with index ?
+
+        // CAUTION: due to API adaptation we do not use same idx when toolkit is client and server which
+        //  could lead to Id conflicts !!! => DO NOT USE TOOLKIT IN SAME TIME AS CLIENT AND SERVER FOR NOW !
+        assert(SLinkedList_FindFromId(secureChConConfigList, scConConfig->configIdx) == NULL); // must be unique id !
+        SLinkedList_Prepend(secureChConConfigList, scConConfig->configIdx, (void*) scConConfig);
+        // TODO: add to toolkit config ?
+        SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                                             SC_CONNECTED,
+                                             scConConfig->secureChannelId,
+                                             (void*) scConConfig,
+                                             clientCon->instance->secureChannelId,
+                                             "Client secure channel connected");
+        break;
+    case SOPC_ChannelEvent_Disconnected:
+        ch = (SOPC_Channel*) SLinkedList_RemoveFromId(secureChInstList, *configIdx);
+        assert(&channel == ch);
+        if(NULL != ch){
+            SOPC_Channel_Delete(&channel);
+            free(ch);
+            assert(NULL != tmpToolkitMgr);
+            SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                                                 SC_CONNECTION_TIMEOUT,
+                                                 *configIdx,
+                                                 NULL,
+                                                 (int32_t) status,
+                                                 "Secure channel closed for given reason");
+        }
+        break;
+    }
+    return STATUS_OK;
+}
+
 void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                                        uint32_t id,
                                        void*    params,
@@ -130,7 +193,10 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
     SOPC_Endpoint* ep = NULL;
     SOPC_Endpoint_Config* epConfig = NULL;
     uint32_t* idContext = NULL;
+    SOPC_Channel* ch = NULL;
+    SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_StatusCode status = STATUS_OK;
+    SOPC_SecureChannel_ConnectedConfig* scConConfig = NULL; // TMP: needed to store config due to stack/toolkit separation (no access to "shared" context)
     switch((SOPC_SC_Event) scEvent){
     /** SC external events */
     /* Services to SC events */
@@ -176,7 +242,9 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                     "Endpoint opening failed");
         }
         break;
+
     case EP_CLOSE:
+        // id ==  endpoint configuration index
         ep = (SOPC_Endpoint*) SLinkedList_RemoveFromId(endpointInstList, id);
         if(NULL != ep){
             SOPC_Endpoint_Delete(ep);
@@ -190,11 +258,78 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                     "Endpoint closed on demand");
         }
         break;
+
     case SC_CONNECT:
+        // id ==  sc configuration index
+        // params = sc configuration pointer => TMP due to separation toolkit / stack
+        // auxParam == ?
+        scConfig = (SOPC_SecureChannel_Config*) params;
+        ch = malloc(sizeof(SOPC_Channel));
+        idContext = malloc(sizeof(uint32_t)); // TMP memory leak necessary for scope of id
+        if(NULL != ch && NULL != idContext && NULL != scConfig){
+            status = SOPC_Channel_Create(ep, SOPC_EndpointSerializer_Binary);
+        }else{
+            status = STATUS_NOK;
+        }
+        if(STATUS_OK == status){
+            *idContext = id;
+            status = SOPC_Channel_BeginConnect(ch,
+                                               scConfig->url,
+                                               scConfig->crt_cli,
+                                               scConfig->key_priv_cli,
+                                               scConfig->crt_srv,
+                                               scConfig->pki,
+                                               scConfig->reqSecuPolicyUri,
+                                               scConfig->requestedLifetime,
+                                               scConfig->msgSecurityMode,
+                                               1000,
+                                               TMP_SecureChannelEvent_CB,
+                                               (void*) idContext);
+            if(STATUS_OK == status){
+                if(ep != SLinkedList_Prepend(secureChInstList, id, (void*) ch)){
+                    status = STATUS_NOK;
+                }
+            }
+            if(STATUS_OK != status){
+                SOPC_Channel_Delete(ch);
+                free(ch);
+            }
+        }
+        if(STATUS_OK != status){
+            SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                    SC_CONNECTION_TIMEOUT,
+                    id,
+                    NULL,
+                    (int32_t) status,
+                    "Secure channel connection failed");
+        }
         break;
+
     case SC_DISCONNECT:
+        assert(NULL != scConConfig);
+        ch = (SOPC_Channel*) SLinkedList_RemoveFromId(secureChInstList, id);
+        scConConfig = SLinkedList_RemoveFromId(secureChConConfigList, id);
+        if(NULL != ch && NULL != scConConfig){
+            SOPC_Channel_Delete(ch);
+            free(ch);
+            assert(NULL != tmpToolkitMgr);
+            SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                                                 SC_DISCONNECTED,
+                                                 scConConfig->secureChannelId,
+                                                 NULL,
+                                                 scConConfig->connectionId,
+                                                 "Secure channel closed on demand");
+            if(NULL != scConConfig->config){
+                free(scConConfig->config);
+            }
+            free(scConConfig);
+        }
         break;
+
     case SC_SERVICE_SND_MSG:
+        // id ==  connection id
+        // params = byte buffer (node Id + OPC UA message)
+        // auxParam == secure channel config id ? => tmp since connection defined correctly by stack
         break;
 
         /* Sockets to SC events */

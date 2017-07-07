@@ -57,6 +57,7 @@ typedef struct SOPC_Endpoint_Config{
 } SOPC_Endpoint_Config;
 
 typedef struct SOPC_SecureChannel_ConnectedConfig {
+    uint32_t                   configIdx;
     uint32_t                   connectionId;
     uint32_t                   secureChannelId;
     SOPC_SecureChannel_Config* config;
