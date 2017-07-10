@@ -1,5 +1,6 @@
 #!/bin/bash
-#
+
+
 #  Builds INGOPCS OPC UA stack and run tests
 #
 #  Binary files are generated in out/
