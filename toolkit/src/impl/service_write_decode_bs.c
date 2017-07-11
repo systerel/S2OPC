@@ -25,7 +25,7 @@
 #include "service_write_decode_bs.h"
 
 #include "sopc_types.h"
-#include "internal_msg.h"
+#include "sopc_sc_events.h"
 #include "address_space_impl.h" /* e_aid_* */
 
 
@@ -49,8 +49,8 @@ void service_write_decode_bs__decode_write_request(
    constants__t_StatusCode_i * const service_write_decode_bs__StatusCode_service)
 {
     /* TODO: this is were you think you have a payload, because the variable is called "payload",
-       but in fact you have a message__message. */
-    message__message*  msg = (message__message*) service_write_decode_bs__req_payload;
+       but in fact you have a SOPC_Toolkit_Msg. */
+    SOPC_Toolkit_Msg*  msg = (SOPC_Toolkit_Msg*) service_write_decode_bs__req_payload;
     *service_write_decode_bs__StatusCode_service = constants__e_sc_nok;
     if(msg->encType == &OpcUa_WriteRequest_EncodeableType){
         OpcUa_WriteRequest *req = (OpcUa_WriteRequest*) msg->msg;

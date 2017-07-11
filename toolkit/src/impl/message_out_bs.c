@@ -31,6 +31,8 @@
 #include "internal_msg.h"
 #include "constants_bs.h"
 
+#include "sopc_sc_events.h"
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -44,7 +46,7 @@ void message_out_bs__alloc_msg(
    const constants__t_msg_type message_out_bs__msg_type,
    constants__t_msg_i * const message_out_bs__nmsg) {
 
-  message__message* msg = NULL;
+  SOPC_Toolkit_Msg* msg = NULL;
   SOPC_StatusCode status = STATUS_NOK;
  
   SOPC_EncodeableType* encTyp = NULL;
@@ -64,9 +66,9 @@ void message_out_bs__alloc_msg(
     }
   }
   if(NULL != encTyp){
-    msg = malloc(sizeof(message__message));
+    msg = malloc(sizeof(SOPC_Toolkit_Msg));
     if(NULL != msg){
-      memset(msg, 0, sizeof(message__message));
+      memset(msg, 0, sizeof(SOPC_Toolkit_Msg));
       status = SOPC_Encodeable_Create(encTyp, &msg->msg);
     }
   }
@@ -91,7 +93,7 @@ void message_out_bs__bless_msg_out(
 
 void message_out_bs__dealloc_msg_out(
    const constants__t_msg_i message_out_bs__msg) {
-  message__message* msg = (message__message*) message_out_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
   if(message_out_bs__msg != constants__c_msg_indet && NULL != msg->encType){
     if(&OpcUa_ReadResponse_EncodeableType == msg->encType){
       /* Current implementation share the variants of the address space in the response,
@@ -112,7 +114,7 @@ void message_out_bs__dealloc_msg_out(
 void message_out_bs__get_msg_out_type(
    const constants__t_msg_i message_out_bs__msg,
    constants__t_msg_type * const message_out_bs__msgtype) {
-  message__message* msg = (message__message*) message_out_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
   util_message__get_message_type(msg->encType,
                                  message_out_bs__msgtype);
 }
@@ -138,7 +140,7 @@ void message_out_bs__write_activate_msg_user(
 void message_out_bs__write_create_session_msg_session_token(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_session_token_i message_out_bs__session_token) {
-  message__message* msg = (message__message*) message_out_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
   OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) msg->msg;
   SOPC_StatusCode status;
   status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, message_out_bs__session_token);
@@ -150,7 +152,7 @@ void message_out_bs__write_create_session_msg_session_token(
 void message_out_bs__write_msg_out_header_req_handle(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_request_handle_i message_out_bs__req_handle) {
-  message__message* msg = (message__message*) message_out_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
   if((!FALSE) == msg->isRequest){
     message__request_message* req_msg = (message__request_message*) msg->msg;
     req_msg->requestHeader.RequestHandle = message_out_bs__req_handle;
@@ -163,7 +165,7 @@ void message_out_bs__write_msg_out_header_req_handle(
 void message_out_bs__write_msg_out_header_session_token(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_session_token_i message_out_bs__session_token) {
-  message__message* msg = (message__message*) message_out_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
   SOPC_NodeId* authToken = (SOPC_NodeId*) message_out_bs__session_token;
   assert(msg->isRequest == (!FALSE));
   message__request_message* req_msg = (message__request_message*) msg->msg;
@@ -178,7 +180,7 @@ void message_out_bs__write_msg_resp_header_service_status(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_StatusCode_i message_out_bs__status_code) {
   SOPC_StatusCode status = STATUS_NOK;
-  message__message* msg = (message__message*) message_out_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
   util_status_code__B_to_C(message_out_bs__status_code,
                            &status);
   message__response_message* resp_msg = (message__response_message*) msg->msg;

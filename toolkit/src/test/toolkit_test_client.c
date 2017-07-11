@@ -25,7 +25,6 @@
 #include "constants_bs.h"
 
 #include "address_space_impl.h"
-#include "internal_msg.h"
 #include "test_results.h"
 #include "util_b2c.h"
 
@@ -38,9 +37,11 @@
 #include "testlib_write.h"
 
 
+#include "sopc_sc_events.h"
+
 /* Function to build the read service request message */
-message__message* getReadRequest_message(){
-  message__message *pMsg = (message__message *)malloc(sizeof(message__message));
+SOPC_Toolkit_Msg* getReadRequest_message(){
+  SOPC_Toolkit_Msg *pMsg = (SOPC_Toolkit_Msg *)malloc(sizeof(SOPC_Toolkit_Msg));
   if(NULL == pMsg)
     return NULL;
   pMsg->msg = read_new_read_request();
@@ -53,8 +54,8 @@ message__message* getReadRequest_message(){
 }
 
 /* Function to build the verification read request */
-message__message* getReadRequest_verif_message() {
-  message__message *pMsg = (message__message *)malloc(sizeof(message__message));
+SOPC_Toolkit_Msg* getReadRequest_verif_message() {
+  SOPC_Toolkit_Msg *pMsg = (SOPC_Toolkit_Msg *)malloc(sizeof(SOPC_Toolkit_Msg));
   if(NULL == pMsg)
     return NULL;
   pMsg->msg = tlibw_new_ReadRequest_check();
@@ -170,8 +171,8 @@ int main(void){
   }
 
   if(STATUS_OK == status){
-    /* Create a service request message and send it through session (read service) */
-    message__message *pMsgRead = getReadRequest_message();
+    /* Create a service request message and send it through session (read service)*/
+    SOPC_Toolkit_Msg *pMsgRead = getReadRequest_message();
     io_dispatch_mgr__send_service_request_msg(session,
                                               pMsgRead,
                                               &sCode);
@@ -208,7 +209,7 @@ int main(void){
     test_results_set_service_result(FALSE);
     /* Sends a WriteRequest */
     pWriteReq = tlibw_new_WriteRequest();
-    message__message *pMsgWrite = tlibw_new_message_WriteRequest(pWriteReq);
+    SOPC_Toolkit_Msg *pMsgWrite = tlibw_new_message_WriteRequest(pWriteReq);
     pWriteReq = (OpcUa_WriteRequest *) pMsgWrite->msg;
     test_results_set_WriteRequest(pWriteReq);
     io_dispatch_mgr__send_service_request_msg(session, pMsgWrite, &sCode);
@@ -244,7 +245,7 @@ int main(void){
     test_results_set_service_result(FALSE);
     /* Sends another ReadRequest, to verify that the AddS has changed */
     /* The callback will call the verification */
-    message__message *pMsgRead = getReadRequest_verif_message();
+    SOPC_Toolkit_Msg *pMsgRead = getReadRequest_verif_message();
     io_dispatch_mgr__send_service_request_msg(session,
                                               pMsgRead,
                                               &sCode);

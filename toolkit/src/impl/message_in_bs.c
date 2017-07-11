@@ -31,6 +31,8 @@
 #include "internal_msg.h"
 #include "constants_bs.h"
 
+#include "sopc_sc_events.h"
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -75,7 +77,7 @@ void message_in_bs__read_activate_msg_user(
 void message_in_bs__read_create_session_msg_session_token(
    const constants__t_msg_i message_in_bs__msg,
    constants__t_session_token_i * const message_in_bs__session_token) {
-  message__message* msg = (message__message*) message_in_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_in_bs__msg;
   OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) msg->msg;
 
   *message_in_bs__session_token = constants__c_session_token_indet;
@@ -85,7 +87,7 @@ void message_in_bs__read_create_session_msg_session_token(
 void message_in_bs__read_msg_header_req_handle(
    const constants__t_msg_i message_in_bs__msg,
    constants__t_request_handle_i * const message_in_bs__handle) {
-  message__message* msg = (message__message*) message_in_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_in_bs__msg;
   if((!FALSE) == msg->isRequest){
     message__request_message* req_msg = (message__request_message*) msg->msg;
     *message_in_bs__handle = req_msg->requestHeader.RequestHandle;
@@ -98,7 +100,7 @@ void message_in_bs__read_msg_header_req_handle(
 void message_in_bs__read_msg_req_header_session_token(
    const constants__t_msg_i message_in_bs__msg,
    constants__t_session_token_i * const message_in_bs__session_token) {
-  message__message* msg = (message__message*) message_in_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_in_bs__msg;
   // Do only temporary pointer copy
   // TODO: IMPORTANT: if NULL token  => shall return an indet token !
   message__request_message* req_msg = (message__request_message*) msg->msg;
@@ -108,7 +110,7 @@ void message_in_bs__read_msg_req_header_session_token(
 void message_in_bs__read_msg_resp_header_service_status(
    const constants__t_msg_i message_in_bs__msg,
    constants__t_StatusCode_i * const message_in_bs__status) {
-  message__message* msg = (message__message*) message_in_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_in_bs__msg;
   message__response_message* resp_msg = (message__response_message*) msg->msg;
   if(FALSE == util_status_code__C_to_B(resp_msg->responseHeader.ServiceResult,
                                        message_in_bs__status)){

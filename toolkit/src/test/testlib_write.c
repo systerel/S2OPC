@@ -34,8 +34,8 @@
 #include "address_space.h"
 #include "address_space_bs.h"
 #include "io_dispatch_mgr.h"
-#include "internal_msg.h"
 
+#include "sopc_sc_events.h"
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
 #define DESIGNATE_NEW(T, ...)       \
@@ -185,9 +185,9 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq)
 }
 
 
-message__message *tlibw_new_message_WriteRequest(OpcUa_WriteRequest *pWriteReq)
+SOPC_Toolkit_Msg *tlibw_new_message_WriteRequest(OpcUa_WriteRequest *pWriteReq)
 {
-    message__message *pMsg = (message__message *)malloc(sizeof(message__message));
+    SOPC_Toolkit_Msg *pMsg = (SOPC_Toolkit_Msg *)malloc(sizeof(SOPC_Toolkit_Msg));
     if(NULL == pMsg)
         return NULL;
     
@@ -200,7 +200,7 @@ message__message *tlibw_new_message_WriteRequest(OpcUa_WriteRequest *pWriteReq)
 }
 
 
-bool tlibw_stimulateB_with_message(message__message *pMsg)
+bool tlibw_stimulateB_with_message(SOPC_Toolkit_Msg *pMsg)
 {
     constants__t_StatusCode_i sc = constants__c_StatusCode_indet;
 

@@ -28,7 +28,7 @@
 #include "session_header_init.h"
 #include "address_space_bs.h"
 #include "testlib_write.h"
-#include "internal_msg.h"
+#include "sopc_sc_events.h"
 
 
 int main ()
@@ -43,7 +43,7 @@ int main ()
 
     /* Creates a WriteRequest and the message */
     OpcUa_WriteRequest  *pWriteReq = tlibw_new_WriteRequest();
-    message__message    *pMsg = tlibw_new_message_WriteRequest(pWriteReq);
+    SOPC_Toolkit_Msg    *pMsg = tlibw_new_message_WriteRequest(pWriteReq);
     if(NULL == pWriteReq || NULL == pMsg)
         exit(1);
 

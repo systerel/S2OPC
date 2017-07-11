@@ -28,6 +28,7 @@
 #include "singly_linked_list.h"
 
 #include "io_dispatch_mgr.h"
+#include "session_header_init.h"
 
 static struct {
     uint8_t     initDone;
@@ -113,7 +114,8 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
         Mutex_Lock(&tConfig.mut);
         if(tConfig.locked == FALSE){
             tConfig.locked = !FALSE;
-            // TODO: init B model code ?
+            /* Init B model */
+            INITIALISATION();
             status = STATUS_OK;
         }
         Mutex_Unlock(&tConfig.mut);

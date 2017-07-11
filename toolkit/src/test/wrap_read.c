@@ -39,6 +39,7 @@
 #include "gen_addspace.h"
 #include "testlib_read_response.h"
 
+#include "sopc_sc_events.h"
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
 #define DESIGNATE_NEW(T, ...)       \
@@ -142,13 +143,13 @@ bool read_service_test(OpcUa_ReadRequest *pReadReq)
     bool bTest;
 
     /* Feeds the ReadRequest to the machine */
-    message__message msg_in = {
+    SOPC_Toolkit_Msg msg_in = {
             .msg = (void *)pReadReq,
         };
 
     /* Prepares the response message */
     OpcUa_ReadResponse readResp;
-    message__message msg_out = {
+    SOPC_Toolkit_Msg msg_out = {
             .msg = (void *)&readResp,
         };
 

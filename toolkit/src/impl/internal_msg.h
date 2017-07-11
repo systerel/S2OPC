@@ -22,13 +22,6 @@
 #include "sopc_encodeable.h"
 #include "sopc_types.h"
 
-typedef struct message__message {
-  void* msg;
-  SOPC_EncodeableType* encType;
-  SOPC_EncodeableType* respEncType;
-  t_bool isRequest;
-} message__message;
-
 typedef struct message__request_message {
   OpcUa_RequestHeader requestHeader;
   // ...

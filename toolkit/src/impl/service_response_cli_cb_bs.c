@@ -19,9 +19,8 @@
 
 #include "test_results.h"
 
-#include "internal_msg.h"
-
 #include "sopc_types.h"
+#include "sopc_sc_events.h"
 
 #include "testlib_read_response.h"
 #include "testlib_write.h"
@@ -42,7 +41,7 @@ void service_response_cli_cb_bs__cli_service_response(
    const constants__t_msg_i service_response_cli_cb_bs__resp_msg,
    const constants__t_StatusCode_i service_response_cli_cb_bs__status){
 
-  message__message* msg = (message__message*) service_response_cli_cb_bs__resp_msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) service_response_cli_cb_bs__resp_msg;
 
   if(msg->encType == &OpcUa_ReadResponse_EncodeableType){
     OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) msg->msg;
