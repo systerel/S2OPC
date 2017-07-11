@@ -245,7 +245,7 @@ OPERATIONS
     END
     ;
 
-    wvi <-- read_cast_t_WriteValue(ii) =
+    wvi <-- get_cast_t_WriteValue(ii) =
     PRE
         ii : NAT &
         ii : dom(cast_t_WriteValue)

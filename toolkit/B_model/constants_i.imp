@@ -50,7 +50,7 @@ OPERATIONS
     END
     ;
 
-    wvi <-- read_cast_t_WriteValue(ii) =
+    wvi <-- get_cast_t_WriteValue(ii) =
     BEGIN
         wvi := ii
     END

@@ -57,6 +57,7 @@ INVARIANT
     d_inv /* & (d_inv_uninit or d_inv_init) */
 
 INITIALISATION
+    /* TODO: rename rreqs_nb_reqs, ... */
     nb_reqs, reqs_to_iterate, reqs_iterated :(d_inv)
 
 OPERATIONS

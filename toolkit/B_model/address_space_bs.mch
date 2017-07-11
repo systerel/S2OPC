@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 MACHINE
     address_space_bs
 
@@ -109,13 +109,16 @@ OPERATIONS
     ;
 
     /* a_NodeClass */
-    sc <-- read_NodeClass(node) =
+    ncl <-- read_NodeClass(node) =
     PRE
         node : t_Node_i &
         node : t_Node
     THEN
-        sc :(sc : t_NodeClass_i &
-             sc = a_NodeClass(node))
+        ncl
+        :(
+            ncl : t_NodeClass_i &
+            ncl = a_NodeClass(node)
+        )
     END
     ;
 
