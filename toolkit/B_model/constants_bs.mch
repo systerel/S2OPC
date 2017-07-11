@@ -19,6 +19,7 @@ MACHINE
     constants_bs
 
 SETS
+    t_Node_i;
     t_NodeId_i;
     t_Variant_i;
     t_ByteString_i;
@@ -33,7 +34,10 @@ SETS
     t_endpoint_i
 
 CONCRETE_CONSTANTS
+    k_n_nodes_max,
+
     c_Variant_indet,
+    c_Node_indet,
     c_NodeId_indet,
     c_ByteString_indet,
     c_UserId_indet,
@@ -48,6 +52,7 @@ CONCRETE_CONSTANTS
 
 ABSTRACT_CONSTANTS
     t_Variant,
+    t_Node,
     t_NodeId,
     t_ByteString,
     t_UserId,
@@ -61,9 +66,15 @@ ABSTRACT_CONSTANTS
     t_request_handle
 
 PROPERTIES
+    k_n_nodes_max : NAT &
+
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &
     c_Variant_indet /: t_Variant &
+
+    t_Node <: t_Node_i &
+    c_Node_indet : t_Node_i &
+    c_Node_indet /: t_Node &
 
     t_NodeId <: t_NodeId_i &
     c_NodeId_indet : t_NodeId_i &

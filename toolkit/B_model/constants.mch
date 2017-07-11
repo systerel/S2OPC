@@ -137,6 +137,10 @@ PROPERTIES
     c_Variant_indet : t_Variant_i &
     c_Variant_indet /: t_Variant &
 
+    t_Node <: t_Node_i &
+    c_Node_indet : t_Node_i &
+    c_Node_indet /: t_Node &
+
     t_NodeId <: t_NodeId_i &
     c_NodeId_indet : t_NodeId_i &
     c_NodeId_indet /: t_NodeId &
