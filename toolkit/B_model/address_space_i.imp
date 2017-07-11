@@ -149,6 +149,7 @@ OPERATIONS
         l_status,
         l_isvalid
     IN
+        StatusCode_service := e_sc_ok;
         l_nb_req <-- get_nb_WriteValue;
         l_continue <-- init_iter_write_request(l_nb_req);
         WHILE l_continue = TRUE DO
@@ -160,7 +161,37 @@ OPERATIONS
             l_status <-- treat_write_1(l_isvalid, l_nid, l_aid, l_value, userid);
             set_ResponseWrite_StatusCode(l_wvi, l_status)
         INVARIANT
-            0 = 0
+            wreqs_to_iterate <: t_WriteValue &
+            wreqs_iterated <: t_WriteValue &
+            wreqs_to_iterate /\ wreqs_iterated = {} &
+            wreqs_to_iterate \/ wreqs_iterated = cast_t_WriteValue[1..nb_WriteValue] &
+            l_continue = bool(wreqs_to_iterate /= {}) &
+           
+            a_Value : t_Node +-> t_Variant &
+
+            dom(a_Value) = dom(a_Value$0 <+
+                               (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
+                                                                            WriteValue_NodeId~ ;
+                                (wreqs_iterated /\
+                                 WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value)) &
+
+            a_Value <: a_Value$0 <+
+                       (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
+                                                                    WriteValue_NodeId~ ;
+                        (cast_t_WriteValue[1..nb_WriteValue] /\
+                         WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value) &
+                                    
+            ResponseWrite_StatusCode = %wvi.(
+                wvi : t_WriteValue &
+                wvi : wreqs_iterated
+                |
+                {FALSE |-> e_sc_nok,
+                 TRUE  |-> e_sc_ok }(bool(wvi : dom(WriteValue_NodeId)              &
+                                          wvi : dom(WriteValue_AttributeId)         &
+                                          wvi : dom(WriteValue_Value)               &
+                                          WriteValue_NodeId(wvi) : ran(a_NodeId)    &
+                                          WriteValue_AttributeId(wvi) = e_aid_Value &
+                                          a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable)))
         VARIANT
             card(wreqs_to_iterate)
         END

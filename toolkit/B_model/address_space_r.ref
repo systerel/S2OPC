@@ -71,38 +71,33 @@ OPERATIONS
 
     StatusCode_service <-- treat_write_request_WriteValues(userid) =
     BEGIN
+        StatusCode_service := e_sc_ok ||
         a_Value,
-        StatusCode_service,
         ResponseWrite_StatusCode
-        :(
-            StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode &
-            a_Value = a_Value$0 <+ ran({wvi, node, res
-                |
+        :(  ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+            a_Value                  : t_Node +-> t_Variant          &
+
+            dom(a_Value) = dom(a_Value$0 <+ (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
+                                                                                         WriteValue_NodeId~ ;
+                                             (cast_t_WriteValue[1..nb_WriteValue] /\
+                                              WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value)) &
+
+            a_Value <: a_Value$0 <+ (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
+                                                                                 WriteValue_NodeId~ ;
+                                     (cast_t_WriteValue[1..nb_WriteValue] /\
+                                      WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value) &
+                                    
+            ResponseWrite_StatusCode = %wvi.(
                 wvi : t_WriteValue &
-                wvi : dom(WriteValue_NodeId) &
-                wvi : dom(WriteValue_AttributeId) &
-                WriteValue_NodeId(wvi) : ran(a_NodeId) &
-                node = a_NodeId~(WriteValue_NodeId(wvi)) &
-                /* For now, only the Value of the Variable can be modified */
-                WriteValue_AttributeId(wvi) = e_aid_Value &
-                a_NodeClass(node) = e_ncl_Variable &
-                /* TODO: gestion du userid + AccessLevel/WriteMask */
-                wvi : dom(WriteValue_Value) &
-                /* TODO: vérifier le typage (avec DataType) */
-                /* Check for multiplicity of the (node, aid) */
-                card(WriteValue_NodeId~[{WriteValue_NodeId(wvi)}]
-                     /* /\ WriteValue_AttributeId~[{WriteValue_AttributeId(wvi)}] */
-                     ) = 1 &
-                /* Get the value from the request */
-                res = node |-> WriteValue_Value(wvi)
-                }
-            )
-            &
-            ResponseWrite_StatusCode = % wvi . (
-                wvi : t_WriteValue
+                wvi : cast_t_WriteValue[1..nb_WriteValue]
                 |
-                e_sc_ok
+                {FALSE |-> e_sc_nok,
+                 TRUE  |-> e_sc_ok }(bool(wvi : dom(WriteValue_NodeId)              &
+                                          wvi : dom(WriteValue_AttributeId)         &
+                                          wvi : dom(WriteValue_Value)               &
+                                          WriteValue_NodeId(wvi) : ran(a_NodeId)    &
+                                          WriteValue_AttributeId(wvi) = e_aid_Value &
+                                          a_NodeClass(a_NodeId~(WriteValue_NodeId(wvi))) = e_ncl_Variable))
             )
         )
     END
