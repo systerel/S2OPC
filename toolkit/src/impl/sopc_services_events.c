@@ -67,7 +67,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // secure_channel_lost call !
     break;
   case SC_SERVICE_RCV_MSG:
-    // id ==  secure channel id
+    // id ==  connection Id
     // params = message content (TBD)
     // auxParam == context
     // => B model entry point to add

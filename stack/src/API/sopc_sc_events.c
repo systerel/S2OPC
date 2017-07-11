@@ -26,6 +26,7 @@
 #include "singly_linked_list.h"
 #include "sopc_channel.h"
 #include "sopc_secure_channel_client_connection.h"
+#include "opcua_identifiers.h"
 
 static SOPC_EventDispatcherManager* tmpToolkitMgr = NULL;
 
@@ -62,6 +63,91 @@ void SOPC_TEMP_InitEventDispMgr(SOPC_EventDispatcherManager* toolkitMgr){
             SOPC_EventDispatcherManager_CreateAndStart(SOPC_SecureChannelEventDispatcher,
                                                        "(Services) Application event dispatcher manager");
 }
+
+
+/* Function provided to the communication Stack to redirect a received service message to the Toolkit */
+SOPC_StatusCode TMP_BeginService(SOPC_Endpoint               a_hEndpoint,
+                                 struct SOPC_RequestContext* a_hContext,
+                                 void**                      a_ppRequest,
+                                 SOPC_EncodeableType*        a_pRequestType){
+  SOPC_Toolkit_Msg* tMsg = calloc(1, sizeof(SOPC_Toolkit_Msg));
+  uint32_t* pConfigIdx = SOPC_Endpoint_GetCallbackData(a_hEndpoint);
+  assert(NULL != tMsg && NULL != pConfigIdx);
+
+  tMsg->msg = *a_ppRequest;
+  tMsg->encType = a_pRequestType;
+  tMsg->respEncType = NULL; // used only on client side for invoking service
+  tMsg->isRequest = (!FALSE);
+  tMsg->optContext = a_hContext;
+
+  SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                                       SC_SERVICE_RCV_MSG,
+                                       *pConfigIdx, // TMP: to be replaced by connection Id
+                                       tMsg,
+                                       0, // set status ? (if not used for context on server side)
+                                       "Secure channel (server) received request");
+
+  // => deallocation to be done by toolkit
+  // SOPC_Encodeable_Delete(a_pRequestType, a_ppRequest);
+
+  return STATUS_OK;
+}
+
+/* Create session service provided to the Stack */
+struct SOPC_ServiceType SOPC_Toolkit_CreateSession_ServiceType =
+{
+    OpcUaId_CreateSessionRequest,
+    &OpcUa_CreateSessionResponse_EncodeableType,
+    TMP_BeginService,
+    NULL
+};
+
+/* Activate session service provided to the Stack */
+struct SOPC_ServiceType SOPC_Toolkit_ActivateSession_ServiceType =
+{
+    OpcUaId_ActivateSessionRequest,
+    &OpcUa_ActivateSessionResponse_EncodeableType,
+   TMP_BeginService,
+    NULL
+};
+
+/* Close session service provided to the Stack */
+struct SOPC_ServiceType SOPC_Toolkit_CloseSession_ServiceType =
+{
+    OpcUaId_CloseSessionRequest,
+    &OpcUa_CloseSessionResponse_EncodeableType,
+   TMP_BeginService,
+    NULL
+};
+
+/* Read service provided to the Stack */
+struct SOPC_ServiceType SOPC_Toolkit_Read_ServiceType =
+{
+    OpcUaId_ReadRequest,
+    &OpcUa_ReadResponse_EncodeableType,
+    TMP_BeginService,
+    NULL
+};
+
+/* Write service provided to the Stack */
+struct SOPC_ServiceType SOPC_Toolkit_Write_ServiceType =
+{
+    OpcUaId_WriteRequest,
+    &OpcUa_WriteResponse_EncodeableType,
+    TMP_BeginService,
+    NULL
+};
+
+/* List of services provided to the Stack */
+SOPC_ServiceType* SOPC_Toolkit_SupportedServiceTypes[] =
+{
+    &SOPC_Toolkit_CreateSession_ServiceType,
+    &SOPC_Toolkit_ActivateSession_ServiceType,
+    &SOPC_Toolkit_CloseSession_ServiceType,
+    &SOPC_Toolkit_Read_ServiceType,
+    &SOPC_Toolkit_Write_ServiceType,
+    NULL
+};
 
 SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
                                      void*                     cbData,
@@ -135,7 +221,7 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
                                            SOPC_Channel_Event cEvent,
                                            SOPC_StatusCode    status){
     SOPC_SecureChannel_ConnectedConfig* scConConfig = NULL;
-    SOPC_Channel* ch = NULL;
+    SOPC_Channel ch = NULL;
     assert(NULL != channel && NULL != cbData);
     uint32_t* configIdx = (uint32_t*) cbData;
     SC_ClientConnection* clientCon = (SC_ClientConnection*) SOPC_Channel_GetConnection(channel);
@@ -167,21 +253,39 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
                                              "Client secure channel connected");
         break;
     case SOPC_ChannelEvent_Disconnected:
-        ch = (SOPC_Channel*) SLinkedList_RemoveFromId(secureChInstList, *configIdx);
-        assert(&channel == ch);
-        if(NULL != ch){
-            SOPC_Channel_Delete(&channel);
-            free(ch);
-            assert(NULL != tmpToolkitMgr);
-            SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                                                 SC_CONNECTION_TIMEOUT,
-                                                 *configIdx,
-                                                 NULL,
-                                                 (int32_t) status,
-                                                 "Secure channel closed for given reason");
-        }
+        ch = (SOPC_Channel) SLinkedList_RemoveFromId(secureChInstList, *configIdx);
+        assert(channel == ch);
+        SOPC_Channel_Delete(&channel);
+        assert(NULL != tmpToolkitMgr);
+        SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                                             SC_CONNECTION_TIMEOUT,
+                                             *configIdx,
+                                             NULL,
+                                             (int32_t) status,
+                                             "Secure channel closed for given reason");
         break;
     }
+    return STATUS_OK;
+}
+
+SOPC_StatusCode TMP_SecureChannelResponse_CB(SOPC_Channel         channel,
+                                             void*                response,
+                                             SOPC_EncodeableType* responseType,
+                                             void*                cbData,
+                                             SOPC_StatusCode      status){
+    (void) status;
+    SOPC_Toolkit_Msg* tMsg = calloc(1, sizeof(SOPC_Toolkit_Msg));
+    uint32_t id = ((SC_ClientConnection*) SOPC_Channel_GetConnection(channel))->instance->secureChannelId;
+    tMsg->isRequest = FALSE;
+    tMsg->msg = response;
+    tMsg->encType = responseType;
+    tMsg->optContext = cbData;
+    SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                                         SC_SERVICE_RCV_MSG,
+                                         id, // TMP: to be replaced by connection Id
+                                         tMsg,
+                                         0, // set status ? (if not used for context on server side)
+                                         "Secure channel (client) received response");
     return STATUS_OK;
 }
 
@@ -190,13 +294,14 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                                        void*    params,
                                        int32_t  auxParam){
     assert(NULL != tmpToolkitMgr);
-    SOPC_Endpoint* ep = NULL;
+    SOPC_Endpoint ep = NULL;
     SOPC_Endpoint_Config* epConfig = NULL;
     uint32_t* idContext = NULL;
-    SOPC_Channel* ch = NULL;
+    SOPC_Channel ch = NULL;
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_StatusCode status = STATUS_OK;
     SOPC_SecureChannel_ConnectedConfig* scConConfig = NULL; // TMP: needed to store config due to stack/toolkit separation (no access to "shared" context)
+    SOPC_Toolkit_Msg* tMsg = NULL;
     switch((SOPC_SC_Event) scEvent){
     /** SC external events */
     /* Services to SC events */
@@ -205,16 +310,15 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         // params = endpoint configuration pointer => TMP due to separation toolkit / stack
         // auxParam == ?
         epConfig = (SOPC_Endpoint_Config*) params;
-        ep = malloc(sizeof(SOPC_Endpoint));
         idContext = malloc(sizeof(uint32_t)); // TMP memory leak necessary for scope of id
-        if(NULL != ep && NULL != idContext && NULL != epConfig){
-            status = SOPC_Endpoint_Create(ep, SOPC_EndpointSerializer_Binary, NULL); // TODO: generic service redefinition
+        if(NULL != idContext && NULL != epConfig){
+            status = SOPC_Endpoint_Create(&ep, SOPC_EndpointSerializer_Binary, SOPC_Toolkit_SupportedServiceTypes);
         }else{
             status = STATUS_NOK;
         }
         if(STATUS_OK == status){
             *idContext = id;
-            status = SOPC_Endpoint_Open(*ep,
+            status = SOPC_Endpoint_Open(ep,
                     epConfig->endpointURL,
                     TMP_EndpointEvent_CB,
                     (void*) idContext,
@@ -229,8 +333,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                 }
             }
             if(STATUS_OK != status){
-                SOPC_Endpoint_Delete(ep);
-                free(ep);
+                SOPC_Endpoint_Delete(&ep);
             }
         }
         if(STATUS_OK != status){
@@ -245,18 +348,15 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
 
     case EP_CLOSE:
         // id ==  endpoint configuration index
-        ep = (SOPC_Endpoint*) SLinkedList_RemoveFromId(endpointInstList, id);
-        if(NULL != ep){
-            SOPC_Endpoint_Delete(ep);
-            free(ep);
-            assert(NULL != tmpToolkitMgr);
-            SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                    EP_CLOSED,
-                    id,
-                    NULL,
-                    auxParam, // auxParam == status
-                    "Endpoint closed on demand");
-        }
+        ep = (SOPC_Endpoint) SLinkedList_RemoveFromId(endpointInstList, id);
+        SOPC_Endpoint_Delete(&ep);
+        assert(NULL != tmpToolkitMgr);
+        SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
+                EP_CLOSED,
+                id,
+                NULL,
+                auxParam, // auxParam == status
+                "Endpoint closed on demand");
         break;
 
     case SC_CONNECT:
@@ -264,10 +364,9 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         // params = sc configuration pointer => TMP due to separation toolkit / stack
         // auxParam == ?
         scConfig = (SOPC_SecureChannel_Config*) params;
-        ch = malloc(sizeof(SOPC_Channel));
         idContext = malloc(sizeof(uint32_t)); // TMP memory leak necessary for scope of id
-        if(NULL != ch && NULL != idContext && NULL != scConfig){
-            status = SOPC_Channel_Create(ep, SOPC_EndpointSerializer_Binary);
+        if(NULL != idContext && NULL != scConfig){
+            status = SOPC_Channel_Create(&ch, SOPC_EndpointSerializer_Binary);
         }else{
             status = STATUS_NOK;
         }
@@ -286,13 +385,12 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                                                TMP_SecureChannelEvent_CB,
                                                (void*) idContext);
             if(STATUS_OK == status){
-                if(ep != SLinkedList_Prepend(secureChInstList, id, (void*) ch)){
+                if(ch != SLinkedList_Prepend(secureChInstList, id, (void*) ch)){
                     status = STATUS_NOK;
                 }
             }
             if(STATUS_OK != status){
-                SOPC_Channel_Delete(ch);
-                free(ch);
+                SOPC_Channel_Delete(&ch);
             }
         }
         if(STATUS_OK != status){
@@ -307,11 +405,10 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
 
     case SC_DISCONNECT:
         assert(NULL != scConConfig);
-        ch = (SOPC_Channel*) SLinkedList_RemoveFromId(secureChInstList, id);
+        ch = (SOPC_Channel) SLinkedList_RemoveFromId(secureChInstList, id);
         scConConfig = SLinkedList_RemoveFromId(secureChConConfigList, id);
-        if(NULL != ch && NULL != scConConfig){
-            SOPC_Channel_Delete(ch);
-            free(ch);
+        if(NULL != scConConfig){
+            SOPC_Channel_Delete(&ch);
             assert(NULL != tmpToolkitMgr);
             SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
                                                  SC_DISCONNECTED,
@@ -330,13 +427,29 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         // id ==  connection id
         // params = byte buffer (node Id + OPC UA message)
         // auxParam == secure channel config id ? => tmp since connection defined correctly by stack
-        // TODO
+        tMsg = params;
+        ch = (SOPC_Channel) SLinkedList_FindFromId(secureChInstList, auxParam);
+        assert(ch != NULL && tMsg != NULL);
+        SOPC_Channel_BeginInvokeService(ch, NULL,
+                                        tMsg->msg,
+                                        tMsg->encType,
+                                        tMsg->respEncType,
+                                        TMP_SecureChannelResponse_CB,
+                                        NULL //request context ? => type params ?
+                                        );
         break;
+
     case EP_SC_SERVICE_SND_MSG:
         // id ==  endpoint Id id
         // params => message + context ???
         // auxParam => ???
-        // TODO
+        tMsg = params;
+        ep = (SOPC_Endpoint) SLinkedList_FindFromId(endpointInstList, id);
+        assert(ep != NULL && tMsg != NULL);
+        SOPC_Endpoint_SendResponse(ep,
+                                   tMsg->encType,
+                                   tMsg->msg,
+                                   tMsg->optContext);
         break;
 
         /* Sockets to SC events */

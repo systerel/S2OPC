@@ -63,6 +63,14 @@ typedef struct SOPC_SecureChannel_ConnectedConfig {
     SOPC_SecureChannel_Config* config;
 } SOPC_SecureChannel_ConnectedConfig;
 
+typedef struct SOPC_Toolkit_Msg {
+  void* msg;
+  SOPC_EncodeableType* encType;
+  SOPC_EncodeableType* respEncType;
+  uint8_t isRequest;
+  void*   optContext;
+} SOPC_Toolkit_Msg;
+
 typedef enum SOPC_SC_Event {
   /** SC external events */
   /* Services to SC events */
