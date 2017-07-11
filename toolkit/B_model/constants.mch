@@ -80,7 +80,7 @@ SETS
 
 CONCRETE_CONSTANTS
     /*AddS,*/
-    k_n_nodes_max,
+    k_n_Nodes,
     k_n_read_resp_max,
     k_n_WriteResponse_max,
 
@@ -163,7 +163,7 @@ PROPERTIES
     conv_NodeId_Variant : t_NodeId --> t_Variant &
     conv_NodeClass_Variant : t_NodeClass --> t_Variant &
 
-    k_n_nodes_max : NAT &
+    k_n_Nodes : NAT &
     k_n_read_resp_max : NAT &
     k_n_WriteResponse_max : NAT &
 

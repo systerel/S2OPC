@@ -34,7 +34,7 @@ SETS
     t_endpoint_i
 
 CONCRETE_CONSTANTS
-    k_n_nodes_max,
+    k_n_Nodes,
 
     c_Variant_indet,
     c_Node_indet,
@@ -66,7 +66,7 @@ ABSTRACT_CONSTANTS
     t_request_handle
 
 PROPERTIES
-    k_n_nodes_max : NAT &
+    k_n_Nodes : NAT &
 
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &

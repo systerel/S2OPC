@@ -32,7 +32,10 @@
    SETS Clause: deferred sets
   -----------------------------*/
 
+typedef void * constants_bs__t_ByteString_i;
 typedef void * constants_bs__t_NodeId_i;
+#define constants_bs__t_Node_i t_entier4
+#define constants_bs__t_UserId_i t_entier4
 typedef void * constants_bs__t_Variant_i;
 typedef void* constants_bs__t_msg_i;
 typedef void* constants_bs__t_channel_i;
@@ -46,7 +49,10 @@ typedef void* constants_bs__t_session_i;
 /*--------------------------
    Added by the Translator
   --------------------------*/
+#define constants_bs__t_ByteString_i_max (-1)
 #define constants_bs__t_NodeId_i_max (-1)
+#define constants_bs__t_Node_i_max (-1)
+#define constants_bs__t_UserId_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
 #define constants_bs__t_channel_i_max (-1)
 #define constants_bs__t_endpoint_i_max (-1)
@@ -59,7 +65,10 @@ typedef void* constants_bs__t_session_i;
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants_bs__c_ByteString_indet 0
 #define constants_bs__c_NodeId_indet 0
+#define constants_bs__c_Node_indet 0
+#define constants_bs__c_UserId_indet 0
 #define constants_bs__c_Variant_indet 0
 #define constants_bs__c_channel_indet 0
 #define constants_bs__c_endpoint_indet 0
