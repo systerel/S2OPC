@@ -96,6 +96,19 @@ OPERATIONS
     END
     ;
 
+    /* a_Value, setter */
+    set_Value(node, value) =
+    PRE
+        node : t_Node_i &
+        node : t_Node &
+        value : t_Variant_i &
+        value : t_Variant &
+        node |-> e_ncl_Variable : a_NodeClass
+    THEN
+        a_Value(node) := value
+    END
+    ;
+
     /* a_Value_StatusCode */
     sc <-- read_Value_StatusCode(node) =
     PRE
