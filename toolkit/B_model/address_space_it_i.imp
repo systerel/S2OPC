@@ -1,0 +1,35 @@
+IMPLEMENTATION
+    address_space_it_i
+
+REFINES
+    address_space_it
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+    wreqs_i
+
+INVARIANT
+    wreqs_i : NAT &
+    wreqs_i : 0 .. size(cast_t_WriteValue) &
+    wreqs_to_iterate = cast_t_WriteValue[1..wreqs_i]
+
+INITIALISATION
+    wreqs_i := 0
+
+OPERATIONS
+    continue <-- init_iter_write_request(nb_req) =
+    BEGIN
+        wreqs_i := nb_req;
+        continue := bool(0 < nb_req)
+    END
+    ;
+
+    continue, wvi <-- continue_iter_write_request =
+    BEGIN
+        wvi <-- get_cast_t_WriteValue(wreqs_i);
+        wreqs_i := wreqs_i - 1;
+        continue := bool(0 < wreqs_i)
+    END
+END
