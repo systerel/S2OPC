@@ -46,8 +46,8 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // => B model entry point to add
     break;
   case SC_CONNECTED:
-    // id == secure channel Id
-    // params = SC config (for connection Id ?) ?
+    // id == connection Id
+    // params = SC config (for secure channel Id only ?) ?
     // auxParam == secure channel configuration index
     // => B model entry point to add
     break;

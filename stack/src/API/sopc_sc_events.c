@@ -247,9 +247,9 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
         // TODO: add to toolkit config ?
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
                                              SC_CONNECTED,
-                                             scConConfig->secureChannelId,
+                                             scConConfig->connectionId,
                                              (void*) scConConfig,
-                                             clientCon->instance->secureChannelId,
+                                             *configIdx,
                                              "Client secure channel connected");
         break;
     case SOPC_ChannelEvent_Disconnected:
