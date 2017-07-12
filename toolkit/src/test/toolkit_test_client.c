@@ -30,9 +30,10 @@
 #include "util_b2c.h"
 
 #include "sopc_stack_config.h"
-#include "sopc_run.h"
+#include "sopc_base_types.h"
 #include "sopc_types.h"
 #include "opcua_statuscodes.h"
+#include "sopc_run.h"
 
 #include "wrap_read.h"
 
