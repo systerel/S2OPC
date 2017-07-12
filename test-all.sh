@@ -11,7 +11,7 @@ set -e
 BIN_DIR=bin
 BIN_PATH=../$BIN_DIR
 
-DOCKER_IMAGE=7b21e6a30662
+DOCKER_IMAGE=abc5dd2cdb44
 ISLOCAL=$1
 
 mid() {
