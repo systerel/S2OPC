@@ -56,8 +56,8 @@ SETS
     t_user_i;
     t_msg_i;
     t_request_handle_i;
-    t_endpoint_i;
-
+    t_channel_config_idx_i;
+    
     t_sessionState = {
         e_session_creating,
         e_session_created,
@@ -98,7 +98,7 @@ CONCRETE_CONSTANTS
     c_session_indet,
     c_session_token_indet,
     c_msg_indet,
-    c_endpoint_indet,
+    c_channel_config_idx_indet,
     c_request_handle_indet
 
 ABSTRACT_CONSTANTS
@@ -124,7 +124,7 @@ ABSTRACT_CONSTANTS
     t_session_token,
     t_user,
     t_msg,
-    t_endpoint,
+    t_channel_config_idx,
     t_request_handle,
 
     s_service_reqs,
@@ -215,12 +215,11 @@ PROPERTIES
     t_request_handle <: t_request_handle_i &
     c_request_handle_indet : t_request_handle_i &
     c_request_handle_indet /: t_request_handle &
-
-    t_endpoint <: t_endpoint_i &
-    c_endpoint_indet : t_endpoint_i &
-    c_endpoint_indet /: t_endpoint &
-
-
+    
+    t_channel_config_idx <: t_channel_config_idx_i &
+    c_channel_config_idx_indet : t_channel_config_idx_i &
+    c_channel_config_idx_indet /: t_channel_config_idx &
+    
     s_service_reqs  = {e_msg_session_read_req} &
     s_service_resps = {e_msg_session_read_resp} &
     s_req_msgs = {e_msg_tcpua_hello,

@@ -63,11 +63,11 @@ OPERATIONS
         skip
     END
     ;
-
-    nsession <-- create_session (endpoint) =
+    
+    nsession <-- create_session (channel_config_idx) =
     PRE
-        endpoint : t_endpoint_i &
-        endpoint : t_endpoint &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
         c_msg_out = c_msg_indet
     THEN
         nsession :: t_session_i

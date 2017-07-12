@@ -25,12 +25,14 @@ DEFINITIONS
     d_variables ==
     s_channel,
     s_is_client,
-    a_endpoint;
+    a_config;
     
     d_typage == 
     s_channel <: t_channel &
     s_is_client <: s_channel &
-    a_endpoint : s_channel --> t_endpoint
+    /* each created channel has a configuration
+       and there is at most 1 channel per configuration */
+    a_config : s_channel >-> t_channel_config_idx
     
 ABSTRACT_VARIABLES
     d_variables 
@@ -41,33 +43,38 @@ INVARIANT
 INITIALISATION
     s_channel   :: {{}} ||
     s_is_client :: {{}} ||
-    a_endpoint  :: {{}}
+    a_config    :: {{}}
     
 OPERATIONS  
     
-    nchannel <-- open_secure_channel (endpoint) = 
+    nchannel <-- open_secure_channel (config_idx) = 
     PRE
-        endpoint : t_endpoint_i &
-        endpoint : t_endpoint
+        config_idx : t_channel_config_idx_i &
+        config_idx : t_channel_config_idx
     THEN
-        IF s_channel = t_channel
+        IF s_channel /= t_channel & config_idx : t_channel_config_idx
         THEN
-            nchannel := c_channel_indet
-        ELSE
-            CHOICE
-                ANY l_channel WHERE
-                    l_channel : t_channel_i &
-                    l_channel : t_channel - s_channel
-                THEN
-                    s_channel := s_channel \/ {l_channel} ||
-                    s_is_client := s_is_client \/ {l_channel} ||
-                    a_endpoint(l_channel)  := endpoint ||
-                    nchannel := l_channel
+            IF config_idx : ran(a_config)
+            THEN
+                nchannel :(nchannel : t_channel_i & nchannel = a_config~(config_idx))
+            ELSE                
+                CHOICE
+                    ANY l_channel WHERE
+                        l_channel : t_channel_i &
+                        l_channel : t_channel - s_channel
+                    THEN
+                        s_channel := s_channel \/ {l_channel} ||
+                        s_is_client := s_is_client \/ {l_channel} ||
+                        a_config(l_channel)  := config_idx ||
+                        nchannel := l_channel
+                    END
+                OR
+                    /* invalid parameters: URL, security, crypto, etc. */
+                    nchannel := c_channel_indet
                 END
-            OR
-                /* invalid parameters: URL, security, crypto, etc. */
-                nchannel := c_channel_indet
             END
+        ELSE
+            nchannel := c_channel_indet
         END    
     END
     ;
@@ -81,7 +88,7 @@ OPERATIONS
         THEN
             s_channel := s_channel - {channel} ||
             s_is_client := s_is_client - {channel} ||
-            a_endpoint := {channel} <<| a_endpoint
+            a_config := {channel} <<| a_config
         END           
     END;
     
@@ -89,7 +96,7 @@ OPERATIONS
     BEGIN
         s_channel :: {} ||
         s_is_client :: {} ||
-        a_endpoint :: {}
+        a_config :: {}
     END;    
     
     channel_lost (channel) =
@@ -99,7 +106,7 @@ OPERATIONS
     THEN
         s_channel := s_channel - {channel} ||
         s_is_client := s_is_client - {channel} ||
-        a_endpoint := {channel} <<| a_endpoint
+        a_config := {channel} <<| a_config
     END
     ;
     
@@ -110,7 +117,7 @@ OPERATIONS
         msg = c_msg_in &
         c_msg_in : t_msg
     THEN
-        s_channel, s_is_client, a_endpoint :(d_typage) /* channel set can be changed in case it is a new connection */
+        s_channel, s_is_client, a_config :(d_typage) /* channel set can be changed in case it is a new connection */
     END
     ;
     
@@ -121,7 +128,7 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_tcpua_hello
     THEN
-        s_channel, a_endpoint :(d_typage) /* channel set can be changed in case it is a new connection */
+        s_channel, a_config :(d_typage) /* channel set can be changed in case it is a new connection */
     END
     ;
     
@@ -137,7 +144,7 @@ OPERATIONS
             e_msg_sc_close_channel_req, e_msg_sc_close_channel_resp,
             e_msg_public_service_req, e_msg_public_service_resp}
     THEN
-        s_channel, s_is_client, a_endpoint :(d_typage) /* channel set can be changed in case it is a new connection */
+        s_channel, s_is_client, a_config :(d_typage) /* channel set can be changed in case it is a new connection */
     END
     ;
     
@@ -163,30 +170,30 @@ OPERATIONS
     END
     ;
     
-    channel <-- get_valid_channel (endpoint) = /* security configuration concerns must be added*/
+    channel <-- get_valid_channel (config_idx) = /* security configuration concerns must be added*/
     PRE
-        endpoint : t_endpoint_i &
-        endpoint : t_endpoint
+        config_idx : t_channel_config_idx_i &
+        config_idx : t_channel_config_idx
     THEN
-        IF a_endpoint~[{endpoint}] = {}
+        IF a_config~[{config_idx}] = {}
         THEN
             channel := c_channel_indet
         ELSE       
-            channel :: (a_endpoint~[{endpoint}])
+            channel := a_config~(config_idx)
         END
     END
     ;
     
-    endpoint <-- get_channel_info (channel) = /* security configuration concerns must be added*/
+    config_idx <-- get_channel_info (channel) = /* security configuration concerns must be added*/
     PRE
         channel : t_channel_i &
         channel : t_channel
     THEN
         IF channel /: s_channel
         THEN
-            endpoint := c_endpoint_indet
+            config_idx := c_channel_config_idx_indet
         ELSE       
-            endpoint := a_endpoint(channel)
+            config_idx := a_config(channel)
         END
     END
     ;

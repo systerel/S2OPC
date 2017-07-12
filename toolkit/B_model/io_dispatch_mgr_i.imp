@@ -340,8 +340,8 @@ OPERATIONS
         END
     END
     ;
-
-    nsession <-- create_session (endpoint) =
+    
+    nsession <-- create_session (channel_config_idx) =
     VAR
         l_channel,
         l_valid_channel,
@@ -352,11 +352,11 @@ OPERATIONS
         l_valid_session,
         l_ret
     IN
-        l_channel <-- get_valid_channel (endpoint);
+        l_channel <-- get_valid_channel (channel_config_idx);
         l_valid_channel <-- is_valid_channel (l_channel);
         IF l_valid_channel = FALSE
         THEN
-            l_channel <-- open_secure_channel (endpoint)
+            l_channel <-- open_secure_channel (channel_config_idx)
             // async operation => cannot use channel until connection is effective ?
         END;
         l_valid_channel <-- is_valid_channel (l_channel);
@@ -493,7 +493,7 @@ OPERATIONS
         l_valid_channel,
         l_valid_new_channel,
         l_is_client,
-        l_endpoint,
+        l_channel_config_idx,
         l_new_channel,
         l_req_msg,
         l_valid_msg,
@@ -510,11 +510,11 @@ OPERATIONS
             l_is_client <-- is_client_channel (channel);
             IF l_is_client = TRUE
             THEN
-                l_endpoint <-- get_channel_info (channel);
-                l_new_channel <-- get_valid_channel (l_endpoint);
+                l_channel_config_idx <-- get_channel_info (channel);
+                l_new_channel <-- get_valid_channel (l_channel_config_idx);
                 IF l_new_channel = c_channel_indet
                 THEN
-                    l_new_channel <-- open_secure_channel (l_endpoint)
+                    l_new_channel <-- open_secure_channel (l_channel_config_idx)
                     // async operation => cannot use channel until connection is effective ?
                 END;
                 l_valid_new_channel <-- is_valid_channel (l_new_channel);
