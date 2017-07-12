@@ -15,8 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-IMPLEMENTATION address_space_i
-REFINES address_space_r
+IMPLEMENTATION
+    address_space_i
+
+REFINES
+    address_space_r
 
 SEES
     constants,
@@ -200,7 +203,8 @@ OPERATIONS
 
     dealloc_write_request_responses =
     BEGIN
-        skip
+        ResponseWrite_allocated := FALSE;
+        reset_ResponseWrite
     END
     ;
 

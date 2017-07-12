@@ -51,7 +51,10 @@ DEFINITIONS
 
         /* Service Write */
         ResponseWrite_allocated : BOOL &
-        ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
+        ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+        (ResponseWrite_allocated = FALSE
+         =>
+         ResponseWrite_StatusCode = {})
     )
 
 ABSTRACT_VARIABLES
@@ -63,10 +66,7 @@ INVARIANT
 INITIALISATION
     d_variables
     :(
-        d_inv &
-        /* Service Write */
-        ResponseWrite_allocated = FALSE &
-        ResponseWrite_StatusCode = {}
+        d_inv
     )
 
 OPERATIONS
@@ -141,10 +141,14 @@ OPERATIONS
         ResponseWrite_allocated = TRUE /* TODO & userid /= c_user_local */
     THEN
         StatusCode_service,
+        a_Value,
         ResponseWrite_StatusCode
         :(
             StatusCode_service : t_StatusCode_i &
             StatusCode_service : t_StatusCode &
+            a_Value : t_Node +-> t_Variant &
+            dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
+            dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
             ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode
         )
     END
@@ -163,9 +167,9 @@ OPERATIONS
             StatusCode_service : t_StatusCode &
             ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
             ResponseWrite_allocated : BOOL &
-            (nb_req > k_n_WriteResponse_max
+            (ResponseWrite_allocated = FALSE
              =>
-             ResponseWrite_allocated = FALSE)
+             ResponseWrite_StatusCode = {})
         )
     END
     ;
@@ -174,7 +178,7 @@ OPERATIONS
     PRE
         ResponseWrite_allocated = TRUE
     THEN
-        ResponseWrite_allocated := FALSE ||
+        ResponseWrite_allocated  := FALSE ||
         ResponseWrite_StatusCode := {}
     END
 

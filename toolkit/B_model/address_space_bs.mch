@@ -25,6 +25,31 @@ DEFINITIONS
     d_inv ==
     (
         /* Attributes */
+        a_NodeId : t_Node +-> t_NodeId &
+        a_NodeClass : t_Node +-> t_NodeClass &
+
+        a_Value : t_Node +-> t_Variant &
+
+        /* Value attribute meta-data */
+        a_Value_StatusCode : t_Node +-> t_StatusCode
+    )
+
+ABSTRACT_VARIABLES
+    a_NodeId,
+    a_NodeClass,
+    a_Value,
+    a_Value_StatusCode
+
+INVARIANT
+    d_inv
+
+INITIALISATION
+    /* This is where the Address Space is filled */
+    a_NodeId,
+    a_NodeClass,
+    a_Value,
+    a_Value_StatusCode
+    :(
         a_NodeId : t_Node >-> t_NodeId &
         a_NodeClass : t_Node --> t_NodeClass &
 
@@ -32,20 +57,9 @@ DEFINITIONS
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
         dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
-        /* Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable})
     )
-
-ABSTRACT_VARIABLES
-    a_NodeId, a_NodeClass, a_Value, a_Value_StatusCode
-
-INVARIANT
-    d_inv
-
-INITIALISATION
-    /* This is where the Address Space is filled */
-    a_NodeId, a_NodeClass, a_Value, a_Value_StatusCode :(d_inv)
 
 OPERATIONS
     /* As INITIALISATION may use mallocs, needs an UNINIT */

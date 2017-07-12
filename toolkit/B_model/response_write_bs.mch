@@ -36,7 +36,24 @@ OPERATIONS
         nb_req : NAT &
         nb_req <= k_n_WriteResponse_max
     THEN
-        ResponseWrite_allocated :: BOOL
+        ResponseWrite_StatusCode,
+        ResponseWrite_allocated
+        :(
+            ResponseWrite_allocated  : BOOL                          &
+            ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+            (ResponseWrite_allocated = TRUE
+             =>
+             ResponseWrite_StatusCode = cast_t_WriteValue[1..nb_req] * {e_sc_nok}) &
+            (ResponseWrite_allocated = FALSE
+             =>
+             ResponseWrite_StatusCode = ResponseWrite_StatusCode$0)
+         )
+    END
+    ;
+
+    reset_ResponseWrite =
+    BEGIN
+       ResponseWrite_StatusCode :: {{}}
     END
     ;
 

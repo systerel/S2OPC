@@ -58,6 +58,16 @@ DEFINITIONS
         d_inv &
         ResponseWrite_allocated = FALSE &
         ResponseWrite_StatusCode = {}
+    ;
+
+    /* Relation associating to a node a value which is requested to be written
+       in the address space */
+    d_a_Value_requested ==
+        (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
+                                                     WriteValue_NodeId~ ;
+         (cast_t_WriteValue[1..nb_WriteValue] /\
+          WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value)
+
 ABSTRACT_VARIABLES
     d_variables
 
@@ -75,18 +85,20 @@ OPERATIONS
         a_Value,
         ResponseWrite_StatusCode
         :(  ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
-            a_Value                  : t_Node +-> t_Variant          &
 
-            dom(a_Value) = dom(a_Value$0 <+ (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
-                                                                                         WriteValue_NodeId~ ;
-                                             (cast_t_WriteValue[1..nb_WriteValue] /\
-                                              WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value)) &
+            /* For a given node, the write request message may provide different values to be written
+               as the value attribute of this node. In this case, the written value is chosen among
+               possible values. */
 
-            a_Value <: a_Value$0 <+ (a_NodeClass~[{e_ncl_Variable}]           <| a_NodeId ;
-                                                                                 WriteValue_NodeId~ ;
-                                     (cast_t_WriteValue[1..nb_WriteValue] /\
-                                      WriteValue_AttributeId~[{e_aid_Value}]) <| WriteValue_Value) &
-                                    
+            /* At most one value should be written for each node */
+            a_Value : t_Node +-> t_Variant &
+
+            /* Each node with a value requested to be written should indeed be written */
+            dom(a_Value) = dom(a_Value$0 <+ d_a_Value_requested) &
+
+            /* The value requested to be written should be contained in the requested values */
+            a_Value <: a_Value$0 <+ d_a_Value_requested &
+
             ResponseWrite_StatusCode = %wvi.(
                 wvi : t_WriteValue &
                 wvi : cast_t_WriteValue[1..nb_WriteValue]
@@ -110,20 +122,21 @@ OPERATIONS
             ResponseWrite_allocated,
             StatusCode_service
             :(
-                ResponseWrite_allocated : BOOL &
+                ResponseWrite_allocated  : BOOL                          &
                 ResponseWrite_StatusCode : t_WriteValue +-> t_StatusCode &
+                StatusCode_service       : t_StatusCode_i                &
                 (ResponseWrite_allocated = TRUE
                  =>
                  ResponseWrite_StatusCode = cast_t_WriteValue[1..nb_req] * {e_sc_nok} &
                  StatusCode_service = e_sc_ok) &
                 (ResponseWrite_allocated = FALSE
                  =>
+                 ResponseWrite_StatusCode = {} &
                  StatusCode_service = e_sc_nok)
             )
         ELSE
-            ResponseWrite_StatusCode := {} ||
             ResponseWrite_allocated := FALSE ||
-            StatusCode_service := e_sc_nok
+            StatusCode_service      := e_sc_nok
         END
     END
 
