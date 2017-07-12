@@ -24,7 +24,6 @@
 #include <stdlib.h>
 
 #include "b2c.h"
-#include "constants.h"
 #include "address_space_bs.h"
 
 #include "address_space_impl.h"
@@ -125,6 +124,13 @@ void address_space_bs__read_AddressSpace_Attribute_value(
         *address_space_bs__variant = util_variant__new_Variant_from_Indet();
         break;
     }
+}
+
+
+extern void address_space_bs__set_Value(
+   const constants__t_Node_i address_space_bs__node,
+   const constants__t_Variant_i address_space_bs__value)
+{
 }
 
 
