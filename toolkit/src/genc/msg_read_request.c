@@ -2,7 +2,7 @@
 
  File Name            : msg_read_request.c
 
- Date                 : 31/05/2017 17:51:42
+ Date                 : 13/07/2017 16:54:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -75,6 +75,9 @@ void msg_read_request__read_ReadRequest(
             msg_read_request__tab_req_AttributeId[msg_read_request__rvi] = msg_read_request__l_aid;
          }
       }
+      else {
+         msg_read_request__nb_ReadValue = 0;
+      }
       *msg_read_request__rr = msg_read_request__init_ok;
    }
 }
@@ -91,24 +94,13 @@ void msg_read_request__readall_ReadValue_Node_AttributeId(
    constants__t_AttributeId_i * const msg_read_request__aid) {
    {
       t_bool msg_read_request__l_nid_valid;
-      t_bool msg_read_request__l_aid_valid;
-      constants__t_Node_i msg_read_request__l_node;
-      constants__t_AttributeId_i msg_read_request__l_aid;
       
       address_space__readall_AddressSpace_Node(msg_read_request__tab_req_NodeId[msg_read_request__rvi],
          &msg_read_request__l_nid_valid,
-         &msg_read_request__l_node);
-      msg_read_request__l_aid = msg_read_request__tab_req_AttributeId[msg_read_request__rvi];
-      msg_read_request__l_aid_valid = (msg_read_request__l_aid != constants__c_AttributeId_indet);
-      if ((msg_read_request__l_nid_valid == true) &&
-         (msg_read_request__l_aid_valid == true)) {
-         *msg_read_request__isvalid = true;
-         *msg_read_request__node = msg_read_request__l_node;
-         *msg_read_request__aid = msg_read_request__l_aid;
-      }
-      else {
-         *msg_read_request__isvalid = false;
-      }
+         msg_read_request__node);
+      *msg_read_request__aid = msg_read_request__tab_req_AttributeId[msg_read_request__rvi];
+      *msg_read_request__isvalid = ((msg_read_request__l_nid_valid == true) &&
+         (*msg_read_request__aid != constants__c_AttributeId_indet));
    }
 }
 

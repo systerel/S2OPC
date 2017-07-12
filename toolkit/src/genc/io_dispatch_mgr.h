@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 31/05/2017 17:51:42
+ Date                 : 13/07/2017 16:54:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -19,12 +19,14 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "address_space.h"
 #include "channel_mgr_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
 #include "service_read.h"
 #include "service_read_cli_cb_bs.h"
+#include "service_write_decode_bs.h"
 #include "session_mgr.h"
 
 /*--------------
@@ -51,6 +53,10 @@ extern void io_dispatch_mgr__get_response_type(
 extern void io_dispatch_mgr__is_request_type(
    const constants__t_msg_type io_dispatch_mgr__msg_typ,
    t_bool * const io_dispatch_mgr__bres);
+extern void io_dispatch_mgr__treat_write_request(
+   const constants__t_ByteString_i io_dispatch_mgr__req_payload,
+   const constants__t_UserId_i io_dispatch_mgr__userid,
+   constants__t_StatusCode_i * const io_dispatch_mgr__StatusCode_service);
 
 /*--------------------
    OPERATIONS Clause

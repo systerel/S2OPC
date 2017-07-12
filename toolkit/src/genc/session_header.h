@@ -2,7 +2,7 @@
 
  File Name            : session_header.h
 
- Date                 : 31/05/2017 17:51:46
+ Date                 : 13/07/2017 16:54:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -19,7 +19,6 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
-#include "address_space.h"
 #include "constants.h"
 #include "io_dispatch_mgr.h"
 

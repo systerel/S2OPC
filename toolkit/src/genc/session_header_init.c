@@ -2,7 +2,7 @@
 
  File Name            : session_header_init.c
 
- Date                 : 31/05/2017 17:51:47
+ Date                 : 13/07/2017 16:54:11
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -18,6 +18,7 @@
   ---------------------*/
 #include "address_space.h"
 #include "address_space_bs.h"
+#include "address_space_it.h"
 #include "channel_mgr_bs.h"
 #include "constants.h"
 #include "constants_bs.h"
@@ -30,8 +31,10 @@
 #include "msg_read_response.h"
 #include "msg_read_response_bs.h"
 #include "request_handle_bs.h"
+#include "response_write_bs.h"
 #include "service_read.h"
 #include "service_read_cli_cb_bs.h"
+#include "service_write_decode_bs.h"
 #include "session_core.h"
 #include "session_core_1_bs.h"
 #include "session_core_channel_lost_it_bs.h"
@@ -57,6 +60,9 @@ void INITIALISATION(void) {
    msg_read_request_bs__INITIALISATION();
    msg_read_request_it__INITIALISATION();
    address_space_bs__INITIALISATION();
+   response_write_bs__INITIALISATION();
+   address_space_it__INITIALISATION();
+   service_write_decode_bs__INITIALISATION();
    address_space__INITIALISATION();
    msg_read_request__INITIALISATION();
    msg_read_response_bs__INITIALISATION();

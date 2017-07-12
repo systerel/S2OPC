@@ -2,7 +2,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 31/05/2017 17:51:44
+ Date                 : 13/07/2017 16:54:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,7 +38,7 @@ extern void address_space_bs__read_AddressSpace_free_value(
    const constants__t_Variant_i address_space_bs__val);
 extern void address_space_bs__read_NodeClass(
    const constants__t_Node_i address_space_bs__node,
-   constants__t_NodeClass_i * const address_space_bs__sc);
+   constants__t_NodeClass_i * const address_space_bs__ncl);
 extern void address_space_bs__read_Value_StatusCode(
    const constants__t_Node_i address_space_bs__node,
    constants__t_StatusCode_i * const address_space_bs__sc);
@@ -46,5 +46,8 @@ extern void address_space_bs__readall_AddressSpace_Node(
    const constants__t_NodeId_i address_space_bs__nid,
    t_bool * const address_space_bs__nid_valid,
    constants__t_Node_i * const address_space_bs__node);
+extern void address_space_bs__set_Value(
+   const constants__t_Node_i address_space_bs__node,
+   const constants__t_Variant_i address_space_bs__value);
 
 #endif

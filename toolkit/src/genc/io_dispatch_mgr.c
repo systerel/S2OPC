@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 31/05/2017 17:51:42
+ Date                 : 13/07/2017 16:54:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -72,6 +72,28 @@ void io_dispatch_mgr__is_request_type(
    default:
       *io_dispatch_mgr__bres = false;
       break;
+   }
+}
+
+void io_dispatch_mgr__treat_write_request(
+   const constants__t_ByteString_i io_dispatch_mgr__req_payload,
+   const constants__t_UserId_i io_dispatch_mgr__userid,
+   constants__t_StatusCode_i * const io_dispatch_mgr__StatusCode_service) {
+   {
+      t_entier4 io_dispatch_mgr__l_nb_req;
+      
+      service_write_decode_bs__decode_write_request(io_dispatch_mgr__req_payload,
+         io_dispatch_mgr__StatusCode_service);
+      if (*io_dispatch_mgr__StatusCode_service == constants__e_sc_ok) {
+         service_write_decode_bs__get_nb_WriteValue(&io_dispatch_mgr__l_nb_req);
+         address_space__alloc_write_request_responses(io_dispatch_mgr__l_nb_req,
+            io_dispatch_mgr__StatusCode_service);
+         if (*io_dispatch_mgr__StatusCode_service == constants__e_sc_ok) {
+            address_space__treat_write_request_WriteValues(io_dispatch_mgr__userid,
+               io_dispatch_mgr__StatusCode_service);
+         }
+      }
+      service_write_decode_bs__free_write_request();
    }
 }
 

@@ -1,15 +1,15 @@
 /******************************************************************************
 
- File Name            : msg_read_request_it.h
+ File Name            : address_space_it.h
 
- Date                 : 13/07/2017 16:54:05
+ Date                 : 13/07/2017 16:54:04
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _msg_read_request_it_h
-#define _msg_read_request_it_h
+#ifndef _address_space_it_h
+#define _address_space_it_h
 
 /*--------------------------
    Added by the Translator
@@ -24,21 +24,21 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-extern t_entier4 msg_read_request_it__ind_reqs;
+extern t_entier4 address_space_it__wreqs_i;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void msg_read_request_it__INITIALISATION(void);
+extern void address_space_it__INITIALISATION(void);
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void msg_read_request_it__continue_iter_reqs(
-   t_bool * const msg_read_request_it__continue,
-   constants__t_ReadValue_i * const msg_read_request_it__rvi);
-extern void msg_read_request_it__init_iter_reqs(
-   const t_entier4 msg_read_request_it__a_nb_reqs,
-   t_bool * const msg_read_request_it__continue);
+extern void address_space_it__continue_iter_write_request(
+   t_bool * const address_space_it__continue,
+   constants__t_WriteValue_i * const address_space_it__wvi);
+extern void address_space_it__init_iter_write_request(
+   const t_entier4 address_space_it__nb_req,
+   t_bool * const address_space_it__continue);
 
 #endif

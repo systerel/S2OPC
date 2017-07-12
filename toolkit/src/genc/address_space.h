@@ -2,7 +2,7 @@
 
  File Name            : address_space.h
 
- Date                 : 31/05/2017 17:51:41
+ Date                 : 13/07/2017 16:54:04
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -20,11 +20,19 @@
    IMPORTS Clause
   -----------------*/
 #include "address_space_bs.h"
+#include "address_space_it.h"
+#include "response_write_bs.h"
 
 /*--------------
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "service_write_decode_bs.h"
+
+/*----------------------------
+   CONCRETE_VARIABLES Clause
+  ----------------------------*/
+extern t_bool address_space__ResponseWrite_allocated;
 
 /*------------------------
    INITIALISATION Clause
@@ -38,13 +46,36 @@ extern void address_space__INITIALISATION(void);
 #define address_space__read_Value_StatusCode address_space_bs__read_Value_StatusCode
 #define address_space__readall_AddressSpace_Node address_space_bs__readall_AddressSpace_Node
 
+/*--------------------------
+   LOCAL_OPERATIONS Clause
+  --------------------------*/
+extern void address_space__treat_write_1(
+   const t_bool address_space__isvalid,
+   const constants__t_NodeId_i address_space__nid,
+   const constants__t_AttributeId_i address_space__aid,
+   const constants__t_Variant_i address_space__value,
+   const constants__t_UserId_i address_space__uid,
+   constants__t_StatusCode_i * const address_space__sc);
+extern void address_space__treat_write_2(
+   const constants__t_NodeId_i address_space__nid,
+   const constants__t_AttributeId_i address_space__aid,
+   const constants__t_Variant_i address_space__value,
+   constants__t_StatusCode_i * const address_space__sc);
+
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void address_space__alloc_write_request_responses(
+   const t_entier4 address_space__nb_req,
+   constants__t_StatusCode_i * const address_space__StatusCode_service);
+extern void address_space__dealloc_write_request_responses(void);
 extern void address_space__read_NodeClass_Attribute(
    const constants__t_Node_i address_space__node,
    const constants__t_AttributeId_i address_space__aid,
    constants__t_NodeClass_i * const address_space__ncl,
    constants__t_Variant_i * const address_space__val);
+extern void address_space__treat_write_request_WriteValues(
+   const constants__t_UserId_i address_space__userid,
+   constants__t_StatusCode_i * const address_space__StatusCode_service);
 
 #endif
