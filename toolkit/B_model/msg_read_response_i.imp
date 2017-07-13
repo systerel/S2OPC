@@ -15,8 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-IMPLEMENTATION msg_read_response_i
-REFINES msg_read_response
+IMPLEMENTATION
+    msg_read_response_i
+
+REFINES
+    msg_read_response
 
 IMPORTS
     msg_read_response_bs
@@ -45,7 +48,7 @@ CONCRETE_VARIABLES
     tab_StatusCode, /* StatusCode field of the elements of response */
     StatusCode, /* StatusCode for the whole response (StatusCode for the service) */
     nb_resps_to_go, /* Number of response that are not written yet */
-    msg /* Response message */
+    response_msg /* Response message */
 
 INVARIANT
     d_inv_tab &
@@ -61,7 +64,7 @@ INITIALISATION
     tab_StatusCode := t_ReadValue_i * {c_StatusCode_indet};
     StatusCode := c_StatusCode_indet;
     nb_resps_to_go := 0;
-    msg := c_msg_indet
+    response_msg := c_msg_indet
 
 OPERATIONS
     continue <-- init_iterwrite_DataValue(a_nb_resps, resp_msg) =
@@ -71,7 +74,7 @@ OPERATIONS
         tab_StatusCode := t_ReadValue_i * {c_StatusCode_indet};
         nb_resps_to_go := a_nb_resps;
         continue := bool(0 < a_nb_resps);
-        msg := resp_msg;
+        response_msg := resp_msg;
 
         /* TODO: malloc may fail... */
         write_read_response_init(a_nb_resps, resp_msg)
@@ -90,7 +93,7 @@ OPERATIONS
         END;
         continue := bool(0 < nb_resps_to_go);
 
-        write_read_response_iter(msg, rvi, val, sc)
+        write_read_response_iter(response_msg, rvi, val, sc)
     END
     ;
 

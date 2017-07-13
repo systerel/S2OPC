@@ -41,7 +41,7 @@ DEFINITIONS
         resps_iterated <: t_ReadValue &
         resps_to_iterate /\ resps_iterated = {} &
 
-        msg : t_msg_i
+        response_msg : t_msg_i
     )
     ;
     /* Not used yet */
@@ -53,7 +53,7 @@ DEFINITIONS
         data_Value_StatusCode : resps_iterated --> t_StatusCode &
         /*data_Value_SourceTimestamp : xxx +-> t_Timestamp &
         data_Value_ServerTimestamp : xxx --> t_Timestamp*/
-        msg : t_msg
+        response_msg : t_msg
     )
 
 ABSTRACT_VARIABLES
@@ -63,7 +63,7 @@ ABSTRACT_VARIABLES
     nb_resps,
     resps_to_iterate,
     resps_iterated,
-    msg /* Response message */
+    response_msg /* Response message */
 
 INVARIANT
     d_inv_response
@@ -73,7 +73,12 @@ INITIALISATION
     /*data_Value_SourceTimestamp, data_Value_ServerTimestamp := {}, {} ||*/
     response_StatusCode := c_StatusCode_indet ||
 
-    nb_resps, response_ok, resps_to_iterate, resps_iterated, msg :(d_inv_response)
+    nb_resps,
+    response_ok,
+    resps_to_iterate,
+    resps_iterated,
+    response_msg
+    :(d_inv_response)
 
 OPERATIONS
     continue <-- init_iterwrite_DataValue(a_nb_resps, resp_msg) =
@@ -94,7 +99,7 @@ OPERATIONS
         response_StatusCode :: t_StatusCode ||
         continue := bool(0 < a_nb_resps) ||
 
-        msg := resp_msg
+        response_msg := resp_msg
     END
     ;
 
@@ -126,7 +131,7 @@ OPERATIONS
         resp_msg   = c_msg_out &
         c_msg_out : t_msg
         /*data_Value_Value = {} &
-        data_Value_StatusCode = {} *//*&
+        data_Value_StatusCode = {} */ /*&
         data_Value_SourceTimestamp = {} &
         data_Value_ServerTimestamp = {}*/
     THEN
