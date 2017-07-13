@@ -21,6 +21,8 @@
  */
 
 
+#include <stdlib.h>
+
 #include "b2c.h"
 #include "response_write_bs.h"
 
@@ -49,13 +51,13 @@ extern void response_write_bs__alloc_write_request_responses_malloc(
    const t_entier4 response_write_bs__nb_req,
    t_bool * const response_write_bs__ResponseWrite_allocated)
 {
-    response_write_bs__ResponseWrite_allocated = false; /* TODO: set a true and false in b2c.h */
+    *response_write_bs__ResponseWrite_allocated = false; /* TODO: set a true and false in b2c.h */
     nb_req = 0;
 
     arr_StatusCode = (SOPC_StatusCode *)malloc(sizeof(SOPC_StatusCode)*(response_write_bs__nb_req+1));
     if(NULL != arr_StatusCode)
     {
-        response_write_bs__ResponseWrite_allocated = true;
+        *response_write_bs__ResponseWrite_allocated = true;
         nb_req = response_write_bs__nb_req;
     }
 }
@@ -74,12 +76,12 @@ extern void response_write_bs__getall_ResponseWrite_StatusCode(
    t_bool * const response_write_bs__isvalid,
    constants__t_StatusCode_i * const response_write_bs__sc)
 {
-    response_write_bs__isvalid = false;
+    *response_write_bs__isvalid = false;
 
     if(response_write_bs__wvi <= nb_req) /* It is not necessary to test arr_StatusCode */
     {
-        response_write_bs__isvalid = true;
-        response_write_bs__sc = arr_StatusCode[response_write_bs__wvi];
+        *response_write_bs__isvalid = true;
+        *response_write_bs__sc = arr_StatusCode[response_write_bs__wvi];
     }
 }
 

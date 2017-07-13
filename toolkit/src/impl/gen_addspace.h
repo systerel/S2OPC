@@ -49,7 +49,7 @@ SOPC_StatusCode free_addspace(constants__t_NodeId_i     *pnids,
 
 /* Helpers, which shows that this code is ill-organised */
 #ifndef NB_NODES
-#define NB_NODES    constants__t_Node_i_max
+#define NB_NODES    1008
 #endif
 
 

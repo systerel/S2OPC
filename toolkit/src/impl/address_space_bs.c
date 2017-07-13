@@ -36,7 +36,6 @@
  * Changed the name.
  * There index is 0-based.
  */
-#define NB_NODES    constants__t_Node_i_max
 constants__t_NodeId_i a_NodeId[NB_NODES];
 constants__t_NodeClass_i a_NodeClass[NB_NODES];
 constants__t_Variant_i a_Value[NB_NODES];

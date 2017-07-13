@@ -24,9 +24,11 @@
 #include "b2c.h"
 #include "service_write_decode_bs.h"
 
+#include "sopc_types.h"
+
 
 /* Globals */
-static SOPC_WriteRequest *request;
+static OpcUa_WriteRequest *request;
 
 
 /*------------------------
@@ -45,9 +47,9 @@ extern void service_write_decode_bs__decode_write_request(
    constants__t_StatusCode_i * const service_write_decode_bs__StatusCode_service)
 {
     /* TODO: this is were you think you have a payload, because the variable is called "payload",
-       but in fact you have a SOPC_WriteRequest *, because you did not understand that
+       but in fact you have a OpcUa_WriteRequest *, because you did not understand that
        the generic decoders were not that generic, and required the whole OPC stack to function properly. */
-    request = (SOPC_WriteRequest *)service_write_decode_bs__req_payload;
+    request = (OpcUa_WriteRequest *)service_write_decode_bs__req_payload;
 }
 
 

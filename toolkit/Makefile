@@ -22,7 +22,7 @@ INCLUDES=-I$(PATHTRAD) -I. -I$(STACK_H) -I$(PATHIMPL) -I$(PATHTEST)
 LIBS    =-L$(STACK_LIB) -L$(CRYPTO_LIB) -lm -lingopcs -lmbedcrypto -lmbedx509 -lpthread
 
 OBJS        =session_header_init.o \
-             address_space.o constants.o msg_read_request.o msg_read_request_it.o msg_read_response.o service_read.o \
+             address_space.o address_space_it.o constants.o msg_read_request.o msg_read_request_it.o msg_read_response.o service_read.o \
              address_space_bs.o constants_bs.o msg_read_request_bs.o msg_read_response_bs.o \
              service_write_decode_bs.o response_write_bs.o \
              gen_addspace.o testlib_read_response.o util_variant.o
