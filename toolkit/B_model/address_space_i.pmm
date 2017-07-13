@@ -1,0 +1,10 @@
+THEORY User_Pass IS
+/* 46 lemmes      ff(0) & pr; */
+/* 2 lemmes */   ff(0) & dd & pr(Tac(th_invariant));
+/* 2 lemmes */   ff(0) & dd & pr(Tac(th_variant));
+/* 1 lemmes */   ff(0) & ar(PatchProverB0;th_eh_hyp_loc;SUB;th_simp);
+/* 5 lemmes */   ff(0) & pp(rp.0);
+/* 1 lemmes */   ff(0) & ar(PatchProverB0;th_eh_hyp_loc;SUB;th_simp) & dd & fh(not(a_NodeClass$1(a_NodeId$1~(nid)) = e_ncl_Variable)) & mp & pp(rp.1);
+   qu
+END
+
