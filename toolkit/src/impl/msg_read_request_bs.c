@@ -92,6 +92,7 @@ void msg_read_request_bs__read_req_ReadValue_NodeId(
     if(! msg_read_req->NodesToRead)
         return;
 
+    /* TODO: this should raise a warning, constants__t_NodeId_i IS the void *... No need to cast to a (void **) */
     *msg_read_request_bs__nid = (constants__t_NodeId_i *)&msg_read_req->NodesToRead[msg_read_request_bs__rvi-1].NodeId;
 }
 

@@ -130,6 +130,9 @@ extern void address_space_bs__set_Value(
    const constants__t_Node_i address_space_bs__node,
    const constants__t_Variant_i address_space_bs__value)
 {
+    /* TODO: the value is not encoded yet. */
+    /* Copies the value */
+    a_Value[address_space_bs__node-1] = (constants__t_Variant_i)util_variant__new_Variant_from_Variant(address_space_bs__value);
 }
 
 
