@@ -71,7 +71,7 @@ OPERATIONS
     ;
 
     /* Reads any attribute and outputs a variant (valid or not)
-     * As this function uses the *_2_Variant_i functions, the value must be freed once used
+     * As this function uses the util_variant__new_Variant_from_* functions, the value must be freed once used
      */
     variant <-- read_AddressSpace_Attribute_value(node, aid) =
     PRE

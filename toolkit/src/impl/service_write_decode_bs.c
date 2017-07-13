@@ -25,11 +25,16 @@
 #include "service_write_decode_bs.h"
 
 
+/* Globals */
+static SOPC_WriteRequest *request;
+
+
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 extern void service_write_decode_bs__INITIALISATION(void)
 {
+    request = NULL;
 }
 
 /*--------------------
@@ -39,11 +44,16 @@ extern void service_write_decode_bs__decode_write_request(
    const constants__t_ByteString_i service_write_decode_bs__req_payload,
    constants__t_StatusCode_i * const service_write_decode_bs__StatusCode_service)
 {
+    /* TODO: this is were you think you have a payload, because the variable is called "payload",
+       but in fact you have a SOPC_WriteRequest *, because you did not understand that
+       the generic decoders were not that generic, and required the whole OPC stack to function properly. */
+    request = (SOPC_WriteRequest *)service_write_decode_bs__req_payload;
 }
 
 
 extern void service_write_decode_bs__free_write_request(void)
 {
+    /* TODO: don't free the request that you did not initialize */
 }
 
 
