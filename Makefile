@@ -15,17 +15,17 @@ default: all
 
 all: stack toolkit
 
-stack: $(LIB_STACK_PATH)/$(LIB_STACK_FILE)
+stack: $(INSTALL_STACK_PATH)/$(LIB_STACK_FILE)
 
-$(LIB_STACK_PATH)/$(LIB_STACK_FILE): 
+$(INSTALL_STACK_PATH)/$(LIB_STACK_FILE):
 	@make -C $(STACK_PATH) LOCAL_INSTALL_DIR=$(INSTALL_STACK_PATH) EXEC_DIR=$(BIN_PATH) all
 
 toolkit:
 	@make -C $(TOOLKIT_PATH) PATHEXEC=$(BIN_PATH) all
 
 clean:
-	@rm -fr $(BIN_DIR)
-	@rm -fr $(INSTALL_STACK_DIR)
+	@rm -fr "./$(BIN_DIR)"
+	@rm -fr "./$(INSTALL_STACK_DIR)"
 	@make -C $(STACK_PATH) clean
 	@make -C $(TOOLKIT_PATH) clean
 

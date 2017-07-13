@@ -239,8 +239,8 @@ endif
 	@"mkdir" -p $(LOCAL_INSTALL_DIR)/include
 	@"cp" $(H_INCLUDE_PATHS) $(LOCAL_INSTALL_DIR)/include
 
-install: 
-	@echo "Install INGOPCS library files into $INSTALL_PREFIX"
+install:
+	@echo "Install INGOPCS library files into $(INSTALL_PREFIX)"
 	@"cp" -r $(LOCAL_INSTALL_DIR)/* $(INSTALL_PREFIX)/
 
 client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingopcs
@@ -264,8 +264,8 @@ clean_doc:
 
 clean:
 	@echo "Cleaning..."
-	@"rm" -rf $(BUILD_DIR) $(BUILD_STUBS_DIR) $(PLATFORM_BUILD_DIR) $(EXEC_DIR)
-	@"rm" -rf $(LOCAL_INSTALL_DIR)
+	@"rm" -rf "./$(BUILD_DIR)" "./$(BUILD_STUBS_DIR)" "./$(PLATFORM_BUILD_DIR)" "./$(EXEC_DIR)"
+	@"rm" -rf "./$(LOCAL_INSTALL_DIR)"
 	@"rm" -f .depend.tmp .depend .pdepend .tdepend.tmp .tdepend
 
 cleanall: clean clean_doc clean_mbedtls
