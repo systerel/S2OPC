@@ -93,6 +93,7 @@ LOCAL_OPERATIONS
             StatusCode_service : t_StatusCode
         )
     END
+	;
 
     local_create_session (session, channel) =
     PRE

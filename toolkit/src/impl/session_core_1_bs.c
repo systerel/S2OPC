@@ -317,9 +317,11 @@ void session_core_1_bs__get_session_channel(
 
 void session_core_1_bs__set_session_orphaned(
    const constants__t_session_i session_core_1_bs__session,
-   const constants__t_channel_i session_core_1_bs__lost_channel) {
+   const constants__t_channel_i session_core_1_bs__lost_channel,
+   const constants__t_channel_i session_core_1_bs__new_channel){
   (void) session_core_1_bs__session;
   (void) session_core_1_bs__lost_channel;
+  (void) session_core_1_bs__new_channel;
   printf("session_core_1_bs__set_session_orphaned\n");
   exit(1);   
    ;

@@ -28,7 +28,7 @@
 #include "test_results.h"
 #include "util_b2c.h"
 
-#include "sopc_stack_config.h"
+#include "sopc_toolkit_config.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
 #include "opcua_statuscodes.h"
@@ -38,6 +38,12 @@
 
 
 #include "sopc_sc_events.h"
+
+void Test_ComEvent_Fct(SOPC_App_Com_Event event,
+                         void*              param,
+                         SOPC_StatusCode    status){
+printf("COM EVENT '%d' received\n", event);
+}
 
 /* Function to build the read service request message */
 SOPC_Toolkit_Msg* getReadRequest_message(){
@@ -76,7 +82,7 @@ int main(void){
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
-  const constants__t_endpoint_i endpoint = constants__c_endpoint_indet;
+  const constants__t_channel_config_idx_i channel_config_idx = constants__c_channel_config_idx_indet;
   constants__t_session_i session = constants__c_session_indet;
   /* Note: in current version of toolkit user == 1 is considered as anonymous user */
   constants__t_user_i user = 1;
@@ -87,14 +93,11 @@ int main(void){
 
   OpcUa_WriteRequest *pWriteReq = NULL;
 
-  /* Init B model */
-  INITIALISATION();
-
   /* Init stack configuration */
   if(STATUS_OK == status){
-    status = SOPC_StackConfiguration_Initialize();
+    status = SOPC_Toolkit_Initialize(Test_ComEvent_Fct);
     if(STATUS_OK != status){
-      printf(">>Test_Client_Toolkit: Failed initializing stack\n");
+      printf(">>Test_Client_Toolkit: Failed initializing\n");
     }else{
       printf(">>Test_Client_Toolkit: Stack initialized\n");
     }
@@ -106,37 +109,9 @@ int main(void){
      variable and parameter has no effect.
   */
   if(STATUS_OK == status){
-    io_dispatch_mgr__create_session(endpoint,
-                                    &session);
-
-    /* Check a new session was created */
-    if (session == constants__c_session_indet){
-      status = STATUS_NOK;
-    }
-  }
-
-  /* Wait until session is in created state or timeout */
-  loopCpt = 0;
-  while(STATUS_OK == status &&
-        session_state != constants__e_session_created &&
-        loopCpt * sleepTimeout <= loopTimeout){
-    loopCpt++;
-    // Retrieve received messages on socket
-    SOPC_Sleep(sleepTimeout);
-    io_dispatch_mgr__get_session_state_or_closed(session,
-                                                 &session_state);
-  };
-
-  if(loopCpt * sleepTimeout > loopTimeout){
-    status = OpcUa_BadTimeout;
-  }
-
-  if(STATUS_OK == status &&
-     constants__e_session_created == session_state){
-    /* Activate session with anonymous user */
-    io_dispatch_mgr__activate_session(session,
-                                      user,
-                                      &sCode);
+    io_dispatch_mgr__activate_new_session(channel_config_idx,
+                                          user,
+                                          &sCode);
     if(constants__e_sc_ok == sCode){
         printf(">>Test_Client_Toolkit: Activating session: OK\n");
     }else{
@@ -305,7 +280,7 @@ int main(void){
 
   address_space_bs__UNINITIALISATION();
 
-  SOPC_StackConfiguration_Clear();
+  SOPC_Toolkit_Clear();
 
   if(STATUS_OK == status && test_results_get_service_result() == (!FALSE)){
     printf(">>Test_Client_Toolkit: read request received ! \n");

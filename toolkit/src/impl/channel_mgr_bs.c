@@ -50,24 +50,26 @@ void channel_mgr_bs__INITIALISATION(void) {
    OPERATIONS Clause
   --------------------*/
 void channel_mgr_bs__open_secure_channel(
-   const constants__t_endpoint_i channel_mgr_bs__endpoint,
-   constants__t_channel_i * const channel_mgr_bs__nchannel) {
+   const constants__t_channel_config_idx_i channel_mgr_bs__channel_config_idx,
+   constants__t_channel_i * const channel_mgr_bs__nchannel,
+   t_bool * const channel_mgr_bs__is_connected) {
   /* TODO: not synchronous anymore ! 
      parameters needed : SC configuration index => same level as endpoint
    */
    if(NULL == unique_channel_or_endpoint){
       SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
                                            SC_CONNECT,
-                                           channel_mgr_bs__endpoint,
-                                           (void*) SOPC_ToolkitConfig_GetSecureChannelConfig(channel_mgr_bs__endpoint),
+                                           channel_mgr_bs__channel_config_idx,
+                                           (void*) SOPC_ToolkitConfig_GetSecureChannelConfig(channel_mgr_bs__channel_config_idx),
                                            0,
                                            "Services request connection to a SC !");
       // TODO: async response management
       unique_channel_or_endpoint = malloc(sizeof(Internal_Channel_Or_Endpoint));
       unique_channel_or_endpoint->isChannel = (!FALSE);
-      unique_channel_or_endpoint->id = channel_mgr_bs__endpoint; // TMP: use SC config index as id
+      unique_channel_or_endpoint->id = channel_mgr_bs__channel_config_idx; // TMP: use SC config index as id
      
       *channel_mgr_bs__nchannel = unique_channel_or_endpoint;
+      *channel_mgr_bs__is_connected = FALSE;
    }
 }
 
@@ -147,7 +149,7 @@ void channel_mgr_bs__is_valid_channel(
 }
 
 void channel_mgr_bs__get_valid_channel(
-   const constants__t_endpoint_i channel_mgr_bs__endpoint,
+   const constants__t_channel_config_idx_i channel_mgr_bs__channel_config_idx,
    constants__t_channel_i * const channel_mgr_bs__channel) {
   // Always fail: no channel management
   *channel_mgr_bs__channel = constants__c_channel_indet;
@@ -155,9 +157,9 @@ void channel_mgr_bs__get_valid_channel(
 
 void channel_mgr_bs__get_channel_info(
    const constants__t_channel_i channel_mgr_bs__channel,
-   constants__t_endpoint_i * const channel_mgr_bs__endpoint) {
+   constants__t_channel_config_idx_i * const channel_mgr_bs__channel_config_idx) {
   // No endpoint management
-  *channel_mgr_bs__endpoint = constants__c_endpoint_indet;
+  *channel_mgr_bs__channel_config_idx = constants__c_channel_config_idx_indet;
 }
 
 void channel_mgr_bs__is_client_channel(
