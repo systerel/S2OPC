@@ -61,7 +61,7 @@ extern void response_write_bs__alloc_write_request_responses_malloc(
 }
 
 
-extern void wr__free() /* TODO: not defined yet in the B model */
+extern void response_write_bs__reset_ResponseWrite(void)
 {
     free(arr_StatusCode);
     arr_StatusCode = NULL;
