@@ -74,34 +74,41 @@ OPERATIONS
     ;
     
     /* END OF LOCAL OPERATIONS */
+    nsession <-- cli_init_session =
+    BEGIN
+        nsession <-- init_new_session
+    END;
     
-    nsession <-- cli_create_req (channel, req_handle, create_req_msg) =
+    ret <-- cli_create_req (session, channel, req_handle, create_req_msg) =
     VAR
         l_valid_channel,
-        l_nsession,
         l_valid_session,
-        l_valid_handle
+        l_state,
+        l_valid_handle,
+        l_ret
     IN
-        l_nsession := c_session_indet;
-        l_valid_channel <-- is_valid_channel (channel);        
-        IF l_valid_channel = TRUE
+        l_ret := e_sc_bad_invalid_argument;
+        l_valid_channel <-- is_valid_channel (channel);
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE & l_valid_channel = TRUE
         THEN
-            l_nsession <-- create_new_session (channel, e_session_creating);
-            l_valid_session <-- is_valid_session (l_nsession);
-            IF l_valid_session = TRUE
+            l_state <-- get_session_state (session);
+            IF l_state = e_session_init
             THEN
-                l_valid_handle <-- cli_add_pending_request (l_nsession, req_handle);
+                l_valid_handle <-- cli_add_pending_request (session, req_handle);
                 IF l_valid_handle = TRUE
                 THEN
+                    create_session (session, channel, e_session_creating);
+                    l_ret := e_sc_ok
                     /* TODO: populate msg with parameters  */
-                    skip
                 ELSE
-                    delete_session (l_nsession);
-                    l_nsession := c_session_indet
+                    l_ret := e_sc_bad_invalid_argument
                 END
             END
+        ELSE
+            l_ret := e_sc_bad_invalid_state
         END;
-        nsession := l_nsession
+        ret := l_ret
     END
     ;
     
@@ -113,11 +120,12 @@ OPERATIONS
         l_nsession_token,
         l_valid_session_token
     IN
-        l_nsession <-- create_new_session (channel, e_session_created);
+        l_nsession <-- init_new_session;
         l_valid_channel <-- is_valid_channel (channel);
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE &
             l_valid_channel = TRUE THEN
+            create_session(l_nsession, channel, e_session_created);
             /* TODO: check request parameters ? */
             l_nsession_token <-- get_fresh_session_token (l_nsession);
             l_valid_session_token <-- is_valid_session_token (l_nsession_token);
@@ -409,25 +417,27 @@ OPERATIONS
     END
     ;
     
-    cli_secure_channel_lost (channel) =
+    cli_secure_channel_lost (lost_channel, new_channel) =
     VAR
         l_continue,
         l_session,
         l_valid_session,
         l_state
     IN
-        l_continue <-- init_iter_channel_lost_t_session (channel);
+        l_continue <-- init_iter_channel_lost_t_session (lost_channel);
         WHILE l_continue = TRUE DO
             l_session, l_continue <-- continue_iter_orphaned_t_session;
             l_valid_session <-- is_valid_session (l_session);
             IF l_valid_session = TRUE
             THEN
                 l_state <-- get_session_state (l_session);
-                IF l_state = e_session_userActivated
+                IF l_state = e_session_userActivated & new_channel /= c_channel_indet
                 THEN
-                    set_session_orphaned (l_session, channel);
+                    // Active sessions set to orphaned and new channel associated
+                    set_session_orphaned (l_session, lost_channel, new_channel);
                     set_session_state (l_session, e_session_scOrphaned)
                 ELSE
+                    // Inactive sessions or all orphaned sessions (if no new channel can be associated)
                     set_session_state_closed (l_session)
                 END
             END
@@ -457,7 +467,7 @@ OPERATIONS
                 l_state <-- get_session_state (l_session);
                 IF l_state = e_session_userActivated
                 THEN
-                    set_session_orphaned (l_session, channel);
+                    set_session_orphaned (l_session, channel, c_channel_indet);
                     set_session_state (l_session, e_session_scOrphaned)
                 ELSE
                     set_session_state_closed (l_session)

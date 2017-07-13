@@ -79,19 +79,19 @@ INVARIANT
     
     d_typing_imp &
     
-    // Closed sessions shall not have pending requests
-    a_cli_pending_requests |> (dom(a_state |> {e_session_closed})) = {} &
+    // Closed or Init sessions shall not have pending requests
+    a_cli_pending_requests |> (dom(a_state |> {e_session_closed, e_session_init})) = {} &
     
-    // All sessions not (orphaned or closed) have a channel associated and only those sessions
-    dom(a_state |>> {e_session_scOrphaned, e_session_closed}) = dom(a_channel) &
+    // All sessions not (orphaned or closed or init) have a channel associated and only those sessions
+    dom(a_state |>> {e_session_scOrphaned, e_session_closed, e_session_init}) = dom(a_channel) &
     
-    // All sessions not (created or creating or closed) have a user associated and only those sessions
-    dom(a_state |>> {e_session_created, e_session_creating, e_session_closed}) = dom(a_user) &
+    // All sessions not (created or creating or closed or init) have a user associated and only those sessions
+    dom(a_state |>> {e_session_created, e_session_creating, e_session_closed, e_session_init}) = dom(a_user) &
     
     dom(a_state |> {e_session_scOrphaned}) = dom(a_orphaned) &
     
-    // All sessions have a token (except when in state creating or closed (since it creating can be predecessor))
-    dom(a_state |>> {e_session_creating, e_session_closed}) = ran(a_token)    
+    // All sessions have a token (except when in state creating, init or closed (since it creating can be predecessor))
+    dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_token)    
     
     
 INITIALISATION
@@ -163,9 +163,30 @@ OPERATIONS
     END
     ;
     
+    // Initialize a session to be created
+    nsession <-- cli_init_session = 
+    BEGIN
+        IF s_session = t_session
+        THEN
+            // Maximum number of sessions already allocated
+            nsession := c_session_indet
+        ELSE
+            ANY l_nsession WHERE
+                l_nsession : t_session_i &
+                l_nsession : t_session - s_session
+            THEN
+                s_session := s_session \/ {l_nsession} ||
+                a_state(l_nsession) := e_session_init  ||
+                nsession := l_nsession
+            END
+        END
+    END
+    ;
+    
     // Client sends create session request on channel
-    nsession <-- cli_create_req (channel, req_handle, create_req_msg) = 
+    ret <-- cli_create_req (session, channel, req_handle, create_req_msg) = 
     PRE
+        session : t_session_i &
         channel : t_channel_i &
         channel : s_channel &
         req_handle : t_request_handle_i &
@@ -175,32 +196,30 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_create_req
     THEN
-        IF s_session = t_session
+        IF session : s_session		    
         THEN
-            // Maximum number of sessions already allocated
-            nsession := c_session_indet
-        ELSE
-            IF req_handle /: dom (a_cli_pending_requests)
+            IF a_state(session) : {e_session_init}
             THEN
-                CHOICE
-                    ANY l_nsession WHERE
-                        l_nsession : t_session_i &
-                        l_nsession : t_session - s_session
-                    THEN
-                        s_session := s_session \/ {l_nsession}                             ||
-                        a_channel(l_nsession) := channel                                   ||
-                        a_state(l_nsession) := e_session_creating                                  ||
-                        nsession := l_nsession                                             ||
-                        a_cli_pending_requests := a_cli_pending_requests <+ {req_handle |-> nsession}
+                IF req_handle /: dom (a_cli_pending_requests)
+                THEN
+                    CHOICE
+                        a_channel(session) := channel                                                ||
+                        a_state(session) := e_session_creating                                       ||
+                        a_cli_pending_requests := a_cli_pending_requests <+ {req_handle |-> session} ||
+                        ret := e_sc_ok
+                    OR
+                        // no request handle available, no enough memory for new message, etc.
+                        ret := e_sc_bad_out_of_memory
                     END
-                OR
-                    // no request handle available, no enough memory for new message, etc.
-                    nsession := c_session_indet
-                END
+                ELSE
+                    ret := e_sc_bad_invalid_argument
+                END // end check valid req handle
             ELSE
-                nsession := c_session_indet
-            END
-        END
+                ret := e_sc_bad_invalid_state
+            END // end check state
+        ELSE
+            ret := e_sc_bad_invalid_argument
+        END // end check valid session
     END
     ;
     
@@ -496,25 +515,41 @@ OPERATIONS
     ;
     
     // Client channel lost
-    cli_secure_channel_lost (channel) =
+    cli_secure_channel_lost (lost_channel, new_channel) =
     PRE
-        channel : t_channel_i &
-        channel : s_channel
+        lost_channel : t_channel_i &
+        lost_channel : s_channel &
+        new_channel : t_channel_i
     THEN
-        LET active_sessions, inactive_sessions BE
-            active_sessions = dom(a_channel |> {channel}) /\ dom(a_state |>  {e_session_userActivated}) &
-            inactive_sessions = dom(a_channel |> {channel}) /\ dom(a_state |>>  {e_session_userActivated})
-        IN           
-            a_state := a_state <+ (active_sessions*{e_session_scOrphaned})
-            // sessions on lost channel that were in activated state are now channel orphaned,
-            // other created sessions on channel are closed
-            <+ (inactive_sessions *{e_session_closed}) ||
-            a_channel := a_channel |>> {channel} ||
-            // channel is not the channel of any session
-            a_user := inactive_sessions <<| a_user ||
-            // sessions CLOSED due to channel loss do not have user anymore
-            a_orphaned := a_orphaned <+ active_sessions*{channel}
-            // sessions ORPHANED of a channel are recorded
+        IF new_channel : s_channel
+        THEN
+            // We have a new channel to provide (waiting for connection)
+            LET active_sessions, inactive_sessions BE
+                active_sessions = dom(a_channel |> {lost_channel}) /\ dom(a_state |>  {e_session_userActivated}) &
+                inactive_sessions = dom(a_channel |> {lost_channel}) /\ dom(a_state |>>  {e_session_userActivated})
+            IN           
+                a_state := a_state <+ (active_sessions*{e_session_scOrphaned})
+                // sessions on lost channel that were in activated state are now channel orphaned,
+                // other created sessions on channel are closed
+                <+ (inactive_sessions *{e_session_closed}) ||
+                a_channel := a_channel |>> {lost_channel} ||
+                // channel is not the channel of any session
+                a_user := inactive_sessions <<| a_user ||
+                // sessions CLOSED due to channel loss do not have user anymore
+                a_orphaned := a_orphaned <+ active_sessions*{new_channel}
+                // sessions ORPHANED of a channel are recorded
+            END
+        ELSE
+            // We do not have new channel to provide: close all session that lost channel
+            LET sessions BE
+                sessions = dom(a_channel |> {lost_channel})
+            IN
+                a_state := a_state <+ (sessions *{e_session_closed}) ||
+                a_channel := a_channel |>> {lost_channel} ||
+                // channel is not the channel of any session
+                a_user := sessions <<| a_user
+                // sessions CLOSED due to channel loss do not have user anymore
+            END
         END
     END
     ;
@@ -535,10 +570,11 @@ OPERATIONS
             <+ (inactive_sessions *{e_session_closed}) ||
             a_channel := a_channel |>> {channel} ||
             // channel is not the channel of any session
-            a_user := inactive_sessions <<| a_user ||
+            a_user := inactive_sessions <<| a_user
             // sessions CLOSED due to channel loss do not have user anymore
-            a_orphaned := a_orphaned <+ active_sessions*{channel}
-            // sessions ORPHANED of a channel are recorded
+            
+            // No  need to record channel lost since session will be associated to a new channel by client
+            // TODO: trigger a timer on session ?
         END
     END
     ;

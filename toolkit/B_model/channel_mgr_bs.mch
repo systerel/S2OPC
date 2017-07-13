@@ -47,7 +47,7 @@ INITIALISATION
     
 OPERATIONS  
     
-    nchannel <-- open_secure_channel (config_idx) = 
+    nchannel, is_connected <-- open_secure_channel (config_idx) = 
     PRE
         config_idx : t_channel_config_idx_i &
         config_idx : t_channel_config_idx
@@ -56,7 +56,8 @@ OPERATIONS
         THEN
             IF config_idx : ran(a_config)
             THEN
-                nchannel :(nchannel : t_channel_i & nchannel = a_config~(config_idx))
+                nchannel :(nchannel : t_channel_i & nchannel = a_config~(config_idx)) ||
+                is_connected := TRUE
             ELSE                
                 CHOICE
                     ANY l_channel WHERE
@@ -66,15 +67,18 @@ OPERATIONS
                         s_channel := s_channel \/ {l_channel} ||
                         s_is_client := s_is_client \/ {l_channel} ||
                         a_config(l_channel)  := config_idx ||
-                        nchannel := l_channel
+                        nchannel := l_channel ||
+                        is_connected := FALSE
                     END
                 OR
                     /* invalid parameters: URL, security, crypto, etc. */
-                    nchannel := c_channel_indet
+                    nchannel := c_channel_indet ||
+                    is_connected := FALSE
                 END
             END
         ELSE
-            nchannel := c_channel_indet
+            nchannel := c_channel_indet ||
+            is_connected := FALSE
         END    
     END
     ;
@@ -204,6 +208,15 @@ OPERATIONS
         channel         : s_channel
     THEN
         bres := bool(channel : s_is_client)
+    END
+    ;
+    
+    notify_user_app_sc_connected (channel) =
+    PRE
+        channel         : t_channel_i &
+        channel         : s_channel
+    THEN
+        skip
     END
     
 END

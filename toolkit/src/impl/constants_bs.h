@@ -41,6 +41,7 @@ typedef void* constants_bs__t_msg_i;
 typedef void* constants_bs__t_channel_i;
 typedef void* constants_bs__t_session_token_i;
 typedef void* constants_bs__t_session_i;
+#define constants_bs__t_channel_config_idx_i t_entier4
 #define constants_bs__t_endpoint_i t_entier4
 #define constants_bs__t_request_handle_i t_entier4
 #define constants_bs__t_user_i t_entier4
@@ -54,6 +55,7 @@ typedef void* constants_bs__t_session_i;
 #define constants_bs__t_Node_i_max (-1)
 #define constants_bs__t_UserId_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
+#define constants_bs__t_channel_config_idx_i_max (-1)
 #define constants_bs__t_channel_i_max (-1)
 #define constants_bs__t_endpoint_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
@@ -70,6 +72,7 @@ typedef void* constants_bs__t_session_i;
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_UserId_indet 0
 #define constants_bs__c_Variant_indet 0
+#define constants_bs__c_channel_config_idx_indet 0
 #define constants_bs__c_channel_indet 0
 #define constants_bs__c_endpoint_indet 0
 #define constants_bs__c_msg_indet 0

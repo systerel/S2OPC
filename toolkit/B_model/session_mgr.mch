@@ -27,13 +27,20 @@ SEES
     
 DEFINITIONS
    
-    d_var_it ==
+   d_var_it ==
+   	/* sessions to auto activate on session created state obtained */
+   	s_session_async_activate_session, /* TODO: If users not anonymous, partial function to user config to use ! */
+   	/* sessions to auto create on secure channel connection */
+    s_session_async_create_session, /* TODO: Need to could activate several sessions (with same or different user), partial function to ? */
     /* iter */
     av_sessions_to_iterate,
     av_sessions_iterated,
     av_sessions_orphaned;
 
     d_typing_it ==
+    s_session_async_activate_session <: t_session &
+	s_session_async_create_session <: t_channel_config_idx &
+	/* iter */
     av_sessions_orphaned <: t_session &
     av_sessions_to_iterate <: av_sessions_orphaned &
     av_sessions_iterated <: av_sessions_orphaned &
@@ -46,7 +53,8 @@ INVARIANT
     d_typing_it
     
 INITIALISATION
-   
+    s_session_async_activate_session := {} ||
+    s_session_async_create_session := {} ||
     /* it */
     av_sessions_to_iterate,
     av_sessions_iterated,
@@ -57,7 +65,7 @@ INITIALISATION
 
 OPERATIONS
     
-    receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
+    session <-- receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
     PRE
         channel : t_channel_i &
         channel : s_channel &
@@ -71,7 +79,7 @@ OPERATIONS
             e_msg_session_activate_resp,
             e_msg_session_close_resp}
     THEN
-        skip
+        session :: t_session_i
     END
     ;
     
@@ -194,8 +202,15 @@ OPERATIONS
     END
     ;
     
-    nsession <-- cli_create_req (channel, req_handle, create_req_msg) = 
+    nsession <-- cli_init_session = 
+    BEGIN
+        nsession :: t_session_i
+    END
+    ;
+        
+    ret <-- cli_create_req (session, channel, req_handle, create_req_msg) = 
     PRE
+        session : t_session_i &
         channel : t_channel_i &
         channel : s_channel &
         req_handle : t_request_handle_i &
@@ -205,9 +220,8 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_create_req
     THEN
-        nsession :: t_session_i
-    END
-    ;
+        ret :: {e_sc_bad_invalid_argument, e_sc_bad_invalid_state, e_sc_bad_out_of_memory, e_sc_ok}
+    END;
     
     ret, channel, session_token <-- cli_user_activate_req (session, req_handle, user, activate_req_msg) =
     PRE
@@ -259,10 +273,12 @@ OPERATIONS
     END
     ;
     
-    cli_secure_channel_lost (channel) =
+    cli_secure_channel_lost (lost_channel, new_channel) =
     PRE
-        channel : t_channel_i &
-        channel : s_channel
+        lost_channel : t_channel_i &
+        lost_channel : s_channel &
+        new_channel : t_channel_i &
+        new_channel : s_channel
     THEN
         skip
     END

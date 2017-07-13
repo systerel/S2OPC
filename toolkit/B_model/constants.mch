@@ -59,13 +59,14 @@ SETS
     t_channel_config_idx_i;
     
     t_sessionState = {
-        e_session_creating,
-        e_session_created,
-        e_session_userActivating,
-        e_session_userActivated,
-        e_session_scActivating,
-        e_session_scOrphaned,
-        e_session_closing,
+        e_session_init,
+        e_session_creating, 
+        e_session_created, 
+        e_session_userActivating, 
+        e_session_userActivated, 
+        e_session_scActivating, 
+        e_session_scOrphaned, 
+        e_session_closing, 
         e_session_closed};
 
     t_msg_type = {

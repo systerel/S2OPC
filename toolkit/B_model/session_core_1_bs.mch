@@ -180,12 +180,8 @@ OPERATIONS
         a_cli_pending_requests := a_cli_pending_requests |>> {session}
     END;
     
-    session <-- create_new_session (channel, state) =
-    PRE
-        channel    : t_channel_i &
-        channel    : t_channel &
-        state : {e_session_created, e_session_creating}
-    THEN
+    session <-- init_new_session =
+    BEGIN
         IF s_session = t_session
         THEN
             session := c_session_indet
@@ -196,11 +192,23 @@ OPERATIONS
                 l_nsession /: s_session
             THEN
                 s_session := s_session \/ {l_nsession} ||
-                a_channel (l_nsession) := channel ||
-                a_state (l_nsession) := state ||
+                a_state (l_nsession) := e_session_init ||
                 session := l_nsession
             END
         END
+    END
+    ;
+    
+    create_session (session, channel, state) =
+    PRE
+        session : t_session_i &
+        session : s_session &
+        channel    : t_channel_i &
+        channel    : t_channel &
+        state : {e_session_created, e_session_creating}
+    THEN
+        a_channel (session) := channel ||
+        a_state (session) := state
     END
     ;
     
@@ -259,9 +267,10 @@ OPERATIONS
         session : t_session_i &
         session : s_session &
         state : t_sessionState &
-        state /: {e_session_creating, e_session_closed}
+        state /: {e_session_closed}
     THEN
         a_state (session) := state
+        // + notify  user app when session activated
     END
 	;
         
@@ -304,15 +313,23 @@ OPERATIONS
     END
     ;
     
-    set_session_orphaned (session, lost_channel) =
+    // new_channel is channel on which connection is awaited to re-associate session
+    set_session_orphaned (session, lost_channel, new_channel) =
     PRE
         session : t_session_i &
         session : s_session &
         lost_channel : t_channel_i &
-        lost_channel : t_channel
+        lost_channel : t_channel &
+        new_channel : t_channel_i
     THEN
-        a_channel := a_channel |>> {lost_channel} ||
-        a_orphaned(session) := lost_channel
+        IF new_channel /= c_channel_indet
+        THEN
+            a_channel := a_channel |>> {lost_channel} ||
+            a_orphaned(session) := new_channel
+        ELSE
+            // Server case, new channel to wait for is unknown (set by client)
+            a_channel := a_channel |>> {lost_channel}
+        END
     END
     ;
     

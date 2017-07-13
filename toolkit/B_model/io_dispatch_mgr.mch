@@ -64,16 +64,31 @@ OPERATIONS
     END
     ;
     
-    nsession <-- create_session (channel_config_idx) =
+    // TODO: add connection id / sc parameter
+    channel_connected_event (channel_config_idx) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
+    ret <-- activate_new_session (channel_config_idx, user) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
+        user : t_user_i &
+        user : t_user &
         c_msg_out = c_msg_indet
     THEN
-        nsession :: t_session_i
+        ret :: {e_sc_ok, e_sc_nok, e_sc_bad_out_of_memory}
+        
     END
     ;
 
+    
+    /* Only to change user on an active channel */
     ret <-- activate_session (session, user) =
     PRE
         session : t_session_i &

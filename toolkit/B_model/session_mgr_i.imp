@@ -32,6 +32,7 @@ PROMOTES
     get_session_state_or_closed,
     get_session_user_or_indet,
     get_session_from_token,
+    cli_init_session,
     cli_create_req,
     cli_user_activate_req,
     cli_sc_activate_req,
@@ -46,7 +47,7 @@ PROMOTES
     
 OPERATIONS
     
-    receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
+    session <-- receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
     VAR
         l_session,
         l_session_token
@@ -58,11 +59,12 @@ OPERATIONS
                 l_session_token <-- read_create_session_msg_session_token (resp_msg);
                 cli_create_resp (channel, l_session, req_handle, l_session_token, resp_msg)
             OR e_msg_session_activate_resp THEN
-                cli_activate_resp (channel, l_session, req_handle, resp_msg)
+                cli_activate_resp (channel, l_session, req_handle, resp_msg)                
             OR e_msg_session_close_resp THEN
                 cli_close_resp (channel, l_session, req_handle, resp_msg)
             END
-        END
+        END;
+        session := l_session
     END
     ;
     

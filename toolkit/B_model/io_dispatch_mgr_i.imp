@@ -23,6 +23,7 @@ SEES
 
 IMPORTS
     session_mgr,
+    session_async_bs,
     message_in_bs,
     message_out_bs,
     service_read,
@@ -92,6 +93,48 @@ LOCAL_OPERATIONS
             StatusCode_service : t_StatusCode
         )
     END
+
+    local_create_session (session, channel) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel : t_channel_i &
+        channel : t_channel &
+        c_msg_out = c_msg_indet
+    THEN
+        skip
+    END
+    ;
+    
+    local_sc_activate_orphaned_sessions (channel) =
+    PRE
+        channel : t_channel_i &
+        channel : t_channel
+    THEN
+        skip
+    END
+    ;
+    
+    ret <-- local_activate_session (session, user) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        user : t_user_i &
+        user : t_user &
+        c_msg_out = c_msg_indet
+    THEN
+        ret :: {e_sc_ok, 
+            e_sc_bad_out_of_memory,
+            e_sc_bad_invalid_argument,
+            e_sc_bad_invalid_state,          /* session not in a valid state to activate a user on it */
+            e_sc_bad_unexpected_error,
+            e_sc_bad_identity_token_invalid, /* user identity invalid */
+            e_sc_bad_encoding_error,
+            e_sc_bad_secure_channel_closed,
+            e_sc_bad_connection_closed,
+            e_sc_bad_encoding_error}
+    END
+    
 
 OPERATIONS
 
@@ -175,6 +218,154 @@ OPERATIONS
         free_write_request
     END
     ;
+    
+    local_create_session (session, channel) =
+    VAR
+        l_req_msg,
+        l_req_handle,
+        l_valid_req_handle,
+        l_valid_msg,
+        l_valid_session,
+        l_ret
+    IN
+        l_req_msg <-- alloc_msg (e_msg_session_create_req);
+        l_valid_msg <-- is_valid_msg_out (l_req_msg);
+        IF l_valid_msg = TRUE
+        THEN
+            l_req_handle <-- fresh_req_handle;
+            l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+            IF l_valid_req_handle  = TRUE
+            THEN
+                l_valid_session <-- is_valid_session (session);
+                IF l_valid_session = TRUE
+                THEN
+                    l_ret <-- cli_create_req (session, channel, l_req_handle, l_req_msg);
+                    IF l_ret = e_sc_ok
+                    THEN
+                        
+                        write_msg_out_header_req_handle (l_req_msg, l_req_handle);
+                        l_ret <-- send_channel_msg (channel, l_req_msg);
+                        IF l_ret /= e_sc_ok
+                        THEN
+                            remove_req_handle (l_req_handle);
+                            cli_close_session (session)
+                        END
+                    ELSE
+                        remove_req_handle (l_req_handle);
+                        cli_close_session (session)
+                    END
+                ELSE
+                    cli_close_session (session)
+                END
+            END;
+            dealloc_msg_out (l_req_msg)
+        END
+    END
+    ;
+    
+    local_sc_activate_orphaned_sessions (channel) =
+    VAR
+        l_valid_new_channel,
+        l_req_msg,
+        l_valid_msg,
+        l_continue,
+        l_session,
+        l_ret,
+        l_req_handle,
+        l_valid_req_handle,
+        l_session_token
+    IN
+        l_valid_new_channel <-- is_valid_channel (channel);
+        IF l_valid_new_channel = TRUE
+        THEN
+            l_continue <-- init_iter_orphaned_t_session (channel);
+            WHILE l_continue = TRUE
+            DO
+                l_session, l_continue <-- continue_iter_orphaned_t_session;
+                l_req_msg <-- alloc_msg (e_msg_session_activate_req);
+                l_valid_msg <-- is_valid_msg_out (l_req_msg);
+                IF l_valid_msg = TRUE
+                THEN
+                    l_req_handle <-- fresh_req_handle;
+                    l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+                    IF l_valid_req_handle = TRUE
+                    THEN
+                        l_ret, l_session_token <-- cli_sc_activate_req (l_session, l_req_handle, channel, l_req_msg);
+                        IF l_ret = e_sc_ok
+                        THEN
+                            write_msg_out_header_req_handle(l_req_msg, l_req_handle);
+                            write_msg_out_header_session_token(l_req_msg, l_session_token);
+                            l_ret <-- send_channel_msg (channel, l_req_msg);
+                            /* TODO: something in case of failure ? */
+                            IF l_ret /= e_sc_ok
+                            THEN
+                                remove_req_handle (l_req_handle);
+                                cli_close_session (l_session)
+                            END
+                        END
+                    END;
+                    dealloc_msg_out (l_req_msg)
+                END
+            INVARIANT
+                l_continue = bool(av_sessions_to_iterate /= {}) &
+                av_sessions_to_iterate /\ av_sessions_iterated = {} &
+                av_sessions_to_iterate \/ av_sessions_iterated = av_sessions_orphaned
+            VARIANT
+                card(av_sessions_to_iterate)
+            END
+        END
+    END
+    ;
+    
+    ret <-- local_activate_session (session, user) =
+    VAR
+        l_req_msg,
+        l_valid_msg,
+        l_ret,
+        l_channel,
+        l_req_handle,
+        l_valid_req_handle,
+        l_session_token
+    IN
+        l_req_msg <-- alloc_msg (e_msg_session_activate_req);
+        l_valid_msg <-- is_valid_msg_out (l_req_msg);
+        IF l_valid_msg = TRUE
+        THEN
+            l_req_handle <-- fresh_req_handle;
+            l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+            IF l_valid_req_handle = TRUE
+            THEN
+                l_req_handle <-- fresh_req_handle;
+                l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
+                IF l_valid_req_handle = TRUE
+                THEN
+                    l_ret, l_channel, l_session_token <-- cli_user_activate_req (session, l_req_handle, user, l_req_msg);
+                    IF l_ret = e_sc_ok
+                    THEN
+                        write_msg_out_header_req_handle(l_req_msg, l_req_handle);
+                        write_msg_out_header_session_token(l_req_msg, l_session_token);
+                        l_ret <-- send_channel_msg (l_channel, l_req_msg);
+                        IF l_ret /= e_sc_ok
+                        THEN
+                            remove_req_handle (l_req_handle);
+                            cli_close_session (session)
+                        END
+                    END
+                ELSE
+                    l_ret := e_sc_bad_out_of_memory
+                END
+            ELSE
+                l_ret := e_sc_bad_out_of_memory
+            END;
+            dealloc_msg_out (l_req_msg)
+        ELSE
+            l_ret := e_sc_bad_out_of_memory
+        END;
+        ret := l_ret
+    END
+    ;
+    
+    /* END OF LOCAL OPERATIONS */
 
     msgs_memory_changed =
     BEGIN
@@ -188,6 +379,7 @@ OPERATIONS
         l_request_handle,
         l_session_token,
         l_session,
+        l_session_state,
         l_session_user,
         l_valid_msg,
         l_msg_type,
@@ -238,8 +430,20 @@ OPERATIONS
                                 e_msg_session_close_resp
                             THEN
                                 l_request_handle <-- read_msg_header_req_handle (msg);
-                                receive_session_resp (channel, l_request_handle, msg, l_msg_type);
-                                remove_req_handle (l_request_handle)
+                                l_session <-- receive_session_resp (channel, l_request_handle, msg, l_msg_type);
+                                remove_req_handle (l_request_handle);
+                                
+                                // If session is created, activate it with async data if present
+                                l_session_state <-- get_session_state_or_closed (l_session);
+                                IF l_session_state = e_session_created 
+                                THEN
+                                    l_session_user <-- is_session_to_activate (l_session);
+                                    IF l_session_user /= c_user_indet
+                                    THEN
+                                        l_ret <-- local_activate_session (l_session, l_session_user)
+                                    END
+                                END
+                                
                             OR e_msg_session_read_resp,
                                 e_msg_session_write_resp
                             THEN
@@ -341,108 +545,93 @@ OPERATIONS
     END
     ;
     
-    nsession <-- create_session (channel_config_idx) =
+        
+    channel_connected_event (channel_config_idx) =
     VAR
         l_channel,
         l_valid_channel,
-        l_req_msg,
-        l_req_handle,
-        l_valid_req_handle,
-        l_valid_msg,
+        l_session_to_create
+    IN
+        l_channel <-- get_valid_channel (channel_config_idx);
+        // Re-associate orphaned sessions waiting for sc (if there are some)
+        local_sc_activate_orphaned_sessions (l_channel);
+        // Create session waiting for sc
+        l_session_to_create <-- is_session_to_create (channel_config_idx);
+        IF l_session_to_create /= c_session_indet
+        THEN
+            local_create_session (l_session_to_create, l_channel)
+            // activation already registered as next async step
+        END;
+        l_valid_channel <-- is_valid_channel (l_channel);
+        IF l_valid_channel = TRUE
+        THEN
+            notify_user_app_sc_connected (l_channel)
+        END
+    END
+    ;
+    
+    ret <-- activate_new_session (channel_config_idx, user) =
+    VAR
+        l_channel,
+        l_channel_connected,
+        l_session,
         l_valid_session,
-        l_ret
+        l_valid_channel,
+        l_bret
     IN
         l_channel <-- get_valid_channel (channel_config_idx);
         l_valid_channel <-- is_valid_channel (l_channel);
         IF l_valid_channel = FALSE
         THEN
-            l_channel <-- open_secure_channel (channel_config_idx)
-            // async operation => cannot use channel until connection is effective ?
+            l_channel, l_channel_connected <-- open_secure_channel (channel_config_idx)
+        ELSE
+            l_channel_connected := FALSE
         END;
         l_valid_channel <-- is_valid_channel (l_channel);
         IF l_valid_channel = FALSE
         THEN
-            nsession := c_session_indet
+            ret := e_sc_nok
         ELSE
-            l_req_msg <-- alloc_msg (e_msg_session_create_req);
-            l_valid_msg <-- is_valid_msg_out (l_req_msg);
-            IF l_valid_msg = TRUE
-            THEN
-                l_req_handle <-- fresh_req_handle;
-                l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
-                IF l_valid_req_handle  = TRUE
+            l_session <-- cli_init_session;
+            l_valid_session <-- is_valid_session (l_session);
+            IF l_valid_session = TRUE THEN
+                IF l_channel_connected = FALSE 
                 THEN
-                    nsession <-- cli_create_req (l_channel, l_req_handle, l_req_msg);
-                    l_valid_session <-- is_valid_session (nsession);
-                    IF l_valid_session = TRUE
+                    /* channel did not exist or is not connected anymore: add async session creation on SC connection */
+                    l_bret <-- add_session_to_create (l_session, channel_config_idx);
+                    IF l_bret = TRUE
                     THEN
-                        write_msg_out_header_req_handle (l_req_msg, l_req_handle);
-                        l_ret <-- send_channel_msg (l_channel, l_req_msg);
-                        IF l_ret /= e_sc_ok
-                        THEN
-                            remove_req_handle (l_req_handle);
-                            cli_close_session (nsession);
-                            nsession := c_session_indet
-                        END
+                        local_create_session (l_session, l_channel);
+                        ret := e_sc_ok
                     ELSE
-                        remove_req_handle (l_req_handle);
-                        cli_close_session (nsession)
+                        ret := e_sc_nok
                     END
+                ELSE
+                    ret := e_sc_ok
                 END;
-                dealloc_msg_out (l_req_msg)
+                IF ret = e_sc_ok
+                THEN
+                    l_bret <-- add_session_to_activate (l_session, user);
+                    IF l_bret = TRUE
+                    THEN
+                        ret := e_sc_ok
+                    ELSE
+                        ret := e_sc_nok
+                    END
+                ELSE
+                    /* Remove session from sessions to create */
+                    l_session <-- is_session_to_create (channel_config_idx)
+                END
             ELSE
-                nsession := c_session_indet
+                ret := e_sc_bad_out_of_memory
             END
         END
     END
     ;
 
-
     ret <-- activate_session (session, user) =
-    VAR
-        l_req_msg,
-        l_valid_msg,
-        l_ret,
-        l_channel,
-        l_req_handle,
-        l_valid_req_handle,
-        l_session_token
-    IN
-        l_req_msg <-- alloc_msg (e_msg_session_activate_req);
-        l_valid_msg <-- is_valid_msg_out (l_req_msg);
-        IF l_valid_msg = TRUE
-        THEN
-            l_req_handle <-- fresh_req_handle;
-            l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
-            IF l_valid_req_handle = TRUE
-            THEN
-                l_req_handle <-- fresh_req_handle;
-                l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
-                IF l_valid_req_handle = TRUE
-                THEN
-                    l_ret, l_channel, l_session_token <-- cli_user_activate_req (session, l_req_handle, user, l_req_msg);
-                    IF l_ret = e_sc_ok
-                    THEN
-                        write_msg_out_header_req_handle(l_req_msg, l_req_handle);
-                        write_msg_out_header_session_token(l_req_msg, l_session_token);
-                        l_ret <-- send_channel_msg (l_channel, l_req_msg);
-                        IF l_ret /= e_sc_ok
-                        THEN
-                            remove_req_handle (l_req_handle);
-                            cli_close_session (session)
-                        END
-                    END
-                ELSE
-                    l_ret := e_sc_bad_out_of_memory
-                END
-            ELSE
-                l_ret := e_sc_bad_out_of_memory
-            END;
-            dealloc_msg_out (l_req_msg)
-        ELSE
-            l_ret := e_sc_bad_out_of_memory
-        END;
-        ret := l_ret
+    BEGIN
+        ret <-- local_activate_session (session, user)
     END
     ;
 
@@ -492,17 +681,10 @@ OPERATIONS
     VAR
         l_valid_channel,
         l_valid_new_channel,
+        l_new_channel_connected,
         l_is_client,
         l_channel_config_idx,
-        l_new_channel,
-        l_req_msg,
-        l_valid_msg,
-        l_continue,
-        l_session,
-        l_ret,
-        l_req_handle,
-        l_valid_req_handle,
-        l_session_token
+        l_new_channel
     IN
         l_valid_channel <-- is_valid_channel (channel);
         IF l_valid_channel = TRUE
@@ -514,50 +696,19 @@ OPERATIONS
                 l_new_channel <-- get_valid_channel (l_channel_config_idx);
                 IF l_new_channel = c_channel_indet
                 THEN
-                    l_new_channel <-- open_secure_channel (l_channel_config_idx)
+                    l_new_channel, l_new_channel_connected <-- open_secure_channel (l_channel_config_idx)
                     // async operation => cannot use channel until connection is effective ?
+                ELSE
+l_new_channel_connected := FALSE
                 END;
+                
+                cli_secure_channel_lost (channel, l_new_channel);             
                 l_valid_new_channel <-- is_valid_channel (l_new_channel);
-
-                cli_secure_channel_lost (channel);
-
-                IF l_valid_new_channel = TRUE
+                
+                IF l_valid_new_channel = TRUE & l_new_channel_connected = TRUE
                 THEN
-                    l_continue <-- init_iter_orphaned_t_session (channel);
-                    WHILE l_continue = TRUE
-                    DO
-                        l_session, l_continue <-- continue_iter_orphaned_t_session;
-                        l_req_msg <-- alloc_msg (e_msg_session_activate_req);
-                        l_valid_msg <-- is_valid_msg_out (l_req_msg);
-                        IF l_valid_msg = TRUE
-                        THEN
-                            l_req_handle <-- fresh_req_handle;
-                            l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
-                            IF l_valid_req_handle = TRUE
-                            THEN
-                            l_ret, l_session_token <-- cli_sc_activate_req (l_session, l_req_handle, l_new_channel, l_req_msg);
-                                IF l_ret = e_sc_ok
-                                THEN
-                                    write_msg_out_header_req_handle(l_req_msg, l_req_handle);
-                                    write_msg_out_header_session_token(l_req_msg, l_session_token);
-                                    l_ret <-- send_channel_msg (l_new_channel, l_req_msg);
-                                    /* TODO: something in case of failure ? */
-                                    IF l_ret /= e_sc_ok
-                                    THEN
-                                        remove_req_handle (l_req_handle);
-                                        cli_close_session (l_session)
-                                    END
-                                END
-                            END;
-                            dealloc_msg_out (l_req_msg)
-                        END
-                    INVARIANT
-                        l_continue = bool(av_sessions_to_iterate /= {}) &
-                        av_sessions_to_iterate /\ av_sessions_iterated = {} &
-                        av_sessions_to_iterate \/ av_sessions_iterated = av_sessions_orphaned
-                    VARIANT
-                        card(av_sessions_to_iterate)
-                    END
+                    // If channel already connected, associate sessions orphaned
+                    local_sc_activate_orphaned_sessions (l_new_channel)                    
                 END
             ELSE
                 srv_secure_channel_lost (channel)
