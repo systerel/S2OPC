@@ -19,5 +19,6 @@ toolkit/build
 toolkit/out
 bdp/
 tradc/
+depand/
 install_stack
 bin
