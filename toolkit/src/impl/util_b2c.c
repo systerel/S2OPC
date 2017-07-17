@@ -61,6 +61,14 @@ void util_message__get_encodeable_type(const constants__t_msg_type message__msg_
     *reqEncType = &OpcUa_ReadRequest_EncodeableType;
     *respEncType = &OpcUa_ReadResponse_EncodeableType;
     break;
+  case constants__e_msg_session_write_req:
+    *reqEncType = &OpcUa_WriteRequest_EncodeableType;
+    *respEncType = &OpcUa_WriteResponse_EncodeableType;
+    break;
+  case constants__e_msg_session_write_resp:
+    *reqEncType = &OpcUa_WriteRequest_EncodeableType;
+    *respEncType = &OpcUa_WriteResponse_EncodeableType;
+    break;
   case constants__e_msg_tcpua_hello:
   case constants__e_msg_tcpua_ack:
   case constants__e_msg_sc_open_channel_req:
@@ -95,6 +103,10 @@ void util_message__get_message_type(SOPC_EncodeableType* encType,
     *message__msg_type = constants__e_msg_session_read_req;
   }else if(encType == &OpcUa_ReadResponse_EncodeableType){
     *message__msg_type = constants__e_msg_session_read_resp;
+  }else if(encType == &OpcUa_WriteRequest_EncodeableType){
+    *message__msg_type = constants__e_msg_session_write_req;
+  }else if(encType == &OpcUa_WriteResponse_EncodeableType){
+    *message__msg_type = constants__e_msg_session_write_resp;
   }else{
     printf("util_message__get_message_type\n");
     exit(1);

@@ -116,3 +116,9 @@ void message_in_bs__read_msg_resp_header_service_status(
     exit(1);
   }
 }
+
+void message_in_bs__get_msg_payload(
+   const constants__t_msg_i message_in_bs__msg,
+   constants__t_ByteString_i * const message_in_bs__payload){
+  *message_in_bs__payload = (constants__t_ByteString_i) message_in_bs__msg;
+}

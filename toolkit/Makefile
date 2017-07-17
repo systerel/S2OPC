@@ -28,7 +28,7 @@ OBJS        =session_header_init.o \
              gen_addspace.o testlib_read_response.o util_variant.o
 OBJS        += session_header.o io_dispatch_mgr.o session_mgr.o session_core.o session_core_1_bs.o \
                channel_mgr_bs.o request_handle_bs.o message_in_bs.o message_out_bs.o \
-               service_read_cli_cb_bs.o \
+               service_response_cli_cb_bs.o \
                session_core_channel_lost_it_bs.o session_core_orphaned_it_bs.o \
                util_b2c.o test_results.o
 CLIENT_OBJS =toolkit_test_client.o
