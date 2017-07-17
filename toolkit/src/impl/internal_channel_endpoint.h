@@ -23,6 +23,7 @@
 
 typedef struct Internal_Channel_Or_Endpoint {
   t_bool isChannel;
+  struct SOPC_RequestContext* context;
   uint32_t id;
 } Internal_Channel_Or_Endpoint;
 

@@ -41,6 +41,7 @@ typedef struct session {
 
 static session unique_session;
 static t_bool unique_session_init = FALSE;
+static t_bool unique_session_created = FALSE;
 
 static int token_cpt = 0;
 
@@ -56,7 +57,7 @@ void session_core_1_bs__INITIALISATION(void) {
 void session_core_1_bs__get_session_from_req_handle(
    const constants__t_request_handle_i session_core_1_bs__req_handle,
    constants__t_session_i * const session_core_1_bs__session) {
-  if((!FALSE) == unique_session_init &&
+  if((!FALSE) == unique_session_created &&
      unique_session.session_core_1_bs__req_handle == session_core_1_bs__req_handle){
     *session_core_1_bs__session = &unique_session;
   }else{
@@ -68,7 +69,7 @@ void session_core_1_bs__get_session_from_token(
    const constants__t_session_token_i session_core_1_bs__session_token,
    constants__t_session_i * const session_core_1_bs__session) {
   int32_t comparison = 0;
-  if((!FALSE) == unique_session_init){
+  if((!FALSE) == unique_session_created){
     SOPC_StatusCode status = SOPC_NodeId_Compare((SOPC_NodeId*)session_core_1_bs__session_token, 
                                                  (SOPC_NodeId*)unique_session.session_core_1_bs__session_token,
                                                  &comparison);
@@ -113,7 +114,7 @@ void session_core_1_bs__get_fresh_session_token(
 void session_core_1_bs__is_fresh_session_token(
    const constants__t_session_token_i session_core_1_bs__session_token,
    t_bool * const session_core_1_bs__ret) {
-  if((!FALSE) == unique_session_init){
+  if((!FALSE) == unique_session_created){
     if(session_core_1_bs__session_token != constants__c_session_token_indet &&
        session_core_1_bs__session_token != unique_session.session_core_1_bs__session_token){
       *session_core_1_bs__ret = (!FALSE);
@@ -199,23 +200,39 @@ void session_core_1_bs__delete_session(
   exit(1);   
 }
 
-void session_core_1_bs__create_new_session(
-   const constants__t_channel_i session_core_1_bs__channel,
-   const constants__t_sessionState session_core_1_bs__state,
-   constants__t_session_i * const session_core_1_bs__session) {
+void session_core_1_bs__init_new_session(
+   constants__t_session_i * const session_core_1_bs__session){
   if(FALSE == unique_session_init){
+    *session_core_1_bs__session = &unique_session;
+    unique_session_init = !FALSE;
+    unique_session.session_core_1_bs__state = constants__e_session_init;
+  }else{
+    *session_core_1_bs__session = constants__c_session_indet;
+  }
+}
+
+void session_core_1_bs__create_session(
+   const constants__t_session_i session_core_1_bs__session,
+   const constants__t_channel_i session_core_1_bs__channel,
+   const constants__t_sessionState session_core_1_bs__state) {
+  if(session_core_1_bs__session == &unique_session && FALSE == unique_session_created){
     unique_session.session_core_1_bs__channel = session_core_1_bs__channel;
     unique_session.session_core_1_bs__state = session_core_1_bs__state;
     unique_session.session_core_1_bs__session_token = constants__c_session_token_indet;
     unique_session.session_core_1_bs__user = constants__c_user_indet;
     unique_session.session_core_1_bs__req_handle = constants__c_request_handle_indet;
     unique_session.session_core_1_bs__req_handle_used = FALSE;
-    unique_session_init = (!FALSE);
-    *session_core_1_bs__session = &unique_session;
-  }else{
-    *session_core_1_bs__session = constants__c_session_indet;
+    unique_session_created = (!FALSE);
   }
 }
+
+void session_core_1_bs__create_session_failure(const constants__t_session_i session_core_1_bs__session){
+  if(session_core_1_bs__session == &unique_session && FALSE != unique_session_created){
+    unique_session_created = FALSE;
+    unique_session.session_core_1_bs__state = constants__e_session_init;
+  }
+}
+
   
 void session_core_1_bs__cli_add_pending_request(
    const constants__t_session_i session_core_1_bs__session,

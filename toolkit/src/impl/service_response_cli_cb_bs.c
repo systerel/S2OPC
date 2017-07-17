@@ -15,35 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "service_reponse_cli_cb_bs.h"
+#include "service_response_cli_cb_bs.h"
 
-#include "test_results.h"
-
-#include "internal_msg.h"
-
-#include "sopc_types.h"
+#include "sopc_user_app_itf.h"
+#include "sopc_toolkit_config.h"
+#include "sopc_services_events.h"
 #include "sopc_sc_events.h"
 
-#include "testlib_read_response.h"
 
-
-void service_reponse_cli_cb_bs__INITIALISATION(void)
+void service_response_cli_cb_bs__INITIALISATION(void)
 {
 }
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void service_reponse_cli_cb_bs__cli_service_read_response(
-   const constants__t_msg_i service_reponse_cli_cb_bs__resp_msg,
-   const constants__t_StatusCode_i service_reponse_cli_cb_bs__status){
-
-  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) service_reponse_cli_cb_bs__resp_msg;
-  OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) msg->msg;
-
-  test_results_set_read_result(test_read_request_response(readResp,
-                                                          service_reponse_cli_cb_bs__status,
-                                                          0)
-                               ? (!FALSE):FALSE);
+void service_response_cli_cb_bs__cli_service_response(
+   const constants__t_msg_i service_response_cli_cb_bs__resp_msg,
+   const constants__t_StatusCode_i service_response_cli_cb_bs__status){
+   SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
+                                        SOPC_AppEvent_ComEvent_Create(SE_RCV_SESSION_RESPONSE),
+                                        0, // unused
+                                        service_response_cli_cb_bs__resp_msg, // (SOPC_Toolkit_Msg*) 
+                                        service_response_cli_cb_bs__status,
+                                        "Session service response");
 }
 

@@ -83,8 +83,8 @@ void channel_mgr_bs__close_secure_channel(
 void channel_mgr_bs__channel_lost(
    const constants__t_channel_i channel_mgr_bs__channel) {
   printf("channel_mgr_bs__channel_lost\n");
-  exit(1);
-   ;
+  free(unique_channel_or_endpoint);
+  unique_channel_or_endpoint = NULL;
 }
 
 void channel_mgr_bs__receive_sc_msg(
@@ -120,19 +120,22 @@ void channel_mgr_bs__send_channel_msg(
   
   // Verif on channel state ?
   if(msg->isRequest == (!FALSE)){
-      SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                           SC_SERVICE_SND_MSG,
-                                           chOrEnd->id,
-                                           msg,
-                                           chOrEnd->id, // TMP: shall be the sc config index !
-                                           "Services sends a message on (client) channel !");
+    SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
+                                         SC_SERVICE_SND_MSG,
+                                         chOrEnd->id,
+                                         msg,
+                                         chOrEnd->id, // TMP: shall be the sc config index !
+                                         "Services sends a message on (client) channel !");
   }else if(msg->isRequest == FALSE){
-      SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                           EP_SC_SERVICE_SND_MSG,
-                                           chOrEnd->id, // Shall be endpoint config index
-                                           msg,
-                                           0,
-                                           "Services sends a message on (server) channel !");
+    if(chOrEnd->isChannel == FALSE){
+      msg->optContext = (void*) chOrEnd->context;
+    }
+    SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
+                                         EP_SC_SERVICE_SND_MSG,
+                                         chOrEnd->id, // Shall be endpoint config index
+                                         msg,
+                                         0,
+                                         "Services sends a message on (server) channel !");
   }else{
     printf("channel_mgr_bs__send_channel_msg\n");
     exit(1);
@@ -145,14 +148,19 @@ void channel_mgr_bs__is_valid_channel(
    const constants__t_channel_i channel_mgr_bs__channel,
    t_bool * const channel_mgr_bs__bres) {
   // Not null channel pointer
-  *channel_mgr_bs__bres = channel_mgr_bs__channel != 0;
+  *channel_mgr_bs__bres = channel_mgr_bs__channel != constants__c_channel_indet;
 }
 
 void channel_mgr_bs__get_valid_channel(
    const constants__t_channel_config_idx_i channel_mgr_bs__channel_config_idx,
    constants__t_channel_i * const channel_mgr_bs__channel) {
+  if(NULL != unique_channel_or_endpoint && 
+     channel_mgr_bs__channel_config_idx == (t_entier4) unique_channel_or_endpoint->id){
+    *channel_mgr_bs__channel = unique_channel_or_endpoint;
+  }else{
+    *channel_mgr_bs__channel = constants__c_channel_indet;
+  }
   // Always fail: no channel management
-  *channel_mgr_bs__channel = constants__c_channel_indet;
 }
 
 void channel_mgr_bs__get_channel_info(
@@ -179,6 +187,7 @@ void channel_mgr_bs__close_all_channel(void){
                                            0,
                                            "Close all channel !");
       free(unique_channel_or_endpoint);
+      unique_channel_or_endpoint = NULL;
     }
   }
 }

@@ -43,11 +43,6 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
                                   int32_t  auxParam);
 
 
-typedef enum SOPC_App_Event_Type {
-  APP_COM_EVENT,
-  APP_ADDRESS_SPACE_NOTIF,
-} SOPC_App_Event_Type;
-
 void SOPC_ApplicationEventDispatcher(int32_t  appEvent, 
                                      uint32_t eventType, 
                                      void*    params, 

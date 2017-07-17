@@ -44,7 +44,9 @@ void message_in_bs__INITIALISATION(void) {
   --------------------*/
 
 void message_in_bs__dealloc_msg_in(const constants__t_msg_i message_in_bs__msg){
-  message_out_bs__dealloc_msg_out(message_in_bs__msg);
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_in_bs__msg; 
+  SOPC_Encodeable_Delete(msg->encType, &msg->msg);
+  free(msg);
 }
 
 void message_in_bs__get_msg_in_type(

@@ -34,8 +34,8 @@ void session_core_orphaned_it_bs__INITIALISATION(void) {
 void session_core_orphaned_it_bs__init_iter_orphaned_t_session(
    const constants__t_channel_i session_core_orphaned_it_bs__lost_channel,
    t_bool * const session_core_orphaned_it_bs__continue) {
-  printf("session_core_orphaned_it_bs__init_iter_orphaned_t_session\n");
-  exit(1);
+  // TODO: iter
+  *session_core_orphaned_it_bs__continue = 0;
 }
 
 void session_core_orphaned_it_bs__continue_iter_orphaned_t_session(

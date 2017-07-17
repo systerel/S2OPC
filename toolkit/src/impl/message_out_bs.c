@@ -93,22 +93,23 @@ void message_out_bs__bless_msg_out(
 
 void message_out_bs__dealloc_msg_out(
    const constants__t_msg_i message_out_bs__msg) {
-  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
-  if(message_out_bs__msg != constants__c_msg_indet && NULL != msg->encType){
-    if(&OpcUa_ReadResponse_EncodeableType == msg->encType){
-      /* Current implementation share the variants of the address space in the response,
-         avoid deallocation of those variants */
-      OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) msg->msg;
-      if(NULL != readMsg){
-        free(readMsg->Results);
-        readMsg->Results = NULL;
-        readMsg->NoOfResults = 0;
-      }
-    }
-    // TODO: status returned ?
-    SOPC_Encodeable_Delete(msg->encType, &msg->msg);
-    free(msg);
-  }
+  NULL; // Deallocation really done by SC event manager now
+//  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
+//  if(message_out_bs__msg != constants__c_msg_indet && NULL != msg->encType){
+//    if(&OpcUa_ReadResponse_EncodeableType == msg->encType){
+//      /* Current implementation share the variants of the address space in the response,
+//         avoid deallocation of those variants */
+//      OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) msg->msg;
+//      if(NULL != readMsg){
+//        free(readMsg->Results);
+//        readMsg->Results = NULL;
+//        readMsg->NoOfResults = 0;
+//      }
+//    }
+//    // TODO: status returned ?
+//    SOPC_Encodeable_Delete(msg->encType, &msg->msg);
+//    free(msg);
+//  }
 }
 
 void message_out_bs__get_msg_out_type(

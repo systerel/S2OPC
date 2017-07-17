@@ -30,6 +30,7 @@
   ------------------------*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "session_core_channel_lost_it_bs.h"
 
 /*------------------------
@@ -44,8 +45,8 @@ void session_core_channel_lost_it_bs__INITIALISATION(void) {
 void session_core_channel_lost_it_bs__init_iter_channel_lost_t_session(
    const constants__t_channel_i session_core_channel_lost_it_bs__lost_channel,
    t_bool * const session_core_channel_lost_it_bs__continue) {
-  printf("session_core_channel_lost_it_bs__init_iter_channel_lost_t_session\n");
-  exit(1);
+  printf("NOT IMPLEMENTED: session_core_channel_lost_it_bs__init_iter_channel_lost_t_session\n");
+  *session_core_channel_lost_it_bs__continue = false;
 }
 void session_core_channel_lost_it_bs__continue_iter_channel_lost_t_session(
    constants__t_session_i * const session_core_channel_lost_it_bs__session,

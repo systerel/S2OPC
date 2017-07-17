@@ -16,6 +16,7 @@
  */
 
 #include "sopc_toolkit_config.h"
+#include "sopc_user_app_itf.h"
 #include "sopc_services_events.h"
 #include "sopc_sc_events.h"
 
@@ -25,7 +26,9 @@
 
 #include "sopc_stack_config.h"
 #include "sopc_mutexes.h"
+#include "sopc_time.h"
 #include "singly_linked_list.h"
+#include "sopc_encodeable.h"
 
 #include "io_dispatch_mgr.h"
 #include "session_header_init.h"
@@ -45,25 +48,31 @@ static struct {
 
 SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
 
-static SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
-static SOPC_ComEvent_Fct* pAppFct = NULL;
+SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
+static SOPC_ComEvent_Fct* appFct = NULL;
 static SOPC_AddressSpaceNotif_Fct* pAddSpaceFct = NULL;
 
-void SOPC_ApplicationEventDispatcher(int32_t  appEvent, 
-                                     uint32_t eventType, 
+void SOPC_ApplicationEventDispatcher(int32_t  eventAndType, 
+                                     uint32_t id, 
                                      void*    params, 
                                      int32_t  auxParam){
-  switch((SOPC_App_Event_Type) eventType){
+  SOPC_Toolkit_Msg* tmsg = NULL;
+  switch(SOPC_AppEvent_AppEventType_Get(eventAndType)){
   case APP_COM_EVENT:
-    if(NULL != pAppFct){
-      pAppFct((SOPC_App_Com_Event) appEvent,
-              params, // TBD
-              (SOPC_StatusCode) auxParam); // TBD             
+    if(NULL != appFct){
+      appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
+             params, // TBD
+             (SOPC_StatusCode) auxParam); // TBD
+      if(SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_SESSION_RESPONSE){
+        // Message to deallocate ? => if not application shall deallocate !
+        tmsg = (SOPC_Toolkit_Msg*) params;
+        SOPC_Encodeable_Delete(tmsg->encType, &tmsg->msg);
+      }
     }
     break;
   case APP_ADDRESS_SPACE_NOTIF:
     if(NULL != pAddSpaceFct){
-      pAddSpaceFct((SOPC_App_AddSpace_Event) appEvent,
+      pAddSpaceFct(SOPC_AppEvent_AddSpaceEvent_Get(eventAndType),
                    params, // TBD
                    (SOPC_StatusCode) auxParam); // TBD             
     }
@@ -71,11 +80,13 @@ void SOPC_ApplicationEventDispatcher(int32_t  appEvent,
   default:
     assert(FALSE);
   }
+  free(params);
 }
 
 SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != pAppFct){
+      appFct = pAppFct;
       status = OpcUa_BadInvalidState;
       if(tConfig.initDone == FALSE){
         Mutex_Initialization(&tConfig.mut);
@@ -127,15 +138,21 @@ void SOPC_Toolkit_Clear(){
     SOPC_StatusCode status = STATUS_OK;
     if(tConfig.initDone != FALSE){
       Mutex_Lock(&tConfig.mut);
-      SOPC_StackConfiguration_Clear();
+      io_dispatch_mgr__close_all_active_connections();
+      // TODO: need a synchronous way to wait for end of all connections
+      // (SC_DISCONNECTED shall be received even in case of SC_DISCONNECT request
+      //  and all events shall be awaited)
+      SOPC_Sleep(500);
+      // END TODO
       status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
       (void) status; // log
       status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);
-      (void) status; // log 
-      io_dispatch_mgr__close_all_active_connections();
+      (void) status; // log
+      SOPC_TEMP_ClearEventDispMgr();
+      SOPC_StackConfiguration_Clear();
       SLinkedList_Delete(tConfig.scConfigs);
       SLinkedList_Delete(tConfig.epConfigs);       
-      pAppFct = NULL;
+      appFct = NULL;
       pAddSpaceFct = NULL;
       tConfig.locked = FALSE;
       tConfig.initDone = FALSE;
@@ -264,4 +281,24 @@ SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces()
         Mutex_Unlock(&tConfig.mut);
     }
     return res;
+}
+
+int32_t SOPC_AppEvent_ComEvent_Create(SOPC_App_Com_Event event){
+  return APP_COM_EVENT + (event << 8);
+}
+
+int32_t SOPC_AppEvent_AddSpaceEvent_Create(SOPC_App_AddSpace_Event event){
+  return APP_ADDRESS_SPACE_NOTIF + (event << 8);
+}
+
+SOPC_App_EventType SOPC_AppEvent_AppEventType_Get(int32_t iEvent){
+  return (iEvent & 0xFF);
+}
+
+SOPC_App_Com_Event SOPC_AppEvent_ComEvent_Get(int32_t iEvent){
+  return (iEvent >> 8);
+}
+
+SOPC_App_AddSpace_Event SOPC_AppEvent_AddSpaceEvent_Get(int32_t iEvent){
+    return (iEvent >> 8);
 }

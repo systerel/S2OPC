@@ -1,8 +1,3 @@
-/**
- *  \file sopc_toolkit_config.h
- *
- *  \brief Stack initialization and configuration
- */
 /*
  *  Copyright (C) 2017 Systerel and others.
  *
@@ -24,6 +19,7 @@
 #define SOPC_TOOLKIT_CONFIG_H_
 
 #include "sopc_sc_events.h" // TMP
+#include "sopc_user_app_itf.h" // TMP ? => separation of public / internal
 
 #include "sopc_builtintypes.h"
 #include "sopc_namespace_table.h"
@@ -32,37 +28,6 @@
 #include "key_manager.h"
 
 extern SOPC_EventDispatcherManager* servicesEventDispatcherMgr;
-
-/* Client and Server communication events to be managed by applicative code*/
-typedef enum SOPC_App_Com_Event {
-  /* Client application events */
-  SE_SESSION_ACTIVATION_FAILURE,
-  SE_ACTIVATED_SESSION,
-  SE_RCV_SESSION_RESPONSE,
-  SE_CLOSED_SESSION,
-  //  SE_RCV_PUBLIC_RESPONSE, => discovery services
-  
-  /* Server application events */
-  SE_CLOSED_ENDPOINT,
-} SOPC_App_Com_Event;
-
-/* Server address space access/modification notifications to applicative code */
-typedef enum SOPC_App_AddSpace_Event {
-  /* Server application events */
-  AS_READ_EVENT,
-  AS_WRITE_EVENT,
-} SOPC_App_AddSpace_Event;
-
-// TODO: define parameter for each type of event
-typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event,
-                               void*              param,
-                               SOPC_StatusCode    status);
-
-
-// TODO: define parameter for each type of event
-typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event,
-                                        void*                   param,
-                                        SOPC_StatusCode         status);
 
 /**
  *  \brief  Initialize the toolkit configuration, libraries and threads
