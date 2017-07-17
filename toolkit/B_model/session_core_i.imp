@@ -39,7 +39,8 @@ PROMOTES
     get_session_from_token,
     get_session_from_req_handle,
     get_session_channel,
-    is_valid_session
+    is_valid_session,
+    delete_session
     
 LOCAL_OPERATIONS
     
@@ -95,10 +96,10 @@ OPERATIONS
             l_state <-- get_session_state (session);
             IF l_state = e_session_init
             THEN
+                create_session (session, channel, e_session_creating);
                 l_valid_handle <-- cli_add_pending_request (session, req_handle);
                 IF l_valid_handle = TRUE
                 THEN
-                    create_session (session, channel, e_session_creating);
                     l_ret := e_sc_ok
                     /* TODO: populate msg with parameters  */
                 ELSE

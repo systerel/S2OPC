@@ -836,5 +836,20 @@ OPERATIONS
             user := c_user_indet
         END
     END
-
+    ;
+    
+    delete_session (session) = 
+    PRE
+        session : t_session_i &
+        session : s_session
+    THEN
+        s_session := s_session - {session} ||
+        a_channel := {session} <<| a_channel ||
+        a_state := {session} <<| a_state ||
+        a_user := {session} <<| a_user ||
+        a_token := a_token |>> {session} ||
+        a_orphaned := {session} <<| a_orphaned ||
+        a_cli_pending_requests := a_cli_pending_requests |>> {session}
+    END
+    
 END

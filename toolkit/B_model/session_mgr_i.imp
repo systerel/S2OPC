@@ -33,6 +33,7 @@ PROMOTES
     get_session_user_or_indet,
     get_session_from_token,
     cli_init_session,
+    delete_session,
     cli_create_req,
     cli_user_activate_req,
     cli_sc_activate_req,

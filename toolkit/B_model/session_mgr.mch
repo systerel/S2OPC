@@ -366,5 +366,13 @@ OPERATIONS
     THEN
         user :: t_user_i
     END
+    ;
+
+    delete_session (session) = 
+    PRE
+        session : t_session_i
+    THEN
+        skip
+    END
     
 END

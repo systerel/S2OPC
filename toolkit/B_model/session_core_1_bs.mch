@@ -212,6 +212,16 @@ OPERATIONS
     END
     ;
     
+    create_session_failure (session) =
+    PRE
+        session : t_session_i &
+        session : s_session &
+        a_state (session) : {e_session_created, e_session_creating}
+    THEN
+        a_channel := {session} <<| a_channel ||
+        a_state (session) := e_session_init
+    END;
+    
     ret <-- cli_add_pending_request (session, req_handle) =
     PRE
         session : t_session_i &

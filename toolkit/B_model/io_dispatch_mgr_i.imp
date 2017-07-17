@@ -443,7 +443,10 @@ OPERATIONS
                                     THEN
                                         l_ret <-- local_activate_session (l_session, l_session_user)
                                     END
-                                END
+                                END;
+                                // In case it is an internally treated message we have to deallocate it
+                                // (services response messages are forwarded to application)
+                                dealloc_msg_in (msg)
                                 
                             OR e_msg_session_read_resp,
                                 e_msg_session_write_resp
@@ -536,7 +539,10 @@ OPERATIONS
                                     END
                                 END
                             END
-                        END
+                        END;
+                        // In case it is an internally treated message we have to deallocate it
+                        // (all messages received by server are treated internally)
+                        dealloc_msg_in (msg)
                     ELSE
                         skip /* Not a request on a server channel NOR a response on a client channel */
                     END
@@ -550,7 +556,6 @@ OPERATIONS
     channel_connected_event (channel_config_idx) =
     VAR
         l_channel,
-        l_valid_channel,
         l_session_to_create
     IN
         l_channel <-- get_valid_channel (channel_config_idx);
@@ -562,24 +567,19 @@ OPERATIONS
         THEN
             local_create_session (l_session_to_create, l_channel)
             // activation already registered as next async step
-        END;
-        l_valid_channel <-- is_valid_channel (l_channel);
-        IF l_valid_channel = TRUE
-        THEN
-            notify_user_app_sc_connected (l_channel)
         END
     END
     ;
     
-    ret <-- activate_new_session (channel_config_idx, user) =
+    session <-- activate_new_session (channel_config_idx, user) =
     VAR
         l_channel,
         l_channel_connected,
-        l_session,
         l_valid_session,
         l_valid_channel,
         l_bret
     IN
+        session := c_session_indet;
         l_channel <-- get_valid_channel (channel_config_idx);
         l_valid_channel <-- is_valid_channel (l_channel);
         IF l_valid_channel = FALSE
@@ -589,42 +589,31 @@ OPERATIONS
             l_channel_connected := FALSE
         END;
         l_valid_channel <-- is_valid_channel (l_channel);
-        IF l_valid_channel = FALSE
+        IF l_valid_channel = TRUE
         THEN
-            ret := e_sc_nok
-        ELSE
-            l_session <-- cli_init_session;
-            l_valid_session <-- is_valid_session (l_session);
+            session <-- cli_init_session;
+            l_valid_session <-- is_valid_session (session);
             IF l_valid_session = TRUE THEN
                 IF l_channel_connected = FALSE 
                 THEN
                     /* channel did not exist or is not connected anymore: add async session creation on SC connection */
-                    l_bret <-- add_session_to_create (l_session, channel_config_idx);
-                    IF l_bret = TRUE
-                    THEN
-                        local_create_session (l_session, l_channel);
-                        ret := e_sc_ok
-                    ELSE
-                        ret := e_sc_nok
-                    END
+                    l_bret <-- add_session_to_create (session, channel_config_idx)
                 ELSE
-                    ret := e_sc_ok
+                    local_create_session (session, l_channel);
+                    l_bret := TRUE
                 END;
-                IF ret = e_sc_ok
+                IF l_bret = TRUE
                 THEN
-                    l_bret <-- add_session_to_activate (l_session, user);
-                    IF l_bret = TRUE
-                    THEN
-                        ret := e_sc_ok
-                    ELSE
-                        ret := e_sc_nok
-                    END
-                ELSE
+                    l_bret <-- add_session_to_activate (session, user)
+                END;
+                IF l_bret = FALSE
+                THEN
                     /* Remove session from sessions to create */
-                    l_session <-- is_session_to_create (channel_config_idx)
-                END
-            ELSE
-                ret := e_sc_bad_out_of_memory
+                    session <-- is_session_to_create (channel_config_idx);
+                    /* Delete session */
+                    delete_session (session);
+                    session := c_session_indet
+                END            
             END
         END
     END

@@ -209,14 +209,5 @@ OPERATIONS
     THEN
         bres := bool(channel : s_is_client)
     END
-    ;
-    
-    notify_user_app_sc_connected (channel) =
-    PRE
-        channel         : t_channel_i &
-        channel         : s_channel
-    THEN
-        skip
-    END
-    
+
 END

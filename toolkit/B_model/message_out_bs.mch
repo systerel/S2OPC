@@ -71,6 +71,9 @@ OPERATIONS
     END
     ;
     
+    /* TODO: rename ? does not free message anymore, managed by SC. 
+       PB: nothing done here except in model ! => msg shall be set to NULL after this operation
+    */
     dealloc_msg_out (msg) =
     PRE
         msg : t_msg_i &
