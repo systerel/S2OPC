@@ -15,52 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "service_response_cli_cb_bs.h"
+#include "service_reponse_cli_cb_bs.h"
 
 #include "test_results.h"
+
+#include "internal_msg.h"
 
 #include "sopc_types.h"
 #include "sopc_sc_events.h"
 
 #include "testlib_read_response.h"
-#include "testlib_write.h"
 
-#include "util_b2c.h"
 
-static uint32_t cptReadResps = 0;
-
-void service_response_cli_cb_bs__INITIALISATION(void)
+void service_reponse_cli_cb_bs__INITIALISATION(void)
 {
 }
 
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-// Temporary callback function for client side (non configurable)
-void service_response_cli_cb_bs__cli_service_response(
-   const constants__t_msg_i service_response_cli_cb_bs__resp_msg,
-   const constants__t_StatusCode_i service_response_cli_cb_bs__status){
+void service_reponse_cli_cb_bs__cli_service_read_response(
+   const constants__t_msg_i service_reponse_cli_cb_bs__resp_msg,
+   const constants__t_StatusCode_i service_reponse_cli_cb_bs__status){
 
-  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) service_response_cli_cb_bs__resp_msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) service_reponse_cli_cb_bs__resp_msg;
+  OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) msg->msg;
 
-  if(msg->encType == &OpcUa_ReadResponse_EncodeableType){
-    OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) msg->msg;
-    cptReadResps++;
-    if(cptReadResps <= 1){
-      // First read response is to test read result
-      test_results_set_service_result(test_read_request_response(readResp,
-                                                              service_response_cli_cb_bs__status,
-                                                              0)
-                                   ? (!FALSE):FALSE);
-    }else{
-      // Second read response is to test write effect (through read result)
-      test_results_set_service_result(
-          tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
-    }
-  }else if(msg->encType == &OpcUa_WriteResponse_EncodeableType){
-    OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) msg->msg;
-    test_results_set_service_result(
-        tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
-  }
+  test_results_set_read_result(test_read_request_response(readResp,
+                                                          service_reponse_cli_cb_bs__status,
+                                                          0)
+                               ? (!FALSE):FALSE);
 }
 
