@@ -2,7 +2,7 @@
 
  File Name            : address_space.h
 
- Date                 : 13/07/2017 16:54:04
+ Date                 : 18/07/2017 17:12:41
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,6 +45,7 @@ extern void address_space__INITIALISATION(void);
 #define address_space__read_AddressSpace_free_value address_space_bs__read_AddressSpace_free_value
 #define address_space__read_Value_StatusCode address_space_bs__read_Value_StatusCode
 #define address_space__readall_AddressSpace_Node address_space_bs__readall_AddressSpace_Node
+#define address_space__write_WriteResponse_msg_out response_write_bs__write_WriteResponse_msg_out
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -54,7 +55,7 @@ extern void address_space__treat_write_1(
    const constants__t_NodeId_i address_space__nid,
    const constants__t_AttributeId_i address_space__aid,
    const constants__t_Variant_i address_space__value,
-   const constants__t_UserId_i address_space__uid,
+   const constants__t_user_i address_space__uid,
    constants__t_StatusCode_i * const address_space__sc);
 extern void address_space__treat_write_2(
    const constants__t_NodeId_i address_space__nid,
@@ -75,7 +76,7 @@ extern void address_space__read_NodeClass_Attribute(
    constants__t_NodeClass_i * const address_space__ncl,
    constants__t_Variant_i * const address_space__val);
 extern void address_space__treat_write_request_WriteValues(
-   const constants__t_UserId_i address_space__userid,
+   const constants__t_user_i address_space__userid,
    constants__t_StatusCode_i * const address_space__StatusCode_service);
 
 #endif

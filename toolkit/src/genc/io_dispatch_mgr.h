@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 13/07/2017 16:54:05
+ Date                 : 18/07/2017 17:12:42
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -25,7 +25,7 @@
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
 #include "service_read.h"
-#include "service_read_cli_cb_bs.h"
+#include "service_response_cli_cb_bs.h"
 #include "service_write_decode_bs.h"
 #include "session_mgr.h"
 
@@ -55,7 +55,7 @@ extern void io_dispatch_mgr__is_request_type(
    t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__treat_write_request(
    const constants__t_ByteString_i io_dispatch_mgr__req_payload,
-   const constants__t_UserId_i io_dispatch_mgr__userid,
+   const constants__t_user_i io_dispatch_mgr__userid,
    constants__t_StatusCode_i * const io_dispatch_mgr__StatusCode_service);
 
 /*--------------------

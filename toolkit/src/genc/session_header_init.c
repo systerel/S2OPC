@@ -2,7 +2,7 @@
 
  File Name            : session_header_init.c
 
- Date                 : 13/07/2017 16:54:11
+ Date                 : 18/07/2017 17:12:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -33,7 +33,7 @@
 #include "request_handle_bs.h"
 #include "response_write_bs.h"
 #include "service_read.h"
-#include "service_read_cli_cb_bs.h"
+#include "service_response_cli_cb_bs.h"
 #include "service_write_decode_bs.h"
 #include "session_core.h"
 #include "session_core_1_bs.h"
@@ -68,7 +68,7 @@ void INITIALISATION(void) {
    msg_read_response_bs__INITIALISATION();
    msg_read_response__INITIALISATION();
    service_read__INITIALISATION();
-   service_read_cli_cb_bs__INITIALISATION();
+   service_response_cli_cb_bs__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
    session_header__INITIALISATION();
 }

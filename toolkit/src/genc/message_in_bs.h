@@ -2,7 +2,7 @@
 
  File Name            : message_in_bs.h
 
- Date                 : 13/07/2017 16:54:08
+ Date                 : 18/07/2017 17:12:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -34,6 +34,9 @@ extern void message_in_bs__dealloc_msg_in(
 extern void message_in_bs__get_msg_in_type(
    const constants__t_msg_i message_in_bs__msg,
    constants__t_msg_type * const message_in_bs__msgtype);
+extern void message_in_bs__get_msg_payload(
+   const constants__t_msg_i message_in_bs__msg,
+   constants__t_ByteString_i * const message_in_bs__payload);
 extern void message_in_bs__is_valid_msg_in(
    const constants__t_msg_i message_in_bs__msg,
    t_bool * const message_in_bs__bres);

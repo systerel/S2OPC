@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 13/07/2017 16:54:05
+ Date                 : 18/07/2017 17:12:42
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -77,7 +77,7 @@ void io_dispatch_mgr__is_request_type(
 
 void io_dispatch_mgr__treat_write_request(
    const constants__t_ByteString_i io_dispatch_mgr__req_payload,
-   const constants__t_UserId_i io_dispatch_mgr__userid,
+   const constants__t_user_i io_dispatch_mgr__userid,
    constants__t_StatusCode_i * const io_dispatch_mgr__StatusCode_service) {
    {
       t_entier4 io_dispatch_mgr__l_nb_req;
@@ -109,8 +109,10 @@ void io_dispatch_mgr__receive_msg(
       constants__t_request_handle_i io_dispatch_mgr__l_request_handle;
       constants__t_session_token_i io_dispatch_mgr__l_session_token;
       constants__t_session_i io_dispatch_mgr__l_session;
+      constants__t_user_i io_dispatch_mgr__l_session_user;
       t_bool io_dispatch_mgr__l_valid_msg;
       constants__t_msg_type io_dispatch_mgr__l_msg_type;
+      constants__t_ByteString_i io_dispatch_mgr__l_payload;
       t_bool io_dispatch_mgr__l_valid_channel;
       t_bool io_dispatch_mgr__l_is_client;
       t_bool io_dispatch_mgr__l_is_req;
@@ -168,6 +170,7 @@ void io_dispatch_mgr__receive_msg(
                   request_handle_bs__remove_req_handle(io_dispatch_mgr__l_request_handle);
                   break;
                case constants__e_msg_session_read_resp:
+               case constants__e_msg_session_write_resp:
                   message_in_bs__read_msg_header_req_handle(io_dispatch_mgr__msg,
                      &io_dispatch_mgr__l_request_handle);
                   session_mgr__cli_validate_session_service_resp(io_dispatch_mgr__channel,
@@ -177,7 +180,7 @@ void io_dispatch_mgr__receive_msg(
                   if (io_dispatch_mgr__l_is_valid_resp == true) {
                      message_in_bs__read_msg_resp_header_service_status(io_dispatch_mgr__msg,
                         &io_dispatch_mgr__l_status);
-                     service_read_cli_cb_bs__cli_service_read_response(io_dispatch_mgr__msg,
+                     service_response_cli_cb_bs__cli_service_response(io_dispatch_mgr__msg,
                         io_dispatch_mgr__l_status);
                   }
                   break;
@@ -224,6 +227,7 @@ void io_dispatch_mgr__receive_msg(
                   }
                   break;
                case constants__e_msg_session_read_req:
+               case constants__e_msg_session_write_req:
                   message_in_bs__read_msg_header_req_handle(io_dispatch_mgr__msg,
                      &io_dispatch_mgr__l_request_handle);
                   message_in_bs__read_msg_req_header_session_token(io_dispatch_mgr__msg,
@@ -235,15 +239,27 @@ void io_dispatch_mgr__receive_msg(
                      &io_dispatch_mgr__l_is_valid_req,
                      &io_dispatch_mgr__l_snd_session_err);
                   if (io_dispatch_mgr__l_is_valid_req == true) {
-                     message_out_bs__alloc_msg(constants__e_msg_session_read_resp,
+                     message_out_bs__alloc_msg(io_dispatch_mgr__l_msg_type,
                         &io_dispatch_mgr__l_resp_msg);
                      message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_resp_msg,
                         &io_dispatch_mgr__l_valid_msg);
                      session_mgr__get_session_from_token(io_dispatch_mgr__l_session_token,
                         &io_dispatch_mgr__l_session);
                      if (io_dispatch_mgr__l_valid_msg == true) {
-                        service_read__treat_read_request(io_dispatch_mgr__msg,
-                           io_dispatch_mgr__l_resp_msg);
+                        if (io_dispatch_mgr__l_msg_type == constants__e_msg_session_read_req) {
+                           service_read__treat_read_request(io_dispatch_mgr__msg,
+                              io_dispatch_mgr__l_resp_msg);
+                        }
+                        else {
+                           session_mgr__get_session_user_or_indet(io_dispatch_mgr__l_session,
+                              &io_dispatch_mgr__l_session_user);
+                           message_in_bs__get_msg_payload(io_dispatch_mgr__msg,
+                              &io_dispatch_mgr__l_payload);
+                           io_dispatch_mgr__treat_write_request(io_dispatch_mgr__l_payload,
+                              io_dispatch_mgr__l_session_user,
+                              &io_dispatch_mgr__l_ret);
+                           address_space__write_WriteResponse_msg_out(io_dispatch_mgr__l_resp_msg);
+                        }
                         session_mgr__srv_validate_session_service_resp(io_dispatch_mgr__channel,
                            io_dispatch_mgr__l_session,
                            io_dispatch_mgr__l_request_handle,

@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 13/07/2017 16:54:06
+ Date                 : 18/07/2017 17:12:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -844,6 +844,24 @@ void session_core__get_session_state_or_closed(
       }
       else {
          *session_core__state = constants__e_session_closed;
+      }
+   }
+}
+
+void session_core__get_session_user_or_indet(
+   const constants__t_session_i session_core__session,
+   constants__t_user_i * const session_core__user) {
+   {
+      t_bool session_core__l_valid_session;
+      
+      session_core_1_bs__is_valid_session(session_core__session,
+         &session_core__l_valid_session);
+      if (session_core__l_valid_session == true) {
+         session_core_1_bs__get_session_user(session_core__session,
+            session_core__user);
+      }
+      else {
+         *session_core__user = constants__c_user_indet;
       }
    }
 }

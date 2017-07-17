@@ -2,7 +2,7 @@
 
  File Name            : response_write_bs.h
 
- Date                 : 13/07/2017 16:54:09
+ Date                 : 18/07/2017 17:12:46
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -40,5 +40,7 @@ extern void response_write_bs__reset_ResponseWrite(void);
 extern void response_write_bs__set_ResponseWrite_StatusCode(
    const constants__t_WriteValue_i response_write_bs__wvi,
    const constants__t_StatusCode_i response_write_bs__sc);
+extern void response_write_bs__write_WriteResponse_msg_out(
+   const constants__t_msg_i response_write_bs__msg_out);
 
 #endif

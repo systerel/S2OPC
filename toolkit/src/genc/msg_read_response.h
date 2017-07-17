@@ -2,7 +2,7 @@
 
  File Name            : msg_read_response.h
 
- Date                 : 13/07/2017 16:54:06
+ Date                 : 18/07/2017 17:12:43
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -32,8 +32,8 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 extern constants__t_StatusCode_i msg_read_response__StatusCode;
-extern constants__t_msg_i msg_read_response__msg;
 extern t_entier4 msg_read_response__nb_resps_to_go;
+extern constants__t_msg_i msg_read_response__response_msg;
 extern constants__t_StatusCode_i msg_read_response__tab_StatusCode[constants__t_ReadValue_i_max+1];
 extern constants__t_Variant_i msg_read_response__tab_Value[constants__t_ReadValue_i_max+1];
 

@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 13/07/2017 16:54:05
+ Date                 : 18/07/2017 17:12:42
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -91,7 +91,9 @@ typedef enum {
    constants__e_msg_session_close_req,
    constants__e_msg_session_close_resp,
    constants__e_msg_session_read_req,
-   constants__e_msg_session_read_resp
+   constants__e_msg_session_read_resp,
+   constants__e_msg_session_write_req,
+   constants__e_msg_session_write_resp
 } constants__t_msg_type;
 typedef enum {
    constants__e_session_creating,
