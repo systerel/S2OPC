@@ -135,5 +135,21 @@ OPERATIONS
     THEN
         status :( status : t_StatusCode_i & status : t_StatusCode)
     END
+    ;
+    
+    payload <-- get_msg_payload (msg) =
+    PRE
+        msg : t_msg_i &
+        msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type :
+        {/*e_msg_session_create_req,
+            e_msg_session_activate_req, 
+            e_msg_session_close_req, 
+            e_msg_session_read_req,*/
+        	e_msg_session_write_req}
+    THEN
+        payload :( payload : t_ByteString_i & payload : t_ByteString)
+    END
     
 END

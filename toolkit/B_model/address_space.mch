@@ -136,8 +136,8 @@ OPERATIONS
 
     StatusCode_service <-- treat_write_request_WriteValues(userid) =
     PRE
-        userid : t_UserId_i &
-        userid : t_UserId &
+        userid : t_user_i &
+        userid : t_user &
         ResponseWrite_allocated = TRUE /* TODO & userid /= c_user_local */
     THEN
         StatusCode_service,

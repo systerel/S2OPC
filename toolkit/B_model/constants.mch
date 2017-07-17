@@ -76,7 +76,8 @@ SETS
         e_msg_session_create_req, e_msg_session_create_resp,
         e_msg_session_activate_req, e_msg_session_activate_resp,
         e_msg_session_close_req, e_msg_session_close_resp,
-        e_msg_session_read_req, e_msg_session_read_resp}
+        e_msg_session_read_req, e_msg_session_read_resp,
+        e_msg_session_write_req, e_msg_session_write_resp}
 
 CONCRETE_CONSTANTS
     /*AddS,*/

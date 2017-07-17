@@ -787,5 +787,18 @@ OPERATIONS
             state := e_session_closed
         END
     END
+    ;
+    
+    user <-- get_session_user_or_indet (session) =
+    PRE
+        session : t_session_i
+    THEN
+        IF session : s_session & a_state(session) = e_session_userActivated
+        THEN
+            user :( user : t_user_i & user = a_user (session))
+        ELSE
+            user := c_user_indet
+        END
+    END
 
 END

@@ -50,7 +50,7 @@ LOCAL_OPERATIONS
         nid : t_NodeId_i &
         aid : t_AttributeId_i &
         value : t_Variant_i &
-        uid : t_UserId_i &
+        uid : t_user_i &
         (isvalid = TRUE
          =>
          nid : t_NodeId &

@@ -723,6 +723,20 @@ OPERATIONS
             state := e_session_closed
         END
     END
+    ;
+    
+    user <-- get_session_user_or_indet (session) =
+    VAR
+        l_valid_session
+    IN
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE
+        THEN
+            user <-- get_session_user (session)
+        ELSE
+            user := c_user_indet
+        END
+    END
     
     
 END

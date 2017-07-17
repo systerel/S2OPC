@@ -16,7 +16,7 @@
  */
 
 MACHINE
-    service_read_cli_cb_bs
+    service_response_cli_cb_bs
     
 SEES
     constants,
@@ -24,12 +24,12 @@ SEES
     
 OPERATIONS
     
-    cli_service_read_response (resp_msg, status) = 
+    cli_service_response (resp_msg, status) = 
     PRE
         resp_msg   : t_msg_i &
         resp_msg   = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type = e_msg_session_read_resp &
+        a_msg_in_type : { e_msg_session_read_resp, e_msg_session_write_resp } &
         status : t_StatusCode_i &
         status : t_StatusCode
     THEN

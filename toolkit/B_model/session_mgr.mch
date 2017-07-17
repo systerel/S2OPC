@@ -342,5 +342,13 @@ OPERATIONS
     THEN
         state :: t_sessionState
     END
+    ;
+    
+    user <-- get_session_user_or_indet (session) =
+    PRE
+        session : t_session_i
+    THEN
+        user :: t_user_i
+    END
     
 END

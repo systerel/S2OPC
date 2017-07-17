@@ -28,7 +28,7 @@ IMPORTS
     service_read,
     channel_mgr_bs,
     request_handle_bs,
-    service_read_cli_cb_bs,
+    service_response_cli_cb_bs,
     address_space,
     service_write_decode_bs
 
@@ -61,8 +61,8 @@ LOCAL_OPERATIONS
     PRE
         req_payload : t_ByteString_i &
         req_payload : t_ByteString &
-        userid : t_UserId_i &
-        userid : t_UserId
+        userid : t_user_i &
+        userid : t_user
     THEN
         StatusCode_service
         :(  StatusCode_service : t_StatusCode_i &
@@ -147,8 +147,10 @@ OPERATIONS
         l_request_handle,
         l_session_token,
         l_session,
+        l_session_user,
         l_valid_msg,
         l_msg_type,
+        l_payload,
         l_valid_channel,
         l_is_client,
         l_is_req,
@@ -197,15 +199,15 @@ OPERATIONS
                                 l_request_handle <-- read_msg_header_req_handle (msg);
                                 receive_session_resp (channel, l_request_handle, msg, l_msg_type);
                                 remove_req_handle (l_request_handle)
-                            OR e_msg_session_read_resp
+                            OR e_msg_session_read_resp,
+                                e_msg_session_write_resp
                             THEN
                                 l_request_handle <-- read_msg_header_req_handle (msg);
                                 l_is_valid_resp <-- cli_validate_session_service_resp (channel, l_request_handle, msg);
                                 IF l_is_valid_resp = TRUE
                                 THEN
                                     l_status <-- read_msg_resp_header_service_status (msg);
-                                    // TODO: manage session read resp correctly
-                                    cli_service_read_response (msg, l_status)
+                                    cli_service_response (msg, l_status)
                                 END
                             END
                         END
@@ -237,19 +239,28 @@ OPERATIONS
                                     END;
                                     dealloc_msg_out (l_resp_msg)
                                 END
-                            OR e_msg_session_read_req
+                            OR e_msg_session_read_req,
+                                e_msg_session_write_req
                             THEN
                                 l_request_handle <-- read_msg_header_req_handle (msg);
                                 l_session_token <-- read_msg_req_header_session_token (msg);
                                 l_is_valid_req, l_snd_session_err <-- srv_validate_session_service_req (channel, l_request_handle, l_session_token, msg);
                                 IF l_is_valid_req = TRUE
                                 THEN
-                                    l_resp_msg <-- alloc_msg (e_msg_session_read_resp);
+                                    l_resp_msg <-- alloc_msg (l_msg_type);
                                     l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                                     l_session <-- get_session_from_token (l_session_token);
                                     IF l_valid_msg = TRUE
                                     THEN
-                                        treat_read_request(msg, l_resp_msg);
+                                        IF l_msg_type = e_msg_session_read_req
+                                        THEN
+                                            treat_read_request (msg, l_resp_msg)
+                                        ELSE
+                                            l_session_user <-- get_session_user_or_indet (l_session);
+                                            l_payload <-- get_msg_payload (msg);
+                                            l_ret <-- treat_write_request (l_payload, l_session_user)
+                                            // TODO: fill the write response with appropriate operation
+                                        END;
                                         l_is_valid_resp, l_snd_session_err <-- srv_validate_session_service_resp (channel, l_session, l_request_handle, msg, l_resp_msg);
                                         IF l_is_valid_resp = TRUE THEN
                                             write_msg_out_header_req_handle (l_resp_msg, l_request_handle);

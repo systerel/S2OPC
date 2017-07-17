@@ -30,6 +30,7 @@ IMPORTS
     
 PROMOTES
     get_session_state_or_closed,
+    get_session_user_or_indet,
     get_session_from_token,
     cli_create_req,
     cli_user_activate_req,
