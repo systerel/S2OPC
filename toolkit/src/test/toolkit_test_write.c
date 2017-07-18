@@ -23,6 +23,7 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "session_header_init.h"
 #include "address_space_bs.h"
@@ -53,6 +54,11 @@ int main ()
 
     /* Free the request */
     tlibw_free_WriteRequest(&pWriteReq);
+
+    if(bTest)
+        printf("Internal test: OK\n");
+    else
+        printf("Internal test: NOT ok\n");
 
     return false == bTest;
 }

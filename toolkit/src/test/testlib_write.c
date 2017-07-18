@@ -24,10 +24,16 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "testlib_write.h"
 #include "gen_addspace.h"
 #include "address_space_impl.h"
+#include "util_variant.h"
+
+#include "address_space.h"
+#include "address_space_bs.h"
+#include "io_dispatch_mgr.h"
 
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
@@ -178,14 +184,72 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq)
 }
 
 
-void tlibw_stimulateB_with_request(OpcUa_WriteRequest *pWriteReq)
+bool tlibw_stimulateB_with_request(OpcUa_WriteRequest *pWriteReq)
 {
+    constants__t_StatusCode_i sc = constants__c_StatusCode_indet;
+
+    /* Calls treat */
+    io_dispatch_mgr__treat_write_request(
+        (constants__t_ByteString_i) pWriteReq,
+        (constants__t_user_i) 0,
+        (constants__t_StatusCode_i *) &sc);
+
+    return sc == constants__e_sc_ok;
 }
 
 
 bool tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq)
 {
-    return false;
+    OpcUa_WriteValue *lwv;
+    size_t i;
+    t_bool isvalid;
+    constants__t_StatusCode_i sc;
+    constants__t_Node_i node;
+    SOPC_Variant *pVariant;
+    bool bVerif = true;
+    bool bTest;
+
+    if(NULL == pWriteReq)
+        exit(1);
+
+    lwv = pWriteReq->NodesToWrite;
+
+    for(i=0; i<(size_t)(pWriteReq->NoOfNodesToWrite); ++i)
+    {
+        /* Checks that the response [i] is ok */
+        response_write_bs__getall_ResponseWrite_StatusCode(i+1, &isvalid, &sc);
+        if(! isvalid || constants__e_sc_ok != sc)
+        {
+            printf("Response[wvi = %zd] is invalid (isvalid = %d, sc = %d)\n", i+1, isvalid, sc);
+            bVerif = false;
+        }
+        /* Directly checks in the address space that the request [i] is effective */
+        /* .. but first, get a Node from a nid... */
+        /* TODO: this must disappear when the read interface is complete (and an application can fetch a value) */
+        address_space_bs__readall_AddressSpace_Node((constants__t_NodeId_i) &lwv[i].NodeId, &isvalid, &node);
+        if(! isvalid)
+        {
+            printf("Cannot find NodeId[wvi = %zd]\n", i+1);
+            bVerif = false;
+        }
+        address_space_bs__read_AddressSpace_Attribute_value(node, constants__e_aid_Value, (constants__t_Variant_i *)&pVariant);
+        if(i < OFFSET_REQUESTS_OTHERS)
+            bTest = memcmp(pVariant, &lwv[i].Value.Value, sizeof(SOPC_Variant)) == 0;
+        else
+            /* The last request is redundant with the first, and because of the way our iterators are coded, it should be ignored. So its test is different. The request shall not be taken into account. */
+            bTest = memcmp(pVariant, &lwv[i].Value.Value, sizeof(SOPC_Variant)) != 0;
+        if(!bTest)
+        {
+            printf("Request[wvi = %zd] did not change the address space.\n+ Expected value:\n", i+1);
+            util_variant__print_SOPC_Variant(&lwv[i].Value.Value);
+            printf("+ Read value:\n");
+            util_variant__print_SOPC_Variant(pVariant);
+            bVerif = false;
+        }
+        free(pVariant);
+    }
+
+    return bVerif;
 }
 
 
