@@ -25,7 +25,8 @@ OBJS        =session_header_init.o \
              address_space.o address_space_it.o constants.o msg_read_request.o msg_read_request_it.o msg_read_response.o service_read.o \
              address_space_bs.o constants_bs.o msg_read_request_bs.o msg_read_response_bs.o \
              service_write_decode_bs.o response_write_bs.o \
-             gen_addspace.o testlib_read_response.o util_variant.o
+             gen_addspace.o util_variant.o \
+             testlib_read_response.o wrap_read.o
 OBJS        += session_header.o io_dispatch_mgr.o session_mgr.o session_core.o session_core_1_bs.o \
                channel_mgr_bs.o request_handle_bs.o message_in_bs.o message_out_bs.o \
                service_response_cli_cb_bs.o \
@@ -34,23 +35,24 @@ OBJS        += session_header.o io_dispatch_mgr.o session_mgr.o session_core.o s
 CLIENT_OBJS =toolkit_test_client.o
 SERVER_OBJS =toolkit_test_server.o
 READ_OBJS   =toolkit_test_read.o
+WRITE_OBJS  =toolkit_test_write.o
 
 CLIENT_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(CLIENT_OBJS))
 SERVER_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(SERVER_OBJS))
 READ_EXEC   :=$(patsubst %.o,$(PATHEXEC)/%,$(READ_OBJS))
+WRITE_EXEC  :=$(patsubst %.o,$(PATHEXEC)/%,$(WRITE_OBJS))
 OBJS        :=$(patsubst %,$(PATHOBJ)/%,$(OBJS))
-CLIENT_OBJS += wrap_read.o
 CLIENT_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(CLIENT_OBJS))
-SERVER_OBJS += wrap_read.o
 SERVER_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(SERVER_OBJS))
-READ_OBJS   += wrap_read.o
 READ_OBJS   :=$(patsubst %,$(PATHOBJ)/%,$(READ_OBJS))
+WRITE_OBJS  += testlib_write.o
+WRITE_OBJS  :=$(patsubst %,$(PATHOBJ)/%,$(WRITE_OBJS))
 
 .PHONY: all config clean trad client_server_test
 
 default: all
 
-all: config $(OBJS) $(CLIENT_EXEC) $(SERVER_EXEC) $(READ_EXEC)
+all: config $(OBJS) $(CLIENT_EXEC) $(SERVER_EXEC) $(READ_EXEC) $(WRITE_EXEC)
 
 config:
 	@echo "Configuring Toolkit build and output directory..."
@@ -64,7 +66,7 @@ clean:
 	@[ -d "$(PATHEXEC)" ] && \rm -rf $(PATHEXEC) || true
 
 trad:
-	@[ -d "./$(PATHTRAD)" ] && \rm -fr ./$(PATHTRAD)
+	@\rm -fr ./$(PATHTRAD)
 	m -tr
 	@mkdir $(PATHTRAD)
 	@cp $(PATHGENTRAD)/*.c $(PATHGENTRAD)/*.h $(PATHTRAD)
@@ -97,6 +99,10 @@ $(SERVER_EXEC): config $(OBJS) $(SERVER_OBJS)
 $(READ_EXEC): config $(OBJS) $(READ_OBJS)
 	@echo "Linking $@"
 	@$(CC) $(OBJS) $(READ_OBJS) $(LIBS) $(LFLAGS) -o $(READ_EXEC)
+
+$(WRITE_EXEC): config $(OBJS) $(WRITE_OBJS)
+	@echo "Linking $@"
+	@$(CC) $(OBJS) $(WRITE_OBJS) $(LIBS) $(LFLAGS) -o $(WRITE_EXEC)
 
 toolkit_test_read: $(READ_EXEC)
 	@echo "Executing Toolkit read test"
