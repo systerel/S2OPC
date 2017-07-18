@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 24/07/2017 18:24:08
+ Date                 : 25/07/2017 17:17:58
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -123,6 +123,179 @@ void io_dispatch_mgr__treat_write_request(
    }
 }
 
+void io_dispatch_mgr__local_create_session(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_channel_i io_dispatch_mgr__channel) {
+   {
+      constants__t_msg_i io_dispatch_mgr__l_req_msg;
+      constants__t_request_handle_i io_dispatch_mgr__l_req_handle;
+      t_bool io_dispatch_mgr__l_valid_req_handle;
+      t_bool io_dispatch_mgr__l_valid_msg;
+      t_bool io_dispatch_mgr__l_valid_session;
+      constants__t_StatusCode_i io_dispatch_mgr__l_ret;
+      
+      message_out_bs__alloc_msg(constants__e_msg_session_create_req,
+         &io_dispatch_mgr__l_req_msg);
+      message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
+         &io_dispatch_mgr__l_valid_msg);
+      if (io_dispatch_mgr__l_valid_msg == true) {
+         request_handle_bs__fresh_req_handle(&io_dispatch_mgr__l_req_handle);
+         request_handle_bs__is_valid_req_handle(io_dispatch_mgr__l_req_handle,
+            &io_dispatch_mgr__l_valid_req_handle);
+         if (io_dispatch_mgr__l_valid_req_handle == true) {
+            session_mgr__is_valid_session(io_dispatch_mgr__session,
+               &io_dispatch_mgr__l_valid_session);
+            if (io_dispatch_mgr__l_valid_session == true) {
+               session_mgr__cli_create_req(io_dispatch_mgr__session,
+                  io_dispatch_mgr__channel,
+                  io_dispatch_mgr__l_req_handle,
+                  io_dispatch_mgr__l_req_msg,
+                  &io_dispatch_mgr__l_ret);
+               if (io_dispatch_mgr__l_ret == constants__e_sc_ok) {
+                  message_out_bs__write_msg_out_header_req_handle(io_dispatch_mgr__l_req_msg,
+                     io_dispatch_mgr__l_req_handle);
+                  channel_mgr_bs__send_channel_msg(io_dispatch_mgr__channel,
+                     io_dispatch_mgr__l_req_msg,
+                     &io_dispatch_mgr__l_ret);
+                  if (io_dispatch_mgr__l_ret != constants__e_sc_ok) {
+                     request_handle_bs__remove_req_handle(io_dispatch_mgr__l_req_handle);
+                     session_mgr__cli_close_session(io_dispatch_mgr__session);
+                  }
+               }
+               else {
+                  request_handle_bs__remove_req_handle(io_dispatch_mgr__l_req_handle);
+                  session_mgr__cli_close_session(io_dispatch_mgr__session);
+               }
+            }
+            else {
+               session_mgr__cli_close_session(io_dispatch_mgr__session);
+            }
+         }
+         message_out_bs__dealloc_msg_out(io_dispatch_mgr__l_req_msg);
+      }
+   }
+}
+
+void io_dispatch_mgr__local_sc_activate_orphaned_sessions(
+   const constants__t_channel_i io_dispatch_mgr__channel) {
+   {
+      t_bool io_dispatch_mgr__l_valid_new_channel;
+      constants__t_msg_i io_dispatch_mgr__l_req_msg;
+      t_bool io_dispatch_mgr__l_valid_msg;
+      t_bool io_dispatch_mgr__l_continue;
+      constants__t_session_i io_dispatch_mgr__l_session;
+      constants__t_StatusCode_i io_dispatch_mgr__l_ret;
+      constants__t_request_handle_i io_dispatch_mgr__l_req_handle;
+      t_bool io_dispatch_mgr__l_valid_req_handle;
+      constants__t_session_token_i io_dispatch_mgr__l_session_token;
+      
+      channel_mgr_bs__is_valid_channel(io_dispatch_mgr__channel,
+         &io_dispatch_mgr__l_valid_new_channel);
+      if (io_dispatch_mgr__l_valid_new_channel == true) {
+         session_mgr__init_iter_orphaned_t_session(io_dispatch_mgr__channel,
+            &io_dispatch_mgr__l_continue);
+         while (io_dispatch_mgr__l_continue == true) {
+            session_mgr__continue_iter_orphaned_t_session(&io_dispatch_mgr__l_session,
+               &io_dispatch_mgr__l_continue);
+            message_out_bs__alloc_msg(constants__e_msg_session_activate_req,
+               &io_dispatch_mgr__l_req_msg);
+            message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
+               &io_dispatch_mgr__l_valid_msg);
+            if (io_dispatch_mgr__l_valid_msg == true) {
+               request_handle_bs__fresh_req_handle(&io_dispatch_mgr__l_req_handle);
+               request_handle_bs__is_valid_req_handle(io_dispatch_mgr__l_req_handle,
+                  &io_dispatch_mgr__l_valid_req_handle);
+               if (io_dispatch_mgr__l_valid_req_handle == true) {
+                  session_mgr__cli_sc_activate_req(io_dispatch_mgr__l_session,
+                     io_dispatch_mgr__l_req_handle,
+                     io_dispatch_mgr__channel,
+                     io_dispatch_mgr__l_req_msg,
+                     &io_dispatch_mgr__l_ret,
+                     &io_dispatch_mgr__l_session_token);
+                  if (io_dispatch_mgr__l_ret == constants__e_sc_ok) {
+                     message_out_bs__write_msg_out_header_req_handle(io_dispatch_mgr__l_req_msg,
+                        io_dispatch_mgr__l_req_handle);
+                     message_out_bs__write_msg_out_header_session_token(io_dispatch_mgr__l_req_msg,
+                        io_dispatch_mgr__l_session_token);
+                     channel_mgr_bs__send_channel_msg(io_dispatch_mgr__channel,
+                        io_dispatch_mgr__l_req_msg,
+                        &io_dispatch_mgr__l_ret);
+                     if (io_dispatch_mgr__l_ret != constants__e_sc_ok) {
+                        request_handle_bs__remove_req_handle(io_dispatch_mgr__l_req_handle);
+                        session_mgr__cli_close_session(io_dispatch_mgr__l_session);
+                     }
+                  }
+               }
+               message_out_bs__dealloc_msg_out(io_dispatch_mgr__l_req_msg);
+            }
+         }
+      }
+   }
+}
+
+void io_dispatch_mgr__local_activate_session(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_user_i io_dispatch_mgr__user,
+   constants__t_StatusCode_i * const io_dispatch_mgr__ret) {
+   {
+      constants__t_msg_i io_dispatch_mgr__l_req_msg;
+      t_bool io_dispatch_mgr__l_valid_msg;
+      constants__t_StatusCode_i io_dispatch_mgr__l_ret;
+      constants__t_channel_i io_dispatch_mgr__l_channel;
+      constants__t_request_handle_i io_dispatch_mgr__l_req_handle;
+      t_bool io_dispatch_mgr__l_valid_req_handle;
+      constants__t_session_token_i io_dispatch_mgr__l_session_token;
+      
+      message_out_bs__alloc_msg(constants__e_msg_session_activate_req,
+         &io_dispatch_mgr__l_req_msg);
+      message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
+         &io_dispatch_mgr__l_valid_msg);
+      if (io_dispatch_mgr__l_valid_msg == true) {
+         request_handle_bs__fresh_req_handle(&io_dispatch_mgr__l_req_handle);
+         request_handle_bs__is_valid_req_handle(io_dispatch_mgr__l_req_handle,
+            &io_dispatch_mgr__l_valid_req_handle);
+         if (io_dispatch_mgr__l_valid_req_handle == true) {
+            request_handle_bs__fresh_req_handle(&io_dispatch_mgr__l_req_handle);
+            request_handle_bs__is_valid_req_handle(io_dispatch_mgr__l_req_handle,
+               &io_dispatch_mgr__l_valid_req_handle);
+            if (io_dispatch_mgr__l_valid_req_handle == true) {
+               session_mgr__cli_user_activate_req(io_dispatch_mgr__session,
+                  io_dispatch_mgr__l_req_handle,
+                  io_dispatch_mgr__user,
+                  io_dispatch_mgr__l_req_msg,
+                  &io_dispatch_mgr__l_ret,
+                  &io_dispatch_mgr__l_channel,
+                  &io_dispatch_mgr__l_session_token);
+               if (io_dispatch_mgr__l_ret == constants__e_sc_ok) {
+                  message_out_bs__write_msg_out_header_req_handle(io_dispatch_mgr__l_req_msg,
+                     io_dispatch_mgr__l_req_handle);
+                  message_out_bs__write_msg_out_header_session_token(io_dispatch_mgr__l_req_msg,
+                     io_dispatch_mgr__l_session_token);
+                  channel_mgr_bs__send_channel_msg(io_dispatch_mgr__l_channel,
+                     io_dispatch_mgr__l_req_msg,
+                     &io_dispatch_mgr__l_ret);
+                  if (io_dispatch_mgr__l_ret != constants__e_sc_ok) {
+                     request_handle_bs__remove_req_handle(io_dispatch_mgr__l_req_handle);
+                     session_mgr__cli_close_session(io_dispatch_mgr__session);
+                  }
+               }
+            }
+            else {
+               io_dispatch_mgr__l_ret = constants__e_sc_bad_out_of_memory;
+            }
+         }
+         else {
+            io_dispatch_mgr__l_ret = constants__e_sc_bad_out_of_memory;
+         }
+         message_out_bs__dealloc_msg_out(io_dispatch_mgr__l_req_msg);
+      }
+      else {
+         io_dispatch_mgr__l_ret = constants__e_sc_bad_out_of_memory;
+      }
+      *io_dispatch_mgr__ret = io_dispatch_mgr__l_ret;
+   }
+}
+
 void io_dispatch_mgr__msgs_memory_changed(void) {
    message_in_bs__msg_in_memory_changed();
    message_out_bs__msg_out_memory_changed();
@@ -135,6 +308,7 @@ void io_dispatch_mgr__receive_msg(
       constants__t_request_handle_i io_dispatch_mgr__l_request_handle;
       constants__t_session_token_i io_dispatch_mgr__l_session_token;
       constants__t_session_i io_dispatch_mgr__l_session;
+      constants__t_sessionState io_dispatch_mgr__l_session_state;
       constants__t_user_i io_dispatch_mgr__l_session_user;
       t_bool io_dispatch_mgr__l_valid_msg;
       constants__t_msg_type io_dispatch_mgr__l_msg_type;
@@ -192,8 +366,21 @@ void io_dispatch_mgr__receive_msg(
                   session_mgr__receive_session_resp(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_request_handle,
                      io_dispatch_mgr__msg,
-                     io_dispatch_mgr__l_msg_type);
+                     io_dispatch_mgr__l_msg_type,
+                     &io_dispatch_mgr__l_session);
                   request_handle_bs__remove_req_handle(io_dispatch_mgr__l_request_handle);
+                  session_mgr__get_session_state_or_closed(io_dispatch_mgr__l_session,
+                     &io_dispatch_mgr__l_session_state);
+                  if (io_dispatch_mgr__l_session_state == constants__e_session_created) {
+                     session_async_bs__is_session_to_activate(io_dispatch_mgr__l_session,
+                        &io_dispatch_mgr__l_session_user);
+                     if (io_dispatch_mgr__l_session_user != constants__c_user_indet) {
+                        io_dispatch_mgr__local_activate_session(io_dispatch_mgr__l_session,
+                           io_dispatch_mgr__l_session_user,
+                           &io_dispatch_mgr__l_ret);
+                     }
+                  }
+                  message_in_bs__dealloc_msg_in(io_dispatch_mgr__msg);
                   break;
                case constants__e_msg_session_read_resp:
                case constants__e_msg_session_write_resp:
@@ -330,6 +517,7 @@ void io_dispatch_mgr__receive_msg(
                default:
                   break;
                }
+               message_in_bs__dealloc_msg_in(io_dispatch_mgr__msg);
             }
             else {
                ;
@@ -340,69 +528,76 @@ void io_dispatch_mgr__receive_msg(
    }
 }
 
-void io_dispatch_mgr__create_session(
-   const constants__t_endpoint_i io_dispatch_mgr__endpoint,
-   constants__t_session_i * const io_dispatch_mgr__nsession) {
+void io_dispatch_mgr__channel_connected_event(
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx) {
    {
       constants__t_channel_i io_dispatch_mgr__l_channel;
-      t_bool io_dispatch_mgr__l_valid_channel;
-      constants__t_msg_i io_dispatch_mgr__l_req_msg;
-      constants__t_request_handle_i io_dispatch_mgr__l_req_handle;
-      t_bool io_dispatch_mgr__l_valid_req_handle;
-      t_bool io_dispatch_mgr__l_valid_msg;
-      t_bool io_dispatch_mgr__l_valid_session;
-      constants__t_StatusCode_i io_dispatch_mgr__l_ret;
+      constants__t_session_i io_dispatch_mgr__l_session_to_create;
       
-      channel_mgr_bs__get_valid_channel(io_dispatch_mgr__endpoint,
+      channel_mgr_bs__get_valid_channel(io_dispatch_mgr__channel_config_idx,
+         &io_dispatch_mgr__l_channel);
+      io_dispatch_mgr__local_sc_activate_orphaned_sessions(io_dispatch_mgr__l_channel);
+      session_async_bs__is_session_to_create(io_dispatch_mgr__channel_config_idx,
+         &io_dispatch_mgr__l_session_to_create);
+      if (io_dispatch_mgr__l_session_to_create != constants__c_session_indet) {
+         io_dispatch_mgr__local_create_session(io_dispatch_mgr__l_session_to_create,
+            io_dispatch_mgr__l_channel);
+      }
+   }
+}
+
+void io_dispatch_mgr__activate_new_session(
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_user_i io_dispatch_mgr__user,
+   constants__t_session_i * const io_dispatch_mgr__session) {
+   {
+      constants__t_channel_i io_dispatch_mgr__l_channel;
+      t_bool io_dispatch_mgr__l_channel_connected;
+      t_bool io_dispatch_mgr__l_valid_session;
+      t_bool io_dispatch_mgr__l_valid_channel;
+      t_bool io_dispatch_mgr__l_bret;
+      
+      *io_dispatch_mgr__session = constants__c_session_indet;
+      channel_mgr_bs__get_valid_channel(io_dispatch_mgr__channel_config_idx,
          &io_dispatch_mgr__l_channel);
       channel_mgr_bs__is_valid_channel(io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_valid_channel);
       if (io_dispatch_mgr__l_valid_channel == false) {
-         channel_mgr_bs__open_secure_channel(io_dispatch_mgr__endpoint,
-            &io_dispatch_mgr__l_channel);
+         channel_mgr_bs__open_secure_channel(io_dispatch_mgr__channel_config_idx,
+            &io_dispatch_mgr__l_channel,
+            &io_dispatch_mgr__l_channel_connected);
+      }
+      else {
+         io_dispatch_mgr__l_channel_connected = false;
       }
       channel_mgr_bs__is_valid_channel(io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_valid_channel);
-      if (io_dispatch_mgr__l_valid_channel == false) {
-         *io_dispatch_mgr__nsession = constants__c_session_indet;
-      }
-      else {
-         message_out_bs__alloc_msg(constants__e_msg_session_create_req,
-            &io_dispatch_mgr__l_req_msg);
-         message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
-            &io_dispatch_mgr__l_valid_msg);
-         if (io_dispatch_mgr__l_valid_msg == true) {
-            request_handle_bs__fresh_req_handle(&io_dispatch_mgr__l_req_handle);
-            request_handle_bs__is_valid_req_handle(io_dispatch_mgr__l_req_handle,
-               &io_dispatch_mgr__l_valid_req_handle);
-            if (io_dispatch_mgr__l_valid_req_handle == true) {
-               session_mgr__cli_create_req(io_dispatch_mgr__l_channel,
-                  io_dispatch_mgr__l_req_handle,
-                  io_dispatch_mgr__l_req_msg,
-                  io_dispatch_mgr__nsession);
-               session_mgr__is_valid_session(*io_dispatch_mgr__nsession,
-                  &io_dispatch_mgr__l_valid_session);
-               if (io_dispatch_mgr__l_valid_session == true) {
-                  message_out_bs__write_msg_out_header_req_handle(io_dispatch_mgr__l_req_msg,
-                     io_dispatch_mgr__l_req_handle);
-                  channel_mgr_bs__send_channel_msg(io_dispatch_mgr__l_channel,
-                     io_dispatch_mgr__l_req_msg,
-                     &io_dispatch_mgr__l_ret);
-                  if (io_dispatch_mgr__l_ret != constants__e_sc_ok) {
-                     request_handle_bs__remove_req_handle(io_dispatch_mgr__l_req_handle);
-                     session_mgr__cli_close_session(*io_dispatch_mgr__nsession);
-                     *io_dispatch_mgr__nsession = constants__c_session_indet;
-                  }
-               }
-               else {
-                  request_handle_bs__remove_req_handle(io_dispatch_mgr__l_req_handle);
-                  session_mgr__cli_close_session(*io_dispatch_mgr__nsession);
-               }
+      if (io_dispatch_mgr__l_valid_channel == true) {
+         session_mgr__cli_init_session(io_dispatch_mgr__session);
+         session_mgr__is_valid_session(*io_dispatch_mgr__session,
+            &io_dispatch_mgr__l_valid_session);
+         if (io_dispatch_mgr__l_valid_session == true) {
+            if (io_dispatch_mgr__l_channel_connected == false) {
+               session_async_bs__add_session_to_create(*io_dispatch_mgr__session,
+                  io_dispatch_mgr__channel_config_idx,
+                  &io_dispatch_mgr__l_bret);
             }
-            message_out_bs__dealloc_msg_out(io_dispatch_mgr__l_req_msg);
-         }
-         else {
-            *io_dispatch_mgr__nsession = constants__c_session_indet;
+            else {
+               io_dispatch_mgr__local_create_session(*io_dispatch_mgr__session,
+                  io_dispatch_mgr__l_channel);
+               io_dispatch_mgr__l_bret = true;
+            }
+            if (io_dispatch_mgr__l_bret == true) {
+               session_async_bs__add_session_to_activate(*io_dispatch_mgr__session,
+                  io_dispatch_mgr__user,
+                  &io_dispatch_mgr__l_bret);
+            }
+            if (io_dispatch_mgr__l_bret == false) {
+               session_async_bs__is_session_to_create(io_dispatch_mgr__channel_config_idx,
+                  io_dispatch_mgr__session);
+               session_mgr__delete_session(*io_dispatch_mgr__session);
+               *io_dispatch_mgr__session = constants__c_session_indet;
+            }
          }
       }
    }
@@ -412,63 +607,9 @@ void io_dispatch_mgr__activate_session(
    const constants__t_session_i io_dispatch_mgr__session,
    const constants__t_user_i io_dispatch_mgr__user,
    constants__t_StatusCode_i * const io_dispatch_mgr__ret) {
-   {
-      constants__t_msg_i io_dispatch_mgr__l_req_msg;
-      t_bool io_dispatch_mgr__l_valid_msg;
-      constants__t_StatusCode_i io_dispatch_mgr__l_ret;
-      constants__t_channel_i io_dispatch_mgr__l_channel;
-      constants__t_request_handle_i io_dispatch_mgr__l_req_handle;
-      t_bool io_dispatch_mgr__l_valid_req_handle;
-      constants__t_session_token_i io_dispatch_mgr__l_session_token;
-      
-      message_out_bs__alloc_msg(constants__e_msg_session_activate_req,
-         &io_dispatch_mgr__l_req_msg);
-      message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
-         &io_dispatch_mgr__l_valid_msg);
-      if (io_dispatch_mgr__l_valid_msg == true) {
-         request_handle_bs__fresh_req_handle(&io_dispatch_mgr__l_req_handle);
-         request_handle_bs__is_valid_req_handle(io_dispatch_mgr__l_req_handle,
-            &io_dispatch_mgr__l_valid_req_handle);
-         if (io_dispatch_mgr__l_valid_req_handle == true) {
-            request_handle_bs__fresh_req_handle(&io_dispatch_mgr__l_req_handle);
-            request_handle_bs__is_valid_req_handle(io_dispatch_mgr__l_req_handle,
-               &io_dispatch_mgr__l_valid_req_handle);
-            if (io_dispatch_mgr__l_valid_req_handle == true) {
-               session_mgr__cli_user_activate_req(io_dispatch_mgr__session,
-                  io_dispatch_mgr__l_req_handle,
-                  io_dispatch_mgr__user,
-                  io_dispatch_mgr__l_req_msg,
-                  &io_dispatch_mgr__l_ret,
-                  &io_dispatch_mgr__l_channel,
-                  &io_dispatch_mgr__l_session_token);
-               if (io_dispatch_mgr__l_ret == constants__e_sc_ok) {
-                  message_out_bs__write_msg_out_header_req_handle(io_dispatch_mgr__l_req_msg,
-                     io_dispatch_mgr__l_req_handle);
-                  message_out_bs__write_msg_out_header_session_token(io_dispatch_mgr__l_req_msg,
-                     io_dispatch_mgr__l_session_token);
-                  channel_mgr_bs__send_channel_msg(io_dispatch_mgr__l_channel,
-                     io_dispatch_mgr__l_req_msg,
-                     &io_dispatch_mgr__l_ret);
-                  if (io_dispatch_mgr__l_ret != constants__e_sc_ok) {
-                     request_handle_bs__remove_req_handle(io_dispatch_mgr__l_req_handle);
-                     session_mgr__cli_close_session(io_dispatch_mgr__session);
-                  }
-               }
-            }
-            else {
-               io_dispatch_mgr__l_ret = constants__e_sc_bad_out_of_memory;
-            }
-         }
-         else {
-            io_dispatch_mgr__l_ret = constants__e_sc_bad_out_of_memory;
-         }
-         message_out_bs__dealloc_msg_out(io_dispatch_mgr__l_req_msg);
-      }
-      else {
-         io_dispatch_mgr__l_ret = constants__e_sc_bad_out_of_memory;
-      }
-      *io_dispatch_mgr__ret = io_dispatch_mgr__l_ret;
-   }
+   io_dispatch_mgr__local_activate_session(io_dispatch_mgr__session,
+      io_dispatch_mgr__user,
+      io_dispatch_mgr__ret);
 }
 
 void io_dispatch_mgr__close_session(
@@ -527,17 +668,10 @@ void io_dispatch_mgr__secure_channel_lost(
    {
       t_bool io_dispatch_mgr__l_valid_channel;
       t_bool io_dispatch_mgr__l_valid_new_channel;
+      t_bool io_dispatch_mgr__l_new_channel_connected;
       t_bool io_dispatch_mgr__l_is_client;
-      constants__t_endpoint_i io_dispatch_mgr__l_endpoint;
+      constants__t_channel_config_idx_i io_dispatch_mgr__l_channel_config_idx;
       constants__t_channel_i io_dispatch_mgr__l_new_channel;
-      constants__t_msg_i io_dispatch_mgr__l_req_msg;
-      t_bool io_dispatch_mgr__l_valid_msg;
-      t_bool io_dispatch_mgr__l_continue;
-      constants__t_session_i io_dispatch_mgr__l_session;
-      constants__t_StatusCode_i io_dispatch_mgr__l_ret;
-      constants__t_request_handle_i io_dispatch_mgr__l_req_handle;
-      t_bool io_dispatch_mgr__l_valid_req_handle;
-      constants__t_session_token_i io_dispatch_mgr__l_session_token;
       
       channel_mgr_bs__is_valid_channel(io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_valid_channel);
@@ -546,54 +680,24 @@ void io_dispatch_mgr__secure_channel_lost(
             &io_dispatch_mgr__l_is_client);
          if (io_dispatch_mgr__l_is_client == true) {
             channel_mgr_bs__get_channel_info(io_dispatch_mgr__channel,
-               &io_dispatch_mgr__l_endpoint);
-            channel_mgr_bs__get_valid_channel(io_dispatch_mgr__l_endpoint,
+               &io_dispatch_mgr__l_channel_config_idx);
+            channel_mgr_bs__get_valid_channel(io_dispatch_mgr__l_channel_config_idx,
                &io_dispatch_mgr__l_new_channel);
             if (io_dispatch_mgr__l_new_channel == constants__c_channel_indet) {
-               channel_mgr_bs__open_secure_channel(io_dispatch_mgr__l_endpoint,
-                  &io_dispatch_mgr__l_new_channel);
+               channel_mgr_bs__open_secure_channel(io_dispatch_mgr__l_channel_config_idx,
+                  &io_dispatch_mgr__l_new_channel,
+                  &io_dispatch_mgr__l_new_channel_connected);
             }
+            else {
+               io_dispatch_mgr__l_new_channel_connected = false;
+            }
+            session_mgr__cli_secure_channel_lost(io_dispatch_mgr__channel,
+               io_dispatch_mgr__l_new_channel);
             channel_mgr_bs__is_valid_channel(io_dispatch_mgr__l_new_channel,
                &io_dispatch_mgr__l_valid_new_channel);
-            session_mgr__cli_secure_channel_lost(io_dispatch_mgr__channel);
-            if (io_dispatch_mgr__l_valid_new_channel == true) {
-               session_mgr__init_iter_orphaned_t_session(io_dispatch_mgr__channel,
-                  &io_dispatch_mgr__l_continue);
-               while (io_dispatch_mgr__l_continue == true) {
-                  session_mgr__continue_iter_orphaned_t_session(&io_dispatch_mgr__l_session,
-                     &io_dispatch_mgr__l_continue);
-                  message_out_bs__alloc_msg(constants__e_msg_session_activate_req,
-                     &io_dispatch_mgr__l_req_msg);
-                  message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
-                     &io_dispatch_mgr__l_valid_msg);
-                  if (io_dispatch_mgr__l_valid_msg == true) {
-                     request_handle_bs__fresh_req_handle(&io_dispatch_mgr__l_req_handle);
-                     request_handle_bs__is_valid_req_handle(io_dispatch_mgr__l_req_handle,
-                        &io_dispatch_mgr__l_valid_req_handle);
-                     if (io_dispatch_mgr__l_valid_req_handle == true) {
-                        session_mgr__cli_sc_activate_req(io_dispatch_mgr__l_session,
-                           io_dispatch_mgr__l_req_handle,
-                           io_dispatch_mgr__l_new_channel,
-                           io_dispatch_mgr__l_req_msg,
-                           &io_dispatch_mgr__l_ret,
-                           &io_dispatch_mgr__l_session_token);
-                        if (io_dispatch_mgr__l_ret == constants__e_sc_ok) {
-                           message_out_bs__write_msg_out_header_req_handle(io_dispatch_mgr__l_req_msg,
-                              io_dispatch_mgr__l_req_handle);
-                           message_out_bs__write_msg_out_header_session_token(io_dispatch_mgr__l_req_msg,
-                              io_dispatch_mgr__l_session_token);
-                           channel_mgr_bs__send_channel_msg(io_dispatch_mgr__l_new_channel,
-                              io_dispatch_mgr__l_req_msg,
-                              &io_dispatch_mgr__l_ret);
-                           if (io_dispatch_mgr__l_ret != constants__e_sc_ok) {
-                              request_handle_bs__remove_req_handle(io_dispatch_mgr__l_req_handle);
-                              session_mgr__cli_close_session(io_dispatch_mgr__l_session);
-                           }
-                        }
-                     }
-                     message_out_bs__dealloc_msg_out(io_dispatch_mgr__l_req_msg);
-                  }
-               }
+            if ((io_dispatch_mgr__l_valid_new_channel == true) &&
+               (io_dispatch_mgr__l_new_channel_connected == true)) {
+               io_dispatch_mgr__local_sc_activate_orphaned_sessions(io_dispatch_mgr__l_new_channel);
             }
          }
          else {

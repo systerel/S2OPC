@@ -2,7 +2,7 @@
 
  File Name            : session_core_1_bs.h
 
- Date                 : 24/07/2017 18:24:13
+ Date                 : 25/07/2017 17:18:03
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -38,10 +38,12 @@ extern void session_core_1_bs__cli_remove_pending_request(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_request_handle_i session_core_1_bs__req_handle,
    t_bool * const session_core_1_bs__ret);
-extern void session_core_1_bs__create_new_session(
+extern void session_core_1_bs__create_session(
+   const constants__t_session_i session_core_1_bs__session,
    const constants__t_channel_i session_core_1_bs__channel,
-   const constants__t_sessionState session_core_1_bs__state,
-   constants__t_session_i * const session_core_1_bs__session);
+   const constants__t_sessionState session_core_1_bs__state);
+extern void session_core_1_bs__create_session_failure(
+   const constants__t_session_i session_core_1_bs__session);
 extern void session_core_1_bs__delete_session(
    const constants__t_session_i session_core_1_bs__session);
 extern void session_core_1_bs__delete_session_token(
@@ -70,6 +72,8 @@ extern void session_core_1_bs__get_token_from_session(
 extern void session_core_1_bs__has_session_token(
    const constants__t_session_i session_core_1_bs__session,
    t_bool * const session_core_1_bs__ret);
+extern void session_core_1_bs__init_new_session(
+   constants__t_session_i * const session_core_1_bs__session);
 extern void session_core_1_bs__is_fresh_session_token(
    const constants__t_session_token_i session_core_1_bs__session_token,
    t_bool * const session_core_1_bs__ret);
@@ -87,7 +91,8 @@ extern void session_core_1_bs__set_session_channel(
    const constants__t_channel_i session_core_1_bs__channel);
 extern void session_core_1_bs__set_session_orphaned(
    const constants__t_session_i session_core_1_bs__session,
-   const constants__t_channel_i session_core_1_bs__lost_channel);
+   const constants__t_channel_i session_core_1_bs__lost_channel,
+   const constants__t_channel_i session_core_1_bs__new_channel);
 extern void session_core_1_bs__set_session_state(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_sessionState session_core_1_bs__state);

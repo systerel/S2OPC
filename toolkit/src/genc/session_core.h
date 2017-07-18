@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 24/07/2017 18:24:09
+ Date                 : 25/07/2017 17:17:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -41,6 +41,7 @@ extern void session_core__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define session_core__continue_iter_orphaned_t_session session_core_orphaned_it_bs__continue_iter_orphaned_t_session
+#define session_core__delete_session session_core_1_bs__delete_session
 #define session_core__get_session_channel session_core_1_bs__get_session_channel
 #define session_core__get_session_from_req_handle session_core_1_bs__get_session_from_req_handle
 #define session_core__get_session_from_token session_core_1_bs__get_session_from_token
@@ -79,16 +80,19 @@ extern void session_core__cli_close_resp(
 extern void session_core__cli_close_session(
    const constants__t_session_i session_core__session);
 extern void session_core__cli_create_req(
+   const constants__t_session_i session_core__session,
    const constants__t_channel_i session_core__channel,
    const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__create_req_msg,
-   constants__t_session_i * const session_core__nsession);
+   constants__t_StatusCode_i * const session_core__ret);
 extern void session_core__cli_create_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_request_handle_i session_core__req_handle,
    const constants__t_session_token_i session_core__session_token,
    const constants__t_msg_i session_core__create_resp_msg);
+extern void session_core__cli_init_session(
+   constants__t_session_i * const session_core__nsession);
 extern void session_core__cli_is_session_valid_for_service(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
@@ -111,7 +115,8 @@ extern void session_core__cli_sc_activate_req(
    constants__t_StatusCode_i * const session_core__ret,
    constants__t_session_token_i * const session_core__session_token);
 extern void session_core__cli_secure_channel_lost(
-   const constants__t_channel_i session_core__channel);
+   const constants__t_channel_i session_core__lost_channel,
+   const constants__t_channel_i session_core__new_channel);
 extern void session_core__cli_user_activate_req(
    const constants__t_session_i session_core__session,
    const constants__t_request_handle_i session_core__req_handle,

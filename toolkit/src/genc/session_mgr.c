@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 24/07/2017 18:24:10
+ Date                 : 25/07/2017 17:18:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -26,7 +26,8 @@ void session_mgr__receive_session_resp(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_request_handle_i session_mgr__req_handle,
    const constants__t_msg_i session_mgr__resp_msg,
-   const constants__t_msg_type session_mgr__resp_typ) {
+   const constants__t_msg_type session_mgr__resp_typ,
+   constants__t_session_i * const session_mgr__session) {
    {
       constants__t_session_i session_mgr__l_session;
       constants__t_session_token_i session_mgr__l_session_token;
@@ -58,6 +59,7 @@ void session_mgr__receive_session_resp(
       default:
          break;
       }
+      *session_mgr__session = session_mgr__l_session;
    }
 }
 

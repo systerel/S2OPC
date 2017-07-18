@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 24/07/2017 18:24:08
+ Date                 : 25/07/2017 17:17:58
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -27,6 +27,7 @@
 #include "service_read.h"
 #include "service_response_cli_cb_bs.h"
 #include "service_write_decode_bs.h"
+#include "session_async_bs.h"
 #include "session_mgr.h"
 
 /*--------------
@@ -53,6 +54,15 @@ extern void io_dispatch_mgr__get_response_type(
 extern void io_dispatch_mgr__is_request_type(
    const constants__t_msg_type io_dispatch_mgr__msg_typ,
    t_bool * const io_dispatch_mgr__bres);
+extern void io_dispatch_mgr__local_activate_session(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_user_i io_dispatch_mgr__user,
+   constants__t_StatusCode_i * const io_dispatch_mgr__ret);
+extern void io_dispatch_mgr__local_create_session(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_channel_i io_dispatch_mgr__channel);
+extern void io_dispatch_mgr__local_sc_activate_orphaned_sessions(
+   const constants__t_channel_i io_dispatch_mgr__channel);
 extern void io_dispatch_mgr__treat_read_request(
    const constants__t_msg_i io_dispatch_mgr__p_request_msg,
    const constants__t_msg_i io_dispatch_mgr__p_response_msg);
@@ -64,17 +74,20 @@ extern void io_dispatch_mgr__treat_write_request(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void io_dispatch_mgr__activate_new_session(
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_user_i io_dispatch_mgr__user,
+   constants__t_session_i * const io_dispatch_mgr__session);
 extern void io_dispatch_mgr__activate_session(
    const constants__t_session_i io_dispatch_mgr__session,
    const constants__t_user_i io_dispatch_mgr__user,
    constants__t_StatusCode_i * const io_dispatch_mgr__ret);
+extern void io_dispatch_mgr__channel_connected_event(
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx);
 extern void io_dispatch_mgr__close_all_active_connections(void);
 extern void io_dispatch_mgr__close_session(
    const constants__t_session_i io_dispatch_mgr__session,
    constants__t_StatusCode_i * const io_dispatch_mgr__ret);
-extern void io_dispatch_mgr__create_session(
-   const constants__t_endpoint_i io_dispatch_mgr__endpoint,
-   constants__t_session_i * const io_dispatch_mgr__nsession);
 extern void io_dispatch_mgr__msgs_memory_changed(void);
 extern void io_dispatch_mgr__receive_msg(
    const constants__t_channel_i io_dispatch_mgr__channel,

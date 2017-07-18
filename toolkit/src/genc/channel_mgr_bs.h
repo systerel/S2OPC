@@ -2,7 +2,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 24/07/2017 18:24:10
+ Date                 : 25/07/2017 17:18:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -37,9 +37,9 @@ extern void channel_mgr_bs__close_secure_channel(
    const constants__t_channel_i channel_mgr_bs__channel);
 extern void channel_mgr_bs__get_channel_info(
    const constants__t_channel_i channel_mgr_bs__channel,
-   constants__t_endpoint_i * const channel_mgr_bs__endpoint);
+   constants__t_channel_config_idx_i * const channel_mgr_bs__config_idx);
 extern void channel_mgr_bs__get_valid_channel(
-   const constants__t_endpoint_i channel_mgr_bs__endpoint,
+   const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
    constants__t_channel_i * const channel_mgr_bs__channel);
 extern void channel_mgr_bs__is_client_channel(
    const constants__t_channel_i channel_mgr_bs__channel,
@@ -48,8 +48,9 @@ extern void channel_mgr_bs__is_valid_channel(
    const constants__t_channel_i channel_mgr_bs__channel,
    t_bool * const channel_mgr_bs__bres);
 extern void channel_mgr_bs__open_secure_channel(
-   const constants__t_endpoint_i channel_mgr_bs__endpoint,
-   constants__t_channel_i * const channel_mgr_bs__nchannel);
+   const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
+   constants__t_channel_i * const channel_mgr_bs__nchannel,
+   t_bool * const channel_mgr_bs__is_connected);
 extern void channel_mgr_bs__receive_channel_msg(
    const constants__t_channel_i channel_mgr_bs__channel,
    const constants__t_msg_i channel_mgr_bs__msg);
