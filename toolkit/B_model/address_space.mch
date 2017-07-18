@@ -181,5 +181,15 @@ OPERATIONS
         ResponseWrite_allocated  := FALSE ||
         ResponseWrite_StatusCode := {}
     END
+    ;
+
+    /* Promoted */
+    write_WriteResponse_msg_out(msg_out) =
+    PRE
+        msg_out : t_msg_i &
+        msg_out : t_msg
+    THEN
+        skip
+    END
 
 END

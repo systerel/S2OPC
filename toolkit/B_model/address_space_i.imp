@@ -33,7 +33,8 @@ IMPORTS
 PROMOTES
     readall_AddressSpace_Node,
     read_Value_StatusCode,
-    read_AddressSpace_free_value
+    read_AddressSpace_free_value,
+    write_WriteResponse_msg_out
 
 CONCRETE_VARIABLES
     ResponseWrite_allocated

@@ -84,4 +84,14 @@ OPERATIONS
             sc :: t_StatusCode_i
         END
     END
+    ;
+
+    write_WriteResponse_msg_out(msg_out) =
+    PRE
+        msg_out : t_msg_i &
+        msg_out : t_msg
+    THEN
+        skip
+    END
+
 END
