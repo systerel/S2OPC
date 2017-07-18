@@ -53,7 +53,7 @@ extern void service_write_decode_bs__decode_write_request(
     OpcUa_WriteRequest *req = (OpcUa_WriteRequest *)service_write_decode_bs__req_payload;
     *service_write_decode_bs__StatusCode_service = constants__e_sc_nok;
 
-    if(0 == req->NoOfNodesToWrite || constants__k_n_WriteResponse_max < req->NoOfNodesToWrite)
+    if(0 != req->NoOfNodesToWrite && req->NoOfNodesToWrite <= constants__k_n_WriteResponse_max)
     {
         /* TODO: req shall not be freed before request is null... */
         request = req;
