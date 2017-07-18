@@ -34,72 +34,30 @@ DEFINITIONS
     d_inv_tab ==
     (
         StatusCode : t_StatusCode_i &
-        tab_Value : t_ReadValue_i --> t_Variant_i &
-        tab_StatusCode : t_ReadValue_i --> t_StatusCode_i &
-        /*data_Value_SourceTimestamp : t_ReadValue_i +-> t_Timestamp &
-        data_Value_ServerTimestamp : t_ReadValue_i +-> t_Timestamp */
         nb_resps_to_go : NAT &
         nb_resps_to_go <= k_n_read_resp_max
     )
 
 CONCRETE_VARIABLES
     /* TODO: thanks to the iterator, it is not necessary to keep these tabs */
-    tab_Value, /* Value field of the elements of response */
-    tab_StatusCode, /* StatusCode field of the elements of response */
-    StatusCode, /* StatusCode for the whole response (StatusCode for the service) */
-    nb_resps_to_go, /* Number of response that are not written yet */
+    response_StatusCode, /* StatusCode for the whole response (StatusCode for the service) */
+    nb_resps, /* Number of response that are not written yet */
     response_msg /* Response message */
 
-INVARIANT
-    d_inv_tab &
-    (
-        /* Invariant de collage (one way only for now) */
-        data_Value_Value = tab_Value |>> {c_Variant_indet} &
-        data_Value_StatusCode = tab_StatusCode |>> {c_StatusCode_indet} &
-        StatusCode = response_StatusCode
-    )
-
+PROMOTES
+    write_read_response_init,
+    write_read_response
+    
 INITIALISATION
-    tab_Value := t_ReadValue_i * {c_Variant_indet};
-    tab_StatusCode := t_ReadValue_i * {c_StatusCode_indet};
-    StatusCode := c_StatusCode_indet;
-    nb_resps_to_go := 0;
-    response_msg := c_msg_indet
+    response_StatusCode := c_StatusCode_indet;
+    nb_resps            := 0;
+    response_msg        := c_msg_indet
 
 OPERATIONS
-    continue <-- init_iterwrite_DataValue(a_nb_resps, resp_msg) =
-    BEGIN
-        StatusCode := e_sc_ok;
-        tab_Value := t_ReadValue_i * {c_Variant_indet};
-        tab_StatusCode := t_ReadValue_i * {c_StatusCode_indet};
-        nb_resps_to_go := a_nb_resps;
-        continue := bool(0 < a_nb_resps);
-        response_msg := resp_msg;
-
-        /* TODO: malloc may fail... */
-        write_read_response_init(a_nb_resps, resp_msg)
-    END
-    ;
-
-    continue <-- continue_iterwrite_DataValue(rvi, val, sc) =
-    BEGIN
-        IF val /= c_Variant_indet THEN
-            tab_Value(rvi) := val
-        END
-        ;
-        tab_StatusCode(rvi) := sc;
-        IF 0 < nb_resps_to_go THEN
-            nb_resps_to_go := nb_resps_to_go-1
-        END;
-        continue := bool(0 < nb_resps_to_go);
-
-        write_read_response_iter(response_msg, rvi, val, sc)
-    END
-    ;
 
     write_response_error(sc, resp_msg) =
     BEGIN
-        StatusCode := sc
+        response_StatusCode := sc
         /* TODO: figure out where the StatusCode for the service should be written and who does that */
     END
 

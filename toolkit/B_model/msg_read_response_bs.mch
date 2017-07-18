@@ -27,12 +27,12 @@ SEES
 OPERATIONS
     /* Pb: malloc may fail... */
     /* Pb: the content of *resp_msg is changed, that does not appear here */
-    write_read_response_init(a_nb_resps, resp_msg) =
+    write_read_response_init(p_nb_resps, p_resp_msg) =
     PRE
-        a_nb_resps : NAT &
-        a_nb_resps <= k_n_read_resp_max &
-        resp_msg   : t_msg_i &
-        resp_msg   = c_msg_out &
+        p_nb_resps : NAT &
+        p_nb_resps <= k_n_read_resp_max &
+        p_resp_msg   : t_msg_i &
+        p_resp_msg   = c_msg_out &
         c_msg_out : t_msg
     THEN
         skip
@@ -40,7 +40,7 @@ OPERATIONS
     ;
 
     /* Pb: the content of *resp_msg is changed, that does not appear here */
-    write_read_response_iter(resp_msg, rvi, val, sc) =
+    write_read_response(resp_msg, rvi, val, sc) =
     PRE
         resp_msg   : t_msg_i &
         resp_msg   = c_msg_out &
@@ -48,7 +48,6 @@ OPERATIONS
 
         rvi : t_ReadValue_i &
         rvi : t_ReadValue &
-        /* rvi : resps_to_iterate & */
         val : t_Variant_i &
         sc : t_StatusCode_i &
         sc : t_StatusCode

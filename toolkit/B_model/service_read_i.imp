@@ -15,8 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-IMPLEMENTATION service_read_i
-REFINES service_read
+IMPLEMENTATION
+    service_read_i
+
+REFINES
+    service_read_r
+
+DEFINITIONS
+    "definitions.def"
 
 SEES
     constants,
@@ -26,51 +32,122 @@ SEES
 
 IMPORTS
     msg_read_request,
-    msg_read_response
+    msg_read_response,
+    service_read_it
+
+LOCAL_OPERATIONS
+
+    treat_read_request_1(p_resp_msg, p_isvalid, p_node, p_aid, p_rvi) =
+    PRE
+        p_resp_msg : t_msg_i         &
+        p_isvalid  : BOOL            &
+        p_node     : t_Node_i        &
+        p_node     : t_Node          &
+        p_aid      : t_AttributeId_i &
+        p_aid      : t_AttributeId   &
+        p_rvi      : t_ReadValue_i
+    THEN
+        data_Value_Value,
+        data_Value_StatusCode
+        :(data_Value_Value      : t_ReadValue +-> t_Variant    &
+          data_Value_StatusCode : t_ReadValue +-> t_StatusCode &
+
+          (p_isvalid = TRUE
+           =>
+           data_Value_Value = data_Value_Value$0 <+
+                              {p_rvi |-> AttributeID_Node_Variant(p_aid)(p_node)} &
+           (p_aid = e_aid_Value &
+            a_NodeClass(p_node) = e_ncl_Variable
+            =>
+            data_Value_StatusCode = data_Value_StatusCode$0 <+
+                                    {p_rvi |-> a_Value_StatusCode(p_node)}) &
+           (not(p_aid = e_aid_Value &
+                a_NodeClass(p_node) = e_ncl_Variable)
+            =>
+            data_Value_StatusCode = data_Value_StatusCode$0 <+
+                                    {p_rvi |-> e_sc_ok})) &
+          (p_isvalid = FALSE
+           =>
+           data_Value_Value = {p_rvi} <<| data_Value_Value$0 &
+           data_Value_StatusCode = data_Value_StatusCode$0 <+
+                                   {p_rvi |-> e_sc_nok})
+        )
+    END
 
 OPERATIONS
+
+    treat_read_request_1(p_resp_msg, p_isvalid, p_node, p_aid, p_rvi) =
+    VAR
+        l_ncl,
+        l_value,
+        l_sc
+    IN
+        IF p_isvalid = TRUE THEN
+            l_ncl, l_value <-- read_NodeClass_Attribute(p_node, p_aid);
+            IF  p_aid = e_aid_Value &
+                l_ncl = e_ncl_Variable
+            THEN
+                l_sc <-- read_Value_StatusCode(p_node)
+            ELSE
+                l_sc := e_sc_ok
+            END;
+            write_read_response(p_resp_msg, p_rvi, l_value, l_sc);
+            read_AddressSpace_free_value(l_value)
+        ELSE
+            write_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_nok)
+        END
+    END
+    ;
+
     treat_read_request(req_msg, resp_msg) =
     VAR
-        ii, rvi,
-        l_nb_ReadValue,
         l_isvalid,
-        l_node, l_aid,
-        l_value, l_ncl, l_sc,
-        l_continue
+        l_nb_ReadValue,
+        l_continue,
+        l_rvi,
+        l_node,
+        l_aid
     IN
-        l_isvalid <-- read_ReadRequest(req_msg);
+        l_isvalid, l_nb_ReadValue <-- read_ReadRequest(req_msg);
         IF l_isvalid = TRUE THEN
-            l_nb_ReadValue <-- read_nb_ReadValue;
-            l_continue <-- init_iterwrite_DataValue(l_nb_ReadValue, resp_msg);
-            ii := 0;
+            write_read_response_init(l_nb_ReadValue, resp_msg);
+            l_continue <-- init_iter_write_request(l_nb_ReadValue);
             WHILE l_continue = TRUE DO
-                ii := ii+1;
-                /* To determine which StatusCode is sent, we need the NodeClass:
-                 *  the StatusCode associated to the Value attribute of a Variable is the one in the AddressSpace.
-                 * TODO: UserAccessLevel
-                 * TODO: To determine which timestamp are returned, we need the timestampsToReturn of the request.
-                 */
-                /* Récup la ième requête : NodeId, AttrId */
-                rvi <-- read_cast_t_ReadValue(ii);
-                l_isvalid, l_node, l_aid <-- readall_ReadValue_Node_AttributeId(rvi);
-                IF l_isvalid = TRUE THEN /* Note: une opération locale permettrait de simplifier la preuve */
-                    l_ncl, l_value <-- read_NodeClass_Attribute(l_node, l_aid);
-                    IF l_aid = e_aid_Value & l_ncl = e_ncl_Variable THEN
-                        l_sc <-- read_Value_StatusCode(l_node)
-                    ELSE
-                        l_sc := e_sc_ok
-                    END
-                    ;
-                    l_continue <-- continue_iterwrite_DataValue(rvi, l_value, l_sc);
-                    read_AddressSpace_free_value(l_value)
-                ELSE
-                    /* TODO: split in two different noks (nodeId/attrId invalid) */
-                    l_continue <-- continue_iterwrite_DataValue(rvi, c_Variant_indet, e_sc_nok)
-                END
+                l_continue, l_rvi <-- continue_iter_write_request;
+                l_isvalid, l_node, l_aid <-- readall_ReadValue_Node_AttributeId(req_msg, l_rvi);
+                treat_read_request_1(resp_msg, l_isvalid, l_node, l_aid, l_rvi)
             INVARIANT
-                ii : 0..l_nb_ReadValue
+                rreqs_to_iterate <: t_ReadValue &
+                rreqs_iterated   <: t_ReadValue &
+                rreqs_to_iterate /\ rreqs_iterated = {} &
+                rreqs_to_iterate \/ rreqs_iterated = cast_t_ReadValue[1..nb_ReadValue] &
+                l_continue = bool(rreqs_to_iterate /= {}) &
+
+                data_Value_Value =
+                %rvi.(rvi : t_ReadValue &
+                      rvi : rreqs_iterated &
+                      rvi : dom(ReadValue_Node) &
+                      ReadValue_Node(rvi) : dom(a_NodeId) &
+                      rvi : dom(ReadValue_AttributeId) &
+                      ReadValue_Node(rvi) : dom(AttributeID_Node_Variant(ReadValue_AttributeId(rvi)))
+                      |
+                      AttributeID_Node_Variant(ReadValue_AttributeId(rvi))(ReadValue_Node(rvi))
+                     ) &
+
+                data_Value_StatusCode =
+                %rvi.(rvi : t_ReadValue &
+                      rvi : rreqs_iterated
+                      |
+                      {FALSE |-> e_sc_nok,
+                       TRUE  |->
+                                 {FALSE |-> e_sc_ok,
+                                  TRUE  |-> a_Value_StatusCode(ReadValue_Node(rvi))}
+                                 (bool(ReadValue_AttributeId(rvi) = e_aid_Value &
+                                       a_NodeClass(ReadValue_Node(rvi)) = e_ncl_Variable))}
+                      (bool(rvi : dom(data_Value_Value)))
+                     )
             VARIANT
-                l_nb_ReadValue-ii
+                card(rreqs_to_iterate)
             END
         ELSE
             write_response_error(e_sc_nok, resp_msg)

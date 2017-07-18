@@ -29,8 +29,8 @@ DEFINITIONS
     d_inv_read == (
         nb_ReadValue : NAT &
         nb_ReadValue <= k_n_read_resp_max &
-        ReadValue_Node : cast_t_ReadValue[1..nb_ReadValue] --> t_Node /* TODO: !!! not total, as a NodeId is always given in the ReadValue, but there may not be a Node in the AddS with this NodeId. This is a lie... It's not "such" a pb, as it is an abstract constant, the implementation is ok */ &
-        ReadValue_AttributeId : cast_t_ReadValue[1..nb_ReadValue] --> t_AttributeId
+        ReadValue_Node : t_ReadValue +-> t_Node &
+        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
     )
     ;
     d_inv_response == (
@@ -41,19 +41,22 @@ DEFINITIONS
     )
 
 ABSTRACT_VARIABLES
-    nb_ReadValue, ReadValue_Node, ReadValue_AttributeId,
-    data_Value_Value, data_Value_StatusCode/*, data_Value_SourceTimestamp, data_Value_ServerTimestamp*/
+    nb_ReadValue,
+    ReadValue_Node,
+    ReadValue_AttributeId,
+    data_Value_Value,
+    data_Value_StatusCode
 
 INVARIANT
     d_inv_read &
     d_inv_response
 
 INITIALISATION
-    nb_ReadValue := 0  ||
-    ReadValue_Node := {} ||
+    nb_ReadValue          := 0  ||
+    ReadValue_Node        := {} ||
     ReadValue_AttributeId := {} ||
-    data_Value_Value, data_Value_StatusCode := {}, {} /* ||
-    data_Value_SourceTimestamp, data_Value_ServerTimestamp := {}, {} */
+    data_Value_Value      := {} ||
+    data_Value_StatusCode := {}
 
 OPERATIONS
     treat_read_request(req_msg, resp_msg) =
@@ -65,57 +68,16 @@ OPERATIONS
         resp_msg   = c_msg_out &
         c_msg_out : t_msg
     THEN
-        nb_ReadValue, ReadValue_Node, ReadValue_AttributeId,
-        data_Value_Value, data_Value_StatusCode/*,
-        data_Value_SourceTimestamp, data_Value_ServerTimestamp */
+        nb_ReadValue,
+        ReadValue_Node,
+        ReadValue_AttributeId,
+        data_Value_Value,
+        data_Value_StatusCode
         :(
-            /* TODO: It would be nice to specify that a response is always sent, even when there is an error */
             d_inv_read &
             data_Value_Value : t_ReadValue +-> t_Variant &
-            data_Value_Value = % rvi. (
-                rvi : t_ReadValue &
-                /* ith node id has a node in the Address Space */
-                rvi : dom(ReadValue_Node) &
-                ReadValue_Node(rvi) : dom(a_NodeId) &
-                /* Node is in the domain of the attribute */
-                rvi : dom(ReadValue_AttributeId) &
-                ReadValue_Node(rvi) : dom(AttributeID_Node_Variant(ReadValue_AttributeId(rvi)))
-                /* TODO: add use-access levels */
-                |
-                AttributeID_Node_Variant(ReadValue_AttributeId(rvi)) (ReadValue_Node(rvi))
-            ) &
-
-            data_Value_StatusCode : t_ReadValue --> t_StatusCode &
-            data_Value_StatusCode = {rvi,sc |
-                rvi : t_ReadValue & sc : t_StatusCode &
-                (
-                    rvi /: dom(data_Value_Value) /* TODO: split in two different noks (nodeId invalid, or attrId invalid) */
-                        => sc = e_sc_nok
-                ) &
-                (
-                    rvi : dom(data_Value_Value)
-                    /* Soit on est dans l'attribut Value d'une Variable,
-                       -> le StatusCode associé à la Value de la Var
-                       Sinon, c'est le StatusCode de l'opération (ok) */
-                    =>
-                    (
-                        (ReadValue_AttributeId(rvi) = e_aid_Value &
-                         a_NodeClass(ReadValue_Node(rvi)) = e_ncl_Variable
-                            => sc = a_Value_StatusCode(ReadValue_Node(rvi)) )
-                        &
-                        ( not(ReadValue_AttributeId(rvi) = e_aid_Value &
-                              a_NodeClass(ReadValue_Node(rvi)) = e_ncl_Variable)
-                           => sc = e_sc_ok )
-                    )
-                )
-            }
-
-            /*(!ii.ii : dom(data_Value_Value) & ReadValue_Node(ii) : dom(att(ReadValue_AttributeId(ii)))
-                => data_Value_Value(ii) = att(ReadValue_AttributeId(ii))(ReadValue_Node(ii)) ) &
-            data_Value_StatusCode : set_read_elements --> t_StatusCode &
-            data_Value_SourceTimestamp
-            data_Value_ServerTimestamp */
-        )
+            data_Value_StatusCode : t_ReadValue +-> t_StatusCode
+         )
     END
 
 END

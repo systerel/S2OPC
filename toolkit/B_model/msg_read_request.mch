@@ -30,22 +30,18 @@ DEFINITIONS
         ReadValue_Node : t_ReadValue +-> t_Node &
         ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
     )
-    ;
-    d_inv_init_ok == (
-        nb_ReadValue <= k_n_read_resp_max &
-        ReadValue_Node : t_ReadValue +-> t_Node &
-        ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
-    )
-
-CONCRETE_VARIABLES
-    init_ok
 
 ABSTRACT_VARIABLES
-    nb_ReadValue, ReadValue_Node, ReadValue_AttributeId
+    init_ok,
+    nb_ReadValue,
+    ReadValue_Node,
+    ReadValue_AttributeId
 
 INVARIANT
     d_inv &
-    (init_ok = TRUE => d_inv_init_ok)
+    (init_ok = TRUE
+     =>
+     nb_ReadValue <= k_n_read_resp_max)
 
 INITIALISATION
     init_ok := FALSE ||
@@ -54,20 +50,30 @@ INITIALISATION
     ReadValue_AttributeId := {}
 
 OPERATIONS
+
     /* Makes the ReadRequest available to the machine (if possible)
      * This "read" does not have the meaning of the other reads, which are accessors... */
-    rr <-- read_ReadRequest(msg) =
+    rr, nb <-- read_ReadRequest(msg) =
     PRE
         msg  : t_msg_i &
         msg  = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_read_req
     THEN
-        rr, init_ok, nb_ReadValue, ReadValue_Node, ReadValue_AttributeId :(
-            rr : BOOL & /* Error code, for now a simple bool */
-            d_inv &
-            rr = init_ok &
-            (rr = TRUE => d_inv_init_ok)
+       rr,
+       nb,
+       init_ok,
+       nb_ReadValue,
+       ReadValue_Node,
+        ReadValue_AttributeId
+       :(rr : BOOL & /* Error code, for now a simple bool */
+         nb : NAT &
+         d_inv &
+         rr = init_ok &
+         (rr = TRUE
+          =>
+          nb_ReadValue <= k_n_read_resp_max &
+          nb = nb_ReadValue)
         )
     END
     ;
@@ -80,27 +86,32 @@ OPERATIONS
     END
     ;
 
-    isvalid, node, aid <-- readall_ReadValue_Node_AttributeId(rvi) =
+    isvalid, node, aid <-- readall_ReadValue_Node_AttributeId(msg, rvi) =
     PRE
+        msg  : t_msg_i &
+        msg  = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_read_req &
         rvi : t_ReadValue_i &
         rvi : t_ReadValue &
         init_ok = TRUE
     THEN
-        LET cond BE
-            cond = bool(rvi : dom(ReadValue_Node) /\ dom(ReadValue_AttributeId))
-        IN
-            isvalid := cond ||
-            node, aid :(
-                node : t_Node_i &
-                aid : t_AttributeId_i &
-                aid : t_AttributeId &
-                (
-                    cond = TRUE
-                    =>
-                    node = ReadValue_Node(rvi) & /* TODO: this is not proved */
-                    aid = ReadValue_AttributeId(rvi) /* TODO: this is not proved */
-                )
-            )
-        END
+       IF rvi : dom(ReadValue_Node) &
+          rvi : dom(ReadValue_AttributeId)
+       THEN
+          isvalid := TRUE ||
+          node,
+          aid
+          :(node : t_Node_i &
+            aid  : t_AttributeId_i &
+            node = ReadValue_Node(rvi) &
+            aid  = ReadValue_AttributeId(rvi)
+           )
+       ELSE
+          isvalid := FALSE           ||
+          node    :: t_Node_i        ||
+          aid     :: t_AttributeId_i
+       END
     END
+
 END

@@ -68,6 +68,7 @@ OPERATIONS
     END
     ;
 
+    /* TODO: jamais utilisé depuis le B, à conserver ? */
     isvalid, sc <-- getall_ResponseWrite_StatusCode(wvi) =
     PRE
         wvi : t_WriteValue_i &

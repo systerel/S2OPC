@@ -32,94 +32,61 @@ DEFINITIONS
         /*data_Value_SourceTimestamp : t_ReadValue +-> t_Timestamp &
         data_Value_ServerTimestamp : t_ReadValue +-> t_Timestamp*/
 
-        response_ok : BOOL &
-
         nb_resps : NAT &
         nb_resps <= k_n_read_resp_max &
 
-        resps_to_iterate <: t_ReadValue &
-        resps_iterated <: t_ReadValue &
-        resps_to_iterate /\ resps_iterated = {} &
-
         response_msg : t_msg_i
-    )
-    ;
-    /* Not used yet */
-    d_prop_response == (
-        card(resps_iterated \/ resps_to_iterate) = nb_resps &
-
-        response_StatusCode : t_StatusCode &
-        data_Value_Value : resps_iterated +-> t_Variant &
-        data_Value_StatusCode : resps_iterated --> t_StatusCode &
-        /*data_Value_SourceTimestamp : xxx +-> t_Timestamp &
-        data_Value_ServerTimestamp : xxx --> t_Timestamp*/
-        response_msg : t_msg
     )
 
 ABSTRACT_VARIABLES
-    response_StatusCode, data_Value_Value, data_Value_StatusCode,
-    /* data_Value_SourceTimestamp, data_Value_ServerTimestamp*/
-    response_ok,
+    response_StatusCode,
+    data_Value_Value,
+    data_Value_StatusCode,
     nb_resps,
-    resps_to_iterate,
-    resps_iterated,
     response_msg /* Response message */
 
 INVARIANT
     d_inv_response
 
 INITIALISATION
-    data_Value_Value, data_Value_StatusCode := {}, {} ||
+    data_Value_Value      := {} ||
+    data_Value_StatusCode := {} ||
     /*data_Value_SourceTimestamp, data_Value_ServerTimestamp := {}, {} ||*/
     response_StatusCode := c_StatusCode_indet ||
 
     nb_resps,
-    response_ok,
-    resps_to_iterate,
-    resps_iterated,
     response_msg
     :(d_inv_response)
 
 OPERATIONS
-    continue <-- init_iterwrite_DataValue(a_nb_resps, resp_msg) =
+
+    write_read_response_init(p_nb_resps, p_resp_msg) =
     PRE
-        a_nb_resps : NAT &
-        a_nb_resps <= k_n_read_resp_max &
-        resp_msg   : t_msg_i &
-        resp_msg   = c_msg_out &
-        c_msg_out : t_msg
+        p_nb_resps : NAT &
+        p_nb_resps <= k_n_read_resp_max &
+        p_resp_msg : t_msg_i &
+        p_resp_msg = c_msg_out &
+        c_msg_out  : t_msg
     THEN
-        nb_resps := a_nb_resps ||
-        resps_to_iterate := cast_t_ReadValue[1..a_nb_resps] ||
-        resps_iterated := {} ||
-
-        data_Value_Value := {} ||
-        data_Value_StatusCode := {} ||
-
-        response_StatusCode :: t_StatusCode ||
-        continue := bool(0 < a_nb_resps) ||
-
-        response_msg := resp_msg
+        nb_resps     := p_nb_resps ||
+        response_msg := p_resp_msg
     END
     ;
 
-    continue <-- continue_iterwrite_DataValue(rvi, val, sc) =
+    write_read_response(resp_msg, rvi, val, sc) =
     PRE
-        rvi : t_ReadValue_i &
-        rvi : t_ReadValue &
-        rvi : resps_to_iterate &
-        val : t_Variant_i &
-        sc : t_StatusCode_i &
-        sc : t_StatusCode
+        resp_msg  : t_msg_i   &
+        resp_msg  = c_msg_out &
+        c_msg_out : t_msg     &
+
+        rvi : t_ReadValue_i   &
+        rvi : t_ReadValue     &
+        val : t_Variant_i     &
+        sc  : t_StatusCode_i  &
+        sc  : t_StatusCode
     THEN
-        IF val /= c_Variant_indet THEN
-            data_Value_Value(rvi) := val
-        END
-        ||
-        data_Value_StatusCode(rvi) := sc ||
-        resps_iterated := resps_iterated \/ {rvi} ||
-        resps_to_iterate := resps_to_iterate - {rvi} ||
-        continue := bool(resps_to_iterate /= {rvi}) /* Pb: malloc may fail... */
+        data_Value_Value     (rvi) := val ||
+        data_Value_StatusCode(rvi) := sc
     END
     ;
 
@@ -130,10 +97,6 @@ OPERATIONS
         resp_msg   : t_msg_i &
         resp_msg   = c_msg_out &
         c_msg_out : t_msg
-        /*data_Value_Value = {} &
-        data_Value_StatusCode = {} */ /*&
-        data_Value_SourceTimestamp = {} &
-        data_Value_ServerTimestamp = {}*/
     THEN
         nb_resps := 0 ||
         response_StatusCode := sc
