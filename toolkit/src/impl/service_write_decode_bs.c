@@ -35,7 +35,7 @@ static OpcUa_WriteRequest *request;
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void service_write_decode_bs__INITIALISATION(void)
+void service_write_decode_bs__INITIALISATION(void)
 {
     request = NULL;
 }
@@ -43,7 +43,7 @@ extern void service_write_decode_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void service_write_decode_bs__decode_write_request(
+void service_write_decode_bs__decode_write_request(
    const constants__t_ByteString_i service_write_decode_bs__req_payload,
    constants__t_StatusCode_i * const service_write_decode_bs__StatusCode_service)
 {
@@ -62,14 +62,14 @@ extern void service_write_decode_bs__decode_write_request(
 }
 
 
-extern void service_write_decode_bs__free_write_request(void)
+void service_write_decode_bs__free_write_request(void)
 {
     /* TODO: don't free the request that you did not initialize */
     request = NULL;
 }
 
 
-extern void service_write_decode_bs__get_nb_WriteValue(
+void service_write_decode_bs__get_nb_WriteValue(
    t_entier4 * const service_write_decode_bs__nb_req)
 {
     /* TODO: does B prevent this operation from being called before decode ? */
@@ -85,7 +85,7 @@ extern void service_write_decode_bs__get_nb_WriteValue(
  * \p nid and \p value are borrowed from request,
  * you should not free them.
  */
-extern void service_write_decode_bs__getall_WriteValue(
+void service_write_decode_bs__getall_WriteValue(
    const constants__t_WriteValue_i service_write_decode_bs__wvi,
    t_bool * const service_write_decode_bs__isvalid,
    constants__t_NodeId_i * const service_write_decode_bs__nid,

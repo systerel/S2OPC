@@ -37,7 +37,7 @@ static t_entier4 nb_req;
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void response_write_bs__INITIALISATION(void)
+void response_write_bs__INITIALISATION(void)
 {
     arr_StatusCode = NULL;
     nb_req = 0;
@@ -47,7 +47,7 @@ extern void response_write_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void response_write_bs__alloc_write_request_responses_malloc(
+void response_write_bs__alloc_write_request_responses_malloc(
    const t_entier4 response_write_bs__nb_req,
    t_bool * const response_write_bs__ResponseWrite_allocated)
 {
@@ -63,7 +63,7 @@ extern void response_write_bs__alloc_write_request_responses_malloc(
 }
 
 
-extern void response_write_bs__reset_ResponseWrite(void)
+void response_write_bs__reset_ResponseWrite(void)
 {
     free(arr_StatusCode);
     arr_StatusCode = NULL;
@@ -71,7 +71,7 @@ extern void response_write_bs__reset_ResponseWrite(void)
 }
 
 
-extern void response_write_bs__getall_ResponseWrite_StatusCode(
+void response_write_bs__getall_ResponseWrite_StatusCode(
    const constants__t_WriteValue_i response_write_bs__wvi,
    t_bool * const response_write_bs__isvalid,
    constants__t_StatusCode_i * const response_write_bs__sc)
@@ -86,7 +86,7 @@ extern void response_write_bs__getall_ResponseWrite_StatusCode(
 }
 
 
-extern void response_write_bs__set_ResponseWrite_StatusCode(
+void response_write_bs__set_ResponseWrite_StatusCode(
    const constants__t_WriteValue_i response_write_bs__wvi,
    const constants__t_StatusCode_i response_write_bs__sc)
 {

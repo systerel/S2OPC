@@ -34,7 +34,7 @@
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-extern void msg_read_response_bs__INITIALISATION(void)
+void msg_read_response_bs__INITIALISATION(void)
 {
 }
 
@@ -42,7 +42,7 @@ extern void msg_read_response_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void msg_read_response_bs__write_read_response_init(
+void msg_read_response_bs__write_read_response_init(
    const t_entier4 msg_read_response_bs__a_nb_resps,
    const constants__t_msg_i msg_read_response_bs__resp_msg)
 {
@@ -61,7 +61,7 @@ extern void msg_read_response_bs__write_read_response_init(
 }
 
 
-extern void msg_read_response_bs__write_read_response_iter(
+void msg_read_response_bs__write_read_response_iter(
    const constants__t_msg_i msg_read_response_bs__resp_msg,
    const constants__t_ReadValue_i msg_read_response_bs__rvi,
    const constants__t_Variant_i msg_read_response_bs__val,
