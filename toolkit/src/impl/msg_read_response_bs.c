@@ -50,14 +50,15 @@ void msg_read_response_bs__write_read_response_init(
 
     msg_read_resp->NoOfResults = msg_read_response_bs__a_nb_resps;
     msg_read_resp->Results = (SOPC_DataValue *)malloc(sizeof(SOPC_DataValue)*msg_read_response_bs__a_nb_resps);
-    if(NULL == msg_read_resp->Results){
+    if(NULL == msg_read_resp->Results)
         /* Temp */
         exit(1);
-    }else{
-        for(int32_t i = 0; i < msg_read_resp->NoOfResults; i++){
-            SOPC_DataValue_Initialize(&msg_read_resp->Results[i]);
-        }
-    }
+
+    for(int32_t i = 0; i < msg_read_resp->NoOfResults; i++)
+        SOPC_DataValue_Initialize(&msg_read_resp->Results[i]);
+
+    msg_read_resp->NoOfDiagnosticInfos = 0;
+    msg_read_resp->DiagnosticInfos = NULL;
 }
 
 
