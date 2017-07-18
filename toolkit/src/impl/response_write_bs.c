@@ -22,11 +22,15 @@
 
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "b2c.h"
 #include "response_write_bs.h"
 
+#include "internal_msg.h"
+
 #include "sopc_base_types.h"
+#include "sopc_types.h"
 
 
 /* Globals */
@@ -91,5 +95,25 @@ void response_write_bs__set_ResponseWrite_StatusCode(
    const constants__t_StatusCode_i response_write_bs__sc)
 {
     arr_StatusCode[response_write_bs__wvi] = response_write_bs__sc;
+}
+
+
+void response_write_bs__write_WriteResponse_msg_out(
+   const constants__t_msg_i response_write_bs__msg_out)
+{
+    OpcUa_WriteResponse *msg_write_resp = (OpcUa_WriteResponse *)(((message__message *)response_write_bs__msg_out)->msg);
+    SOPC_StatusCode *lsc;
+
+    lsc = (SOPC_StatusCode *)malloc(sizeof(SOPC_StatusCode)*nb_req);
+    if(NULL == lsc)
+        /* TODO: unreasonnable behavior */
+        exit(1);
+
+    memcpy((void *)lsc, (void *)(arr_StatusCode + 1), sizeof(SOPC_StatusCode)*nb_req);
+
+    msg_write_resp->NoOfResults = nb_req;
+    msg_write_resp->Results = lsc;
+    msg_write_resp->NoOfDiagnosticInfos = 0;
+    msg_write_resp->DiagnosticInfos = NULL;
 }
 
