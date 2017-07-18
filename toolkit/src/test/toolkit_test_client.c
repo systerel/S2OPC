@@ -36,6 +36,8 @@
 #include "sopc_run.h"
 
 #include "wrap_read.h"
+#include "testlib_write.h"
+
 
 /* Function to build the read service request message */
 message__message* getReadRequest_message(){
@@ -43,6 +45,32 @@ message__message* getReadRequest_message(){
   if(NULL == pMsg)
     return NULL;
   pMsg->msg = read_new_read_request();
+  if(NULL == pMsg->msg)
+    return NULL;
+  pMsg->encType = &OpcUa_ReadRequest_EncodeableType;
+  pMsg->respEncType = &OpcUa_ReadResponse_EncodeableType;
+  pMsg->isRequest = (!FALSE);
+  return pMsg;
+}
+
+/* Functions to build a write service request message, and its verification read request */
+message__message *getWriteRequest_message() {
+  message__message *pMsg = (message__message *)malloc(sizeof(message__message));
+  if(NULL == pMsg)
+    return NULL;
+  pMsg->msg = tlibw_new_WriteRequest();
+  if(NULL == pMsg->msg)
+    return NULL;
+  pMsg->encType = &OpcUa_WriteRequest_EncodeableType;
+  pMsg->respEncType = &OpcUa_WriteResponse_EncodeableType;
+  pMsg->isRequest = (!FALSE);
+  return pMsg;
+}
+message__message* getReadRequest_verif_message() {
+  message__message *pMsg = (message__message *)malloc(sizeof(message__message));
+  if(NULL == pMsg)
+    return NULL;
+  pMsg->msg = tlibw_new_ReadRequest_check();
   if(NULL == pMsg->msg)
     return NULL;
   pMsg->encType = &OpcUa_ReadRequest_EncodeableType;
@@ -68,6 +96,8 @@ int main(void){
 
   SOPC_StatusCode status = STATUS_OK;
   constants__t_StatusCode_i sCode = constants__e_sc_ok;
+
+  OpcUa_WriteRequest *pWriteReq;
 
   /* Init B model */
   INITIALISATION();
@@ -130,7 +160,7 @@ int main(void){
 
   /* Wait until session is activated or timeout */
   loopCpt = 0;
-  while(STATUS_OK == status && 
+  while(STATUS_OK == status &&
         session_state != constants__e_session_userActivated &&
         loopCpt * maxSleepTimeout <= maxLoopTimeout){
     loopCpt++;
@@ -153,7 +183,7 @@ int main(void){
   }
 
   if(STATUS_OK == status){
-    /* Create a service request message and send it through session (read service)*/
+    /* Create a service request message and send it through session (read service) */
     message__message *pMsgRead = getReadRequest_message();
     io_dispatch_mgr__send_service_request_msg(session,
                                               pMsgRead,
@@ -183,6 +213,70 @@ int main(void){
   if(loopCpt * maxSleepTimeout > maxLoopTimeout){
     status = OpcUa_BadTimeout;
   }
+
+  if(STATUS_OK == status)
+  {
+    /* Sends a WriteRequest */
+    pWriteReq = getWriteRequest_message();
+    message__message *pMsgWrite = pWriteReq;
+    test_results_set_WriteRequest((OpcUa_WriteRequest *) pMsgWrite->msg);
+    io_dispatch_mgr__send_service_request_msg(session, pMsgWrite, &sCode);
+
+    /* Do not free the WriteRequest now, it is used by test_results_* */
+    free(pMsgWrite);
+
+    if(constants__e_sc_ok == sCode){
+      printf(">>Test_Client_Toolkit: write request sending: OK'\n");
+    }else{
+      util_status_code__B_to_C(sCode,
+                               &status);
+      printf(">>Test_Client_Toolkit: write request sending: statusCode = '%d' | NOK\n", status);
+    }
+  }
+
+  /* Wait until service response is received */
+  loopCpt = 0;
+  while(STATUS_OK == status &&
+        test_results_get_read_result() == FALSE &&
+        loopCpt * maxSleepTimeout <= maxLoopTimeout){
+    status = SOPC_TreatReceivedMessages(100);
+  }
+
+  if(loopCpt * maxSleepTimeout > maxLoopTimeout){
+    status = OpcUa_BadTimeout;
+  }
+
+  if(STATUS_OK == status)
+  {
+    /* Sends another ReadRequest, to verify that the AddS has changed */
+    /* The callback will call the verification */
+    message__message *pMsgRead = getReadRequest_verif_message();
+    io_dispatch_mgr__send_service_request_msg(session,
+                                              pMsgRead,
+                                              &sCode);
+
+    free(((OpcUa_ReadRequest *)pMsgRead->msg)->NodesToRead);
+    free(pMsgRead->msg);
+    free(pMsgRead);
+
+    /* Don't check, sCode is ok */
+  }
+
+  /* Wait until service response is received */
+  loopCpt = 0;
+  while(STATUS_OK == status &&
+        test_results_get_read_result() == FALSE &&
+        loopCpt * maxSleepTimeout <= maxLoopTimeout){
+    status = SOPC_TreatReceivedMessages(100);
+  }
+
+  if(loopCpt * maxSleepTimeout > maxLoopTimeout){
+    status = OpcUa_BadTimeout;
+  }
+
+  /* Now the request can be freed */
+  test_results_set_WriteRequest(NULL);
+  tlibw_free_WriteRequest((OpcUa_WriteRequest **) &pWriteReq);
 
   /* Close the session */
   if(constants__c_session_indet != session){

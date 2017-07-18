@@ -240,7 +240,7 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq)
             bTest = memcmp(pVariant, &lwv[i].Value.Value, sizeof(SOPC_Variant)) != 0;
         if(!bTest)
         {
-            printf("Request[wvi = %zd] did not change the address space.\n+ Expected value:\n", i+1);
+            printf("Request[wvi = %zd] did not change the address space.\n+ Expected value:\n", i);
             util_variant__print_SOPC_Variant(&lwv[i].Value.Value);
             printf("+ Read value:\n");
             util_variant__print_SOPC_Variant(pVariant);
@@ -258,8 +258,11 @@ bool tlibw_verify_response(OpcUa_WriteRequest *pWriteReq, OpcUa_WriteResponse *p
     bool bVerif = true;
     int32_t i;
 
-    if(pWriteReq->NoOfNodesToWrite < 0)
-        exit(1);
+    if(NULL == pWriteReq || NULL == pWriteResp || pWriteReq->NoOfNodesToWrite < 0)
+    {
+        printf("Invalid pWriteReq or pWriteResp or number of Nodes < 0\n");
+        return false;
+    }
 
     if(pWriteResp->NoOfResults != pWriteReq->NoOfNodesToWrite)
     {
@@ -285,12 +288,78 @@ bool tlibw_verify_response(OpcUa_WriteRequest *pWriteReq, OpcUa_WriteResponse *p
 
 OpcUa_ReadRequest *tlibw_new_ReadRequest_check(void)
 {
-    return 0;
+    OpcUa_ReadValueId *lrv = (OpcUa_ReadValueId *)malloc(N_REQUESTS*sizeof(OpcUa_ReadValueId));
+    size_t i;
+
+    if(NULL == lrv)
+        exit(1);
+
+    /* We only check that the values of the variables that were modified.
+     * For the duplicate WriteRequest, there is a single request.
+     * It should match (in the current implementation) the first of the two WriteValue. */
+    for(i=0; i<N_REQUESTS_VALS; ++i)
+    {
+        lrv[i] = (OpcUa_ReadValueId) {
+            .NodeId = {
+                .IdentifierType = IdentifierType_Numeric,
+                .Data.Numeric = 10+i+(i*4/N_REQUESTS_VALS)*(NB_NODES-8)/4 },
+            .AttributeId = e_aid_Value,
+            .IndexRange = {.Length = 0},
+            .DataEncoding = {.Name.Length = 0} };
+    }
+
+    OpcUa_ReadRequest *pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest,
+            /*.RequestHeader = , */
+            .MaxAge = 0.,
+            .TimestampsToReturn = OpcUa_TimestampsToReturn_Neither,
+            .NoOfNodesToRead = N_REQUESTS,
+            .NodesToRead = lrv
+        );
+
+    if(NULL == pReadReq)
+        exit(1);
+
+    return pReadReq;
 }
 
 
 bool tlibw_verify_response_remote(OpcUa_WriteRequest *pWriteReq, OpcUa_ReadResponse *pReadResp)
 {
-    return false;
+    bool bVerif = true;
+    int32_t i;
+    int32_t cmp;
+    SOPC_StatusCode sc;
+    
+    if(NULL == pWriteReq || NULL == pReadResp)
+    {
+        printf("Invalid pWriteReq or pReadResp\n");
+        return false;
+    }
+
+    if(pWriteReq->NoOfNodesToWrite < pReadResp->NoOfResults)
+    {
+        printf(" or number of request (%d) < number of response (%d)\n",
+               pWriteReq->NoOfNodesToWrite, pReadResp->NoOfResults);
+        return false;
+    }
+
+    /* Verify that the read value is the requested write value */
+    for(i=0; i<pReadResp->NoOfResults; ++i)
+    {
+        sc = SOPC_Variant_Compare(&pReadResp->Results[i].Value, /* <-- Variant */
+                                  &pWriteReq->NodesToWrite[i].Value.Value, /* <-- Variant */
+                                  &cmp);
+        if(sc != STATUS_OK || cmp != 0)
+        {
+            printf("Response[rvi = %d] is different from Request[wvi = %d] (Compare sc = %d, cmp = %d)\n+ Expected value:\n",
+                   i, i, sc, cmp);
+            util_variant__print_SOPC_Variant(&pWriteReq->NodesToWrite[i].Value.Value);
+            printf("+ Read value:\n");
+            util_variant__print_SOPC_Variant(&pReadResp->Results[i].Value);
+            bVerif = false;
+        }
+    }
+
+    return bVerif;
 }
 

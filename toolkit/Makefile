@@ -42,6 +42,7 @@ SERVER_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(SERVER_OBJS))
 READ_EXEC   :=$(patsubst %.o,$(PATHEXEC)/%,$(READ_OBJS))
 WRITE_EXEC  :=$(patsubst %.o,$(PATHEXEC)/%,$(WRITE_OBJS))
 OBJS        :=$(patsubst %,$(PATHOBJ)/%,$(OBJS))
+CLIENT_OBJS += testlib_write.o
 CLIENT_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(CLIENT_OBJS))
 SERVER_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(SERVER_OBJS))
 READ_OBJS   :=$(patsubst %,$(PATHOBJ)/%,$(READ_OBJS))
