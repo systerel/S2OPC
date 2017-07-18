@@ -39,7 +39,7 @@ bool                tlibw_stimulateB_with_request(OpcUa_WriteRequest *pWriteReq)
 bool                tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq);
 
 /** Verifies that the response is ok and the response of each request is ok too */
-bool                tlibw_verify_response(OpcUa_WriteResponse *pWriteResp);
+bool                tlibw_verify_response(OpcUa_WriteRequest *pWriteReq, OpcUa_WriteResponse *pWriteResp);
 /** Generates a new ReadRequest, that asks for the modified values. Must be coherent with tlibw_new_WriteRequest... */
 OpcUa_ReadRequest  *tlibw_new_ReadRequest_check(void);
 /** Client-side, after sending the tlib_new_ReadRequest, verifies the ReadResponse against the initial WriteRequest. Values should match. */

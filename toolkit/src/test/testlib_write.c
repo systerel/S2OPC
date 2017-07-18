@@ -253,9 +253,33 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq)
 }
 
 
-bool tlibw_verify_response(OpcUa_WriteResponse *pWriteResp)
+bool tlibw_verify_response(OpcUa_WriteRequest *pWriteReq, OpcUa_WriteResponse *pWriteResp)
 {
-    return false;
+    bool bVerif = true;
+    int32_t i;
+
+    if(pWriteReq->NoOfNodesToWrite < 0)
+        exit(1);
+
+    if(pWriteResp->NoOfResults != pWriteReq->NoOfNodesToWrite)
+    {
+        printf("Number of responses (%d) differs from number of requests (%d)\n", pWriteResp->NoOfResults, pWriteReq->NoOfNodesToWrite);
+        return false; /* Can't continue, as there might be something very wrong here */
+    }
+
+    /* Verify the vector of StatusCode, should all be OK */
+    for(i=0; i<pWriteReq->NoOfNodesToWrite; ++i)
+    {
+        if(pWriteResp->Results[i] != constants__e_sc_ok)
+        {
+            printf("Response[wvi = %d] is not OK (%d)\n", i, pWriteResp->Results[i]);
+            bVerif = false;
+        }
+    }
+
+    /* Don't verify Diagnostics, don't care */
+
+    return bVerif;
 }
 
 
