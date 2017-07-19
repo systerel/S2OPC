@@ -294,8 +294,8 @@ bool tlibw_verify_response(OpcUa_WriteRequest *pWriteReq, OpcUa_WriteResponse *p
 
 OpcUa_ReadRequest *tlibw_new_ReadRequest_check(void)
 {
-    OpcUa_ReadValueId *lrv = (OpcUa_ReadValueId *)malloc(N_REQUESTS*sizeof(OpcUa_ReadValueId));
-    size_t i;
+    OpcUa_ReadValueId *lrv = (OpcUa_ReadValueId *)malloc(N_REQUESTS_VALS*sizeof(OpcUa_ReadValueId));
+    size_t i, j;
 
     if(NULL == lrv)
         exit(1);
@@ -303,22 +303,25 @@ OpcUa_ReadRequest *tlibw_new_ReadRequest_check(void)
     /* We only check that the values of the variables that were modified.
      * For the duplicate WriteRequest, there is a single request.
      * It should match (in the current implementation) the first of the two WriteValue. */
-    for(i=0; i<N_REQUESTS_VALS; ++i)
+    for(i=0; i<N_REQUESTS_VALS/4; ++i)
     {
-        lrv[i] = (OpcUa_ReadValueId) {
-            .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+i+(i*4/N_REQUESTS_VALS)*(NB_NODES-8)/4 },
-            .AttributeId = e_aid_Value,
-            .IndexRange = {.Length = 0},
-            .DataEncoding = {.Name.Length = 0} };
+        for(j=0; j<4; ++j)
+        {
+            lrv[4*i+j] = (OpcUa_ReadValueId) {
+                .NodeId = {
+                    .IdentifierType = IdentifierType_Numeric,
+                    .Data.Numeric = 10+i+j*(NB_NODES-8)/4 },
+                .AttributeId = e_aid_Value,
+                .IndexRange = {.Length = 0},
+                .DataEncoding = {.Name.Length = 0} };
+        }
     }
 
     OpcUa_ReadRequest *pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest,
             /*.RequestHeader = , */
             .MaxAge = 0.,
             .TimestampsToReturn = OpcUa_TimestampsToReturn_Neither,
-            .NoOfNodesToRead = N_REQUESTS,
+            .NoOfNodesToRead = N_REQUESTS_VALS,
             .NodesToRead = lrv
         );
 
