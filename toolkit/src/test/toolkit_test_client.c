@@ -205,7 +205,7 @@ int main(void){
   /* Wait until service response is received */
   loopCpt = 0;
   while(STATUS_OK == status &&
-        test_results_get_read_result() == FALSE &&
+        test_results_get_service_result() == FALSE &&
         loopCpt * maxSleepTimeout <= maxLoopTimeout){
     status = SOPC_TreatReceivedMessages(100);
   }
@@ -216,6 +216,8 @@ int main(void){
 
   if(STATUS_OK == status)
   {
+    // Reset expected result
+    test_results_set_service_result(FALSE);
     /* Sends a WriteRequest */
     message__message *pMsgWrite = getWriteRequest_message();
     pWriteReq = (OpcUa_WriteRequest *) pMsgWrite->msg;
@@ -237,7 +239,7 @@ int main(void){
   /* Wait until service response is received */
   loopCpt = 0;
   while(STATUS_OK == status &&
-        test_results_get_read_result() == FALSE &&
+        test_results_get_service_result() == FALSE &&
         loopCpt * maxSleepTimeout <= maxLoopTimeout){
     status = SOPC_TreatReceivedMessages(100);
   }
@@ -248,6 +250,8 @@ int main(void){
 
   if(STATUS_OK == status)
   {
+    // Reset expected result
+    test_results_set_service_result(FALSE);
     /* Sends another ReadRequest, to verify that the AddS has changed */
     /* The callback will call the verification */
     message__message *pMsgRead = getReadRequest_verif_message();
@@ -271,7 +275,7 @@ int main(void){
   /* Wait until service response is received */
   loopCpt = 0;
   while(STATUS_OK == status &&
-        test_results_get_read_result() == FALSE &&
+        test_results_get_service_result() == FALSE &&
         loopCpt * maxSleepTimeout <= maxLoopTimeout){
     status = SOPC_TreatReceivedMessages(100);
   }
@@ -311,7 +315,7 @@ int main(void){
 
   StackConfiguration_Clear();
 
-  if(STATUS_OK == status && test_results_get_read_result() == (!FALSE)){
+  if(STATUS_OK == status && test_results_get_service_result() == (!FALSE)){
     printf(">>Test_Client_Toolkit: read request received ! \n");
     printf(">>Test_Client_Toolkit final result: OK\n");
     return 0;

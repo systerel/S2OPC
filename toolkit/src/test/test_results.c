@@ -20,12 +20,12 @@
 #include "sopc_base_types.h"
 
 
-static t_bool valid_read_result = FALSE;
+static t_bool valid_service_result = FALSE;
 static OpcUa_WriteRequest *current_pWriteRequest = NULL;
 
 
-void test_results_set_read_result(t_bool res){
-  valid_read_result = res;
+void test_results_set_service_result(t_bool res){
+  valid_service_result = res;
 }
 
 void test_results_set_WriteRequest(OpcUa_WriteRequest *pWriteReq) {
@@ -33,8 +33,8 @@ void test_results_set_WriteRequest(OpcUa_WriteRequest *pWriteReq) {
 }
 
 
-t_bool test_results_get_read_result(void){
-  return valid_read_result;
+t_bool test_results_get_service_result(void){
+  return valid_service_result;
 }
 
 OpcUa_WriteRequest *test_results_get_WriteRequest(void) {

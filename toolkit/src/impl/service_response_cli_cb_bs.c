@@ -49,18 +49,18 @@ void service_response_cli_cb_bs__cli_service_response(
     cptReadResps++;
     if(cptReadResps <= 1){
       // First read response is to test read result
-      test_results_set_read_result(test_read_request_response(readResp,
+      test_results_set_service_result(test_read_request_response(readResp,
                                                               service_response_cli_cb_bs__status,
                                                               0)
                                    ? (!FALSE):FALSE);
     }else{
       // Second read response is to test write effect (through read result)
-      test_results_set_read_result(
+      test_results_set_service_result(
           tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
     }
   }else if(msg->encType == &OpcUa_WriteResponse_EncodeableType){
     OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) msg->msg;
-    test_results_set_read_result(
+    test_results_set_service_result(
         tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
   }
 }
