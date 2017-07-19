@@ -97,7 +97,7 @@ int main(void){
   SOPC_StatusCode status = STATUS_OK;
   constants__t_StatusCode_i sCode = constants__e_sc_ok;
 
-  OpcUa_WriteRequest *pWriteReq;
+  OpcUa_WriteRequest *pWriteReq = NULL;
 
   /* Init B model */
   INITIALISATION();
