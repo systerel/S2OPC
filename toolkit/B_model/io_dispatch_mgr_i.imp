@@ -265,7 +265,8 @@ OPERATIONS
                                                 l_ret <-- treat_write_request (l_payload, l_session_user);
                                                 /* TODO: where should the service StatusCode be written ?? */
                                                 /* TODO: the following may fail (malloc) */
-                                                write_WriteResponse_msg_out(l_resp_msg)
+                                                write_WriteResponse_msg_out(l_resp_msg);
+                                                dealloc_write_request_responses
                                             END
                                         END;
                                         l_is_valid_resp, l_snd_session_err <-- srv_validate_session_service_resp (channel, l_session, l_request_handle, msg, l_resp_msg);
