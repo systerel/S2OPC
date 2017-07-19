@@ -31,6 +31,7 @@ Current status:
   closed
 - A statically defined address space shall be provided on server-side
 - Read service is provided on server-side
+- Write service is provided on server-side
 
 
 Documentation: 
@@ -51,7 +52,11 @@ Client-side documentation:
 - A statically defined read service callback shall be provided to
   treat read response. In the example it is provided by
   testlib_read_response{.h,.c} through the
-  test_results_set_read_result function.
+  test_read_request_response function.
+- A statically defined write service callback shall be provided to
+  treat read response. In the example it is provided by
+  testlib_write{.h,.c} through the tlibw_verify_response and
+  tlibw_verify_response_remote functions.
 
 
 Tests are covering the following cases:

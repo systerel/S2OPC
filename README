@@ -57,14 +57,16 @@ INGOPCS OPC UA Toolkit features
   * Security policy and mode can be used with None value only
 
 - Client side:
-  * Create a session with an anonymous user
-  * Send a read request with 377 node accesses through the created session
+  * Activate a session with an anonymous user
+  * Send a read request
+  * Send a write request
 
 - Server side:
  * Static address space defined with 1008 different nodes
- * Accepts creation of a session with an anonymous user
- * Read service
-
+ * Accepts activation of a session with an anonymous user
+ * Accepts to treat one service request at the same time:
+   > Read service
+   > Write service
 
 INGOPCS OPC UA Stack and Toolkit tests
 ======================================
