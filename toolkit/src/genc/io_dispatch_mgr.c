@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 18/07/2017 17:12:42
+ Date                 : 19/07/2017 17:51:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -50,6 +50,9 @@ void io_dispatch_mgr__get_response_type(
    case constants__e_msg_session_read_req:
       *io_dispatch_mgr__resp_msg_typ = constants__e_msg_session_read_resp;
       break;
+   case constants__e_msg_session_write_resp:
+      *io_dispatch_mgr__resp_msg_typ = constants__e_msg_session_write_resp;
+      break;
    default:
       break;
    }
@@ -67,6 +70,7 @@ void io_dispatch_mgr__is_request_type(
    case constants__e_msg_session_activate_req:
    case constants__e_msg_session_close_req:
    case constants__e_msg_session_read_req:
+   case constants__e_msg_session_write_req:
       *io_dispatch_mgr__bres = true;
       break;
    default:
@@ -246,11 +250,12 @@ void io_dispatch_mgr__receive_msg(
                      session_mgr__get_session_from_token(io_dispatch_mgr__l_session_token,
                         &io_dispatch_mgr__l_session);
                      if (io_dispatch_mgr__l_valid_msg == true) {
-                        if (io_dispatch_mgr__l_msg_type == constants__e_msg_session_read_req) {
+                        switch (io_dispatch_mgr__l_msg_type) {
+                        case constants__e_msg_session_read_req:
                            service_read__treat_read_request(io_dispatch_mgr__msg,
                               io_dispatch_mgr__l_resp_msg);
-                        }
-                        else {
+                           break;
+                        case constants__e_msg_session_write_req:
                            session_mgr__get_session_user_or_indet(io_dispatch_mgr__l_session,
                               &io_dispatch_mgr__l_session_user);
                            message_in_bs__get_msg_payload(io_dispatch_mgr__msg,
@@ -259,6 +264,10 @@ void io_dispatch_mgr__receive_msg(
                               io_dispatch_mgr__l_session_user,
                               &io_dispatch_mgr__l_ret);
                            address_space__write_WriteResponse_msg_out(io_dispatch_mgr__l_resp_msg);
+                           address_space__dealloc_write_request_responses();
+                           break;
+                        default:
+                           break;
                         }
                         session_mgr__srv_validate_session_service_resp(io_dispatch_mgr__channel,
                            io_dispatch_mgr__l_session,
@@ -278,7 +287,9 @@ void io_dispatch_mgr__receive_msg(
                      }
                   }
                   if (io_dispatch_mgr__l_snd_session_err == true) {
-                     message_out_bs__alloc_msg(constants__e_msg_session_read_resp,
+                     io_dispatch_mgr__get_response_type(io_dispatch_mgr__l_msg_type,
+                        &io_dispatch_mgr__l_resp_msg_typ);
+                     message_out_bs__alloc_msg(io_dispatch_mgr__l_resp_msg_typ,
                         &io_dispatch_mgr__l_resp_msg);
                      message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_resp_msg,
                         &io_dispatch_mgr__l_valid_msg);
@@ -587,6 +598,7 @@ void io_dispatch_mgr__send_service_request_msg(
          &io_dispatch_mgr__l_msg_typ);
       switch (io_dispatch_mgr__l_msg_typ) {
       case constants__e_msg_session_read_req:
+      case constants__e_msg_session_write_req:
          message_out_bs__bless_msg_out(io_dispatch_mgr__req_msg,
             io_dispatch_mgr__l_msg_typ);
          message_out_bs__is_valid_msg_out(io_dispatch_mgr__req_msg,
