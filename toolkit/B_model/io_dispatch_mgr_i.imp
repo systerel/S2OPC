@@ -91,6 +91,8 @@ OPERATIONS
                 resp_msg_typ := e_msg_session_close_resp
             OR e_msg_session_read_req THEN
                 resp_msg_typ := e_msg_session_read_resp
+            OR e_msg_session_write_resp THEN
+                resp_msg_typ := e_msg_session_write_resp
             END
         END
     END
@@ -106,7 +108,8 @@ OPERATIONS
                 e_msg_session_create_req,
                 e_msg_session_activate_req,
                 e_msg_session_close_req,
-                e_msg_session_read_req
+                e_msg_session_read_req,
+                e_msg_session_write_req
             THEN
                 bres := TRUE
             ELSE
@@ -252,16 +255,18 @@ OPERATIONS
                                     l_session <-- get_session_from_token (l_session_token);
                                     IF l_valid_msg = TRUE
                                     THEN
-                                        IF l_msg_type = e_msg_session_read_req
-                                        THEN
-                                            treat_read_request (msg, l_resp_msg)
-                                        ELSE
-                                            l_session_user <-- get_session_user_or_indet (l_session);
-                                            l_payload <-- get_msg_payload (msg);
-                                            l_ret <-- treat_write_request (l_payload, l_session_user);
-                                            /* TODO: where should the service StatusCode be written ?? */
-                                            /* TODO: the following may fail (malloc) */
-                                            write_WriteResponse_msg_out(l_resp_msg)
+                                        CASE l_msg_type OF
+                                            EITHER e_msg_session_read_req THEN
+                                                treat_read_request (msg, l_resp_msg)
+                                            OR e_msg_session_write_req THEN
+                                                // Write request case
+                                                l_session_user <-- get_session_user_or_indet (l_session);
+                                                l_payload <-- get_msg_payload (msg);
+                                                l_ret <-- treat_write_request (l_payload, l_session_user);
+                                                /* TODO: where should the service StatusCode be written ?? */
+                                                /* TODO: the following may fail (malloc) */
+                                                write_WriteResponse_msg_out(l_resp_msg)
+                                            END
                                         END;
                                         l_is_valid_resp, l_snd_session_err <-- srv_validate_session_service_resp (channel, l_session, l_request_handle, msg, l_resp_msg);
                                         IF l_is_valid_resp = TRUE THEN
@@ -275,7 +280,8 @@ OPERATIONS
                                 IF l_snd_session_err = TRUE
                                 THEN
                                     /* Send a session closed error in response */
-                                    l_resp_msg <-- alloc_msg (e_msg_session_read_resp);
+                                    l_resp_msg_typ <-- get_response_type (l_msg_type);
+                                    l_resp_msg <-- alloc_msg (l_resp_msg_typ);
                                     l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                                     IF l_valid_msg = TRUE
                                     THEN
@@ -534,7 +540,9 @@ OPERATIONS
     IN
         l_msg_typ <-- get_msg_in_type (req_msg);
         CASE l_msg_typ OF
-            EITHER e_msg_session_read_req THEN /* s_service_reqs */
+            EITHER e_msg_session_read_req,
+                e_msg_session_write_req
+            THEN /* s_service_reqs */
                 bless_msg_out (req_msg, l_msg_typ);
                 l_valid_msg <-- is_valid_msg_out (req_msg);
                 IF l_valid_msg = TRUE
