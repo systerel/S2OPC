@@ -207,6 +207,7 @@ int main(void){
   while(STATUS_OK == status &&
         test_results_get_service_result() == FALSE &&
         loopCpt * maxSleepTimeout <= maxLoopTimeout){
+    loopCpt++;
     status = SOPC_TreatReceivedMessages(100);
   }
 
@@ -241,6 +242,7 @@ int main(void){
   while(STATUS_OK == status &&
         test_results_get_service_result() == FALSE &&
         loopCpt * maxSleepTimeout <= maxLoopTimeout){
+    loopCpt++;
     status = SOPC_TreatReceivedMessages(100);
   }
 
@@ -277,6 +279,7 @@ int main(void){
   while(STATUS_OK == status &&
         test_results_get_service_result() == FALSE &&
         loopCpt * maxSleepTimeout <= maxLoopTimeout){
+    loopCpt++;
     status = SOPC_TreatReceivedMessages(100);
   }
 
