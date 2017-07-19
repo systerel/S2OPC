@@ -90,7 +90,7 @@ bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
                                 constants__t_StatusCode_i status_code,
                                 int verbose)
 {
-    printf("\n\n--> ReadRequest test result: ");
+    printf("--> ReadRequest test result: ");
     if(verbose > 0)
         printf("\n");
 

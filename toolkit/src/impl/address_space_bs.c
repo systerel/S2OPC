@@ -131,8 +131,20 @@ void address_space_bs__set_Value(
    const constants__t_Variant_i address_space_bs__value)
 {
     /* TODO: the value is not encoded yet. */
-    /* Copies the value */
-    a_Value[address_space_bs__node-1] = (constants__t_Variant_i)util_variant__new_Variant_from_Variant(address_space_bs__value);
+    /* TODO: this may FAIL! But the operation is not specified to be able to fail */
+    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
+
+    /* Deep-copy the value */
+    if(NULL != pvar)
+    {
+        SOPC_Variant_Initialize(pvar);
+        if(STATUS_OK == SOPC_Variant_Copy(pvar, (SOPC_Variant *)address_space_bs__value))
+        {
+            SOPC_Variant_Clear((SOPC_Variant *)a_Value[address_space_bs__node-1]);
+            free((void *)a_Value[address_space_bs__node-1]);
+            a_Value[address_space_bs__node-1] = (constants__t_Variant_i)pvar;
+        }
+    }
 }
 
 
