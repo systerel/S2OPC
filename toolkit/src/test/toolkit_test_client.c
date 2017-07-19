@@ -226,7 +226,7 @@ int main(void){
     free(pMsgWrite);
 
     if(constants__e_sc_ok == sCode){
-      printf(">>Test_Client_Toolkit: write request sending: OK'\n");
+      printf(">>Test_Client_Toolkit: write request sending: OK\n");
     }else{
       util_status_code__B_to_C(sCode,
                                &status);
@@ -259,7 +259,13 @@ int main(void){
     free(pMsgRead->msg);
     free(pMsgRead);
 
-    /* Don't check, sCode is ok */
+    if(constants__e_sc_ok == sCode){
+      printf(">>Test_Client_Toolkit: read request sending: OK'\n");
+    }else{
+      util_status_code__B_to_C(sCode,
+                               &status);
+      printf(">>Test_Client_Toolkit: read request sending: statusCode = '%d' | NOK\n", status);
+    }
   }
 
   /* Wait until service response is received */

@@ -282,6 +282,12 @@ bool tlibw_verify_response(OpcUa_WriteRequest *pWriteReq, OpcUa_WriteResponse *p
 
     /* Don't verify Diagnostics, don't care */
 
+    printf("--> twlib_verify_response test result: ");
+    if(bVerif)
+        printf("OK\n");
+    else
+        printf("NOK\n");
+
     return bVerif;
 }
 
@@ -338,7 +344,7 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest *pWriteReq, OpcUa_ReadRespo
 
     if(pWriteReq->NoOfNodesToWrite < pReadResp->NoOfResults)
     {
-        printf(" or number of request (%d) < number of response (%d)\n",
+        printf("Number of request (%d) < number of response (%d)\n",
                pWriteReq->NoOfNodesToWrite, pReadResp->NoOfResults);
         return false;
     }
@@ -359,6 +365,12 @@ bool tlibw_verify_response_remote(OpcUa_WriteRequest *pWriteReq, OpcUa_ReadRespo
             bVerif = false;
         }
     }
+
+    printf("--> twlib_verify_response_remote test result: ");
+    if(bVerif)
+        printf("OK\n");
+    else
+        printf("NOK\n");
 
     return bVerif;
 }
