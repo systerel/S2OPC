@@ -108,6 +108,15 @@ struct SOPC_ServiceType Toolkit_Read_ServiceType =
     NULL
 };
 
+/* Write service provided to the Stack */
+struct SOPC_ServiceType Toolkit_Write_ServiceType =
+{
+    OpcUaId_WriteRequest,
+    &OpcUa_WriteResponse_EncodeableType,
+    Toolkit_BeginService,
+    NULL
+};
+
 /* List of services provided to the Stack */
 SOPC_ServiceType* Toolkit_SupportedServiceTypes[] =
 {
@@ -115,6 +124,7 @@ SOPC_ServiceType* Toolkit_SupportedServiceTypes[] =
     &Toolkit_ActivateSession_ServiceType,
     &Toolkit_CloseSession_ServiceType,
     &Toolkit_Read_ServiceType,
+    &Toolkit_Write_ServiceType,
     NULL
 };
 
