@@ -26,7 +26,7 @@ OBJS        =session_header_init.o \
              address_space_bs.o constants_bs.o msg_read_request_bs.o msg_read_response_bs.o \
              service_write_decode_bs.o response_write_bs.o \
              gen_addspace.o util_variant.o \
-             testlib_read_response.o wrap_read.o
+             testlib_read_response.o wrap_read.o testlib_write.o
 OBJS        += session_header.o io_dispatch_mgr.o session_mgr.o session_core.o session_core_1_bs.o \
                channel_mgr_bs.o request_handle_bs.o message_in_bs.o message_out_bs.o \
                service_response_cli_cb_bs.o \
@@ -42,11 +42,9 @@ SERVER_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(SERVER_OBJS))
 READ_EXEC   :=$(patsubst %.o,$(PATHEXEC)/%,$(READ_OBJS))
 WRITE_EXEC  :=$(patsubst %.o,$(PATHEXEC)/%,$(WRITE_OBJS))
 OBJS        :=$(patsubst %,$(PATHOBJ)/%,$(OBJS))
-CLIENT_OBJS += testlib_write.o
 CLIENT_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(CLIENT_OBJS))
 SERVER_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(SERVER_OBJS))
 READ_OBJS   :=$(patsubst %,$(PATHOBJ)/%,$(READ_OBJS))
-WRITE_OBJS  += testlib_write.o
 WRITE_OBJS  :=$(patsubst %,$(PATHOBJ)/%,$(WRITE_OBJS))
 
 .PHONY: all config clean trad client_server_test

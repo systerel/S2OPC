@@ -217,9 +217,9 @@ int main(void){
   if(STATUS_OK == status)
   {
     /* Sends a WriteRequest */
-    pWriteReq = getWriteRequest_message();
-    message__message *pMsgWrite = pWriteReq;
-    test_results_set_WriteRequest((OpcUa_WriteRequest *) pMsgWrite->msg);
+    message__message *pMsgWrite = getWriteRequest_message();
+    pWriteReq = (OpcUa_WriteRequest *) pMsgWrite->msg;
+    test_results_set_WriteRequest(pWriteReq);
     io_dispatch_mgr__send_service_request_msg(session, pMsgWrite, &sCode);
 
     /* Do not free the WriteRequest now, it is used by test_results_* */

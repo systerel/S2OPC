@@ -24,8 +24,11 @@
 #include "sopc_types.h"
 
 #include "testlib_read_response.h"
+#include "testlib_write.h"
 
 #include "util_b2c.h"
+
+static uint32_t cptReadResps = 0;
 
 void service_response_cli_cb_bs__INITIALISATION(void)
 {
@@ -34,20 +37,31 @@ void service_response_cli_cb_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+// Temporary callback function for client side (non configurable)
 void service_response_cli_cb_bs__cli_service_response(
    const constants__t_msg_i service_response_cli_cb_bs__resp_msg,
    const constants__t_StatusCode_i service_response_cli_cb_bs__status){
 
   message__message* msg = (message__message*) service_response_cli_cb_bs__resp_msg;
-  OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) msg->msg;
 
   if(msg->encType == &OpcUa_ReadResponse_EncodeableType){
-    test_results_set_read_result(test_read_request_response(readResp,
-                                                            service_response_cli_cb_bs__status,
-                                                            0)
-                                 ? (!FALSE):FALSE);
+    OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) msg->msg;
+    cptReadResps++;
+    if(cptReadResps <= 1){
+      // First read response is to test read result
+      test_results_set_read_result(test_read_request_response(readResp,
+                                                              service_response_cli_cb_bs__status,
+                                                              0)
+                                   ? (!FALSE):FALSE);
+    }else{
+      // Second read response is to test write effect (through read result)
+      test_results_set_read_result(
+          tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
+    }
   }else if(msg->encType == &OpcUa_WriteResponse_EncodeableType){
-    NULL;
+    OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) msg->msg;
+    test_results_set_read_result(
+        tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
   }
 }
 
