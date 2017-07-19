@@ -25,6 +25,7 @@
 #include "service_write_decode_bs.h"
 
 #include "sopc_types.h"
+#include "internal_msg.h"
 #include "address_space_impl.h" /* e_aid_* */
 
 
@@ -48,16 +49,18 @@ void service_write_decode_bs__decode_write_request(
    constants__t_StatusCode_i * const service_write_decode_bs__StatusCode_service)
 {
     /* TODO: this is were you think you have a payload, because the variable is called "payload",
-       but in fact you have a OpcUa_WriteRequest *, because you did not understand that
-       the generic decoders were not that generic, and required the whole OPC stack to function properly. */
-    OpcUa_WriteRequest *req = (OpcUa_WriteRequest *)service_write_decode_bs__req_payload;
+       but in fact you have a message__message. */
+    message__message*  msg = (message__message*) service_write_decode_bs__req_payload;
     *service_write_decode_bs__StatusCode_service = constants__e_sc_nok;
-
-    if(0 != req->NoOfNodesToWrite && req->NoOfNodesToWrite <= constants__k_n_WriteResponse_max)
-    {
-        /* TODO: req shall not be freed before request is null... */
-        request = req;
-        *service_write_decode_bs__StatusCode_service = constants__e_sc_ok;
+    if(msg->encType == &OpcUa_WriteRequest_EncodeableType){
+        OpcUa_WriteRequest *req = (OpcUa_WriteRequest*) msg->msg;
+        
+        if(0 != req->NoOfNodesToWrite && req->NoOfNodesToWrite <= constants__k_n_WriteResponse_max)
+        {
+            /* TODO: req shall not be freed before request is null... */
+            request = req;
+            *service_write_decode_bs__StatusCode_service = constants__e_sc_ok;
+        }
     }
 }
 
