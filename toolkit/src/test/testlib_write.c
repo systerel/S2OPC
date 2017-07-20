@@ -272,6 +272,9 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq)
         free(pVariant);
     }
 
+    /* Free the response's internals */
+    response_write_bs__reset_ResponseWrite();
+
     return bVerif;
 }
 
