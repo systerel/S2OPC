@@ -36,7 +36,7 @@ void                tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq);
 /** You can free the message with free and the included WriteRequest with tlibw_free_WriteRequest */
 message__message   *tlibw_new_message_WriteRequest(OpcUa_WriteRequest *pWriteReq);
 /** Calls the depths of the B model to inject the request as if it was a client request, returns the service status */
-bool                tlibw_stimulateB_with_request(OpcUa_WriteRequest *pWriteReq);
+bool                tlibw_stimulateB_with_message(message__message *pMsg);
 /** Verifies that the effects of the Write are taken into account by the server, locally */
 bool                tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq);
 

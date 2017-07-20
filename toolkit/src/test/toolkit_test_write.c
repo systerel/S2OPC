@@ -28,6 +28,7 @@
 #include "session_header_init.h"
 #include "address_space_bs.h"
 #include "testlib_write.h"
+#include "internal_msg.h"
 
 
 int main ()
@@ -39,20 +40,24 @@ int main ()
     /* Init */
     INITIALISATION();
 
-    /* Creates a WriteRequest */
-    OpcUa_WriteRequest *pWriteReq = tlibw_new_WriteRequest();
+    /* Creates a WriteRequest and the message */
+    OpcUa_WriteRequest  *pWriteReq = tlibw_new_WriteRequest();
+    message__message    *pMsg = tlibw_new_message_WriteRequest(pWriteReq);
+    if(NULL == pWriteReq || NULL == pMsg)
+        exit(1);
 
     /* Main service test.
      * The Write differs from the Read: the response cache will be checked instead of the OpcUa_*Response,
      *  as the B model does it in two steps.
      */
-    tlibw_stimulateB_with_request(pWriteReq);
+    tlibw_stimulateB_with_message(pMsg);
     bTest = tlibw_verify_effects_local(pWriteReq);
 
     /* Uninit the address space */
     address_space_bs__UNINITIALISATION();
 
     /* Free the request */
+    free(pMsg);
     tlibw_free_WriteRequest(&pWriteReq);
 
     if(bTest)

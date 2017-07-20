@@ -200,13 +200,13 @@ message__message *tlibw_new_message_WriteRequest(OpcUa_WriteRequest *pWriteReq)
 }
 
 
-bool tlibw_stimulateB_with_request(OpcUa_WriteRequest *pWriteReq)
+bool tlibw_stimulateB_with_message(message__message *pMsg)
 {
     constants__t_StatusCode_i sc = constants__c_StatusCode_indet;
 
     /* Calls treat */
     io_dispatch_mgr__treat_write_request(
-        (constants__t_ByteString_i) pWriteReq,
+        (constants__t_ByteString_i) pMsg,
         (constants__t_user_i) 0,
         (constants__t_StatusCode_i *) &sc);
 
