@@ -223,7 +223,8 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq)
     constants__t_Node_i node;
     SOPC_Variant *pVariant;
     bool bVerif = true;
-    bool bTest;
+    int32_t cmp;
+    SOPC_StatusCode ssc;
 
     if(NULL == pWriteReq)
         exit(1);
@@ -249,19 +250,25 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq)
             bVerif = false;
         }
         address_space_bs__read_AddressSpace_Attribute_value(node, constants__e_aid_Value, (constants__t_Variant_i *)&pVariant);
-        if(i < OFFSET_REQUESTS_OTHERS)
-            bTest = memcmp(pVariant, &lwv[i].Value.Value, sizeof(SOPC_Variant)) == 0;
-        else
-            /* The last request is redundant with the first, and because of the way our iterators are coded, it should be ignored. So its test is different. The request shall not be taken into account. */
-            bTest = memcmp(pVariant, &lwv[i].Value.Value, sizeof(SOPC_Variant)) != 0;
-        if(!bTest)
+
+        ssc = SOPC_Variant_Compare(pVariant, &lwv[i].Value.Value, &cmp);
+        /* The last request is redundant with the first, and because of the way our iterators are coded, it should be ignored. So its test is different. The request shall not be taken into account. */
+        if(i < OFFSET_REQUESTS_OTHERS && (ssc != STATUS_OK || cmp != 0))
         {
-            printf("Request[wvi = %zd] did not change the address space.\n+ Expected value:\n", i);
+            printf("Request[wvi = %zd] did not change the address space (Compare sc = %d, cmp = %d)\n+ Expected value:\n", i, ssc, cmp);
             util_variant__print_SOPC_Variant(&lwv[i].Value.Value);
             printf("+ Read value:\n");
             util_variant__print_SOPC_Variant(pVariant);
             bVerif = false;
         }
+        else if(i >= OFFSET_REQUESTS_OTHERS && (ssc != STATUS_OK || cmp == 0))
+        {
+            printf("Request[wvi = %zd] was not ignored and changed the address space (Compare sc = %d, cmp = %d)\n+ Read value:\n", i, ssc, cmp);
+            util_variant__print_SOPC_Variant(pVariant);
+            bVerif = false;
+        }
+        /* else it is ok */
+
         free(pVariant);
     }
 
