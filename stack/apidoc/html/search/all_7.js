@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['g_5fcpbasic256',['g_cpBasic256',['../crypto__profiles_8h.html#af684a4cc711265b7e071384b98859443',1,'g_cpBasic256():&#160;crypto_profiles_lib.c'],['../crypto__profiles__lib_8c.html#af684a4cc711265b7e071384b98859443',1,'g_cpBasic256():&#160;crypto_profiles_lib.c']]],
+  ['g_5fcpbasic256sha256',['g_cpBasic256Sha256',['../crypto__profiles_8h.html#a48deb4df9019d6d0cfbe4ce46193e43f',1,'g_cpBasic256Sha256():&#160;crypto_profiles_lib.c'],['../crypto__profiles__lib_8c.html#a48deb4df9019d6d0cfbe4ce46193e43f',1,'g_cpBasic256Sha256():&#160;crypto_profiles_lib.c']]],
+  ['g_5fcpnone',['g_cpNone',['../crypto__profiles_8h.html#a7e1bb6bf43768efe386fd18721402493',1,'g_cpNone():&#160;crypto_profiles_lib.c'],['../crypto__profiles__lib_8c.html#a7e1bb6bf43768efe386fd18721402493',1,'g_cpNone():&#160;crypto_profiles_lib.c']]],
+  ['g_5flockedconfig',['g_lockedConfig',['../sopc__stack__config_8c.html#ad3b9b4cce75baa48e70296e6eea46de4',1,'sopc_stack_config.c']]],
+  ['g_5fstackconfiguration',['g_stackConfiguration',['../sopc__stack__config_8c.html#a61705d34eccce734034f8b527dfeb8fa',1,'sopc_stack_config.c']]],
+  ['gatewayserveruri',['GatewayServerUri',['../struct__OpcUa__ApplicationDescription.html#add4adc2ae517416ccb7b1a7253fc229b',1,'_OpcUa_ApplicationDescription::GatewayServerUri()'],['../struct__OpcUa__RegisteredServer.html#a39d4cacc28eb4b19205d17a5a30acd2c',1,'_OpcUa_RegisteredServer::GatewayServerUri()']]],
+  ['get_5finvokecallbackdata',['Get_InvokeCallbackData',['../sopc__channel_8c.html#aa882866fb852c920f64434261825a829',1,'sopc_channel.c']]],
+  ['getbuiltintypeclearfunction',['GetBuiltInTypeClearFunction',['../sopc__builtintypes_8c.html#a28e3bfece590209367ff54b219e45dfa',1,'sopc_builtintypes.c']]],
+  ['getbuiltintypecompfunction',['GetBuiltInTypeCompFunction',['../sopc__builtintypes_8c.html#ac70a0a31f0356806316f1e6dcd3d25d0',1,'sopc_builtintypes.c']]],
+  ['getbuiltintypecopyfunction',['GetBuiltInTypeCopyFunction',['../sopc__builtintypes_8c.html#ab9d0c848e65679c2a564b07139412dfa',1,'sopc_builtintypes.c']]],
+  ['getdatavalueencodingmask',['GetDataValueEncodingMask',['../sopc__encoder_8c.html#a591acce98bc228ea678a81c0065bd810',1,'sopc_encoder.c']]],
+  ['getdiaginfoencodingbyte',['GetDiagInfoEncodingByte',['../sopc__encoder_8c.html#a5485d9b237d35effd2f7225e39e6ed72',1,'sopc_encoder.c']]],
+  ['getencrypteddatalength',['GetEncryptedDataLength',['../sopc__secure__channel__low__level_8c.html#abf26dbc2b5a2e1bdfbeebc3b68c32794',1,'sopc_secure_channel_low_level.c']]],
+  ['getfreesocket',['GetFreeSocket',['../sopc__sockets_8c.html#af0f79165911340b5ac47e3d4855d3119',1,'sopc_sockets.c']]],
+  ['getlocalizedtextencodingbyte',['GetLocalizedTextEncodingByte',['../sopc__encoder_8c.html#ae0750c928770200ecb158365fe6daad7',1,'sopc_encoder.c']]],
+  ['getmaxbodysize',['GetMaxBodySize',['../sopc__secure__channel__low__level_8c.html#adfce894427c3801f0ef9d284ca705c43',1,'sopc_secure_channel_low_level.c']]],
+  ['getnextrequestid',['GetNextRequestId',['../sopc__secure__channel__client__connection_8c.html#a3928d8e19ca34b8dbd6963a707d038dc',1,'sopc_secure_channel_client_connection.c']]],
+  ['getnodeiddataencoding',['GetNodeIdDataEncoding',['../sopc__encoder_8c.html#a2e3afdc7945c6a44451aab34cadccdc8',1,'sopc_encoder.c']]],
+  ['getpaddingsize',['GetPaddingSize',['../sopc__secure__channel__low__level_8c.html#a8b304cd91ba1ad82144cb3edfe871d78',1,'sopc_secure_channel_low_level.c']]],
+  ['getsize',['GetSize',['../structSOPC__EncodeableType.html#a61f76698dc57f0874842e1ef0f96cded',1,'SOPC_EncodeableType']]],
+  ['getvariantencodingmask',['GetVariantEncodingMask',['../sopc__encoder_8c.html#a92305ec96860037abb6024e2f1354dcc',1,'sopc_encoder.c']]],
+  ['globalinitialized',['globalInitialized',['../sopc__sockets_8c.html#a8938e3a0faddaac6ea686c4ba13d1e43',1,'sopc_sockets.c']]],
+  ['globalsocketmgr',['globalSocketMgr',['../sopc__sockets_8c.html#ad86a75905cda1a68a50098b50d4d099d',1,'sopc_sockets.c']]],
+  ['guid',['Guid',['../structSOPC__NodeId.html#a45fe3960f3ca32282ccbdf4ccf4ac477',1,'SOPC_NodeId::Guid()'],['../unionSOPC__VariantValue.html#a1a8e807d28e1f9fa3e49b029d7990901',1,'SOPC_VariantValue::Guid()']]],
+  ['guidarr',['GuidArr',['../unionSOPC__VariantArrayValue.html#a244b712596901eb6ea7aa89b4b868f2b',1,'SOPC_VariantArrayValue']]]
+];
