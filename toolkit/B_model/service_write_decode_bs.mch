@@ -82,7 +82,7 @@ OPERATIONS
     isvalid, nid, aid, value <-- getall_WriteValue(wvi) =
     PRE
         wvi : t_WriteValue_i &
-        wvi : t_WriteValue
+        wvi : cast_t_WriteValue[1..nb_WriteValue]
     THEN
         isvalid := bool(wvi : dom(WriteValue_NodeId) &
                         wvi : dom(WriteValue_AttributeId) &
