@@ -33,6 +33,8 @@
 OpcUa_WriteRequest *tlibw_new_WriteRequest(void);
 /** One does not simply free a request, it must also free its content (NodesToWrite) and the content of its content (ByteString) */
 void                tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq);
+/** You can free the message with free and the included WriteRequest with tlibw_free_WriteRequest */
+message__message   *tlibw_new_message_WriteRequest(OpcUa_WriteRequest *pWriteReq);
 /** Calls the depths of the B model to inject the request as if it was a client request, returns the service status */
 bool                tlibw_stimulateB_with_request(OpcUa_WriteRequest *pWriteReq);
 /** Verifies that the effects of the Write are taken into account by the server, locally */

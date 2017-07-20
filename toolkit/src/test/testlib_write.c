@@ -34,6 +34,7 @@
 #include "address_space.h"
 #include "address_space_bs.h"
 #include "io_dispatch_mgr.h"
+#include "internal_msg.h"
 
 
 /* http://stackoverflow.com/questions/7265583/combine-designated-initializers-and-malloc-in-c99 */
@@ -181,6 +182,21 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq)
     free(pReq);
     /* Reset the pointer */
     *ppWriteReq = NULL;
+}
+
+
+message__message *tlibw_new_message_WriteRequest(OpcUa_WriteRequest *pWriteReq)
+{
+    message__message *pMsg = (message__message *)malloc(sizeof(message__message));
+    if(NULL == pMsg)
+        return NULL;
+    
+    pMsg->encType = &OpcUa_WriteRequest_EncodeableType;
+    pMsg->respEncType = &OpcUa_WriteResponse_EncodeableType;
+    pMsg->isRequest = (!FALSE);
+    pMsg->msg = pWriteReq;
+    
+    return pMsg;
 }
 
 

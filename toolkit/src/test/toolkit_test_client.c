@@ -53,19 +53,7 @@ message__message* getReadRequest_message(){
   return pMsg;
 }
 
-/* Functions to build a write service request message, and its verification read request */
-message__message *getWriteRequest_message() {
-  message__message *pMsg = (message__message *)malloc(sizeof(message__message));
-  if(NULL == pMsg)
-    return NULL;
-  pMsg->msg = tlibw_new_WriteRequest();
-  if(NULL == pMsg->msg)
-    return NULL;
-  pMsg->encType = &OpcUa_WriteRequest_EncodeableType;
-  pMsg->respEncType = &OpcUa_WriteResponse_EncodeableType;
-  pMsg->isRequest = (!FALSE);
-  return pMsg;
-}
+/* Function to build the verification read request */
 message__message* getReadRequest_verif_message() {
   message__message *pMsg = (message__message *)malloc(sizeof(message__message));
   if(NULL == pMsg)
@@ -220,7 +208,8 @@ int main(void){
     // Reset expected result
     test_results_set_service_result(FALSE);
     /* Sends a WriteRequest */
-    message__message *pMsgWrite = getWriteRequest_message();
+    pWriteReq = tlibw_new_WriteRequest();
+    message__message *pMsgWrite = tlibw_new_message_WriteRequest(pWriteReq);
     pWriteReq = (OpcUa_WriteRequest *) pMsgWrite->msg;
     test_results_set_WriteRequest(pWriteReq);
     io_dispatch_mgr__send_service_request_msg(session, pMsgWrite, &sCode);
