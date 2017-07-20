@@ -32,7 +32,7 @@ IMPORTS
 
 PROMOTES
     readall_AddressSpace_Node,
-    read_Value_StatusCode,
+    get_Value_StatusCode,
     read_AddressSpace_free_value,
     write_WriteResponse_msg_out
 
@@ -120,7 +120,7 @@ LOCAL_OPERATIONS
 OPERATIONS
     ncl, val <-- read_NodeClass_Attribute(node, aid) =
     BEGIN
-        ncl <-- read_NodeClass(node);
+        ncl <-- get_NodeClass(node);
         val <-- read_AddressSpace_Attribute_value(node, aid)
     END
     ;
@@ -229,7 +229,7 @@ OPERATIONS
         l_isvalid, l_node <-- readall_AddressSpace_Node(nid);
         IF l_isvalid = TRUE THEN
             IF aid = e_aid_Value THEN
-                l_ncl <-- read_NodeClass(l_node);
+                l_ncl <-- get_NodeClass(l_node);
                 IF l_ncl = e_ncl_Variable THEN
                     set_Value(l_node, value);
                     sc := e_sc_ok

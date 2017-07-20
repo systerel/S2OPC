@@ -89,10 +89,12 @@ OPERATIONS
      */
     variant <-- read_AddressSpace_Attribute_value(node, aid) =
     PRE
-        node : t_Node_i &
-        node : t_Node &
-        aid : t_AttributeId_i &
-        aid : t_AttributeId
+        node : t_Node_i         &
+        node : t_Node           &
+        node : dom(a_NodeId)    &
+        node : dom(a_NodeClass) &
+        aid  : t_AttributeId_i  &
+        aid  : t_AttributeId
     THEN
         SELECT aid = e_aid_NodeId THEN
             variant
@@ -113,22 +115,21 @@ OPERATIONS
     /* a_Value, setter */
     set_Value(node, value) =
     PRE
-        node : t_Node_i &
-        node : t_Node &
+        node  : t_Node_i    &
+        node  : t_Node      &
         value : t_Variant_i &
-        value : t_Variant &
-        node |-> e_ncl_Variable : a_NodeClass
+        value : t_Variant
     THEN
         a_Value(node) := value
     END
     ;
 
     /* a_Value_StatusCode */
-    sc <-- read_Value_StatusCode(node) =
+    sc <-- get_Value_StatusCode(node) =
     PRE
         node : t_Node_i &
-        node : t_Node &
-        a_NodeClass(node) = e_ncl_Variable
+        node : t_Node   &
+        node : dom(a_Value_StatusCode)
     THEN
         sc :(sc : t_StatusCode_i &
              sc = a_Value_StatusCode(node))
@@ -136,10 +137,11 @@ OPERATIONS
     ;
 
     /* a_NodeClass */
-    ncl <-- read_NodeClass(node) =
+    ncl <-- get_NodeClass(node) =
     PRE
         node : t_Node_i &
-        node : t_Node
+        node : t_Node   &
+        node : dom(a_NodeClass)
     THEN
         ncl
         :(

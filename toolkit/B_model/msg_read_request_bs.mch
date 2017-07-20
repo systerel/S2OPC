@@ -23,14 +23,20 @@ SEES
     message_in_bs
 
 ABSTRACT_VARIABLES
-    nb_reqs_curr
+    ReadValue_NodeId,
+    ReadValue_AttributeId
 
 INVARIANT
-    nb_reqs_curr : NAT &
-    nb_reqs_curr <= k_n_read_resp_max
+    ReadValue_NodeId      : t_ReadValue +-> t_NodeId &
+    ReadValue_AttributeId : t_ReadValue +-> t_AttributeId
 
 INITIALISATION
-    nb_reqs_curr :: 0..k_n_read_resp_max
+    ReadValue_NodeId,
+    ReadValue_AttributeId
+    :(
+        ReadValue_NodeId      = {} &
+        ReadValue_AttributeId = {}
+     )
 
 OPERATIONS
     nb <-- read_req_nb_ReadValue(msg) =
@@ -40,39 +46,51 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_read_req
     THEN
-        nb, nb_reqs_curr :( nb : 0..k_n_read_resp_max & nb_reqs_curr = nb )
+        nb :: INT
     END
     ;
 
     /* Returns the NodeId (pointer or hash_id, or...)
      * Does not check if there is a node in the AddressSpace corresponding to this nid */
-    nid <-- read_req_ReadValue_NodeId(msg, rvi) =
+    isvalid, nid <-- getall_req_ReadValue_NodeId(msg, rvi) =
     PRE
         msg  : t_msg_i &
         msg  = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_read_req &
         rvi : t_ReadValue_i &
-        rvi : t_ReadValue &
-        rvi : cast_t_ReadValue[0..nb_reqs_curr]
+        rvi : t_ReadValue
     THEN
-        nid :: t_NodeId_i
+        IF  rvi : dom(ReadValue_NodeId) THEN
+            isvalid := TRUE ||
+            nid :(nid : t_NodeId_i &
+                  nid = ReadValue_NodeId(rvi))
+        ELSE
+            isvalid := FALSE ||
+            nid     :: t_NodeId_i
+        END
     END
     ;
 
-    /* Returns the AttributeId (c_*_indet if not valid) */
+    /* Returns the AttributeId if it is valid */
     /* ... Could have merged them */
-    aid <-- read_req_ReadValue_AttributeId(msg, rvi) =
+    isvalid, aid <-- getall_req_ReadValue_AttributeId(msg, rvi) =
     PRE
         msg  : t_msg_i &
         msg  = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_read_req &
         rvi : t_ReadValue_i &
-        rvi : t_ReadValue &
-        rvi : cast_t_ReadValue[0..nb_reqs_curr]
+        rvi : t_ReadValue
     THEN
-        aid :: t_AttributeId_i
+        IF  rvi : dom(ReadValue_AttributeId) THEN
+            isvalid := TRUE ||
+            aid :(aid : t_AttributeId_i &
+                  aid = ReadValue_AttributeId(rvi))
+        ELSE
+            isvalid := FALSE ||
+            aid     :: t_AttributeId_i
+        END
     END
 
 END

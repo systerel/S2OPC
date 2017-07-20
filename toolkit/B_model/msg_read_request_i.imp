@@ -30,40 +30,37 @@ SEES
     message_in_bs
 
 CONCRETE_VARIABLES
-    init_ok,
     nb_ReadValue
 
 INITIALISATION
-    init_ok := FALSE;
     nb_ReadValue := 0
 
 OPERATIONS
-    rr, nb <-- read_ReadRequest(msg) =
+    p_read_ok, p_nb_ReadValue <-- check_ReadRequest(p_msg) =
     BEGIN
-        nb_ReadValue <-- read_req_nb_ReadValue(msg);
-        init_ok := bool(0 <= nb_ReadValue &
-                        nb_ReadValue <= k_n_read_resp_max);
-        rr := init_ok;
-        nb := nb_ReadValue
+        p_nb_ReadValue <-- read_req_nb_ReadValue(p_msg);
+        p_read_ok := bool(0              <= p_nb_ReadValue &
+                          p_nb_ReadValue <= k_n_read_resp_max);
+        IF  p_read_ok = TRUE THEN
+            nb_ReadValue := p_nb_ReadValue
+        END
     END
     ;
 
-    rr <-- read_nb_ReadValue =
+    p_isvalid, p_nid, p_aid <-- getall_ReadValue_NodeId_AttributeId(p_msg, p_rvi) =
     BEGIN
-        rr := nb_ReadValue
+        p_isvalid, p_nid <-- getall_req_ReadValue_NodeId(p_msg, p_rvi);
+        IF  p_isvalid = TRUE THEN
+            p_isvalid, p_aid <-- getall_req_ReadValue_AttributeId(p_msg, p_rvi)
+        ELSE
+            p_aid := c_AttributeId_indet
+        END
     END
     ;
 
-    isvalid, node, aid <-- readall_ReadValue_Node_AttributeId(msg, rvi) =
-    VAR
-        l_nid,
-        l_nid_valid
-    IN
-        l_nid <-- read_req_ReadValue_NodeId     (msg, rvi);
-        aid   <-- read_req_ReadValue_AttributeId(msg, rvi);
-        l_nid_valid, node <-- readall_AddressSpace_Node(l_nid);
-        isvalid := bool(l_nid_valid = TRUE &
-                        aid /= c_AttributeId_indet)
+    p_nb_ReadValue <-- get_nb_ReadValue =
+    BEGIN
+        p_nb_ReadValue := nb_ReadValue
     END
 
 END

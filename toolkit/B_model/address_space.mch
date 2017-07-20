@@ -109,7 +109,7 @@ OPERATIONS
     ;
 
     /* Promoted */
-    sc <-- read_Value_StatusCode(node) =
+    sc <-- get_Value_StatusCode(node) =
     PRE
         node : t_Node_i &
         node : t_Node &

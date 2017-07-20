@@ -32,17 +32,21 @@ SEES
 
 IMPORTS
     msg_read_request,
-    msg_read_response,
+    msg_read_response_bs,
     service_read_it
+
+PROMOTES
+    check_ReadRequest,
+    alloc_read_response
 
 LOCAL_OPERATIONS
 
-    treat_read_request_1(p_resp_msg, p_isvalid, p_node, p_aid, p_rvi) =
+    fill_read_response_1(p_resp_msg, p_isvalid, p_nid, p_aid, p_rvi) =
     PRE
         p_resp_msg : t_msg_i         &
         p_isvalid  : BOOL            &
-        p_node     : t_Node_i        &
-        p_node     : t_Node          &
+        p_nid      : t_NodeId_i      &
+        p_nid      : t_NodeId        &
         p_aid      : t_AttributeId_i &
         p_aid      : t_AttributeId   &
         p_rvi      : t_ReadValue_i
@@ -52,105 +56,107 @@ LOCAL_OPERATIONS
         :(data_Value_Value      : t_ReadValue +-> t_Variant    &
           data_Value_StatusCode : t_ReadValue +-> t_StatusCode &
 
-          (p_isvalid = TRUE
+          (p_isvalid = TRUE &
+           p_nid : dom(a_NodeId~)
            =>
            data_Value_Value = data_Value_Value$0 <+
-                              {p_rvi |-> AttributeID_Node_Variant(p_aid)(p_node)} &
-           (p_aid = e_aid_Value &
-            a_NodeClass(p_node) = e_ncl_Variable
+                              {p_rvi |-> AttributeID_Node_Variant(p_aid)(a_NodeId~(p_nid))} &
+           (a_NodeClass(a_NodeId~(p_nid)) = e_ncl_Variable
             =>
             data_Value_StatusCode = data_Value_StatusCode$0 <+
-                                    {p_rvi |-> a_Value_StatusCode(p_node)}) &
-           (not(p_aid = e_aid_Value &
-                a_NodeClass(p_node) = e_ncl_Variable)
+                                    {p_rvi |-> a_Value_StatusCode(a_NodeId~(p_nid))}) &
+           (not(a_NodeClass(a_NodeId~(p_nid)) = e_ncl_Variable)
             =>
             data_Value_StatusCode = data_Value_StatusCode$0 <+
                                     {p_rvi |-> e_sc_ok})) &
-          (p_isvalid = FALSE
+          (not(p_isvalid = TRUE &
+               p_nid : dom(a_NodeId~))
            =>
            data_Value_Value = {p_rvi} <<| data_Value_Value$0 &
            data_Value_StatusCode = data_Value_StatusCode$0 <+
                                    {p_rvi |-> e_sc_nok})
-        )
+         )
     END
 
 OPERATIONS
 
-    treat_read_request_1(p_resp_msg, p_isvalid, p_node, p_aid, p_rvi) =
+    fill_read_response_1(p_resp_msg, p_isvalid, p_nid, p_aid, p_rvi) =
     VAR
+        l_is_valid,
+        l_node,
         l_ncl,
         l_value,
         l_sc
     IN
-        IF p_isvalid = TRUE THEN
-            l_ncl, l_value <-- read_NodeClass_Attribute(p_node, p_aid);
-            IF  p_aid = e_aid_Value &
-                l_ncl = e_ncl_Variable
-            THEN
-                l_sc <-- read_Value_StatusCode(p_node)
+        IF  p_isvalid = TRUE THEN
+            l_is_valid, l_node <-- readall_AddressSpace_Node(p_nid);
+            IF l_is_valid = TRUE THEN
+                l_ncl, l_value <-- read_NodeClass_Attribute(l_node, p_aid);
+                IF  p_aid = e_aid_Value &
+                    l_ncl = e_ncl_Variable
+                THEN
+                    l_sc <-- get_Value_StatusCode(l_node)
+                ELSE
+                    l_sc := e_sc_ok
+                END;
+                set_read_response(p_resp_msg, p_rvi, l_value, l_sc);
+                read_AddressSpace_free_value(l_value)
             ELSE
-                l_sc := e_sc_ok
-            END;
-            write_read_response(p_resp_msg, p_rvi, l_value, l_sc);
-            read_AddressSpace_free_value(l_value)
+                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_nok)
+            END
         ELSE
-            write_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_nok)
+            set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_nok)
         END
     END
     ;
 
-    treat_read_request(req_msg, resp_msg) =
+    fill_read_response(req_msg, resp_msg) =
     VAR
-        l_isvalid,
         l_nb_ReadValue,
         l_continue,
+        l_isvalid,
         l_rvi,
-        l_node,
+        l_nid,
         l_aid
     IN
-        l_isvalid, l_nb_ReadValue <-- read_ReadRequest(req_msg);
-        IF l_isvalid = TRUE THEN
-            write_read_response_init(l_nb_ReadValue, resp_msg);
-            l_continue <-- init_iter_write_request(l_nb_ReadValue);
-            WHILE l_continue = TRUE DO
-                l_continue, l_rvi <-- continue_iter_write_request;
-                l_isvalid, l_node, l_aid <-- readall_ReadValue_Node_AttributeId(req_msg, l_rvi);
-                treat_read_request_1(resp_msg, l_isvalid, l_node, l_aid, l_rvi)
-            INVARIANT
-                rreqs_to_iterate <: t_ReadValue &
-                rreqs_iterated   <: t_ReadValue &
-                rreqs_to_iterate /\ rreqs_iterated = {} &
-                rreqs_to_iterate \/ rreqs_iterated = cast_t_ReadValue[1..nb_ReadValue] &
-                l_continue = bool(rreqs_to_iterate /= {}) &
+        l_nb_ReadValue <-- get_nb_ReadValue;
+        l_continue <-- init_iter_write_request(l_nb_ReadValue);
+        WHILE l_continue = TRUE DO
+            l_continue, l_rvi <-- continue_iter_write_request;
+            l_isvalid, l_nid, l_aid <-- getall_ReadValue_NodeId_AttributeId(req_msg, l_rvi);
+            fill_read_response_1(resp_msg, l_isvalid, l_nid, l_aid, l_rvi)
+        INVARIANT
+            rreqs_to_iterate <: t_ReadValue &
+            rreqs_iterated   <: t_ReadValue &
+            rreqs_to_iterate /\ rreqs_iterated = {} &
+            rreqs_to_iterate \/ rreqs_iterated = cast_t_ReadValue[1..nb_ReadValue] &
+            l_continue = bool(rreqs_to_iterate /= {}) &
+            
+            data_Value_Value =
+            %rvi.(rvi : t_ReadValue &
+                  rvi : rreqs_iterated &
+                  rvi : dom(ReadValue_NodeId) &
+                  ReadValue_NodeId(rvi) : dom(a_NodeId~) &
+                  rvi : dom(ReadValue_AttributeId) &
+                  a_NodeId~(ReadValue_NodeId(rvi)) : dom(AttributeID_Node_Variant(ReadValue_AttributeId(rvi)))
+                  |
+                  AttributeID_Node_Variant(ReadValue_AttributeId(rvi))(a_NodeId~(ReadValue_NodeId(rvi)))
+                 ) &
 
-                data_Value_Value =
-                %rvi.(rvi : t_ReadValue &
-                      rvi : rreqs_iterated &
-                      rvi : dom(ReadValue_Node) &
-                      ReadValue_Node(rvi) : dom(a_NodeId) &
-                      rvi : dom(ReadValue_AttributeId) &
-                      ReadValue_Node(rvi) : dom(AttributeID_Node_Variant(ReadValue_AttributeId(rvi)))
-                      |
-                      AttributeID_Node_Variant(ReadValue_AttributeId(rvi))(ReadValue_Node(rvi))
-                     ) &
-
-                data_Value_StatusCode =
-                %rvi.(rvi : t_ReadValue &
-                      rvi : rreqs_iterated
-                      |
-                      {FALSE |-> e_sc_nok,
-                       TRUE  |->
-                                 {FALSE |-> e_sc_ok,
-                                  TRUE  |-> a_Value_StatusCode(ReadValue_Node(rvi))}
-                                 (bool(ReadValue_AttributeId(rvi) = e_aid_Value &
-                                       a_NodeClass(ReadValue_Node(rvi)) = e_ncl_Variable))}
-                      (bool(rvi : dom(data_Value_Value)))
-                     )
-            VARIANT
-                card(rreqs_to_iterate)
-            END
-        ELSE
-            write_response_error(e_sc_nok, resp_msg)
+            data_Value_StatusCode =
+            %rvi.(rvi : t_ReadValue &
+                  rvi : rreqs_iterated
+                  |
+                  {FALSE |-> e_sc_nok,
+                   TRUE  |->
+                             {FALSE |-> e_sc_ok,
+                              TRUE  |-> a_Value_StatusCode(a_NodeId~(ReadValue_NodeId(rvi)))}
+                             (bool(ReadValue_AttributeId(rvi) = e_aid_Value &
+                                   a_NodeClass(a_NodeId~(ReadValue_NodeId(rvi))) = e_ncl_Variable))}
+                  (bool(rvi : dom(data_Value_Value)))
+                 )
+        VARIANT
+            card(rreqs_to_iterate)
         END
     END
 

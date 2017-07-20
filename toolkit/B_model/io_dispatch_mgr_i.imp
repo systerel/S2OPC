@@ -55,6 +55,29 @@ LOCAL_OPERATIONS
     END
     ;
 
+    treat_read_request(p_request_msg, p_response_msg) =
+    PRE
+        p_request_msg  : t_msg_i   &
+        p_request_msg  = c_msg_in  &
+        p_response_msg : t_msg_i   &
+        p_response_msg = c_msg_out
+    THEN
+        nb_ReadValue,
+        ReadValue_NodeId,
+        ReadValue_AttributeId,
+        data_Value_Value,
+        data_Value_StatusCode
+        :(
+          nb_ReadValue          : NAT                           &
+          nb_ReadValue         <= k_n_read_resp_max             &
+          ReadValue_NodeId      : t_ReadValue +-> t_NodeId      &
+          ReadValue_AttributeId : t_ReadValue +-> t_AttributeId &
+          data_Value_Value      : t_ReadValue +-> t_Variant     &
+          data_Value_StatusCode : t_ReadValue +-> t_StatusCode
+         )
+    END
+    ;
+    
     /* TODO: call the treat write on an encoded WriteRequest */
     /* TODO: add constraints on userid? */
     StatusCode_service <-- treat_write_request(req_payload, userid) =
@@ -115,6 +138,21 @@ OPERATIONS
             ELSE
 
                 bres := FALSE
+            END
+        END
+    END
+    ;
+
+    treat_read_request(p_request_msg, p_response_msg) =
+    VAR
+        l_nb_ReadValue,
+        l_is_valid
+    IN
+        l_is_valid, l_nb_ReadValue <-- check_ReadRequest(p_request_msg);
+        IF  l_is_valid = TRUE THEN
+            l_is_valid <-- alloc_read_response(l_nb_ReadValue, p_response_msg);
+            IF  l_is_valid = TRUE THEN
+                fill_read_response(p_request_msg, p_response_msg)
             END
         END
     END
