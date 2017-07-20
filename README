@@ -92,5 +92,6 @@ Run a particular test (bin directory):
 - OPC UA Stack client/server example: execute ./stub_server_ingopcs
   and then ./stub_client_ingopcs in parallel
 - OPC UA Toolkit read service test: execute ./toolkit_test_read
+- OPC UA Toolkit write service test: execute ./toolkit_test_write
 - OPC UA Toolkit client/server session and read service example:
   execute ./toolkit_test_server and then ./toolkit_test_client in parallel
