@@ -107,6 +107,10 @@ toolkit_test_read: $(READ_EXEC)
 	@echo "Executing Toolkit read test"
 	./run_read_test.sh $(PATHEXEC)
 
+toolkit_test_write: $(WRITE_EXEC)
+	@echo "Executing Toolkit write test"
+	./run_write_test.sh $(PATHEXEC)
+
 client_server_test: $(CLIENT_EXEC) $(SERVER_EXEC)
 	@echo "Executing Toolkit client / server test"
 	./run_client_server_test.sh $(PATHEXEC)
