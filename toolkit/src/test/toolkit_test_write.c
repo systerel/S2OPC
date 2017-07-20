@@ -34,6 +34,7 @@
 int main ()
 {
     bool bTest;
+    int retCode;
 
     /* This test is offline, local, "server-side". */
 
@@ -60,11 +61,14 @@ int main ()
     free(pMsg);
     tlibw_free_WriteRequest(&pWriteReq);
 
-    if(bTest)
+    if(bTest){
         printf("Internal test: OK\n");
-    else
+        retCode = 0;
+    }else{
         printf("Internal test: NOT ok\n");
+        retCode = 1;
+    }
 
-    return false == bTest;
+    return retCode;
 }
 
