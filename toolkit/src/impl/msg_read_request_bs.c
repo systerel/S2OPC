@@ -43,15 +43,17 @@ void msg_read_request_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void msg_read_request_bs__read_req_ReadValue_AttributeId(
+void msg_read_request_bs__getall_req_ReadValue_AttributeId(
    const constants__t_msg_i msg_read_request_bs__msg,
    const constants__t_ReadValue_i msg_read_request_bs__rvi,
+   t_bool * const msg_read_request_bs__isvalid,
    constants__t_AttributeId_i * const msg_read_request_bs__aid)
 {
     *msg_read_request_bs__aid = constants__c_AttributeId_indet;
     /* TODO: is message type checked at this point? */
     OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *)(((message__message *)msg_read_request_bs__msg)->msg);
 
+    *msg_read_request_bs__isvalid = false;
     if(! msg_read_req)
         return;
     if(msg_read_request_bs__rvi > msg_read_req->NoOfNodesToRead)
@@ -59,6 +61,7 @@ void msg_read_request_bs__read_req_ReadValue_AttributeId(
     if(! msg_read_req->NodesToRead)
         return;
 
+    *msg_read_request_bs__isvalid = true;
     switch(msg_read_req->NodesToRead[msg_read_request_bs__rvi-1].AttributeId)
     {
     case e_aid_NodeId:
@@ -71,6 +74,7 @@ void msg_read_request_bs__read_req_ReadValue_AttributeId(
         *msg_read_request_bs__aid = constants__e_aid_Value;
         break;
     default:
+        *msg_read_request_bs__isvalid = false;
         break;
     }
 }

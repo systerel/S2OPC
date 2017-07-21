@@ -43,16 +43,23 @@ void msg_read_response_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 void msg_read_response_bs__write_read_response_init(
-   const t_entier4 msg_read_response_bs__a_nb_resps,
-   const constants__t_msg_i msg_read_response_bs__resp_msg)
+   const t_entier4 msg_read_response_bs__p_nb_resps,
+   const constants__t_msg_i msg_read_response_bs__p_resp_msg,
+   t_bool * const msg_read_response_bs__p_isvalid)
 {
-    OpcUa_ReadResponse *msg_read_resp = (OpcUa_ReadResponse *)(((message__message *)msg_read_response_bs__resp_msg)->msg);
+    OpcUa_ReadResponse *msg_read_resp = (OpcUa_ReadResponse *)(((message__message *)msg_read_response_bs__p_resp_msg)->msg);
 
-    msg_read_resp->NoOfResults = msg_read_response_bs__a_nb_resps;
-    msg_read_resp->Results = (SOPC_DataValue *)malloc(sizeof(SOPC_DataValue)*msg_read_response_bs__a_nb_resps);
+    msg_read_resp->NoOfResults = msg_read_response_bs__p_nb_resps;
+    msg_read_resp->Results = (SOPC_DataValue *)malloc(sizeof(SOPC_DataValue)*msg_read_response_bs__p_nb_resps);
     if(NULL == msg_read_resp->Results)
-        /* Temp */
-        exit(1);
+    {
+        *msg_read_response_bs__p_isvalid = false;
+        /* TODO: implement abstract variables */
+    }
+    else
+    {
+        *msg_read_response_bs__p_isvalid = true;
+    }
 
     for(int32_t i = 0; i < msg_read_resp->NoOfResults; i++)
         SOPC_DataValue_Initialize(&msg_read_resp->Results[i]);
@@ -62,7 +69,7 @@ void msg_read_response_bs__write_read_response_init(
 }
 
 
-void msg_read_response_bs__write_read_response_iter(
+void msg_read_response_bs__set_read_response(
    const constants__t_msg_i msg_read_response_bs__resp_msg,
    const constants__t_ReadValue_i msg_read_response_bs__rvi,
    const constants__t_Variant_i msg_read_response_bs__val,

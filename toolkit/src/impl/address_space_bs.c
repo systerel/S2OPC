@@ -148,7 +148,7 @@ void address_space_bs__set_Value(
 }
 
 
-void address_space_bs__read_Value_StatusCode(
+void address_space_bs__get_Value_StatusCode(
    const constants__t_Node_i address_space_bs__node,
    constants__t_StatusCode_i * const address_space_bs__sc)
 {
@@ -156,7 +156,7 @@ void address_space_bs__read_Value_StatusCode(
 }
 
 
-void address_space_bs__read_NodeClass(
+void address_space_bs__get_NodeClass(
    const constants__t_Node_i address_space_bs__node,
    constants__t_NodeClass_i * const address_space_bs__sc)
 {
