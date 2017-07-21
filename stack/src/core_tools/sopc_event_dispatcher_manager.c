@@ -56,8 +56,8 @@ static void* SOPC_ThreadStartEventDispatcherManager(void* pEventMgr)
                 }else{ // Nominal case
                     pParams = (SOPC_EventDispatcherParams*) pAnonParam;
                     pMgr->pDispatcherFct(pParams->event, pParams->eltId, pParams->params, pParams->auxParam);
+                    free(pParams);
                 }
-                free(pParams);
             }else{
                 status = STATUS_NOK;
             }
@@ -118,15 +118,12 @@ SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager
 
 SOPC_StatusCode SOPC_EventDispatcherManager_StopAndDelete(SOPC_EventDispatcherManager** eventMgr){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SOPC_EventDispatcherParams* pParams = NULL;
     if(NULL != eventMgr && NULL != *eventMgr){
         status = STATUS_INVALID_STATE;
         if((*eventMgr)->stopMgr == FALSE){
-            if(NULL != pParams){
-                (*eventMgr)->stopMgr = !FALSE;
-                // Use stopMgr flag address as indicator all precedent actions were treated
-                status = SOPC_AsyncQueue_BlockingEnqueue((*eventMgr)->queue, &(*eventMgr)->stopMgr);
-            }
+            (*eventMgr)->stopMgr = !FALSE;
+            // Use stopMgr flag address as indicator all precedent actions were treated
+            status = SOPC_AsyncQueue_BlockingEnqueue((*eventMgr)->queue, &(*eventMgr)->stopMgr);
         }
         if(STATUS_OK == status){
             status = SOPC_Thread_Join((*eventMgr)->mgrThread);

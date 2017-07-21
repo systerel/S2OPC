@@ -35,7 +35,7 @@ extern SOPC_EventDispatcherManager* scEventDispatcherMgr;
 
 /* Client static configuration of a Secure Channel */
 typedef struct SOPC_SecureChannel_Config {
-    const uint8_t             isClientSc;
+    uint8_t                   isClientSc;
     const char*               url;
     const Certificate*        crt_cli;
     const AsymmetricKey*      key_priv_cli;
@@ -111,6 +111,9 @@ typedef enum SOPC_SC_Event {
 } SOPC_SC_Event;
 
 void SOPC_TEMP_InitEventDispMgr(SOPC_EventDispatcherManager* toolkitMgr);
+
+void SOPC_TEMP_ClearEventDispMgr();
+
 
 void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                                        uint32_t id,

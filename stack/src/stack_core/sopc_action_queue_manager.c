@@ -44,12 +44,13 @@ void* SOPC_ThreadStartManager(void* pQueueMgr)
     while(localStopMgr == FALSE){
         status = SOPC_Action_BlockingDequeue(pMgr->queue, &fctPointer, &fctArgument, &txt);
         if(STATUS_OK == status){
+            //printf("Action queue manager %p, action = %s\n", pQueueMgr, txt);
             if(fctPointer != NULL){
                 fctPointer(fctArgument);
             }else if(fctArgument == &pMgr->stopMgr){ // It is the stop flag address
                 localStopMgr = 1;
             }else{
-                status = STATUS_NOK;
+                assert(FALSE);
             }
         }
     }
@@ -85,6 +86,7 @@ SOPC_StatusCode SOPC_ActionQueueManager_AddAction(SOPC_ActionQueueManager* queue
     if(NULL != queueMgr){
         status = STATUS_INVALID_STATE;
         if(queueMgr->stopMgr == FALSE){
+            //printf("ADD action queue manager %p, action = %s\n", queueMgr, actionText);
             status = SOPC_Action_BlockingEnqueue(queueMgr->queue, fctPointer, fctArgument, actionText);
         }
     }
