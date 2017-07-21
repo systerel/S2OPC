@@ -32,17 +32,45 @@
 #include "sopc_time.h"
 #include "sopc_types.h"
 #include "opcua_statuscodes.h"
+#include "config_toolkit.h"
+#include "crypto_profiles.h"
 
 #include "wrap_read.h"
 #include "testlib_write.h"
 
+#include "test_results.h"
+#include "testlib_read_response.h"
 
 #include "sopc_sc_events.h"
+
+static uint32_t cptReadResps = 0;
 
 void Test_ComEvent_Fct(SOPC_App_Com_Event event,
                          void*              param,
                          SOPC_StatusCode    status){
-printf("COM EVENT '%d' received\n", event);
+ if(event == SE_RCV_SESSION_RESPONSE){
+   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) param;
+   if(msg->encType == &OpcUa_ReadResponse_EncodeableType){
+       printf(">>Test_Client_Toolkit: received ReadResponse \n");
+       OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) msg->msg;
+       cptReadResps++;
+       if(cptReadResps <= 1){
+           test_results_set_service_result(test_read_request_response(readResp,
+                                                                      status,
+                                                                      0)
+                                           ? (!FALSE):FALSE);
+       }else{
+           // Second read response is to test write effect (through read result)
+           test_results_set_service_result(
+               tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
+       }
+   }else if(msg->encType == &OpcUa_WriteResponse_EncodeableType){
+       printf(">>Test_Client_Toolkit: received WriteResponse \n");
+       OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) msg->msg;
+       test_results_set_service_result(
+           tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+   }
+ }
 }
 
 /* Function to build the read service request message */
@@ -73,6 +101,18 @@ SOPC_Toolkit_Msg* getReadRequest_verif_message() {
   return pMsg;
 }
 
+SOPC_SecureChannel_Config scConfig = {
+    .isClientSc = !FALSE,
+    .url= ENDPOINT_URL,
+    .crt_cli = NULL,
+    .key_priv_cli = NULL,
+    .crt_srv = NULL,
+    .pki = NULL,
+    .reqSecuPolicyUri = SecurityPolicy_None_URI,
+    .requestedLifetime = 5,
+    .msgSecurityMode = OpcUa_MessageSecurityMode_None
+};
+
 int main(void){
 
   // Sleep timeout in milliseconds
@@ -82,7 +122,7 @@ int main(void){
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
-  const constants__t_channel_config_idx_i channel_config_idx = constants__c_channel_config_idx_indet;
+  constants__t_channel_config_idx_i channel_config_idx = constants__c_channel_config_idx_indet;
   constants__t_session_i session = constants__c_session_indet;
   /* Note: in current version of toolkit user == 1 is considered as anonymous user */
   constants__t_user_i user = 1;
@@ -103,6 +143,20 @@ int main(void){
     }
   }
 
+  if(STATUS_OK == status){
+    channel_config_idx = 1;
+    status = SOPC_ToolkitConfig_AddSecureChannelConfig(channel_config_idx,
+                                                       &scConfig);
+    if(STATUS_OK == status){
+      status = SOPC_Toolkit_Configured();
+    }
+    if(STATUS_OK != status){
+      printf(">>Test_Client_Toolkit: Failed to configure the secure channel\n");
+    }else{
+      printf(">>Test_Client_Toolkit: Client configured\n");
+    }
+  }
+
   /* Create a session (and underlying secure channel if necessary).
 
      Note: in current version endpoint is managed through ENDPOINT_URL
@@ -111,13 +165,12 @@ int main(void){
   if(STATUS_OK == status){
     io_dispatch_mgr__activate_new_session(channel_config_idx,
                                           user,
-                                          &sCode);
-    if(constants__e_sc_ok == sCode){
-        printf(">>Test_Client_Toolkit: Activating session: OK\n");
+                                          &session);
+    if(session != constants__c_session_indet){
+        printf(">>Test_Client_Toolkit: Creating/Activating session: OK\n");
     }else{
-      util_status_code__B_to_C(sCode,
-                               &status);
-      printf(">>Test_Client_Toolkit: Activating session: statusCode = '%X' | NOK\n", status);
+        status = STATUS_NOK;
+        printf(">>Test_Client_Toolkit: Creating/Activating session: statusCode = '%X' | NOK\n", status);
     }
   }
 
@@ -148,13 +201,10 @@ int main(void){
   if(STATUS_OK == status){
     /* Create a service request message and send it through session (read service)*/
     SOPC_Toolkit_Msg *pMsgRead = getReadRequest_message();
+    // msg freed when sent
     io_dispatch_mgr__send_service_request_msg(session,
                                               pMsgRead,
                                               &sCode);
-
-    free(((OpcUa_ReadRequest *)pMsgRead->msg)->NodesToRead);
-    free(pMsgRead->msg);
-    free(pMsgRead);
 
     if(constants__e_sc_ok == sCode){
       printf(">>Test_Client_Toolkit: read request sending: OK'\n");
@@ -187,10 +237,13 @@ int main(void){
     SOPC_Toolkit_Msg *pMsgWrite = tlibw_new_message_WriteRequest(pWriteReq);
     pWriteReq = (OpcUa_WriteRequest *) pMsgWrite->msg;
     test_results_set_WriteRequest(pWriteReq);
+    // msg freed when sent
     io_dispatch_mgr__send_service_request_msg(session, pMsgWrite, &sCode);
 
-    /* Do not free the WriteRequest now, it is used by test_results_* */
-    free(pMsgWrite);
+    /* Same data must be provided to verify result, since request will be freed on sending allocate a new (same content) */
+    pWriteReq = tlibw_new_WriteRequest();
+    test_results_set_WriteRequest(pWriteReq);
+
 
     if(constants__e_sc_ok == sCode){
       printf(">>Test_Client_Toolkit: write request sending: OK\n");
@@ -221,13 +274,10 @@ int main(void){
     /* Sends another ReadRequest, to verify that the AddS has changed */
     /* The callback will call the verification */
     SOPC_Toolkit_Msg *pMsgRead = getReadRequest_verif_message();
+    // msg freed when sent
     io_dispatch_mgr__send_service_request_msg(session,
                                               pMsgRead,
                                               &sCode);
-
-    free(((OpcUa_ReadRequest *)pMsgRead->msg)->NodesToRead);
-    free(pMsgRead->msg);
-    free(pMsgRead);
 
     if(constants__e_sc_ok == sCode){
       printf(">>Test_Client_Toolkit: read request sending: OK'\n");
@@ -275,8 +325,6 @@ int main(void){
   }while(STATUS_OK == status &&
          constants__e_session_closed != session_state &&
          loopCpt * sleepTimeout <= loopTimeout);
-
-  io_dispatch_mgr__close_all_active_connections();
 
   address_space_bs__UNINITIALISATION();
 

@@ -36,13 +36,16 @@
 
 #include "sopc_sc_events.h"
 
+static int endpointClosed = FALSE;
+
 void Test_ComEvent_Fct(SOPC_App_Com_Event event,
                          void*              param,
                          SOPC_StatusCode    status){
-printf("COM EVENT '%d' received\n", event);
+  printf("COM EVENT '%d' received\n", event);
+  if(event == SE_CLOSED_ENDPOINT){
+    endpointClosed = !FALSE;
+  }
 }
-
-int connectionClosed = FALSE;
 
 int main(void)
 {
@@ -51,7 +54,7 @@ int main(void)
   // Sleep timeout in milliseconds
   const uint32_t sleepTimeout = 500;
   // Loop timeout in milliseconds
-  const uint32_t loopTimeout = 20000;
+  uint32_t loopTimeout = 20000;
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
@@ -111,7 +114,25 @@ int main(void)
     }
   }
 
-  while (STATUS_OK == status && connectionClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
+  loopCpt = 0;
+  loopTimeout = 5000;
+  while (STATUS_OK == status && loopCpt * sleepTimeout <= loopTimeout)
+    {
+        loopCpt++;
+    	// Retrieve received messages on socket
+        SOPC_Sleep(sleepTimeout);
+    }
+
+  SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
+                                       EP_CLOSE,
+                                       1,
+                                       &epConfig,
+                                       0,
+                                       "Endpoint closing !");
+
+  loopCpt = 0;
+  loopTimeout = 1000;
+  while (STATUS_OK == status && endpointClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
     	// Retrieve received messages on socket
@@ -123,13 +144,7 @@ int main(void)
   }
 
   address_space_bs__UNINITIALISATION();
-
-  SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                       EP_CLOSE,
-                                       1,
-                                       &epConfig,
-                                       0,
-                                       "Endpoint closing !");
+  
 
   SOPC_Toolkit_Clear();
 
