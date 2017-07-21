@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 25/07/2017 17:17:58
+ Date                 : 25/07/2017 17:22:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -134,7 +134,7 @@ void io_dispatch_mgr__local_create_session(
       t_bool io_dispatch_mgr__l_valid_session;
       constants__t_StatusCode_i io_dispatch_mgr__l_ret;
       
-      message_out_bs__alloc_msg(constants__e_msg_session_create_req,
+      message_out_bs__alloc_req_msg(constants__e_msg_session_create_req,
          &io_dispatch_mgr__l_req_msg);
       message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
          &io_dispatch_mgr__l_valid_msg);
@@ -197,7 +197,7 @@ void io_dispatch_mgr__local_sc_activate_orphaned_sessions(
          while (io_dispatch_mgr__l_continue == true) {
             session_mgr__continue_iter_orphaned_t_session(&io_dispatch_mgr__l_session,
                &io_dispatch_mgr__l_continue);
-            message_out_bs__alloc_msg(constants__e_msg_session_activate_req,
+            message_out_bs__alloc_req_msg(constants__e_msg_session_activate_req,
                &io_dispatch_mgr__l_req_msg);
             message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
                &io_dispatch_mgr__l_valid_msg);
@@ -246,7 +246,7 @@ void io_dispatch_mgr__local_activate_session(
       t_bool io_dispatch_mgr__l_valid_req_handle;
       constants__t_session_token_i io_dispatch_mgr__l_session_token;
       
-      message_out_bs__alloc_msg(constants__e_msg_session_activate_req,
+      message_out_bs__alloc_req_msg(constants__e_msg_session_activate_req,
          &io_dispatch_mgr__l_req_msg);
       message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
          &io_dispatch_mgr__l_valid_msg);
@@ -413,7 +413,8 @@ void io_dispatch_mgr__receive_msg(
                      &io_dispatch_mgr__l_session_token);
                   io_dispatch_mgr__get_response_type(io_dispatch_mgr__l_msg_type,
                      &io_dispatch_mgr__l_resp_msg_typ);
-                  message_out_bs__alloc_msg(io_dispatch_mgr__l_resp_msg_typ,
+                  message_out_bs__alloc_resp_msg(io_dispatch_mgr__l_resp_msg_typ,
+                     io_dispatch_mgr__msg,
                      &io_dispatch_mgr__l_resp_msg);
                   message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_resp_msg,
                      &io_dispatch_mgr__l_valid_msg);
@@ -452,7 +453,10 @@ void io_dispatch_mgr__receive_msg(
                      &io_dispatch_mgr__l_is_valid_req,
                      &io_dispatch_mgr__l_snd_session_err);
                   if (io_dispatch_mgr__l_is_valid_req == true) {
-                     message_out_bs__alloc_msg(io_dispatch_mgr__l_msg_type,
+                     io_dispatch_mgr__get_response_type(io_dispatch_mgr__l_msg_type,
+                        &io_dispatch_mgr__l_resp_msg_typ);
+                     message_out_bs__alloc_resp_msg(io_dispatch_mgr__l_resp_msg_typ,
+                        io_dispatch_mgr__msg,
                         &io_dispatch_mgr__l_resp_msg);
                      message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_resp_msg,
                         &io_dispatch_mgr__l_valid_msg);
@@ -498,7 +502,8 @@ void io_dispatch_mgr__receive_msg(
                   if (io_dispatch_mgr__l_snd_session_err == true) {
                      io_dispatch_mgr__get_response_type(io_dispatch_mgr__l_msg_type,
                         &io_dispatch_mgr__l_resp_msg_typ);
-                     message_out_bs__alloc_msg(io_dispatch_mgr__l_resp_msg_typ,
+                     message_out_bs__alloc_resp_msg(io_dispatch_mgr__l_resp_msg_typ,
+                        io_dispatch_mgr__msg,
                         &io_dispatch_mgr__l_resp_msg);
                      message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_resp_msg,
                         &io_dispatch_mgr__l_valid_msg);
@@ -623,7 +628,7 @@ void io_dispatch_mgr__close_session(
       t_bool io_dispatch_mgr__l_valid_req_handle;
       constants__t_session_token_i io_dispatch_mgr__l_session_token;
       
-      message_out_bs__alloc_msg(constants__e_msg_session_close_req,
+      message_out_bs__alloc_req_msg(constants__e_msg_session_close_req,
          &io_dispatch_mgr__l_req_msg);
       message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_req_msg,
          &io_dispatch_mgr__l_valid_msg);

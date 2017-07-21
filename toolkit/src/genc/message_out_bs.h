@@ -2,7 +2,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 25/07/2017 17:18:01
+ Date                 : 25/07/2017 17:22:47
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -20,6 +20,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "message_in_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -29,8 +30,12 @@ extern void message_out_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void message_out_bs__alloc_msg(
+extern void message_out_bs__alloc_req_msg(
    const constants__t_msg_type message_out_bs__msg_type,
+   constants__t_msg_i * const message_out_bs__nmsg);
+extern void message_out_bs__alloc_resp_msg(
+   const constants__t_msg_type message_out_bs__msg_type,
+   const constants__t_msg_i message_out_bs__req_msg_ctx,
    constants__t_msg_i * const message_out_bs__nmsg);
 extern void message_out_bs__bless_msg_out(
    const constants__t_msg_i message_out_bs__msg,
