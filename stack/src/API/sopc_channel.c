@@ -501,7 +501,7 @@ SOPC_StatusCode SOPC_IntChannel_ChannelEventCB(SC_ClientConnection* cConnection,
                         retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
                                                                       SOPC_Channel_Action_AppChannelEventCallback,
                                                                       (void*) appCallbackData,
-                                                                      "Channel event applicative callback");
+                                                                      "Channel event applicative callback: connected");
                     }else{
                         retStatus = STATUS_NOK;
                     }
@@ -551,7 +551,7 @@ SOPC_StatusCode SOPC_IntChannel_ChannelEventCB(SC_ClientConnection* cConnection,
                         retStatus = SOPC_ActionQueueManager_AddAction(appCallbackQueueMgr,
                                                                       SOPC_Channel_Action_AppChannelEventCallback,
                                                                       (void*) appCallbackData,
-                                                                      "Channel event applicative callback");
+                                                                      "Channel event applicative callback: disconnected");
                     }else{
                         retStatus = STATUS_NOK;
                     }
@@ -901,17 +901,20 @@ SOPC_StatusCode SOPC_Channel_AsyncInvokeService(SOPC_Channel                    
             }else{
                 status = STATUS_NOK;
             }
-            // TODO: do not use end send request callback at this level
-            //       anymore since error will be triggered in SOPC_Channel_PfnRequestComplete callback
-            status = SC_CreateAction_Send_Request(intChannel->cConnection,
-                                                  requestType,
-                                                  msgBuffers,
-                                                  responseType,
-                                                  timeout,
-                                                  (SC_ResponseEvent_CB*) SOPC_Channel_CreateAction_AppInvokeCallback,
-                                                  appCallbackData,
-                                                  endSendCallback,
-                                                  (void*) appSendReqResultCbData);
+
+            if(STATUS_OK == status){
+                // TODO: do not use end send request callback at this level
+                //       anymore since error will be triggered in SOPC_Channel_PfnRequestComplete callback
+                status = SC_CreateAction_Send_Request(intChannel->cConnection,
+                        requestType,
+                        msgBuffers,
+                        responseType,
+                        timeout,
+                        (SC_ResponseEvent_CB*) SOPC_Channel_CreateAction_AppInvokeCallback,
+                        appCallbackData,
+                        endSendCallback,
+                        (void*) appSendReqResultCbData);
+            }
         }
     }
 
