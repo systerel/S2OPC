@@ -1,0 +1,53 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    service_read_it_i
+
+REFINES
+    service_read_it
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+    rreqs_i
+
+INVARIANT
+    rreqs_i : NAT &
+    rreqs_i : 0 .. size(cast_t_ReadValue) &
+    rreqs_to_iterate = cast_t_ReadValue[1..rreqs_i]
+
+INITIALISATION
+    rreqs_i := 0
+
+OPERATIONS
+    continue <-- init_iter_write_request(nb_req) =
+    BEGIN
+        rreqs_i := nb_req;
+        continue := bool(0 < nb_req)
+    END
+    ;
+
+    continue, rvi <-- continue_iter_write_request =
+    BEGIN
+        rvi <-- read_cast_t_ReadValue(rreqs_i);
+        rreqs_i := rreqs_i - 1;
+        continue := bool(0 < rreqs_i)
+    END
+
+END
