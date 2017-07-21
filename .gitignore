@@ -2,6 +2,7 @@
 .project
 stack/.settings/
 .*.swp
+*~
 stack/build/
 stack/out/
 stack/apidoc/
