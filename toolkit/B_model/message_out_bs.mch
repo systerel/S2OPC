@@ -18,7 +18,8 @@
 MACHINE
     message_out_bs
 SEES
-    constants
+    constants,
+    message_in_bs
     
 DEFINITIONS
     d_variables ==
@@ -58,9 +59,25 @@ OPERATIONS
     END
     ;
 
-    nmsg <-- alloc_msg (msg_type) =
+    nmsg <-- alloc_req_msg (msg_type) =
     PRE
         msg_type : t_msg_type
+    THEN
+        CHOICE
+            nmsg, c_msg_out :( nmsg : t_msg_i & nmsg = c_msg_out & c_msg_out : t_msg ) ||
+            a_msg_out_type := msg_type
+        OR
+            nmsg := c_msg_indet
+        END
+    END
+    ;
+    
+    nmsg <-- alloc_resp_msg (msg_type, req_msg_ctx) =
+    PRE
+        msg_type : t_msg_type &
+        req_msg_ctx : t_msg_i &
+        req_msg_ctx = c_msg_in &
+        c_msg_in : t_msg
     THEN
         CHOICE
             nmsg, c_msg_out :( nmsg : t_msg_i & nmsg = c_msg_out & c_msg_out : t_msg ) ||

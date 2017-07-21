@@ -42,7 +42,7 @@ void message_out_bs__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void message_out_bs__alloc_msg(
+void util_message_out_bs__alloc_msg(
    const constants__t_msg_type message_out_bs__msg_type,
    constants__t_msg_i * const message_out_bs__nmsg) {
 
@@ -81,6 +81,29 @@ void message_out_bs__alloc_msg(
     *message_out_bs__nmsg = (constants__t_msg_i) msg;
   }else{
     *message_out_bs__nmsg = constants__c_msg_indet;
+  }
+}
+
+void message_out_bs__alloc_req_msg(
+   const constants__t_msg_type message_out_bs__msg_type,
+   constants__t_msg_i * const message_out_bs__nmsg){
+  util_message_out_bs__alloc_msg(message_out_bs__msg_type,
+                                 message_out_bs__nmsg);
+}
+
+void message_out_bs__alloc_resp_msg(
+   const constants__t_msg_type message_out_bs__msg_type,
+   const constants__t_msg_i message_out_bs__req_msg_ctx,
+   constants__t_msg_i * const message_out_bs__nmsg){
+  SOPC_Toolkit_Msg* req_msg = NULL;
+  SOPC_Toolkit_Msg* resp_msg = NULL;
+  util_message_out_bs__alloc_msg(message_out_bs__msg_type,
+                                 message_out_bs__nmsg);
+  if(*message_out_bs__nmsg != constants__c_msg_indet){
+    req_msg = (SOPC_Toolkit_Msg*) message_out_bs__req_msg_ctx;
+    resp_msg = (SOPC_Toolkit_Msg*) message_out_bs__nmsg;
+    // Copy request context into response
+    resp_msg->optContext = req_msg->optContext;
   }
 }
 

@@ -229,7 +229,7 @@ OPERATIONS
         l_valid_session,
         l_ret
     IN
-        l_req_msg <-- alloc_msg (e_msg_session_create_req);
+        l_req_msg <-- alloc_req_msg (e_msg_session_create_req);
         l_valid_msg <-- is_valid_msg_out (l_req_msg);
         IF l_valid_msg = TRUE
         THEN
@@ -283,7 +283,7 @@ OPERATIONS
             WHILE l_continue = TRUE
             DO
                 l_session, l_continue <-- continue_iter_orphaned_t_session;
-                l_req_msg <-- alloc_msg (e_msg_session_activate_req);
+                l_req_msg <-- alloc_req_msg (e_msg_session_activate_req);
                 l_valid_msg <-- is_valid_msg_out (l_req_msg);
                 IF l_valid_msg = TRUE
                 THEN
@@ -328,7 +328,7 @@ OPERATIONS
         l_valid_req_handle,
         l_session_token
     IN
-        l_req_msg <-- alloc_msg (e_msg_session_activate_req);
+        l_req_msg <-- alloc_req_msg (e_msg_session_activate_req);
         l_valid_msg <-- is_valid_msg_out (l_req_msg);
         IF l_valid_msg = TRUE
         THEN
@@ -471,7 +471,7 @@ OPERATIONS
                                 l_request_handle <-- read_msg_header_req_handle (msg);
                                 l_session_token <-- read_msg_req_header_session_token (msg);
                                 l_resp_msg_typ <-- get_response_type (l_msg_type);
-                                l_resp_msg <-- alloc_msg (l_resp_msg_typ);
+                                l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ, msg);
                                 l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                                 IF l_valid_msg = TRUE
                                 THEN
@@ -496,7 +496,8 @@ OPERATIONS
                                 l_is_valid_req, l_snd_session_err <-- srv_validate_session_service_req (channel, l_request_handle, l_session_token, msg);
                                 IF l_is_valid_req = TRUE
                                 THEN
-                                    l_resp_msg <-- alloc_msg (l_msg_type);
+                                    l_resp_msg_typ <-- get_response_type (l_msg_type);
+                                    l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ, msg);
                                     l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                                     l_session <-- get_session_from_token (l_session_token);
                                     IF l_valid_msg = TRUE
@@ -528,7 +529,7 @@ OPERATIONS
                                 THEN
                                     /* Send a session closed error in response */
                                     l_resp_msg_typ <-- get_response_type (l_msg_type);
-                                    l_resp_msg <-- alloc_msg (l_resp_msg_typ);
+                                    l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ, msg);
                                     l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                                     IF l_valid_msg = TRUE
                                     THEN
@@ -635,7 +636,7 @@ OPERATIONS
         l_valid_req_handle,
         l_session_token
     IN
-        l_req_msg <-- alloc_msg (e_msg_session_close_req);
+        l_req_msg <-- alloc_req_msg (e_msg_session_close_req);
         l_valid_msg <-- is_valid_msg_out (l_req_msg);
         IF l_valid_msg = TRUE
         THEN
