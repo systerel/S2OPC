@@ -23,16 +23,19 @@ SEES
     
 DEFINITIONS
     d_variables ==
-    s_channel,
-    s_is_client,
-    a_config;
+    s_cli_channel_connecting,
+    s_channel_connected,
+    a_config,
+    a_endpoint;
     
     d_typage == 
-    s_channel <: t_channel &
-    s_is_client <: s_channel &
+    s_cli_channel_connecting <: t_channel_config_idx &
+    s_channel_connected <: t_channel &
     /* each created channel has a configuration
        and there is at most 1 channel per configuration */
-    a_config : s_channel >-> t_channel_config_idx
+    a_config : s_channel_connected >-> t_channel_config_idx &
+    a_endpoint : s_channel_connected +-> t_endpoint_config_idx
+       
     
 ABSTRACT_VARIABLES
     d_variables 
@@ -41,66 +44,72 @@ INVARIANT
     d_typage
     
 INITIALISATION
-    s_channel   :: {{}} ||
-    s_is_client :: {{}} ||
-    a_config    :: {{}}
+    s_cli_channel_connecting  :: {{}} ||
+    s_channel_connected   :: {{}} ||
+    a_config    :: {{}} ||
+    a_endpoint  :: {{}}
     
 OPERATIONS  
     
-    nchannel, is_connected <-- open_secure_channel (config_idx) = 
+    bres <-- cli_open_secure_channel (config_idx) = 
     PRE
         config_idx : t_channel_config_idx_i &
         config_idx : t_channel_config_idx
     THEN
-        IF s_channel /= t_channel & config_idx : t_channel_config_idx
+        IF config_idx : ran(a_config)
         THEN
-            IF config_idx : ran(a_config)
+            bres := FALSE
+        ELSE 
+            IF card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel)
             THEN
-                nchannel :(nchannel : t_channel_i & nchannel = a_config~(config_idx)) ||
-                is_connected := TRUE
-            ELSE                
-                CHOICE
-                    ANY l_channel WHERE
-                        l_channel : t_channel_i &
-                        l_channel : t_channel - s_channel
-                    THEN
-                        s_channel := s_channel \/ {l_channel} ||
-                        s_is_client := s_is_client \/ {l_channel} ||
-                        a_config(l_channel)  := config_idx ||
-                        nchannel := l_channel ||
-                        is_connected := FALSE
-                    END
-                OR
-                    /* invalid parameters: URL, security, crypto, etc. */
-                    nchannel := c_channel_indet ||
-                    is_connected := FALSE
-                END
+                s_cli_channel_connecting := s_cli_channel_connecting \/ {config_idx} ||
+                bres := TRUE
+            ELSE
+                bres := FALSE
             END
-        ELSE
-            nchannel := c_channel_indet ||
-            is_connected := FALSE
-        END    
+        END
     END
     ;
+    
+    bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel) =
+    PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        channel : t_channel_i &
+        channel : t_channel
+    THEN
+        IF channel /: s_channel_connected &
+           s_channel_connected /= t_channel
+        THEN
+            s_channel_connected := s_channel_connected \/ {channel} ||
+            a_config(channel)  := channel_config_idx ||
+            a_endpoint(channel) := endpoint_config_idx ||
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END
+    END;
     
     close_secure_channel (channel) =
     PRE
         channel : t_channel_i &
         channel : t_channel
     THEN
-        IF channel : s_channel
+        IF channel : s_channel_connected
         THEN
-            s_channel := s_channel - {channel} ||
-            s_is_client := s_is_client - {channel} ||
-            a_config := {channel} <<| a_config
+            s_channel_connected := s_channel_connected - {channel} ||
+            a_config := {channel} <<| a_config ||
+            a_endpoint := {channel} <<| a_endpoint
         END           
     END;
     
     close_all_channel =
     BEGIN
-        s_channel :: {} ||
-        s_is_client :: {} ||
-        a_config :: {}
+        s_channel_connected :: {} ||
+        a_config :: {} ||
+        a_endpoint :: {}
     END;    
     
     channel_lost (channel) =
@@ -108,47 +117,9 @@ OPERATIONS
         channel : t_channel_i &
         channel : t_channel
     THEN
-        s_channel := s_channel - {channel} ||
-        s_is_client := s_is_client - {channel} ||
-        a_config := {channel} <<| a_config
-    END
-    ;
-    
-    receive_sc_msg (channel, msg) =
-    PRE
-        channel : t_channel_i & /* channel can be indetermined in case it is a new connection (HEL) */
-        msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg
-    THEN
-        s_channel, s_is_client, a_config :(d_typage) /* channel set can be changed in case it is a new connection */
-    END
-    ;
-    
-    receive_hello_msg (msg) =
-    PRE
-        msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type = e_msg_tcpua_hello
-    THEN
-        s_channel, a_config :(d_typage) /* channel set can be changed in case it is a new connection */
-    END
-    ;
-    
-    receive_channel_msg (channel, msg) =
-    PRE
-        channel : t_channel_i &
-        channel : t_channel &
-        msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type : {e_msg_tcpua_ack,
-            e_msg_sc_open_channel_req, e_msg_sc_open_channel_resp,
-            e_msg_sc_close_channel_req, e_msg_sc_close_channel_resp,
-            e_msg_public_service_req, e_msg_public_service_resp}
-    THEN
-        s_channel, s_is_client, a_config :(d_typage) /* channel set can be changed in case it is a new connection */
+        s_channel_connected := s_channel_connected - {channel} ||
+        a_config := {channel} <<| a_config ||
+        a_endpoint := {channel} <<| a_endpoint
     END
     ;
     
@@ -166,11 +137,31 @@ OPERATIONS
     END
     ;
     
+    bres <-- cli_set_valid_channel (config_idx, channel) =
+    PRE
+        channel : t_channel_i &
+        channel : t_channel &
+        config_idx : t_channel_config_idx_i &
+        config_idx : t_channel_config_idx
+    THEN
+        IF config_idx : s_cli_channel_connecting &
+            channel /: s_channel_connected &
+            s_channel_connected /= t_channel
+        THEN
+            s_cli_channel_connecting := s_cli_channel_connecting - {config_idx} ||
+            s_channel_connected := s_channel_connected \/ {channel} ||
+            a_config(channel)  := config_idx
+        ELSE
+            bres := FALSE
+        END  
+    END
+    ;
+    
     bres <-- is_valid_channel (channel) =
     PRE
         channel : t_channel_i
     THEN
-        bres := bool(channel : s_channel)
+        bres := bool(channel : s_channel_connected)
     END
     ;
     
@@ -193,7 +184,7 @@ OPERATIONS
         channel : t_channel_i &
         channel : t_channel
     THEN
-        IF channel /: s_channel
+        IF channel /: s_channel_connected
         THEN
             config_idx := c_channel_config_idx_indet
         ELSE       
@@ -205,9 +196,9 @@ OPERATIONS
     bres <-- is_client_channel (channel) =
     PRE
         channel         : t_channel_i &
-        channel         : s_channel
+        channel         : s_channel_connected
     THEN
-        bres := bool(channel : s_is_client)
+        bres := bool(channel /: dom(a_endpoint))
     END
 
 END

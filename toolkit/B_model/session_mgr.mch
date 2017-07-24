@@ -68,7 +68,7 @@ OPERATIONS
     session <-- receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
     PRE
         channel : t_channel_i &
-        channel : s_channel &
+        channel : s_channel_connected &
         req_handle : t_request_handle_i &
         resp_msg : t_msg_i &
         resp_msg : t_msg &
@@ -86,7 +86,7 @@ OPERATIONS
     b_send_resp, session <-- receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
     PRE
         channel : t_channel_i &
-        channel : s_channel &
+        channel : s_channel_connected &
         req_handle : t_request_handle_i &
         session_token : t_session_token_i &
         req_msg : t_msg_i &
@@ -136,7 +136,7 @@ OPERATIONS
     bres <-- cli_validate_session_service_resp (channel, req_handle, resp_msg) =
     PRE
         channel : t_channel_i &
-        channel : s_channel &
+        channel : s_channel_connected &
         req_handle : t_request_handle_i &
         resp_msg : t_msg_i &
         resp_msg : t_msg &
@@ -150,7 +150,7 @@ OPERATIONS
     bres, snd_err <-- srv_validate_session_service_req (channel, req_handle, session_token, req_msg) =
     PRE
         channel : t_channel_i &
-        channel : s_channel &
+        channel : s_channel_connected &
         req_handle : t_request_handle_i &
         session_token : t_session_token_i &
         req_msg : t_msg_i &
@@ -171,7 +171,7 @@ OPERATIONS
     bres, snd_err <-- srv_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
     PRE
         channel : t_channel_i &
-        channel : s_channel   &
+        channel : s_channel_connected   &
         session  : t_session_i &
         req_handle : t_request_handle_i &
         req_msg  : t_msg_i &
@@ -212,7 +212,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         channel : t_channel_i &
-        channel : s_channel &
+        channel : s_channel_connected &
         req_handle : t_request_handle_i &
         req_handle : s_request_handle &
         create_req_msg : t_msg_i &
@@ -237,7 +237,7 @@ OPERATIONS
     THEN
         CHOICE
             ret := e_sc_ok ||
-            channel :(channel : t_channel_i & channel : s_channel) ||
+            channel :(channel : t_channel_i & channel : s_channel_connected) ||
             session_token :(session_token : t_session_token_i & session_token : t_session_token)
         OR
             ret :: {e_sc_bad_identity_token_invalid,
@@ -258,7 +258,7 @@ OPERATIONS
         req_handle : t_request_handle_i &
         req_handle : s_request_handle &
         channel : t_channel_i &
-        channel : s_channel &
+        channel : s_channel_connected &
         activate_req_msg : t_msg_i &
         activate_req_msg = c_msg_out &
         c_msg_out : t_msg &
@@ -273,12 +273,12 @@ OPERATIONS
     END
     ;
     
-    cli_secure_channel_lost (lost_channel, new_channel) =
+    cli_secure_channel_lost (lost_channel, channel_config_idx) =
     PRE
         lost_channel : t_channel_i &
-        lost_channel : s_channel &
-        new_channel : t_channel_i &
-        new_channel : s_channel
+        lost_channel : s_channel_connected &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
     THEN
         skip
     END
@@ -287,7 +287,7 @@ OPERATIONS
     srv_secure_channel_lost (channel) =
     PRE
         channel : t_channel_i &
-        channel : s_channel
+        channel : s_channel_connected
     THEN
         skip
     END
@@ -306,7 +306,7 @@ OPERATIONS
     THEN
         CHOICE
             ret := e_sc_ok ||
-            channel :(channel : t_channel_i & channel : s_channel) ||
+            channel :(channel : t_channel_i & channel : s_channel_connected) ||
             session_token :(session_token : t_session_token_i & session_token : t_session_token)
         OR
             ret :: {e_sc_bad_invalid_state,
@@ -334,10 +334,10 @@ OPERATIONS
         ret :: BOOL
     END;
     
-    continue <-- init_iter_orphaned_t_session (lost_channel) =
+    continue <-- init_iter_orphaned_t_session (channel_config_idx) =
     PRE
-        lost_channel : t_channel_i &
-        lost_channel : t_channel
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
     THEN
         continue :: BOOL
     END

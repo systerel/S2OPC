@@ -107,10 +107,12 @@ LOCAL_OPERATIONS
     END
     ;
     
-    local_sc_activate_orphaned_sessions (channel) =
+    local_sc_activate_orphaned_sessions (channel_config_idx, channel) =
     PRE
         channel : t_channel_i &
-        channel : t_channel
+        channel : t_channel &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
     THEN
         skip
     END
@@ -142,13 +144,7 @@ OPERATIONS
     resp_msg_typ <-- get_response_type (req_msg_typ) =
     BEGIN
         CASE req_msg_typ OF
-            EITHER e_msg_tcpua_hello THEN
-                resp_msg_typ := e_msg_tcpua_ack
-            OR e_msg_sc_open_channel_req THEN
-                resp_msg_typ := e_msg_sc_open_channel_resp
-            OR e_msg_sc_close_channel_req THEN
-                resp_msg_typ := e_msg_sc_close_channel_resp
-            OR e_msg_public_service_req THEN
+            EITHER e_msg_public_service_req THEN
                 resp_msg_typ := e_msg_public_service_resp
             OR e_msg_session_create_req THEN
                 resp_msg_typ := e_msg_session_create_resp
@@ -168,10 +164,7 @@ OPERATIONS
     bres <-- is_request_type (msg_typ) =
     BEGIN
         CASE msg_typ OF
-            EITHER e_msg_tcpua_hello,
-                e_msg_sc_open_channel_req,
-                e_msg_sc_close_channel_req,
-                e_msg_public_service_req,
+            EITHER e_msg_public_service_req,
                 e_msg_session_create_req,
                 e_msg_session_activate_req,
                 e_msg_session_close_req,
@@ -264,7 +257,7 @@ OPERATIONS
     END
     ;
     
-    local_sc_activate_orphaned_sessions (channel) =
+    local_sc_activate_orphaned_sessions (channel_config_idx, channel) =
     VAR
         l_valid_new_channel,
         l_req_msg,
@@ -279,7 +272,7 @@ OPERATIONS
         l_valid_new_channel <-- is_valid_channel (channel);
         IF l_valid_new_channel = TRUE
         THEN
-            l_continue <-- init_iter_orphaned_t_session (channel);
+            l_continue <-- init_iter_orphaned_t_session (channel_config_idx);
             WHILE l_continue = TRUE
             DO
                 l_session, l_continue <-- continue_iter_orphaned_t_session;
@@ -404,19 +397,11 @@ OPERATIONS
         THEN
             l_msg_type <-- get_msg_in_type (msg);
             CASE l_msg_type OF
-                EITHER e_msg_tcpua_hello, e_msg_tcpua_ack,
-                    e_msg_sc_open_channel_req, e_msg_sc_open_channel_resp,
-                    e_msg_sc_close_channel_req, e_msg_sc_close_channel_resp,
+                EITHER 
                     e_msg_public_service_req, e_msg_public_service_resp
                 THEN
-                    /* TODO: no channel msg nor public service treated for now */
-                    IF l_msg_type = e_msg_tcpua_hello
-                    THEN
-                        receive_hello_msg (msg)
-                    ELSE
-                        /* message type is secure channel level message */
-                        receive_channel_msg (channel, msg)
-                    END
+                    /* TODO: no public service treated for now */
+                    skip
                 ELSE
                     l_is_client <-- is_client_channel (channel);
                     l_is_req <-- is_request_type (l_msg_type);
@@ -554,21 +539,32 @@ OPERATIONS
     ;
     
         
-    channel_connected_event (channel_config_idx) =
+    cli_channel_connected_event (channel_config_idx, channel) =
     VAR
-        l_channel,
-        l_session_to_create
+        l_session_to_create,
+        l_bres
     IN
-        l_channel <-- get_valid_channel (channel_config_idx);
-        // Re-associate orphaned sessions waiting for sc (if there are some)
-        local_sc_activate_orphaned_sessions (l_channel);
-        // Create session waiting for sc
-        l_session_to_create <-- is_session_to_create (channel_config_idx);
-        IF l_session_to_create /= c_session_indet
+        l_bres <-- cli_set_valid_channel (channel_config_idx, channel);
+        IF l_bres = TRUE
         THEN
-            local_create_session (l_session_to_create, l_channel)
-            // activation already registered as next async step
+            // Re-associate orphaned sessions waiting for sc (if there are some)
+            local_sc_activate_orphaned_sessions (channel_config_idx, channel);
+            // Create session waiting for sc
+            l_session_to_create <-- is_session_to_create (channel_config_idx);
+            IF l_session_to_create /= c_session_indet
+            THEN
+                local_create_session (l_session_to_create, channel)
+                // activation already registered as next async step
+            END
         END
+    END
+    ;
+    
+    srv_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
+    VAR
+        l_bres
+    IN
+        l_bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel)
     END
     ;
     
@@ -585,12 +581,14 @@ OPERATIONS
         l_valid_channel <-- is_valid_channel (l_channel);
         IF l_valid_channel = FALSE
         THEN
-            l_channel, l_channel_connected <-- open_secure_channel (channel_config_idx)
-        ELSE
+            l_bret <-- cli_open_secure_channel (channel_config_idx);
             l_channel_connected := FALSE
+        ELSE
+            l_bret := TRUE;
+            l_channel_connected := TRUE
         END;
-        l_valid_channel <-- is_valid_channel (l_channel);
-        IF l_valid_channel = TRUE
+
+        IF l_bret = TRUE
         THEN
             session <-- cli_init_session;
             l_valid_session <-- is_valid_session (session);
@@ -600,6 +598,7 @@ OPERATIONS
                     /* channel did not exist or is not connected anymore: add async session creation on SC connection */
                     l_bret <-- add_session_to_create (session, channel_config_idx)
                 ELSE
+                    // l_channel defined because l_channel_connected = TRUE 
                     local_create_session (session, l_channel);
                     l_bret := TRUE
                 END;
@@ -672,10 +671,10 @@ OPERATIONS
     VAR
         l_valid_channel,
         l_valid_new_channel,
-        l_new_channel_connected,
         l_is_client,
         l_channel_config_idx,
-        l_new_channel
+        l_new_channel,
+        l_bres
     IN
         l_valid_channel <-- is_valid_channel (channel);
         IF l_valid_channel = TRUE
@@ -684,22 +683,20 @@ OPERATIONS
             IF l_is_client = TRUE
             THEN
                 l_channel_config_idx <-- get_channel_info (channel);
+                cli_secure_channel_lost (channel, l_channel_config_idx);
                 l_new_channel <-- get_valid_channel (l_channel_config_idx);
                 IF l_new_channel = c_channel_indet
                 THEN
-                    l_new_channel, l_new_channel_connected <-- open_secure_channel (l_channel_config_idx)
+                    l_bres <-- cli_open_secure_channel (l_channel_config_idx)
                     // async operation => cannot use channel until connection is effective ?
-                ELSE
-l_new_channel_connected := FALSE
                 END;
-                
-                cli_secure_channel_lost (channel, l_new_channel);             
+               	
                 l_valid_new_channel <-- is_valid_channel (l_new_channel);
                 
-                IF l_valid_new_channel = TRUE & l_new_channel_connected = TRUE
+                IF l_valid_new_channel = TRUE
                 THEN
                     // If channel already connected, associate sessions orphaned
-                    local_sc_activate_orphaned_sessions (l_new_channel)                    
+                    local_sc_activate_orphaned_sessions (l_channel_config_idx, l_new_channel)                    
                 END
             ELSE
                 srv_secure_channel_lost (channel)

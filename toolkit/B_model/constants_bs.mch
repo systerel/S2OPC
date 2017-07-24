@@ -31,7 +31,8 @@ SETS
     t_user_i;
     t_msg_i;
     t_request_handle_i;
-    t_channel_config_idx_i
+    t_channel_config_idx_i;
+    t_endpoint_config_idx_i
 
 CONCRETE_CONSTANTS
     k_n_Nodes,
@@ -48,6 +49,7 @@ CONCRETE_CONSTANTS
     c_session_token_indet,
     c_msg_indet,
     c_channel_config_idx_indet,
+    c_endpoint_config_idx_indet,
     c_request_handle_indet
 
 ABSTRACT_CONSTANTS
@@ -63,6 +65,7 @@ ABSTRACT_CONSTANTS
     t_user,
     t_msg,
     t_channel_config_idx,
+    t_endpoint_config_idx,
     t_request_handle
 
 PROPERTIES
@@ -114,6 +117,10 @@ PROPERTIES
     
     t_channel_config_idx <: t_channel_config_idx_i &
     c_channel_config_idx_indet : t_channel_config_idx_i &
-    c_channel_config_idx_indet /: t_channel_config_idx
+    c_channel_config_idx_indet /: t_channel_config_idx &
+    
+    t_endpoint_config_idx <: t_endpoint_config_idx_i &
+    c_endpoint_config_idx_indet : t_endpoint_config_idx_i &
+    c_endpoint_config_idx_indet /: t_endpoint_config_idx
 
 END

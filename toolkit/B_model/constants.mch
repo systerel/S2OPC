@@ -49,14 +49,15 @@ SETS
     t_WriteValue_i;
     t_ByteString_i;
     t_UserId_i;
-
-    t_channel_i;
+    
     t_session_i;
     t_session_token_i;
     t_user_i;
     t_msg_i;
     t_request_handle_i;
     t_channel_config_idx_i;
+    t_channel_i;
+    t_endpoint_config_idx_i;
     
     t_sessionState = {
         e_session_init,
@@ -70,9 +71,6 @@ SETS
         e_session_closed};
 
     t_msg_type = {
-        e_msg_tcpua_hello, e_msg_tcpua_ack,
-        e_msg_sc_open_channel_req, e_msg_sc_open_channel_resp,
-        e_msg_sc_close_channel_req, e_msg_sc_close_channel_resp,
         e_msg_public_service_req, e_msg_public_service_resp,
         e_msg_session_create_req, e_msg_session_create_resp,
         e_msg_session_activate_req, e_msg_session_activate_resp,
@@ -94,12 +92,13 @@ CONCRETE_CONSTANTS
     c_ByteString_indet,
     c_UserId_indet,
 
-    c_channel_indet,
+    c_endpoint_config_idx_indet,
     c_user_indet,
     c_session_indet,
     c_session_token_indet,
     c_msg_indet,
     c_channel_config_idx_indet,
+    c_channel_indet,
     c_request_handle_indet
 
 ABSTRACT_CONSTANTS
@@ -119,13 +118,14 @@ ABSTRACT_CONSTANTS
 
     cast_t_ReadValue,
     cast_t_WriteValue,
-
-    t_channel,
+    
+    t_endpoint_config_idx,
     t_session,
     t_session_token,
     t_user,
     t_msg,
     t_channel_config_idx,
+    t_channel,
     t_request_handle,
 
     s_service_reqs,
@@ -196,7 +196,11 @@ PROPERTIES
     t_channel <: t_channel_i &
     c_channel_indet : t_channel_i &
     c_channel_indet /: t_channel &
-
+    
+    t_endpoint_config_idx <: t_endpoint_config_idx_i &
+    c_endpoint_config_idx_indet : t_endpoint_config_idx_i & 
+    c_endpoint_config_idx_indet /: t_endpoint_config_idx &
+    
     t_session <: t_session_i &
     c_session_indet : t_session_i &
     c_session_indet /: t_session &
@@ -223,17 +227,13 @@ PROPERTIES
     
     s_service_reqs  = {e_msg_session_read_req} &
     s_service_resps = {e_msg_session_read_resp} &
-    s_req_msgs = {e_msg_tcpua_hello,
-        e_msg_sc_open_channel_req,
-        e_msg_sc_close_channel_req,
+    s_req_msgs = {
         e_msg_public_service_req,
         e_msg_session_create_req,
         e_msg_session_activate_req,
         e_msg_session_close_req,
         e_msg_session_read_req} &
-    s_resp_msgs = {e_msg_tcpua_ack,
-        e_msg_sc_open_channel_resp,
-        e_msg_sc_close_channel_resp,
+    s_resp_msgs = {
         e_msg_public_service_resp,
         e_msg_session_create_resp,
         e_msg_session_activate_resp,

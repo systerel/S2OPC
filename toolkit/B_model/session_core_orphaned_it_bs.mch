@@ -43,15 +43,15 @@ INITIALISATION
     
 OPERATIONS
     
-    continue <-- init_iter_orphaned_t_session (lost_channel) =
+    continue <-- init_iter_orphaned_t_session (channel_config_idx) =
     PRE
-        lost_channel : t_channel_i &
-        lost_channel : t_channel
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
     THEN
-        av_sessions_orphaned := dom(a_orphaned |> {lost_channel}) ||
-        av_sessions_to_iterate := dom(a_orphaned |> {lost_channel}) ||
+        av_sessions_orphaned := dom(a_orphaned |> {channel_config_idx}) ||
+        av_sessions_to_iterate := dom(a_orphaned |> {channel_config_idx}) ||
         av_sessions_iterated := {} ||
-        continue := bool(lost_channel : ran(a_orphaned))
+        continue := bool(channel_config_idx : ran(a_orphaned))
     END
     ;
     

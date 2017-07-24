@@ -46,7 +46,7 @@ DEFINITIONS
     s_session <: t_session &    
     a_state : s_session --> t_sessionState & // a session shall be associated to a state    
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel    
-    a_orphaned : s_session +-> t_channel & // a client session may be orphaned of a channel (precedently lost)    
+    a_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)    
     a_token : t_session_token >+> s_session & // a session has an authentication token once create response is produced / received    
     a_user : s_session +-> t_user;  //  a session may be associated to a valid user
     
@@ -188,7 +188,7 @@ OPERATIONS
     PRE
         session : t_session_i &
         channel : t_channel_i &
-        channel : s_channel &
+        channel : s_channel_connected &
         req_handle : t_request_handle_i &
         req_handle : s_request_handle &
         create_req_msg : t_msg_i &
@@ -227,7 +227,7 @@ OPERATIONS
     nsession <-- srv_create_req_and_resp (channel, req_handle, create_req_msg, create_resp_msg) = 
     PRE
         channel : t_channel_i  &
-        channel : s_channel &
+        channel : s_channel_connected &
         req_handle : t_request_handle_i &
         create_req_msg : t_msg_i &
         create_req_msg = c_msg_in &
@@ -269,7 +269,7 @@ OPERATIONS
     cli_create_resp (channel, session, req_handle, session_token, create_resp_msg) =
     PRE
         channel       : t_channel_i &
-        channel       : s_channel   &
+        channel       : s_channel_connected   &
         session       : t_session_i &
         session_token : t_session_token_i &
         req_handle    : t_request_handle_i &
@@ -331,7 +331,7 @@ OPERATIONS
                         a_state(session) := e_session_userActivating ||
                         a_user(session) := user              ||
                         ret := e_sc_ok                          ||
-                        channel :(channel : t_channel_i & channel : s_channel) ||
+                        channel :(channel : t_channel_i & channel : s_channel_connected) ||
                         session_token :(session_token : t_session_token_i & session_token : dom(a_token))
                     ELSE
                         ret := e_sc_bad_invalid_argument ||
@@ -369,7 +369,7 @@ OPERATIONS
         req_handle : t_request_handle_i &
         req_handle : s_request_handle &
         channel : t_channel_i &
-        channel : s_channel &
+        channel : s_channel_connected &
         activate_req_msg : t_msg_i &
         activate_req_msg = c_msg_out &
         c_msg_out : t_msg &
@@ -414,7 +414,7 @@ OPERATIONS
     ret <-- srv_activate_req_and_resp (channel, session, req_handle, user, activate_req_msg, activate_resp_msg) =
     PRE
         channel : t_channel_i &
-        channel : s_channel   &
+        channel : s_channel_connected   &
         session : t_session_i &
         req_handle : t_request_handle_i &
         user : t_user_i &
@@ -479,7 +479,7 @@ OPERATIONS
     cli_activate_resp (channel, session, req_handle, activate_resp_msg) = 
     PRE
         channel : t_channel_i &
-        channel : s_channel   &
+        channel : s_channel_connected   &
         session : t_session_i &
         req_handle : t_request_handle_i &
         activate_resp_msg : t_msg_i &
@@ -515,41 +515,28 @@ OPERATIONS
     ;
     
     // Client channel lost
-    cli_secure_channel_lost (lost_channel, new_channel) =
+    cli_secure_channel_lost (lost_channel, channel_config_idx) =
     PRE
         lost_channel : t_channel_i &
-        lost_channel : s_channel &
-        new_channel : t_channel_i
+        lost_channel : s_channel_connected &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
     THEN
-        IF new_channel : s_channel
-        THEN
-            // We have a new channel to provide (waiting for connection)
-            LET active_sessions, inactive_sessions BE
-                active_sessions = dom(a_channel |> {lost_channel}) /\ dom(a_state |>  {e_session_userActivated}) &
-                inactive_sessions = dom(a_channel |> {lost_channel}) /\ dom(a_state |>>  {e_session_userActivated})
-            IN           
-                a_state := a_state <+ (active_sessions*{e_session_scOrphaned})
-                // sessions on lost channel that were in activated state are now channel orphaned,
-                // other created sessions on channel are closed
-                <+ (inactive_sessions *{e_session_closed}) ||
-                a_channel := a_channel |>> {lost_channel} ||
-                // channel is not the channel of any session
-                a_user := inactive_sessions <<| a_user ||
-                // sessions CLOSED due to channel loss do not have user anymore
-                a_orphaned := a_orphaned <+ active_sessions*{new_channel}
-                // sessions ORPHANED of a channel are recorded
-            END
-        ELSE
-            // We do not have new channel to provide: close all session that lost channel
-            LET sessions BE
-                sessions = dom(a_channel |> {lost_channel})
-            IN
-                a_state := a_state <+ (sessions *{e_session_closed}) ||
-                a_channel := a_channel |>> {lost_channel} ||
-                // channel is not the channel of any session
-                a_user := sessions <<| a_user
-                // sessions CLOSED due to channel loss do not have user anymore
-            END
+        // We have a new channel to provide (waiting for connection)
+        LET active_sessions, inactive_sessions BE
+            active_sessions = dom(a_channel |> {lost_channel}) /\ dom(a_state |>  {e_session_userActivated}) &
+            inactive_sessions = dom(a_channel |> {lost_channel}) /\ dom(a_state |>>  {e_session_userActivated})
+        IN           
+            a_state := a_state <+ (active_sessions*{e_session_scOrphaned})
+            // sessions on lost channel that were in activated state are now channel orphaned,
+            // other created sessions on channel are closed
+            <+ (inactive_sessions *{e_session_closed}) ||
+            a_channel := a_channel |>> {lost_channel} ||
+            // channel is not the channel of any session
+            a_user := inactive_sessions <<| a_user ||
+            // sessions CLOSED due to channel loss do not have user anymore
+            a_orphaned := a_orphaned <+ active_sessions*{channel_config_idx}
+            // sessions ORPHANED of a channel are recorded
         END
     END
     ;
@@ -558,7 +545,7 @@ OPERATIONS
     srv_secure_channel_lost (channel) =
     PRE
         channel : t_channel_i &
-        channel : s_channel
+        channel : s_channel_connected
     THEN
         LET active_sessions, inactive_sessions BE
             active_sessions = dom(a_channel |> {channel}) /\ dom(a_state |>  {e_session_userActivated}) &
@@ -599,7 +586,7 @@ OPERATIONS
                     a_cli_pending_requests := a_cli_pending_requests <+ {req_handle |-> session} ||
                     a_state(session) := e_session_closing ||
                     ret := e_sc_ok ||
-                    channel :(channel : t_channel_i & channel : s_channel) ||
+                    channel :(channel : t_channel_i & channel : s_channel_connected) ||
                     session_token :(session_token : t_session_token_i & session_token : dom(a_token))
                 ELSE
                     ret := e_sc_bad_invalid_argument ||
@@ -625,7 +612,7 @@ OPERATIONS
     ret <-- srv_close_req_and_resp (channel, session, req_handle, close_req_msg, close_resp_msg) =
     PRE
         channel : t_channel_i &
-        channel : s_channel   &
+        channel : s_channel_connected   &
         session : t_session_i &
         req_handle : t_request_handle_i &
         close_req_msg : t_msg_i &
@@ -656,7 +643,7 @@ OPERATIONS
     cli_close_resp (channel, session, req_handle, close_resp_msg) =
     PRE
         channel : t_channel_i &
-        channel : s_channel   &
+        channel : s_channel_connected   &
         session : t_session_i &
         req_handle : t_request_handle_i &
         close_resp_msg : t_msg_i &
@@ -744,13 +731,13 @@ OPERATIONS
     ret, snd_err <-- srv_is_session_valid_for_service (channel, session) =
     PRE
         channel : t_channel_i &
-        channel : s_channel   &
+        channel : s_channel_connected   &
         session : t_session_i
     THEN
         IF session : s_session
         THEN
             IF a_channel(session) = channel  &
-                channel : s_channel
+                channel : s_channel_connected
             THEN
                 IF a_state(session) = e_session_userActivated 
                 THEN
@@ -775,13 +762,13 @@ OPERATIONS
     ret <-- cli_is_session_valid_for_service (channel, session) =
     PRE
         channel : t_channel_i &
-        channel : s_channel   &
+        channel : s_channel_connected   &
         session : t_session_i
     THEN
         IF session : s_session
         THEN
             IF a_channel(session) = channel  &
-                channel : s_channel &
+                channel : s_channel_connected &
                 a_state(session) = e_session_userActivated 
             THEN
                 ret := TRUE
@@ -794,10 +781,10 @@ OPERATIONS
         END
     END;
     
-    continue <-- init_iter_orphaned_t_session (lost_channel) =
+    continue <-- init_iter_orphaned_t_session (channel_config_idx) =
     PRE
-        lost_channel : t_channel_i &
-        lost_channel : t_channel
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
     THEN
         continue :: BOOL
     END

@@ -47,7 +47,7 @@ LOCAL_OPERATIONS
     srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg) =
     PRE
         channel       : t_channel_i &
-        channel       : s_channel &
+        channel       : s_channel_connected &
         session       : t_session_i &
         session       : s_session &
         user          : t_user_i &
@@ -418,7 +418,7 @@ OPERATIONS
     END
     ;
     
-    cli_secure_channel_lost (lost_channel, new_channel) =
+    cli_secure_channel_lost (lost_channel, channel_config_idx) =
     VAR
         l_continue,
         l_session,
@@ -432,10 +432,10 @@ OPERATIONS
             IF l_valid_session = TRUE
             THEN
                 l_state <-- get_session_state (l_session);
-                IF l_state = e_session_userActivated & new_channel /= c_channel_indet
+                IF l_state = e_session_userActivated & channel_config_idx /= c_channel_config_idx_indet
                 THEN
-                    // Active sessions set to orphaned and new channel associated
-                    set_session_orphaned (l_session, lost_channel, new_channel);
+                    // Active sessions set to orphaned and channel config idx associated
+                    set_session_orphaned (l_session, lost_channel, channel_config_idx);
                     set_session_state (l_session, e_session_scOrphaned)
                 ELSE
                     // Inactive sessions or all orphaned sessions (if no new channel can be associated)
@@ -468,7 +468,7 @@ OPERATIONS
                 l_state <-- get_session_state (l_session);
                 IF l_state = e_session_userActivated
                 THEN
-                    set_session_orphaned (l_session, channel, c_channel_indet);
+                    set_session_orphaned (l_session, channel, c_channel_config_idx_indet);
                     set_session_state (l_session, e_session_scOrphaned)
                 ELSE
                     set_session_state_closed (l_session)

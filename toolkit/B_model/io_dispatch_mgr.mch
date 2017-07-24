@@ -65,10 +65,25 @@ OPERATIONS
     ;
     
     // TODO: add connection id / sc parameter
-    channel_connected_event (channel_config_idx) =
+    cli_channel_connected_event (channel_config_idx, channel) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx
+        channel_config_idx : t_channel_config_idx &
+        channel : t_channel_i &
+        channel : t_channel
+    THEN
+        skip
+    END
+    ;
+    
+    srv_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
+    PRE
+        endpoint_config_idx : t_endpoint_config_idx_i &
+        endpoint_config_idx : t_endpoint_config_idx &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        channel : t_channel_i &
+        channel : t_channel
     THEN
         skip
     END

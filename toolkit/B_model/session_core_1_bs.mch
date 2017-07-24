@@ -38,7 +38,7 @@ INVARIANT
     
     a_channel : s_session +-> t_channel & 
     
-    a_orphaned : s_session +-> t_channel &
+    a_orphaned : s_session +-> t_channel_config_idx &
     
     a_cli_pending_requests : t_request_handle +-> s_session & // 1 request handle is associated to only one session
     
@@ -324,21 +324,20 @@ OPERATIONS
     ;
     
     // new_channel is channel on which connection is awaited to re-associate session
-    set_session_orphaned (session, lost_channel, new_channel) =
+    set_session_orphaned (session, lost_channel, channel_config_idx) =
     PRE
         session : t_session_i &
         session : s_session &
         lost_channel : t_channel_i &
         lost_channel : t_channel &
-        new_channel : t_channel_i
+        channel_config_idx : t_channel_config_idx_i
     THEN
-        IF new_channel /= c_channel_indet
-        THEN
+        IF channel_config_idx : t_channel_config_idx
+        THEN 
             a_channel := a_channel |>> {lost_channel} ||
-            a_orphaned(session) := new_channel
+            a_orphaned(session) := channel_config_idx
         ELSE
-            // Server case, new channel to wait for is unknown (set by client)
-            a_channel := a_channel |>> {lost_channel}
+            a_channel := a_channel |>> {lost_channel} // TODO: to be rechecked: is it ok ?
         END
     END
     ;
