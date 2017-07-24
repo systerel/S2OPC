@@ -82,7 +82,7 @@ void channel_mgr_bs__cli_open_secure_channel(
   }
 }
 
-void channel_mgr_bs__cli_set_valid_channel(
+void channel_mgr_bs__cli_set_connected_channel(
    const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
    const constants__t_channel_i channel_mgr_bs__channel,
    t_bool * const channel_mgr_bs__bres){
@@ -152,7 +152,7 @@ void channel_mgr_bs__send_channel_msg(
   }
 }
 
-void channel_mgr_bs__is_valid_channel(
+void channel_mgr_bs__is_connected_channel(
    const constants__t_channel_i channel_mgr_bs__channel,
    t_bool * const channel_mgr_bs__bres) {
   // Not null channel pointer
@@ -161,7 +161,7 @@ void channel_mgr_bs__is_valid_channel(
      channel_mgr_bs__channel == (t_entier4) unique_channel.id);
 }
 
-void channel_mgr_bs__get_valid_channel(
+void channel_mgr_bs__get_connected_channel(
    const constants__t_channel_config_idx_i channel_mgr_bs__channel_config_idx,
    constants__t_channel_i * const channel_mgr_bs__channel) {
   if(channel_mgr_bs__channel_config_idx != constants__c_channel_config_idx_indet &&

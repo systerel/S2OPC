@@ -137,7 +137,7 @@ OPERATIONS
     END
     ;
     
-    bres <-- cli_set_valid_channel (config_idx, channel) =
+    bres <-- cli_set_connected_channel (config_idx, channel) =
     PRE
         channel : t_channel_i &
         channel : t_channel &
@@ -157,7 +157,7 @@ OPERATIONS
     END
     ;
     
-    bres <-- is_valid_channel (channel) =
+    bres <-- is_connected_channel (channel) =
     PRE
         channel : t_channel_i
     THEN
@@ -165,7 +165,7 @@ OPERATIONS
     END
     ;
     
-    channel <-- get_valid_channel (config_idx) = /* security configuration concerns must be added*/
+    channel <-- get_connected_channel (config_idx) = /* security configuration concerns must be added*/
     PRE
         config_idx : t_channel_config_idx_i &
         config_idx : t_channel_config_idx

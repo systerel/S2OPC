@@ -269,7 +269,7 @@ OPERATIONS
         l_valid_req_handle,
         l_session_token
     IN
-        l_valid_new_channel <-- is_valid_channel (channel);
+        l_valid_new_channel <-- is_connected_channel (channel);
         IF l_valid_new_channel = TRUE
         THEN
             l_continue <-- init_iter_orphaned_t_session (channel_config_idx);
@@ -378,7 +378,7 @@ OPERATIONS
         l_valid_msg,
         l_msg_type,
         l_payload,
-        l_valid_channel,
+        l_connected_channel,
         l_is_client,
         l_is_req,
         l_is_valid_req,
@@ -390,9 +390,9 @@ OPERATIONS
         l_to_send,
         l_ret
     IN
-        l_valid_channel <-- is_valid_channel (channel);
+        l_connected_channel <-- is_connected_channel (channel);
         l_valid_msg <-- is_valid_msg_in (msg);
-        IF l_valid_channel = TRUE &
+        IF l_connected_channel = TRUE &
             l_valid_msg = TRUE
         THEN
             l_msg_type <-- get_msg_in_type (msg);
@@ -544,7 +544,7 @@ OPERATIONS
         l_session_to_create,
         l_bres
     IN
-        l_bres <-- cli_set_valid_channel (channel_config_idx, channel);
+        l_bres <-- cli_set_connected_channel (channel_config_idx, channel);
         IF l_bres = TRUE
         THEN
             // Re-associate orphaned sessions waiting for sc (if there are some)
@@ -573,13 +573,13 @@ OPERATIONS
         l_channel,
         l_channel_connected,
         l_valid_session,
-        l_valid_channel,
+        l_connected_channel,
         l_bret
     IN
         session := c_session_indet;
-        l_channel <-- get_valid_channel (channel_config_idx);
-        l_valid_channel <-- is_valid_channel (l_channel);
-        IF l_valid_channel = FALSE
+        l_channel <-- get_connected_channel (channel_config_idx);
+        l_connected_channel <-- is_connected_channel (l_channel);
+        IF l_connected_channel = FALSE
         THEN
             l_bret <-- cli_open_secure_channel (channel_config_idx);
             l_channel_connected := FALSE
@@ -669,29 +669,29 @@ OPERATIONS
 
     secure_channel_lost (channel) =
     VAR
-        l_valid_channel,
+        l_connected_channel,
         l_valid_new_channel,
         l_is_client,
         l_channel_config_idx,
         l_new_channel,
         l_bres
     IN
-        l_valid_channel <-- is_valid_channel (channel);
-        IF l_valid_channel = TRUE
+        l_connected_channel <-- is_connected_channel (channel);
+        IF l_connected_channel = TRUE
         THEN
             l_is_client <-- is_client_channel (channel);
             IF l_is_client = TRUE
             THEN
                 l_channel_config_idx <-- get_channel_info (channel);
                 cli_secure_channel_lost (channel, l_channel_config_idx);
-                l_new_channel <-- get_valid_channel (l_channel_config_idx);
+                l_new_channel <-- get_connected_channel (l_channel_config_idx);
                 IF l_new_channel = c_channel_indet
                 THEN
                     l_bres <-- cli_open_secure_channel (l_channel_config_idx)
                     // async operation => cannot use channel until connection is effective ?
                 END;
                	
-                l_valid_new_channel <-- is_valid_channel (l_new_channel);
+                l_valid_new_channel <-- is_connected_channel (l_new_channel);
                 
                 IF l_valid_new_channel = TRUE
                 THEN

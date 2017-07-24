@@ -110,7 +110,7 @@ OPERATIONS
     VAR
         l_valid_session,
         l_channel,
-        l_valid_channel,
+        l_connected_channel,
         l_session_token,
         l_ret,
         l_bres
@@ -122,8 +122,8 @@ OPERATIONS
         IF l_valid_session = TRUE
         THEN
             l_channel <-- get_session_channel (session);
-            l_valid_channel <-- is_valid_channel (l_channel);
-            IF l_valid_channel = TRUE
+            l_connected_channel <-- is_connected_channel (l_channel);
+            IF l_connected_channel = TRUE
             THEN
                 l_bres <-- cli_is_session_valid_for_service (l_channel, session);
                 IF l_bres = TRUE
