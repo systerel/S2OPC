@@ -19,7 +19,7 @@ MACHINE
     msg_read_response_bs
 
 SEES
-    constants, 
+    constants,
     message_out_bs
 
 DEFINITIONS
@@ -27,7 +27,7 @@ DEFINITIONS
         response_StatusCode : t_StatusCode_i &
         data_Value_Value : t_ReadValue +-> t_Variant &
         data_Value_StatusCode : t_ReadValue +-> t_StatusCode
-        
+
         /*data_Value_SourceTimestamp : t_ReadValue +-> t_Timestamp &
         data_Value_ServerTimestamp : t_ReadValue +-> t_Timestamp*/
     )
@@ -41,8 +41,8 @@ INVARIANT
     d_inv_response
 
 INITIALISATION
-    data_Value_Value      := {} ||
-    data_Value_StatusCode := {} ||
+    data_Value_Value      :: {{}} ||
+    data_Value_StatusCode :: {{}} ||
     response_StatusCode := c_StatusCode_indet
 
     /*data_Value_SourceTimestamp, data_Value_ServerTimestamp := {}, {} ||*/
