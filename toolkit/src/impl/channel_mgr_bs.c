@@ -20,6 +20,7 @@
   ------------------------*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #include "sopc_types.h"
@@ -38,7 +39,17 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_event_dispatcher_manager.h"
 
-static Internal_Channel_Or_Endpoint* unique_channel_or_endpoint = NULL;
+static struct {
+  t_bool isClient;
+  uint32_t endpointIdx; // if isClient == false
+  uint32_t configIdx;
+  uint32_t id; // non indet => connected
+} unique_channel = {
+  .isClient = false,
+  .endpointIdx = constants__c_endpoint_config_idx_indet,
+  .configIdx = constants__c_channel_config_idx_indet,
+  .id = constants__c_channel_indet
+};
 
 /*------------------------
    INITIALISATION Clause
@@ -49,29 +60,62 @@ void channel_mgr_bs__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void channel_mgr_bs__open_secure_channel(
-   const constants__t_channel_config_idx_i channel_mgr_bs__channel_config_idx,
-   constants__t_channel_i * const channel_mgr_bs__nchannel,
-   t_bool * const channel_mgr_bs__is_connected) {
-  /* TODO: not synchronous anymore ! 
-     parameters needed : SC configuration index => same level as endpoint
-   */
-   if(NULL == unique_channel_or_endpoint){
-      SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                           SC_CONNECT,
-                                           channel_mgr_bs__channel_config_idx,
-                                           (void*) SOPC_ToolkitConfig_GetSecureChannelConfig(channel_mgr_bs__channel_config_idx),
-                                           0,
-                                           "Services request connection to a SC !");
-      // TODO: async response management
-      unique_channel_or_endpoint = malloc(sizeof(Internal_Channel_Or_Endpoint));
-      unique_channel_or_endpoint->isChannel = (!FALSE);
-      unique_channel_or_endpoint->id = channel_mgr_bs__channel_config_idx; // TMP: use SC config index as id
-     
-      *channel_mgr_bs__nchannel = unique_channel_or_endpoint;
-      *channel_mgr_bs__is_connected = FALSE;
-   }
+void channel_mgr_bs__cli_open_secure_channel(
+   const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
+   t_bool * const channel_mgr_bs__bres){ 
+  SOPC_SecureChannel_Config* config = NULL;
+  *channel_mgr_bs__bres = false;
+  if(channel_mgr_bs__config_idx != constants__c_channel_config_idx_indet){
+    config = SOPC_ToolkitConfig_GetSecureChannelConfig(channel_mgr_bs__config_idx);
+    if(NULL != config){
+      if(STATUS_OK == SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
+                                                           SC_CONNECT,
+                                                           channel_mgr_bs__config_idx,
+                                                           (void*) config,
+                                                           0,
+                                                           "Services request connection to a SC !")){
+        unique_channel.isClient = true;
+        unique_channel.configIdx = channel_mgr_bs__config_idx;    
+        *channel_mgr_bs__bres = true;
+      }
+    }
+  }
 }
+
+void channel_mgr_bs__cli_set_valid_channel(
+   const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
+   const constants__t_channel_i channel_mgr_bs__channel,
+   t_bool * const channel_mgr_bs__bres){
+  *channel_mgr_bs__bres = false;
+  if(channel_mgr_bs__config_idx != constants__c_channel_config_idx_indet &&
+     unique_channel.isClient != false &&
+     unique_channel.configIdx == (uint32_t) channel_mgr_bs__config_idx){
+    unique_channel.id = channel_mgr_bs__channel;
+    *channel_mgr_bs__bres = true;
+  }
+}
+
+void channel_mgr_bs__srv_new_secure_channel(
+   const constants__t_endpoint_config_idx_i channel_mgr_bs__endpoint_config_idx,
+   const constants__t_channel_config_idx_i channel_mgr_bs__channel_config_idx,
+   const constants__t_channel_i channel_mgr_bs__channel,
+   t_bool * const channel_mgr_bs__bres){
+  *channel_mgr_bs__bres = false;
+  if(channel_mgr_bs__endpoint_config_idx != constants__c_endpoint_config_idx_indet &&
+     channel_mgr_bs__channel_config_idx != constants__c_channel_config_idx_indet &&
+     channel_mgr_bs__channel != constants__c_channel_indet &&
+     unique_channel.endpointIdx == constants__c_endpoint_config_idx_indet &&
+     unique_channel.id == constants__c_channel_indet &&
+     unique_channel.configIdx == constants__c_channel_config_idx_indet &&
+     unique_channel.isClient == false){
+    unique_channel.configIdx = (uint32_t) channel_mgr_bs__channel_config_idx;
+    unique_channel.id = channel_mgr_bs__channel;
+    unique_channel.endpointIdx = channel_mgr_bs__endpoint_config_idx;
+    *channel_mgr_bs__bres = true;
+  }
+
+}
+
 
 void channel_mgr_bs__close_secure_channel(
    const constants__t_channel_i channel_mgr_bs__channel) {
@@ -83,31 +127,8 @@ void channel_mgr_bs__close_secure_channel(
 void channel_mgr_bs__channel_lost(
    const constants__t_channel_i channel_mgr_bs__channel) {
   printf("channel_mgr_bs__channel_lost\n");
-  free(unique_channel_or_endpoint);
-  unique_channel_or_endpoint = NULL;
-}
-
-void channel_mgr_bs__receive_sc_msg(
-   const constants__t_channel_i channel_mgr_bs__channel,
-   const constants__t_msg_i channel_mgr_bs__msg) {
-  printf("channel_mgr_bs__receive_sc_msg\n");
-  exit(1);
-   ;
-}
-
-void channel_mgr_bs__receive_hello_msg(
-   const constants__t_msg_i channel_mgr_bs__msg) {
-  printf("channel_mgr_bs__receive_hello_msg\n");
-  exit(1);
-   ;
-}
-
-void channel_mgr_bs__receive_channel_msg(
-   const constants__t_channel_i channel_mgr_bs__channel,
-   const constants__t_msg_i channel_mgr_bs__msg) {
-  printf("channel_mgr_bs__receive_channel_msg\n");
-  exit(1);
-   ;
+  unique_channel.id = constants__c_channel_indet;
+  unique_channel.configIdx = constants__c_channel_config_idx_indet;
 }
 
 void channel_mgr_bs__send_channel_msg(
@@ -116,78 +137,75 @@ void channel_mgr_bs__send_channel_msg(
    constants__t_StatusCode_i * const channel_mgr_bs__ret) {
 
   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) channel_mgr_bs__msg;
-  Internal_Channel_Or_Endpoint* chOrEnd = (Internal_Channel_Or_Endpoint*) channel_mgr_bs__channel;
-  
-  // Verif on channel state ?
-  if(msg->isRequest == (!FALSE)){
+
+  if(channel_mgr_bs__channel == (t_entier4) unique_channel.id){
     SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
                                          SC_SERVICE_SND_MSG,
-                                         chOrEnd->id,
+                                         channel_mgr_bs__channel,
                                          msg,
-                                         chOrEnd->id, // TMP: shall be the sc config index !
-                                         "Services sends a message on (client) channel !");
-  }else if(msg->isRequest == FALSE){
-    if(chOrEnd->isChannel == FALSE){
-      msg->optContext = (void*) chOrEnd->context;
-    }
-    SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                         EP_SC_SERVICE_SND_MSG,
-                                         chOrEnd->id, // Shall be endpoint config index
-                                         msg,
-                                         0,
-                                         "Services sends a message on (server) channel !");
+                                         unique_channel.configIdx,
+                                         "Services mgr sends a message on channel !");
+    // TODO: no status to retrieve on asyn operation !
+    *channel_mgr_bs__ret = constants__e_sc_ok; 
   }else{
-    printf("channel_mgr_bs__send_channel_msg\n");
-    exit(1);
+    *channel_mgr_bs__ret = constants__e_sc_nok;
   }
-  // TODO: no status to retrieve on asyn operation !
-  *channel_mgr_bs__ret = constants__e_sc_ok; 
 }
 
 void channel_mgr_bs__is_valid_channel(
    const constants__t_channel_i channel_mgr_bs__channel,
    t_bool * const channel_mgr_bs__bres) {
   // Not null channel pointer
-  *channel_mgr_bs__bres = channel_mgr_bs__channel != constants__c_channel_indet;
+  *channel_mgr_bs__bres = 
+    (channel_mgr_bs__channel != constants__c_channel_indet &&
+     channel_mgr_bs__channel == (t_entier4) unique_channel.id);
 }
 
 void channel_mgr_bs__get_valid_channel(
    const constants__t_channel_config_idx_i channel_mgr_bs__channel_config_idx,
    constants__t_channel_i * const channel_mgr_bs__channel) {
-  if(NULL != unique_channel_or_endpoint && 
-     channel_mgr_bs__channel_config_idx == (t_entier4) unique_channel_or_endpoint->id){
-    *channel_mgr_bs__channel = unique_channel_or_endpoint;
+  if(channel_mgr_bs__channel_config_idx != constants__c_channel_config_idx_indet &&
+     channel_mgr_bs__channel_config_idx == (t_entier4) unique_channel.configIdx &&
+     unique_channel.id != constants__c_channel_indet){
+    *channel_mgr_bs__channel = unique_channel.id;
   }else{
     *channel_mgr_bs__channel = constants__c_channel_indet;
   }
-  // Always fail: no channel management
 }
 
 void channel_mgr_bs__get_channel_info(
    const constants__t_channel_i channel_mgr_bs__channel,
    constants__t_channel_config_idx_i * const channel_mgr_bs__channel_config_idx) {
-  // No endpoint management
-  *channel_mgr_bs__channel_config_idx = constants__c_channel_config_idx_indet;
+  if(channel_mgr_bs__channel != constants__c_channel_indet &&
+     channel_mgr_bs__channel == (t_entier4) unique_channel.id){
+    *channel_mgr_bs__channel_config_idx = unique_channel.configIdx;
+  }else{
+    *channel_mgr_bs__channel_config_idx = constants__c_channel_config_idx_indet;
+  }
 }
 
 void channel_mgr_bs__is_client_channel(
    const constants__t_channel_i channel_mgr_bs__channel,
    t_bool * const channel_mgr_bs__bres) {
-  Internal_Channel_Or_Endpoint* channel_or_endpoint = (Internal_Channel_Or_Endpoint*) channel_mgr_bs__channel;
-  *channel_mgr_bs__bres = channel_or_endpoint->isChannel;
+  if(channel_mgr_bs__channel != constants__c_channel_indet &&
+     channel_mgr_bs__channel == (t_entier4) unique_channel.id){
+    *channel_mgr_bs__bres = unique_channel.isClient;
+  }else{
+    assert(false);
+  }
 }
 
 void channel_mgr_bs__close_all_channel(void){
-  if(unique_channel_or_endpoint != NULL){
-    if((!FALSE) == unique_channel_or_endpoint->isChannel){
+  if(unique_channel.id != constants__c_channel_indet){
+    if((!false) == unique_channel.isClient){
       SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
                                            SC_DISCONNECT,
-                                           unique_channel_or_endpoint->id, // Shall be endpoint config index
+                                           unique_channel.id, // Shall be endpoint config index
                                            NULL,
                                            0,
                                            "Close all channel !");
-      free(unique_channel_or_endpoint);
-      unique_channel_or_endpoint = NULL;
+      unique_channel.id = constants__c_channel_indet;
+      unique_channel.configIdx = constants__c_channel_config_idx_indet;
     }
   }
 }

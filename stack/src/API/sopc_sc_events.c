@@ -188,17 +188,17 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
         scConConfig->config->crt_cli = clientCertificate;
         scConConfig->config->msgSecurityMode = securityMode;
         scConConfig->config->reqSecuPolicyUri = SOPC_String_GetRawCString(securityPolicy);
-        scConConfig->connectionId = secureChannelId; // For now we can just use scId but in the future it is better to be a shared index with Sockets !
-        scConConfig->configIdx = 0; // TODO: add to toolkit config with index ?
+        scConConfig->connectionId = *epConfigIdx; // TMP: For now we just use the EP config index, but we shall provide the SC connection id corresponding to socket id ...
+        scConConfig->configIdx = *epConfigIdx; // TODO: add to toolkit config with index ? TMP: use ep config idx
 
         assert(SLinkedList_FindFromId(secureChConConfigList, scConConfig->connectionId) == NULL); // must be unique id !
         SLinkedList_Prepend(secureChConConfigList, scConConfig->connectionId, (void*) scConConfig);
-        // TODO: add to toolkit config ?
+        // TODO: add to toolkit config  !
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
                                              EP_SC_CONNECTED,
                                              *epConfigIdx,
                                              (void*) scConConfig,
-                                             secureChannelId,
+                                             scConConfig->connectionId,
                                              "Secure channel connected on Endpoint");
         break;
     case SOPC_EndpointEvent_SecureChannelClosed:
@@ -244,7 +244,7 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
         scConConfig->config->crt_cli = clientCon->clientCertificate;
         scConConfig->config->msgSecurityMode = clientCon->securityMode;
         scConConfig->config->reqSecuPolicyUri = SOPC_String_GetRawCString(&clientCon->securityPolicy);
-        scConConfig->connectionId = clientCon->instance->secureChannelId; // For now we can just use scId but in the future it is better to be a shared index with Sockets !
+        scConConfig->connectionId = *configIdx; // For now we can just use config idx but in the future it is better to be a shared index with Sockets !
         scConConfig->configIdx = *configIdx; // TODO: add to toolkit config with index ?
 
         // CAUTION: due to API adaptation we do not use same idx when toolkit is client and server which
@@ -441,51 +441,49 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         // id ==  connection id
         // params = byte buffer (node Id + OPC UA message)
         // auxParam == secure channel config id ? => tmp since connection defined correctly by stack
-        tMsg = params;
-        ch = (SOPC_Channel) SLinkedList_FindFromId(secureChInstList, auxParam);
-        assert(ch != NULL && tMsg != NULL);
-        idContext = malloc(sizeof(uint32_t));
-        assert(NULL != idContext);
-        *idContext = auxParam;
-        SOPC_Channel_BeginInvokeService(ch, NULL,
-                                        tMsg->msg,
-                                        tMsg->encType,
-                                        tMsg->respEncType,
-                                        TMP_SecureChannelResponse_CB,
-                                        (void*) idContext //request context ? => type params ?
-                                        );
-        if(NULL != tMsg->encType){
-            SOPC_Encodeable_Delete(tMsg->encType, &tMsg->msg);
-            free(tMsg);
-        }
-        break;
-
-    case EP_SC_SERVICE_SND_MSG:
-        //printf("EP_SC_SERVICE_SND_MSG\n");
-        // id ==  endpoint Id id
-        // params => message + context ???
-        // auxParam => ???
-        tMsg = params;
-        ep = (SOPC_Endpoint) SLinkedList_FindFromId(endpointInstList, id);
-        assert(ep != NULL && tMsg != NULL);
-        SOPC_Endpoint_SendResponse(ep,
-                                   tMsg->encType,
-                                   tMsg->msg,
-                                   (SOPC_RequestContext**) &tMsg->optContext);
-        if(NULL != tMsg->encType){
-            if(&OpcUa_ReadResponse_EncodeableType == tMsg->encType){
-                /* Current implementation share the variants of the address space in the response,
-                         avoid deallocation of those variants */
-                OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) tMsg->msg;
-                if(NULL != readMsg){
-                    free(readMsg->Results);
-                    readMsg->Results = NULL;
-                    readMsg->NoOfResults = 0;
+        tMsg = (SOPC_Toolkit_Msg*) params;
+        assert(NULL != tMsg);
+        if(tMsg->isRequest == FALSE){
+            // Server response
+            ep = (SOPC_Endpoint) SLinkedList_FindFromId(endpointInstList, id);
+            assert(ep != NULL && tMsg != NULL);
+            SOPC_Endpoint_SendResponse(ep,
+                    tMsg->encType,
+                    tMsg->msg,
+                    (SOPC_RequestContext**) &tMsg->optContext);
+            if(NULL != tMsg->encType){
+                if(&OpcUa_ReadResponse_EncodeableType == tMsg->encType){
+                    /* Current implementation share the variants of the address space in the response,
+                                     avoid deallocation of those variants */
+                    OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) tMsg->msg;
+                    if(NULL != readMsg){
+                        free(readMsg->Results);
+                        readMsg->Results = NULL;
+                        readMsg->NoOfResults = 0;
+                    }
                 }
+                // TODO: status returned ?
+                SOPC_Encodeable_Delete(tMsg->encType, &tMsg->msg);
+                free(tMsg);
             }
-            // TODO: status returned ?
-            SOPC_Encodeable_Delete(tMsg->encType, &tMsg->msg);
-            free(tMsg);
+        }else{
+            // Client request
+            ch = (SOPC_Channel) SLinkedList_FindFromId(secureChInstList, auxParam);
+            assert(ch != NULL && tMsg != NULL);
+            idContext = malloc(sizeof(uint32_t));
+            assert(NULL != idContext);
+            *idContext = auxParam;
+            SOPC_Channel_BeginInvokeService(ch, NULL,
+                    tMsg->msg,
+                    tMsg->encType,
+                    tMsg->respEncType,
+                    TMP_SecureChannelResponse_CB,
+                    (void*) idContext //request context ? => type params ?
+            );
+            if(NULL != tMsg->encType){
+                SOPC_Encodeable_Delete(tMsg->encType, &tMsg->msg);
+                free(tMsg);
+            }
         }
         break;
 

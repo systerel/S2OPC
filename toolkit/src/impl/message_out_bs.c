@@ -101,9 +101,10 @@ void message_out_bs__alloc_resp_msg(
                                  message_out_bs__nmsg);
   if(*message_out_bs__nmsg != constants__c_msg_indet){
     req_msg = (SOPC_Toolkit_Msg*) message_out_bs__req_msg_ctx;
-    resp_msg = (SOPC_Toolkit_Msg*) message_out_bs__nmsg;
+    resp_msg = (SOPC_Toolkit_Msg*) *message_out_bs__nmsg;
     // Copy request context into response
     resp_msg->optContext = req_msg->optContext;
+    
   }
 }
 

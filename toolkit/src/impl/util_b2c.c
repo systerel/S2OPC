@@ -69,12 +69,6 @@ void util_message__get_encodeable_type(const constants__t_msg_type message__msg_
     *reqEncType = &OpcUa_WriteRequest_EncodeableType;
     *respEncType = &OpcUa_WriteResponse_EncodeableType;
     break;
-  case constants__e_msg_tcpua_hello:
-  case constants__e_msg_tcpua_ack:
-  case constants__e_msg_sc_open_channel_req:
-  case constants__e_msg_sc_open_channel_resp:
-  case constants__e_msg_sc_close_channel_req:
-  case constants__e_msg_sc_close_channel_resp:
   case constants__e_msg_public_service_req:
   case constants__e_msg_public_service_resp:
   default:

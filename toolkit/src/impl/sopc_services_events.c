@@ -36,16 +36,17 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
 {
   //printf("Services event dispatcher: event='%d', id='%d', params='%p', auxParam='%d'\n", scEvent, id, params, auxParam);
   SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
-  Internal_Channel_Or_Endpoint* chOrEnd = NULL;
-  SOPC_Toolkit_Msg* msg = NULL;
   switch(event){
   /* SC to Services events */
   case EP_SC_CONNECTED:
     //printf("EP_SC_CONNECTED\n");
     // id ==  endpoint configuration index
     // params = SOPC_SecureChannel_Config*
-    // auxParam == secure channel Id
+    // auxParam == connection Id
     // => B model entry point to add
+    io_dispatch_mgr__srv_channel_connected_event(id, 
+                                                 ((SOPC_SecureChannel_ConnectedConfig*) params)->configIdx, 
+                                                 auxParam);
     break;
   case EP_CLOSED:
     //printf("EP_CLOSED\n");
@@ -66,7 +67,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // params = SC config (for secure channel Id only ?) ? => TMP: NULL for now
     // auxParam == secure channel configuration index
     // => B model entry point to add
-    io_dispatch_mgr__channel_connected_event(auxParam);
+    io_dispatch_mgr__cli_channel_connected_event(auxParam, id);
     break;
   case SC_CONNECTION_TIMEOUT:
     //printf("SC_CONNECTION_TIMEOUT\n");
@@ -79,13 +80,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // auxParam = status
     // => B model entry point to add
     // secure_channel_lost call !
-    if(NULL == tmpEndpointInstance){
-      channel_mgr_bs__get_valid_channel((constants__t_channel_config_idx_i) id,
-                                        (constants__t_channel_i*) &chOrEnd);
-    }else{
-      chOrEnd = tmpEndpointInstance;
-    }
-    io_dispatch_mgr__secure_channel_lost((constants__t_channel_i) chOrEnd);
+    io_dispatch_mgr__secure_channel_lost((constants__t_channel_i) id);
     break;
   case SC_SERVICE_RCV_MSG:
     //printf("SC_SERVICE_RCV_MSG\n");
@@ -94,22 +89,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // auxParam == context
     // => B model entry point to add
     assert(NULL != params);
-    msg = (SOPC_Toolkit_Msg*) params;
-    if(msg->isRequest == FALSE){
-      channel_mgr_bs__get_valid_channel((constants__t_channel_config_idx_i) id,
-                                        (constants__t_channel_i*) &chOrEnd);
-    }else{
-      if(NULL == tmpEndpointInstance){
-        tmpEndpointInstance = calloc(1, sizeof(Internal_Channel_Or_Endpoint));
-        tmpEndpointInstance->id = id;
-        tmpEndpointInstance->isChannel = FALSE;
-      }
-      chOrEnd = tmpEndpointInstance;
-    }
-    if(chOrEnd->isChannel == FALSE){
-      chOrEnd->context = (struct SOPC_RequestContext*) msg->optContext;
-    }
-    io_dispatch_mgr__receive_msg((constants__t_channel_i) chOrEnd,
+    io_dispatch_mgr__receive_msg((constants__t_channel_i) id,
                                  (constants__t_msg_i) params); // SOPC_Toolkit_Msg
     // params is freed by services manager
     break;
