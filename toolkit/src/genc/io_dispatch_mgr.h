@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 25/07/2017 17:22:44
+ Date                 : 25/07/2017 17:24:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -62,6 +62,7 @@ extern void io_dispatch_mgr__local_create_session(
    const constants__t_session_i io_dispatch_mgr__session,
    const constants__t_channel_i io_dispatch_mgr__channel);
 extern void io_dispatch_mgr__local_sc_activate_orphaned_sessions(
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
    const constants__t_channel_i io_dispatch_mgr__channel);
 extern void io_dispatch_mgr__treat_read_request(
    const constants__t_msg_i io_dispatch_mgr__p_request_msg,
@@ -82,8 +83,9 @@ extern void io_dispatch_mgr__activate_session(
    const constants__t_session_i io_dispatch_mgr__session,
    const constants__t_user_i io_dispatch_mgr__user,
    constants__t_StatusCode_i * const io_dispatch_mgr__ret);
-extern void io_dispatch_mgr__channel_connected_event(
-   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx);
+extern void io_dispatch_mgr__cli_channel_connected_event(
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_channel_i io_dispatch_mgr__channel);
 extern void io_dispatch_mgr__close_all_active_connections(void);
 extern void io_dispatch_mgr__close_session(
    const constants__t_session_i io_dispatch_mgr__session,
@@ -98,5 +100,9 @@ extern void io_dispatch_mgr__send_service_request_msg(
    const constants__t_session_i io_dispatch_mgr__session,
    const constants__t_msg_i io_dispatch_mgr__req_msg,
    constants__t_StatusCode_i * const io_dispatch_mgr__ret);
+extern void io_dispatch_mgr__srv_channel_connected_event(
+   const constants__t_endpoint_config_idx_i io_dispatch_mgr__endpoint_config_idx,
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
+   const constants__t_channel_i io_dispatch_mgr__channel);
 
 #endif

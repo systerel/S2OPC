@@ -2,7 +2,7 @@
 
  File Name            : session_core_1_bs.h
 
- Date                 : 25/07/2017 17:22:49
+ Date                 : 25/07/2017 17:24:12
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -92,7 +92,7 @@ extern void session_core_1_bs__set_session_channel(
 extern void session_core_1_bs__set_session_orphaned(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_channel_i session_core_1_bs__lost_channel,
-   const constants__t_channel_i session_core_1_bs__new_channel);
+   const constants__t_channel_config_idx_i session_core_1_bs__channel_config_idx);
 extern void session_core_1_bs__set_session_state(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_sessionState session_core_1_bs__state);

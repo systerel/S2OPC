@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 25/07/2017 17:22:46
+ Date                 : 25/07/2017 17:24:09
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -49,19 +49,19 @@ void session_core__cli_create_req(
    const constants__t_msg_i session_core__create_req_msg,
    constants__t_StatusCode_i * const session_core__ret) {
    {
-      t_bool session_core__l_valid_channel;
+      t_bool session_core__l_connected_channel;
       t_bool session_core__l_valid_session;
       constants__t_sessionState session_core__l_state;
       t_bool session_core__l_valid_handle;
       constants__t_StatusCode_i session_core__l_ret;
       
       session_core__l_ret = constants__e_sc_bad_invalid_argument;
-      channel_mgr_bs__is_valid_channel(session_core__channel,
-         &session_core__l_valid_channel);
+      channel_mgr_bs__is_connected_channel(session_core__channel,
+         &session_core__l_connected_channel);
       session_core_1_bs__is_valid_session(session_core__session,
          &session_core__l_valid_session);
       if ((session_core__l_valid_session == true) &&
-         (session_core__l_valid_channel == true)) {
+         (session_core__l_connected_channel == true)) {
          session_core_1_bs__get_session_state(session_core__session,
             &session_core__l_state);
          if (session_core__l_state == constants__e_session_init) {
@@ -93,19 +93,19 @@ void session_core__srv_create_req_and_resp(
    const constants__t_msg_i session_core__create_resp_msg,
    constants__t_session_i * const session_core__nsession) {
    {
-      t_bool session_core__l_valid_channel;
+      t_bool session_core__l_connected_channel;
       constants__t_session_i session_core__l_nsession;
       t_bool session_core__l_valid_session;
       constants__t_session_token_i session_core__l_nsession_token;
       t_bool session_core__l_valid_session_token;
       
       session_core_1_bs__init_new_session(&session_core__l_nsession);
-      channel_mgr_bs__is_valid_channel(session_core__channel,
-         &session_core__l_valid_channel);
+      channel_mgr_bs__is_connected_channel(session_core__channel,
+         &session_core__l_connected_channel);
       session_core_1_bs__is_valid_session(session_core__l_nsession,
          &session_core__l_valid_session);
       if ((session_core__l_valid_session == true) &&
-         (session_core__l_valid_channel == true)) {
+         (session_core__l_connected_channel == true)) {
          session_core_1_bs__create_session(session_core__l_nsession,
             session_core__channel,
             constants__e_session_created);
@@ -141,7 +141,7 @@ void session_core__cli_create_resp(
       t_bool session_core__l_has_session_token;
       constants__t_sessionState session_core__l_state;
       constants__t_channel_i session_core__l_channel;
-      t_bool session_core__l_valid_channel;
+      t_bool session_core__l_connected_channel;
       constants__t_StatusCode_i session_core__l_status;
       
       session_core_1_bs__is_valid_session(session_core__session,
@@ -151,14 +151,14 @@ void session_core__cli_create_resp(
             &session_core__l_state);
          session_core_1_bs__get_session_channel(session_core__session,
             &session_core__l_channel);
-         channel_mgr_bs__is_valid_channel(session_core__channel,
-            &session_core__l_valid_channel);
+         channel_mgr_bs__is_connected_channel(session_core__channel,
+            &session_core__l_connected_channel);
          session_core_1_bs__is_fresh_session_token(session_core__session_token,
             &session_core__l_fresh_session_token);
          session_core_1_bs__has_session_token(session_core__session,
             &session_core__l_has_session_token);
          if (((((session_core__l_state == constants__e_session_creating) &&
-            (session_core__l_valid_channel == true)) &&
+            (session_core__l_connected_channel == true)) &&
             (session_core__l_channel == session_core__channel)) &&
             (session_core__l_fresh_session_token == true)) &&
             (session_core__l_has_session_token == false)) {
@@ -200,7 +200,7 @@ void session_core__cli_user_activate_req(
       t_bool session_core__l_valid_session;
       constants__t_sessionState session_core__l_state;
       constants__t_channel_i session_core__l_channel;
-      t_bool session_core__l_valid_channel;
+      t_bool session_core__l_connected_channel;
       constants__t_StatusCode_i session_core__l_ret;
       
       session_core__l_channel = constants__c_channel_indet;
@@ -214,13 +214,13 @@ void session_core__cli_user_activate_req(
             (session_core__l_state == constants__e_session_userActivated)) {
             session_core_1_bs__get_session_channel(session_core__session,
                &session_core__l_channel);
-            channel_mgr_bs__is_valid_channel(session_core__l_channel,
-               &session_core__l_valid_channel);
+            channel_mgr_bs__is_connected_channel(session_core__l_channel,
+               &session_core__l_connected_channel);
             session_core_1_bs__get_token_from_session(session_core__session,
                &session_core__l_session_token);
             session_core_1_bs__is_valid_session_token(session_core__l_session_token,
                &session_core__l_valid_session_token);
-            if ((session_core__l_valid_channel == true) &&
+            if ((session_core__l_connected_channel == true) &&
                (session_core__l_valid_session_token == true)) {
                session_core_1_bs__cli_add_pending_request(session_core__session,
                   session_core__req_handle,
@@ -265,7 +265,7 @@ void session_core__cli_sc_activate_req(
    constants__t_StatusCode_i * const session_core__ret,
    constants__t_session_token_i * const session_core__session_token) {
    {
-      t_bool session_core__l_valid_channel;
+      t_bool session_core__l_connected_channel;
       t_bool session_core__l_valid_handle;
       constants__t_session_token_i session_core__l_session_token;
       t_bool session_core__l_valid_session_token;
@@ -277,11 +277,11 @@ void session_core__cli_sc_activate_req(
       
       session_core_1_bs__is_valid_session(session_core__session,
          &session_core__l_valid_session);
-      channel_mgr_bs__is_valid_channel(session_core__channel,
-         &session_core__l_valid_channel);
+      channel_mgr_bs__is_connected_channel(session_core__channel,
+         &session_core__l_connected_channel);
       session_core__l_session_token = constants__c_session_token_indet;
       if ((session_core__l_valid_session == true) &&
-         (session_core__l_valid_channel == true)) {
+         (session_core__l_connected_channel == true)) {
          session_core_1_bs__get_session_state(session_core__session,
             &session_core__l_state);
          if ((session_core__l_state == constants__e_session_scOrphaned) ||
@@ -447,19 +447,19 @@ void session_core__cli_activate_resp(
    const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__activate_resp_msg) {
    {
-      t_bool session_core__l_valid_channel;
+      t_bool session_core__l_connected_channel;
       t_bool session_core__l_valid_session;
       t_bool session_core__l_valid_handle;
       constants__t_sessionState session_core__l_state;
       constants__t_channel_i session_core__l_channel;
       constants__t_StatusCode_i session_core__l_status;
       
-      channel_mgr_bs__is_valid_channel(session_core__channel,
-         &session_core__l_valid_channel);
+      channel_mgr_bs__is_connected_channel(session_core__channel,
+         &session_core__l_connected_channel);
       session_core_1_bs__is_valid_session(session_core__session,
          &session_core__l_valid_session);
       if ((session_core__l_valid_session == true) &&
-         (session_core__l_valid_channel == true)) {
+         (session_core__l_connected_channel == true)) {
          session_core_1_bs__get_session_state(session_core__session,
             &session_core__l_state);
          session_core_1_bs__get_session_channel(session_core__session,
@@ -486,7 +486,7 @@ void session_core__cli_activate_resp(
 
 void session_core__cli_secure_channel_lost(
    const constants__t_channel_i session_core__lost_channel,
-   const constants__t_channel_i session_core__new_channel) {
+   const constants__t_channel_config_idx_i session_core__channel_config_idx) {
    {
       t_bool session_core__l_continue;
       constants__t_session_i session_core__l_session;
@@ -504,10 +504,10 @@ void session_core__cli_secure_channel_lost(
             session_core_1_bs__get_session_state(session_core__l_session,
                &session_core__l_state);
             if ((session_core__l_state == constants__e_session_userActivated) &&
-               (session_core__new_channel != constants__c_channel_indet)) {
+               (session_core__channel_config_idx != constants__c_channel_config_idx_indet)) {
                session_core_1_bs__set_session_orphaned(session_core__l_session,
                   session_core__lost_channel,
-                  session_core__new_channel);
+                  session_core__channel_config_idx);
                session_core_1_bs__set_session_state(session_core__l_session,
                   constants__e_session_scOrphaned);
             }
@@ -540,7 +540,7 @@ void session_core__srv_secure_channel_lost(
             if (session_core__l_state == constants__e_session_userActivated) {
                session_core_1_bs__set_session_orphaned(session_core__l_session,
                   session_core__channel,
-                  constants__c_channel_indet);
+                  constants__c_channel_config_idx_indet);
                session_core_1_bs__set_session_state(session_core__l_session,
                   constants__e_session_scOrphaned);
             }
@@ -561,7 +561,7 @@ void session_core__cli_close_req(
    constants__t_session_token_i * const session_core__session_token) {
    {
       constants__t_channel_i session_core__l_channel;
-      t_bool session_core__l_valid_channel;
+      t_bool session_core__l_connected_channel;
       t_bool session_core__l_valid_handle;
       constants__t_session_token_i session_core__l_session_token;
       t_bool session_core__l_valid_session_token;
@@ -579,13 +579,13 @@ void session_core__cli_close_req(
          if (session_core__l_state == constants__e_session_userActivated) {
             session_core_1_bs__get_session_channel(session_core__session,
                &session_core__l_channel);
-            channel_mgr_bs__is_valid_channel(session_core__l_channel,
-               &session_core__l_valid_channel);
+            channel_mgr_bs__is_connected_channel(session_core__l_channel,
+               &session_core__l_connected_channel);
             session_core_1_bs__get_token_from_session(session_core__session,
                &session_core__l_session_token);
             session_core_1_bs__is_valid_session_token(session_core__l_session_token,
                &session_core__l_valid_session_token);
-            if ((session_core__l_valid_channel == true) &&
+            if ((session_core__l_connected_channel == true) &&
                (session_core__l_valid_session_token == true)) {
                session_core_1_bs__cli_add_pending_request(session_core__session,
                   session_core__req_handle,
@@ -773,16 +773,16 @@ void session_core__srv_is_session_valid_for_service(
       t_bool session_core__l_valid_session;
       constants__t_sessionState session_core__l_state;
       constants__t_channel_i session_core__l_channel;
-      t_bool session_core__l_valid_channel;
+      t_bool session_core__l_connected_channel;
       
       session_core_1_bs__is_valid_session(session_core__session,
          &session_core__l_valid_session);
       if (session_core__l_valid_session == true) {
          session_core_1_bs__get_session_channel(session_core__session,
             &session_core__l_channel);
-         channel_mgr_bs__is_valid_channel(session_core__l_channel,
-            &session_core__l_valid_channel);
-         if ((session_core__l_valid_channel == true) &&
+         channel_mgr_bs__is_connected_channel(session_core__l_channel,
+            &session_core__l_connected_channel);
+         if ((session_core__l_connected_channel == true) &&
             (session_core__l_channel == session_core__channel)) {
             session_core_1_bs__get_session_state(session_core__session,
                &session_core__l_state);
@@ -818,18 +818,18 @@ void session_core__cli_is_session_valid_for_service(
       t_bool session_core__l_valid_session;
       constants__t_sessionState session_core__l_state;
       constants__t_channel_i session_core__l_channel;
-      t_bool session_core__l_valid_channel;
+      t_bool session_core__l_connected_channel;
       
       session_core_1_bs__is_valid_session(session_core__session,
          &session_core__l_valid_session);
       if (session_core__l_valid_session == true) {
          session_core_1_bs__get_session_channel(session_core__session,
             &session_core__l_channel);
-         channel_mgr_bs__is_valid_channel(session_core__l_channel,
-            &session_core__l_valid_channel);
+         channel_mgr_bs__is_connected_channel(session_core__l_channel,
+            &session_core__l_connected_channel);
          session_core_1_bs__get_session_state(session_core__session,
             &session_core__l_state);
-         if (((session_core__l_valid_channel == true) &&
+         if (((session_core__l_connected_channel == true) &&
             (session_core__l_channel == session_core__channel)) &&
             (session_core__l_state == constants__e_session_userActivated)) {
             *session_core__ret = true;

@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 25/07/2017 17:22:44
+ Date                 : 25/07/2017 17:24:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -31,6 +31,7 @@
 #define constants__t_Variant_i constants_bs__t_Variant_i
 #define constants__t_channel_config_idx_i constants_bs__t_channel_config_idx_i
 #define constants__t_channel_i constants_bs__t_channel_i
+#define constants__t_endpoint_config_idx_i constants_bs__t_endpoint_config_idx_i
 #define constants__t_msg_i constants_bs__t_msg_i
 #define constants__t_request_handle_i constants_bs__t_request_handle_i
 #define constants__t_session_i constants_bs__t_session_i
@@ -76,12 +77,6 @@ typedef enum {
    constants__e_sc_bad_out_of_memory
 } constants__t_StatusCode_i;
 typedef enum {
-   constants__e_msg_tcpua_hello,
-   constants__e_msg_tcpua_ack,
-   constants__e_msg_sc_open_channel_req,
-   constants__e_msg_sc_open_channel_resp,
-   constants__e_msg_sc_close_channel_req,
-   constants__e_msg_sc_close_channel_resp,
    constants__e_msg_public_service_req,
    constants__e_msg_public_service_resp,
    constants__e_msg_session_create_req,
@@ -117,6 +112,7 @@ typedef enum {
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
 #define constants__t_channel_config_idx_i_max constants_bs__t_channel_config_idx_i_max
 #define constants__t_channel_i_max constants_bs__t_channel_i_max
+#define constants__t_endpoint_config_idx_i_max constants_bs__t_endpoint_config_idx_i_max
 #define constants__t_msg_i_max constants_bs__t_msg_i_max
 #define constants__t_request_handle_i_max constants_bs__t_request_handle_i_max
 #define constants__t_session_i_max constants_bs__t_session_i_max
@@ -135,6 +131,7 @@ typedef enum {
 #define constants__c_Variant_indet constants_bs__c_Variant_indet
 #define constants__c_channel_config_idx_indet constants_bs__c_channel_config_idx_indet
 #define constants__c_channel_indet constants_bs__c_channel_indet
+#define constants__c_endpoint_config_idx_indet constants_bs__c_endpoint_config_idx_indet
 #define constants__c_msg_indet constants_bs__c_msg_indet
 #define constants__c_request_handle_indet constants_bs__c_request_handle_indet
 #define constants__c_session_indet constants_bs__c_session_indet

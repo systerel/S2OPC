@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 25/07/2017 17:22:45
+ Date                 : 25/07/2017 17:24:09
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -116,7 +116,7 @@ extern void session_core__cli_sc_activate_req(
    constants__t_session_token_i * const session_core__session_token);
 extern void session_core__cli_secure_channel_lost(
    const constants__t_channel_i session_core__lost_channel,
-   const constants__t_channel_i session_core__new_channel);
+   const constants__t_channel_config_idx_i session_core__channel_config_idx);
 extern void session_core__cli_user_activate_req(
    const constants__t_session_i session_core__session,
    const constants__t_request_handle_i session_core__req_handle,

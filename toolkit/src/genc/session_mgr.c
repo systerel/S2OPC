@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 25/07/2017 17:22:46
+ Date                 : 25/07/2017 17:24:09
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -139,7 +139,7 @@ void session_mgr__cli_validate_session_service_req(
    {
       t_bool session_mgr__l_valid_session;
       constants__t_channel_i session_mgr__l_channel;
-      t_bool session_mgr__l_valid_channel;
+      t_bool session_mgr__l_connected_channel;
       constants__t_session_token_i session_mgr__l_session_token;
       constants__t_StatusCode_i session_mgr__l_ret;
       t_bool session_mgr__l_bres;
@@ -151,9 +151,9 @@ void session_mgr__cli_validate_session_service_req(
       if (session_mgr__l_valid_session == true) {
          session_core__get_session_channel(session_mgr__session,
             &session_mgr__l_channel);
-         channel_mgr_bs__is_valid_channel(session_mgr__l_channel,
-            &session_mgr__l_valid_channel);
-         if (session_mgr__l_valid_channel == true) {
+         channel_mgr_bs__is_connected_channel(session_mgr__l_channel,
+            &session_mgr__l_connected_channel);
+         if (session_mgr__l_connected_channel == true) {
             session_core__cli_is_session_valid_for_service(session_mgr__l_channel,
                session_mgr__session,
                &session_mgr__l_bres);
