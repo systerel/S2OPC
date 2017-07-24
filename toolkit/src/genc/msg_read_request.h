@@ -2,7 +2,7 @@
 
  File Name            : msg_read_request.h
 
- Date                 : 19/07/2017 17:51:25
+ Date                 : 24/07/2017 18:24:09
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -20,7 +20,6 @@
    IMPORTS Clause
   -----------------*/
 #include "msg_read_request_bs.h"
-#include "msg_read_request_it.h"
 
 /*--------------
    SEES Clause
@@ -32,10 +31,7 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
-extern t_bool msg_read_request__init_ok;
 extern t_entier4 msg_read_request__nb_ReadValue;
-extern constants__t_AttributeId_i msg_read_request__tab_req_AttributeId[constants__t_ReadValue_i_max+1];
-extern constants__t_NodeId_i msg_read_request__tab_req_NodeId[constants__t_ReadValue_i_max+1];
 
 /*------------------------
    INITIALISATION Clause
@@ -45,15 +41,17 @@ extern void msg_read_request__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void msg_read_request__read_ReadRequest(
-   const constants__t_msg_i msg_read_request__msg,
-   t_bool * const msg_read_request__rr);
-extern void msg_read_request__read_nb_ReadValue(
-   t_entier4 * const msg_read_request__rr);
-extern void msg_read_request__readall_ReadValue_Node_AttributeId(
-   const constants__t_ReadValue_i msg_read_request__rvi,
-   t_bool * const msg_read_request__isvalid,
-   constants__t_Node_i * const msg_read_request__node,
-   constants__t_AttributeId_i * const msg_read_request__aid);
+extern void msg_read_request__check_ReadRequest(
+   const constants__t_msg_i msg_read_request__p_msg,
+   t_bool * const msg_read_request__p_read_ok,
+   t_entier4 * const msg_read_request__p_nb_ReadValue);
+extern void msg_read_request__get_nb_ReadValue(
+   t_entier4 * const msg_read_request__p_nb_ReadValue);
+extern void msg_read_request__getall_ReadValue_NodeId_AttributeId(
+   const constants__t_msg_i msg_read_request__p_msg,
+   const constants__t_ReadValue_i msg_read_request__p_rvi,
+   t_bool * const msg_read_request__p_isvalid,
+   constants__t_NodeId_i * const msg_read_request__p_nid,
+   constants__t_AttributeId_i * const msg_read_request__p_aid);
 
 #endif

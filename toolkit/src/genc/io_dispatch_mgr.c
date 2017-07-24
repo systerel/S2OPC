@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 19/07/2017 17:51:25
+ Date                 : 24/07/2017 18:24:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -76,6 +76,28 @@ void io_dispatch_mgr__is_request_type(
    default:
       *io_dispatch_mgr__bres = false;
       break;
+   }
+}
+
+void io_dispatch_mgr__treat_read_request(
+   const constants__t_msg_i io_dispatch_mgr__p_request_msg,
+   const constants__t_msg_i io_dispatch_mgr__p_response_msg) {
+   {
+      t_entier4 io_dispatch_mgr__l_nb_ReadValue;
+      t_bool io_dispatch_mgr__l_is_valid;
+      
+      service_read__check_ReadRequest(io_dispatch_mgr__p_request_msg,
+         &io_dispatch_mgr__l_is_valid,
+         &io_dispatch_mgr__l_nb_ReadValue);
+      if (io_dispatch_mgr__l_is_valid == true) {
+         service_read__alloc_read_response(io_dispatch_mgr__l_nb_ReadValue,
+            io_dispatch_mgr__p_response_msg,
+            &io_dispatch_mgr__l_is_valid);
+         if (io_dispatch_mgr__l_is_valid == true) {
+            service_read__fill_read_response(io_dispatch_mgr__p_request_msg,
+               io_dispatch_mgr__p_response_msg);
+         }
+      }
    }
 }
 
@@ -252,7 +274,7 @@ void io_dispatch_mgr__receive_msg(
                      if (io_dispatch_mgr__l_valid_msg == true) {
                         switch (io_dispatch_mgr__l_msg_type) {
                         case constants__e_msg_session_read_req:
-                           service_read__treat_read_request(io_dispatch_mgr__msg,
+                           io_dispatch_mgr__treat_read_request(io_dispatch_mgr__msg,
                               io_dispatch_mgr__l_resp_msg);
                            break;
                         case constants__e_msg_session_write_req:

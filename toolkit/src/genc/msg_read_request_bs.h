@@ -2,7 +2,7 @@
 
  File Name            : msg_read_request_bs.h
 
- Date                 : 19/07/2017 17:51:28
+ Date                 : 24/07/2017 18:24:11
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -30,13 +30,15 @@ extern void msg_read_request_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void msg_read_request_bs__read_req_ReadValue_AttributeId(
+extern void msg_read_request_bs__getall_req_ReadValue_AttributeId(
    const constants__t_msg_i msg_read_request_bs__msg,
    const constants__t_ReadValue_i msg_read_request_bs__rvi,
+   t_bool * const msg_read_request_bs__isvalid,
    constants__t_AttributeId_i * const msg_read_request_bs__aid);
-extern void msg_read_request_bs__read_req_ReadValue_NodeId(
+extern void msg_read_request_bs__getall_req_ReadValue_NodeId(
    const constants__t_msg_i msg_read_request_bs__msg,
    const constants__t_ReadValue_i msg_read_request_bs__rvi,
+   t_bool * const msg_read_request_bs__isvalid,
    constants__t_NodeId_i * const msg_read_request_bs__nid);
 extern void msg_read_request_bs__read_req_nb_ReadValue(
    const constants__t_msg_i msg_read_request_bs__msg,

@@ -2,7 +2,7 @@
 
  File Name            : address_space.h
 
- Date                 : 19/07/2017 17:51:24
+ Date                 : 24/07/2017 18:24:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -42,8 +42,8 @@ extern void address_space__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define address_space__get_Value_StatusCode address_space_bs__get_Value_StatusCode
 #define address_space__read_AddressSpace_free_value address_space_bs__read_AddressSpace_free_value
-#define address_space__read_Value_StatusCode address_space_bs__read_Value_StatusCode
 #define address_space__readall_AddressSpace_Node address_space_bs__readall_AddressSpace_Node
 #define address_space__write_WriteResponse_msg_out response_write_bs__write_WriteResponse_msg_out
 

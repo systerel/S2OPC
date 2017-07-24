@@ -2,7 +2,7 @@
 
  File Name            : msg_read_response_bs.h
 
- Date                 : 19/07/2017 17:51:28
+ Date                 : 24/07/2017 18:24:12
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -30,10 +30,11 @@ extern void msg_read_response_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void msg_read_response_bs__write_read_response_init(
-   const t_entier4 msg_read_response_bs__a_nb_resps,
-   const constants__t_msg_i msg_read_response_bs__resp_msg);
-extern void msg_read_response_bs__write_read_response_iter(
+extern void msg_read_response_bs__alloc_read_response(
+   const t_entier4 msg_read_response_bs__p_nb_resps,
+   const constants__t_msg_i msg_read_response_bs__p_resp_msg,
+   t_bool * const msg_read_response_bs__p_isvalid);
+extern void msg_read_response_bs__set_read_response(
    const constants__t_msg_i msg_read_response_bs__resp_msg,
    const constants__t_ReadValue_i msg_read_response_bs__rvi,
    const constants__t_Variant_i msg_read_response_bs__val,

@@ -2,7 +2,7 @@
 
  File Name            : session_header_init.c
 
- Date                 : 19/07/2017 17:51:30
+ Date                 : 24/07/2017 18:24:14
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -27,12 +27,11 @@
 #include "message_out_bs.h"
 #include "msg_read_request.h"
 #include "msg_read_request_bs.h"
-#include "msg_read_request_it.h"
-#include "msg_read_response.h"
 #include "msg_read_response_bs.h"
 #include "request_handle_bs.h"
 #include "response_write_bs.h"
 #include "service_read.h"
+#include "service_read_it.h"
 #include "service_response_cli_cb_bs.h"
 #include "service_write_decode_bs.h"
 #include "session_core.h"
@@ -58,7 +57,6 @@ void INITIALISATION(void) {
    session_core__INITIALISATION();
    session_mgr__INITIALISATION();
    msg_read_request_bs__INITIALISATION();
-   msg_read_request_it__INITIALISATION();
    address_space_bs__INITIALISATION();
    response_write_bs__INITIALISATION();
    address_space_it__INITIALISATION();
@@ -66,7 +64,7 @@ void INITIALISATION(void) {
    address_space__INITIALISATION();
    msg_read_request__INITIALISATION();
    msg_read_response_bs__INITIALISATION();
-   msg_read_response__INITIALISATION();
+   service_read_it__INITIALISATION();
    service_read__INITIALISATION();
    service_response_cli_cb_bs__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
