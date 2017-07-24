@@ -39,7 +39,7 @@ typedef void * constants_bs__t_NodeId_i;
 typedef void * constants_bs__t_Variant_i;
 typedef void* constants_bs__t_msg_i;
 typedef void* constants_bs__t_session_token_i;
-typedef void* constants_bs__t_session_i;
+#define constants_bs__t_session_i t_entier4
 #define constants_bs__t_channel_i t_entier4
 #define constants_bs__t_channel_config_idx_i t_entier4
 #define constants_bs__t_endpoint_config_idx_i t_entier4

@@ -37,10 +37,12 @@
 #include "config_toolkit.h"
 
 #include "sopc_toolkit_config.h"
+#include "sopc_services_events.h"
 #include "sopc_event_dispatcher_manager.h"
 
 static struct {
   t_bool isClient;
+  t_bool disconnecting;
   uint32_t endpointIdx; // if isClient == false
   uint32_t configIdx;
   uint32_t id; // non indet => connected
@@ -48,7 +50,8 @@ static struct {
   .isClient = false,
   .endpointIdx = constants__c_endpoint_config_idx_indet,
   .configIdx = constants__c_channel_config_idx_indet,
-  .id = constants__c_channel_indet
+  .id = constants__c_channel_indet,
+  .disconnecting = false
 };
 
 /*------------------------
@@ -95,6 +98,21 @@ void channel_mgr_bs__cli_set_connected_channel(
   }
 }
 
+void channel_mgr_bs__cli_set_connection_timeout_channel(
+   const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
+   t_bool * const channel_mgr_bs__bres){
+  if(channel_mgr_bs__config_idx != constants__c_channel_config_idx_indet &&
+     unique_channel.configIdx == (uint32_t) channel_mgr_bs__config_idx &&
+     unique_channel.id == constants__c_channel_indet){
+    unique_channel.isClient = false;
+    unique_channel.configIdx = constants__c_channel_config_idx_indet;
+    *channel_mgr_bs__bres = true;
+  }else{
+    *channel_mgr_bs__bres = false;
+  }
+}
+
+
 void channel_mgr_bs__srv_new_secure_channel(
    const constants__t_endpoint_config_idx_i channel_mgr_bs__endpoint_config_idx,
    const constants__t_channel_config_idx_i channel_mgr_bs__channel_config_idx,
@@ -126,9 +144,20 @@ void channel_mgr_bs__close_secure_channel(
 
 void channel_mgr_bs__channel_lost(
    const constants__t_channel_i channel_mgr_bs__channel) {
-  printf("channel_mgr_bs__channel_lost\n");
-  unique_channel.id = constants__c_channel_indet;
-  unique_channel.configIdx = constants__c_channel_config_idx_indet;
+  if(channel_mgr_bs__channel != constants__c_channel_indet &&
+     (uint32_t) channel_mgr_bs__channel == unique_channel.id){
+    unique_channel.id = constants__c_channel_indet;
+    unique_channel.configIdx = constants__c_channel_config_idx_indet;
+    if(unique_channel.disconnecting != false){
+      unique_channel.disconnecting = false;
+      SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                           SC_ALL_DISCONNECTED,
+                                           0,
+                                           NULL,
+                                           0,
+                                           "Services mgr: notify itself all SC disconnected ");
+    }
+  }
 }
 
 void channel_mgr_bs__send_channel_msg(
@@ -159,6 +188,15 @@ void channel_mgr_bs__is_connected_channel(
   *channel_mgr_bs__bres = 
     (channel_mgr_bs__channel != constants__c_channel_indet &&
      channel_mgr_bs__channel == (t_entier4) unique_channel.id);
+}
+
+void channel_mgr_bs__is_disconnecting_channel(
+   const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
+   t_bool * const channel_mgr_bs__bres){
+  *channel_mgr_bs__bres = 
+    (channel_mgr_bs__config_idx != constants__c_channel_config_idx_indet &&
+     channel_mgr_bs__config_idx == (t_entier4) unique_channel.configIdx &&
+     unique_channel.disconnecting != false);
 }
 
 void channel_mgr_bs__get_connected_channel(
@@ -195,7 +233,8 @@ void channel_mgr_bs__is_client_channel(
   }
 }
 
-void channel_mgr_bs__close_all_channel(void){
+void channel_mgr_bs__close_all_channel(t_bool * const channel_mgr_bs__bres){
+  *channel_mgr_bs__bres = false;
   if(unique_channel.id != constants__c_channel_indet){
     if((!false) == unique_channel.isClient){
       SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
@@ -203,9 +242,9 @@ void channel_mgr_bs__close_all_channel(void){
                                            unique_channel.id, // Shall be endpoint config index
                                            NULL,
                                            0,
-                                           "Close all channel !");
-      unique_channel.id = constants__c_channel_indet;
-      unique_channel.configIdx = constants__c_channel_config_idx_indet;
+                                           "Close channel !");
+      unique_channel.disconnecting = true;
+      *channel_mgr_bs__bres = true;
     }
   }
 }

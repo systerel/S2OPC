@@ -559,6 +559,14 @@ OPERATIONS
         END
     END
     ;
+
+    cli_secure_channel_timeout (channel_config_idx) =
+    VAR
+        l_bres
+    IN
+        l_bres <-- cli_set_connection_timeout_channel (channel_config_idx)
+    END
+	;
     
     srv_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
     VAR
@@ -568,15 +576,16 @@ OPERATIONS
     END
     ;
     
-    session <-- activate_new_session (channel_config_idx, user) =
+    bres <-- activate_new_session (channel_config_idx, user) =
     VAR
         l_channel,
         l_channel_connected,
+        l_session,
         l_valid_session,
         l_connected_channel,
         l_bret
     IN
-        session := c_session_indet;
+        bres := FALSE;
         l_channel <-- get_connected_channel (channel_config_idx);
         l_connected_channel <-- is_connected_channel (l_channel);
         IF l_connected_channel = FALSE
@@ -590,32 +599,32 @@ OPERATIONS
 
         IF l_bret = TRUE
         THEN
-            session <-- cli_init_session;
-            l_valid_session <-- is_valid_session (session);
+            l_session <-- cli_init_session;
+            l_valid_session <-- is_valid_session (l_session);
             IF l_valid_session = TRUE THEN
                 IF l_channel_connected = FALSE 
                 THEN
                     /* channel did not exist or is not connected anymore: add async session creation on SC connection */
-                    l_bret <-- add_session_to_create (session, channel_config_idx)
+                    l_bret <-- add_session_to_create (l_session, channel_config_idx)
                 ELSE
                     // l_channel defined because l_channel_connected = TRUE 
-                    local_create_session (session, l_channel);
+                    local_create_session (l_session, l_channel);
                     l_bret := TRUE
                 END;
                 IF l_bret = TRUE
                 THEN
-                    l_bret <-- add_session_to_activate (session, user)
+                    l_bret <-- add_session_to_activate (l_session, user)
                 END;
                 IF l_bret = FALSE
                 THEN
                     /* Remove session from sessions to create */
-                    session <-- is_session_to_create (channel_config_idx);
+                    l_session <-- is_session_to_create (channel_config_idx);
                     /* Delete session */
-                    delete_session (session);
-                    session := c_session_indet
+                    delete_session (l_session)
                 END            
             END
-        END
+        END;
+        bres := l_bret
     END
     ;
 
@@ -670,6 +679,7 @@ OPERATIONS
     secure_channel_lost (channel) =
     VAR
         l_connected_channel,
+       	l_disconnecting_channel,
         l_valid_new_channel,
         l_is_client,
         l_channel_config_idx,
@@ -683,20 +693,25 @@ OPERATIONS
             IF l_is_client = TRUE
             THEN
                 l_channel_config_idx <-- get_channel_info (channel);
+                l_disconnecting_channel <-- is_disconnecting_channel (l_channel_config_idx);
                 cli_secure_channel_lost (channel, l_channel_config_idx);
-                l_new_channel <-- get_connected_channel (l_channel_config_idx);
-                IF l_new_channel = c_channel_indet
+                IF l_disconnecting_channel = FALSE
                 THEN
-                    l_bres <-- cli_open_secure_channel (l_channel_config_idx)
-                    // async operation => cannot use channel until connection is effective ?
-                END;
-               	
-                l_valid_new_channel <-- is_connected_channel (l_new_channel);
-                
-                IF l_valid_new_channel = TRUE
-                THEN
-                    // If channel already connected, associate sessions orphaned
-                    local_sc_activate_orphaned_sessions (l_channel_config_idx, l_new_channel)                    
+                    // attempt to reconnect channel
+                    l_new_channel <-- get_connected_channel (l_channel_config_idx);
+                    IF l_new_channel = c_channel_indet
+                    THEN
+                        l_bres <-- cli_open_secure_channel (l_channel_config_idx)
+                        // async operation => cannot use channel until connection is effective ?
+                    END;
+                    
+                    l_valid_new_channel <-- is_connected_channel (l_new_channel);
+                    
+                    IF l_valid_new_channel = TRUE
+                    THEN
+                        // If channel already connected, associate sessions orphaned
+                        local_sc_activate_orphaned_sessions (l_channel_config_idx, l_new_channel)                    
+                    END
                 END
             ELSE
                 srv_secure_channel_lost (channel)
@@ -749,11 +764,10 @@ OPERATIONS
             END
         END
     END;
-
-
-    close_all_active_connections =
+    
+    bres <-- close_all_active_connections =
     BEGIN
-        close_all_channel
+        bres <-- close_all_channel
     END
 
 END

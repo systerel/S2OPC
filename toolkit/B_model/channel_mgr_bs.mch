@@ -24,12 +24,14 @@ SEES
 DEFINITIONS
     d_variables ==
     s_cli_channel_connecting,
+    s_cli_channel_disconnecting,
     s_channel_connected,
     a_config,
     a_endpoint;
     
     d_typage == 
     s_cli_channel_connecting <: t_channel_config_idx &
+    s_cli_channel_disconnecting <: t_channel_config_idx &
     s_channel_connected <: t_channel &
     /* each created channel has a configuration
        and there is at most 1 channel per configuration */
@@ -45,6 +47,7 @@ INVARIANT
     
 INITIALISATION
     s_cli_channel_connecting  :: {{}} ||
+    s_cli_channel_disconnecting  :: {{}} ||
     s_channel_connected   :: {{}} ||
     a_config    :: {{}} ||
     a_endpoint  :: {{}}
@@ -99,17 +102,14 @@ OPERATIONS
     THEN
         IF channel : s_channel_connected
         THEN
-            s_channel_connected := s_channel_connected - {channel} ||
-            a_config := {channel} <<| a_config ||
-            a_endpoint := {channel} <<| a_endpoint
-        END           
+            s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {a_config(channel)}
+        END
     END;
     
-    close_all_channel =
+    bres <-- close_all_channel =
     BEGIN
-        s_channel_connected :: {} ||
-        a_config :: {} ||
-        a_endpoint :: {}
+        s_cli_channel_disconnecting :(s_cli_channel_disconnecting <: t_channel_config_idx) ||
+        bres :: BOOL
     END;    
     
     channel_lost (channel) =
@@ -118,6 +118,7 @@ OPERATIONS
         channel : t_channel
     THEN
         s_channel_connected := s_channel_connected - {channel} ||
+        s_cli_channel_disconnecting := s_cli_channel_disconnecting - {a_config(channel)} ||
         a_config := {channel} <<| a_config ||
         a_endpoint := {channel} <<| a_endpoint
     END
@@ -156,6 +157,21 @@ OPERATIONS
         END  
     END
     ;
+
+    bres <-- cli_set_connection_timeout_channel (config_idx) =
+    PRE
+        config_idx : t_channel_config_idx_i &
+        config_idx : t_channel_config_idx
+    THEN
+        IF config_idx : s_cli_channel_connecting
+        THEN
+            s_cli_channel_connecting := s_cli_channel_connecting - {config_idx} ||
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END  
+    END
+    ;
     
     bres <-- is_connected_channel (channel) =
     PRE
@@ -164,6 +180,16 @@ OPERATIONS
         bres := bool(channel : s_channel_connected)
     END
     ;
+    
+    bres <-- is_disconnecting_channel (config_idx) =
+    PRE
+        config_idx : t_channel_config_idx_i &
+        config_idx : t_channel_config_idx
+    THEN
+        bres := bool(config_idx : s_cli_channel_disconnecting)
+    END
+    ;
+    
     
     channel <-- get_connected_channel (config_idx) = /* security configuration concerns must be added*/
     PRE

@@ -16,10 +16,13 @@
  */
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
 
 #include "sopc_services_events.h"
+#include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
 #include "sopc_sc_events.h"
 #include "internal_msg.h"
@@ -36,6 +39,10 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
 {
   //printf("Services event dispatcher: event='%d', id='%d', params='%p', auxParam='%d'\n", scEvent, id, params, auxParam);
   SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
+  SOPC_StatusCode status = STATUS_OK;
+  SOPC_Endpoint_Config* epConfig = NULL;
+  constants__t_StatusCode_i sCode = constants__e_sc_ok;
+  bool bres = false;
   switch(event){
   /* SC to Services events */
   case EP_SC_CONNECTED:
@@ -54,12 +61,12 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // params = NULL
     // auxParam == status
     // => B model entry point to add
-    SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
-                                         SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT),
-                                         id,                                        
-                                         NULL,
-                                         auxParam,
-                                         "Endpoint is closed !");
+    status = SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
+                                                  SOPC_AppEvent_ComEvent_Create(SE_CLOSED_ENDPOINT),
+                                                  id,                                        
+                                                  NULL,
+                                                  auxParam,
+                                                  "Endpoint is closed !");
     break;
   case SC_CONNECTED:
     //printf("SC_CONNECTED\n");
@@ -73,6 +80,8 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     //printf("SC_CONNECTION_TIMEOUT\n");
     // id == secure channel configuration index
     // => B model entry point to add
+    // TODO: treat with a timer reconnection attempt (limited attempts ?) => no change of state (connecting) until all attempts terminated
+    io_dispatch_mgr__cli_secure_channel_timeout(id);
     break;
   case SC_DISCONNECTED:
     //printf("SC_DISCONNECTED\n");
@@ -81,6 +90,11 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // => B model entry point to add
     // secure_channel_lost call !
     io_dispatch_mgr__secure_channel_lost((constants__t_channel_i) id);
+    break;
+  case SC_ALL_DISCONNECTED:
+    //printf("SC_ALL_DISCONNECTED\n");
+    // Call directly toolkit configuration callback
+    SOPC_Internal_AllClientSecureChannelsDisconnected();
     break;
   case SC_SERVICE_RCV_MSG:
     //printf("SC_SERVICE_RCV_MSG\n");
@@ -99,28 +113,80 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     //printf("SE_OPEN_ENDPOINT\n");
     // id ==  endpoint configuration index
     // => B model entry point to add
+    epConfig = SOPC_ToolkitConfig_GetEndpointConfig(id);
+    if(NULL == epConfig){
+      status = STATUS_INVALID_PARAMETERS;
+    }else{
+      status = SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
+                                                    EP_OPEN,
+                                                    id,
+                                                    epConfig,
+                                                    0,
+                                                    "Endpoint opening !");
+    }
     break;
   case SE_CLOSE_ENDPOINT:
     //printf("SE_CLOSE_ENDPOINT\n");
     // id ==  endpoint configuration index
     // => B model entry point to add
+    epConfig = SOPC_ToolkitConfig_GetEndpointConfig(id);
+    if(NULL == epConfig){
+      status = STATUS_INVALID_PARAMETERS;
+    }else{
+      status = SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
+                                                    EP_CLOSE,
+                                                    id,
+                                                    epConfig,
+                                                    0,
+                                                    "Endpoint closing !");
+    }
     break;
   case SE_ACTIVATE_SESSION:
     //printf("SE_ACTIVATE_SESSION\n");
     // id == secure channel configuration
     // params = TODO: user authentication
+    // auxParam = TMP: user integer
+    io_dispatch_mgr__activate_new_session(id,
+                                          auxParam,
+                                          &bres);
+    if(bres == false){
+      status = STATUS_NOK;
+    }
     break;
   case SE_SEND_SESSION_REQUEST:
     //printf("SE_SEND_SESSION_REQUEST\n");
     // id == session id
-    // params = TODO: user authentication
+    // params = request
+    io_dispatch_mgr__send_service_request_msg(id,
+                                              params,
+                                              &sCode);
+    if(sCode != constants__e_sc_ok){
+      status = STATUS_NOK;
+    }
     break;
   case SE_CLOSE_SESSION:
     //printf("SE_CLOSE_SESSION\n");
     // id == session id
+    io_dispatch_mgr__close_session(id,
+                                   &sCode);
+    if(sCode != constants__e_sc_ok){
+      status = STATUS_NOK;
+    }
+    break;
+  case SE_CLOSE_ALL_CONNECTIONS:
+    //printf("SE_CLOSE_ALL_CONNECTIONS\n");
+    io_dispatch_mgr__close_all_active_connections(&bres);
+    if(bres == false){
+      // All connections considered closed: simulate new service event
+      SOPC_ServicesEventDispatcher(SC_ALL_DISCONNECTED,
+                                   id,
+                                   params,
+                                   auxParam);
+    }
     break;
   default:
     assert(FALSE);
   }
+  assert(STATUS_OK == status);
 }
 

@@ -64,7 +64,6 @@ OPERATIONS
     END
     ;
     
-    // TODO: add connection id / sc parameter
     cli_channel_connected_event (channel_config_idx, channel) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
@@ -75,6 +74,15 @@ OPERATIONS
         skip
     END
     ;
+
+    cli_secure_channel_timeout (channel_config_idx) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+	;
     
     srv_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
     PRE
@@ -89,7 +97,7 @@ OPERATIONS
     END
     ;
     
-    session <-- activate_new_session (channel_config_idx, user) =
+    bres <-- activate_new_session (channel_config_idx, user) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
@@ -97,7 +105,7 @@ OPERATIONS
         user : t_user &
         c_msg_out = c_msg_indet
     THEN
-        session :: t_session_i
+        bres :: BOOL
     END
     ;
 
@@ -171,9 +179,12 @@ OPERATIONS
         c_msg_out  :: t_msg_i
     END
     ;
-
-    close_all_active_connections = skip;
-
+    
+    bres <-- close_all_active_connections =
+    BEGIN
+        bres :: BOOL // indicates if active connection will be closed
+    END;
+    
     state <-- get_session_state_or_closed (session) =
     PRE
         session : t_session_i

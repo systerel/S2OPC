@@ -16,6 +16,7 @@
  */
 
 #include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
 #include "sopc_services_events.h"
 #include "sopc_sc_events.h"
@@ -46,6 +47,16 @@ static struct {
     .epConfigs = NULL,
 };
 
+// Structure used to close all connections in a synchronous way
+// (necessary on toolkit clear)
+static struct {
+    Mutex           mutex;
+    Condition       cond;
+    uint8_t         flag;
+} closeAllConnectionsSync = {
+  .flag = false
+};
+
 SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
 
 SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
@@ -60,13 +71,21 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
   switch(SOPC_AppEvent_AppEventType_Get(eventAndType)){
   case APP_COM_EVENT:
     if(NULL != appFct){
-      appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
-             params, // TBD
-             (SOPC_StatusCode) auxParam); // TBD
+      if(SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_ACTIVATED_SESSION){
+        appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
+               (void*) &id, // session id
+               (SOPC_StatusCode) auxParam);
+      }else{
+        appFct(SOPC_AppEvent_ComEvent_Get(eventAndType),
+               params, // TBD
+               (SOPC_StatusCode) auxParam); // TBD
+      }
       if(SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_SESSION_RESPONSE){
         // Message to deallocate ? => if not application shall deallocate !
         tmsg = (SOPC_Toolkit_Msg*) params;
         SOPC_Encodeable_Delete(tmsg->encType, &tmsg->msg);
+        // TBD: free only in this case ?
+        free(params);
       }
     }
     break;
@@ -80,7 +99,6 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
   default:
     assert(FALSE);
   }
-  free(params);
 }
 
 SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
@@ -119,6 +137,13 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
     return status;
 }
 
+void SOPC_Internal_AllClientSecureChannelsDisconnected(){
+  Mutex_Lock(&closeAllConnectionsSync.mutex);
+  closeAllConnectionsSync.flag = true;
+  Condition_SignalAll(&closeAllConnectionsSync.cond);
+  Mutex_Unlock(&closeAllConnectionsSync.mutex);
+}
+
 SOPC_StatusCode SOPC_Toolkit_Configured(){
     SOPC_StatusCode status = OpcUa_BadInvalidState;
     if(tConfig.initDone != FALSE){
@@ -136,14 +161,24 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
 
 void SOPC_Toolkit_Clear(){
     SOPC_StatusCode status = STATUS_OK;
+    // Do a synchronous connections closed (effective on client only)
     if(tConfig.initDone != FALSE){
+      Mutex_Initialization(&closeAllConnectionsSync.mutex);
+      Condition_Init(&closeAllConnectionsSync.cond);
+      Mutex_Lock(&closeAllConnectionsSync.mutex);
+
+      SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                           SE_CLOSE_ALL_CONNECTIONS,
+                                           0,
+                                           NULL,
+                                           0,
+                                           "Services: Close all channel !");
+      while(closeAllConnectionsSync.flag == false){
+        Mutex_UnlockAndWaitCond(&closeAllConnectionsSync.cond, &closeAllConnectionsSync.mutex);
+      }
+      Mutex_Unlock(&closeAllConnectionsSync.mutex);
+      
       Mutex_Lock(&tConfig.mut);
-      io_dispatch_mgr__close_all_active_connections();
-      // TODO: need a synchronous way to wait for end of all connections
-      // (SC_DISCONNECTED shall be received even in case of SC_DISCONNECT request
-      //  and all events shall be awaited)
-      SOPC_Sleep(500);
-      // END TODO
       status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
       (void) status; // log
       status = SOPC_EventDispatcherManager_StopAndDelete(&applicationEventDispatcherMgr);

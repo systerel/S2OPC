@@ -27,6 +27,7 @@ typedef enum SOPC_Services_Event {
   SC_CONNECTED,
   SC_CONNECTION_TIMEOUT,
   SC_DISCONNECTED,
+  SC_ALL_DISCONNECTED, // special event sent by services mgr itself
   SC_SERVICE_RCV_MSG,
   /* App to Services events */
   SE_OPEN_ENDPOINT,
@@ -34,6 +35,7 @@ typedef enum SOPC_Services_Event {
   SE_ACTIVATE_SESSION, /* Connect SC + Create Session + Activate session */
   SE_SEND_SESSION_REQUEST, // TODO: manage buffer when session with channel lost ? Or return a send failure in this case
   SE_CLOSE_SESSION,
+  SE_CLOSE_ALL_CONNECTIONS, // Automatically called by toolkit clear
   //  SE_SEND_PUBLIC_REQUEST, => discovery services /* Connect SC */
 } SOPC_Services_Event;
 

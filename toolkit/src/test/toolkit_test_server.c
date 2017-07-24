@@ -28,9 +28,8 @@
 #include "sopc_encodeable.h"
 
 #include "config_toolkit.h"
-#include "internal_msg.h"
-#include "internal_channel_endpoint.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_services_events.h"
 
 #include "wrap_read.h"
 
@@ -41,9 +40,11 @@ static int endpointClosed = FALSE;
 void Test_ComEvent_Fct(SOPC_App_Com_Event event,
                          void*              param,
                          SOPC_StatusCode    status){
-  printf("COM EVENT '%d' received\n", event);
   if(event == SE_CLOSED_ENDPOINT){
+    printf("<Test_Server_Toolkit: closed endpoint event: OK\n");
     endpointClosed = !FALSE;
+  }else{
+    printf("<Test_Server_Toolkit: unexpected endpoint event %d : NOK\n", event);
   }
 }
 
@@ -101,12 +102,12 @@ int main(void)
   }
 
   if(STATUS_OK == status){
-    status = SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                                  EP_OPEN,
+    status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                                  SE_OPEN_ENDPOINT,
                                                   1,
-                                                  &epConfig,
+                                                  NULL,
                                                   0,
-                                                  "Endpoint opening !");
+                                                  "Services: endpoint opening !");
     if(STATUS_OK == status){
       printf("<Test_Server_Toolkit: Opening endpoint... \n");
     }else{
@@ -123,12 +124,12 @@ int main(void)
         SOPC_Sleep(sleepTimeout);
     }
 
-  SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                       EP_CLOSE,
+  SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                       SE_CLOSE_ENDPOINT,
                                        1,
-                                       &epConfig,
+                                       NULL,
                                        0,
-                                       "Endpoint closing !");
+                                       "Services: Endpoint closing !");
 
   loopCpt = 0;
   loopTimeout = 1000;

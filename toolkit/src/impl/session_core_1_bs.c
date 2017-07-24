@@ -24,19 +24,23 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_encodeable.h"
+#include "sopc_event_dispatcher_manager.h"
+#include "sopc_user_app_itf.h"
 
 #include "session_core_1_bs.h"
 
-#include "internal_channel_endpoint.h"
+#include "channel_mgr_bs.h"
 
 typedef struct session {
+  constants__t_session_i id;
   constants__t_channel_i session_core_1_bs__channel;
   constants__t_sessionState session_core_1_bs__state;
   constants__t_session_token_i session_core_1_bs__session_token;
   constants__t_user_i session_core_1_bs__user;
+  t_bool cli_activated_session;
   // Only one request handle managed by session in this version
   constants__t_request_handle_i session_core_1_bs__req_handle;
-  t_bool session_core_1_bs__req_handle_used;
+  t_bool session_core_1_bs__req_handle_used;  
 } session;
 
 static session unique_session;
@@ -59,7 +63,7 @@ void session_core_1_bs__get_session_from_req_handle(
    constants__t_session_i * const session_core_1_bs__session) {
   if((!FALSE) == unique_session_created &&
      unique_session.session_core_1_bs__req_handle == session_core_1_bs__req_handle){
-    *session_core_1_bs__session = &unique_session;
+    *session_core_1_bs__session = unique_session.id;
   }else{
     *session_core_1_bs__session = constants__c_session_indet;
   }
@@ -74,7 +78,7 @@ void session_core_1_bs__get_session_from_token(
                                                  (SOPC_NodeId*)unique_session.session_core_1_bs__session_token,
                                                  &comparison);
     if(STATUS_OK == status && comparison == 0){
-      *session_core_1_bs__session = &unique_session;
+      *session_core_1_bs__session = unique_session.id;
     }
   }
 }
@@ -82,7 +86,7 @@ void session_core_1_bs__get_session_from_token(
 void session_core_1_bs__get_token_from_session(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_session_token_i * const session_core_1_bs__session_token) {
-  if(&unique_session == session_core_1_bs__session){
+  if(unique_session.id == session_core_1_bs__session){
     *session_core_1_bs__session_token = unique_session.session_core_1_bs__session_token;    
   }else{
     *session_core_1_bs__session_token = constants__c_session_token_indet;    
@@ -93,7 +97,7 @@ void session_core_1_bs__get_fresh_session_token(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_session_token_i * const session_core_1_bs__token) {
   if(token_cpt + 1 > 0 &&
-     &unique_session == session_core_1_bs__session &&
+     unique_session.id == session_core_1_bs__session &&
      unique_session.session_core_1_bs__session_token == constants__c_session_token_indet){
     SOPC_NodeId* token = malloc(sizeof(SOPC_NodeId));
     if(NULL != token){
@@ -147,7 +151,7 @@ void session_core_1_bs__is_valid_session_token(
 void session_core_1_bs__has_session_token(
    const constants__t_session_i session_core_1_bs__session,
    t_bool * const session_core_1_bs__ret) {
-  if(session_core_1_bs__session == &unique_session &&
+  if(session_core_1_bs__session == unique_session.id &&
      constants__c_session_token_indet != unique_session.session_core_1_bs__session_token){
     *session_core_1_bs__ret = (!FALSE);
   }else{
@@ -158,7 +162,7 @@ void session_core_1_bs__has_session_token(
 void session_core_1_bs__set_session_token(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_session_token_i session_core_1_bs__token) {
-  if(&unique_session == session_core_1_bs__session){
+  if(unique_session.id == session_core_1_bs__session){
     if(session_core_1_bs__token != unique_session.session_core_1_bs__session_token){
       SOPC_NodeId* token = malloc(sizeof(SOPC_NodeId));
       if(NULL != token){
@@ -203,8 +207,10 @@ void session_core_1_bs__delete_session(
 void session_core_1_bs__init_new_session(
    constants__t_session_i * const session_core_1_bs__session){
   if(FALSE == unique_session_init){
-    *session_core_1_bs__session = &unique_session;
+    unique_session.id = 1;
+    *session_core_1_bs__session = unique_session.id;
     unique_session_init = !FALSE;
+    unique_session.cli_activated_session = FALSE;
     unique_session.session_core_1_bs__state = constants__e_session_init;
   }else{
     *session_core_1_bs__session = constants__c_session_indet;
@@ -215,21 +221,28 @@ void session_core_1_bs__create_session(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_channel_i session_core_1_bs__channel,
    const constants__t_sessionState session_core_1_bs__state) {
-  if(session_core_1_bs__session == &unique_session && FALSE == unique_session_created){
+  if(session_core_1_bs__session == unique_session.id && FALSE == unique_session_created){
     unique_session.session_core_1_bs__channel = session_core_1_bs__channel;
     unique_session.session_core_1_bs__state = session_core_1_bs__state;
     unique_session.session_core_1_bs__session_token = constants__c_session_token_indet;
     unique_session.session_core_1_bs__user = constants__c_user_indet;
     unique_session.session_core_1_bs__req_handle = constants__c_request_handle_indet;
     unique_session.session_core_1_bs__req_handle_used = FALSE;
+    unique_session.cli_activated_session = FALSE;
     unique_session_created = (!FALSE);
   }
 }
 
 void session_core_1_bs__create_session_failure(const constants__t_session_i session_core_1_bs__session){
-  if(session_core_1_bs__session == &unique_session && FALSE != unique_session_created){
+  if(session_core_1_bs__session == unique_session.id && FALSE != unique_session_created){
     unique_session_created = FALSE;
     unique_session.session_core_1_bs__state = constants__e_session_init;
+    SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
+                                         SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
+                                         0, // TMP unused ? => session idx ?
+                                         NULL, // user ?
+                                         0, // TBD: status
+                                         "Session activation failure notification");
   }
 }
 
@@ -238,7 +251,7 @@ void session_core_1_bs__cli_add_pending_request(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_request_handle_i session_core_1_bs__req_handle,
    t_bool * const session_core_1_bs__ret) {
-  if(session_core_1_bs__session == &unique_session){
+  if(session_core_1_bs__session == unique_session.id){
     if(FALSE == unique_session.session_core_1_bs__req_handle_used){
       unique_session.session_core_1_bs__req_handle = session_core_1_bs__req_handle;
       unique_session.session_core_1_bs__req_handle_used = (!FALSE);
@@ -255,7 +268,7 @@ void session_core_1_bs__cli_remove_pending_request(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_request_handle_i session_core_1_bs__req_handle,
    t_bool * const session_core_1_bs__ret) {
-  if(session_core_1_bs__session == &unique_session){
+  if(session_core_1_bs__session == unique_session.id){
     if((!FALSE) == unique_session.session_core_1_bs__req_handle_used &&
        unique_session.session_core_1_bs__req_handle == session_core_1_bs__req_handle){
       unique_session.session_core_1_bs__req_handle_used = FALSE;
@@ -271,13 +284,13 @@ void session_core_1_bs__cli_remove_pending_request(
 void session_core_1_bs__is_valid_session(
    const constants__t_session_i session_core_1_bs__session,
    t_bool * const session_core_1_bs__ret) {
-  *session_core_1_bs__ret = session_core_1_bs__session == &unique_session;
+  *session_core_1_bs__ret = session_core_1_bs__session == unique_session.id;
 }
 
 void session_core_1_bs__get_session_state(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_sessionState * const session_core_1_bs__state) {
-  if(session_core_1_bs__session == &unique_session){
+  if(session_core_1_bs__session == unique_session.id){
     *session_core_1_bs__state = unique_session.session_core_1_bs__state;
   }else{
     *session_core_1_bs__state = constants__e_session_closed;
@@ -287,14 +300,66 @@ void session_core_1_bs__get_session_state(
 void session_core_1_bs__set_session_state(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_sessionState session_core_1_bs__state) {
-  if(&unique_session == session_core_1_bs__session){
+  if(unique_session.id == session_core_1_bs__session){
     unique_session.session_core_1_bs__state = session_core_1_bs__state;
+    if(session_core_1_bs__state == constants__e_session_userActivated){
+      constants__t_channel_i channel = constants__c_channel_indet;
+      t_bool bres = false;
+      session_core_1_bs__get_session_channel(session_core_1_bs__session,
+                                             &channel);
+      channel_mgr_bs__is_client_channel(channel, &bres);
+      if(bres != false){
+        unique_session.cli_activated_session = !FALSE;
+        SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
+                                             SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
+                                             session_core_1_bs__session, // TMP unused ? => session idx ?
+                                             NULL,
+                                             0, // unused 
+                                             "Session activated notification");
+      }
+    }
   }
 }
 
 void session_core_1_bs__set_session_state_closed(
-   const constants__t_session_i session_core_1_bs__session) {
-  if(session_core_1_bs__session == &unique_session){
+                                                 const constants__t_session_i session_core_1_bs__session) {
+  if(session_core_1_bs__session == unique_session.id){
+    // Manage notification on client side
+    constants__t_channel_i channel = constants__c_channel_indet;
+    t_bool bres = false;
+    session_core_1_bs__get_session_channel(session_core_1_bs__session,
+                                           &channel);
+    if(channel == constants__c_channel_indet){
+      // init session phase: no channel associated (mandatory client side)
+      SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
+                                           SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
+                                           0, // TMP unused ? => session idx ?
+                                           NULL, // user ?
+                                           0, // TBD: status
+                                           "Session activation failure notification");
+    }else{
+      channel_mgr_bs__is_client_channel(channel, &bres);
+      if(bres != false){
+        if(unique_session.cli_activated_session == FALSE){
+          SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
+                                               SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
+                                               0, // TMP unused ? => session idx ?
+                                               NULL, // user ?
+                                               0, // TBD: status
+                                               "Session activation failure notification");
+        }else{
+          // Activated session closing
+          SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
+                                               SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
+                                               session_core_1_bs__session, // session idx 
+                                               NULL,
+                                               0, // TBD: status
+                                               "Session closed notification");
+        }
+      }
+    }
+
+    // Modify state
     unique_session.session_core_1_bs__state = constants__e_session_closed;
     unique_session.session_core_1_bs__user = constants__c_user_indet;
     unique_session.session_core_1_bs__req_handle = constants__c_request_handle_indet;
@@ -312,7 +377,7 @@ void session_core_1_bs__set_session_channel(
    const constants__t_channel_i session_core_1_bs__channel) {
   // TODO: add constraint that session has no channel in B model ?
   //  => for now the fact it is not is used for setting channel in both cases of activate session (change of user / channel)
-  if(session_core_1_bs__session == &unique_session){
+  if(session_core_1_bs__session == unique_session.id){
     unique_session.session_core_1_bs__channel = session_core_1_bs__channel;
   }else{
     printf("session_core_1_bs__set_session_channel\n");
@@ -323,7 +388,7 @@ void session_core_1_bs__set_session_channel(
 void session_core_1_bs__get_session_channel(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_channel_i * const session_core_1_bs__channel) {
-  if(session_core_1_bs__session == &unique_session){
+  if(session_core_1_bs__session == unique_session.id){
     *session_core_1_bs__channel = unique_session.session_core_1_bs__channel;
   }else{
     // session : s_session guarantee
@@ -354,7 +419,7 @@ void session_core_1_bs__is_valid_user(
 void session_core_1_bs__set_session_user(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_user_i session_core_1_bs__user) {
-  if(session_core_1_bs__session == &unique_session){
+  if(session_core_1_bs__session == unique_session.id){
     unique_session.session_core_1_bs__user = session_core_1_bs__user;
   }
 }
@@ -362,7 +427,7 @@ void session_core_1_bs__set_session_user(
 void session_core_1_bs__get_session_user(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_user_i * const session_core_1_bs__user) {
-  if(session_core_1_bs__session == &unique_session){
+  if(session_core_1_bs__session == unique_session.id){
     *session_core_1_bs__user = unique_session.session_core_1_bs__user;
   }
 }
