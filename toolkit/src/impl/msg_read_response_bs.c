@@ -42,7 +42,7 @@ void msg_read_response_bs__INITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void msg_read_response_bs__write_read_response_init(
+void msg_read_response_bs__alloc_read_response(
    const t_entier4 msg_read_response_bs__p_nb_resps,
    const constants__t_msg_i msg_read_response_bs__p_resp_msg,
    t_bool * const msg_read_response_bs__p_isvalid)
@@ -54,12 +54,10 @@ void msg_read_response_bs__write_read_response_init(
     if(NULL == msg_read_resp->Results)
     {
         *msg_read_response_bs__p_isvalid = false;
-        /* TODO: implement abstract variables */
+        return;
     }
     else
-    {
         *msg_read_response_bs__p_isvalid = true;
-    }
 
     for(int32_t i = 0; i < msg_read_resp->NoOfResults; i++)
         SOPC_DataValue_Initialize(&msg_read_resp->Results[i]);

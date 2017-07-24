@@ -80,15 +80,17 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(
 }
 
 
-void msg_read_request_bs__read_req_ReadValue_NodeId(
+void msg_read_request_bs__getall_req_ReadValue_NodeId(
    const constants__t_msg_i msg_read_request_bs__msg,
    const constants__t_ReadValue_i msg_read_request_bs__rvi,
+   t_bool * const msg_read_request_bs__isvalid,
    constants__t_NodeId_i * const msg_read_request_bs__nid)
 {
     *msg_read_request_bs__nid = constants__c_NodeId_indet;
     /* TODO: is message type checked at this point? */
     OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *)(((message__message *)msg_read_request_bs__msg)->msg);
 
+    *msg_read_request_bs__isvalid = false;
     if(! msg_read_req)
         return;
     if(msg_read_request_bs__rvi > msg_read_req->NoOfNodesToRead)
@@ -97,6 +99,7 @@ void msg_read_request_bs__read_req_ReadValue_NodeId(
         return;
 
     /* TODO: this should raise a warning, constants__t_NodeId_i IS the void *... No need to cast to a (void **) */
+    *msg_read_request_bs__isvalid = true;
     *msg_read_request_bs__nid = (constants__t_NodeId_i *)&msg_read_req->NodesToRead[msg_read_request_bs__rvi-1].NodeId;
 }
 
