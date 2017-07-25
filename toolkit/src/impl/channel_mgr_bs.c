@@ -32,8 +32,6 @@
 
 #include "channel_mgr_bs.h"
 
-#include "internal_channel_endpoint.h"
-#include "internal_msg.h"
 #include "config_toolkit.h"
 
 #include "sopc_toolkit_config.h"

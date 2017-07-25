@@ -25,9 +25,6 @@
 
 #include "msg_read_request_bs.h"
 
-#include "internal_msg.h"
-
-//#include "messages.h"
 #include "sopc_types.h"
 #include "address_space_impl.h"
 

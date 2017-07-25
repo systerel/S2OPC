@@ -25,12 +25,7 @@
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_app_itf.h"
 #include "sopc_sc_events.h"
-#include "internal_msg.h"
-#include "internal_channel_endpoint.h"
 #include "io_dispatch_mgr.h"
-
-// Necessary since not managed by B model
-Internal_Channel_Or_Endpoint* tmpEndpointInstance = NULL;
 
 void SOPC_ServicesEventDispatcher(int32_t  scEvent, 
                                   uint32_t id, 

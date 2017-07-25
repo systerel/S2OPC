@@ -21,9 +21,7 @@
 
 
 #include <stdbool.h>
-
-#include "internal_msg.h"
-
+#include "sopc_types.h"
 
 /* The lib */
 OpcUa_ReadRequest *read_new_read_request(void);

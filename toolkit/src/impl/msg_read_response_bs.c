@@ -26,8 +26,6 @@
 
 #include "msg_read_response_bs.h"
 
-#include "internal_msg.h"
-
 #include "sopc_types.h"
 
 #include "sopc_sc_events.h"
