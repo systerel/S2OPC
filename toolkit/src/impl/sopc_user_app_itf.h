@@ -40,6 +40,13 @@ typedef enum SOPC_App_AddSpace_Event {
   AS_WRITE_EVENT,
 } SOPC_App_AddSpace_Event;
 
+/* Server address space local modifications */
+typedef enum SOPC_App_AddSpace_LocalService_Result {
+  /* Server application local service results */
+  AS_LOCAL_READ_RESULT,
+  AS_WRITE_RESULT,
+} SOPC_App_AddSpace_LocalService_Result;
+
 /// INTERNAL USE ONLY ////
 
 extern SOPC_EventDispatcherManager* applicationEventDispatcherMgr;
@@ -59,6 +66,11 @@ typedef void SOPC_ComEvent_Fct(SOPC_App_Com_Event event,
 typedef void SOPC_AddressSpaceNotif_Fct(SOPC_App_AddSpace_Event event,
                                         void*                   param,
                                         SOPC_StatusCode         status);
+
+// TODO: define parameter for each type of event
+typedef void SOPC_AddressSpaceLocalService_Fct(SOPC_App_AddSpace_LocalService_Result resultType,
+                                               void*                                 param,
+                                               SOPC_StatusCode                       status);
 
 void SOPC_ApplicationEventDispatcher(int32_t  appEvent, 
                                      uint32_t eventType, 

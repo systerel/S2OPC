@@ -66,7 +66,10 @@ void SOPC_Toolkit_Clear();
  *  OpcUa_BadInvalidState if toolkit is not initialized, already
  *  configured or address space is already set, STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(void* addressSpace);
+// TODO: implement address space configuration
+SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(void*                              addressSpace,
+                                                         SOPC_AddressSpaceNotif_Fct*        pAddSpaceAccessFct,
+                                                         SOPC_AddressSpaceLocalService_Fct* pLocalServiceFct);
 
 /**
  *  \brief Record the given secure channel configuration in given index

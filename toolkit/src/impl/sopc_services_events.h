@@ -37,6 +37,10 @@ typedef enum SOPC_Services_Event {
   SE_CLOSE_SESSION,
   SE_CLOSE_ALL_CONNECTIONS, // Automatically called by toolkit clear
   //  SE_SEND_PUBLIC_REQUEST, => discovery services /* Connect SC */
+
+  /* App to Services: local services events */ 
+  SE_LOCAL_READ,
+  SE_LOCAL_WRITE
 } SOPC_Services_Event;
 
 void SOPC_ServicesEventDispatcher(int32_t  scEvent, 
