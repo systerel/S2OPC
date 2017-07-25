@@ -218,9 +218,7 @@ SOPC_StatusCode SOPC_ToolkitConfig_AddSecureChannelConfig(uint32_t              
         status = OpcUa_BadInvalidState;
         if(tConfig.initDone != FALSE){
             Mutex_Lock(&tConfig.mut);
-            if(FALSE == tConfig.locked){
-              status = SOPC_IntToolkitConfig_AddConfig(tConfig.scConfigs, scConfigIdx, (void*) scConfig);
-            }
+            status = SOPC_IntToolkitConfig_AddConfig(tConfig.scConfigs, scConfigIdx, (void*) scConfig);
             Mutex_Unlock(&tConfig.mut);
         }
     }
