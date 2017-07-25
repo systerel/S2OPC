@@ -19,7 +19,7 @@ C99FLAGS=-std=c99 -pedantic
 CFLAGS  =-g3 -c -Wall -Wextra -O0 -Wno-unused-parameter $(C99FLAGS)
 LFLAGS  =-g
 INCLUDES=-I$(PATHTRAD) -I. -I$(STACK_H) -I$(PATHIMPL) -I$(PATHTEST)
-LIBS    =-L$(STACK_LIB) -L$(CRYPTO_LIB) -lm -lingopcs -lmbedcrypto -lmbedx509 -lpthread
+LIBS    =-L$(STACK_LIB) -L$(CRYPTO_LIB) -lm -lingopcs -lmbedcrypto -lmbedx509 -lpthread -lrt
 
 OBJS        =session_header_init.o \
              address_space.o address_space_it.o constants.o msg_read_request.o service_read.o service_read_it.o \
