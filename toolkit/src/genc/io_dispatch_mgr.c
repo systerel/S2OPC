@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 25/07/2017 17:25:08
+ Date                 : 25/07/2017 17:25:43
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -41,7 +41,7 @@ void io_dispatch_mgr__get_response_type(
    case constants__e_msg_session_read_req:
       *io_dispatch_mgr__resp_msg_typ = constants__e_msg_session_read_resp;
       break;
-   case constants__e_msg_session_write_resp:
+   case constants__e_msg_session_write_req:
       *io_dispatch_mgr__resp_msg_typ = constants__e_msg_session_write_resp;
       break;
    default:
