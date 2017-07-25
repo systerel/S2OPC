@@ -154,7 +154,7 @@ OPERATIONS
                 resp_msg_typ := e_msg_session_close_resp
             OR e_msg_session_read_req THEN
                 resp_msg_typ := e_msg_session_read_resp
-            OR e_msg_session_write_resp THEN
+            OR e_msg_session_write_req THEN
                 resp_msg_typ := e_msg_session_write_resp
             END
         END
