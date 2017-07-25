@@ -2,7 +2,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 25/07/2017 17:24:10
+ Date                 : 25/07/2017 17:25:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,7 +39,11 @@ extern void channel_mgr_bs__cli_set_connected_channel(
    const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
    const constants__t_channel_i channel_mgr_bs__channel,
    t_bool * const channel_mgr_bs__bres);
-extern void channel_mgr_bs__close_all_channel(void);
+extern void channel_mgr_bs__cli_set_connection_timeout_channel(
+   const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
+   t_bool * const channel_mgr_bs__bres);
+extern void channel_mgr_bs__close_all_channel(
+   t_bool * const channel_mgr_bs__bres);
 extern void channel_mgr_bs__close_secure_channel(
    const constants__t_channel_i channel_mgr_bs__channel);
 extern void channel_mgr_bs__get_channel_info(
@@ -53,6 +57,9 @@ extern void channel_mgr_bs__is_client_channel(
    t_bool * const channel_mgr_bs__bres);
 extern void channel_mgr_bs__is_connected_channel(
    const constants__t_channel_i channel_mgr_bs__channel,
+   t_bool * const channel_mgr_bs__bres);
+extern void channel_mgr_bs__is_disconnecting_channel(
+   const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
    t_bool * const channel_mgr_bs__bres);
 extern void channel_mgr_bs__send_channel_msg(
    const constants__t_channel_i channel_mgr_bs__channel,

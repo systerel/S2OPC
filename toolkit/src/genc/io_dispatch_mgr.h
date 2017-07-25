@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 25/07/2017 17:24:07
+ Date                 : 25/07/2017 17:25:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -78,7 +78,7 @@ extern void io_dispatch_mgr__treat_write_request(
 extern void io_dispatch_mgr__activate_new_session(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
    const constants__t_user_i io_dispatch_mgr__user,
-   constants__t_session_i * const io_dispatch_mgr__session);
+   t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__activate_session(
    const constants__t_session_i io_dispatch_mgr__session,
    const constants__t_user_i io_dispatch_mgr__user,
@@ -86,7 +86,10 @@ extern void io_dispatch_mgr__activate_session(
 extern void io_dispatch_mgr__cli_channel_connected_event(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
    const constants__t_channel_i io_dispatch_mgr__channel);
-extern void io_dispatch_mgr__close_all_active_connections(void);
+extern void io_dispatch_mgr__cli_secure_channel_timeout(
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx);
+extern void io_dispatch_mgr__close_all_active_connections(
+   t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__close_session(
    const constants__t_session_i io_dispatch_mgr__session,
    constants__t_StatusCode_i * const io_dispatch_mgr__ret);
