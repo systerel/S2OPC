@@ -51,6 +51,7 @@ void Test_ComEvent_Fct(SOPC_App_Com_Event event,
 int main(void)
 {
   SOPC_StatusCode status = STATUS_OK;
+  constants__t_endpoint_config_idx_i epConfigIdx = constants__c_endpoint_config_idx_indet;
   SOPC_Endpoint_Config epConfig;
   // Sleep timeout in milliseconds
   const uint32_t sleepTimeout = 500;
@@ -89,10 +90,11 @@ int main(void)
 
 
   if(STATUS_OK == status){
-    status = SOPC_ToolkitConfig_AddEndpointConfig(1,
-                                                  &epConfig);
-    if(STATUS_OK == status){
+    epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);    
+    if(epConfigIdx != constants__c_endpoint_config_idx_indet){
       status = SOPC_Toolkit_Configured();
+    }else{
+      status = STATUS_NOK;
     }
     if(STATUS_OK != status){
       printf("<Test_Server_Toolkit: Failed to configure the endpoint\n");

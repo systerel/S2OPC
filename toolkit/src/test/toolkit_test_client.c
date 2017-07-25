@@ -152,11 +152,11 @@ int main(void){
   }
 
   if(STATUS_OK == status){
-    channel_config_idx = 1;
-    status = SOPC_ToolkitConfig_AddSecureChannelConfig(channel_config_idx,
-                                                       &scConfig);
-    if(STATUS_OK == status){
+    channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
+    if(channel_config_idx != constants__c_channel_config_idx_indet){
       status = SOPC_Toolkit_Configured();
+    }else{
+      status = STATUS_NOK;
     }
     if(STATUS_OK != status){
       printf(">>Test_Client_Toolkit: Failed to configure the secure channel\n");

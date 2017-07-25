@@ -67,7 +67,7 @@ void channel_mgr_bs__cli_open_secure_channel(
   SOPC_SecureChannel_Config* config = NULL;
   *channel_mgr_bs__bres = false;
   if(channel_mgr_bs__config_idx != constants__c_channel_config_idx_indet){
-    config = SOPC_ToolkitConfig_GetSecureChannelConfig(channel_mgr_bs__config_idx);
+    config = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__config_idx);
     if(NULL != config){
       if(STATUS_OK == SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
                                                            SC_CONNECT,

@@ -66,22 +66,17 @@ void SOPC_Toolkit_Clear();
  *  OpcUa_BadInvalidState if toolkit is not initialized, already
  *  configured or address space is already set, STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_ToolkitConfig_SetAddressSpaceConfig(void* addressSpace);
+SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(void* addressSpace);
 
 /**
  *  \brief Record the given secure channel configuration in given index
  *  (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
  *
- *  \param scConfigIdx  The (unique) index for the given configuration
- *  \param scConfig     The secure channel configuration to be set at given index
- *
- *  \return STATUS_OK if configuration succeeded,
- *  OpcUa_BadInvalidState if toolkit is not initialized or already
- *  configured, STATUS_INVALID_PARAMETER if \p scConfigIdx not unique
- *  or \p scConfig == NULL, STATUS_NOK otherwise
+ *  \return secure channel configuration index if configuration succeeded,
+ *  0 if toolkit is not initialized, already
+ *  configured or otherwise
  */
-SOPC_StatusCode SOPC_ToolkitConfig_AddSecureChannelConfig(uint32_t                   scConfigIdx,
-                                                          SOPC_SecureChannel_Config* scConfig);
+uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig);
 
 
 /**
@@ -92,7 +87,7 @@ SOPC_StatusCode SOPC_ToolkitConfig_AddSecureChannelConfig(uint32_t              
  *  \return Secure channel configuration at given index or NULL if
  *  index invalid or toolkit is not configured yet
  */
-SOPC_SecureChannel_Config* SOPC_ToolkitConfig_GetSecureChannelConfig(uint32_t scConfigIdx);
+SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx);
 
 /**
  *  \brief Return the endpoint configuration for the given index or null if not defined. (SOPC_Toolkit_Configured required)
@@ -102,22 +97,17 @@ SOPC_SecureChannel_Config* SOPC_ToolkitConfig_GetSecureChannelConfig(uint32_t sc
  *  \return Endpoint configuration at given index or NULL if
  *  index invalid or toolkit is not configured yet
  */
-SOPC_Endpoint_Config* SOPC_ToolkitConfig_GetEndpointConfig(uint32_t epConfigIdx);
+SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx);
 
 /**
  *  \brief Record the given secure channel configuration in given index
  *  (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
  *
- *  \param epConfigIdx     The (unique) index for the given configuration
- *  \param endpointConfig  The endpoint configuration to be set at given index
- *
- *  \return STATUS_OK if configuration succeeded,
- *  OpcUa_BadInvalidState if toolkit is not initialized or already
- *  configured, STATUS_INVALID_PARAMETER if \p idx not unique
- *  or \p config == NULL, STATUS_NOK otherwise
+ *  \return endpoint configuration index configuration succeeded,
+ *  0 if toolkit is not initialized, already
+ *  configured or otherwise
  */
-SOPC_StatusCode SOPC_ToolkitConfig_AddEndpointConfig(uint32_t              idx,
-                                                     SOPC_Endpoint_Config* config);
+uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* config);
 
 /**
  *  \brief Set the given namespace table configuration (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)

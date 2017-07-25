@@ -57,6 +57,9 @@ static struct {
   .flag = false
 };
 
+static uint32_t scConfigIdxMax = 0;
+static uint32_t epConfigIdxMax = 0;
+
 SOPC_EventDispatcherManager* servicesEventDispatcherMgr = NULL;
 
 SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
@@ -211,21 +214,27 @@ static SOPC_StatusCode SOPC_IntToolkitConfig_AddConfig(SLinkedList* configList,
     return status;
 }
 
-SOPC_StatusCode SOPC_ToolkitConfig_AddSecureChannelConfig(uint32_t                   scConfigIdx,
-                                                          SOPC_SecureChannel_Config* scConfig){
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(NULL != scConfig){
-        status = OpcUa_BadInvalidState;
+uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* scConfig){
+  uint32_t result = 0;
+  SOPC_StatusCode status;
+  if(NULL != scConfig){
         if(tConfig.initDone != FALSE){
             Mutex_Lock(&tConfig.mut);
-            status = SOPC_IntToolkitConfig_AddConfig(tConfig.scConfigs, scConfigIdx, (void*) scConfig);
+            // TODO: check maximum value < max configs
+            scConfigIdxMax++;
+            status = SOPC_IntToolkitConfig_AddConfig(tConfig.scConfigs, scConfigIdxMax, (void*) scConfig);
+            if(STATUS_OK == status){
+              result = scConfigIdxMax;
+            }else{
+              scConfigIdxMax--;
+            }
             Mutex_Unlock(&tConfig.mut);
         }
     }
-    return status;
+    return result;
 }
 
-SOPC_SecureChannel_Config* SOPC_ToolkitConfig_GetSecureChannelConfig(uint32_t scConfigIdx){
+SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx){
     SOPC_SecureChannel_Config* res = NULL;
     if(tConfig.initDone != FALSE){
         Mutex_Lock(&tConfig.mut);
@@ -237,23 +246,29 @@ SOPC_SecureChannel_Config* SOPC_ToolkitConfig_GetSecureChannelConfig(uint32_t sc
     return res;
 }
 
-SOPC_StatusCode SOPC_ToolkitConfig_AddEndpointConfig(uint32_t              epConfigIdx,
-                                                     SOPC_Endpoint_Config* epConfig){
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig){
+    uint32_t result = 0;
+    SOPC_StatusCode status;
     if(NULL != epConfig){
-        status = OpcUa_BadInvalidState;
         if(tConfig.initDone != FALSE){
             Mutex_Lock(&tConfig.mut);
             if(FALSE == tConfig.locked){
-              status = SOPC_IntToolkitConfig_AddConfig(tConfig.epConfigs, epConfigIdx, (void*) epConfig);
+              // TODO: check maximum value < max configs
+              epConfigIdxMax++;
+              status = SOPC_IntToolkitConfig_AddConfig(tConfig.epConfigs, epConfigIdxMax, (void*) epConfig);
+              if(STATUS_OK == status){
+                result = epConfigIdxMax;
+              }else{
+                epConfigIdxMax--;
+              }
             }
             Mutex_Unlock(&tConfig.mut);
         }
     }
-    return status;
+    return result;
 }
 
-SOPC_Endpoint_Config* SOPC_ToolkitConfig_GetEndpointConfig(uint32_t epConfigIdx){
+SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx){
     SOPC_Endpoint_Config* res = NULL;
     if(tConfig.initDone != FALSE){
         Mutex_Lock(&tConfig.mut);

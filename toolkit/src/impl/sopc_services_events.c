@@ -108,7 +108,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     //printf("SE_OPEN_ENDPOINT\n");
     // id ==  endpoint configuration index
     // => B model entry point to add
-    epConfig = SOPC_ToolkitConfig_GetEndpointConfig(id);
+    epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
     if(NULL == epConfig){
       status = STATUS_INVALID_PARAMETERS;
     }else{
@@ -124,7 +124,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     //printf("SE_CLOSE_ENDPOINT\n");
     // id ==  endpoint configuration index
     // => B model entry point to add
-    epConfig = SOPC_ToolkitConfig_GetEndpointConfig(id);
+    epConfig = SOPC_ToolkitServer_GetEndpointConfig(id);
     if(NULL == epConfig){
       status = STATUS_INVALID_PARAMETERS;
     }else{
