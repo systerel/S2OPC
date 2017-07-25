@@ -43,7 +43,7 @@ ifeq ($(OSTYPE),$(filter linux% darwin%,$(OSTYPE)))
      EXCLUDE_DIR="*win*"
      PLATFORM_DIR="*linux*"
      PFLAGS=-std=c99 -pedantic -D_XOPEN_SOURCE=600
-     LIBS=$(LIBS_MBEDTLS) -lpthread $(LIB_CHECK)
+     LIBS=$(LIBS_MBEDTLS) -lpthread -lrt $(LIB_CHECK)
 else
     STATIC_LIB_EXT=".a"
     DYNAMIC_LIB_EXT=".so"
