@@ -105,7 +105,7 @@ int main(void)
 
   if(STATUS_OK == status){
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  SE_OPEN_ENDPOINT,
+                                                  APP_TO_SE_OPEN_ENDPOINT,
                                                   1,
                                                   NULL,
                                                   0,
@@ -127,7 +127,7 @@ int main(void)
     }
 
   SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                       SE_CLOSE_ENDPOINT,
+                                       APP_TO_SE_CLOSE_ENDPOINT,
                                        1,
                                        NULL,
                                        0,

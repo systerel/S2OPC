@@ -22,25 +22,26 @@
 
 typedef enum SOPC_Services_Event {
   /* SC to Services events */
-  EP_SC_CONNECTED,
-  EP_CLOSED,
-  SC_CONNECTED,
-  SC_CONNECTION_TIMEOUT,
-  SC_DISCONNECTED,
-  SC_ALL_DISCONNECTED, // special event sent by services mgr itself
-  SC_SERVICE_RCV_MSG,
+  SC_TO_SE_EP_SC_CONNECTED,
+  SC_TO_SE_EP_CLOSED,
+  SC_TO_SE_SC_CONNECTED,
+  SC_TO_SE_SC_CONNECTION_TIMEOUT,
+  SC_TO_SE_SC_DISCONNECTED,
+  SC_TO_SE_SC_SERVICE_RCV_MSG,
+  /* Services to services events */
+  SE_TO_SE_SC_ALL_DISCONNECTED, // special event sent by services mgr itself
   /* App to Services events */
-  SE_OPEN_ENDPOINT,
-  SE_CLOSE_ENDPOINT,
-  SE_ACTIVATE_SESSION, /* Connect SC + Create Session + Activate session */
-  SE_SEND_SESSION_REQUEST, // TODO: manage buffer when session with channel lost ? Or return a send failure in this case
-  SE_CLOSE_SESSION,
-  SE_CLOSE_ALL_CONNECTIONS, // Automatically called by toolkit clear
+  APP_TO_SE_OPEN_ENDPOINT,
+  APP_TO_SE_CLOSE_ENDPOINT,
+  APP_TO_SE_ACTIVATE_SESSION, /* Connect SC + Create Session + Activate session */
+  APP_TO_SE_SEND_SESSION_REQUEST, // TODO: manage buffer when session with channel lost ? Or return a send failure in this case
+  APP_TO_SE_CLOSE_SESSION,
+  APP_TO_SE_CLOSE_ALL_CONNECTIONS, // Automatically called by toolkit clear
   //  SE_SEND_PUBLIC_REQUEST, => discovery services /* Connect SC */
 
   /* App to Services: local services events */ 
-  SE_LOCAL_READ,
-  SE_LOCAL_WRITE
+  APP_TO_SE_LOCAL_READ,
+  APP_TO_SE_LOCAL_WRITE
 } SOPC_Services_Event;
 
 void SOPC_ServicesEventDispatcher(int32_t  scEvent, 

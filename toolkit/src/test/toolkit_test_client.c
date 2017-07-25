@@ -172,7 +172,7 @@ int main(void){
   */
   if(STATUS_OK == status){
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  SE_ACTIVATE_SESSION,
+                                                  APP_TO_SE_ACTIVATE_SESSION,
                                                   channel_config_idx,
                                                   NULL, // TMP ? => user auth data ?
                                                   user, // TMP: user integer as data
@@ -214,7 +214,7 @@ int main(void){
     SOPC_Toolkit_Msg *pMsgRead = getReadRequest_message();
     // msg freed when sent
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  SE_SEND_SESSION_REQUEST,
+                                                  APP_TO_SE_SEND_SESSION_REQUEST,
                                                   session,
                                                   pMsgRead,
                                                   0,
@@ -251,7 +251,7 @@ int main(void){
     test_results_set_WriteRequest(pWriteReq);
     // msg freed when sent
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  SE_SEND_SESSION_REQUEST,
+                                                  APP_TO_SE_SEND_SESSION_REQUEST,
                                                   session,
                                                   pMsgWrite,
                                                   0,
@@ -291,7 +291,7 @@ int main(void){
     SOPC_Toolkit_Msg *pMsgRead = getReadRequest_verif_message();
     // msg freed when sent
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  SE_SEND_SESSION_REQUEST,
+                                                  APP_TO_SE_SEND_SESSION_REQUEST,
                                                   session,
                                                   pMsgRead,
                                                   0,
@@ -324,7 +324,7 @@ int main(void){
   /* Close the session */
   if(constants__c_session_indet != session){
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                  SE_CLOSE_SESSION,
+                                                  APP_TO_SE_CLOSE_SESSION,
                                                   session,
                                                   NULL,
                                                   user,

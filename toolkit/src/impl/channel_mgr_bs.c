@@ -70,7 +70,7 @@ void channel_mgr_bs__cli_open_secure_channel(
     config = SOPC_ToolkitClient_GetSecureChannelConfig(channel_mgr_bs__config_idx);
     if(NULL != config){
       if(STATUS_OK == SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                                           SC_CONNECT,
+                                                           SE_TO_SC_CONNECT,
                                                            channel_mgr_bs__config_idx,
                                                            (void*) config,
                                                            0,
@@ -149,7 +149,7 @@ void channel_mgr_bs__channel_lost(
     if(unique_channel.disconnecting != false){
       unique_channel.disconnecting = false;
       SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                           SC_ALL_DISCONNECTED,
+                                           SE_TO_SE_SC_ALL_DISCONNECTED,
                                            0,
                                            NULL,
                                            0,
@@ -167,7 +167,7 @@ void channel_mgr_bs__send_channel_msg(
 
   if(channel_mgr_bs__channel == (t_entier4) unique_channel.id){
     SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                         SC_SERVICE_SND_MSG,
+                                         SE_TO_SC_SERVICE_SND_MSG,
                                          channel_mgr_bs__channel,
                                          msg,
                                          unique_channel.configIdx,
@@ -236,7 +236,7 @@ void channel_mgr_bs__close_all_channel(t_bool * const channel_mgr_bs__bres){
   if(unique_channel.id != constants__c_channel_indet){
     if((!false) == unique_channel.isClient){
       SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                           SC_DISCONNECT,
+                                           SE_TO_SC_DISCONNECT,
                                            unique_channel.id, // Shall be endpoint config index
                                            NULL,
                                            0,

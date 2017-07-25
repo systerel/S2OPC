@@ -31,23 +31,29 @@
 
 static SOPC_EventDispatcherManager* tmpToolkitMgr = NULL;
 
+/* TODO: copy of events since toolkit depends on SC for now */
 typedef enum SOPC_TMP_Services_Event {
   /* SC to Services events */
-  EP_SC_CONNECTED,
-  EP_CLOSED,
-  SC_CONNECTED,
-  SC_CONNECTION_TIMEOUT,
-  SC_DISCONNECTED,
-  SC_ALL_DISCONNECTED, // special event sent by services mgr itself
-  SC_SERVICE_RCV_MSG,
+  SC_TO_SE_EP_SC_CONNECTED,
+  SC_TO_SE_EP_CLOSED,
+  SC_TO_SE_SC_CONNECTED,
+  SC_TO_SE_SC_CONNECTION_TIMEOUT,
+  SC_TO_SE_SC_DISCONNECTED,
+  SC_TO_SE_SC_SERVICE_RCV_MSG,
+  /* Services to services events */
+  SE_TO_SE_SC_ALL_DISCONNECTED, // special event sent by services mgr itself
   /* App to Services events */
-  SE_OPEN_ENDPOINT,
-  SE_CLOSE_ENDPOINT,
-  SE_ACTIVATE_SESSION, /* Connect SC + Create Session + Activate session */
-  SE_SEND_SESSION_REQUEST, // TODO: manage buffer when session with channel lost ? Or return a send failure in this case
-  SE_CLOSE_SESSION,
-  SE_CLOSE_ALL_CONNECTIONS,
+  APP_TO_SE_OPEN_ENDPOINT,
+  APP_TO_SE_CLOSE_ENDPOINT,
+  APP_TO_SE_ACTIVATE_SESSION, /* Connect SC + Create Session + Activate session */
+  APP_TO_SE_SEND_SESSION_REQUEST, // TODO: manage buffer when session with channel lost ? Or return a send failure in this case
+  APP_TO_SE_CLOSE_SESSION,
+  APP_TO_SE_CLOSE_ALL_CONNECTIONS, // Automatically called by toolkit clear
   //  SE_SEND_PUBLIC_REQUEST, => discovery services /* Connect SC */
+
+  /* App to Services: local services events */
+  APP_TO_SE_LOCAL_READ,
+  APP_TO_SE_LOCAL_WRITE
 } SOPC_TMP_Services_Event;
 
 static SLinkedList* endpointInstList = NULL;
@@ -90,7 +96,7 @@ SOPC_StatusCode TMP_BeginService(SOPC_Endpoint               a_hEndpoint,
   tMsg->optContext = a_hContext;
 
   SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                                       SC_SERVICE_RCV_MSG,
+                                       SC_TO_SE_SC_SERVICE_RCV_MSG,
                                        *pConfigIdx, // TMP: to be replaced by connection Id
                                        tMsg,
                                        0, // set status ? (if not used for context on server side)
@@ -176,7 +182,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
     case SOPC_EndpointEvent_EndpointClosed:
         assert(epConfigIdx != NULL);
         SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                             EP_CLOSE,
+                                             SE_TO_SC_EP_CLOSE,
                                              *epConfigIdx,
                                              NULL,
                                              (int32_t) status,
@@ -197,7 +203,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
         SLinkedList_Prepend(secureChConConfigList, scConConfig->connectionId, (void*) scConConfig);
         // TODO: add to toolkit config  !
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                                             EP_SC_CONNECTED,
+                                             SC_TO_SE_EP_SC_CONNECTED,
                                              *epConfigIdx,
                                              (void*) scConConfig,
                                              scConConfig->connectionId,
@@ -212,7 +218,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
             free(scConConfig);
         }
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                                             SC_DISCONNECTED,
+                                             SC_TO_SE_SC_DISCONNECTED,
                                              secureChannelId,
                                              NULL,
                                              (int32_t) status,
@@ -255,7 +261,7 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
         SLinkedList_Prepend(secureChConConfigList, scConConfig->configIdx, (void*) scConConfig);
         // TODO: add to toolkit config ?
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                                             SC_CONNECTED,
+                                             SC_TO_SE_SC_CONNECTED,
                                              scConConfig->connectionId,
                                              (void*) scConConfig,
                                              *configIdx,
@@ -268,7 +274,7 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
         SOPC_Channel_Delete(&channel);
         assert(NULL != tmpToolkitMgr);
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                                             SC_DISCONNECTED, // TODO: cannot differentiate timeout from disconnection here
+                                             SC_TO_SE_SC_DISCONNECTED, // TODO: cannot differentiate timeout from disconnection here
                                              *configIdx,
                                              NULL,
                                              (int32_t) status,
@@ -291,7 +297,7 @@ SOPC_StatusCode TMP_SecureChannelResponse_CB(SOPC_Channel         channel,
     tMsg->msg = response;
     tMsg->encType = responseType;
     SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                                         SC_SERVICE_RCV_MSG,
+                                         SC_TO_SE_SC_SERVICE_RCV_MSG,
                                          id, // TMP: to be replaced by connection Id
                                          tMsg,
                                          0, // set status ? (if not used for context on server side)
@@ -317,7 +323,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
     switch((SOPC_SC_Event) scEvent){
     /** SC external events */
     /* Services to SC events */
-    case EP_OPEN:
+    case SE_TO_SC_EP_OPEN:
         //printf("EP_OPEN\n");
         // id ==  endpoint configuration index
         // params = endpoint configuration pointer => TMP due to separation toolkit / stack
@@ -351,7 +357,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         }
         if(STATUS_OK != status){
             SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                    EP_CLOSED,
+                    SC_TO_SE_EP_CLOSED,
                     id,
                     NULL,
                     (int32_t) status,
@@ -359,21 +365,21 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         }
         break;
 
-    case EP_CLOSE:
+    case SE_TO_SC_EP_CLOSE:
         //printf("EP_CLOSE\n");
         // id ==  endpoint configuration index
         ep = (SOPC_Endpoint) SLinkedList_RemoveFromId(endpointInstList, id);
         SOPC_Endpoint_Delete(&ep);
         assert(NULL != tmpToolkitMgr);
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                EP_CLOSED,
+                SC_TO_SE_EP_CLOSED,
                 id,
                 NULL,
                 auxParam, // auxParam == status
                 "Endpoint closed on demand");
         break;
 
-    case SC_CONNECT:
+    case SE_TO_SC_CONNECT:
         //printf("SC_CONNECT\n");
         // id ==  sc configuration index
         // params = sc configuration pointer => TMP due to separation toolkit / stack
@@ -410,7 +416,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         }
         if(STATUS_OK != status){
             SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                    SC_CONNECTION_TIMEOUT,
+                    SC_TO_SE_SC_CONNECTION_TIMEOUT,
                     id,
                     NULL,
                     (int32_t) status,
@@ -418,7 +424,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         }
         break;
 
-    case SC_DISCONNECT:
+    case SE_TO_SC_DISCONNECT:
         //printf("SC_DISCONNECT\n");
         ch = (SOPC_Channel) SLinkedList_RemoveFromId(secureChInstList, id);
         scConConfig = SLinkedList_RemoveFromId(secureChConConfigList, id);
@@ -426,7 +432,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
             SOPC_Channel_Delete(&ch);
             assert(NULL != tmpToolkitMgr);
             SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
-                                                 SC_DISCONNECTED,
+                                                 SC_TO_SE_SC_DISCONNECTED,
                                                  id,
                                                  NULL,
                                                  scConConfig->connectionId,
@@ -438,7 +444,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         }
         break;
 
-    case SC_SERVICE_SND_MSG:
+    case SE_TO_SC_SERVICE_SND_MSG:
         //printf("SC_SERVICE_SND_MSG\n");
         // id ==  connection id
         // params = byte buffer (node Id + OPC UA message)
@@ -490,21 +496,21 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         break;
 
         /* Sockets to SC events */
-    case SOCKET_CONNECTION:
+    case SC_TO_SC_SOCKET_CONNECTION:
         //printf("SOCKET_CONNECTION\n");
         // id ==  endpoint configuration index
         // params = NULL ?
         // auxParam == fresh connection id
         assert(FALSE);
         break;
-    case SOCKET_FAILURE:
+    case SC_TO_SC_SOCKET_FAILURE:
         //printf("SOCKET_FAILURE\n");
         // id ==  endpoint config index or SC configuration index or connection Id
         // params = NULL ?
         // auxParam == error status
         assert(FALSE);
         break;
-    case SOCKET_RCV_BYTES:
+    case SC_TO_SC_SOCKET_RCV_BYTES:
         //printf("SOCKET_RCV_BYTES\n");
         // id ==  connection Id
         // params = bytes buffer
@@ -513,7 +519,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         break;
         /** SC internal events */
         /* SC mgr to EP mgr */
-    case EP_SC_DISCONNECTED:
+    case SC_TO_SC_EP_SC_DISCONNECTED:
         //printf("EP_SC_DISCONNECTED\n");
         // id ==  endpoint configuration index
         // params = NULL ?
@@ -521,7 +527,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         assert(FALSE);
         break;
         /* EP mgr to SC mgr */
-    case EP_SC_CREATE:
+    case SC_TO_SC_EP_SC_CREATE:
         //printf("EP_SC_CREATE\n");
         // id ==  endpoint configuration index
         // params = NULL ?
@@ -529,49 +535,49 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         assert(FALSE);
         break;
         /* SC mgr to Chunks mgr */
-    case ENCODE_HEL:
+    case SC_TO_SC_ENCODE_HEL:
         //printf("ENCODE_HEL\n");
         // id ==  connection Id
         // params = params MAX TCP ?
         // auxParam == ?
         assert(FALSE);
         break;
-    case ENCODE_ACK:
+    case SC_TO_SC_ENCODE_ACK:
         //printf("ENCODE_ACK\n");
         // id ==  connection Id
         // params = params revised TCP ?
         // auxParam == ?
         assert(FALSE);
         break;
-    case ENCODE_OPN_REQ:
+    case SC_TO_SC_ENCODE_OPN_REQ:
         //printf("ENCODE_OPN_REQ\n");
         // id ==  connection Id
         // params == NULL ? => connection Id for SC config sufficient
         // auxParam == ?
         assert(FALSE);
         break;
-    case ENCODE_OPN_RESP:
+    case SC_TO_SC_ENCODE_OPN_RESP:
         //printf("ENCODE_OPN_RESP\n");
         // id ==  connection Id
         // params == NULL ? => connection Id for SC config sufficient
         // auxParam == status ?
         assert(FALSE);
         break;
-    case ENCODE_CLO_REQ:
+    case SC_TO_SC_ENCODE_CLO_REQ:
         //printf("ENCODE_CLO_REQ\n");
         // id ==  connection Id
         // params == NULL ?
         // auxParam == ?
         assert(FALSE);
         break;
-    case ENCODE_CLO_RESP:
+    case SC_TO_SC_ENCODE_CLO_RESP:
         //printf("ENCODE_CLO_RESP\n");
         // id ==  connection Id
         // params == NULL ?
         // auxParam == status ?
         assert(FALSE);
         break;
-    case ENCODE_MSG_CHUNKS:
+    case SC_TO_SC_ENCODE_MSG_CHUNKS:
         //printf("ENCODE_MSG_CHUNKS\n");
         // id ==  connection Id
         // params == Bytes buffer (OPC UA message: node Id + message)
@@ -579,63 +585,63 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         assert(FALSE);
         break;
         /* Chunks mgr to SC mgr */
-    case SC_RCV_HEL:
+    case SC_TO_SC_RCV_HEL:
         //printf("SC_RCV_HEL\n");
         // id ==  connection Id
         // params == bytes buffer with TCP HEL payload
         // auxParam == ?
         assert(FALSE);
         break;
-    case SC_RCV_ACK:
+    case SC_TO_SC_RCV_ACK:
         //printf("SC_RCV_ACK\n");
         // id ==  connection Id
         // params == bytes buffer with TCP HEL payload
         // auxParam == ?
         assert(FALSE);
         break;
-    case SC_RCV_OPN_REQ:
+    case SC_TO_SC_RCV_OPN_REQ:
         //printf("SC_RCV_OPN_REQ\n");
         // id ==  connection Id
         // params == bytes buffer with OPN REQ payload
         // auxParam == ?
         assert(FALSE);
         break;
-    case SC_RCV_OPN_RESP:
+    case SC_TO_SC_RCV_OPN_RESP:
         //printf("SC_RCV_OPN_RESP\n");
         // id ==  connection Id
         // params == bytes buffer with OPN RESP payload
         // auxParam == ?
         assert(FALSE);
         break;
-    case SC_RCV_CLO_REQ:
+    case SC_TO_SC_RCV_CLO_REQ:
         //printf("SC_RCV_CLO_REQ\n");
         // id ==  connection Id
         // params == bytes buffer with CLO REQ payload
         // auxParam == ?
         assert(FALSE);
         break;
-    case SC_RCV_CLO_RESP:
+    case SC_TO_SC_RCV_CLO_RESP:
         //printf("SC_RCV_CLO_RESP\n");
         // id ==  connection Id
         // params == bytes buffer with CLO RESP payload
         // auxParam == ?
         assert(FALSE);
         break;
-    case SC_RCV_MSG:
+    case SC_TO_SC_RCV_MSG:
         //printf("SC_RCV_MSG\n");
         // id ==  connection Id
         // params == bytes buffer with MSG payload
         // auxParam == ?
         assert(FALSE);
         break;
-    case SC_RCV_FAILURE:
+    case SC_TO_SC_RCV_FAILURE:
         //printf("SC_RCV_FAILURE\n");
         // id ==  connection Id
         // params == NULL ?
         // auxParam == status
         assert(FALSE);
         break;
-    case SC_ENCODE_FAILURE:
+    case SC_TO_SC_ENCODE_FAILURE:
         //printf("SC_ENCODE_FAILURE\n");
         // id ==  connection Id
         // params == byte buffer ?

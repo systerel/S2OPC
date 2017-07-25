@@ -171,7 +171,7 @@ void SOPC_Toolkit_Clear(){
       Mutex_Lock(&closeAllConnectionsSync.mutex);
 
       SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                           SE_CLOSE_ALL_CONNECTIONS,
+                                           APP_TO_SE_CLOSE_ALL_CONNECTIONS,
                                            0,
                                            NULL,
                                            0,
