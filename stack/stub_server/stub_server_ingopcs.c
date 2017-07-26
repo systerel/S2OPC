@@ -101,12 +101,13 @@ int main(void){
     // Empty callback data
     StubServer_Endpoint Callback_Data;
 
-    // Number of the secu policy configuration: 1
-    uint32_t nbOfSecurityPolicyConfigurations = 1;
+    // Number of the secu policy configuration
+    uint32_t nbOfSecurityPolicyConfigurations = 2;
 
     // Secu policy configuration: empty
-    SOPC_SecurityPolicy secuConfig[1];
+    SOPC_SecurityPolicy secuConfig[nbOfSecurityPolicyConfigurations];
     SOPC_String_Initialize(&secuConfig[0].securityPolicy);
+    SOPC_String_Initialize(&secuConfig[1].securityPolicy);
 
     // Endpoint URL
     char* endpointUrl = "opc.tcp://localhost:8888/myEndPoint";
@@ -159,6 +160,8 @@ int main(void){
     if(STATUS_OK == status){
         status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy, SecurityPolicy_Basic256Sha256_URI);
         secuConfig[0].securityModes = SECURITY_MODE_SIGN_MASK | SECURITY_MODE_SIGNANDENCRYPT_MASK;
+        status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy, SecurityPolicy_None_URI);
+        secuConfig[1].securityModes = SECURITY_MODE_NONE_MASK;
     }
 
     if(STATUS_OK == status){

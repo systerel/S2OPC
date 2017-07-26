@@ -101,7 +101,7 @@ SOPC_StatusCode StubClient_ResponseEvent_Callback(SOPC_Channel         channel,
     return 0;
 }
 
-int main(void){
+int main(int argc, char *argv[]){
     SOPC_StatusCode status = STATUS_OK;
 
     // Sleep timeout in milliseconds
@@ -129,8 +129,24 @@ int main(void){
     char* pRequestedSecurityPolicyUri = SecurityPolicy_Basic256Sha256_URI;
 
     // Message security mode: None
-    OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;//OpcUa_MessageSecurityMode_None;
+    OpcUa_MessageSecurityMode messageSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
 
+    // Manage change of security policy and mode (none = None, None | sign = Basic256Sha256)
+    if(argc == 2){
+        if(strlen(argv[1]) == strlen("none") && 0 == memcmp(argv[1], "none", strlen("none"))){
+            messageSecurityMode = OpcUa_MessageSecurityMode_None;
+            pRequestedSecurityPolicyUri = SecurityPolicy_None_URI;
+            printf(">>Stub_Client: Security mode ='None'\n");
+        }else if(strlen(argv[1]) == strlen("sign") && 0 == memcmp(argv[1], "sign", strlen("sign"))){
+            messageSecurityMode = OpcUa_MessageSecurityMode_Sign;
+            printf(">>Stub_Client: Security mode ='Sign'\n");
+        }else{
+            printf(">>Stub_Client: Security mode ='SignAndEncrypt'\n");
+        }
+    }else{
+        printf(">>Stub_Client: Security mode ='SignAndEncrypt'\n");
+    }
+    printf(">>Stub_Client: Security policy ='%s'\n", pRequestedSecurityPolicyUri);
 
     // Paths to client certificate/key and server certificate
     // Client certificate name
