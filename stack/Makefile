@@ -242,7 +242,7 @@ client_server_test: $(EXEC_DIR)/stub_client_ingopcs $(EXEC_DIR)/stub_server_ingo
 
 mbedtls:
 	@echo "Building mbedtls..."
-	@$(MAKE) $(MBED_SHARED) -C $(MBEDTLS_DIR) programs tests
+	@$(MAKE) $(MBED_SHARED) -C $(MBEDTLS_DIR) lib
 
 check: config library $(EXEC_DIR)/check_stack
 	@echo "Executing tests..."
