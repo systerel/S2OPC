@@ -2098,47 +2098,47 @@ SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_MsgBuffer* m
     SOPC_Byte encodingMask = 0;
     if(dataValue != NULL){
         status = SOPC_Byte_Read(&encodingMask, msgBuffer);
-    }
-    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotNullValue) != 0){
-        status = SOPC_Variant_Read(&dataValue->Value, msgBuffer);
-    }else{
-        dataValue->Value.BuiltInTypeId = SOPC_Null_Id;
-    }
-    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotGoodStatusCode) != 0){
-        status = SOPC_StatusCode_Read(&dataValue->Status, msgBuffer);
-    }else{
-        dataValue->Status = STATUS_OK;
-    }
-    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinSourceDate) != 0){
-        status = SOPC_DateTime_Read(&dataValue->SourceTimestamp, msgBuffer);
-    }else{
-        dataValue->SourceTimestamp.Low32 = 0;
-        dataValue->SourceTimestamp.High32 = 0;
-    }
-    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroSourcePico) != 0){
-        status = SOPC_UInt16_Read(&dataValue->SourcePicoSeconds, msgBuffer);
-    }else{
-        dataValue->SourcePicoSeconds = 0;
-    }
-    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinServerDate) != 0){
+        if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotNullValue) != 0){
+            status = SOPC_Variant_Read(&dataValue->Value, msgBuffer);
+        }else{
+            dataValue->Value.BuiltInTypeId = SOPC_Null_Id;
+        }
+        if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotGoodStatusCode) != 0){
+            status = SOPC_StatusCode_Read(&dataValue->Status, msgBuffer);
+        }else{
+            dataValue->Status = STATUS_OK;
+        }
+        if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinSourceDate) != 0){
+            status = SOPC_DateTime_Read(&dataValue->SourceTimestamp, msgBuffer);
+        }else{
+            dataValue->SourceTimestamp.Low32 = 0;
+            dataValue->SourceTimestamp.High32 = 0;
+        }
+        if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroSourcePico) != 0){
+            status = SOPC_UInt16_Read(&dataValue->SourcePicoSeconds, msgBuffer);
+        }else{
+            dataValue->SourcePicoSeconds = 0;
+        }
+        if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotMinServerDate) != 0){
             status = SOPC_DateTime_Read(&dataValue->ServerTimestamp, msgBuffer);
-    }else{
-        dataValue->ServerTimestamp.Low32 = 0;
-        dataValue->ServerTimestamp.High32 = 0;
-    }
-    if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroServerPico) != 0){
-        status = SOPC_UInt16_Read(&dataValue->ServerPicoSeconds, msgBuffer);
-    }else{
-        dataValue->ServerPicoSeconds = 0;
-    }
+        }else{
+            dataValue->ServerTimestamp.Low32 = 0;
+            dataValue->ServerTimestamp.High32 = 0;
+        }
+        if(status == STATUS_OK && (encodingMask & SOPC_DataValue_NotZeroServerPico) != 0){
+            status = SOPC_UInt16_Read(&dataValue->ServerPicoSeconds, msgBuffer);
+        }else{
+            dataValue->ServerPicoSeconds = 0;
+        }
 
-    if(status != STATUS_OK && dataValue != NULL){
-        SOPC_Variant_Clear(&dataValue->Value);
-        SOPC_StatusCode_Clear(&dataValue->Status);
-        SOPC_DateTime_Clear(&dataValue->SourceTimestamp);
-        SOPC_UInt16_Clear(&dataValue->SourcePicoSeconds);
-        SOPC_DateTime_Clear(&dataValue->ServerTimestamp);
-        // No clear for last read since it should manage it itself in case of failure
+        if(status != STATUS_OK && dataValue != NULL){
+            SOPC_Variant_Clear(&dataValue->Value);
+            SOPC_StatusCode_Clear(&dataValue->Status);
+            SOPC_DateTime_Clear(&dataValue->SourceTimestamp);
+            SOPC_UInt16_Clear(&dataValue->SourcePicoSeconds);
+            SOPC_DateTime_Clear(&dataValue->ServerTimestamp);
+            // No clear for last read since it should manage it itself in case of failure
+        }
     }
 
     return status;
