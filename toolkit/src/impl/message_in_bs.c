@@ -44,7 +44,7 @@ void message_in_bs__INITIALISATION(void) {
    OPERATIONS Clause
   --------------------*/
 
-void message_in_bs__dealloc_msg_header_in(
+void message_in_bs__dealloc_msg_in_header(
    const constants__t_msg_header_i message_in_bs__msg_header){
   message_in_bs__dealloc_msg_in((constants__t_msg_i) message_in_bs__msg_header);
 }
@@ -56,7 +56,7 @@ void message_in_bs__dealloc_msg_in(const constants__t_msg_i message_in_bs__msg){
   }
 }
 
-void message_in_bs__dealloc_msg_buffer_in(
+void message_in_bs__dealloc_msg_in_buffer(
    const constants__t_byte_buffer_i message_in_bs__msg_buffer){
   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_in_bs__msg_buffer;
   SOPC_Buffer_Delete(msg->msgBuffer);
@@ -117,11 +117,34 @@ void message_in_bs__is_valid_msg_in(
   message_out_bs__is_valid_msg_out(message_in_bs__msg, message_in_bs__bres);
 }
 
-void message_in_bs__is_valid_msg_header_in(
+void message_in_bs__is_valid_msg_in_header(
    const constants__t_msg_header_i message_in_bs__msg_header,
    t_bool * const message_in_bs__bres){
   message_in_bs__is_valid_msg_in((constants__t_msg_i) message_in_bs__msg_header,
                                  message_in_bs__bres);
+}
+
+void message_in_bs__is_valid_msg_in_type(
+   const constants__t_msg_type_i message_in_bs__msg_typ,
+   t_bool * const message_in_bs__bres){
+  *message_in_bs__bres = true;
+  switch(message_in_bs__msg_typ){
+   case constants__e_msg_public_service_req:
+   case constants__e_msg_public_service_resp:
+   case constants__e_msg_session_create_req:
+   case constants__e_msg_session_create_resp:
+   case constants__e_msg_session_activate_req:
+   case constants__e_msg_session_activate_resp:
+   case constants__e_msg_session_close_req:
+   case constants__e_msg_session_close_resp:
+   case constants__e_msg_session_read_req:
+   case constants__e_msg_session_read_resp:
+   case constants__e_msg_session_write_req:
+   case constants__e_msg_session_write_resp:
+     break;
+   default: 
+     *message_in_bs__bres = false;
+   }
 }
 
 void message_in_bs__msg_in_memory_changed(void) {

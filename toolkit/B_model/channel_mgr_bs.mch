@@ -18,9 +18,7 @@
 MACHINE
     channel_mgr_bs
 SEES
-    constants,
-    message_in_bs,
-    message_out_bs
+    constants
     
 DEFINITIONS
     d_variables ==
@@ -130,8 +128,9 @@ OPERATIONS
         channel         : t_channel_i &
         channel         : t_channel &
         buffer          : t_byte_buffer_i &
-        buffer          : t_byte_buffer &
-        a_buffer_out_state = e_buffer_out_msg_written
+        buffer          : t_byte_buffer/* &
+        a_buffer_out_state = e_buffer_out_msg_written */
+        /* ISSUE: not possible to see message_out_bs */
     THEN
         ret :: {e_sc_ok, 
             e_sc_bad_invalid_state,  /* channel is not in a valid state*/

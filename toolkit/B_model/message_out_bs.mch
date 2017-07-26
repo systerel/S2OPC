@@ -45,9 +45,20 @@ INITIALISATION
     
 OPERATIONS
     
-    msg_out_memory_changed =
-    BEGIN
-        d_variables :( d_typing )
+    nmsg_header <-- alloc_app_req_msg_header (msg_type, req_msg) =
+    PRE
+        msg_type : t_msg_type_i &
+        msg_type : t_msg_type &
+        req_msg : t_msg_i &
+        req_msg : t_msg &
+        c_msg_out_header = c_msg_header_indet
+    THEN
+        CHOICE
+            nmsg_header, c_msg_out_header 
+            :( nmsg_header : t_msg_header_i & nmsg_header = c_msg_out_header & c_msg_out_header : t_msg_header)
+        OR
+            nmsg_header :( nmsg_header = c_msg_header_indet & nmsg_header = c_msg_out_header)
+        END
     END
     ;
     
@@ -66,54 +77,44 @@ OPERATIONS
         a_msg_out_type := msg_type
     END
     ;
-    
-    /* Note: msg shall temporary be provided if allocated since header is inside message*/
-    nmsg_header <-- alloc_msg_header (msg_type, msg) =
+        
+    nmsg_header, nmsg <-- alloc_req_msg (msg_type) =
     PRE
         msg_type : t_msg_type_i &
         msg_type : t_msg_type &
-        /* Note: temporary constraints: */
-        msg : t_msg_i &
-        msg = c_msg_out &
-        c_msg_out : t_msg
+        c_msg_out_header = c_msg_header_indet &
+        c_msg_out = c_msg_indet
     THEN
         CHOICE
-            nmsg_header, c_msg_out_header :( nmsg_header : t_msg_header_i & 
-                nmsg_header = c_msg_out_header & 
-                c_msg_out_header : t_msg_header)
-        OR
-            nmsg_header := c_msg_header_indet
-        END
-    END
-    ;
-    
-    nmsg <-- alloc_req_msg (msg_type) =
-    PRE
-        msg_type : t_msg_type_i &
-        msg_type : t_msg_type
-    THEN
-        CHOICE
+            nmsg_header, c_msg_out_header 
+            :( nmsg_header : t_msg_header_i & nmsg_header = c_msg_out_header & c_msg_out_header : t_msg_header) || 
             nmsg, c_msg_out :( nmsg : t_msg_i & nmsg = c_msg_out & c_msg_out : t_msg ) ||
             a_msg_out_type := msg_type
         OR
-            nmsg := c_msg_indet
+            nmsg_header :( nmsg_header = c_msg_header_indet & nmsg_header = c_msg_out_header) ||
+            nmsg :( nmsg = c_msg_indet & nmsg = c_msg_out)
         END
     END
     ;
     
-    nmsg <-- alloc_resp_msg (msg_type, req_msg_ctx) =
+    nmsg_header, nmsg <-- alloc_resp_msg (msg_type, req_msg_ctx) =
     PRE
         msg_type : t_msg_type_i &
-        msg_type : t_msg_type &
+        msg_type : t_msg_type & 
+        c_msg_out_header = c_msg_header_indet &
+        c_msg_out = c_msg_indet &
         req_msg_ctx : t_msg_i &
         req_msg_ctx = c_msg_in &
         c_msg_in : t_msg
     THEN
         CHOICE
+            nmsg_header, c_msg_out_header 
+            :( nmsg_header : t_msg_header_i & nmsg_header = c_msg_out_header & c_msg_out_header : t_msg_header) ||
             nmsg, c_msg_out :( nmsg : t_msg_i & nmsg = c_msg_out & c_msg_out : t_msg ) ||
             a_msg_out_type := msg_type
         OR
-            nmsg := c_msg_indet
+            nmsg_header :( nmsg_header = c_msg_header_indet & nmsg_header = c_msg_out_header) ||
+            nmsg :( nmsg = c_msg_indet & nmsg = c_msg_out)
         END
     END
     ;
@@ -132,10 +133,11 @@ OPERATIONS
     PRE
         msg : t_msg_i &
         msg = c_msg_out &
-        c_msg_out : t_msg
+        c_msg_out : t_msg &
+        a_msg_out_type : t_msg_type
     THEN
         c_msg_out := c_msg_indet ||
-        a_msg_out_type :: t_msg_type
+        a_msg_out_type := c_msg_type_indet
     END
     ;
     

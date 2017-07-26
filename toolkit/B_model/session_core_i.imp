@@ -412,7 +412,7 @@ OPERATIONS
     END
     ;
     
-    client_close_session (session) =
+    cli_close_session (session) =
     BEGIN
         set_session_state_closed (session)
     END

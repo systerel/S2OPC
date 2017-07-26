@@ -204,7 +204,7 @@ bool tlibw_stimulateB_with_message(SOPC_Toolkit_Msg *pMsg)
     constants__t_StatusCode_i sc = constants__c_StatusCode_indet;
 
     /* Calls treat */
-    io_dispatch_mgr__treat_write_request(
+    service_mgr__treat_write_request(
         (constants__t_msg_i) pMsg,
         (constants__t_user_i) 0,
         (constants__t_StatusCode_i *) &sc);

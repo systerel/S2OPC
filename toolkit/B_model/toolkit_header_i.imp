@@ -15,7 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-MACHINE
-    session_header
+IMPLEMENTATION
+   toolkit_header_i
+REFINES
+   toolkit_header
+
+IMPORTS
+    io_dispatch_mgr,
+    constants
 
 END

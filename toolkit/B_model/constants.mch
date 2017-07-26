@@ -81,13 +81,27 @@ SETS
     t_buffer_out_state_i = {c_buffer_out_state_indet,
         e_buffer_out_msg_written};
     
+    /* OPC UA message type */
     t_msg_type_i = {c_msg_type_indet,
         e_msg_public_service_req, e_msg_public_service_resp,
         e_msg_session_create_req, e_msg_session_create_resp,
         e_msg_session_activate_req, e_msg_session_activate_resp,
         e_msg_session_close_req, e_msg_session_close_resp,
         e_msg_session_read_req, e_msg_session_read_resp,
-        e_msg_session_write_req, e_msg_session_write_resp}
+        e_msg_session_write_req, e_msg_session_write_resp};
+    
+    /* OPC UA message header type (request / response) */
+    t_msg_header_type = {
+        e_msg_request_type,
+        e_msg_response_type
+    };
+    
+    /* Service type: session management / service on a session / public service */
+    t_msg_service_class = {
+        e_msg_session_treatment_class,
+        e_msg_session_service_class,
+        e_msg_public_service_class
+    }
 
 CONCRETE_CONSTANTS
     /*AddS,*/
@@ -143,13 +157,14 @@ ABSTRACT_CONSTANTS
     t_channel,
     t_request_handle,
     
-    s_msg_managed,
+    s_service_treatment_reqs,
+    s_service_treatment_resps,
     s_service_on_session_reqs,
     s_service_on_session_resps,
+    s_public_service_reqs,
+    s_public_service_resps,
     s_service_reqs,
-    s_service_resps,
-    s_req_msgs,
-    s_resp_msgs
+    s_service_resps
 
 PROPERTIES
     /*AddS <: t_Node &*/
@@ -252,39 +267,27 @@ PROPERTIES
         e_buffer_in_msg_header_read,
         e_buffer_in_msg_read } &
     
-    t_msg_type = { e_msg_public_service_req, e_msg_public_service_resp,
-        e_msg_session_create_req, e_msg_session_create_resp,
-        e_msg_session_activate_req, e_msg_session_activate_resp,
-        e_msg_session_close_req, e_msg_session_close_resp,
-        e_msg_session_read_req, e_msg_session_read_resp,
-        e_msg_session_write_req, e_msg_session_write_resp} &
-    s_msg_managed = { e_msg_public_service_req, e_msg_public_service_resp,
-        e_msg_session_create_req, e_msg_session_create_resp,
-        e_msg_session_activate_req, e_msg_session_activate_resp,
-        e_msg_session_close_req, e_msg_session_close_resp,
-        e_msg_session_read_req, e_msg_session_read_resp,
-        e_msg_session_write_req, e_msg_session_write_resp} &
+    s_service_treatment_reqs = {e_msg_session_create_req,
+        e_msg_session_activate_req,
+        e_msg_session_close_req} &
+
+    s_service_treatment_resps = {e_msg_session_create_resp,
+        e_msg_session_activate_resp,
+        e_msg_session_close_resp } &
     
     s_service_on_session_reqs  = {e_msg_session_read_req,
         e_msg_session_write_req} &
+    
     s_service_on_session_resps = {e_msg_session_read_resp,
         e_msg_session_write_resp} &
     
-    s_service_reqs  = s_service_on_session_reqs \/ {e_msg_public_service_req} &
-    s_service_resps = s_service_on_session_resps \/ {e_msg_public_service_resp} &
-
-    s_req_msgs = {
-        e_msg_public_service_req,
-        e_msg_session_create_req,
-        e_msg_session_activate_req,
-        e_msg_session_close_req,
-        e_msg_session_read_req} &
-    s_resp_msgs = {
-        e_msg_public_service_resp,
-        e_msg_session_create_resp,
-        e_msg_session_activate_resp,
-        e_msg_session_close_resp,
-        e_msg_session_read_resp}
+    s_public_service_reqs = {e_msg_public_service_req} &
+    s_public_service_resps = {e_msg_public_service_resp} &
+    
+    s_service_reqs  = s_service_treatment_reqs \/ s_service_on_session_reqs \/ s_public_service_reqs &
+    s_service_resps = s_service_on_session_resps \/ s_public_service_resps &
+    
+    t_msg_type = s_service_reqs \/ s_service_resps
 
 OPERATIONS
     rvi <-- read_cast_t_ReadValue(ii) =

@@ -316,7 +316,7 @@ OPERATIONS
     END
     ;
     
-    client_close_session (session) =
+    cli_close_session (session) =
     PRE
         session : t_session_i
     THEN

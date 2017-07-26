@@ -21,7 +21,7 @@
 
 #include "b2c.h"
 
-#include "session_header_init.h"
+#include "toolkit_header_init.h"
 #include "io_dispatch_mgr.h"
 #include "constants_bs.h"
 

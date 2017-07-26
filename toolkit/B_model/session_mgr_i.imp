@@ -36,7 +36,7 @@ PROMOTES
     delete_session,
     client_secure_channel_lost,
     server_secure_channel_lost,
-    client_close_session,
+    cli_close_session,
     server_close_session,
     
     is_valid_session,
@@ -108,7 +108,7 @@ OPERATIONS
             l_ret := l_resp_status
         END;
         IF l_ret /= e_sc_ok THEN
-            client_close_session (session)
+            cli_close_session (session)
         END;
         session := l_session
     END
@@ -241,7 +241,7 @@ OPERATIONS
             IF bres = FALSE
             THEN
                 // session in invalid state or invalid channel used => close session
-                client_close_session (l_session)
+                cli_close_session (l_session)
             END
         ELSE
             bres := FALSE

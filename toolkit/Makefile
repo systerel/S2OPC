@@ -21,13 +21,13 @@ LFLAGS  =-g
 INCLUDES=-I$(PATHTRAD) -I. -I$(STACK_H) -I$(PATHIMPL) -I$(PATHTEST)
 LIBS    =-L$(STACK_LIB) -L$(CRYPTO_LIB) -lm -lingopcs -lmbedcrypto -lmbedx509 -lpthread -lrt
 
-OBJS        =session_header_init.o \
+OBJS        =toolkit_header_init.o \
              address_space.o address_space_it.o constants.o msg_read_request.o service_read.o service_read_it.o \
              address_space_bs.o constants_bs.o msg_read_request_bs.o msg_read_response_bs.o \
              service_write_decode_bs.o response_write_bs.o \
              gen_addspace.o util_variant.o \
              testlib_read_response.o wrap_read.o testlib_write.o
-OBJS        += session_header.o io_dispatch_mgr.o session_mgr.o session_core.o session_core_1_bs.o \
+OBJS        += toolkit_header.o io_dispatch_mgr.o service_mgr.o session_mgr.o session_core.o session_core_1_bs.o \
                session_async_bs.o \
                channel_mgr_bs.o request_handle_bs.o message_in_bs.o message_out_bs.o \
                service_response_cli_cb_bs.o \

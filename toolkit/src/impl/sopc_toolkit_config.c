@@ -32,7 +32,7 @@
 #include "sopc_encodeable.h"
 
 #include "io_dispatch_mgr.h"
-#include "session_header_init.h"
+#include "toolkit_header_init.h"
 
 static struct {
     uint8_t     initDone;

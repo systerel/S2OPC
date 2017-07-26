@@ -43,12 +43,6 @@ INITIALISATION
     d_variables :( d_typing )
     
 OPERATIONS
-    
-    msg_in_memory_changed =
-    BEGIN
-        d_variables :( d_typing )
-    END
-    ;
 
     msg_typ <-- decode_msg_type (msg_buffer) =
     PRE
@@ -114,7 +108,7 @@ OPERATIONS
     END
     ;
     
-    dealloc_msg_header_in (msg_header) =
+    dealloc_msg_in_header (msg_header) =
     PRE
         msg_header : t_msg_header_i &
         msg_header = c_msg_in_header &
@@ -128,14 +122,15 @@ OPERATIONS
     PRE
         msg : t_msg_i &
         msg = c_msg_in &
-        c_msg_in : t_msg
+        c_msg_in : t_msg &
+        a_msg_in_type : t_msg_type
     THEN
         c_msg_in := c_msg_indet ||
         a_msg_in_type := c_msg_type_indet
     END
     ;
     
-    dealloc_msg_buffer_in (msg_buffer) =
+    dealloc_msg_in_buffer (msg_buffer) =
     PRE
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer
@@ -144,7 +139,7 @@ OPERATIONS
     END
     ;
         
-    bres <-- is_valid_msg_header_in (msg_header) =
+    bres <-- is_valid_msg_in_header (msg_header) =
     PRE
         msg_header : t_msg_header_i
     THEN
@@ -157,6 +152,14 @@ OPERATIONS
         msg : t_msg_i
     THEN
         bres := bool(msg = c_msg_in & c_msg_in : t_msg)
+    END
+    ;
+    
+    bres <-- is_valid_msg_in_type (msg_typ) =
+    PRE
+        msg_typ : t_msg_type_i
+    THEN
+        bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
     
@@ -175,7 +178,7 @@ OPERATIONS
         msg_header : t_msg_header_i &
         msg_header = c_msg_in_header &
         c_msg_in_header : t_msg_header &
-        a_msg_in_type : s_req_msgs
+        a_msg_in_type : s_service_treatment_reqs \/ s_service_on_session_reqs
     THEN
         session_token :: t_session_token_i
     END

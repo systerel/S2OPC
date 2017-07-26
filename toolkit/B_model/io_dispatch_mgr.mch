@@ -22,66 +22,65 @@ SEES
     constants
 
 DEFINITIONS
-    d_variables ==
+    d_msg_variables ==
     a_buffer_in_state,
+    c_msg_in_header,
     c_msg_in,
     a_msg_in_type,
-    c_msg_out;
-
-    d_typage ==
+    a_buffer_out_state,
+    c_msg_out_header,
+    c_msg_out,
+    a_msg_out_type;
+    
+    d_msg_typing == 
     a_buffer_in_state : t_buffer_in_state_i &
+    c_msg_in_header : t_msg_header_i &
     c_msg_in : t_msg_i &
-    a_msg_in_type : t_msg_type &
-    c_msg_out : t_msg_i
-
+    a_msg_in_type : t_msg_type_i &
+    a_buffer_out_state : t_buffer_out_state_i &
+    c_msg_out_header : t_msg_header_i &
+    c_msg_out : t_msg_i &
+    a_msg_out_type : t_msg_type_i
+    
 ABSTRACT_VARIABLES
-    d_variables
-
+    d_msg_variables 
+    
 INVARIANT
-    d_typage
-
+    d_msg_typing
+    
 INITIALISATION
-    a_buffer_in_state  :: t_buffer_in_state_i ||
-    c_msg_in  :: t_msg_i                      ||
-    a_msg_in_type :: t_msg_type               ||
-    c_msg_out  :: t_msg_i
-
+    d_msg_variables :( d_msg_typing )
+    
 OPERATIONS
 
-    msgs_memory_changed =
-    BEGIN
-        d_variables :( d_typage )
-    END
-    ;
-
-    receive_buffer_msg (channel, buffer) =
+    receive_msg_buffer (channel, buffer) =
     PRE
         channel  : t_channel_i &
         channel  : t_channel &
         buffer   : t_byte_buffer_i &
         buffer   : t_byte_buffer &
         a_buffer_in_state = e_buffer_in_msg_not_read &
-        c_msg_in = c_msg_indet &
-        c_msg_out = c_msg_indet &
-        a_msg_in_type = c_msg_type_indet
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         /* End of receive execution lead to a buffer in invalid state (error) or a buffer fully read */
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
+        /* c_msg_in instance could be provided to app but should be not referenced anymore in c_msg_in */
     END
     ;
     
-    cli_channel_connected_event (channel_config_idx, channel) =
+    client_channel_connected_event (channel_config_idx, channel) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         channel : t_channel_i &
-        channel : t_channel
+        channel : t_channel &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         skip
     END
     ;
 
-    cli_secure_channel_timeout (channel_config_idx) =
+    client_secure_channel_timeout (channel_config_idx) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx
@@ -90,7 +89,7 @@ OPERATIONS
     END
 	;
     
-    srv_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
+    server_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
         endpoint_config_idx : t_endpoint_config_idx &
@@ -103,27 +102,27 @@ OPERATIONS
     END
     ;
     
-    bres <-- activate_new_session (channel_config_idx, user) =
+    bres <-- client_activate_new_session (channel_config_idx, user) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         user : t_user_i &
         user : t_user &
-        c_msg_out = c_msg_indet
+        c_msg_out = c_msg_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         bres :: BOOL
     END
     ;
 
-    
     /* Only to change user on an active channel */
-    ret <-- activate_session (session, user) =
+    ret <-- client_activate_session (session, user) = /* PROMOTED */
     PRE
         session : t_session_i &
         session : t_session &
         user : t_user_i &
         user : t_user &
-        c_msg_out = c_msg_indet
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         ret :: {e_sc_ok,
             e_sc_bad_out_of_memory,
@@ -138,11 +137,11 @@ OPERATIONS
     END
     ;
 
-    ret <-- close_session (session) =
+    ret <-- client_close_session (session) =
     PRE
         session : t_session_i &
         session : t_session &
-        c_msg_out = c_msg_indet
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         ret :: {e_sc_ok,
             e_sc_bad_encoding_error,
@@ -159,20 +158,19 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : t_channel &
-        c_msg_out = c_msg_indet
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         skip
     END
     ;
 
-    ret <-- send_service_request_msg (session, req_msg) =
+    ret <-- client_send_service_request_msg (session, req_msg) =
     PRE
         session         : t_session_i &
         session         : t_session &
         req_msg         : t_msg_i &
-        req_msg         = c_msg_in &
-        c_msg_in        : t_msg &
-        a_buffer_in_state = c_buffer_in_state_indet /* no buffer_in used from applicative API */
+        req_msg         : t_msg &
+        a_buffer_out_state = c_buffer_out_state_indet
     THEN
         ret :: {e_sc_ok,
             e_sc_bad_invalid_state,  /* session is not in a valid state */
@@ -182,8 +180,7 @@ OPERATIONS
             e_sc_bad_secure_channel_closed,
             e_sc_bad_connection_closed,
             e_sc_bad_invalid_argument, /* message has not expected type */
-            e_sc_bad_encoding_error} ||
-        c_msg_out  :: t_msg_i
+            e_sc_bad_encoding_error}
     END
     ;
     

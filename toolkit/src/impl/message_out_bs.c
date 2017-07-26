@@ -82,30 +82,34 @@ void util_message_out_bs__alloc_msg(
   }
 }
 
-void message_out_bs__alloc_msg_header(
+void message_out_bs__alloc_app_req_msg_header(
    const constants__t_msg_type_i message_out_bs__msg_type,
-   const constants__t_msg_i message_out_bs__msg,
+   const constants__t_msg_i message_out_bs__req_msg,
    constants__t_msg_header_i * const message_out_bs__nmsg_header){
   // NOTHING TO DO: until body and header are really separated in implementation of messages
-  *message_out_bs__nmsg_header = (constants__t_msg_header_i) message_out_bs__msg;
+  *message_out_bs__nmsg_header = (constants__t_msg_header_i) message_out_bs__req_msg;
 }
 
 
 void message_out_bs__alloc_req_msg(
    const constants__t_msg_type_i message_out_bs__msg_type,
+   constants__t_msg_header_i * const message_out_bs__nmsg_header,
    constants__t_msg_i * const message_out_bs__nmsg){
   util_message_out_bs__alloc_msg(message_out_bs__msg_type,
                                  message_out_bs__nmsg);
+  *message_out_bs__nmsg_header = *message_out_bs__nmsg;
 }
 
 void message_out_bs__alloc_resp_msg(
    const constants__t_msg_type_i message_out_bs__msg_type,
    const constants__t_msg_i message_out_bs__req_msg_ctx,
+   constants__t_msg_header_i * const message_out_bs__nmsg_header,
    constants__t_msg_i * const message_out_bs__nmsg){
   SOPC_Toolkit_Msg* req_msg = NULL;
   SOPC_Toolkit_Msg* resp_msg = NULL;
   util_message_out_bs__alloc_msg(message_out_bs__msg_type,
                                  message_out_bs__nmsg);
+  *message_out_bs__nmsg_header = *message_out_bs__nmsg;
   if(*message_out_bs__nmsg != constants__c_msg_indet){
     req_msg = (SOPC_Toolkit_Msg*) message_out_bs__req_msg_ctx;
     resp_msg = (SOPC_Toolkit_Msg*) *message_out_bs__nmsg;

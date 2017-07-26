@@ -154,7 +154,7 @@ bool read_service_test(OpcUa_ReadRequest *pReadReq)
         };
 
     /* Calls treat */
-    io_dispatch_mgr__treat_read_request(
+    service_mgr__treat_read_request(
         (constants__t_msg_i)&msg_in,
         (constants__t_msg_i)&msg_out);
 

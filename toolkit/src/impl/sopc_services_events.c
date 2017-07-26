@@ -46,9 +46,9 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // params = SOPC_SecureChannel_Config*
     // auxParam == connection Id
     // => B model entry point to add
-    io_dispatch_mgr__srv_channel_connected_event(id, 
-                                                 ((SOPC_SecureChannel_ConnectedConfig*) params)->configIdx, 
-                                                 auxParam);
+    io_dispatch_mgr__server_channel_connected_event(id, 
+                                                    ((SOPC_SecureChannel_ConnectedConfig*) params)->configIdx, 
+                                                    auxParam);
     break;
   case SC_TO_SE_EP_CLOSED:
     //printf("SC_TO_SE_EPCLOSED\n");
@@ -69,14 +69,14 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // params = SC config (for secure channel Id only ?) ? => TMP: NULL for now
     // auxParam == secure channel configuration index
     // => B model entry point to add
-    io_dispatch_mgr__cli_channel_connected_event(auxParam, id);
+    io_dispatch_mgr__client_channel_connected_event(auxParam, id);
     break;
   case SC_TO_SE_SC_CONNECTION_TIMEOUT:
     //printf("SC_TO_SE_SC_CONNECTION_TIMEOUT\n");
     // id == secure channel configuration index
     // => B model entry point to add
     // TODO: treat with a timer reconnection attempt (limited attempts ?) => no change of state (connecting) until all attempts terminated
-    io_dispatch_mgr__cli_secure_channel_timeout(id);
+    io_dispatch_mgr__client_secure_channel_timeout(id);
     break;
   case SC_TO_SE_SC_DISCONNECTED:
     //printf("SC_TO_SE_SC_DISCONNECTED\n");
@@ -98,7 +98,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // auxParam == context
     // => B model entry point to add
     assert(NULL != params);
-    io_dispatch_mgr__receive_buffer_msg((constants__t_channel_i) id,
+    io_dispatch_mgr__receive_msg_buffer((constants__t_channel_i) id,
                                         (constants__t_byte_buffer_i) params); // SOPC_Toolkit_Msg
     // params is freed by services manager
     break;
@@ -141,9 +141,9 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // id == secure channel configuration
     // params = TODO: user authentication
     // auxParam = TMP: user integer
-    io_dispatch_mgr__activate_new_session(id,
-                                          auxParam,
-                                          &bres);
+    io_dispatch_mgr__client_activate_new_session(id,
+                                                 auxParam,
+                                                 &bres);
     if(bres == false){
       status = STATUS_NOK;
     }
@@ -152,9 +152,9 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     //printf("APP_TO_SE_SEND_SESSION_REQUEST\n");
     // id == session id
     // params = request
-    io_dispatch_mgr__send_service_request_msg(id,
-                                              params,
-                                              &sCode);
+    io_dispatch_mgr__client_send_service_request_msg(id,
+                                                     params,
+                                                     &sCode);
     if(sCode != constants__e_sc_ok){
       status = STATUS_NOK;
     }
@@ -162,8 +162,8 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
   case APP_TO_SE_CLOSE_SESSION:
     //printf("APP_TO_SE_CLOSE_SESSION\n");
     // id == session id
-    io_dispatch_mgr__close_session(id,
-                                   &sCode);
+    io_dispatch_mgr__client_close_session(id,
+                                          &sCode);
     if(sCode != constants__e_sc_ok){
       status = STATUS_NOK;
     }
