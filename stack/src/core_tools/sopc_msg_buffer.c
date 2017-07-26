@@ -27,7 +27,7 @@ const SOPC_Byte SOPC_MSG[3] = {'M','S','G'};
 const SOPC_Byte SOPC_OPN[3] = {'O','P','N'};
 const SOPC_Byte SOPC_CLO[3] = {'C','L','O'};
 
-SOPC_MsgBuffer* MsgBuffer_Create(Buffer*               buffer,
+SOPC_MsgBuffer* MsgBuffer_Create(SOPC_Buffer*               buffer,
                                  uint32_t              maxChunks,
                                  void*                 flushData,
                                  SOPC_NamespaceTable*  nsTable,
@@ -58,7 +58,7 @@ void MsgBuffer_Delete(SOPC_MsgBuffer** ptBuffer){
     if(ptBuffer != NULL && *ptBuffer != NULL){
         assert((*ptBuffer)->nbBuffers == 1);
         if((*ptBuffer)->buffers != NULL){
-            Buffer_Delete((*ptBuffer)->buffers);
+            SOPC_Buffer_Delete((*ptBuffer)->buffers);
         }
         free(*ptBuffer);
         *ptBuffer = NULL;
@@ -68,7 +68,7 @@ void MsgBuffer_Delete(SOPC_MsgBuffer** ptBuffer){
 void MsgBuffer_Reset(SOPC_MsgBuffer* mBuffer){
     if(mBuffer != NULL){
         assert(mBuffer->nbBuffers == 1);
-        Buffer_Reset(mBuffer->buffers);
+        SOPC_Buffer_Reset(mBuffer->buffers);
         mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = SOPC_SecureMessage;
         mBuffer->currentChunkSize = 0;
@@ -85,7 +85,7 @@ SOPC_StatusCode MsgBuffer_ResetNextChunk(SOPC_MsgBuffer* mBuffer,
     if(mBuffer != NULL){
         assert(mBuffer->nbBuffers == 1);
         mBuffer->currentChunkSize = bodyPosition;
-        status = Buffer_ResetAfterPosition(mBuffer->buffers, bodyPosition);
+        status = SOPC_Buffer_ResetAfterPosition(mBuffer->buffers, bodyPosition);
         if(status == STATUS_OK &&
            (mBuffer->maxChunks == 0
             || mBuffer->nbChunks < mBuffer->maxChunks))
@@ -135,7 +135,7 @@ SOPC_StatusCode MsgBuffer_CopyBuffer(SOPC_MsgBuffer* destMsgBuffer,
         //  and nbBuffers which is set on initialization
         MsgBuffer_InternalCopyProperties(destMsgBuffer, srcMsgBuffer);
 
-        status = Buffer_Copy(destMsgBuffer->buffers, srcMsgBuffer->buffers);
+        status = SOPC_Buffer_Copy(destMsgBuffer->buffers, srcMsgBuffer->buffers);
     }
     return status;
 }
@@ -157,11 +157,11 @@ SOPC_MsgBuffers* MsgBuffers_Create(uint32_t              maxChunks,
         if(mBuffers != NULL){
             status = STATUS_OK;
             mBuffers->nbBuffers = maxChunks;
-            mBuffers->buffers = (Buffer*) malloc(sizeof(Buffer) * maxChunks);
+            mBuffers->buffers = (SOPC_Buffer*) malloc(sizeof(SOPC_Buffer) * maxChunks);
 
             if(mBuffers->buffers != NULL){
                 while(status == STATUS_OK && idx < maxChunks){
-                    status = Buffer_Init(&(mBuffers->buffers[idx]), bufferSize);
+                    status = SOPC_Buffer_Init(&(mBuffers->buffers[idx]), bufferSize);
                     idx++;
                 }
 
@@ -200,7 +200,7 @@ void MsgBuffers_Reset(SOPC_MsgBuffers* mBuffer){
     uint32_t idx = 0;
     if(mBuffer != NULL){
         for(idx = 0; idx < mBuffer->nbChunks; idx++){
-            Buffer_Reset(&(mBuffer->buffers[idx]));
+            SOPC_Buffer_Reset(&(mBuffer->buffers[idx]));
         }
         mBuffer->type = TCP_UA_Message_Unknown;
         mBuffer->secureType = SOPC_SecureMessage;
@@ -218,7 +218,7 @@ void MsgBuffers_Delete(SOPC_MsgBuffers** ptBuffers){
     if(ptBuffers != NULL && msgBuffers != NULL){
         if(msgBuffers->buffers != NULL){
             for(idx = 0; idx < msgBuffers->nbBuffers; idx++){
-                Buffer_Clear (&(msgBuffers->buffers[idx]));
+                SOPC_Buffer_Clear (&(msgBuffers->buffers[idx]));
             }
             free(msgBuffers->buffers);
         }
@@ -227,8 +227,8 @@ void MsgBuffers_Delete(SOPC_MsgBuffers** ptBuffers){
     }
 }
 
-Buffer* MsgBuffers_GetCurrentChunk(SOPC_MsgBuffers* mBuffer){
-    Buffer* buf = NULL;
+SOPC_Buffer* MsgBuffers_GetCurrentChunk(SOPC_MsgBuffers* mBuffer){
+    SOPC_Buffer* buf = NULL;
     if(mBuffer != NULL){
         if(mBuffer->nbChunks > 0){
             buf = &(mBuffer->buffers[mBuffer->nbChunks - 1]);
@@ -237,9 +237,9 @@ Buffer* MsgBuffers_GetCurrentChunk(SOPC_MsgBuffers* mBuffer){
     return buf;
 }
 
-Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
+SOPC_Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
                              uint32_t*        bufferIdx){
-    Buffer* buf = NULL;
+    SOPC_Buffer* buf = NULL;
     if(mBuffer != NULL && bufferIdx != NULL){
         if(mBuffer->nbChunks < mBuffer->maxChunks){
             *bufferIdx = mBuffer->nbChunks;
@@ -250,17 +250,17 @@ Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
     return buf;
 }
 
-Buffer* MsgBuffers_NextChunkWithHeadersCopy(SOPC_MsgBuffers* mBuffers,
+SOPC_Buffer* MsgBuffers_NextChunkWithHeadersCopy(SOPC_MsgBuffers* mBuffers,
                                             uint32_t         bodyPosition)
 {
     SOPC_StatusCode status = STATUS_NOK;
-    Buffer* buf = NULL;
+    SOPC_Buffer* buf = NULL;
     if(mBuffers != NULL){
         assert(mBuffers->nbBuffers == 1);
         mBuffers->currentChunkSize = bodyPosition;
         if(mBuffers->maxChunks == 0 || mBuffers->nbChunks < mBuffers->maxChunks)
         {
-            status = Buffer_CopyWithLength(&mBuffers->buffers[mBuffers->nbChunks],
+            status = SOPC_Buffer_CopyWithLength(&mBuffers->buffers[mBuffers->nbChunks],
                                            &mBuffers->buffers[mBuffers->nbChunks-1],
                                            bodyPosition);
             mBuffers->nbChunks = mBuffers->nbChunks + 1;
@@ -277,14 +277,14 @@ Buffer* MsgBuffers_NextChunkWithHeadersCopy(SOPC_MsgBuffers* mBuffers,
 SOPC_StatusCode MsgBuffers_SetCurrentChunkFirst(SOPC_MsgBuffers* mBuffer){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t idx = 0;
-    Buffer* buffer = NULL;
+    SOPC_Buffer* buffer = NULL;
     if(mBuffer != NULL && mBuffer->nbChunks > 1){
         // Keep current buffer reference
         buffer = MsgBuffers_GetCurrentChunk(mBuffer);
         if(buffer != NULL){
-            status = Buffer_Copy(&mBuffer->buffers[0], buffer);
+            status = SOPC_Buffer_Copy(&mBuffer->buffers[0], buffer);
             for(idx = 1; idx < mBuffer->nbChunks; idx++){
-                Buffer_Reset(&mBuffer->buffers[idx]);
+                SOPC_Buffer_Reset(&mBuffer->buffers[idx]);
             }
             mBuffer->nbChunks = 1;
         }
@@ -310,7 +310,7 @@ SOPC_StatusCode MsgBuffers_CopyBufferIdx(SOPC_MsgBuffer*  destMsgBuffer,
         //  and nbBuffers which is set on initialization
         MsgBuffer_InternalCopyProperties(destMsgBuffer, srcMsgBuffers);
 
-        status = Buffer_Copy(destMsgBuffer->buffers, &srcMsgBuffers->buffers[bufferIdx]);
+        status = SOPC_Buffer_Copy(destMsgBuffer->buffers, &srcMsgBuffers->buffers[bufferIdx]);
     }
     return status;
 }
@@ -330,7 +330,7 @@ SOPC_StatusCode MsgBuffers_CopyBuffer(SOPC_MsgBuffers* destMsgBuffer,
         //  and nbBuffers which is set on initialization
         MsgBuffer_InternalCopyProperties(destMsgBuffer, srcMsgBuffer);
 
-        status = Buffer_CopyWithLength(&(destMsgBuffer->buffers[bufferIdx]),
+        status = SOPC_Buffer_CopyWithLength(&(destMsgBuffer->buffers[bufferIdx]),
                                        srcMsgBuffer->buffers,
                                        limitedLength);
     }

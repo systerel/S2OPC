@@ -38,13 +38,13 @@ SOPC_StatusCode TCP_UA_EncodeHeader(SOPC_MsgBuffer* msgBuffer,
         assert(msgBuffer->buffers->max_size > TCP_UA_HEADER_LENGTH);
         switch(type){
             case TCP_UA_Message_Hello:
-                status = Buffer_Write(msgBuffer->buffers, SOPC_HEL, 3);
+                status = SOPC_Buffer_Write(msgBuffer->buffers, SOPC_HEL, 3);
                 break;
             case TCP_UA_Message_Acknowledge:
-                status = Buffer_Write(msgBuffer->buffers, SOPC_ACK, 3);
+                status = SOPC_Buffer_Write(msgBuffer->buffers, SOPC_ACK, 3);
                 break;
             case TCP_UA_Message_Error:
-                status = Buffer_Write(msgBuffer->buffers, SOPC_ERR, 3);
+                status = SOPC_Buffer_Write(msgBuffer->buffers, SOPC_ERR, 3);
                 break;
             case TCP_UA_Message_SecureMessage:
                 // Managed by secure channel layer
@@ -77,13 +77,13 @@ SOPC_StatusCode TCP_UA_FinalizeHeader(SOPC_MsgBuffer* msgBuffer){
     SOPC_StatusCode status = STATUS_NOK;
     const uint32_t currentPosition = msgBuffer->buffers->position;
 
-    status = Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
+    status = SOPC_Buffer_SetPosition(msgBuffer->buffers, UA_HEADER_LENGTH_POSITION);
 
     if(status == STATUS_OK){
         status = SOPC_UInt32_Write(&currentPosition, msgBuffer);
     }
     if(status == STATUS_OK){
-        status = Buffer_SetPosition(msgBuffer->buffers, currentPosition);
+        status = SOPC_Buffer_SetPosition(msgBuffer->buffers, currentPosition);
         msgBuffer->currentChunkSize = currentPosition;
     }
     return status;
@@ -123,7 +123,7 @@ SOPC_StatusCode TCP_UA_ReadData(SOPC_Socket*    socket,
                 readBytes = TCP_UA_HEADER_LENGTH - msgBuffer->buffers->length;
                 status = SOPC_Socket_Read(socket, msgBuffer->buffers->data, readBytes, &readBytes);
                 if(status == STATUS_OK && readBytes > 0){
-                    Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
+                    SOPC_Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
 
                     if(msgBuffer->buffers->length == TCP_UA_HEADER_LENGTH){
                         status = TCP_UA_ReadHeader(msgBuffer);
@@ -149,7 +149,7 @@ SOPC_StatusCode TCP_UA_ReadData(SOPC_Socket*    socket,
                                     readBytes,
                                     &readBytes);
             if(status == STATUS_OK && readBytes > 0){
-                Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
+                SOPC_Buffer_SetDataLength(msgBuffer->buffers, msgBuffer->buffers->length + readBytes);
             }
             if(msgBuffer->buffers->length == msgBuffer->currentChunkSize){
                 // Message complete just return
@@ -178,7 +178,7 @@ SOPC_StatusCode TCP_UA_ReadHeader(SOPC_MsgBuffer* msgBuffer){
        && msgBuffer->type == TCP_UA_Message_Unknown)
     {
         // READ message type
-        status = Buffer_Read(msgType, msgBuffer->buffers, 3);
+        status = SOPC_Buffer_Read(msgType, msgBuffer->buffers, 3);
         if(status == STATUS_OK){
             if(memcmp(msgType, SOPC_HEL, 3) == 0){
                 msgBuffer->type = TCP_UA_Message_Hello;
@@ -212,7 +212,7 @@ SOPC_StatusCode TCP_UA_ReadHeader(SOPC_MsgBuffer* msgBuffer){
         // READ IsFinal message chunk
         if(status == STATUS_OK)
         {
-            status = Buffer_Read(&isFinal, msgBuffer->buffers, 1);
+            status = SOPC_Buffer_Read(&isFinal, msgBuffer->buffers, 1);
             if(status == STATUS_OK){
                 switch(isFinal){
                     case 'C':
@@ -258,7 +258,7 @@ SOPC_StatusCode TCP_UA_ReadMsgBuffer(SOPC_Byte*      data_dest,
                                      SOPC_MsgBuffer* msgBuffer,
                                      uint32_t        count){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    Buffer* buffer = NULL;
+    SOPC_Buffer* buffer = NULL;
     if(data_dest != NULL && size > 0 && msgBuffer != NULL && count > 0){
         // Treat single buffer messages and multiple buffers message (SOPC_MsgBuffers)
         if(msgBuffer->nbBuffers == 1){
@@ -279,7 +279,7 @@ SOPC_StatusCode TCP_UA_ReadMsgBuffer(SOPC_Byte*      data_dest,
         {
             status = STATUS_INVALID_PARAMETERS;
         }else{
-            status = Buffer_Read(data_dest, buffer, count);
+            status = SOPC_Buffer_Read(data_dest, buffer, count);
         }
     }
 
@@ -301,7 +301,7 @@ SOPC_StatusCode TCP_UA_FlushMsgBuffer(SOPC_MsgBuffer*               msgBuffer,
 }
 
 
-SOPC_StatusCode TCP_UA_WriteMsgBuffer(Buffer*          buffer,
+SOPC_StatusCode TCP_UA_WriteMsgBuffer(SOPC_Buffer*          buffer,
                                       const SOPC_Byte* data_src,
                                       uint32_t         count)
 {
@@ -313,7 +313,7 @@ SOPC_StatusCode TCP_UA_WriteMsgBuffer(Buffer*          buffer,
             //  no possible message chunks except for MSG type !
             status = STATUS_INVALID_STATE;
         }else{
-            status = Buffer_Write(buffer, data_src, count);
+            status = SOPC_Buffer_Write(buffer, data_src, count);
         }
     }
     return status;

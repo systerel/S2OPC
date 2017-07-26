@@ -37,7 +37,7 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffers*  msgBuffers,
                                         const SOPC_Byte*  data_src,
                                         uint32_t          count){
     SOPC_StatusCode status = STATUS_NOK;
-    Buffer* buffer = NULL;
+    SOPC_Buffer* buffer = NULL;
     SC_Connection* scConnection = NULL;
 
     if(msgBuffers == NULL){
@@ -78,7 +78,7 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffers*  msgBuffers,
                     uint32_t tmpCount = // Maximum Count - Precedent Count => Count to write
                      (msgBuffers->sequenceNumberPosition + UA_SECURE_MESSAGE_SEQUENCE_LENGTH +
                       scConnection->sendingMaxBodySize) - msgBuffers->buffers->position;
-                    status = Buffer_Write(buffer, data_src, tmpCount);
+                    status = SOPC_Buffer_Write(buffer, data_src, tmpCount);
 
                     // Continue in next buffer
                     if(STATUS_OK == status){
@@ -93,7 +93,7 @@ SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffers*  msgBuffers,
             } // While not fitting in current buffer, fill and flush current buffer
 
             if(status == STATUS_OK){
-                status = Buffer_Write(buffer, data_src, count);
+                status = SOPC_Buffer_Write(buffer, data_src, count);
             }
         }
     }else{

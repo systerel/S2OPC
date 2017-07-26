@@ -41,7 +41,7 @@ START_TEST(test_ua_msg_buffer_create_set_type)
 
     // Test creation / set type
     //// Test nominal case
-    Buffer* buf = Buffer_Create(10);
+    SOPC_Buffer* buf = SOPC_Buffer_Create(10);
     SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ck_assert(msgBuf != NULL);
     ck_assert(msgBuf->nbBuffers == 1);
@@ -107,10 +107,10 @@ START_TEST(test_ua_msg_buffer_reset)
 
     // Test reset
     //// Test nominal case
-    Buffer* buf = Buffer_Create(10);
+    SOPC_Buffer* buf = SOPC_Buffer_Create(10);
     SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
-    Buffer_Write(buf, &flushData, 1);
+    SOPC_Buffer_Write(buf, &flushData, 1);
     msgBuf->type = TCP_UA_Message_SecureMessage;
     MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
@@ -148,10 +148,10 @@ START_TEST(test_ua_msg_buffer_reset)
     MsgBuffer_Delete(&msgBuf);
 
     ////// Modify properties
-    buf = Buffer_Create(10);
+    buf = SOPC_Buffer_Create(10);
     msgBuf = MsgBuffer_Create(buf, 2, &flushData, &table, encTypes);
-    Buffer_Write(buf, &flushData, 1);
-    Buffer_Write(buf, &flushData, 1);
+    SOPC_Buffer_Write(buf, &flushData, 1);
+    SOPC_Buffer_Write(buf, &flushData, 1);
     msgBuf->type = TCP_UA_Message_SecureMessage;
     MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
@@ -203,10 +203,10 @@ START_TEST(test_ua_msg_buffer_copy)
 
     // Test reset
     //// Test nominal case
-    Buffer* buf = Buffer_Create(10);
+    SOPC_Buffer* buf = SOPC_Buffer_Create(10);
     SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
-    Buffer_Write(buf, &flushData, 1);
+    SOPC_Buffer_Write(buf, &flushData, 1);
     msgBuf->type = TCP_UA_Message_SecureMessage;
     MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
@@ -220,7 +220,7 @@ START_TEST(test_ua_msg_buffer_copy)
     ck_assert(msgBuf->buffers->length == 1);
     ck_assert(msgBuf->secureType == SOPC_CloseSecureChannel);
 
-    Buffer* bufDest = Buffer_Create(2);
+    SOPC_Buffer* bufDest = SOPC_Buffer_Create(2);
     SOPC_MsgBuffer* msgBufDest = MsgBuffer_Create(bufDest, 2, NULL, NULL, NULL);
     ////// Reset msg buffer
     status = MsgBuffer_CopyBuffer(msgBufDest, msgBuf);
@@ -251,8 +251,8 @@ START_TEST(test_ua_msg_buffer_copy)
 
     ////// Fulfill 3 bytes in buffer data of src
     ////// and try to copy in a msg buffer with buffer data max size = 2
-    Buffer_Write(buf, &flushData, 1);
-    Buffer_Write(buf, &flushData, 1);
+    SOPC_Buffer_Write(buf, &flushData, 1);
+    SOPC_Buffer_Write(buf, &flushData, 1);
     ck_assert(msgBuf->buffers->length == 3);
     status = MsgBuffer_CopyBuffer(msgBufDest, msgBuf);
     ck_assert(status != STATUS_OK);
@@ -306,8 +306,8 @@ START_TEST(test_ua_msg_buffers_chunk_mgr)
     SOPC_NamespaceTable table;
     Namespace_Initialize(&table);
     SOPC_EncodeableType* encTypes[1];
-    Buffer* buf = NULL;
-    Buffer* buf2 = NULL;
+    SOPC_Buffer* buf = NULL;
+    SOPC_Buffer* buf2 = NULL;
     uint32_t bufIdx = 0;
     SOPC_StatusCode status = STATUS_NOK;
 
@@ -396,10 +396,10 @@ START_TEST(test_ua_msg_buffers_copy)
 
     // Test reset
     //// Test nominal case
-    Buffer* buf = Buffer_Create(10);
+    SOPC_Buffer* buf = SOPC_Buffer_Create(10);
     SOPC_MsgBuffer* msgBuf = MsgBuffer_Create(buf, 1, &flushData, &table, encTypes);
     ////// Modify properties
-    Buffer_Write(buf, &flushData, 1);
+    SOPC_Buffer_Write(buf, &flushData, 1);
     msgBuf->type = TCP_UA_Message_SecureMessage;
     MsgBuffer_SetSecureMsgType(msgBuf, SOPC_CloseSecureChannel);
     msgBuf->currentChunkSize = 9;
@@ -673,10 +673,10 @@ START_TEST(test_ua_encoder_basic_types)
 {
     InitPlatformDependencies(); // Necessary to initialize endianess configuration
     SOPC_StatusCode status = STATUS_OK;
-    Buffer* buffer = Buffer_Create(100);
+    SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
     SOPC_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
 
-    Buffer* buffer2 = Buffer_Create(8);
+    SOPC_Buffer* buffer2 = SOPC_Buffer_Create(8);
     SOPC_MsgBuffer* msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
 
     // Test Byte nominal and degraded cases
@@ -696,7 +696,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     byte = 0x00;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_Byte_Read(&byte, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(byte == 0xAE);
@@ -734,7 +734,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     bool = 4;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     msgBuffer->buffers->data[2] = 2; // Simulates a true value received as 2
     status = SOPC_Boolean_Read(&bool, msgBuffer);
     ck_assert(status == STATUS_OK);
@@ -770,7 +770,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     sbyte = 0x00;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_SByte_Read(&sbyte, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(sbyte == -1);
@@ -803,7 +803,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     v16 = 0;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_Int16_Read(&v16, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(v16 == -2);
@@ -836,7 +836,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     vu16 = 0;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_UInt16_Read(&vu16, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vu16 == 2);
@@ -871,7 +871,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     v32 = 0;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_Int32_Read(&v32, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(v32 == -2);
@@ -906,7 +906,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     vu32 = 0;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_UInt32_Read(&vu32, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vu32 == 1048578);
@@ -945,7 +945,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     v64 = 0;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_Int64_Read(&v64, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(v64 == -2);
@@ -984,7 +984,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     vu64 = 0;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_UInt64_Read(&vu64, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vu64 == 0x100000000000002);
@@ -1019,7 +1019,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     vfloat = 0;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_Float_Read(&vfloat, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vfloat == -6.5);
@@ -1058,7 +1058,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     vdouble = 0;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_Double_Read(&vdouble, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(vdouble == -6.5);
@@ -1099,7 +1099,7 @@ START_TEST(test_ua_encoder_basic_types)
 
     //// Nominal read
     SOPC_DateTime_Clear(&vDate);
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_DateTime_Read(&vDate, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(SOPC_DateTime_ToInt64(&vDate) == -2);
@@ -1120,10 +1120,10 @@ START_TEST(test_ua_encoder_other_types)
 {
     InitPlatformDependencies(); // Necessary to initialize endianess configuration
     SOPC_StatusCode status = STATUS_OK;
-    Buffer* buffer = Buffer_Create(100);
+    SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
     SOPC_MsgBuffer* msgBuffer = MsgBuffer_Create(buffer, 1, NULL, NULL, NULL);
 
-    Buffer* buffer2 = Buffer_Create(8);
+    SOPC_Buffer* buffer2 = SOPC_Buffer_Create(8);
     SOPC_MsgBuffer* msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
 
     //////////////////////////////////////////////
@@ -1188,7 +1188,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_ByteString_Clear(bs2);
     SOPC_ByteString_Initialize(bs2);
     status = SOPC_ByteString_Read(bs2, msgBuffer);
@@ -1204,7 +1204,7 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[1] = 0x00;
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0x00;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_ByteString_Clear(bs2);
     SOPC_ByteString_Initialize(bs2);status = SOPC_ByteString_Read(bs2, msgBuffer);
     ck_assert(status == STATUS_OK);
@@ -1215,7 +1215,7 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[1] = 0x00;
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0xFF;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_ByteString_Clear(bs2);
     SOPC_ByteString_Initialize(bs2);
     status = SOPC_ByteString_Read(bs2, msgBuffer);
@@ -1227,7 +1227,7 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[1] = 0xFF;
     msgBuffer->buffers->data[2] = 0xFF;
     msgBuffer->buffers->data[3] = 0xFF;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_ByteString_Clear(bs2);
     SOPC_ByteString_Initialize(bs2);
     status = SOPC_ByteString_Read(bs2, msgBuffer);
@@ -1311,7 +1311,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_String_Clear(&str2);
     SOPC_String_Initialize(&str2);
     status = SOPC_String_Read(&str2, msgBuffer);
@@ -1324,7 +1324,7 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[1] = 0x00;
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0x00;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_String_Clear(&str2);
     SOPC_String_Initialize(&str2);status = SOPC_String_Read(&str2, msgBuffer);
     ck_assert(status == STATUS_OK);
@@ -1335,7 +1335,7 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[1] = 0x00;
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0xFF;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_String_Clear(&str2);
     SOPC_String_Initialize(&str2);
     status = SOPC_String_Read(&str2, msgBuffer);
@@ -1347,7 +1347,7 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[1] = 0xFF;
     msgBuffer->buffers->data[2] = 0xFF;
     msgBuffer->buffers->data[3] = 0xFF;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_String_Clear(&str2);
     SOPC_String_Initialize(&str2);
     status = SOPC_String_Read(&str2, msgBuffer);
@@ -1431,7 +1431,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_XmlElement_Clear(&xmlElt2);
     SOPC_XmlElement_Initialize(&xmlElt2);
     status = SOPC_XmlElement_Read(&xmlElt2, msgBuffer);
@@ -1447,7 +1447,7 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[1] = 0x00;
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0x00;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_XmlElement_Clear(&xmlElt2);
     SOPC_XmlElement_Initialize(&xmlElt2);
     status = SOPC_XmlElement_Read(&xmlElt2, msgBuffer);
@@ -1459,7 +1459,7 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[1] = 0x00;
     msgBuffer->buffers->data[2] = 0x00;
     msgBuffer->buffers->data[3] = 0xFF;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_XmlElement_Clear(&xmlElt2);
     SOPC_XmlElement_Initialize(&xmlElt2);
     status = SOPC_XmlElement_Read(&xmlElt2, msgBuffer);
@@ -1471,7 +1471,7 @@ START_TEST(test_ua_encoder_other_types)
     msgBuffer->buffers->data[1] = 0xFF;
     msgBuffer->buffers->data[2] = 0xFF;
     msgBuffer->buffers->data[3] = 0xFF;
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     SOPC_XmlElement_Clear(&xmlElt2);
     SOPC_XmlElement_Initialize(&xmlElt2);
     status = SOPC_XmlElement_Read(&xmlElt2, msgBuffer);
@@ -1491,7 +1491,7 @@ START_TEST(test_ua_encoder_other_types)
     // Resize "full" msg buffer
     /////////////////////////////////////////
     MsgBuffer_Delete(&msgBufferFull);
-    buffer2 = Buffer_Create(32);
+    buffer2 = SOPC_Buffer_Create(32);
     msgBufferFull = MsgBuffer_Create(buffer2, 1, NULL, NULL, NULL);
     /////////////////////////////////////////
     // Test GUID nominal and degraded cases
@@ -1543,7 +1543,7 @@ START_TEST(test_ua_encoder_other_types)
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_Guid_Read(&guid2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(memcmp(&guid, &guid2, sizeof(SOPC_Guid)) == 0);
@@ -1614,7 +1614,7 @@ START_TEST(test_ua_encoder_other_types)
 
     //// Nominal read
     ////// Two bytes NodeId
-    Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
+    SOPC_Buffer_SetPosition(msgBuffer->buffers, 0); // Reset position for reading
     status = SOPC_NodeId_Read(&nodeId2, msgBuffer);
     ck_assert(status == STATUS_OK);
     ck_assert(nodeId2.Namespace == 0);

@@ -24,7 +24,7 @@
 #ifndef SOPC_MSG_BUFFER_H_
 #define SOPC_MSG_BUFFER_H_
 
-#include "buffer.h"
+#include "sopc_buffer.h"
 #include "sopc_base_types.h"
 #include "sopc_namespace_table.h"
 
@@ -95,7 +95,7 @@ typedef enum {
  */
 typedef struct SOPC_MsgBuffer {
     uint32_t               nbBuffers;              /**< Number of buffers allocated (one per chunk) */
-    Buffer*                buffers;                /**< Pointers on buffers for the UA Message (nbBuffers buffers) */
+    SOPC_Buffer*           buffers;                /**< Pointers on buffers for the UA Message (nbBuffers buffers) */
     TCP_UA_MsgType         type;                   /**< Type of the TCP UA Message stored */
     SOPC_SecureMessageType secureType;             /**< Type of the UA Secure Message stored (only valid if type = SecureMessage) */
     uint32_t               currentChunkSize;       /**< MessageSize of the current message chunk (current is chunk corresponding to nbChunks) */
@@ -120,7 +120,7 @@ typedef struct SOPC_MsgBuffer {
  *
  *  \return                  NULL if buffer creation failed (NULL buffer), allocated UA Message Buffer otherwise.
  */
-SOPC_MsgBuffer* MsgBuffer_Create(Buffer*               buffer,
+SOPC_MsgBuffer* MsgBuffer_Create(SOPC_Buffer*               buffer,
                                  uint32_t              maxChunks,
                                  void*                 flushData,
                                  SOPC_NamespaceTable*  nsTable,
@@ -220,7 +220,7 @@ void MsgBuffers_Delete(SOPC_MsgBuffers** mBuffer);
  *  \param mBuffer    Pointer to the UA Message buffers
  *  \return           Pointer to the current chunk buffer, NULL if argument was NULL or incoherent
  */
-Buffer* MsgBuffers_GetCurrentChunk(SOPC_MsgBuffers* mBuffer);
+SOPC_Buffer* MsgBuffers_GetCurrentChunk(SOPC_MsgBuffers* mBuffer);
 
 /**
  *  \brief Set the next (empty) chunk buffer of UA Message buffers as current one and returns it
@@ -229,7 +229,7 @@ Buffer* MsgBuffers_GetCurrentChunk(SOPC_MsgBuffers* mBuffer);
  *  \param bufferIdx  Index of the new current chunk buffer
  *  \return           Pointer to the next chunk buffer which became current, NULL if argument was NULL or incoherent
  */
-Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
+SOPC_Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
                              uint32_t*        bufferIdx);
 
 /**
@@ -240,7 +240,7 @@ Buffer* MsgBuffers_NextChunk(SOPC_MsgBuffers* mBuffer,
  *  \param bodyPosition  Position of the message body first byte, all headers to copy are included before this position
  *  \return              Pointer to the next chunk buffer which became current, NULL if argument was NULL or incoherent
  */
-Buffer* MsgBuffers_NextChunkWithHeadersCopy(SOPC_MsgBuffers* mBuffers,
+SOPC_Buffer* MsgBuffers_NextChunkWithHeadersCopy(SOPC_MsgBuffers* mBuffers,
                                             uint32_t         bodyPosition);
 
 /**

@@ -28,7 +28,7 @@
 #include <check.h>
 
 #include "base_tools.h"
-#include "buffer.h"
+#include "sopc_buffer.h"
 #include "singly_linked_list.h"
 #include "sopc_base_types.h"
 #include "check_stack.h"
@@ -77,40 +77,40 @@ START_TEST(test_buffer_create)
 
     // Test creation
     //// Test nominal case
-    Buffer* buf = Buffer_Create(10);
+    SOPC_Buffer* buf = SOPC_Buffer_Create(10);
     ck_assert(buf != NULL);
     ck_assert(buf->data != NULL);
     ck_assert(buf->position == 0);
     ck_assert(buf->length == 0);
     ck_assert(buf->max_size == 10);
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
     buf = NULL;
 
     //// Test buffer creation degraded cases
-    buf = Buffer_Create(0);
+    buf = SOPC_Buffer_Create(0);
     ck_assert(buf == NULL);
 
     // Test initialization
     //// Test nominal case
-    buf = malloc(sizeof(Buffer));
-    status = Buffer_Init(buf, 100);
+    buf = malloc(sizeof(SOPC_Buffer));
+    status = SOPC_Buffer_Init(buf, 100);
     ck_assert(status == 0);
     ck_assert(buf->data != NULL);
     ck_assert(buf->position == 0);
     ck_assert(buf->length == 0);
     ck_assert(buf->max_size == 100);
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
     buf = NULL;
 
     //// Test degraded case: NULL buffer
     buf = NULL;
-    status = Buffer_Init(buf, 100);
+    status = SOPC_Buffer_Init(buf, 100);
     ck_assert(status != 0);
     ck_assert(buf == NULL);
 
     //// Test degraded case: invalid size
     buf = NULL;
-    status = Buffer_Init(buf, 0);
+    status = SOPC_Buffer_Init(buf, 0);
     ck_assert(status != 0);
     ck_assert(buf == NULL);
 
@@ -122,19 +122,19 @@ START_TEST(test_buffer_read_write)
     uint8_t data[4] = {0x00, 0x01, 0x02 , 0x03};
     uint8_t readData[4] = {0x00, 0x00, 0x00, 0x00};
     SOPC_StatusCode status = 0;
-    Buffer* buf = NULL;
+    SOPC_Buffer* buf = NULL;
 
     // Test write
     //// Test nominal cases
-    buf = Buffer_Create(10);
-    status = Buffer_Write(buf, data, 3);
+    buf = SOPC_Buffer_Create(10);
+    status = SOPC_Buffer_Write(buf, data, 3);
     ck_assert(status == 0);
     ck_assert(buf->length == 3);
     ck_assert(buf->position == 3);
     ck_assert(buf->data[0] == 0x00);
     ck_assert(buf->data[1] == 0x01);
     ck_assert(buf->data[2] == 0x02);
-    status = Buffer_Write(buf, data, 1);
+    status = SOPC_Buffer_Write(buf, data, 1);
     ck_assert(status == 0);
     ck_assert(buf->length == 4);
     ck_assert(buf->position == 4);
@@ -142,68 +142,68 @@ START_TEST(test_buffer_read_write)
     ck_assert(buf->data[1] == 0x01);
     ck_assert(buf->data[2] == 0x02);
     ck_assert(buf->data[3] == 0x00);
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
     buf = NULL;
 
     //// Test degraded cases
-    buf = malloc(sizeof(Buffer));
-    memset(buf, 0, sizeof(Buffer));
+    buf = malloc(sizeof(SOPC_Buffer));
+    memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
-    status = Buffer_Write(buf, data, 3);
+    status = SOPC_Buffer_Write(buf, data, 3);
     ck_assert(status != STATUS_OK);
     free(buf);
     buf = NULL;
 
     ////// NULL buf pointer
-    status = Buffer_Write(buf, data, 3);
+    status = SOPC_Buffer_Write(buf, data, 3);
     ck_assert(status != STATUS_OK);
 
-    buf = Buffer_Create(1);
+    buf = SOPC_Buffer_Create(1);
     ////// NULL data pointer
-    status = Buffer_Write(buf, NULL, 3);
+    status = SOPC_Buffer_Write(buf, NULL, 3);
     ck_assert(status != STATUS_OK);
     ck_assert(buf->length == 0);
     ck_assert(buf->position == 0);
 
     ////// Full buffer
-    status = Buffer_Write(buf, data, 2);
+    status = SOPC_Buffer_Write(buf, data, 2);
     ck_assert(status != STATUS_OK);
     ck_assert(buf->length == 0);
     ck_assert(buf->position == 0);
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
     buf = NULL;
 
 
     // Test read
     //// Test nominal cases
-    buf = Buffer_Create(10);
-    status = Buffer_Write(buf, data, 4);
+    buf = SOPC_Buffer_Create(10);
+    status = SOPC_Buffer_Write(buf, data, 4);
     // Reset position for reading content written
-    status = Buffer_SetPosition(buf, 0);
+    status = SOPC_Buffer_SetPosition(buf, 0);
     ck_assert(buf->position == 0);
     ck_assert(buf->length == 4);
-    status = Buffer_Read(readData, buf, 2);
+    status = SOPC_Buffer_Read(readData, buf, 2);
     ck_assert(status == STATUS_OK);
     ck_assert(buf->position == 2);
     ck_assert(readData[0] == 0x00);
     ck_assert(readData[1] == 0x01);
     ck_assert(readData[2] == 0x00);
     ck_assert(readData[3] == 0x00);
-    status = Buffer_Read(&(readData[2]), buf, 2);
+    status = SOPC_Buffer_Read(&(readData[2]), buf, 2);
     ck_assert(status == STATUS_OK);
     ck_assert(buf->position == 4);
     ck_assert(readData[0] == 0x00);
     ck_assert(readData[1] == 0x01);
     ck_assert(readData[2] == 0x02);
     ck_assert(readData[3] == 0x03);
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
     buf = NULL;
 
     //// Test degraded cases
-    buf = malloc(sizeof(Buffer));
-    memset(buf, 0, sizeof(Buffer));
+    buf = malloc(sizeof(SOPC_Buffer));
+    memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
-    status = Buffer_Read(readData, buf, 3);
+    status = SOPC_Buffer_Read(readData, buf, 3);
     ck_assert(buf->length == 0);
     ck_assert(buf->position == 0);
     ck_assert(status != STATUS_OK);
@@ -211,12 +211,12 @@ START_TEST(test_buffer_read_write)
     buf = NULL;
 
     ////// NULL buf pointer
-    status = Buffer_Read(readData, buf, 3);
+    status = SOPC_Buffer_Read(readData, buf, 3);
     ck_assert(status != STATUS_OK);
 
-    buf = Buffer_Create(4);
+    buf = SOPC_Buffer_Create(4);
     ////// NULL data pointer
-    status = Buffer_Read(NULL, buf, 3);
+    status = SOPC_Buffer_Read(NULL, buf, 3);
     ck_assert(status != STATUS_OK);
     ck_assert(buf->length == 0);
     ck_assert(buf->position == 0);
@@ -226,9 +226,9 @@ START_TEST(test_buffer_read_write)
     readData[1] = 0x00;
     readData[2] = 0x00;
     readData[3] = 0x00;
-    status = Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_Write(buf, data, 4);
     //// DO NOT reset position for reading content written
-    status = Buffer_Read(readData, buf, 4);
+    status = SOPC_Buffer_Read(readData, buf, 4);
     ck_assert(status != STATUS_OK);
     ck_assert(buf->length == 4);
     ck_assert(buf->position == 4);
@@ -236,7 +236,7 @@ START_TEST(test_buffer_read_write)
     ck_assert(readData[1] == 0x00);
     ck_assert(readData[2] == 0x00);
     ck_assert(readData[3] == 0x00);
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
     buf = NULL;
 
 }
@@ -246,15 +246,15 @@ START_TEST(test_buffer_copy)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02 , 0x03};
     SOPC_StatusCode status = STATUS_OK;
-    Buffer* buf = NULL;
-    Buffer* buf2 = NULL;
+    SOPC_Buffer* buf = NULL;
+    SOPC_Buffer* buf2 = NULL;
 
     // Test copy
     //// Test nominal cases
-    buf = Buffer_Create(10);
-    buf2 = Buffer_Create(5);
-    status = Buffer_Write(buf, data, 4);
-    status = Buffer_Copy(buf2, buf);
+    buf = SOPC_Buffer_Create(10);
+    buf2 = SOPC_Buffer_Create(5);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_Copy(buf2, buf);
     ck_assert(status == STATUS_OK);
     ck_assert(buf2->length == 4);
     ck_assert(buf2->position == 4);
@@ -267,8 +267,8 @@ START_TEST(test_buffer_copy)
 
     buf->data[0] = 0x01;
     buf->data[3] = 0x0F;
-    status = Buffer_SetPosition(buf, 1);
-    status = Buffer_CopyWithLength(buf2, buf, 3);
+    status = SOPC_Buffer_SetPosition(buf, 1);
+    status = SOPC_Buffer_CopyWithLength(buf2, buf, 3);
     ck_assert(status == STATUS_OK);
     ck_assert(buf2->length == 3);
     ck_assert(buf2->position == 1);
@@ -279,14 +279,14 @@ START_TEST(test_buffer_copy)
 
     //// Test degraded cases
     /////// NULL pointers
-    status = Buffer_Copy(buf2, NULL);
+    status = SOPC_Buffer_Copy(buf2, NULL);
     ck_assert(status != STATUS_OK);
     ck_assert(buf2->length == 3);
     ck_assert(buf2->position == 1);
     ck_assert(buf2->data[0] == 0x01);
     ck_assert(buf2->data[1] == 0x01);
     ck_assert(buf2->data[2] == 0x02);
-    status = Buffer_CopyWithLength(buf2, NULL, 4);
+    status = SOPC_Buffer_CopyWithLength(buf2, NULL, 4);
     ck_assert(status != STATUS_OK);
     ck_assert(buf2->length == 3);
     ck_assert(buf2->position == 1);
@@ -294,17 +294,17 @@ START_TEST(test_buffer_copy)
     ck_assert(buf2->data[1] == 0x01);
     ck_assert(buf2->data[2] == 0x02);
 
-    status = Buffer_Copy(NULL, buf);
+    status = SOPC_Buffer_Copy(NULL, buf);
     ck_assert(status != STATUS_OK);
-    status = Buffer_CopyWithLength(NULL, buf, 3);
+    status = SOPC_Buffer_CopyWithLength(NULL, buf, 3);
     ck_assert(status != STATUS_OK);
 
 
     /////// Destination buffer size insufficient
-    Buffer_Reset(buf);
-    status = Buffer_Write(buf, data, 4);
-    status = Buffer_Write(buf, data, 4);
-    status = Buffer_Copy(buf2, buf);
+    SOPC_Buffer_Reset(buf);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_Copy(buf2, buf);
     ck_assert(status != STATUS_OK);
     ck_assert(buf2->length == 3);
     ck_assert(buf2->position == 1);
@@ -312,7 +312,7 @@ START_TEST(test_buffer_copy)
     ck_assert(buf2->data[1] == 0x01);
     ck_assert(buf2->data[2] == 0x02);
 
-    status = Buffer_CopyWithLength(buf2, buf, 6);
+    status = SOPC_Buffer_CopyWithLength(buf2, buf, 6);
     ck_assert(status != STATUS_OK);
     ck_assert(buf2->length == 3);
     ck_assert(buf2->position == 1);
@@ -320,35 +320,35 @@ START_TEST(test_buffer_copy)
     ck_assert(buf2->data[1] == 0x01);
     ck_assert(buf2->data[2] == 0x02);
 
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
     buf = NULL;
 
     /////// Non allocated buffer data
-    buf = malloc(sizeof(Buffer));
-    memset(buf, 0, sizeof(Buffer));
+    buf = malloc(sizeof(SOPC_Buffer));
+    memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
-    status = Buffer_Copy(buf2, buf);
+    status = SOPC_Buffer_Copy(buf2, buf);
     ck_assert(status != STATUS_OK);
-    status = Buffer_CopyWithLength(buf2, buf, 4);
+    status = SOPC_Buffer_CopyWithLength(buf2, buf, 4);
     ck_assert(status != STATUS_OK);
     free(buf);
     buf = NULL;
 
-    buf = Buffer_Create(1);
-    Buffer_Delete(buf2);
+    buf = SOPC_Buffer_Create(1);
+    SOPC_Buffer_Delete(buf2);
     buf2 = NULL;
 
     /////// Non allocated buffer data
-    buf2 = malloc(sizeof(Buffer));
-    memset(buf2, 0, sizeof(Buffer));
+    buf2 = malloc(sizeof(SOPC_Buffer));
+    memset(buf2, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
-    status = Buffer_Copy(buf2, buf);
+    status = SOPC_Buffer_Copy(buf2, buf);
     ck_assert(status != STATUS_OK);
-    status = Buffer_CopyWithLength(buf2, buf, 4);
+    status = SOPC_Buffer_CopyWithLength(buf2, buf, 4);
     ck_assert(status != STATUS_OK);
     free(buf2);
     buf2 = NULL;
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
 
 }
 END_TEST
@@ -358,13 +358,13 @@ START_TEST(test_buffer_reset)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02 , 0x03};
     SOPC_StatusCode status = STATUS_OK;
-    Buffer* buf = NULL;
+    SOPC_Buffer* buf = NULL;
 
     // Test copy
     //// Test nominal cases
-    buf = Buffer_Create(10);
-    status = Buffer_Write(buf, data, 4);
-    Buffer_Reset(buf);
+    buf = SOPC_Buffer_Create(10);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    SOPC_Buffer_Reset(buf);
     ck_assert(buf->length == 0);
     ck_assert(buf->position == 0);
     ck_assert(buf->data[0] == 0x00);
@@ -373,8 +373,8 @@ START_TEST(test_buffer_reset)
     ck_assert(buf->data[3] == 0x00);
 
     ////// Reset with position = 0 <=> Reset
-    status = Buffer_Write(buf, data, 4);
-    status = Buffer_ResetAfterPosition(buf, 0);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_ResetAfterPosition(buf, 0);
     ck_assert(status == STATUS_OK);
     ck_assert(buf->length == 0);
     ck_assert(buf->position == 0);
@@ -384,8 +384,8 @@ START_TEST(test_buffer_reset)
     ck_assert(buf->data[3] == 0x00);
 
     ////// Reset with position = 2 in length of 4 buffer
-    status = Buffer_Write(buf, data, 4);
-    status = Buffer_ResetAfterPosition(buf, 2);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_ResetAfterPosition(buf, 2);
     ck_assert(status == STATUS_OK);
     ck_assert(buf->length == 2);
     ck_assert(buf->position == 2);
@@ -395,9 +395,9 @@ START_TEST(test_buffer_reset)
     ck_assert(buf->data[3] == 0x00);
 
     ////// Reset with position = 4 in buffer with length 4
-    Buffer_Reset(buf);
-    status = Buffer_Write(buf, data, 4);
-    status = Buffer_ResetAfterPosition(buf, 4);
+    SOPC_Buffer_Reset(buf);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_ResetAfterPosition(buf, 4);
     ck_assert(status == STATUS_OK);
     ck_assert(buf->length == 4);
     ck_assert(buf->position == 4);
@@ -408,11 +408,11 @@ START_TEST(test_buffer_reset)
 
     //// Test degraded cases
     /////// NULL pointers
-    status = Buffer_ResetAfterPosition(NULL, 2);
+    status = SOPC_Buffer_ResetAfterPosition(NULL, 2);
     ck_assert(status != STATUS_OK);
 
     /////// Invalid position: position > length
-    status = Buffer_ResetAfterPosition(buf, 5);
+    status = SOPC_Buffer_ResetAfterPosition(buf, 5);
     ck_assert(status != STATUS_OK);
     ck_assert(buf->length == 4);
     ck_assert(buf->position == 4);
@@ -421,14 +421,14 @@ START_TEST(test_buffer_reset)
     ck_assert(buf->data[2] == 0x02);
     ck_assert(buf->data[3] == 0x03);
 
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
     buf = NULL;
 
     /////// Non allocated buffer data
-    buf = malloc(sizeof(Buffer));
-    memset(buf, 0, sizeof(Buffer));
+    buf = malloc(sizeof(SOPC_Buffer));
+    memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
-        status = Buffer_ResetAfterPosition(buf, 2);
+        status = SOPC_Buffer_ResetAfterPosition(buf, 2);
     ck_assert(status != STATUS_OK);
     free(buf);
     buf = NULL;
@@ -439,13 +439,13 @@ START_TEST(test_buffer_set_properties)
 {
     uint8_t data[4] = {0x00, 0x01, 0x02 , 0x03};
     SOPC_StatusCode status = STATUS_OK;
-    Buffer* buf = NULL;
+    SOPC_Buffer* buf = NULL;
 
     // Test copy
     //// Test nominal cases
-    buf = Buffer_Create(10);
-    status = Buffer_Write(buf, data, 4);
-    status = Buffer_SetPosition(buf, 2);
+    buf = SOPC_Buffer_Create(10);
+    status = SOPC_Buffer_Write(buf, data, 4);
+    status = SOPC_Buffer_SetPosition(buf, 2);
     ck_assert(status == STATUS_OK);
     ck_assert(buf->length == 4);
     ck_assert(buf->position == 2);
@@ -454,7 +454,7 @@ START_TEST(test_buffer_set_properties)
     ck_assert(buf->data[2] == 0x02);
     ck_assert(buf->data[3] == 0x03);
 
-    status = Buffer_SetDataLength(buf, 2);
+    status = SOPC_Buffer_SetDataLength(buf, 2);
     ck_assert(status == STATUS_OK);
     ck_assert(buf->length == 2);
     ck_assert(buf->position == 2);
@@ -465,13 +465,13 @@ START_TEST(test_buffer_set_properties)
 
     //// Test degraded cases
     /////// NULL pointers
-    status = Buffer_SetPosition(NULL, 1);
+    status = SOPC_Buffer_SetPosition(NULL, 1);
     ck_assert(status != STATUS_OK);
-    status = Buffer_SetDataLength(NULL, 1);
+    status = SOPC_Buffer_SetDataLength(NULL, 1);
     ck_assert(status != STATUS_OK);
 
     /////// Invalid position: position > length
-    status = Buffer_SetPosition(buf, 3);
+    status = SOPC_Buffer_SetPosition(buf, 3);
     ck_assert(status != STATUS_OK);
     ck_assert(buf->length == 2);
     ck_assert(buf->position == 2);
@@ -479,23 +479,23 @@ START_TEST(test_buffer_set_properties)
     ck_assert(buf->data[1] == 0x01);
 
     /////// Invalid length: length < position
-    status = Buffer_SetDataLength(buf, 1);
+    status = SOPC_Buffer_SetDataLength(buf, 1);
     ck_assert(status != STATUS_OK);
     ck_assert(buf->length == 2);
     ck_assert(buf->position == 2);
     ck_assert(buf->data[0] == 0x00);
     ck_assert(buf->data[1] == 0x01);
 
-    Buffer_Delete(buf);
+    SOPC_Buffer_Delete(buf);
     buf = NULL;
 
     /////// Non allocated buffer data
-    buf = malloc(sizeof(Buffer));
-    memset(buf, 0, sizeof(Buffer));
+    buf = malloc(sizeof(SOPC_Buffer));
+    memset(buf, 0, sizeof(SOPC_Buffer));
     ////// Non allocated buffer data
-    status = Buffer_SetPosition(buf, 0);
+    status = SOPC_Buffer_SetPosition(buf, 0);
     ck_assert(status != STATUS_OK);
-    status = Buffer_SetDataLength(buf, 0);
+    status = SOPC_Buffer_SetDataLength(buf, 0);
     ck_assert(status != STATUS_OK);
     free(buf);
     buf = NULL;

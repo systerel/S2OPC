@@ -29,7 +29,7 @@
 SOPC_StatusCode InitSendBuffer(TCP_UA_Connection* connection){
     SOPC_StatusCode status = STATUS_NOK;
     if(connection->outputMsgBuffer == NULL){
-        Buffer* buf = Buffer_Create(connection->sendBufferSize);
+        SOPC_Buffer* buf = SOPC_Buffer_Create(connection->sendBufferSize);
         if(buf != NULL){
             connection->outputMsgBuffer = MsgBuffer_Create(buf,
                                                            connection->maxChunkCountSnd,
@@ -49,7 +49,7 @@ SOPC_StatusCode InitSendBuffer(TCP_UA_Connection* connection){
 SOPC_StatusCode InitReceiveBuffer(TCP_UA_Connection* connection){
     SOPC_StatusCode status = STATUS_NOK;
     if(connection->inputMsgBuffer == NULL){
-        Buffer* buf = Buffer_Create(connection->receiveBufferSize);
+        SOPC_Buffer* buf = SOPC_Buffer_Create(connection->receiveBufferSize);
         if(buf != NULL){
             connection->inputMsgBuffer = MsgBuffer_Create(buf,
                                                           connection->maxChunkCountRcv,

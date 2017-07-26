@@ -1283,9 +1283,9 @@ SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, S
                     // Go backward to write correct length value
                     curPos = msgBuffer->buffers->position;
                     length = curPos - (lengthPos + 4);
-                    Buffer_SetPosition(msgBuffer->buffers, lengthPos);
+                    SOPC_Buffer_SetPosition(msgBuffer->buffers, lengthPos);
                     SOPC_Int32_Write(&length, msgBuffer);
-                    Buffer_SetPosition(msgBuffer->buffers, curPos);
+                    SOPC_Buffer_SetPosition(msgBuffer->buffers, curPos);
                 }
                 break;
         }

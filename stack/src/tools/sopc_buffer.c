@@ -18,17 +18,17 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "buffer.h"
+#include "sopc_buffer.h"
 
-Buffer* Buffer_Create(uint32_t size)
+SOPC_Buffer* SOPC_Buffer_Create(uint32_t size)
 {
-    Buffer* buf = NULL;
+    SOPC_Buffer* buf = NULL;
     if(size > 0){
-        buf = (Buffer*) malloc(sizeof(Buffer));
+        buf = (SOPC_Buffer*) malloc(sizeof(SOPC_Buffer));
         if(buf != NULL){
-            SOPC_StatusCode status = Buffer_Init(buf, size);
+            SOPC_StatusCode status = SOPC_Buffer_Init(buf, size);
             if(status != STATUS_OK){
-                Buffer_Delete(buf);
+                SOPC_Buffer_Delete(buf);
                 buf = NULL;
             }
         }
@@ -36,7 +36,7 @@ Buffer* Buffer_Create(uint32_t size)
     return buf;
 }
 
-SOPC_StatusCode Buffer_Init(Buffer* buffer, uint32_t size)
+SOPC_StatusCode SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t size)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(buffer != NULL && size > 0){
@@ -52,7 +52,7 @@ SOPC_StatusCode Buffer_Init(Buffer* buffer, uint32_t size)
     return status;
 }
 
-void Buffer_Clear(Buffer* buffer)
+void SOPC_Buffer_Clear(SOPC_Buffer* buffer)
 {
     if(buffer != NULL){
         if(buffer->data != NULL){
@@ -62,15 +62,15 @@ void Buffer_Clear(Buffer* buffer)
     }
 }
 
-void Buffer_Delete(Buffer* buffer)
+void SOPC_Buffer_Delete(SOPC_Buffer* buffer)
 {
     if(buffer != NULL){
-        Buffer_Clear(buffer);
+        SOPC_Buffer_Clear(buffer);
         free(buffer);
     }
 }
 
-void Buffer_Reset(Buffer* buffer)
+void SOPC_Buffer_Reset(SOPC_Buffer* buffer)
 {
     if(buffer != NULL && buffer->data != NULL){
         buffer->position = 0;
@@ -79,7 +79,7 @@ void Buffer_Reset(Buffer* buffer)
     }
 }
 
-SOPC_StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
+SOPC_StatusCode SOPC_Buffer_ResetAfterPosition(SOPC_Buffer*  buffer,
                                      uint32_t position)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
@@ -94,7 +94,7 @@ SOPC_StatusCode Buffer_ResetAfterPosition(Buffer*  buffer,
     return status;
 }
 
-SOPC_StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
+SOPC_StatusCode SOPC_Buffer_SetPosition(SOPC_Buffer* buffer, uint32_t position){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(buffer != NULL && buffer->data != NULL &&
        buffer->length >= position){
@@ -104,7 +104,7 @@ SOPC_StatusCode Buffer_SetPosition(Buffer* buffer, uint32_t position){
     return status;
 }
 
-SOPC_StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
+SOPC_StatusCode SOPC_Buffer_SetDataLength(SOPC_Buffer* buffer, uint32_t length)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint8_t* data = NULL;
@@ -123,7 +123,7 @@ SOPC_StatusCode Buffer_SetDataLength(Buffer* buffer, uint32_t length)
     return status;
 }
 
-SOPC_StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t count)
+SOPC_StatusCode SOPC_Buffer_Write(SOPC_Buffer* buffer, const uint8_t* data_src, uint32_t count)
 {
     SOPC_StatusCode status = STATUS_NOK;
     if(data_src == NULL || buffer == NULL || buffer->data == NULL){
@@ -149,7 +149,7 @@ SOPC_StatusCode Buffer_Write(Buffer* buffer, const uint8_t* data_src, uint32_t c
     return status;
 }
 
-SOPC_StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count)
+SOPC_StatusCode SOPC_Buffer_Read(uint8_t* data_dest, SOPC_Buffer* buffer, uint32_t count)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if( buffer != NULL && buffer->data != NULL &&
@@ -165,7 +165,7 @@ SOPC_StatusCode Buffer_Read(uint8_t* data_dest, Buffer* buffer, uint32_t count)
     return status;
 }
 
-SOPC_StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limitedLength)
+SOPC_StatusCode SOPC_Buffer_CopyWithLength(SOPC_Buffer* dest, SOPC_Buffer* src, uint32_t limitedLength)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(dest != NULL && src != NULL &&
@@ -177,24 +177,24 @@ SOPC_StatusCode Buffer_CopyWithLength(Buffer* dest, Buffer* src, uint32_t limite
         status = STATUS_OK;
 
         memcpy(dest->data, src->data, limitedLength);
-        status = Buffer_SetPosition(dest, 0);
+        status = SOPC_Buffer_SetPosition(dest, 0);
         if(status == STATUS_OK){
-            status = Buffer_SetDataLength(dest, limitedLength);
+            status = SOPC_Buffer_SetDataLength(dest, limitedLength);
         }
         if(status == STATUS_OK){
-            status = Buffer_SetPosition(dest, src->position);
+            status = SOPC_Buffer_SetPosition(dest, src->position);
         }
     }
     return status;
 }
 
 
-SOPC_StatusCode Buffer_Copy(Buffer* dest, Buffer* src)
+SOPC_StatusCode SOPC_Buffer_Copy(SOPC_Buffer* dest, SOPC_Buffer* src)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(src != NULL)
     {
-        status = Buffer_CopyWithLength(dest, src, src->length);
+        status = SOPC_Buffer_CopyWithLength(dest, src, src->length);
     }
 
     return status;

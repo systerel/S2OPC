@@ -564,19 +564,19 @@ SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffers*       msgBuffers,
         status = STATUS_OK;
         switch(smType){
                 case SOPC_SecureMessage:
-                    status = Buffer_Write(msgBuffers->buffers, SOPC_MSG, 3);
+                    status = SOPC_Buffer_Write(msgBuffers->buffers, SOPC_MSG, 3);
                     break;
                 case SOPC_OpenSecureChannel:
-                    status = Buffer_Write(msgBuffers->buffers, SOPC_OPN, 3);
+                    status = SOPC_Buffer_Write(msgBuffers->buffers, SOPC_OPN, 3);
                     break;
                 case SOPC_CloseSecureChannel:
-                    status = Buffer_Write(msgBuffers->buffers, SOPC_CLO, 3);
+                    status = SOPC_Buffer_Write(msgBuffers->buffers, SOPC_CLO, 3);
                     break;
         }
         status = MsgBuffer_SetSecureMsgType(msgBuffers, smType);
         if(status == STATUS_OK){
             // Default behavior: final except if too long for SOPC_SecureMessage only !
-            status = Buffer_Write(msgBuffers->buffers, &fByte, 1);
+            status = SOPC_Buffer_Write(msgBuffers->buffers, &fByte, 1);
         }
         if(status == STATUS_OK){
             msgBuffers->isFinal = SOPC_Msg_Chunk_Final;
@@ -757,21 +757,21 @@ SOPC_StatusCode Set_Message_Length(SOPC_MsgBuffers* msgBuffers,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t originPosition = 0;
     uint32_t originNbChunk = 0;
-    Buffer* buffer = NULL;
+    SOPC_Buffer* buffer = NULL;
     if(msgBuffers != NULL && msgLength < msgBuffers->buffers->max_size){
         originPosition = msgBuffers->buffers->position;
         originNbChunk = msgBuffers->nbChunks;
         msgBuffers->nbChunks = nbChunk; // Mimic nbChunk is the current chunk to write into using SOPC_<Type>_Write functions
         buffer = MsgBuffers_GetCurrentChunk(msgBuffers);
         if(NULL != buffer && msgLength < buffer->max_size){
-            status = Buffer_SetPosition(buffer, UA_HEADER_LENGTH_POSITION);
+            status = SOPC_Buffer_SetPosition(buffer, UA_HEADER_LENGTH_POSITION);
         }
     }
     if(status == STATUS_OK){
         status = SOPC_UInt32_Write(&msgLength, msgBuffers);
     }
     if(status == STATUS_OK){
-        status = Buffer_SetPosition(buffer, originPosition);
+        status = SOPC_Buffer_SetPosition(buffer, originPosition);
         msgBuffers->nbChunks = originNbChunk;
         msgBuffers->currentChunkSize = msgLength;
     }
@@ -785,21 +785,21 @@ SOPC_StatusCode Set_Message_SymmetricSecuTokenId(SOPC_MsgBuffers* msgBuffers,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t originPosition = 0;
     uint32_t originNbChunk = 0;
-    Buffer* buffer = NULL;
+    SOPC_Buffer* buffer = NULL;
     if(msgBuffers != NULL){
         originPosition = msgBuffers->buffers->position;
         originNbChunk = msgBuffers->nbChunks;
         msgBuffers->nbChunks = nbChunk; // Mimic nbChunk is the current chunk to write into using SOPC_<Type>_Write functions
         buffer = MsgBuffers_GetCurrentChunk(msgBuffers);
         if(NULL != buffer){
-            status = Buffer_SetPosition(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH);
+            status = SOPC_Buffer_SetPosition(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH);
         }
     }
     if(status == STATUS_OK){
         status = SOPC_UInt32_Write(&tokenId, msgBuffers);
     }
     if(status == STATUS_OK){
-        status = Buffer_SetPosition(buffer, originPosition);
+        status = SOPC_Buffer_SetPosition(buffer, originPosition);
         msgBuffers->nbChunks = originNbChunk;
     }
     return status;
@@ -809,13 +809,13 @@ SOPC_StatusCode Set_Message_Chunk_Type(SOPC_MsgBuffers*   msgBuffers,
                                        uint32_t           nbChunk, // Number of chunk in which length must be set
                                        SOPC_MsgFinalChunk chunkType){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    Buffer* buffer = NULL;
+    SOPC_Buffer* buffer = NULL;
     uint32_t originPosition = 0;
 
     if(msgBuffers != NULL){
         buffer = &msgBuffers->buffers[nbChunk-1];
         originPosition = buffer->position;
-        status = Buffer_SetPosition(buffer, UA_HEADER_ISFINAL_POSITION);
+        status = SOPC_Buffer_SetPosition(buffer, UA_HEADER_ISFINAL_POSITION);
     }
 
     SOPC_Byte chunkTypeByte;
@@ -838,7 +838,7 @@ SOPC_StatusCode Set_Message_Chunk_Type(SOPC_MsgBuffers*   msgBuffers,
     }
 
     if(status == STATUS_OK){
-        status = Buffer_SetPosition(buffer, originPosition);
+        status = SOPC_Buffer_SetPosition(buffer, originPosition);
     }
 
     return status;
@@ -853,7 +853,7 @@ SOPC_StatusCode Set_Sequence_NumberHeader(SOPC_MsgBuffers* msgBuffers,
 
     uint32_t originPosition = 0;
     uint32_t originNbChunk = 0;
-    Buffer* buffer = NULL;
+    SOPC_Buffer* buffer = NULL;
     if(msgBuffers != NULL && msgBuffers->flushData != NULL){
         scConnection = (SC_Connection*) msgBuffers->flushData;
         if(scConnection-> lastSeqNumSent > UINT32_MAX - 1024){ // Part 6 §6.7.2 v1.03
@@ -870,7 +870,7 @@ SOPC_StatusCode Set_Sequence_NumberHeader(SOPC_MsgBuffers* msgBuffers,
 
         if(NULL != buffer){
             // Sequence number position is the same in any chunk (same header for all chunks of same msg)
-            status = Buffer_SetPosition(buffer, msgBuffers->sequenceNumberPosition);
+            status = SOPC_Buffer_SetPosition(buffer, msgBuffers->sequenceNumberPosition);
         }
     }
     if(status == STATUS_OK){
@@ -880,7 +880,7 @@ SOPC_StatusCode Set_Sequence_NumberHeader(SOPC_MsgBuffers* msgBuffers,
             status = SOPC_UInt32_Write(&requestId, msgBuffers);
         }
     if(status == STATUS_OK){
-        status = Buffer_SetPosition(buffer, originPosition);
+        status = SOPC_Buffer_SetPosition(buffer, originPosition);
         msgBuffers->nbChunks = originNbChunk;
     }
     return status;
@@ -953,7 +953,7 @@ static SOPC_StatusCode EncodePadding(SOPC_MsgBuffer* msgBuffer,
                                             signatureSize);
         //Little endian conversion of padding:
         SOPC_EncodeDecode_UInt16(realPaddingLength);
-        status = Buffer_Write(msgBuffer->buffers, (SOPC_Byte*) realPaddingLength, 1);
+        status = SOPC_Buffer_Write(msgBuffer->buffers, (SOPC_Byte*) realPaddingLength, 1);
         paddingSizeField = 0xFF & *realPaddingLength;
 
         if(status == STATUS_OK){
@@ -961,7 +961,7 @@ static SOPC_StatusCode EncodePadding(SOPC_MsgBuffer* msgBuffer,
             SOPC_Byte* paddingBytes = malloc(sizeof(SOPC_Byte)*(*realPaddingLength));
             if(paddingBytes != NULL){
                 memset(paddingBytes, paddingSizeField, *realPaddingLength);
-                status = Buffer_Write(msgBuffer->buffers, paddingBytes, *realPaddingLength);
+                status = SOPC_Buffer_Write(msgBuffer->buffers, paddingBytes, *realPaddingLength);
                 free(paddingBytes);
                 paddingBytes = NULL;
             }else{
@@ -974,7 +974,7 @@ static SOPC_StatusCode EncodePadding(SOPC_MsgBuffer* msgBuffer,
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
             SOPC_Byte extraPadding = 0x00FF & *realPaddingLength;
-            Buffer_Write(msgBuffer->buffers, &extraPadding, 1);
+            SOPC_Buffer_Write(msgBuffer->buffers, &extraPadding, 1);
         }
     }
 
@@ -1007,7 +1007,7 @@ SOPC_StatusCode EncodeSignature(SC_Connection*  scConnection,
             }
 
             if(status == STATUS_OK){
-                status = Buffer_Write(msgBuffer->buffers,
+                status = SOPC_Buffer_Write(msgBuffer->buffers,
                                       signedData.Data,
                                       signedData.Length);
             }
@@ -1032,7 +1032,7 @@ SOPC_StatusCode EncodeSignature(SC_Connection*  scConnection,
             }
 
             if(status == STATUS_OK){
-                status = Buffer_Write(msgBuffer->buffers,
+                status = SOPC_Buffer_Write(msgBuffer->buffers,
                                       signedData.Data,
                                       signedData.Length);
             }
@@ -1088,7 +1088,7 @@ SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
                     // Copy non encrypted headers part
                     memcpy(encryptedData, msgBuffer->buffers->data, msgBuffer->sequenceNumberPosition);
                     // Set correct message size and encrypted buffer length
-                    Buffer_SetDataLength(encryptedMsgBuffer->buffers,
+                    SOPC_Buffer_SetDataLength(encryptedMsgBuffer->buffers,
                                            msgBuffer->sequenceNumberPosition + encryptedDataLength);
                     encryptedMsgBuffer->currentChunkSize = msgBuffer->currentChunkSize;
                     // Message size was already encrypted message length, it must be the same now
@@ -1135,7 +1135,7 @@ SOPC_StatusCode EncryptMsg(SC_Connection* scConnection,
                     // Copy non encrypted headers part
                     memcpy(encryptedData, msgBuffer->buffers->data, msgBuffer->sequenceNumberPosition);
                     // Set correct message size and encrypted buffer length
-                    Buffer_SetDataLength(encryptedMsgBuffer->buffers,
+                    SOPC_Buffer_SetDataLength(encryptedMsgBuffer->buffers,
                                          msgBuffer->sequenceNumberPosition + encryptedDataLength);
 
                 }
@@ -1185,7 +1185,7 @@ SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffers*                      msgBuffers,
             // Set only one chunk for abort message
             msgBuffers->nbChunks = 1;
             // Set buffer position to body start (reuse header part already filled)
-            status = Buffer_SetPosition(msgBuffers->buffers,
+            status = SOPC_Buffer_SetPosition(msgBuffers->buffers,
                                         (msgBuffers->sequenceNumberPosition +
                                          UA_SECURE_MESSAGE_SEQUENCE_LENGTH));
             if(STATUS_OK == status){
@@ -1784,7 +1784,7 @@ SOPC_StatusCode SC_DecryptMsg(SC_Connection*  scConnection,
     uint32_t decryptedTextLength = 0;
     CryptoProvider* cryptoProvider = NULL;
     OpcUa_MessageSecurityMode securityMode = OpcUa_MessageSecurityMode_Invalid;
-    Buffer* plainBuffer = NULL;
+    SOPC_Buffer* plainBuffer = NULL;
     uint32_t bufferIdx = 0;
 
     if(scConnection != NULL && transportBuffer != NULL){
@@ -1837,7 +1837,7 @@ SOPC_StatusCode SC_DecryptMsg(SC_Connection*  scConnection,
                                                                   decryptedTextLength, // TODO integration: pas très beau d'avoir la variable et son pointeur juste après (devrait marcher ceci dit, mais ne permet pas de vérifier qu'on s'est pas planté)
                                                                   &decryptedTextLength);
                         if(status == STATUS_OK){
-                            Buffer_SetDataLength(plainBuffer, sequenceNumberPosition + decryptedTextLength);
+                            SOPC_Buffer_SetDataLength(plainBuffer, sequenceNumberPosition + decryptedTextLength);
                         }
                     }else{
                         status = STATUS_NOK;
@@ -1879,7 +1879,7 @@ SOPC_StatusCode SC_DecryptMsg(SC_Connection*  scConnection,
                                                                  &(plainBuffer->data[sequenceNumberPosition]),
                                                                  decryptedTextLength);
                         if(status == STATUS_OK){
-                            Buffer_SetDataLength(plainBuffer, sequenceNumberPosition + decryptedTextLength);
+                            SOPC_Buffer_SetDataLength(plainBuffer, sequenceNumberPosition + decryptedTextLength);
                         }
                     }else{
                         status = STATUS_NOK;
@@ -1996,7 +1996,7 @@ SOPC_StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
 
     CryptoProvider* cryptoProvider = NULL;
     OpcUa_MessageSecurityMode securityMode = OpcUa_MessageSecurityMode_Invalid;
-    Buffer* receptionBuffer = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
+    SOPC_Buffer* receptionBuffer = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
 
     uint32_t signatureSize = 0;
     uint32_t signaturePosition = 0;
@@ -2180,7 +2180,7 @@ SOPC_StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
     uint32_t cipherBlockSize = 0;
     uint32_t plainBlockSize = 0;
     uint16_t padding = 0;
-    Buffer* curChunk = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
+    SOPC_Buffer* curChunk = MsgBuffers_GetCurrentChunk(scConnection->receptionBuffers);
     uint32_t newBufferLength = curChunk->length;
     uint8_t isEncrypted = 1;
     uint8_t isSigned = 1;
@@ -2239,7 +2239,7 @@ SOPC_StatusCode SC_RemovePaddingAndSig(SC_Connection* scConnection,
             newBufferLength -= 1;
         }
         // Set new buffer length without padding and signature
-        status = Buffer_SetDataLength(curChunk, newBufferLength);
+        status = SOPC_Buffer_SetDataLength(curChunk, newBufferLength);
     }
 
 
@@ -2366,10 +2366,10 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
                                void**                encObj){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t msgSize = 0;
-    Buffer* tmpBuffer = NULL;
+    SOPC_Buffer* tmpBuffer = NULL;
     uint32_t idx = 0;
     SOPC_MsgBuffer* tmpMsgBuffer = NULL;
-    Buffer* buffer = NULL;
+    SOPC_Buffer* buffer = NULL;
 
     if(msgBuffers != NULL &&
        recEncType != NULL && encObj != NULL)
@@ -2391,7 +2391,7 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
                     for(idx = 0; idx < msgBuffers->nbChunks; idx++){
                         msgSize += msgBuffers->buffers[idx].length;
                     }
-                    buffer = Buffer_Create(msgSize);
+                    buffer = SOPC_Buffer_Create(msgSize);
 
                     if(buffer == NULL){
                         status = STATUS_NOK;
@@ -2400,7 +2400,7 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
                     // Copy all buffers content into temporary buffer for decoding
                     for(idx = 0; idx < msgBuffers->nbChunks && status == STATUS_OK; idx++){
                         tmpBuffer = &msgBuffers->buffers[idx];
-                        status = Buffer_Write(buffer, tmpBuffer->data, tmpBuffer->length);
+                        status = SOPC_Buffer_Write(buffer, tmpBuffer->data, tmpBuffer->length);
                     }
 
                     if(status == STATUS_OK){
@@ -2422,7 +2422,7 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
 
                     if(tmpMsgBuffer == NULL){
                         // In any case buffer deallocation guarantee
-                        Buffer_Delete(buffer);
+                        SOPC_Buffer_Delete(buffer);
                     }else{
                         // In case msg buffer is allocated, buffer also deallocated here
                         MsgBuffers_Delete(&tmpMsgBuffer);
