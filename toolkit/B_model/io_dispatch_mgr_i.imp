@@ -489,13 +489,15 @@ OPERATIONS
                                     THEN
                                         CASE l_msg_type OF
                                             EITHER e_msg_session_read_req THEN
-                                                treat_read_request (msg, l_resp_msg)
+                                                treat_read_request (msg, l_resp_msg);
+                                                /* TODO: set a returned status code result from read request */
+                                                write_msg_resp_header_service_status (l_resp_msg, e_sc_ok)
                                             OR e_msg_session_write_req THEN
                                                 // Write request case
                                                 l_session_user <-- get_session_user_or_indet (l_session);
                                                 l_payload <-- get_msg_payload (msg);
                                                 l_ret <-- treat_write_request (l_payload, l_session_user);
-                                                /* TODO: where should the service StatusCode be written ?? */
+                                                write_msg_resp_header_service_status (l_resp_msg, l_ret);
                                                 /* TODO: the following may fail (malloc) */
                                                 write_WriteResponse_msg_out(l_resp_msg);
                                                 dealloc_write_request_responses
