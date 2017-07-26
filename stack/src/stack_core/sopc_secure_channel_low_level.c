@@ -886,65 +886,71 @@ SOPC_StatusCode Set_Sequence_NumberHeader(SOPC_MsgBuffers* msgBuffers,
     return status;
 }
 
-SOPC_StatusCode EncodePadding(SC_Connection* scConnection,
-                              SOPC_MsgBuffer* msgBuffer,
-                              uint8_t       symmetricAlgo,
-                              uint8_t*      hasPadding,
-                              uint16_t*     realPaddingLength, // >= paddingSizeField
-                              uint8_t*      hasExtraPadding,
-                              uint32_t*     signatureSize)
-{
-    SOPC_StatusCode status = STATUS_OK;
-    uint32_t plainBlockSize = 0;
-    uint32_t cipherBlockSize = 0;
-    *hasPadding = 1; // True
-
+static SOPC_StatusCode GetCryptoSizes (SC_Connection* scConnection,
+                                       uint8_t        symmetricAlgo,
+                                       uint32_t*      signatureSize,
+                                       uint32_t*      cipherTextBlockSize,
+                                       uint32_t*      plainTextBlockSize){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(symmetricAlgo == FALSE){
         if(scConnection->runningAppCertificate.Length <= 0 ||
-           scConnection->runningAppPrivateKey == NULL ||
-           scConnection->otherAppCertificate.Length <= 0){
-           status = STATUS_INVALID_STATE;
+                scConnection->runningAppPrivateKey == NULL ||
+                scConnection->otherAppCertificate.Length <= 0){
+            status = STATUS_INVALID_STATE;
         }else{
             AsymmetricKey* publicKey = NULL;
 
             status = KeyManager_AsymmetricKey_CreateFromCertificate(scConnection->otherAppPublicKeyCert,
-                                                                    &publicKey);
+                    &publicKey);
 
             if(status == STATUS_OK){
                 status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->currentCryptoProvider,
-                                                                      publicKey,
-                                                                      signatureSize);
+                        publicKey,
+                        signatureSize);
             }
             if(status == STATUS_OK){
                 status = CryptoProvider_AsymmetricGetLength_Msgs(scConnection->currentCryptoProvider,
-                                                                 publicKey,
-                                                                 &cipherBlockSize,
-                                                                 &plainBlockSize);
+                        publicKey,
+                        cipherTextBlockSize,
+                        plainTextBlockSize);
             }
 
             KeyManager_AsymmetricKey_Free(publicKey);
         }
     }else{
         if(scConnection->currentSecuKeySets.senderKeySet == NULL ||
-           scConnection->currentSecuKeySets.receiverKeySet == NULL){
+                scConnection->currentSecuKeySets.receiverKeySet == NULL){
             status = STATUS_INVALID_STATE;
         }else{
             status = CryptoProvider_SymmetricGetLength_Signature(scConnection->currentCryptoProvider,
-                                                                 signatureSize);
+                    signatureSize);
             if(status == STATUS_OK){
                 status = CryptoProvider_SymmetricGetLength_Blocks(scConnection->currentCryptoProvider,
-                                                                  &cipherBlockSize,
-                                                                  &plainBlockSize);
+                        cipherTextBlockSize,
+                        plainTextBlockSize);
             }
         }
     }
+
+    return status;
+}
+
+static SOPC_StatusCode EncodePadding(SOPC_MsgBuffer* msgBuffer,
+                                     uint32_t        plainTextBlockSize,
+                                     uint32_t        signatureSize,
+                                     uint8_t*        hasPadding,
+                                     uint16_t*       realPaddingLength, // >= paddingSizeField
+                                     uint8_t*        hasExtraPadding)
+{
+    SOPC_StatusCode status = STATUS_OK;
+    *hasPadding = 1; // True
 
     if(status == STATUS_OK){
         uint8_t paddingSizeField = 0;
         *realPaddingLength = GetPaddingSize(msgBuffer->buffers->length -
                                               msgBuffer->sequenceNumberPosition,
-                                            plainBlockSize,
-                                            *signatureSize);
+                                              plainTextBlockSize,
+                                            signatureSize);
         //Little endian conversion of padding:
         SOPC_EncodeDecode_UInt16(realPaddingLength);
         status = Buffer_Write(msgBuffer->buffers, (SOPC_Byte*) realPaddingLength, 1);
@@ -964,7 +970,7 @@ SOPC_StatusCode EncodePadding(SC_Connection* scConnection,
         }
 
         // Extra-padding necessary if padding could be greater 256 bytes
-        if(status == STATUS_OK && Is_ExtraPaddingSizePresent(plainBlockSize) != FALSE){
+        if(status == STATUS_OK && Is_ExtraPaddingSizePresent(plainTextBlockSize) != FALSE){
             *hasExtraPadding = 1; // True
             // extra padding = most significant byte of 2 bytes padding size
             SOPC_Byte extraPadding = 0x00FF & *realPaddingLength;
@@ -1322,6 +1328,8 @@ SOPC_StatusCode SC_FlushSecureMsgBuffers(SOPC_MsgBuffers*             msgBuffers
     uint16_t paddingLength = 0;
     uint8_t hasExtraPadding = 0;
     uint32_t signatureSize = 0;
+    uint32_t cipherTextBlockSize = 0;
+    uint32_t plainTextBlockSize = 0;
     uint32_t encryptedLength = 0;
     uint32_t precSeqNum = 0;
 
@@ -1374,17 +1382,26 @@ SOPC_StatusCode SC_FlushSecureMsgBuffers(SOPC_MsgBuffers*             msgBuffers
             symmetricAlgo = FALSE;
         }
 
+        if(toEncrypt != FALSE || toSign != FALSE){
+            status = GetCryptoSizes(scConnection,
+                                    symmetricAlgo,
+                                    &signatureSize,
+                                    &cipherTextBlockSize,
+                                    &plainTextBlockSize);
+        }
+
+        if(STATUS_OK == status){
         //// Encode padding if encrypted message
-        if(toEncrypt == FALSE){
-            // No padding fields
-        }else{
-            status = EncodePadding(scConnection,
-                                   msgBuffers,
-                                   symmetricAlgo,
-                                   &hasPadding,
-                                   &paddingLength,
-                                   &hasExtraPadding,
-                                   &signatureSize);
+            if(toEncrypt == FALSE){
+                // No padding fields
+            }else{
+                status = EncodePadding(msgBuffers,
+                                       plainTextBlockSize,
+                                       signatureSize,
+                                       &hasPadding,
+                                       &paddingLength,
+                                       &hasExtraPadding);
+            }
         }
 
         //// Set the chunk type for the given message
