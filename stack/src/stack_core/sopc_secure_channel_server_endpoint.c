@@ -226,7 +226,7 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
     // Message header already managed by transport layer
     // (except secure channel Id)
     if(STATUS_OK == status){
-        status = SOPC_UInt32_Read(&secureChannelId, transportMsgBuffer);
+        status = SOPC_UInt32_Read(&secureChannelId, transportMsgBuffer->buffers);
     }
 
     if(STATUS_OK == status){
@@ -316,7 +316,7 @@ SOPC_StatusCode Receive_OpenSecureChannelRequest(SC_ServerEndpoint* sEndpoint,
 
     if(STATUS_OK == status){
         // Retrieve request id
-        status = SOPC_UInt32_Read(requestId, scConnection->receptionBuffers);
+        status = SOPC_UInt32_Read(requestId, scConnection->receptionBuffers->buffers);
     }
 
     if(STATUS_OK == status){

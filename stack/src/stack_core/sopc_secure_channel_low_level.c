@@ -582,11 +582,11 @@ SOPC_StatusCode SC_EncodeSecureMsgHeader(SOPC_MsgBuffers*       msgBuffers,
             msgBuffers->isFinal = SOPC_Msg_Chunk_Final;
             // Temporary message size
             const uint32_t msgHeaderLength = UA_SECURE_MESSAGE_HEADER_LENGTH;
-            status = SOPC_UInt32_Write(&msgHeaderLength, msgBuffers);
+            status = SOPC_UInt32_Write(&msgHeaderLength, msgBuffers->buffers);
         }
         if(status == STATUS_OK){
             // Secure channel Id
-            status = SOPC_UInt32_Write(&secureChannelId, msgBuffers);
+            status = SOPC_UInt32_Write(&secureChannelId, msgBuffers->buffers);
         }
 
     }else{
@@ -610,11 +610,11 @@ SOPC_StatusCode SC_EncodeSequenceHeader(SOPC_MsgBuffers* msgBuffers,
     // Set temporary SN value: to be set on message sending (ensure contiguous SNs)
     if(status == STATUS_OK){
         msgBuffers->sequenceNumberPosition = msgBuffers->buffers->position;
-        SOPC_UInt32_Write(&zero, msgBuffers);
+        SOPC_UInt32_Write(&zero, msgBuffers->buffers);
     }
 
     if(status == STATUS_OK){
-        SOPC_UInt32_Write(&requestId, msgBuffers);
+        SOPC_UInt32_Write(&requestId, msgBuffers->buffers);
     }
 
     return status;
@@ -642,7 +642,7 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
     // Security Policy:
     if(status == STATUS_OK){
         if(securityPolicy->Length>0){
-            status = SOPC_String_Write(securityPolicy, msgBuffer);
+            status = SOPC_String_Write(securityPolicy, msgBuffer->buffers);
         }else{
             // Null security policy is invalid parameter since unspecified
             status = STATUS_INVALID_PARAMETERS;
@@ -651,14 +651,14 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
     // Sender Certificate:
     if(status == STATUS_OK){
         if(toSign != FALSE && senderCertificate->Length>0){ // Field shall be null if message not signed
-            status = SOPC_ByteString_Write(senderCertificate, msgBuffer);
+            status = SOPC_ByteString_Write(senderCertificate, msgBuffer->buffers);
         }else if(toSign == FALSE){
             // TODO:
             // regarding mantis #3335 negative values are not valid anymore
             // status = Write_Int32(msgBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
             const int32_t minusOne = -1;
-            status = SOPC_Int32_Write(&minusOne, msgBuffer);
+            status = SOPC_Int32_Write(&minusOne, msgBuffer->buffers);
             // NULL string: nothing to write
         }else{
             status = STATUS_INVALID_PARAMETERS;
@@ -687,7 +687,7 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
             }
 
             if(STATUS_OK == status){
-                status = SOPC_ByteString_Write(&recCertThumbprint, msgBuffer);
+                status = SOPC_ByteString_Write(&recCertThumbprint, msgBuffer->buffers);
             }
             SOPC_ByteString_Clear(&recCertThumbprint);
         }else if(toEncrypt == FALSE){
@@ -696,7 +696,7 @@ SOPC_StatusCode EncodeAsymmSecurityHeader(CryptoProvider*           cryptoProvid
             //status = Write_Int32(msgBuffer, 0);
             // BUT FOUNDATION STACK IS EXPECTING -1 !!!
             const int32_t minusOne = -1;
-            status = SOPC_Int32_Write(&minusOne, msgBuffer);
+            status = SOPC_Int32_Write(&minusOne, msgBuffer->buffers);
             // NULL string: nothing to write
         }else{
             status = STATUS_INVALID_PARAMETERS;
@@ -743,10 +743,10 @@ SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffers*     msgBuffers,
         }
         nodeId.Data.Numeric = encType->BinaryEncodingTypeId;
 
-        status = SOPC_NodeId_Write(&nodeId, msgBuffers);
+        status = SOPC_NodeId_Write(&nodeId, msgBuffers->buffers);
     }
     if(status == STATUS_OK){
-        status = encType->Encode(msgBody, msgBuffers);
+        status = encType->Encode(msgBody, msgBuffers->buffers);
     }
     return status;
 }
@@ -768,7 +768,7 @@ SOPC_StatusCode Set_Message_Length(SOPC_MsgBuffers* msgBuffers,
         }
     }
     if(status == STATUS_OK){
-        status = SOPC_UInt32_Write(&msgLength, msgBuffers);
+        status = SOPC_UInt32_Write(&msgLength, msgBuffers->buffers);
     }
     if(status == STATUS_OK){
         status = SOPC_Buffer_SetPosition(buffer, originPosition);
@@ -796,7 +796,7 @@ SOPC_StatusCode Set_Message_SymmetricSecuTokenId(SOPC_MsgBuffers* msgBuffers,
         }
     }
     if(status == STATUS_OK){
-        status = SOPC_UInt32_Write(&tokenId, msgBuffers);
+        status = SOPC_UInt32_Write(&tokenId, msgBuffers->buffers);
     }
     if(status == STATUS_OK){
         status = SOPC_Buffer_SetPosition(buffer, originPosition);
@@ -874,10 +874,10 @@ SOPC_StatusCode Set_Sequence_NumberHeader(SOPC_MsgBuffers* msgBuffers,
         }
     }
     if(status == STATUS_OK){
-        status = SOPC_UInt32_Write(&scConnection->lastSeqNumSent, msgBuffers);
+        status = SOPC_UInt32_Write(&scConnection->lastSeqNumSent, msgBuffers->buffers);
     }
     if(status == STATUS_OK){
-            status = SOPC_UInt32_Write(&requestId, msgBuffers);
+            status = SOPC_UInt32_Write(&requestId, msgBuffers->buffers);
         }
     if(status == STATUS_OK){
         status = SOPC_Buffer_SetPosition(buffer, originPosition);
@@ -1189,10 +1189,10 @@ SOPC_StatusCode SC_AbortMsg(SOPC_MsgBuffers*                      msgBuffers,
                                         (msgBuffers->sequenceNumberPosition +
                                          UA_SECURE_MESSAGE_SEQUENCE_LENGTH));
             if(STATUS_OK == status){
-                status = SOPC_StatusCode_Write(&errorCode, msgBuffers);
+                status = SOPC_StatusCode_Write(&errorCode, msgBuffers->buffers);
             }
             if(STATUS_OK == status){
-                status = SOPC_String_Write(reason, msgBuffers);
+                status = SOPC_String_Write(reason, msgBuffers->buffers);
             }
             if(STATUS_OK == status){
                 flushSecureMsgData->errorStatus = errorCode; // To call the end operation function with error code
@@ -1527,7 +1527,7 @@ SOPC_StatusCode SC_DecodeSecureMsgSCid(SC_Connection*  scConnection,
 
     if(status == STATUS_OK){
         //TODO: on server side, randomize secure channel ids (table 26 part 6)!
-        status = SOPC_UInt32_Read(&secureChannelId, transportBuffer);
+        status = SOPC_UInt32_Read(&secureChannelId, transportBuffer->buffers);
     }
 
     if(status == STATUS_OK){
@@ -1549,7 +1549,7 @@ SOPC_StatusCode SC_DecodeAsymSecurityHeader_SecurityPolicy(SC_Connection*  scCon
        transportBuffer != NULL &&
        securityPolicy != NULL)
         {
-            status = SOPC_String_Read(securityPolicy, transportBuffer);
+            status = SOPC_String_Read(securityPolicy, transportBuffer->buffers);
         }
         return status;
 }
@@ -1588,7 +1588,7 @@ SOPC_StatusCode SC_DecodeAsymSecurityHeader_Certificates(SC_Connection*     scCo
 
     // Sender Certificate:
     if(status == STATUS_OK){
-        status = SOPC_ByteString_Read(&senderCertificate, transportBuffer);
+        status = SOPC_ByteString_Read(&senderCertificate, transportBuffer->buffers);
         if(status == STATUS_OK){
             if (toSign == FALSE && senderCertificate.Length > 0){
                 // Table 27 part 6: "field shall be null if the Message is not signed"
@@ -1645,7 +1645,7 @@ SOPC_StatusCode SC_DecodeAsymSecurityHeader_Certificates(SC_Connection*     scCo
 
     // Receiver Certificate Thumbprint:
     if(status == STATUS_OK){
-        status = SOPC_ByteString_Read(&receiverCertThumb, transportBuffer);
+        status = SOPC_ByteString_Read(&receiverCertThumb, transportBuffer->buffers);
 
         if(status == STATUS_OK){
             if(toEncrypt == FALSE && receiverCertThumb.Length > 0){
@@ -1919,7 +1919,7 @@ SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
     if(receptionBuffer != NULL && namespaceTable != NULL && encodeableObj != NULL &&
        (knownTypes != NULL || recvEncType != NULL))
     {
-        status = SOPC_NodeId_Read(&nodeId, receptionBuffer);
+        status = SOPC_NodeId_Read(&nodeId, receptionBuffer->buffers);
     }
 
     if(status == STATUS_OK && nodeId.IdentifierType == OpcUa_IdType_Numeric){
@@ -1978,7 +1978,7 @@ SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
     if(status == STATUS_OK){
         *encodeableObj = malloc(recEncType->AllocationSize);
         if(*encodeableObj != NULL){
-            status = recEncType->Decode(*encodeableObj, receptionBuffer);
+            status = recEncType->Decode(*encodeableObj, receptionBuffer->buffers);
         }else{
             status = STATUS_NOK;
         }
@@ -2074,7 +2074,7 @@ SOPC_StatusCode SC_CheckSeqNumReceived(SC_Connection* scConnection)
 
     if(scConnection != NULL){
         status = STATUS_OK;
-        status = SOPC_UInt32_Read(&seqNumber, scConnection->receptionBuffers);
+        status = SOPC_UInt32_Read(&seqNumber, scConnection->receptionBuffers->buffers);
     }
 
     if(status == STATUS_OK){
@@ -2140,7 +2140,7 @@ SOPC_StatusCode SC_EncodeSecureMessage(SOPC_MsgBuffers*     msgBuffers,
 
     if(STATUS_OK == status){
         // Encode symmetric security header
-        status = SOPC_UInt32_Write(&tokenId, msgBuffers);
+        status = SOPC_UInt32_Write(&tokenId, msgBuffers->buffers);
     }
 
     if(STATUS_OK == status){
@@ -2161,7 +2161,7 @@ SOPC_StatusCode SC_DecodeSymmSecurityHeader(SOPC_MsgBuffer* transportBuffer,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(transportBuffer != NULL)
     {
-        status = SOPC_UInt32_Read(tokenId, transportBuffer);
+        status = SOPC_UInt32_Read(tokenId, transportBuffer->buffers);
     }
     if(status == STATUS_OK){
         *snPosition = transportBuffer->buffers->position;
@@ -2301,7 +2301,7 @@ SOPC_StatusCode SC_DecryptSecureMessage(SC_Connection*  scConnection,
 
     if(status == STATUS_OK){
         // Retrieve request id
-        status = SOPC_UInt32_Read(requestId, scConnection->receptionBuffers);
+        status = SOPC_UInt32_Read(requestId, scConnection->receptionBuffers->buffers);
     }
 
     if(status == STATUS_OK){
@@ -2345,10 +2345,10 @@ SOPC_StatusCode SC_CheckAbortChunk(SOPC_MsgBuffers* msgBuffer,
     uint32_t errorCode = 0;
     if(msgBuffer != NULL && reason != NULL){
         if(msgBuffer->isFinal == SOPC_Msg_Chunk_Abort){
-            status = SOPC_UInt32_Read(&errorCode, msgBuffer);
+            status = SOPC_UInt32_Read(&errorCode, msgBuffer->buffers);
             if(status == STATUS_OK){
                 status = errorCode;
-                SOPC_String_Read(reason, msgBuffer);
+                SOPC_String_Read(reason, msgBuffer->buffers);
             }
 
         }else{
