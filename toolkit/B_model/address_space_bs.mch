@@ -22,33 +22,60 @@ SEES
     constants
 
 DEFINITIONS
+
+    d_variables ==
+        a_NodeId,
+        a_NodeClass,
+        a_BrowseName,
+        a_DisplayName,
+        a_Value,
+        a_Value_StatusCode,
+
+        TypeDefinition,
+
+        Reference_SourceNode,
+        Reference_ReferenceType,
+        Reference_TargetNode,
+        Reference_IsForward,
+        
+        Node_RefIndexBegin,
+        Node_RefIndexEnd,
+        RefIndex_Reference
+    ;
+
     d_inv ==
     (
         /* Attributes */
-        a_NodeId : t_Node +-> t_NodeId &
-        a_NodeClass : t_Node +-> t_NodeClass &
-
-        a_Value : t_Node +-> t_Variant &
+        a_NodeId      : t_Node +-> t_NodeId    &
+        a_NodeClass   : t_Node +-> t_NodeClass &
+        a_BrowseName  : t_Node +-> t_QualifiedName &
+        a_DisplayName : t_Node +-> t_LocalizedText &
+        a_Value       : t_Node +-> t_Variant   &
 
         /* Value attribute meta-data */
-        a_Value_StatusCode : t_Node +-> t_StatusCode
+        a_Value_StatusCode : t_Node +-> t_StatusCode &
+
+        TypeDefinition : t_Node +-> t_ExpandedNodeId &
+
+        Reference_SourceNode    : t_Reference +-> t_NodeId         &
+        Reference_ReferenceType : t_Reference +-> t_NodeId         &
+        Reference_TargetNode    : t_Reference +-> t_ExpandedNodeId &
+        Reference_IsForward     : t_Reference +-> BOOL             &
+
+        Node_RefIndexBegin      : t_Node     +-> t_RefIndex  &
+        Node_RefIndexEnd        : t_Node     +-> t_RefIndex  &
+        RefIndex_Reference      : t_RefIndex +-> t_Reference
     )
 
 ABSTRACT_VARIABLES
-    a_NodeId,
-    a_NodeClass,
-    a_Value,
-    a_Value_StatusCode
+    d_variables
 
 INVARIANT
     d_inv
 
 INITIALISATION
     /* This is where the Address Space is filled */
-    a_NodeId,
-    a_NodeClass,
-    a_Value,
-    a_Value_StatusCode
+    d_variables
     :(
         a_NodeId : t_Node >-> t_NodeId &
         a_NodeClass : t_Node --> t_NodeClass &
@@ -58,8 +85,14 @@ INITIALISATION
         dom(a_Value) <: dom(a_NodeClass|>{e_ncl_Variable, e_ncl_VariableType}) &
 
         a_Value_StatusCode : t_Node +-> t_StatusCode &
-        dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable})
-    )
+        dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        /* References */
+        Reference_SourceNode    : t_Reference --> t_NodeId         &
+        Reference_ReferenceType : t_Reference --> t_NodeId         &
+        Reference_TargetNode    : t_Reference --> t_ExpandedNodeId &
+        Reference_IsForward     : t_Reference --> BOOL
+     )
 
 OPERATIONS
     /* As INITIALISATION may use mallocs, needs an UNINIT */
@@ -136,27 +169,117 @@ OPERATIONS
     END
     ;
 
-    /* a_NodeClass */
-    ncl <-- get_NodeClass(node) =
-    PRE
-        node : t_Node_i &
-        node : t_Node   &
-        node : dom(a_NodeClass)
-    THEN
-        ncl
-        :(
-            ncl : t_NodeClass_i &
-            ncl = a_NodeClass(node)
-        )
-    END
-    ;
-
     /* Frees a value previously malloced with read_AddressSpace_Attribute_value */
     read_AddressSpace_free_value(val) =
     PRE
         val : t_Variant_i
     THEN
         skip
+    END
+    ;
+
+    p_browse_name <-- get_BrowseName(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node   &
+        p_node : dom(a_BrowseName)
+    THEN
+        p_browse_name :(p_browse_name : t_QualifiedName_i &
+                        p_browse_name = a_BrowseName(p_node))
+    END
+    ;
+
+    p_display_name <-- get_DisplayName(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node   &
+        p_node : dom(a_DisplayName)
+    THEN
+        p_display_name :(p_display_name : t_LocalizedText_i &
+                         p_display_name = a_DisplayName(p_node))
+    END
+    ;
+
+    p_node_class <-- get_NodeClass(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node   &
+        p_node : dom(a_NodeClass)
+    THEN
+        p_node_class :(p_node_class : t_NodeClass_i &
+                       p_node_class = a_NodeClass(p_node))
+    END
+    ;
+
+    p_type_def <-- get_TypeDefinition(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node   &
+        p_node : dom(TypeDefinition)
+    THEN
+        p_type_def :(p_type_def : t_ExpandedNodeId_i &
+                     p_type_def = TypeDefinition(p_node))
+    END
+    ;
+
+    p_RefType <-- get_Reference_ReferenceType(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_RefType
+        :(  p_RefType : t_NodeId_i &
+            p_RefType = Reference_ReferenceType(p_ref)
+         )
+    END
+    ;
+
+    p_TargetNode <-- get_Reference_TargetNode(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_TargetNode
+        :(
+            p_TargetNode : t_ExpandedNodeId_i &
+            p_TargetNode = Reference_TargetNode(p_ref)
+         )
+    END
+    ;
+   
+    p_IsForward <-- get_Reference_IsForward(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_IsForward := Reference_IsForward(p_ref)
+    END
+    ;
+
+    p_ref_index <-- get_Node_RefIndexBegin(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_ref_index := Node_RefIndexBegin(p_node)
+    END
+    ;
+    
+    p_ref_index <-- get_Node_RefIndexEnd(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_ref_index := Node_RefIndexEnd(p_node)
+    END
+    ;
+
+    p_ref <-- get_RefIndex_Reference(p_ref_index) =
+    PRE
+        p_ref_index : t_RefIndex
+    THEN
+        p_ref :(p_ref : t_Reference_i &
+                p_ref = RefIndex_Reference(p_ref_index))
     END
 
 END

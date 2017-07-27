@@ -1,0 +1,234 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    service_browse_seq_i
+
+REFINES
+    service_browse_seq
+
+SEES
+    constants,
+    address_space
+
+IMPORTS
+    service_browse,
+    service_browse_seq_it,
+    service_browse_decode_bs
+
+LOCAL_OPERATIONS
+
+    p_continue_bri, p_bri_new <-- fill_browse_response_ref(p_bvi, p_bri, p_ref, p_dir,
+                                                           p_isreftype, p_ref_type, p_inc_subtype) =
+    PRE
+        p_bvi         : t_BrowseValue_i     &
+        p_bvi         : t_BrowseValue       &
+        p_bri         : t_BrowseResult_i    &
+        p_bri         : t_BrowseResult      &
+        p_ref         : t_Reference_i       &
+        p_ref         : t_Reference         &
+        p_dir         : t_BrowseDirection_i &
+        p_dir         : t_BrowseDirection   &
+        p_isreftype   : BOOL                &
+        p_ref_type    : t_NodeId_i          &
+        p_ref_type    : t_NodeId            &
+        p_inc_subtype : BOOL
+    THEN
+        p_continue_bri,
+        p_bri_new
+        :(
+            p_continue_bri : BOOL &
+            p_bri_new      : t_BrowseResult_i
+         )
+    END
+    ;
+
+    fill_browse_response(p_bvi, p_nb_bri, p_src_node, p_dir, p_isreftype, p_reftype, p_inc_subtype) =
+    PRE
+        p_bvi         : t_BrowseValue_i     &
+        p_bvi         : t_BrowseValue       &
+        p_nb_bri      : NAT                 &
+        p_src_node    : t_Node_i            &
+        p_src_node    : t_Node              &
+        p_dir         : t_BrowseDirection_i &
+        p_dir         : t_BrowseDirection   &
+        p_isreftype   : BOOL                &
+        p_reftype     : t_NodeId_i          &
+        p_inc_subtype : BOOL
+    THEN
+        skip
+    END
+    ;
+
+    treat_browse_request_BrowseValue_1(p_bvi, p_nb_target_max) =
+    PRE
+        p_bvi           : t_BrowseValue_i &
+        p_bvi           : t_BrowseValue   &
+        p_nb_target_max : NAT
+    THEN
+        skip
+    END
+
+
+OPERATIONS
+
+    /* When the target node fulfills all the filtering conditions, then fill its data and iterate
+       on the browse result index.
+       p_bvi          : browse value index of the starting node
+       p_bri          : browse response index
+       p_ref          : reference
+       p_dir          : direction(s) of references to filter
+       p_isreftype    : indicates whether the reference type should be filtered. The following 2
+                        parameters are meaningfull only when this one is true
+       p_reftype      : reference type to filter
+       p_inc_subtype  : indicates whether subtypes should be filtered. Else only the given reference
+                        type is filtered
+       p_continue_bri : indicates whether the iteration should continue (it should stop if the
+                        maximum number of browse response index has just been filled)
+       p_bri_new      : new value of the browse response index
+    */
+    p_continue_bri, p_bri_new <-- fill_browse_response_ref(p_bvi, p_bri, p_ref, p_dir,
+                                                           p_isreftype, p_ref_type, p_inc_subtype) =
+    VAR
+        l_RefType,
+        l_TargetNode,
+        l_IsForward,
+        l_res
+    IN
+        p_bri_new      := p_bri;
+        p_continue_bri := TRUE;
+        l_RefType    <-- get_Reference_ReferenceType(p_ref);
+        l_TargetNode <-- get_Reference_TargetNode(p_ref);
+        l_IsForward  <-- get_Reference_IsForward(p_ref);
+        l_res        <-- get_Is_Dir_Forward_Compatible(p_dir, l_IsForward);
+        IF  l_res = TRUE THEN
+            l_res <-- Is_RefTypes_Compatible(p_isreftype, p_ref_type, p_inc_subtype, l_RefType);
+            IF  l_res = TRUE THEN
+                l_res <-- copy_target_node_browse_result(p_bvi, p_bri, l_RefType, l_TargetNode, l_IsForward);
+                IF  l_res = TRUE THEN
+                    p_continue_bri, p_bri_new <-- continue_iter_browse_result
+                END
+            END
+        END
+    END
+    ;
+
+    /* Fills the part of the response to a browse request message on one given source node.
+       Iterates on each reference 
+       p_bvi         : browse value index of the starting node
+       p_nb_bri      : maximum number of target nodes
+       p_src_node    : source node from which refences should start
+       p_dir         : direction(s) of references to filter
+       p_isreftype   : indicates whether the reference type should be filtered. The following 2
+                       parameters are meaningfull only when this one is true
+       p_reftype     : reference type to filter
+       p_inc_subtype : indicates whether subtypes should be filtered. Else only the given reference
+                       type is filtered
+    */
+    fill_browse_response(p_bvi, p_nb_bri, p_src_node, p_dir, p_isreftype, p_reftype, p_inc_subtype) =
+    VAR
+        l_continue_bri,
+        l_bri,
+        l_bri_new,
+        l_continue_ref,
+        l_ref
+    IN
+        /* Initialization of the iteration on the browse result */
+        l_continue_bri <-- init_iter_browse_result(p_nb_bri);
+        IF  l_continue_bri = TRUE THEN
+            /* Setting the first browse result element to store data */
+            l_continue_bri, l_bri <-- continue_iter_browse_result;
+
+            /* Loop on the references starting from the source node */
+            l_continue_ref <-- init_iter_reference(p_src_node);
+            WHILE
+                l_continue_ref = TRUE &
+                l_continue_bri = TRUE
+            DO
+                l_continue_ref, l_ref <-- continue_iter_reference;
+                /* When the target node fulfills all the filtering conditions, then
+                   fill its data and iterate on the browse result index */
+                l_continue_bri, l_bri_new <-- fill_browse_response_ref(p_bvi, l_bri, l_ref, p_dir,
+                                                                       p_isreftype, p_reftype, p_inc_subtype);
+                l_bri := l_bri_new
+            INVARIANT
+                0=0
+            VARIANT
+                0
+            END;
+            /* TODO: There may need more information */
+            fill_continuation_point(p_bvi, l_continue_ref, l_ref)
+        END
+    END
+    ;
+
+    /* Computes the part of the response to a browse request message on one given source node.
+       Computes the maximum number of target nodes, allocate the memory to store then and fill
+       the requested data.
+       p_bvi           : browse value index of the starting node
+       p_nb_target_max : limit number of target nodes in the browse response set by the client.
+                         0 means no limit
+    */
+    treat_browse_request_BrowseValue_1(p_bvi, p_nb_target_max) =
+    VAR
+        l_isvalid,
+        l_SrcNodeId,
+        l_dir,
+        l_isreftype,
+        l_reftype,
+        l_incsubtyp,
+        l_nb_target,
+        l_src_node,
+        l_nb_bri
+    IN
+        l_isvalid, l_SrcNodeId, l_dir, l_isreftype, l_reftype, l_incsubtyp <-- getall_BrowseValue(p_bvi);
+        IF  l_isvalid = TRUE THEN
+            l_isvalid, l_nb_target, l_src_node <-- get_SourceNode_NbRef(l_SrcNodeId); /* TODOPAB getall */
+            IF  l_isvalid = TRUE THEN
+                l_isvalid, l_nb_bri <-- alloc_browse_result(p_bvi, p_nb_target_max, l_nb_target);
+                IF  l_isvalid = TRUE THEN
+                    fill_browse_response(p_bvi, l_nb_bri, l_src_node, l_dir, l_isreftype, l_reftype, l_incsubtyp)
+                END
+            END
+        END
+    END
+    ;
+
+    /* Computes a browse request message by looping on each source node found in the browse request.
+    */
+    StatusCode_service <-- treat_browse_request_BrowseValues =
+    VAR
+        l_nb_target_max,
+        l_nb_bvi,
+        l_continue,
+        l_bvi
+    IN
+        l_nb_target_max <-- get_nb_BrowseTargetMax;
+        StatusCode_service := e_sc_ok;  /* TODOPAB */
+        l_nb_bvi <-- get_nb_BrowseValue;
+        l_continue <-- init_iter_browse_request(l_nb_bvi);
+        WHILE l_continue = TRUE DO
+            l_continue, l_bvi <-- continue_iter_browse_request;
+            treat_browse_request_BrowseValue_1(l_bvi, l_nb_target_max)
+        INVARIANT
+            0=0
+        VARIANT
+            0
+        END
+    END
+
+END

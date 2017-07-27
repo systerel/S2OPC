@@ -23,6 +23,13 @@ SETS
     t_Node_i;
     /* The node IDs. There might not be a NODE behind a node ID. */
     t_NodeId_i;
+
+    /* Expanded Nodes Id : nodes ID local the the address space server or from distant address spaces */
+    t_ExpandedNodeId_i;
+
+    /* Address space references */
+    t_Reference_i;
+
     /* The node classes */
     t_NodeClass_i = {c_NodeClass_indet,
                      e_ncl_Object, e_ncl_Variable, e_ncl_Method,
@@ -42,14 +49,28 @@ SETS
                       e_sc_bad_invalid_argument,
                       e_sc_bad_unexpected_error,
                       e_sc_bad_out_of_memory};
+
+    t_BrowseDirection_i = {e_bd_indet,
+                           e_bd_forward,
+                           e_bd_inverse,
+                           e_bd_both};
+
     /*t_Timestamp;*/
 
     /* A ReadValue of a ReadRequest. The size of that will define the nb_max_read_value. */
     t_ReadValue_i;
+
     /* A WriteValue of a WriteRequest. */
     t_WriteValue_i;
+
+    /* A BrowseValue of a BrowseRequest. */
+    t_BrowseValue_i;
+    t_BrowseResult_i;
+
     t_byte_buffer_i;
     t_UserId_i;
+    t_LocalizedText_i;
+    t_QualifiedName_i;
 
     t_session_i;
     t_session_token_i;
@@ -111,14 +132,22 @@ CONCRETE_CONSTANTS
     k_n_Nodes,
     k_n_read_resp_max,
     k_n_WriteResponse_max,
+    k_n_BrowseResponse_max,
+    k_n_BrowseTarget_max,
 
     c_Variant_indet,
     c_NodeId_indet,
+    c_ExpandedNodeId_indet,
+    c_Reference_indet,
     c_Node_indet,
     c_ReadValue_indet,
     c_WriteValue_indet,
+    c_BrowseValue_indet,
+    c_BrowseResult_indet,
     c_byte_buffer_indet,
     c_UserId_indet,
+    c_LocalizedText_indet,
+    c_QualifiedName_indet,
 
     c_endpoint_config_idx_indet,
     c_user_indet,
@@ -131,25 +160,38 @@ CONCRETE_CONSTANTS
     c_request_context_indet,
     c_channel_config_idx_indet,
     c_channel_indet,
-    c_request_handle_indet
+    c_request_handle_indet,
+
+    t_RefIndex
 
 ABSTRACT_CONSTANTS
     conv_NodeId_Variant,
     conv_NodeClass_Variant,
 
+    conv_ExpandedNodeId_NodeId,
+
     t_StatusCode,
+    t_BrowseDirection,
     t_AttributeId,
     t_NodeClass,
     t_Variant,
     t_NodeId,
+    t_ExpandedNodeId,
+    t_Reference,
     t_Node,
     t_ReadValue,
     t_WriteValue,
+    t_BrowseValue,
+    t_BrowseResult,
     t_byte_buffer,
     t_UserId,
+    t_LocalizedText,
+    t_QualifiedName,
 
     cast_t_ReadValue,
     cast_t_WriteValue,
+    cast_t_BrowseValue,
+    cast_t_BrowseResult,
 
     t_endpoint_config_idx,
     t_session,
@@ -173,7 +215,10 @@ ABSTRACT_CONSTANTS
     s_discovery_service_reqs,
     s_discovery_service_resps,
     s_service_reqs,
-    s_service_resps
+    s_service_resps,
+
+    Is_SubType,
+    Is_Dir_Forward_Compatible
 
 PROPERTIES
     /*AddS <: t_Node &*/
@@ -189,6 +234,14 @@ PROPERTIES
     c_NodeId_indet : t_NodeId_i &
     c_NodeId_indet /: t_NodeId &
 
+    t_ExpandedNodeId <: t_ExpandedNodeId_i &
+    c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
+    c_ExpandedNodeId_indet /: t_ExpandedNodeId &
+
+    t_Reference <: t_Reference_i &
+    c_Reference_indet : t_Reference_i &
+    c_Reference_indet /: t_Reference &
+
     t_StatusCode = {e_sc_ok, e_sc_nok,
                       e_sc_bad_secure_channel_closed,
                       e_sc_bad_connection_closed,
@@ -200,6 +253,11 @@ PROPERTIES
                       e_sc_bad_invalid_argument,
                       e_sc_bad_unexpected_error,
                       e_sc_bad_out_of_memory} &
+
+    t_BrowseDirection = {e_bd_forward,
+                         e_bd_inverse,
+                         e_bd_both} &
+
     t_AttributeId = {e_aid_NodeId, e_aid_NodeClass, e_aid_Value} &
 
     t_NodeClass = t_NodeClass_i - {c_NodeClass_indet} &
@@ -207,9 +265,13 @@ PROPERTIES
     conv_NodeId_Variant : t_NodeId --> t_Variant &
     conv_NodeClass_Variant : t_NodeClass --> t_Variant &
 
+    conv_ExpandedNodeId_NodeId : t_ExpandedNodeId +-> t_NodeId &
+
     k_n_Nodes : NAT &
     k_n_read_resp_max : NAT &
     k_n_WriteResponse_max : NAT &
+    k_n_BrowseResponse_max : NAT &
+    k_n_BrowseTarget_max : NAT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &
@@ -227,6 +289,18 @@ PROPERTIES
     cast_t_WriteValue : NAT +-> t_WriteValue_i &
     cast_t_WriteValue : perm(t_WriteValue) &
 
+    t_BrowseValue <: t_BrowseValue_i &
+    c_BrowseValue_indet : t_BrowseValue_i &
+    c_BrowseValue_indet /: t_BrowseValue &
+    cast_t_BrowseValue : NAT +-> t_BrowseValue_i &
+    cast_t_BrowseValue : perm(t_BrowseValue) &
+
+    t_BrowseResult <: t_BrowseResult_i &
+    c_BrowseResult_indet : t_BrowseResult_i &
+    c_BrowseResult_indet /: t_BrowseResult &
+    cast_t_BrowseResult : NAT +-> t_BrowseResult_i &
+    cast_t_BrowseResult : perm(t_BrowseResult) &
+
     t_byte_buffer <: t_byte_buffer_i &
     c_byte_buffer_indet : t_byte_buffer_i &
     c_byte_buffer_indet /: t_byte_buffer &
@@ -234,6 +308,14 @@ PROPERTIES
     t_UserId <: t_UserId_i &
     c_UserId_indet : t_UserId_i &
     c_UserId_indet /: t_UserId &
+
+    t_LocalizedText <: t_LocalizedText_i &
+    c_LocalizedText_indet : t_LocalizedText_i &
+    c_LocalizedText_indet /: t_LocalizedText &
+
+    t_QualifiedName <: t_QualifiedName_i &
+    c_QualifiedName_indet : t_QualifiedName_i &
+    c_QualifiedName_indet /: t_QualifiedName &
 
     t_channel <: t_channel_i &
     c_channel_indet : t_channel_i &
@@ -288,6 +370,8 @@ PROPERTIES
         e_buffer_in_msg_header_read,
         e_buffer_in_msg_read } &
 
+    t_RefIndex <: NAT &
+
     s_service_treatment_reqs = {e_msg_session_create_req,
         e_msg_session_activate_req,
         e_msg_session_close_req} &
@@ -308,7 +392,17 @@ PROPERTIES
     s_service_reqs  = s_service_treatment_reqs \/ s_service_on_session_reqs \/ s_discovery_service_reqs &
     s_service_resps = s_service_on_session_resps \/ s_discovery_service_resps \/ {e_msg_service_fault_resp} &
 
-    t_msg_type = s_service_reqs \/ s_service_resps
+    t_msg_type = s_service_reqs \/ s_service_resps &
+
+    Is_SubType : t_NodeId * t_NodeId --> BOOL &
+
+    Is_Dir_Forward_Compatible : t_BrowseDirection * BOOL --> BOOL &
+    Is_Dir_Forward_Compatible = {e_bd_forward |-> FALSE |-> FALSE,
+                                 e_bd_forward |-> TRUE  |-> TRUE,
+                                 e_bd_inverse |-> FALSE |-> TRUE,
+                                 e_bd_inverse |-> TRUE  |-> FALSE,
+                                 e_bd_both    |-> FALSE |-> TRUE,
+                                 e_bd_both    |-> TRUE  |-> TRUE}
 
 OPERATIONS
     rvi <-- read_cast_t_ReadValue(ii) =
@@ -326,6 +420,61 @@ OPERATIONS
         ii : dom(cast_t_WriteValue)
     THEN
         wvi := cast_t_WriteValue(ii)
+    END
+    ;
+
+    p_bvi <-- get_cast_t_BrowseValue(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_BrowseValue)
+    THEN
+        p_bvi := cast_t_BrowseValue(p_ind)
+    END
+    ;
+
+    p_bri <-- get_cast_t_BrowseResult(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_BrowseResult)
+    THEN
+        p_bri := cast_t_BrowseResult(p_ind)
+    END
+    ;
+
+    p_isvalid, p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
+    PRE
+        p_expnid : t_ExpandedNodeId_i &
+        p_expnid : t_ExpandedNodeId
+    THEN
+        IF  p_expnid : dom(conv_ExpandedNodeId_NodeId) THEN
+            p_isvalid := TRUE ||
+            p_nid :(p_nid : t_NodeId_i &
+                    p_nid = conv_ExpandedNodeId_NodeId(p_expnid))
+        ELSE
+            p_isvalid := FALSE ||
+            p_nid     :: t_NodeId_i
+        END
+    END
+    ;
+
+    p_dir_compat <-- get_Is_Dir_Forward_Compatible(p_dir, p_IsForward) =
+    PRE
+        p_dir       : t_BrowseDirection_i &
+        p_dir       : t_BrowseDirection   &
+        p_IsForward : BOOL
+    THEN
+        p_dir_compat := Is_Dir_Forward_Compatible(p_dir |-> p_IsForward)
+    END
+    ;
+
+    p_res <-- get_Is_SubType(p_type1, p_type2) =
+    PRE
+        p_type1 : t_NodeId_i &
+        p_type1 : t_NodeId   &
+        p_type2 : t_NodeId_i &
+        p_type2 : t_NodeId
+    THEN
+        p_res := Is_SubType(p_type1 |-> p_type2)
     END
 
 END

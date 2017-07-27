@@ -27,8 +27,22 @@ DEFINITIONS
     d_variables ==
         a_NodeId,
         a_NodeClass,
+        a_BrowseName,
+        a_DisplayName,
         a_Value,
         a_Value_StatusCode,
+
+        TypeDefinition,
+
+        Reference_SourceNode,
+        Reference_ReferenceType,
+        Reference_TargetNode,
+        Reference_IsForward,
+
+        Node_Reference,
+        Node_RefIndexBegin,
+        Node_RefIndexEnd,
+        RefIndex_Reference,
 
         /* Service Write */
         ResponseWrite_allocated,
@@ -37,9 +51,11 @@ DEFINITIONS
 
     d_inv ==
     (
-        /* Attributes */
-        a_NodeId : t_Node >-> t_NodeId &
-        a_NodeClass : t_Node --> t_NodeClass &
+        /* Node attributes */
+        a_NodeId      : t_Node >-> t_NodeId        &
+        a_NodeClass   : t_Node --> t_NodeClass     &
+        a_BrowseName  : t_Node --> t_QualifiedName &
+        a_DisplayName : t_Node --> t_LocalizedText &
 
         a_Value : t_Node +-> t_Variant &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
@@ -48,6 +64,20 @@ DEFINITIONS
         /* Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        TypeDefinition : t_Node +-> t_ExpandedNodeId &
+        dom(TypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
+
+        /* References */
+        Reference_SourceNode    : t_Reference --> t_NodeId         &
+        Reference_ReferenceType : t_Reference --> t_NodeId         &
+        Reference_TargetNode    : t_Reference --> t_ExpandedNodeId &
+        Reference_IsForward     : t_Reference --> BOOL             &
+
+        Node_Reference          : t_Node     <-> t_Reference &
+        Node_RefIndexBegin      : t_Node     --> t_RefIndex  &
+        Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
+        RefIndex_Reference      : t_RefIndex --> t_Reference &
 
         /* Service Write */
         ResponseWrite_allocated : BOOL &
@@ -98,13 +128,105 @@ OPERATIONS
     PRE
         nid : t_NodeId_i
     THEN
-        IF nid : ran(a_NodeId) THEN
+        IF  nid : ran(a_NodeId) THEN
             nid_valid := TRUE ||
             node :( node : t_Node_i & node|->nid : a_NodeId )
         ELSE
             nid_valid := FALSE ||
             node := c_Node_indet
         END
+    END
+    ;
+
+    p_node_class <-- get_NodeClass(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_node_class :(p_node_class : t_NodeClass_i &
+                       p_node_class = a_NodeClass(p_node))
+    END
+    ;
+
+    p_browse_name <-- get_BrowseName(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_browse_name :(p_browse_name : t_QualifiedName_i &
+                        p_browse_name = a_BrowseName(p_node))
+    END
+    ;
+
+    p_display_name <-- get_DisplayName(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_display_name :(p_display_name : t_LocalizedText_i &
+                         p_display_name = a_DisplayName(p_node))
+    END
+    ;
+
+    p_RefType <-- get_Reference_ReferenceType(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_RefType
+        :(  p_RefType : t_NodeId_i &
+            p_RefType = Reference_ReferenceType(p_ref)
+         )
+    END
+    ;
+    
+
+    p_TargetNode <-- get_Reference_TargetNode(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_TargetNode
+        :(
+            p_TargetNode : t_ExpandedNodeId_i &
+            p_TargetNode = Reference_TargetNode(p_ref)
+         )
+    END
+    ;
+   
+    p_IsForward <-- get_Reference_IsForward(p_ref) =
+    PRE
+        p_ref : t_Reference_i &
+        p_ref : t_Reference
+    THEN
+        p_IsForward := Reference_IsForward(p_ref)
+    END
+    ;
+
+    p_ref_index <-- get_Node_RefIndexBegin(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_ref_index := Node_RefIndexBegin(p_node)
+    END
+    ;
+    
+    p_ref_index <-- get_Node_RefIndexEnd(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node
+    THEN
+        p_ref_index := Node_RefIndexEnd(p_node)
+    END
+    ;
+
+    p_ref <-- get_RefIndex_Reference(p_ref_index) =
+    PRE
+        p_ref_index : t_RefIndex
+    THEN
+        p_ref :(p_ref : t_Reference_i &
+                p_ref = RefIndex_Reference(p_ref_index))
     END
     ;
 

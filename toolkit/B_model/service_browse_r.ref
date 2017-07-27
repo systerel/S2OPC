@@ -1,0 +1,200 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+REFINEMENT
+    service_browse_r
+
+REFINES
+    service_browse
+
+SEES
+    constants,
+    address_space
+
+DEFINITIONS
+    d_variables ==
+        ResponseBrowse_BrowseStatus,
+        ResponseBrowse_ContinuationPoint,
+        ResponseBrowse_Res_ReferenceTypeId,
+        ResponseBrowse_Res_Forwards,
+        ResponseBrowse_Res_NodeId,
+        ResponseBrowse_Res_BrowseName,
+        ResponseBrowse_Res_DisplayName,
+        ResponseBrowse_Res_NodeClass,
+        ResponseBrowse_Res_TypeDefinition
+
+ABSTRACT_VARIABLES
+    d_variables
+
+INITIALISATION
+    d_variables
+    :(
+        ResponseBrowse_BrowseStatus        = {}                   &
+        ResponseBrowse_ContinuationPoint   = {}                   &
+        ResponseBrowse_Res_ReferenceTypeId = t_BrowseValue * {{}} &
+        ResponseBrowse_Res_Forwards        = t_BrowseValue * {{}} &
+        ResponseBrowse_Res_NodeId          = t_BrowseValue * {{}} &
+        ResponseBrowse_Res_BrowseName      = t_BrowseValue * {{}} &
+        ResponseBrowse_Res_DisplayName     = t_BrowseValue * {{}} &
+        ResponseBrowse_Res_NodeClass       = t_BrowseValue * {{}} &
+        ResponseBrowse_Res_TypeDefinition  = t_BrowseValue * {{}}
+     )
+
+OPERATIONS
+
+    /* Get the node associated to a node ID and the number of references starting from this node.
+       p_src_nodeid : current node ID to process (in t_NodeId)
+       p_isvalid    : indicates whether the node ID is associated to a node
+       p_nb_ref     : number of references starting from this source node
+       p_src_node   : source node associated to the node ID (in t_Node if such an association exists)
+    */
+    p_isvalid, p_nb_ref, p_src_node <-- get_SourceNode_NbRef(p_src_nodeid) =
+    BEGIN
+        IF  p_src_nodeid : dom(a_NodeId~) THEN
+            /* Source node ID p_src_nodeid is associated to a node */
+            LET
+                l_src_node
+            BE
+               /* Source node (in t_Node) associated to node ID p_src_nodeid (in t_NodeId) */
+                l_src_node = a_NodeId~(p_src_nodeid)
+            IN
+                p_isvalid := TRUE ||
+                p_nb_ref  := max({0, Node_RefIndexEnd(l_src_node) - Node_RefIndexBegin(l_src_node) + 1}) ||
+                p_src_node :(p_src_node : t_Node_i &
+                             p_src_node = l_src_node)
+            END
+        ELSE
+            p_isvalid  := FALSE ||
+            p_nb_ref   :: INT   ||
+            p_src_node :: t_Node_i
+        END
+    END
+    ;
+
+
+    /* Allocate memory to store the response to a browse request for a given starting node and
+       compute the maximum number of target nodes in the response.
+       p_bvi           : browse value index of the starting node
+       p_nb_target_max : limit number of target nodes in the browse response set by the client.
+                         0 means no limit
+       p_nb_target     : maximum number of references (so maximum number of target nodes) starting
+                         from the starting node
+       p_isallocated   : indicates whether the allocation succeeded
+       p_nb_bri        : number of target nodes allocated
+    */
+    p_isallocated, p_nb_bri <-- alloc_browse_result(p_bvi, p_nb_target_max, p_nb_target) =
+    BEGIN
+        p_isallocated :: BOOL ||
+        IF  0 < p_nb_target_max &
+            p_nb_target_max < p_nb_target
+        THEN
+            p_nb_bri := p_nb_target_max
+        ELSE
+            p_nb_bri := p_nb_target
+        END
+    END
+    ;
+
+    /* Indicates whether a reference type 2 is compatible a reference type 1
+       p_is_ref_type1     : indicates whether there is a reference type 1 to check compatibility with.
+                            In this case the following 2 parameters define the compatibility
+       p_ref_type1        : reference type 1 (in t_Node_Id)
+       p_inc_subtypes     : indicates whether subtypes of reference type 1 are considered compatible.
+                            Else only a reference type equal to reference type 1 is compatible.
+       p_ref_type2        : reference type 2 (in t_Node_Id)
+       p_ref_types_compat : indicates whether type 2 is compatible
+    */
+    p_ref_types_compat <-- Is_RefTypes_Compatible(p_is_ref_type1, p_ref_type1, p_inc_subtypes, p_ref_type2) =
+    BEGIN
+    /*  Equivalent à la spec à base de IF THEN ELSE. Laquelle choisir ?
+        p_ref_types_compat := bool(p_is_ref_type1 = TRUE
+                                   =>
+                                   (p_ref_type1 /= p_ref_type2
+                                    =>
+                                    p_inc_subtypes = TRUE &
+                                    Is_SubType(p_ref_type2, p_ref_type1)))
+     */
+        IF  p_is_ref_type1 = TRUE THEN
+            IF  p_ref_type1 = p_ref_type2 THEN
+                p_ref_types_compat := TRUE
+            ELSIF p_inc_subtypes = TRUE THEN
+                p_ref_types_compat := Is_SubType(p_ref_type2 |-> p_ref_type1)
+            ELSE
+                p_ref_types_compat := FALSE
+            END
+        ELSE
+            p_ref_types_compat := TRUE
+        END
+    END
+    ;
+
+    /* In the context of establishing a browse service response, copy information on a target node
+       of a reference at the current browsing index
+       p_bvi       : browsing value index currently processed
+       p_bri       : browsing response index currently processed
+       p_RefType   : type of the reference currently processed (in t_NodeId)
+       p_NodeId    : target node ID of the reference currently processed (in t_ExpandedNodeId)
+       p_IsForward : indicates whether the reference currently processed is in forward direction
+       p_res       : copy result
+    */
+    p_res <-- copy_target_node_browse_result(p_bvi, p_bri, p_RefType, p_NodeId, p_IsForward) =
+    BEGIN
+        p_res := TRUE                                                   || /* TODOPAB: les copies peuvent toujours échouer */
+        ResponseBrowse_Res_ReferenceTypeId(p_bvi)(p_bri) := p_RefType   ||
+        ResponseBrowse_Res_NodeId         (p_bvi)(p_bri) := p_NodeId    ||
+        ResponseBrowse_Res_Forwards       (p_bvi)(p_bri) := p_IsForward ||
+        IF  p_NodeId : dom(conv_ExpandedNodeId_NodeId) THEN
+            /* Target node p_NodeId is a local node */
+            LET
+                l_NodeId
+            BE
+                /* Local target node ID (in t_NodeId) associated to expanded target node ID p_NodeId
+                   (in t_ExpandedNodeId) */
+                l_NodeId = conv_ExpandedNodeId_NodeId(p_NodeId)
+            IN
+                IF  l_NodeId : dom(a_NodeId~) THEN
+                    /* Local target node ID is associated to an address space node */
+                    ResponseBrowse_Res_BrowseName (p_bvi)(p_bri) := a_BrowseName (a_NodeId~(l_NodeId)) ||
+                    ResponseBrowse_Res_DisplayName(p_bvi)(p_bri) := a_DisplayName(a_NodeId~(l_NodeId)) ||
+                    ResponseBrowse_Res_NodeClass  (p_bvi)(p_bri) := a_NodeClass  (a_NodeId~(l_NodeId))
+                ELSE
+                    ResponseBrowse_Res_BrowseName (p_bvi) := {p_bri} <<| ResponseBrowse_Res_BrowseName (p_bvi) ||
+                    ResponseBrowse_Res_DisplayName(p_bvi) := {p_bri} <<| ResponseBrowse_Res_DisplayName(p_bvi) ||
+                    ResponseBrowse_Res_NodeClass  (p_bvi) := {p_bri} <<| ResponseBrowse_Res_NodeClass  (p_bvi)
+                END
+            END
+        ELSE
+            /* Target node p_NodeId is a remote node */
+            ResponseBrowse_Res_BrowseName (p_bvi) := {p_bri} <<| ResponseBrowse_Res_BrowseName (p_bvi) ||
+            ResponseBrowse_Res_DisplayName(p_bvi) := {p_bri} <<| ResponseBrowse_Res_DisplayName(p_bvi) ||
+            ResponseBrowse_Res_NodeClass  (p_bvi) := {p_bri} <<| ResponseBrowse_Res_NodeClass  (p_bvi)
+        END
+    END
+    ;
+
+    /* Save information of the continuation point usefull to call service browse next
+    */
+    fill_continuation_point(p_bvi, p_continue_ref, p_ref) =
+    BEGIN
+        IF  p_continue_ref = TRUE THEN
+            ResponseBrowse_ContinuationPoint(p_bvi) := p_ref
+        ELSE
+            ResponseBrowse_ContinuationPoint := {p_bvi} <<| ResponseBrowse_ContinuationPoint
+        END
+    END
+
+END

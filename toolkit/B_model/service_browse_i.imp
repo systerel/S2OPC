@@ -1,0 +1,126 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    service_browse_i
+
+REFINES
+    service_browse_r
+
+SEES
+    constants,
+    address_space
+
+IMPORTS
+    msg_browse_response_bs
+
+OPERATIONS
+
+    p_isvalid, p_nb_ref, p_src_node <-- get_SourceNode_NbRef(p_src_nodeid) =
+    VAR
+        l_ref_index_begin,
+        l_ref_index_end
+    IN
+        p_isvalid, p_src_node <-- readall_AddressSpace_Node(p_src_nodeid);
+        IF  p_isvalid = TRUE THEN
+            l_ref_index_begin <-- get_Node_RefIndexBegin(p_src_node);
+            l_ref_index_end   <-- get_Node_RefIndexEnd  (p_src_node);
+            p_nb_ref := l_ref_index_end - l_ref_index_begin + 1;
+            IF  p_nb_ref < 0 THEN
+                p_nb_ref := 0
+            END
+        ELSE
+            p_nb_ref := 0
+        END
+    END
+    ;
+    
+    p_isallocated, p_nb_bri <-- alloc_browse_result(p_bvi, p_nb_target_max, p_nb_target) =
+    BEGIN
+        IF  0 < p_nb_target_max &
+            p_nb_target_max < p_nb_target
+        THEN
+            p_nb_bri := p_nb_target_max
+        ELSE
+            p_nb_bri := p_nb_target
+        END;
+        p_isallocated <-- malloc_browse_result(p_bvi, p_nb_bri)
+    END
+    ;
+
+    p_ref_types_compat <-- Is_RefTypes_Compatible(p_is_ref_type1, p_ref_type1, p_inc_subtypes, p_ref_type2) =
+    BEGIN
+        IF  p_is_ref_type1 = TRUE THEN
+            IF  p_ref_type1 = p_ref_type2 THEN
+                p_ref_types_compat := TRUE
+            ELSIF p_inc_subtypes = TRUE THEN
+                p_ref_types_compat <-- get_Is_SubType(p_ref_type2, p_ref_type1)
+            ELSE
+                p_ref_types_compat := FALSE
+            END
+        ELSE
+            p_ref_types_compat := TRUE
+        END
+    END
+    ;
+
+    p_res <-- copy_target_node_browse_result(p_bvi, p_bri, p_RefType, p_NodeId, p_IsForward) =
+    VAR
+        l_isvalid,
+        l_NodeId,
+        l_node,
+        l_BrowseName,
+        l_DisplayName,
+        l_NodeClass
+    IN
+        p_res := TRUE;
+        set_ResponseBrowse_Res_ReferenceTypeId(p_bvi, p_bri, p_RefType);
+        set_ResponseBrowse_Res_NodeId(p_bvi, p_bri, p_NodeId);
+        set_ResponseBrowse_Res_Forwards(p_bvi, p_bri, p_IsForward);
+        l_isvalid, l_NodeId <-- getall_conv_ExpandedNodeId_NodeId(p_NodeId);
+        IF  l_isvalid = TRUE THEN
+            l_isvalid, l_node <-- readall_AddressSpace_Node(l_NodeId);
+            IF  l_isvalid = TRUE THEN
+                l_BrowseName <-- get_BrowseName(l_node);
+                set_ResponseBrowse_Res_BrowseName (p_bvi, p_bri, l_BrowseName);
+                l_DisplayName <-- get_DisplayName(l_node);
+                set_ResponseBrowse_Res_DisplayName(p_bvi, p_bri, l_DisplayName);
+                l_NodeClass <-- get_NodeClass(l_node);
+                set_ResponseBrowse_Res_NodeClass(p_bvi, p_bri, l_NodeClass)
+            ELSE
+                reset_ResponseBrowse_Res_BrowseName (p_bvi, p_bri);
+                reset_ResponseBrowse_Res_DisplayName(p_bvi, p_bri);
+                reset_ResponseBrowse_Res_NodeClass  (p_bvi, p_bri)
+            END
+        ELSE
+            reset_ResponseBrowse_Res_BrowseName (p_bvi, p_bri);
+            reset_ResponseBrowse_Res_DisplayName(p_bvi, p_bri);
+            reset_ResponseBrowse_Res_NodeClass  (p_bvi, p_bri)
+        END
+    END
+    ;
+
+    fill_continuation_point(p_bvi, p_continue_ref, p_ref) =
+    BEGIN
+        IF  p_continue_ref = TRUE THEN
+            set_ResponseBrowse_ContinuationPoint(p_bvi, p_ref)
+        ELSE
+            reset_ResponseBrowse_ContinuationPoint(p_bvi)
+        END
+    END
+
+END

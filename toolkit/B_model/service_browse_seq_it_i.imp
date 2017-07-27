@@ -1,0 +1,107 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    service_browse_seq_it_i
+
+REFINES
+    service_browse_seq_it
+
+SEES
+    constants,
+    address_space
+
+CONCRETE_VARIABLES
+    nb_bvi,
+    bvi_i,
+
+    nb_bri,
+    bri_i,
+
+    RefIndex,
+    RefIndexEnd
+
+INVARIANT
+    nb_bvi : NAT &
+    bvi_i  : NAT &
+
+    nb_bri : NAT &
+    bri_i  : NAT &
+
+    RefIndex    : t_RefIndex &
+    RefIndexEnd : t_RefIndex
+
+INITIALISATION
+    nb_bvi := 0;
+    bvi_i  := 0;
+
+    nb_bri := 0;
+    bri_i  := 0;
+
+    RefIndex    := 0;
+    RefIndexEnd := 0
+
+OPERATIONS
+
+    p_continue <-- init_iter_browse_request(p_nb_req) =
+    BEGIN
+        nb_bvi     := p_nb_req;
+        bvi_i      := 1;
+        p_continue := bool(1 <= p_nb_req)
+    END
+    ;
+
+    p_continue, p_bvi <-- continue_iter_browse_request =
+    BEGIN
+        p_bvi <-- get_cast_t_BrowseValue(bvi_i);
+        bvi_i := bvi_i + 1;
+        p_continue := bool(bvi_i <= nb_bvi)
+    END
+    ;
+   
+    p_continue <-- init_iter_browse_result(p_nb_bri) =
+    BEGIN
+        nb_bri     := p_nb_bri;
+        bri_i      := 1;
+        p_continue := bool(1 <= p_nb_bri)
+    END
+    ;
+   
+    p_continue, p_bri <-- continue_iter_browse_result =
+    BEGIN
+        p_bri <-- get_cast_t_BrowseResult(bri_i);
+        bri_i := bri_i + 1;
+        p_continue := bool(bri_i <= nb_bri)
+    END
+    ;
+    
+    p_continue <-- init_iter_reference(p_node) =
+    BEGIN
+        RefIndex    <-- get_Node_RefIndexBegin(p_node);
+        RefIndexEnd <-- get_Node_RefIndexEnd(p_node);
+        p_continue := bool(RefIndexEnd >= RefIndex)
+    END
+    ;
+    
+    p_continue, p_ref <-- continue_iter_reference =
+    BEGIN
+       p_ref <-- get_RefIndex_Reference(RefIndex);
+       RefIndex := RefIndex + 1;
+       p_continue := bool(RefIndex <= RefIndexEnd)
+    END
+    
+END

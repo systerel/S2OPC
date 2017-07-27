@@ -33,7 +33,8 @@ IMPORTS
     service_response_cli_cb_bs,
     address_space,
     service_write_decode_bs,
-    service_get_endpoints_bs
+    service_get_endpoints_bs,
+    service_browse_seq
     
 PROMOTES
     /* message_in_bs */
@@ -344,6 +345,7 @@ OPERATIONS
                                     /* TODO: the following may fail (malloc) */
                                     write_WriteResponse_msg_out(l_resp_msg);
                                     dealloc_write_request_responses
+                                /* OR TODOPAB: call treat_browse_request_BrowseValues */
                                 ELSE
                                     /* Cases shall cover all session services req types */
                                     l_ret := e_sc_bad_unexpected_error

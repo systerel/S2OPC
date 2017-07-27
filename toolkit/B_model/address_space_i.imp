@@ -32,6 +32,15 @@ IMPORTS
 
 PROMOTES
     readall_AddressSpace_Node,
+    get_NodeClass,
+    get_BrowseName,
+    get_DisplayName,
+    get_Reference_ReferenceType,
+    get_Reference_TargetNode,
+    get_Reference_IsForward,
+    get_Node_RefIndexBegin,
+    get_Node_RefIndexEnd,
+    get_RefIndex_Reference,
     get_Value_StatusCode,
     read_AddressSpace_free_value,
     write_WriteResponse_msg_out

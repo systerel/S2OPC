@@ -36,7 +36,11 @@ SETS
     t_request_context_i;
     t_request_handle_i;
     t_channel_config_idx_i;
-    t_endpoint_config_idx_i
+    t_endpoint_config_idx_i;
+    t_ExpandedNodeId_i;
+    t_Reference_i;
+    t_LocalizedText_i;
+    t_QualifiedName_i
 
 CONCRETE_CONSTANTS
     k_n_Nodes,
@@ -58,7 +62,11 @@ CONCRETE_CONSTANTS
     c_request_context_indet,
     c_channel_config_idx_indet,
     c_endpoint_config_idx_indet,
-    c_request_handle_indet
+    c_request_handle_indet,
+    c_ExpandedNodeId_indet,
+    c_Reference_indet,
+    c_LocalizedText_indet,
+    c_QualifiedName_indet
 
 ABSTRACT_CONSTANTS
     t_Variant,
@@ -78,7 +86,11 @@ ABSTRACT_CONSTANTS
     t_request_context,
     t_channel_config_idx,
     t_endpoint_config_idx,
-    t_request_handle
+    t_request_handle,
+    t_ExpandedNodeId,
+    t_Reference,
+    t_LocalizedText,
+    t_QualifiedName
 
 PROPERTIES
     k_n_Nodes : NAT &
@@ -134,11 +146,11 @@ PROPERTIES
     t_msg <: t_msg_i &
     c_msg_indet : t_msg_i &
     c_msg_indet /: t_msg &
-    
+
     t_request_context <: t_request_context_i &
     c_request_context_indet : t_request_context_i &
     c_request_context_indet /: t_request_context &
-    
+
     t_request_handle <: t_request_handle_i &
     c_request_handle_indet : t_request_handle_i &
     c_request_handle_indet /: t_request_handle &
@@ -149,6 +161,44 @@ PROPERTIES
 
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &
-    c_endpoint_config_idx_indet /: t_endpoint_config_idx
+    c_endpoint_config_idx_indet /: t_endpoint_config_idx &
+
+    t_ExpandedNodeId <: t_ExpandedNodeId_i &
+    c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
+    c_ExpandedNodeId_indet /: t_ExpandedNodeId &
+
+    t_Reference <: t_Reference_i &
+    c_Reference_indet : t_Reference_i &
+    c_Reference_indet /: t_Reference &
+
+    t_LocalizedText <: t_LocalizedText_i &
+    c_LocalizedText_indet : t_LocalizedText_i &
+    c_LocalizedText_indet /: t_LocalizedText &
+
+    t_QualifiedName <: t_QualifiedName_i &
+    c_QualifiedName_indet : t_QualifiedName_i &
+    c_QualifiedName_indet /: t_QualifiedName
+
+OPERATIONS
+
+    p_res <-- get_Is_SubType(p_type1, p_type2) =
+    PRE
+        p_type1 : t_NodeId_i &
+        p_type1 : t_NodeId   &
+        p_type2 : t_NodeId_i &
+        p_type2 : t_NodeId
+    THEN
+        p_res :: BOOL
+    END
+    ;
+
+    p_isvalid, p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
+    PRE
+        p_expnid : t_ExpandedNodeId_i &
+        p_expnid : t_ExpandedNodeId
+    THEN
+        p_isvalid :: BOOL ||
+        p_nid     :: t_NodeId_i
+    END
 
 END

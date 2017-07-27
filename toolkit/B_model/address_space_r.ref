@@ -28,8 +28,22 @@ DEFINITIONS
     d_variables ==
         a_NodeId,
         a_NodeClass,
+        a_BrowseName,
+        a_DisplayName,
         a_Value,
         a_Value_StatusCode,
+
+        TypeDefinition,
+
+        Reference_SourceNode,
+        Reference_ReferenceType,
+        Reference_TargetNode,
+        Reference_IsForward,
+   
+        Node_Reference,
+        Node_RefIndexBegin,
+        Node_RefIndexEnd,
+        RefIndex_Reference,
 
         /* Service Write */
         ResponseWrite_allocated,
@@ -38,8 +52,10 @@ DEFINITIONS
 
     d_inv ==
         /* Attributes */
-        a_NodeId : t_Node >-> t_NodeId &
-        a_NodeClass : t_Node --> t_NodeClass &
+        a_NodeId      : t_Node >-> t_NodeId        &
+        a_NodeClass   : t_Node --> t_NodeClass     &
+        a_BrowseName  : t_Node --> t_QualifiedName &
+        a_DisplayName : t_Node --> t_LocalizedText &
 
         a_Value : t_Node +-> t_Variant &
         dom(a_NodeClass|>{e_ncl_Variable}) <: dom(a_Value) &
@@ -48,6 +64,20 @@ DEFINITIONS
         /* Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
+
+        TypeDefinition : t_Node +-> t_ExpandedNodeId &
+        dom(TypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
+
+        /* References */
+        Reference_SourceNode    : t_Reference --> t_NodeId         &
+        Reference_ReferenceType : t_Reference --> t_NodeId         &
+        Reference_TargetNode    : t_Reference --> t_ExpandedNodeId &
+        Reference_IsForward     : t_Reference --> BOOL             &
+
+        Node_Reference          : t_Node     <-> t_Reference &
+        Node_RefIndexBegin      : t_Node     --> t_RefIndex  &
+        Node_RefIndexEnd        : t_Node     --> t_RefIndex  &
+        RefIndex_Reference      : t_RefIndex --> t_Reference &
 
         /* Service Write */
         ResponseWrite_allocated : BOOL &
