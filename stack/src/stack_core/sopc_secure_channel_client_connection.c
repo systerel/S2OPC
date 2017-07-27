@@ -308,7 +308,7 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
     }
 
     if(status == STATUS_OK){
-        status = SC_EncodeMsgBody(msgBuffers,
+        status = SOPC_EncodeMsgTypeAndBody(msgBuffers->buffers,
                                   &OpcUa_OpenSecureChannelRequest_EncodeableType,
                                   &openRequest);
     }
@@ -451,15 +451,24 @@ SOPC_StatusCode Read_OpenSecureChannelReponse(SC_ClientConnection* cConnection,
            pRequest != NULL && pRequest->responseType != NULL);
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     OpcUa_OpenSecureChannelResponse* encObj = NULL;
-    SOPC_EncodeableType* receivedType = NULL;
+    SOPC_NodeId nodeId;
+    SOPC_NodeId_Initialize(&nodeId);
 
-    status = SC_DecodeMsgBody(cConnection->instance->receptionBuffers,
-                              &cConnection->instance->receptionBuffers->nsTable,
-                              NULL,
-                              pRequest->responseType,
-                              NULL,
-                              &receivedType,
-                              (void**) &encObj);
+    status = SOPC_NodeId_Read(&nodeId, cConnection->instance->receptionBuffers->buffers);
+    if(status == STATUS_OK &&
+       nodeId.IdentifierType == OpcUa_IdType_Numeric &&
+       nodeId.Namespace == OPCUA_NAMESPACE_INDEX &&
+       pRequest->responseType == &OpcUa_OpenSecureChannelResponse_EncodeableType &&
+       nodeId.Data.Numeric == OpcUa_OpenSecureChannelResponse_EncodeableType.BinaryEncodingTypeId){
+        status = STATUS_OK;
+    }else{
+        status = STATUS_INVALID_RCV_PARAMETER;
+    }
+    if(STATUS_OK == status){
+        status = SOPC_DecodeMsgBody(cConnection->instance->receptionBuffers->buffers,
+                                    &OpcUa_OpenSecureChannelResponse_EncodeableType,
+                                    (void**) &encObj);
+    }
     if(status == STATUS_OK){
         status = SC_CheckReceivedProtocolVersion(cConnection->instance, encObj->ServerProtocolVersion);
     }

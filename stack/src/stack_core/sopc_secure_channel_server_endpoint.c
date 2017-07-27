@@ -27,6 +27,7 @@
 #include "sopc_encoder.h"
 #include "crypto_profiles.h"
 #include "sopc_action_queue_manager.h"
+#include "opcua_identifiers.h"
 
 typedef struct TransportEvent_CallbackData {
     SC_ServerEndpoint* endpoint;
@@ -70,16 +71,24 @@ SOPC_StatusCode Read_OpenSecureChannelRequest(SC_Connection*       scConnection,
 {
     assert(scConnection != NULL && secuPolicy != NULL && requestHandle != NULL);
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_NodeId nodeId;
+    SOPC_NodeId_Initialize(&nodeId);
     OpcUa_OpenSecureChannelRequest* encObj = NULL;
-    SOPC_EncodeableType* receivedType = NULL;
+    status = SOPC_NodeId_Read(&nodeId, scConnection->receptionBuffers->buffers);
+    if(status == STATUS_OK &&
+       nodeId.IdentifierType == OpcUa_IdType_Numeric &&
+       nodeId.Namespace == OPCUA_NAMESPACE_INDEX &&
+       nodeId.Data.Numeric == OpcUaId_OpenSecureChannelRequest_Encoding_DefaultBinary){
+        status = STATUS_OK;
+    }else{
+        status = STATUS_INVALID_RCV_PARAMETER;
+    }
+    if(STATUS_OK == status){
+        SOPC_DecodeMsgBody(scConnection->receptionBuffers->buffers,
+                           &OpcUa_OpenSecureChannelRequest_EncodeableType,
+                           (void**) &encObj);
+    }
 
-    status = SC_DecodeMsgBody(scConnection->receptionBuffers,
-                              &scConnection->receptionBuffers->nsTable,
-                              NULL,
-                              &OpcUa_OpenSecureChannelRequest_EncodeableType,
-                              NULL,
-                              &receivedType,
-                              (void**) &encObj);
     if(STATUS_OK == status){
         status = SC_CheckReceivedProtocolVersion(scConnection, encObj->ClientProtocolVersion);
     }
@@ -456,7 +465,7 @@ SOPC_StatusCode Write_OpenSecureChannelResponse(SC_Connection*   scConnection,
                                                SecretBuffer_GetLength(scConnection->currentNonce));
     }
     if(status == STATUS_OK){
-        status = SC_EncodeMsgBody(msgBuffers,
+        status = SOPC_EncodeMsgTypeAndBody(msgBuffers->buffers,
                                   &OpcUa_OpenSecureChannelResponse_EncodeableType,
                                   &openResponse);
     }

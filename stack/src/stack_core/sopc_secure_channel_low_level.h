@@ -130,10 +130,6 @@ SOPC_StatusCode SC_SetMaxBodySize(SC_Connection* scConnection,
 SOPC_StatusCode SC_EncodeSequenceHeader(SOPC_MsgBuffers* msgBuffers,
                                         uint32_t         requestId);
 
-SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffers*     msgBuffers,
-                                 SOPC_EncodeableType* encType,
-                                 void*                msgBody);
-
 SOPC_StatusCode SC_WriteSecureMsgBuffer(SOPC_MsgBuffers* msgBuffers,
                                         const SOPC_Byte* data_src,
                                         uint32_t         count);
@@ -177,14 +173,6 @@ SOPC_StatusCode SC_DecryptMsg(SC_Connection*  scConnection,
                               uint32_t        sequenceNumberPosition,
                               uint32_t        isSymmetric,
                               uint32_t        isPrecCryptoData);
-
-SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
-                                 SOPC_NamespaceTable*  namespaceTable,
-                                 SOPC_EncodeableType** knownTypes, // only in case next 2 types not provided
-                                 SOPC_EncodeableType*  respEncType, // expected type
-                                 SOPC_EncodeableType*  errEncType,  // + expected error type (or both null if unknown)
-                                 SOPC_EncodeableType** receivedEncType, // actually received type
-                                 void**                encodeableObj);
 
 SOPC_StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                       uint32_t       isSymmetric,

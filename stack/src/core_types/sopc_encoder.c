@@ -26,6 +26,8 @@
 #include "sopc_namespace_table.h"
 #include "sopc_stack_config.h"
 
+#include "sopc_types.h"
+
 void SOPC_EncodeDecode_Int16(int16_t* intv)
 {
     uint16_t* twoBytes = (uint16_t*) intv;
@@ -2231,3 +2233,81 @@ SOPC_StatusCode SOPC_Write_Array(SOPC_Buffer* buf, int32_t* noOfElts, void** elt
     return status;
 }
 
+SOPC_StatusCode SOPC_EncodeMsgTypeAndBody(SOPC_Buffer*         buf,
+                                 SOPC_EncodeableType* encType,
+                                 void*                msgBody)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_NodeId nodeId;
+    SOPC_NodeId_Initialize(&nodeId);
+
+    if(buf != NULL && msgBody != NULL &&
+       encType != NULL){
+        nodeId.IdentifierType = IdentifierType_Numeric;
+        if(encType->NamespaceUri == NULL){
+            nodeId.Namespace = 0;
+        }else{
+            // TODO: find namespace Id
+        }
+        nodeId.Data.Numeric = encType->BinaryEncodingTypeId;
+
+        status = SOPC_NodeId_Write(&nodeId, buf);
+    }
+    if(status == STATUS_OK){
+        status = encType->Encode(msgBody, buf);
+    }
+    return status;
+}
+
+SOPC_StatusCode SOPC_MsgBodyType_Read(SOPC_Buffer*          buf,
+                                      SOPC_EncodeableType** receivedEncType)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_NamespaceTable* namespaceTable = SOPC_StackConfiguration_GetNamespaces();
+    SOPC_EncodeableType** knownTypes = SOPC_StackConfiguration_GetEncodeableTypes();
+    SOPC_EncodeableType* recEncType = NULL;
+    SOPC_NodeId nodeId;
+    const char* nsName;
+    SOPC_NodeId_Initialize(&nodeId);
+    if(buf != NULL && knownTypes != NULL)
+    {
+        status = SOPC_NodeId_Read(&nodeId, buf);
+    }
+
+    if(status == STATUS_OK && nodeId.IdentifierType == OpcUa_IdType_Numeric){
+
+        // Must be the case in which we cannot know the type before decoding it
+        if(nodeId.Namespace == OPCUA_NAMESPACE_INDEX){
+            recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.Data.Numeric);
+        }else{
+            nsName = Namespace_GetName(namespaceTable, nodeId.Namespace);
+            if(nsName != NULL){
+                recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.Data.Numeric);
+            }
+            if(recEncType == NULL){
+                status = STATUS_INVALID_RCV_PARAMETER;
+            }
+        }
+        *receivedEncType = recEncType;
+    }
+
+    SOPC_NodeId_Clear(&nodeId);
+    return status;
+}
+
+SOPC_StatusCode SOPC_DecodeMsgBody(SOPC_Buffer*          buffer,
+                                   SOPC_EncodeableType*  msgEncType,
+                                   void**                encodeableObj)
+{
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(buffer != NULL && encodeableObj != NULL && msgEncType != NULL)
+    {
+        *encodeableObj = malloc(msgEncType->AllocationSize);
+        if(*encodeableObj != NULL){
+            status = msgEncType->Decode(*encodeableObj, buffer);
+        }else{
+            status = STATUS_NOK;
+        }
+    }
+    return status;
+}

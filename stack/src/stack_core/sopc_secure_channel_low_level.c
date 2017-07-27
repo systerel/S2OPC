@@ -725,32 +725,6 @@ SOPC_StatusCode SC_EncodeAsymmSecurityHeader(SC_Connection*  scConnection,
     return status;
 }
 
-SOPC_StatusCode SC_EncodeMsgBody(SOPC_MsgBuffers*     msgBuffers,
-                                 SOPC_EncodeableType* encType,
-                                 void*                msgBody)
-{
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SOPC_NodeId nodeId;
-    SOPC_NodeId_Initialize(&nodeId);
-
-    if(msgBuffers != NULL && msgBody != NULL &&
-       encType != NULL){
-        nodeId.IdentifierType = IdentifierType_Numeric;
-        if(encType->NamespaceUri == NULL){
-            nodeId.Namespace = 0;
-        }else{
-            // TODO: find namespace Id
-        }
-        nodeId.Data.Numeric = encType->BinaryEncodingTypeId;
-
-        status = SOPC_NodeId_Write(&nodeId, msgBuffers->buffers);
-    }
-    if(status == STATUS_OK){
-        status = encType->Encode(msgBody, msgBuffers->buffers);
-    }
-    return status;
-}
-
 SOPC_StatusCode Set_Message_Length(SOPC_MsgBuffers* msgBuffers,
                                    uint32_t         nbChunk, // Number of chunk in which length must be set
                                    uint32_t         msgLength){
@@ -1902,91 +1876,6 @@ SOPC_StatusCode SC_DecryptMsg(SC_Connection*  scConnection,
     return status;
 }
 
-SOPC_StatusCode SC_DecodeMsgBody(SOPC_MsgBuffer*       receptionBuffer,
-                                 SOPC_NamespaceTable*  namespaceTable,
-                                 SOPC_EncodeableType** knownTypes,
-                                 SOPC_EncodeableType*  recvEncType,
-                                 SOPC_EncodeableType*  errEncType,
-                                 SOPC_EncodeableType** receivedEncType,
-                                 void**                encodeableObj)
-{
-    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    SOPC_EncodeableType* recEncType = NULL;
-    SOPC_NodeId nodeId;
-    const char* nsName;
-    uint16_t nsIndex = 0;
-    SOPC_NodeId_Initialize(&nodeId);
-    if(receptionBuffer != NULL && namespaceTable != NULL && encodeableObj != NULL &&
-       (knownTypes != NULL || recvEncType != NULL))
-    {
-        status = SOPC_NodeId_Read(&nodeId, receptionBuffer->buffers);
-    }
-
-    if(status == STATUS_OK && nodeId.IdentifierType == OpcUa_IdType_Numeric){
-
-        if(recvEncType != NULL){
-            // Case in which we know the expected type from the request Id
-            if (nodeId.Data.Numeric == recvEncType->TypeId || nodeId.Data.Numeric == recvEncType->BinaryEncodingTypeId){
-    //          || nodeId.data.numeric == recvEncType->xmlTypeId){ => what is the point to accept this type ?
-                *receivedEncType = recvEncType;
-            }else if(errEncType != NULL &&
-                     (nodeId.Data.Numeric == errEncType->TypeId || nodeId.Data.Numeric == errEncType->BinaryEncodingTypeId)){
-    //               || nodeId.data.numeric == errEncType->xmlTypeId){ => what is the point to accept this type ?
-                *receivedEncType = errEncType;
-            }else{
-                status = STATUS_INVALID_RCV_PARAMETER;
-            }
-
-            // Check namespace of received type using index
-            if(status == STATUS_OK){
-                recEncType = *receivedEncType;
-                if(recEncType->NamespaceUri == NULL && nodeId.Namespace != OPCUA_NAMESPACE_INDEX){
-                    status = STATUS_INVALID_RCV_PARAMETER;
-                }else if(recEncType->NamespaceUri != NULL){
-                    status = Namespace_GetIndex(namespaceTable,
-                                                recEncType->NamespaceUri,
-                                                &nsIndex);
-                    if(status == STATUS_OK){
-                        if(nodeId.Namespace != nsIndex){
-                            status = STATUS_INVALID_RCV_PARAMETER;
-                        }
-                    }
-                }
-            }
-
-        }else{
-            // Must be the case in which we cannot know the type before decoding it
-            if(nodeId.Namespace == OPCUA_NAMESPACE_INDEX){
-                recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, OPCUA_NAMESPACE_NAME, nodeId.Data.Numeric);
-            }else{
-                nsName = Namespace_GetName(namespaceTable, nodeId.Namespace);
-                if(nsName != NULL){
-                    recEncType = SOPC_EncodeableType_GetEncodeableType(knownTypes, nsName, nodeId.Data.Numeric);
-                }
-                if(recEncType == NULL){
-                    status = STATUS_INVALID_RCV_PARAMETER;
-                }
-            }
-            *receivedEncType = recEncType;
-        }
-
-
-    }else if(status == STATUS_OK){
-        status = STATUS_INVALID_RCV_PARAMETER;
-    }
-
-    if(status == STATUS_OK){
-        *encodeableObj = malloc(recEncType->AllocationSize);
-        if(*encodeableObj != NULL){
-            status = recEncType->Decode(*encodeableObj, receptionBuffer->buffers);
-        }else{
-            status = STATUS_NOK;
-        }
-    }
-    SOPC_NodeId_Clear(&nodeId);
-    return status;
-}
-
 SOPC_StatusCode SC_VerifyMsgSignature(SC_Connection* scConnection,
                                       uint32_t       isSymmetric,
                                       uint32_t       isPrecCryptoData)
@@ -2148,7 +2037,7 @@ SOPC_StatusCode SC_EncodeSecureMessage(SOPC_MsgBuffers*     msgBuffers,
     }
 
     if(STATUS_OK == status){
-        status = SC_EncodeMsgBody(msgBuffers, encType, value);
+        status = SOPC_EncodeMsgTypeAndBody(msgBuffers->buffers, encType, value);
     }
 
     return status;
@@ -2364,6 +2253,8 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
                                SOPC_EncodeableType*  errEncType,
                                SOPC_EncodeableType** recEncType,
                                void**                encObj){
+    (void) expEncType;
+    (void) errEncType;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     uint32_t msgSize = 0;
     SOPC_Buffer* tmpBuffer = NULL;
@@ -2379,13 +2270,14 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
             case SOPC_Msg_Chunk_Final:
                 // Treat case with only 1 chunk for response
                 if(msgBuffers->nbChunks == 1){
-                    status = SC_DecodeMsgBody(msgBuffers,
-                                              &msgBuffers->nsTable,
-                                              msgBuffers->encTypesTable,
-                                              expEncType,
-                                              errEncType,
-                                              recEncType,
-                                              encObj);
+                    status = SOPC_MsgBodyType_Read(msgBuffers->buffers,
+                                                   recEncType);
+                    if(STATUS_OK == status){
+                        assert(*recEncType != NULL);
+                        SOPC_DecodeMsgBody(msgBuffers->buffers,
+                                           *recEncType,
+                                           encObj);
+                    }
                 }else{
                     //Store all buffers in 1 to could decode msg body !
                     for(idx = 0; idx < msgBuffers->nbChunks; idx++){
@@ -2410,13 +2302,15 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
                                                         &msgBuffers->nsTable,
                                                         msgBuffers->encTypesTable);
                         if(tmpMsgBuffer != NULL){
-                            status = SC_DecodeMsgBody(tmpMsgBuffer,
-                                                      &msgBuffers->nsTable,
-                                                      msgBuffers->encTypesTable,
-                                                      expEncType,
-                                                      errEncType,
-                                                      recEncType,
-                                                      encObj);
+                            // Not treated correctly anymore (multichunks)
+                            assert(FALSE);
+//                            status = SC_DecodeMsgBody(tmpMsgBuffer,
+//                                                      &msgBuffers->nsTable,
+//                                                      msgBuffers->encTypesTable,
+//                                                      expEncType,
+//                                                      errEncType,
+//                                                      recEncType,
+//                                                      encObj);
                         }
                     }
 
