@@ -26,11 +26,9 @@
 #include <stdint.h>
 
 #include "sopc_base_types.h"
+#include "sopc_buffer.h"
 
 BEGIN_EXTERN_C
-
-struct SOPC_MsgBuffer;
-
 
 /**
  *  \brief Initialization function generic signature for an encodeable object
@@ -51,12 +49,12 @@ typedef void (SOPC_EncodeableObject_PfnGetSize) (void);
 /**
  *  \brief Encoding function generic signature for an encodeable object
  */
-typedef SOPC_StatusCode (SOPC_EncodeableObject_PfnEncode) (void* value, struct SOPC_MsgBuffer* msgBuffer);
+typedef SOPC_StatusCode (SOPC_EncodeableObject_PfnEncode) (void* value, SOPC_Buffer* msgBuffer);
 
 /**
  *  \brief Decoding function generic signature for an encodeable object
  */
-typedef SOPC_StatusCode (SOPC_EncodeableObject_PfnDecode) (void* value, struct SOPC_MsgBuffer* msgBuffer);
+typedef SOPC_StatusCode (SOPC_EncodeableObject_PfnDecode) (void* value, SOPC_Buffer* msgBuffer);
 
 /**
  *  \brief Encodeable object type structure definition. It provides all the services

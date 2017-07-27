@@ -20,6 +20,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
+#include "sopc_buffer.h"
 
 #define SWAP_2_BYTES(x) (x & 0x00FF) << 8 | (x & 0xFF00) >> 8
 #define SWAP_3_BYTES(x) (x & 0x0000FF) << 16 | (x & 0x00FF00) \
@@ -71,8 +72,6 @@ typedef enum {
     SOPC_DataValue_NotZeroSourcePico = 0x10,
     SOPC_DataValue_NotZeroServerPico = 0x20
 } SOPC_DataValue_EncodingFlag;
-
-struct SOPC_MsgBuffer;
 
 /**
  *  \brief Encode an signed 16 bits integer from machine endianess representation to binary UA encoding endianess representation.
@@ -154,113 +153,113 @@ void SOPC_EncodeDecode_Float(float* floatv);
  */
 void SOPC_EncodeDecode_Double(double* doublev);
 
-SOPC_StatusCode SOPC_Byte_Write(const SOPC_Byte* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Byte_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Byte_Read(SOPC_Byte* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Byte_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Boolean_Write(const SOPC_Boolean* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Boolean_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Boolean_Read(SOPC_Boolean* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Boolean_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_SByte_Write(const SOPC_SByte* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_SByte_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_SByte_Read(SOPC_SByte* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_SByte_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int16_Write(const int16_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int16_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int16_Read(int16_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int16_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt16_Write(const uint16_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt16_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt16_Read(uint16_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt16_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int32_Write(const int32_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int32_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int32_Read(int32_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int32_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt32_Write(const uint32_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt32_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt32_Read(uint32_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt32_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int64_Write(const int64_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int64_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int64_Read(int64_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Int64_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt64_Write(const uint64_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt64_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt64_Read(uint64_t* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_UInt64_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Float_Write(const float* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Float_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Float_Read(float* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Float_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Double_Write(const double* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Double_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Double_Read(double* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Double_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DateTime_Write(const SOPC_DateTime* date, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DateTime_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DateTime_Read(SOPC_DateTime* date, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DateTime_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
+SOPC_StatusCode SOPC_Byte_Write(const SOPC_Byte* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Byte_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Byte_Read(SOPC_Byte* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Byte_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Boolean_Write(const SOPC_Boolean* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Boolean_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Boolean_Read(SOPC_Boolean* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Boolean_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_SByte_Write(const SOPC_SByte* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_SByte_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_SByte_Read(SOPC_SByte* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_SByte_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int16_Write(const int16_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int16_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int16_Read(int16_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int16_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt16_Write(const uint16_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt16_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt16_Read(uint16_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt16_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int32_Write(const int32_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int32_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int32_Read(int32_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int32_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt32_Write(const uint32_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt32_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt32_Read(uint32_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt32_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int64_Write(const int64_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int64_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int64_Read(int64_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Int64_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt64_Write(const uint64_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt64_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt64_Read(uint64_t* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_UInt64_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Float_Write(const float* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Float_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Float_Read(float* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Float_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Double_Write(const double* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Double_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Double_Read(double* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Double_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DateTime_Write(const SOPC_DateTime* date, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DateTime_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DateTime_Read(SOPC_DateTime* date, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DateTime_ReadAux(void* value, SOPC_Buffer* buf);
 
-SOPC_StatusCode SOPC_ByteString_Write(const SOPC_ByteString* str, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ByteString_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ByteString_Read(SOPC_ByteString* str, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ByteString_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_String_Write(const SOPC_String* str, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_String_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_String_Read(SOPC_String* str, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_String_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_XmlElement_Write(const SOPC_XmlElement* xml, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_XmlElement_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_XmlElement_Read(SOPC_XmlElement* xml, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_XmlElement_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Guid_Write(const SOPC_Guid* guid, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Guid_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Guid_Read(SOPC_Guid* guid, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Guid_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_NodeId_Write(const SOPC_NodeId* nodeId, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_NodeId_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_NodeId_Read(SOPC_NodeId* nodeId, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_NodeId_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ExpandedNodeId_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ExpandedNodeId_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_StatusCode_Write(const SOPC_StatusCode* status, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_StatusCode_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_StatusCode_Read(SOPC_StatusCode* status, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_StatusCode_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DiagnosticInfo_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DiagnosticInfo_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_QualifiedName_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_QualifiedName_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedText, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_LocalizedText_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_LocalizedText_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ExtensionObject_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_ExtensionObject_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Variant_Write(const SOPC_Variant* variant, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Variant_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_Variant_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DataValue_Write(const SOPC_DataValue* dataValue, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DataValue_WriteAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, struct SOPC_MsgBuffer* msgBuffer);
-SOPC_StatusCode SOPC_DataValue_ReadAux(void* value, struct SOPC_MsgBuffer* msgBuffer);
+SOPC_StatusCode SOPC_ByteString_Write(const SOPC_ByteString* str, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ByteString_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ByteString_Read(SOPC_ByteString* str, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ByteString_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_String_Write(const SOPC_String* str, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_String_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_String_Read(SOPC_String* str, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_String_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_XmlElement_Write(const SOPC_XmlElement* xml, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_XmlElement_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_XmlElement_Read(SOPC_XmlElement* xml, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_XmlElement_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Guid_Write(const SOPC_Guid* guid, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Guid_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Guid_Read(SOPC_Guid* guid, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Guid_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_NodeId_Write(const SOPC_NodeId* nodeId, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_NodeId_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_NodeId_Read(SOPC_NodeId* nodeId, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_NodeId_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ExpandedNodeId_Write(const SOPC_ExpandedNodeId* expNodeId, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ExpandedNodeId_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ExpandedNodeId_Read(SOPC_ExpandedNodeId* expNodeId, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ExpandedNodeId_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_StatusCode_Write(const SOPC_StatusCode* status, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_StatusCode_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_StatusCode_Read(SOPC_StatusCode* status, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_StatusCode_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DiagnosticInfo_Write(const SOPC_DiagnosticInfo* diagInfo, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DiagnosticInfo_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DiagnosticInfo_Read(SOPC_DiagnosticInfo* diagInfo, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DiagnosticInfo_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_QualifiedName_Write(const SOPC_QualifiedName* qname, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_QualifiedName_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_QualifiedName_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_LocalizedText_Write(const SOPC_LocalizedText* localizedText, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_LocalizedText_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_LocalizedText_Read(SOPC_LocalizedText* localizedText, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_LocalizedText_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ExtensionObject_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_ExtensionObject_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Variant_Write(const SOPC_Variant* variant, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Variant_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Variant_Read(SOPC_Variant* variant, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_Variant_ReadAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DataValue_Write(const SOPC_DataValue* dataValue, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DataValue_WriteAux(void* value, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DataValue_Read(SOPC_DataValue* dataValue, SOPC_Buffer* buf);
+SOPC_StatusCode SOPC_DataValue_ReadAux(void* value, SOPC_Buffer* buf);
 
-SOPC_StatusCode SOPC_Read_Array(struct SOPC_MsgBuffer* msgBuf, int32_t* noOfElts, void** eltsArray,
+SOPC_StatusCode SOPC_Read_Array(SOPC_Buffer* msgBuf, int32_t* noOfElts, void** eltsArray,
                                 size_t sizeOfElt, SOPC_EncodeableObject_PfnDecode* decodeFct,
                                 SOPC_EncodeableObject_PfnInitialize* initializeFct,
                                 SOPC_EncodeableObject_PfnClear* clearFct);
-SOPC_StatusCode SOPC_Write_Array(struct SOPC_MsgBuffer* msgBuf, int32_t* noOfElts, void** eltsArray,
+SOPC_StatusCode SOPC_Write_Array(SOPC_Buffer* msgBuf, int32_t* noOfElts, void** eltsArray,
                                  size_t sizeOfElt, SOPC_EncodeableObject_PfnEncode* encodeFct);
 
 #endif /* SOPC_ENCODER_H_ */
