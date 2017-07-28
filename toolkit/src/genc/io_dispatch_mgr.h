@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 25/07/2017 17:25:43
+ Date                 : 28/07/2017 17:53:12
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -39,11 +39,6 @@
    INITIALISATION Clause
   ------------------------*/
 extern void io_dispatch_mgr__INITIALISATION(void);
-
-/*-------------------------------
-   PROMOTES and EXTENDS Clauses
-  -------------------------------*/
-#define io_dispatch_mgr__get_session_state_or_closed session_mgr__get_session_state_or_closed
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

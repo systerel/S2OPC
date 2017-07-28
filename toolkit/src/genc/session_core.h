@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 25/07/2017 17:25:44
+ Date                 : 28/07/2017 17:53:13
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,7 @@ extern void session_core__INITIALISATION(void);
 #define session_core__get_session_from_token session_core_1_bs__get_session_from_token
 #define session_core__init_iter_orphaned_t_session session_core_orphaned_it_bs__init_iter_orphaned_t_session
 #define session_core__is_valid_session session_core_1_bs__is_valid_session
+#define session_core__is_valid_user session_core_1_bs__is_valid_user
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -64,7 +65,8 @@ extern void session_core__cli_activate_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_request_handle_i session_core__req_handle,
-   const constants__t_msg_i session_core__activate_resp_msg);
+   const constants__t_msg_i session_core__activate_resp_msg,
+   constants__t_StatusCode_i * const session_core__ret);
 extern void session_core__cli_close_req(
    const constants__t_session_i session_core__session,
    const constants__t_request_handle_i session_core__req_handle,
@@ -77,8 +79,6 @@ extern void session_core__cli_close_resp(
    const constants__t_session_i session_core__session,
    const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__close_resp_msg);
-extern void session_core__cli_close_session(
-   const constants__t_session_i session_core__session);
 extern void session_core__cli_create_req(
    const constants__t_session_i session_core__session,
    const constants__t_channel_i session_core__channel,
@@ -90,17 +90,13 @@ extern void session_core__cli_create_resp(
    const constants__t_session_i session_core__session,
    const constants__t_request_handle_i session_core__req_handle,
    const constants__t_session_token_i session_core__session_token,
-   const constants__t_msg_i session_core__create_resp_msg);
-extern void session_core__cli_init_session(
-   constants__t_session_i * const session_core__nsession);
-extern void session_core__cli_is_session_valid_for_service(
-   const constants__t_channel_i session_core__channel,
-   const constants__t_session_i session_core__session,
-   t_bool * const session_core__ret);
+   const constants__t_msg_i session_core__create_resp_msg,
+   constants__t_StatusCode_i * const session_core__ret);
 extern void session_core__cli_new_session_service_req(
    const constants__t_session_i session_core__session,
    const constants__t_request_handle_i session_core__req_handle,
    constants__t_StatusCode_i * const session_core__ret,
+   constants__t_channel_i * const session_core__channel,
    constants__t_session_token_i * const session_core__session_token);
 extern void session_core__cli_record_session_service_resp(
    const constants__t_session_i session_core__session,
@@ -114,9 +110,6 @@ extern void session_core__cli_sc_activate_req(
    const constants__t_msg_i session_core__activate_req_msg,
    constants__t_StatusCode_i * const session_core__ret,
    constants__t_session_token_i * const session_core__session_token);
-extern void session_core__cli_secure_channel_lost(
-   const constants__t_channel_i session_core__lost_channel,
-   const constants__t_channel_config_idx_i session_core__channel_config_idx);
 extern void session_core__cli_user_activate_req(
    const constants__t_session_i session_core__session,
    const constants__t_request_handle_i session_core__req_handle,
@@ -125,12 +118,25 @@ extern void session_core__cli_user_activate_req(
    constants__t_StatusCode_i * const session_core__ret,
    constants__t_channel_i * const session_core__channel,
    constants__t_session_token_i * const session_core__session_token);
+extern void session_core__client_close_session(
+   const constants__t_session_i session_core__session);
+extern void session_core__client_init_session(
+   constants__t_session_i * const session_core__nsession);
+extern void session_core__client_secure_channel_lost(
+   const constants__t_channel_i session_core__lost_channel,
+   const constants__t_channel_config_idx_i session_core__channel_config_idx);
 extern void session_core__get_session_state_or_closed(
    const constants__t_session_i session_core__session,
    constants__t_sessionState * const session_core__state);
 extern void session_core__get_session_user_or_indet(
    const constants__t_session_i session_core__session,
    constants__t_user_i * const session_core__user);
+extern void session_core__is_session_valid_for_service(
+   const constants__t_channel_i session_core__channel,
+   const constants__t_session_i session_core__session,
+   t_bool * const session_core__ret);
+extern void session_core__server_secure_channel_lost(
+   const constants__t_channel_i session_core__channel);
 extern void session_core__srv_activate_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
@@ -154,12 +160,5 @@ extern void session_core__srv_create_req_and_resp(
    const constants__t_msg_i session_core__create_req_msg,
    const constants__t_msg_i session_core__create_resp_msg,
    constants__t_session_i * const session_core__nsession);
-extern void session_core__srv_is_session_valid_for_service(
-   const constants__t_channel_i session_core__channel,
-   const constants__t_session_i session_core__session,
-   t_bool * const session_core__ret,
-   t_bool * const session_core__snd_err);
-extern void session_core__srv_secure_channel_lost(
-   const constants__t_channel_i session_core__channel);
 
 #endif
