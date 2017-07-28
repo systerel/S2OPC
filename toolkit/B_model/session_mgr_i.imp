@@ -49,7 +49,8 @@ OPERATIONS
         l_session,
         l_session_token,
         l_session_state,
-        l_session_channel
+        l_session_channel,
+        l_ret
     IN
         l_session <-- get_session_from_req_handle (req_handle);
         l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
@@ -59,7 +60,10 @@ OPERATIONS
                     l_session_channel <-- get_session_channel (l_session);
                     IF l_session_channel = channel THEN
                         l_session_token <-- read_create_session_msg_session_token (resp_msg);
-                        cli_create_resp (channel, l_session, req_handle, l_session_token, resp_msg)
+                        l_ret <-- cli_create_resp (channel, l_session, req_handle, l_session_token, resp_msg);
+                        IF l_ret /= e_sc_ok THEN
+                            client_close_session (session)
+                        END
                     END
                 END
             OR e_msg_session_activate_resp THEN
@@ -68,7 +72,10 @@ OPERATIONS
                 THEN
                     l_session_channel <-- get_session_channel (l_session);
                     IF l_session_channel = channel THEN	
-                        cli_activate_resp (channel, l_session, req_handle, resp_msg)
+                        l_ret <-- cli_activate_resp (channel, l_session, req_handle, resp_msg);
+                        IF l_ret /= e_sc_ok THEN
+                            client_close_session (session)
+                        END
                     END
                 END
             OR e_msg_session_close_resp THEN
@@ -133,6 +140,11 @@ OPERATIONS
                         ELSE
                             // invalid user in msg => no session change
                             l_ret := e_sc_bad_invalid_argument
+                        END;
+                        IF l_ret /= e_sc_ok
+                        THEN
+                            // Invalid user or parameters in received request: choice is to close the session in this case (not specified)
+                            srv_close_session (session)
                         END
                     ELSE
                         // if session is not in a correct state to be activated => close session (and send closed session resp ?)

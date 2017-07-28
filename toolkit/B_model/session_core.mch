@@ -263,7 +263,7 @@ OPERATIONS
     ;
     
     // Client receive create session response from server
-    cli_create_resp (channel, session, req_handle, session_token, create_resp_msg) =
+    ret <-- cli_create_resp (channel, session, req_handle, session_token, create_resp_msg) =
     PRE
         channel       : t_channel_i &
         channel       : s_channel_connected   &
@@ -287,13 +287,14 @@ OPERATIONS
             CHOICE
                 a_state(session) := e_session_created                     ||
                 a_token := a_token <+ {session_token |-> session} ||
-                a_cli_pending_requests := a_cli_pending_requests - {req_handle |-> session}
+                a_cli_pending_requests := a_cli_pending_requests - {req_handle |-> session} ||
+                ret := e_sc_ok
             OR
                 // Constraints on message content not verified
-                d_close_session(session)
+                ret := e_sc_nok
             END
         ELSE
-            d_close_session(session)
+            ret := e_sc_bad_invalid_argument
         END
     END
     ;
@@ -410,8 +411,6 @@ OPERATIONS
                 ret := e_sc_ok
                 // modify credential if user was already associated, sends response
             OR
-                // Invalid user or parameters in received request: choice is to close the session in this case (spec does not indicate what to do)
-                d_close_session(session) ||
                 ret := e_sc_bad_invalid_argument
                 // sends response with error
             END
@@ -422,22 +421,20 @@ OPERATIONS
             CHOICE
                 a_orphaned := {session} <<| a_orphaned ||
                 a_channel(session) := channel         ||
-                a_state(session) := e_session_userActivated
+                a_state(session) := e_session_userActivated ||
+                ret := e_sc_ok
             OR
-                // Invalid parameters in received request: choice is to close the session in this case (spec does not indicate what to do)
-                d_close_session(session) ||
                 ret := e_sc_bad_invalid_argument
                 // sends response with error
             END
         ELSE
-            d_close_session(session) ||
             ret :: {e_sc_bad_invalid_argument,
                 e_sc_bad_invalid_state}
         END
     END
     ;
     
-    cli_activate_resp (channel, session, req_handle, activate_resp_msg) = 
+    ret <-- cli_activate_resp (channel, session, req_handle, activate_resp_msg) = 
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -457,15 +454,15 @@ OPERATIONS
         THEN
             CHOICE
                 a_state(session) := e_session_userActivated ||
-                a_cli_pending_requests := a_cli_pending_requests - {req_handle |-> session}
+                a_cli_pending_requests := a_cli_pending_requests - {req_handle |-> session} ||
+                ret := e_sc_ok
                 // modify credential if user was already associated, sends response
             OR
-                // Invalid user or parameters in received request: choice is to close the session in this case (spec does not indicate what to do)
-                d_close_session(session)
-                // sends response with error
+                // status nok in response
+                ret := e_sc_nok
             END
         ELSE
-            d_close_session(session)
+            ret := e_sc_bad_invalid_argument
         END
     END
     ;

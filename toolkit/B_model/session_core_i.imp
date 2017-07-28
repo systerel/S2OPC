@@ -126,7 +126,7 @@ OPERATIONS
     END
     ;
     
-    cli_create_resp (channel, session, req_handle, session_token, create_resp_msg) =
+    ret <-- cli_create_resp (channel, session, req_handle, session_token, create_resp_msg) =
     VAR
         l_valid_handle,
         l_fresh_session_token,
@@ -141,16 +141,20 @@ OPERATIONS
         THEN
             l_valid_handle <-- cli_remove_pending_request (session, req_handle);
             l_status <-- read_msg_resp_header_service_status (create_resp_msg);
-            IF l_valid_handle = TRUE &
-                l_status = e_sc_ok
+            IF l_valid_handle = TRUE
             THEN
-                set_session_state (session, e_session_created);
-                set_session_token (session, session_token)
+                IF l_status = e_sc_ok THEN
+                    set_session_state (session, e_session_created);
+                    set_session_token (session, session_token);
+                    ret := e_sc_ok
+                ELSE
+                    ret := e_sc_nok
+                END
             ELSE
-                set_session_state_closed (session)
+                ret := e_sc_bad_invalid_argument
             END
         ELSE
-            set_session_state_closed (session)
+            ret := e_sc_bad_invalid_argument
         END
     END
     ;
@@ -239,7 +243,6 @@ OPERATIONS
                 srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
                 l_ret := e_sc_ok
             ELSE
-                set_session_state_closed (session);
                 l_ret := e_sc_bad_invalid_argument
             END
         ELSIF l_state = e_session_userActivated
@@ -256,7 +259,6 @@ OPERATIONS
                 srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
                 l_ret := e_sc_ok
             ELSE
-                set_session_state_closed (session);
                 l_ret := e_sc_bad_invalid_argument
             END
         ELSIF l_state = e_session_scOrphaned
@@ -268,18 +270,16 @@ OPERATIONS
                 srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
                 l_ret := e_sc_ok
             ELSE
-                set_session_state_closed (session);
                 l_ret := e_sc_bad_invalid_argument
             END
         ELSE
-            set_session_state_closed (session);
             l_ret := e_sc_bad_invalid_state
         END;
         ret := l_ret
     END
     ;
     
-    cli_activate_resp (channel , session, req_handle, activate_resp_msg) =
+    ret <-- cli_activate_resp (channel , session, req_handle, activate_resp_msg) =
     VAR
         l_valid_handle,
         l_state,
@@ -289,12 +289,16 @@ OPERATIONS
         l_valid_handle <-- cli_remove_pending_request (session, req_handle);
         l_status <-- read_msg_resp_header_service_status (activate_resp_msg);
         /* Check response parameters ? */
-        IF l_valid_handle = TRUE &
-            l_status = e_sc_ok
+        IF l_valid_handle = TRUE
         THEN
-            set_session_state (session, e_session_userActivated)
+            IF l_status = e_sc_ok
+            THEN
+                set_session_state (session, e_session_userActivated)
+            ELSE
+                ret := e_sc_nok
+            END
         ELSE
-            set_session_state_closed (session)
+            ret := e_sc_bad_invalid_argument
         END
     END
     ;
