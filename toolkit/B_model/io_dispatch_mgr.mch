@@ -183,13 +183,6 @@ OPERATIONS
     bres <-- close_all_active_connections =
     BEGIN
         bres :: BOOL // indicates if active connection will be closed
-    END;
-    
-    state <-- get_session_state_or_closed (session) =
-    PRE
-        session : t_session_i
-    THEN
-        state :: t_sessionState
     END
 
 END

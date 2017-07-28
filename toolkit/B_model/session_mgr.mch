@@ -26,7 +26,6 @@ SEES
     request_handle_bs
     
 DEFINITIONS
-   
    d_var_it ==
    	/* sessions to auto activate on session created state obtained */
    	s_session_async_activate_session, /* TODO: If users not anonymous, partial function to user config to use ! */
@@ -36,7 +35,7 @@ DEFINITIONS
     av_sessions_to_iterate,
     av_sessions_iterated,
     av_sessions_orphaned;
-
+    
     d_typing_it ==
     s_session_async_activate_session <: t_session &
 	s_session_async_create_session <: t_channel_config_idx &
@@ -65,7 +64,7 @@ INITIALISATION
 
 OPERATIONS
     
-    session <-- receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
+    session <-- client_receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -83,7 +82,7 @@ OPERATIONS
     END
     ;
     
-    b_send_resp, session <-- receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
+    b_send_resp, session <-- server_receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -109,7 +108,7 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- cli_validate_session_service_req (session, req_handle, req_msg) =
+    ret, channel, session_token <-- client_validate_session_service_req (session, req_handle, req_msg) =
     PRE
         session : t_session_i &
         req_handle : t_request_handle_i &
@@ -133,7 +132,7 @@ OPERATIONS
     END
     ;
     
-    bres <-- cli_validate_session_service_resp (channel, req_handle, resp_msg) =
+    bres <-- client_validate_session_service_resp (channel, req_handle, resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -147,7 +146,7 @@ OPERATIONS
     END
     ;
     
-    bres, snd_err <-- srv_validate_session_service_req (channel, req_handle, session_token, req_msg) =
+    bres, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token, req_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -168,7 +167,7 @@ OPERATIONS
     END
     ;
     
-    bres, snd_err <-- srv_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
+    bres, snd_err <-- server_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -193,22 +192,7 @@ OPERATIONS
     END
     ;
     
-    /*PROMOTES*/
-    session <-- get_session_from_token (session_token) =
-    PRE
-        session_token : t_session_token_i
-    THEN
-        session :: t_session_i
-    END
-    ;
-    
-    nsession <-- cli_init_session = 
-    BEGIN
-        nsession :: t_session_i
-    END
-    ;
-        
-    ret <-- cli_create_req (session, channel, req_handle, create_req_msg) = 
+    ret <-- client_create_req (session, channel, req_handle, create_req_msg) = 
     PRE
         session : t_session_i &
         channel : t_channel_i &
@@ -221,9 +205,10 @@ OPERATIONS
         a_msg_out_type = e_msg_session_create_req
     THEN
         ret :: {e_sc_bad_invalid_argument, e_sc_bad_invalid_state, e_sc_bad_out_of_memory, e_sc_ok}
-    END;
+    END
+    ;
     
-    ret, channel, session_token <-- cli_user_activate_req (session, req_handle, user, activate_req_msg) =
+    ret, channel, session_token <-- client_user_activate_req (session, req_handle, user, activate_req_msg) =
     PRE
         session : t_session_i & // Here session is provided by applicative but still can point to invalid session (ref on closed session)
         req_handle : t_request_handle_i &
@@ -251,10 +236,10 @@ OPERATIONS
     END
     ;
     
-    ret, session_token <-- cli_sc_activate_req (session, req_handle, channel, activate_req_msg) =
+    ret, session_token <-- client_sc_activate_req (session, req_handle, channel, activate_req_msg) =
     PRE
         session : t_session_i &
-        session : t_session &
+        session : t_session & // provided by dispatch manager => not an invalid session
         req_handle : t_request_handle_i &
         req_handle : s_request_handle &
         channel : t_channel_i &
@@ -273,27 +258,7 @@ OPERATIONS
     END
     ;
     
-    cli_secure_channel_lost (lost_channel, channel_config_idx) =
-    PRE
-        lost_channel : t_channel_i &
-        lost_channel : s_channel_connected &
-        channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx
-    THEN
-        skip
-    END
-    ;
-    
-    srv_secure_channel_lost (channel) =
-    PRE
-        channel : t_channel_i &
-        channel : s_channel_connected
-    THEN
-        skip
-    END
-    ;
-        
-    ret, channel, session_token <-- cli_close_req (session, req_handle, close_req_msg) =
+    ret, channel, session_token <-- client_close_req (session, req_handle, close_req_msg) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -319,7 +284,42 @@ OPERATIONS
     END
     ;
     
-    cli_close_session (session) =
+    /*PROMOTES*/
+    session <-- get_session_from_token (session_token) =
+    PRE
+        session_token : t_session_token_i
+    THEN
+        session :: t_session_i
+    END
+    ;
+    
+    nsession <-- client_init_session = 
+    BEGIN
+        nsession :: t_session_i
+    END
+    ;
+    
+    client_secure_channel_lost (lost_channel, channel_config_idx) =
+    PRE
+        lost_channel : t_channel_i &
+        lost_channel : s_channel_connected &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;
+    
+    server_secure_channel_lost (channel) =
+    PRE
+        channel : t_channel_i &
+        channel : s_channel_connected
+    THEN
+        skip
+    END
+    ;
+    
+    client_close_session (session) =
     PRE
         session : t_session_i
     THEN

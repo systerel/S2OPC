@@ -32,15 +32,11 @@ PROMOTES
     get_session_state_or_closed,
     get_session_user_or_indet,
     get_session_from_token,
-    cli_init_session,
+    client_init_session,
     delete_session,
-    cli_create_req,
-    cli_user_activate_req,
-    cli_sc_activate_req,
-    cli_secure_channel_lost,
-    srv_secure_channel_lost,
-    cli_close_session,
-    cli_close_req,
+    client_secure_channel_lost,
+    server_secure_channel_lost,
+    client_close_session,
     
     is_valid_session,
     init_iter_orphaned_t_session,
@@ -48,51 +44,136 @@ PROMOTES
     
 OPERATIONS
     
-    session <-- receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
+    session <-- client_receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
     VAR
         l_session,
-        l_session_token
+        l_session_token,
+        l_session_state,
+        l_session_channel
     IN
-        /* TODO: validate session */
         l_session <-- get_session_from_req_handle (req_handle);
+        l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
         CASE resp_typ OF
             EITHER e_msg_session_create_resp THEN
-                l_session_token <-- read_create_session_msg_session_token (resp_msg);
-                cli_create_resp (channel, l_session, req_handle, l_session_token, resp_msg)
+                IF l_session_state = e_session_creating THEN
+                    l_session_channel <-- get_session_channel (l_session);
+                    IF l_session_channel = channel THEN
+                        l_session_token <-- read_create_session_msg_session_token (resp_msg);
+                        cli_create_resp (channel, l_session, req_handle, l_session_token, resp_msg)
+                    END
+                END
             OR e_msg_session_activate_resp THEN
-                cli_activate_resp (channel, l_session, req_handle, resp_msg)                
+                IF l_session_state = e_session_userActivating or
+                    l_session_state = e_session_scActivating
+                THEN
+                    l_session_channel <-- get_session_channel (l_session);
+                    IF l_session_channel = channel THEN	
+                        cli_activate_resp (channel, l_session, req_handle, resp_msg)
+                    END
+                END
             OR e_msg_session_close_resp THEN
-                cli_close_resp (channel, l_session, req_handle, resp_msg)
+                IF l_session_state = e_session_closing
+                THEN
+                    l_session_channel <-- get_session_channel (l_session);
+                    IF l_session_channel = channel THEN	
+                        cli_close_resp (channel, l_session, req_handle, resp_msg)
+                    ELSE
+                        // If response on wrong channel we still close session since it is unexpected
+                        client_close_session (l_session)
+                    END
+                    // TODO ELSE => close session !
+                END
             END
         END;
         session := l_session
     END
     ;
     
-    b_send_resp, session <-- receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
+    // TODO: b_send_resp => shall be a status code to return an error response appropriated ?
+    b_send_resp, session <-- server_receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
     VAR
         l_valid_session,
+        l_session_state,
+        l_session_channel,
         l_user,
+        l_valid_user,
         l_ret
     IN
+        // TODO: l_ret => delete and fill response with error instead !
         CASE req_typ OF
             EITHER e_msg_session_create_req THEN
+                // SESSION CREATION REQUEST
                 session <-- srv_create_req_and_resp (channel, req_handle, req_msg, resp_msg);
                 l_valid_session <-- is_valid_session (session);
                 IF l_valid_session = TRUE
                 THEN
                     l_ret := e_sc_ok
                 ELSE
-                    l_ret := e_sc_bad_unexpected_error
+                    l_ret := e_sc_bad_invalid_state
                 END
             OR e_msg_session_activate_req THEN
+                // SESSION ACTIVATION REQUEST
+                // TODO: add a local operation for rest
                 session <-- get_session_from_token (session_token);
-                l_user <-- read_activate_msg_user (req_msg);
-                l_ret <-- srv_activate_req_and_resp (channel, session, req_handle, l_user, req_msg, resp_msg)
-                
+                l_valid_session <-- is_valid_session (session);
+                l_session_state <-- get_session_state_or_closed (session);
+                IF l_valid_session = TRUE
+                THEN
+                    IF l_session_state = e_session_created or
+                        l_session_state = e_session_userActivated or
+                        l_session_state =  e_session_scOrphaned or
+                        l_session_state = e_session_userActivated
+                    THEN
+                        l_user <-- read_activate_msg_user (req_msg);
+                        l_valid_user <-- is_valid_user (l_user);
+                        IF l_valid_user = TRUE
+                        THEN
+                            // TODO: differentiate sc_activate from user_activate directly here
+                            l_ret <-- srv_activate_req_and_resp (channel, session, req_handle, l_user, req_msg, resp_msg)
+                        ELSE
+                            // invalid user in msg => no session change
+                            l_ret := e_sc_bad_invalid_argument
+                        END
+                    ELSE
+                        // if session is not in a correct state to be activated => close session (and send closed session resp ?)
+                        srv_close_session (session);
+                        l_ret := e_sc_bad_invalid_state
+                    END
+                ELSE
+                    // session token was not correct (send bad status activate session response ?)
+                    l_ret := e_sc_bad_invalid_argument
+                END
             OR e_msg_session_close_req THEN
+                // SESSION CLOSE REQUEST
+                // TODO: add a local operation for rest
                 session <-- get_session_from_token (session_token);
-                l_ret <-- srv_close_req_and_resp (channel, session, req_handle, req_msg, resp_msg)
+                l_valid_session <-- is_valid_session (session);
+                l_session_state <-- get_session_state_or_closed (session);
+                IF l_valid_session = TRUE
+                THEN
+                    IF l_session_state = e_session_created or
+                        l_session_state = e_session_userActivating or
+                        l_session_state = e_session_userActivated
+                    THEN
+                        l_session_channel <-- get_session_channel (session);
+                        IF l_session_channel = channel
+                        THEN
+                            // TODO: respond to pending requests with error if close succeeded ?
+                            l_ret <-- srv_close_req_and_resp (channel, session, req_handle, req_msg, resp_msg)
+                        ELSE
+                            // Close anyway since non correct channel is unexpected
+                            srv_close_session(session);
+                            l_ret := e_sc_bad_invalid_argument
+                        END
+                    ELSE
+                        // if session is not in a correct state to be activated => close session (and send closed session resp ?)
+                        srv_close_session (session);
+                        l_ret := e_sc_bad_invalid_state
+                    END
+                ELSE
+                    // session token was not correct (send bad status close session response ?)
+                    l_ret := e_sc_bad_invalid_argument
+                END
             ELSE
                 l_ret := e_sc_bad_unexpected_error /* guarantee by PRE but still a warning on l_ret */
             END
@@ -106,72 +187,211 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- cli_validate_session_service_req (session, req_handle, req_msg) =
+    ret, channel, session_token <-- client_validate_session_service_req (session, req_handle, req_msg) =
     VAR
-        l_valid_session,
-        l_channel,
-        l_connected_channel,
-        l_session_token,
-        l_ret,
-        l_bres
+        l_session_state,
+        ret
     IN
-        l_session_token := c_session_token_indet;
-        l_channel := c_channel_indet;
+        session_token := c_session_token_indet;
+        channel := c_channel_indet;
         /* TODO: do not require req msg ? */
-        l_valid_session <-- is_valid_session (session);
-        IF l_valid_session = TRUE
+        l_session_state <-- get_session_state_or_closed (session); // l_session_state /= closed => is_valid_session = TRUE
+        IF l_session_state = e_session_userActivated
         THEN
-            l_channel <-- get_session_channel (session);
-            l_connected_channel <-- is_connected_channel (l_channel);
-            IF l_connected_channel = TRUE
-            THEN
-                l_bres <-- cli_is_session_valid_for_service (l_channel, session);
-                IF l_bres = TRUE
-                THEN
-                    l_ret, l_session_token <-- cli_new_session_service_req (session, req_handle)
-                ELSE
-                    l_channel := c_channel_indet;
-                    l_ret := e_sc_bad_invalid_state
-                END
-            ELSE
-                l_ret := e_sc_bad_invalid_argument
-            END
+            ret, channel, session_token <-- cli_new_session_service_req (session, req_handle)
         ELSE
-            l_ret := e_sc_bad_invalid_argument
-        END;
-        ret := l_ret;
-        channel := l_channel;
-        session_token := l_session_token
+            ret := e_sc_bad_invalid_argument
+        END
     END;
     
-    bres <-- cli_validate_session_service_resp (channel, req_handle, resp_msg) =
+    bres <-- client_validate_session_service_resp (channel, req_handle, resp_msg) =
     VAR
-        l_session
+        l_session,
+        l_valid_session,
+        l_session_state,
+        l_session_channel
     IN
         /* TODO: do not require resp msg ? */
         l_session <-- get_session_from_req_handle (req_handle);
-        bres <-- cli_is_session_valid_for_service (channel, l_session);
+        l_valid_session <-- is_valid_session (l_session);
+        l_session_state <-- get_session_state_or_closed (l_session);
+        IF l_valid_session = TRUE
+        THEN
+            l_session_channel <-- get_session_channel (l_session);
+            IF l_session_state = e_session_userActivated &
+                l_session_channel = channel
+            THEN
+                bres <-- is_session_valid_for_service (channel, l_session)
+            ELSE
+                bres := FALSE
+            END;
+            IF bres = FALSE
+            THEN
+                // session in invalid state or invalid channel used => close session
+                client_close_session (l_session)
+            END
+        ELSE
+            bres := FALSE
+        END;
         IF bres = TRUE
         THEN
             bres <-- cli_record_session_service_resp (l_session, resp_msg, req_handle)
         END
     END;
     
-    bres, snd_err <-- srv_validate_session_service_req (channel, req_handle, session_token, req_msg) =
+    bres, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token, req_msg) =
     VAR
-        l_session
+        l_session,
+        l_valid_session,
+        l_session_state,
+        l_session_channel
     IN
         /* TODO: req handle to be recorded on server side at session level ? => considered unique in 1 session (make possible to check req_handle on call to *_resp operation) */
         l_session <-- get_session_from_token (session_token);
-        bres, snd_err <-- srv_is_session_valid_for_service (channel, l_session)
+        l_valid_session <-- is_valid_session (l_session);
+        l_session_state <-- get_session_state_or_closed (l_session);
+        IF l_valid_session = TRUE
+        THEN
+            l_session_channel <-- get_session_channel (l_session);
+            IF l_session_state = e_session_userActivated &
+                l_session_channel = channel
+            THEN
+                bres <-- is_session_valid_for_service (channel, l_session)
+            ELSE
+                // Unexpected access to session (wrong state or channel): close it
+                srv_close_session (l_session);
+                bres := FALSE;
+                snd_err := TRUE
+            END
+        ELSE
+            bres := FALSE;
+            snd_err := FALSE
+        END
     END
     ;
     
-    bres, snd_err <-- srv_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
-    BEGIN
+    bres, snd_err <-- server_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
+    VAR
+        l_valid_session,
+        l_session_state,
+        l_session_channel
+    IN
         /* Coherency of messages types done in PRE for now */
         /* TODO: check req handle valid in given session ? */
-        bres, snd_err <-- srv_is_session_valid_for_service (channel, session)
+        l_valid_session <-- is_valid_session (session);
+        l_session_state <-- get_session_state_or_closed (session);
+        IF l_valid_session = TRUE
+        THEN
+            l_session_channel <-- get_session_channel (session);
+            IF l_session_state = e_session_userActivated &
+                l_session_channel = channel
+            THEN
+                bres <-- is_session_valid_for_service (channel, session)
+            ELSE
+                bres := FALSE;
+                snd_err := TRUE
+            END
+        ELSE
+            bres := FALSE;
+            snd_err := FALSE
+        END
+    END
+    ;
+    
+    ret <-- client_create_req (session, channel, req_handle, create_req_msg) = 
+    VAR
+        l_valid_session,
+        l_session_state
+    IN
+        l_valid_session <-- is_valid_session (session);
+        l_session_state <-- get_session_state_or_closed (session);
+        IF l_valid_session = TRUE
+        THEN
+            IF l_session_state = e_session_init
+            THEN
+                ret <-- cli_create_req (session, channel, req_handle, create_req_msg)
+            ELSE
+                ret := e_sc_bad_invalid_state
+            END
+        ELSE
+            ret := e_sc_bad_invalid_argument
+        END
+    END;
+    
+    ret, channel, session_token <-- client_user_activate_req (session, req_handle, user, activate_req_msg) =
+    VAR
+        l_valid_session,
+        l_session_state
+    IN
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE
+        THEN
+            l_session_state <-- get_session_state_or_closed (session);
+            IF l_session_state = e_session_created or
+                l_session_state = e_session_userActivated
+            THEN
+                ret, channel, session_token <-- cli_user_activate_req (session, req_handle, user, activate_req_msg)
+            ELSE
+                ret := e_sc_bad_invalid_state;
+                channel := c_channel_indet;
+                session_token := c_session_token_indet
+            END
+        ELSE
+            ret := e_sc_bad_invalid_argument;
+            channel := c_channel_indet;
+            session_token := c_session_token_indet            
+        END
+    END
+    ;
+    
+    ret, session_token <-- client_sc_activate_req (session , req_handle, channel, activate_req_msg) =
+    VAR
+        l_valid_session,
+        l_session_state
+    IN
+        l_valid_session <-- is_valid_session (session);
+        IF l_valid_session = TRUE
+        THEN
+            l_session_state <-- get_session_state_or_closed (session);
+            IF l_session_state = e_session_scOrphaned or 
+                l_session_state = e_session_userActivated
+            THEN
+                ret, session_token <-- cli_sc_activate_req (session , req_handle, channel, activate_req_msg)
+            ELSE
+                ret := e_sc_bad_invalid_state;
+                session_token := c_session_token_indet
+            END
+        ELSE
+            ret := e_sc_bad_invalid_argument;
+            session_token := c_session_token_indet
+        END
+    END
+    ;
+    
+    ret, channel, session_token <-- client_close_req (session, req_handle, close_req_msg) =
+    VAR
+        l_valid_session,
+        l_session_state
+    IN
+        l_valid_session <-- is_valid_session(session);
+        IF l_valid_session = TRUE
+        THEN
+            l_session_state <-- get_session_state_or_closed (session);
+            IF l_session_state = e_session_created or
+                l_session_state = e_session_userActivating or
+                l_session_state = e_session_userActivated
+            THEN
+                ret, channel, session_token <-- cli_close_req (session, req_handle, close_req_msg)
+            ELSE
+                ret := e_sc_bad_invalid_state;
+                channel := c_channel_indet;
+                session_token := c_session_token_indet
+            END
+        ELSE
+            ret := e_sc_bad_invalid_argument;
+            channel := c_channel_indet;
+            session_token := c_session_token_indet
+        END
     END
     
 END

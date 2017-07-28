@@ -87,15 +87,11 @@ OPERATIONS
     session_token <-- get_token_from_session (session) =
     PRE
         session : t_session_i &
-        session : t_session
+        session : t_session &
+        session : ran(a_token)
     THEN
-        IF session : ran(a_token)
-        THEN
-            // Guarantee only 1 session token by session provided by set_session_token PRE
-            session_token :(session_token : t_session_token_i & session_token = a_token~(session))
-        ELSE
-            session_token := c_session_token_indet
-        END
+        // Guarantee only 1 session token by session provided by set_session_token PRE
+        session_token :(session_token : t_session_token_i & session_token = a_token~(session))
     END;
     
     token <-- get_fresh_session_token (session) = 
@@ -312,14 +308,10 @@ OPERATIONS
     channel <-- get_session_channel (session) =
     PRE
         session : t_session_i &
-        session : s_session
+        session : s_session &
+        session : dom(a_channel)
     THEN
-        IF session : dom(a_channel)
-        THEN
             channel :(channel : t_channel_i & channel = a_channel(session))
-        ELSE
-            channel := c_channel_indet
-        END
     END
     ;
     
@@ -364,14 +356,10 @@ OPERATIONS
     user <-- get_session_user (session) =
     PRE
         session : t_session_i &
-        session : s_session
+        session : s_session &
+        session : dom(a_user)
     THEN
-        IF session : dom(a_user)
-        THEN
-            user :(user : t_user_i & user = a_user (session))
-        ELSE
-            user := c_user_indet
-        END
+        user :(user : t_user_i & user = a_user (session))
     END
 
 END
