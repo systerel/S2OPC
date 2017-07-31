@@ -744,13 +744,12 @@ SOPC_StatusCode SOPC_Endpoint_AsyncSendResponse(SOPC_Endpoint                 en
             }
         }
 
-
-        msgBuffers = SC_CreateSendSecureBuffers(context->maxChunksSendingCfg,
-                                                context->maxMsgSizeSendingCfg,
-                                                context->bufferSizeSendingCfg,
-                                                context->scConnection,
-                                                context->nsTableCfg,
-                                                context->encTypesTableCfg);
+        // Note: request message limited to 1 chunk maximum for this intermediary version
+        msgBuffers = MsgBuffer_Create((SOPC_Buffer*) response,
+                                      1,
+                                      context->scConnection,
+                                      context->nsTableCfg,
+                                      context->encTypesTableCfg);
 
         if(NULL != msgBuffers){
             status = SC_ServerEndpoint_EncodeResponse(context->secureChannelId,

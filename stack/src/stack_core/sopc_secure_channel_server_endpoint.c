@@ -821,7 +821,7 @@ void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
 
     SC_Connection*       scConnection = NULL;
     uint32_t             requestId = NULL;
-    SOPC_EncodeableType* responseType = NULL;
+    //SOPC_EncodeableType* responseType = NULL;
     SOPC_MsgBuffers*     respBuffers = NULL;
     SOPC_Socket_EndOperation_CB*  endSendCallback = NULL;
     void*                         endSendCallbackData = NULL;
@@ -829,14 +829,13 @@ void SC_Send_Response(SOPC_Action_ServiceResponseSendData* sendData)
     if(NULL != sendData){
         scConnection = sendData->scConnection;
         requestId = sendData->requestId;
-        responseType = sendData->responseType;
+        //responseType = sendData->responseType;
         respBuffers = sendData->respBuffers;
         endSendCallback = sendData->endSendCallback;
         endSendCallbackData = sendData->endSendCallbackData;
     }
 
     if(scConnection != NULL &&
-       responseType != NULL &&
        respBuffers != NULL)
     {
         if(SC_Connection_Connected == scConnection->state){
@@ -893,7 +892,6 @@ SOPC_StatusCode SC_CreateAction_Send_Response(SC_Connection*               scCon
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Action_ServiceResponseSendData* data = NULL;
     if(scConnection != NULL &&
-       responseType != NULL &&
        respBuffers != NULL)
     {
         status = STATUS_NOK;
@@ -928,8 +926,9 @@ SOPC_StatusCode SC_ServerEndpoint_EncodeResponse(uint32_t             secureChan
                                                  void*                response,
                                                  SOPC_MsgBuffers*     msgBuffers)
 {
+    // Note: response useless now since it is the buffer inside msgBuffers
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(NULL != responseType && NULL != response && NULL != msgBuffers){
+    if(NULL != response && NULL != msgBuffers){
         status = SC_EncodeSecureMessage(msgBuffers,
                                         responseType,
                                         response,

@@ -2016,11 +2016,21 @@ SOPC_StatusCode SC_EncodeSecureMessage(SOPC_MsgBuffers*     msgBuffers,
                                        uint32_t             tokenId,
                                        uint32_t             requestId)
 {
+    // Note: value useless now since it is the buffer inside msgBuffers
+    (void) value;
+    (void) encType;
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    // Position after the already encoded body
+    const uint32_t bodyEncodedPosition = msgBuffers->buffers->position;
     if(msgBuffers != NULL &&
-       encType != NULL &&
-       value != NULL)
+       value != NULL &&
+       bodyEncodedPosition > UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH)
     {
+        // reset position to encode headers
+        status = SOPC_Buffer_SetPosition(msgBuffers->buffers, 0);
+    }
+
+    if(STATUS_OK == status){
         // Encode secure message header:
         status = SC_EncodeSecureMsgHeader(msgBuffers,
                                           SOPC_SecureMessage,
@@ -2037,7 +2047,10 @@ SOPC_StatusCode SC_EncodeSecureMessage(SOPC_MsgBuffers*     msgBuffers,
     }
 
     if(STATUS_OK == status){
-        status = SOPC_EncodeMsgTypeAndBody(msgBuffers->buffers, encType, value);
+        // Note: message body type (node Id) and message body are already encoded, just restore position after msg body
+        //status = SOPC_EncodeMsgTypeAndBody(msgBuffers->buffers, encType, value);
+
+        status = SOPC_Buffer_SetPosition(msgBuffers->buffers, bodyEncodedPosition);
     }
 
     return status;
@@ -2259,8 +2272,9 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
     uint32_t msgSize = 0;
     SOPC_Buffer* tmpBuffer = NULL;
     uint32_t idx = 0;
-    SOPC_MsgBuffer* tmpMsgBuffer = NULL;
+//    SOPC_MsgBuffer* tmpMsgBuffer = NULL;
     SOPC_Buffer* buffer = NULL;
+    uint32_t bufferPosition;
 
     if(msgBuffers != NULL &&
        recEncType != NULL && encObj != NULL)
@@ -2270,14 +2284,27 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
             case SOPC_Msg_Chunk_Final:
                 // Treat case with only 1 chunk for response
                 if(msgBuffers->nbChunks == 1){
-                    status = SOPC_MsgBodyType_Read(msgBuffers->buffers,
-                                                   recEncType);
-                    if(STATUS_OK == status){
-                        assert(*recEncType != NULL);
-                        SOPC_DecodeMsgBody(msgBuffers->buffers,
-                                           *recEncType,
-                                           encObj);
-                    }
+                    //Note: deactivate body decoding
+
+//                    status = SOPC_MsgBodyType_Read(msgBuffers->buffers,
+//                                                   recEncType);
+//                    if(STATUS_OK == status){
+//                        assert(*recEncType != NULL);
+//                        SOPC_DecodeMsgBody(msgBuffers->buffers,
+//                                           *recEncType,
+//                                           encObj);
+//                    }
+                    buffer = SOPC_Buffer_Create(msgBuffers->buffers->length);
+                    assert(NULL != buffer);
+                    status = SOPC_Buffer_Copy(buffer, msgBuffers->buffers);
+                    // encObj is now the buffer pointing to the msg body type (node Id as prefix)
+                    *encObj = (void*) buffer;
+                    // TMP: just retrieve type (for service dispatcher on server) and restore position
+                    bufferPosition = buffer->position;
+                    status = SOPC_MsgBodyType_Read(buffer, recEncType);
+                    assert(STATUS_OK == status);
+                    status = SOPC_Buffer_SetPosition(buffer, bufferPosition);
+                    assert(STATUS_OK == status);
                 }else{
                     //Store all buffers in 1 to could decode msg body !
                     for(idx = 0; idx < msgBuffers->nbChunks; idx++){
@@ -2296,31 +2323,40 @@ SOPC_StatusCode SC_DecodeChunk(SOPC_MsgBuffers*      msgBuffers,
                     }
 
                     if(status == STATUS_OK){
-                        tmpMsgBuffer = MsgBuffer_Create(buffer,
-                                                        msgBuffers->maxChunks,
-                                                        NULL,
-                                                        &msgBuffers->nsTable,
-                                                        msgBuffers->encTypesTable);
-                        if(tmpMsgBuffer != NULL){
-                            // Not treated correctly anymore (multichunks)
-                            assert(FALSE);
-//                            status = SC_DecodeMsgBody(tmpMsgBuffer,
-//                                                      &msgBuffers->nsTable,
-//                                                      msgBuffers->encTypesTable,
-//                                                      expEncType,
-//                                                      errEncType,
-//                                                      recEncType,
-//                                                      encObj);
-                        }
+//                        tmpMsgBuffer = MsgBuffer_Create(buffer,
+//                                                        msgBuffers->maxChunks,
+//                                                        NULL,
+//                                                        &msgBuffers->nsTable,
+//                                                        msgBuffers->encTypesTable);
+//                        if(tmpMsgBuffer != NULL){
+                            // encObj is now the buffer pointing to the msg body type (node Id as prefix)
+                        *encObj = (void*) buffer;
+                        // TMP: just retrieve type (for service dispatcher on server) and restore position
+                        bufferPosition = buffer->position;
+                        status = SOPC_MsgBodyType_Read(buffer, recEncType);
+                        assert(STATUS_OK == status);
+                        status = SOPC_Buffer_SetPosition(buffer, bufferPosition);
+                        assert(STATUS_OK == status);
+
+                          // Note: deactivate body decoding
+
+//                        status = SOPC_MsgBodyType_Read(msgBuffers->buffers,
+//                                                       recEncType);
+//                        if(STATUS_OK == status){
+//                            assert(*recEncType != NULL);
+//                            SOPC_DecodeMsgBody(msgBuffers->buffers,
+//                                               *recEncType,
+//                                               encObj);
+//                        }
                     }
 
-                    if(tmpMsgBuffer == NULL){
-                        // In any case buffer deallocation guarantee
-                        SOPC_Buffer_Delete(buffer);
-                    }else{
-                        // In case msg buffer is allocated, buffer also deallocated here
-                        MsgBuffers_Delete(&tmpMsgBuffer);
-                    }
+//                    if(tmpMsgBuffer == NULL){
+//                        // In any case buffer deallocation guarantee
+//                        SOPC_Buffer_Delete(buffer);
+//                    }else{
+//                        // In case msg buffer is allocated, buffer also deallocated here
+//                        MsgBuffers_Delete(&tmpMsgBuffer);
+//                    }
                 }
 
                 MsgBuffers_Reset(msgBuffers);

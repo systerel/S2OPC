@@ -64,9 +64,9 @@ typedef struct SOPC_SecureChannel_ConnectedConfig {
 } SOPC_SecureChannel_ConnectedConfig;
 
 typedef struct SOPC_Toolkit_Msg {
-  void* msg;
-  SOPC_EncodeableType* encType;
-  SOPC_EncodeableType* respEncType;
+  SOPC_Buffer* msg;
+  //SOPC_EncodeableType* encType;
+  //SOPC_EncodeableType* respEncType;
   uint8_t isRequest;
   void*   optContext;
 } SOPC_Toolkit_Msg;

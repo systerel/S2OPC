@@ -843,7 +843,7 @@ SOPC_StatusCode SOPC_Channel_AsyncInvokeService(SOPC_Channel                    
     SOPC_MsgBuffers* msgBuffers = NULL;
 
     if(intChannel != NULL && intChannel->cConnection != NULL &&
-       request != NULL && requestType != NULL &&
+       request != NULL && // requestType != NULL &&
        cb != NULL)
     {
         if(responseType == NULL){
@@ -884,14 +884,14 @@ SOPC_StatusCode SOPC_Channel_AsyncInvokeService(SOPC_Channel                    
 
         if(STATUS_OK == status){
             // There is always a request header as first struct field in a request (safe cast)
-            timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
+            //timeout = ((OpcUa_RequestHeader*)request)->TimeoutHint;
 
-            msgBuffers = SC_CreateSendSecureBuffers(intChannel->maxChunksSendingCfg,
-                                                    intChannel->maxMsgSizeSendingCfg,
-                                                    intChannel->bufferSizeSendingCfg,
-                                                    intChannel->cConnection->instance,
-                                                    intChannel->nsTableCfg,
-                                                    intChannel->encTypesTableCfg);
+            // Note: request message limited to 1 chunk maximum for this intermediary version
+            msgBuffers = MsgBuffer_Create((SOPC_Buffer*) request,
+                                          1,
+                                          intChannel->cConnection->instance,
+                                          intChannel->nsTableCfg,
+                                          intChannel->encTypesTableCfg);
 
             if(NULL != msgBuffers){
                 status = SC_Client_EncodeRequest(intChannel->secureChannelId,

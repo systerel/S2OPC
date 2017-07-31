@@ -1097,7 +1097,9 @@ SOPC_StatusCode SC_Client_EncodeRequest(uint32_t             secureChannelId,
                                         SOPC_MsgBuffers*     msgBuffers)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
-    if(NULL != requestType && NULL != request && NULL != msgBuffers){
+    // Note: request useless now since it is the buffer inside msgBuffers
+    if(//NULL != requestType &&
+       NULL != request && NULL != msgBuffers){
         status = SC_EncodeSecureMessage(msgBuffers,
                                         requestType,
                                         request,
@@ -1121,7 +1123,7 @@ SOPC_StatusCode SC_CreateAction_Send_Request(SC_ClientConnection*         connec
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_Action_ServiceRequestSendData* data = NULL;
     if(connection != NULL &&
-            requestType != NULL &&
+            //requestType != NULL &&
             requestMsgBuffers != NULL)
     {
         status = STATUS_NOK;

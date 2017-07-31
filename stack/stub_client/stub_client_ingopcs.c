@@ -96,7 +96,7 @@ SOPC_StatusCode StubClient_ResponseEvent_Callback(SOPC_Channel         channel,
     }
 
     // Free the allocated response message
-    free(response);
+    SOPC_Buffer_Delete((SOPC_Buffer*)response);
 
     return 0;
 }
