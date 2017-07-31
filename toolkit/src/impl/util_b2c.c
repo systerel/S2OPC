@@ -113,6 +113,12 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus,
   case constants__e_sc_ok:
     *status = STATUS_OK;
     break;
+  case constants__e_sc_nok:
+    *status = STATUS_NOK;
+    break;
+  case constants__e_sc_bad_secure_channel_id_invalid:
+    *status = OpcUa_BadSecureChannelIdInvalid;
+    break;
   case constants__e_sc_bad_secure_channel_closed:
     *status = OpcUa_BadSecureChannelClosed;
     break;

@@ -221,7 +221,7 @@ OPERATIONS
     ;
     
     // Server receives create session request on channel and sends response
-    nsession <-- srv_create_req_and_resp (channel, req_handle, create_req_msg, create_resp_msg) = 
+    nsession, service_ret <-- srv_create_req_and_resp (channel, req_handle, create_req_msg, create_resp_msg) = 
     PRE
         channel : t_channel_i  &
         channel : s_channel_connected &
@@ -250,12 +250,15 @@ OPERATIONS
                     s_session := s_session \/ {l_nsession}                  || // add new session to created sessions
                     a_token := a_token <+ {l_nsession_token |-> l_nsession} ||
                     a_channel(l_nsession) := channel                        || // associate current channel
-                    a_state(l_nsession) := e_session_created                        ||
-                    nsession := l_nsession
+                    a_state(l_nsession) := e_session_created                ||
+                    nsession := l_nsession                                  ||
+                    service_ret := e_sc_ok
                     // sends response
                 OR
                     // sends error response
-                    nsession := c_session_indet
+                    nsession := c_session_indet ||
+                    // TODO: could return at least all result codes from table 15
+                    service_ret := e_sc_bad_out_of_memory
                 END
             END
         END
@@ -612,7 +615,7 @@ OPERATIONS
     END
     ;
     
-    srv_close_session (session) =
+    server_close_session (session) =
     PRE
         session : t_session_i &
         session : s_session

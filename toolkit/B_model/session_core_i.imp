@@ -68,7 +68,6 @@ OPERATIONS
     
     srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg) =
     BEGIN
-        write_msg_resp_header_service_status (activate_resp_msg, e_sc_ok);
         set_session_user (session, user);
         set_session_channel (session, channel);
         set_session_state (session, e_session_userActivated)
@@ -97,7 +96,7 @@ OPERATIONS
     END
     ;
     
-    nsession <-- srv_create_req_and_resp (channel, req_handle, create_req_msg, create_resp_msg) =
+    nsession, service_ret <-- srv_create_req_and_resp (channel, req_handle, create_req_msg, create_resp_msg) =
     VAR
         l_nsession,
         l_valid_session,
@@ -108,19 +107,22 @@ OPERATIONS
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE THEN
             create_session(l_nsession, channel, e_session_created);
-            /* TODO: check request parameters ? */
+            /* TODO: check request parameters ? => at least server / endpoint URI */ 
             l_nsession_token <-- get_fresh_session_token (l_nsession);
             l_valid_session_token <-- is_valid_session_token (l_nsession_token);
             /* No need to store the handle since we will send response in same step */
             IF l_valid_session_token = TRUE
             THEN
                 write_create_session_msg_session_token (create_resp_msg, l_nsession_token);
-                write_msg_resp_header_service_status (create_resp_msg, e_sc_ok)
+                service_ret := e_sc_ok
                 /* TODO: populate msg with parameters */
             ELSE
+                service_ret := e_sc_bad_out_of_memory;
                 delete_session (l_nsession);
                 l_nsession := c_session_indet
             END
+        ELSE
+            service_ret := e_sc_bad_out_of_memory
         END;
         nsession := l_nsession
     END
@@ -406,10 +408,9 @@ OPERATIONS
     
     ret <-- srv_close_req_and_resp (channel, session, req_handle, close_req_msg, close_resp_msg) =
     BEGIN
-        /* TODO: actions on pending requests or current subscriptions */
+        /* TODO: actions on pending requests or current subscriptions to manage (see request) */
         /* No need to store the handle since we will send response in same step */
-        write_msg_resp_header_service_status (close_resp_msg, e_sc_ok);
-        /* TODO: populate msg with parameters */
+        /* TODO: populate msg body with parameters */
         set_session_state_closed (session);
         ret := e_sc_ok
     END
@@ -433,7 +434,7 @@ OPERATIONS
     END
     ;
     
-    srv_close_session (session) =
+    server_close_session (session) =
     BEGIN
         set_session_state_closed (session)
     END

@@ -82,7 +82,7 @@ OPERATIONS
     END
     ;
     
-    b_send_resp, session <-- server_receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
+    session, service_ret <-- server_receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -103,7 +103,7 @@ OPERATIONS
             e_msg_session_activate_resp,
             e_msg_session_close_resp}
     THEN
-        b_send_resp :: BOOL ||
+        service_ret :: t_StatusCode_i ||
         session :: t_session_i
     END
     ;
@@ -320,6 +320,14 @@ OPERATIONS
     ;
     
     client_close_session (session) =
+    PRE
+        session : t_session_i
+    THEN
+        skip
+    END
+    ;
+    
+    server_close_session (session) =
     PRE
         session : t_session_i
     THEN

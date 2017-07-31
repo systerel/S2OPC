@@ -37,6 +37,7 @@ PROMOTES
     client_secure_channel_lost,
     server_secure_channel_lost,
     client_close_session,
+    server_close_session,
     
     is_valid_session,
     init_iter_orphaned_t_session,
@@ -96,28 +97,18 @@ OPERATIONS
     END
     ;
     
-    // TODO: b_send_resp => shall be a status code to return an error response appropriated ?
-    b_send_resp, session <-- server_receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
+    session, service_ret <-- server_receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
     VAR
         l_valid_session,
         l_session_state,
         l_session_channel,
         l_user,
-        l_valid_user,
-        l_ret
+        l_valid_user
     IN
-        // TODO: l_ret => delete and fill response with error instead !
         CASE req_typ OF
             EITHER e_msg_session_create_req THEN
                 // SESSION CREATION REQUEST
-                session <-- srv_create_req_and_resp (channel, req_handle, req_msg, resp_msg);
-                l_valid_session <-- is_valid_session (session);
-                IF l_valid_session = TRUE
-                THEN
-                    l_ret := e_sc_ok
-                ELSE
-                    l_ret := e_sc_bad_invalid_state
-                END
+                session, service_ret <-- srv_create_req_and_resp (channel, req_handle, req_msg, resp_msg)
             OR e_msg_session_activate_req THEN
                 // SESSION ACTIVATION REQUEST
                 // TODO: add a local operation for rest
@@ -136,24 +127,24 @@ OPERATIONS
                         IF l_valid_user = TRUE
                         THEN
                             // TODO: differentiate sc_activate from user_activate directly here
-                            l_ret <-- srv_activate_req_and_resp (channel, session, req_handle, l_user, req_msg, resp_msg)
+                            service_ret <-- srv_activate_req_and_resp (channel, session, req_handle, l_user, req_msg, resp_msg)
                         ELSE
                             // invalid user in msg => no session change
-                            l_ret := e_sc_bad_invalid_argument
+                            service_ret := e_sc_bad_identity_token_invalid
                         END;
-                        IF l_ret /= e_sc_ok
+                        IF service_ret /= e_sc_ok
                         THEN
                             // Invalid user or parameters in received request: choice is to close the session in this case (not specified)
-                            srv_close_session (session)
+                            server_close_session (session)
                         END
                     ELSE
-                        // if session is not in a correct state to be activated => close session (and send closed session resp ?)
-                        srv_close_session (session);
-                        l_ret := e_sc_bad_invalid_state
+                        // if session is not in a correct state to be activated => close session
+                        server_close_session (session);
+                        service_ret := e_sc_bad_invalid_state
                     END
                 ELSE
-                    // session token was not correct (send bad status activate session response ?)
-                    l_ret := e_sc_bad_invalid_argument
+                    // session token was not correct
+                    service_ret := e_sc_bad_session_id_invalid
                 END
             OR e_msg_session_close_req THEN
                 // SESSION CLOSE REQUEST
@@ -171,30 +162,23 @@ OPERATIONS
                         IF l_session_channel = channel
                         THEN
                             // TODO: respond to pending requests with error if close succeeded ?
-                            l_ret <-- srv_close_req_and_resp (channel, session, req_handle, req_msg, resp_msg)
+                            service_ret <-- srv_close_req_and_resp (channel, session, req_handle, req_msg, resp_msg)
                         ELSE
-                            // Close anyway since non correct channel is unexpected
-                            srv_close_session(session);
-                            l_ret := e_sc_bad_invalid_argument
+                            // Close anyway since incorrect channel usage is unexpected
+                            server_close_session(session);
+                            // Use closest error code corresponding for response
+                            service_ret := e_sc_bad_secure_channel_id_invalid
                         END
                     ELSE
-                        // if session is not in a correct state to be activated => close session (and send closed session resp ?)
-                        srv_close_session (session);
-                        l_ret := e_sc_bad_invalid_state
+                        // Close session and return error
+                        server_close_session (session);
+                        service_ret := e_sc_bad_invalid_state
                     END
                 ELSE
-                    // session token was not correct (send bad status close session response ?)
-                    l_ret := e_sc_bad_invalid_argument
+                    // session token was not correct => return error
+                    service_ret := e_sc_bad_session_id_invalid
                 END
-            ELSE
-                l_ret := e_sc_bad_unexpected_error /* guarantee by PRE but still a warning on l_ret */
             END
-        END;
-        IF l_ret = e_sc_ok
-        THEN
-            b_send_resp := TRUE
-        ELSE
-            b_send_resp := FALSE
         END
     END
     ;
@@ -271,7 +255,7 @@ OPERATIONS
                 bres <-- is_session_valid_for_service (channel, l_session)
             ELSE
                 // Unexpected access to session (wrong state or channel): close it
-                srv_close_session (l_session);
+                server_close_session (l_session);
                 bres := FALSE;
                 snd_err := TRUE
             END

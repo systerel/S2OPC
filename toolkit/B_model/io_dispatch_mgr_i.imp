@@ -378,7 +378,6 @@ OPERATIONS
         l_status,
         l_resp_msg_typ,
         l_resp_msg,
-        l_to_send,
         l_ret
     IN
         l_connected_channel <-- is_connected_channel (channel);
@@ -451,16 +450,14 @@ OPERATIONS
                                 l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                                 IF l_valid_msg = TRUE
                                 THEN
-                                    /* TODO: ret value to guarantee session is valid */
-                                    l_to_send, l_session <-- server_receive_session_req (channel, l_request_handle, l_session_token, msg, l_msg_type, l_resp_msg);
-                                    IF l_to_send = TRUE
+                                    l_session, l_ret <-- server_receive_session_req (channel, l_request_handle, l_session_token, msg, l_msg_type, l_resp_msg);
+                                    write_msg_resp_header_service_status (l_resp_msg, l_ret);
+                                    write_msg_out_header_req_handle (l_resp_msg, l_request_handle);
+                                    l_ret <-- send_channel_msg (channel, l_resp_msg);
+                                    IF l_ret /= e_sc_ok
                                     THEN
-                                        write_msg_out_header_req_handle (l_resp_msg, l_request_handle);
-                                        l_ret <-- send_channel_msg (channel, l_resp_msg);
-                                        IF l_ret /= e_sc_ok
-                                        THEN
-                                            client_close_session (l_session)
-                                        END
+                                        // TODO: store message to retry later ?
+                                        server_close_session (l_session)
                                     END;
                                     dealloc_msg_out (l_resp_msg)
                                 END

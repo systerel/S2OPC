@@ -32,6 +32,7 @@ SETS
     t_AttributeId_i = {c_AttributeId_indet, e_aid_NodeId, e_aid_NodeClass, e_aid_Value};
     t_StatusCode_i = {c_StatusCode_indet, e_sc_ok, e_sc_nok,
                       e_sc_bad_secure_channel_closed,
+                      e_sc_bad_secure_channel_id_invalid,
                       e_sc_bad_connection_closed,
                       e_sc_bad_invalid_state,
                       e_sc_bad_session_id_invalid,
