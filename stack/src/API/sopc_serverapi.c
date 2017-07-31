@@ -35,6 +35,7 @@
 #ifdef OPCUA_HAVE_SERVERAPI
 
 #include <string.h>
+#include <assert.h>
 
 /* types */
 #include "sopc_types.h"
@@ -43,6 +44,8 @@
 #include "sopc_encodeable.h"
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_encoder.h"
+#include "sopc_msg_buffer.h"
 
 /* server related */
 #include "sopc_endpoint.h"
@@ -422,10 +425,12 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
     SOPC_EncodeableType*        a_pRequestType)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    SOPC_EncodeableType* recEncType = NULL;
     OpcUa_GetEndpointsRequest* pRequest = NULL;
     OpcUa_GetEndpointsResponse pResponse;
     OpcUa_GetEndpointsResponse_Initialize(&pResponse);
     OpcUa_ServerApi_PfnGetEndpoints* pfnInvoke = NULL;
+    SOPC_Buffer* buffer = NULL;
 
     if(a_hEndpoint != NULL && a_hContext != NULL
        && a_ppRequest != NULL && *a_ppRequest != NULL
@@ -438,7 +443,14 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
     }
 
     if(status == STATUS_OK){
-        pRequest = (OpcUa_GetEndpointsRequest*)*a_ppRequest;
+        status = SOPC_MsgBodyType_Read((SOPC_Buffer*) *a_ppRequest,
+                                       &recEncType);
+        assert(recEncType == a_pRequestType);
+        if(STATUS_OK == status){
+            SOPC_DecodeMsgBody((SOPC_Buffer*) *a_ppRequest,
+                               recEncType,
+                               (void**) &pRequest);
+        }
     }
 
     if(status == STATUS_OK){
@@ -477,9 +489,18 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
                                                  &faultObj);
         
         if(faultStatus == STATUS_OK){
+            buffer = SOPC_Buffer_Create(OPCUA_ENCODER_MAXMESSAGELENGTH);
+            assert(NULL != buffer);
+            faultStatus = SOPC_Buffer_SetDataLength(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+            assert(STATUS_OK == faultStatus);
+            faultStatus = SOPC_Buffer_SetPosition(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+            assert(STATUS_OK == faultStatus);
+            assert(STATUS_OK == SOPC_EncodeMsgTypeAndBody(buffer, &OpcUa_ServiceFault_EncodeableType, &faultObj));
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
-                                                     &OpcUa_ServiceFault_EncodeableType, &faultObj,
+                                                     &OpcUa_ServiceFault_EncodeableType,
+                                                     // &faultObj,
+                                                     buffer,
                                                      &a_hContext);
         }
         
@@ -494,7 +515,11 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
     }
     
     // Clear and free the request object
-    SOPC_Encodeable_Delete(&OpcUa_GetEndpointsRequest_EncodeableType, a_ppRequest);
+
+    // TMP: manual modification to test separated encoder
+    //SOPC_Encodeable_Delete(&OpcUa_GetEndpointsRequest_EncodeableType, a_ppRequest);
+    SOPC_Encodeable_Delete(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &pRequest);
+    SOPC_Buffer_Delete((SOPC_Buffer*)*a_ppRequest);
     
     // Clear the response object
     OpcUa_GetEndpointsResponse_Clear(&pResponse);

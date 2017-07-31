@@ -43,6 +43,12 @@
 #include "opcua_statuscodes.h"
 #include "sopc_clientapi.h"
 
+// TMP: manual modification to test separated encoder
+#include "sopc_msg_buffer.h"
+#include "sopc_encoder.h"
+#include <assert.h>
+
+
 #ifndef OPCUA_EXCLUDE_FindServers
 /*============================================================================
  * Synchronously calls the FindServers service.
@@ -435,11 +441,21 @@ SOPC_StatusCode OpcUa_ClientApi_BeginGetEndpoints(
         cRequest.NoOfProfileUris = a_nNoOfProfileUris;
         cRequest.ProfileUris     = (SOPC_String*)a_pProfileUris;
 
+        // TMP: manual modification to test separated encoder
+        SOPC_Buffer* buffer = SOPC_Buffer_Create(OPCUA_ENCODER_MAXMESSAGELENGTH);
+        assert(NULL != buffer);
+        status = SOPC_Buffer_SetDataLength(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+        assert(STATUS_OK == status);
+        status = SOPC_Buffer_SetPosition(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+        assert(STATUS_OK == status);
+        status = SOPC_EncodeMsgTypeAndBody(buffer, &OpcUa_GetEndpointsRequest_EncodeableType, (void*)&cRequest);
+        assert(STATUS_OK == status);
+
         /* begin invoke service */
         status = SOPC_Channel_BeginInvokeService(
             a_hChannel,
             "GetEndpoints",
-            (void*)&cRequest,
+            (void*) buffer, //(void*)&cRequest,
             &OpcUa_GetEndpointsRequest_EncodeableType,
             &OpcUa_GetEndpointsResponse_EncodeableType,
             a_pCallback,
