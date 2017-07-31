@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 28/07/2017 17:53:11
+ Date                 : 31/07/2017 12:03:48
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -66,6 +66,7 @@ typedef enum {
    constants__e_sc_ok,
    constants__e_sc_nok,
    constants__e_sc_bad_secure_channel_closed,
+   constants__e_sc_bad_secure_channel_id_invalid,
    constants__e_sc_bad_connection_closed,
    constants__e_sc_bad_invalid_state,
    constants__e_sc_bad_session_id_invalid,

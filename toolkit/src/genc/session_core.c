@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 28/07/2017 17:53:13
+ Date                 : 31/07/2017 12:03:50
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -27,8 +27,6 @@ void session_core__srv_internal_activate_req_and_resp(
    const constants__t_session_i session_core__session,
    const constants__t_user_i session_core__user,
    const constants__t_msg_i session_core__activate_resp_msg) {
-   message_out_bs__write_msg_resp_header_service_status(session_core__activate_resp_msg,
-      constants__e_sc_ok);
    session_core_1_bs__set_session_user(session_core__session,
       session_core__user);
    session_core_1_bs__set_session_channel(session_core__session,
@@ -71,7 +69,8 @@ void session_core__srv_create_req_and_resp(
    const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__create_req_msg,
    const constants__t_msg_i session_core__create_resp_msg,
-   constants__t_session_i * const session_core__nsession) {
+   constants__t_session_i * const session_core__nsession,
+   constants__t_StatusCode_i * const session_core__service_ret) {
    {
       constants__t_session_i session_core__l_nsession;
       t_bool session_core__l_valid_session;
@@ -92,13 +91,16 @@ void session_core__srv_create_req_and_resp(
          if (session_core__l_valid_session_token == true) {
             message_out_bs__write_create_session_msg_session_token(session_core__create_resp_msg,
                session_core__l_nsession_token);
-            message_out_bs__write_msg_resp_header_service_status(session_core__create_resp_msg,
-               constants__e_sc_ok);
+            *session_core__service_ret = constants__e_sc_ok;
          }
          else {
+            *session_core__service_ret = constants__e_sc_bad_out_of_memory;
             session_core_1_bs__delete_session(session_core__l_nsession);
             session_core__l_nsession = constants__c_session_indet;
          }
+      }
+      else {
+         *session_core__service_ret = constants__e_sc_bad_out_of_memory;
       }
       *session_core__nsession = session_core__l_nsession;
    }
@@ -466,8 +468,6 @@ void session_core__srv_close_req_and_resp(
    const constants__t_msg_i session_core__close_req_msg,
    const constants__t_msg_i session_core__close_resp_msg,
    constants__t_StatusCode_i * const session_core__ret) {
-   message_out_bs__write_msg_resp_header_service_status(session_core__close_resp_msg,
-      constants__e_sc_ok);
    session_core_1_bs__set_session_state_closed(session_core__session);
    *session_core__ret = constants__e_sc_ok;
 }
@@ -495,7 +495,7 @@ void session_core__client_close_session(
    session_core_1_bs__set_session_state_closed(session_core__session);
 }
 
-void session_core__srv_close_session(
+void session_core__server_close_session(
    const constants__t_session_i session_core__session) {
    session_core_1_bs__set_session_state_closed(session_core__session);
 }

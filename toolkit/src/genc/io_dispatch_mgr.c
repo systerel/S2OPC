@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 28/07/2017 17:53:12
+ Date                 : 31/07/2017 12:03:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -303,7 +303,6 @@ void io_dispatch_mgr__receive_msg(
       constants__t_StatusCode_i io_dispatch_mgr__l_status;
       constants__t_msg_type io_dispatch_mgr__l_resp_msg_typ;
       constants__t_msg_i io_dispatch_mgr__l_resp_msg;
-      t_bool io_dispatch_mgr__l_to_send;
       constants__t_StatusCode_i io_dispatch_mgr__l_ret;
       
       channel_mgr_bs__is_connected_channel(io_dispatch_mgr__channel,
@@ -394,17 +393,17 @@ void io_dispatch_mgr__receive_msg(
                         io_dispatch_mgr__msg,
                         io_dispatch_mgr__l_msg_type,
                         io_dispatch_mgr__l_resp_msg,
-                        &io_dispatch_mgr__l_to_send,
-                        &io_dispatch_mgr__l_session);
-                     if (io_dispatch_mgr__l_to_send == true) {
-                        message_out_bs__write_msg_out_header_req_handle(io_dispatch_mgr__l_resp_msg,
-                           io_dispatch_mgr__l_request_handle);
-                        channel_mgr_bs__send_channel_msg(io_dispatch_mgr__channel,
-                           io_dispatch_mgr__l_resp_msg,
-                           &io_dispatch_mgr__l_ret);
-                        if (io_dispatch_mgr__l_ret != constants__e_sc_ok) {
-                           session_mgr__client_close_session(io_dispatch_mgr__l_session);
-                        }
+                        &io_dispatch_mgr__l_session,
+                        &io_dispatch_mgr__l_ret);
+                     message_out_bs__write_msg_resp_header_service_status(io_dispatch_mgr__l_resp_msg,
+                        io_dispatch_mgr__l_ret);
+                     message_out_bs__write_msg_out_header_req_handle(io_dispatch_mgr__l_resp_msg,
+                        io_dispatch_mgr__l_request_handle);
+                     channel_mgr_bs__send_channel_msg(io_dispatch_mgr__channel,
+                        io_dispatch_mgr__l_resp_msg,
+                        &io_dispatch_mgr__l_ret);
+                     if (io_dispatch_mgr__l_ret != constants__e_sc_ok) {
+                        session_mgr__server_close_session(io_dispatch_mgr__l_session);
                      }
                      message_out_bs__dealloc_msg_out(io_dispatch_mgr__l_resp_msg);
                   }
