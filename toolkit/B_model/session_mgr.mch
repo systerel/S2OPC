@@ -146,7 +146,7 @@ OPERATIONS
     END
     ;
     
-    bres, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token, req_msg) =
+    is_valid_res, session, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token, req_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -158,16 +158,18 @@ OPERATIONS
         a_msg_in_type : s_service_reqs
     THEN
         CHOICE
-            bres :: {TRUE, FALSE} ||
+            is_valid_res := TRUE ||
+            session :( session : t_session_i & session : t_session) ||
             snd_err := FALSE
         OR
-            bres := FALSE ||
-            snd_err := TRUE
+            is_valid_res := FALSE ||
+            snd_err := TRUE ||
+            session := c_session_indet
         END
     END
     ;
     
-    bres, snd_err <-- server_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
+    is_valid_res, snd_err <-- server_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -183,10 +185,10 @@ OPERATIONS
         a_msg_out_type : {e_msg_session_read_resp}
     THEN
         CHOICE
-            bres :: {TRUE, FALSE} ||
+            is_valid_res := TRUE ||
             snd_err := FALSE
         OR
-            bres := FALSE ||
+            is_valid_res := FALSE ||
             snd_err := TRUE
         END
     END

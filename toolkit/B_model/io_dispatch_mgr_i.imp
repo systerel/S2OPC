@@ -466,13 +466,12 @@ OPERATIONS
                             THEN
                                 l_request_handle <-- read_msg_header_req_handle (msg);
                                 l_session_token <-- read_msg_req_header_session_token (msg);
-                                l_is_valid_req, l_snd_session_err <-- server_validate_session_service_req (channel, l_request_handle, l_session_token, msg);
+                                l_is_valid_req, l_session, l_snd_session_err <-- server_validate_session_service_req (channel, l_request_handle, l_session_token, msg);
                                 IF l_is_valid_req = TRUE
                                 THEN
                                     l_resp_msg_typ <-- get_response_type (l_msg_type);
                                     l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ, msg);
                                     l_valid_msg <-- is_valid_msg_out (l_resp_msg);
-                                    l_session <-- get_session_from_token (l_session_token);
                                     IF l_valid_msg = TRUE
                                     THEN
                                         CASE l_msg_type OF

@@ -235,7 +235,7 @@ OPERATIONS
         END
     END;
     
-    bres, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token, req_msg) =
+    is_valid_res, session, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token, req_msg) =
     VAR
         l_session,
         l_valid_session,
@@ -246,27 +246,31 @@ OPERATIONS
         l_session <-- get_session_from_token (session_token);
         l_valid_session <-- is_valid_session (l_session);
         l_session_state <-- get_session_state_or_closed (l_session);
+        session := c_session_indet;
         IF l_valid_session = TRUE
         THEN
             l_session_channel <-- get_session_channel (l_session);
             IF l_session_state = e_session_userActivated &
                 l_session_channel = channel
             THEN
-                bres <-- is_session_valid_for_service (channel, l_session)
+                // Returns always TRUE if compliant with PRE (proved)
+                is_valid_res <-- is_session_valid_for_service (channel, l_session);
+                snd_err := FALSE;
+                session := l_session
             ELSE
                 // Unexpected access to session (wrong state or channel): close it
                 server_close_session (l_session);
-                bres := FALSE;
+                is_valid_res := FALSE;
                 snd_err := TRUE
             END
         ELSE
-            bres := FALSE;
-            snd_err := FALSE
+            is_valid_res := FALSE;
+            snd_err := TRUE
         END
     END
     ;
     
-    bres, snd_err <-- server_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
+    is_valid_res, snd_err <-- server_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
     VAR
         l_valid_session,
         l_session_state,
@@ -282,14 +286,16 @@ OPERATIONS
             IF l_session_state = e_session_userActivated &
                 l_session_channel = channel
             THEN
-                bres <-- is_session_valid_for_service (channel, session)
+                // Returns always TRUE if compliant with PRE (proved)
+                is_valid_res <-- is_session_valid_for_service (channel, session);
+                snd_err := FALSE
             ELSE
-                bres := FALSE;
+                is_valid_res := FALSE;
                 snd_err := TRUE
             END
         ELSE
-            bres := FALSE;
-            snd_err := FALSE
+            is_valid_res := FALSE;
+            snd_err := TRUE
         END
     END
     ;
