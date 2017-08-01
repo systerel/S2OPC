@@ -23,11 +23,13 @@ SEES
 
 DEFINITIONS
     d_variables ==
+    a_buffer_in_state,
     c_msg_in,
     a_msg_in_type,
     c_msg_out;
 
     d_typage ==
+    a_buffer_in_state : t_buffer_in_state_i &
     c_msg_in : t_msg_i &
     a_msg_in_type : t_msg_type &
     c_msg_out : t_msg_i
@@ -39,8 +41,9 @@ INVARIANT
     d_typage
 
 INITIALISATION
-    c_msg_in  :: t_msg_i            ||
-    a_msg_in_type :: t_msg_type     ||
+    a_buffer_in_state  :: t_buffer_in_state_i ||
+    c_msg_in  :: t_msg_i                      ||
+    a_msg_in_type :: t_msg_type               ||
     c_msg_out  :: t_msg_i
 
 OPERATIONS
@@ -51,16 +54,19 @@ OPERATIONS
     END
     ;
 
-    receive_msg (channel, msg) =
+    receive_buffer_msg (channel, buffer) =
     PRE
         channel  : t_channel_i &
         channel  : t_channel &
-        msg      : t_msg_i &
-        msg      = c_msg_in &
-        c_msg_in : t_msg &
-        c_msg_out = c_msg_indet
+        buffer   : t_byte_buffer_i &
+        buffer   : t_byte_buffer &
+        a_buffer_in_state = e_buffer_in_msg_not_read &
+        c_msg_in = c_msg_indet &
+        c_msg_out = c_msg_indet &
+        a_msg_in_type = c_msg_type_indet
     THEN
-        skip
+        /* End of receive execution lead to a buffer in invalid state (error) or a buffer fully read */
+        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
     END
     ;
     
@@ -165,7 +171,8 @@ OPERATIONS
         session         : t_session &
         req_msg         : t_msg_i &
         req_msg         = c_msg_in &
-        c_msg_in        : t_msg
+        c_msg_in        : t_msg &
+        a_buffer_in_state = c_buffer_in_state_indet /* no buffer_in used from applicative API */
     THEN
         ret :: {e_sc_ok,
             e_sc_bad_invalid_state,  /* session is not in a valid state */

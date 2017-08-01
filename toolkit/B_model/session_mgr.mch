@@ -64,19 +64,21 @@ INITIALISATION
 
 OPERATIONS
     
-    session <-- client_receive_session_resp (channel, req_handle, resp_msg, resp_typ) =
+    session <-- client_receive_session_resp (channel, req_handle, resp_typ, resp_header, resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
         req_handle : t_request_handle_i &
-        resp_msg : t_msg_i &
-        resp_msg : t_msg &
-        resp_msg = c_msg_in &
-        resp_typ : t_msg_type &
+        resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
         a_msg_in_type : {e_msg_session_create_resp,
             e_msg_session_activate_resp,
-            e_msg_session_close_resp}
+            e_msg_session_close_resp} &
+        resp_header : t_msg_header_i &
+        resp_header = c_msg_in_header &
+        c_msg_in_header : t_msg_header &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_in
     THEN
         session :: t_session_i
     END
@@ -91,6 +93,7 @@ OPERATIONS
         req_msg : t_msg_i &
         req_msg : t_msg &
         req_msg = c_msg_in &
+        req_typ : t_msg_type_i &
         req_typ : t_msg_type &
         req_typ = a_msg_in_type &
         a_msg_in_type : {e_msg_session_create_req,
@@ -116,7 +119,7 @@ OPERATIONS
         req_msg : t_msg_i &
         req_msg : t_msg &
         req_msg = c_msg_out &
-        a_msg_out_type : s_service_reqs
+        a_msg_out_type : s_service_on_session_reqs
     THEN
         CHOICE
             ret := e_sc_ok ||
@@ -132,30 +135,26 @@ OPERATIONS
     END
     ;
     
-    bres <-- client_validate_session_service_resp (channel, req_handle, resp_msg) =
+    bres <-- client_validate_session_service_resp (channel, req_handle) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
         req_handle : t_request_handle_i &
-        resp_msg : t_msg_i &
-        resp_msg : t_msg &
-        resp_msg = c_msg_in &
-        a_msg_in_type : s_service_resps
+        c_msg_in : t_msg &
+        a_msg_in_type : s_service_on_session_resps
     THEN
         bres :: BOOL
     END
     ;
     
-    is_valid_res, session, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token, req_msg) =
+    is_valid_res, session, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
         req_handle : t_request_handle_i &
         session_token : t_session_token_i &
-        req_msg : t_msg_i &
-        req_msg : t_msg &
-        req_msg = c_msg_in &
-        a_msg_in_type : s_service_reqs
+        c_msg_in : t_msg &
+        a_msg_in_type : s_service_on_session_reqs
     THEN
         CHOICE
             is_valid_res := TRUE ||
@@ -169,20 +168,16 @@ OPERATIONS
     END
     ;
     
-    is_valid_res, snd_err <-- server_validate_session_service_resp (channel, session, req_handle, req_msg, resp_msg) =
+    is_valid_res, snd_err <-- server_validate_session_service_resp (channel, session, req_handle) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
         session  : t_session_i &
         req_handle : t_request_handle_i &
-        req_msg  : t_msg_i &
-        req_msg  = c_msg_in &
         c_msg_in : t_msg &
-        resp_msg : t_msg_i &
-        resp_msg = c_msg_out &
         c_msg_out : t_msg  &
-        a_msg_in_type : {e_msg_session_read_req} &
-        a_msg_out_type : {e_msg_session_read_resp}
+        a_msg_in_type : s_service_on_session_reqs &
+        a_msg_out_type : s_service_on_session_resps
     THEN
         CHOICE
             is_valid_res := TRUE ||

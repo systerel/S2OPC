@@ -32,11 +32,12 @@
    SETS Clause: deferred sets
   -----------------------------*/
 
-typedef void * constants_bs__t_ByteString_i;
 typedef void * constants_bs__t_NodeId_i;
 #define constants_bs__t_Node_i t_entier4
 #define constants_bs__t_UserId_i t_entier4
 typedef void * constants_bs__t_Variant_i;
+typedef void * constants_bs__t_byte_buffer_i;
+typedef void* constants_bs__t_msg_header_i;
 typedef void* constants_bs__t_msg_i;
 typedef void* constants_bs__t_session_token_i;
 #define constants_bs__t_session_i t_entier4
@@ -50,14 +51,15 @@ typedef void* constants_bs__t_session_token_i;
 /*--------------------------
    Added by the Translator
   --------------------------*/
-#define constants_bs__t_ByteString_i_max (-1)
 #define constants_bs__t_NodeId_i_max (-1)
 #define constants_bs__t_Node_i_max (-1)
 #define constants_bs__t_UserId_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
+#define constants_bs__t_byte_buffer_i_max (-1)
 #define constants_bs__t_channel_config_idx_i_max (-1)
 #define constants_bs__t_channel_i_max (-1)
 #define constants_bs__t_endpoint_config_idx_i_max (-1)
+#define constants_bs__t_msg_header_i_max (-1)
 #define constants_bs__t_msg_i_max (-1)
 #define constants_bs__t_request_handle_i_max (-1)
 #define constants_bs__t_session_i_max (-1)
@@ -67,19 +69,21 @@ typedef void* constants_bs__t_session_token_i;
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
-#define constants_bs__c_ByteString_indet 0
 #define constants_bs__c_NodeId_indet 0
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_UserId_indet 0
 #define constants_bs__c_Variant_indet 0
+#define constants_bs__c_byte_buffer_indet 0
 #define constants_bs__c_channel_config_idx_indet 0
 #define constants_bs__c_channel_indet 0
 #define constants_bs__c_endpoint_config_idx_indet 0
+#define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0
 #define constants_bs__c_request_handle_indet 0
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0
 #define constants_bs__c_user_indet 0
+#define constants_bs__k_n_Nodes 0
 
 /*------------------------
    INITIALISATION Clause

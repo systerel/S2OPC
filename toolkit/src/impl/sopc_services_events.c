@@ -98,8 +98,8 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // auxParam == context
     // => B model entry point to add
     assert(NULL != params);
-    io_dispatch_mgr__receive_msg((constants__t_channel_i) id,
-                                 (constants__t_msg_i) params); // SOPC_Toolkit_Msg
+    io_dispatch_mgr__receive_buffer_msg((constants__t_channel_i) id,
+                                        (constants__t_byte_buffer_i) params); // SOPC_Toolkit_Msg
     // params is freed by services manager
     break;
 

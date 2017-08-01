@@ -32,6 +32,8 @@
 #include "constants_bs.h"
 
 #include "sopc_sc_events.h"
+#include "sopc_msg_buffer.h"
+#include "sopc_encoder.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -43,7 +45,7 @@ void message_out_bs__INITIALISATION(void) {
    OPERATIONS Clause
   --------------------*/
 void util_message_out_bs__alloc_msg(
-   const constants__t_msg_type message_out_bs__msg_type,
+   const constants__t_msg_type_i message_out_bs__msg_type,
    constants__t_msg_i * const message_out_bs__nmsg) {
 
   SOPC_Toolkit_Msg* msg = NULL;
@@ -66,33 +68,38 @@ void util_message_out_bs__alloc_msg(
     }
   }
   if(NULL != encTyp){
-    msg = malloc(sizeof(SOPC_Toolkit_Msg));
+    msg = calloc(1, sizeof(SOPC_Toolkit_Msg));
     if(NULL != msg){
-      memset(msg, 0, sizeof(SOPC_Toolkit_Msg));
-      status = SOPC_Encodeable_Create(encTyp, &msg->msg);
+      status = SOPC_Encodeable_Create(encTyp, &msg->msgStruct);
     }
   }
   if(STATUS_OK == status){
     msg->isRequest = isReq;
-    msg->encType = encTyp;
-    if(isReq == (!FALSE)){
-      msg->respEncType = respEncTyp;
-    }
+    msg->msgType = encTyp;
     *message_out_bs__nmsg = (constants__t_msg_i) msg;
   }else{
     *message_out_bs__nmsg = constants__c_msg_indet;
   }
 }
 
+void message_out_bs__alloc_msg_header(
+   const constants__t_msg_type_i message_out_bs__msg_type,
+   const constants__t_msg_i message_out_bs__msg,
+   constants__t_msg_header_i * const message_out_bs__nmsg_header){
+  // NOTHING TO DO: until body and header are really separated in implementation of messages
+  *message_out_bs__nmsg_header = (constants__t_msg_header_i) message_out_bs__msg;
+}
+
+
 void message_out_bs__alloc_req_msg(
-   const constants__t_msg_type message_out_bs__msg_type,
+   const constants__t_msg_type_i message_out_bs__msg_type,
    constants__t_msg_i * const message_out_bs__nmsg){
   util_message_out_bs__alloc_msg(message_out_bs__msg_type,
                                  message_out_bs__nmsg);
 }
 
 void message_out_bs__alloc_resp_msg(
-   const constants__t_msg_type message_out_bs__msg_type,
+   const constants__t_msg_type_i message_out_bs__msg_type,
    const constants__t_msg_i message_out_bs__req_msg_ctx,
    constants__t_msg_i * const message_out_bs__nmsg){
   SOPC_Toolkit_Msg* req_msg = NULL;
@@ -109,39 +116,80 @@ void message_out_bs__alloc_resp_msg(
 }
 
 void message_out_bs__bless_msg_out(
-   const constants__t_msg_i message_out_bs__msg,
-   const constants__t_msg_type message_out_bs__msg_type){
+   const constants__t_msg_type_i message_out_bs__msg_type,
+   const constants__t_msg_header_i message_out_bs__msg_header,
+   const constants__t_msg_i message_out_bs__msg){
   /* NOTHING TO DO: in B model now message_out_bs__msg = c_msg_out now */
 }
 
+void message_out_bs__dealloc_msg_header_out(
+   const constants__t_msg_header_i message_out_bs__msg_header){
+  message_out_bs__dealloc_msg_out((constants__t_msg_i) message_out_bs__msg_header);
+}
 
 void message_out_bs__dealloc_msg_out(
    const constants__t_msg_i message_out_bs__msg) {
-  NULL; // Deallocation really done by SC event manager now
-//  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
-//  if(message_out_bs__msg != constants__c_msg_indet && NULL != msg->encType){
-//    if(&OpcUa_ReadResponse_EncodeableType == msg->encType){
-//      /* Current implementation share the variants of the address space in the response,
-//         avoid deallocation of those variants */
-//      OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) msg->msg;
-//      if(NULL != readMsg){
-//        free(readMsg->Results);
-//        readMsg->Results = NULL;
-//        readMsg->NoOfResults = 0;
-//      }
-//    }
-//    // TODO: status returned ?
-//    SOPC_Encodeable_Delete(msg->encType, &msg->msg);
-//    free(msg);
-//  }
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
+  if(message_out_bs__msg != constants__c_msg_indet && NULL != msg->msgType){
+    if(&OpcUa_ReadResponse_EncodeableType == msg->msgType){
+      /* Current implementation share the variants of the address space in the response,
+         avoid deallocation of those variants */
+      OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) msg->msgStruct;
+      if(NULL != readMsg){
+        free(readMsg->Results);
+        readMsg->Results = NULL;
+        readMsg->NoOfResults = 0;
+      }
+    }
+    // TODO: status returned ?
+    SOPC_Encodeable_Delete(msg->msgType, &msg->msgStruct);
+    msg->msgStruct = NULL;
+  }
+}
+
+void message_out_bs__encode_msg(
+   const constants__t_msg_type_i message_out_bs__msg_type,
+   const constants__t_msg_header_i message_out_bs__msg_header,
+   const constants__t_msg_i message_out_bs__msg,
+   constants__t_byte_buffer_i * const message_out_bs__buffer){
+  *message_out_bs__buffer = constants__c_byte_buffer_indet;
+  SOPC_StatusCode status = STATUS_OK;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
+  if(NULL != msg->msgBuffer){
+    status = STATUS_NOK;
+  }
+  if(STATUS_OK == status){
+    msg->msgBuffer = SOPC_Buffer_Create(OPCUA_ENCODER_MAXMESSAGELENGTH);
+    if(msg->msgBuffer == NULL){
+      status = STATUS_NOK;
+    }
+  }
+  if(STATUS_OK == status){
+    status = SOPC_Buffer_SetDataLength(msg->msgBuffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+  }
+  if(STATUS_OK == status){
+    status = SOPC_Buffer_SetPosition(msg->msgBuffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+  }
+  if(STATUS_OK == status){
+    status = SOPC_EncodeMsgTypeAndBody(msg->msgBuffer, msg->msgType, msg->msgStruct);
+  }
+  if(STATUS_OK == status){
+    *message_out_bs__buffer = (constants__t_byte_buffer_i) msg;
+  }
 }
 
 void message_out_bs__get_msg_out_type(
    const constants__t_msg_i message_out_bs__msg,
-   constants__t_msg_type * const message_out_bs__msgtype) {
+   constants__t_msg_type_i * const message_out_bs__msgtype) {
   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
-  util_message__get_message_type(msg->encType,
+  util_message__get_message_type(msg->msgType,
                                  message_out_bs__msgtype);
+}
+
+void message_out_bs__is_valid_buffer_out(
+   const constants__t_byte_buffer_i message_out_bs__buffer,
+   t_bool * const message_out_bs__bres){
+  *message_out_bs__bres = message_out_bs__buffer != constants__c_byte_buffer_indet;
 }
 
 void message_out_bs__is_valid_msg_out(
@@ -149,6 +197,13 @@ void message_out_bs__is_valid_msg_out(
    t_bool * const message_out_bs__bres) {
   *message_out_bs__bres = message_out_bs__msg != constants__c_msg_indet;
 }
+
+void message_out_bs__is_valid_msg_out_header(
+   const constants__t_msg_header_i message_out_bs__msg_header,
+   t_bool * const message_out_bs__bres){
+  *message_out_bs__bres = message_out_bs__msg_header != constants__c_msg_header_indet;
+}
+
 
 void message_out_bs__msg_out_memory_changed(void) {
   printf("message_out_bs__msg_out_memory_changed\n");
@@ -166,7 +221,7 @@ void message_out_bs__write_create_session_msg_session_token(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_session_token_i message_out_bs__session_token) {
   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
-  OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) msg->msg;
+  OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) msg->msgStruct;
   SOPC_StatusCode status;
   status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, message_out_bs__session_token);
   assert(STATUS_OK == status);
@@ -179,10 +234,10 @@ void message_out_bs__write_msg_out_header_req_handle(
    const constants__t_request_handle_i message_out_bs__req_handle) {
   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
   if((!FALSE) == msg->isRequest){
-    message__request_message* req_msg = (message__request_message*) msg->msg;
+    message__request_message* req_msg = (message__request_message*) msg->msgStruct;
     req_msg->requestHeader.RequestHandle = message_out_bs__req_handle;
   }else{
-    message__response_message* resp_msg = (message__response_message*) msg->msg;
+    message__response_message* resp_msg = (message__response_message*) msg->msgStruct;
     resp_msg->responseHeader.RequestHandle = message_out_bs__req_handle;
   }
 }
@@ -193,7 +248,7 @@ void message_out_bs__write_msg_out_header_session_token(
   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
   SOPC_NodeId* authToken = (SOPC_NodeId*) message_out_bs__session_token;
   assert(msg->isRequest == (!FALSE));
-  message__request_message* req_msg = (message__request_message*) msg->msg;
+  message__request_message* req_msg = (message__request_message*) msg->msgStruct;
   
   if(STATUS_OK != SOPC_NodeId_Copy(&req_msg->requestHeader.AuthenticationToken, authToken)){
     printf("message_out_bs__write_msg_header_session_token\n");
@@ -208,7 +263,7 @@ void message_out_bs__write_msg_resp_header_service_status(
   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
   util_status_code__B_to_C(message_out_bs__status_code,
                            &status);
-  message__response_message* resp_msg = (message__response_message*) msg->msg;
+  message__response_message* resp_msg = (message__response_message*) msg->msgStruct;
   resp_msg->responseHeader.ServiceResult = status;
 }
 

@@ -46,7 +46,7 @@ void msg_read_response_bs__alloc_read_response(
    const constants__t_msg_i msg_read_response_bs__p_resp_msg,
    t_bool * const msg_read_response_bs__p_isvalid)
 {
-    OpcUa_ReadResponse *msg_read_resp = (OpcUa_ReadResponse *)(((SOPC_Toolkit_Msg *)msg_read_response_bs__p_resp_msg)->msg);
+    OpcUa_ReadResponse *msg_read_resp = (OpcUa_ReadResponse *)(((SOPC_Toolkit_Msg *)msg_read_response_bs__p_resp_msg)->msgStruct);
 
     msg_read_resp->NoOfResults = msg_read_response_bs__p_nb_resps;
     msg_read_resp->Results = (SOPC_DataValue *)malloc(sizeof(SOPC_DataValue)*msg_read_response_bs__p_nb_resps);
@@ -72,7 +72,7 @@ void msg_read_response_bs__set_read_response(
    const constants__t_Variant_i msg_read_response_bs__val,
    const constants__t_StatusCode_i msg_read_response_bs__sc)
 {
-    OpcUa_ReadResponse *msg_read_resp = (OpcUa_ReadResponse *)(((SOPC_Toolkit_Msg*)msg_read_response_bs__resp_msg)->msg);
+    OpcUa_ReadResponse *msg_read_resp = (OpcUa_ReadResponse *)(((SOPC_Toolkit_Msg*)msg_read_response_bs__resp_msg)->msgStruct);
 
     /* rvi is castable, it's one of its properties, but it starts at 1 */
     if(constants__c_Variant_indet != msg_read_response_bs__val)

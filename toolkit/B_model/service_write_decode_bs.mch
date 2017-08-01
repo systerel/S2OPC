@@ -19,7 +19,8 @@ MACHINE
     service_write_decode_bs
 
 SEES
-    constants
+    constants,
+    message_in_bs
 
 DEFINITIONS
     d_variables ==
@@ -52,10 +53,12 @@ INITIALISATION
     d_init
 
 OPERATIONS
-    StatusCode_service <-- decode_write_request(req_payload) =
+    StatusCode_service <-- decode_write_request(write_msg) =
     PRE
-        req_payload : t_ByteString_i &
-        req_payload : t_ByteString
+        write_msg : t_msg_i &
+        write_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_write_req
     THEN
         StatusCode_service,
         d_variables

@@ -19,7 +19,8 @@ MACHINE
     channel_mgr_bs
 SEES
     constants,
-    message_in_bs
+    message_in_bs,
+    message_out_bs
     
 DEFINITIONS
     d_variables ==
@@ -124,12 +125,13 @@ OPERATIONS
     END
     ;
     
-    ret <-- send_channel_msg (channel, msg) =
+    ret <-- send_channel_msg_buffer (channel, buffer) =
     PRE
         channel         : t_channel_i &
         channel         : t_channel &
-        msg             : t_msg_i &
-        msg             : t_msg
+        buffer          : t_byte_buffer_i &
+        buffer          : t_byte_buffer &
+        a_buffer_out_state = e_buffer_out_msg_written
     THEN
         ret :: {e_sc_ok, 
             e_sc_bad_invalid_state,  /* channel is not in a valid state*/

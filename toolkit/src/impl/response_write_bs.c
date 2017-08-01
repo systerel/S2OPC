@@ -99,7 +99,7 @@ void response_write_bs__set_ResponseWrite_StatusCode(
 void response_write_bs__write_WriteResponse_msg_out(
    const constants__t_msg_i response_write_bs__msg_out)
 {
-    OpcUa_WriteResponse *msg_write_resp = (OpcUa_WriteResponse *)(((SOPC_Toolkit_Msg *)response_write_bs__msg_out)->msg);
+    OpcUa_WriteResponse *msg_write_resp = (OpcUa_WriteResponse *)(((SOPC_Toolkit_Msg *)response_write_bs__msg_out)->msgStruct);
     SOPC_StatusCode *lsc;
 
     lsc = (SOPC_StatusCode *)malloc(sizeof(SOPC_StatusCode)*nb_req);

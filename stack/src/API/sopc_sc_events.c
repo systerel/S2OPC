@@ -90,7 +90,7 @@ SOPC_StatusCode TMP_BeginService(SOPC_Endpoint               a_hEndpoint,
   uint32_t* pConfigIdx = SOPC_Endpoint_GetCallbackData(a_hEndpoint);
   assert(NULL != tMsg && NULL != pConfigIdx);
 
-  tMsg->msg = (SOPC_Buffer*) *a_ppRequest;
+  tMsg->msgBuffer = (SOPC_Buffer*) *a_ppRequest;
 // Note : manage on service side now
   (void) a_pRequestType;
 //  tMsg->encType = a_pRequestType;
@@ -297,7 +297,7 @@ SOPC_StatusCode TMP_SecureChannelResponse_CB(SOPC_Channel         channel,
     SOPC_Toolkit_Msg* tMsg = calloc(1, sizeof(SOPC_Toolkit_Msg));
     uint32_t id = *(uint32_t*) cbData; // TMP: sc config index
     tMsg->isRequest = FALSE;
-    tMsg->msg = (SOPC_Buffer*) response;
+    tMsg->msgBuffer = (SOPC_Buffer*) response;
 // Note: managed no service side now
     (void) responseType;
 //    tMsg->encType = responseType;
@@ -462,26 +462,9 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
             assert(ep != NULL && tMsg != NULL);
             SOPC_Endpoint_SendResponse(ep,
                                        NULL, //tMsg->encType,
-                                       tMsg->msg,
+                                       tMsg->msgBuffer,
                                        (SOPC_RequestContext**) &tMsg->optContext);
 
-// Note: since it is the buffer used to encode rest of message, should be deallocated by sender
-
-//            if(NULL != tMsg->encType){
-//                if(&OpcUa_ReadResponse_EncodeableType == tMsg->encType){
-//                    /* Current implementation share the variants of the address space in the response,
-//                                     avoid deallocation of those variants */
-//                    OpcUa_ReadResponse* readMsg = (OpcUa_ReadResponse*) tMsg->msg;
-//                    if(NULL != readMsg){
-//                        free(readMsg->Results);
-//                        readMsg->Results = NULL;
-//                        readMsg->NoOfResults = 0;
-//                    }
-//                }
-//                // TODO: status returned ?
-//                SOPC_Encodeable_Delete(tMsg->encType, &tMsg->msg);
-//                free(tMsg);
-//            }
         }else{
             // Client request
             ch = (SOPC_Channel) SLinkedList_FindFromId(secureChInstList, auxParam);
@@ -490,20 +473,15 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
             assert(NULL != idContext);
             *idContext = auxParam;
             SOPC_Channel_BeginInvokeService(ch, NULL,
-                                            tMsg->msg,
+                                            tMsg->msgBuffer,
                                             NULL, // tMsg->encType,
                                             NULL, // tMsg->respEncType,
                                             TMP_SecureChannelResponse_CB,
                                             (void*) idContext //request context ? => type params ?
             );
 
-// Note: since it is the buffer used to encode rest of message, should be deallocated by sender
-
-//            if(NULL != tMsg->encType){
-//                SOPC_Encodeable_Delete(tMsg->encType, &tMsg->msg);
-//                free(tMsg);
-//            }
         }
+        free(tMsg);
         break;
 
         /* Sockets to SC events */

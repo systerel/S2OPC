@@ -45,15 +45,13 @@ void service_write_decode_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 void service_write_decode_bs__decode_write_request(
-   const constants__t_ByteString_i service_write_decode_bs__req_payload,
+   const constants__t_msg_i service_write_decode_bs__write_msg,
    constants__t_StatusCode_i * const service_write_decode_bs__StatusCode_service)
 {
-    /* TODO: this is were you think you have a payload, because the variable is called "payload",
-       but in fact you have a SOPC_Toolkit_Msg. */
-    SOPC_Toolkit_Msg*  msg = (SOPC_Toolkit_Msg*) service_write_decode_bs__req_payload;
+    SOPC_Toolkit_Msg*  msg = (SOPC_Toolkit_Msg*) service_write_decode_bs__write_msg;
     *service_write_decode_bs__StatusCode_service = constants__e_sc_nok;
-    if(msg->encType == &OpcUa_WriteRequest_EncodeableType){
-        OpcUa_WriteRequest *req = (OpcUa_WriteRequest*) msg->msg;
+    if(msg->msgType == &OpcUa_WriteRequest_EncodeableType){
+        OpcUa_WriteRequest *req = (OpcUa_WriteRequest*) msg->msgStruct;
         
         if(0 != req->NoOfNodesToWrite && req->NoOfNodesToWrite <= constants__k_n_WriteResponse_max)
         {

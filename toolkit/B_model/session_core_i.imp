@@ -132,8 +132,7 @@ OPERATIONS
     VAR
         l_valid_handle,
         l_fresh_session_token,
-        l_has_session_token,
-        l_status
+        l_has_session_token
     IN
         // channel: only for the precondition
         l_fresh_session_token <-- is_fresh_session_token (session_token);
@@ -142,16 +141,11 @@ OPERATIONS
             l_has_session_token = FALSE
         THEN
             l_valid_handle <-- cli_remove_pending_request (session, req_handle);
-            l_status <-- read_msg_resp_header_service_status (create_resp_msg);
             IF l_valid_handle = TRUE
             THEN
-                IF l_status = e_sc_ok THEN
-                    set_session_state (session, e_session_created);
-                    set_session_token (session, session_token);
-                    ret := e_sc_ok
-                ELSE
-                    ret := e_sc_nok
-                END
+                set_session_state (session, e_session_created);
+                set_session_token (session, session_token);
+                ret := e_sc_ok
             ELSE
                 ret := e_sc_bad_invalid_argument
             END
@@ -283,22 +277,14 @@ OPERATIONS
     
     ret <-- cli_activate_resp (channel , session, req_handle, activate_resp_msg) =
     VAR
-        l_valid_handle,
-        l_state,
-        l_status
+        l_valid_handle
     IN
-        l_state <-- get_session_state (session);
         l_valid_handle <-- cli_remove_pending_request (session, req_handle);
-        l_status <-- read_msg_resp_header_service_status (activate_resp_msg);
         /* Check response parameters ? */
         IF l_valid_handle = TRUE
         THEN
-            IF l_status = e_sc_ok
-            THEN
-                set_session_state (session, e_session_userActivated)
-            ELSE
-                ret := e_sc_nok
-            END
+            set_session_state (session, e_session_userActivated);
+            ret := e_sc_ok
         ELSE
             ret := e_sc_bad_invalid_argument
         END
@@ -418,11 +404,9 @@ OPERATIONS
     
     cli_close_resp (channel, session, req_handle, close_resp_msg) =
     VAR
-        l_valid_handle,
-        l_status
+        l_valid_handle
     IN
         l_valid_handle <-- cli_remove_pending_request (session, req_handle);
-        l_status <-- read_msg_resp_header_service_status (close_resp_msg);
         /* In any case we close the session: correct channel or not  */
         set_session_state_closed (session)
     END
@@ -460,7 +444,7 @@ OPERATIONS
     END
     ;
     
-    bres <-- cli_record_session_service_resp (session, msg, req_handle) =
+    bres <-- cli_record_session_service_resp (session, req_handle) =
     BEGIN
         bres <-- cli_remove_pending_request (session, req_handle)
     END

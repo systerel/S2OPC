@@ -144,13 +144,13 @@ bool read_service_test(OpcUa_ReadRequest *pReadReq)
 
     /* Feeds the ReadRequest to the machine */
     SOPC_Toolkit_Msg msg_in = {
-            .msg = (void *)pReadReq,
+            .msgStruct = (void *)pReadReq,
         };
 
     /* Prepares the response message */
     OpcUa_ReadResponse readResp;
     SOPC_Toolkit_Msg msg_out = {
-            .msg = (void *)&readResp,
+            .msgStruct = (void *)&readResp,
         };
 
     /* Calls treat */

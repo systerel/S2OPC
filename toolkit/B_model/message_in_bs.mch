@@ -22,12 +22,16 @@ SEES
     
 DEFINITIONS
     d_variables ==
+    a_buffer_in_state,
+    c_msg_in_header,
     c_msg_in,
     a_msg_in_type;
     
     d_typing == 
+    a_buffer_in_state : t_buffer_in_state_i &
+    c_msg_in_header : t_msg_header_i &
     c_msg_in : t_msg_i &
-    a_msg_in_type : t_msg_type
+    a_msg_in_type : t_msg_type_i
     
 ABSTRACT_VARIABLES
     d_variables 
@@ -45,6 +49,80 @@ OPERATIONS
         d_variables :( d_typing )
     END
     ;
+
+    msg_typ <-- decode_msg_type (msg_buffer) =
+    PRE
+        msg_buffer : t_byte_buffer_i &
+        msg_buffer : t_byte_buffer &
+        a_buffer_in_state = e_buffer_in_msg_not_read &
+        c_msg_in_header = c_msg_header_indet &
+        c_msg_in = c_msg_indet &
+        a_msg_in_type = c_msg_type_indet
+    THEN
+        CHOICE
+            a_buffer_in_state := e_buffer_in_msg_type_read ||
+            a_msg_in_type :(a_msg_in_type : t_msg_type_i & a_msg_in_type : t_msg_type) ||
+            msg_typ := a_msg_in_type
+        OR
+            a_buffer_in_state := c_buffer_in_state_indet ||
+            msg_typ := c_msg_type_indet
+        END
+    END
+    ;
+
+    msg_header <-- decode_msg_header (msg_buffer) =
+    PRE
+        msg_buffer : t_byte_buffer_i &
+        msg_buffer : t_byte_buffer &
+        a_buffer_in_state = e_buffer_in_msg_type_read &
+        c_msg_in_header = c_msg_header_indet &
+        c_msg_in = c_msg_indet &
+        a_msg_in_type : t_msg_type_i &
+        a_msg_in_type : t_msg_type
+    THEN
+        CHOICE
+            a_buffer_in_state := e_buffer_in_msg_header_read ||
+            c_msg_in_header :(c_msg_in_header : t_msg_header_i & c_msg_in_header : t_msg_header) ||
+            msg_header := c_msg_in_header
+        OR
+            a_buffer_in_state := c_buffer_in_state_indet ||
+            msg_header := c_msg_header_indet
+        END
+    END
+    ;
+    
+    msg <-- decode_msg (msg_buffer) =
+    PRE
+        msg_buffer : t_byte_buffer_i &
+        msg_buffer : t_byte_buffer &
+        a_buffer_in_state = e_buffer_in_msg_type_read &
+        c_msg_in_header : t_msg_header_i &
+        c_msg_in_header : t_msg_header &
+        c_msg_in = c_msg_indet &
+        a_msg_in_type : t_msg_type_i &
+        a_msg_in_type : t_msg_type
+    THEN
+        CHOICE
+            // TODO: free the msg buffer ! (except if lazy decoding linked to buffer)
+            a_buffer_in_state := e_buffer_in_msg_read ||
+            c_msg_in :(c_msg_in : t_msg_i & c_msg_in : t_msg) ||
+            msg := c_msg_in
+        OR
+            a_buffer_in_state := c_buffer_in_state_indet ||
+            msg := c_msg_indet
+        END
+    END
+    ;
+    
+    dealloc_msg_header_in (msg_header) =
+    PRE
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_in_header &
+        c_msg_in_header : t_msg_header
+    THEN
+        c_msg_in_header := c_msg_header_indet
+    END
+    ;
     
     dealloc_msg_in (msg) =
     PRE
@@ -53,7 +131,24 @@ OPERATIONS
         c_msg_in : t_msg
     THEN
         c_msg_in := c_msg_indet ||
-        a_msg_in_type :: t_msg_type
+        a_msg_in_type := c_msg_type_indet
+    END
+    ;
+    
+    dealloc_msg_buffer_in (msg_buffer) =
+    PRE
+        msg_buffer : t_byte_buffer_i &
+        msg_buffer : t_byte_buffer
+    THEN
+        a_buffer_in_state := c_buffer_in_state_indet
+    END
+    ;
+        
+    bres <-- is_valid_msg_header_in (msg_header) =
+    PRE
+        msg_header : t_msg_header_i
+    THEN
+        bres := bool(msg_header = c_msg_in_header & c_msg_in_header : t_msg_header)
     END
     ;
     
@@ -65,36 +160,32 @@ OPERATIONS
     END
     ;
     
-    msgtype <-- get_msg_in_type (msg) =
+    msgtype <-- get_msg_in_type (req_msg) =
     PRE
-        msg : t_msg_i &
-        msg = c_msg_in &
+        req_msg : t_msg_i &
+        req_msg = c_msg_in &
         c_msg_in : t_msg
     THEN
-        msgtype := a_msg_in_type
+        msgtype, a_msg_in_type :( msgtype : t_msg_type_i & msgtype = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
     
-    session_token <-- read_msg_req_header_session_token (msg) =
+    session_token <-- read_msg_req_header_session_token (msg_header) =
     PRE
-        msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type : 
-        {e_msg_session_create_req, /* should return an indet token here OR not be used */
-         e_msg_session_activate_req,
-            e_msg_session_close_req,
-            e_msg_session_read_req}
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_in_header &
+        c_msg_in_header : t_msg_header &
+        a_msg_in_type : s_req_msgs
     THEN
         session_token :: t_session_token_i
     END
     ;
     
-    handle <-- read_msg_header_req_handle (msg) =
+    handle <-- read_msg_header_req_handle (msg_header) =
     PRE
-        msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_in_header &
+        c_msg_in_header : t_msg_header
     THEN
         handle :: t_request_handle_i
     END
@@ -122,34 +213,14 @@ OPERATIONS
     END
     ;
     
-    status <-- read_msg_resp_header_service_status (msg) =
+    status <-- read_msg_resp_header_service_status (msg_header) =
     PRE
-        msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type :
-        {e_msg_session_create_resp,
-            e_msg_session_activate_resp, 
-            e_msg_session_close_resp, 
-            e_msg_session_read_resp}
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_in_header &
+        c_msg_in_header : t_msg_header &
+        a_msg_in_type : s_service_resps
     THEN
         status :( status : t_StatusCode_i & status : t_StatusCode)
-    END
-    ;
-    
-    payload <-- get_msg_payload (msg) =
-    PRE
-        msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type :
-        {/*e_msg_session_create_req,
-            e_msg_session_activate_req, 
-            e_msg_session_close_req, 
-            e_msg_session_read_req,*/
-        	e_msg_session_write_req}
-    THEN
-        payload :( payload : t_ByteString_i & payload : t_ByteString)
     END
     
 END

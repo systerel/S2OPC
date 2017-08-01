@@ -187,14 +187,13 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq)
 
 SOPC_Toolkit_Msg *tlibw_new_message_WriteRequest(OpcUa_WriteRequest *pWriteReq)
 {
-    SOPC_Toolkit_Msg *pMsg = (SOPC_Toolkit_Msg *)malloc(sizeof(SOPC_Toolkit_Msg));
+    SOPC_Toolkit_Msg *pMsg = (SOPC_Toolkit_Msg *) calloc(1, sizeof(SOPC_Toolkit_Msg));
     if(NULL == pMsg)
         return NULL;
     
-    pMsg->encType = &OpcUa_WriteRequest_EncodeableType;
-    pMsg->respEncType = &OpcUa_WriteResponse_EncodeableType;
+    pMsg->msgType = &OpcUa_WriteRequest_EncodeableType;
     pMsg->isRequest = (!FALSE);
-    pMsg->msg = pWriteReq;
+    pMsg->msgStruct = pWriteReq;
     
     return pMsg;
 }
@@ -206,7 +205,7 @@ bool tlibw_stimulateB_with_message(SOPC_Toolkit_Msg *pMsg)
 
     /* Calls treat */
     io_dispatch_mgr__treat_write_request(
-        (constants__t_ByteString_i) pMsg,
+        (constants__t_msg_i) pMsg,
         (constants__t_user_i) 0,
         (constants__t_StatusCode_i *) &sc);
 

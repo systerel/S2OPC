@@ -23,12 +23,16 @@ SEES
     
 DEFINITIONS
     d_variables ==
+    a_buffer_out_state,
+    c_msg_out_header,
     c_msg_out,
     a_msg_out_type;
     
     d_typing == 
+    a_buffer_out_state : t_buffer_out_state_i &
+    c_msg_out_header : t_msg_header_i &
     c_msg_out : t_msg_i &
-    a_msg_out_type : t_msg_type
+    a_msg_out_type : t_msg_type_i
     
 ABSTRACT_VARIABLES
     d_variables 
@@ -48,19 +52,44 @@ OPERATIONS
     ;
     
     /* Accept a message that was allocated by another part of the program */
-    bless_msg_out (msg, msg_type) =
+    bless_msg_out (msg_type, msg_header, msg) =
     PRE
+        msg_type : t_msg_type_i &
+        msg_type : t_msg_type &
+        msg_header : t_msg_header_i &
+        msg_header : t_msg_header &
         msg      : t_msg_i &
-        msg      : t_msg &
-        msg_type : t_msg_type
+        msg      : t_msg
     THEN
+        c_msg_out_header := msg_header ||
         c_msg_out := msg ||
         a_msg_out_type := msg_type
     END
     ;
-
+    
+    /* Note: msg shall temporary be provided if allocated since header is inside message*/
+    nmsg_header <-- alloc_msg_header (msg_type, msg) =
+    PRE
+        msg_type : t_msg_type_i &
+        msg_type : t_msg_type &
+        /* Note: temporary constraints: */
+        msg : t_msg_i &
+        msg = c_msg_out &
+        c_msg_out : t_msg
+    THEN
+        CHOICE
+            nmsg_header, c_msg_out_header :( nmsg_header : t_msg_header_i & 
+                nmsg_header = c_msg_out_header & 
+                c_msg_out_header : t_msg_header)
+        OR
+            nmsg_header := c_msg_header_indet
+        END
+    END
+    ;
+    
     nmsg <-- alloc_req_msg (msg_type) =
     PRE
+        msg_type : t_msg_type_i &
         msg_type : t_msg_type
     THEN
         CHOICE
@@ -74,6 +103,7 @@ OPERATIONS
     
     nmsg <-- alloc_resp_msg (msg_type, req_msg_ctx) =
     PRE
+        msg_type : t_msg_type_i &
         msg_type : t_msg_type &
         req_msg_ctx : t_msg_i &
         req_msg_ctx = c_msg_in &
@@ -88,9 +118,16 @@ OPERATIONS
     END
     ;
     
-    /* TODO: rename ? does not free message anymore, managed by SC. 
-       PB: nothing done here except in model ! => msg shall be set to NULL after this operation
-    */
+    dealloc_msg_header_out (msg_header) =
+    PRE
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_out_header &
+        c_msg_out_header : t_msg_header
+    THEN
+        c_msg_out_header := c_msg_header_indet
+    END
+    ;
+    
     dealloc_msg_out (msg) =
     PRE
         msg : t_msg_i &
@@ -102,11 +139,49 @@ OPERATIONS
     END
     ;
     
+    buffer <-- encode_msg (msg_type, msg_header, msg) = 
+    PRE
+        a_buffer_out_state = c_buffer_out_state_indet &
+        msg_type : t_msg_type_i &
+        msg_type = a_msg_out_type &
+        a_msg_out_type : t_msg_type &
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_out_header &
+        c_msg_out_header : t_msg_header &
+        msg : t_msg_i &
+        msg = c_msg_out &
+        c_msg_out : t_msg
+    THEN
+        CHOICE
+            buffer :(buffer : t_byte_buffer_i & buffer = c_byte_buffer_indet)
+        OR
+            buffer :(buffer : t_byte_buffer_i & buffer : t_byte_buffer) ||
+            a_buffer_out_state := e_buffer_out_msg_written
+        END
+    END
+    ;
+    
+    bres <-- is_valid_buffer_out (buffer) =
+    PRE
+        buffer : t_byte_buffer_i
+    THEN
+        bres := bool(a_buffer_out_state = e_buffer_out_msg_written & buffer : t_byte_buffer)
+    END
+    ;
+        
     bres <-- is_valid_msg_out (msg) =
     PRE
         msg : t_msg_i
     THEN
         bres := bool(msg = c_msg_out & c_msg_out : t_msg)
+    END
+    ;
+    
+    bres <-- is_valid_msg_out_header (msg_header) =
+    PRE
+        msg_header : t_msg_header_i
+    THEN
+        bres := bool(msg_header = c_msg_out_header & c_msg_out_header : t_msg_header)
     END
     ;
     
@@ -120,27 +195,27 @@ OPERATIONS
     END
     ;
     
-    write_msg_out_header_session_token (msg, session_token) = 
+    write_msg_out_header_session_token (msg_header, session_token) = 
     PRE
-        msg : t_msg_i &
-        msg = c_msg_out &
-        c_msg_out : t_msg &
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_out_header &
+        c_msg_out_header : t_msg_header &
         session_token : t_session_token_i &
         session_token : t_session_token &
         a_msg_out_type : 
         {e_msg_session_activate_req, 
-            e_msg_session_close_req} \/ s_service_reqs
+            e_msg_session_close_req} \/ s_service_on_session_reqs
     THEN
         /* TODO: add relation on session token ? => need to retrieve after write ? */
         skip
     END
     ;
     
-    write_msg_out_header_req_handle (msg, req_handle) =
+    write_msg_out_header_req_handle (msg_header, req_handle) =
     PRE
-        msg : t_msg_i &
-        msg = c_msg_out &
-        c_msg_out : t_msg &
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_out_header &
+        c_msg_out_header : t_msg_header &
         req_handle : t_request_handle_i
     THEN
         /* TODO: add relation on request handle ? => need to retrieve after write ? */
@@ -149,15 +224,12 @@ OPERATIONS
     END
     ;
     
-    write_msg_resp_header_service_status (msg, status_code) =
+    write_msg_resp_header_service_status (msg_header, status_code) =
     PRE
-        msg : t_msg_i &
-        msg = c_msg_out &
-        a_msg_out_type : 
-        {e_msg_session_create_resp,
-            e_msg_session_activate_resp, 
-            e_msg_session_close_resp, 
-            e_msg_session_read_resp} &
+        msg_header : t_msg_header_i &
+        msg_header = c_msg_out_header &
+        c_msg_out_header : t_msg_header &
+        a_msg_out_type : s_service_resps &
         status_code : t_StatusCode_i &
         status_code : t_StatusCode
     THEN

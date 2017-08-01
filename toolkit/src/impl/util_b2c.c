@@ -21,7 +21,7 @@
 
 #include "sopc_types.h"
 
-void util_message__get_encodeable_type(const constants__t_msg_type message__msg_type,
+void util_message__get_encodeable_type(const constants__t_msg_type_i message__msg_type,
                                        SOPC_EncodeableType** reqEncType,
                                        SOPC_EncodeableType** respEncType,
                                        t_bool* isRequest) {
@@ -79,7 +79,7 @@ void util_message__get_encodeable_type(const constants__t_msg_type message__msg_
 }
 
 void util_message__get_message_type(SOPC_EncodeableType* encType,
-                                    constants__t_msg_type* message__msg_type)
+                                    constants__t_msg_type_i* message__msg_type)
 {
   if(encType == &OpcUa_CreateSessionRequest_EncodeableType){
     *message__msg_type = constants__e_msg_session_create_req;

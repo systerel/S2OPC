@@ -22,13 +22,14 @@ SETS
     t_Node_i;
     t_NodeId_i;
     t_Variant_i;
-    t_ByteString_i;
+    t_byte_buffer_i;
     t_UserId_i;
 
     t_channel_i;
     t_session_i;
     t_session_token_i;
     t_user_i;
+    t_msg_header_i;
     t_msg_i;
     t_request_handle_i;
     t_channel_config_idx_i;
@@ -40,13 +41,14 @@ CONCRETE_CONSTANTS
     c_Variant_indet,
     c_Node_indet,
     c_NodeId_indet,
-    c_ByteString_indet,
+    c_byte_buffer_indet,
     c_UserId_indet,
 
     c_channel_indet,
     c_user_indet,
     c_session_indet,
     c_session_token_indet,
+    c_msg_header_indet,
     c_msg_indet,
     c_channel_config_idx_indet,
     c_endpoint_config_idx_indet,
@@ -56,13 +58,14 @@ ABSTRACT_CONSTANTS
     t_Variant,
     t_Node,
     t_NodeId,
-    t_ByteString,
+    t_byte_buffer,
     t_UserId,
 
     t_channel,
     t_session,
     t_session_token,
     t_user,
+    t_msg_header,
     t_msg,
     t_channel_config_idx,
     t_endpoint_config_idx,
@@ -83,9 +86,9 @@ PROPERTIES
     c_NodeId_indet : t_NodeId_i &
     c_NodeId_indet /: t_NodeId &
 
-    t_ByteString <: t_ByteString_i &
-    c_ByteString_indet : t_ByteString_i &
-    c_ByteString_indet /: t_ByteString &
+    t_byte_buffer <: t_byte_buffer_i &
+    c_byte_buffer_indet : t_byte_buffer_i &
+    c_byte_buffer_indet /: t_byte_buffer &
 
     t_UserId <: t_UserId_i &
     c_UserId_indet : t_UserId_i &
@@ -106,7 +109,11 @@ PROPERTIES
     t_user <: t_user_i &
     c_user_indet : t_user_i &
     c_user_indet /: t_user &
-
+        
+    t_msg_header <: t_msg_header_i &
+    c_msg_header_indet : t_msg_header_i &
+    c_msg_header_indet /: t_msg_header &
+    
     t_msg <: t_msg_i &
     c_msg_indet : t_msg_i &
     c_msg_indet /: t_msg &

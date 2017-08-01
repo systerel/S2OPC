@@ -1021,8 +1021,7 @@ void SC_Send_Request(SOPC_Action_ServiceRequestSendData* sendRequestData)
     }
 
     if(NULL != connection &&
-       NULL != msgBuffers &&
-       NULL != responseType)
+       NULL != msgBuffers)
     {
         status = STATUS_OK;
         if(connection->instance->state == SC_Connection_Connected){

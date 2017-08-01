@@ -648,15 +648,13 @@ OPERATIONS
     END
     ;
 
-    bres <-- cli_record_session_service_resp (session, msg, req_handle) =
+    bres <-- cli_record_session_service_resp (session, req_handle) =
     PRE
         session : t_session_i &
         session : s_session &
         a_state(session) = e_session_userActivated &
-        msg : t_msg_i &
-        msg = c_msg_in &
         c_msg_in : t_msg &
-        a_msg_in_type : {e_msg_session_read_resp} &
+        a_msg_in_type : s_service_on_session_resps &
         req_handle : t_request_handle_i
     THEN
         CHOICE

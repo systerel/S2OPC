@@ -48,12 +48,13 @@ SETS
     t_ReadValue_i;
     /* A WriteValue of a WriteRequest. */
     t_WriteValue_i;
-    t_ByteString_i;
+    t_byte_buffer_i;
     t_UserId_i;
     
     t_session_i;
     t_session_token_i;
     t_user_i;
+    t_msg_header_i;
     t_msg_i;
     t_request_handle_i;
     t_channel_config_idx_i;
@@ -70,8 +71,17 @@ SETS
         e_session_scOrphaned, 
         e_session_closing, 
         e_session_closed};
-
-    t_msg_type = {
+    
+    t_buffer_in_state_i = {c_buffer_in_state_indet,
+        e_buffer_in_msg_not_read,
+        e_buffer_in_msg_type_read,
+        e_buffer_in_msg_header_read,
+        e_buffer_in_msg_read};
+    
+    t_buffer_out_state_i = {c_buffer_out_state_indet,
+        e_buffer_out_msg_written};
+    
+    t_msg_type_i = {c_msg_type_indet,
         e_msg_public_service_req, e_msg_public_service_resp,
         e_msg_session_create_req, e_msg_session_create_resp,
         e_msg_session_activate_req, e_msg_session_activate_resp,
@@ -90,13 +100,14 @@ CONCRETE_CONSTANTS
     c_Node_indet,
     c_ReadValue_indet,
     c_WriteValue_indet,
-    c_ByteString_indet,
+    c_byte_buffer_indet,
     c_UserId_indet,
 
     c_endpoint_config_idx_indet,
     c_user_indet,
     c_session_indet,
     c_session_token_indet,
+    c_msg_header_indet,
     c_msg_indet,
     c_channel_config_idx_indet,
     c_channel_indet,
@@ -114,7 +125,7 @@ ABSTRACT_CONSTANTS
     t_Node,
     t_ReadValue,
     t_WriteValue,
-    t_ByteString,
+    t_byte_buffer,
     t_UserId,
 
     cast_t_ReadValue,
@@ -124,11 +135,17 @@ ABSTRACT_CONSTANTS
     t_session,
     t_session_token,
     t_user,
+    t_buffer_in_state,
+    t_msg_header,
     t_msg,
+    t_msg_type,
     t_channel_config_idx,
     t_channel,
     t_request_handle,
-
+    
+    s_msg_managed,
+    s_service_on_session_reqs,
+    s_service_on_session_resps,
     s_service_reqs,
     s_service_resps,
     s_req_msgs,
@@ -186,9 +203,9 @@ PROPERTIES
     cast_t_WriteValue : NAT +-> t_WriteValue_i &
     cast_t_WriteValue : perm(t_WriteValue) &
 
-    t_ByteString <: t_ByteString_i &
-    c_ByteString_indet : t_ByteString_i &
-    c_ByteString_indet /: t_ByteString &
+    t_byte_buffer <: t_byte_buffer_i &
+    c_byte_buffer_indet : t_byte_buffer_i &
+    c_byte_buffer_indet /: t_byte_buffer &
 
     t_UserId <: t_UserId_i &
     c_UserId_indet : t_UserId_i &
@@ -213,7 +230,11 @@ PROPERTIES
     t_user <: t_user_i &
     c_user_indet : t_user_i &
     c_user_indet /: t_user &
-
+    
+    t_msg_header <: t_msg_header_i &
+    c_msg_header_indet : t_msg_header_i &
+    c_msg_header_indet /: t_msg_header &
+    
     t_msg <: t_msg_i &
     c_msg_indet : t_msg_i &
     c_msg_indet /: t_msg &
@@ -226,8 +247,32 @@ PROPERTIES
     c_channel_config_idx_indet : t_channel_config_idx_i &
     c_channel_config_idx_indet /: t_channel_config_idx &
     
-    s_service_reqs  = {e_msg_session_read_req} &
-    s_service_resps = {e_msg_session_read_resp} &
+    t_buffer_in_state = { e_buffer_in_msg_not_read,
+        e_buffer_in_msg_type_read,
+        e_buffer_in_msg_header_read,
+        e_buffer_in_msg_read } &
+    
+    t_msg_type = { e_msg_public_service_req, e_msg_public_service_resp,
+        e_msg_session_create_req, e_msg_session_create_resp,
+        e_msg_session_activate_req, e_msg_session_activate_resp,
+        e_msg_session_close_req, e_msg_session_close_resp,
+        e_msg_session_read_req, e_msg_session_read_resp,
+        e_msg_session_write_req, e_msg_session_write_resp} &
+    s_msg_managed = { e_msg_public_service_req, e_msg_public_service_resp,
+        e_msg_session_create_req, e_msg_session_create_resp,
+        e_msg_session_activate_req, e_msg_session_activate_resp,
+        e_msg_session_close_req, e_msg_session_close_resp,
+        e_msg_session_read_req, e_msg_session_read_resp,
+        e_msg_session_write_req, e_msg_session_write_resp} &
+    
+    s_service_on_session_reqs  = {e_msg_session_read_req,
+        e_msg_session_write_req} &
+    s_service_on_session_resps = {e_msg_session_read_resp,
+        e_msg_session_write_resp} &
+    
+    s_service_reqs  = s_service_on_session_reqs \/ {e_msg_public_service_req} &
+    s_service_resps = s_service_on_session_resps \/ {e_msg_public_service_resp} &
+
     s_req_msgs = {
         e_msg_public_service_req,
         e_msg_session_create_req,

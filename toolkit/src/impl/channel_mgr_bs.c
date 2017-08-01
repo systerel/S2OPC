@@ -158,12 +158,12 @@ void channel_mgr_bs__channel_lost(
   }
 }
 
-void channel_mgr_bs__send_channel_msg(
+void channel_mgr_bs__send_channel_msg_buffer(
    const constants__t_channel_i channel_mgr_bs__channel,
-   const constants__t_msg_i channel_mgr_bs__msg,
+   const constants__t_byte_buffer_i channel_mgr_bs__buffer,
    constants__t_StatusCode_i * const channel_mgr_bs__ret) {
 
-  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) channel_mgr_bs__msg;
+  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) channel_mgr_bs__buffer;
 
   if(channel_mgr_bs__channel == (t_entier4) unique_channel.id){
     SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,

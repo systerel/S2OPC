@@ -86,7 +86,7 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
       if(SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_SESSION_RESPONSE){
         // Message to deallocate ? => if not application shall deallocate !
         tmsg = (SOPC_Toolkit_Msg*) params;
-        SOPC_Encodeable_Delete(tmsg->encType, &tmsg->msg);
+        SOPC_Encodeable_Delete(tmsg->msgType, &tmsg->msgStruct);
         // TBD: free only in this case ?
         free(params);
       }
