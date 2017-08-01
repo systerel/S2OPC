@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 31/07/2017 12:03:49
+ Date                 : 01/08/2017 11:32:37
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -419,6 +419,7 @@ void io_dispatch_mgr__receive_msg(
                      io_dispatch_mgr__l_session_token,
                      io_dispatch_mgr__msg,
                      &io_dispatch_mgr__l_is_valid_req,
+                     &io_dispatch_mgr__l_session,
                      &io_dispatch_mgr__l_snd_session_err);
                   if (io_dispatch_mgr__l_is_valid_req == true) {
                      io_dispatch_mgr__get_response_type(io_dispatch_mgr__l_msg_type,
@@ -428,8 +429,6 @@ void io_dispatch_mgr__receive_msg(
                         &io_dispatch_mgr__l_resp_msg);
                      message_out_bs__is_valid_msg_out(io_dispatch_mgr__l_resp_msg,
                         &io_dispatch_mgr__l_valid_msg);
-                     session_mgr__get_session_from_token(io_dispatch_mgr__l_session_token,
-                        &io_dispatch_mgr__l_session);
                      if (io_dispatch_mgr__l_valid_msg == true) {
                         switch (io_dispatch_mgr__l_msg_type) {
                         case constants__e_msg_session_read_req:

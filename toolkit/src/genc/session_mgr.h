@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 31/07/2017 12:03:50
+ Date                 : 01/08/2017 11:32:38
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -114,7 +114,8 @@ extern void session_mgr__server_validate_session_service_req(
    const constants__t_request_handle_i session_mgr__req_handle,
    const constants__t_session_token_i session_mgr__session_token,
    const constants__t_msg_i session_mgr__req_msg,
-   t_bool * const session_mgr__bres,
+   t_bool * const session_mgr__is_valid_res,
+   constants__t_session_i * const session_mgr__session,
    t_bool * const session_mgr__snd_err);
 extern void session_mgr__server_validate_session_service_resp(
    const constants__t_channel_i session_mgr__channel,
@@ -122,7 +123,7 @@ extern void session_mgr__server_validate_session_service_resp(
    const constants__t_request_handle_i session_mgr__req_handle,
    const constants__t_msg_i session_mgr__req_msg,
    const constants__t_msg_i session_mgr__resp_msg,
-   t_bool * const session_mgr__bres,
+   t_bool * const session_mgr__is_valid_res,
    t_bool * const session_mgr__snd_err);
 
 #endif
