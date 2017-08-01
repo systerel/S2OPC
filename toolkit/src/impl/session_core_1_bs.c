@@ -300,22 +300,40 @@ void session_core_1_bs__get_session_state(
 void session_core_1_bs__set_session_state(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_sessionState session_core_1_bs__state) {
+  t_bool is_client = false;
+  constants__t_channel_i channel = constants__c_channel_indet;
   if(unique_session.id == session_core_1_bs__session){
     unique_session.session_core_1_bs__state = session_core_1_bs__state;
+
+    // Check if it is client side
+    session_core_1_bs__get_session_channel(session_core_1_bs__session,
+                                           &channel);
+    channel_mgr_bs__is_client_channel(channel, &is_client);
+
     if(session_core_1_bs__state == constants__e_session_userActivated){
-      constants__t_channel_i channel = constants__c_channel_indet;
-      t_bool bres = false;
-      session_core_1_bs__get_session_channel(session_core_1_bs__session,
-                                             &channel);
-      channel_mgr_bs__is_client_channel(channel, &bres);
-      if(bres != false){
-        unique_session.cli_activated_session = !FALSE;
+      if(is_client != false &&
+         unique_session.cli_activated_session == false)
+      {
+        unique_session.cli_activated_session = true;
         SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
                                              SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
-                                             session_core_1_bs__session, // TMP unused ? => session idx ?
+                                             session_core_1_bs__session,
                                              NULL,
                                              0, // unused 
                                              "Session activated notification");
+      }
+    }else if(session_core_1_bs__state == constants__e_session_userActivating ||
+             session_core_1_bs__state == constants__e_session_scActivating){
+      if(is_client != false && 
+         unique_session.cli_activated_session != false){
+        // session is in re-activation step
+        unique_session.cli_activated_session = false;
+        SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
+                                             SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
+                                             session_core_1_bs__session,
+                                             NULL,
+                                             0, // unused 
+                                             "Session re-activation notification");
       }
     }
   }

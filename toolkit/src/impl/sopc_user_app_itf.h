@@ -25,6 +25,7 @@ typedef enum SOPC_App_Com_Event {
   /* Client application events */
   SE_SESSION_ACTIVATION_FAILURE,
   SE_ACTIVATED_SESSION,
+  SE_SESSION_REACTIVATING, /* automatic new SC or manual new user on same SC */
   SE_RCV_SESSION_RESPONSE,
   SE_CLOSED_SESSION,
   //  SE_RCV_PUBLIC_RESPONSE, => discovery services
