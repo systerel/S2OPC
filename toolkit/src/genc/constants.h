@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 01/08/2017 11:32:36
+ Date                 : 03/08/2017 13:22:21
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -24,14 +24,15 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
-#define constants__t_ByteString_i constants_bs__t_ByteString_i
 #define constants__t_NodeId_i constants_bs__t_NodeId_i
 #define constants__t_Node_i constants_bs__t_Node_i
 #define constants__t_UserId_i constants_bs__t_UserId_i
 #define constants__t_Variant_i constants_bs__t_Variant_i
+#define constants__t_byte_buffer_i constants_bs__t_byte_buffer_i
 #define constants__t_channel_config_idx_i constants_bs__t_channel_config_idx_i
 #define constants__t_channel_i constants_bs__t_channel_i
 #define constants__t_endpoint_config_idx_i constants_bs__t_endpoint_config_idx_i
+#define constants__t_msg_header_i constants_bs__t_msg_header_i
 #define constants__t_msg_i constants_bs__t_msg_i
 #define constants__t_request_handle_i constants_bs__t_request_handle_i
 #define constants__t_session_i constants_bs__t_session_i
@@ -78,6 +79,18 @@ typedef enum {
    constants__e_sc_bad_out_of_memory
 } constants__t_StatusCode_i;
 typedef enum {
+   constants__c_buffer_in_state_indet,
+   constants__e_buffer_in_msg_not_read,
+   constants__e_buffer_in_msg_type_read,
+   constants__e_buffer_in_msg_header_read,
+   constants__e_buffer_in_msg_read
+} constants__t_buffer_in_state_i;
+typedef enum {
+   constants__c_buffer_out_state_indet,
+   constants__e_buffer_out_msg_written
+} constants__t_buffer_out_state_i;
+typedef enum {
+   constants__c_msg_type_indet,
    constants__e_msg_public_service_req,
    constants__e_msg_public_service_resp,
    constants__e_msg_session_create_req,
@@ -90,7 +103,7 @@ typedef enum {
    constants__e_msg_session_read_resp,
    constants__e_msg_session_write_req,
    constants__e_msg_session_write_resp
-} constants__t_msg_type;
+} constants__t_msg_type_i;
 typedef enum {
    constants__e_session_init,
    constants__e_session_creating,
@@ -106,14 +119,15 @@ typedef enum {
 /*--------------------------
    Added by the Translator
   --------------------------*/
-#define constants__t_ByteString_i_max constants_bs__t_ByteString_i_max
 #define constants__t_NodeId_i_max constants_bs__t_NodeId_i_max
 #define constants__t_Node_i_max constants_bs__t_Node_i_max
 #define constants__t_UserId_i_max constants_bs__t_UserId_i_max
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
+#define constants__t_byte_buffer_i_max constants_bs__t_byte_buffer_i_max
 #define constants__t_channel_config_idx_i_max constants_bs__t_channel_config_idx_i_max
 #define constants__t_channel_i_max constants_bs__t_channel_i_max
 #define constants__t_endpoint_config_idx_i_max constants_bs__t_endpoint_config_idx_i_max
+#define constants__t_msg_header_i_max constants_bs__t_msg_header_i_max
 #define constants__t_msg_i_max constants_bs__t_msg_i_max
 #define constants__t_request_handle_i_max constants_bs__t_request_handle_i_max
 #define constants__t_session_i_max constants_bs__t_session_i_max
@@ -125,14 +139,15 @@ typedef enum {
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
-#define constants__c_ByteString_indet constants_bs__c_ByteString_indet
 #define constants__c_NodeId_indet constants_bs__c_NodeId_indet
 #define constants__c_Node_indet constants_bs__c_Node_indet
 #define constants__c_UserId_indet constants_bs__c_UserId_indet
 #define constants__c_Variant_indet constants_bs__c_Variant_indet
+#define constants__c_byte_buffer_indet constants_bs__c_byte_buffer_indet
 #define constants__c_channel_config_idx_indet constants_bs__c_channel_config_idx_indet
 #define constants__c_channel_indet constants_bs__c_channel_indet
 #define constants__c_endpoint_config_idx_indet constants_bs__c_endpoint_config_idx_indet
+#define constants__c_msg_header_indet constants_bs__c_msg_header_indet
 #define constants__c_msg_indet constants_bs__c_msg_indet
 #define constants__c_request_handle_indet constants_bs__c_request_handle_indet
 #define constants__c_session_indet constants_bs__c_session_indet

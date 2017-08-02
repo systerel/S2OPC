@@ -2,7 +2,7 @@
 
  File Name            : service_write_decode_bs.h
 
- Date                 : 01/08/2017 11:32:41
+ Date                 : 03/08/2017 13:22:26
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -20,6 +20,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "message_in_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -30,7 +31,7 @@ extern void service_write_decode_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void service_write_decode_bs__decode_write_request(
-   const constants__t_ByteString_i service_write_decode_bs__req_payload,
+   const constants__t_msg_i service_write_decode_bs__write_msg,
    constants__t_StatusCode_i * const service_write_decode_bs__StatusCode_service);
 extern void service_write_decode_bs__free_write_request(void);
 extern void service_write_decode_bs__get_nb_WriteValue(

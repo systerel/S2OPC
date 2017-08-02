@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 01/08/2017 11:32:37
+ Date                 : 03/08/2017 13:22:22
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,10 +44,10 @@ extern void io_dispatch_mgr__INITIALISATION(void);
    LOCAL_OPERATIONS Clause
   --------------------------*/
 extern void io_dispatch_mgr__get_response_type(
-   const constants__t_msg_type io_dispatch_mgr__req_msg_typ,
-   constants__t_msg_type * const io_dispatch_mgr__resp_msg_typ);
+   const constants__t_msg_type_i io_dispatch_mgr__req_msg_typ,
+   constants__t_msg_type_i * const io_dispatch_mgr__resp_msg_typ);
 extern void io_dispatch_mgr__is_request_type(
-   const constants__t_msg_type io_dispatch_mgr__msg_typ,
+   const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
    t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__local_activate_session(
    const constants__t_session_i io_dispatch_mgr__session,
@@ -63,7 +63,7 @@ extern void io_dispatch_mgr__treat_read_request(
    const constants__t_msg_i io_dispatch_mgr__p_request_msg,
    const constants__t_msg_i io_dispatch_mgr__p_response_msg);
 extern void io_dispatch_mgr__treat_write_request(
-   const constants__t_ByteString_i io_dispatch_mgr__req_payload,
+   const constants__t_msg_i io_dispatch_mgr__write_msg,
    const constants__t_user_i io_dispatch_mgr__userid,
    constants__t_StatusCode_i * const io_dispatch_mgr__StatusCode_service);
 
@@ -89,9 +89,9 @@ extern void io_dispatch_mgr__close_session(
    const constants__t_session_i io_dispatch_mgr__session,
    constants__t_StatusCode_i * const io_dispatch_mgr__ret);
 extern void io_dispatch_mgr__msgs_memory_changed(void);
-extern void io_dispatch_mgr__receive_msg(
+extern void io_dispatch_mgr__receive_buffer_msg(
    const constants__t_channel_i io_dispatch_mgr__channel,
-   const constants__t_msg_i io_dispatch_mgr__msg);
+   const constants__t_byte_buffer_i io_dispatch_mgr__buffer);
 extern void io_dispatch_mgr__secure_channel_lost(
    const constants__t_channel_i io_dispatch_mgr__channel);
 extern void io_dispatch_mgr__send_service_request_msg(

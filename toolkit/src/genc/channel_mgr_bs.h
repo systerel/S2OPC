@@ -2,7 +2,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 01/08/2017 11:32:39
+ Date                 : 03/08/2017 13:22:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -21,6 +21,7 @@
   --------------*/
 #include "constants.h"
 #include "message_in_bs.h"
+#include "message_out_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -61,9 +62,9 @@ extern void channel_mgr_bs__is_connected_channel(
 extern void channel_mgr_bs__is_disconnecting_channel(
    const constants__t_channel_config_idx_i channel_mgr_bs__config_idx,
    t_bool * const channel_mgr_bs__bres);
-extern void channel_mgr_bs__send_channel_msg(
+extern void channel_mgr_bs__send_channel_msg_buffer(
    const constants__t_channel_i channel_mgr_bs__channel,
-   const constants__t_msg_i channel_mgr_bs__msg,
+   const constants__t_byte_buffer_i channel_mgr_bs__buffer,
    constants__t_StatusCode_i * const channel_mgr_bs__ret);
 extern void channel_mgr_bs__srv_new_secure_channel(
    const constants__t_endpoint_config_idx_i channel_mgr_bs__endpoint_config_idx,

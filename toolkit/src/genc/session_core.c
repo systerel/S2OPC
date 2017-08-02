@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 01/08/2017 11:32:38
+ Date                 : 03/08/2017 13:22:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -117,7 +117,6 @@ void session_core__cli_create_resp(
       t_bool session_core__l_valid_handle;
       t_bool session_core__l_fresh_session_token;
       t_bool session_core__l_has_session_token;
-      constants__t_StatusCode_i session_core__l_status;
       
       session_core_1_bs__is_fresh_session_token(session_core__session_token,
          &session_core__l_fresh_session_token);
@@ -128,19 +127,12 @@ void session_core__cli_create_resp(
          session_core_1_bs__cli_remove_pending_request(session_core__session,
             session_core__req_handle,
             &session_core__l_valid_handle);
-         message_in_bs__read_msg_resp_header_service_status(session_core__create_resp_msg,
-            &session_core__l_status);
          if (session_core__l_valid_handle == true) {
-            if (session_core__l_status == constants__e_sc_ok) {
-               session_core_1_bs__set_session_state(session_core__session,
-                  constants__e_session_created);
-               session_core_1_bs__set_session_token(session_core__session,
-                  session_core__session_token);
-               *session_core__ret = constants__e_sc_ok;
-            }
-            else {
-               *session_core__ret = constants__e_sc_nok;
-            }
+            session_core_1_bs__set_session_state(session_core__session,
+               constants__e_session_created);
+            session_core_1_bs__set_session_token(session_core__session,
+               session_core__session_token);
+            *session_core__ret = constants__e_sc_ok;
          }
          else {
             *session_core__ret = constants__e_sc_bad_invalid_argument;
@@ -323,24 +315,14 @@ void session_core__cli_activate_resp(
    constants__t_StatusCode_i * const session_core__ret) {
    {
       t_bool session_core__l_valid_handle;
-      constants__t_sessionState session_core__l_state;
-      constants__t_StatusCode_i session_core__l_status;
       
-      session_core_1_bs__get_session_state(session_core__session,
-         &session_core__l_state);
       session_core_1_bs__cli_remove_pending_request(session_core__session,
          session_core__req_handle,
          &session_core__l_valid_handle);
-      message_in_bs__read_msg_resp_header_service_status(session_core__activate_resp_msg,
-         &session_core__l_status);
       if (session_core__l_valid_handle == true) {
-         if (session_core__l_status == constants__e_sc_ok) {
-            session_core_1_bs__set_session_state(session_core__session,
-               constants__e_session_userActivated);
-         }
-         else {
-            *session_core__ret = constants__e_sc_nok;
-         }
+         session_core_1_bs__set_session_state(session_core__session,
+            constants__e_session_userActivated);
+         *session_core__ret = constants__e_sc_ok;
       }
       else {
          *session_core__ret = constants__e_sc_bad_invalid_argument;
@@ -479,13 +461,10 @@ void session_core__cli_close_resp(
    const constants__t_msg_i session_core__close_resp_msg) {
    {
       t_bool session_core__l_valid_handle;
-      constants__t_StatusCode_i session_core__l_status;
       
       session_core_1_bs__cli_remove_pending_request(session_core__session,
          session_core__req_handle,
          &session_core__l_valid_handle);
-      message_in_bs__read_msg_resp_header_service_status(session_core__close_resp_msg,
-         &session_core__l_status);
       session_core_1_bs__set_session_state_closed(session_core__session);
    }
 }
@@ -531,7 +510,6 @@ void session_core__cli_new_session_service_req(
 
 void session_core__cli_record_session_service_resp(
    const constants__t_session_i session_core__session,
-   const constants__t_msg_i session_core__msg,
    const constants__t_request_handle_i session_core__req_handle,
    t_bool * const session_core__bres) {
    session_core_1_bs__cli_remove_pending_request(session_core__session,

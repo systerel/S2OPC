@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 01/08/2017 11:32:38
+ Date                 : 03/08/2017 13:22:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -70,8 +70,9 @@ extern void session_mgr__client_create_req(
 extern void session_mgr__client_receive_session_resp(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_request_handle_i session_mgr__req_handle,
+   const constants__t_msg_type_i session_mgr__resp_typ,
+   const constants__t_msg_header_i session_mgr__resp_header,
    const constants__t_msg_i session_mgr__resp_msg,
-   const constants__t_msg_type session_mgr__resp_typ,
    constants__t_session_i * const session_mgr__session);
 extern void session_mgr__client_sc_activate_req(
    const constants__t_session_i session_mgr__session,
@@ -98,14 +99,13 @@ extern void session_mgr__client_validate_session_service_req(
 extern void session_mgr__client_validate_session_service_resp(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_request_handle_i session_mgr__req_handle,
-   const constants__t_msg_i session_mgr__resp_msg,
    t_bool * const session_mgr__bres);
 extern void session_mgr__server_receive_session_req(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_request_handle_i session_mgr__req_handle,
    const constants__t_session_token_i session_mgr__session_token,
    const constants__t_msg_i session_mgr__req_msg,
-   const constants__t_msg_type session_mgr__req_typ,
+   const constants__t_msg_type_i session_mgr__req_typ,
    const constants__t_msg_i session_mgr__resp_msg,
    constants__t_session_i * const session_mgr__session,
    constants__t_StatusCode_i * const session_mgr__service_ret);
@@ -113,7 +113,6 @@ extern void session_mgr__server_validate_session_service_req(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_request_handle_i session_mgr__req_handle,
    const constants__t_session_token_i session_mgr__session_token,
-   const constants__t_msg_i session_mgr__req_msg,
    t_bool * const session_mgr__is_valid_res,
    constants__t_session_i * const session_mgr__session,
    t_bool * const session_mgr__snd_err);
@@ -121,8 +120,6 @@ extern void session_mgr__server_validate_session_service_resp(
    const constants__t_channel_i session_mgr__channel,
    const constants__t_session_i session_mgr__session,
    const constants__t_request_handle_i session_mgr__req_handle,
-   const constants__t_msg_i session_mgr__req_msg,
-   const constants__t_msg_i session_mgr__resp_msg,
    t_bool * const session_mgr__is_valid_res,
    t_bool * const session_mgr__snd_err);
 

@@ -2,7 +2,7 @@
 
  File Name            : msg_read_response_bs.h
 
- Date                 : 01/08/2017 11:32:40
+ Date                 : 03/08/2017 13:22:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 

@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 01/08/2017 11:32:38
+ Date                 : 03/08/2017 13:22:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -100,7 +100,6 @@ extern void session_core__cli_new_session_service_req(
    constants__t_session_token_i * const session_core__session_token);
 extern void session_core__cli_record_session_service_resp(
    const constants__t_session_i session_core__session,
-   const constants__t_msg_i session_core__msg,
    const constants__t_request_handle_i session_core__req_handle,
    t_bool * const session_core__bres);
 extern void session_core__cli_sc_activate_req(

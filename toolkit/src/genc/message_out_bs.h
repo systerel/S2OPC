@@ -2,7 +2,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 01/08/2017 11:32:40
+ Date                 : 03/08/2017 13:22:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -30,23 +30,41 @@ extern void message_out_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void message_out_bs__alloc_msg_header(
+   const constants__t_msg_type_i message_out_bs__msg_type,
+   const constants__t_msg_i message_out_bs__msg,
+   constants__t_msg_header_i * const message_out_bs__nmsg_header);
 extern void message_out_bs__alloc_req_msg(
-   const constants__t_msg_type message_out_bs__msg_type,
+   const constants__t_msg_type_i message_out_bs__msg_type,
    constants__t_msg_i * const message_out_bs__nmsg);
 extern void message_out_bs__alloc_resp_msg(
-   const constants__t_msg_type message_out_bs__msg_type,
+   const constants__t_msg_type_i message_out_bs__msg_type,
    const constants__t_msg_i message_out_bs__req_msg_ctx,
    constants__t_msg_i * const message_out_bs__nmsg);
 extern void message_out_bs__bless_msg_out(
-   const constants__t_msg_i message_out_bs__msg,
-   const constants__t_msg_type message_out_bs__msg_type);
+   const constants__t_msg_type_i message_out_bs__msg_type,
+   const constants__t_msg_header_i message_out_bs__msg_header,
+   const constants__t_msg_i message_out_bs__msg);
+extern void message_out_bs__dealloc_msg_header_out(
+   const constants__t_msg_header_i message_out_bs__msg_header);
 extern void message_out_bs__dealloc_msg_out(
    const constants__t_msg_i message_out_bs__msg);
+extern void message_out_bs__encode_msg(
+   const constants__t_msg_type_i message_out_bs__msg_type,
+   const constants__t_msg_header_i message_out_bs__msg_header,
+   const constants__t_msg_i message_out_bs__msg,
+   constants__t_byte_buffer_i * const message_out_bs__buffer);
 extern void message_out_bs__get_msg_out_type(
    const constants__t_msg_i message_out_bs__msg,
-   constants__t_msg_type * const message_out_bs__msgtype);
+   constants__t_msg_type_i * const message_out_bs__msgtype);
+extern void message_out_bs__is_valid_buffer_out(
+   const constants__t_byte_buffer_i message_out_bs__buffer,
+   t_bool * const message_out_bs__bres);
 extern void message_out_bs__is_valid_msg_out(
    const constants__t_msg_i message_out_bs__msg,
+   t_bool * const message_out_bs__bres);
+extern void message_out_bs__is_valid_msg_out_header(
+   const constants__t_msg_header_i message_out_bs__msg_header,
    t_bool * const message_out_bs__bres);
 extern void message_out_bs__msg_out_memory_changed(void);
 extern void message_out_bs__write_activate_msg_user(
@@ -56,13 +74,13 @@ extern void message_out_bs__write_create_session_msg_session_token(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_session_token_i message_out_bs__session_token);
 extern void message_out_bs__write_msg_out_header_req_handle(
-   const constants__t_msg_i message_out_bs__msg,
+   const constants__t_msg_header_i message_out_bs__msg_header,
    const constants__t_request_handle_i message_out_bs__req_handle);
 extern void message_out_bs__write_msg_out_header_session_token(
-   const constants__t_msg_i message_out_bs__msg,
+   const constants__t_msg_header_i message_out_bs__msg_header,
    const constants__t_session_token_i message_out_bs__session_token);
 extern void message_out_bs__write_msg_resp_header_service_status(
-   const constants__t_msg_i message_out_bs__msg,
+   const constants__t_msg_header_i message_out_bs__msg_header,
    const constants__t_StatusCode_i message_out_bs__status_code);
 
 #endif
