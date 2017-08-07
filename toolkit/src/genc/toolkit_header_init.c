@@ -2,7 +2,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 07/08/2017 16:37:11
+ Date                 : 08/08/2017 10:57:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -41,6 +41,7 @@
 #include "session_core_channel_lost_it_bs.h"
 #include "session_core_orphaned_it_bs.h"
 #include "session_mgr.h"
+#include "session_request_handle_bs.h"
 #include "toolkit_header.h"
 
 /*------------------------
@@ -57,6 +58,7 @@ void INITIALISATION(void) {
    session_core_channel_lost_it_bs__INITIALISATION();
    channel_mgr_bs__INITIALISATION();
    session_core__INITIALISATION();
+   session_request_handle_bs__INITIALISATION();
    session_mgr__INITIALISATION();
    session_async_bs__INITIALISATION();
    msg_read_request_bs__INITIALISATION();

@@ -2,7 +2,7 @@
 
  File Name            : response_write_bs.h
 
- Date                 : 07/08/2017 16:37:09
+ Date                 : 08/08/2017 10:57:27
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 

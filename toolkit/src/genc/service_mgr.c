@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 07/08/2017 16:37:06
+ Date                 : 08/08/2017 10:57:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -149,16 +149,16 @@ void service_mgr__local_create_session(
                   }
                   if (service_mgr__l_ret != constants__e_sc_ok) {
                      request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                     session_mgr__cli_close_session(service_mgr__session);
+                     session_mgr__client_session_mgr_close_session(service_mgr__session);
                   }
                }
                else {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                  session_mgr__cli_close_session(service_mgr__session);
+                  session_mgr__client_session_mgr_close_session(service_mgr__session);
                }
             }
             else {
-               session_mgr__cli_close_session(service_mgr__session);
+               session_mgr__client_session_mgr_close_session(service_mgr__session);
             }
          }
          message_out_bs__dealloc_msg_header_out(service_mgr__l_msg_header);
@@ -234,7 +234,7 @@ void service_mgr__local_sc_activate_orphaned_sessions(
                      }
                      if (service_mgr__l_ret != constants__e_sc_ok) {
                         request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                        session_mgr__cli_close_session(service_mgr__l_session);
+                        session_mgr__client_session_mgr_close_session(service_mgr__l_session);
                      }
                   }
                }
@@ -305,7 +305,7 @@ void service_mgr__local_activate_session(
                }
                if (service_mgr__l_ret != constants__e_sc_ok) {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                  session_mgr__cli_close_session(service_mgr__session);
+                  session_mgr__client_session_mgr_close_session(service_mgr__session);
                }
             }
          }
@@ -809,7 +809,7 @@ void service_mgr__client_close_session(
                }
                if (*service_mgr__ret != constants__e_sc_ok) {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                  session_mgr__cli_close_session(service_mgr__session);
+                  session_mgr__client_session_mgr_close_session(service_mgr__session);
                }
             }
          }

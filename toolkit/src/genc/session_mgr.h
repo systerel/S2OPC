@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 07/08/2017 16:37:07
+ Date                 : 08/08/2017 10:57:25
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -20,6 +20,7 @@
    IMPORTS Clause
   -----------------*/
 #include "session_core.h"
+#include "session_request_handle_bs.h"
 
 /*--------------
    SEES Clause
@@ -38,7 +39,6 @@ extern void session_mgr__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define session_mgr__cli_close_session session_core__cli_close_session
 #define session_mgr__client_init_session session_core__client_init_session
 #define session_mgr__client_secure_channel_lost session_core__client_secure_channel_lost
 #define session_mgr__continue_iter_orphaned_t_session session_core__continue_iter_orphaned_t_session
@@ -81,6 +81,8 @@ extern void session_mgr__client_sc_activate_req(
    const constants__t_msg_i session_mgr__activate_req_msg,
    constants__t_StatusCode_i * const session_mgr__ret,
    constants__t_session_token_i * const session_mgr__session_token);
+extern void session_mgr__client_session_mgr_close_session(
+   const constants__t_session_i session_mgr__session);
 extern void session_mgr__client_user_activate_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_request_handle_i session_mgr__req_handle,

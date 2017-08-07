@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 07/08/2017 16:37:07
+ Date                 : 08/08/2017 10:57:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,7 +43,6 @@ extern void session_core__INITIALISATION(void);
 #define session_core__continue_iter_orphaned_t_session session_core_orphaned_it_bs__continue_iter_orphaned_t_session
 #define session_core__delete_session session_core_1_bs__delete_session
 #define session_core__get_session_channel session_core_1_bs__get_session_channel
-#define session_core__get_session_from_req_handle session_core_1_bs__get_session_from_req_handle
 #define session_core__get_session_from_token session_core_1_bs__get_session_from_token
 #define session_core__init_iter_orphaned_t_session session_core_orphaned_it_bs__init_iter_orphaned_t_session
 #define session_core__is_valid_session session_core_1_bs__is_valid_session
@@ -64,12 +63,10 @@ extern void session_core__srv_internal_activate_req_and_resp(
 extern void session_core__cli_activate_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__activate_resp_msg,
    constants__t_StatusCode_i * const session_core__ret);
 extern void session_core__cli_close_req(
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__close_req_msg,
    constants__t_StatusCode_i * const session_core__ret,
    constants__t_channel_i * const session_core__channel,
@@ -77,43 +74,30 @@ extern void session_core__cli_close_req(
 extern void session_core__cli_close_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__close_resp_msg);
 extern void session_core__cli_close_session(
    const constants__t_session_i session_core__session);
 extern void session_core__cli_create_req(
    const constants__t_session_i session_core__session,
    const constants__t_channel_i session_core__channel,
-   const constants__t_request_handle_i session_core__req_handle,
-   const constants__t_msg_i session_core__create_req_msg,
-   constants__t_StatusCode_i * const session_core__ret);
+   const constants__t_msg_i session_core__create_req_msg);
 extern void session_core__cli_create_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_session_token_i session_core__session_token,
    const constants__t_msg_i session_core__create_resp_msg,
    constants__t_StatusCode_i * const session_core__ret);
 extern void session_core__cli_new_session_service_req(
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
-   constants__t_StatusCode_i * const session_core__ret,
    constants__t_channel_i * const session_core__channel,
    constants__t_session_token_i * const session_core__session_token);
-extern void session_core__cli_record_session_service_resp(
-   const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
-   t_bool * const session_core__bres);
 extern void session_core__cli_sc_activate_req(
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_channel_i session_core__channel,
    const constants__t_msg_i session_core__activate_req_msg,
-   constants__t_StatusCode_i * const session_core__ret,
    constants__t_session_token_i * const session_core__session_token);
 extern void session_core__cli_user_activate_req(
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_user_i session_core__user,
    const constants__t_msg_i session_core__activate_req_msg,
    constants__t_StatusCode_i * const session_core__ret,

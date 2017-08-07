@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 07/08/2017 16:37:07
+ Date                 : 08/08/2017 10:57:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,25 +43,10 @@ void session_core__client_init_session(
 void session_core__cli_create_req(
    const constants__t_session_i session_core__session,
    const constants__t_channel_i session_core__channel,
-   const constants__t_request_handle_i session_core__req_handle,
-   const constants__t_msg_i session_core__create_req_msg,
-   constants__t_StatusCode_i * const session_core__ret) {
-   {
-      t_bool session_core__l_valid_handle;
-      
-      session_core_1_bs__create_session(session_core__session,
-         session_core__channel,
-         constants__e_session_creating);
-      session_core_1_bs__cli_add_pending_request(session_core__session,
-         session_core__req_handle,
-         &session_core__l_valid_handle);
-      if (session_core__l_valid_handle == true) {
-         *session_core__ret = constants__e_sc_ok;
-      }
-      else {
-         *session_core__ret = constants__e_sc_bad_invalid_argument;
-      }
-   }
+   const constants__t_msg_i session_core__create_req_msg) {
+   session_core_1_bs__create_session(session_core__session,
+      session_core__channel,
+      constants__e_session_creating);
 }
 
 void session_core__srv_create_req_and_resp(
@@ -108,34 +93,20 @@ void session_core__srv_create_req_and_resp(
 void session_core__cli_create_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_session_token_i session_core__session_token,
    const constants__t_msg_i session_core__create_resp_msg,
    constants__t_StatusCode_i * const session_core__ret) {
    {
-      t_bool session_core__l_valid_handle;
       t_bool session_core__l_fresh_session_token;
-      t_bool session_core__l_has_session_token;
       
       session_core_1_bs__is_fresh_session_token(session_core__session_token,
          &session_core__l_fresh_session_token);
-      session_core_1_bs__has_session_token(session_core__session,
-         &session_core__l_has_session_token);
-      if ((session_core__l_fresh_session_token == true) &&
-         (session_core__l_has_session_token == false)) {
-         session_core_1_bs__cli_remove_pending_request(session_core__session,
-            session_core__req_handle,
-            &session_core__l_valid_handle);
-         if (session_core__l_valid_handle == true) {
-            session_core_1_bs__set_session_state(session_core__session,
-               constants__e_session_created);
-            session_core_1_bs__set_session_token(session_core__session,
-               session_core__session_token);
-            *session_core__ret = constants__e_sc_ok;
-         }
-         else {
-            *session_core__ret = constants__e_sc_bad_invalid_argument;
-         }
+      if (session_core__l_fresh_session_token == true) {
+         session_core_1_bs__set_session_state(session_core__session,
+            constants__e_session_created);
+         session_core_1_bs__set_session_token(session_core__session,
+            session_core__session_token);
+         *session_core__ret = constants__e_sc_ok;
       }
       else {
          *session_core__ret = constants__e_sc_bad_invalid_argument;
@@ -145,91 +116,42 @@ void session_core__cli_create_resp(
 
 void session_core__cli_user_activate_req(
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_user_i session_core__user,
    const constants__t_msg_i session_core__activate_req_msg,
    constants__t_StatusCode_i * const session_core__ret,
    constants__t_channel_i * const session_core__channel,
    constants__t_session_token_i * const session_core__session_token) {
-   {
-      t_bool session_core__l_valid_handle;
-      constants__t_session_token_i session_core__l_session_token;
-      constants__t_channel_i session_core__l_channel;
-      t_bool session_core__l_connected_channel;
-      constants__t_StatusCode_i session_core__l_ret;
-      
-      session_core__l_channel = constants__c_channel_indet;
-      session_core__l_session_token = constants__c_session_token_indet;
-      session_core_1_bs__get_session_channel(session_core__session,
-         &session_core__l_channel);
-      channel_mgr_bs__is_connected_channel(session_core__l_channel,
-         &session_core__l_connected_channel);
-      session_core_1_bs__get_token_from_session(session_core__session,
-         &session_core__l_session_token);
-      if (session_core__l_connected_channel == true) {
-         session_core_1_bs__cli_add_pending_request(session_core__session,
-            session_core__req_handle,
-            &session_core__l_valid_handle);
-         if (session_core__l_valid_handle == true) {
-            message_out_bs__write_activate_msg_user(session_core__activate_req_msg,
-               session_core__user);
-            session_core_1_bs__set_session_user(session_core__session,
-               session_core__user);
-            session_core_1_bs__set_session_state(session_core__session,
-               constants__e_session_userActivating);
-            session_core__l_ret = constants__e_sc_ok;
-         }
-         else {
-            session_core__l_session_token = constants__c_session_token_indet;
-            session_core__l_ret = constants__e_sc_bad_invalid_argument;
-         }
-      }
-      else {
-         session_core__l_session_token = constants__c_session_token_indet;
-         session_core__l_ret = constants__e_sc_bad_unexpected_error;
-      }
-      *session_core__ret = session_core__l_ret;
-      *session_core__session_token = session_core__l_session_token;
-      *session_core__channel = session_core__l_channel;
-   }
+   session_core_1_bs__get_session_channel(session_core__session,
+      session_core__channel);
+   session_core_1_bs__get_token_from_session(session_core__session,
+      session_core__session_token);
+   message_out_bs__write_activate_msg_user(session_core__activate_req_msg,
+      session_core__user);
+   session_core_1_bs__set_session_user(session_core__session,
+      session_core__user);
+   session_core_1_bs__set_session_state(session_core__session,
+      constants__e_session_userActivating);
+   *session_core__ret = constants__e_sc_ok;
 }
 
 void session_core__cli_sc_activate_req(
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_channel_i session_core__channel,
    const constants__t_msg_i session_core__activate_req_msg,
-   constants__t_StatusCode_i * const session_core__ret,
    constants__t_session_token_i * const session_core__session_token) {
    {
-      t_bool session_core__l_valid_handle;
-      constants__t_session_token_i session_core__l_session_token;
       constants__t_user_i session_core__l_user;
-      constants__t_StatusCode_i session_core__l_ret;
       
-      session_core__l_session_token = constants__c_session_token_indet;
       session_core_1_bs__get_token_from_session(session_core__session,
-         &session_core__l_session_token);
+         session_core__session_token);
       session_core_1_bs__get_session_user(session_core__session,
          &session_core__l_user);
-      session_core_1_bs__cli_add_pending_request(session_core__session,
-         session_core__req_handle,
-         &session_core__l_valid_handle);
-      if (session_core__l_valid_handle == true) {
-         message_out_bs__write_activate_msg_user(session_core__activate_req_msg,
-            session_core__l_user);
-         session_core_1_bs__set_session_channel(session_core__session,
-            session_core__channel);
-         session_core_1_bs__set_session_state(session_core__session,
-            constants__e_session_scActivating);
-         session_core__l_ret = constants__e_sc_ok;
-      }
-      else {
-         session_core__l_session_token = constants__c_session_token_indet;
-         session_core__l_ret = constants__e_sc_bad_invalid_argument;
-      }
-      *session_core__session_token = session_core__l_session_token;
-      *session_core__ret = session_core__l_ret;
+      message_out_bs__write_activate_msg_user(session_core__activate_req_msg,
+         session_core__l_user);
+      session_core_1_bs__set_session_channel(session_core__session,
+         session_core__channel);
+      session_core_1_bs__set_session_state(session_core__session,
+         constants__e_session_scActivating);
    }
 }
 
@@ -308,24 +230,11 @@ void session_core__srv_activate_req_and_resp(
 void session_core__cli_activate_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__activate_resp_msg,
    constants__t_StatusCode_i * const session_core__ret) {
-   {
-      t_bool session_core__l_valid_handle;
-      
-      session_core_1_bs__cli_remove_pending_request(session_core__session,
-         session_core__req_handle,
-         &session_core__l_valid_handle);
-      if (session_core__l_valid_handle == true) {
-         session_core_1_bs__set_session_state(session_core__session,
-            constants__e_session_userActivated);
-         *session_core__ret = constants__e_sc_ok;
-      }
-      else {
-         *session_core__ret = constants__e_sc_bad_invalid_argument;
-      }
-   }
+   session_core_1_bs__set_session_state(session_core__session,
+      constants__e_session_userActivated);
+   *session_core__ret = constants__e_sc_ok;
 }
 
 void session_core__client_secure_channel_lost(
@@ -398,47 +307,17 @@ void session_core__server_secure_channel_lost(
 
 void session_core__cli_close_req(
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__close_req_msg,
    constants__t_StatusCode_i * const session_core__ret,
    constants__t_channel_i * const session_core__channel,
    constants__t_session_token_i * const session_core__session_token) {
-   {
-      constants__t_channel_i session_core__l_channel;
-      t_bool session_core__l_connected_channel;
-      t_bool session_core__l_valid_handle;
-      constants__t_session_token_i session_core__l_session_token;
-      constants__t_StatusCode_i session_core__l_ret;
-      
-      session_core__l_channel = constants__c_channel_indet;
-      session_core__l_session_token = constants__c_session_token_indet;
-      session_core_1_bs__get_session_channel(session_core__session,
-         &session_core__l_channel);
-      channel_mgr_bs__is_connected_channel(session_core__l_channel,
-         &session_core__l_connected_channel);
-      session_core_1_bs__get_token_from_session(session_core__session,
-         &session_core__l_session_token);
-      if (session_core__l_connected_channel == true) {
-         session_core_1_bs__cli_add_pending_request(session_core__session,
-            session_core__req_handle,
-            &session_core__l_valid_handle);
-         if (session_core__l_valid_handle == true) {
-            session_core_1_bs__set_session_state(session_core__session,
-               constants__e_session_closing);
-            session_core__l_ret = constants__e_sc_ok;
-         }
-         else {
-            session_core__l_session_token = constants__c_session_token_indet;
-            session_core__l_ret = constants__e_sc_bad_invalid_argument;
-         }
-      }
-      else {
-         session_core__l_ret = constants__e_sc_bad_unexpected_error;
-      }
-      *session_core__channel = session_core__l_channel;
-      *session_core__session_token = session_core__l_session_token;
-      *session_core__ret = session_core__l_ret;
-   }
+   session_core_1_bs__get_session_channel(session_core__session,
+      session_core__channel);
+   session_core_1_bs__get_token_from_session(session_core__session,
+      session_core__session_token);
+   session_core_1_bs__set_session_state(session_core__session,
+      constants__e_session_closing);
+   *session_core__ret = constants__e_sc_ok;
 }
 
 void session_core__srv_close_req_and_resp(
@@ -454,16 +333,8 @@ void session_core__srv_close_req_and_resp(
 void session_core__cli_close_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__close_resp_msg) {
-   {
-      t_bool session_core__l_valid_handle;
-      
-      session_core_1_bs__cli_remove_pending_request(session_core__session,
-         session_core__req_handle,
-         &session_core__l_valid_handle);
-      session_core_1_bs__set_session_state_closed(session_core__session);
-   }
+   session_core_1_bs__set_session_state_closed(session_core__session);
 }
 
 void session_core__cli_close_session(
@@ -478,40 +349,12 @@ void session_core__server_close_session(
 
 void session_core__cli_new_session_service_req(
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
-   constants__t_StatusCode_i * const session_core__ret,
    constants__t_channel_i * const session_core__channel,
    constants__t_session_token_i * const session_core__session_token) {
-   {
-      t_bool session_core__l_valid_handle;
-      constants__t_session_token_i session_core__l_session_token;
-      
-      *session_core__session_token = constants__c_session_token_indet;
-      *session_core__channel = constants__c_channel_indet;
-      session_core_1_bs__cli_add_pending_request(session_core__session,
-         session_core__req_handle,
-         &session_core__l_valid_handle);
-      session_core_1_bs__get_token_from_session(session_core__session,
-         &session_core__l_session_token);
-      if (session_core__l_valid_handle == true) {
-         *session_core__session_token = session_core__l_session_token;
-         session_core_1_bs__get_session_channel(session_core__session,
-            session_core__channel);
-         *session_core__ret = constants__e_sc_ok;
-      }
-      else {
-         *session_core__ret = constants__e_sc_bad_invalid_argument;
-      }
-   }
-}
-
-void session_core__cli_record_session_service_resp(
-   const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
-   t_bool * const session_core__bres) {
-   session_core_1_bs__cli_remove_pending_request(session_core__session,
-      session_core__req_handle,
-      session_core__bres);
+   session_core_1_bs__get_token_from_session(session_core__session,
+      session_core__session_token);
+   session_core_1_bs__get_session_channel(session_core__session,
+      session_core__channel);
 }
 
 void session_core__is_session_valid_for_service(
