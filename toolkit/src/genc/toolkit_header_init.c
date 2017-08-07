@@ -1,8 +1,8 @@
 /******************************************************************************
 
- File Name            : session_header_init.c
+ File Name            : toolkit_header_init.c
 
- Date                 : 03/08/2017 13:22:27
+ Date                 : 07/08/2017 10:43:19
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -11,7 +11,7 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include "session_header_init.h"
+#include "toolkit_header_init.h"
 
 /*---------------------
    List of Components
@@ -30,6 +30,7 @@
 #include "msg_read_response_bs.h"
 #include "request_handle_bs.h"
 #include "response_write_bs.h"
+#include "service_mgr.h"
 #include "service_read.h"
 #include "service_read_it.h"
 #include "service_response_cli_cb_bs.h"
@@ -39,8 +40,8 @@
 #include "session_core_1_bs.h"
 #include "session_core_channel_lost_it_bs.h"
 #include "session_core_orphaned_it_bs.h"
-#include "session_header.h"
 #include "session_mgr.h"
+#include "toolkit_header.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -48,12 +49,12 @@
 void INITIALISATION(void) {
    constants_bs__INITIALISATION();
    constants__INITIALISATION();
+   message_in_bs__INITIALISATION();
+   message_out_bs__INITIALISATION();
    request_handle_bs__INITIALISATION();
    session_core_1_bs__INITIALISATION();
    session_core_orphaned_it_bs__INITIALISATION();
    session_core_channel_lost_it_bs__INITIALISATION();
-   message_in_bs__INITIALISATION();
-   message_out_bs__INITIALISATION();
    channel_mgr_bs__INITIALISATION();
    session_core__INITIALISATION();
    session_mgr__INITIALISATION();
@@ -69,7 +70,8 @@ void INITIALISATION(void) {
    service_read_it__INITIALISATION();
    service_read__INITIALISATION();
    service_response_cli_cb_bs__INITIALISATION();
+   service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
-   session_header__INITIALISATION();
+   toolkit_header__INITIALISATION();
 }
 

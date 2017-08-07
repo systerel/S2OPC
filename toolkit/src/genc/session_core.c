@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 03/08/2017 13:22:23
+ Date                 : 07/08/2017 10:43:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -469,7 +469,7 @@ void session_core__cli_close_resp(
    }
 }
 
-void session_core__client_close_session(
+void session_core__cli_close_session(
    const constants__t_session_i session_core__session) {
    session_core_1_bs__set_session_state_closed(session_core__session);
 }

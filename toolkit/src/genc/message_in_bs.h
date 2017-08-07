@@ -2,7 +2,7 @@
 
  File Name            : message_in_bs.h
 
- Date                 : 03/08/2017 13:22:24
+ Date                 : 07/08/2017 10:43:16
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -29,12 +29,12 @@ extern void message_in_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void message_in_bs__dealloc_msg_buffer_in(
-   const constants__t_byte_buffer_i message_in_bs__msg_buffer);
-extern void message_in_bs__dealloc_msg_header_in(
-   const constants__t_msg_header_i message_in_bs__msg_header);
 extern void message_in_bs__dealloc_msg_in(
    const constants__t_msg_i message_in_bs__msg);
+extern void message_in_bs__dealloc_msg_in_buffer(
+   const constants__t_byte_buffer_i message_in_bs__msg_buffer);
+extern void message_in_bs__dealloc_msg_in_header(
+   const constants__t_msg_header_i message_in_bs__msg_header);
 extern void message_in_bs__decode_msg(
    const constants__t_byte_buffer_i message_in_bs__msg_buffer,
    constants__t_msg_i * const message_in_bs__msg);
@@ -47,13 +47,15 @@ extern void message_in_bs__decode_msg_type(
 extern void message_in_bs__get_msg_in_type(
    const constants__t_msg_i message_in_bs__req_msg,
    constants__t_msg_type_i * const message_in_bs__msgtype);
-extern void message_in_bs__is_valid_msg_header_in(
-   const constants__t_msg_header_i message_in_bs__msg_header,
-   t_bool * const message_in_bs__bres);
 extern void message_in_bs__is_valid_msg_in(
    const constants__t_msg_i message_in_bs__msg,
    t_bool * const message_in_bs__bres);
-extern void message_in_bs__msg_in_memory_changed(void);
+extern void message_in_bs__is_valid_msg_in_header(
+   const constants__t_msg_header_i message_in_bs__msg_header,
+   t_bool * const message_in_bs__bres);
+extern void message_in_bs__is_valid_msg_in_type(
+   const constants__t_msg_type_i message_in_bs__msg_typ,
+   t_bool * const message_in_bs__bres);
 extern void message_in_bs__read_activate_msg_user(
    const constants__t_msg_i message_in_bs__msg,
    constants__t_user_i * const message_in_bs__user);

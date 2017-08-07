@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 03/08/2017 13:22:23
+ Date                 : 07/08/2017 10:43:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -115,7 +115,7 @@ void session_mgr__client_receive_session_resp(
          session_mgr__l_ret = session_mgr__l_resp_status;
       }
       if (session_mgr__l_ret != constants__e_sc_ok) {
-         session_core__client_close_session(*session_mgr__session);
+         session_core__cli_close_session(*session_mgr__session);
       }
       *session_mgr__session = session_mgr__l_session;
    }
@@ -285,7 +285,7 @@ void session_mgr__client_validate_session_service_resp(
             *session_mgr__bres = false;
          }
          if (*session_mgr__bres == false) {
-            session_core__client_close_session(session_mgr__l_session);
+            session_core__cli_close_session(session_mgr__l_session);
          }
       }
       else {

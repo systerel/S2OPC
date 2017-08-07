@@ -1,8 +1,8 @@
 /******************************************************************************
 
- File Name            : session_header.c
+ File Name            : toolkit_header.c
 
- Date                 : 03/08/2017 13:22:27
+ Date                 : 07/08/2017 10:43:19
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -11,11 +11,11 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include "session_header.h"
+#include "toolkit_header.h"
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
-void session_header__INITIALISATION(void) {
+void toolkit_header__INITIALISATION(void) {
 }
 

@@ -1,15 +1,15 @@
 /******************************************************************************
 
- File Name            : session_header_init.h
+ File Name            : toolkit_header_init.h
 
- Date                 : 03/08/2017 13:22:27
+ Date                 : 07/08/2017 10:43:19
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
 ******************************************************************************/
 
-#ifndef _session_header_init_h
-#define _session_header_init_h
+#ifndef _toolkit_header_init_h
+#define _toolkit_header_init_h
 
 /*------------------------
    INITIALISATION Clause

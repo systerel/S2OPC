@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 03/08/2017 13:22:21
+ Date                 : 07/08/2017 10:43:13
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -89,6 +89,15 @@ typedef enum {
    constants__c_buffer_out_state_indet,
    constants__e_buffer_out_msg_written
 } constants__t_buffer_out_state_i;
+typedef enum {
+   constants__e_msg_request_type,
+   constants__e_msg_response_type
+} constants__t_msg_header_type;
+typedef enum {
+   constants__e_msg_session_treatment_class,
+   constants__e_msg_session_service_class,
+   constants__e_msg_public_service_class
+} constants__t_msg_service_class;
 typedef enum {
    constants__c_msg_type_indet,
    constants__e_msg_public_service_req,

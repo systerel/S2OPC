@@ -2,7 +2,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 03/08/2017 13:22:24
+ Date                 : 07/08/2017 10:43:16
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -20,8 +20,6 @@
    SEES Clause
   --------------*/
 #include "constants.h"
-#include "message_in_bs.h"
-#include "message_out_bs.h"
 
 /*------------------------
    INITIALISATION Clause

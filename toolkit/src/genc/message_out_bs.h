@@ -2,7 +2,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 03/08/2017 13:22:25
+ Date                 : 07/08/2017 10:43:16
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -30,16 +30,18 @@ extern void message_out_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void message_out_bs__alloc_msg_header(
+extern void message_out_bs__alloc_app_req_msg_header(
    const constants__t_msg_type_i message_out_bs__msg_type,
-   const constants__t_msg_i message_out_bs__msg,
+   const constants__t_msg_i message_out_bs__req_msg,
    constants__t_msg_header_i * const message_out_bs__nmsg_header);
 extern void message_out_bs__alloc_req_msg(
    const constants__t_msg_type_i message_out_bs__msg_type,
+   constants__t_msg_header_i * const message_out_bs__nmsg_header,
    constants__t_msg_i * const message_out_bs__nmsg);
 extern void message_out_bs__alloc_resp_msg(
    const constants__t_msg_type_i message_out_bs__msg_type,
    const constants__t_msg_i message_out_bs__req_msg_ctx,
+   constants__t_msg_header_i * const message_out_bs__nmsg_header,
    constants__t_msg_i * const message_out_bs__nmsg);
 extern void message_out_bs__bless_msg_out(
    const constants__t_msg_type_i message_out_bs__msg_type,
@@ -66,7 +68,6 @@ extern void message_out_bs__is_valid_msg_out(
 extern void message_out_bs__is_valid_msg_out_header(
    const constants__t_msg_header_i message_out_bs__msg_header,
    t_bool * const message_out_bs__bres);
-extern void message_out_bs__msg_out_memory_changed(void);
 extern void message_out_bs__write_activate_msg_user(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_user_i message_out_bs__user);
