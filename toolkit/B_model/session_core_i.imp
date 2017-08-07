@@ -96,7 +96,7 @@ OPERATIONS
     END
     ;
     
-    nsession, service_ret <-- srv_create_req_and_resp (channel, req_handle, create_req_msg, create_resp_msg) =
+    nsession, service_ret <-- srv_create_req_and_resp (channel, create_req_msg, create_resp_msg) =
     VAR
         l_nsession,
         l_valid_session,
@@ -221,7 +221,7 @@ OPERATIONS
     END
     ;  
     
-    ret <-- srv_activate_req_and_resp (channel, session, req_handle, user, activate_req_msg, activate_resp_msg) =
+    ret <-- srv_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg) =
     VAR
         l_channel,
         l_user,
@@ -392,7 +392,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- srv_close_req_and_resp (channel, session, req_handle, close_req_msg, close_resp_msg) =
+    ret <-- srv_close_req_and_resp (channel, session, close_req_msg, close_resp_msg) =
     BEGIN
         /* TODO: actions on pending requests or current subscriptions to manage (see request) */
         /* No need to store the handle since we will send response in same step */

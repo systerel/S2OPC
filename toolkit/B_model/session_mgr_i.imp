@@ -114,7 +114,7 @@ OPERATIONS
     END
     ;
     
-    session, service_ret <-- server_receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
+    session, service_ret <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
     VAR
         l_valid_session,
         l_session_state,
@@ -125,7 +125,7 @@ OPERATIONS
         CASE req_typ OF
             EITHER e_msg_session_create_req THEN
                 // SESSION CREATION REQUEST
-                session, service_ret <-- srv_create_req_and_resp (channel, req_handle, req_msg, resp_msg)
+                session, service_ret <-- srv_create_req_and_resp (channel, req_msg, resp_msg)
             OR e_msg_session_activate_req THEN
                 // SESSION ACTIVATION REQUEST
                 // TODO: add a local operation for rest
@@ -144,7 +144,7 @@ OPERATIONS
                         IF l_valid_user = TRUE
                         THEN
                             // TODO: differentiate sc_activate from user_activate directly here
-                            service_ret <-- srv_activate_req_and_resp (channel, session, req_handle, l_user, req_msg, resp_msg)
+                            service_ret <-- srv_activate_req_and_resp (channel, session, l_user, req_msg, resp_msg)
                         ELSE
                             // invalid user in msg => no session change
                             service_ret := e_sc_bad_identity_token_invalid
@@ -179,7 +179,7 @@ OPERATIONS
                         IF l_session_channel = channel
                         THEN
                             // TODO: respond to pending requests with error if close succeeded ?
-                            service_ret <-- srv_close_req_and_resp (channel, session, req_handle, req_msg, resp_msg)
+                            service_ret <-- srv_close_req_and_resp (channel, session, req_msg, resp_msg)
                         ELSE
                             // Close anyway since incorrect channel usage is unexpected
                             server_close_session(session);

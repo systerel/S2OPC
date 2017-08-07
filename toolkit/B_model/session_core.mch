@@ -221,11 +221,10 @@ OPERATIONS
     ;
     
     // Server receives create session request on channel and sends response
-    nsession, service_ret <-- srv_create_req_and_resp (channel, req_handle, create_req_msg, create_resp_msg) = 
+    nsession, service_ret <-- srv_create_req_and_resp (channel, create_req_msg, create_resp_msg) = 
     PRE
         channel : t_channel_i  &
         channel : s_channel_connected &
-        req_handle : t_request_handle_i &
         create_req_msg : t_msg_i &
         create_req_msg = c_msg_in &
         c_msg_in : t_msg &
@@ -383,7 +382,7 @@ OPERATIONS
     ;
     
     // Server receives a user activate request and sends response
-    ret <-- srv_activate_req_and_resp (channel, session, req_handle, user, activate_req_msg, activate_resp_msg) =
+    ret <-- srv_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -391,7 +390,6 @@ OPERATIONS
         session : s_session &
         a_state(session) : {e_session_created, e_session_userActivated,
         					e_session_scOrphaned} &
-        req_handle : t_request_handle_i &
         user : t_user_i &
         user : t_user &
         activate_req_msg : t_msg_i &
@@ -559,7 +557,7 @@ OPERATIONS
     ;
     
     
-    ret <-- srv_close_req_and_resp (channel, session, req_handle, close_req_msg, close_resp_msg) =
+    ret <-- srv_close_req_and_resp (channel, session, close_req_msg, close_resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -569,7 +567,6 @@ OPERATIONS
         a_state(session) : {e_session_created, 
             e_session_userActivating, 
             e_session_userActivated} &
-        req_handle : t_request_handle_i &
         close_req_msg : t_msg_i &
         close_req_msg = c_msg_in &
         c_msg_in : t_msg &

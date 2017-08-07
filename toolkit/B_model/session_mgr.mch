@@ -69,6 +69,7 @@ OPERATIONS
         channel : t_channel_i &
         channel : s_channel_connected &
         req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
         a_msg_in_type : {e_msg_session_create_resp,
@@ -84,11 +85,10 @@ OPERATIONS
     END
     ;
     
-    session, service_ret <-- server_receive_session_req (channel, req_handle, session_token, req_msg, req_typ, resp_msg) =
+    session, service_ret <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
-        req_handle : t_request_handle_i &
         session_token : t_session_token_i &
         req_msg : t_msg_i &
         req_msg : t_msg &
@@ -140,6 +140,7 @@ OPERATIONS
         channel : t_channel_i &
         channel : s_channel_connected &
         req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
         c_msg_in : t_msg &
         a_msg_in_type : s_service_on_session_resps
     THEN
@@ -152,6 +153,7 @@ OPERATIONS
         channel : t_channel_i &
         channel : s_channel_connected &
         req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
         session_token : t_session_token_i &
         c_msg_in : t_msg &
         a_msg_in_type : s_service_on_session_reqs
@@ -174,6 +176,7 @@ OPERATIONS
         channel : s_channel_connected   &
         session  : t_session_i &
         req_handle : t_request_handle_i &
+        req_handle : s_request_handle &
         c_msg_in : t_msg &
         c_msg_out : t_msg  &
         a_msg_in_type : s_service_on_session_reqs &

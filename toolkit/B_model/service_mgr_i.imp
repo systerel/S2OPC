@@ -218,7 +218,7 @@ OPERATIONS
         IF l_valid_msg_header = TRUE &
             l_valid_msg = TRUE
         THEN
-            l_req_handle <-- fresh_req_handle;
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_create_resp);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle  = TRUE
             THEN
@@ -241,11 +241,11 @@ OPERATIONS
                         END;
                         IF l_ret /= e_sc_ok
                         THEN
-                            remove_req_handle (l_req_handle);
+                            client_remove_req_handle (l_req_handle);
                             cli_close_session (session)
                         END
                     ELSE
-                        remove_req_handle (l_req_handle);
+                        client_remove_req_handle (l_req_handle);
                         cli_close_session (session)
                     END
                 ELSE
@@ -287,7 +287,7 @@ OPERATIONS
                 IF l_valid_msg = TRUE &
                     l_valid_msg_header = TRUE
                 THEN
-                    l_req_handle <-- fresh_req_handle;
+                    l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_resp);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                     IF l_valid_req_handle = TRUE
                     THEN
@@ -308,7 +308,7 @@ OPERATIONS
                             /* TODO: something in case of failure ? */
                             IF l_ret /= e_sc_ok
                             THEN
-                                remove_req_handle (l_req_handle);
+                                client_remove_req_handle (l_req_handle);
                                 cli_close_session (l_session)
                             END
                         END
@@ -347,7 +347,7 @@ OPERATIONS
         IF l_valid_msg = TRUE &
             l_valid_msg_header = TRUE
         THEN
-            l_req_handle <-- fresh_req_handle;
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_activate_resp);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
@@ -367,7 +367,7 @@ OPERATIONS
                     END;
                     IF l_ret /= e_sc_ok
                     THEN
-                        remove_req_handle (l_req_handle);
+                        client_remove_req_handle (l_req_handle);
                         cli_close_session (session)
                     END
                 END
@@ -393,6 +393,7 @@ OPERATIONS
         l_req_msg,
         l_valid_req,
         l_request_handle,
+        l_valid_req_handle,
         l_session_token,
         l_resp_msg_typ,
         l_resp_msg,
@@ -409,10 +410,12 @@ OPERATIONS
         IF l_valid_req_header = TRUE
         THEN
             l_request_handle <-- read_msg_header_req_handle (l_req_msg_header);
+            l_valid_req_handle <-- is_valid_req_handle (l_request_handle);
             l_session_token <-- read_msg_req_header_session_token (l_req_msg_header);
-            /* TODOnow: check request handle and session token */
+            /* TODOnow: check request session token */
             l_checked_req_header := TRUE;
-            IF l_checked_req_header = TRUE
+            IF l_checked_req_header = TRUE &
+                l_valid_req_handle = TRUE
             THEN
                 l_req_msg <-- decode_msg (msg_buffer);
                 l_valid_req <-- is_valid_msg_in (l_req_msg);
@@ -425,7 +428,7 @@ OPERATIONS
                     IF l_valid_msg = TRUE &
                         l_valid_resp_header = TRUE
                     THEN
-                        l_session, l_ret <-- server_receive_session_req (channel, l_request_handle, l_session_token, l_req_msg, req_typ, l_resp_msg);
+                        l_session, l_ret <-- server_receive_session_req (channel, l_session_token, l_req_msg, req_typ, l_resp_msg);
                         write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
                         write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
                         l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
@@ -465,10 +468,10 @@ OPERATIONS
     VAR
         l_resp_msg_header,
         l_valid_resp_header,
-        l_checked_resp_header,
         l_resp_msg,
         l_valid_resp,
         l_request_handle,
+        l_validated_req_handle,
         l_session,
         l_session_state,
         l_session_user,
@@ -479,16 +482,15 @@ OPERATIONS
         IF l_valid_resp_header = TRUE
         THEN
             l_request_handle <-- read_msg_header_req_handle (l_resp_msg_header);
-            /* TODOnow: check request handle and session token */
-            l_checked_resp_header := TRUE;
-            IF l_checked_resp_header = TRUE
+            l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
+            IF l_validated_req_handle = TRUE
             THEN
                 l_resp_msg <-- decode_msg (msg_buffer);
                 l_valid_resp <-- is_valid_msg_in (l_resp_msg);
                 IF l_valid_resp = TRUE
                 THEN
                     l_session <-- client_receive_session_resp (channel, l_request_handle, resp_typ, l_resp_msg_header, l_resp_msg);
-                    remove_req_handle (l_request_handle);
+                    client_remove_req_handle (l_request_handle);
                     
                     /* TODOnow: move this behavior in session mgr ? */
                     // If session is created, activate it with async data if present
@@ -503,7 +505,8 @@ OPERATIONS
                     END;
                     /* resp message not used anymore => deallocate */
                     dealloc_msg_in (l_resp_msg)
-                END /* DECODE RESP CHECK */
+                END; /* DECODE RESP CHECK */
+                client_remove_req_handle (l_request_handle)
             END /* VALID RESP HEADER CHECK */
         END; /* DECODE RESP HEADER CHECK */
     
@@ -523,8 +526,8 @@ OPERATIONS
         l_req_msg_header,
         l_valid_req_header,
         l_request_handle,
+        l_valid_req_handle,
         l_session_token,
-        l_checked_req_header,
         l_is_valid_req,
         l_session,
         l_snd_session_err,
@@ -544,64 +547,67 @@ OPERATIONS
         l_req_msg_header <-- decode_msg_header (msg_buffer);
         l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
         IF l_valid_req_header = TRUE
-        THEN    
+        THEN
+            /* Check request handle */
             l_request_handle <-- read_msg_header_req_handle (l_req_msg_header);
-            l_session_token <-- read_msg_req_header_session_token (l_req_msg_header);
-            l_is_valid_req, l_session, l_snd_session_err <-- server_validate_session_service_req (channel, l_request_handle, l_session_token);
-            /* TODOnow: check request handle and session token */
-            l_checked_req_header := TRUE;
-            IF l_checked_req_header = TRUE &
-                l_is_valid_req = TRUE
+            l_valid_req_handle <-- is_valid_req_handle (l_request_handle);
+            IF l_valid_req_handle = TRUE
             THEN
-                l_req_msg <-- decode_msg (msg_buffer);
-                l_valid_req <-- is_valid_msg_in (l_req_msg);
-                IF l_valid_req = TRUE
+                /* Check valid session token used */
+                l_session_token <-- read_msg_req_header_session_token (l_req_msg_header);
+                l_is_valid_req, l_session, l_snd_session_err <-- server_validate_session_service_req (channel, l_request_handle, l_session_token);
+                IF l_is_valid_req = TRUE
                 THEN
-                    IF l_is_valid_req = TRUE
+                    l_req_msg <-- decode_msg (msg_buffer);
+                    l_valid_req <-- is_valid_msg_in (l_req_msg);
+                    IF l_valid_req = TRUE
                     THEN
-                        l_resp_msg_typ <-- get_response_type (req_typ);
-                        l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ, l_req_msg);
-                        l_valid_msg <-- is_valid_msg_out (l_resp_msg);
-                        l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
-                        IF l_valid_msg = TRUE &
-                            l_valid_resp_header = TRUE
+                        IF l_is_valid_req = TRUE
                         THEN
-                            CASE req_typ OF
-                                EITHER e_msg_session_read_req THEN
-                                    treat_read_request (l_req_msg, l_resp_msg);
-                                    /* TODO: set a returned status code result from read request */
-                                    write_msg_resp_header_service_status (l_resp_msg_header, e_sc_ok)
-                                OR e_msg_session_write_req THEN
-                                    // Write request case
-                                    l_session_user <-- get_session_user_or_indet (l_session);
-                                    l_ret <-- treat_write_request (l_req_msg, l_session_user);
-                                    write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
-                                    /* TODO: the following may fail (malloc) */
-                                    write_WriteResponse_msg_out(l_resp_msg);
-                                    dealloc_write_request_responses
-                                END
+                            l_resp_msg_typ <-- get_response_type (req_typ);
+                            l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ, l_req_msg);
+                            l_valid_msg <-- is_valid_msg_out (l_resp_msg);
+                            l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
+                            IF l_valid_msg = TRUE &
+                                l_valid_resp_header = TRUE
+                            THEN
+                                CASE req_typ OF
+                                    EITHER e_msg_session_read_req THEN
+                                        treat_read_request (l_req_msg, l_resp_msg);
+                                        /* TODO: set a returned status code result from read request */
+                                        write_msg_resp_header_service_status (l_resp_msg_header, e_sc_ok)
+                                    OR e_msg_session_write_req THEN
+                                        // Write request case
+                                        l_session_user <-- get_session_user_or_indet (l_session);
+                                        l_ret <-- treat_write_request (l_req_msg, l_session_user);
+                                        write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
+                                        /* TODO: the following may fail (malloc) */
+                                        write_WriteResponse_msg_out(l_resp_msg);
+                                        dealloc_write_request_responses
+                                    END
+                                END;
+                                l_is_valid_resp, l_snd_session_err <-- server_validate_session_service_resp (channel, l_session, l_request_handle);
+                                IF l_is_valid_resp = TRUE THEN
+                                    write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
+                                    l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
+                                    l_valid_buffer <-- is_valid_buffer_out (l_buffer_out);
+                                    IF l_valid_buffer = TRUE
+                                    THEN
+                                        l_ret <-- send_channel_msg_buffer (channel, l_buffer_out)
+                                    ELSE
+                                        /* allocation / encoding problem */
+                                        l_ret := e_sc_nok
+                                    END
+                                END;
+                                /* response message structures not necessary anymore */
+                                dealloc_msg_header_out (l_resp_msg_header);
+                                dealloc_msg_out (l_resp_msg)
                             END;
-                            l_is_valid_resp, l_snd_session_err <-- server_validate_session_service_resp (channel, l_session, l_request_handle);
-                            IF l_is_valid_resp = TRUE THEN
-                                write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
-                                l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
-                                l_valid_buffer <-- is_valid_buffer_out (l_buffer_out);
-                                IF l_valid_buffer = TRUE
-                                THEN
-                                    l_ret <-- send_channel_msg_buffer (channel, l_buffer_out)
-                                ELSE
-                                    /* allocation / encoding problem */
-                                    l_ret := e_sc_nok
-                                END
-                            END;
-                            /* response message structures not necessary anymore */
-                            dealloc_msg_header_out (l_resp_msg_header);
-                            dealloc_msg_out (l_resp_msg)
-                        END;
-                        /* request message not necessary anymore */
-                        dealloc_msg_in (l_req_msg)
-                    END
-                END /* DECODE REQ CHECK */
+                            /* request message not necessary anymore */
+                            dealloc_msg_in (l_req_msg)
+                        END
+                    END /* DECODE REQ CHECK */
+                END /* VALID SESSION REQ CHECK */
             END /* VALID REQ HEADER CHECK */
         END; /* DECODE REQ HEADER CHECK */
         IF l_valid_req_header = TRUE
@@ -618,7 +624,7 @@ OPERATIONS
         l_resp_msg_header,
         l_valid_resp_header,
         l_request_handle,
-        l_checked_resp_header,
+        l_validated_req_handle,
         l_is_valid_session_resp,
         l_resp_msg,
         l_valid_resp_msg,
@@ -628,21 +634,23 @@ OPERATIONS
         l_valid_resp_header <-- is_valid_msg_in_header (l_resp_msg_header);
         IF l_valid_resp_header = TRUE
         THEN
-        l_request_handle <-- read_msg_header_req_handle (l_resp_msg_header);
-            l_is_valid_session_resp <-- client_validate_session_service_resp (channel, l_request_handle);
-            /* TODOnow: check request handle and session token */
-            l_checked_resp_header := TRUE;
-            IF l_checked_resp_header = TRUE &
-                l_is_valid_session_resp = TRUE
+            l_request_handle <-- read_msg_header_req_handle (l_resp_msg_header);
+            l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
+            IF l_validated_req_handle = TRUE
             THEN
-                l_resp_msg <-- decode_msg (msg_buffer);
-                l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
-                IF l_valid_resp_msg = TRUE    
+                l_is_valid_session_resp <-- client_validate_session_service_resp (channel, l_request_handle);
+                IF l_is_valid_session_resp = TRUE
                 THEN
-                    l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
-                    cli_service_response (l_resp_msg, l_status)
-                END /* DECODE RESP CHECK */
-            END /* VALID RESP HEADER CHECK */
+                    l_resp_msg <-- decode_msg (msg_buffer);
+                    l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
+                    IF l_valid_resp_msg = TRUE    
+                    THEN
+                        l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
+                        cli_service_response (l_resp_msg, l_status)
+                    END /* DECODE RESP CHECK */
+                END; /* VALID REQ HANDLE ASSOCIATED TO A VALID SESSION */
+                client_remove_req_handle (l_request_handle)
+            END /* VALID REQ HANDLE */
         END; /* DECODE RESP HEADER CHECK */
         /* For services on session IN response messages will be provided to applicative
         TODO: dealloc header if not provided to app and separated from the msg body
@@ -652,7 +660,7 @@ OPERATIONS
         dealloc_msg_in_buffer (msg_buffer)
     END
     ;
-
+    
     server_receive_public_service_req (channel, req_typ, msg_buffer) =
     BEGIN
         /* TODO: no public service treated for now => at least return service failure and deallocate */
@@ -763,7 +771,7 @@ OPERATIONS
         IF l_valid_msg = TRUE &
             l_valid_msg_header = TRUE
         THEN
-            l_req_handle <-- fresh_req_handle;
+            l_req_handle <-- client_fresh_req_handle (e_msg_session_close_resp);
             l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
             IF l_valid_req_handle = TRUE
             THEN
@@ -784,7 +792,7 @@ OPERATIONS
                     END;
                     IF ret /= e_sc_ok
                     THEN
-                        remove_req_handle (l_req_handle);
+                        client_remove_req_handle (l_req_handle);
                         cli_close_session (session)
                     END
                 END
@@ -803,7 +811,8 @@ OPERATIONS
     VAR
         l_msg_header,
         l_valid_msg_header,
-        l_msg_typ,
+        l_req_typ,
+        l_resp_typ,
         l_valid_msg,
         l_channel,
         l_req_handle,
@@ -815,19 +824,20 @@ OPERATIONS
         l_valid_msg <-- is_valid_msg_out (req_msg);
         IF l_valid_msg = TRUE
         THEN
-            l_msg_typ <-- get_msg_in_type (req_msg);
-            CASE l_msg_typ OF
+            l_req_typ <-- get_msg_in_type (req_msg);
+            CASE l_req_typ OF
                 EITHER e_msg_session_read_req,
                     e_msg_session_write_req
                 THEN /* s_service_reqs */
-                    l_msg_header <-- alloc_app_req_msg_header (l_msg_typ, req_msg);
+                    l_resp_typ <-- get_response_type (l_req_typ);
+                    l_msg_header <-- alloc_app_req_msg_header (l_req_typ, req_msg);
                     l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
-                    l_req_handle <-- fresh_req_handle;
+                    l_req_handle <-- client_fresh_req_handle (l_resp_typ);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);
                     IF l_valid_req_handle = TRUE &
                         l_valid_msg_header = TRUE
                     THEN
-                        bless_msg_out (l_msg_typ, l_msg_header, req_msg);
+                        bless_msg_out (l_req_typ, l_msg_header, req_msg);
                         ret, l_channel, l_session_token <-- client_validate_session_service_req (session, l_req_handle,
  req_msg);
                         IF ret = e_sc_ok

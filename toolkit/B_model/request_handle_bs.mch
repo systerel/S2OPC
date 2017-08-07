@@ -22,18 +22,25 @@ SEES
     constants
     
 ABSTRACT_VARIABLES
-    s_request_handle
+    s_request_handle,
+    a_client_request
     
 INVARIANT
-    s_request_handle <: t_request_handle
+    s_request_handle <: t_request_handle &
+    /* Associate the request handle of a client request with its response */
+    a_client_request : s_request_handle --> s_service_resps
     
 INITIALISATION
-    s_request_handle :: {{}}
+    s_request_handle :: {{}} ||
+    a_client_request :: {{}}
     
 OPERATIONS  
     
-    request_handle <-- fresh_req_handle =
-    BEGIN
+    request_handle <-- client_fresh_req_handle (resp_typ) =
+    PRE
+        resp_typ : t_msg_type_i &
+        resp_typ : s_service_resps
+    THEN
         IF s_request_handle = t_request_handle
         THEN
             request_handle := c_request_handle_indet
@@ -44,7 +51,8 @@ OPERATIONS
                 l_request_handle /: s_request_handle
             THEN 
                 request_handle := l_request_handle ||
-                s_request_handle := s_request_handle \/ {l_request_handle}
+                s_request_handle := s_request_handle \/ {l_request_handle} ||
+                a_client_request (l_request_handle) := resp_typ
             END
         END
     END
@@ -58,14 +66,26 @@ OPERATIONS
     END
     ;
     
-    remove_req_handle (req_handle) =
+    client_remove_req_handle (req_handle) =
     PRE
-        req_handle : t_request_handle_i
+        req_handle : t_request_handle_i &
+        req_handle : s_request_handle
     THEN
         IF req_handle : t_request_handle
         THEN
-            s_request_handle := s_request_handle - {req_handle}
+            s_request_handle := s_request_handle - {req_handle} ||
+            a_client_request := {req_handle} <<| a_client_request
         END
+    END
+    ;
+    
+    ret <-- client_validate_response_request_handle (req_handle, resp_typ) =
+    PRE
+        req_handle : t_request_handle_i &
+        resp_typ : t_msg_type_i &
+        resp_typ : s_service_resps
+    THEN
+        ret := bool(req_handle : s_request_handle & a_client_request (req_handle) = resp_typ)
     END
     
 END
