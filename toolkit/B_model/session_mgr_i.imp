@@ -26,7 +26,8 @@ SEES
     request_handle_bs
     
 IMPORTS
-    session_core
+    session_core,
+    session_request_handle_bs
     
 PROMOTES
     get_session_state_or_closed,
@@ -36,7 +37,6 @@ PROMOTES
     delete_session,
     client_secure_channel_lost,
     server_secure_channel_lost,
-    cli_close_session,
     server_close_session,
     
     is_valid_session,
@@ -54,7 +54,7 @@ OPERATIONS
         l_resp_status,
         l_ret
     IN
-        l_session <-- get_session_from_req_handle (req_handle);
+        l_session <-- client_get_session_and_remove_request_handle (req_handle);
         l_session_state <-- get_session_state_or_closed (l_session); // Note: state != closed => session is valid
         l_resp_status <-- read_msg_resp_header_service_status (resp_header);
         IF l_resp_status = e_sc_ok
@@ -65,7 +65,7 @@ OPERATIONS
                         l_session_channel <-- get_session_channel (l_session);
                         IF l_session_channel = channel THEN
                             l_session_token <-- read_create_session_msg_session_token (resp_msg);
-                            l_ret <-- cli_create_resp (channel, l_session, req_handle, l_session_token, resp_msg)
+                            l_ret <-- cli_create_resp (channel, l_session, l_session_token, resp_msg)
                         ELSE
                             l_ret := e_sc_bad_secure_channel_id_invalid
                         END
@@ -78,7 +78,7 @@ OPERATIONS
                     THEN
                         l_session_channel <-- get_session_channel (l_session);
                         IF l_session_channel = channel THEN	
-                            l_ret <-- cli_activate_resp (channel, l_session, req_handle, resp_msg)
+                            l_ret <-- cli_activate_resp (channel, l_session, resp_msg)
                         ELSE
                             l_ret := e_sc_bad_secure_channel_id_invalid
                         END
@@ -89,8 +89,9 @@ OPERATIONS
                     IF l_session_state = e_session_closing
                     THEN
                         l_session_channel <-- get_session_channel (l_session);
-                        IF l_session_channel = channel THEN	
-                            cli_close_resp (channel, l_session, req_handle, resp_msg);
+                        IF l_session_channel = channel THEN
+                            client_remove_all_request_handles (l_session);
+                            cli_close_resp (channel, l_session, resp_msg);
                             l_ret := e_sc_ok
                         ELSE
                             l_ret := e_sc_bad_secure_channel_id_invalid
@@ -203,7 +204,7 @@ OPERATIONS
     ret, channel, session_token <-- client_validate_session_service_req (session, req_handle, req_msg) =
     VAR
         l_session_state,
-        ret
+        l_ret
     IN
         session_token := c_session_token_indet;
         channel := c_channel_indet;
@@ -211,10 +212,13 @@ OPERATIONS
         l_session_state <-- get_session_state_or_closed (session); // l_session_state /= closed => is_valid_session = TRUE
         IF l_session_state = e_session_userActivated
         THEN
-            ret, channel, session_token <-- cli_new_session_service_req (session, req_handle)
+            channel, session_token <-- cli_new_session_service_req (session);
+            client_add_session_request_handle (session, req_handle);
+            l_ret := e_sc_ok
         ELSE
-            ret := e_sc_bad_invalid_argument
-        END
+            l_ret := e_sc_bad_invalid_argument
+        END;
+        ret := l_ret
     END;
     
     bres <-- client_validate_session_service_resp (channel, req_handle) =
@@ -224,8 +228,7 @@ OPERATIONS
         l_session_state,
         l_session_channel
     IN
-        /* TODO: do not require resp msg ? */
-        l_session <-- get_session_from_req_handle (req_handle);
+        l_session <-- client_get_session_and_remove_request_handle (req_handle);
         l_valid_session <-- is_valid_session (l_session);
         l_session_state <-- get_session_state_or_closed (l_session);
         IF l_valid_session = TRUE
@@ -245,10 +248,6 @@ OPERATIONS
             END
         ELSE
             bres := FALSE
-        END;
-        IF bres = TRUE
-        THEN
-            bres <-- cli_record_session_service_resp (l_session, req_handle)
         END
     END;
     
@@ -259,7 +258,7 @@ OPERATIONS
         l_session_state,
         l_session_channel
     IN
-        /* TODO: req handle to be recorded on server side at session level ? => considered unique in 1 session (make possible to check req_handle on call to *_resp operation) */
+        /* TODO: req handle to be recorded on server side at session/request level ? (no guarantee to be unique on a session / connection) */
         l_session <-- get_session_from_token (session_token);
         l_valid_session <-- is_valid_session (l_session);
         l_session_state <-- get_session_state_or_closed (l_session);
@@ -320,7 +319,8 @@ OPERATIONS
     ret <-- client_create_req (session, channel, req_handle, create_req_msg) = 
     VAR
         l_valid_session,
-        l_session_state
+        l_session_state,
+        l_ret
     IN
         l_valid_session <-- is_valid_session (session);
         l_session_state <-- get_session_state_or_closed (session);
@@ -328,19 +328,23 @@ OPERATIONS
         THEN
             IF l_session_state = e_session_init
             THEN
-                ret <-- cli_create_req (session, channel, req_handle, create_req_msg)
+                cli_create_req (session, channel, create_req_msg);
+                client_add_session_request_handle (session, req_handle);
+                l_ret := e_sc_ok
             ELSE
-                ret := e_sc_bad_invalid_state
+                l_ret := e_sc_bad_invalid_state
             END
         ELSE
-            ret := e_sc_bad_invalid_argument
-        END
+            l_ret := e_sc_bad_invalid_argument
+        END;
+        ret := l_ret
     END;
     
     ret, channel, session_token <-- client_user_activate_req (session, req_handle, user, activate_req_msg) =
     VAR
         l_valid_session,
-        l_session_state
+        l_session_state,
+        l_ret
     IN
         l_valid_session <-- is_valid_session (session);
         IF l_valid_session = TRUE
@@ -349,24 +353,30 @@ OPERATIONS
             IF l_session_state = e_session_created or
                 l_session_state = e_session_userActivated
             THEN
-                ret, channel, session_token <-- cli_user_activate_req (session, req_handle, user, activate_req_msg)
+                l_ret, channel, session_token <-- cli_user_activate_req (session, user, activate_req_msg);
+                IF l_ret = e_sc_ok
+                THEN
+                    client_add_session_request_handle (session, req_handle)
+                END
             ELSE
-                ret := e_sc_bad_invalid_state;
+                l_ret := e_sc_bad_invalid_state;
                 channel := c_channel_indet;
                 session_token := c_session_token_indet
             END
         ELSE
-            ret := e_sc_bad_invalid_argument;
+            l_ret := e_sc_bad_invalid_argument;
             channel := c_channel_indet;
             session_token := c_session_token_indet            
-        END
+        END;
+        ret := l_ret
     END
     ;
     
     ret, session_token <-- client_sc_activate_req (session , req_handle, channel, activate_req_msg) =
     VAR
         l_valid_session,
-        l_session_state
+        l_session_state,
+        l_ret
     IN
         l_valid_session <-- is_valid_session (session);
         IF l_valid_session = TRUE
@@ -375,22 +385,26 @@ OPERATIONS
             IF l_session_state = e_session_scOrphaned or 
                 l_session_state = e_session_userActivated
             THEN
-                ret, session_token <-- cli_sc_activate_req (session , req_handle, channel, activate_req_msg)
+                session_token <-- cli_sc_activate_req (session , channel, activate_req_msg);
+                client_add_session_request_handle (session, req_handle);
+                l_ret := e_sc_ok
             ELSE
-                ret := e_sc_bad_invalid_state;
+                l_ret := e_sc_bad_invalid_state;
                 session_token := c_session_token_indet
             END
         ELSE
-            ret := e_sc_bad_invalid_argument;
+            l_ret := e_sc_bad_invalid_argument;
             session_token := c_session_token_indet
-        END
+        END;
+        ret := l_ret
     END
     ;
     
     ret, channel, session_token <-- client_close_req (session, req_handle, close_req_msg) =
     VAR
         l_valid_session,
-        l_session_state
+        l_session_state,
+        l_ret
     IN
         l_valid_session <-- is_valid_session(session);
         IF l_valid_session = TRUE
@@ -400,17 +414,29 @@ OPERATIONS
                 l_session_state = e_session_userActivating or
                 l_session_state = e_session_userActivated
             THEN
-                ret, channel, session_token <-- cli_close_req (session, req_handle, close_req_msg)
+                l_ret, channel, session_token <-- cli_close_req (session, close_req_msg);
+                IF l_ret = e_sc_ok
+                THEN
+                    client_add_session_request_handle (session, req_handle)
+                END
             ELSE
-                ret := e_sc_bad_invalid_state;
+                l_ret := e_sc_bad_invalid_state;
                 channel := c_channel_indet;
                 session_token := c_session_token_indet
             END
         ELSE
-            ret := e_sc_bad_invalid_argument;
+            l_ret := e_sc_bad_invalid_argument;
             channel := c_channel_indet;
             session_token := c_session_token_indet
-        END
+        END;
+        ret := l_ret
+    END
+    ;
+    
+    client_session_mgr_close_session (session) =
+    BEGIN
+        client_remove_all_request_handles (session);
+        cli_close_session(session)
     END
     
 END

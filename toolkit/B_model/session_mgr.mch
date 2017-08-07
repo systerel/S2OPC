@@ -284,6 +284,14 @@ OPERATIONS
     END
     ;
     
+    client_session_mgr_close_session (session) =
+    PRE
+        session : t_session_i
+    THEN
+        skip
+    END
+    ;
+    
     /*PROMOTES*/
     session <-- get_session_from_token (session_token) =
     PRE
@@ -314,14 +322,6 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : s_channel_connected
-    THEN
-        skip
-    END
-    ;
-    
-    cli_close_session (session) =
-    PRE
-        session : t_session_i
     THEN
         skip
     END

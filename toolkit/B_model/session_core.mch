@@ -39,9 +39,6 @@ DEFINITIONS
     av_sessions_iterated,
     av_sessions_orphaned;
     
-    d_var_imp ==
-    a_cli_pending_requests;
-    
     d_typing ==    
     s_session <: t_session &    
     a_state : s_session --> t_sessionState & // a session shall be associated to a state    
@@ -55,32 +52,22 @@ DEFINITIONS
     av_sessions_to_iterate <: av_sessions_orphaned &
     av_sessions_iterated <: av_sessions_orphaned &
     av_sessions_to_iterate /\ av_sessions_iterated = {};
-    
-    d_typing_imp == 
-    a_cli_pending_requests : t_request_handle +-> s_session;
-    
+        
     d_close_session (session) ==
     a_channel := {session} <<| a_channel               || // If session had a channel, remove this relation
     a_orphaned := {session} <<| a_orphaned             || // If session was orphaned, remove this relation
     a_user := {session} <<| a_user                     || // If session had a user, remove this relation
     a_token := a_token |>> {session}                   || // If session had a token, remove this relation
-    a_cli_pending_requests := a_cli_pending_requests |>> {session}  ||// If session had pending requests, remove those relations
     a_state(session) := e_session_closed // keep session token as used
     
 ABSTRACT_VARIABLES
     d_variables,
-    d_var_it,
-    d_var_imp
+    d_var_it
     
 INVARIANT
     d_typing &
     
     d_typing_it &
-    
-    d_typing_imp &
-    
-    // Closed or Init sessions shall not have pending requests
-    a_cli_pending_requests |> (dom(a_state |> {e_session_closed, e_session_init})) = {} &
     
     // All sessions not (orphaned or closed or init) have a channel associated and only those sessions
     dom(a_state |>> {e_session_scOrphaned, e_session_closed, e_session_init}) = dom(a_channel) &
@@ -108,24 +95,9 @@ INITIALISATION
     av_sessions_orphaned :(av_sessions_orphaned <: t_session &
         av_sessions_to_iterate <: av_sessions_orphaned &
         av_sessions_iterated <: av_sessions_orphaned &
-        av_sessions_to_iterate /\ av_sessions_iterated = {}) ||
-    
-    /* imp */
-    a_cli_pending_requests := {}
+        av_sessions_to_iterate /\ av_sessions_iterated = {})
     
 OPERATIONS
-    
-    session <-- get_session_from_req_handle (req_handle) =
-    PRE
-        req_handle : t_request_handle_i
-    THEN
-        CHOICE
-            session :(session : t_session_i & session : s_session)
-        OR
-            session := c_session_indet
-        END
-    END
-    ;
     
     session <-- get_session_from_token (session_token) =
     PRE
@@ -188,7 +160,7 @@ OPERATIONS
     ;
     
     // Client sends create session request on channel
-    ret <-- cli_create_req (session, channel, req_handle, create_req_msg) = 
+    cli_create_req (session, channel, create_req_msg) = 
     PRE
         session : t_session_i &
         session : t_session &
@@ -196,27 +168,13 @@ OPERATIONS
         a_state(session) = e_session_init &
         channel : t_channel_i &
         channel : s_channel_connected &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
         create_req_msg : t_msg_i &
         create_req_msg = c_msg_out &
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_create_req
     THEN
-        IF req_handle /: dom (a_cli_pending_requests)
-        THEN
-            CHOICE
-                a_channel(session) := channel                                                ||
-                a_state(session) := e_session_creating                                       ||
-                a_cli_pending_requests := a_cli_pending_requests <+ {req_handle |-> session} ||
-                ret := e_sc_ok
-            OR
-                // invalid request handle, channel not connected, etc.
-                ret :: {e_sc_bad_invalid_argument}
-            END
-        ELSE
-            ret := e_sc_bad_invalid_argument
-        END // end check valid req handle
+        a_channel(session) := channel          ||
+        a_state(session) := e_session_creating
     END
     ;
     
@@ -265,7 +223,7 @@ OPERATIONS
     ;
     
     // Client receive create session response from server
-    ret <-- cli_create_resp (channel, session, req_handle, session_token, create_resp_msg) =
+    ret <-- cli_create_resp (channel, session, session_token, create_resp_msg) =
     PRE
         channel       : t_channel_i &
         channel       : s_channel_connected   &
@@ -274,22 +232,18 @@ OPERATIONS
         a_channel(session) = channel &
         a_state(session) = e_session_creating &
         session_token : t_session_token_i &
-        req_handle    : t_request_handle_i &
         create_resp_msg : t_msg_i &
         create_resp_msg = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_create_resp
     THEN
         IF session_token : t_session_token &
-            session_token /: dom(a_token) & // check it is a fresh session token
-            session /: ran(a_token) & // check it is a fresh session
-            req_handle : t_request_handle &
-            req_handle : dom(a_cli_pending_requests)
+            session_token /: dom(a_token) // check it is a fresh session token
+            // TODO: since it is a global freshness it could be an issue when connecting to several endpoints/servers => separate token of client (session --> token) and those of server (token >-> session)
         THEN
             CHOICE
                 a_state(session) := e_session_created                     ||
                 a_token := a_token <+ {session_token |-> session} ||
-                a_cli_pending_requests := a_cli_pending_requests - {req_handle |-> session} ||
                 ret := e_sc_ok
             OR
                 // Constraints on message content not verified
@@ -302,13 +256,11 @@ OPERATIONS
     ;
     
     // Client sends a user activate request for current session
-    ret, channel, session_token <-- cli_user_activate_req (session, req_handle, user, activate_req_msg) =
+    ret, channel, session_token <-- cli_user_activate_req (session, user, activate_req_msg) =
     PRE
         session : t_session_i &
         session : s_session &
         a_state(session) : {e_session_created, e_session_userActivated} &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
         user : t_user_i &
         user : t_user &
         activate_req_msg : t_msg_i &
@@ -317,26 +269,16 @@ OPERATIONS
         a_msg_out_type = e_msg_session_activate_req
     THEN
         CHOICE
-            IF req_handle /: dom (a_cli_pending_requests)
-            THEN
-                a_cli_pending_requests := a_cli_pending_requests <+ {req_handle |-> session} ||
-                a_state(session) := e_session_userActivating ||
-                a_user(session) := user              ||
-                ret := e_sc_ok                          ||
-                channel :(channel : t_channel_i & channel : s_channel_connected) ||
-                session_token :(session_token : t_session_token_i & session_token : dom(a_token))
-            ELSE
-                ret := e_sc_bad_invalid_argument ||
-                channel := c_channel_indet ||
-                session_token := c_session_token_indet
-            END
+            a_state(session) := e_session_userActivating ||
+            a_user(session) := user              ||
+            ret := e_sc_ok                          ||
+            channel :(channel : t_channel_i & channel : s_channel_connected) ||
+            session_token :(session_token : t_session_token_i & session_token : dom(a_token))
         OR
             // applicative code provided invalid user: no change
-            // no more request handle available
             // ...
             ret :: {e_sc_bad_identity_token_invalid,
-                e_sc_bad_unexpected_error,
-                e_sc_bad_out_of_memory} ||
+                e_sc_bad_unexpected_error} ||
             channel := c_channel_indet ||
             session_token := c_session_token_indet
         END
@@ -344,13 +286,11 @@ OPERATIONS
     ;
     
     // Client sends activate request for new channel: keep for possible applicative initiative on sc activate ?
-    ret, session_token <-- cli_sc_activate_req (session, req_handle, channel, activate_req_msg) =
+    session_token <-- cli_sc_activate_req (session, channel, activate_req_msg) =
     PRE
         session : t_session_i &
         session : s_session &
         a_state(session) : {e_session_scOrphaned, e_session_userActivated} & // last state never used in toolkit (no app API provided)
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
         channel : t_channel_i &
         channel : s_channel_connected &
         activate_req_msg : t_msg_i &
@@ -358,26 +298,10 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_activate_req
     THEN
-        CHOICE
-            IF req_handle /: dom (a_cli_pending_requests)
-            THEN
-                a_cli_pending_requests := a_cli_pending_requests <+ {req_handle |-> session} ||
-                a_channel(session) := channel ||
-                a_state(session) := e_session_scActivating ||
-                a_orphaned := {session} <<| a_orphaned ||
-                ret := e_sc_ok ||
-                session_token :(session_token : t_session_token_i & session_token : dom(a_token))
-            ELSE
-                ret := e_sc_bad_invalid_argument ||
-                session_token := c_session_token_indet
-            END
-        OR
-            ret :: {e_sc_bad_identity_token_invalid, 
-                e_sc_bad_invalid_argument,
-                e_sc_bad_unexpected_error,
-                e_sc_bad_out_of_memory} ||
-            session_token := c_session_token_indet
-        END
+        a_channel(session) := channel ||
+        a_state(session) := e_session_scActivating ||
+        a_orphaned := {session} <<| a_orphaned ||
+        session_token :(session_token : t_session_token_i & session_token = a_token~(session))
     END
     ;
     
@@ -435,7 +359,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- cli_activate_resp (channel, session, req_handle, activate_resp_msg) = 
+    ret <-- cli_activate_resp (channel, session, activate_resp_msg) = 
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -443,27 +367,18 @@ OPERATIONS
         session : s_session &
         a_channel(session) = channel &
         a_state(session) : {e_session_userActivating, e_session_scActivating} &
-        req_handle : t_request_handle_i &
         activate_resp_msg : t_msg_i &
         activate_resp_msg = c_msg_in &
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_activate_resp
     THEN
-        IF req_handle : t_request_handle &
-            req_handle : dom(a_cli_pending_requests) 
-            // current channel is the channel associated to the current session
-        THEN
-            CHOICE
-                a_state(session) := e_session_userActivated ||
-                a_cli_pending_requests := a_cli_pending_requests - {req_handle |-> session} ||
-                ret := e_sc_ok
-                // modify credential if user was already associated, sends response
-            OR
-                // status nok in response
-                ret := e_sc_nok
-            END
-        ELSE
-            ret := e_sc_bad_invalid_argument
+        CHOICE
+            a_state(session) := e_session_userActivated ||
+            ret := e_sc_ok
+            // modify credential if user was already associated, sends response
+        OR
+            // TBD: invalid response msg content
+            ret := e_sc_nok
         END
     END
     ;
@@ -520,33 +435,23 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- cli_close_req (session, req_handle, close_req_msg) =
+    ret, channel, session_token <-- cli_close_req (session, close_req_msg) =
     PRE
         session : t_session_i &
         session : s_session &
         a_state(session) : {e_session_created, 
             e_session_userActivating, 
             e_session_userActivated} &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle &
         close_req_msg : t_msg_i &
         close_req_msg = c_msg_out &
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_close_req
     THEN
         CHOICE
-            IF req_handle /: dom (a_cli_pending_requests)
-            THEN
-                a_cli_pending_requests := a_cli_pending_requests <+ {req_handle |-> session} ||
-                a_state(session) := e_session_closing ||
-                ret := e_sc_ok ||
-                channel :(channel : t_channel_i & channel : s_channel_connected) ||
-                session_token :(session_token : t_session_token_i & session_token : dom(a_token))
-            ELSE
-                ret := e_sc_bad_invalid_argument ||
-                channel := c_channel_indet ||
-                session_token := c_session_token_indet
-            END
+            a_state(session) := e_session_closing ||
+            ret := e_sc_ok ||
+            channel :(channel : t_channel_i & channel : s_channel_connected) ||
+            session_token :(session_token : t_session_token_i & session_token : dom(a_token))
         OR
             ret :: {e_sc_bad_out_of_memory, 
                 e_sc_bad_unexpected_error} ||
@@ -583,7 +488,7 @@ OPERATIONS
     END
     ;
     
-    cli_close_resp (channel, session, req_handle, close_resp_msg) =
+    cli_close_resp (channel, session, close_resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -591,7 +496,6 @@ OPERATIONS
         session : s_session &
         a_channel(session) = channel &
         a_state(session) = e_session_closing &
-        req_handle : t_request_handle_i &
         close_resp_msg : t_msg_i &
         close_resp_msg = c_msg_in &
         c_msg_in : t_msg &
@@ -601,6 +505,18 @@ OPERATIONS
         d_close_session(session)
     END
     ;
+    
+    channel, session_token <-- cli_new_session_service_req (session) =
+    PRE
+        session : t_session_i &
+        session : s_session &
+        a_state(session) = e_session_userActivated
+    THEN
+        session_token :(session_token : t_session_token_i & a_token(session_token) = session) ||
+        channel :(channel : t_channel_i & channel = a_channel(session))
+    END
+    ;
+
     
     cli_close_session (session) =
     PRE
@@ -623,46 +539,7 @@ OPERATIONS
         d_close_session(session)
     END
     ;
-    
-    ret, channel, session_token <-- cli_new_session_service_req (session, req_handle) =
-    PRE
-        session : t_session_i &
-        session : s_session &
-        a_state(session) = e_session_userActivated &
-        req_handle : t_request_handle_i &
-        req_handle : s_request_handle
-    THEN
-        CHOICE
-            ret := e_sc_ok ||
-            session_token :(session_token : t_session_token_i & a_token(session_token) = session) ||
-            channel :(channel : t_channel_i & channel = a_channel(session))
-        OR
-            ret :: {e_sc_bad_invalid_argument,
-                e_sc_bad_unexpected_error} ||
-            session_token := c_session_token_indet ||
-            channel := c_channel_indet
-        END
-    END
-    ;
 
-    bres <-- cli_record_session_service_resp (session, req_handle) =
-    PRE
-        session : t_session_i &
-        session : s_session &
-        a_state(session) = e_session_userActivated &
-        c_msg_in : t_msg &
-        a_msg_in_type : s_service_on_session_resps &
-        req_handle : t_request_handle_i
-    THEN
-        CHOICE
-            bres := TRUE
-        OR
-            /* invalid req handle */
-            bres := FALSE
-        END
-    END
-    ;
-    
     ret <-- is_session_valid_for_service (channel, session) =
     PRE
         channel : t_channel_i &
@@ -730,8 +607,7 @@ OPERATIONS
         a_state := {session} <<| a_state ||
         a_user := {session} <<| a_user ||
         a_token := a_token |>> {session} ||
-        a_orphaned := {session} <<| a_orphaned ||
-        a_cli_pending_requests := a_cli_pending_requests |>> {session}
+        a_orphaned := {session} <<| a_orphaned
     END
 
 END

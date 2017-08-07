@@ -242,14 +242,14 @@ OPERATIONS
                         IF l_ret /= e_sc_ok
                         THEN
                             client_remove_req_handle (l_req_handle);
-                            cli_close_session (session)
+                            client_session_mgr_close_session (session)
                         END
                     ELSE
                         client_remove_req_handle (l_req_handle);
-                        cli_close_session (session)
+                        client_session_mgr_close_session (session)
                     END
                 ELSE
-                    cli_close_session (session)
+                    client_session_mgr_close_session (session)
                 END
             END;
             dealloc_msg_header_out (l_msg_header);
@@ -309,7 +309,7 @@ OPERATIONS
                             IF l_ret /= e_sc_ok
                             THEN
                                 client_remove_req_handle (l_req_handle);
-                                cli_close_session (l_session)
+                                client_session_mgr_close_session (l_session)
                             END
                         END
                     END;
@@ -368,7 +368,7 @@ OPERATIONS
                     IF l_ret /= e_sc_ok
                     THEN
                         client_remove_req_handle (l_req_handle);
-                        cli_close_session (session)
+                        client_session_mgr_close_session (session)
                     END
                 END
             ELSE
@@ -793,7 +793,7 @@ OPERATIONS
                     IF ret /= e_sc_ok
                     THEN
                         client_remove_req_handle (l_req_handle);
-                        cli_close_session (session)
+                        client_session_mgr_close_session (session)
                     END
                 END
             ELSE

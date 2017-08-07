@@ -57,19 +57,6 @@ INITIALISATION
     
 OPERATIONS
     
-    session <-- get_session_from_req_handle (req_handle) =
-    PRE
-        req_handle : t_request_handle_i
-    THEN
-        IF req_handle : dom(a_cli_pending_requests)
-        THEN
-            session :(session : t_session_i & session = a_cli_pending_requests (req_handle))
-        ELSE
-            session := c_session_indet
-        END
-    END
-    ;
-    
     session <-- get_session_from_token (session_token) =
     PRE
         session_token : t_session_token_i
@@ -128,15 +115,6 @@ OPERATIONS
         token : t_session_token_i
     THEN
         ret := bool(token : t_session_token & token : dom(a_token))
-    END
-    ;
-    
-    ret <-- has_session_token (session) =
-    PRE
-        session : t_session_i &
-        session : s_session
-    THEN
-        ret := bool(session : ran(a_token))
     END
     ;
     

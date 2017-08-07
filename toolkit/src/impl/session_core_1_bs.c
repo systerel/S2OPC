@@ -38,9 +38,6 @@ typedef struct session {
   constants__t_session_token_i session_core_1_bs__session_token;
   constants__t_user_i session_core_1_bs__user;
   t_bool cli_activated_session;
-  // Only one request handle managed by session in this version
-  constants__t_request_handle_i session_core_1_bs__req_handle;
-  t_bool session_core_1_bs__req_handle_used;  
 } session;
 
 static session unique_session;
@@ -58,17 +55,6 @@ void session_core_1_bs__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void session_core_1_bs__get_session_from_req_handle(
-   const constants__t_request_handle_i session_core_1_bs__req_handle,
-   constants__t_session_i * const session_core_1_bs__session) {
-  if((!FALSE) == unique_session_created &&
-     unique_session.session_core_1_bs__req_handle == session_core_1_bs__req_handle){
-    *session_core_1_bs__session = unique_session.id;
-  }else{
-    *session_core_1_bs__session = constants__c_session_indet;
-  }
-}
-
 void session_core_1_bs__get_session_from_token(
    const constants__t_session_token_i session_core_1_bs__session_token,
    constants__t_session_i * const session_core_1_bs__session) {
@@ -226,8 +212,6 @@ void session_core_1_bs__create_session(
     unique_session.session_core_1_bs__state = session_core_1_bs__state;
     unique_session.session_core_1_bs__session_token = constants__c_session_token_indet;
     unique_session.session_core_1_bs__user = constants__c_user_indet;
-    unique_session.session_core_1_bs__req_handle = constants__c_request_handle_indet;
-    unique_session.session_core_1_bs__req_handle_used = FALSE;
     unique_session.cli_activated_session = FALSE;
     unique_session_created = (!FALSE);
   }
@@ -245,42 +229,7 @@ void session_core_1_bs__create_session_failure(const constants__t_session_i sess
                                          "Session activation failure notification");
   }
 }
-
-  
-void session_core_1_bs__cli_add_pending_request(
-   const constants__t_session_i session_core_1_bs__session,
-   const constants__t_request_handle_i session_core_1_bs__req_handle,
-   t_bool * const session_core_1_bs__ret) {
-  if(session_core_1_bs__session == unique_session.id){
-    if(FALSE == unique_session.session_core_1_bs__req_handle_used){
-      unique_session.session_core_1_bs__req_handle = session_core_1_bs__req_handle;
-      unique_session.session_core_1_bs__req_handle_used = (!FALSE);
-      *session_core_1_bs__ret = (!FALSE);
-    }else{
-      *session_core_1_bs__ret = FALSE;
-    }
-  }else{
-    *session_core_1_bs__ret = FALSE;
-  }
-}
-
-void session_core_1_bs__cli_remove_pending_request(
-   const constants__t_session_i session_core_1_bs__session,
-   const constants__t_request_handle_i session_core_1_bs__req_handle,
-   t_bool * const session_core_1_bs__ret) {
-  if(session_core_1_bs__session == unique_session.id){
-    if((!FALSE) == unique_session.session_core_1_bs__req_handle_used &&
-       unique_session.session_core_1_bs__req_handle == session_core_1_bs__req_handle){
-      unique_session.session_core_1_bs__req_handle_used = FALSE;
-      *session_core_1_bs__ret = (!FALSE);
-    }else{
-      *session_core_1_bs__ret = FALSE;
-    }
-  }else{
-    *session_core_1_bs__ret = FALSE;
-  }
-}
-
+ 
 void session_core_1_bs__is_valid_session(
    const constants__t_session_i session_core_1_bs__session,
    t_bool * const session_core_1_bs__ret) {
@@ -380,8 +329,6 @@ void session_core_1_bs__set_session_state_closed(
     // Modify state
     unique_session.session_core_1_bs__state = constants__e_session_closed;
     unique_session.session_core_1_bs__user = constants__c_user_indet;
-    unique_session.session_core_1_bs__req_handle = constants__c_request_handle_indet;
-    unique_session.session_core_1_bs__req_handle_used = FALSE;
     if(constants__c_session_token_indet != unique_session.session_core_1_bs__session_token){
       session_core_1_bs__delete_session_token(unique_session.session_core_1_bs__session_token);
       unique_session.session_core_1_bs__session_token = constants__c_session_token_indet;
