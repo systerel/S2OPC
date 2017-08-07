@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 07/08/2017 10:43:15
+ Date                 : 07/08/2017 16:37:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -141,7 +141,6 @@ extern void session_core__server_secure_channel_lost(
 extern void session_core__srv_activate_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_user_i session_core__user,
    const constants__t_msg_i session_core__activate_req_msg,
    const constants__t_msg_i session_core__activate_resp_msg,
@@ -149,13 +148,11 @@ extern void session_core__srv_activate_req_and_resp(
 extern void session_core__srv_close_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__close_req_msg,
    const constants__t_msg_i session_core__close_resp_msg,
    constants__t_StatusCode_i * const session_core__ret);
 extern void session_core__srv_create_req_and_resp(
    const constants__t_channel_i session_core__channel,
-   const constants__t_request_handle_i session_core__req_handle,
    const constants__t_msg_i session_core__create_req_msg,
    const constants__t_msg_i session_core__create_resp_msg,
    constants__t_session_i * const session_core__nsession,

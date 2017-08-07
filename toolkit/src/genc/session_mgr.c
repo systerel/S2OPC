@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 07/08/2017 10:43:15
+ Date                 : 07/08/2017 16:37:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -123,7 +123,6 @@ void session_mgr__client_receive_session_resp(
 
 void session_mgr__server_receive_session_req(
    const constants__t_channel_i session_mgr__channel,
-   const constants__t_request_handle_i session_mgr__req_handle,
    const constants__t_session_token_i session_mgr__session_token,
    const constants__t_msg_i session_mgr__req_msg,
    const constants__t_msg_type_i session_mgr__req_typ,
@@ -140,7 +139,6 @@ void session_mgr__server_receive_session_req(
       switch (session_mgr__req_typ) {
       case constants__e_msg_session_create_req:
          session_core__srv_create_req_and_resp(session_mgr__channel,
-            session_mgr__req_handle,
             session_mgr__req_msg,
             session_mgr__resp_msg,
             session_mgr__session,
@@ -165,7 +163,6 @@ void session_mgr__server_receive_session_req(
                if (session_mgr__l_valid_user == true) {
                   session_core__srv_activate_req_and_resp(session_mgr__channel,
                      *session_mgr__session,
-                     session_mgr__req_handle,
                      session_mgr__l_user,
                      session_mgr__req_msg,
                      session_mgr__resp_msg,
@@ -203,7 +200,6 @@ void session_mgr__server_receive_session_req(
                if (session_mgr__l_session_channel == session_mgr__channel) {
                   session_core__srv_close_req_and_resp(session_mgr__channel,
                      *session_mgr__session,
-                     session_mgr__req_handle,
                      session_mgr__req_msg,
                      session_mgr__resp_msg,
                      session_mgr__service_ret);
