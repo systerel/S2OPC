@@ -344,6 +344,7 @@ OPERATIONS
     VAR
         l_valid_session,
         l_session_state,
+        l_connected_channel,
         l_ret
     IN
         l_valid_session <-- is_valid_session (session);
@@ -354,6 +355,13 @@ OPERATIONS
                 l_session_state = e_session_userActivated
             THEN
                 l_ret, channel, session_token <-- cli_user_activate_req (session, user, activate_req_msg);
+                l_connected_channel <-- is_connected_channel (channel); 
+                IF l_connected_channel = FALSE
+                THEN
+                    /* Unexpected case: associated channel shall be connected for those session states */
+                    cli_close_session (session);
+                    l_ret := e_sc_bad_unexpected_error
+                END;
                 IF l_ret = e_sc_ok
                 THEN
                     client_add_session_request_handle (session, req_handle)
@@ -404,6 +412,7 @@ OPERATIONS
     VAR
         l_valid_session,
         l_session_state,
+        l_connected_channel,
         l_ret
     IN
         l_valid_session <-- is_valid_session(session);
@@ -415,6 +424,13 @@ OPERATIONS
                 l_session_state = e_session_userActivated
             THEN
                 l_ret, channel, session_token <-- cli_close_req (session, close_req_msg);
+                l_connected_channel <-- is_connected_channel (channel); 
+                IF l_connected_channel = FALSE
+                THEN
+                    /* Unexpected case: associated channel shall be connected for those session states */
+                    cli_close_session (session);
+                    l_ret := e_sc_bad_unexpected_error
+                END;
                 IF l_ret = e_sc_ok
                 THEN
                     client_add_session_request_handle (session, req_handle)

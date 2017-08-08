@@ -135,32 +135,16 @@ OPERATIONS
     ;
     
     ret, channel, session_token <-- cli_user_activate_req (session, user, activate_req_msg) =
-    VAR
-        l_session_token,
-        l_channel,
-        l_connected_channel
-    IN
-        l_channel := c_channel_indet;
-        l_session_token := c_session_token_indet;
-        l_channel <-- get_session_channel (session);
-        /* TODO: check in session manager channel is connected ? 
-        => session shall not be in correct state if channel not connected anymore ! */
-        l_connected_channel <-- is_connected_channel (l_channel); 
-        IF l_connected_channel = TRUE
-        THEN
-            l_session_token <-- get_token_from_session (session);
-            /* TODO: check validity of user */
-            /* TODO: populate msg with parameters */
-            write_activate_msg_user(activate_req_msg, user);
-            /* TODO: crypto steps */
-            set_session_user(session, user);
-            set_session_state(session, e_session_userActivating);
-            ret := e_sc_ok
-        ELSE
-            ret := e_sc_bad_unexpected_error
-        END;
-        session_token := l_session_token;
-        channel := l_channel
+    BEGIN
+        channel <-- get_session_channel (session);
+        session_token <-- get_token_from_session (session);
+        /* TODO: check validity of user */
+        /* TODO: populate msg with parameters */
+        write_activate_msg_user(activate_req_msg, user);
+        /* TODO: crypto steps */
+        set_session_user(session, user);
+        set_session_state(session, e_session_userActivating);
+        ret := e_sc_ok
     END
     ;
     
@@ -306,30 +290,12 @@ OPERATIONS
     ;
     
     ret, channel, session_token <-- cli_close_req (session, close_req_msg) =
-    VAR
-        l_channel,
-        l_connected_channel,
-        l_session_token,
-        l_ret
-    IN
-        l_channel := c_channel_indet;
-        l_session_token := c_session_token_indet;
-        l_channel <-- get_session_channel (session);
-        /* TODO: check in session manager channel is connected ? 
-        => session shall not be in correct state if channel not connected anymore ! */
-        l_connected_channel <-- is_connected_channel (l_channel);
-        l_session_token <-- get_token_from_session (session);
-        IF l_connected_channel = TRUE
-        THEN                    
-            /* TODO: populate msg with parameters (req handle, etc.)  */
-            set_session_state (session, e_session_closing);
-            l_ret := e_sc_ok
-        ELSE
-            l_ret := e_sc_bad_unexpected_error
-        END;
-        channel := l_channel;
-        session_token := l_session_token;
-        ret := l_ret
+    BEGIN
+        channel <-- get_session_channel (session);
+        session_token <-- get_token_from_session (session);
+        /* TODO: populate msg with parameters */
+        set_session_state (session, e_session_closing);
+        ret := e_sc_ok
     END
     ;
     
