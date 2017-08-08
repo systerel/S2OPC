@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 08/08/2017 10:57:25
+ Date                 : 08/08/2017 11:53:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,7 +43,6 @@ extern void session_mgr__INITIALISATION(void);
 #define session_mgr__client_secure_channel_lost session_core__client_secure_channel_lost
 #define session_mgr__continue_iter_orphaned_t_session session_core__continue_iter_orphaned_t_session
 #define session_mgr__delete_session session_core__delete_session
-#define session_mgr__get_session_from_token session_core__get_session_from_token
 #define session_mgr__get_session_state_or_closed session_core__get_session_state_or_closed
 #define session_mgr__get_session_user_or_indet session_core__get_session_user_or_indet
 #define session_mgr__init_iter_orphaned_t_session session_core__init_iter_orphaned_t_session

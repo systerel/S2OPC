@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 08/08/2017 10:57:24
+ Date                 : 08/08/2017 11:53:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,10 +43,10 @@ extern void session_core__INITIALISATION(void);
 #define session_core__continue_iter_orphaned_t_session session_core_orphaned_it_bs__continue_iter_orphaned_t_session
 #define session_core__delete_session session_core_1_bs__delete_session
 #define session_core__get_session_channel session_core_1_bs__get_session_channel
-#define session_core__get_session_from_token session_core_1_bs__get_session_from_token
 #define session_core__init_iter_orphaned_t_session session_core_orphaned_it_bs__init_iter_orphaned_t_session
 #define session_core__is_valid_session session_core_1_bs__is_valid_session
 #define session_core__is_valid_user session_core_1_bs__is_valid_user
+#define session_core__server_get_session_from_token session_core_1_bs__server_get_session_from_token
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

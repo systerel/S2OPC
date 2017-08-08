@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 08/08/2017 10:57:25
+ Date                 : 08/08/2017 11:53:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -143,7 +143,7 @@ void session_mgr__server_receive_session_req(
             session_mgr__service_ret);
          break;
       case constants__e_msg_session_activate_req:
-         session_core__get_session_from_token(session_mgr__session_token,
+         session_core__server_get_session_from_token(session_mgr__session_token,
             session_mgr__session);
          session_core__is_valid_session(*session_mgr__session,
             &session_mgr__l_valid_session);
@@ -183,7 +183,7 @@ void session_mgr__server_receive_session_req(
          }
          break;
       case constants__e_msg_session_close_req:
-         session_core__get_session_from_token(session_mgr__session_token,
+         session_core__server_get_session_from_token(session_mgr__session_token,
             session_mgr__session);
          session_core__is_valid_session(*session_mgr__session,
             &session_mgr__l_valid_session);
@@ -303,7 +303,7 @@ void session_mgr__server_validate_session_service_req(
       constants__t_sessionState session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
       
-      session_core__get_session_from_token(session_mgr__session_token,
+      session_core__server_get_session_from_token(session_mgr__session_token,
          &session_mgr__l_session);
       session_core__is_valid_session(session_mgr__l_session,
          &session_mgr__l_valid_session);
