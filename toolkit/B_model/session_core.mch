@@ -30,7 +30,8 @@ DEFINITIONS
     a_state,
     a_channel,
     a_orphaned,
-    a_token,
+    a_client_token,
+    a_server_token,
     a_user;
     
     d_var_it ==
@@ -43,8 +44,9 @@ DEFINITIONS
     s_session <: t_session &    
     a_state : s_session --> t_sessionState & // a session shall be associated to a state    
     a_channel : s_session +-> t_channel & // a session may be associated to a valid channel    
-    a_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)    
-    a_token : t_session_token >+> s_session & // a session has an authentication token once create response is produced / received    
+    a_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
+    a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
+    a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent  
     a_user : s_session +-> t_user;  //  a session may be associated to a valid user
     
     d_typing_it ==
@@ -57,7 +59,8 @@ DEFINITIONS
     a_channel := {session} <<| a_channel               || // If session had a channel, remove this relation
     a_orphaned := {session} <<| a_orphaned             || // If session was orphaned, remove this relation
     a_user := {session} <<| a_user                     || // If session had a user, remove this relation
-    a_token := a_token |>> {session}                   || // If session had a token, remove this relation
+    a_client_token := {session} <<| a_client_token     || // If session had a token, remove this relation
+    a_server_token := a_server_token |>> {session}     || // If session had a token, remove this relation
     a_state(session) := e_session_closed // keep session token as used
     
 ABSTRACT_VARIABLES
@@ -78,7 +81,7 @@ INVARIANT
     dom(a_state |> {e_session_scOrphaned}) = dom(a_orphaned) &
     
     // All sessions have a token (except when in state creating, init or closed (since it creating can be predecessor))
-    dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_token)    
+    dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_server_token) \/ dom(a_client_token) 
     
     
 INITIALISATION
@@ -86,7 +89,8 @@ INITIALISATION
     a_state := {}            ||
     a_channel := {}          ||
     a_orphaned := {}         ||
-    a_token := {}            ||
+    a_client_token := {}     ||
+    a_server_token := {}     ||
     a_user := {} ||
     
     /* it */
@@ -99,14 +103,14 @@ INITIALISATION
     
 OPERATIONS
     
-    session <-- get_session_from_token (session_token) =
+    session <-- server_get_session_from_token (session_token) =
     PRE
         session_token : t_session_token_i
     THEN
         IF session_token : t_session_token &
-            session_token : dom(a_token)
+            session_token : dom(a_server_token)
         THEN
-            session :(session : t_session_i & session = a_token(session_token))
+            session :(session : t_session_i & session = a_server_token(session_token))
         ELSE
             session := c_session_indet
         END
@@ -201,11 +205,11 @@ OPERATIONS
                 l_nsession : t_session_i &
                 l_nsession : t_session - s_session &
                 l_nsession_token : t_session_token_i &
-                l_nsession_token : t_session_token - dom(a_token)
+                l_nsession_token : t_session_token - dom(a_server_token)
             THEN
                 CHOICE
                     s_session := s_session \/ {l_nsession}                  || // add new session to created sessions
-                    a_token := a_token <+ {l_nsession_token |-> l_nsession} ||
+                    a_server_token := a_server_token <+ {l_nsession_token |-> l_nsession} ||
                     a_channel(l_nsession) := channel                        || // associate current channel
                     a_state(l_nsession) := e_session_created                ||
                     nsession := l_nsession                                  ||
@@ -237,13 +241,12 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_create_resp
     THEN
-        IF session_token : t_session_token &
-            session_token /: dom(a_token) // check it is a fresh session token
-            // TODO: since it is a global freshness it could be an issue when connecting to several endpoints/servers => separate token of client (session --> token) and those of server (token >-> session)
+        // Note: session does not have associated token due to state guaranteed by PRE
+        IF session_token : t_session_token
         THEN
             CHOICE
-                a_state(session) := e_session_created                     ||
-                a_token := a_token <+ {session_token |-> session} ||
+                a_state(session) := e_session_created    ||
+                a_client_token(session) := session_token ||
                 ret := e_sc_ok
             OR
                 // Constraints on message content not verified
@@ -273,7 +276,7 @@ OPERATIONS
             a_user(session) := user              ||
             ret := e_sc_ok                          ||
             channel :(channel : t_channel_i & channel : t_channel) ||
-            session_token :(session_token : t_session_token_i & session_token : dom(a_token))
+            session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
         OR
             // applicative code provided invalid user: no change
             // ...
@@ -301,7 +304,7 @@ OPERATIONS
         a_channel(session) := channel ||
         a_state(session) := e_session_scActivating ||
         a_orphaned := {session} <<| a_orphaned ||
-        session_token :(session_token : t_session_token_i & session_token = a_token~(session))
+        session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
     END
     ;
     
@@ -451,7 +454,7 @@ OPERATIONS
             a_state(session) := e_session_closing ||
             ret := e_sc_ok ||
             channel :(channel : t_channel_i & channel : t_channel) ||
-            session_token :(session_token : t_session_token_i & session_token : dom(a_token))
+            session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
         OR
             ret :: {e_sc_bad_out_of_memory, 
                 e_sc_bad_unexpected_error} ||
@@ -481,7 +484,7 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_close_resp
     THEN
-        // TODO: respond to pending requests with error if close succeeded ?
+        // TODO: respond to pending requests with error if requested in request
         d_close_session(session) ||
         ret :: {e_sc_ok,
             e_sc_bad_unexpected_error}                
@@ -512,7 +515,7 @@ OPERATIONS
         session : s_session &
         a_state(session) = e_session_userActivated
     THEN
-        session_token :(session_token : t_session_token_i & a_token(session_token) = session) ||
+        session_token :(session_token : t_session_token_i & session_token = a_client_token(session)) ||
         channel :(channel : t_channel_i & channel = a_channel(session))
     END
     ;
@@ -606,7 +609,8 @@ OPERATIONS
         a_channel := {session} <<| a_channel ||
         a_state := {session} <<| a_state ||
         a_user := {session} <<| a_user ||
-        a_token := a_token |>> {session} ||
+        a_client_token := {session} <<| a_client_token ||
+        a_server_token := a_server_token |>> {session} ||
         a_orphaned := {session} <<| a_orphaned
     END
 

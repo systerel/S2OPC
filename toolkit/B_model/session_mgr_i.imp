@@ -32,7 +32,6 @@ IMPORTS
 PROMOTES
     get_session_state_or_closed,
     get_session_user_or_indet,
-    get_session_from_token,
     client_init_session,
     delete_session,
     client_secure_channel_lost,
@@ -130,7 +129,7 @@ OPERATIONS
             OR e_msg_session_activate_req THEN
                 // SESSION ACTIVATION REQUEST
                 // TODO: add a local operation for rest
-                session <-- get_session_from_token (session_token);
+                session <-- server_get_session_from_token (session_token);
                 l_valid_session <-- is_valid_session (session);
                 l_session_state <-- get_session_state_or_closed (session);
                 IF l_valid_session = TRUE
@@ -167,7 +166,7 @@ OPERATIONS
             OR e_msg_session_close_req THEN
                 // SESSION CLOSE REQUEST
                 // TODO: add a local operation for rest
-                session <-- get_session_from_token (session_token);
+                session <-- server_get_session_from_token (session_token);
                 l_valid_session <-- is_valid_session (session);
                 l_session_state <-- get_session_state_or_closed (session);
                 IF l_valid_session = TRUE
@@ -259,7 +258,7 @@ OPERATIONS
         l_session_channel
     IN
         /* TODO: req handle to be recorded on server side at session/request level ? (no guarantee to be unique on a session / connection) */
-        l_session <-- get_session_from_token (session_token);
+        l_session <-- server_get_session_from_token (session_token);
         l_valid_session <-- is_valid_session (l_session);
         l_session_state <-- get_session_state_or_closed (l_session);
         session := c_session_indet;

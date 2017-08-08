@@ -293,14 +293,6 @@ OPERATIONS
     ;
     
     /*PROMOTES*/
-    session <-- get_session_from_token (session_token) =
-    PRE
-        session_token : t_session_token_i
-    THEN
-        session :: t_session_i
-    END
-    ;
-    
     nsession <-- client_init_session = 
     BEGIN
         nsession :: t_session_i

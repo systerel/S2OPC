@@ -36,7 +36,7 @@ PROMOTES
     init_iter_orphaned_t_session,
     continue_iter_orphaned_t_session,
     
-    get_session_from_token,
+    server_get_session_from_token,
     get_session_channel,
     is_valid_session,
     is_valid_user,
@@ -97,8 +97,8 @@ OPERATIONS
         IF l_valid_session = TRUE THEN
             create_session(l_nsession, channel, e_session_created);
             /* TODO: check request parameters ? => at least server / endpoint URI */ 
-            l_nsession_token <-- get_fresh_session_token (l_nsession);
-            l_valid_session_token <-- is_valid_session_token (l_nsession_token);
+            l_nsession_token <-- server_get_fresh_session_token (l_nsession);
+            l_valid_session_token <-- server_is_valid_session_token (l_nsession_token);
             /* No need to store the handle since we will send response in same step */
             IF l_valid_session_token = TRUE
             THEN
@@ -118,26 +118,19 @@ OPERATIONS
     ;
     
     ret <-- cli_create_resp (channel, session, session_token, create_resp_msg) =
-    VAR
-        l_fresh_session_token
-    IN
+    BEGIN
         // channel: only for the precondition
-        l_fresh_session_token <-- is_fresh_session_token (session_token);
-        IF l_fresh_session_token = TRUE
-        THEN
-            set_session_state (session, e_session_created);
-            set_session_token (session, session_token);
-            ret := e_sc_ok
-        ELSE
-            ret := e_sc_bad_invalid_argument
-        END
+        // TODO: check response msg parameters
+        set_session_state (session, e_session_created);
+        client_set_session_token (session, session_token);
+        ret := e_sc_ok
     END
     ;
     
     ret, channel, session_token <-- cli_user_activate_req (session, user, activate_req_msg) =
     BEGIN
         channel <-- get_session_channel (session);
-        session_token <-- get_token_from_session (session);
+        session_token <-- client_get_token_from_session (session);
         /* TODO: check validity of user */
         /* TODO: populate msg with parameters */
         write_activate_msg_user(activate_req_msg, user);
@@ -152,7 +145,7 @@ OPERATIONS
     VAR
         l_user
     IN
-        session_token <-- get_token_from_session (session);
+        session_token <-- client_get_token_from_session (session);
         l_user <-- get_session_user (session);
         /* TODO: populate msg with parameters  */
         write_activate_msg_user(activate_req_msg, l_user);
@@ -292,7 +285,7 @@ OPERATIONS
     ret, channel, session_token <-- cli_close_req (session, close_req_msg) =
     BEGIN
         channel <-- get_session_channel (session);
-        session_token <-- get_token_from_session (session);
+        session_token <-- client_get_token_from_session (session);
         /* TODO: populate msg with parameters */
         set_session_state (session, e_session_closing);
         ret := e_sc_ok
@@ -330,7 +323,7 @@ OPERATIONS
     
     channel, session_token <-- cli_new_session_service_req (session) =
     BEGIN
-        session_token <-- get_token_from_session (session);
+        session_token <-- client_get_token_from_session (session);
         channel <-- get_session_channel (session)
     END
     ;

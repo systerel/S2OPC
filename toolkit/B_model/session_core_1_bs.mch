@@ -57,7 +57,7 @@ INITIALISATION
     
 OPERATIONS
     
-    session <-- get_session_from_token (session_token) =
+    session <-- server_get_session_from_token (session_token) =
     PRE
         session_token : t_session_token_i
     THEN
@@ -71,7 +71,7 @@ OPERATIONS
     END
     ;
 
-    session_token <-- get_token_from_session (session) =
+    session_token <-- client_get_token_from_session (session) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -81,7 +81,7 @@ OPERATIONS
         session_token :(session_token : t_session_token_i & session_token = a_token~(session))
     END;
     
-    token <-- get_fresh_session_token (session) = 
+    token <-- server_get_fresh_session_token (session) = 
     PRE
         session : t_session_i &
         session : s_session &
@@ -100,17 +100,8 @@ OPERATIONS
         END
     END
     ;
-    
-    ret <-- is_fresh_session_token (session_token) =
-    PRE
-        session_token : t_session_token_i
-    THEN
-        ret := bool(session_token : t_session_token &
-            session_token /: dom(a_token))
-    END
-    ;
-    
-    ret <-- is_valid_session_token (token) =
+        
+    ret <-- server_is_valid_session_token (token) =
     PRE
         token : t_session_token_i
     THEN
@@ -118,7 +109,7 @@ OPERATIONS
     END
     ;
     
-    set_session_token (session, token) =
+    client_set_session_token (session, token) =
     PRE
         session : t_session_i &
         session : s_session &

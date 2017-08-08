@@ -55,7 +55,7 @@ void session_core_1_bs__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void session_core_1_bs__get_session_from_token(
+void session_core_1_bs__server_get_session_from_token(
    const constants__t_session_token_i session_core_1_bs__session_token,
    constants__t_session_i * const session_core_1_bs__session) {
   int32_t comparison = 0;
@@ -69,7 +69,7 @@ void session_core_1_bs__get_session_from_token(
   }
 }
 
-void session_core_1_bs__get_token_from_session(
+void session_core_1_bs__client_get_token_from_session(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_session_token_i * const session_core_1_bs__session_token) {
   if(unique_session.id == session_core_1_bs__session){
@@ -79,7 +79,7 @@ void session_core_1_bs__get_token_from_session(
   }
 }
 
-void session_core_1_bs__get_fresh_session_token(
+void session_core_1_bs__server_get_fresh_session_token(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_session_token_i * const session_core_1_bs__token) {
   if(token_cpt + 1 > 0 &&
@@ -101,22 +101,7 @@ void session_core_1_bs__get_fresh_session_token(
   } 
 }
 
-void session_core_1_bs__is_fresh_session_token(
-   const constants__t_session_token_i session_core_1_bs__session_token,
-   t_bool * const session_core_1_bs__ret) {
-  if((!FALSE) == unique_session_created){
-    if(session_core_1_bs__session_token != constants__c_session_token_indet &&
-       session_core_1_bs__session_token != unique_session.session_core_1_bs__session_token){
-      *session_core_1_bs__ret = (!FALSE);
-    }else{
-      *session_core_1_bs__ret = FALSE;
-    }
-  }else{
-    *session_core_1_bs__ret = (!FALSE);
-  }
-}
-
-void session_core_1_bs__is_valid_session_token(
+void session_core_1_bs__server_is_valid_session_token(
    const constants__t_session_token_i session_core_1_bs__token,
    t_bool * const session_core_1_bs__ret) {
   int32_t comparison = 0;
@@ -134,18 +119,7 @@ void session_core_1_bs__is_valid_session_token(
   }
 }
 
-void session_core_1_bs__has_session_token(
-   const constants__t_session_i session_core_1_bs__session,
-   t_bool * const session_core_1_bs__ret) {
-  if(session_core_1_bs__session == unique_session.id &&
-     constants__c_session_token_indet != unique_session.session_core_1_bs__session_token){
-    *session_core_1_bs__ret = (!FALSE);
-  }else{
-    *session_core_1_bs__ret = FALSE;
-  }
-}
-
-void session_core_1_bs__set_session_token(
+void session_core_1_bs__client_set_session_token(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_session_token_i session_core_1_bs__token) {
   if(unique_session.id == session_core_1_bs__session){
