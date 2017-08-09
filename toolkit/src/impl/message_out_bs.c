@@ -233,6 +233,12 @@ void message_out_bs__write_create_session_msg_session_token(
   assert(STATUS_OK == status);
 }
 
+void message_out_bs__write_create_session_msg_server_endpoints(
+   const constants__t_msg_i message_out_bs__msg,
+   const constants__t_endpoint_config_idx_i message_out_bs__endpoint_config_idx){
+  printf("NOT IMPLEMENTED: message_out_bs__write_create_session_msg_server_endpoints\n");
+}
+
 void message_out_bs__write_msg_out_header_req_handle(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_request_handle_i message_out_bs__req_handle) {

@@ -35,7 +35,7 @@ DEFINITIONS
     /* each created channel has a configuration
        and there is at most 1 channel per configuration */
     a_config : s_channel_connected >-> t_channel_config_idx &
-    a_endpoint : s_channel_connected +-> t_endpoint_config_idx
+    a_endpoint : s_channel_connected +-> t_endpoint_config_idx /* TODO: add in invariants that it is empty for clients */
        
     
 ABSTRACT_VARIABLES
@@ -224,6 +224,17 @@ OPERATIONS
         channel         : s_channel_connected
     THEN
         bres := bool(channel /: dom(a_endpoint))
+    END
+    ;
+    
+    endpoint_config_idx <-- server_get_endpoint_config (channel) =
+    PRE
+        channel         : t_channel_i &
+        channel         : s_channel_connected
+    THEN
+        endpoint_config_idx 
+        :(endpoint_config_idx : t_endpoint_config_idx_i &
+            endpoint_config_idx = a_endpoint(channel))
     END
 
 END

@@ -247,3 +247,14 @@ void channel_mgr_bs__close_all_channel(t_bool * const channel_mgr_bs__bres){
     }
   }
 }
+
+void channel_mgr_bs__server_get_endpoint_config(
+   const constants__t_channel_i channel_mgr_bs__channel,
+   constants__t_endpoint_config_idx_i * const channel_mgr_bs__endpoint_config_idx){
+  if(channel_mgr_bs__channel != constants__c_channel_indet &&
+     channel_mgr_bs__channel == (t_entier4) unique_channel.id){
+    *channel_mgr_bs__endpoint_config_idx = unique_channel.endpointIdx;
+  }else{
+    assert(false);
+  }
+}
