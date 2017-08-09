@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 09/08/2017 15:43:06
+ Date                 : 09/08/2017 18:09:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -167,7 +167,7 @@ void service_mgr__server_receive_session_treatment_req(
                   message_out_bs__is_valid_buffer_out(service_mgr__l_buffer_out,
                      &service_mgr__l_valid_buffer);
                   if (service_mgr__l_valid_buffer == false) {
-                     session_mgr__server_close_session(service_mgr__l_session);
+                     session_mgr__server_close_session_sm(service_mgr__l_session);
                   }
                   message_out_bs__dealloc_msg_header_out(service_mgr__l_resp_msg_header);
                   message_out_bs__dealloc_msg_out(service_mgr__l_resp_msg);
@@ -410,7 +410,7 @@ void service_mgr__client_receive_public_service_resp(
    ;
 }
 
-void service_mgr__client_create_session(
+void service_mgr__client_service_create_session(
    const constants__t_session_i service_mgr__session,
    const constants__t_channel_i service_mgr__channel,
    constants__t_byte_buffer_i * const service_mgr__buffer_out) {
@@ -421,7 +421,6 @@ void service_mgr__client_create_session(
       constants__t_request_handle_i service_mgr__l_req_handle;
       t_bool service_mgr__l_valid_req_handle;
       t_bool service_mgr__l_valid_msg;
-      t_bool service_mgr__l_valid_session;
       constants__t_byte_buffer_i service_mgr__l_buffer;
       t_bool service_mgr__l_valid_buffer;
       constants__t_StatusCode_i service_mgr__l_ret;
@@ -441,36 +440,32 @@ void service_mgr__client_create_session(
          request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
             &service_mgr__l_valid_req_handle);
          if (service_mgr__l_valid_req_handle == true) {
-            session_mgr__is_valid_session(service_mgr__session,
-               &service_mgr__l_valid_session);
-            if (service_mgr__l_valid_session == true) {
-               session_mgr__client_create_req(service_mgr__session,
-                  service_mgr__channel,
-                  service_mgr__l_req_handle,
+            session_mgr__client_create_session_req(service_mgr__session,
+               service_mgr__channel,
+               service_mgr__l_req_handle,
+               service_mgr__l_req_msg,
+               &service_mgr__l_ret);
+            if (service_mgr__l_ret == constants__e_sc_ok) {
+               message_out_bs__write_msg_out_header_req_handle(service_mgr__l_msg_header,
+                  service_mgr__l_req_handle);
+               message_out_bs__encode_msg(constants__e_msg_session_create_req,
+                  service_mgr__l_msg_header,
                   service_mgr__l_req_msg,
-                  &service_mgr__l_ret);
-               if (service_mgr__l_ret == constants__e_sc_ok) {
-                  message_out_bs__write_msg_out_header_req_handle(service_mgr__l_msg_header,
-                     service_mgr__l_req_handle);
-                  message_out_bs__encode_msg(constants__e_msg_session_create_req,
-                     service_mgr__l_msg_header,
-                     service_mgr__l_req_msg,
-                     &service_mgr__l_buffer);
-                  message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
-                     &service_mgr__l_valid_buffer);
-                  if (service_mgr__l_valid_buffer == false) {
-                     request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                     session_mgr__client_session_mgr_close_session(service_mgr__session);
-                  }
-               }
-               else {
+                  &service_mgr__l_buffer);
+               message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
+                  &service_mgr__l_valid_buffer);
+               if (service_mgr__l_valid_buffer == false) {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                  session_mgr__client_session_mgr_close_session(service_mgr__session);
+                  session_mgr__client_close_session(service_mgr__session);
                }
             }
             else {
-               session_mgr__client_session_mgr_close_session(service_mgr__session);
+               request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
+               session_mgr__client_close_session(service_mgr__session);
             }
+         }
+         else {
+            session_mgr__client_close_session(service_mgr__session);
          }
          message_out_bs__dealloc_msg_header_out(service_mgr__l_msg_header);
          message_out_bs__dealloc_msg_out(service_mgr__l_req_msg);
@@ -479,7 +474,7 @@ void service_mgr__client_create_session(
    }
 }
 
-void service_mgr__client_activate_orphaned_session(
+void service_mgr__client_service_activate_orphaned_session(
    const constants__t_session_i service_mgr__session,
    const constants__t_channel_i service_mgr__channel,
    constants__t_byte_buffer_i * const service_mgr__buffer_out) {
@@ -510,7 +505,7 @@ void service_mgr__client_activate_orphaned_session(
          request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
             &service_mgr__l_valid_req_handle);
          if (service_mgr__l_valid_req_handle == true) {
-            session_mgr__client_sc_activate_req(service_mgr__session,
+            session_mgr__client_sc_activate_session_req(service_mgr__session,
                service_mgr__l_req_handle,
                service_mgr__channel,
                service_mgr__l_req_msg,
@@ -529,7 +524,7 @@ void service_mgr__client_activate_orphaned_session(
                   &service_mgr__l_valid_buffer);
                if (service_mgr__l_valid_buffer == false) {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                  session_mgr__client_session_mgr_close_session(service_mgr__session);
+                  session_mgr__client_close_session(service_mgr__session);
                }
             }
          }
@@ -540,7 +535,7 @@ void service_mgr__client_activate_orphaned_session(
    }
 }
 
-void service_mgr__client_activate_session(
+void service_mgr__client_service_activate_session(
    const constants__t_session_i service_mgr__session,
    const constants__t_user_i service_mgr__user,
    constants__t_StatusCode_i * const service_mgr__ret,
@@ -575,7 +570,7 @@ void service_mgr__client_activate_session(
          request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
             &service_mgr__l_valid_req_handle);
          if (service_mgr__l_valid_req_handle == true) {
-            session_mgr__client_user_activate_req(service_mgr__session,
+            session_mgr__client_user_activate_session_req(service_mgr__session,
                service_mgr__l_req_handle,
                service_mgr__user,
                service_mgr__l_req_msg,
@@ -597,7 +592,7 @@ void service_mgr__client_activate_session(
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
                   service_mgr__l_ret = constants__e_sc_bad_encoding_error;
                   service_mgr__l_channel = constants__c_channel_indet;
-                  session_mgr__client_session_mgr_close_session(service_mgr__session);
+                  session_mgr__client_close_session(service_mgr__session);
                }
             }
          }
@@ -616,7 +611,7 @@ void service_mgr__client_activate_session(
    }
 }
 
-void service_mgr__client_close_session(
+void service_mgr__client_service_close_session(
    const constants__t_session_i service_mgr__session,
    constants__t_StatusCode_i * const service_mgr__ret,
    constants__t_channel_i * const service_mgr__channel,
@@ -649,7 +644,7 @@ void service_mgr__client_close_session(
          request_handle_bs__is_valid_req_handle(service_mgr__l_req_handle,
             &service_mgr__l_valid_req_handle);
          if (service_mgr__l_valid_req_handle == true) {
-            session_mgr__client_close_req(service_mgr__session,
+            session_mgr__client_close_session_req(service_mgr__session,
                service_mgr__l_req_handle,
                service_mgr__l_req_msg,
                service_mgr__ret,
@@ -670,7 +665,7 @@ void service_mgr__client_close_session(
                   service_mgr__l_channel = constants__c_channel_indet;
                   *service_mgr__ret = constants__e_sc_bad_encoding_error;
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
-                  session_mgr__client_session_mgr_close_session(service_mgr__session);
+                  session_mgr__client_close_session(service_mgr__session);
                }
             }
          }
@@ -688,7 +683,7 @@ void service_mgr__client_close_session(
    }
 }
 
-void service_mgr__client_send_service_request_msg(
+void service_mgr__client_service_request(
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_i service_mgr__req_msg,
    constants__t_StatusCode_i * const service_mgr__ret,

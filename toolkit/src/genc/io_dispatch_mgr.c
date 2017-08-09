@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 09/08/2017 15:43:05
+ Date                 : 09/08/2017 18:09:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -252,7 +252,7 @@ void io_dispatch_mgr__client_reactivate_session_new_user(
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       t_bool io_dispatch_mgr__l_valid_buffer_out;
       
-      service_mgr__client_activate_session(io_dispatch_mgr__session,
+      service_mgr__client_service_activate_session(io_dispatch_mgr__session,
          io_dispatch_mgr__user,
          io_dispatch_mgr__ret,
          &io_dispatch_mgr__l_channel,
@@ -271,7 +271,7 @@ void io_dispatch_mgr__client_reactivate_session_new_user(
    }
 }
 
-void io_dispatch_mgr__client_service_request(
+void io_dispatch_mgr__client_send_service_request(
    const constants__t_session_i io_dispatch_mgr__session,
    const constants__t_msg_i io_dispatch_mgr__req_msg,
    constants__t_StatusCode_i * const io_dispatch_mgr__ret) {
@@ -281,7 +281,7 @@ void io_dispatch_mgr__client_service_request(
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       t_bool io_dispatch_mgr__l_valid_buffer_out;
       
-      service_mgr__client_send_service_request_msg(io_dispatch_mgr__session,
+      service_mgr__client_service_request(io_dispatch_mgr__session,
          io_dispatch_mgr__req_msg,
          io_dispatch_mgr__ret,
          &io_dispatch_mgr__l_channel,
@@ -300,7 +300,7 @@ void io_dispatch_mgr__client_service_request(
    }
 }
 
-void io_dispatch_mgr__client_close_session_request(
+void io_dispatch_mgr__client_send_close_session_request(
    const constants__t_session_i io_dispatch_mgr__session,
    constants__t_StatusCode_i * const io_dispatch_mgr__ret) {
    {
@@ -309,7 +309,7 @@ void io_dispatch_mgr__client_close_session_request(
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       t_bool io_dispatch_mgr__l_valid_buffer_out;
       
-      service_mgr__client_close_session(io_dispatch_mgr__session,
+      service_mgr__client_service_close_session(io_dispatch_mgr__session,
          io_dispatch_mgr__ret,
          &io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_buffer_out);
@@ -341,10 +341,10 @@ void io_dispatch_mgr__internal_client_create_session(
       channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_connected_channel);
       if (io_dispatch_mgr__l_connected_channel == false) {
-         service_mgr__client_session_mgr_close_session(io_dispatch_mgr__session);
+         service_mgr__client_close_session(io_dispatch_mgr__session);
       }
       else {
-         service_mgr__client_create_session(io_dispatch_mgr__session,
+         service_mgr__client_service_create_session(io_dispatch_mgr__session,
             io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_buffer_out);
          service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
@@ -371,7 +371,7 @@ void io_dispatch_mgr__internal_client_activate_orphaned_session(
       channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
          &io_dispatch_mgr__l_connected_channel);
       if (io_dispatch_mgr__l_connected_channel == false) {
-         service_mgr__client_activate_orphaned_session(io_dispatch_mgr__session,
+         service_mgr__client_service_activate_orphaned_session(io_dispatch_mgr__session,
             io_dispatch_mgr__l_channel,
             &io_dispatch_mgr__l_buffer_out);
          service_mgr__is_valid_buffer_out(io_dispatch_mgr__l_buffer_out,
@@ -405,7 +405,7 @@ void io_dispatch_mgr__secure_channel_lost(
                &io_dispatch_mgr__l_channel_config_idx);
             channel_mgr_bs__is_disconnecting_channel(io_dispatch_mgr__l_channel_config_idx,
                &io_dispatch_mgr__l_disconnecting_channel);
-            service_mgr__client_secure_channel_lost(io_dispatch_mgr__channel,
+            service_mgr__client_secure_channel_lost_session_sm(io_dispatch_mgr__channel,
                io_dispatch_mgr__l_channel_config_idx);
             if (io_dispatch_mgr__l_disconnecting_channel == false) {
                channel_mgr_bs__get_connected_channel(io_dispatch_mgr__l_channel_config_idx,
@@ -423,7 +423,7 @@ void io_dispatch_mgr__secure_channel_lost(
             }
          }
          else {
-            service_mgr__server_secure_channel_lost(io_dispatch_mgr__channel);
+            service_mgr__server_secure_channel_lost_session_sm(io_dispatch_mgr__channel);
          }
          channel_mgr_bs__channel_lost(io_dispatch_mgr__channel);
       }

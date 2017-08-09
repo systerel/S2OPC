@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 09/08/2017 15:43:06
+ Date                 : 09/08/2017 18:09:00
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,12 +45,12 @@ extern void service_mgr__INITIALISATION(void);
 #define service_mgr__client_async_activate_new_session_with_channel session_mgr__client_async_activate_new_session_with_channel
 #define service_mgr__client_async_activate_new_session_without_channel session_mgr__client_async_activate_new_session_without_channel
 #define service_mgr__client_channel_connected_event_session session_mgr__client_channel_connected_event_session
-#define service_mgr__client_secure_channel_lost session_mgr__client_secure_channel_lost
-#define service_mgr__client_session_mgr_close_session session_mgr__client_session_mgr_close_session
+#define service_mgr__client_close_session session_mgr__client_close_session
+#define service_mgr__client_secure_channel_lost_session_sm session_mgr__client_secure_channel_lost_session_sm
 #define service_mgr__decode_msg_type message_in_bs__decode_msg_type
 #define service_mgr__is_valid_buffer_out message_out_bs__is_valid_buffer_out
 #define service_mgr__is_valid_msg_in_type message_in_bs__is_valid_msg_in_type
-#define service_mgr__server_secure_channel_lost session_mgr__server_secure_channel_lost
+#define service_mgr__server_secure_channel_lost_session_sm session_mgr__server_secure_channel_lost_session_sm
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -69,25 +69,6 @@ extern void service_mgr__treat_write_request(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void service_mgr__client_activate_orphaned_session(
-   const constants__t_session_i service_mgr__session,
-   const constants__t_channel_i service_mgr__channel,
-   constants__t_byte_buffer_i * const service_mgr__buffer_out);
-extern void service_mgr__client_activate_session(
-   const constants__t_session_i service_mgr__session,
-   const constants__t_user_i service_mgr__user,
-   constants__t_StatusCode_i * const service_mgr__ret,
-   constants__t_channel_i * const service_mgr__channel,
-   constants__t_byte_buffer_i * const service_mgr__buffer_out);
-extern void service_mgr__client_close_session(
-   const constants__t_session_i service_mgr__session,
-   constants__t_StatusCode_i * const service_mgr__ret,
-   constants__t_channel_i * const service_mgr__channel,
-   constants__t_byte_buffer_i * const service_mgr__buffer_out);
-extern void service_mgr__client_create_session(
-   const constants__t_session_i service_mgr__session,
-   const constants__t_channel_i service_mgr__channel,
-   constants__t_byte_buffer_i * const service_mgr__buffer_out);
 extern void service_mgr__client_receive_public_service_resp(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__resp_typ,
@@ -100,7 +81,26 @@ extern void service_mgr__client_receive_session_treatment_resp(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__resp_typ,
    const constants__t_byte_buffer_i service_mgr__msg_buffer);
-extern void service_mgr__client_send_service_request_msg(
+extern void service_mgr__client_service_activate_orphaned_session(
+   const constants__t_session_i service_mgr__session,
+   const constants__t_channel_i service_mgr__channel,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out);
+extern void service_mgr__client_service_activate_session(
+   const constants__t_session_i service_mgr__session,
+   const constants__t_user_i service_mgr__user,
+   constants__t_StatusCode_i * const service_mgr__ret,
+   constants__t_channel_i * const service_mgr__channel,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out);
+extern void service_mgr__client_service_close_session(
+   const constants__t_session_i service_mgr__session,
+   constants__t_StatusCode_i * const service_mgr__ret,
+   constants__t_channel_i * const service_mgr__channel,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out);
+extern void service_mgr__client_service_create_session(
+   const constants__t_session_i service_mgr__session,
+   const constants__t_channel_i service_mgr__channel,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out);
+extern void service_mgr__client_service_request(
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_i service_mgr__req_msg,
    constants__t_StatusCode_i * const service_mgr__ret,

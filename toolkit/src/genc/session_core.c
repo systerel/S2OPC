@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 09/08/2017 15:43:07
+ Date                 : 09/08/2017 18:09:01
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -22,7 +22,7 @@ void session_core__INITIALISATION(void) {
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void session_core__srv_internal_activate_req_and_resp(
+void session_core__server_internal_activate_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_user_i session_core__user,
@@ -35,12 +35,12 @@ void session_core__srv_internal_activate_req_and_resp(
       constants__e_session_userActivated);
 }
 
-void session_core__client_init_session(
+void session_core__client_init_session_sm(
    constants__t_session_i * const session_core__nsession) {
    session_core_1_bs__init_new_session(session_core__nsession);
 }
 
-void session_core__cli_create_req(
+void session_core__client_create_session_req_sm(
    const constants__t_session_i session_core__session,
    const constants__t_channel_i session_core__channel,
    const constants__t_msg_i session_core__create_req_msg) {
@@ -49,7 +49,7 @@ void session_core__cli_create_req(
       constants__e_session_creating);
 }
 
-void session_core__srv_create_req_and_resp(
+void session_core__server_create_session_req_and_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_msg_i session_core__create_req_msg,
    const constants__t_msg_i session_core__create_resp_msg,
@@ -95,7 +95,7 @@ void session_core__srv_create_req_and_resp(
    }
 }
 
-void session_core__cli_create_resp(
+void session_core__client_create_session_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_session_token_i session_core__session_token,
@@ -108,7 +108,7 @@ void session_core__cli_create_resp(
    *session_core__ret = constants__e_sc_ok;
 }
 
-void session_core__cli_user_activate_req(
+void session_core__client_user_activate_session_req_sm(
    const constants__t_session_i session_core__session,
    const constants__t_user_i session_core__user,
    const constants__t_msg_i session_core__activate_req_msg,
@@ -128,7 +128,7 @@ void session_core__cli_user_activate_req(
    *session_core__ret = constants__e_sc_ok;
 }
 
-void session_core__cli_sc_activate_req(
+void session_core__client_sc_activate_session_req_sm(
    const constants__t_session_i session_core__session,
    const constants__t_channel_i session_core__channel,
    const constants__t_msg_i session_core__activate_req_msg,
@@ -149,7 +149,7 @@ void session_core__cli_sc_activate_req(
    }
 }
 
-void session_core__srv_activate_req_and_resp(
+void session_core__server_activate_session_req_and_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_user_i session_core__user,
@@ -170,7 +170,7 @@ void session_core__srv_activate_req_and_resp(
          &session_core__l_state);
       if (session_core__l_state == constants__e_session_created) {
          if (session_core__l_channel == session_core__channel) {
-            session_core__srv_internal_activate_req_and_resp(session_core__channel,
+            session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
                session_core__user,
                session_core__activate_resp_msg);
@@ -183,7 +183,7 @@ void session_core__srv_activate_req_and_resp(
       else if (session_core__l_state == constants__e_session_userActivated) {
          if ((session_core__l_channel == session_core__channel) &&
             (session_core__l_user != session_core__user)) {
-            session_core__srv_internal_activate_req_and_resp(session_core__channel,
+            session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
                session_core__user,
                session_core__activate_resp_msg);
@@ -191,7 +191,7 @@ void session_core__srv_activate_req_and_resp(
          }
          else if ((session_core__l_channel != session_core__channel) &&
             (session_core__l_user == session_core__user)) {
-            session_core__srv_internal_activate_req_and_resp(session_core__channel,
+            session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
                session_core__user,
                session_core__activate_resp_msg);
@@ -204,7 +204,7 @@ void session_core__srv_activate_req_and_resp(
       else if (session_core__l_state == constants__e_session_scOrphaned) {
          if ((session_core__l_channel != session_core__channel) &&
             (session_core__l_user == session_core__user)) {
-            session_core__srv_internal_activate_req_and_resp(session_core__channel,
+            session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
                session_core__user,
                session_core__activate_resp_msg);
@@ -221,7 +221,7 @@ void session_core__srv_activate_req_and_resp(
    }
 }
 
-void session_core__cli_activate_resp(
+void session_core__client_activate_session_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_msg_i session_core__activate_resp_msg,
@@ -231,7 +231,7 @@ void session_core__cli_activate_resp(
    *session_core__ret = constants__e_sc_ok;
 }
 
-void session_core__client_secure_channel_lost(
+void session_core__client_secure_channel_lost_session_sm(
    const constants__t_channel_i session_core__lost_channel,
    const constants__t_channel_config_idx_i session_core__channel_config_idx) {
    {
@@ -266,7 +266,7 @@ void session_core__client_secure_channel_lost(
    }
 }
 
-void session_core__server_secure_channel_lost(
+void session_core__server_secure_channel_lost_session_sm(
    const constants__t_channel_i session_core__channel) {
    {
       t_bool session_core__l_continue;
@@ -299,7 +299,7 @@ void session_core__server_secure_channel_lost(
    }
 }
 
-void session_core__cli_close_req(
+void session_core__client_close_session_req_sm(
    const constants__t_session_i session_core__session,
    const constants__t_msg_i session_core__close_req_msg,
    constants__t_StatusCode_i * const session_core__ret,
@@ -314,7 +314,7 @@ void session_core__cli_close_req(
    *session_core__ret = constants__e_sc_ok;
 }
 
-void session_core__srv_close_req_and_resp(
+void session_core__server_close_session_req_and_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_msg_i session_core__close_req_msg,
@@ -324,31 +324,21 @@ void session_core__srv_close_req_and_resp(
    *session_core__ret = constants__e_sc_ok;
 }
 
-void session_core__cli_close_resp(
+void session_core__client_close_session_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_msg_i session_core__close_resp_msg) {
    session_core_1_bs__set_session_state_closed(session_core__session);
 }
 
-void session_core__cli_close_session(
+void session_core__client_close_session_sm(
    const constants__t_session_i session_core__session) {
    session_core_1_bs__set_session_state_closed(session_core__session);
 }
 
-void session_core__server_close_session(
+void session_core__server_close_session_sm(
    const constants__t_session_i session_core__session) {
    session_core_1_bs__set_session_state_closed(session_core__session);
-}
-
-void session_core__cli_new_session_service_req(
-   const constants__t_session_i session_core__session,
-   constants__t_channel_i * const session_core__channel,
-   constants__t_session_token_i * const session_core__session_token) {
-   session_core_1_bs__client_get_token_from_session(session_core__session,
-      session_core__session_token);
-   session_core_1_bs__get_session_channel(session_core__session,
-      session_core__channel);
 }
 
 void session_core__is_session_valid_for_service(

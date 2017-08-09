@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 09/08/2017 15:43:08
+ Date                 : 09/08/2017 18:09:01
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -40,16 +40,11 @@ extern void session_mgr__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define session_mgr__client_init_session session_core__client_init_session
-#define session_mgr__client_secure_channel_lost session_core__client_secure_channel_lost
-#define session_mgr__continue_iter_orphaned_t_session session_core__continue_iter_orphaned_t_session
-#define session_mgr__delete_session session_core__delete_session
+#define session_mgr__client_secure_channel_lost_session_sm session_core__client_secure_channel_lost_session_sm
 #define session_mgr__get_session_state_or_closed session_core__get_session_state_or_closed
 #define session_mgr__get_session_user_or_indet session_core__get_session_user_or_indet
-#define session_mgr__init_iter_orphaned_t_session session_core__init_iter_orphaned_t_session
-#define session_mgr__is_valid_session session_core__is_valid_session
-#define session_mgr__server_close_session session_core__server_close_session
-#define session_mgr__server_secure_channel_lost session_core__server_secure_channel_lost
+#define session_mgr__server_close_session_sm session_core__server_close_session_sm
+#define session_mgr__server_secure_channel_lost_session_sm session_core__server_secure_channel_lost_session_sm
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -73,14 +68,16 @@ extern void session_mgr__client_async_activate_new_session_without_channel(
 extern void session_mgr__client_channel_connected_event_session(
    const constants__t_channel_config_idx_i session_mgr__channel_config_idx,
    const constants__t_channel_i session_mgr__channel);
-extern void session_mgr__client_close_req(
+extern void session_mgr__client_close_session(
+   const constants__t_session_i session_mgr__session);
+extern void session_mgr__client_close_session_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_request_handle_i session_mgr__req_handle,
    const constants__t_msg_i session_mgr__close_req_msg,
    constants__t_StatusCode_i * const session_mgr__ret,
    constants__t_channel_i * const session_mgr__channel,
    constants__t_session_token_i * const session_mgr__session_token);
-extern void session_mgr__client_create_req(
+extern void session_mgr__client_create_session_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_channel_i session_mgr__channel,
    const constants__t_request_handle_i session_mgr__req_handle,
@@ -93,16 +90,14 @@ extern void session_mgr__client_receive_session_resp(
    const constants__t_msg_header_i session_mgr__resp_header,
    const constants__t_msg_i session_mgr__resp_msg,
    constants__t_session_i * const session_mgr__session);
-extern void session_mgr__client_sc_activate_req(
+extern void session_mgr__client_sc_activate_session_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_request_handle_i session_mgr__req_handle,
    const constants__t_channel_i session_mgr__channel,
    const constants__t_msg_i session_mgr__activate_req_msg,
    constants__t_StatusCode_i * const session_mgr__ret,
    constants__t_session_token_i * const session_mgr__session_token);
-extern void session_mgr__client_session_mgr_close_session(
-   const constants__t_session_i session_mgr__session);
-extern void session_mgr__client_user_activate_req(
+extern void session_mgr__client_user_activate_session_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_request_handle_i session_mgr__req_handle,
    const constants__t_user_i session_mgr__user,
