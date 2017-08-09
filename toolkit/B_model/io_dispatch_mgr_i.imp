@@ -247,7 +247,7 @@ OPERATIONS
         l_buffer_out,
         l_valid_buffer_out
     IN
-        ret, l_channel, l_buffer_out <-- client_activate_session (session, user);
+        ret, l_channel, l_buffer_out <-- client_service_activate_session (session, user);
         IF ret = e_sc_ok 
         THEN
             l_connected_channel <-- is_connected_channel (l_channel);
@@ -261,14 +261,14 @@ OPERATIONS
     END
     ;
     
-    ret <-- client_service_request (session, req_msg) = 
+    ret <-- client_send_service_request (session, req_msg) = 
     VAR
         l_channel,
         l_connected_channel,
         l_buffer_out,
         l_valid_buffer_out
     IN
-        ret, l_channel, l_buffer_out <-- client_send_service_request_msg (session, req_msg);
+        ret, l_channel, l_buffer_out <-- client_service_request (session, req_msg);
         IF ret = e_sc_ok 
         THEN
             l_connected_channel <-- is_connected_channel (l_channel);
@@ -282,14 +282,14 @@ OPERATIONS
     END
     ;
     
-    ret <-- client_close_session_request (session) =
+    ret <-- client_send_close_session_request (session) =
     VAR
         l_channel,
         l_connected_channel,
         l_buffer_out,
         l_valid_buffer_out
     IN
-        ret, l_channel, l_buffer_out <-- client_close_session (session);
+        ret, l_channel, l_buffer_out <-- client_service_close_session (session);
         IF ret = e_sc_ok 
         THEN
             l_connected_channel <-- is_connected_channel (l_channel);
@@ -316,9 +316,9 @@ OPERATIONS
         IF l_connected_channel = FALSE
         THEN
             /* In case internal event to create session cannot be done => close session */
-            client_session_mgr_close_session (session)
+            client_close_session (session)
         ELSE
-            l_buffer_out <-- client_create_session (session, l_channel);
+            l_buffer_out <-- client_service_create_session (session, l_channel);
             /* Send the response message on secure channel if available */ 
             l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
             IF l_valid_buffer_out = TRUE
@@ -340,7 +340,7 @@ OPERATIONS
         l_connected_channel <-- is_connected_channel (l_channel);
         IF l_connected_channel = FALSE
         THEN
-            l_buffer_out <-- client_activate_orphaned_session (session, l_channel);
+            l_buffer_out <-- client_service_activate_orphaned_session (session, l_channel);
             l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
             IF l_valid_buffer_out = TRUE
             THEN
@@ -368,7 +368,7 @@ OPERATIONS
             THEN
                 l_channel_config_idx <-- get_channel_info (channel);
                 l_disconnecting_channel <-- is_disconnecting_channel (l_channel_config_idx);
-                client_secure_channel_lost (channel, l_channel_config_idx);
+                client_secure_channel_lost_session_sm (channel, l_channel_config_idx);
                 IF l_disconnecting_channel = FALSE
                 THEN
                     // attempt to reconnect channel
@@ -387,7 +387,7 @@ OPERATIONS
                     END
                 END
             ELSE
-                server_secure_channel_lost (channel)
+                server_secure_channel_lost_session_sm (channel)
             END;
             channel_lost (channel)
         END

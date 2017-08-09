@@ -155,7 +155,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- client_close_session_request (session) =
+    ret <-- client_send_close_session_request (session) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -190,7 +190,7 @@ OPERATIONS
     END
     ;
 
-    ret <-- client_service_request (session, req_msg) =
+    ret <-- client_send_service_request (session, req_msg) =
     PRE
         session         : t_session_i &
         session         : t_session &

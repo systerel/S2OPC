@@ -192,7 +192,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- client_create_req (session, channel, req_handle, create_req_msg) = 
+    ret <-- client_create_session_req (session, channel, req_handle, create_req_msg) = 
     PRE
         session : t_session_i &
         channel : t_channel_i &
@@ -238,7 +238,7 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- client_user_activate_req (session, req_handle, user, activate_req_msg) =
+    ret, channel, session_token <-- client_user_activate_session_req (session, req_handle, user, activate_req_msg) =
     PRE
         session : t_session_i & // Here session is provided by applicative but still can point to invalid session (ref on closed session)
         req_handle : t_request_handle_i &
@@ -266,7 +266,7 @@ OPERATIONS
     END
     ;
     
-    ret, session_token <-- client_sc_activate_req (session, req_handle, channel, activate_req_msg) =
+    ret, session_token <-- client_sc_activate_session_req (session, req_handle, channel, activate_req_msg) =
     PRE
         session : t_session_i &
         session : t_session & // provided by dispatch manager => not an invalid session
@@ -299,7 +299,7 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- client_close_req (session, req_handle, close_req_msg) =
+    ret, channel, session_token <-- client_close_session_req (session, req_handle, close_req_msg) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -325,7 +325,7 @@ OPERATIONS
     END
     ;
     
-    client_session_mgr_close_session (session) =
+    client_close_session (session) =
     PRE
         session : t_session_i
     THEN
@@ -333,14 +333,8 @@ OPERATIONS
     END
     ;
     
-    /*PROMOTES*/
-    nsession <-- client_init_session = 
-    BEGIN
-        nsession :: t_session_i
-    END
-    ;
-    
-    client_secure_channel_lost (lost_channel, channel_config_idx) =
+    /*PROMOTES*/    
+    client_secure_channel_lost_session_sm (lost_channel, channel_config_idx) =
     PRE
         lost_channel : t_channel_i &
         lost_channel : s_channel_connected &
@@ -351,7 +345,7 @@ OPERATIONS
     END
     ;
     
-    server_secure_channel_lost (channel) =
+    server_secure_channel_lost_session_sm (channel) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected
@@ -360,39 +354,14 @@ OPERATIONS
     END
     ;
     
-    server_close_session (session) =
+    server_close_session_sm (session) =
     PRE
         session : t_session_i
     THEN
         skip
     END
     ;
-    
-    ret <-- is_valid_session (session) =
-    PRE
-        session : t_session_i
-    THEN
-        ret :: BOOL
-    END;
-    
-    continue <-- init_iter_orphaned_t_session (channel_config_idx) =
-    PRE
-        channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx
-    THEN
-        continue :: BOOL
-    END
-    ;
-    
-    session, continue <-- continue_iter_orphaned_t_session =
-    PRE
-        av_sessions_to_iterate /= {}
-    THEN
-        session :(session : t_session_i & session : t_session) ||
-        continue :: BOOL
-    END
-    ;
-    
+        
     state <-- get_session_state_or_closed (session) =
     PRE
         session : t_session_i
@@ -406,14 +375,6 @@ OPERATIONS
         session : t_session_i
     THEN
         user :: t_user_i
-    END
-    ;
-
-    delete_session (session) = 
-    PRE
-        session : t_session_i
-    THEN
-        skip
     END
     
 END

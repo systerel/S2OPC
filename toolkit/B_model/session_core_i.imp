@@ -37,6 +37,7 @@ PROMOTES
     continue_iter_orphaned_t_session,
     
     server_get_session_from_token,
+    client_get_token_from_session,
     get_session_channel,
     is_valid_session,
     is_valid_user,
@@ -44,7 +45,7 @@ PROMOTES
     
 LOCAL_OPERATIONS
     
-    srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg) =
+    server_internal_activate_req_and_resp (channel, session, user, activate_resp_msg) =
     PRE
         channel       : t_channel_i &
         channel       : s_channel_connected &
@@ -65,7 +66,7 @@ LOCAL_OPERATIONS
     
 OPERATIONS
     
-    srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg) =
+    server_internal_activate_req_and_resp (channel, session, user, activate_resp_msg) =
     BEGIN
         set_session_user (session, user);
         set_session_channel (session, channel);
@@ -74,18 +75,18 @@ OPERATIONS
     ;
     
     /* END OF LOCAL OPERATIONS */
-    nsession <-- client_init_session =
+    nsession <-- client_init_session_sm =
     BEGIN
         nsession <-- init_new_session
     END;
     
-    cli_create_req (session, channel, create_req_msg) =
+    client_create_session_req_sm (session, channel, create_req_msg) =
     BEGIN
         create_session (session, channel, e_session_creating)
     END
     ;
     
-    nsession, service_ret <-- srv_create_req_and_resp (channel, create_req_msg, create_resp_msg) =
+    nsession, service_ret <-- server_create_session_req_and_resp_sm (channel, create_req_msg, create_resp_msg) =
     VAR
         l_nsession,
         l_valid_session,
@@ -120,7 +121,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- cli_create_resp (channel, session, session_token, create_resp_msg) =
+    ret <-- client_create_session_resp_sm (channel, session, session_token, create_resp_msg) =
     BEGIN
         // channel: only for the precondition
         // TODO: check response msg parameters
@@ -130,7 +131,7 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- cli_user_activate_req (session, user, activate_req_msg) =
+    ret, channel, session_token <-- client_user_activate_session_req_sm (session, user, activate_req_msg) =
     BEGIN
         channel <-- get_session_channel (session);
         session_token <-- client_get_token_from_session (session);
@@ -144,7 +145,7 @@ OPERATIONS
     END
     ;
     
-    session_token <-- cli_sc_activate_req (session, channel, activate_req_msg) =
+    session_token <-- client_sc_activate_session_req_sm (session, channel, activate_req_msg) =
     VAR
         l_user
     IN
@@ -157,7 +158,7 @@ OPERATIONS
     END
     ;  
     
-    ret <-- srv_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg) =
+    ret <-- server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
     VAR
         l_channel,
         l_user,
@@ -172,7 +173,7 @@ OPERATIONS
             /* Channel must be the same and user must be set */
             IF l_channel = channel
             THEN
-                srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
+                server_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
                 l_ret := e_sc_ok
             ELSE
                 l_ret := e_sc_bad_invalid_argument
@@ -183,12 +184,12 @@ OPERATIONS
             IF l_channel = channel &
                 l_user /= user
             THEN
-                srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
+                server_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
                 l_ret := e_sc_ok
             ELSIF l_channel /= channel &
                 l_user = user
             THEN
-                srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
+                server_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
                 l_ret := e_sc_ok
             ELSE
                 l_ret := e_sc_bad_invalid_argument
@@ -199,7 +200,7 @@ OPERATIONS
             IF l_channel /= channel &
                 l_user = user
             THEN
-                srv_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
+                server_internal_activate_req_and_resp (channel, session, user, activate_resp_msg);
                 l_ret := e_sc_ok
             ELSE
                 l_ret := e_sc_bad_invalid_argument
@@ -211,7 +212,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- cli_activate_resp (channel , session, activate_resp_msg) =
+    ret <-- client_activate_session_resp_sm (channel , session, activate_resp_msg) =
     BEGIN
         /* TODO: check response parameters */
         set_session_state (session, e_session_userActivated);
@@ -219,7 +220,7 @@ OPERATIONS
     END
     ;
     
-    client_secure_channel_lost (lost_channel, channel_config_idx) =
+    client_secure_channel_lost_session_sm (lost_channel, channel_config_idx) =
     VAR
         l_continue,
         l_session,
@@ -253,7 +254,7 @@ OPERATIONS
     END
     ;
     
-    server_secure_channel_lost (channel) =
+    server_secure_channel_lost_session_sm (channel) =
     VAR
         l_continue,
         l_session,
@@ -285,7 +286,7 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- cli_close_req (session, close_req_msg) =
+    ret, channel, session_token <-- client_close_session_req_sm (session, close_req_msg) =
     BEGIN
         channel <-- get_session_channel (session);
         session_token <-- client_get_token_from_session (session);
@@ -295,7 +296,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- srv_close_req_and_resp (channel, session, close_req_msg, close_resp_msg) =
+    ret <-- server_close_session_req_and_resp_sm (channel, session, close_req_msg, close_resp_msg) =
     BEGIN
         /* TODO: actions on pending requests or current subscriptions to manage (see request) */
         /* No need to store the handle since we will send response in same step */
@@ -305,29 +306,22 @@ OPERATIONS
     END
     ;
     
-    cli_close_resp (channel, session, close_resp_msg) =
+    client_close_session_resp_sm (channel, session, close_resp_msg) =
     BEGIN
         /* In any case we close the session: correct channel or not  */
         set_session_state_closed (session)
     END
     ;
     
-    cli_close_session (session) =
+    client_close_session_sm (session) =
     BEGIN
         set_session_state_closed (session)
     END
     ;
     
-    server_close_session (session) =
+    server_close_session_sm (session) =
     BEGIN
         set_session_state_closed (session)
-    END
-    ;
-    
-    channel, session_token <-- cli_new_session_service_req (session) =
-    BEGIN
-        session_token <-- client_get_token_from_session (session);
-        channel <-- get_session_channel (session)
     END
     ;
 

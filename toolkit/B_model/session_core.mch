@@ -103,48 +103,10 @@ INITIALISATION
     
 OPERATIONS
     
-    session <-- server_get_session_from_token (session_token) =
-    PRE
-        session_token : t_session_token_i
-    THEN
-        IF session_token : t_session_token &
-            session_token : dom(a_server_token)
-        THEN
-            session :(session : t_session_i & session = a_server_token(session_token))
-        ELSE
-            session := c_session_indet
-        END
-    END
-    ;
-    
-    channel <-- get_session_channel (session) =
-    PRE
-        session : t_session_i &
-        session : s_session &
-        session : dom(a_channel)
-    THEN
-            channel :(channel : t_channel_i & channel = a_channel(session))
-    END
-    ;
-    
-    ret <-- is_valid_session (session) =
-    PRE
-        session : t_session_i
-    THEN
-        ret :=  bool(session : s_session)
-    END
-    ;
-    
-    ret <-- is_valid_user (user) =
-    PRE
-        user : t_user_i
-    THEN
-        ret := bool(user : t_user)
-    END
-    ;
+    /* Note: _sm suffix is for (sesion) State Machine, to indicate a transition */
     
     // Initialize a session to be created
-    nsession <-- client_init_session = 
+    nsession <-- client_init_session_sm = 
     BEGIN
         IF s_session = t_session
         THEN
@@ -164,7 +126,7 @@ OPERATIONS
     ;
     
     // Client sends create session request on channel
-    cli_create_req (session, channel, create_req_msg) = 
+    client_create_session_req_sm (session, channel, create_req_msg) = 
     PRE
         session : t_session_i &
         session : t_session &
@@ -183,7 +145,7 @@ OPERATIONS
     ;
     
     // Server receives create session request on channel and sends response
-    nsession, service_ret <-- srv_create_req_and_resp (channel, create_req_msg, create_resp_msg) = 
+    nsession, service_ret <-- server_create_session_req_and_resp_sm (channel, create_req_msg, create_resp_msg) = 
     PRE
         channel : t_channel_i  &
         channel : s_channel_connected &
@@ -227,7 +189,7 @@ OPERATIONS
     ;
     
     // Client receive create session response from server
-    ret <-- cli_create_resp (channel, session, session_token, create_resp_msg) =
+    ret <-- client_create_session_resp_sm (channel, session, session_token, create_resp_msg) =
     PRE
         channel       : t_channel_i &
         channel       : s_channel_connected   &
@@ -259,7 +221,7 @@ OPERATIONS
     ;
     
     // Client sends a user activate request for current session
-    ret, channel, session_token <-- cli_user_activate_req (session, user, activate_req_msg) =
+    ret, channel, session_token <-- client_user_activate_session_req_sm (session, user, activate_req_msg) =
     PRE
         session : t_session_i &
         session : s_session &
@@ -289,7 +251,7 @@ OPERATIONS
     ;
     
     // Client sends activate request for new channel: keep for possible applicative initiative on sc activate ?
-    session_token <-- cli_sc_activate_req (session, channel, activate_req_msg) =
+    session_token <-- client_sc_activate_session_req_sm (session, channel, activate_req_msg) =
     PRE
         session : t_session_i &
         session : s_session &
@@ -309,7 +271,7 @@ OPERATIONS
     ;
     
     // Server receives a user activate request and sends response
-    ret <-- srv_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg) =
+    ret <-- server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -362,7 +324,7 @@ OPERATIONS
     END
     ;
     
-    ret <-- cli_activate_resp (channel, session, activate_resp_msg) = 
+    ret <-- client_activate_session_resp_sm (channel, session, activate_resp_msg) = 
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -387,7 +349,7 @@ OPERATIONS
     ;
     
     // Client channel lost
-    client_secure_channel_lost (lost_channel, channel_config_idx) =
+    client_secure_channel_lost_session_sm (lost_channel, channel_config_idx) =
     PRE
         lost_channel : t_channel_i &
         lost_channel : s_channel_connected &
@@ -414,7 +376,7 @@ OPERATIONS
     ;
     
     // Server channel lost
-    server_secure_channel_lost (channel) =
+    server_secure_channel_lost_session_sm (channel) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected
@@ -438,7 +400,7 @@ OPERATIONS
     END
     ;
     
-    ret, channel, session_token <-- cli_close_req (session, close_req_msg) =
+    ret, channel, session_token <-- client_close_session_req_sm (session, close_req_msg) =
     PRE
         session : t_session_i &
         session : s_session &
@@ -465,7 +427,7 @@ OPERATIONS
     ;
     
     
-    ret <-- srv_close_req_and_resp (channel, session, close_req_msg, close_resp_msg) =
+    ret <-- server_close_session_req_and_resp_sm (channel, session, close_req_msg, close_resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -491,7 +453,7 @@ OPERATIONS
     END
     ;
     
-    cli_close_resp (channel, session, close_resp_msg) =
+    client_close_session_resp_sm (channel, session, close_resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected   &
@@ -508,20 +470,9 @@ OPERATIONS
         d_close_session(session)
     END
     ;
-    
-    channel, session_token <-- cli_new_session_service_req (session) =
-    PRE
-        session : t_session_i &
-        session : s_session &
-        a_state(session) = e_session_userActivated
-    THEN
-        session_token :(session_token : t_session_token_i & session_token = a_client_token(session)) ||
-        channel :(channel : t_channel_i & channel = a_channel(session))
-    END
-    ;
 
     
-    cli_close_session (session) =
+    client_close_session_sm (session) =
     PRE
         session : t_session_i &
         session : s_session
@@ -531,7 +482,7 @@ OPERATIONS
     END
     ;
     
-    server_close_session (session) =
+    server_close_session_sm (session) =
     PRE
         session : t_session_i &
         session : s_session
@@ -600,6 +551,58 @@ OPERATIONS
     END
     ;
     
+    /* PROMOTES */
+    session <-- server_get_session_from_token (session_token) =
+    PRE
+        session_token : t_session_token_i
+    THEN
+        IF session_token : t_session_token &
+            session_token : dom(a_server_token)
+        THEN
+            session :(session : t_session_i & session = a_server_token(session_token))
+        ELSE
+            session := c_session_indet
+        END
+    END
+    ;
+    
+    session_token <-- client_get_token_from_session (session) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        session : dom(a_client_token)
+    THEN
+        // Guarantee only 1 session token by session provided by set_session_token PRE
+        session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
+    END
+    ;
+    
+    channel <-- get_session_channel (session) =
+    PRE
+        session : t_session_i &
+        session : s_session &
+        session : dom(a_channel)
+    THEN
+            channel :(channel : t_channel_i & channel = a_channel(session))
+    END
+    ;
+    
+    ret <-- is_valid_session (session) =
+    PRE
+        session : t_session_i
+    THEN
+        ret :=  bool(session : s_session)
+    END
+    ;
+    
+    ret <-- is_valid_user (user) =
+    PRE
+        user : t_user_i
+    THEN
+        ret := bool(user : t_user)
+    END
+    ;
+
     delete_session (session) = 
     PRE
         session : t_session_i &
@@ -613,5 +616,6 @@ OPERATIONS
         a_server_token := a_server_token |>> {session} ||
         a_orphaned := {session} <<| a_orphaned
     END
-
+  
+    
 END

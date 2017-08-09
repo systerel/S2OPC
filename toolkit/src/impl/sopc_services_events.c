@@ -173,9 +173,9 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     //printf("APP_TO_SE_SEND_SESSION_REQUEST\n");
     // id == session id
     // params = request
-    io_dispatch_mgr__client_service_request(id,
-                                            params,
-                                            &sCode);
+    io_dispatch_mgr__client_send_service_request(id,
+                                                 params,
+                                                 &sCode);
     if(sCode != constants__e_sc_ok){
       status = STATUS_NOK;
     }
@@ -183,8 +183,8 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
   case APP_TO_SE_CLOSE_SESSION:
     //printf("APP_TO_SE_CLOSE_SESSION\n");
     // id == session id
-    io_dispatch_mgr__client_close_session_request(id,
-                                                  &sCode);
+    io_dispatch_mgr__client_send_close_session_request(id,
+                                                       &sCode);
     if(sCode != constants__e_sc_ok){
       status = STATUS_NOK;
     }
