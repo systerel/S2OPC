@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 08/08/2017 11:53:15
+ Date                 : 09/08/2017 10:37:55
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -19,6 +19,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "session_async_bs.h"
 #include "session_core.h"
 #include "session_request_handle_bs.h"
 
@@ -50,9 +51,28 @@ extern void session_mgr__INITIALISATION(void);
 #define session_mgr__server_close_session session_core__server_close_session
 #define session_mgr__server_secure_channel_lost session_core__server_secure_channel_lost
 
+/*--------------------------
+   LOCAL_OPERATIONS Clause
+  --------------------------*/
+extern void session_mgr__local_sc_activate_orphaned_sessions(
+   const constants__t_channel_config_idx_i session_mgr__channel_config_idx,
+   const constants__t_channel_i session_mgr__channel);
+
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void session_mgr__client_async_activate_new_session_with_channel(
+   const constants__t_channel_config_idx_i session_mgr__channel_config_idx,
+   const constants__t_channel_i session_mgr__channel,
+   const constants__t_user_i session_mgr__user,
+   t_bool * const session_mgr__bres);
+extern void session_mgr__client_async_activate_new_session_without_channel(
+   const constants__t_channel_config_idx_i session_mgr__channel_config_idx,
+   const constants__t_user_i session_mgr__user,
+   t_bool * const session_mgr__bres);
+extern void session_mgr__client_channel_connected_event_session(
+   const constants__t_channel_config_idx_i session_mgr__channel_config_idx,
+   const constants__t_channel_i session_mgr__channel);
 extern void session_mgr__client_close_req(
    const constants__t_session_i session_mgr__session,
    const constants__t_request_handle_i session_mgr__req_handle,

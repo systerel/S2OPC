@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 08/08/2017 11:53:14
+ Date                 : 09/08/2017 10:37:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -169,7 +169,7 @@ void io_dispatch_mgr__client_channel_connected_event(
          io_dispatch_mgr__channel,
          &io_dispatch_mgr__l_bres);
       if (io_dispatch_mgr__l_bres == true) {
-         service_mgr__client_channel_connected_event_service(io_dispatch_mgr__channel_config_idx,
+         service_mgr__client_channel_connected_event_session(io_dispatch_mgr__channel_config_idx,
             io_dispatch_mgr__channel);
       }
    }
@@ -216,16 +216,57 @@ void io_dispatch_mgr__client_activate_new_session(
          channel_mgr_bs__cli_open_secure_channel(io_dispatch_mgr__channel_config_idx,
             io_dispatch_mgr__bres);
          if (*io_dispatch_mgr__bres == true) {
-            service_mgr__client_activate_new_session_wihtout_channel(io_dispatch_mgr__channel_config_idx,
+            service_mgr__client_async_activate_new_session_without_channel(io_dispatch_mgr__channel_config_idx,
                io_dispatch_mgr__user,
                io_dispatch_mgr__bres);
          }
       }
       else {
-         service_mgr__client_activate_new_session_with_channel(io_dispatch_mgr__channel_config_idx,
+         service_mgr__client_async_activate_new_session_with_channel(io_dispatch_mgr__channel_config_idx,
             io_dispatch_mgr__l_channel,
             io_dispatch_mgr__user,
             io_dispatch_mgr__bres);
+      }
+   }
+}
+
+void io_dispatch_mgr__internal_client_create_session(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx) {
+   {
+      constants__t_channel_i io_dispatch_mgr__l_channel;
+      t_bool io_dispatch_mgr__l_connected_channel;
+      constants__t_StatusCode_i io_dispatch_mgr__l_ret;
+      
+      channel_mgr_bs__get_connected_channel(io_dispatch_mgr__channel_config_idx,
+         &io_dispatch_mgr__l_channel);
+      channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
+         &io_dispatch_mgr__l_connected_channel);
+      if (io_dispatch_mgr__l_connected_channel == false) {
+         service_mgr__client_close_session(io_dispatch_mgr__session,
+            &io_dispatch_mgr__l_ret);
+      }
+      else {
+         service_mgr__client_create_session(io_dispatch_mgr__session,
+            io_dispatch_mgr__l_channel);
+      }
+   }
+}
+
+void io_dispatch_mgr__internal_client_activate_orphaned_session(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx) {
+   {
+      constants__t_channel_i io_dispatch_mgr__l_channel;
+      t_bool io_dispatch_mgr__l_connected_channel;
+      
+      channel_mgr_bs__get_connected_channel(io_dispatch_mgr__channel_config_idx,
+         &io_dispatch_mgr__l_channel);
+      channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_channel,
+         &io_dispatch_mgr__l_connected_channel);
+      if (io_dispatch_mgr__l_connected_channel == false) {
+         service_mgr__client_activate_orphaned_session(io_dispatch_mgr__session,
+            io_dispatch_mgr__l_channel);
       }
    }
 }
@@ -263,7 +304,7 @@ void io_dispatch_mgr__secure_channel_lost(
                channel_mgr_bs__is_connected_channel(io_dispatch_mgr__l_new_channel,
                   &io_dispatch_mgr__l_valid_new_channel);
                if (io_dispatch_mgr__l_valid_new_channel == true) {
-                  service_mgr__client_channel_connected_event_service(io_dispatch_mgr__l_channel_config_idx,
+                  service_mgr__client_channel_connected_event_session(io_dispatch_mgr__l_channel_config_idx,
                      io_dispatch_mgr__l_new_channel);
                }
             }

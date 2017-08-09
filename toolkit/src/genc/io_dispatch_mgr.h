@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 08/08/2017 11:53:13
+ Date                 : 09/08/2017 10:37:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -63,6 +63,12 @@ extern void io_dispatch_mgr__client_secure_channel_timeout(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx);
 extern void io_dispatch_mgr__close_all_active_connections(
    t_bool * const io_dispatch_mgr__bres);
+extern void io_dispatch_mgr__internal_client_activate_orphaned_session(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx);
+extern void io_dispatch_mgr__internal_client_create_session(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx);
 extern void io_dispatch_mgr__receive_msg_buffer(
    const constants__t_channel_i io_dispatch_mgr__channel,
    const constants__t_byte_buffer_i io_dispatch_mgr__buffer);
