@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 09/08/2017 10:37:54
+ Date                 : 09/08/2017 13:51:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -96,7 +96,8 @@ void service_mgr__treat_write_request(
 void service_mgr__server_receive_session_treatment_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
-   const constants__t_byte_buffer_i service_mgr__msg_buffer) {
+   const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_req_msg_header;
       t_bool service_mgr__l_valid_req_header;
@@ -116,6 +117,7 @@ void service_mgr__server_receive_session_treatment_req(
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
       t_bool service_mgr__l_valid_buffer;
       
+      service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(service_mgr__msg_buffer,
          &service_mgr__l_req_msg_header);
       message_in_bs__is_valid_msg_in_header(service_mgr__l_req_msg_header,
@@ -164,15 +166,7 @@ void service_mgr__server_receive_session_treatment_req(
                      &service_mgr__l_buffer_out);
                   message_out_bs__is_valid_buffer_out(service_mgr__l_buffer_out,
                      &service_mgr__l_valid_buffer);
-                  if (service_mgr__l_valid_buffer == true) {
-                     channel_mgr_bs__send_channel_msg_buffer(service_mgr__channel,
-                        service_mgr__l_buffer_out,
-                        &service_mgr__l_ret);
-                  }
-                  else {
-                     service_mgr__l_ret = constants__e_sc_nok;
-                  }
-                  if (service_mgr__l_ret != constants__e_sc_ok) {
+                  if (service_mgr__l_valid_buffer == false) {
                      session_mgr__server_close_session(service_mgr__l_session);
                   }
                   message_out_bs__dealloc_msg_header_out(service_mgr__l_resp_msg_header);
@@ -186,6 +180,7 @@ void service_mgr__server_receive_session_treatment_req(
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
       message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
+      *service_mgr__buffer_out = service_mgr__l_buffer_out;
    }
 }
 
@@ -240,7 +235,8 @@ void service_mgr__client_receive_session_treatment_resp(
 void service_mgr__server_receive_session_service_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
-   const constants__t_byte_buffer_i service_mgr__msg_buffer) {
+   const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_req_msg_header;
       t_bool service_mgr__l_valid_req_header;
@@ -261,8 +257,8 @@ void service_mgr__server_receive_session_service_req(
       constants__t_StatusCode_i service_mgr__l_ret;
       t_bool service_mgr__l_is_valid_resp;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
-      t_bool service_mgr__l_valid_buffer;
       
+      service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(service_mgr__msg_buffer,
          &service_mgr__l_req_msg_header);
       message_in_bs__is_valid_msg_in_header(service_mgr__l_req_msg_header,
@@ -333,16 +329,6 @@ void service_mgr__server_receive_session_service_req(
                               service_mgr__l_resp_msg_header,
                               service_mgr__l_resp_msg,
                               &service_mgr__l_buffer_out);
-                           message_out_bs__is_valid_buffer_out(service_mgr__l_buffer_out,
-                              &service_mgr__l_valid_buffer);
-                           if (service_mgr__l_valid_buffer == true) {
-                              channel_mgr_bs__send_channel_msg_buffer(service_mgr__channel,
-                                 service_mgr__l_buffer_out,
-                                 &service_mgr__l_ret);
-                           }
-                           else {
-                              service_mgr__l_ret = constants__e_sc_nok;
-                           }
                         }
                         message_out_bs__dealloc_msg_header_out(service_mgr__l_resp_msg_header);
                         message_out_bs__dealloc_msg_out(service_mgr__l_resp_msg);
@@ -357,6 +343,7 @@ void service_mgr__server_receive_session_service_req(
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
       message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
+      *service_mgr__buffer_out = service_mgr__l_buffer_out;
    }
 }
 
@@ -411,7 +398,8 @@ void service_mgr__client_receive_session_service_resp(
 void service_mgr__server_receive_public_service_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
-   const constants__t_byte_buffer_i service_mgr__msg_buffer) {
+   const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    ;
 }
 
@@ -424,7 +412,8 @@ void service_mgr__client_receive_public_service_resp(
 
 void service_mgr__client_create_session(
    const constants__t_session_i service_mgr__session,
-   const constants__t_channel_i service_mgr__channel) {
+   const constants__t_channel_i service_mgr__channel,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
       t_bool service_mgr__l_valid_msg_header;
@@ -437,6 +426,7 @@ void service_mgr__client_create_session(
       t_bool service_mgr__l_valid_buffer;
       constants__t_StatusCode_i service_mgr__l_ret;
       
+      service_mgr__l_buffer = constants__c_byte_buffer_indet;
       message_out_bs__alloc_req_msg(constants__e_msg_session_create_req,
          &service_mgr__l_msg_header,
          &service_mgr__l_req_msg);
@@ -468,15 +458,7 @@ void service_mgr__client_create_session(
                      &service_mgr__l_buffer);
                   message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
                      &service_mgr__l_valid_buffer);
-                  if (service_mgr__l_valid_buffer == true) {
-                     channel_mgr_bs__send_channel_msg_buffer(service_mgr__channel,
-                        service_mgr__l_buffer,
-                        &service_mgr__l_ret);
-                  }
-                  else {
-                     service_mgr__l_ret = constants__e_sc_nok;
-                  }
-                  if (service_mgr__l_ret != constants__e_sc_ok) {
+                  if (service_mgr__l_valid_buffer == false) {
                      request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
                      session_mgr__client_session_mgr_close_session(service_mgr__session);
                   }
@@ -493,12 +475,14 @@ void service_mgr__client_create_session(
          message_out_bs__dealloc_msg_header_out(service_mgr__l_msg_header);
          message_out_bs__dealloc_msg_out(service_mgr__l_req_msg);
       }
+      *service_mgr__buffer_out = service_mgr__l_buffer;
    }
 }
 
 void service_mgr__client_activate_orphaned_session(
    const constants__t_session_i service_mgr__session,
-   const constants__t_channel_i service_mgr__channel) {
+   const constants__t_channel_i service_mgr__channel,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
       constants__t_msg_i service_mgr__l_req_msg;
@@ -511,6 +495,7 @@ void service_mgr__client_activate_orphaned_session(
       constants__t_byte_buffer_i service_mgr__l_buffer;
       t_bool service_mgr__l_valid_buffer;
       
+      service_mgr__l_buffer = constants__c_byte_buffer_indet;
       message_out_bs__alloc_req_msg(constants__e_msg_session_activate_req,
          &service_mgr__l_msg_header,
          &service_mgr__l_req_msg);
@@ -542,15 +527,7 @@ void service_mgr__client_activate_orphaned_session(
                   &service_mgr__l_buffer);
                message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
                   &service_mgr__l_valid_buffer);
-               if (service_mgr__l_valid_buffer == true) {
-                  channel_mgr_bs__send_channel_msg_buffer(service_mgr__channel,
-                     service_mgr__l_buffer,
-                     &service_mgr__l_ret);
-               }
-               else {
-                  service_mgr__l_ret = constants__e_sc_nok;
-               }
-               if (service_mgr__l_ret != constants__e_sc_ok) {
+               if (service_mgr__l_valid_buffer == false) {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
                   session_mgr__client_session_mgr_close_session(service_mgr__session);
                }
@@ -559,13 +536,16 @@ void service_mgr__client_activate_orphaned_session(
          message_out_bs__dealloc_msg_header_out(service_mgr__l_msg_header);
          message_out_bs__dealloc_msg_out(service_mgr__l_req_msg);
       }
+      *service_mgr__buffer_out = service_mgr__l_buffer;
    }
 }
 
 void service_mgr__client_activate_session(
    const constants__t_session_i service_mgr__session,
    const constants__t_user_i service_mgr__user,
-   constants__t_StatusCode_i * const service_mgr__ret) {
+   constants__t_StatusCode_i * const service_mgr__ret,
+   constants__t_channel_i * const service_mgr__channel,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
       t_bool service_mgr__l_valid_msg_header;
@@ -579,6 +559,8 @@ void service_mgr__client_activate_session(
       constants__t_byte_buffer_i service_mgr__l_buffer;
       t_bool service_mgr__l_valid_buffer;
       
+      service_mgr__l_channel = constants__c_channel_indet;
+      service_mgr__l_buffer = constants__c_byte_buffer_indet;
       message_out_bs__alloc_req_msg(constants__e_msg_session_activate_req,
          &service_mgr__l_msg_header,
          &service_mgr__l_req_msg);
@@ -611,16 +593,10 @@ void service_mgr__client_activate_session(
                   &service_mgr__l_buffer);
                message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
                   &service_mgr__l_valid_buffer);
-               if (service_mgr__l_valid_buffer == true) {
-                  channel_mgr_bs__send_channel_msg_buffer(service_mgr__l_channel,
-                     service_mgr__l_buffer,
-                     &service_mgr__l_ret);
-               }
-               else {
-                  service_mgr__l_ret = constants__e_sc_nok;
-               }
-               if (service_mgr__l_ret != constants__e_sc_ok) {
+               if (service_mgr__l_valid_buffer == false) {
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
+                  service_mgr__l_ret = constants__e_sc_bad_encoding_error;
+                  service_mgr__l_channel = constants__c_channel_indet;
                   session_mgr__client_session_mgr_close_session(service_mgr__session);
                }
             }
@@ -635,12 +611,16 @@ void service_mgr__client_activate_session(
          service_mgr__l_ret = constants__e_sc_bad_out_of_memory;
       }
       *service_mgr__ret = service_mgr__l_ret;
+      *service_mgr__channel = service_mgr__l_channel;
+      *service_mgr__buffer_out = service_mgr__l_buffer;
    }
 }
 
 void service_mgr__client_close_session(
    const constants__t_session_i service_mgr__session,
-   constants__t_StatusCode_i * const service_mgr__ret) {
+   constants__t_StatusCode_i * const service_mgr__ret,
+   constants__t_channel_i * const service_mgr__channel,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
       t_bool service_mgr__l_valid_msg_header;
@@ -653,6 +633,8 @@ void service_mgr__client_close_session(
       constants__t_byte_buffer_i service_mgr__l_buffer;
       t_bool service_mgr__l_valid_buffer;
       
+      service_mgr__l_channel = constants__c_channel_indet;
+      service_mgr__l_buffer = constants__c_byte_buffer_indet;
       message_out_bs__alloc_req_msg(constants__e_msg_session_close_req,
          &service_mgr__l_msg_header,
          &service_mgr__l_req_msg);
@@ -684,15 +666,9 @@ void service_mgr__client_close_session(
                   &service_mgr__l_buffer);
                message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
                   &service_mgr__l_valid_buffer);
-               if (service_mgr__l_valid_buffer == true) {
-                  channel_mgr_bs__send_channel_msg_buffer(service_mgr__l_channel,
-                     service_mgr__l_buffer,
-                     service_mgr__ret);
-               }
-               else {
-                  *service_mgr__ret = constants__e_sc_nok;
-               }
-               if (*service_mgr__ret != constants__e_sc_ok) {
+               if (service_mgr__l_valid_buffer == false) {
+                  service_mgr__l_channel = constants__c_channel_indet;
+                  *service_mgr__ret = constants__e_sc_bad_encoding_error;
                   request_handle_bs__client_remove_req_handle(service_mgr__l_req_handle);
                   session_mgr__client_session_mgr_close_session(service_mgr__session);
                }
@@ -707,13 +683,17 @@ void service_mgr__client_close_session(
       else {
          *service_mgr__ret = constants__e_sc_bad_out_of_memory;
       }
+      *service_mgr__channel = service_mgr__l_channel;
+      *service_mgr__buffer_out = service_mgr__l_buffer;
    }
 }
 
 void service_mgr__client_send_service_request_msg(
    const constants__t_session_i service_mgr__session,
    const constants__t_msg_i service_mgr__req_msg,
-   constants__t_StatusCode_i * const service_mgr__ret) {
+   constants__t_StatusCode_i * const service_mgr__ret,
+   constants__t_channel_i * const service_mgr__channel,
+   constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_msg_header;
       t_bool service_mgr__l_valid_msg_header;
@@ -727,6 +707,8 @@ void service_mgr__client_send_service_request_msg(
       constants__t_byte_buffer_i service_mgr__l_buffer;
       t_bool service_mgr__l_valid_buffer;
       
+      service_mgr__l_channel = constants__c_channel_indet;
+      service_mgr__l_buffer = constants__c_byte_buffer_indet;
       message_out_bs__is_valid_msg_out(service_mgr__req_msg,
          &service_mgr__l_valid_msg);
       if (service_mgr__l_valid_msg == true) {
@@ -768,13 +750,9 @@ void service_mgr__client_send_service_request_msg(
                      &service_mgr__l_buffer);
                   message_out_bs__is_valid_buffer_out(service_mgr__l_buffer,
                      &service_mgr__l_valid_buffer);
-                  if (service_mgr__l_valid_buffer == true) {
-                     channel_mgr_bs__send_channel_msg_buffer(service_mgr__l_channel,
-                        service_mgr__l_buffer,
-                        service_mgr__ret);
-                  }
-                  else {
-                     *service_mgr__ret = constants__e_sc_nok;
+                  if (service_mgr__l_valid_buffer == false) {
+                     *service_mgr__ret = constants__e_sc_bad_encoding_error;
+                     service_mgr__l_channel = constants__c_channel_indet;
                   }
                }
             }
@@ -794,6 +772,8 @@ void service_mgr__client_send_service_request_msg(
       else {
          *service_mgr__ret = constants__e_sc_bad_invalid_argument;
       }
+      *service_mgr__channel = service_mgr__l_channel;
+      *service_mgr__buffer_out = service_mgr__l_buffer;
    }
 }
 

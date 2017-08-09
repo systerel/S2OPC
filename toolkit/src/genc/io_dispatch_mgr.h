@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 09/08/2017 10:37:53
+ Date                 : 09/08/2017 13:51:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -32,13 +32,6 @@
   ------------------------*/
 extern void io_dispatch_mgr__INITIALISATION(void);
 
-/*-------------------------------
-   PROMOTES and EXTENDS Clauses
-  -------------------------------*/
-#define io_dispatch_mgr__client_activate_session service_mgr__client_activate_session
-#define io_dispatch_mgr__client_close_session service_mgr__client_close_session
-#define io_dispatch_mgr__client_send_service_request_msg service_mgr__client_send_service_request_msg
-
 /*--------------------------
    LOCAL_OPERATIONS Clause
   --------------------------*/
@@ -59,8 +52,19 @@ extern void io_dispatch_mgr__client_activate_new_session(
 extern void io_dispatch_mgr__client_channel_connected_event(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx,
    const constants__t_channel_i io_dispatch_mgr__channel);
+extern void io_dispatch_mgr__client_close_session_request(
+   const constants__t_session_i io_dispatch_mgr__session,
+   constants__t_StatusCode_i * const io_dispatch_mgr__ret);
+extern void io_dispatch_mgr__client_reactivate_session_new_user(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_user_i io_dispatch_mgr__user,
+   constants__t_StatusCode_i * const io_dispatch_mgr__ret);
 extern void io_dispatch_mgr__client_secure_channel_timeout(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx);
+extern void io_dispatch_mgr__client_service_request(
+   const constants__t_session_i io_dispatch_mgr__session,
+   const constants__t_msg_i io_dispatch_mgr__req_msg,
+   constants__t_StatusCode_i * const io_dispatch_mgr__ret);
 extern void io_dispatch_mgr__close_all_active_connections(
    t_bool * const io_dispatch_mgr__bres);
 extern void io_dispatch_mgr__internal_client_activate_orphaned_session(
