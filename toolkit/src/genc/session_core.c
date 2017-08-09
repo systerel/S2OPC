@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 09/08/2017 13:51:30
+ Date                 : 09/08/2017 15:43:07
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -60,6 +60,7 @@ void session_core__srv_create_req_and_resp(
       t_bool session_core__l_valid_session;
       constants__t_session_token_i session_core__l_nsession_token;
       t_bool session_core__l_valid_session_token;
+      constants__t_endpoint_config_idx_i session_core__l_endpoint_config_idx;
       
       session_core_1_bs__init_new_session(&session_core__l_nsession);
       session_core_1_bs__is_valid_session(session_core__l_nsession,
@@ -75,6 +76,10 @@ void session_core__srv_create_req_and_resp(
          if (session_core__l_valid_session_token == true) {
             message_out_bs__write_create_session_msg_session_token(session_core__create_resp_msg,
                session_core__l_nsession_token);
+            channel_mgr_bs__server_get_endpoint_config(session_core__channel,
+               &session_core__l_endpoint_config_idx);
+            message_out_bs__write_create_session_msg_server_endpoints(session_core__create_resp_msg,
+               session_core__l_endpoint_config_idx);
             *session_core__service_ret = constants__e_sc_ok;
          }
          else {
