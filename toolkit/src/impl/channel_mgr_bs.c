@@ -160,22 +160,23 @@ void channel_mgr_bs__channel_lost(
 
 void channel_mgr_bs__send_channel_msg_buffer(
    const constants__t_channel_i channel_mgr_bs__channel,
-   const constants__t_byte_buffer_i channel_mgr_bs__buffer,
-   constants__t_StatusCode_i * const channel_mgr_bs__ret) {
+   const constants__t_byte_buffer_i channel_mgr_bs__buffer) {
 
   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) channel_mgr_bs__buffer;
+  SOPC_StatusCode status = STATUS_NOK;
 
   if(channel_mgr_bs__channel == (t_entier4) unique_channel.id){
-    SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                         SE_TO_SC_SERVICE_SND_MSG,
-                                         channel_mgr_bs__channel,
-                                         msg,
-                                         unique_channel.configIdx,
-                                         "Services mgr sends a message on channel !");
-    // TODO: no status to retrieve on asyn operation !
-    *channel_mgr_bs__ret = constants__e_sc_ok; 
-  }else{
-    *channel_mgr_bs__ret = constants__e_sc_nok;
+    status = SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
+                                                  SE_TO_SC_SERVICE_SND_MSG,
+                                                  channel_mgr_bs__channel,
+                                                  msg,
+                                                  unique_channel.configIdx,
+                                                  "Services mgr sends a message on channel !");    
+  }
+
+  if(STATUS_OK != status){
+    printf("channel_mgr_bs__send_channel_msg_buffer\n");
+    exit(1);
   }
 }
 

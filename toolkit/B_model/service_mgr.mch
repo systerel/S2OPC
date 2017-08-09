@@ -28,6 +28,7 @@ DEFINITIONS
     c_msg_in_header,
     c_msg_in,
     a_msg_in_type,
+    a_buffer_out_state,
     c_msg_out_header,
     c_msg_out,
     a_msg_out_type;
@@ -37,6 +38,7 @@ DEFINITIONS
     c_msg_in_header : t_msg_header_i &
     c_msg_in : t_msg_i &
     a_msg_in_type : t_msg_type_i &
+    a_buffer_out_state : t_buffer_out_state_i &
     c_msg_out_header : t_msg_header_i &
     c_msg_out : t_msg_i &
     a_msg_out_type : t_msg_type_i
@@ -52,7 +54,7 @@ INITIALISATION
     
 OPERATIONS
     
-    server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
+    buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -62,6 +64,7 @@ OPERATIONS
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &
+        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet &
@@ -69,7 +72,14 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
+        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
+        CHOICE
+            a_buffer_out_state := c_buffer_out_state_indet ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+        OR
+            a_buffer_out_state := e_buffer_out_msg_written ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+        END
     END
     ;
     
@@ -94,7 +104,7 @@ OPERATIONS
     END
     ;
     
-    server_receive_session_service_req (channel, req_typ, msg_buffer) =
+    buffer_out <-- server_receive_session_service_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -104,6 +114,7 @@ OPERATIONS
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &
+        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet &
@@ -111,7 +122,14 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
+        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
+        CHOICE
+            a_buffer_out_state := c_buffer_out_state_indet ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+        OR
+            a_buffer_out_state := e_buffer_out_msg_written ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+        END
     END
     ;
     
@@ -136,7 +154,7 @@ OPERATIONS
     END
     ;
     
-    server_receive_public_service_req (channel, req_typ, msg_buffer) =
+    buffer_out <-- server_receive_public_service_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -146,6 +164,7 @@ OPERATIONS
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer &
         a_buffer_in_state = e_buffer_in_msg_type_read &
+        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_in = c_msg_indet &
         c_msg_in_header = c_msg_header_indet &
@@ -153,7 +172,14 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
+        a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read} ||
+        CHOICE
+            a_buffer_out_state := c_buffer_out_state_indet ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+        OR
+            a_buffer_out_state := e_buffer_out_msg_written ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+        END
     END
     ;
     
@@ -213,21 +239,31 @@ OPERATIONS
     ;
     
     /* Only called through an internal event sent by session mgr itself */
-    client_create_session (session, channel) =
+    buffer_out <-- client_create_session (session, channel) =
     PRE
         session : t_session_i &
         session : t_session &
         channel : t_channel_i &
         channel : t_channel &
         channel : s_channel_connected &
-        c_msg_out = c_msg_indet
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
-        skip
+        CHOICE
+            a_buffer_out_state := c_buffer_out_state_indet ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+        OR
+            a_buffer_out_state := e_buffer_out_msg_written ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+        END
     END
     ;
     
     /* Only to change user on an active channel */
-    ret <-- client_activate_session (session, user) =
+    ret, channel, buffer_out <-- client_activate_session (session, user) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -238,56 +274,78 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        ret :: {e_sc_ok,
-            e_sc_bad_out_of_memory,
-            e_sc_bad_invalid_argument,
-            e_sc_bad_invalid_state,          /* session not in a valid state to activate a user on it */
-            e_sc_bad_unexpected_error,
-            e_sc_bad_identity_token_invalid, /* user identity invalid */
-            e_sc_bad_encoding_error,
-            e_sc_bad_secure_channel_closed,
-            e_sc_bad_connection_closed,
-            e_sc_bad_encoding_error}
+        CHOICE
+            ret :: {e_sc_bad_out_of_memory,
+                e_sc_bad_invalid_argument,
+                e_sc_bad_invalid_state,          /* session not in a valid state to activate a user on it */
+                e_sc_bad_unexpected_error,
+                e_sc_bad_identity_token_invalid, /* user identity invalid */
+                e_sc_bad_encoding_error,
+                e_sc_bad_secure_channel_closed,
+                e_sc_bad_connection_closed,
+                e_sc_bad_encoding_error} ||
+            channel :(channel : t_channel_i & channel = c_channel_indet) ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+        OR
+            ret := e_sc_ok ||
+            channel :(channel : t_channel_i & channel : s_channel_connected) ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+        END
     END
     ;
     
     /* Only to set new channel on an orphaned session: called through internal event sent by session mgr itself */
-    client_activate_orphaned_session (session, channel) =
+    buffer_out <-- client_activate_orphaned_session (session, channel) =
     PRE
         session : t_session_i &
         session : t_session &
         channel : t_channel_i &
         channel : s_channel_connected &
+        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        skip
+        CHOICE
+            a_buffer_out_state := c_buffer_out_state_indet ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+        OR
+            a_buffer_out_state := e_buffer_out_msg_written ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+        END
     END
     ;
     
-    ret <-- client_close_session (session) =
+    ret, channel, buffer_out <-- client_close_session (session) =
     PRE
         session : t_session_i &
         session : t_session &
+        a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        ret :: {e_sc_ok,
-            e_sc_bad_encoding_error,
-            e_sc_bad_out_of_memory,
-            e_sc_bad_unexpected_error,
-            e_sc_bad_invalid_argument,
-            e_sc_bad_invalid_state,
-            e_sc_bad_secure_channel_closed,
-            e_sc_bad_connection_closed}
+        CHOICE
+            ret :: {e_sc_bad_encoding_error,
+                e_sc_bad_out_of_memory,
+                e_sc_bad_unexpected_error,
+                e_sc_bad_invalid_argument,
+                e_sc_bad_invalid_state,
+                e_sc_bad_secure_channel_closed,
+                e_sc_bad_connection_closed} ||
+            channel :(channel : t_channel_i & channel = c_channel_indet) ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+        OR
+            ret := e_sc_ok ||
+            channel :(channel : t_channel_i & channel : s_channel_connected) ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+        END
     END
     ;
     
-    ret <-- client_send_service_request_msg (session, req_msg) =
+    ret, channel, buffer_out <-- client_send_service_request_msg (session, req_msg) =
     PRE
         session         : t_session_i &
         session         : t_session &
@@ -298,15 +356,22 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        ret :: {e_sc_ok,
-            e_sc_bad_invalid_state,  /* session is not in a valid state */
-            e_sc_bad_out_of_memory,
-            e_sc_bad_unexpected_error,
-            e_sc_bad_session_closed,
-            e_sc_bad_secure_channel_closed,
-            e_sc_bad_connection_closed,
-            e_sc_bad_invalid_argument, /* message has not expected type */
-            e_sc_bad_encoding_error}
+        CHOICE
+            ret :: {e_sc_bad_invalid_state,  /* session is not in a valid state */
+                e_sc_bad_out_of_memory,
+                e_sc_bad_unexpected_error,
+                e_sc_bad_session_closed,
+                e_sc_bad_secure_channel_closed,
+                e_sc_bad_connection_closed,
+                e_sc_bad_invalid_argument, /* message has not expected type */
+                e_sc_bad_encoding_error} ||
+            channel :(channel : t_channel_i & channel = c_channel_indet) ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet)
+        OR
+            ret := e_sc_ok ||
+            channel :(channel : t_channel_i & channel : s_channel_connected) ||
+            buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer)
+        END
     END
     ;
     
@@ -367,6 +432,22 @@ OPERATIONS
         msg_typ : t_msg_type_i
     THEN
         bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
+    END
+    ;
+    
+    bres <-- is_valid_buffer_out (buffer) =
+    PRE
+        buffer : t_byte_buffer_i
+    THEN
+        bres := bool(a_buffer_out_state = e_buffer_out_msg_written & buffer : t_byte_buffer)
+    END
+    ;
+    
+    client_session_mgr_close_session (session) =
+    PRE
+        session : t_session_i
+    THEN
+        skip
     END
 
 END

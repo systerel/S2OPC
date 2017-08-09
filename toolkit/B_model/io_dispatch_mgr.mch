@@ -130,7 +130,7 @@ OPERATIONS
     ;
 
     /* Only to change user on an active channel */
-    ret <-- client_activate_session (session, user) = /* PROMOTED */
+    ret <-- client_reactivate_session_new_user (session, user) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -151,6 +151,65 @@ OPERATIONS
             e_sc_bad_encoding_error,
             e_sc_bad_secure_channel_closed,
             e_sc_bad_connection_closed,
+            e_sc_bad_encoding_error}
+    END
+    ;
+    
+    ret <-- client_close_session_request (session) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        ret :: {e_sc_ok,
+            e_sc_bad_encoding_error,
+            e_sc_bad_out_of_memory,
+            e_sc_bad_unexpected_error,
+            e_sc_bad_invalid_argument,
+            e_sc_bad_invalid_state,
+            e_sc_bad_secure_channel_closed,
+            e_sc_bad_connection_closed}
+    END
+    ;
+
+    secure_channel_lost (channel) =
+    PRE
+        channel : t_channel_i &
+        channel : t_channel &
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        skip
+    END
+    ;
+
+    ret <-- client_service_request (session, req_msg) =
+    PRE
+        session         : t_session_i &
+        session         : t_session &
+        req_msg         : t_msg_i &
+        req_msg         : t_msg &
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        ret :: {e_sc_ok,
+            e_sc_bad_invalid_state,  /* session is not in a valid state */
+            e_sc_bad_out_of_memory,
+            e_sc_bad_unexpected_error,
+            e_sc_bad_session_closed,
+            e_sc_bad_secure_channel_closed,
+            e_sc_bad_connection_closed,
+            e_sc_bad_invalid_argument, /* message has not expected type */
             e_sc_bad_encoding_error}
     END
     ;
@@ -187,65 +246,6 @@ OPERATIONS
     END
     ;
 
-    ret <-- client_close_session (session) =
-    PRE
-        session : t_session_i &
-        session : t_session &
-        a_buffer_out_state = c_buffer_out_state_indet &
-        /* No message allocation before and remaining after operation */
-        c_msg_out = c_msg_indet &
-        c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
-    THEN
-        ret :: {e_sc_ok,
-            e_sc_bad_encoding_error,
-            e_sc_bad_out_of_memory,
-            e_sc_bad_unexpected_error,
-            e_sc_bad_invalid_argument,
-            e_sc_bad_invalid_state,
-            e_sc_bad_secure_channel_closed,
-            e_sc_bad_connection_closed}
-    END
-    ;
-
-    secure_channel_lost (channel) =
-    PRE
-        channel : t_channel_i &
-        channel : t_channel &
-        a_buffer_out_state = c_buffer_out_state_indet &
-        /* No message allocation before and remaining after operation */
-        c_msg_out = c_msg_indet &
-        c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
-    THEN
-        skip
-    END
-    ;
-
-    ret <-- client_send_service_request_msg (session, req_msg) =
-    PRE
-        session         : t_session_i &
-        session         : t_session &
-        req_msg         : t_msg_i &
-        req_msg         : t_msg &
-        a_buffer_out_state = c_buffer_out_state_indet &
-        /* No message allocation before and remaining after operation */
-        c_msg_out = c_msg_indet &
-        c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
-    THEN
-        ret :: {e_sc_ok,
-            e_sc_bad_invalid_state,  /* session is not in a valid state */
-            e_sc_bad_out_of_memory,
-            e_sc_bad_unexpected_error,
-            e_sc_bad_session_closed,
-            e_sc_bad_secure_channel_closed,
-            e_sc_bad_connection_closed,
-            e_sc_bad_invalid_argument, /* message has not expected type */
-            e_sc_bad_encoding_error}
-    END
-    ;
-    
     bres <-- close_all_active_connections =
     BEGIN
         bres :: BOOL // indicates if active connection will be closed

@@ -24,11 +24,6 @@ SEES
 IMPORTS
     service_mgr,
     channel_mgr_bs
-    
-PROMOTES
-    client_activate_session,
-    client_close_session,
-    client_send_service_request_msg
 
 LOCAL_OPERATIONS
     
@@ -130,7 +125,9 @@ OPERATIONS
         l_msg_type,
         l_valid_msg_type,
         l_msg_header_type,
-        l_msg_service_class
+        l_msg_service_class,
+        l_buffer_out,
+        l_valid_buffer_out
     IN
         l_connected_channel <-- is_connected_channel (channel);
         l_msg_type <-- decode_msg_type (buffer);
@@ -148,12 +145,21 @@ OPERATIONS
                         /* Server receiving a request: OK */
                         CASE l_msg_service_class OF
                             EITHER e_msg_session_treatment_class THEN
-                                server_receive_session_treatment_req (channel, l_msg_type, buffer)
+                                l_buffer_out <-- server_receive_session_treatment_req (channel, l_msg_type, buffer)
                             OR e_msg_session_service_class THEN
-                                server_receive_session_service_req (channel, l_msg_type, buffer)
+                                l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, buffer)
                             OR e_msg_public_service_class THEN
-                                server_receive_public_service_req (channel, l_msg_type, buffer)
+                                l_buffer_out <-- server_receive_public_service_req (channel, l_msg_type, buffer)
+                            ELSE
+                                /* Cases shall be exhaustive: remove a B0 TC false warning */
+                                l_buffer_out := c_byte_buffer_indet
                             END
+                        END;
+                        /* Send the response message on secure channel if available */ 
+                        l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+                        IF l_valid_buffer_out = TRUE
+                        THEN
+                            send_channel_msg_buffer (channel, l_buffer_out)
                         END
                     ELSE
                         /* Server receiving a response: ignored */
@@ -169,7 +175,7 @@ OPERATIONS
                             OR e_msg_session_service_class THEN
                                 client_receive_session_service_resp (channel, l_msg_type, buffer)
                             OR e_msg_public_service_class THEN
-                                server_receive_public_service_req (channel, l_msg_type, buffer)
+                                client_receive_public_service_resp (channel, l_msg_type, buffer)
                             END
                         END
                     ELSE
@@ -223,12 +229,76 @@ OPERATIONS
             bres <-- cli_open_secure_channel (channel_config_idx);
             IF bres = TRUE
             THEN
-                /* No connected channel: will send a create session asynchronously */
+                /* No connected channel: will trigger create session and then activate session events asynchronously */
                 bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user)
             END
         ELSE
-            /* Already connected channel: will send a create session synchronously */
+            /* Already connected channel: will trigger a create session event synchronously 
+               and then activate session event asynchronously */
             bres <-- client_async_activate_new_session_with_channel (channel_config_idx, l_channel, user)
+        END
+    END
+    ;
+    
+    ret <-- client_reactivate_session_new_user (session, user) =
+    VAR
+        l_channel,
+        l_connected_channel,
+        l_buffer_out,
+        l_valid_buffer_out
+    IN
+        ret, l_channel, l_buffer_out <-- client_activate_session (session, user);
+        IF ret = e_sc_ok 
+        THEN
+            l_connected_channel <-- is_connected_channel (l_channel);
+            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+            IF l_connected_channel = TRUE &
+                l_valid_buffer_out = TRUE
+            THEN
+                send_channel_msg_buffer (l_channel, l_buffer_out)
+            END
+        END        
+    END
+    ;
+    
+    ret <-- client_service_request (session, req_msg) = 
+    VAR
+        l_channel,
+        l_connected_channel,
+        l_buffer_out,
+        l_valid_buffer_out
+    IN
+        ret, l_channel, l_buffer_out <-- client_send_service_request_msg (session, req_msg);
+        IF ret = e_sc_ok 
+        THEN
+            l_connected_channel <-- is_connected_channel (l_channel);
+            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+            IF l_connected_channel = TRUE &
+                l_valid_buffer_out = TRUE
+            THEN
+                send_channel_msg_buffer (l_channel, l_buffer_out)
+            END
+        END        
+    END
+    ;
+    
+    ret <-- client_close_session_request (session) =
+    VAR
+        l_channel,
+        l_connected_channel,
+        l_buffer_out,
+        l_valid_buffer_out
+    IN
+        ret, l_channel, l_buffer_out <-- client_close_session (session);
+        IF ret = e_sc_ok 
+        THEN
+            l_connected_channel <-- is_connected_channel (l_channel);
+            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+            IF l_connected_channel = TRUE &
+                l_valid_buffer_out = TRUE
+            THEN
+                send_channel_msg_buffer (l_channel, l_buffer_out)
+            END
         END
     END
     ;
@@ -237,6 +307,8 @@ OPERATIONS
     VAR
         l_channel,
         l_connected_channel,
+        l_buffer_out,
+        l_valid_buffer_out,
         l_ret
     IN
         l_channel <-- get_connected_channel (channel_config_idx);
@@ -244,10 +316,15 @@ OPERATIONS
         IF l_connected_channel = FALSE
         THEN
             /* In case internal event to create session cannot be done => close session */
-            l_ret <-- client_close_session (session)
-
+            client_session_mgr_close_session (session)
         ELSE
-            client_create_session (session, l_channel)
+            l_buffer_out <-- client_create_session (session, l_channel);
+            /* Send the response message on secure channel if available */ 
+            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+            IF l_valid_buffer_out = TRUE
+            THEN
+                send_channel_msg_buffer (l_channel, l_buffer_out)
+            END
         END
     END
     ;
@@ -255,13 +332,20 @@ OPERATIONS
     internal_client_activate_orphaned_session (session, channel_config_idx) =
     VAR
         l_channel,
-        l_connected_channel
+        l_connected_channel,
+        l_buffer_out,
+        l_valid_buffer_out
     IN
         l_channel <-- get_connected_channel (channel_config_idx);
         l_connected_channel <-- is_connected_channel (l_channel);
         IF l_connected_channel = FALSE
         THEN
-            client_activate_orphaned_session (session, l_channel)
+            l_buffer_out <-- client_activate_orphaned_session (session, l_channel);
+            l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
+            IF l_valid_buffer_out = TRUE
+            THEN
+                send_channel_msg_buffer (l_channel, l_buffer_out)
+            END
         END
     END
     ;

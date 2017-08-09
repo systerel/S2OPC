@@ -123,19 +123,17 @@ OPERATIONS
     END
     ;
     
-    ret <-- send_channel_msg_buffer (channel, buffer) =
+    send_channel_msg_buffer (channel, buffer) =
     PRE
         channel         : t_channel_i &
-        channel         : t_channel &
+        channel         : s_channel_connected &
         buffer          : t_byte_buffer_i &
         buffer          : t_byte_buffer/* &
         a_buffer_out_state = e_buffer_out_msg_written */
         /* ISSUE: not possible to see message_out_bs */
     THEN
-        ret :: {e_sc_ok, 
-            e_sc_bad_invalid_state,  /* channel is not in a valid state*/
-            e_sc_bad_secure_channel_closed, e_sc_bad_connection_closed,
-            e_sc_bad_encoding_error}
+        /* No return status code, it is an asynchronous action */
+        skip
     END
     ;
     
