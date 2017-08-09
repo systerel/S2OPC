@@ -28,17 +28,17 @@ SEES
 DEFINITIONS
    d_var_it ==
    	/* sessions to auto activate on session created state obtained */
-   	s_session_async_activate_session, /* TODO: If users not anonymous, partial function to user config to use ! */
+   	a_session_async_activate_session,
    	/* sessions to auto create on secure channel connection */
-    s_session_async_create_session, /* TODO: Need to could activate several sessions (with same or different user), partial function to ? */
+    a_session_async_create_session,
     /* iter */
     av_sessions_to_iterate,
     av_sessions_iterated,
     av_sessions_orphaned;
     
     d_typing_it ==
-    s_session_async_activate_session <: t_session &
-	s_session_async_create_session <: t_channel_config_idx &
+    a_session_async_create_session : t_channel_config_idx +-> t_session  &
+    a_session_async_activate_session : t_session +-> t_user &
 	/* iter */
     av_sessions_orphaned <: t_session &
     av_sessions_to_iterate <: av_sessions_orphaned &
@@ -52,8 +52,8 @@ INVARIANT
     d_typing_it
     
 INITIALISATION
-    s_session_async_activate_session := {} ||
-    s_session_async_create_session := {} ||
+    a_session_async_activate_session :: {} ||
+    a_session_async_create_session :: {} ||
     /* it */
     av_sessions_to_iterate,
     av_sessions_iterated,
@@ -208,6 +208,36 @@ OPERATIONS
     END
     ;
     
+    /* New session: creation and activation async */
+    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        user : t_user_i &
+        user : t_user
+    THEN
+        bres :: BOOL
+    END
+    ;
+    
+    /* New session: creation sync and activation async */
+    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        channel : t_channel_i &
+        channel : s_channel_connected &
+        user : t_user_i &
+        user : t_user &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        bres :: BOOL
+    END
+    ;
+    
     ret, channel, session_token <-- client_user_activate_req (session, req_handle, user, activate_req_msg) =
     PRE
         session : t_session_i & // Here session is provided by applicative but still can point to invalid session (ref on closed session)
@@ -255,6 +285,17 @@ OPERATIONS
             e_sc_bad_unexpected_error,
             e_sc_bad_out_of_memory} ||
         session_token :: t_session_token_i
+    END
+    ;
+    
+    client_channel_connected_event_session (channel_config_idx, channel) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        channel : t_channel_i &
+        channel : s_channel_connected
+    THEN
+        skip
     END
     ;
     

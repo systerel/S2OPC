@@ -91,6 +91,27 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // Call directly toolkit configuration callback
     SOPC_Internal_AllClientSecureChannelsDisconnected();
     break;
+
+  case SE_TO_SE_ACTIVATE_ORPHANED_SESSION:
+    //printf("SE_TO_SE_ACTIVATE_ORPHANED_SESSION\n");
+    io_dispatch_mgr__internal_client_activate_orphaned_session((constants__t_session_i) id,
+                                                               (constants__t_channel_config_idx_i) auxParam);
+    break;
+  case SE_TO_SE_ACTIVATE_SESSION:
+    //printf("SE_TO_SE_ACTIVATE_SESSION\n");
+    io_dispatch_mgr__client_activate_session((constants__t_session_i) id,
+                                             (constants__t_user_i) auxParam,
+                                             &sCode);
+    if(sCode != constants__e_sc_ok){
+      status = STATUS_NOK;
+    }
+    break;
+  case SE_TO_SE_CREATE_SESSION:
+    //printf("SE_TO_SE_CREATE_SESSION\n");
+    io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
+                                                    (constants__t_channel_config_idx_i) auxParam);
+    break;
+
   case SC_TO_SE_SC_SERVICE_RCV_MSG:
     //printf("SC_TO_SE_SC_SERVICE_RCV_MSG\n");
     // id ==  TMP: secure channel config idx (To be replaced by => connection Id)

@@ -30,6 +30,9 @@ typedef enum SOPC_Services_Event {
   SC_TO_SE_SC_SERVICE_RCV_MSG,
   /* Services to services events */
   SE_TO_SE_SC_ALL_DISCONNECTED, // special event sent by services mgr itself
+  SE_TO_SE_ACTIVATE_ORPHANED_SESSION,
+  SE_TO_SE_CREATE_SESSION,
+  SE_TO_SE_ACTIVATE_SESSION,
   /* App to Services events */
   APP_TO_SE_OPEN_ENDPOINT,
   APP_TO_SE_CLOSE_ENDPOINT,

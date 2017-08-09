@@ -29,7 +29,7 @@ INVARIANT
     a_cli_pending_requests : t_request_handle +-> t_session
     
 INITIALISATION
-    a_cli_pending_requests :: {{}}
+    a_cli_pending_requests :: {}
     
 OPERATIONS
     

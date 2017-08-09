@@ -17,6 +17,9 @@
 
 #include "session_async_bs.h"
 
+#include "sopc_services_events.h"
+#include "sopc_toolkit_config.h"
+#include "sopc_sc_events.h"
 #include "util_b2c.h"
 
 static constants__t_session_i unique_session_to_activate = constants__c_session_indet;
@@ -59,23 +62,61 @@ void session_async_bs__add_session_to_create(
   }  
 }
 
-void session_async_bs__is_session_to_activate(
+void session_async_bs__get_and_remove_session_user_to_activate(
    const constants__t_session_i session_async_bs__session,
    constants__t_user_i * const session_async_bs__user){
   if(session_async_bs__session == unique_session_to_activate){
     *session_async_bs__user = unique_session_to_activate_user;
+    unique_session_to_activate_user = constants__c_user_indet;
   }else{
     *session_async_bs__user = constants__c_user_indet;
   }
 }
 
-void session_async_bs__is_session_to_create(
+void session_async_bs__get_and_remove_session_to_create(
    const constants__t_channel_config_idx_i session_async_bs__channel_config_idx,
    constants__t_session_i * const session_async_bs__session){
   if(session_async_bs__channel_config_idx == unique_session_to_create_idx){
     *session_async_bs__session = unique_session_to_create;
+    unique_session_to_create = constants__c_session_indet;
   }else{
     *session_async_bs__session = constants__c_session_indet;
   }
 }
 
+void session_async_bs__client_gen_activate_orphaned_session_internal_event(
+   const constants__t_session_i session_async_bs__session,
+   const constants__t_channel_config_idx_i session_async_bs__channel_config_idx){
+  /* TODO: check integer casts */
+  SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                       SE_TO_SE_ACTIVATE_ORPHANED_SESSION,
+                                       (uint32_t) session_async_bs__session,
+                                       NULL,
+                                       (int32_t) session_async_bs__channel_config_idx,
+                                       "Services: async orphaned session activation");
+}
+
+void session_async_bs__client_gen_activate_user_session_internal_event(
+   const constants__t_session_i session_async_bs__session,
+   const constants__t_user_i session_async_bs__user){
+  /* TODO: check integer casts */
+  SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                       SE_TO_SE_ACTIVATE_SESSION,
+                                       (uint32_t) session_async_bs__session,
+                                       NULL,
+                                       (int32_t) session_async_bs__user,
+                                       "Services: async session user activation");
+
+}
+
+void session_async_bs__client_gen_create_session_internal_event(
+   const constants__t_session_i session_async_bs__session,
+   const constants__t_channel_config_idx_i session_async_bs__channel_config_idx){
+  /* TODO: check integer casts */
+  SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                       SE_TO_SE_CREATE_SESSION,
+                                       (uint32_t) session_async_bs__session,
+                                       NULL,
+                                       (int32_t) session_async_bs__channel_config_idx,
+                                       "Services: async orphaned session activation");
+}

@@ -178,23 +178,8 @@ OPERATIONS
     END
     ;
     
-    client_channel_connected_event_service (channel_config_idx, channel) =
-    PRE
-        channel_config_idx : t_channel_config_idx_i &
-        channel_config_idx : t_channel_config_idx &
-        channel : t_channel_i &
-        channel : s_channel_connected &
-        /* No message allocation before and remaining after operation */
-        c_msg_out = c_msg_indet &
-        c_msg_out_header = c_msg_header_indet &
-        a_msg_out_type = c_msg_type_indet
-    THEN
-        skip
-    END
-    ;
-    
     /* New session: creation and activation async */
-    bres <-- client_activate_new_session_wihtout_channel (channel_config_idx, user) =
+    bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
@@ -210,7 +195,7 @@ OPERATIONS
     ;
     
     /* New session: creation sync and activation async */
-    bres <-- client_activate_new_session_with_channel (channel_config_idx, channel, user) =
+    bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
@@ -224,6 +209,20 @@ OPERATIONS
         a_msg_out_type = c_msg_type_indet
     THEN
         bres :: BOOL
+    END
+    ;
+    
+    /* Only called through an internal event sent by session mgr itself */
+    client_create_session (session, channel) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel : t_channel_i &
+        channel : t_channel &
+        channel : s_channel_connected &
+        c_msg_out = c_msg_indet
+    THEN
+        skip
     END
     ;
     
@@ -249,6 +248,22 @@ OPERATIONS
             e_sc_bad_secure_channel_closed,
             e_sc_bad_connection_closed,
             e_sc_bad_encoding_error}
+    END
+    ;
+    
+    /* Only to set new channel on an orphaned session: called through internal event sent by session mgr itself */
+    client_activate_orphaned_session (session, channel) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel : t_channel_i &
+        channel : s_channel_connected &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        skip
     END
     ;
     
@@ -296,6 +311,17 @@ OPERATIONS
     ;
     
     /* PROMOTES */
+    client_channel_connected_event_session (channel_config_idx, channel) =
+    PRE
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        channel : t_channel_i &
+        channel : s_channel_connected
+    THEN
+        skip
+    END
+    ;
+      
     client_secure_channel_lost (lost_channel, channel_config_idx) =
     PRE
         lost_channel : t_channel_i &

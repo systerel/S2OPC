@@ -60,7 +60,13 @@ OPERATIONS
         buffer   : t_byte_buffer_i &
         buffer   : t_byte_buffer &
         a_buffer_in_state = e_buffer_in_msg_not_read &
-        a_buffer_out_state = c_buffer_out_state_indet
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_in = c_msg_indet &
+        c_msg_in_header = c_msg_header_indet &
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         /* End of receive execution lead to a buffer in invalid state (error) or a buffer fully read */
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
@@ -74,7 +80,11 @@ OPERATIONS
         channel_config_idx : t_channel_config_idx &
         channel : t_channel_i &
         channel : t_channel &
-        a_buffer_out_state = c_buffer_out_state_indet
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         skip
     END
@@ -102,14 +112,18 @@ OPERATIONS
     END
     ;
     
+    /* Only one session could be in activation until the first session is notified as activated */
     bres <-- client_activate_new_session (channel_config_idx, user) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
         channel_config_idx : t_channel_config_idx &
         user : t_user_i &
         user : t_user &
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
         c_msg_out = c_msg_indet &
-        a_buffer_out_state = c_buffer_out_state_indet
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         bres :: BOOL
     END
@@ -122,7 +136,11 @@ OPERATIONS
         session : t_session &
         user : t_user_i &
         user : t_user &
-        a_buffer_out_state = c_buffer_out_state_indet
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         ret :: {e_sc_ok,
             e_sc_bad_out_of_memory,
@@ -136,12 +154,48 @@ OPERATIONS
             e_sc_bad_encoding_error}
     END
     ;
+    
+    internal_client_create_session (session, channel_config_idx) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        skip
+    END
+    ;
+    
+    internal_client_activate_orphaned_session (session, channel_config_idx) =
+    PRE
+        session : t_session_i &
+        session : t_session &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
+    THEN
+        skip
+    END
+    ;
 
     ret <-- client_close_session (session) =
     PRE
         session : t_session_i &
         session : t_session &
-        a_buffer_out_state = c_buffer_out_state_indet
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         ret :: {e_sc_ok,
             e_sc_bad_encoding_error,
@@ -158,7 +212,11 @@ OPERATIONS
     PRE
         channel : t_channel_i &
         channel : t_channel &
-        a_buffer_out_state = c_buffer_out_state_indet
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         skip
     END
@@ -170,7 +228,11 @@ OPERATIONS
         session         : t_session &
         req_msg         : t_msg_i &
         req_msg         : t_msg &
-        a_buffer_out_state = c_buffer_out_state_indet
+        a_buffer_out_state = c_buffer_out_state_indet &
+        /* No message allocation before and remaining after operation */
+        c_msg_out = c_msg_indet &
+        c_msg_out_header = c_msg_header_indet &
+        a_msg_out_type = c_msg_type_indet
     THEN
         ret :: {e_sc_ok,
             e_sc_bad_invalid_state,  /* session is not in a valid state */
