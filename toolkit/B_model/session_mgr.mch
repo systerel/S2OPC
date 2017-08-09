@@ -362,14 +362,6 @@ OPERATIONS
     END
     ;
         
-    state <-- get_session_state_or_closed (session) =
-    PRE
-        session : t_session_i
-    THEN
-        state :: t_sessionState
-    END
-    ;
-    
     user <-- get_session_user_or_indet (session) =
     PRE
         session : t_session_i

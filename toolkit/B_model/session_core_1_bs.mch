@@ -22,38 +22,33 @@ SEES
     constants,
     request_handle_bs
     
-ABSTRACT_VARIABLES
+DEFINITIONS
+    d_variables ==
     s_session,
     a_state,
     a_channel,
-    a_cli_pending_requests,
-    a_token,
     a_orphaned,
-    a_user
+    a_client_token,
+    a_server_token,
+    a_user;
+    
+    d_typing ==    
+    s_session <: t_session &    
+    a_state : s_session --> t_sessionState & // a session shall be associated to a state    
+    a_channel : s_session +-> t_channel & // a session may be associated to a valid channel    
+    a_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
+    a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
+    a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent  
+    a_user : s_session +-> t_user  //  a session may be associated to a valid user
+    
+ABSTRACT_VARIABLES
+    d_variables
     
 INVARIANT
-    s_session <: t_session &   
-    
-    a_state : s_session --> t_sessionState &
-    
-    a_channel : s_session +-> t_channel & 
-    
-    a_orphaned : s_session +-> t_channel_config_idx &
-    
-    a_cli_pending_requests : t_request_handle +-> s_session & // 1 request handle is associated to only one session
-    
-    a_token : t_session_token >+> s_session &
-    
-    a_user : t_session +-> t_user
+    d_typing
     
 INITIALISATION
-    s_session :: {{}}        ||
-    a_state :: {{}}          ||
-    a_channel :: {{}}        ||
-    a_orphaned :: {{}}       ||
-    a_cli_pending_requests :: {{}} ||
-    a_token :: {{}}          ||
-    a_user :: {{}}
+    d_variables :(d_typing)
     
 OPERATIONS
     
@@ -62,39 +57,40 @@ OPERATIONS
         session_token : t_session_token_i
     THEN
         IF session_token : t_session_token &
-            session_token : dom(a_token)
+            session_token : dom(a_server_token)
         THEN
-            session :(session : t_session_i & session = a_token (session_token))
+            session :(session : t_session_i & session = a_server_token(session_token))
         ELSE
             session := c_session_indet
         END
     END
     ;
-
+    
     session_token <-- client_get_token_from_session (session) =
     PRE
         session : t_session_i &
         session : t_session &
-        session : ran(a_token)
+        session : dom(a_client_token)
     THEN
         // Guarantee only 1 session token by session provided by set_session_token PRE
-        session_token :(session_token : t_session_token_i & session_token = a_token~(session))
-    END;
+        session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
+    END
+    ;
     
     token <-- server_get_fresh_session_token (session) = 
     PRE
         session : t_session_i &
         session : s_session &
-        session /: ran(a_token)
+        session /: ran(a_server_token)
     THEN
-        IF t_session_token = dom(a_token)
+        IF t_session_token = dom(a_server_token)
         THEN
             token := c_session_token_indet
         ELSE
             ANY l_ntoken WHERE
-                l_ntoken : t_session_token - dom(a_token)
+                l_ntoken : t_session_token - dom(a_server_token)
             THEN
-                a_token (l_ntoken) := session ||
+                a_server_token (l_ntoken) := session ||
                 token := l_ntoken
             END
         END
@@ -105,7 +101,7 @@ OPERATIONS
     PRE
         token : t_session_token_i
     THEN
-        ret := bool(token : t_session_token & token : dom(a_token))
+        ret := bool(token : t_session_token & token : dom(a_server_token))
     END
     ;
     
@@ -113,21 +109,11 @@ OPERATIONS
     PRE
         session : t_session_i &
         session : s_session &
-        session /: ran(a_token) &
+        session /: dom(a_client_token) &
         token : t_session_token_i &
-        token : t_session_token &
-        token /: dom(a_token)
+        token : t_session_token
     THEN
-        a_token (token) := session
-    END
-    ;
-    
-    delete_session_token (session_token) =
-    PRE
-        session_token : t_session_token_i &
-        session_token : dom(a_token)
-    THEN
-        a_token := {session_token} <<| a_token
+        a_client_token (session) := token
     END
     ;
     
@@ -140,9 +126,9 @@ OPERATIONS
         a_channel := {session} <<| a_channel ||
         a_state := {session} <<| a_state ||
         a_user := {session} <<| a_user ||
-        a_token := a_token |>> {session} ||
-        a_orphaned := {session} <<| a_orphaned ||
-        a_cli_pending_requests := a_cli_pending_requests |>> {session}
+        a_server_token := a_server_token |>> {session} ||
+        a_client_token := {session} <<| a_client_token ||
+        a_orphaned := {session} <<| a_orphaned
     END;
     
     session <-- init_new_session =
@@ -187,39 +173,6 @@ OPERATIONS
         a_state (session) := e_session_init
     END;
     
-    ret <-- cli_add_pending_request (session, req_handle) =
-    PRE
-        session : t_session_i &
-        session : s_session &
-        req_handle : t_request_handle_i
-    THEN
-        IF req_handle : t_request_handle &
-            req_handle : s_request_handle &
-            req_handle : dom(a_cli_pending_requests)
-        THEN
-            ret := TRUE ||
-            a_cli_pending_requests(req_handle) := session
-        ELSE            
-            ret := FALSE
-        END
-    END
-    ;
-    
-    ret <-- cli_remove_pending_request (session, req_handle) =
-    PRE
-        session : t_session_i &
-        session : s_session &
-        req_handle : t_request_handle_i
-    THEN
-        IF req_handle : t_request_handle &
-           req_handle : dom(a_cli_pending_requests) THEN
-            a_cli_pending_requests := {req_handle} <| a_cli_pending_requests ||
-            ret := TRUE
-        ELSE
-            ret := FALSE
-        END
-    END;
-    
     ret <-- is_valid_session (session) =
     PRE
         session : t_session_i
@@ -257,9 +210,8 @@ OPERATIONS
         a_channel := {session} <<| a_channel               || // If session had a channel, remove this relation
         a_orphaned := {session} <<| a_orphaned             || // If session was orphaned, remove this relation
         a_user := {session} <<| a_user                     || // If session had a user, remove this relation
-        a_token := a_token |>> {session}                   || // If session had a token, remove this relation
-        a_cli_pending_requests := a_cli_pending_requests |>> {session} ||
-        a_state(session) := e_session_closed // keep session token as used
+        a_server_token := a_server_token |>> {session}     || // If session had token, remove this relation
+        a_client_token := {session} <<| a_client_token
     END
     ;
     

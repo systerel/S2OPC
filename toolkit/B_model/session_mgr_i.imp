@@ -31,7 +31,6 @@ IMPORTS
     session_async_bs
     
 PROMOTES
-    get_session_state_or_closed,
     get_session_user_or_indet,
     client_secure_channel_lost_session_sm,
     server_secure_channel_lost_session_sm,

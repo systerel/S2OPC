@@ -148,15 +148,6 @@ void session_core_1_bs__client_set_session_token(
   }
 }
 
-void session_core_1_bs__delete_session_token(
-   const constants__t_session_token_i session_core_1_bs__session_token) {
-  if(constants__c_session_token_indet != session_core_1_bs__session_token){
-    SOPC_NodeId* token = session_core_1_bs__session_token ;
-    SOPC_NodeId_Clear(token);
-    free(token);
-  }
-}
-
 void session_core_1_bs__delete_session(
    const constants__t_session_i session_core_1_bs__session) {
   (void) session_core_1_bs__session;
@@ -304,7 +295,9 @@ void session_core_1_bs__set_session_state_closed(
     unique_session.session_core_1_bs__state = constants__e_session_closed;
     unique_session.session_core_1_bs__user = constants__c_user_indet;
     if(constants__c_session_token_indet != unique_session.session_core_1_bs__session_token){
-      session_core_1_bs__delete_session_token(unique_session.session_core_1_bs__session_token);
+      SOPC_NodeId* token = unique_session.session_core_1_bs__session_token;
+      SOPC_NodeId_Clear(token);
+      free(token);
       unique_session.session_core_1_bs__session_token = constants__c_session_token_indet;
     }
     unique_session.session_core_1_bs__channel = constants__c_channel_indet;
