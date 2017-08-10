@@ -162,8 +162,8 @@ OPERATIONS
                             send_channel_msg_buffer (channel, l_buffer_out)
                         END
                     ELSE
-                        /* Server receiving a response: ignored */
-                        skip
+                        /* Server receiving a response: close secure channel since it is not expected from client */
+                        close_secure_channel (channel)
                     END
                 OR e_msg_response_type THEN
                     IF l_is_client = TRUE
@@ -179,8 +179,8 @@ OPERATIONS
                             END
                         END
                     ELSE
-                        /* Client receiving a request: ignored */
-                        skip
+                        /* Client receiving a request: close secure channel since it is not expected from server */
+                        close_secure_channel (channel)
                     END
                 END
             END
