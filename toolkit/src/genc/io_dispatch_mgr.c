@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 10/08/2017 10:33:23
+ Date                 : 10/08/2017 15:34:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -135,7 +135,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                }
             }
             else {
-               ;
+               channel_mgr_bs__close_secure_channel(io_dispatch_mgr__channel);
             }
             break;
          case constants__e_msg_response_type:
@@ -161,7 +161,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                }
             }
             else {
-               ;
+               channel_mgr_bs__close_secure_channel(io_dispatch_mgr__channel);
             }
             break;
          default:
