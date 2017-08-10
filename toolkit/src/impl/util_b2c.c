@@ -111,6 +111,10 @@ void util_message__get_message_type(SOPC_EncodeableType* encType,
     *message__msg_type = constants__e_msg_session_write_req;
   }else if(encType == &OpcUa_WriteResponse_EncodeableType){
     *message__msg_type = constants__e_msg_session_write_resp;
+  }else if(encType == &OpcUa_GetEndpointsRequest_EncodeableType){
+    *message__msg_type = constants__e_msg_get_endpoints_service_req;
+  }else if(encType == &OpcUa_GetEndpointsResponse_EncodeableType){
+    *message__msg_type = constants__e_msg_get_endpoints_service_resp;
   }else{
     printf("util_message__get_message_type\n");
     exit(1);
