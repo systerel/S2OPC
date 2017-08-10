@@ -73,8 +73,14 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
     *reqEncType = NULL;
     *respEncType = &OpcUa_ServiceFault_EncodeableType;
     break;
-  case constants__e_msg_public_service_req:
-  case constants__e_msg_public_service_resp:
+  case constants__e_msg_get_endpoints_service_req:
+    *reqEncType = &OpcUa_GetEndpointsRequest_EncodeableType;
+    *respEncType = &OpcUa_GetEndpointsResponse_EncodeableType;
+    break;
+  case constants__e_msg_get_endpoints_service_resp:
+    *reqEncType = &OpcUa_GetEndpointsRequest_EncodeableType;
+    *respEncType = &OpcUa_GetEndpointsResponse_EncodeableType;
+    break;
   default:
     printf("message__alloc_msg: not implemented message type required\n");
     exit(1);   

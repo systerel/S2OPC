@@ -256,16 +256,19 @@ OPERATIONS
     END
     ;
     
-    write_create_session_msg_server_endpoints (msg, endpoint_config_idx) =
+    ret <-- write_create_session_msg_server_endpoints (req_msg, resp_msg, endpoint_config_idx) =
     PRE
-        msg : t_msg_i &
-        msg = c_msg_out &
+        req_msg : t_msg_i &
+        req_msg = c_msg_in &
+        a_msg_in_type = e_msg_session_create_req &
+        resp_msg : t_msg_i &
+        resp_msg = c_msg_out &
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_create_resp &
         endpoint_config_idx : t_endpoint_config_idx_i &
         endpoint_config_idx : t_endpoint_config_idx
     THEN
-        skip
+        ret :(ret : t_StatusCode_i & ret : t_StatusCode)
     END
     ;
     

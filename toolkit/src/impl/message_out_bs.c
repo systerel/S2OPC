@@ -243,9 +243,12 @@ void message_out_bs__write_create_session_msg_session_token(
 }
 
 void message_out_bs__write_create_session_msg_server_endpoints(
-   const constants__t_msg_i message_out_bs__msg,
-   const constants__t_endpoint_config_idx_i message_out_bs__endpoint_config_idx){
+   const constants__t_msg_i message_out_bs__req_msg,
+   const constants__t_msg_i message_out_bs__resp_msg,
+   const constants__t_endpoint_config_idx_i message_out_bs__endpoint_config_idx,
+   constants__t_StatusCode_i * const message_out_bs__ret){
   printf("NOT IMPLEMENTED: message_out_bs__write_create_session_msg_server_endpoints\n");
+  *message_out_bs__ret = constants__e_sc_ok;
 }
 
 void message_out_bs__write_msg_out_header_req_handle(

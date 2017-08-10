@@ -25,6 +25,7 @@ OBJS        =toolkit_header_init.o \
              address_space.o address_space_it.o constants.o msg_read_request.o service_read.o service_read_it.o \
              address_space_bs.o constants_bs.o msg_read_request_bs.o msg_read_response_bs.o \
              service_write_decode_bs.o response_write_bs.o \
+             service_get_endpoints_bs.o \
              gen_addspace.o util_variant.o \
              testlib_read_response.o wrap_read.o testlib_write.o
 OBJS        += toolkit_header.o io_dispatch_mgr.o service_mgr.o session_mgr.o session_core.o session_core_1_bs.o \

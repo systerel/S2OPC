@@ -154,13 +154,13 @@ OPERATIONS
     END
     ;
     
-    buffer_out <-- server_receive_public_service_req (channel, req_typ, msg_buffer) =
+    buffer_out <-- server_receive_discovery_service_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
         req_typ : t_msg_type_i &
         req_typ = a_msg_in_type &
-        a_msg_in_type : s_public_service_reqs &
+        a_msg_in_type : s_discovery_service_reqs &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer &
         a_buffer_in_state = e_buffer_in_msg_type_read &
@@ -183,13 +183,13 @@ OPERATIONS
     END
     ;
     
-    client_receive_public_service_resp (channel, resp_typ, msg_buffer) =
+    client_receive_discovery_service_resp (channel, resp_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
         resp_typ : t_msg_type_i &
         resp_typ = a_msg_in_type &
-        a_msg_in_type : s_public_service_resps &
+        a_msg_in_type : s_discovery_service_resps &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer  &
         a_buffer_in_state = e_buffer_in_msg_type_read &

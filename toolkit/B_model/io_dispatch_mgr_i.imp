@@ -47,9 +47,9 @@ LOCAL_OPERATIONS
         msg_typ : t_msg_type_i &
         msg_typ : t_msg_type
     THEN
-        IF msg_typ : s_public_service_reqs \/ s_public_service_resps
+        IF msg_typ : s_discovery_service_reqs \/ s_discovery_service_resps
         THEN
-            service_class := e_msg_public_service_class
+            service_class := e_msg_discovery_service_class
         ELSIF msg_typ : s_service_on_session_reqs \/ s_service_on_session_resps
         THEN
             service_class := e_msg_session_service_class
@@ -69,7 +69,7 @@ OPERATIONS
     header_type <-- get_msg_header_type (msg_typ) =
     BEGIN
         CASE msg_typ OF
-            EITHER e_msg_public_service_req,
+            EITHER e_msg_get_endpoints_service_req,
                 e_msg_session_create_req,
                 e_msg_session_activate_req,
                 e_msg_session_close_req,
@@ -77,7 +77,7 @@ OPERATIONS
                 e_msg_session_write_req 
             THEN
                 header_type := e_msg_request_type
-            OR e_msg_public_service_resp,
+            OR e_msg_get_endpoints_service_resp,
                 e_msg_session_create_resp,
                 e_msg_session_activate_resp,
                 e_msg_session_close_resp,
@@ -93,10 +93,10 @@ OPERATIONS
     service_class <-- get_msg_service_class (msg_typ) =
     BEGIN
         CASE msg_typ OF
-            EITHER e_msg_public_service_req,
-                e_msg_public_service_resp
+            EITHER e_msg_get_endpoints_service_req,
+                e_msg_get_endpoints_service_resp
             THEN
-                service_class := e_msg_public_service_class
+                service_class := e_msg_discovery_service_class
             OR e_msg_session_create_req,
                 e_msg_session_create_resp,
                 e_msg_session_activate_req,
@@ -138,6 +138,7 @@ OPERATIONS
             l_is_client <-- is_client_channel (channel);
             l_msg_header_type <-- get_msg_header_type (l_msg_type);
             l_msg_service_class <-- get_msg_service_class (l_msg_type);
+            /* TODO: check that channel is secured if service class /= discovery class */
             CASE l_msg_header_type OF
                 EITHER e_msg_request_type THEN
                     IF l_is_client = FALSE
@@ -148,8 +149,8 @@ OPERATIONS
                                 l_buffer_out <-- server_receive_session_treatment_req (channel, l_msg_type, buffer)
                             OR e_msg_session_service_class THEN
                                 l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, buffer)
-                            OR e_msg_public_service_class THEN
-                                l_buffer_out <-- server_receive_public_service_req (channel, l_msg_type, buffer)
+                            OR e_msg_discovery_service_class THEN
+                                l_buffer_out <-- server_receive_discovery_service_req (channel, l_msg_type, buffer)
                             ELSE
                                 /* Cases shall be exhaustive: remove a B0 TC false warning */
                                 l_buffer_out := c_byte_buffer_indet
@@ -174,8 +175,8 @@ OPERATIONS
                                 client_receive_session_treatment_resp (channel, l_msg_type, buffer)
                             OR e_msg_session_service_class THEN
                                 client_receive_session_service_resp (channel, l_msg_type, buffer)
-                            OR e_msg_public_service_class THEN
-                                client_receive_public_service_resp (channel, l_msg_type, buffer)
+                            OR e_msg_discovery_service_class THEN
+                                client_receive_discovery_service_resp (channel, l_msg_type, buffer)
                             END
                         END
                     ELSE

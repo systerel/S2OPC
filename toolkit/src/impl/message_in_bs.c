@@ -129,8 +129,8 @@ void message_in_bs__is_valid_msg_in_type(
    t_bool * const message_in_bs__bres){
   *message_in_bs__bres = true;
   switch(message_in_bs__msg_typ){
-   case constants__e_msg_public_service_req:
-   case constants__e_msg_public_service_resp:
+   case constants__e_msg_get_endpoints_service_req:
+   case constants__e_msg_get_endpoints_service_resp:
    case constants__e_msg_session_create_req:
    case constants__e_msg_session_create_resp:
    case constants__e_msg_session_activate_req:

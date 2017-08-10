@@ -83,7 +83,7 @@ SETS
     
     /* OPC UA message type */
     t_msg_type_i = {c_msg_type_indet, e_msg_service_fault_resp,
-        e_msg_public_service_req, e_msg_public_service_resp,
+        e_msg_get_endpoints_service_req, e_msg_get_endpoints_service_resp,
         e_msg_session_create_req, e_msg_session_create_resp,
         e_msg_session_activate_req, e_msg_session_activate_resp,
         e_msg_session_close_req, e_msg_session_close_resp,
@@ -100,7 +100,7 @@ SETS
     t_msg_service_class = {
         e_msg_session_treatment_class,
         e_msg_session_service_class,
-        e_msg_public_service_class
+        e_msg_discovery_service_class
     }
 
 CONCRETE_CONSTANTS
@@ -161,8 +161,8 @@ ABSTRACT_CONSTANTS
     s_service_treatment_resps,
     s_service_on_session_reqs,
     s_service_on_session_resps,
-    s_public_service_reqs,
-    s_public_service_resps,
+    s_discovery_service_reqs,
+    s_discovery_service_resps,
     s_service_reqs,
     s_service_resps
 
@@ -281,11 +281,11 @@ PROPERTIES
     s_service_on_session_resps = {e_msg_session_read_resp,
         e_msg_session_write_resp} &
     
-    s_public_service_reqs = {e_msg_public_service_req} &
-    s_public_service_resps = {e_msg_public_service_resp} &
+    s_discovery_service_reqs = {e_msg_get_endpoints_service_req} &
+    s_discovery_service_resps = {e_msg_get_endpoints_service_resp} &
     
-    s_service_reqs  = s_service_treatment_reqs \/ s_service_on_session_reqs \/ s_public_service_reqs &
-    s_service_resps = s_service_on_session_resps \/ s_public_service_resps \/ {e_msg_service_fault_resp} &
+    s_service_reqs  = s_service_treatment_reqs \/ s_service_on_session_reqs \/ s_discovery_service_reqs &
+    s_service_resps = s_service_on_session_resps \/ s_discovery_service_resps \/ {e_msg_service_fault_resp} &
     
     t_msg_type = s_service_reqs \/ s_service_resps
 
