@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 09/08/2017 18:22:40
+ Date                 : 10/08/2017 10:33:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -156,6 +156,9 @@ void service_mgr__server_receive_session_treatment_req(
                      service_mgr__l_resp_msg,
                      &service_mgr__l_session,
                      &service_mgr__l_ret);
+                  if (service_mgr__l_ret != constants__e_sc_ok) {
+                     service_mgr__l_resp_msg_typ = constants__e_msg_service_fault_resp;
+                  }
                   message_out_bs__write_msg_resp_header_service_status(service_mgr__l_resp_msg_header,
                      service_mgr__l_ret);
                   message_out_bs__write_msg_out_header_req_handle(service_mgr__l_resp_msg_header,
@@ -300,8 +303,7 @@ void service_mgr__server_receive_session_service_req(
                         case constants__e_msg_session_read_req:
                            service_mgr__treat_read_request(service_mgr__l_req_msg,
                               service_mgr__l_resp_msg);
-                           message_out_bs__write_msg_resp_header_service_status(service_mgr__l_resp_msg_header,
-                              constants__e_sc_ok);
+                           service_mgr__l_ret = constants__e_sc_ok;
                            break;
                         case constants__e_msg_session_write_req:
                            session_mgr__get_session_user_or_indet(service_mgr__l_session,
@@ -309,20 +311,24 @@ void service_mgr__server_receive_session_service_req(
                            service_mgr__treat_write_request(service_mgr__l_req_msg,
                               service_mgr__l_session_user,
                               &service_mgr__l_ret);
-                           message_out_bs__write_msg_resp_header_service_status(service_mgr__l_resp_msg_header,
-                              service_mgr__l_ret);
                            address_space__write_WriteResponse_msg_out(service_mgr__l_resp_msg);
                            address_space__dealloc_write_request_responses();
                            break;
                         default:
+                           service_mgr__l_ret = constants__e_sc_bad_unexpected_error;
                            break;
                         }
+                        message_out_bs__write_msg_resp_header_service_status(service_mgr__l_resp_msg_header,
+                           service_mgr__l_ret);
                         session_mgr__server_validate_session_service_resp(service_mgr__channel,
                            service_mgr__l_session,
                            service_mgr__l_request_handle,
                            &service_mgr__l_is_valid_resp,
                            &service_mgr__l_snd_session_err);
                         if (service_mgr__l_is_valid_resp == true) {
+                           if (service_mgr__l_ret != constants__e_sc_ok) {
+                              service_mgr__l_resp_msg_typ = constants__e_msg_service_fault_resp;
+                           }
                            message_out_bs__write_msg_out_header_req_handle(service_mgr__l_resp_msg_header,
                               service_mgr__l_request_handle);
                            message_out_bs__encode_msg(service_mgr__l_resp_msg_typ,
