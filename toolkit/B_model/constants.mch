@@ -82,7 +82,7 @@ SETS
         e_buffer_out_msg_written};
     
     /* OPC UA message type */
-    t_msg_type_i = {c_msg_type_indet,
+    t_msg_type_i = {c_msg_type_indet, e_msg_service_fault_resp,
         e_msg_public_service_req, e_msg_public_service_resp,
         e_msg_session_create_req, e_msg_session_create_resp,
         e_msg_session_activate_req, e_msg_session_activate_resp,
@@ -285,7 +285,7 @@ PROPERTIES
     s_public_service_resps = {e_msg_public_service_resp} &
     
     s_service_reqs  = s_service_treatment_reqs \/ s_service_on_session_reqs \/ s_public_service_reqs &
-    s_service_resps = s_service_on_session_resps \/ s_public_service_resps &
+    s_service_resps = s_service_on_session_resps \/ s_public_service_resps \/ {e_msg_service_fault_resp} &
     
     t_msg_type = s_service_reqs \/ s_service_resps
 

@@ -69,6 +69,10 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
     *reqEncType = &OpcUa_WriteRequest_EncodeableType;
     *respEncType = &OpcUa_WriteResponse_EncodeableType;
     break;
+  case constants__e_msg_service_fault_resp:
+    *reqEncType = NULL;
+    *respEncType = &OpcUa_ServiceFault_EncodeableType;
+    break;
   case constants__e_msg_public_service_req:
   case constants__e_msg_public_service_resp:
   default:

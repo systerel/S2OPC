@@ -205,6 +205,11 @@ OPERATIONS
                         l_valid_resp_header = TRUE
                     THEN
                         l_session, l_ret <-- server_receive_session_req (channel, l_session_token, l_req_msg, req_typ, l_resp_msg);
+                        IF l_ret /= e_sc_ok
+                        THEN
+                            /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */ 
+                            l_resp_msg_typ := e_msg_service_fault_resp
+                        END;
                         write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
                         write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
                         l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
@@ -331,19 +336,27 @@ OPERATIONS
                                     EITHER e_msg_session_read_req THEN
                                         treat_read_request (l_req_msg, l_resp_msg);
                                         /* TODO: set a returned status code result from read request */
-                                        write_msg_resp_header_service_status (l_resp_msg_header, e_sc_ok)
+                                        l_ret := e_sc_ok
                                     OR e_msg_session_write_req THEN
                                         // Write request case
                                         l_session_user <-- get_session_user_or_indet (l_session);
                                         l_ret <-- treat_write_request (l_req_msg, l_session_user);
-                                        write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
                                         /* TODO: the following may fail (malloc) */
                                         write_WriteResponse_msg_out(l_resp_msg);
                                         dealloc_write_request_responses
+                                    ELSE
+                                        /* Cases shall cover all session services req types */
+                                        l_ret := e_sc_bad_unexpected_error
                                     END
                                 END;
+                                write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
                                 l_is_valid_resp, l_snd_session_err <-- server_validate_session_service_resp (channel, l_session, l_request_handle);
                                 IF l_is_valid_resp = TRUE THEN
+                                    IF l_ret /= e_sc_ok
+                                    THEN
+                                        /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */ 
+                                        l_resp_msg_typ := e_msg_service_fault_resp
+                                    END;
                                     write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
                                     /* Response message encoded */ 
                                     l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg)

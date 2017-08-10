@@ -159,6 +159,7 @@ void message_out_bs__encode_msg(
   *message_out_bs__buffer = constants__c_byte_buffer_indet;
   SOPC_StatusCode status = STATUS_OK;
   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
+  SOPC_EncodeableType* msgType = NULL;
   if(NULL != msg->msgBuffer){
     status = STATUS_NOK;
   }
@@ -172,10 +173,18 @@ void message_out_bs__encode_msg(
     status = SOPC_Buffer_SetDataLength(msg->msgBuffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
   }
   if(STATUS_OK == status){
+    // Encodeable type: either msg_type = service fault type or it is the type provided by the msg
+    if(message_out_bs__msg_type == constants__e_msg_service_fault_resp){
+      msgType = &OpcUa_ServiceFault_EncodeableType;
+    }else{
+      msgType = msg->msgType;
+    }
+  }
+  if(STATUS_OK == status){
     status = SOPC_Buffer_SetPosition(msg->msgBuffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
   }
   if(STATUS_OK == status){
-    status = SOPC_EncodeMsgTypeAndBody(msg->msgBuffer, msg->msgType, msg->msgStruct);
+    status = SOPC_EncodeMsgTypeAndBody(msg->msgBuffer, msgType, msg->msgStruct);
   }
   if(STATUS_OK == status){
     *message_out_bs__buffer = (constants__t_byte_buffer_i) msg;
