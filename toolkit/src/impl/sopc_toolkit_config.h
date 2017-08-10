@@ -105,7 +105,8 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
 /**
  *  \brief Record the given secure channel configuration in given index
  *  (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
- *
+ *  Note: it is forbidden to have 2 configurations with same endpointURL
+ * 
  *  \return endpoint configuration index configuration succeeded,
  *  0 if toolkit is not initialized, already
  *  configured or otherwise
