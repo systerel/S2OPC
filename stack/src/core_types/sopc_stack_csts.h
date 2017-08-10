@@ -42,6 +42,9 @@
 // Maximum time for activation of secure channel (time between hello message and secure channel request),
 #define OPCUA_SECURELISTENER_CHANNELTIMEOUT 5000
 
+// Maximum number of milliseconds that a session shall remain open without activity
+#define OPCUA_SESSION_TIMEOUT 10000
+
 // Default and maximum chunk size for send and receive buffers for a client (max in implem: UINT32_MAX),
 #define OPCUA_TCPCONNECTION_DEFAULTCHUNKSIZE (uint32_t) UINT16_MAX
 // Default and maximum chunk size for send and receive buffers for a server (max in implem: UINT32_MAX),
