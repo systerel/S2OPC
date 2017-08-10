@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 10/08/2017 16:06:11
+ Date                 : 10/08/2017 17:27:12
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -78,9 +78,10 @@ void session_core__server_create_session_req_and_resp_sm(
                session_core__l_nsession_token);
             channel_mgr_bs__server_get_endpoint_config(session_core__channel,
                &session_core__l_endpoint_config_idx);
-            message_out_bs__write_create_session_msg_server_endpoints(session_core__create_resp_msg,
-               session_core__l_endpoint_config_idx);
-            *session_core__service_ret = constants__e_sc_ok;
+            message_out_bs__write_create_session_msg_server_endpoints(session_core__create_req_msg,
+               session_core__create_resp_msg,
+               session_core__l_endpoint_config_idx,
+               session_core__service_ret);
          }
          else {
             *session_core__service_ret = constants__e_sc_bad_out_of_memory;
