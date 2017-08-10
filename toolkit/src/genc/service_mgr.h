@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 10/08/2017 15:34:51
+ Date                 : 10/08/2017 16:06:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -23,6 +23,7 @@
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
+#include "service_get_endpoints_bs.h"
 #include "service_read.h"
 #include "service_response_cli_cb_bs.h"
 #include "service_write_decode_bs.h"
@@ -69,7 +70,7 @@ extern void service_mgr__treat_write_request(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void service_mgr__client_receive_public_service_resp(
+extern void service_mgr__client_receive_discovery_service_resp(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__resp_typ,
    const constants__t_byte_buffer_i service_mgr__msg_buffer);
@@ -106,7 +107,7 @@ extern void service_mgr__client_service_request(
    constants__t_StatusCode_i * const service_mgr__ret,
    constants__t_channel_i * const service_mgr__channel,
    constants__t_byte_buffer_i * const service_mgr__buffer_out);
-extern void service_mgr__server_receive_public_service_req(
+extern void service_mgr__server_receive_discovery_service_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,

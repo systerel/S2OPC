@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 10/08/2017 15:34:51
+ Date                 : 10/08/2017 16:06:10
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -26,7 +26,7 @@ void io_dispatch_mgr__get_msg_header_type(
    const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
    constants__t_msg_header_type * const io_dispatch_mgr__header_type) {
    switch (io_dispatch_mgr__msg_typ) {
-   case constants__e_msg_public_service_req:
+   case constants__e_msg_get_endpoints_service_req:
    case constants__e_msg_session_create_req:
    case constants__e_msg_session_activate_req:
    case constants__e_msg_session_close_req:
@@ -34,7 +34,7 @@ void io_dispatch_mgr__get_msg_header_type(
    case constants__e_msg_session_write_req:
       *io_dispatch_mgr__header_type = constants__e_msg_request_type;
       break;
-   case constants__e_msg_public_service_resp:
+   case constants__e_msg_get_endpoints_service_resp:
    case constants__e_msg_session_create_resp:
    case constants__e_msg_session_activate_resp:
    case constants__e_msg_session_close_resp:
@@ -51,9 +51,9 @@ void io_dispatch_mgr__get_msg_service_class(
    const constants__t_msg_type_i io_dispatch_mgr__msg_typ,
    constants__t_msg_service_class * const io_dispatch_mgr__service_class) {
    switch (io_dispatch_mgr__msg_typ) {
-   case constants__e_msg_public_service_req:
-   case constants__e_msg_public_service_resp:
-      *io_dispatch_mgr__service_class = constants__e_msg_public_service_class;
+   case constants__e_msg_get_endpoints_service_req:
+   case constants__e_msg_get_endpoints_service_resp:
+      *io_dispatch_mgr__service_class = constants__e_msg_discovery_service_class;
       break;
    case constants__e_msg_session_create_req:
    case constants__e_msg_session_create_resp:
@@ -117,8 +117,8 @@ void io_dispatch_mgr__receive_msg_buffer(
                      io_dispatch_mgr__buffer,
                      &io_dispatch_mgr__l_buffer_out);
                   break;
-               case constants__e_msg_public_service_class:
-                  service_mgr__server_receive_public_service_req(io_dispatch_mgr__channel,
+               case constants__e_msg_discovery_service_class:
+                  service_mgr__server_receive_discovery_service_req(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_msg_type,
                      io_dispatch_mgr__buffer,
                      &io_dispatch_mgr__l_buffer_out);
@@ -151,8 +151,8 @@ void io_dispatch_mgr__receive_msg_buffer(
                      io_dispatch_mgr__l_msg_type,
                      io_dispatch_mgr__buffer);
                   break;
-               case constants__e_msg_public_service_class:
-                  service_mgr__client_receive_public_service_resp(io_dispatch_mgr__channel,
+               case constants__e_msg_discovery_service_class:
+                  service_mgr__client_receive_discovery_service_resp(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_msg_type,
                      io_dispatch_mgr__buffer);
                   break;

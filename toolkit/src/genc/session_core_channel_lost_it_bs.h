@@ -2,7 +2,7 @@
 
  File Name            : session_core_channel_lost_it_bs.h
 
- Date                 : 10/08/2017 15:34:56
+ Date                 : 10/08/2017 16:06:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
