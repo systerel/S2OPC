@@ -29,6 +29,8 @@ SETS
     t_session_i;
     t_session_token_i;
     t_user_i;
+    t_Nonce_i;
+    t_SignatureData_i;
     t_msg_header_i;
     t_msg_i;
     t_request_context_i;
@@ -49,6 +51,8 @@ CONCRETE_CONSTANTS
     c_user_indet,
     c_session_indet,
     c_session_token_indet,
+    c_Nonce_indet,
+    c_SignatureData_indet,
     c_msg_header_indet,
     c_msg_indet,
     c_request_context_indet,
@@ -67,6 +71,8 @@ ABSTRACT_CONSTANTS
     t_session,
     t_session_token,
     t_user,
+    t_Nonce,
+    t_SignatureData,
     t_msg_header,
     t_msg,
     t_request_context,
@@ -112,11 +118,19 @@ PROPERTIES
     t_user <: t_user_i &
     c_user_indet : t_user_i &
     c_user_indet /: t_user &
-        
+
+    t_Nonce <: t_Nonce_i &
+    c_Nonce_indet : t_Nonce_i &
+    c_Nonce_indet /: t_Nonce &
+
+    t_SignatureData <: t_SignatureData_i &
+    c_SignatureData_indet : t_SignatureData_i &
+    c_SignatureData_indet /: t_SignatureData &
+
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &
     c_msg_header_indet /: t_msg_header &
-    
+
     t_msg <: t_msg_i &
     c_msg_indet : t_msg_i &
     c_msg_indet /: t_msg &
@@ -128,11 +142,11 @@ PROPERTIES
     t_request_handle <: t_request_handle_i &
     c_request_handle_indet : t_request_handle_i &
     c_request_handle_indet /: t_request_handle &
-    
+
     t_channel_config_idx <: t_channel_config_idx_i &
     c_channel_config_idx_indet : t_channel_config_idx_i &
     c_channel_config_idx_indet /: t_channel_config_idx &
-    
+
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet /: t_endpoint_config_idx

@@ -20,29 +20,29 @@ MACHINE
 SEES
     constants,
     message_in_bs
-    
+
 DEFINITIONS
     d_variables ==
     a_buffer_out_state,
     c_msg_out_header,
     c_msg_out,
     a_msg_out_type;
-    
-    d_typing == 
+
+    d_typing ==
     a_buffer_out_state : t_buffer_out_state_i &
     c_msg_out_header : t_msg_header_i &
     c_msg_out : t_msg_i &
     a_msg_out_type : t_msg_type_i
-    
+
 ABSTRACT_VARIABLES
-    d_variables 
-    
+    d_variables
+
 INVARIANT
     d_typing
-    
+
 INITIALISATION
     d_variables :( d_typing )
-    
+
 OPERATIONS
     
     nmsg_header <-- alloc_app_req_msg_header (msg_type) =
@@ -52,14 +52,14 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet
     THEN
         CHOICE
-            nmsg_header, c_msg_out_header 
+            nmsg_header, c_msg_out_header
             :( nmsg_header : t_msg_header_i & nmsg_header = c_msg_out_header & c_msg_out_header : t_msg_header)
         OR
             nmsg_header :( nmsg_header = c_msg_header_indet & nmsg_header = c_msg_out_header)
         END
     END
     ;
-    
+
     /* Accept a message that was allocated by another part of the program */
     bless_msg_out (msg_type, msg_header, msg) =
     PRE
@@ -75,7 +75,7 @@ OPERATIONS
         a_msg_out_type := msg_type
     END
     ;
-        
+
     nmsg_header, nmsg <-- alloc_req_msg (msg_type) =
     PRE
         msg_type : t_msg_type_i &
@@ -84,8 +84,8 @@ OPERATIONS
         c_msg_out = c_msg_indet
     THEN
         CHOICE
-            nmsg_header, c_msg_out_header 
-            :( nmsg_header : t_msg_header_i & nmsg_header = c_msg_out_header & c_msg_out_header : t_msg_header) || 
+            nmsg_header, c_msg_out_header
+            :( nmsg_header : t_msg_header_i & nmsg_header = c_msg_out_header & c_msg_out_header : t_msg_header) ||
             nmsg, c_msg_out :( nmsg : t_msg_i & nmsg = c_msg_out & c_msg_out : t_msg ) ||
             a_msg_out_type := msg_type
         OR
@@ -98,13 +98,13 @@ OPERATIONS
     nmsg_header, nmsg <-- alloc_resp_msg (msg_type) =
     PRE
         msg_type : t_msg_type_i &
-        msg_type : t_msg_type & 
+        msg_type : t_msg_type &
         c_msg_out_header = c_msg_header_indet &
         c_msg_out = c_msg_indet &
         c_msg_in : t_msg
     THEN
         CHOICE
-            nmsg_header, c_msg_out_header 
+            nmsg_header, c_msg_out_header
             :( nmsg_header : t_msg_header_i & nmsg_header = c_msg_out_header & c_msg_out_header : t_msg_header) ||
             nmsg, c_msg_out :( nmsg : t_msg_i & nmsg = c_msg_out & c_msg_out : t_msg ) ||
             a_msg_out_type := msg_type
@@ -114,7 +114,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     dealloc_msg_header_out (msg_header) =
     PRE
         msg_header : t_msg_header_i &
@@ -124,7 +124,7 @@ OPERATIONS
         c_msg_out_header := c_msg_header_indet
     END
     ;
-    
+
     dealloc_msg_out (msg) =
     PRE
         msg : t_msg_i &
@@ -136,8 +136,8 @@ OPERATIONS
         a_msg_out_type := c_msg_type_indet
     END
     ;
-    
-    buffer <-- encode_msg (msg_type, msg_header, msg) = 
+
+    buffer <-- encode_msg (msg_type, msg_header, msg) =
     PRE
         a_buffer_out_state = c_buffer_out_state_indet &
         msg_type : t_msg_type_i &
@@ -158,7 +158,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres <-- is_valid_buffer_out (buffer) =
     PRE
         buffer : t_byte_buffer_i
@@ -166,7 +166,7 @@ OPERATIONS
         bres := bool(a_buffer_out_state = e_buffer_out_msg_written & buffer : t_byte_buffer)
     END
     ;
-        
+
     bres <-- is_valid_msg_out (msg) =
     PRE
         msg : t_msg_i
@@ -174,7 +174,7 @@ OPERATIONS
         bres := bool(msg = c_msg_out & c_msg_out : t_msg)
     END
     ;
-    
+
     bres <-- is_valid_msg_out_header (msg_header) =
     PRE
         msg_header : t_msg_header_i
@@ -182,7 +182,7 @@ OPERATIONS
         bres := bool(msg_header = c_msg_out_header & c_msg_out_header : t_msg_header)
     END
     ;
-    
+
     msgtype <-- get_msg_out_type (msg) =
     PRE
         msg : t_msg_i &
@@ -192,23 +192,23 @@ OPERATIONS
         msgtype := a_msg_out_type
     END
     ;
-    
-    write_msg_out_header_session_token (msg_header, session_token) = 
+
+    write_msg_out_header_session_token (msg_header, session_token) =
     PRE
         msg_header : t_msg_header_i &
         msg_header = c_msg_out_header &
         c_msg_out_header : t_msg_header &
         session_token : t_session_token_i &
         session_token : t_session_token &
-        a_msg_out_type : 
-        {e_msg_session_activate_req, 
+        a_msg_out_type :
+        {e_msg_session_activate_req,
             e_msg_session_close_req} \/ s_service_on_session_reqs
     THEN
         /* TODO: add relation on session token ? => need to retrieve after write ? */
         skip
     END
     ;
-    
+
     write_msg_out_header_req_handle (msg_header, req_handle) =
     PRE
         msg_header : t_msg_header_i &
@@ -221,7 +221,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     write_msg_resp_header_service_status (msg_header, status_code) =
     PRE
         msg_header : t_msg_header_i &
@@ -235,8 +235,8 @@ OPERATIONS
         skip
     END
     ;
-    
-    
+
+
     /* SESSION MESSAGES */
     write_create_session_req_msg_endpointUrl (msg, channel_config_idx) =
     PRE
@@ -251,8 +251,8 @@ OPERATIONS
         skip
     END
     ;
-    
-    write_create_session_msg_session_token (msg, session_token) = 
+
+    write_create_session_msg_session_token (msg, session_token) =
     PRE
         msg : t_msg_i &
         msg = c_msg_out &
@@ -265,7 +265,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     ret <-- write_create_session_msg_server_endpoints (req_msg, resp_msg, endpoint_config_idx) =
     PRE
         req_msg : t_msg_i &
@@ -281,10 +281,26 @@ OPERATIONS
         ret :(ret : t_StatusCode_i & ret : t_StatusCode)
     END
     ;
-    
+
+    sc <-- write_create_session_msg_crypto(p_msg, p_nonce, p_signature) =
+    PRE
+        p_msg : t_msg_i &
+        p_msg : c_msg_out &
+        p_nonce : t_Nonce_i &
+        p_nonce : t_Nonce &
+        p_signature : t_SignatureData_i &
+        p_signature : t_SignatureData
+    THEN
+        sc :(
+            sc : t_StatusCode_i &
+            sc : t_StatusCode
+        )
+    END
+    ;
+
     write_activate_msg_user (msg, user) =
     PRE
-	    msg : t_msg_i &
+        msg : t_msg_i &
         msg = c_msg_out &
         c_msg_out : t_msg &
         user : t_user_i &
@@ -294,5 +310,5 @@ OPERATIONS
         /* TODO: add relation on user ? => need to retrieve after write ? */
         skip
     END
-    
+
 END

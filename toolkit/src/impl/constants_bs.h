@@ -47,6 +47,8 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__t_endpoint_config_idx_i t_entier4
 #define constants_bs__t_request_handle_i t_entier4
 #define constants_bs__t_user_i t_entier4
+typedef void* constants_bs__t_Nonce_i;
+typedef void* constants_bs__t_SignatureData_i;
 
 
 /*--------------------------
@@ -66,6 +68,8 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__t_session_i_max (-1)
 #define constants_bs__t_session_token_i_max (-1)
 #define constants_bs__t_user_i_max (-1)
+#define constants_bs__t_Nonce_i_max (-1)
+#define constants_bs__t_SignatureData_i_max (-1)
 
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays

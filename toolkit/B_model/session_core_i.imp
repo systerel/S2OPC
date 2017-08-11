@@ -19,32 +19,32 @@ IMPLEMENTATION
     session_core_i
 REFINES
     session_core
-    
+
 SEES
     constants,
     message_in_bs,
     message_out_bs,
     channel_mgr_bs,
     request_handle_bs
-   
+
 IMPORTS
     session_core_1_bs,
     session_core_orphaned_it_bs,
     session_core_channel_lost_it_bs
-    
+
 PROMOTES
     init_iter_orphaned_t_session,
     continue_iter_orphaned_t_session,
-    
+
     server_get_session_from_token,
     client_get_token_from_session,
     get_session_channel,
     is_valid_session,
     is_valid_user,
     delete_session
-    
+
 LOCAL_OPERATIONS
-    
+
     server_internal_activate_req_and_resp (channel, session, user, activate_resp_msg) =
     PRE
         channel       : t_channel_i &
@@ -63,9 +63,9 @@ LOCAL_OPERATIONS
         a_channel(session) := channel ||
         a_user(session) := user
     END
-    
+
 OPERATIONS
-    
+
     server_internal_activate_req_and_resp (channel, session, user, activate_resp_msg) =
     BEGIN
         set_session_user (session, user);
@@ -73,13 +73,13 @@ OPERATIONS
         set_session_state (session, e_session_userActivated)
     END
     ;
-    
+
     /* END OF LOCAL OPERATIONS */
     nsession <-- client_init_session_sm =
     BEGIN
         nsession <-- init_new_session
     END;
-    
+
     client_create_session_req_sm (session, channel, create_req_msg) =
     VAR
         l_channel_config_idx
@@ -90,29 +90,45 @@ OPERATIONS
         /* TODO: fill parameters */
     END
     ;
-    
+
     nsession, service_ret <-- server_create_session_req_and_resp_sm (channel, create_req_msg, create_resp_msg) =
     VAR
         l_nsession,
         l_valid_session,
         l_nsession_token,
         l_valid_session_token,
-        l_endpoint_config_idx
+        l_endpoint_config_idx,
+        /*l_valid_req,*/
+        l_config_idx,
+        l_valid_crypto,
+        l_signature,
+        l_nonce
     IN
         l_nsession <-- init_new_session;
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE THEN
             create_session(l_nsession, channel, e_session_created);
-            /* TODO: check request parameters ? => at least server / endpoint URI */ 
+            /* TODO: check request parameters: client certificate, endpointURL*/
+            /*l_valid_req <-- server_create_session_valid_req(create_req_msg) */
             l_nsession_token <-- server_get_fresh_session_token (l_nsession);
             l_valid_session_token <-- server_is_valid_session_token (l_nsession_token);
-            /* No need to store the handle since we will send response in same step */
-            IF l_valid_session_token = TRUE
+            IF l_valid_session_token = TRUE /*& l_valid_req = TRUE */
             THEN
-                write_create_session_msg_session_token (create_resp_msg, l_nsession_token);
                 l_endpoint_config_idx <-- server_get_endpoint_config (channel);
-                service_ret <-- write_create_session_msg_server_endpoints (create_req_msg, create_resp_msg, l_endpoint_config_idx)
-                /* TODO: populate msg with parameters */
+                /* No need to store the handle since we will send response in same step */
+                /* Do the cryptographic challenge which may fail because of mallocs */
+                l_config_idx <-- get_channel_info(channel); /* MAYBE this is denoted client side only... */
+                l_valid_crypto, l_signature <-- server_create_session_req_do_crypto(l_nsession, create_req_msg, l_endpoint_config_idx, l_config_idx);
+                IF  l_valid_crypto = TRUE THEN
+                    write_create_session_msg_session_token (create_resp_msg, l_nsession_token);
+                    /* TODO: this one also populates RevisedSessionTimeout */
+                    service_ret <-- write_create_session_msg_server_endpoints (create_req_msg, create_resp_msg, l_endpoint_config_idx);
+                    IF service_ret = e_sc_ok THEN
+                        l_nonce <-- get_NonceServer(l_nsession);
+                        service_ret <-- write_create_session_msg_crypto(create_resp_msg, l_nonce, l_signature)
+                        /* TODO: populate msg with remaining parameters: MaxRequestSize, RevisedSessionTimeout, CertServer, ... */
+                    END
+                END
             ELSE
                 service_ret := e_sc_bad_out_of_memory;
                 delete_session (l_nsession);
@@ -124,7 +140,7 @@ OPERATIONS
         nsession := l_nsession
     END
     ;
-    
+
     ret <-- client_create_session_resp_sm (channel, session, session_token, create_resp_msg) =
     BEGIN
         // channel: only for the precondition
@@ -134,7 +150,7 @@ OPERATIONS
         ret := e_sc_ok
     END
     ;
-    
+
     ret, channel, session_token <-- client_user_activate_session_req_sm (session, user, activate_req_msg) =
     BEGIN
         channel <-- get_session_channel (session);
@@ -148,7 +164,7 @@ OPERATIONS
         ret := e_sc_ok
     END
     ;
-    
+
     session_token <-- client_sc_activate_session_req_sm (session, channel, activate_req_msg) =
     VAR
         l_user
@@ -160,8 +176,8 @@ OPERATIONS
         set_session_channel(session, channel);
         set_session_state(session, e_session_scActivating)
     END
-    ;  
-    
+    ;
+
     ret <-- server_activate_session_req_and_resp_sm (channel, session, user, activate_req_msg, activate_resp_msg) =
     VAR
         l_channel,
@@ -215,7 +231,7 @@ OPERATIONS
         ret := l_ret
     END
     ;
-    
+
     ret <-- client_activate_session_resp_sm (channel , session, activate_resp_msg) =
     BEGIN
         /* TODO: check response parameters */
@@ -223,7 +239,7 @@ OPERATIONS
         ret := e_sc_ok
     END
     ;
-    
+
     client_secure_channel_lost_session_sm (lost_channel, channel_config_idx) =
     VAR
         l_continue,
@@ -257,7 +273,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     server_secure_channel_lost_session_sm (channel) =
     VAR
         l_continue,
@@ -289,7 +305,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret, channel, session_token <-- client_close_session_req_sm (session, close_req_msg) =
     BEGIN
         channel <-- get_session_channel (session);
@@ -299,7 +315,7 @@ OPERATIONS
         ret := e_sc_ok
     END
     ;
-    
+
     ret <-- server_close_session_req_and_resp_sm (channel, session, close_req_msg, close_resp_msg) =
     BEGIN
         /* TODO: actions on pending requests or current subscriptions to manage (see request) */
@@ -309,20 +325,20 @@ OPERATIONS
         ret := e_sc_ok
     END
     ;
-    
+
     client_close_session_resp_sm (channel, session, close_resp_msg) =
     BEGIN
         /* In any case we close the session: correct channel or not  */
         set_session_state_closed (session)
     END
     ;
-    
+
     client_close_session_sm (session) =
     BEGIN
         set_session_state_closed (session)
     END
     ;
-    
+
     server_close_session_sm (session) =
     BEGIN
         set_session_state_closed (session)
@@ -335,7 +351,7 @@ OPERATIONS
         ret := TRUE
     END
     ;
-    
+
     state <-- get_session_state_or_closed (session) =
     VAR
         l_valid_session
@@ -349,7 +365,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     user <-- get_session_user_or_indet (session) =
     VAR
         l_valid_session,
@@ -369,6 +385,6 @@ OPERATIONS
             END
         END
     END
-    
-    
+
+
 END

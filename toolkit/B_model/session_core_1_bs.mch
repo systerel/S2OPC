@@ -17,11 +17,11 @@
 
 MACHINE
     session_core_1_bs
-    
+
 SEES
     constants,
     request_handle_bs
-    
+
 DEFINITIONS
     d_variables ==
     s_session,
@@ -30,28 +30,31 @@ DEFINITIONS
     a_orphaned,
     a_client_token,
     a_server_token,
-    a_user;
-    
-    d_typing ==    
-    s_session <: t_session &    
-    a_state : s_session --> t_sessionState & // a session shall be associated to a state    
-    a_channel : s_session +-> t_channel & // a session may be associated to a valid channel    
+    a_user,
+    a_NonceServer;
+
+    d_typing ==
+    s_session <: t_session &
+    a_state : s_session --> t_sessionState & // a session shall be associated to a state
+    a_channel : s_session +-> t_channel & // a session may be associated to a valid channel
     a_orphaned : s_session +-> t_channel_config_idx_i & // a client session may be orphaned of a channel (precedently lost)
     a_client_token : s_session +-> t_session_token & // a client session has an associated session token once create response received
-    a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent  
-    a_user : s_session +-> t_user  //  a session may be associated to a valid user
-    
+    a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent
+    a_user : s_session +-> t_user & // a session may be associated to a valid user
+    /* The NonceServer negotiated for a session in CreateSession or ActivateSession */
+    a_NonceServer : s_session +-> t_Nonce
+
 ABSTRACT_VARIABLES
     d_variables
-    
+
 INVARIANT
     d_typing
-    
+
 INITIALISATION
     d_variables :(d_typing)
-    
+
 OPERATIONS
-    
+
     session <-- server_get_session_from_token (session_token) =
     PRE
         session_token : t_session_token_i
@@ -65,7 +68,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     session_token <-- client_get_token_from_session (session) =
     PRE
         session : t_session_i &
@@ -76,8 +79,8 @@ OPERATIONS
         session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
     END
     ;
-    
-    token <-- server_get_fresh_session_token (session) = 
+
+    token <-- server_get_fresh_session_token (session) =
     PRE
         session : t_session_i &
         session : s_session &
@@ -96,7 +99,7 @@ OPERATIONS
         END
     END
     ;
-        
+
     ret <-- server_is_valid_session_token (token) =
     PRE
         token : t_session_token_i
@@ -104,7 +107,7 @@ OPERATIONS
         ret := bool(token : t_session_token & token : dom(a_server_token))
     END
     ;
-    
+
     client_set_session_token (session, token) =
     PRE
         session : t_session_i &
@@ -116,8 +119,8 @@ OPERATIONS
         a_client_token (session) := token
     END
     ;
-    
-    delete_session (session) = 
+
+    delete_session (session) =
     PRE
         session : t_session_i &
         session : s_session
@@ -130,7 +133,7 @@ OPERATIONS
         a_client_token := {session} <<| a_client_token ||
         a_orphaned := {session} <<| a_orphaned
     END;
-    
+
     session <-- init_new_session =
     BEGIN
         IF s_session = t_session
@@ -149,7 +152,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     create_session (session, channel, state) =
     PRE
         session : t_session_i &
@@ -162,7 +165,7 @@ OPERATIONS
         a_state (session) := state
     END
     ;
-    
+
     create_session_failure (session) =
     PRE
         session : t_session_i &
@@ -172,7 +175,7 @@ OPERATIONS
         a_channel := {session} <<| a_channel ||
         a_state (session) := e_session_init
     END;
-    
+
     ret <-- is_valid_session (session) =
     PRE
         session : t_session_i
@@ -180,7 +183,7 @@ OPERATIONS
         ret :=  bool(session : s_session)
     END
     ;
-    
+
     state <-- get_session_state (session) =
     PRE
         session : t_session_i &
@@ -189,7 +192,7 @@ OPERATIONS
         state := a_state(session)
     END
     ;
-    
+
     set_session_state (session, state) =
     PRE
         session : t_session_i &
@@ -200,8 +203,8 @@ OPERATIONS
         a_state (session) := state
         // + notify  user app when session activated
     END
-	;
-        
+    ;
+
     set_session_state_closed (session) =
     PRE
         session : t_session_i &
@@ -214,7 +217,7 @@ OPERATIONS
         a_client_token := {session} <<| a_client_token
     END
     ;
-    
+
     set_session_channel (session, channel) =
     PRE
         session : t_session_i &
@@ -225,7 +228,7 @@ OPERATIONS
         a_channel (session) := channel
     END
     ;
-    
+
     channel <-- get_session_channel (session) =
     PRE
         session : t_session_i &
@@ -235,7 +238,7 @@ OPERATIONS
             channel :(channel : t_channel_i & channel = a_channel(session))
     END
     ;
-    
+
     // new_channel is channel on which connection is awaited to re-associate session
     set_session_orphaned (session, lost_channel, channel_config_idx) =
     PRE
@@ -246,7 +249,7 @@ OPERATIONS
         channel_config_idx : t_channel_config_idx_i
     THEN
         IF channel_config_idx : t_channel_config_idx
-        THEN 
+        THEN
             a_channel := a_channel |>> {lost_channel} ||
             a_orphaned(session) := channel_config_idx
         ELSE
@@ -254,7 +257,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret <-- is_valid_user (user) =
     PRE
         user : t_user_i
@@ -262,7 +265,7 @@ OPERATIONS
         ret := bool(user : t_user)
     END
     ;
-    
+
     set_session_user (session, user) =
     PRE
         session : t_session_i &
@@ -273,7 +276,7 @@ OPERATIONS
         a_user (session) := user
     END
     ;
-    
+
     user <-- get_session_user (session) =
     PRE
         session : t_session_i &
@@ -281,6 +284,54 @@ OPERATIONS
         session : dom(a_user)
     THEN
         user :(user : t_user_i & user = a_user (session))
+    END
+    ;
+
+    /* This implements the crypto challenge in CreateSession.
+     * valid tracks the alloc and success of both the a_NonceServer() and signature
+     * TODO? split to gather common Nonce-generation code with others using it
+     */
+    valid, signature <-- server_create_session_req_do_crypto(p_session, p_req_msg, p_endpoint_config_idx, p_config_idx) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session &
+        p_req_msg : t_msg_i &
+        /*p_req_msg = c_msg_out &
+        c_msg_out : t_msg &*/
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
+        p_config_idx : t_channel_config_idx_i &
+        p_config_idx : t_channel_config_idx
+    THEN
+        valid,
+        signature,
+        a_NonceServer
+        :(
+            valid : BOOL &
+            signature : t_SignatureData_i &
+
+            (valid = TRUE
+             =>
+             signature : t_SignatureData &
+             a_NonceServer(p_session) : t_Nonce)
+            &
+            (valid = FALSE
+             =>
+             a_NonceServer = a_NonceServer$0)
+        )
+    END
+    ;
+
+    nonce <-- get_NonceServer(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session &
+        p_session : dom(a_NonceServer)
+    THEN
+        nonce :(
+            nonce : t_Nonce_i &
+            nonce = a_NonceServer(p_session)
+        )
     END
 
 END
