@@ -233,6 +233,15 @@ void message_out_bs__write_activate_msg_user(
   assert(message_out_bs__user == 1); // anonymous user only for now
 }
 
+void message_out_bs__write_create_session_req_msg_endpointUrl(
+   const constants__t_msg_i message_out_bs__msg,
+   const constants__t_channel_config_idx_i message_out_bs__channel_config_idx){
+  SOPC_Toolkit_Msg* reqMsg = (SOPC_Toolkit_Msg*) message_out_bs__msg;
+  OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) reqMsg->msgStruct;
+  SOPC_SecureChannel_Config* chConfig = SOPC_ToolkitClient_GetSecureChannelConfig(message_out_bs__channel_config_idx);
+  assert(STATUS_OK == SOPC_String_CopyFromCString(&createSessionReq->EndpointUrl, chConfig->url));
+}
+
 void message_out_bs__write_create_session_msg_session_token(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_session_token_i message_out_bs__session_token) {
