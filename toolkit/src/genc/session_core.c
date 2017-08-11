@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 10/08/2017 17:27:12
+ Date                 : 11/08/2017 15:16:38
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,9 +44,17 @@ void session_core__client_create_session_req_sm(
    const constants__t_session_i session_core__session,
    const constants__t_channel_i session_core__channel,
    const constants__t_msg_i session_core__create_req_msg) {
-   session_core_1_bs__create_session(session_core__session,
-      session_core__channel,
-      constants__e_session_creating);
+   {
+      constants__t_channel_config_idx_i session_core__l_channel_config_idx;
+      
+      session_core_1_bs__create_session(session_core__session,
+         session_core__channel,
+         constants__e_session_creating);
+      channel_mgr_bs__get_channel_info(session_core__channel,
+         &session_core__l_channel_config_idx);
+      message_out_bs__write_create_session_req_msg_endpointUrl(session_core__create_req_msg,
+         session_core__l_channel_config_idx);
+   }
 }
 
 void session_core__server_create_session_req_and_resp_sm(
