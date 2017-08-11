@@ -23,6 +23,7 @@
 
 #include "b2c.h"
 #include "service_get_endpoints_bs.h"
+#include "util_discovery_services.h"
 
 #include "sopc_sc_events.h"
 #include "sopc_types.h"
@@ -50,10 +51,12 @@ void service_get_endpoints_bs__treat_get_endpoints_request(
   OpcUa_GetEndpointsRequest* getEndpointsReq = (OpcUa_GetEndpointsRequest*) reqMsg->msgStruct;
   OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) respMsg->msgStruct;
   uint32_t configIdx = (uint32_t) service_get_endpoints_bs__endpoint_config_idx;
-  (void) getEndpointsReq;
-  (void) getEndpointsResp;
-  (void) configIdx;
-  *service_get_endpoints_bs__ret = constants__e_sc_nok;
+
+  *service_get_endpoints_bs__ret = build_endPoints_Descriptions(configIdx,
+  			&getEndpointsReq->EndpointUrl,
+  			(uint32_t*)&getEndpointsResp->NoOfEndpoints,
+  			&getEndpointsResp->Endpoints);
+
 }
 
 

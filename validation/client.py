@@ -12,6 +12,8 @@ if __name__=='__main__':
     print('Connecting to', sUri)
     client = Client(sUri)
     client.connect()
+    endPoints = client.get_endpoints()
+    print('endPoints:', endPoints)
     # Read tests
     n1 = client.get_node(10)
     print('n1:', n1.get_value())
