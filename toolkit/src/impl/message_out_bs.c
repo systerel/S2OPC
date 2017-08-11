@@ -36,6 +36,7 @@
 #include "sopc_encoder.h"
 #include "sopc_stack_csts.h"
 #include "sopc_toolkit_config.h"
+#include "util_discovery_services.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -250,73 +251,18 @@ void message_out_bs__write_create_session_msg_server_endpoints(
    const constants__t_endpoint_config_idx_i message_out_bs__endpoint_config_idx,
    constants__t_StatusCode_i * const message_out_bs__ret){
 
-	SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) message_out_bs__resp_msg;
-	OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) msg->msgStruct;
+	SOPC_Toolkit_Msg* reqMsg = (SOPC_Toolkit_Msg*) message_out_bs__req_msg;
+	OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) reqMsg->msgStruct;
+
+	SOPC_Toolkit_Msg* respMsg = (SOPC_Toolkit_Msg*) message_out_bs__resp_msg;
+	OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) respMsg->msgStruct;
 
 	createSessionResp->RevisedSessionTimeout = OPCUA_SESSION_TIMEOUT;
-	SOPC_StatusCode status;
 
-	SOPC_Endpoint_Config* sopcEndpointConfig = SOPC_ToolkitServer_GetEndpointConfig(message_out_bs__endpoint_config_idx);
-
-	char* endpointURL = sopcEndpointConfig->endpointURL;
-	SOPC_String My_SOPC_String;
-	SOPC_String_Initialize (&My_SOPC_String);
-	status = SOPC_String_AttachFromCstring(&My_SOPC_String, endpointURL);
-	assert(STATUS_OK == status);
-
-	uint8_t	nbSecuConfigs = sopcEndpointConfig->nbSecuConfigs;
-
-	SOPC_SecurityPolicy* tabSecurityPolicy = sopcEndpointConfig->secuConfigurations;
-
-	/* cf §5.6.2.2: t is recommended that Servers only include the endpointUrl, securityMode,
-	securityPolicyUri, userIdentityTokens, transportProfileUri and securityLevel with all
-	other parameters set to null. */
-	// TODO: this code section can probably be optimized
-	OpcUa_EndpointDescription My_OpcUa_EndpointDescription[3*nbSecuConfigs];
-	int nbEndpointDescription = 0;
-	OpcUa_EndpointDescription newEndPointDescription;
-	OpcUa_EndpointDescription_Initialize(&newEndPointDescription);
-	newEndPointDescription.EndpointUrl = My_SOPC_String;
-	/* cf §7.10 Part4 - Value 0 is for not recommended endPoint.
-	   Others values corresponds to more secured endPoints.*/
-
-	for (int iSecuConfig=0; iSecuConfig<nbSecuConfigs; iSecuConfig++){
-		SOPC_SecurityPolicy currentSecurityPolicy = tabSecurityPolicy[iSecuConfig];
-		uint16_t securityModes = currentSecurityPolicy.securityModes;
-		newEndPointDescription.SecurityPolicyUri = currentSecurityPolicy.securityPolicy;
-
-		// Add an endPoint description per security mode
-		if((SECURITY_MODE_NONE_MASK & securityModes) != 0){
-			newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_None;
-			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
-			newEndPointDescription.SecurityLevel = 0;
-			nbEndpointDescription++;
-		}
-
-		if((SECURITY_MODE_SIGN_MASK & securityModes) != 0){
-			newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_Sign;
-			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
-			newEndPointDescription.SecurityLevel = 1;
-			nbEndpointDescription++;
-		}
-
-		if((SECURITY_MODE_SIGNANDENCRYPT_MASK & securityModes) != 0){
-			newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
-			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
-			newEndPointDescription.SecurityLevel = 1;
-			nbEndpointDescription++;
-		}
-
-	}
-
-	OpcUa_EndpointDescription* final_OpcUa_EndpointDescription = malloc(nbEndpointDescription*sizeof(OpcUa_EndpointDescription));
-	for (int i=0; i<nbEndpointDescription; i++){
-		final_OpcUa_EndpointDescription[i] = My_OpcUa_EndpointDescription[i];
-	}
-	createSessionResp->NoOfServerEndpoints = nbEndpointDescription;
-	createSessionResp->ServerEndpoints = final_OpcUa_EndpointDescription;
-
-	  *message_out_bs__ret = constants__e_sc_ok;
+	*message_out_bs__ret = build_endPoints_Descriptions(message_out_bs__endpoint_config_idx,
+			&createSessionReq->EndpointUrl,
+			(uint32_t*)&createSessionResp->NoOfServerEndpoints,
+			&createSessionResp->ServerEndpoints);
 }
 
 void message_out_bs__write_msg_out_header_req_handle(
