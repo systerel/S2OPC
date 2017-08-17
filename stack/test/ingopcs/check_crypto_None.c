@@ -168,10 +168,39 @@ START_TEST(test_crypto_symm_sign_None)
 END_TEST
 
 
+/* This test is the same for security policy that are not None,
+ * as its length is not specified by the policy.
+ * It should not fail in None, but this is not required, as it is not used.
+ */
+START_TEST(test_crypto_generate_nbytes_None)
+{
+    SecretBuffer *pSecNonce0, *pSecNonce1;
+    ExposedBuffer *pExpNonce0, *pExpNonce1;
+
+    // It is random, so...
+    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, &pSecNonce0) == STATUS_OK);
+    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, &pSecNonce1) == STATUS_OK);
+    ck_assert(NULL != (pExpNonce0 = SecretBuffer_Expose(pSecNonce0)));
+    ck_assert(NULL != (pExpNonce1 = SecretBuffer_Expose(pSecNonce1)));
+    // You have a slight chance to fail here (1/(2**512))
+    ck_assert_msg(memcmp(pExpNonce0, pExpNonce1, 64) != 0,
+                  "Randomly generated two times the same 64 bytes, which should happen once in pow(2, 512) tries.");
+    SecretBuffer_Unexpose(pExpNonce0);
+    SecretBuffer_Unexpose(pExpNonce1);
+    SecretBuffer_DeleteClear(pSecNonce0);
+    SecretBuffer_DeleteClear(pSecNonce1);
+
+    // Test invalid inputs
+    ck_assert(CryptoProvider_GenerateRandomBytes(NULL, 64, &pSecNonce0) == STATUS_INVALID_PARAMETERS);
+    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 0, &pSecNonce0) == STATUS_INVALID_PARAMETERS);
+    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, NULL) == STATUS_INVALID_PARAMETERS);
+}
+END_TEST
+
+
 START_TEST(test_crypto_generate_nonce_None)
 {
     SecretBuffer *pSecNonce;
-    //char hexoutput[64];
 
     ck_assert(CryptoProvider_GenerateSecureChannelNonce(crypto, &pSecNonce) == STATUS_NOK);
 
@@ -629,6 +658,7 @@ Suite *tests_make_suite_crypto_None()
 
     suite_add_tcase(s, tc_rands);
     tcase_add_checked_fixture(tc_rands, setup_crypto, teardown_crypto);
+    tcase_add_test(tc_rands, test_crypto_generate_nbytes_None);
     tcase_add_test(tc_rands, test_crypto_generate_nonce_None);
     tcase_add_test(tc_rands, test_crypto_generate_uint32_None);
 

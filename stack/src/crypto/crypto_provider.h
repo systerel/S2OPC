@@ -545,6 +545,29 @@ SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
  */
 
 /**
+ * \brief           Generates truly random data of arbitrary length.
+ *
+ *                  Uses the entropy generator provided by the underlying cryptographic library.
+ *                  The new SecretBuffer is to be freed by the caller.
+ *
+ * \note            Prefer the functions CryptoProvider_GenerateSecureChannelNonce()
+ *                  and CryptoProvider_GenerateRandomID().
+ *
+ * \param pProvider An initialized cryptographic context.
+ * \param nBytes    Number of bytes to generate (and length of the created \p ppBuffer).
+ * \param ppBuffer  A valid handle to the newly created SecretBuffer.
+ *
+ * \note            Content of the output is unspecified when return value is not STATUS_OK.
+ *
+ * \return          STATUS_OK when successful, STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized or sizes are incorrect,
+ *                  and STATUS_NOK when there was an error (e.g. no entropy source).
+ */
+SOPC_StatusCode CryptoProvider_GenerateRandomBytes(const CryptoProvider *pProvider,
+                                                   uint32_t nBytes,
+                                                   SecretBuffer **ppBuffer);
+
+/**
  * \brief           Generates a single truly random nonce for the SecureChannel creation.
  *
  *                  The length of the nonce is defined by the current security policy (see *TBD*).

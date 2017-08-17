@@ -669,38 +669,50 @@ SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
  */
 
 
-SOPC_StatusCode CryptoProvider_GenerateSecureChannelNonce(const CryptoProvider *pProvider,
-                                               SecretBuffer **ppNonce)
+SOPC_StatusCode CryptoProvider_GenerateRandomBytes(const CryptoProvider *pProvider,
+                                                   uint32_t nBytes,
+                                                   SecretBuffer **ppBuffer)
 {
     SOPC_StatusCode status = STATUS_OK;
-    ExposedBuffer *pExpKey;
+    ExposedBuffer *pExp;
+
+    if(NULL == pProvider || nBytes == 0 || NULL == ppBuffer || NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnGenRnd)
+        return STATUS_INVALID_PARAMETERS;
+
+    // Empties pointer in case an error occurs after that point.
+    *ppBuffer = NULL;
+
+    pExp = (ExposedBuffer *)malloc(nBytes);
+    if(NULL == pExp)
+        return STATUS_NOK;
+
+    status = pProvider->pProfile->pFnGenRnd(pProvider, pExp, nBytes);
+    if(STATUS_OK == status)
+    {
+        *ppBuffer = SecretBuffer_NewFromExposedBuffer(pExp, nBytes);
+        if(NULL == *ppBuffer)
+            status = STATUS_NOK;
+    }
+
+    memset(pExp, 0, nBytes);
+    free(pExp);
+
+    return status;
+}
+
+
+SOPC_StatusCode CryptoProvider_GenerateSecureChannelNonce(const CryptoProvider *pProvider,
+                                                          SecretBuffer **ppNonce)
+{
     uint32_t lenNonce;
 
     if(NULL == pProvider || NULL == ppNonce || NULL == pProvider->pProfile || NULL == pProvider->pProfile->pFnGenRnd)
         return STATUS_INVALID_PARAMETERS;
 
-    // Empties pointer in case an error occurs after that point.
-    *ppNonce = NULL;
-
     if(CryptoProvider_SymmetricGetLength_SecureChannelNonce(pProvider, &lenNonce) != STATUS_OK)
         return STATUS_NOK;
 
-    pExpKey = (ExposedBuffer *)malloc(lenNonce);
-    if(NULL == pExpKey)
-        return STATUS_NOK;
-
-    status = pProvider->pProfile->pFnGenRnd(pProvider, pExpKey, lenNonce);
-    if(STATUS_OK == status)
-    {
-        *ppNonce = SecretBuffer_NewFromExposedBuffer(pExpKey, lenNonce);
-        if(NULL == *ppNonce)
-            status = STATUS_NOK;
-    }
-
-    memset(pExpKey, 0, lenNonce);
-    free(pExpKey);
-
-    return status;
+    return CryptoProvider_GenerateRandomBytes(pProvider, lenNonce, ppNonce);
 }
 
 
