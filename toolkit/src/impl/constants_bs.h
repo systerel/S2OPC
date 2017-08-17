@@ -89,6 +89,8 @@ typedef void* constants_bs__t_SignatureData_i;
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0
 #define constants_bs__c_user_indet 0
+#define constants_bs__c_Nonce_indet 0
+#define constants_bs__c_SignatureData_indet 0
 #define constants_bs__k_n_Nodes 0
 
 /*------------------------

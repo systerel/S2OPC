@@ -55,7 +55,7 @@ void util_message_out_bs__alloc_msg(
   void* header = NULL;
   void* msg = NULL;
   SOPC_StatusCode status = STATUS_NOK;
- 
+
   SOPC_EncodeableType* encTyp = NULL;
   SOPC_EncodeableType* reqEncTyp = NULL;
   SOPC_EncodeableType* respEncTyp = NULL;
@@ -228,7 +228,7 @@ void message_out_bs__is_valid_msg_out_header(
 
 void message_out_bs__msg_out_memory_changed(void) {
   printf("message_out_bs__msg_out_memory_changed\n");
-  exit(1);   
+  exit(1);
    ;
 }
 
@@ -263,17 +263,46 @@ void message_out_bs__write_create_session_msg_server_endpoints(
    const constants__t_endpoint_config_idx_i message_out_bs__endpoint_config_idx,
    constants__t_StatusCode_i * const message_out_bs__ret){
 
-	OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__req_msg;
+    OpcUa_CreateSessionRequest* createSessionReq = (OpcUa_CreateSessionRequest*) message_out_bs__req_msg;
 
-	OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__resp_msg;
+    OpcUa_CreateSessionResponse* createSessionResp = (OpcUa_CreateSessionResponse*) message_out_bs__resp_msg;
 
-	createSessionResp->RevisedSessionTimeout = OPCUA_SESSION_TIMEOUT;
+    createSessionResp->RevisedSessionTimeout = OPCUA_SESSION_TIMEOUT;
 
-	*message_out_bs__ret = build_endPoints_Descriptions(message_out_bs__endpoint_config_idx,
-			&createSessionReq->EndpointUrl,
-			(uint32_t*)&createSessionResp->NoOfServerEndpoints,
-			&createSessionResp->ServerEndpoints);
+    *message_out_bs__ret = build_endPoints_Descriptions(message_out_bs__endpoint_config_idx,
+            &createSessionReq->EndpointUrl,
+            (uint32_t*)&createSessionResp->NoOfServerEndpoints,
+            &createSessionResp->ServerEndpoints);
 }
+
+
+void message_out_bs__write_create_session_msg_crypto(
+   const constants__t_msg_i message_out_bs__p_msg,
+   const constants__t_Nonce_i message_out_bs__p_nonce,
+   const constants__t_SignatureData_i message_out_bs__p_signature,
+   constants__t_StatusCode_i * const message_out_bs__sc)
+{
+    SOPC_StatusCode sc = STATUS_NOK;
+    OpcUa_CreateSessionResponse *pResp = (OpcUa_CreateSessionResponse *) message_out_bs__p_msg;
+    OpcUa_SignatureData *pSig = (OpcUa_SignatureData *)message_out_bs__p_signature;
+
+    /* Copy Nonce */
+    /* TODO: should borrow a reference instead of copy */
+    sc = SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString *)message_out_bs__p_nonce);
+
+    /* Copy Signature, which is not a built-in, so copy its fields */
+    /* TODO: should borrow a reference instead of copy */
+    if(STATUS_OK == sc)
+        sc = SOPC_String_Copy(&pResp->ServerSignature.Algorithm, &pSig->Algorithm);
+    if(STATUS_OK == sc)
+        sc = SOPC_ByteString_Copy(&pResp->ServerSignature.Signature, &pSig->Signature);
+
+    if(STATUS_OK == sc)
+        *message_out_bs__sc = constants__e_sc_ok;
+    else
+        *message_out_bs__sc = constants__e_sc_nok;
+}
+
 
 void message_out_bs__write_msg_out_header_req_handle(
    const constants__t_msg_header_i message_out_bs__msg_header,

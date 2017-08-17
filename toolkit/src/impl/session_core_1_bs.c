@@ -21,11 +21,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "sopc_builtintypes.h"
 #include "sopc_encodeable.h"
+#include "sopc_types.h"
 #include "sopc_event_dispatcher_manager.h"
 #include "sopc_user_app_itf.h"
+#include "crypto_provider.h"
+#include "crypto_profiles.h"
+#include "secret_buffer.h"
+#include "sopc_toolkit_config.h"
 
 #include "session_core_1_bs.h"
 
@@ -38,6 +44,8 @@ typedef struct session {
   constants__t_session_token_i session_core_1_bs__session_token;
   constants__t_user_i session_core_1_bs__user;
   t_bool cli_activated_session;
+  SOPC_ByteString NonceServer;
+  OpcUa_SignatureData SignatureData;
 } session;
 
 static session unique_session;
@@ -60,7 +68,7 @@ void session_core_1_bs__server_get_session_from_token(
    constants__t_session_i * const session_core_1_bs__session) {
   int32_t comparison = 0;
   if(false != unique_session_created){
-    SOPC_StatusCode status = SOPC_NodeId_Compare((SOPC_NodeId*)session_core_1_bs__session_token, 
+    SOPC_StatusCode status = SOPC_NodeId_Compare((SOPC_NodeId*)session_core_1_bs__session_token,
                                                  (SOPC_NodeId*)unique_session.session_core_1_bs__session_token,
                                                  &comparison);
     if(STATUS_OK == status && comparison == 0){
@@ -73,9 +81,9 @@ void session_core_1_bs__client_get_token_from_session(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_session_token_i * const session_core_1_bs__session_token) {
   if(unique_session.id == session_core_1_bs__session){
-    *session_core_1_bs__session_token = unique_session.session_core_1_bs__session_token;    
+    *session_core_1_bs__session_token = unique_session.session_core_1_bs__session_token;
   }else{
-    *session_core_1_bs__session_token = constants__c_session_token_indet;    
+    *session_core_1_bs__session_token = constants__c_session_token_indet;
   }
 }
 
@@ -97,8 +105,8 @@ void session_core_1_bs__server_get_fresh_session_token(
       *session_core_1_bs__token = constants__c_session_token_indet;
     }
   }else{
-    *session_core_1_bs__token = constants__c_session_token_indet;    
-  } 
+    *session_core_1_bs__token = constants__c_session_token_indet;
+  }
 }
 
 void session_core_1_bs__server_is_valid_session_token(
@@ -106,7 +114,7 @@ void session_core_1_bs__server_is_valid_session_token(
    t_bool * const session_core_1_bs__ret) {
   int32_t comparison = 0;
   if(session_core_1_bs__token != constants__c_session_token_indet){
-    SOPC_StatusCode status = SOPC_NodeId_Compare((SOPC_NodeId*)session_core_1_bs__token, 
+    SOPC_StatusCode status = SOPC_NodeId_Compare((SOPC_NodeId*)session_core_1_bs__token,
                                                  (SOPC_NodeId*)unique_session.session_core_1_bs__session_token,
                                                  &comparison);
     if(STATUS_OK == status && comparison == 0){
@@ -127,11 +135,11 @@ void session_core_1_bs__client_set_session_token(
       SOPC_NodeId* token = malloc(sizeof(SOPC_NodeId));
       if(NULL != token){
         SOPC_NodeId_Initialize(token);
-        if(STATUS_OK == SOPC_NodeId_Copy(token, (SOPC_NodeId*) session_core_1_bs__token)){        
+        if(STATUS_OK == SOPC_NodeId_Copy(token, (SOPC_NodeId*) session_core_1_bs__token)){
           unique_session.session_core_1_bs__session_token = token;
         }else{
           printf("session_core_1_bs__set_session_token\n");
-          exit(1);         
+          exit(1);
         }
       }else{
         printf("session_core_1_bs__set_session_token\n");
@@ -152,7 +160,7 @@ void session_core_1_bs__delete_session(
    const constants__t_session_i session_core_1_bs__session) {
   (void) session_core_1_bs__session;
   printf("session_core_1_bs__delete_session\n");
-  exit(1);   
+  exit(1);
 }
 
 void session_core_1_bs__init_new_session(
@@ -194,7 +202,7 @@ void session_core_1_bs__create_session_failure(const constants__t_session_i sess
                                          "Session activation failure notification");
   }
 }
- 
+
 void session_core_1_bs__is_valid_session(
    const constants__t_session_i session_core_1_bs__session,
    t_bool * const session_core_1_bs__ret) {
@@ -233,12 +241,12 @@ void session_core_1_bs__set_session_state(
                                              SOPC_AppEvent_ComEvent_Create(SE_ACTIVATED_SESSION),
                                              session_core_1_bs__session,
                                              NULL,
-                                             0, // unused 
+                                             0, // unused
                                              "Session activated notification");
       }
     }else if(session_core_1_bs__state == constants__e_session_userActivating ||
              session_core_1_bs__state == constants__e_session_scActivating){
-      if(is_client != false && 
+      if(is_client != false &&
          unique_session.cli_activated_session != false){
         // session is in re-activation step
         unique_session.cli_activated_session = false;
@@ -246,15 +254,14 @@ void session_core_1_bs__set_session_state(
                                              SOPC_AppEvent_ComEvent_Create(SE_SESSION_REACTIVATING),
                                              session_core_1_bs__session,
                                              NULL,
-                                             0, // unused 
+                                             0, // unused
                                              "Session re-activation notification");
       }
     }
   }
 }
 
-void session_core_1_bs__set_session_state_closed(
-                                                 const constants__t_session_i session_core_1_bs__session) {
+void session_core_1_bs__set_session_state_closed(const constants__t_session_i session_core_1_bs__session) {
   if(session_core_1_bs__session == unique_session.id){
     // Manage notification on client side
     constants__t_channel_i channel = constants__c_channel_indet;
@@ -283,7 +290,7 @@ void session_core_1_bs__set_session_state_closed(
           // Activated session closing
           SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
                                                SOPC_AppEvent_ComEvent_Create(SE_CLOSED_SESSION),
-                                               session_core_1_bs__session, // session idx 
+                                               session_core_1_bs__session, // session idx
                                                NULL,
                                                0, // TBD: status
                                                "Session closed notification");
@@ -313,7 +320,7 @@ void session_core_1_bs__set_session_channel(
     unique_session.session_core_1_bs__channel = session_core_1_bs__channel;
   }else{
     printf("session_core_1_bs__set_session_channel\n");
-    exit(1);   
+    exit(1);
   }
 }
 
@@ -337,7 +344,7 @@ void session_core_1_bs__set_session_orphaned(
   (void) session_core_1_bs__lost_channel;
   (void) session_core_1_bs__new_channel;
   printf("session_core_1_bs__set_session_orphaned\n");
-  exit(1);   
+  exit(1);
    ;
 }
 
@@ -362,5 +369,105 @@ void session_core_1_bs__get_session_user(
   if(session_core_1_bs__session == unique_session.id){
     *session_core_1_bs__user = unique_session.session_core_1_bs__user;
   }
+}
+
+
+void session_core_1_bs__server_create_session_req_do_crypto(
+   const constants__t_session_i session_core_1_bs__p_session,
+   const constants__t_msg_i session_core_1_bs__p_req_msg,
+   const constants__t_endpoint_config_idx_i session_core_1_bs__p_endpoint_config_idx,
+   const constants__t_channel_config_idx_i session_core_1_bs__p_config_idx,
+   t_bool * const session_core_1_bs__valid,
+   constants__t_SignatureData_i * const session_core_1_bs__signature)
+{
+    CryptoProvider *pProvider = NULL;
+    SOPC_Endpoint_Config *pECfg = NULL;
+    SOPC_SecureChannel_Config *pSCCfg = NULL;
+    session *pSession = NULL;
+    SOPC_ByteString *pNonce = NULL;
+    OpcUa_SignatureData *pSign = NULL;
+    uint8_t *pToSign = NULL;
+    uint32_t lenToSign = 0;
+    OpcUa_CreateSessionRequest *pReq = NULL;
+
+    *session_core_1_bs__valid = FALSE;
+    *session_core_1_bs__signature = constants__c_SignatureData_indet;
+
+    /* Retrieve the security policy and mode */
+    /* TODO: this function is denoted CLIENT */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_config_idx);
+    if(NULL == pSCCfg) /* When debugging here, pSCCfg might be NULL because config_idx is indet because SC is a client concept --> switch to endpoint_config_idx */
+        return;
+
+    /* Retrieve the server certificate */
+    pECfg = SOPC_ToolkitServer_GetEndpointConfig((uint32_t) session_core_1_bs__p_endpoint_config_idx);
+    if(NULL == pECfg)
+        return;
+
+    /* If security policy is not None, generate the nonce and a signature */
+    if(strncmp(pSCCfg->reqSecuPolicyUri, SecurityPolicy_None_URI, strlen(SecurityPolicy_None_URI)+1) != 0) /* Including the terminating \0 */
+    {
+        /* Retrieve ptrs to Nonce and Signature */
+        if(session_core_1_bs__p_session != unique_session.id)
+            return;
+	pSession = &unique_session;
+        pNonce = &pSession->NonceServer;
+        pSign = &pSession->SignatureData;
+
+        /* Create the CryptoProvider */
+        /* TODO: don't create it each time, maybe add it to the session */
+        pProvider = CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
+
+        /* Ask the CryptoProvider for 32 random bytes */
+        SOPC_ByteString_Clear(pNonce);
+        pNonce->Length = 32;
+        pNonce->Data = malloc(sizeof(SOPC_Byte)*pNonce->Length); /* TODO: This should be freed with session */
+        if(NULL == pNonce->Data)
+            return;
+        if(STATUS_OK != CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data))
+            /* Should we clean half allocated things? */
+            return;
+
+        /* Use the server certificate to sign the client certificate ++ nonce */
+        /* a) Prepare the buffer to sign */
+        pReq = (OpcUa_CreateSessionRequest*) session_core_1_bs__p_req_msg;
+        lenToSign = pReq->ClientCertificate.Length + pReq->ClientNonce.Length;
+        pToSign = malloc(sizeof(uint8_t)*lenToSign);
+        if(NULL == pToSign)
+            return;
+        memcpy(pToSign, pReq->ClientCertificate.Data, pReq->ClientCertificate.Length);
+        memcpy(pToSign+pReq->ClientCertificate.Length, pReq->ClientNonce.Data, pReq->ClientNonce.Length);
+        /* b) Sign and store the signature in pSign */
+        SOPC_ByteString_Clear(&pSign->Signature);
+        if(STATUS_OK != CryptoProvider_AsymmetricGetLength_Signature(pProvider, pECfg->serverKey, (uint32_t *)&pSign->Signature.Length))
+            return;
+        pSign->Signature.Data = malloc(sizeof(SOPC_Byte)*pSign->Signature.Length); /* TODO: This should be freed with session */
+        if(NULL == pSign->Signature.Data)
+            return;
+        if(STATUS_OK != CryptoProvider_AsymmetricSign(pProvider,
+                                                      pToSign, lenToSign,
+                                                      pECfg->serverKey,
+                                                      pSign->Signature.Data, pSign->Signature.Length))
+            return;
+        /* c) Prepare the OpcUa_SignatureData */
+        SOPC_String_Delete(&pSign->Algorithm);
+        if(STATUS_OK != SOPC_String_CopyFromCString(&pSign->Algorithm, CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider)))
+            return;
+
+        /* Clean */
+        free(pToSign);
+        CryptoProvider_Free(pProvider);
+        pProvider = NULL;
+    }
+
+    *session_core_1_bs__valid = !FALSE;
+}
+
+
+void session_core_1_bs__get_NonceServer(
+   const constants__t_session_i session_core_1_bs__p_session,
+   constants__t_Nonce_i * const session_core_1_bs__nonce)
+{
+    *session_core_1_bs__nonce = (constants__t_Nonce_i *)(&unique_session.NonceServer);
 }
 
