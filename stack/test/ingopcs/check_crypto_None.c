@@ -174,25 +174,20 @@ END_TEST
  */
 START_TEST(test_crypto_generate_nbytes_None)
 {
-    SecretBuffer *pSecNonce0, *pSecNonce1;
-    ExposedBuffer *pExpNonce0, *pExpNonce1;
+    ExposedBuffer *pExpBuffer0, *pExpBuffer1;
 
     // It is random, so...
-    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, &pSecNonce0) == STATUS_OK);
-    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, &pSecNonce1) == STATUS_OK);
-    ck_assert(NULL != (pExpNonce0 = SecretBuffer_Expose(pSecNonce0)));
-    ck_assert(NULL != (pExpNonce1 = SecretBuffer_Expose(pSecNonce1)));
+    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, &pExpBuffer0) == STATUS_OK);
+    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, &pExpBuffer1) == STATUS_OK);
     // You have a slight chance to fail here (1/(2**512))
-    ck_assert_msg(memcmp(pExpNonce0, pExpNonce1, 64) != 0,
+    ck_assert_msg(memcmp(pExpBuffer0, pExpBuffer1, 64) != 0,
                   "Randomly generated two times the same 64 bytes, which should happen once in pow(2, 512) tries.");
-    SecretBuffer_Unexpose(pExpNonce0);
-    SecretBuffer_Unexpose(pExpNonce1);
-    SecretBuffer_DeleteClear(pSecNonce0);
-    SecretBuffer_DeleteClear(pSecNonce1);
+    free(pExpBuffer0);
+    free(pExpBuffer1);
 
     // Test invalid inputs
-    ck_assert(CryptoProvider_GenerateRandomBytes(NULL, 64, &pSecNonce0) == STATUS_INVALID_PARAMETERS);
-    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 0, &pSecNonce0) == STATUS_INVALID_PARAMETERS);
+    ck_assert(CryptoProvider_GenerateRandomBytes(NULL, 64, &pExpBuffer0) == STATUS_INVALID_PARAMETERS);
+    ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 0, &pExpBuffer0) == STATUS_INVALID_PARAMETERS);
     ck_assert(CryptoProvider_GenerateRandomBytes(crypto, 64, NULL) == STATUS_INVALID_PARAMETERS);
 }
 END_TEST
