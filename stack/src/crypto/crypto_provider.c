@@ -440,6 +440,27 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvide
 }
 
 
+const char *CryptoProvider_AsymmetricGetUri_SignAlgorithm(const CryptoProvider *pProvider)
+{
+    if(NULL == pProvider || NULL == pProvider->pProfile || SecurityPolicy_Invalid_ID == pProvider->pProfile->SecurityPolicyID)
+        return NULL;
+
+    switch(pProvider->pProfile->SecurityPolicyID)
+    {
+    case SecurityPolicy_Invalid_ID:
+    case SecurityPolicy_None_ID:
+    default:
+        return NULL;
+    case SecurityPolicy_Basic256Sha256_ID:
+        return SecurityPolicy_Basic256Sha256_URI_SignAlgo;
+    case SecurityPolicy_Basic256_ID:
+        return SecurityPolicy_Basic256_URI_SignAlgo;
+    }
+
+    return NULL;
+}
+
+
 SOPC_StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvider *pProvider,
                                                           uint32_t *pLength)
 {

@@ -93,7 +93,7 @@ SOPC_StatusCode CryptoProvider_Deinit(CryptoProvider *pCryptoProvider);
 
 
 /* ------------------------------------------------------------------------------------------------
- * CryptoProvider get-length operations
+ * CryptoProvider get-length & uris operations
  * ------------------------------------------------------------------------------------------------
  */
 
@@ -390,7 +390,17 @@ SOPC_StatusCode CryptoProvider_AsymmetricGetLength_Signature(const CryptoProvide
                                                         const AsymmetricKey *pKey,
                                                         uint32_t *pLength);
 
-/** \brief          Calculates the size of the signature of the certificates.
+/**
+ * \brief           Returns the URI of the AsymetricSignatureAlgorithm.
+ *
+ * \param pProvider An initialized cryptographic context.
+ *
+ * \return          A zero-terminated string to the URI or NULL.
+ */
+const char *CryptoProvider_AsymmetricGetUri_SignAlgorithm(const CryptoProvider *pProvider);
+
+/**
+ * \brief           Calculates the size of the signature of the certificates.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pLength   A valid pointer to the length in bytes of the signature.

@@ -2,6 +2,7 @@
  *
  * \brief Defines the cryptographic profiles: constants and struct.
  *
+ * \note The constants defined in this file are mainly based on the test specification (Part 7).
  */
 /*
  *  Copyright (C) 2016 Systerel and others.
@@ -49,6 +50,7 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 #define SecurityPolicy_Basic256Sha256_AsymLen_PSS_Hash      32 /*< RSASS PSS uses SHA-256 in this context (unused, Basic256Sha256 uses PKCS#1, not PSS) */
 #define SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits    2048
 #define SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits    4096
+#define SecurityPolicy_Basic256Sha256_URI_SignAlgo          "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
 
 // Basic256, sizes in bytes
 #define SecurityPolicy_Basic256_SymmLen_Block               16
@@ -60,6 +62,7 @@ const CryptoProfile * CryptoProfile_Get(const char *uri);
 #define SecurityPolicy_Basic256_AsymLen_PSS_Hash            20 /*< RSASS PSS uses SHA-1 in this context (unused, Basic256 uses PKCS#1, not PSS) */
 #define SecurityPolicy_Basic256_AsymLen_KeyMinBits          1024
 #define SecurityPolicy_Basic256_AsymLen_KeyMaxBits          2048
+#define SecurityPolicy_Basic256_URI_SignAlgo                "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
 
 // CryptoProfiles instances
 extern const CryptoProfile g_cpBasic256Sha256;

@@ -518,6 +518,13 @@ START_TEST(test_crypto_asym_copykey_None)
 END_TEST
 
 
+START_TEST(test_crypto_asym_uri_None)
+{
+    ck_assert(CryptoProvider_AsymmetricGetUri_SignAlgorithm(crypto) == NULL);
+}
+END_TEST
+
+
 // Fixtures for PKI: server.der certificate and CA
 static Certificate *crt_ca = NULL;
 static PKIProvider *pki = NULL;
@@ -683,6 +690,7 @@ Suite *tests_make_suite_crypto_None()
     tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt_None);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_sign_verify_None);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_copykey_None);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_uri_None);
 
     suite_add_tcase(s, tc_pki_stack);
     tcase_add_checked_fixture(tc_pki_stack, setup_pki_stack, teardown_pki_stack);

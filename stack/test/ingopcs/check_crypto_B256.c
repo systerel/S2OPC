@@ -880,6 +880,16 @@ START_TEST(test_crypto_asym_copykey_B256)
 END_TEST
 
 
+START_TEST(test_crypto_asym_uri_B256)
+{
+    ck_assert(strncmp(CryptoProvider_AsymmetricGetUri_SignAlgorithm(crypto),
+                      SecurityPolicy_Basic256_URI_SignAlgo,
+                      strlen(SecurityPolicy_Basic256_URI_SignAlgo)+1)
+              == 0);
+}
+END_TEST
+
+
 // Fixtures for PKI: server.der certificate and CA
 static Certificate *crt_ca = NULL;
 static PKIProvider *pki = NULL;
@@ -1046,6 +1056,7 @@ Suite *tests_make_suite_crypto_B256()
     tcase_add_test(tc_crypto_asym, test_crypto_asym_crypt_B256);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_sign_verify_B256);
     tcase_add_test(tc_crypto_asym, test_crypto_asym_copykey_B256);
+    tcase_add_test(tc_crypto_asym, test_crypto_asym_uri_B256);
 
     suite_add_tcase(s, tc_pki_stack);
     tcase_add_checked_fixture(tc_pki_stack, setup_pki_stack, teardown_pki_stack);
