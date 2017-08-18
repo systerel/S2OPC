@@ -472,8 +472,8 @@ SOPC_StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvi
 SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
-                                           const SecretBuffer *pKey,
-                                           const SecretBuffer *pIV,
+                                           SecretBuffer *pKey,
+                                           SecretBuffer *pIV,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput)
 {
@@ -521,8 +521,8 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
 
     status = pProvider->pProfile->pFnSymmEncrypt(pProvider, pInput, lenPlainText, pExpKey, pExpIV, pOutput, lenOutput);
 
-    SecretBuffer_Unexpose(pExpKey);
-    SecretBuffer_Unexpose(pExpIV);
+    SecretBuffer_Unexpose(pExpKey, pKey);
+    SecretBuffer_Unexpose(pExpIV, pIV);
 
     return status;
 }
@@ -531,8 +531,8 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
 SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenCipherText,
-                                           const SecretBuffer *pKey,
-                                           const SecretBuffer *pIV,
+                                           SecretBuffer *pKey,
+                                           SecretBuffer *pIV,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput)
 {
@@ -580,8 +580,8 @@ SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
 
     status = pProvider->pProfile->pFnSymmDecrypt(pProvider, pInput, lenCipherText, pExpKey, pExpIV, pOutput, lenOutput);
 
-    SecretBuffer_Unexpose(pExpKey);
-    SecretBuffer_Unexpose(pExpIV);
+    SecretBuffer_Unexpose(pExpKey, pKey);
+    SecretBuffer_Unexpose(pExpIV, pIV);
 
     return status;
 }
@@ -590,7 +590,7 @@ SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
 SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
                                         const uint8_t *pInput,
                                         uint32_t lenInput,
-                                        const SecretBuffer *pKey,
+                                        SecretBuffer *pKey,
                                         uint8_t *pOutput,
                                         uint32_t lenOutput)
 {
@@ -620,7 +620,7 @@ SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
 
     status = pProvider->pProfile->pFnSymmSign(pProvider, pInput, lenInput, pExpKey, pOutput);
 
-    SecretBuffer_Unexpose(pExpKey);
+    SecretBuffer_Unexpose(pExpKey, pKey);
     return status;
 }
 
@@ -628,7 +628,7 @@ SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
 SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenInput,
-                                          const SecretBuffer *pKey,
+                                          SecretBuffer *pKey,
                                           const uint8_t *pSignature,
                                           uint32_t lenOutput)
 {
@@ -658,7 +658,7 @@ SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
 
     status = pProvider->pProfile->pFnSymmVerif(pProvider, pInput, lenInput, pExpKey, pSignature);
 
-    SecretBuffer_Unexpose(pExpKey);
+    SecretBuffer_Unexpose(pExpKey, pKey);
     return status;
 }
 
@@ -848,16 +848,16 @@ static inline SOPC_StatusCode DeriveKS(const CryptoProvider *pProvider,
     }
 
     // Release ExposedBuffers
-    SecretBuffer_Unexpose(pExpEncr);
-    SecretBuffer_Unexpose(pExpSign);
-    SecretBuffer_Unexpose(pExpIV);
+    SecretBuffer_Unexpose(pExpEncr, pks->encryptKey);
+    SecretBuffer_Unexpose(pExpSign, pks->signKey);
+    SecretBuffer_Unexpose(pExpIV, pks->initVector);
 
     return status;
 }
 
 
 SOPC_StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvider,
-                                              const SecretBuffer *pClientNonce,
+                                              SecretBuffer *pClientNonce,
                                               const ExposedBuffer *pServerNonce,
                                               uint32_t lenServerNonce,
                                               SC_SecurityKeySet *pClientKeySet,
@@ -884,7 +884,7 @@ SOPC_StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvid
                                                   pServerKeySet);
     }
 
-    SecretBuffer_Unexpose(pExpCli);
+    SecretBuffer_Unexpose(pExpCli, pClientNonce);
 
     return status;
 }
@@ -893,7 +893,7 @@ SOPC_StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvid
 SOPC_StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
                                               const ExposedBuffer *pClientNonce,
                                               uint32_t lenClientNonce,
-                                              const SecretBuffer *pServerNonce,
+                                              SecretBuffer *pServerNonce,
                                               SC_SecurityKeySet *pClientKeySet,
                                               SC_SecurityKeySet *pServerKeySet)
 {
@@ -918,7 +918,7 @@ SOPC_StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvid
                                                   pServerKeySet);
     }
 
-    SecretBuffer_Unexpose(pExpSer);
+    SecretBuffer_Unexpose(pExpSer, pServerNonce);
 
     return status;
 }

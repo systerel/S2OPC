@@ -436,8 +436,8 @@ SOPC_StatusCode CryptoProvider_CertificateGetLength_Thumbprint(const CryptoProvi
 SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenPlainText,
-                                           const SecretBuffer *pKey,
-                                           const SecretBuffer *pIV,
+                                           SecretBuffer *pKey,
+                                           SecretBuffer *pIV,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput);
 
@@ -471,8 +471,8 @@ SOPC_StatusCode CryptoProvider_SymmetricEncrypt(const CryptoProvider *pProvider,
 SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
                                            const uint8_t *pInput,
                                            uint32_t lenCipherText,
-                                           const SecretBuffer *pKey,
-                                           const SecretBuffer *pIV,
+                                           SecretBuffer *pKey,
+                                           SecretBuffer *pIV,
                                            uint8_t *pOutput,
                                            uint32_t lenOutput);
 
@@ -502,7 +502,7 @@ SOPC_StatusCode CryptoProvider_SymmetricDecrypt(const CryptoProvider *pProvider,
 SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
                                         const uint8_t *pInput,
                                         uint32_t lenInput,
-                                        const SecretBuffer *pKey,
+                                        SecretBuffer *pKey,
                                         uint8_t *pOutput,
                                         uint32_t lenOutput);
 
@@ -534,7 +534,7 @@ SOPC_StatusCode CryptoProvider_SymmetricSign(const CryptoProvider *pProvider,
 SOPC_StatusCode CryptoProvider_SymmetricVerify(const CryptoProvider *pProvider,
                                           const uint8_t *pInput,
                                           uint32_t lenInput,
-                                          const SecretBuffer *pKey,
+                                          SecretBuffer *pKey,
                                           const uint8_t *pSignature,
                                           uint32_t lenOutput);
 
@@ -661,7 +661,7 @@ SOPC_StatusCode CryptoProvider_DeriveKeySets(const CryptoProvider *pProvider,
  *                  and STATUS_NOK when there was an error.
  */
 SOPC_StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvider, // DeriveKeySets
-                                              const SecretBuffer *pClientNonce,
+                                              SecretBuffer *pClientNonce,
                                               const ExposedBuffer *pServerNonce,
                                               uint32_t lenServerNonce,
                                               SC_SecurityKeySet *pClientKeySet,
@@ -688,7 +688,7 @@ SOPC_StatusCode CryptoProvider_DeriveKeySetsClient(const CryptoProvider *pProvid
 SOPC_StatusCode CryptoProvider_DeriveKeySetsServer(const CryptoProvider *pProvider,
                                               const ExposedBuffer *pClientNonce,
                                               uint32_t lenClientNonce,
-                                              const SecretBuffer *pServerNonce,
+                                              SecretBuffer *pServerNonce,
                                               SC_SecurityKeySet *pClientKeySet,
                                               SC_SecurityKeySet *pServerKeySet);
 

@@ -300,6 +300,7 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
             status = SOPC_ByteString_CopyFromBytes(&openRequest.ClientNonce,
                                                    bytes,
                                                    SecretBuffer_GetLength(cConnection->instance->currentNonce));
+            SecretBuffer_Unexpose(bytes, cConnection->instance->currentNonce);
         }else{
             status = STATUS_NOK;
         }
@@ -317,7 +318,6 @@ SOPC_StatusCode Write_OpenSecureChannelRequest(SC_ClientConnection* cConnection,
                                                  &openRequest);
     }
 
-    SecretBuffer_Unexpose(openRequest.ClientNonce.Data);
     OpcUa_RequestHeader_Clear(&requestHeader);
     OpcUa_OpenSecureChannelRequest_Clear(&openRequest);
 

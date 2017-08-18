@@ -410,8 +410,8 @@ START_TEST(test_crypto_generate_nonce_B256S256)
     // You have a slight chance to fail here (1/(2**256))
     ck_assert_msg(memcmp(pExpKey0, pExpKey1, 32) != 0,
                   "Randomly generated two times the same 32 bytes long nonce, which should happen once in pow(2, 256) tries.");
-    SecretBuffer_Unexpose(pExpKey0);
-    SecretBuffer_Unexpose(pExpKey1);
+    SecretBuffer_Unexpose(pExpKey0, pSecNonce0);
+    SecretBuffer_Unexpose(pExpKey1, pSecNonce1);
     SecretBuffer_DeleteClear(pSecNonce0);
     SecretBuffer_DeleteClear(pSecNonce1);
 
@@ -551,27 +551,27 @@ START_TEST(test_crypto_derive_keysets_B256S256)
     ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "86842427475799fa782efa5c63f5eb6f0b6dbf8a549dd5452247feaa5021714b", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, cliKS.signKey);
     ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.encryptKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "d8de10ac4fb579f2718ddcb50ea68d1851c76644b26454e3f9339958d23429d5", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, cliKS.encryptKey);
     ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.initVector)));
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t)lenIV);
     ck_assert(memcmp(hexoutput, "4167de62880e0bdc023aa133965c34ff", 2*lenIV) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, cliKS.initVector);
     ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "f6db2ad48ad3776f83086b47e9f905ee00193f87e85ccde0c3bf7eb8650e236e", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, serKS.signKey);
     ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.encryptKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "2c86aecfd5629ee05c49345bce3b2a7ca959a0bf4c9c281b8516a369650dbc4e", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, serKS.encryptKey);
     ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.initVector)));
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t)lenIV);
     ck_assert(memcmp(hexoutput, "39a4f596bcbb99e0b48114f60fc6af21", 2*lenIV) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, serKS.initVector);
 
     // Another run, just to be sure...
     ck_assert(unhexlify("d821ea93a6a48a4ef49b36c5e7d1bae6c49ccb2b2ddb07c99dcf046e2225617f", clientNonce, lenCliNonce) == (int32_t)lenCliNonce);
@@ -581,27 +581,27 @@ START_TEST(test_crypto_derive_keysets_B256S256)
     ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "185e860da28d3a224729926ba5b5b800214b2f74257ed39e694596520e67e574", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, cliKS.signKey);
     ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.encryptKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "7a6c2cdc20a842a0e2039075935b14a07f578c157091328adc9d52bbb8ef727d", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, cliKS.encryptKey);
     ck_assert(NULL != (pout = SecretBuffer_Expose(cliKS.initVector)));
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t)lenIV);
     ck_assert(memcmp(hexoutput, "dcf97c356f5ef87b7049900f74355c13", 2*lenIV) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, cliKS.initVector);
     ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.signKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "105b1805ecc3a25de8e2eaa5c9e94504b355990243c6163c2c8b95c1f5681694", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, serKS.signKey);
     ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.encryptKey)));
     ck_assert(hexlify(pout, hexoutput, lenKey) == (int32_t)lenKey);
     ck_assert(memcmp(hexoutput, "2439bdd8fc365b0fe7b7e2cfcefee67ea7bdea6c157d0b23092f0abc015792d5", 2*lenKey) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, serKS.encryptKey);
     ck_assert(NULL != (pout = SecretBuffer_Expose(serKS.initVector)));
     ck_assert(hexlify(pout, hexoutput, lenIV) == (int32_t)lenIV);
     ck_assert(memcmp(hexoutput, "005a70781b43979940c77368677718cd", 2*lenIV) == 0);
-    SecretBuffer_Unexpose(pout);
+    SecretBuffer_Unexpose(pout, serKS.initVector);
 
     // Clears KS
     SecretBuffer_DeleteClear(cliKS.signKey);

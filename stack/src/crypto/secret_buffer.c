@@ -85,15 +85,16 @@ uint32_t SecretBuffer_GetLength(const SecretBuffer *sec)
     return sec->len;
 }
 
-ExposedBuffer *SecretBuffer_Expose(const SecretBuffer *sec)
+ExposedBuffer *SecretBuffer_Expose(SecretBuffer *sec)
 {
     if(NULL != sec)
         return sec->buf;
     return NULL;
 }
 
-void SecretBuffer_Unexpose(ExposedBuffer *buf)
+void SecretBuffer_Unexpose(ExposedBuffer *buf, SecretBuffer *sec)
 {
     (void) buf;
+    (void) sec;
 }
 

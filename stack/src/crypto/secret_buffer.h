@@ -88,14 +88,14 @@ uint32_t SecretBuffer_GetLength(const SecretBuffer *sec);
  *
  * \return          The ExposedBuffer when successful, otherwise a NULL.
  */
-ExposedBuffer * SecretBuffer_Expose(const SecretBuffer *sec);
+ExposedBuffer * SecretBuffer_Expose(SecretBuffer *sec);
 
 /**
  * \brief           Unexposes the buffer.
  *
  * \param buf       The ExposedBuffer.
  */
-void SecretBuffer_Unexpose(ExposedBuffer *buf);
+void SecretBuffer_Unexpose(ExposedBuffer *buf, SecretBuffer *sec);
 
 
 #endif // SOPC_SECRET_BUFFER_H_

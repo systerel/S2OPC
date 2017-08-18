@@ -472,6 +472,7 @@ SOPC_StatusCode Write_OpenSecureChannelResponse(SC_Connection*   scConnection,
         status = SOPC_ByteString_CopyFromBytes(&openResponse.ServerNonce,
                                                bytes,
                                                SecretBuffer_GetLength(scConnection->currentNonce));
+        SecretBuffer_Unexpose(bytes, scConnection->currentNonce);
     }
     if(status == STATUS_OK){
         status = SOPC_EncodeMsg_Type_Header_Body(msgBuffers->buffers,
@@ -481,9 +482,6 @@ SOPC_StatusCode Write_OpenSecureChannelResponse(SC_Connection*   scConnection,
                                                  &openResponse);
     }
 
-    if(scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
-        SecretBuffer_Unexpose(openResponse.ServerNonce.Data);
-    }
     OpcUa_ResponseHeader_Clear(&respHeader);
     OpcUa_OpenSecureChannelResponse_Clear(&openResponse);
 
