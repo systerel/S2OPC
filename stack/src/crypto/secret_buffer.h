@@ -1,6 +1,10 @@
 /**
  *  \file secret_buffer.h
- *  \brief SecretBuffer (mangled key) and ExposedKeyBuffer (contiguous deciphered buffered) APIs.
+ *  \brief SecretBuffer (mangled key) and ExposedBuffer (contiguous deciphered buffered) APIs.
+ *
+ *  Sensitive information should be stored as SecretBuffer (e.g. crypto keys, nonces, initialisation vectors).
+ *  The current implementation of the SecretBuffer is a contiguous buffer, but that could be changed without
+ *  impact on the API.
  */
 /*
  *  Copyright (C) 2016 Systerel and others.
@@ -26,21 +30,71 @@
 #include <stdint.h>
 
 // Types
-typedef struct SecretBuffer
-{
-    uint32_t len; // Mandatory
-    uint8_t *buf;
-} SecretBuffer;
+typedef struct SecretBuffer SecretBuffer;
 typedef uint8_t ExposedBuffer;
 
 
-// API
+/* ------------------------------------------------------------------------------------------------
+ * API
+ * ------------------------------------------------------------------------------------------------
+ */
+
+/**
+ * \brief           Creates a new SecretBuffer from an ExposedBuffer.
+ *
+ *                  Copies \p buf, so it can be de-allocated after that call.
+ *                  This function does not clear the exposed secrets from \p buf.
+ *
+ *                  SecretBuffer shall be de-allocated with SecretBuffer_DeleteClear().
+ *
+ * \param buf       The ExposedBuffer.
+ * \param len       Number of bytes of the buffer.
+ *
+ * \return          The SecretBuffer when successful, otherwise a NULL.
+ */
 SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len);
+
+/**
+ * \brief           Creates a new empty SecretBuffer.
+ *
+ * \param len       Number of bytes of the buffer.
+ *
+ * \return          The SecretBuffer when successful, otherwise a NULL.
+ */
 SecretBuffer *SecretBuffer_New(uint32_t len);
+
+/**
+ * \brief           Clears the SecretBuffer from its secrets and frees it.
+ *
+ * \param sec       The SecretBuffer to free.
+ */
 void SecretBuffer_DeleteClear(SecretBuffer *sec);
+
+/**
+ * \brief           Length of the SecretBuffer.
+ */
 uint32_t SecretBuffer_GetLength(const SecretBuffer *sec);
 
+
+/**
+ * \brief           Creates a ExposedBuffer from a SecretBuffer.
+ *
+ *                  Each call to _Expose shoud be followed by a call to SecretBuffer_Unexpose().
+ *
+ * \warning         \p sec shall not be de-allocated before the call to SecretBuffer_Unexpose().
+ * \warning         The exposed buffer shall not be modified by the caller.
+ *
+ * \param sec       The SecretBuffer to expose.
+ *
+ * \return          The ExposedBuffer when successful, otherwise a NULL.
+ */
 ExposedBuffer * SecretBuffer_Expose(const SecretBuffer *sec);
+
+/**
+ * \brief           Unexposes the buffer.
+ *
+ * \param buf       The ExposedBuffer.
+ */
 void SecretBuffer_Unexpose(ExposedBuffer *buf);
 
 

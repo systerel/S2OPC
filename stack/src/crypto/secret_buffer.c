@@ -21,10 +21,14 @@
 #include <stddef.h>
 #include <string.h>
 
-/* Creates a new SecretBuffer from an exposed buffer and a length. Copies the buffer, so ExposedBuffer
- *  can be cleared and de-allocated.
- * You must call SecretBuffer_DeleteClear() for each call to _New
- */
+
+struct SecretBuffer
+{
+    uint32_t len; // Mandatory
+    uint8_t *buf;
+};
+
+
 SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len)
 {
     SecretBuffer *sec = NULL;
@@ -38,6 +42,7 @@ SecretBuffer *SecretBuffer_NewFromExposedBuffer(ExposedBuffer *buf, uint32_t len
 
     return sec;
 }
+
 SecretBuffer *SecretBuffer_New(uint32_t len)
 {
     SecretBuffer *sec = NULL;
@@ -80,10 +85,6 @@ uint32_t SecretBuffer_GetLength(const SecretBuffer *sec)
     return sec->len;
 }
 
-/* Exposes the secret buffer to a contiguous buffer.
- * Each call to Expose should be followed by a call to Unexpose.
- * SecretBuffer should not be destroyed before the call to Unexpose.
- */
 ExposedBuffer *SecretBuffer_Expose(const SecretBuffer *sec)
 {
     if(NULL != sec)
