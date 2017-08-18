@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 23/08/2017 17:27:29
+ Date                 : 23/08/2017 17:49:56
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -26,6 +26,8 @@
   -----------------------------*/
 #define constants__t_NodeId_i constants_bs__t_NodeId_i
 #define constants__t_Node_i constants_bs__t_Node_i
+#define constants__t_Nonce_i constants_bs__t_Nonce_i
+#define constants__t_SignatureData_i constants_bs__t_SignatureData_i
 #define constants__t_UserId_i constants_bs__t_UserId_i
 #define constants__t_Variant_i constants_bs__t_Variant_i
 #define constants__t_byte_buffer_i constants_bs__t_byte_buffer_i
@@ -132,6 +134,8 @@ typedef enum {
   --------------------------*/
 #define constants__t_NodeId_i_max constants_bs__t_NodeId_i_max
 #define constants__t_Node_i_max constants_bs__t_Node_i_max
+#define constants__t_Nonce_i_max constants_bs__t_Nonce_i_max
+#define constants__t_SignatureData_i_max constants_bs__t_SignatureData_i_max
 #define constants__t_UserId_i_max constants_bs__t_UserId_i_max
 #define constants__t_Variant_i_max constants_bs__t_Variant_i_max
 #define constants__t_byte_buffer_i_max constants_bs__t_byte_buffer_i_max
@@ -153,6 +157,8 @@ typedef enum {
   ------------------------------------------------*/
 #define constants__c_NodeId_indet constants_bs__c_NodeId_indet
 #define constants__c_Node_indet constants_bs__c_Node_indet
+#define constants__c_Nonce_indet constants_bs__c_Nonce_indet
+#define constants__c_SignatureData_indet constants_bs__c_SignatureData_indet
 #define constants__c_UserId_indet constants_bs__c_UserId_indet
 #define constants__c_Variant_indet constants_bs__c_Variant_indet
 #define constants__c_byte_buffer_indet constants_bs__c_byte_buffer_indet

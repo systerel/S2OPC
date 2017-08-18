@@ -2,7 +2,7 @@
 
  File Name            : session_core_1_bs.h
 
- Date                 : 23/08/2017 17:27:35
+ Date                 : 23/08/2017 17:50:01
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -44,6 +44,9 @@ extern void session_core_1_bs__create_session_failure(
    const constants__t_session_i session_core_1_bs__session);
 extern void session_core_1_bs__delete_session(
    const constants__t_session_i session_core_1_bs__session);
+extern void session_core_1_bs__get_NonceServer(
+   const constants__t_session_i session_core_1_bs__p_session,
+   constants__t_Nonce_i * const session_core_1_bs__nonce);
 extern void session_core_1_bs__get_session_channel(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_channel_i * const session_core_1_bs__channel);
@@ -61,6 +64,13 @@ extern void session_core_1_bs__is_valid_session(
 extern void session_core_1_bs__is_valid_user(
    const constants__t_user_i session_core_1_bs__user,
    t_bool * const session_core_1_bs__ret);
+extern void session_core_1_bs__server_create_session_req_do_crypto(
+   const constants__t_session_i session_core_1_bs__p_session,
+   const constants__t_msg_i session_core_1_bs__p_req_msg,
+   const constants__t_endpoint_config_idx_i session_core_1_bs__p_endpoint_config_idx,
+   const constants__t_channel_config_idx_i session_core_1_bs__p_config_idx,
+   t_bool * const session_core_1_bs__valid,
+   constants__t_SignatureData_i * const session_core_1_bs__signature);
 extern void session_core_1_bs__server_get_fresh_session_token(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_session_token_i * const session_core_1_bs__token);

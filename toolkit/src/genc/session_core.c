@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 23/08/2017 17:27:31
+ Date                 : 23/08/2017 17:49:57
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -69,6 +69,10 @@ void session_core__server_create_session_req_and_resp_sm(
       constants__t_session_token_i session_core__l_nsession_token;
       t_bool session_core__l_valid_session_token;
       constants__t_endpoint_config_idx_i session_core__l_endpoint_config_idx;
+      constants__t_channel_config_idx_i session_core__l_config_idx;
+      t_bool session_core__l_valid_crypto;
+      constants__t_SignatureData_i session_core__l_signature;
+      constants__t_Nonce_i session_core__l_nonce;
       
       session_core_1_bs__init_new_session(&session_core__l_nsession);
       session_core_1_bs__is_valid_session(session_core__l_nsession,
@@ -82,14 +86,32 @@ void session_core__server_create_session_req_and_resp_sm(
          session_core_1_bs__server_is_valid_session_token(session_core__l_nsession_token,
             &session_core__l_valid_session_token);
          if (session_core__l_valid_session_token == true) {
-            message_out_bs__write_create_session_msg_session_token(session_core__create_resp_msg,
-               session_core__l_nsession_token);
             channel_mgr_bs__server_get_endpoint_config(session_core__channel,
                &session_core__l_endpoint_config_idx);
-            message_out_bs__write_create_session_msg_server_endpoints(session_core__create_req_msg,
-               session_core__create_resp_msg,
+            channel_mgr_bs__get_channel_info(session_core__channel,
+               &session_core__l_config_idx);
+            session_core_1_bs__server_create_session_req_do_crypto(session_core__l_nsession,
+               session_core__create_req_msg,
                session_core__l_endpoint_config_idx,
-               session_core__service_ret);
+               session_core__l_config_idx,
+               &session_core__l_valid_crypto,
+               &session_core__l_signature);
+            if (session_core__l_valid_crypto == true) {
+               message_out_bs__write_create_session_msg_session_token(session_core__create_resp_msg,
+                  session_core__l_nsession_token);
+               message_out_bs__write_create_session_msg_server_endpoints(session_core__create_req_msg,
+                  session_core__create_resp_msg,
+                  session_core__l_endpoint_config_idx,
+                  session_core__service_ret);
+               if (*session_core__service_ret == constants__e_sc_ok) {
+                  session_core_1_bs__get_NonceServer(session_core__l_nsession,
+                     &session_core__l_nonce);
+                  message_out_bs__write_create_session_msg_crypto(session_core__create_resp_msg,
+                     session_core__l_nonce,
+                     session_core__l_signature,
+                     session_core__service_ret);
+               }
+            }
          }
          else {
             *session_core__service_ret = constants__e_sc_bad_out_of_memory;

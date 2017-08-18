@@ -2,7 +2,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 23/08/2017 17:27:32
+ Date                 : 23/08/2017 17:49:59
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -21,6 +21,8 @@
   -----------------------------*/
 #define constants_bs__t_NodeId_i t_entier4
 #define constants_bs__t_Node_i t_entier4
+#define constants_bs__t_Nonce_i t_entier4
+#define constants_bs__t_SignatureData_i t_entier4
 #define constants_bs__t_UserId_i t_entier4
 #define constants_bs__t_Variant_i t_entier4
 #define constants_bs__t_byte_buffer_i t_entier4
@@ -40,6 +42,8 @@
   --------------------------*/
 #define constants_bs__t_NodeId_i_max (-1)
 #define constants_bs__t_Node_i_max (-1)
+#define constants_bs__t_Nonce_i_max (-1)
+#define constants_bs__t_SignatureData_i_max (-1)
 #define constants_bs__t_UserId_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
 #define constants_bs__t_byte_buffer_i_max (-1)
@@ -59,6 +63,8 @@
   ------------------------------------------------*/
 #define constants_bs__c_NodeId_indet 0
 #define constants_bs__c_Node_indet 0
+#define constants_bs__c_Nonce_indet 0
+#define constants_bs__c_SignatureData_indet 0
 #define constants_bs__c_UserId_indet 0
 #define constants_bs__c_Variant_indet 0
 #define constants_bs__c_byte_buffer_indet 0
