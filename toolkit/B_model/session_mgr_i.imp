@@ -290,7 +290,7 @@ OPERATIONS
             bres := FALSE
         END
     END;
-    
+
     is_valid_res, session, snd_err <-- server_validate_session_service_req (channel, req_handle, session_token) =
     VAR
         l_session,
@@ -298,7 +298,7 @@ OPERATIONS
         l_session_state,
         l_session_channel
     IN
-        /* TODO: req handle to be recorded on server side at session/request level ? (no guarantee to be unique on a session / connection) */
+        // PRE validates req_handle valid
         l_session <-- server_get_session_from_token (session_token);
         l_valid_session <-- is_valid_session (l_session);
         l_session_state <-- get_session_state_or_closed (l_session);
@@ -332,8 +332,8 @@ OPERATIONS
         l_session_state,
         l_session_channel
     IN
+        // PRE validates req_handle valid
         /* Coherency of messages types done in PRE for now */
-        /* TODO: check req handle valid in given session ? */
         l_valid_session <-- is_valid_session (session);
         l_session_state <-- get_session_state_or_closed (session);
         IF l_valid_session = TRUE
@@ -563,5 +563,5 @@ OPERATIONS
         client_remove_all_request_handles (session);
         client_close_session_sm (session)
     END
-    
+ 
 END

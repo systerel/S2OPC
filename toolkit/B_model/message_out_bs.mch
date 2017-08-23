@@ -45,12 +45,10 @@ INITIALISATION
     
 OPERATIONS
     
-    nmsg_header <-- alloc_app_req_msg_header (msg_type, req_msg) =
+    nmsg_header <-- alloc_app_req_msg_header (msg_type) =
     PRE
         msg_type : t_msg_type_i &
         msg_type : t_msg_type &
-        req_msg : t_msg_i &
-        req_msg : t_msg &
         c_msg_out_header = c_msg_header_indet
     THEN
         CHOICE
@@ -97,14 +95,12 @@ OPERATIONS
     END
     ;
     
-    nmsg_header, nmsg <-- alloc_resp_msg (msg_type, req_msg_ctx) =
+    nmsg_header, nmsg <-- alloc_resp_msg (msg_type) =
     PRE
         msg_type : t_msg_type_i &
         msg_type : t_msg_type & 
         c_msg_out_header = c_msg_header_indet &
         c_msg_out = c_msg_indet &
-        req_msg_ctx : t_msg_i &
-        req_msg_ctx = c_msg_in &
         c_msg_in : t_msg
     THEN
         CHOICE

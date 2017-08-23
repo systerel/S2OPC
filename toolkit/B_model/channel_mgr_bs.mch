@@ -123,14 +123,15 @@ OPERATIONS
     END
     ;
     
-    send_channel_msg_buffer (channel, buffer) =
+    send_channel_msg_buffer (channel, buffer, request_context) =
     PRE
         channel         : t_channel_i &
         channel         : s_channel_connected &
         buffer          : t_byte_buffer_i &
-        buffer          : t_byte_buffer/* &
-        a_buffer_out_state = e_buffer_out_msg_written */
-        /* ISSUE: not possible to see message_out_bs */
+        buffer          : t_byte_buffer &
+        /* a_buffer_out_state = e_buffer_out_msg_written */
+        /* ISSUE: not possible to see message_out_bs with AtelierB => TC failure / m -tc OK */
+        request_context : t_request_context_i
     THEN
         /* No return status code, it is an asynchronous action */
         skip

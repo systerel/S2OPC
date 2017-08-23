@@ -118,7 +118,7 @@ OPERATIONS
     
     /* END OF LOCAL OPERATIONS */
 
-    receive_msg_buffer (channel, buffer) =
+    receive_msg_buffer (channel, buffer, request_context) =
     VAR
         l_connected_channel,
         l_is_client,
@@ -127,7 +127,8 @@ OPERATIONS
         l_msg_header_type,
         l_msg_service_class,
         l_buffer_out,
-        l_valid_buffer_out
+        l_valid_buffer_out,
+        l_valid_req_context
     IN
         l_connected_channel <-- is_connected_channel (channel);
         l_msg_type <-- decode_msg_type (buffer);
@@ -141,7 +142,9 @@ OPERATIONS
             /* TODO: check that channel is secured if service class /= discovery class */
             CASE l_msg_header_type OF
                 EITHER e_msg_request_type THEN
-                    IF l_is_client = FALSE
+                    l_valid_req_context <-- is_valid_request_context (request_context);
+                    IF l_is_client = FALSE &
+                        l_valid_req_context = TRUE
                     THEN
                         /* Server receiving a request: OK */
                         CASE l_msg_service_class OF
@@ -160,7 +163,7 @@ OPERATIONS
                         l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
                         IF l_valid_buffer_out = TRUE
                         THEN
-                            send_channel_msg_buffer (channel, l_buffer_out)
+                            send_channel_msg_buffer (channel, l_buffer_out, request_context)
                         END
                     ELSE
                         /* Server receiving a response: close secure channel since it is not expected from client */
@@ -256,7 +259,7 @@ OPERATIONS
             IF l_connected_channel = TRUE &
                 l_valid_buffer_out = TRUE
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out)
+                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
             END
         END        
     END
@@ -277,7 +280,7 @@ OPERATIONS
             IF l_connected_channel = TRUE &
                 l_valid_buffer_out = TRUE
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out)
+                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
             END
         END        
     END
@@ -298,7 +301,7 @@ OPERATIONS
             IF l_connected_channel = TRUE &
                 l_valid_buffer_out = TRUE
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out)
+                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
             END
         END
     END
@@ -324,7 +327,7 @@ OPERATIONS
             l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
             IF l_valid_buffer_out = TRUE
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out)
+                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
             END
         END
     END
@@ -345,7 +348,7 @@ OPERATIONS
             l_valid_buffer_out <-- is_valid_buffer_out (l_buffer_out);
             IF l_valid_buffer_out = TRUE
             THEN
-                send_channel_msg_buffer (l_channel, l_buffer_out)
+                send_channel_msg_buffer (l_channel, l_buffer_out, c_request_context_indet)
             END
         END
     END

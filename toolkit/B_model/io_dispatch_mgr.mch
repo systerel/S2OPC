@@ -53,12 +53,13 @@ INITIALISATION
     
 OPERATIONS
 
-    receive_msg_buffer (channel, buffer) =
+    receive_msg_buffer (channel, buffer, request_context) =
     PRE
         channel  : t_channel_i &
         channel  : t_channel &
         buffer   : t_byte_buffer_i &
         buffer   : t_byte_buffer &
+        request_context : t_request_context_i &
         a_buffer_in_state = e_buffer_in_msg_not_read &
         a_buffer_out_state = c_buffer_out_state_indet &
         /* No message allocation before and remaining after operation */

@@ -443,6 +443,14 @@ OPERATIONS
     END
     ;
     
+    bres <-- is_valid_request_context (req_context) =
+    PRE
+        req_context : t_request_context_i
+    THEN
+        bres := bool(req_context : t_request_context)
+    END
+    ;
+    
     client_close_session (session) =
     PRE
         session : t_session_i

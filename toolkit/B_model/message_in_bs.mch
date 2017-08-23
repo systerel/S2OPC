@@ -64,8 +64,9 @@ OPERATIONS
     END
     ;
 
-    msg_header <-- decode_msg_header (msg_buffer) =
+    msg_header <-- decode_msg_header (is_request, msg_buffer) =
     PRE
+        is_request : BOOL &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer &
         a_buffer_in_state = e_buffer_in_msg_type_read &
@@ -85,8 +86,11 @@ OPERATIONS
     END
     ;
     
-    msg <-- decode_msg (msg_buffer) =
+    msg <-- decode_msg (msg_type, msg_buffer) =
     PRE
+        msg_type : t_msg_type_i &
+        msg_type : t_msg_type &
+        msg_type = a_msg_in_type &
         msg_buffer : t_byte_buffer_i &
         msg_buffer : t_byte_buffer &
         a_buffer_in_state = e_buffer_in_msg_type_read &
@@ -160,6 +164,14 @@ OPERATIONS
         msg_typ : t_msg_type_i
     THEN
         bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
+    END
+    ;
+    
+    bres <-- is_valid_request_context (req_context) =
+    PRE
+        req_context : t_request_context_i
+    THEN
+        bres := bool(req_context : t_request_context)
     END
     ;
     

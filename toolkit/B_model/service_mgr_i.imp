@@ -39,6 +39,7 @@ PROMOTES
     /* message_in_bs */
     decode_msg_type,
     is_valid_msg_in_type,
+    is_valid_request_context,
     
     /* message_out_bs */
     is_valid_buffer_out,
@@ -182,24 +183,22 @@ OPERATIONS
         l_valid_buffer
     IN
         l_buffer_out := c_byte_buffer_indet;
-        l_req_msg_header <-- decode_msg_header (msg_buffer);
+        l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
         IF l_valid_req_header = TRUE
         THEN
             l_request_handle <-- read_msg_header_req_handle (l_req_msg_header);
             l_valid_req_handle <-- is_valid_req_handle (l_request_handle);
             l_session_token <-- read_msg_req_header_session_token (l_req_msg_header);
-            /* TODOnow: check request session token */
-            l_checked_req_header := TRUE;
-            IF l_checked_req_header = TRUE &
-                l_valid_req_handle = TRUE
+            /* TODO: check request session token before decoding message */
+            IF l_valid_req_handle = TRUE
             THEN
-                l_req_msg <-- decode_msg (msg_buffer);
+                l_req_msg <-- decode_msg (req_typ, msg_buffer);
                 l_valid_req <-- is_valid_msg_in (l_req_msg);
                 IF l_valid_req = TRUE
                 THEN
                     l_resp_msg_typ <-- get_response_type (req_typ);
-                    l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ, l_req_msg);
+                    l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
                     l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                     l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
                     IF l_valid_msg = TRUE &
@@ -250,7 +249,7 @@ OPERATIONS
         l_validated_req_handle,
         l_session
     IN
-        l_resp_msg_header <-- decode_msg_header (msg_buffer);
+        l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
         l_valid_resp_header <-- is_valid_msg_in_header (l_resp_msg_header);
         IF l_valid_resp_header = TRUE
         THEN
@@ -258,7 +257,7 @@ OPERATIONS
             l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
             IF l_validated_req_handle = TRUE
             THEN
-                l_resp_msg <-- decode_msg (msg_buffer);
+                l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                 l_valid_resp <-- is_valid_msg_in (l_resp_msg);
                 IF l_valid_resp = TRUE
                 THEN
@@ -306,7 +305,7 @@ OPERATIONS
         l_valid_buffer
     IN
         l_buffer_out := c_byte_buffer_indet;
-        l_req_msg_header <-- decode_msg_header (msg_buffer);
+        l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
         IF l_valid_req_header = TRUE
         THEN
@@ -321,13 +320,13 @@ OPERATIONS
                 IF l_is_valid_req = TRUE
                 THEN
                     /* Decode message */
-                    l_req_msg <-- decode_msg (msg_buffer);
+                    l_req_msg <-- decode_msg (req_typ, msg_buffer);
                     l_valid_req <-- is_valid_msg_in (l_req_msg);
                     IF l_valid_req = TRUE
                     THEN
                         /* Allocate response message */
                         l_resp_msg_typ <-- get_response_type (req_typ);
-                        l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ, l_req_msg);
+                        l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
                         l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                         l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
                         IF l_valid_msg = TRUE &
@@ -393,7 +392,7 @@ OPERATIONS
         l_valid_resp_msg,
         l_status
     IN
-        l_resp_msg_header <-- decode_msg_header (msg_buffer);
+        l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
         l_valid_resp_header <-- is_valid_msg_in_header (l_resp_msg_header);
         IF l_valid_resp_header = TRUE
         THEN
@@ -404,7 +403,7 @@ OPERATIONS
                 l_is_valid_session_resp <-- client_validate_session_service_resp (channel, l_request_handle);
                 IF l_is_valid_session_resp = TRUE
                 THEN
-                    l_resp_msg <-- decode_msg (msg_buffer);
+                    l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                     l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
                     IF l_valid_resp_msg = TRUE    
                     THEN
@@ -413,12 +412,12 @@ OPERATIONS
                     END /* DECODE RESP CHECK */
                 END; /* VALID REQ HANDLE ASSOCIATED TO A VALID SESSION */
                 client_remove_req_handle (l_request_handle)
-            END /* VALID REQ HANDLE */
+            END; /* VALID REQ HANDLE */
+            dealloc_msg_in_header (l_resp_msg_header)
         END; /* DECODE RESP HEADER CHECK */
         /* For services on session IN response messages will be provided to applicative
-        TODO: dealloc header if not provided to app and separated from the msg body
+        
         TODOnow: unreference header/msg as current header/msg IN */
-        skip;
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer)
     END
@@ -449,7 +448,7 @@ OPERATIONS
         l_endpoint_config_idx
     IN
         l_buffer_out := c_byte_buffer_indet;
-        l_req_msg_header <-- decode_msg_header (msg_buffer);
+        l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
         l_valid_req_header <-- is_valid_msg_in_header (l_req_msg_header);
         IF l_valid_req_header = TRUE
         THEN
@@ -459,13 +458,13 @@ OPERATIONS
             IF l_valid_req_handle = TRUE
             THEN
                 /* Decode message */
-                l_req_msg <-- decode_msg (msg_buffer);
+                l_req_msg <-- decode_msg (req_typ, msg_buffer);
                 l_valid_req <-- is_valid_msg_in (l_req_msg);
                 IF l_valid_req = TRUE
                 THEN
                     /* Allocate response */
                     l_resp_msg_typ <-- get_response_type (req_typ);
-                    l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ, l_req_msg);
+                    l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
                     l_valid_msg <-- is_valid_msg_out (l_resp_msg);
                     l_valid_resp_header <-- is_valid_msg_out_header (l_resp_msg_header);
                     IF l_valid_msg = TRUE &
@@ -523,7 +522,7 @@ OPERATIONS
         l_valid_resp_msg,
         l_status
     IN
-        l_resp_msg_header <-- decode_msg_header (msg_buffer);
+        l_resp_msg_header <-- decode_msg_header (FALSE, msg_buffer);
         l_valid_resp_header <-- is_valid_msg_in_header (l_resp_msg_header);
         IF l_valid_resp_header = TRUE
         THEN
@@ -531,7 +530,7 @@ OPERATIONS
             l_validated_req_handle <-- client_validate_response_request_handle (l_request_handle, resp_typ);
             IF l_validated_req_handle = TRUE
             THEN
-                l_resp_msg <-- decode_msg (msg_buffer);
+                l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                 l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
                 IF l_valid_resp_msg = TRUE    
                 THEN
@@ -539,11 +538,11 @@ OPERATIONS
                     cli_service_response (l_resp_msg, l_status)
                 END; /* DECODE RESP CHECK */
                 client_remove_req_handle (l_request_handle)
-            END /* VALID REQ HANDLE */
+            END; /* VALID REQ HANDLE */
+            dealloc_msg_in_header (l_resp_msg_header)
         END; /* DECODE RESP HEADER CHECK */
         /* For services on session IN response messages will be provided to applicative
-        TODO: dealloc header if not provided to app and separated from the msg body
-        TODOnow: unreference header/msg as current header/msg IN */
+        TODO: unreference header/msg as current header/msg IN */
         skip;
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer)
@@ -784,7 +783,7 @@ OPERATIONS
                     e_msg_session_write_req
                 THEN /* s_service_reqs */
                     l_resp_typ <-- get_response_type (l_req_typ);
-                    l_msg_header <-- alloc_app_req_msg_header (l_req_typ, req_msg);
+                    l_msg_header <-- alloc_app_req_msg_header (l_req_typ);
                     l_valid_msg_header <-- is_valid_msg_out_header (l_msg_header);
                     l_req_handle <-- client_fresh_req_handle (l_resp_typ);
                     l_valid_req_handle <-- is_valid_req_handle (l_req_handle);

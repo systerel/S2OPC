@@ -56,6 +56,7 @@ SETS
     t_user_i;
     t_msg_header_i;
     t_msg_i;
+    t_request_context_i;
     t_request_handle_i;
     t_channel_config_idx_i;
     t_channel_i;
@@ -123,6 +124,7 @@ CONCRETE_CONSTANTS
     c_session_token_indet,
     c_msg_header_indet,
     c_msg_indet,
+    c_request_context_indet,
     c_channel_config_idx_indet,
     c_channel_indet,
     c_request_handle_indet
@@ -152,6 +154,7 @@ ABSTRACT_CONSTANTS
     t_buffer_in_state,
     t_msg_header,
     t_msg,
+    t_request_context,
     t_msg_type,
     t_channel_config_idx,
     t_channel,
@@ -253,6 +256,10 @@ PROPERTIES
     t_msg <: t_msg_i &
     c_msg_indet : t_msg_i &
     c_msg_indet /: t_msg &
+
+    t_request_context <: t_request_context_i &
+    c_request_context_indet : t_request_context_i &
+    c_request_context_indet /: t_request_context &
 
     t_request_handle <: t_request_handle_i &
     c_request_handle_indet : t_request_handle_i &
