@@ -33,7 +33,8 @@ DEFINITIONS
     a_client_token,
     a_server_token,
     a_user,
-    a_NonceServer;
+    a_NonceServer,
+    a_NonceClient;
 
     d_var_it ==
     /* iter */
@@ -50,7 +51,9 @@ DEFINITIONS
     a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent
     a_user : s_session +-> t_user & // a session may be associated to a valid user
     /* The NonceServer negotiated for a session in CreateSession or ActivateSession */
-    a_NonceServer : s_session +-> t_Nonce;
+    a_NonceServer : s_session +-> t_Nonce &
+    /* The NonceClient is remembered by the client in Sess_Creating */
+    a_NonceClient : s_session +-> t_Nonce;
 
     d_typing_it ==
     av_sessions_orphaned <: t_session &
@@ -65,7 +68,8 @@ DEFINITIONS
     a_client_token := {session} <<| a_client_token     || // If session had a token, remove this relation
     a_server_token := a_server_token |>> {session}     || // If session had a token, remove this relation
     a_state(session) := e_session_closed               || // keep session token as used
-    a_NonceServer := {session} <<| a_NonceServer          /* If session had a Nonce, remove it */
+    a_NonceServer := {session} <<| a_NonceServer       || /* If session had a server nonce, remove it */
+    a_NonceClient := {session} <<| a_NonceClient          /* If session had a client nonce, remove it */
 
 ABSTRACT_VARIABLES
     d_variables,
@@ -87,8 +91,12 @@ INVARIANT
     // All sessions have a token (except when in state creating, init or closed (since it creating can be predecessor))
     dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_server_token) \/ dom(a_client_token) &
 
+    /* TODO: both nonces are not present when security policy is "None" */
     /* Sessions not (init or creating or closed) have a Nonce, even in security mode None */
-    dom(a_state |>> {e_session_init, e_session_creating, e_session_closed}) = dom(a_NonceServer)
+    dom(a_state |>> {e_session_init, e_session_creating, e_session_closed}) = dom(a_NonceServer) &
+
+    /* Sessions in Sess_Creating have a Nonce */
+    dom(a_state |>> {e_session_creating}) = dom(a_NonceClient)
 
 
 INITIALISATION
@@ -100,6 +108,7 @@ INITIALISATION
     a_server_token := {}     ||
     a_user := {}             ||
     a_NonceServer := {}      ||
+    a_NonceClient := {}      ||
 
     /* it */
     av_sessions_to_iterate,
@@ -134,7 +143,7 @@ OPERATIONS
     ;
 
     // Client sends create session request on channel
-    client_create_session_req_sm (session, channel, create_req_msg) =
+    valid <-- client_create_session_req_sm (session, channel, create_req_msg) =
     PRE
         session : t_session_i &
         session : t_session &
@@ -147,8 +156,18 @@ OPERATIONS
         c_msg_out : t_msg &
         a_msg_out_type = e_msg_session_create_req
     THEN
-        a_channel(session) := channel          ||
-        a_state(session) := e_session_creating
+        CHOICE
+            valid := TRUE                           ||
+            a_channel(session) := channel           ||
+            a_state(session) := e_session_creating  ||
+            a_NonceClient
+            :(
+                a_NonceClient$0 = {session} <<| a_NonceClient &
+                a_NonceClient(session) : t_Nonce
+            )
+        OR
+            valid := FALSE /* Nonce creation can fail */
+        END
     END
     ;
 
@@ -218,9 +237,10 @@ OPERATIONS
         IF session_token : t_session_token
         THEN
             CHOICE
-                a_state(session) := e_session_created    ||
-                a_client_token(session) := session_token ||
-                ret := e_sc_ok
+                a_state(session) := e_session_created       ||
+                a_client_token(session) := session_token    ||
+                ret := e_sc_ok                              ||
+                a_NonceClient := {session} <<| a_NonceClient
             OR
                 // Constraints on message content not verified
                 ret := e_sc_nok

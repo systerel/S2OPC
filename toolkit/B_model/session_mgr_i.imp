@@ -95,6 +95,7 @@ OPERATIONS
                         IF l_session_channel = channel THEN
                             l_session_token <-- read_create_session_msg_session_token (resp_msg);
                             l_ret <-- client_create_session_resp_sm (channel, l_session, l_session_token, resp_msg);
+                            /* TODO: react if error: must drop the nonce, but do we close the connexion? */
                             // If session is created, trigger event for activation of session with async data
                             l_session_state <-- get_session_state_or_closed (l_session);
                             IF l_session_state = e_session_created
@@ -360,6 +361,7 @@ OPERATIONS
     VAR
         l_valid_session,
         l_session_state,
+        l_valid,
         l_ret
     IN
         l_valid_session <-- is_valid_session (session);
@@ -368,9 +370,13 @@ OPERATIONS
         THEN
             IF l_session_state = e_session_init
             THEN
-                client_create_session_req_sm (session, channel, create_req_msg);
-                client_add_session_request_handle (session, req_handle);
-                l_ret := e_sc_ok
+                l_valid <-- client_create_session_req_sm (session, channel, create_req_msg);
+                IF l_valid = TRUE THEN
+                    client_add_session_request_handle (session, req_handle);
+                    l_ret := e_sc_ok
+                ELSE
+                    l_ret := e_sc_nok
+                END
             ELSE
                 l_ret := e_sc_bad_invalid_state
             END

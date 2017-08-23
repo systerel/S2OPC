@@ -285,7 +285,7 @@ OPERATIONS
     sc <-- write_create_session_msg_crypto(p_msg, p_nonce, p_signature) =
     PRE
         p_msg : t_msg_i &
-        p_msg : c_msg_out &
+        p_msg = c_msg_out &
         p_nonce : t_Nonce_i &
         p_nonce : t_Nonce &
         p_signature : t_SignatureData_i &
@@ -297,6 +297,31 @@ OPERATIONS
         )
     END
     ;
+
+    /* Fills the Nonce and Certificate. Do not call when SC:Sec_pol is None */
+    write_create_session_req_msg_crypto(p_req_msg, p_channel_config_idx, p_nonce) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_out &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_nonce : t_Nonce_i &
+        p_nonce : t_Nonce
+    THEN
+        skip
+    END
+    ;
+
+    /*write_create_session_req_msg_fill(p_req_msg, p_channel_config_idx) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg = c_msg_out &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
+    THEN
+        skip
+    END
+    ;*/
 
     write_activate_msg_user (msg, user) =
     PRE

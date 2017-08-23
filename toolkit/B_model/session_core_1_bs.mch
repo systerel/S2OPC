@@ -31,7 +31,8 @@ DEFINITIONS
     a_client_token,
     a_server_token,
     a_user,
-    a_NonceServer;
+    a_NonceServer,
+    a_NonceClient;
 
     d_typing ==
     s_session <: t_session &
@@ -42,7 +43,9 @@ DEFINITIONS
     a_server_token : t_session_token >+> s_session & // a server session has a unique authentication token in server once create response sent
     a_user : s_session +-> t_user & // a session may be associated to a valid user
     /* The NonceServer negotiated for a session in CreateSession or ActivateSession */
-    a_NonceServer : s_session +-> t_Nonce
+    a_NonceServer : s_session +-> t_Nonce &
+    /* The NonceClient is remembered by the client in Sess_Creating */
+    a_NonceClient : s_session +-> t_Nonce
 
 ABSTRACT_VARIABLES
     d_variables
@@ -332,6 +335,70 @@ OPERATIONS
             nonce : t_Nonce_i &
             nonce = a_NonceServer(p_session)
         )
+    END
+    ;
+
+    /* Fails only when nonce was needed but not generated */
+    valid <-- client_create_session_req_do_crypto(p_session, p_channel_config_idx) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
+    THEN
+        valid,
+        a_NonceClient
+        :(
+            valid : BOOL &
+            (valid = TRUE
+             =>
+             a_NonceClient(p_session) : t_Nonce)
+            &
+            (valid = FALSE
+             =>
+             a_NonceClient = a_NonceClient$0)
+        )
+    END
+    ;
+
+    valid, nonce <-- getall_NonceClient(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session
+    THEN
+        IF p_session /: dom(a_NonceClient) THEN
+            valid := FALSE ||
+            nonce :: t_Nonce_i
+        ELSE
+            valid := TRUE ||
+            nonce := a_NonceClient(p_session)
+        END
+    END
+    ;
+
+    drop_NonceClient(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session &
+        p_session : dom(a_NonceClient)
+    THEN
+        a_NonceClient := {p_session} <<| a_NonceClient
+    END
+    ;
+
+    /* This function is not called when there is no client nonce (ie SC:Sec_pol is None) */
+    valid <-- client_create_session_check_crypto(p_session, p_channel_config_idx, p_resp_msg) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session &
+        p_session : dom(a_NonceClient) &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
+        p_resp_msg : t_msg_i
+        /*p_resp_msg = c_msg_in &
+        c_msg_in : t_msg &*/
+    THEN
+        valid :: BOOL
     END
 
 END

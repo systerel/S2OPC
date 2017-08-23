@@ -80,14 +80,24 @@ OPERATIONS
         nsession <-- init_new_session
     END;
 
-    client_create_session_req_sm (session, channel, create_req_msg) =
+    valid <-- client_create_session_req_sm (session, channel, create_req_msg) =
     VAR
-        l_channel_config_idx
+        l_channel_config_idx,
+        l_nonce_valid,
+        l_nonce
     IN
         create_session (session, channel, e_session_creating);
         l_channel_config_idx <-- get_channel_info (channel);
-        write_create_session_req_msg_endpointUrl (create_req_msg, l_channel_config_idx)
-        /* TODO: fill parameters */
+        valid <-- client_create_session_req_do_crypto(session, l_channel_config_idx);
+        IF valid = TRUE THEN
+            write_create_session_req_msg_endpointUrl (create_req_msg, l_channel_config_idx);
+            l_nonce_valid, l_nonce <-- getall_NonceClient(session);
+            IF l_nonce_valid = TRUE THEN
+                write_create_session_req_msg_crypto(create_req_msg, l_channel_config_idx, l_nonce)
+            END
+            /* TODO: Fill remaining parameters: sessionName, timeout, maxResponseSize */
+            /*write_create_session_req_msg_fill(create_req_msg, l_channel_config_idx) */
+        END
     END
     ;
 
@@ -145,12 +155,31 @@ OPERATIONS
     ;
 
     ret <-- client_create_session_resp_sm (channel, session, session_token, create_resp_msg) =
-    BEGIN
-        // channel: only for the precondition
-        // TODO: check response msg parameters
-        set_session_state (session, e_session_created);
-        client_set_session_token (session, session_token);
-        ret := e_sc_ok
+    VAR
+        l_nonce,
+        l_valid,
+        l_channel_config_idx
+    IN
+        /* TODO: check Request:handle == Response:handle ; Response:Cert_server == Cert_server */
+        /* TODO? check Response:serverEndpoints */
+        /* Check server signature */
+        l_valid, l_nonce <-- getall_NonceClient(session);
+        l_channel_config_idx <-- get_channel_info (channel);
+        /* If there is no client nonce, there is nothing to check. */
+        IF l_valid = TRUE THEN
+            l_valid <-- client_create_session_check_crypto(session, l_channel_config_idx, create_resp_msg);
+            IF l_valid = TRUE THEN
+                ret := e_sc_ok;
+                // channel: only for the precondition
+                set_session_state (session, e_session_created);
+                client_set_session_token (session, session_token);
+                drop_NonceClient(session)
+            ELSE
+                ret := e_sc_nok
+            END
+        ELSE
+            ret := e_sc_ok
+        END
     END
     ;
 
