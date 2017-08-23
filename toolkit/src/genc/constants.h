@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 11/08/2017 15:16:36
+ Date                 : 23/08/2017 17:27:29
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -34,6 +34,7 @@
 #define constants__t_endpoint_config_idx_i constants_bs__t_endpoint_config_idx_i
 #define constants__t_msg_header_i constants_bs__t_msg_header_i
 #define constants__t_msg_i constants_bs__t_msg_i
+#define constants__t_request_context_i constants_bs__t_request_context_i
 #define constants__t_request_handle_i constants_bs__t_request_handle_i
 #define constants__t_session_i constants_bs__t_session_i
 #define constants__t_session_token_i constants_bs__t_session_token_i
@@ -139,6 +140,7 @@ typedef enum {
 #define constants__t_endpoint_config_idx_i_max constants_bs__t_endpoint_config_idx_i_max
 #define constants__t_msg_header_i_max constants_bs__t_msg_header_i_max
 #define constants__t_msg_i_max constants_bs__t_msg_i_max
+#define constants__t_request_context_i_max constants_bs__t_request_context_i_max
 #define constants__t_request_handle_i_max constants_bs__t_request_handle_i_max
 #define constants__t_session_i_max constants_bs__t_session_i_max
 #define constants__t_session_token_i_max constants_bs__t_session_token_i_max
@@ -159,6 +161,7 @@ typedef enum {
 #define constants__c_endpoint_config_idx_indet constants_bs__c_endpoint_config_idx_indet
 #define constants__c_msg_header_indet constants_bs__c_msg_header_indet
 #define constants__c_msg_indet constants_bs__c_msg_indet
+#define constants__c_request_context_indet constants_bs__c_request_context_indet
 #define constants__c_request_handle_indet constants_bs__c_request_handle_indet
 #define constants__c_session_indet constants_bs__c_session_indet
 #define constants__c_session_token_indet constants_bs__c_session_token_indet

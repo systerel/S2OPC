@@ -2,7 +2,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 11/08/2017 15:16:39
+ Date                 : 23/08/2017 17:27:32
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -62,7 +62,8 @@ extern void channel_mgr_bs__is_disconnecting_channel(
    t_bool * const channel_mgr_bs__bres);
 extern void channel_mgr_bs__send_channel_msg_buffer(
    const constants__t_channel_i channel_mgr_bs__channel,
-   const constants__t_byte_buffer_i channel_mgr_bs__buffer);
+   const constants__t_byte_buffer_i channel_mgr_bs__buffer,
+   const constants__t_request_context_i channel_mgr_bs__request_context);
 extern void channel_mgr_bs__server_get_endpoint_config(
    const constants__t_channel_i channel_mgr_bs__channel,
    constants__t_endpoint_config_idx_i * const channel_mgr_bs__endpoint_config_idx);

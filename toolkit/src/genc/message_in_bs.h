@@ -2,7 +2,7 @@
 
  File Name            : message_in_bs.h
 
- Date                 : 11/08/2017 15:16:39
+ Date                 : 23/08/2017 17:27:32
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -36,9 +36,11 @@ extern void message_in_bs__dealloc_msg_in_buffer(
 extern void message_in_bs__dealloc_msg_in_header(
    const constants__t_msg_header_i message_in_bs__msg_header);
 extern void message_in_bs__decode_msg(
+   const constants__t_msg_type_i message_in_bs__msg_type,
    const constants__t_byte_buffer_i message_in_bs__msg_buffer,
    constants__t_msg_i * const message_in_bs__msg);
 extern void message_in_bs__decode_msg_header(
+   const t_bool message_in_bs__is_request,
    const constants__t_byte_buffer_i message_in_bs__msg_buffer,
    constants__t_msg_header_i * const message_in_bs__msg_header);
 extern void message_in_bs__decode_msg_type(
@@ -55,6 +57,9 @@ extern void message_in_bs__is_valid_msg_in_header(
    t_bool * const message_in_bs__bres);
 extern void message_in_bs__is_valid_msg_in_type(
    const constants__t_msg_type_i message_in_bs__msg_typ,
+   t_bool * const message_in_bs__bres);
+extern void message_in_bs__is_valid_request_context(
+   const constants__t_request_context_i message_in_bs__req_context,
    t_bool * const message_in_bs__bres);
 extern void message_in_bs__read_activate_msg_user(
    const constants__t_msg_i message_in_bs__msg,

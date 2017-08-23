@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 11/08/2017 15:16:37
+ Date                 : 23/08/2017 17:27:30
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,6 +51,7 @@ extern void service_mgr__INITIALISATION(void);
 #define service_mgr__decode_msg_type message_in_bs__decode_msg_type
 #define service_mgr__is_valid_buffer_out message_out_bs__is_valid_buffer_out
 #define service_mgr__is_valid_msg_in_type message_in_bs__is_valid_msg_in_type
+#define service_mgr__is_valid_request_context message_in_bs__is_valid_request_context
 #define service_mgr__server_secure_channel_lost_session_sm session_mgr__server_secure_channel_lost_session_sm
 
 /*--------------------------

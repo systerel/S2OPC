@@ -2,7 +2,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 11/08/2017 15:16:40
+ Date                 : 23/08/2017 17:27:33
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -32,7 +32,6 @@ extern void message_out_bs__INITIALISATION(void);
   --------------------*/
 extern void message_out_bs__alloc_app_req_msg_header(
    const constants__t_msg_type_i message_out_bs__msg_type,
-   const constants__t_msg_i message_out_bs__req_msg,
    constants__t_msg_header_i * const message_out_bs__nmsg_header);
 extern void message_out_bs__alloc_req_msg(
    const constants__t_msg_type_i message_out_bs__msg_type,
@@ -40,7 +39,6 @@ extern void message_out_bs__alloc_req_msg(
    constants__t_msg_i * const message_out_bs__nmsg);
 extern void message_out_bs__alloc_resp_msg(
    const constants__t_msg_type_i message_out_bs__msg_type,
-   const constants__t_msg_i message_out_bs__req_msg_ctx,
    constants__t_msg_header_i * const message_out_bs__nmsg_header,
    constants__t_msg_i * const message_out_bs__nmsg);
 extern void message_out_bs__bless_msg_out(

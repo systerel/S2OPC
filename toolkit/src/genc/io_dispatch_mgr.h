@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 11/08/2017 15:16:37
+ Date                 : 23/08/2017 17:27:30
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -75,7 +75,8 @@ extern void io_dispatch_mgr__internal_client_create_session(
    const constants__t_channel_config_idx_i io_dispatch_mgr__channel_config_idx);
 extern void io_dispatch_mgr__receive_msg_buffer(
    const constants__t_channel_i io_dispatch_mgr__channel,
-   const constants__t_byte_buffer_i io_dispatch_mgr__buffer);
+   const constants__t_byte_buffer_i io_dispatch_mgr__buffer,
+   const constants__t_request_context_i io_dispatch_mgr__request_context);
 extern void io_dispatch_mgr__secure_channel_lost(
    const constants__t_channel_i io_dispatch_mgr__channel);
 extern void io_dispatch_mgr__server_channel_connected_event(
