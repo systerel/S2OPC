@@ -46,6 +46,10 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // params = SOPC_SecureChannel_Config*
     // auxParam == connection Id
     // => B model entry point to add
+
+    // Note: temporarly only accept SC config idx == EP config idx
+    assert(((SOPC_SecureChannel_ConnectedConfig*) params)->configIdx ==
+           SOPC_ToolkitClient_AddSecureChannelConfig (((SOPC_SecureChannel_ConnectedConfig*) params)->config));
     io_dispatch_mgr__server_channel_connected_event(id, 
                                                     ((SOPC_SecureChannel_ConnectedConfig*) params)->configIdx, 
                                                     auxParam);

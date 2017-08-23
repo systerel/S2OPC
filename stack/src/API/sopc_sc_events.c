@@ -210,7 +210,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
         scConConfig->config = malloc(sizeof(SOPC_SecureChannel_Config));
         scConConfig->config->crt_cli = clientCertificate;
         scConConfig->config->msgSecurityMode = securityMode;
-        scConConfig->config->reqSecuPolicyUri = SOPC_String_GetRawCString(securityPolicy);
+        scConConfig->config->reqSecuPolicyUri = SOPC_String_GetCString(securityPolicy);
         scConConfig->connectionId = *epConfigIdx; // TMP: For now we just use the EP config index, but we shall provide the SC connection id corresponding to socket id ...
         scConConfig->configIdx = *epConfigIdx; // TODO: add to toolkit config with index ? TMP: use ep config idx
 
