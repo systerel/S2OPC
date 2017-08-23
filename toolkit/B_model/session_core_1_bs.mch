@@ -291,7 +291,7 @@ OPERATIONS
      * valid tracks the alloc and success of both the a_NonceServer() and signature
      * TODO? split to gather common Nonce-generation code with others using it
      */
-    valid, signature <-- server_create_session_req_do_crypto(p_session, p_req_msg, p_endpoint_config_idx, p_config_idx) =
+    valid, signature <-- server_create_session_req_do_crypto(p_session, p_req_msg, p_endpoint_config_idx, p_channel_config_idx) =
     PRE
         p_session : t_session_i &
         p_session : s_session &
@@ -300,8 +300,8 @@ OPERATIONS
         c_msg_out : t_msg &*/
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx &
-        p_config_idx : t_channel_config_idx_i &
-        p_config_idx : t_channel_config_idx
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx
     THEN
         valid,
         signature,

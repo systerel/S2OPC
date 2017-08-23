@@ -376,7 +376,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
    const constants__t_session_i session_core_1_bs__p_session,
    const constants__t_msg_i session_core_1_bs__p_req_msg,
    const constants__t_endpoint_config_idx_i session_core_1_bs__p_endpoint_config_idx,
-   const constants__t_channel_config_idx_i session_core_1_bs__p_config_idx,
+   const constants__t_channel_config_idx_i session_core_1_bs__p_channel_config_idx,
    t_bool * const session_core_1_bs__valid,
    constants__t_SignatureData_i * const session_core_1_bs__signature)
 {
@@ -395,7 +395,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
 
     /* Retrieve the security policy and mode */
     /* TODO: this function is denoted CLIENT */
-    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_config_idx);
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
     if(NULL == pSCCfg) /* When debugging here, pSCCfg might be NULL because config_idx is indet because SC is a client concept --> switch to endpoint_config_idx */
         return;
 
