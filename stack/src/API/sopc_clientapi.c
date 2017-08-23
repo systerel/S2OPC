@@ -421,6 +421,8 @@ SOPC_StatusCode OpcUa_ClientApi_BeginGetEndpoints(
     void*                            a_pCallbackData)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    OpcUa_RequestHeader reqHeader;
+    OpcUa_RequestHeader_Initialize(&reqHeader);
     OpcUa_GetEndpointsRequest cRequest;
     OpcUa_GetEndpointsRequest_Initialize(&cRequest);
 
@@ -434,7 +436,7 @@ SOPC_StatusCode OpcUa_ClientApi_BeginGetEndpoints(
 
     if(status == STATUS_OK){
         /* copy parameters into request object. */
-        cRequest.RequestHeader   = *a_pRequestHeader;
+        reqHeader = *a_pRequestHeader;
         cRequest.EndpointUrl     = *a_pEndpointUrl;
         cRequest.NoOfLocaleIds   = a_nNoOfLocaleIds;
         cRequest.LocaleIds       = (SOPC_String*)a_pLocaleIds;
@@ -448,7 +450,11 @@ SOPC_StatusCode OpcUa_ClientApi_BeginGetEndpoints(
         assert(STATUS_OK == status);
         status = SOPC_Buffer_SetPosition(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
         assert(STATUS_OK == status);
-        status = SOPC_EncodeMsgTypeAndBody(buffer, &OpcUa_GetEndpointsRequest_EncodeableType, (void*)&cRequest);
+        status = SOPC_EncodeMsg_Type_Header_Body(buffer,
+                                                 &OpcUa_GetEndpointsRequest_EncodeableType,
+                                                 &OpcUa_RequestHeader_EncodeableType,
+                                                 (void*)&reqHeader,
+                                                 (void*)&cRequest);
         assert(STATUS_OK == status);
 
         /* begin invoke service */

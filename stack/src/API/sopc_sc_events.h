@@ -63,13 +63,10 @@ typedef struct SOPC_SecureChannel_ConnectedConfig {
     SOPC_SecureChannel_Config* config;
 } SOPC_SecureChannel_ConnectedConfig;
 
-typedef struct SOPC_Toolkit_Msg {
+typedef struct SOPC_SecureChannel_OpcUaMsg {
   SOPC_Buffer* msgBuffer;
-  uint8_t isRequest;
   void*   optContext;
-  void* msgStruct; /* valid only on toolkit side when not NULL */
-  SOPC_EncodeableType* msgType; /* valid only on toolkit side when not NULL */
-} SOPC_Toolkit_Msg;
+} SOPC_SecureChannel_OpcUaMsg;
 
 typedef enum SOPC_SC_Event {
   /** SC external events */

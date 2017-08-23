@@ -262,18 +262,20 @@ SOPC_StatusCode SOPC_Read_Array(SOPC_Buffer* msgBuf, int32_t* noOfElts, void** e
 SOPC_StatusCode SOPC_Write_Array(SOPC_Buffer* msgBuf, int32_t* noOfElts, void** eltsArray,
                                  size_t sizeOfElt, SOPC_EncodeableObject_PfnEncode* encodeFct);
 
-// Encode msg body type as node id + msg body content from encodeable type and corresponding structure
-SOPC_StatusCode SOPC_EncodeMsgTypeAndBody(SOPC_Buffer*         buf,
-                                          SOPC_EncodeableType* encType,
-                                          void*                msgBody);
+// Encode msg body type as node id + msg header + msg body content from encodeable type and corresponding structure
+SOPC_StatusCode SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer*         buf,
+                                                SOPC_EncodeableType* encType,
+                                                SOPC_EncodeableType* headerType,
+                                                void*                msgHeader,
+                                                void*                msgBody);
 
 // Read the msg body type from buffer and return the encodeable type of the msg body
 SOPC_StatusCode SOPC_MsgBodyType_Read(SOPC_Buffer*          buf,
                                       SOPC_EncodeableType** receivedEncType);
 
 
-SOPC_StatusCode SOPC_DecodeMsgBody(SOPC_Buffer*          buffer,
-                                   SOPC_EncodeableType*  msgEncType,
-                                   void**                encodeableObj);
+SOPC_StatusCode SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer*          buffer,
+                                            SOPC_EncodeableType*  msgEncType,
+                                            void**                encodeableObj);
 
 #endif /* SOPC_ENCODER_H_ */

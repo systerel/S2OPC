@@ -89,7 +89,7 @@ SOPC_StatusCode TMP_BeginService(SOPC_Endpoint               a_hEndpoint,
                                  void**                      a_ppRequest,
                                  SOPC_EncodeableType*        a_pRequestType){
 
-  SOPC_Toolkit_Msg* tMsg = calloc(1, sizeof(SOPC_Toolkit_Msg));
+  SOPC_SecureChannel_OpcUaMsg* tMsg = calloc(1, sizeof(SOPC_SecureChannel_OpcUaMsg));
   uint32_t* pConfigIdx = SOPC_Endpoint_GetCallbackData(a_hEndpoint);
   assert(NULL != tMsg && NULL != pConfigIdx);
 
@@ -98,7 +98,6 @@ SOPC_StatusCode TMP_BeginService(SOPC_Endpoint               a_hEndpoint,
   (void) a_pRequestType;
 //  tMsg->encType = a_pRequestType;
 //  tMsg->respEncType = NULL; // used only on client side for invoking service
-  tMsg->isRequest = (!FALSE);
   tMsg->optContext = a_hContext;
 
   SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
@@ -307,9 +306,8 @@ SOPC_StatusCode TMP_SecureChannelResponse_CB(SOPC_Channel         channel,
                                              SOPC_StatusCode      status){
     (void) status;
     (void) channel;
-    SOPC_Toolkit_Msg* tMsg = calloc(1, sizeof(SOPC_Toolkit_Msg));
+    SOPC_SecureChannel_OpcUaMsg* tMsg = calloc(1, sizeof(SOPC_SecureChannel_OpcUaMsg));
     uint32_t id = *(uint32_t*) cbData; // TMP: sc config index
-    tMsg->isRequest = FALSE;
     tMsg->msgBuffer = (SOPC_Buffer*) response;
 // Note: managed no service side now
     (void) responseType;
@@ -337,7 +335,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
     SOPC_SecureChannel_Config* scConfig = NULL;
     SOPC_StatusCode status = STATUS_OK;
     SOPC_SecureChannel_ConnectedConfig* scConConfig = NULL; // TMP: needed to store config due to stack/toolkit separation (no access to "shared" context)
-    SOPC_Toolkit_Msg* tMsg = NULL;
+    SOPC_SecureChannel_OpcUaMsg* tMsg = NULL;
     switch((SOPC_SC_Event) scEvent){
     /** SC external events */
     /* Services to SC events */
@@ -467,9 +465,9 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
         // id ==  connection id
         // params = byte buffer (node Id + OPC UA message)
         // auxParam == secure channel config id ? => tmp since connection defined correctly by stack
-        tMsg = (SOPC_Toolkit_Msg*) params;
+        tMsg = (SOPC_SecureChannel_OpcUaMsg*) params;
         assert(NULL != tMsg);
-        if(tMsg->isRequest == FALSE){
+        if(tMsg->optContext != FALSE){
             // Server response
             ep = (SOPC_Endpoint) SLinkedList_FindFromId(endpointInstList, id);
             assert(ep != NULL && tMsg != NULL);

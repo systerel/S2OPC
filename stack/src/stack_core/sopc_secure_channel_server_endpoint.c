@@ -73,6 +73,7 @@ SOPC_StatusCode Read_OpenSecureChannelRequest(SC_Connection*       scConnection,
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_NodeId nodeId;
     SOPC_NodeId_Initialize(&nodeId);
+    OpcUa_RequestHeader* encHeader = NULL;
     OpcUa_OpenSecureChannelRequest* encObj = NULL;
     status = SOPC_NodeId_Read(&nodeId, scConnection->receptionBuffers->buffers);
     if(status == STATUS_OK &&
@@ -84,9 +85,14 @@ SOPC_StatusCode Read_OpenSecureChannelRequest(SC_Connection*       scConnection,
         status = STATUS_INVALID_RCV_PARAMETER;
     }
     if(STATUS_OK == status){
-        SOPC_DecodeMsgBody(scConnection->receptionBuffers->buffers,
-                           &OpcUa_OpenSecureChannelRequest_EncodeableType,
-                           (void**) &encObj);
+        SOPC_DecodeMsg_HeaderOrBody(scConnection->receptionBuffers->buffers,
+                                    &OpcUa_RequestHeader_EncodeableType,
+                                    (void**) &encHeader);
+    }
+    if(STATUS_OK == status){
+        SOPC_DecodeMsg_HeaderOrBody(scConnection->receptionBuffers->buffers,
+                                    &OpcUa_OpenSecureChannelRequest_EncodeableType,
+                                    (void**) &encObj);
     }
 
     if(STATUS_OK == status){
@@ -94,7 +100,7 @@ SOPC_StatusCode Read_OpenSecureChannelRequest(SC_Connection*       scConnection,
     }
 
     if(STATUS_OK == status){
-        *requestHandle = encObj->RequestHeader.RequestHandle;
+        *requestHandle = encHeader->RequestHandle;
         // TODO: in case of renew: when moving from current to prec ?
         if(encObj->RequestType == OpcUa_SecurityTokenRequestType_Issue){
             switch(encObj->SecurityMode){
@@ -195,7 +201,8 @@ SOPC_StatusCode Read_OpenSecureChannelRequest(SC_Connection*       scConnection,
             assert(FALSE);
         }
     }
-
+    OpcUa_RequestHeader_Clear(encHeader);
+    free(encHeader);
     OpcUa_OpenSecureChannelRequest_Clear(encObj);
     free(encObj);
 
@@ -427,16 +434,18 @@ SOPC_StatusCode Write_OpenSecureChannelResponse(SC_Connection*   scConnection,
 {
     SOPC_StatusCode status = STATUS_OK;
     uint8_t* bytes = NULL;
+    OpcUa_ResponseHeader respHeader;
+    OpcUa_ResponseHeader_Initialize(&respHeader);
     OpcUa_OpenSecureChannelResponse openResponse;
     OpcUa_OpenSecureChannelResponse_Initialize(&openResponse);
 
     //// Encode response header
     // Encode 64 bits UtcTime => null ok ?
-    SOPC_DateTime_Clear(&openResponse.ResponseHeader.Timestamp);
+    SOPC_DateTime_Clear(&respHeader.Timestamp);
     // Encode requestHandler
-    openResponse.ResponseHeader.RequestHandle = requestHandle;
+    respHeader.RequestHandle = requestHandle;
     // Encode service result code: always OK since we should send tranport error or service fault in other cases
-    openResponse.ResponseHeader.ServiceResult = STATUS_OK;
+    respHeader.ServiceResult = STATUS_OK;
     // No service diagnostic (default)
     // No of string table = 0 (default)
     // String table = NULL (default)
@@ -444,10 +453,10 @@ SOPC_StatusCode Write_OpenSecureChannelResponse(SC_Connection*   scConnection,
     // Extension object: additional header => null node id => no content
     // !! Extensible parameter indicated in specification but Extension object in XML file !!
     // Encoding body byte:
-    openResponse.ResponseHeader.AdditionalHeader.Encoding = SOPC_ExtObjBodyEncoding_None;
+    respHeader.AdditionalHeader.Encoding = SOPC_ExtObjBodyEncoding_None;
     // Type Id: Node Id
-    openResponse.ResponseHeader.AdditionalHeader.TypeId.NodeId.IdentifierType = IdentifierType_Numeric;
-    openResponse.ResponseHeader.AdditionalHeader.TypeId.NodeId.Data.Numeric = SOPC_Null_Id;
+    respHeader.AdditionalHeader.TypeId.NodeId.IdentifierType = IdentifierType_Numeric;
+    respHeader.AdditionalHeader.TypeId.NodeId.Data.Numeric = SOPC_Null_Id;
 
     //// Encode response content
     // Server protocol version
@@ -465,14 +474,17 @@ SOPC_StatusCode Write_OpenSecureChannelResponse(SC_Connection*   scConnection,
                                                SecretBuffer_GetLength(scConnection->currentNonce));
     }
     if(status == STATUS_OK){
-        status = SOPC_EncodeMsgTypeAndBody(msgBuffers->buffers,
-                                  &OpcUa_OpenSecureChannelResponse_EncodeableType,
-                                  &openResponse);
+        status = SOPC_EncodeMsg_Type_Header_Body(msgBuffers->buffers,
+                                                 &OpcUa_OpenSecureChannelResponse_EncodeableType,
+                                                 &OpcUa_ResponseHeader_EncodeableType,
+                                                 &respHeader,
+                                                 &openResponse);
     }
 
     if(scConnection->currentSecuMode != OpcUa_MessageSecurityMode_None){
         SecretBuffer_Unexpose(openResponse.ServerNonce.Data);
     }
+    OpcUa_ResponseHeader_Clear(&respHeader);
     OpcUa_OpenSecureChannelResponse_Clear(&openResponse);
 
     return status;

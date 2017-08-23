@@ -426,9 +426,11 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_EncodeableType* recEncType = NULL;
+    OpcUa_RequestHeader* reqHeader = NULL;
     OpcUa_GetEndpointsRequest* pRequest = NULL;
     OpcUa_GetEndpointsResponse pResponse;
     OpcUa_GetEndpointsResponse_Initialize(&pResponse);
+    OpcUa_ResponseHeader_Initialize(&pResponse.ResponseHeader);
     OpcUa_ServerApi_PfnGetEndpoints* pfnInvoke = NULL;
     SOPC_Buffer* buffer = NULL;
 
@@ -447,9 +449,14 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
                                        &recEncType);
         assert(recEncType == a_pRequestType);
         if(STATUS_OK == status){
-            SOPC_DecodeMsgBody((SOPC_Buffer*) *a_ppRequest,
-                               recEncType,
-                               (void**) &pRequest);
+            SOPC_DecodeMsg_HeaderOrBody((SOPC_Buffer*) *a_ppRequest,
+                                        &OpcUa_RequestHeader_EncodeableType,
+                                        (void**) &reqHeader);
+        }
+        if(STATUS_OK == status){
+            SOPC_DecodeMsg_HeaderOrBody((SOPC_Buffer*) *a_ppRequest,
+                                        recEncType,
+                                        (void**) &pRequest);
         }
     }
 
@@ -481,7 +488,8 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
         OpcUa_ServiceFault faultObj;
         OpcUa_ServiceFault_Initialize(&faultObj);
         /* create a fault */
-        faultStatus = SOPC_ServerApi_CreateFault(&pRequest->RequestHeader,
+        OpcUa_ResponseHeader_Initialize(&faultObj.ResponseHeader);
+        faultStatus = SOPC_ServerApi_CreateFault(reqHeader,
                                                  status,
                                                  &pResponse.ResponseHeader.ServiceDiagnostics,
                                                  &pResponse.ResponseHeader.NoOfStringTable,
@@ -495,7 +503,11 @@ SOPC_StatusCode OpcUa_Server_BeginGetEndpoints(
             assert(STATUS_OK == faultStatus);
             faultStatus = SOPC_Buffer_SetPosition(buffer, UA_SECURE_MESSAGE_HEADER_LENGTH + UA_SYMMETRIC_SECURITY_HEADER_LENGTH + UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
             assert(STATUS_OK == faultStatus);
-            assert(STATUS_OK == SOPC_EncodeMsgTypeAndBody(buffer, &OpcUa_ServiceFault_EncodeableType, &faultObj));
+            assert(STATUS_OK == SOPC_EncodeMsg_Type_Header_Body(buffer,
+                                                                &OpcUa_ServiceFault_EncodeableType,
+                                                                &OpcUa_ResponseHeader_EncodeableType,
+                                                                &faultObj.ResponseHeader,
+                                                                NULL));
             /* send the response */
             faultStatus = SOPC_Endpoint_SendResponse(a_hEndpoint, 
                                                      &OpcUa_ServiceFault_EncodeableType,

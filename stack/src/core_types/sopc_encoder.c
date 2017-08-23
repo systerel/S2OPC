@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "opcua_identifiers.h"
 #include "platform_deps.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_namespace_table.h"
@@ -2233,16 +2234,21 @@ SOPC_StatusCode SOPC_Write_Array(SOPC_Buffer* buf, int32_t* noOfElts, void** elt
     return status;
 }
 
-SOPC_StatusCode SOPC_EncodeMsgTypeAndBody(SOPC_Buffer*         buf,
-                                 SOPC_EncodeableType* encType,
-                                 void*                msgBody)
+SOPC_StatusCode SOPC_EncodeMsg_Type_Header_Body(SOPC_Buffer*         buf,
+                                                SOPC_EncodeableType* encType,
+                                                SOPC_EncodeableType* headerType,
+                                                void*                msgHeader,
+                                                void*                msgBody)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_NodeId nodeId;
     SOPC_NodeId_Initialize(&nodeId);
 
-    if(buf != NULL && msgBody != NULL &&
-       encType != NULL){
+    if(buf != NULL &&
+       // Body cannot be null except in case of service fault message
+       (msgBody != NULL || encType->TypeId == OpcUaId_ServiceFault) &&
+       encType != NULL && headerType != NULL && msgHeader != NULL)
+    {
         nodeId.IdentifierType = IdentifierType_Numeric;
         if(encType->NamespaceUri == NULL){
             nodeId.Namespace = 0;
@@ -2254,6 +2260,9 @@ SOPC_StatusCode SOPC_EncodeMsgTypeAndBody(SOPC_Buffer*         buf,
         status = SOPC_NodeId_Write(&nodeId, buf);
     }
     if(status == STATUS_OK){
+        status = headerType->Encode(msgHeader, buf);
+    }
+    if(status == STATUS_OK  && encType->TypeId != OpcUaId_ServiceFault){
         status = encType->Encode(msgBody, buf);
     }
     return status;
@@ -2295,9 +2304,9 @@ SOPC_StatusCode SOPC_MsgBodyType_Read(SOPC_Buffer*          buf,
     return status;
 }
 
-SOPC_StatusCode SOPC_DecodeMsgBody(SOPC_Buffer*          buffer,
-                                   SOPC_EncodeableType*  msgEncType,
-                                   void**                encodeableObj)
+SOPC_StatusCode SOPC_DecodeMsg_HeaderOrBody(SOPC_Buffer*          buffer,
+                                            SOPC_EncodeableType*  msgEncType,
+                                            void**                encodeableObj)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(buffer != NULL && encodeableObj != NULL && msgEncType != NULL)
