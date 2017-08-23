@@ -125,7 +125,7 @@ OpcUa_ReadRequest *read_new_read_request(void)
             .DataEncoding = {.Name.Length = 0} };
 
     OpcUa_ReadRequest *pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest,
-            /*.RequestHeader = , */
+            .encodeableType = &OpcUa_ReadRequest_EncodeableType,
             .MaxAge = 0.,
             .TimestampsToReturn = OpcUa_TimestampsToReturn_Neither,
             .NoOfNodesToRead = N_REQUESTS,
@@ -142,21 +142,13 @@ bool read_service_test(OpcUa_ReadRequest *pReadReq)
 {
     bool bTest;
 
-    /* Feeds the ReadRequest to the machine */
-    SOPC_Toolkit_Msg msg_in = {
-            .msgStruct = (void *)pReadReq,
-        };
-
     /* Prepares the response message */
     OpcUa_ReadResponse readResp;
-    SOPC_Toolkit_Msg msg_out = {
-            .msgStruct = (void *)&readResp,
-        };
 
     /* Calls treat */
     service_mgr__treat_read_request(
-        (constants__t_msg_i)&msg_in,
-        (constants__t_msg_i)&msg_out);
+        (constants__t_msg_i) pReadReq,
+        (constants__t_msg_i) &readResp);
 
     /* Tests the response */
     /* TODO: this does not check anymore the service status code (because it is not accessible yet) */

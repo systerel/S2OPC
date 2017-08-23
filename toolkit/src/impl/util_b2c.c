@@ -16,6 +16,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "util_b2c.h"
 
@@ -29,7 +30,7 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
   case constants__e_msg_session_create_req:
     *reqEncType = &OpcUa_CreateSessionRequest_EncodeableType;
     *respEncType = &OpcUa_CreateSessionResponse_EncodeableType;
-    *isRequest = (!FALSE);
+    *isRequest = true;
     break;
   case constants__e_msg_session_create_resp:
     *reqEncType = &OpcUa_CreateSessionRequest_EncodeableType;
@@ -38,7 +39,7 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
   case constants__e_msg_session_activate_req:
     *reqEncType = &OpcUa_ActivateSessionRequest_EncodeableType;
     *respEncType = &OpcUa_ActivateSessionResponse_EncodeableType;
-    *isRequest = (!FALSE);
+    *isRequest = true;
     break;
   case constants__e_msg_session_activate_resp:
     *reqEncType = &OpcUa_ActivateSessionRequest_EncodeableType;
@@ -47,7 +48,7 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
   case constants__e_msg_session_close_req:
     *reqEncType = &OpcUa_CloseSessionRequest_EncodeableType;
     *respEncType = &OpcUa_CloseSessionResponse_EncodeableType;
-    *isRequest = (!FALSE);
+    *isRequest = true;
     break;
   case constants__e_msg_session_close_resp:
     *reqEncType = &OpcUa_CloseSessionRequest_EncodeableType;
@@ -56,6 +57,7 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
   case constants__e_msg_session_read_req:
     *reqEncType = &OpcUa_ReadRequest_EncodeableType;
     *respEncType = &OpcUa_ReadResponse_EncodeableType;
+    *isRequest = true;
     break;
   case constants__e_msg_session_read_resp:
     *reqEncType = &OpcUa_ReadRequest_EncodeableType;
@@ -64,6 +66,7 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
   case constants__e_msg_session_write_req:
     *reqEncType = &OpcUa_WriteRequest_EncodeableType;
     *respEncType = &OpcUa_WriteResponse_EncodeableType;
+    *isRequest = true;
     break;
   case constants__e_msg_session_write_resp:
     *reqEncType = &OpcUa_WriteRequest_EncodeableType;
@@ -76,13 +79,14 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
   case constants__e_msg_get_endpoints_service_req:
     *reqEncType = &OpcUa_GetEndpointsRequest_EncodeableType;
     *respEncType = &OpcUa_GetEndpointsResponse_EncodeableType;
+    *isRequest = true;
     break;
   case constants__e_msg_get_endpoints_service_resp:
     *reqEncType = &OpcUa_GetEndpointsRequest_EncodeableType;
     *respEncType = &OpcUa_GetEndpointsResponse_EncodeableType;
     break;
   default:
-    printf("message__alloc_msg: not implemented message type required\n");
+    printf("util_message__get_encodeable_type: not implemented message type required\n");
     exit(1);   
     ;    
   }
@@ -173,7 +177,7 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus,
 
 t_bool util_status_code__C_to_B(SOPC_StatusCode status,
                                 constants__t_StatusCode_i* bstatus){
-  t_bool success = (!FALSE);
+  t_bool success = true;
   switch(status){
   case STATUS_OK:
     *bstatus = constants__e_sc_ok;
@@ -209,7 +213,7 @@ t_bool util_status_code__C_to_B(SOPC_StatusCode status,
     *bstatus = constants__e_sc_bad_out_of_memory;
     break;
   default:
-    success = FALSE;
+    success = false;
   }
   return success;
 }

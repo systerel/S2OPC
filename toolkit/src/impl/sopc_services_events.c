@@ -119,8 +119,12 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     // auxParam == context
     // => B model entry point to add
     assert(NULL != params);
+    SOPC_SecureChannel_OpcUaMsg* msg = (SOPC_SecureChannel_OpcUaMsg*) params;
     io_dispatch_mgr__receive_msg_buffer((constants__t_channel_i) id,
-                                        (constants__t_byte_buffer_i) params); // SOPC_Toolkit_Msg
+                                        (constants__t_byte_buffer_i) msg->msgBuffer,
+                                        (constants__t_request_context_i) msg->optContext);
+    // OpcUaMsg container could be freed
+    free(msg);
     // params is freed by services manager
     break;
 
@@ -201,7 +205,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     }
     break;
   default:
-    assert(FALSE);
+    assert(false);
   }
   assert(STATUS_OK == status);
 }

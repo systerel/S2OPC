@@ -36,7 +36,7 @@ void service_response_cli_cb_bs__cli_service_response(
    SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
                                         SOPC_AppEvent_ComEvent_Create(SE_RCV_SESSION_RESPONSE),
                                         0, // unused
-                                        service_response_cli_cb_bs__resp_msg, // (SOPC_Toolkit_Msg*) 
+                                        service_response_cli_cb_bs__resp_msg,
                                         service_response_cli_cb_bs__status,
                                         "Session service response");
 }

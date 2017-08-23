@@ -55,26 +55,28 @@ void Test_ComEvent_Fct(SOPC_App_Com_Event event,
                        void*              param,
                        SOPC_StatusCode    status){
  if(event == SE_RCV_SESSION_RESPONSE){
-   SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) param;
-   if(msg->msgType == &OpcUa_ReadResponse_EncodeableType){
+   if(NULL != param){
+     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) param;
+     if(encType == &OpcUa_ReadResponse_EncodeableType){
        printf(">>Test_Client_Toolkit: received ReadResponse \n");
-       OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) msg->msgStruct;
+       OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) param;
        cptReadResps++;
        if(cptReadResps <= 1){
-           test_results_set_service_result(test_read_request_response(readResp,
-                                                                      status,
-                                                                      0)
-                                           ? (!FALSE):FALSE);
+         test_results_set_service_result(test_read_request_response(readResp,
+                                                                    status,
+                                                                    0)
+                                         ? (!FALSE):FALSE);
        }else{
-           // Second read response is to test write effect (through read result)
-           test_results_set_service_result(
-               tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
+         // Second read response is to test write effect (through read result)
+         test_results_set_service_result(
+                                         tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
        }
-   }else if(msg->msgType == &OpcUa_WriteResponse_EncodeableType){
+     }else if(encType == &OpcUa_WriteResponse_EncodeableType){
        printf(">>Test_Client_Toolkit: received WriteResponse \n");
-       OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) msg->msgStruct;
+       OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) param;
        test_results_set_service_result(
-           tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+                                       tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+     }
    }
  }else if(event == SE_ACTIVATED_SESSION){
    sessionActivated = true;
@@ -85,29 +87,13 @@ void Test_ComEvent_Fct(SOPC_App_Com_Event event,
 }
 
 /* Function to build the read service request message */
-SOPC_Toolkit_Msg* getReadRequest_message(){
-  SOPC_Toolkit_Msg *pMsg = (SOPC_Toolkit_Msg *)calloc(1, sizeof(SOPC_Toolkit_Msg));
-  if(NULL == pMsg)
-    return NULL;
-  pMsg->msgStruct = read_new_read_request();
-  if(NULL == pMsg->msgStruct)
-    return NULL;
-  pMsg->msgType = &OpcUa_ReadRequest_EncodeableType;
-  pMsg->isRequest = (!FALSE);
-  return pMsg;
+void* getReadRequest_message(){
+  return read_new_read_request();
 }
 
 /* Function to build the verification read request */
-SOPC_Toolkit_Msg* getReadRequest_verif_message() {
-  SOPC_Toolkit_Msg *pMsg = (SOPC_Toolkit_Msg *)calloc(1, sizeof(SOPC_Toolkit_Msg));
-  if(NULL == pMsg)
-    return NULL;
-  pMsg->msgStruct = tlibw_new_ReadRequest_check();
-  if(NULL == pMsg->msgStruct)
-    return NULL;
-  pMsg->msgType = &OpcUa_ReadRequest_EncodeableType;
-  pMsg->isRequest = (!FALSE);
-  return pMsg;
+void* getReadRequest_verif_message() {
+  return tlibw_new_ReadRequest_check();
 }
 
 SOPC_SecureChannel_Config scConfig = {
@@ -209,12 +195,11 @@ int main(void){
 
   if(STATUS_OK == status){
     /* Create a service request message and send it through session (read service)*/
-    SOPC_Toolkit_Msg *pMsgRead = getReadRequest_message();
     // msg freed when sent
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                                   APP_TO_SE_SEND_SESSION_REQUEST,
                                                   session,
-                                                  pMsgRead,
+                                                  getReadRequest_message(),
                                                   0,
                                                   "Services: sending read request !");
 
@@ -244,14 +229,12 @@ int main(void){
     test_results_set_service_result(FALSE);
     /* Sends a WriteRequest */
     pWriteReq = tlibw_new_WriteRequest();
-    SOPC_Toolkit_Msg *pMsgWrite = tlibw_new_message_WriteRequest(pWriteReq);
-    pWriteReq = (OpcUa_WriteRequest *) pMsgWrite->msgStruct;
     test_results_set_WriteRequest(pWriteReq);
     // msg freed when sent
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                                   APP_TO_SE_SEND_SESSION_REQUEST,
                                                   session,
-                                                  pMsgWrite,
+                                                  pWriteReq,
                                                   0,
                                                   "Services: sending write request !");
 
@@ -286,12 +269,11 @@ int main(void){
     test_results_set_service_result(FALSE);
     /* Sends another ReadRequest, to verify that the AddS has changed */
     /* The callback will call the verification */
-    SOPC_Toolkit_Msg *pMsgRead = getReadRequest_verif_message();
     // msg freed when sent
     status = SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                                   APP_TO_SE_SEND_SESSION_REQUEST,
                                                   session,
-                                                  pMsgRead,
+                                                  getReadRequest_verif_message(),
                                                   0,
                                                   "Services: sending read request !");
 

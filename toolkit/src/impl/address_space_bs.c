@@ -73,7 +73,7 @@ void address_space_bs__readall_AddressSpace_Node(
     SOPC_NodeId *pnid_req, *pnid;
     int nid_cmp;
 
-    *address_space_bs__nid_valid = FALSE;
+    *address_space_bs__nid_valid = false;
 
     pnid_req = (SOPC_NodeId *)address_space_bs__nid;
     if(NULL == pnid_req)
@@ -90,7 +90,7 @@ void address_space_bs__readall_AddressSpace_Node(
             continue; /* That should be an error */
 
         if(nid_cmp == 0) {
-            *address_space_bs__nid_valid = (!FALSE);
+            *address_space_bs__nid_valid = true;
             *address_space_bs__node = i+1;
             return;
         }

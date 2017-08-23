@@ -43,22 +43,20 @@ int main ()
 
     /* Creates a WriteRequest and the message */
     OpcUa_WriteRequest  *pWriteReq = tlibw_new_WriteRequest();
-    SOPC_Toolkit_Msg    *pMsg = tlibw_new_message_WriteRequest(pWriteReq);
-    if(NULL == pWriteReq || NULL == pMsg)
+    if(NULL == pWriteReq)
         exit(1);
 
     /* Main service test.
      * The Write differs from the Read: the response cache will be checked instead of the OpcUa_*Response,
      *  as the B model does it in two steps.
      */
-    tlibw_stimulateB_with_message(pMsg);
+    tlibw_stimulateB_with_message(pWriteReq);
     bTest = tlibw_verify_effects_local(pWriteReq);
 
     /* Uninit the address space */
     address_space_bs__UNINITIALISATION();
 
     /* Free the request */
-    free(pMsg);
     tlibw_free_WriteRequest(&pWriteReq);
 
     if(bTest){

@@ -46,10 +46,8 @@ void service_get_endpoints_bs__treat_get_endpoints_request(
    const constants__t_msg_i service_get_endpoints_bs__resp_msg,
    const constants__t_endpoint_config_idx_i service_get_endpoints_bs__endpoint_config_idx,
    constants__t_StatusCode_i * const service_get_endpoints_bs__ret){
-  SOPC_Toolkit_Msg* reqMsg = (SOPC_Toolkit_Msg*) service_get_endpoints_bs__req_msg;
-  SOPC_Toolkit_Msg* respMsg = (SOPC_Toolkit_Msg*) service_get_endpoints_bs__resp_msg;
-  OpcUa_GetEndpointsRequest* getEndpointsReq = (OpcUa_GetEndpointsRequest*) reqMsg->msgStruct;
-  OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) respMsg->msgStruct;
+  OpcUa_GetEndpointsRequest* getEndpointsReq = (OpcUa_GetEndpointsRequest*) service_get_endpoints_bs__req_msg;
+  OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) service_get_endpoints_bs__resp_msg;
   uint32_t configIdx = (uint32_t) service_get_endpoints_bs__endpoint_config_idx;
 
   *service_get_endpoints_bs__ret = build_endPoints_Descriptions(configIdx,

@@ -160,18 +160,27 @@ void channel_mgr_bs__channel_lost(
 
 void channel_mgr_bs__send_channel_msg_buffer(
    const constants__t_channel_i channel_mgr_bs__channel,
-   const constants__t_byte_buffer_i channel_mgr_bs__buffer) {
+   const constants__t_byte_buffer_i channel_mgr_bs__buffer,
+   const constants__t_request_context_i channel_mgr_bs__request_context) {
 
-  SOPC_Toolkit_Msg* msg = (SOPC_Toolkit_Msg*) channel_mgr_bs__buffer;
   SOPC_StatusCode status = STATUS_NOK;
 
   if(channel_mgr_bs__channel == (t_entier4) unique_channel.id){
-    status = SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
-                                                  SE_TO_SC_SERVICE_SND_MSG,
-                                                  channel_mgr_bs__channel,
-                                                  msg,
-                                                  unique_channel.configIdx,
-                                                  "Services mgr sends a message on channel !");    
+    SOPC_SecureChannel_OpcUaMsg* msg = calloc(1, sizeof(SOPC_SecureChannel_OpcUaMsg));
+  
+    if(msg != NULL){
+      msg->msgBuffer = (SOPC_Buffer*) channel_mgr_bs__buffer;
+      if(channel_mgr_bs__request_context != constants__c_request_context_indet){
+        msg->optContext = channel_mgr_bs__request_context;
+      }
+      status = SOPC_EventDispatcherManager_AddEvent(scEventDispatcherMgr,
+                                                    SE_TO_SC_SERVICE_SND_MSG,
+                                                    channel_mgr_bs__channel,
+                                                    msg,
+                                                    unique_channel.configIdx,
+                                                    "Services mgr sends a message on channel !");    
+    }
+    
   }
 
   if(STATUS_OK != status){

@@ -41,8 +41,8 @@ typedef struct session {
 } session;
 
 static session unique_session;
-static t_bool unique_session_init = FALSE;
-static t_bool unique_session_created = FALSE;
+static t_bool unique_session_init = false;
+static t_bool unique_session_created = false;
 
 static int token_cpt = 0;
 
@@ -59,7 +59,7 @@ void session_core_1_bs__server_get_session_from_token(
    const constants__t_session_token_i session_core_1_bs__session_token,
    constants__t_session_i * const session_core_1_bs__session) {
   int32_t comparison = 0;
-  if((!FALSE) == unique_session_created){
+  if(false != unique_session_created){
     SOPC_StatusCode status = SOPC_NodeId_Compare((SOPC_NodeId*)session_core_1_bs__session_token, 
                                                  (SOPC_NodeId*)unique_session.session_core_1_bs__session_token,
                                                  &comparison);
@@ -110,12 +110,12 @@ void session_core_1_bs__server_is_valid_session_token(
                                                  (SOPC_NodeId*)unique_session.session_core_1_bs__session_token,
                                                  &comparison);
     if(STATUS_OK == status && comparison == 0){
-      *session_core_1_bs__ret = (!FALSE);
+      *session_core_1_bs__ret = true;
     }else{
-      *session_core_1_bs__ret = FALSE;
+      *session_core_1_bs__ret = false;
     }
   }else{
-    *session_core_1_bs__ret = FALSE;
+    *session_core_1_bs__ret = false;
   }
 }
 
@@ -157,11 +157,11 @@ void session_core_1_bs__delete_session(
 
 void session_core_1_bs__init_new_session(
    constants__t_session_i * const session_core_1_bs__session){
-  if(FALSE == unique_session_init){
+  if(false == unique_session_init){
     unique_session.id = 1;
     *session_core_1_bs__session = unique_session.id;
-    unique_session_init = !FALSE;
-    unique_session.cli_activated_session = FALSE;
+    unique_session_init = true;
+    unique_session.cli_activated_session = false;
     unique_session.session_core_1_bs__state = constants__e_session_init;
   }else{
     *session_core_1_bs__session = constants__c_session_indet;
@@ -172,19 +172,19 @@ void session_core_1_bs__create_session(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_channel_i session_core_1_bs__channel,
    const constants__t_sessionState session_core_1_bs__state) {
-  if(session_core_1_bs__session == unique_session.id && FALSE == unique_session_created){
+  if(session_core_1_bs__session == unique_session.id && false == unique_session_created){
     unique_session.session_core_1_bs__channel = session_core_1_bs__channel;
     unique_session.session_core_1_bs__state = session_core_1_bs__state;
     unique_session.session_core_1_bs__session_token = constants__c_session_token_indet;
     unique_session.session_core_1_bs__user = constants__c_user_indet;
-    unique_session.cli_activated_session = FALSE;
-    unique_session_created = (!FALSE);
+    unique_session.cli_activated_session = false;
+    unique_session_created = true;
   }
 }
 
 void session_core_1_bs__create_session_failure(const constants__t_session_i session_core_1_bs__session){
-  if(session_core_1_bs__session == unique_session.id && FALSE != unique_session_created){
-    unique_session_created = FALSE;
+  if(session_core_1_bs__session == unique_session.id && false != unique_session_created){
+    unique_session_created = false;
     unique_session.session_core_1_bs__state = constants__e_session_init;
     SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
                                          SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
@@ -272,7 +272,7 @@ void session_core_1_bs__set_session_state_closed(
     }else{
       channel_mgr_bs__is_client_channel(channel, &bres);
       if(bres != false){
-        if(unique_session.cli_activated_session == FALSE){
+        if(unique_session.cli_activated_session == false){
           SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
                                                SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),
                                                0, // TMP unused ? => session idx ?
@@ -345,7 +345,7 @@ void session_core_1_bs__is_valid_user(
    const constants__t_user_i session_core_1_bs__user,
    t_bool * const session_core_1_bs__ret) {
   assert(session_core_1_bs__user == 1);
-  *session_core_1_bs__ret = (!FALSE);
+  *session_core_1_bs__ret = true;
 }
 
 void session_core_1_bs__set_session_user(

@@ -153,6 +153,7 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
     };
 
     OpcUa_WriteRequest *pReq = DESIGNATE_NEW(OpcUa_WriteRequest,
+            .encodeableType = &OpcUa_WriteRequest_EncodeableType,                                             
             .NoOfNodesToWrite = N_REQUESTS,
             .NodesToWrite = lwv
         );
@@ -185,21 +186,7 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq)
 }
 
 
-SOPC_Toolkit_Msg *tlibw_new_message_WriteRequest(OpcUa_WriteRequest *pWriteReq)
-{
-    SOPC_Toolkit_Msg *pMsg = (SOPC_Toolkit_Msg *) calloc(1, sizeof(SOPC_Toolkit_Msg));
-    if(NULL == pMsg)
-        return NULL;
-    
-    pMsg->msgType = &OpcUa_WriteRequest_EncodeableType;
-    pMsg->isRequest = (!FALSE);
-    pMsg->msgStruct = pWriteReq;
-    
-    return pMsg;
-}
-
-
-bool tlibw_stimulateB_with_message(SOPC_Toolkit_Msg *pMsg)
+bool tlibw_stimulateB_with_message(void *pMsg)
 {
     constants__t_StatusCode_i sc = constants__c_StatusCode_indet;
 
@@ -343,7 +330,7 @@ OpcUa_ReadRequest *tlibw_new_ReadRequest_check(void)
     }
 
     OpcUa_ReadRequest *pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest,
-            /*.RequestHeader = , */
+            .encodeableType = &OpcUa_ReadRequest_EncodeableType,                                             
             .MaxAge = 0.,
             .TimestampsToReturn = OpcUa_TimestampsToReturn_Neither,
             .NoOfNodesToRead = N_REQUESTS_VALS,

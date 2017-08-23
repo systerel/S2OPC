@@ -42,9 +42,9 @@ void session_async_bs__add_session_to_activate(
   if(unique_session_to_activate_user == constants__c_user_indet){
     unique_session_to_activate_user = session_async_bs__user;
     unique_session_to_activate = session_async_bs__session;
-    *session_async_bs__ret = !FALSE;
+    *session_async_bs__ret = true;
   }else{
-    *session_async_bs__ret = FALSE;
+    *session_async_bs__ret = false;
   }  
 }
 
@@ -56,9 +56,9 @@ void session_async_bs__add_session_to_create(
   if(unique_session_to_create == constants__c_session_indet){
     unique_session_to_create_idx = session_async_bs__channel_config_idx;
     unique_session_to_create = session_async_bs__session;
-    *session_async_bs__ret = !FALSE;
+    *session_async_bs__ret = true;
   }else{
-    *session_async_bs__ret = FALSE;
+    *session_async_bs__ret = false;
   }  
 }
 

@@ -41,8 +41,8 @@ static struct {
     SLinkedList* scConfigs;
     SLinkedList* epConfigs;
 } tConfig = {
-    .initDone = FALSE,
-    .locked = FALSE,
+    .initDone = false,
+    .locked = false,
     .scConfigs = NULL,
     .epConfigs = NULL,
 };
@@ -70,7 +70,6 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
                                      uint32_t id, 
                                      void*    params, 
                                      int32_t  auxParam){
-  SOPC_Toolkit_Msg* tmsg = NULL;
   switch(SOPC_AppEvent_AppEventType_Get(eventAndType)){
   case APP_COM_EVENT:
     if(NULL != appFct){
@@ -85,8 +84,7 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
       }
       if(SOPC_AppEvent_ComEvent_Get(eventAndType) == SE_RCV_SESSION_RESPONSE){
         // Message to deallocate ? => if not application shall deallocate !
-        tmsg = (SOPC_Toolkit_Msg*) params;
-        SOPC_Encodeable_Delete(tmsg->msgType, &tmsg->msgStruct);
+        SOPC_Encodeable_Delete(*(SOPC_EncodeableType**)params, &params);
         // TBD: free only in this case ?
         free(params);
       }
@@ -100,7 +98,7 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
     }
     break;
   default:
-    assert(FALSE);
+    assert(false);
   }
 }
 
@@ -109,10 +107,10 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
     if(NULL != pAppFct){
       appFct = pAppFct;
       status = OpcUa_BadInvalidState;
-      if(tConfig.initDone == FALSE){
+      if(tConfig.initDone == false){
         Mutex_Initialization(&tConfig.mut);
         Mutex_Lock(&tConfig.mut);
-        tConfig.initDone = !FALSE;
+        tConfig.initDone = true;
         status = SOPC_StackConfiguration_Initialize();
         if(STATUS_OK == status){
           tConfig.scConfigs = SLinkedList_Create(0);
@@ -149,10 +147,10 @@ void SOPC_Internal_AllClientSecureChannelsDisconnected(){
 
 SOPC_StatusCode SOPC_Toolkit_Configured(){
     SOPC_StatusCode status = OpcUa_BadInvalidState;
-    if(tConfig.initDone != FALSE){
+    if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
-        if(tConfig.locked == FALSE){
-            tConfig.locked = !FALSE;
+        if(tConfig.locked == false){
+            tConfig.locked = true;
             /* Init B model */
             INITIALISATION();
             status = STATUS_OK;
@@ -165,7 +163,7 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
 void SOPC_Toolkit_Clear(){
     SOPC_StatusCode status = STATUS_OK;
     // Do a synchronous connections closed (effective on client only)
-    if(tConfig.initDone != FALSE){
+    if(tConfig.initDone != false){
       Mutex_Initialization(&closeAllConnectionsSync.mutex);
       Condition_Init(&closeAllConnectionsSync.cond);
       Mutex_Lock(&closeAllConnectionsSync.mutex);
@@ -192,8 +190,8 @@ void SOPC_Toolkit_Clear(){
       SLinkedList_Delete(tConfig.epConfigs);       
       appFct = NULL;
       pAddSpaceFct = NULL;
-      tConfig.locked = FALSE;
-      tConfig.initDone = FALSE;
+      tConfig.locked = false;
+      tConfig.initDone = false;
       Mutex_Unlock(&tConfig.mut);
       Mutex_Clear(&tConfig.mut);
     }
@@ -218,7 +216,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
   uint32_t result = 0;
   SOPC_StatusCode status;
   if(NULL != scConfig){
-        if(tConfig.initDone != FALSE){
+        if(tConfig.initDone != false){
             Mutex_Lock(&tConfig.mut);
             // TODO: check maximum value < max configs
             scConfigIdxMax++;
@@ -236,9 +234,9 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
 
 SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t scConfigIdx){
     SOPC_SecureChannel_Config* res = NULL;
-    if(tConfig.initDone != FALSE){
+    if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
-        if(tConfig.locked != FALSE){
+        if(tConfig.locked != false){
             res = (SOPC_SecureChannel_Config*) SLinkedList_FindFromId(tConfig.scConfigs, scConfigIdx);
         }
         Mutex_Unlock(&tConfig.mut);
@@ -250,9 +248,9 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig){
     uint32_t result = 0;
     SOPC_StatusCode status;
     if(NULL != epConfig){
-        if(tConfig.initDone != FALSE){
+        if(tConfig.initDone != false){
             Mutex_Lock(&tConfig.mut);
-            if(FALSE == tConfig.locked){
+            if(false == tConfig.locked){
               // TODO: check maximum value < max configs
               epConfigIdxMax++;
               status = SOPC_IntToolkitConfig_AddConfig(tConfig.epConfigs, epConfigIdxMax, (void*) epConfig);
@@ -270,9 +268,9 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig){
 
 SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx){
     SOPC_Endpoint_Config* res = NULL;
-    if(tConfig.initDone != FALSE){
+    if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
-        if(tConfig.locked != FALSE){
+        if(tConfig.locked != false){
             res = (SOPC_Endpoint_Config*) SLinkedList_FindFromId(tConfig.epConfigs, epConfigIdx);
         }
         Mutex_Unlock(&tConfig.mut);
@@ -282,9 +280,9 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
 
 SOPC_StatusCode SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable){
     SOPC_StatusCode status = OpcUa_BadInvalidState;
-    if(tConfig.initDone != FALSE){
+    if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
-        if(FALSE == tConfig.locked){
+        if(false == tConfig.locked){
           status = SOPC_StackConfiguration_SetNamespaceUris(nsTable);
         }
         Mutex_Unlock(&tConfig.mut);
@@ -295,9 +293,9 @@ SOPC_StatusCode SOPC_ToolkitConfig_SetNamespaceUris(SOPC_NamespaceTable* nsTable
 SOPC_StatusCode SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable,
                                                    uint32_t              nbTypes){
     SOPC_StatusCode status = OpcUa_BadInvalidState;
-    if(tConfig.initDone != FALSE){
+    if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
-        if(FALSE == tConfig.locked){
+        if(false == tConfig.locked){
           status = SOPC_StackConfiguration_AddTypes(encTypesTable, nbTypes);
         }
         Mutex_Unlock(&tConfig.mut);
@@ -308,9 +306,9 @@ SOPC_StatusCode SOPC_ToolkitConfig_AddTypes(SOPC_EncodeableType** encTypesTable,
 SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes()
 {
     SOPC_EncodeableType** res = NULL;
-    if(tConfig.initDone != FALSE){
+    if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
-        if(tConfig.locked != FALSE){
+        if(tConfig.locked != false){
             res = SOPC_StackConfiguration_GetEncodeableTypes();
         }
         Mutex_Unlock(&tConfig.mut);
@@ -321,9 +319,9 @@ SOPC_EncodeableType** SOPC_ToolkitConfig_GetEncodeableTypes()
 SOPC_NamespaceTable* SOPC_ToolkitConfig_GetNamespaces()
 {
     SOPC_NamespaceTable* res = NULL;
-    if(tConfig.initDone != FALSE){
+    if(tConfig.initDone != false){
         Mutex_Lock(&tConfig.mut);
-        if(tConfig.locked != FALSE){
+        if(tConfig.locked != false){
             res = SOPC_StackConfiguration_GetNamespaces();
         }
         Mutex_Unlock(&tConfig.mut);

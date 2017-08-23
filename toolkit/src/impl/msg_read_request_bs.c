@@ -49,7 +49,7 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(
 {
     *msg_read_request_bs__aid = constants__c_AttributeId_indet;
     /* TODO: is message type checked at this point? */
-    OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *)(((SOPC_Toolkit_Msg*)msg_read_request_bs__msg)->msgStruct);
+    OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *)msg_read_request_bs__msg;
 
     *msg_read_request_bs__isvalid = false;
     if(! msg_read_req)
@@ -86,7 +86,7 @@ void msg_read_request_bs__getall_req_ReadValue_NodeId(
 {
     *msg_read_request_bs__nid = constants__c_NodeId_indet;
     /* TODO: is message type checked at this point? */
-    OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *)(((SOPC_Toolkit_Msg*)msg_read_request_bs__msg)->msgStruct);
+    OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *) msg_read_request_bs__msg;
 
     *msg_read_request_bs__isvalid = false;
     if(! msg_read_req)
@@ -108,7 +108,7 @@ void msg_read_request_bs__read_req_nb_ReadValue(
 {
     *msg_read_request_bs__nb = 0;
     /* TODO: is message type checked at this point? */
-    OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *)(((SOPC_Toolkit_Msg*)msg_read_request_bs__msg)->msgStruct);
+    OpcUa_ReadRequest *msg_read_req = (OpcUa_ReadRequest *) msg_read_request_bs__msg;
 
     if(! msg_read_req)
         return;

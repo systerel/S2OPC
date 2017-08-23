@@ -119,7 +119,7 @@ int main(void)
 
   loopCpt = 0;
   loopTimeout = 5000;
-  while (STATUS_OK == status && loopCpt * sleepTimeout <= loopTimeout)
+  while (STATUS_OK == status && endpointClosed == FALSE && loopCpt * sleepTimeout <= loopTimeout)
     {
         loopCpt++;
     	// Retrieve received messages on socket
