@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 23/08/2017 17:49:57
+ Date                 : 25/08/2017 09:14:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -111,6 +111,9 @@ void session_core__server_create_session_req_and_resp_sm(
                      session_core__l_signature,
                      session_core__service_ret);
                }
+            }
+            else {
+               *session_core__service_ret = constants__e_sc_bad_unexpected_error;
             }
          }
          else {
