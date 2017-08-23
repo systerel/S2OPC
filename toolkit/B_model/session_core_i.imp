@@ -128,6 +128,9 @@ OPERATIONS
                         service_ret <-- write_create_session_msg_crypto(create_resp_msg, l_nonce, l_signature)
                         /* TODO: populate msg with remaining parameters: MaxRequestSize, RevisedSessionTimeout, CertServer, ... */
                     END
+                ELSE
+                    /* TODO: add bad security check failed error and use it instead */
+                    service_ret := e_sc_bad_unexpected_error
                 END
             ELSE
                 service_ret := e_sc_bad_out_of_memory;
