@@ -68,6 +68,7 @@ clean:
 	@[ -d "$(PATHEXEC)" ] && \rm -rf $(PATHEXEC) || true
 
 trad:
+	@m -s | grep TOTAL | awk -F '|' '{ err = $$3 ~ "OK" && $$10 ~ "OK" ? 0:1 } END {if(err == 1) print "Please typecheck and B0check before make trad"; exit err}'
 	@\rm -fr ./$(PATHTRAD)
 	@\rm -fr ./$(PATHGENTRAD)
 	m -tr
