@@ -162,8 +162,9 @@ OPERATIONS
             a_state(session) := e_session_creating  ||
             a_NonceClient
             :(
-                a_NonceClient$0 = {session} <<| a_NonceClient &
-                a_NonceClient(session) : t_Nonce
+                a_NonceClient : s_session +-> t_Nonce &
+                {session} <<| a_NonceClient = {session} <<| a_NonceClient$0 &
+                session : dom(a_NonceClient)
             )
         OR
             valid := FALSE /* Nonce creation can fail */
