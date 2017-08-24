@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 25/08/2017 09:14:28
+ Date                 : 25/08/2017 18:29:40
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -410,6 +410,7 @@ void session_mgr__client_create_session_req(
    {
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
+      t_bool session_mgr__l_valid;
       constants__t_StatusCode_i session_mgr__l_ret;
       
       session_core__is_valid_session(session_mgr__session,
@@ -420,10 +421,16 @@ void session_mgr__client_create_session_req(
          if (session_mgr__l_session_state == constants__e_session_init) {
             session_core__client_create_session_req_sm(session_mgr__session,
                session_mgr__channel,
-               session_mgr__create_req_msg);
-            session_request_handle_bs__client_add_session_request_handle(session_mgr__session,
-               session_mgr__req_handle);
-            session_mgr__l_ret = constants__e_sc_ok;
+               session_mgr__create_req_msg,
+               &session_mgr__l_valid);
+            if (session_mgr__l_valid == true) {
+               session_request_handle_bs__client_add_session_request_handle(session_mgr__session,
+                  session_mgr__req_handle);
+               session_mgr__l_ret = constants__e_sc_ok;
+            }
+            else {
+               session_mgr__l_ret = constants__e_sc_nok;
+            }
          }
          else {
             session_mgr__l_ret = constants__e_sc_bad_invalid_state;

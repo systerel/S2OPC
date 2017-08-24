@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 25/08/2017 09:14:28
+ Date                 : 25/08/2017 18:29:40
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -81,7 +81,8 @@ extern void session_core__client_close_session_sm(
 extern void session_core__client_create_session_req_sm(
    const constants__t_session_i session_core__session,
    const constants__t_channel_i session_core__channel,
-   const constants__t_msg_i session_core__create_req_msg);
+   const constants__t_msg_i session_core__create_req_msg,
+   t_bool * const session_core__valid);
 extern void session_core__client_create_session_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,

@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 25/08/2017 09:14:28
+ Date                 : 25/08/2017 18:29:40
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,17 +43,33 @@ void session_core__client_init_session_sm(
 void session_core__client_create_session_req_sm(
    const constants__t_session_i session_core__session,
    const constants__t_channel_i session_core__channel,
-   const constants__t_msg_i session_core__create_req_msg) {
+   const constants__t_msg_i session_core__create_req_msg,
+   t_bool * const session_core__valid) {
    {
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
+      t_bool session_core__l_nonce_valid;
+      constants__t_Nonce_i session_core__l_nonce;
       
       session_core_1_bs__create_session(session_core__session,
          session_core__channel,
          constants__e_session_creating);
       channel_mgr_bs__get_channel_info(session_core__channel,
          &session_core__l_channel_config_idx);
-      message_out_bs__write_create_session_req_msg_endpointUrl(session_core__create_req_msg,
-         session_core__l_channel_config_idx);
+      session_core_1_bs__client_create_session_req_do_crypto(session_core__session,
+         session_core__l_channel_config_idx,
+         session_core__valid);
+      if (*session_core__valid == true) {
+         message_out_bs__write_create_session_req_msg_endpointUrl(session_core__create_req_msg,
+            session_core__l_channel_config_idx);
+         session_core_1_bs__getall_NonceClient(session_core__session,
+            &session_core__l_nonce_valid,
+            &session_core__l_nonce);
+         if (session_core__l_nonce_valid == true) {
+            message_out_bs__write_create_session_req_msg_crypto(session_core__create_req_msg,
+               session_core__l_channel_config_idx,
+               session_core__l_nonce);
+         }
+      }
    }
 }
 
@@ -135,11 +151,37 @@ void session_core__client_create_session_resp_sm(
    const constants__t_session_token_i session_core__session_token,
    const constants__t_msg_i session_core__create_resp_msg,
    constants__t_StatusCode_i * const session_core__ret) {
-   session_core_1_bs__set_session_state(session_core__session,
-      constants__e_session_created);
-   session_core_1_bs__client_set_session_token(session_core__session,
-      session_core__session_token);
-   *session_core__ret = constants__e_sc_ok;
+   {
+      constants__t_Nonce_i session_core__l_nonce;
+      t_bool session_core__l_valid;
+      constants__t_channel_config_idx_i session_core__l_channel_config_idx;
+      
+      session_core_1_bs__getall_NonceClient(session_core__session,
+         &session_core__l_valid,
+         &session_core__l_nonce);
+      channel_mgr_bs__get_channel_info(session_core__channel,
+         &session_core__l_channel_config_idx);
+      if (session_core__l_valid == true) {
+         session_core_1_bs__client_create_session_check_crypto(session_core__session,
+            session_core__l_channel_config_idx,
+            session_core__create_resp_msg,
+            &session_core__l_valid);
+         if (session_core__l_valid == true) {
+            *session_core__ret = constants__e_sc_ok;
+            session_core_1_bs__set_session_state(session_core__session,
+               constants__e_session_created);
+            session_core_1_bs__client_set_session_token(session_core__session,
+               session_core__session_token);
+            session_core_1_bs__drop_NonceClient(session_core__session);
+         }
+         else {
+            *session_core__ret = constants__e_sc_nok;
+         }
+      }
+      else {
+         *session_core__ret = constants__e_sc_ok;
+      }
+   }
 }
 
 void session_core__client_user_activate_session_req_sm(
