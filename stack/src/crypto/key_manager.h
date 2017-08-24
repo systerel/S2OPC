@@ -41,7 +41,7 @@
  *
  *                  \p buffer is \p lenBuf long, and describes the key in the DER of PEM format.
  *
- *                  Public keys are usually extracted from Certificate, see KeyManager_Certificate_GetPublicKey() or
+ *                  Public keys are usually extracted from Certificate, see KeyManager_AsymmetricKey_CreateFromCertificate() or
  *                  KeyManager_AsymmetricKey_CreateFromCertificate().
  *
  * \param buffer    A valid pointer to the buffer containing the DER or PEM description.
@@ -62,7 +62,7 @@ SOPC_StatusCode KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t *buffer,
  *                  \p szPath is the path to the file containing the key. It should be zero-terminated.
  *                  The key may be described in the DER of PEM format.
  *
- *                  Public keys are usually extracted from Certificate, see KeyManager_Certificate_GetPublicKey() or
+ *                  Public keys are usually extracted from Certificate, see KeyManager_AsymmetricKey_CreateFromCertificate() or
  *                  KeyManager_AsymmetricKey_CreateFromCertificate().
  *
  * \param szPath    The path to the DER/PEM file.
@@ -178,7 +178,7 @@ SOPC_StatusCode KeyManager_Certificate_CreateFromFile(const char *szPath,
 /**
  * \brief           Frees a Certificate created with KeyManager_Certificate_CreateFromFile() or KeyManager_Certificate_CreateFromDER()
  *
- * \warning         You must not free a Certificate for which a key is still being used. See KeyManager_Certificate_GetPublicKey().
+ * \warning         You must not free a Certificate for which a key is still being used. See KeyManager_Certificate_GetPublicKey() and KeyManager_AsymmetricKey_CreateFromCertificate().
  *
  * \param pCert     The Certificate to free.
  */
