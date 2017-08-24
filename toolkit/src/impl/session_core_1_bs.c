@@ -30,12 +30,15 @@
 #include "sopc_user_app_itf.h"
 #include "crypto_provider.h"
 #include "crypto_profiles.h"
+#include "key_manager.h"
 #include "secret_buffer.h"
 #include "sopc_toolkit_config.h"
 
 #include "session_core_1_bs.h"
 
 #include "channel_mgr_bs.h"
+
+#define LENGTH_NONCE 32
 
 typedef struct session {
   constants__t_session_i id;
@@ -45,6 +48,7 @@ typedef struct session {
   constants__t_user_i session_core_1_bs__user;
   t_bool cli_activated_session;
   SOPC_ByteString NonceServer;
+  SOPC_ByteString NonceClient;
   OpcUa_SignatureData SignatureData;
 } session;
 
@@ -396,7 +400,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
     /* Retrieve the security policy and mode */
     /* TODO: this function is denoted CLIENT */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
-    if(NULL == pSCCfg) /* When debugging here, pSCCfg might be NULL because config_idx is indet because SC is a client concept --> switch to endpoint_config_idx */
+    if(NULL == pSCCfg)
         return;
 
     /* Retrieve the server certificate */
@@ -410,7 +414,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
         /* Retrieve ptrs to Nonce and Signature */
         if(session_core_1_bs__p_session != unique_session.id)
             return;
-	pSession = &unique_session;
+        pSession = &unique_session;
         pNonce = &pSession->NonceServer;
         pSign = &pSession->SignatureData;
 
@@ -418,19 +422,19 @@ void session_core_1_bs__server_create_session_req_do_crypto(
         /* TODO: don't create it each time, maybe add it to the session */
         pProvider = CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
 
-        /* Ask the CryptoProvider for 32 random bytes */
+        /* Ask the CryptoProvider for LENGTH_NONCE random bytes */
         SOPC_ByteString_Clear(pNonce);
-        pNonce->Length = 32;
-        pNonce->Data = malloc(sizeof(SOPC_Byte)*pNonce->Length); /* TODO: This should be freed with session */
+        pNonce->Length = LENGTH_NONCE;
+        pNonce->Data = malloc(sizeof(SOPC_Byte)*pNonce->Length); /* TODO: This should be cleared and freed with session */
         if(NULL == pNonce->Data)
             return;
         if(STATUS_OK != CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data))
-            /* Should we clean half allocated things? */
+            /* TODO: Should we clean half allocated things? */
             return;
 
-        /* Use the server certificate to sign the client certificate ++ nonce */
+        /* Use the server certificate to sign the client certificate ++ client nonce */
         /* a) Prepare the buffer to sign */
-        pReq = (OpcUa_CreateSessionRequest*) session_core_1_bs__p_req_msg;
+        pReq = (OpcUa_CreateSessionRequest *)session_core_1_bs__p_req_msg;
         lenToSign = pReq->ClientCertificate.Length + pReq->ClientNonce.Length;
         pToSign = malloc(sizeof(uint8_t)*lenToSign);
         if(NULL == pToSign)
@@ -455,6 +459,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
             return;
 
         /* Clean */
+        /* TODO: with the many previous returns, you do not always free it */
         free(pToSign);
         CryptoProvider_Free(pProvider);
         pProvider = NULL;
@@ -469,5 +474,168 @@ void session_core_1_bs__get_NonceServer(
    constants__t_Nonce_i * const session_core_1_bs__nonce)
 {
     *session_core_1_bs__nonce = (constants__t_Nonce_i *)(&unique_session.NonceServer);
+}
+
+
+void session_core_1_bs__client_create_session_req_do_crypto(
+   const constants__t_session_i session_core_1_bs__p_session,
+   const constants__t_channel_config_idx_i session_core_1_bs__p_channel_config_idx,
+   t_bool * const session_core_1_bs__valid)
+{
+    /* Produce the Nonce when SC:Sec_pol is not "None" */
+    CryptoProvider *pProvider = NULL;
+    SOPC_SecureChannel_Config *pSCCfg = NULL;
+    session *pSession = NULL;
+    SOPC_ByteString *pNonce = NULL;
+
+    /* Default answer */
+    *session_core_1_bs__valid = FALSE;
+
+    /* Retrieve the security policy */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
+    if(NULL == pSCCfg)
+        return;
+
+    /* If security policy is not None, generate the nonce */
+    if(strncmp(pSCCfg->reqSecuPolicyUri, SecurityPolicy_None_URI, strlen(SecurityPolicy_None_URI)+1) != 0) /* Including the terminating \0 */
+    {
+        /* Retrieve ptrs to Nonce and Signature */
+        if(session_core_1_bs__p_session != unique_session.id)
+            return;
+        pSession = &unique_session;
+        pNonce = &pSession->NonceClient;
+
+        /* Create the CryptoProvider */
+        /* TODO: don't create it each time, maybe add it to the session */
+        pProvider = CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
+
+        /* Ask the CryptoProvider for LENGTH_NONCE random bytes */
+        SOPC_ByteString_Clear(pNonce);
+        pNonce->Length = LENGTH_NONCE;
+        pNonce->Data = malloc(sizeof(SOPC_Byte)*pNonce->Length);
+        if(NULL == pNonce->Data)
+            return;
+        if(STATUS_OK != CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data))
+            /* TODO: Should we clean half allocated things? */
+            return;
+
+        /* Clean */
+        /* TODO: with the many previous returns, you do not always free it */
+        CryptoProvider_Free(pProvider);
+        pProvider = NULL;
+    }
+
+    /* Success */
+    *session_core_1_bs__valid = !FALSE;
+}
+
+
+void session_core_1_bs__getall_NonceClient(
+   const constants__t_session_i session_core_1_bs__p_session,
+   t_bool * const session_core_1_bs__valid,
+   constants__t_Nonce_i * const session_core_1_bs__nonce)
+{
+    if(NULL == unique_session.NonceServer.Data) {
+        *session_core_1_bs__valid = FALSE;
+        *session_core_1_bs__nonce = constants__c_Nonce_indet;
+    }
+    else {
+        *session_core_1_bs__valid = !FALSE;
+        *session_core_1_bs__nonce = (constants__t_Nonce_i *)(&unique_session.NonceServer);
+    }
+}
+
+
+void session_core_1_bs__drop_NonceClient(
+   const constants__t_session_i session_core_1_bs__p_session)
+{
+    SOPC_ByteString_Clear(&unique_session.NonceServer);
+}
+
+
+void session_core_1_bs__client_create_session_check_crypto(
+   const constants__t_session_i session_core_1_bs__p_session,
+   const constants__t_channel_config_idx_i session_core_1_bs__p_channel_config_idx,
+   const constants__t_msg_i session_core_1_bs__p_resp_msg,
+   t_bool * const session_core_1_bs__valid)
+{
+    CryptoProvider *pProvider = NULL;
+    const SOPC_SecureChannel_Config *pSCCfg = NULL;
+    const session *pSession = NULL;
+    const SOPC_ByteString *pNonce = NULL;
+    const OpcUa_SignatureData *pSignCandid = NULL;
+    uint8_t *pDerCli = NULL;
+    uint32_t lenDerCli = 0;
+    uint8_t *pToVerify = NULL;
+    uint32_t lenToVerify = 0;
+    const OpcUa_CreateSessionResponse *pResp = NULL;
+    const Certificate *pCrtCli = NULL, *pCrtSrv = NULL;
+    const char *szSignUri = NULL;
+    AsymmetricKey *pKeyCrtSrv = NULL;
+
+    /* Default answer */
+    *session_core_1_bs__valid = FALSE;
+
+    /* Retrieve the security policy and mode */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
+    if(NULL == pSCCfg)
+        return;
+
+    /* Retrieve the certificates */
+    pCrtCli = pSCCfg->crt_cli;
+    pCrtSrv = pSCCfg->crt_srv;
+    if(NULL == pCrtSrv || NULL == pCrtCli)
+        return;
+
+    /* TODO: Verify that the server certificate in the Response is the same as the one stored with the SecureChannel */
+
+    /* Retrieve ptrs to ClientNonce and ServerSignature */
+    if(session_core_1_bs__p_session != unique_session.id)
+        return;
+    pSession = &unique_session;
+    pNonce = &pSession->NonceClient;
+    pResp = (OpcUa_CreateSessionResponse *)((SOPC_Toolkit_Msg *)session_core_1_bs__p_resp_msg)->msgStruct;
+    pSignCandid = &pResp->ServerSignature;
+
+    /* Build CryptoProvider */
+    /* TODO: don't create it each time, maybe add it to the session */
+    pProvider = CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
+
+    /* Verify signature algorithm URI */
+    szSignUri = CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider);
+    pSignCandid = &pResp->ServerSignature;
+    if(strncmp((char *)pSignCandid->Algorithm.Data, szSignUri, strlen(szSignUri)+1) == 0)
+    {
+        /* Build signed data (client certificate ++ client nonce) */
+        /* a) Get Der of client certificate */
+        if(STATUS_OK == KeyManager_Certificate_CopyDER(pCrtCli, &pDerCli, &lenDerCli))
+        {
+            /* b) Concat Nonce */
+            lenToVerify = lenDerCli + LENGTH_NONCE;
+            pToVerify = (uint8_t *)malloc(sizeof(uint8_t)*lenToVerify);
+            if(NULL != pToVerify)
+            {
+                /* TODO: The KeyManager API should be changed to avoid these useless copies */
+                memcpy(pToVerify, pDerCli, lenDerCli);
+                memcpy(pToVerify+lenDerCli, pNonce->Data, pNonce->Length);
+
+                /* Verify given signature */
+                /* a) Retrieve public key from certificate */
+                if(STATUS_OK == KeyManager_AsymmetricKey_CreateFromCertificate(pCrtSrv, &pKeyCrtSrv))
+                {
+                    /* b) Call AsymVerify */
+                    if(STATUS_OK == CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify,
+                                                                    pKeyCrtSrv, pSignCandid->Signature.Data, pSignCandid->Signature.Length))
+                        *session_core_1_bs__valid = !FALSE;
+                }
+            }
+        }
+    }
+
+    /* Clear */
+    KeyManager_AsymmetricKey_Free(pKeyCrtSrv);
+    free(pToVerify);
+    free(pDerCli);
+    CryptoProvider_Free(pProvider);
 }
 

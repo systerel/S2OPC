@@ -246,6 +246,38 @@ void message_out_bs__write_create_session_req_msg_endpointUrl(
   assert(STATUS_OK == SOPC_String_CopyFromCString(&createSessionReq->EndpointUrl, chConfig->url));
 }
 
+void message_out_bs__write_create_session_req_msg_crypto(
+   const constants__t_msg_i message_out_bs__p_req_msg,
+   const constants__t_channel_config_idx_i message_out_bs__p_channel_config_idx,
+   const constants__t_Nonce_i message_out_bs__p_nonce)
+{
+    SOPC_SecureChannel_Config *pSCCfg = NULL;
+    OpcUa_CreateSessionRequest *pReq = (OpcUa_CreateSessionRequest *)((SOPC_Toolkit_Msg *)message_out_bs__p_req_msg)->msgStruct;
+    const Certificate *pCrtCli = NULL;
+
+    /* Retrieve the certificate */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
+    if(NULL == pSCCfg)
+        return;
+    pCrtCli = pSCCfg->crt_cli;
+    if(NULL == pCrtCli)
+        return;
+
+    /* Write the Certificate */
+    SOPC_ByteString_Clear(&pReq->ClientCertificate);
+    /* TODO: this is a malloc error, this can fail, and the B model should be notified */
+    if(STATUS_OK != KeyManager_Certificate_CopyDER(pCrtCli, &pReq->ClientCertificate.Data,
+                                                   (uint32_t *)&pReq->ClientCertificate.Length))
+        return;
+
+    /* Write the nonce */
+    SOPC_ByteString_Clear(&pReq->ClientNonce);
+    /* TODO: this can also fail because of the malloc */
+    if(STATUS_OK != SOPC_ByteString_Copy(&pReq->ClientNonce, (SOPC_ByteString *)message_out_bs__p_nonce))
+        return;
+}
+
+
 void message_out_bs__write_create_session_msg_session_token(
    const constants__t_msg_i message_out_bs__msg,
    const constants__t_session_token_i message_out_bs__session_token) {
