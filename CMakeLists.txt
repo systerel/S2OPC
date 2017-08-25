@@ -45,6 +45,8 @@ file(GLOB_RECURSE UASTACK_SRCS
     "toolkit/src/genc/*.c"
     "toolkit/src/impl/*.c"
     "toolkit/src/test/*.c"
+    "src/configuration/*c"
+    "src/sockets/*c"
 )
 
 add_library(ingopcs STATIC ${PLATFORM_SRCS} ${UASTACK_SRCS})
@@ -60,6 +62,8 @@ set(INGOPCS_PUBLIC_INCLUDES
     "toolkit/src/genc"
     "toolkit/src/impl"
     "toolkit/src/test"
+    "src/configuration"
+    "src/sockets"
 )
 set(INGOPCS_PRIVATE_INCLUDES
     "stack/src/platforms/${PLATFORM_DIR}"
@@ -82,43 +86,43 @@ endif()
 # Stack
 
 # Stub client
-add_executable(stub_client_ingopcs "stack/stub_client/stub_client_ingopcs.c")
-target_link_libraries(stub_client_ingopcs PRIVATE ingopcs)
-target_include_directories(stub_client_ingopcs BEFORE
-    PRIVATE "stack/stub_client"
-)
+#add_executable(stub_client_ingopcs "stack/stub_client/stub_client_ingopcs.c")
+#target_link_libraries(stub_client_ingopcs PRIVATE ingopcs)
+#target_include_directories(stub_client_ingopcs BEFORE
+#    PRIVATE "stack/stub_client"
+#)
 
 # Stub server
-add_executable(stub_server_ingopcs "stack/stub_server/stub_server_ingopcs.c")
-target_link_libraries(stub_server_ingopcs PRIVATE ingopcs)
-target_include_directories(stub_server_ingopcs BEFORE
-    PRIVATE "stack/stub_server"
-)
+#add_executable(stub_server_ingopcs "stack/stub_server/stub_server_ingopcs.c")
+#target_link_libraries(stub_server_ingopcs PRIVATE ingopcs)
+#target_include_directories(stub_server_ingopcs BEFORE
+#    PRIVATE "stack/stub_server"
+#)
 
 # Client/Server tests
-add_custom_target(client_server_test
-    "./stack/run_client_server_test.sh"
-    DEPENDS stub_client_ingopcs stub_server_ingopcs
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    COMMENT "Runs the client/server tests")
+#add_custom_target(client_server_test
+#    "./stack/run_client_server_test.sh"
+#    DEPENDS stub_client_ingopcs stub_server_ingopcs
+#    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#    COMMENT "Runs the client/server tests")
 
 # Unit tests
-if (NOT CMAKE_CROSSCOMPILING)
-    file(GLOB_RECURSE INTERNAL_TESTS_SRCS "stack/test/ingopcs/*.c")
-    add_executable(check_stack ${INTERNAL_TESTS_SRCS})
-    target_include_directories(check_stack PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
-    target_link_libraries(check_stack PRIVATE ingopcs check)
-endif()
+#if (NOT CMAKE_CROSSCOMPILING)
+#    file(GLOB_RECURSE INTERNAL_TESTS_SRCS "stack/test/ingopcs/*.c")
+#    add_executable(check_stack ${INTERNAL_TESTS_SRCS})
+#    target_include_directories(check_stack PRIVATE ${INGOPCS_PRIVATE_INCLUDES})
+#    target_link_libraries(check_stack PRIVATE ingopcs check)
+#endif()
 
 # Toolkit
-add_executable(toolkit_test_client "toolkit/src/test/toolkit_test_client.c")
-target_link_libraries(toolkit_test_client PRIVATE ingopcs)
-
-add_executable(toolkit_test_server "toolkit/src/test/toolkit_test_server.c")
-target_link_libraries(toolkit_test_server PRIVATE ingopcs)
-
-add_executable(toolkit_test_read "toolkit/src/test/toolkit_test_read.c")
-target_link_libraries(toolkit_test_read PRIVATE ingopcs)
-
-add_executable(toolkit_test_write "toolkit/src/test/toolkit_test_write.c")
-target_link_libraries(toolkit_test_write PRIVATE ingopcs)
+#add_executable(toolkit_test_client "toolkit/src/test/toolkit_test_client.c")
+#target_link_libraries(toolkit_test_client PRIVATE ingopcs)
+#
+#add_executable(toolkit_test_server "toolkit/src/test/toolkit_test_server.c")
+#target_link_libraries(toolkit_test_server PRIVATE ingopcs)
+#
+#add_executable(toolkit_test_read "toolkit/src/test/toolkit_test_read.c")
+#target_link_libraries(toolkit_test_read PRIVATE ingopcs)
+#
+#add_executable(toolkit_test_write "toolkit/src/test/toolkit_test_write.c")
+#target_link_libraries(toolkit_test_write PRIVATE ingopcs)

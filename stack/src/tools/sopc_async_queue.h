@@ -24,8 +24,13 @@ typedef struct SOPC_AsyncQueue SOPC_AsyncQueue;
 
 SOPC_StatusCode SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char*  queueName);
 
+/** @brief: enqueue in FIFO mode */
 SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueue(SOPC_AsyncQueue* queue,
                                                 void*            element);
+
+/** @brief: enqueue in LIFO mode */
+SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueueFirstOut(SOPC_AsyncQueue* queue,
+                                                        void*            element);
 
 SOPC_StatusCode SOPC_AsyncQueue_BlockingDequeue(SOPC_AsyncQueue* queue,
                                                 void**           element);
@@ -34,6 +39,7 @@ SOPC_StatusCode SOPC_AsyncQueue_BlockingDequeue(SOPC_AsyncQueue* queue,
 SOPC_StatusCode SOPC_AsyncQueue_NonBlockingDequeue(SOPC_AsyncQueue* queue,
                                                    void**           element);
 
+/** @brief: clear the queue by freeing every present element and free the asynchronous queue */
 void SOPC_AsyncQueue_Free(SOPC_AsyncQueue** queue);
 
 #endif /* SOPC_ASYNC_QUEUE_H_ */

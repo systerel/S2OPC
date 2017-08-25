@@ -18,6 +18,7 @@
 #include "sopc_async_queue.h"
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "singly_linked_list.h"
 #include "sopc_mutexes.h"
@@ -66,14 +67,21 @@ SOPC_StatusCode SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char*  queue
     return status;
 }
 
-SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueue(SOPC_AsyncQueue* queue,
-                                                void*            element)
+static SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQueue* queue,
+                                                                  void*            element,
+                                                                  bool             firstOut)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    void* enqueuedElt = NULL;
     if(NULL != queue && NULL != element){
         status = Mutex_Lock(&queue->queueMutex);
         if(STATUS_OK == status){
-            if(element == SLinkedList_Append(queue->queueList, 0, element)){
+            if(firstOut == false){
+                enqueuedElt = SLinkedList_Append(queue->queueList, 0, element);
+            }else{
+                enqueuedElt = SLinkedList_Prepend(queue->queueList, 0, element);
+            }
+            if(element == enqueuedElt){
                 if(queue->waitingThreads > 0){
                     Condition_SignalAll(&queue->queueCond);
                 }
@@ -84,6 +92,22 @@ SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueue(SOPC_AsyncQueue* queue,
         }
     }
     return status;
+}
+
+SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueueFirstOut(SOPC_AsyncQueue* queue,
+                                                        void*            element)
+{
+    return SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(queue,
+                                                      element,
+                                                      true);
+}
+
+SOPC_StatusCode SOPC_AsyncQueue_BlockingEnqueue(SOPC_AsyncQueue* queue,
+                                                void*            element)
+{
+    return SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(queue,
+                                                      element,
+                                                      false);
 }
 
 static SOPC_StatusCode SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue,
