@@ -94,7 +94,7 @@ typedef enum SOPC_App_AddSpace_Event {
 typedef enum SOPC_App_AddSpace_LocalService_Result {
   /* Server application local service results */
   AS_LOCAL_READ_RESULT,
-  AS_WRITE_RESULT,
+  AS_LOCAL_WRITE_RESULT,
 } SOPC_App_AddSpace_LocalService_Result;
 
 /// INTERNAL USE ONLY ////
