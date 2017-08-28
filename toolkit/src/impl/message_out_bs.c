@@ -252,7 +252,7 @@ void message_out_bs__write_create_session_req_msg_crypto(
    const constants__t_Nonce_i message_out_bs__p_nonce)
 {
     SOPC_SecureChannel_Config *pSCCfg = NULL;
-    OpcUa_CreateSessionRequest *pReq = (OpcUa_CreateSessionRequest *)((SOPC_Toolkit_Msg *)message_out_bs__p_req_msg)->msgStruct;
+    OpcUa_CreateSessionRequest *pReq = (OpcUa_CreateSessionRequest *)message_out_bs__p_req_msg;
     const Certificate *pCrtCli = NULL;
 
     /* Retrieve the certificate */

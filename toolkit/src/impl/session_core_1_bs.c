@@ -392,7 +392,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
     OpcUa_SignatureData *pSign = NULL;
     uint8_t *pToSign = NULL;
     uint32_t lenToSign = 0;
-    OpcUa_CreateSessionRequest *pReq = NULL;
+    OpcUa_CreateSessionRequest *pReq = (OpcUa_CreateSessionRequest *)session_core_1_bs__p_req_msg;
 
     *session_core_1_bs__valid = FALSE;
     *session_core_1_bs__signature = constants__c_SignatureData_indet;
@@ -434,7 +434,6 @@ void session_core_1_bs__server_create_session_req_do_crypto(
 
         /* Use the server certificate to sign the client certificate ++ client nonce */
         /* a) Prepare the buffer to sign */
-        pReq = (OpcUa_CreateSessionRequest *)session_core_1_bs__p_req_msg;
         lenToSign = pReq->ClientCertificate.Length + pReq->ClientNonce.Length;
         pToSign = malloc(sizeof(uint8_t)*lenToSign);
         if(NULL == pToSign)
@@ -568,7 +567,7 @@ void session_core_1_bs__client_create_session_check_crypto(
     uint32_t lenDerCli = 0;
     uint8_t *pToVerify = NULL;
     uint32_t lenToVerify = 0;
-    const OpcUa_CreateSessionResponse *pResp = NULL;
+    const OpcUa_CreateSessionResponse *pResp = (OpcUa_CreateSessionResponse *)session_core_1_bs__p_resp_msg;
     const Certificate *pCrtCli = NULL, *pCrtSrv = NULL;
     const char *szSignUri = NULL;
     AsymmetricKey *pKeyCrtSrv = NULL;
@@ -594,7 +593,6 @@ void session_core_1_bs__client_create_session_check_crypto(
         return;
     pSession = &unique_session;
     pNonce = &pSession->NonceClient;
-    pResp = (OpcUa_CreateSessionResponse *)((SOPC_Toolkit_Msg *)session_core_1_bs__p_resp_msg)->msgStruct;
     pSignCandid = &pResp->ServerSignature;
 
     /* Build CryptoProvider */
