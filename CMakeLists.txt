@@ -12,6 +12,7 @@ add_subdirectory(libraries/mbedtls-2.3.0)
 # Compiler options
 # C99 compliant
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -pedantic")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Wextra -O0")
 
 # Core library
 if(UNIX)
@@ -45,8 +46,10 @@ file(GLOB_RECURSE UASTACK_SRCS
     "toolkit/src/genc/*.c"
     "toolkit/src/impl/*.c"
     "toolkit/src/test/*.c"
-    "src/configuration/*c"
-    "src/sockets/*c"
+    "src/configuration/*.c"
+    "src/helpers/*.c"
+    "src/sockets/*.c"
+    "src/secure_channels/*.c"
 )
 
 add_library(ingopcs STATIC ${PLATFORM_SRCS} ${UASTACK_SRCS})
@@ -63,7 +66,9 @@ set(INGOPCS_PUBLIC_INCLUDES
     "toolkit/src/impl"
     "toolkit/src/test"
     "src/configuration"
+    "src/helpers"
     "src/sockets"
+    "src/secure_channels"
 )
 set(INGOPCS_PRIVATE_INCLUDES
     "stack/src/platforms/${PLATFORM_DIR}"
@@ -126,3 +131,25 @@ endif()
 #
 #add_executable(toolkit_test_write "toolkit/src/test/toolkit_test_write.c")
 #target_link_libraries(toolkit_test_write PRIVATE ingopcs)
+
+# Sockets layer (stubbed) tests
+file(GLOB_RECURSE SOCKETS_SRC
+    "src/helpers/*.c"
+    "src/sockets/*.c"
+)
+
+file(GLOB_RECURSE OLD_STACK_DEP_SRC
+    ${PLATFORM_SRCS}
+    "stack/src/tools/*.c"
+    "stack/src/core_tools/sopc_event_dispatcher_manager.c")
+
+file(GLOB_RECURSE SOCKETS_TEST
+     "tests/sockets/*.c")
+
+add_executable(check_sockets ${OLD_STACK_DEP_SRC}
+                             ${SOCKETS_SRC}
+                             ${SOCKETS_TEST})
+target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
+                                                 ${INGOPCS_PUBLIC_INCLUDES} 
+                                                 ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(check_sockets PRIVATE pthread check)
