@@ -49,6 +49,10 @@ typedef struct SOPC_Socket {
     void*                         nextConnectAttemptAddr; // Next connection attempt address
     // number of connection for a listener (state = LISTENING)
     uint32_t                      listenerConnections;
+    // false if it is a client connection, otherwise it is a server connection (linked to a listener)
+    bool                          isServerConnection;
+    // define if isServerConnection != false
+    uint32_t                      listenerSocketIdx;
 } SOPC_Socket;
 
 /** @brief Array containing all sockets that can be used */

@@ -78,6 +78,9 @@ void SOPC_SocketsInternalContext_CloseSocketNoLock(uint32_t socketIdx){
         Socket_Close(&socket->sock);
         socket->isUsed = false;
         socket->state = SOCKET_STATE_CLOSED;
+        socket->isServerConnection = false;
+        socket->listenerSocketIdx = 0;
+        socket->listenerConnections = 0;
         if(socket->connectAddrs != NULL){
             Socket_AddrInfoDelete((Socket_AddressInfo**) &socket->connectAddrs);
         }

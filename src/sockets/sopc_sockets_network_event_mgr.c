@@ -130,7 +130,9 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
 
                         }else if(uaSock->state == SOCKET_STATE_LISTENING){
                             // TODO: check maximum number of sockets and increment it !
-                            acceptSock = SOPC_SocketsInternalContext_GetFreeSocketNoLock(false);
+                            if(uaSock->listenerConnections < SOPC_MAX_SOCKETS_CONNECTIONS){
+                                acceptSock = SOPC_SocketsInternalContext_GetFreeSocketNoLock(false);
+                            }
                             if(acceptSock == NULL){
                                 // TODO: log refusing new sockets due to limit
                             }else{
@@ -138,6 +140,8 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                                                               1, // Non blocking socket
                                                               &acceptSock->sock)){
                                     acceptSock->isUsed = true;
+                                    acceptSock->isServerConnection = true;
+                                    acceptSock->listenerSocketIdx = uaSock->socketIdx;
                                     acceptSock->state = SOCKET_STATE_ACCEPTED;
                                     // Temporarly copy endpoint description config index (waiting for SC connection index)
                                     acceptSock->connectionId = uaSock->connectionId;
@@ -145,7 +149,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                                     SOPC_Sockets_EnqueueEvent(INT_SOCKET_ACCEPTED,
                                                               acceptSock->socketIdx,
                                                               NULL,
-                                                              0);
+                                                              (int32_t) uaSock->socketIdx);
                                 }
                             }
                         }else{

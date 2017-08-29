@@ -406,6 +406,15 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         break;
     case SOCKET_CLOSE:
         /* id = socket index */
+        socketElt = &socketsArray[eltId];
+
+        if(socketElt->isServerConnection != false){
+            // Management of number of connection on a listener
+            if(socketsArray[socketElt->socketIdx].state == SOCKET_STATE_LISTENING){
+                socketsArray[socketElt->socketIdx].listenerConnections--;
+            }
+        }
+
         SOPC_SocketsInternalContext_CloseSocket(eltId);
         break;
     case SOCKET_WRITE:
@@ -453,6 +462,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
 
         // State was set to accepted by network event manager
         assert(socketElt->state == SOCKET_STATE_ACCEPTED);
+        assert(socketsArray[(uint32_t) auxParam].state == SOCKET_STATE_LISTENING);
+        // Increment number of connections on listener
+        socketsArray[(uint32_t) auxParam].listenerConnections++;
 
         // Send to the secure channel listener state manager and wait for SOCKET_ACCEPTED_CONNECTION for association with connection index
         SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_CONNECTION,
@@ -504,6 +516,12 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
                                              NULL,
                                              (int32_t) eltId);
         }else{
+            if(socketElt->isServerConnection != false){
+                // Management of number of connection on a listener
+                if(socketsArray[socketElt->socketIdx].state == SOCKET_STATE_LISTENING){
+                    socketsArray[socketElt->socketIdx].listenerConnections--;
+                }
+            }
             SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE,
                                              socketElt->connectionId,
                                              NULL,
