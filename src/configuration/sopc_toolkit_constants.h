@@ -18,6 +18,8 @@
 #ifndef SOPC_TOOLKIT_CONSTANTS_H_
 #define SOPC_TOOLKIT_CONSTANTS_H_
 
+#include <stdbool.h>
+
 /* COMMON CONFIGURATION */
 
 /** @brief Maximum Message Length used */
@@ -36,5 +38,23 @@
 #ifndef SOPC_MAX_SOCKETS_CONNECTIONS
 # define SOPC_MAX_SOCKETS_CONNECTIONS  50
 #endif /* SOPC_MAX_SOCKETS_CONNECTIONS */
+
+/* SECURE CHANNEL CONFIGURATION */
+
+/** @brief Maximum number of endpoint description configured */
+#ifndef SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS
+# define SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS  10
+#endif /* SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS */
+
+#ifndef SOPC_LISTENER_LISTEN_ALL_INTERFACES
+# define SOPC_LISTENER_LISTEN_ALL_INTERFACES  true
+#endif /* SOPC_LISTENER_LISTEN_ALL_INTERFACES */
+
+
+/** @brief Maximum number of secure channel connections established (should be < SOPC_MAX_SOCKETS) */
+#ifndef SOPC_MAX_SECURE_CONNECTIONS
+# define SOPC_MAX_SECURE_CONNECTIONS  20
+#endif /* SOPC_MAX_SECURE_CONNECTIONS */
+
 
 #endif /* SOPC_TOOLKIT_CONSTANTS_H_ */

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2017 Systerel and others.
+ *  Copyright (C) 2016 Systerel and others.
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_SOCKETS_NETWORK_EVENT_MGR_H_
-#define SOPC_SOCKETS_NETWORK_EVENT_MGR_H_
+#include <stddef.h>
+#include <string.h>
 
-void SOPC_SocketsNetworkEventMgr_Initialize(void);
-void SOPC_SocketsNetworkEventMgr_Clear(void);
+#include "sopc_secure_channels_internal_ctx.h"
 
+SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
+SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS];
 
-#define CYCLE_TIMEOUT_MS 500
+void SOPC_SecureChannelsInternalContext_Initialize(){
+    memset(secureListenersArray, 0, sizeof(SOPC_SecureListener) * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
+    memset(secureConnectionsArray, 0, sizeof(SOPC_SecureConnection) * SOPC_MAX_SECURE_CONNECTIONS);
+}
 
-#endif /* SOPC_SOCKETS_NETWORK_EVENT_MGR_H_ */
+void SOPC_SecureChannelsInternalContext_Clear(){
+}

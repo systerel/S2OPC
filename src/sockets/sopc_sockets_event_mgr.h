@@ -18,11 +18,7 @@
 #ifndef SOPC_SOCKETS_EVENT_MGR_H_
 #define SOPC_SOCKETS_EVENT_MGR_H_
 
-#include <stdbool.h>
 #include <stdint.h>
-
-#include "sopc_sockets_internal_ctx.h"
-#include "p_sockets.h"
 
 void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
                                       uint32_t eltId,

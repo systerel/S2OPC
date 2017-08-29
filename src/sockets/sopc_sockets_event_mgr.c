@@ -22,9 +22,14 @@
 #include "sopc_sockets_event_mgr.h"
 
 #include "sopc_sockets_api.h"
+#include "sopc_sockets_internal_ctx.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_buffer.h"
 #include "sopc_helper_uri.h"
+
+#include "p_sockets.h"
+
+
 
 static bool ParseURI (const char* uri, char** hostname, char** port){
     bool result = false;
