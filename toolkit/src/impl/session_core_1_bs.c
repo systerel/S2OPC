@@ -35,7 +35,6 @@
 #include "sopc_toolkit_config.h"
 
 #include "session_core_1_bs.h"
-
 #include "channel_mgr_bs.h"
 
 #define LENGTH_NONCE 32
@@ -394,7 +393,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
     uint32_t lenToSign = 0;
     OpcUa_CreateSessionRequest *pReq = (OpcUa_CreateSessionRequest *)session_core_1_bs__p_req_msg;
 
-    *session_core_1_bs__valid = FALSE;
+    *session_core_1_bs__valid = false;
     *session_core_1_bs__signature = constants__c_SignatureData_indet;
 
     /* Retrieve the security policy and mode */
@@ -464,7 +463,7 @@ void session_core_1_bs__server_create_session_req_do_crypto(
         pProvider = NULL;
     }
 
-    *session_core_1_bs__valid = !FALSE;
+    *session_core_1_bs__valid = true;
 }
 
 
@@ -478,9 +477,12 @@ void session_core_1_bs__get_NonceServer(
 
 void session_core_1_bs__client_create_session_req_do_crypto(
    const constants__t_session_i session_core_1_bs__p_session,
+   const constants__t_channel_i session_core_1_bs__p_channel,
    const constants__t_channel_config_idx_i session_core_1_bs__p_channel_config_idx,
-   t_bool * const session_core_1_bs__valid)
+   t_bool * const session_core_1_bs__valid,
+   t_bool * const session_core_1_bs__nonce_needed)
 {
+    (void) session_core_1_bs__p_channel;
     /* Produce the Nonce when SC:Sec_pol is not "None" */
     CryptoProvider *pProvider = NULL;
     SOPC_SecureChannel_Config *pSCCfg = NULL;
@@ -488,7 +490,8 @@ void session_core_1_bs__client_create_session_req_do_crypto(
     SOPC_ByteString *pNonce = NULL;
 
     /* Default answer */
-    *session_core_1_bs__valid = FALSE;
+    *session_core_1_bs__valid = false;
+    *session_core_1_bs__nonce_needed = false;
 
     /* Retrieve the security policy */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
@@ -498,6 +501,7 @@ void session_core_1_bs__client_create_session_req_do_crypto(
     /* If security policy is not None, generate the nonce */
     if(strncmp(pSCCfg->reqSecuPolicyUri, SecurityPolicy_None_URI, strlen(SecurityPolicy_None_URI)+1) != 0) /* Including the terminating \0 */
     {
+        *session_core_1_bs__nonce_needed = true;
         /* Retrieve ptrs to Nonce and Signature */
         if(session_core_1_bs__p_session != unique_session.id)
             return;
@@ -525,23 +529,15 @@ void session_core_1_bs__client_create_session_req_do_crypto(
     }
 
     /* Success */
-    *session_core_1_bs__valid = !FALSE;
+    *session_core_1_bs__valid = true;
 }
 
 
-void session_core_1_bs__getall_NonceClient(
+void session_core_1_bs__get_NonceClient(
    const constants__t_session_i session_core_1_bs__p_session,
-   t_bool * const session_core_1_bs__valid,
    constants__t_Nonce_i * const session_core_1_bs__nonce)
 {
-    if(NULL == unique_session.NonceServer.Data) {
-        *session_core_1_bs__valid = FALSE;
-        *session_core_1_bs__nonce = constants__c_Nonce_indet;
-    }
-    else {
-        *session_core_1_bs__valid = !FALSE;
-        *session_core_1_bs__nonce = (constants__t_Nonce_i *)(&unique_session.NonceServer);
-    }
+    *session_core_1_bs__nonce = (constants__t_Nonce_i *)(&unique_session.NonceServer);
 }
 
 
@@ -573,7 +569,7 @@ void session_core_1_bs__client_create_session_check_crypto(
     AsymmetricKey *pKeyCrtSrv = NULL;
 
     /* Default answer */
-    *session_core_1_bs__valid = FALSE;
+    *session_core_1_bs__valid = false;
 
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__p_channel_config_idx);
@@ -624,7 +620,7 @@ void session_core_1_bs__client_create_session_check_crypto(
                     /* b) Call AsymVerify */
                     if(STATUS_OK == CryptoProvider_AsymmetricVerify(pProvider, pToVerify, lenToVerify,
                                                                     pKeyCrtSrv, pSignCandid->Signature.Data, pSignCandid->Signature.Length))
-                        *session_core_1_bs__valid = !FALSE;
+                        *session_core_1_bs__valid = true;
                 }
             }
         }

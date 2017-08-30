@@ -17,10 +17,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "util_b2c.h"
 
 #include "sopc_types.h"
+#include "crypto_profiles.h"
 
 void util_message__get_encodeable_type(const constants__t_msg_type_i message__msg_type,
                                        SOPC_EncodeableType** reqEncType,
@@ -216,5 +218,28 @@ t_bool util_status_code__C_to_B(SOPC_StatusCode status,
     success = false;
   }
   return success;
+}
+
+
+bool util_channel__SecurityPolicy_C_to_B(const char *uri,
+                                         constants__t_SecurityPolicy *secpol)
+{
+    if(NULL == uri || NULL == secpol)
+        return false;
+
+    if(strncmp(uri, SecurityPolicy_None_URI, strlen(SecurityPolicy_None_URI)) == 0) {
+        *secpol = constants__e_secpol_None;
+        return true;
+    }
+    if(strncmp(uri, SecurityPolicy_Basic256_URI, strlen(SecurityPolicy_Basic256_URI)) == 0) {
+        *secpol = constants__e_secpol_B256;
+        return true;
+    }
+    if(strncmp(uri, SecurityPolicy_Basic256Sha256_URI, strlen(SecurityPolicy_Basic256Sha256_URI)) == 0) {
+        *secpol = constants__e_secpol_B256S256;
+        return true;
+    }
+
+    return false;
 }
 

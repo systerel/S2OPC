@@ -18,6 +18,8 @@
 #ifndef _util_b2c_h
 #define _util_b2c_h
 
+#include <stdbool.h>
+
 #include "sopc_encodeable.h"
 #include "opcua_statuscodes.h"
 #include "constants.h"
@@ -35,5 +37,8 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus,
 
 t_bool util_status_code__C_to_B(SOPC_StatusCode status,
                                 constants__t_StatusCode_i* bstatus);
+
+bool util_channel__SecurityPolicy_C_to_B(const char *uri,
+                                         constants__t_SecurityPolicy *secpol);
 
 #endif /* _util_b2c_h */

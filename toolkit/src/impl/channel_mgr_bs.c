@@ -29,10 +29,10 @@
 #include "sopc_endpoint.h"
 
 #include "io_dispatch_mgr.h"
-
 #include "channel_mgr_bs.h"
 
 #include "config_toolkit.h"
+#include "util_b2c.h"
 
 #include "sopc_toolkit_config.h"
 #include "sopc_services_events.h"
@@ -267,3 +267,22 @@ void channel_mgr_bs__server_get_endpoint_config(
     assert(false);
   }
 }
+
+
+void channel_mgr_bs__get_SecurityPolicy(
+   const constants__t_channel_i channel_mgr_bs__channel,
+   constants__t_SecurityPolicy * const channel_mgr_bs__secpol)
+{
+    SOPC_SecureChannel_Config *pSCCfg = NULL;
+
+    /* TODO: exit is not a solution. Can this really fail? */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(unique_channel.configIdx);
+    if(NULL == pSCCfg)
+        exit(1);
+
+    /* TODO: The following assert is asserted by the PRE of the operation */
+    assert(channel_mgr_bs__channel == (t_entier4) unique_channel.id);
+
+    util_channel__SecurityPolicy_C_to_B(pSCCfg->reqSecuPolicyUri, channel_mgr_bs__secpol);
+}
+
