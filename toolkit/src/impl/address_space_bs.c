@@ -156,16 +156,81 @@ void address_space_bs__get_Value_StatusCode(
 }
 
 
-void address_space_bs__get_NodeClass(
-   const constants__t_Node_i address_space_bs__node,
-   constants__t_NodeClass_i * const address_space_bs__sc)
-{
-    *address_space_bs__sc = a_NodeClass[address_space_bs__node-1];
-}
-
-
 void address_space_bs__read_AddressSpace_free_value(
    const constants__t_Variant_i address_space_bs__val)
 {
     free(address_space_bs__val);
 }
+
+
+void address_space_bs__get_BrowseName(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants__t_QualifiedName_i * const address_space_bs__p_browse_name)
+{
+}
+
+
+void address_space_bs__get_DisplayName(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants__t_LocalizedText_i * const address_space_bs__p_display_name)
+{
+}
+
+
+void address_space_bs__get_NodeClass(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants__t_NodeClass_i * const address_space_bs__p_node_class)
+{
+    *address_space_bs__p_node_class = a_NodeClass[address_space_bs__p_node-1];
+}
+
+
+void address_space_bs__get_TypeDefinition(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants__t_ExpandedNodeId_i * const address_space_bs__p_type_def)
+{
+}
+
+
+void address_space_bs__get_Reference_ReferenceType(
+   const constants__t_Reference_i address_space_bs__p_ref,
+   constants__t_NodeId_i * const address_space_bs__p_RefType)
+{
+}
+
+
+void address_space_bs__get_Reference_TargetNode(
+   const constants__t_Reference_i address_space_bs__p_ref,
+   constants__t_ExpandedNodeId_i * const address_space_bs__p_TargetNode)
+{
+}
+
+
+void address_space_bs__get_Reference_IsForward(
+   const constants__t_Reference_i address_space_bs__p_ref,
+   t_bool * const address_space_bs__p_IsForward)
+{
+}
+
+
+void address_space_bs__get_Node_RefIndexBegin(
+   const constants__t_Node_i address_space_bs__p_node,
+   t_entier4 * const address_space_bs__p_ref_index)
+{
+}
+
+
+void address_space_bs__get_Node_RefIndexEnd(
+   const constants__t_Node_i address_space_bs__p_node,
+   t_entier4 * const address_space_bs__p_ref_index)
+{
+}
+
+
+void address_space_bs__get_RefIndex_Reference(
+   const t_entier4 address_space_bs__p_ref_index,
+   constants__t_Reference_i * const address_space_bs__p_ref)
+{
+}
+
+

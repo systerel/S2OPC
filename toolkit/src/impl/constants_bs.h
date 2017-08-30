@@ -49,6 +49,10 @@ typedef void* constants_bs__t_session_token_i;
 #define constants_bs__t_user_i t_entier4
 typedef void* constants_bs__t_Nonce_i;
 typedef void* constants_bs__t_SignatureData_i;
+typedef void * constants_bs__t_ExpandedNodeId_i;
+typedef void * constants_bs__t_Reference_i;
+typedef void * constants_bs__t_LocalizedText_i;
+typedef void * constants_bs__t_QualifiedName_i;
 
 
 /*--------------------------
@@ -97,5 +101,17 @@ typedef void* constants_bs__t_SignatureData_i;
    INITIALISATION Clause
   ------------------------*/
 extern void constants_bs__INITIALISATION(void);
+
+/*--------------------
+   OPERATIONS Clause
+  --------------------*/
+extern void constants_bs__get_Is_SubType(
+   const constants_bs__t_NodeId_i constants_bs__p_type1,
+   const constants_bs__t_NodeId_i constants_bs__p_type2,
+   t_bool * const constants_bs__p_res);
+extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
+   const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
+   t_bool * const constants_bs__p_isvalid,
+   constants_bs__t_NodeId_i * const constants_bs__p_nid);
 
 #endif

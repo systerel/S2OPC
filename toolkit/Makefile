@@ -27,7 +27,9 @@ OBJS        =toolkit_header_init.o \
              service_write_decode_bs.o response_write_bs.o \
              service_get_endpoints_bs.o \
              gen_addspace.o util_variant.o \
-             testlib_read_response.o wrap_read.o testlib_write.o
+             testlib_read_response.o wrap_read.o testlib_write.o \
+             service_browse.o service_browse_seq.o service_browse_seq_it.o \
+             msg_browse_response_bs.o service_browse_decode_bs.o
 OBJS        += toolkit_header.o io_dispatch_mgr.o service_mgr.o session_mgr.o session_core.o session_core_1_bs.o \
                session_async_bs.o session_request_handle_bs.o \
                channel_mgr_bs.o request_handle_bs.o message_in_bs.o message_out_bs.o \
