@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 25/08/2017 18:29:39
+ Date                 : 30/08/2017 19:04:03
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -23,6 +23,7 @@
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
+#include "service_browse_seq.h"
 #include "service_get_endpoints_bs.h"
 #include "service_read.h"
 #include "service_response_cli_cb_bs.h"

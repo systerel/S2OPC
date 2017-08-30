@@ -2,7 +2,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 25/08/2017 18:29:45
+ Date                 : 30/08/2017 19:04:09
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -25,11 +25,16 @@
 #include "io_dispatch_mgr.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
+#include "msg_browse_response_bs.h"
 #include "msg_read_request.h"
 #include "msg_read_request_bs.h"
 #include "msg_read_response_bs.h"
 #include "request_handle_bs.h"
 #include "response_write_bs.h"
+#include "service_browse.h"
+#include "service_browse_decode_bs.h"
+#include "service_browse_seq.h"
+#include "service_browse_seq_it.h"
 #include "service_get_endpoints_bs.h"
 #include "service_mgr.h"
 #include "service_read.h"
@@ -54,10 +59,10 @@ void INITIALISATION(void) {
    message_in_bs__INITIALISATION();
    message_out_bs__INITIALISATION();
    request_handle_bs__INITIALISATION();
+   channel_mgr_bs__INITIALISATION();
    session_core_1_bs__INITIALISATION();
    session_core_orphaned_it_bs__INITIALISATION();
    session_core_channel_lost_it_bs__INITIALISATION();
-   channel_mgr_bs__INITIALISATION();
    session_core__INITIALISATION();
    session_request_handle_bs__INITIALISATION();
    session_async_bs__INITIALISATION();
@@ -74,6 +79,11 @@ void INITIALISATION(void) {
    service_read__INITIALISATION();
    service_response_cli_cb_bs__INITIALISATION();
    service_get_endpoints_bs__INITIALISATION();
+   msg_browse_response_bs__INITIALISATION();
+   service_browse__INITIALISATION();
+   service_browse_seq_it__INITIALISATION();
+   service_browse_decode_bs__INITIALISATION();
+   service_browse_seq__INITIALISATION();
    service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
    toolkit_header__INITIALISATION();

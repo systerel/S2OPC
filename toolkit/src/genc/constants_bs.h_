@@ -2,7 +2,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 25/08/2017 18:29:41
+ Date                 : 30/08/2017 19:04:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -19,9 +19,13 @@
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
+#define constants_bs__t_ExpandedNodeId_i t_entier4
+#define constants_bs__t_LocalizedText_i t_entier4
 #define constants_bs__t_NodeId_i t_entier4
 #define constants_bs__t_Node_i t_entier4
 #define constants_bs__t_Nonce_i t_entier4
+#define constants_bs__t_QualifiedName_i t_entier4
+#define constants_bs__t_Reference_i t_entier4
 #define constants_bs__t_SignatureData_i t_entier4
 #define constants_bs__t_UserId_i t_entier4
 #define constants_bs__t_Variant_i t_entier4
@@ -40,9 +44,13 @@
 /*--------------------------
    Added by the Translator
   --------------------------*/
+#define constants_bs__t_ExpandedNodeId_i_max (-1)
+#define constants_bs__t_LocalizedText_i_max (-1)
 #define constants_bs__t_NodeId_i_max (-1)
 #define constants_bs__t_Node_i_max (-1)
 #define constants_bs__t_Nonce_i_max (-1)
+#define constants_bs__t_QualifiedName_i_max (-1)
+#define constants_bs__t_Reference_i_max (-1)
 #define constants_bs__t_SignatureData_i_max (-1)
 #define constants_bs__t_UserId_i_max (-1)
 #define constants_bs__t_Variant_i_max (-1)
@@ -61,9 +69,13 @@
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays
   ------------------------------------------------*/
+#define constants_bs__c_ExpandedNodeId_indet 0
+#define constants_bs__c_LocalizedText_indet 0
 #define constants_bs__c_NodeId_indet 0
 #define constants_bs__c_Node_indet 0
 #define constants_bs__c_Nonce_indet 0
+#define constants_bs__c_QualifiedName_indet 0
+#define constants_bs__c_Reference_indet 0
 #define constants_bs__c_SignatureData_indet 0
 #define constants_bs__c_UserId_indet 0
 #define constants_bs__c_Variant_indet 0
@@ -84,5 +96,17 @@
    INITIALISATION Clause
   ------------------------*/
 extern void constants_bs__INITIALISATION(void);
+
+/*--------------------
+   OPERATIONS Clause
+  --------------------*/
+extern void constants_bs__get_Is_SubType(
+   const constants_bs__t_NodeId_i constants_bs__p_type1,
+   const constants_bs__t_NodeId_i constants_bs__p_type2,
+   t_bool * const constants_bs__p_res);
+extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
+   const constants_bs__t_ExpandedNodeId_i constants_bs__p_expnid,
+   t_bool * const constants_bs__p_isvalid,
+   constants_bs__t_NodeId_i * const constants_bs__p_nid);
 
 #endif

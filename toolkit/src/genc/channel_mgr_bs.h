@@ -2,7 +2,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 25/08/2017 18:29:41
+ Date                 : 30/08/2017 19:04:05
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,6 +45,9 @@ extern void channel_mgr_bs__close_all_channel(
    t_bool * const channel_mgr_bs__bres);
 extern void channel_mgr_bs__close_secure_channel(
    const constants__t_channel_i channel_mgr_bs__channel);
+extern void channel_mgr_bs__get_SecurityPolicy(
+   const constants__t_channel_i channel_mgr_bs__channel,
+   constants__t_SecurityPolicy * const channel_mgr_bs__secpol);
 extern void channel_mgr_bs__get_channel_info(
    const constants__t_channel_i channel_mgr_bs__channel,
    constants__t_channel_config_idx_i * const channel_mgr_bs__config_idx);

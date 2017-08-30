@@ -2,7 +2,7 @@
 
  File Name            : session_core_1_bs.h
 
- Date                 : 25/08/2017 18:29:44
+ Date                 : 30/08/2017 19:04:08
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -19,6 +19,7 @@
 /*--------------
    SEES Clause
   --------------*/
+#include "channel_mgr_bs.h"
 #include "constants.h"
 #include "request_handle_bs.h"
 
@@ -37,8 +38,10 @@ extern void session_core_1_bs__client_create_session_check_crypto(
    t_bool * const session_core_1_bs__valid);
 extern void session_core_1_bs__client_create_session_req_do_crypto(
    const constants__t_session_i session_core_1_bs__p_session,
+   const constants__t_channel_i session_core_1_bs__p_channel,
    const constants__t_channel_config_idx_i session_core_1_bs__p_channel_config_idx,
-   t_bool * const session_core_1_bs__valid);
+   t_bool * const session_core_1_bs__valid,
+   t_bool * const session_core_1_bs__nonce_needed);
 extern void session_core_1_bs__client_get_token_from_session(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_session_token_i * const session_core_1_bs__session_token);
@@ -55,6 +58,9 @@ extern void session_core_1_bs__delete_session(
    const constants__t_session_i session_core_1_bs__session);
 extern void session_core_1_bs__drop_NonceClient(
    const constants__t_session_i session_core_1_bs__p_session);
+extern void session_core_1_bs__get_NonceClient(
+   const constants__t_session_i session_core_1_bs__p_session,
+   constants__t_Nonce_i * const session_core_1_bs__nonce);
 extern void session_core_1_bs__get_NonceServer(
    const constants__t_session_i session_core_1_bs__p_session,
    constants__t_Nonce_i * const session_core_1_bs__nonce);
@@ -67,10 +73,6 @@ extern void session_core_1_bs__get_session_state(
 extern void session_core_1_bs__get_session_user(
    const constants__t_session_i session_core_1_bs__session,
    constants__t_user_i * const session_core_1_bs__user);
-extern void session_core_1_bs__getall_NonceClient(
-   const constants__t_session_i session_core_1_bs__p_session,
-   t_bool * const session_core_1_bs__valid,
-   constants__t_Nonce_i * const session_core_1_bs__nonce);
 extern void session_core_1_bs__init_new_session(
    constants__t_session_i * const session_core_1_bs__session);
 extern void session_core_1_bs__is_valid_session(
