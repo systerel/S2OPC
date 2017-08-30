@@ -96,6 +96,11 @@ SETS
         e_session_closing,
         e_session_closed};
 
+    t_SecurityPolicy = {
+        e_secpol_None,
+        e_secpol_B256,
+        e_secpol_B256S256};
+
     t_buffer_in_state_i = {c_buffer_in_state_indet,
         e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,

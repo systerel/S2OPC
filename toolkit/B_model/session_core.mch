@@ -71,6 +71,7 @@ DEFINITIONS
     a_NonceServer := {session} <<| a_NonceServer       || /* If session had a server nonce, remove it */
     a_NonceClient := {session} <<| a_NonceClient          /* If session had a client nonce, remove it */
 
+
 ABSTRACT_VARIABLES
     d_variables,
     d_var_it
@@ -91,12 +92,13 @@ INVARIANT
     // All sessions have a token (except when in state creating, init or closed (since it creating can be predecessor))
     dom(a_state |>> {e_session_creating, e_session_closed, e_session_init}) = ran(a_server_token) \/ dom(a_client_token) &
 
-    /* TODO: both nonces are not present when security policy is "None" */
-    /* Sessions not (init or creating or closed) have a Nonce, even in security mode None */
-    dom(a_state |>> {e_session_init, e_session_creating, e_session_closed}) = dom(a_NonceServer) &
+    /* Sessions not (init or creating or closed) have a Nonce when their security policy is not None*/
+    /* The security policy part cannot be modeled in this invariant, but is in the operations */
+    /* TODO: decide whether this invariant is useful or not, as it is weak. */
+    dom(a_NonceServer) <: dom(a_state |>> {e_session_init, e_session_creating, e_session_closed}) &
 
-    /* Sessions in Sess_Creating have a Nonce */
-    dom(a_state |>> {e_session_creating}) = dom(a_NonceClient)
+    /* Sessions in Sess_Creating and which security policy is not None have a Nonce */
+    dom(a_NonceClient) <: dom(a_state |> {e_session_creating})
 
 
 INITIALISATION
@@ -160,12 +162,14 @@ OPERATIONS
             valid := TRUE                           ||
             a_channel(session) := channel           ||
             a_state(session) := e_session_creating  ||
-            a_NonceClient
-            :(
-                a_NonceClient : s_session +-> t_Nonce &
-                {session} <<| a_NonceClient = {session} <<| a_NonceClient$0 &
-                session : dom(a_NonceClient)
-            )
+            IF a_SecurityPolicy(channel) /= e_secpol_None THEN
+                a_NonceClient
+                :(
+                    a_NonceClient : s_session +-> t_Nonce &
+                    {session} <<| a_NonceClient = {session} <<| a_NonceClient$0 &
+                    session : dom(a_NonceClient)
+                )
+            END
         OR
             valid := FALSE /* Nonce creation can fail */
         END
@@ -206,7 +210,9 @@ OPERATIONS
                     a_state(l_nsession) := e_session_created                ||
                     nsession := l_nsession                                  ||
                     service_ret := e_sc_ok                                  ||
-                    a_NonceServer(l_nsession) := l_nonce
+                    IF a_SecurityPolicy(channel) /= e_secpol_None THEN
+                        a_NonceServer(l_nsession) := l_nonce
+                    END
                     // sends response
                 OR
                     // sends error response

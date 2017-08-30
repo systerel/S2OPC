@@ -83,16 +83,17 @@ OPERATIONS
     valid <-- client_create_session_req_sm (session, channel, create_req_msg) =
     VAR
         l_channel_config_idx,
+        l_nonce_needed,
         l_nonce_valid,
         l_nonce
     IN
         create_session (session, channel, e_session_creating);
         l_channel_config_idx <-- get_channel_info (channel);
-        valid <-- client_create_session_req_do_crypto(session, l_channel_config_idx);
+        valid, l_nonce_needed <-- client_create_session_req_do_crypto(session, channel, l_channel_config_idx);
         IF valid = TRUE THEN
             write_create_session_req_msg_endpointUrl (create_req_msg, l_channel_config_idx);
-            l_nonce_valid, l_nonce <-- getall_NonceClient(session);
-            IF l_nonce_valid = TRUE THEN
+            IF l_nonce_needed = TRUE THEN
+                l_nonce <-- get_NonceClient(session);
                 write_create_session_req_msg_crypto(create_req_msg, l_channel_config_idx, l_nonce)
             END
             /* TODO: Fill remaining parameters: sessionName, timeout, maxResponseSize */
@@ -112,7 +113,8 @@ OPERATIONS
         l_config_idx,
         l_valid_crypto,
         l_signature,
-        l_nonce
+        l_nonce,
+        l_secpol
     IN
         l_nsession <-- init_new_session;
         l_valid_session <-- is_valid_session (l_nsession);
@@ -126,21 +128,24 @@ OPERATIONS
             THEN
                 l_endpoint_config_idx <-- server_get_endpoint_config (channel);
                 /* No need to store the handle since we will send response in same step */
-                /* Do the cryptographic challenge which may fail because of mallocs */
-                l_config_idx <-- get_channel_info(channel); /* MAYBE this is denoted client side only... */
-                l_valid_crypto, l_signature <-- server_create_session_req_do_crypto(l_nsession, create_req_msg, l_endpoint_config_idx, l_config_idx);
-                IF  l_valid_crypto = TRUE THEN
-                    write_create_session_msg_session_token (create_resp_msg, l_nsession_token);
-                    /* TODO: this one also populates RevisedSessionTimeout */
-                    service_ret <-- write_create_session_msg_server_endpoints (create_req_msg, create_resp_msg, l_endpoint_config_idx);
-                    IF service_ret = e_sc_ok THEN
-                        l_nonce <-- get_NonceServer(l_nsession);
-                        service_ret <-- write_create_session_msg_crypto(create_resp_msg, l_nonce, l_signature)
-                        /* TODO: populate msg with remaining parameters: MaxRequestSize, RevisedSessionTimeout, CertServer, ... */
+                write_create_session_msg_session_token (create_resp_msg, l_nsession_token);
+                /* TODO: this one also populates RevisedSessionTimeout */
+                service_ret <-- write_create_session_msg_server_endpoints (create_req_msg, create_resp_msg, l_endpoint_config_idx);
+                /* TODO: populate msg with remaining parameters: MaxRequestSize, RevisedSessionTimeout, CertServer, ... */
+                IF service_ret = e_sc_ok THEN
+                    l_secpol <-- get_SecurityPolicy(channel);
+                    IF l_secpol /= e_secpol_None THEN
+                        /* Do the cryptographic challenge which may fail because of mallocs */
+                        l_config_idx <-- get_channel_info(channel); /* MAYBE this is denoted client side only... */
+                        l_valid_crypto, l_signature <-- server_create_session_req_do_crypto(l_nsession, create_req_msg, l_endpoint_config_idx, l_config_idx);
+                        IF  l_valid_crypto = TRUE THEN
+                            l_nonce <-- get_NonceServer(l_nsession);
+                            service_ret <-- write_create_session_msg_crypto(create_resp_msg, l_nonce, l_signature)
+                        ELSE
+                            /* TODO: add bad security check failed error and use it instead */
+                            service_ret := e_sc_bad_unexpected_error
+                        END
                     END
-                ELSE
-                    /* TODO: add bad security check failed error and use it instead */
-                    service_ret := e_sc_bad_unexpected_error
                 END
             ELSE
                 service_ret := e_sc_bad_out_of_memory;
@@ -158,18 +163,20 @@ OPERATIONS
     VAR
         l_nonce,
         l_valid,
-        l_channel_config_idx
+        l_channel_config_idx,
+        l_secpol
     IN
         /* TODO: check Request:handle == Response:handle ; Response:Cert_server == Cert_server */
         /* TODO? check Response:serverEndpoints */
         /* Check server signature */
-        l_valid, l_nonce <-- getall_NonceClient(session);
-        l_channel_config_idx <-- get_channel_info (channel);
-        /* If there is no client nonce, there is nothing to check. */
-        IF l_valid = TRUE THEN
+        ret := e_sc_ok;
+        l_secpol <-- get_SecurityPolicy(channel);
+        IF l_secpol /= e_secpol_None THEN
+            /* Note: receiving a request implies that we sent it, and Nonce, if needed, was valid, hence get_NonceClient cannot fail. */
+            l_nonce <-- get_NonceClient(session);
+            l_channel_config_idx <-- get_channel_info (channel);
             l_valid <-- client_create_session_check_crypto(session, l_channel_config_idx, create_resp_msg);
             IF l_valid = TRUE THEN
-                ret := e_sc_ok;
                 // channel: only for the precondition
                 set_session_state (session, e_session_created);
                 client_set_session_token (session, session_token);
@@ -178,7 +185,8 @@ OPERATIONS
                 ret := e_sc_nok
             END
         ELSE
-            ret := e_sc_ok
+            set_session_state (session, e_session_created);
+            client_set_session_token (session, session_token)
         END
     END
     ;

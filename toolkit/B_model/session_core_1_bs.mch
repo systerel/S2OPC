@@ -20,7 +20,8 @@ MACHINE
 
 SEES
     constants,
-    request_handle_bs
+    request_handle_bs,
+    channel_mgr_bs
 
 DEFINITIONS
     d_variables ==
@@ -338,41 +339,42 @@ OPERATIONS
     END
     ;
 
-    /* Fails only when nonce was needed but not generated */
-    valid <-- client_create_session_req_do_crypto(p_session, p_channel_config_idx) =
+    valid, nonce_needed <-- client_create_session_req_do_crypto(p_session, p_channel, p_channel_config_idx) =
     PRE
         p_session : t_session_i &
         p_session : s_session &
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx
     THEN
-        valid,
-        a_NonceClient
-        :(
-            valid : BOOL &
-            (valid = TRUE
-             =>
-             a_NonceClient(p_session) : t_Nonce)
-            &
-            (valid = FALSE
-             =>
-             a_NonceClient = a_NonceClient$0)
-        )
+        IF a_SecurityPolicy(p_channel) = e_secpol_None THEN
+            valid :: BOOL || /* This fails when we cannot retreive the SecurityPolicy  <-- but this should not be possible */
+            nonce_needed := FALSE
+        ELSE
+            nonce_needed := TRUE ||
+            IF valid = TRUE THEN
+                a_NonceClient
+                :(
+                    a_NonceClient : s_session +-> t_Nonce &
+                    {p_session} <<| a_NonceClient = {p_session} <<| a_NonceClient$0 &
+                    a_NonceClient(p_session) : t_Nonce
+                )
+            END
+        END
     END
     ;
 
-    valid, nonce <-- getall_NonceClient(p_session) =
+    nonce <-- get_NonceClient(p_session) =
     PRE
         p_session : t_session_i &
-        p_session : s_session
+        p_session : s_session &
+        p_session : dom(a_NonceClient)
     THEN
-        IF p_session /: dom(a_NonceClient) THEN
-            valid := FALSE ||
-            nonce :: t_Nonce_i
-        ELSE
-            valid := TRUE ||
-            nonce := a_NonceClient(p_session)
-        END
+        nonce :(
+            nonce : t_Nonce_i &
+            nonce = a_NonceClient(p_session)
+        )
     END
     ;
 
