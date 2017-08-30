@@ -40,7 +40,7 @@ bool SOPC_Helper_URI_ParseTcpUaUri(const char* uri,
         *hostnameLength = 0;
         *portIdx = 0;
         *portLength = 0;
-        if(strlen(uri) + 4  > TCP_UA_MAX_URL_LENGTH){
+        if(strlen(uri) + 4  > SOPC_TCP_UA_MAX_URL_LENGTH){
             // Encoded value shall be less than 4096 bytes
         }else if(strlen(uri) > 10 && strncmp_ignore_case(uri, (const char*) "opc.tcp://", 10) == 0){
             // search for a ':' defining port for given IP

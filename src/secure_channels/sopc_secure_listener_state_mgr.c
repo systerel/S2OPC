@@ -17,14 +17,17 @@
 
 #include "sopc_secure_listener_state_mgr.h"
 
-#include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 #include <assert.h>
 
 #include "sopc_toolkit_constants.h"
-#include "sopc_secure_channels_internal_ctx.h"
-
 #include "sopc_toolkit_config.h"
+#include "sopc_secure_channels_api.h"
+#include "sopc_secure_channels_internal_ctx.h"
+#include "sopc_sockets_api.h"
+
+#include "sopc_services_events.h"
 
 static bool SOPC_SecureListenerStateMgr_OpeningListener(uint32_t endpointConfigIdx){
     bool result = false;
@@ -40,10 +43,12 @@ static bool SOPC_SecureListenerStateMgr_OpeningListener(uint32_t endpointConfigI
     return result;
 }
 
-static void SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx){
+static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx){
     SOPC_SecureListener* scListener = NULL;
+    bool result = false;
     uint32_t idx = 0;
     if(endpointConfigIdx < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS){
+        result = true;
         scListener = &(secureListenersArray[endpointConfigIdx]);
         if(scListener->state == SECURE_LISTENER_STATE_OPENED){
             // Close all active secure connections established on the listener
@@ -65,6 +70,7 @@ static void SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
             memset(scListener, 0, sizeof(SOPC_SecureListener));
         }
     }
+    return result;
 }
 
 static SOPC_SecureListener* SOPC_SecureListenerStateMgr_GetListener(uint32_t endpointConfigIdx){
@@ -79,14 +85,20 @@ static bool SOPC_SecureListenerStateMgr_AddConnection(SOPC_SecureListener* scLis
                                                       uint32_t             newConnectionIndex){
     assert(scListener != NULL);
     uint32_t idx = (scListener->lastConnectionIdxArrayIdx + 1) % SOPC_MAX_SOCKETS_CONNECTIONS;
+    uint32_t lastIdx = 0;
     bool result = false;
     do{
+        lastIdx = idx;
         if(scListener->isUsedConnectionIdxArray[idx] == false){
             scListener->connectionIdxArray[idx] = newConnectionIndex;
             result = true;
         }
         idx = (idx + 1) % SOPC_MAX_SOCKETS_CONNECTIONS;
     }while(idx != scListener->lastConnectionIdxArrayIdx && result == false);
+
+    if(result != false){
+        scListener->lastConnectionIdxArrayIdx = lastIdx;
+    }
 
     return result;
 }
@@ -111,6 +123,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                                             uint32_t                       eltId,
                                             void*                          params,
                                             int32_t                        auxParam){
+    (void) params;
     bool result = false;
     SOPC_Endpoint_Config* epConfig = NULL;
     SOPC_SecureListener* scListener = NULL;

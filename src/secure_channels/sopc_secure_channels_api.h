@@ -58,7 +58,7 @@ typedef enum {
     /* Internal events */
     /* SC listener manager -> SC connection manager */
     INT_EP_SC_CREATE, /* id = endpoint description configuration index,
-                         auxParam = secure channel connection index */
+                         auxParam = socket index */
     INT_EP_SC_CLOSE, /* id = secure channel connection index,
                         auxParam = endpoint description configuration index */
     /* SC connection manager -> SC listener manager */
@@ -68,25 +68,28 @@ typedef enum {
                                auxParam = secure channel connection index */
 
     /* OPC UA chunks message manager -> SC connection manager */
-    INT_SC_RCV_HEL, /* -------------------------- */
+    INT_SC_RCV_HEL, /* >------------------------- */
     INT_SC_RCV_ACK,
     INT_SC_RCV_ERR, // id = secure channel connection index,
     INT_SC_RCV_OPN, // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_RCV_CLO, // auxParam = message payload size
-    INT_SC_RCV_MSG_CHUNKS, /* -------------------------- */
+    INT_SC_RCV_CLO, // auxParam = request Id context if request
+    INT_SC_RCV_MSG_CHUNKS, /* -------------------------< */
     INT_SC_RCV_FAILURE, /* id = secure channel connection index,
                            auxParam = error status */
     INT_SC_ENCODE_FAILURE, /* id = secure channel connection index,
                               params = (SOPC_Buffer*) buffer provided for encoding,
-                              auxParam = error status */
+                              auxParam = request Id in case of server / error status in case of client ? */
 
     /* SC connection manager -> OPC UA chunks message manager */
-    INT_SC_SND_HEL,        /* -------------------------- */
-    INT_SC_SND_ACK,        // id = secure channel connection index,
+    INT_SC_SND_HEL,        /* >------------------------- */
+    INT_SC_SND_ACK,
+    INT_SC_SND_ERR,        // id = secure channel connection index,
     INT_SC_SND_OPN,        // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_SND_CLO,        // auxParam = socket index ?
-    INT_SC_SND_MSG_CHUNKS, /* -------------------------- */
+    INT_SC_SND_CLO,        // auxParam = request Id context if response
+    INT_SC_SND_MSG_CHUNKS, /* -------------------------< */
 
+    /* SC connection manager -> SC connection manager */
+    INT_SC_CLOSE // id = secure channel connection index
 
 } SOPC_SecureChannels_InputEvent;
 

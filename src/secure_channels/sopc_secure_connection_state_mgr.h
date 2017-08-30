@@ -15,16 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SOPC_SECURE_LISTENER_STATE_MGR_H_
-#define SOPC_SECURE_LISTENER_STATE_MGR_H_
+#ifndef SOPC_SECURE_CONNECTION_STATE_MGR_H_
+#define SOPC_SECURE_CONNECTION_STATE_MGR_H_
 
 #include <stdint.h>
 
-#include "sopc_secure_channels_api.h"
 
-void SOPC_SecureListenerStateMgr_Dispatcher (SOPC_SecureChannels_InputEvent event,
-                                             uint32_t                       eltId,
-                                             void*                          params,
-                                             int32_t                        auxParam);
+void SOPC_SecureConnectionStateMgr_Dispatcher (SOPC_SecureChannels_InputEvent event,
+                                               uint32_t                       eltId,
+                                               void*                          params,
+                                               int32_t                        auxParam);
 
-#endif /* SOPC_SECURE_LISTENER_STATE_MGR_H_ */
+#endif /* SOPC_SECURE_CONNECTION_STATE_MGR_H_ */

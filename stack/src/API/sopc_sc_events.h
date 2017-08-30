@@ -31,6 +31,11 @@
 
 extern SOPC_EventDispatcherManager* scEventDispatcherMgr;
 
+#define SOPC_SECURITY_MODE_NONE_MASK 0x01
+#define SOPC_SECURITY_MODE_SIGN_MASK 0x02
+#define SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK 0x04
+#define SOPC_SECURITY_MODE_ANY_MASK 0x07
+
 // TODO:move config types in toolkit config
 
 /* Client static configuration of a Secure Channel */
@@ -42,7 +47,7 @@ typedef struct SOPC_SecureChannel_Config {
     const Certificate*        crt_srv;
     const PKIProvider*        pki;
     const char*               reqSecuPolicyUri;
-    int32_t                   requestedLifetime;
+    uint32_t                  requestedLifetime;
     OpcUa_MessageSecurityMode msgSecurityMode;
 } SOPC_SecureChannel_Config;
 

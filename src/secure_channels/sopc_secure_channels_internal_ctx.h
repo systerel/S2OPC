@@ -25,6 +25,7 @@
 #include "sopc_builtintypes.h"
 #include "singly_linked_list.h"
 #include "secret_buffer.h"
+#include "crypto_decl.h"
 
 typedef enum {
     SECURE_LISTENER_STATE_CLOSED = 0,
@@ -57,14 +58,13 @@ typedef struct SOPC_SecureConnection_TcpProperties {
     uint32_t maxChunkCount;     // Maximum number of chunks accepted
 } SOPC_SecureConnection_TcpProperties;
 
-/*
-// Set on OPN reception (see OPC UA specification Part 6 table 27): necessary to check coherency with body OPN message content
-typedef struct SOPC_SecureConnection_TcpAsymmSecu {
-    // securityPolicyUri;
-    // senderCertificate;
-    // receiverCertificateThumbprint ? => verified on the fly
+// Set on OPN request reception (see OPC UA specification Part 6 table 27): necessary to check coherence with body OPN message content
+typedef struct SOPC_SecureConnection_TcpOpnReqAsymmSecu {
+    char*                securityPolicyUri;
+    uint16_t             securityModes;
+    Certificate*         clientCertificate; /* temporary record of the client certificate */
 } SOPC_SecureConnection_TcpAsymmSecu;
-*/
+
 
 // See Part 6 table 29
 typedef struct SOPC_SecureConnection_TcpSequenceProperties {
@@ -86,15 +86,20 @@ typedef struct SOPC_SecureConnection {
     /* Set and accessed only by Chunks manager */
     SOPC_SecureConnection_ChunkMgrCtx           chunksCtx;
     /* Set by Chunks manager */
-    SOPC_SecureConnection_TcpProperties         tcpMsgProperties;
     SOPC_SecureConnection_TcpSequenceProperties tcpSeqProperties;
+    SOPC_SecureConnection_TcpAsymmSecu          serverAsymmSecuInfo; // Temporary recorded information form the OPN request asymmetric security header
 
     /* Set by SC connection state manager */
     SOPC_SecureConnection_State                 state;
-    uint32_t                                    socketIndex; // associated TCP socket index
+    uint32_t                                    endpointConnectionConfigIdx;
+    uint32_t                                    socketIndex; // associated TCP socket index (defined when state != TCP_INIT or SC_CLOSED)
+
+    // Message body content dependent properties
+    SOPC_SecureConnection_TcpProperties         tcpMsgProperties;
+    CryptoProvider*                             cryptoProvider; // defined once security policy id define (OPN req)
     SOPC_SecureConnection_SecurityToken         precedentSecurityToken;
     SOPC_SecureConnection_SecurityToken         currentSecurityToken;
-    SecretBuffer*                               currentNonce;
+    SecretBuffer*                               clientNonce; // client nonce used to create symmetric keys
 
     /* Server connection: endpoint description configuration association */
     bool                                        isServerConnection;
@@ -116,6 +121,7 @@ extern SOPC_SecureListener secureListenersArray[SOPC_MAX_ENDPOINT_DESCRIPTION_CO
 
 /** @brief Array containing all connections that can be used */
 extern SOPC_SecureConnection secureConnectionsArray[SOPC_MAX_SECURE_CONNECTIONS];
+extern uint32_t              lastSecureConnectionArrayIdx; // last secure connection index used for a new secure connection
 
 
 /** @brief Initialize the array of secure listeners/connections */

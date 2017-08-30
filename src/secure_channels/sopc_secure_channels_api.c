@@ -23,6 +23,7 @@
 #include "sopc_event_dispatcher_manager.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_secure_listener_state_mgr.h"
+#include "sopc_secure_connection_state_mgr.h"
 
 static SOPC_EventDispatcherManager* secureChannelsEventDispatcherMgr = NULL;
 
