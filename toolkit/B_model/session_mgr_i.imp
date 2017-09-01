@@ -105,6 +105,9 @@ OPERATIONS
                                 THEN
                                     client_gen_activate_user_session_internal_event (l_session, l_session_user)
                                 END
+                            ELSE
+                                /* The session may be not e_session_created when Nonce generation failed */
+                                l_ret := e_sc_bad_out_of_memory
                             END
                         ELSE
                             l_ret := e_sc_bad_secure_channel_id_invalid
