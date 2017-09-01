@@ -26,6 +26,7 @@
 #include "singly_linked_list.h"
 #include "secret_buffer.h"
 #include "crypto_decl.h"
+#include "sopc_types.h"
 
 typedef enum {
     SECURE_LISTENER_STATE_CLOSED = 0,
@@ -43,10 +44,35 @@ typedef enum {
     SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW
 } SOPC_SecureConnection_State;
 
+/**
+ *  \brief TCP UA Message types
+ */
+typedef enum {
+    SOPC_MSG_TYPE_INVALID = 0,
+    SOPC_MSG_TYPE_HEL,
+    SOPC_MSG_TYPE_ACK,
+    SOPC_MSG_TYPE_ERR,
+    SOPC_MSG_TYPE_SC_OPN,
+    SOPC_MSG_TYPE_SC_CLO,
+    SOPC_MSG_TYPE_SC_MSG
+} SOPC_Msg_Type;
+
+/**
+ *  \brief UA Message Chunk IsFinal type
+ */
+typedef enum {
+    SOPC_MSG_ISFINAL_INVALID = 0,
+    SOPC_MSG_ISFINAL_INTERMEDIATE, /**< C type */
+    SOPC_MSG_ISFINAL_FINAL,        /**< F type */
+    SOPC_MSG_ISFINAL_ABORT         /**< A type */
+} SOPC_Msg_IsFinal;
 
 // Chunk manager context
 typedef struct SOPC_SecureConnection_ChunkMgrCtx {
-    SOPC_Buffer* chunkInputBuffer;
+    SOPC_Buffer*     chunkInputBuffer;
+    uint32_t         currentMsgSize;
+    SOPC_Msg_Type    currentMsgType;
+    SOPC_Msg_IsFinal currentMsgIsFinal;
 } SOPC_SecureConnection_ChunkMgrCtx;
 
 // Set on HEL/ACK exchange (see OPC UA specification Part 6 table 36/37)
@@ -60,9 +86,10 @@ typedef struct SOPC_SecureConnection_TcpProperties {
 
 // Set on OPN request reception (see OPC UA specification Part 6 table 27): necessary to check coherence with body OPN message content
 typedef struct SOPC_SecureConnection_TcpOpnReqAsymmSecu {
-    char*                securityPolicyUri;
-    uint16_t             securityModes;
-    Certificate*         clientCertificate; /* temporary record of the client certificate */
+    const char*               securityPolicyUri;
+    uint16_t                  validSecurityModes;  // accepted security mode for the valid security policy requested
+    bool                      isSecureModeActive; // a secure mode is active (sign or signAndEncrypt) choice based on certificates presence in OPN
+    Certificate*              clientCertificate; /* temporary record of the client certificate */
 } SOPC_SecureConnection_TcpAsymmSecu;
 
 
@@ -75,7 +102,7 @@ typedef struct SOPC_SecureConnection_TcpSequenceProperties {
 
 typedef struct SOPC_SecureConnection_SecurityToken
 {
-    uint32_t      secureChannelId;
+    uint32_t      secureChannelId; // TODO: move secure channel Id outside (it shall not be changed with the token)
     uint32_t      tokenId;
     SOPC_DateTime createdAt;
     uint32_t      revisedLifetime;
@@ -87,7 +114,16 @@ typedef struct SOPC_SecureConnection {
     SOPC_SecureConnection_ChunkMgrCtx           chunksCtx;
     /* Set by Chunks manager */
     SOPC_SecureConnection_TcpSequenceProperties tcpSeqProperties;
+    uint32_t                                    asymmSecuMaxBodySize;
+    uint32_t                                    symmSecuMaxBodySize;
+
+    // (Client side specific)
+    uint32_t                                    clientSecureChannelId;  // Temporary recorded information from the OPN response TCP message
+    // (Client side specific)
+    uint32_t                                    clientLastReqId; // client last request Id used
+    // (Server side specific)
     SOPC_SecureConnection_TcpAsymmSecu          serverAsymmSecuInfo; // Temporary recorded information form the OPN request asymmetric security header
+    
 
     /* Set by SC connection state manager */
     SOPC_SecureConnection_State                 state;
@@ -99,11 +135,16 @@ typedef struct SOPC_SecureConnection {
     CryptoProvider*                             cryptoProvider; // defined once security policy id define (OPN req)
     SOPC_SecureConnection_SecurityToken         precedentSecurityToken;
     SOPC_SecureConnection_SecurityToken         currentSecurityToken;
-    SecretBuffer*                               clientNonce; // client nonce used to create symmetric keys
+    // (Server side specific)
+    SecretBuffer*                               clientNonce; // client nonce used to create symmetric key  
+    // (Server side specific)
+    bool                                        serverNewSecuTokenActive;
 
-    /* Server connection: endpoint description configuration association */
+    /* Server or Client side connection */
     bool                                        isServerConnection;
-    uint32_t                                    serverEndpointConfigIdx;
+    // (Server side specific)
+    uint32_t                                    serverEndpointConfigIdx; // endpoint description configuration association
+
 } SOPC_SecureConnection;
 
 typedef struct SOPC_SecureListener {

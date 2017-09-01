@@ -24,6 +24,7 @@
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_secure_listener_state_mgr.h"
 #include "sopc_secure_connection_state_mgr.h"
+#include "sopc_chunks_mgr.h"
 
 static SOPC_EventDispatcherManager* secureChannelsEventDispatcherMgr = NULL;
 
@@ -105,7 +106,7 @@ static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t event,
     case INT_SC_RCV_CLO:
     case INT_SC_RCV_MSG_CHUNKS:
     case INT_SC_RCV_FAILURE:
-    case INT_SC_ENCODE_FAILURE:
+    case INT_SC_SND_FAILURE:
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent,
                                                  eltId,
                                                  params,
