@@ -30,6 +30,9 @@ IMPORTS
     service_browse_seq_it,
     service_browse_decode_bs
 
+PROMOTES
+    write_BrowseResponse_msg_out
+
 LOCAL_OPERATIONS
 
     p_continue_bri, p_bri_new <-- fill_browse_response_ref(p_bvi, p_bri, p_ref, p_dir,
@@ -177,7 +180,7 @@ OPERATIONS
     ;
 
     /* Computes the part of the response to a browse request message on one given source node.
-       Computes the maximum number of target nodes, allocate the memory to store then and fill
+       Computes the maximum number of target nodes, allocate the memory to store them and fill
        the requested data.
        p_bvi           : browse value index of the starting node
        p_nb_target_max : limit number of target nodes in the browse response set by the client.

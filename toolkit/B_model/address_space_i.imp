@@ -35,6 +35,7 @@ PROMOTES
     get_NodeClass,
     get_BrowseName,
     get_DisplayName,
+    get_TypeDefinition,
     get_Reference_ReferenceType,
     get_Reference_TargetNode,
     get_Reference_IsForward,

@@ -28,6 +28,9 @@ SEES
 IMPORTS
     msg_browse_response_bs
 
+PROMOTES
+    write_BrowseResponse_msg_out
+
 OPERATIONS
 
     p_isvalid, p_nb_ref, p_src_node <-- get_SourceNode_NbRef(p_src_nodeid) =
@@ -85,7 +88,8 @@ OPERATIONS
         l_node,
         l_BrowseName,
         l_DisplayName,
-        l_NodeClass
+        l_NodeClass,
+        l_TypeDefinition
     IN
         p_res := TRUE;
         set_ResponseBrowse_Res_ReferenceTypeId(p_bvi, p_bri, p_RefType);
@@ -100,16 +104,20 @@ OPERATIONS
                 l_DisplayName <-- get_DisplayName(l_node);
                 set_ResponseBrowse_Res_DisplayName(p_bvi, p_bri, l_DisplayName);
                 l_NodeClass <-- get_NodeClass(l_node);
-                set_ResponseBrowse_Res_NodeClass(p_bvi, p_bri, l_NodeClass)
+                set_ResponseBrowse_Res_NodeClass(p_bvi, p_bri, l_NodeClass);
+                l_TypeDefinition <-- get_TypeDefinition(l_node);
+                set_ResponseBrowse_Res_TypeDefinition(p_bvi, p_bri, l_TypeDefinition)
             ELSE
-                reset_ResponseBrowse_Res_BrowseName (p_bvi, p_bri);
-                reset_ResponseBrowse_Res_DisplayName(p_bvi, p_bri);
-                reset_ResponseBrowse_Res_NodeClass  (p_bvi, p_bri)
+                reset_ResponseBrowse_Res_BrowseName    (p_bvi, p_bri);
+                reset_ResponseBrowse_Res_DisplayName   (p_bvi, p_bri);
+                reset_ResponseBrowse_Res_NodeClass     (p_bvi, p_bri);
+                reset_ResponseBrowse_Res_TypeDefinition(p_bvi, p_bri)
             END
         ELSE
-            reset_ResponseBrowse_Res_BrowseName (p_bvi, p_bri);
-            reset_ResponseBrowse_Res_DisplayName(p_bvi, p_bri);
-            reset_ResponseBrowse_Res_NodeClass  (p_bvi, p_bri)
+            reset_ResponseBrowse_Res_BrowseName    (p_bvi, p_bri);
+            reset_ResponseBrowse_Res_DisplayName   (p_bvi, p_bri);
+            reset_ResponseBrowse_Res_NodeClass     (p_bvi, p_bri);
+            reset_ResponseBrowse_Res_TypeDefinition(p_bvi, p_bri)
         END
     END
     ;

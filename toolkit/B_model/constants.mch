@@ -117,7 +117,8 @@ SETS
         e_msg_session_activate_req, e_msg_session_activate_resp,
         e_msg_session_close_req, e_msg_session_close_resp,
         e_msg_session_read_req, e_msg_session_read_resp,
-        e_msg_session_write_req, e_msg_session_write_resp};
+        e_msg_session_write_req, e_msg_session_write_resp,
+        e_msg_session_browse_req, e_msg_session_browse_resp};
 
     /* OPC UA message header type (request / response) */
     t_msg_header_type = {
@@ -386,7 +387,8 @@ PROPERTIES
         e_msg_session_close_resp } &
 
     s_service_on_session_reqs  = {e_msg_session_read_req,
-        e_msg_session_write_req} &
+        e_msg_session_write_req,
+        e_msg_session_browse_req} &
 
     s_service_on_session_resps = {e_msg_session_read_resp,
         e_msg_session_write_resp} &

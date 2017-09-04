@@ -192,6 +192,7 @@ OPERATIONS
     END
     ;
 
+    /* TODOPAB: borrow */
     p_isvalid, p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
     PRE
         p_expnid : t_ExpandedNodeId_i &

@@ -31,8 +31,8 @@ DEFINITIONS
     c_msg_out_header,
     c_msg_out,
     a_msg_out_type;
-    
-    d_msg_typing == 
+
+    d_msg_typing ==
     a_buffer_in_state : t_buffer_in_state_i &
     c_msg_in_header : t_msg_header_i &
     c_msg_in : t_msg_i &
@@ -41,16 +41,16 @@ DEFINITIONS
     c_msg_out_header : t_msg_header_i &
     c_msg_out : t_msg_i &
     a_msg_out_type : t_msg_type_i
-    
+
 ABSTRACT_VARIABLES
-    d_msg_variables 
-    
+    d_msg_variables
+
 INVARIANT
     d_msg_typing
-    
+
 INITIALISATION
     d_msg_variables :( d_msg_typing )
-    
+
 OPERATIONS
 
     receive_msg_buffer (channel, buffer, request_context) =
@@ -74,7 +74,7 @@ OPERATIONS
         /* c_msg_in instance could be provided to app but should be not referenced anymore in c_msg_in */
     END
     ;
-    
+
     client_channel_connected_event (channel_config_idx, channel) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
@@ -98,8 +98,8 @@ OPERATIONS
     THEN
         skip
     END
-	;
-    
+    ;
+
     server_channel_connected_event (endpoint_config_idx, channel_config_idx, channel) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
@@ -112,7 +112,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     /* Only one session could be in activation until the first session is notified as activated */
     bres <-- client_activate_new_session (channel_config_idx, user) =
     PRE
@@ -155,7 +155,7 @@ OPERATIONS
             e_sc_bad_encoding_error}
     END
     ;
-    
+
     ret <-- client_send_close_session_request (session) =
     PRE
         session : t_session_i &
@@ -214,7 +214,7 @@ OPERATIONS
             e_sc_bad_encoding_error}
     END
     ;
-    
+
     internal_client_create_session (session, channel_config_idx) =
     PRE
         session : t_session_i &
@@ -230,7 +230,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     internal_client_activate_orphaned_session (session, channel_config_idx) =
     PRE
         session : t_session_i &

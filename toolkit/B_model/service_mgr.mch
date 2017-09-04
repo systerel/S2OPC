@@ -17,7 +17,7 @@
 
 MACHINE
     service_mgr
-    
+
 SEES
     channel_mgr_bs,
     constants
@@ -32,8 +32,8 @@ DEFINITIONS
     c_msg_out_header,
     c_msg_out,
     a_msg_out_type;
-    
-    d_msg_typing == 
+
+    d_msg_typing ==
     a_buffer_in_state : t_buffer_in_state_i &
     c_msg_in_header : t_msg_header_i &
     c_msg_in : t_msg_i &
@@ -42,18 +42,18 @@ DEFINITIONS
     c_msg_out_header : t_msg_header_i &
     c_msg_out : t_msg_i &
     a_msg_out_type : t_msg_type_i
-    
+
 ABSTRACT_VARIABLES
-    d_msg_variables 
-    
+    d_msg_variables
+
 INVARIANT
     d_msg_typing
-    
+
 INITIALISATION
     d_msg_variables :( d_msg_typing )
-    
+
 OPERATIONS
-    
+
     buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
@@ -82,7 +82,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     client_receive_session_treatment_resp (channel, resp_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
@@ -103,7 +103,7 @@ OPERATIONS
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
     END
     ;
-    
+
     buffer_out <-- server_receive_session_service_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
@@ -132,7 +132,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     client_receive_session_service_resp (channel, resp_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
@@ -153,7 +153,7 @@ OPERATIONS
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
     END
     ;
-    
+
     buffer_out <-- server_receive_discovery_service_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
@@ -182,7 +182,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     client_receive_discovery_service_resp (channel, resp_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
@@ -203,7 +203,7 @@ OPERATIONS
         a_buffer_in_state :: {c_buffer_in_state_indet, e_buffer_in_msg_read}
     END
     ;
-    
+
     /* Only called through an internal event sent by session mgr itself */
     buffer_out <-- client_service_create_session (session, channel) =
     PRE
@@ -227,7 +227,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* Only to change user on an active channel */
     ret, channel, buffer_out <-- client_service_activate_session (session, user) =
     PRE
@@ -259,7 +259,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* Only to set new channel on an orphaned session: called through internal event sent by session mgr itself */
     buffer_out <-- client_service_activate_orphaned_session (session, channel) =
     PRE
@@ -282,7 +282,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret, channel, buffer_out <-- client_service_close_session (session) =
     PRE
         session : t_session_i &
@@ -310,7 +310,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     ret, channel, buffer_out <-- client_service_request (session, req_msg) =
     PRE
         session         : t_session_i &
@@ -340,7 +340,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     /* PROMOTES */
         /* New session: creation and activation async */
     bres <-- client_async_activate_new_session_without_channel (channel_config_idx, user) =
@@ -357,7 +357,7 @@ OPERATIONS
         bres :: BOOL
     END
     ;
-    
+
     /* New session: creation sync and activation async */
     bres <-- client_async_activate_new_session_with_channel (channel_config_idx, channel, user) =
     PRE
@@ -375,7 +375,7 @@ OPERATIONS
         bres :: BOOL
     END
     ;
-    
+
     client_channel_connected_event_session (channel_config_idx, channel) =
     PRE
         channel_config_idx : t_channel_config_idx_i &
@@ -386,7 +386,7 @@ OPERATIONS
         skip
     END
     ;
-      
+
     client_secure_channel_lost_session_sm (lost_channel, channel_config_idx) =
     PRE
         lost_channel : t_channel_i &
@@ -397,7 +397,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     server_secure_channel_lost_session_sm (channel) =
     PRE
         channel : t_channel_i &
@@ -406,7 +406,7 @@ OPERATIONS
         skip
     END
     ;
-    
+
     msg_typ <-- decode_msg_type (msg_buffer) =
     PRE
         msg_buffer : t_byte_buffer_i &
@@ -426,7 +426,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     bres <-- is_valid_msg_in_type (msg_typ) =
     PRE
         msg_typ : t_msg_type_i
@@ -434,7 +434,7 @@ OPERATIONS
         bres := bool(msg_typ = a_msg_in_type & a_msg_in_type : t_msg_type)
     END
     ;
-    
+
     bres <-- is_valid_buffer_out (buffer) =
     PRE
         buffer : t_byte_buffer_i
@@ -442,7 +442,7 @@ OPERATIONS
         bres := bool(a_buffer_out_state = e_buffer_out_msg_written & buffer : t_byte_buffer)
     END
     ;
-    
+
     bres <-- is_valid_request_context (req_context) =
     PRE
         req_context : t_request_context_i
@@ -450,7 +450,7 @@ OPERATIONS
         bres := bool(req_context : t_request_context)
     END
     ;
-    
+
     client_close_session (session) =
     PRE
         session : t_session_i

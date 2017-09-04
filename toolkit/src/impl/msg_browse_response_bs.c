@@ -129,3 +129,8 @@ void msg_browse_response_bs__malloc_browse_result(
 }
 
 
+void msg_browse_response_bs__write_BrowseResponse_msg_out(
+   const constants__t_msg_i msg_browse_response_bs__p_msg_out)
+{
+}
+

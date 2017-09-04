@@ -31,7 +31,7 @@ DEFINITIONS
         a_Value,
         a_Value_StatusCode,
 
-        TypeDefinition,
+        Ref_HasTypeDefinition,
 
         Reference_SourceNode,
         Reference_ReferenceType,
@@ -55,7 +55,7 @@ DEFINITIONS
         /* Value attribute meta-data */
         a_Value_StatusCode : t_Node +-> t_StatusCode &
 
-        TypeDefinition : t_Node +-> t_ExpandedNodeId &
+        Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
 
         Reference_SourceNode    : t_Reference +-> t_NodeId         &
         Reference_ReferenceType : t_Reference +-> t_NodeId         &
@@ -215,10 +215,10 @@ OPERATIONS
     PRE
         p_node : t_Node_i &
         p_node : t_Node   &
-        p_node : dom(TypeDefinition)
+        p_node : dom(Ref_HasTypeDefinition)
     THEN
         p_type_def :(p_type_def : t_ExpandedNodeId_i &
-                     p_type_def = TypeDefinition(p_node))
+                     p_type_def = Ref_HasTypeDefinition(p_node))
     END
     ;
 

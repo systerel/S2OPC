@@ -25,6 +25,7 @@ SEES
 DEFINITIONS
     "definitions.def";
     d_variables ==
+        /* Attributes */
         a_NodeId,
         a_NodeClass,
         a_BrowseName,
@@ -32,8 +33,7 @@ DEFINITIONS
         a_Value,
         a_Value_StatusCode,
 
-        TypeDefinition,
-
+        /* References */
         Reference_SourceNode,
         Reference_ReferenceType,
         Reference_TargetNode,
@@ -46,7 +46,11 @@ DEFINITIONS
 
         /* Service Write */
         ResponseWrite_allocated,
-        ResponseWrite_StatusCode
+        ResponseWrite_StatusCode,
+
+        /* A special reference, that we model because it is used by Browse.
+         * This is the content of the TargetNode of all Variables and Objects. */
+        Ref_HasTypeDefinition
     ;
 
     d_inv ==
@@ -65,8 +69,8 @@ DEFINITIONS
         a_Value_StatusCode : t_Node +-> t_StatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
-        TypeDefinition : t_Node +-> t_ExpandedNodeId &
-        dom(TypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
+        Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
+        dom(Ref_HasTypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
 
         /* References */
         Reference_SourceNode    : t_Reference --> t_NodeId         &
@@ -168,6 +172,17 @@ OPERATIONS
     END
     ;
 
+    p_type_def <-- get_TypeDefinition(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node   &
+        p_node : dom(Ref_HasTypeDefinition)
+    THEN
+        p_type_def :(p_type_def : t_ExpandedNodeId_i &
+                     p_type_def = Ref_HasTypeDefinition(p_node))
+    END
+    ;
+
     p_RefType <-- get_Reference_ReferenceType(p_ref) =
     PRE
         p_ref : t_Reference_i &
@@ -179,7 +194,6 @@ OPERATIONS
          )
     END
     ;
-    
 
     p_TargetNode <-- get_Reference_TargetNode(p_ref) =
     PRE
@@ -193,7 +207,7 @@ OPERATIONS
          )
     END
     ;
-   
+
     p_IsForward <-- get_Reference_IsForward(p_ref) =
     PRE
         p_ref : t_Reference_i &
@@ -203,6 +217,9 @@ OPERATIONS
     END
     ;
 
+    /* TODOPAB: Voir conjointement avec les Références à l'entrée */
+    /* TODO: On peut mettre un array pour les Begin, pour les End,
+       et un 3° un (Reference *) */
     p_ref_index <-- get_Node_RefIndexBegin(p_node) =
     PRE
         p_node : t_Node_i &
@@ -211,7 +228,6 @@ OPERATIONS
         p_ref_index := Node_RefIndexBegin(p_node)
     END
     ;
-    
     p_ref_index <-- get_Node_RefIndexEnd(p_node) =
     PRE
         p_node : t_Node_i &

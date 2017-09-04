@@ -29,5 +29,15 @@ OPERATIONS
     BEGIN
         StatusCode_service :: t_StatusCode_i
     END
+    ;
+
+    /* Promoted from msg_browse_response_bs */
+    write_BrowseResponse_msg_out(p_msg_out) =
+    PRE
+        p_msg_out : t_msg_i &
+        p_msg_out : t_msg
+    THEN
+        skip
+    END
 
 END

@@ -19,7 +19,7 @@ MACHINE
     msg_browse_response_bs
 
 SEES
-    constants, 
+    constants,
     message_out_bs
 
 DEFINITIONS
@@ -40,6 +40,7 @@ ABSTRACT_VARIABLES
 INVARIANT
         ResponseBrowse_BrowseStatus        : t_BrowseValue +-> BOOL                                  &
         ResponseBrowse_ContinuationPoint   : t_BrowseValue +-> t_Reference                           &
+        /* TODOPAB: comment on gère la taille non connue à l'avance de ces tableaux de BrowseResult  ??? */
         ResponseBrowse_Res_ReferenceTypeId : t_BrowseValue +-> (t_BrowseResult +-> t_NodeId)         &
         ResponseBrowse_Res_Forwards        : t_BrowseValue +-> (t_BrowseResult +-> BOOL)             &
         ResponseBrowse_Res_NodeId          : t_BrowseValue +-> (t_BrowseResult +-> t_ExpandedNodeId) &
@@ -201,15 +202,49 @@ OPERATIONS
         p_bri : t_BrowseResult
     THEN
         ResponseBrowse_Res_NodeClass(p_bvi) := {p_bri} <<| ResponseBrowse_Res_NodeClass(p_bvi)
-    END;
-    
-   p_isallocated <-- malloc_browse_result(p_bvi, p_nb_bri) =
-   PRE
-       p_bvi    : t_BrowseValue_i &
-       p_bvi    : t_BrowseValue   &
-       p_nb_bri : NAT
-   THEN
-       p_isallocated :: BOOL
-   END
+    END
+    ;
+
+    set_ResponseBrowse_Res_TypeDefinition(p_bvi, p_bri, p_TypeDefinition) =
+    PRE
+        p_bvi            : t_BrowseValue_i    &
+        p_bvi            : t_BrowseValue      &
+        p_bri            : t_BrowseResult_i   &
+        p_bri            : t_BrowseResult     &
+        p_TypeDefinition : t_ExpandedNodeId_i &
+        p_TypeDefinition : t_ExpandedNodeId
+    THEN
+        ResponseBrowse_Res_TypeDefinition(p_bvi)(p_bri) := p_TypeDefinition
+    END
+    ;
+
+    reset_ResponseBrowse_Res_TypeDefinition(p_bvi, p_bri) =
+    PRE
+        p_bvi : t_BrowseValue_i  &
+        p_bvi : t_BrowseValue    &
+        p_bri : t_BrowseResult_i &
+        p_bri : t_BrowseResult
+    THEN
+        ResponseBrowse_Res_TypeDefinition(p_bvi) := {p_bri} <<| ResponseBrowse_Res_TypeDefinition(p_bvi)
+    END
+    ;
+
+    p_isallocated <-- malloc_browse_result(p_bvi, p_nb_bri) =
+    PRE
+        p_bvi    : t_BrowseValue_i &
+        p_bvi    : t_BrowseValue   &
+        p_nb_bri : NAT
+    THEN
+        p_isallocated :: BOOL
+    END
+    ;
+
+    write_BrowseResponse_msg_out(p_msg_out) =
+    PRE
+        p_msg_out : t_msg_i &
+        p_msg_out : t_msg
+    THEN
+        skip
+    END
 
 END

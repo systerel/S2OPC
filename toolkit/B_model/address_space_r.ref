@@ -33,7 +33,7 @@ DEFINITIONS
         a_Value,
         a_Value_StatusCode,
 
-        TypeDefinition,
+        Ref_HasTypeDefinition,
 
         Reference_SourceNode,
         Reference_ReferenceType,
@@ -65,8 +65,8 @@ DEFINITIONS
         a_Value_StatusCode : t_Node +-> t_StatusCode &
         dom(a_Value_StatusCode) = dom(a_NodeClass|>{e_ncl_Variable}) &
 
-        TypeDefinition : t_Node +-> t_ExpandedNodeId &
-        dom(TypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
+        Ref_HasTypeDefinition : t_Node +-> t_ExpandedNodeId &
+        dom(Ref_HasTypeDefinition) = dom(a_NodeClass |> {e_ncl_Variable, e_ncl_Object}) &
 
         /* References */
         Reference_SourceNode    : t_Reference --> t_NodeId         &

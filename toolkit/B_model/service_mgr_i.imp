@@ -16,14 +16,14 @@
  */
 
 IMPLEMENTATION
-   service_mgr_i
+    service_mgr_i
 REFINES
-   service_mgr
+    service_mgr
 
 SEES
-   channel_mgr_bs,
-   constants
-   
+    channel_mgr_bs,
+    constants
+
 IMPORTS
     message_in_bs,
     message_out_bs,
@@ -35,16 +35,16 @@ IMPORTS
     service_write_decode_bs,
     service_get_endpoints_bs,
     service_browse_seq
-    
+
 PROMOTES
     /* message_in_bs */
     decode_msg_type,
     is_valid_msg_in_type,
     is_valid_request_context,
-    
+
     /* message_out_bs */
     is_valid_buffer_out,
-    
+
     /* session_mgr */
     client_secure_channel_lost_session_sm,
     server_secure_channel_lost_session_sm,
@@ -52,9 +52,9 @@ PROMOTES
     client_async_activate_new_session_with_channel,
     client_channel_connected_event_session,
     client_close_session
-    
+
 LOCAL_OPERATIONS
-    
+
     resp_msg_typ <-- get_response_type (req_msg_typ) =
     PRE
         req_msg_typ : t_msg_type_i &
@@ -89,7 +89,7 @@ LOCAL_OPERATIONS
          )
     END
     ;
-    
+
     /* TODO: call the treat write on an encoded WriteRequest */
     /* TODO: add constraints on userid? */
     StatusCode_service <-- treat_write_request(write_msg, userid) =
@@ -108,7 +108,7 @@ LOCAL_OPERATIONS
     END
 
 OPERATIONS
-    
+
     resp_msg_typ <-- get_response_type (req_msg_typ) =
     BEGIN
         CASE req_msg_typ OF
@@ -124,6 +124,8 @@ OPERATIONS
                 resp_msg_typ := e_msg_session_read_resp
             OR e_msg_session_write_req THEN
                 resp_msg_typ := e_msg_session_write_resp
+            OR e_msg_session_browse_req THEN
+                resp_msg_typ := e_msg_session_browse_resp
             END
         END
     END
@@ -160,9 +162,9 @@ OPERATIONS
         END;
         free_write_request
     END
-    ;    
+    ;
     /* END OF LOCAL OPERATIONS */
-    
+
     buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
     VAR
         l_req_msg_header,
@@ -208,7 +210,7 @@ OPERATIONS
                         l_session, l_ret <-- server_receive_session_req (channel, l_session_token, l_req_msg, req_typ, l_resp_msg);
                         IF l_ret /= e_sc_ok
                         THEN
-                            /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */ 
+                            /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
                             l_resp_msg_typ := e_msg_service_fault_resp
                         END;
                         write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
@@ -220,7 +222,7 @@ OPERATIONS
                             /* invalid encoding => close session */
                             server_close_session_sm (l_session)
                         END;
-                        
+
                         /* response message structures not necessary anymore */
                         dealloc_msg_header_out (l_resp_msg_header);
                         dealloc_msg_out (l_resp_msg)
@@ -239,7 +241,7 @@ OPERATIONS
         buffer_out := l_buffer_out
     END
     ;
-    
+
     client_receive_session_treatment_resp (channel, resp_typ, msg_buffer) =
     VAR
         l_resp_msg_header,
@@ -270,18 +272,18 @@ OPERATIONS
                 client_remove_req_handle (l_request_handle)
             END /* VALID RESP HEADER CHECK */
         END; /* DECODE RESP HEADER CHECK */
-    
+
         IF l_valid_resp_header = TRUE
         THEN
             /* resp header message not used anymore => deallocate */
             dealloc_msg_in_header (l_resp_msg_header)
         END;
-        
+
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer)
     END
     ;
-    
+
     buffer_out <-- server_receive_session_service_req (channel, req_typ, msg_buffer) =
     VAR
         l_req_msg_header,
@@ -336,7 +338,7 @@ OPERATIONS
                             CASE req_typ OF
                                 EITHER e_msg_session_read_req THEN
                                     treat_read_request (l_req_msg, l_resp_msg);
-                                    /* TODO: set a returned status code result from read request */
+                                    /* TODOPAB: set a returned status code result from read request */
                                     l_ret := e_sc_ok
                                 OR e_msg_session_write_req THEN
                                     // Write request case
@@ -345,7 +347,10 @@ OPERATIONS
                                     /* TODO: the following may fail (malloc) */
                                     write_WriteResponse_msg_out(l_resp_msg);
                                     dealloc_write_request_responses
-                                /* OR TODOPAB: call treat_browse_request_BrowseValues */
+                                OR e_msg_session_browse_req THEN
+                                    l_ret <-- treat_browse_request_BrowseValues;
+                                    write_BrowseResponse_msg_out(l_resp_msg)
+                                    /* TODOPAB: dealloc the response */
                                 ELSE
                                     /* Cases shall cover all session services req types */
                                     l_ret := e_sc_bad_unexpected_error
@@ -356,11 +361,11 @@ OPERATIONS
                             IF l_is_valid_resp = TRUE THEN
                                 IF l_ret /= e_sc_ok
                                 THEN
-                                    /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */ 
+                                    /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
                                     l_resp_msg_typ := e_msg_service_fault_resp
                                 END;
                                 write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
-                                /* Response message encoded */ 
+                                /* Response message encoded */
                                 l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg)
                             END;
                             /* response message structures not necessary anymore */
@@ -382,7 +387,7 @@ OPERATIONS
         buffer_out := l_buffer_out
     END
     ;
-    
+
     client_receive_session_service_resp (channel, resp_typ, msg_buffer) =
     VAR
         l_resp_msg_header,
@@ -407,7 +412,7 @@ OPERATIONS
                 THEN
                     l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                     l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
-                    IF l_valid_resp_msg = TRUE    
+                    IF l_valid_resp_msg = TRUE
                     THEN
                         l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
                         cli_service_response (l_resp_msg, l_status)
@@ -418,13 +423,13 @@ OPERATIONS
             dealloc_msg_in_header (l_resp_msg_header)
         END; /* DECODE RESP HEADER CHECK */
         /* For services on session IN response messages will be provided to applicative
-        
+
         TODOnow: unreference header/msg as current header/msg IN */
         /* In any case buffer will not be used anymore after this operation */
         dealloc_msg_in_buffer (msg_buffer)
     END
     ;
-    
+
     buffer_out <-- server_receive_discovery_service_req (channel, req_typ, msg_buffer) =
     VAR
         l_req_msg_header,
@@ -486,12 +491,12 @@ OPERATIONS
                         write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
                         IF l_ret /= e_sc_ok
                         THEN
-                            /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */ 
+                            /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
                             l_resp_msg_typ := e_msg_service_fault_resp
                         END;
                         write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
 
-                        /* Response message encoded */ 
+                        /* Response message encoded */
                         l_buffer_out <-- encode_msg (l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
 
                         /* response message structures not necessary anymore */
@@ -534,7 +539,7 @@ OPERATIONS
             THEN
                 l_resp_msg <-- decode_msg (resp_typ, msg_buffer);
                 l_valid_resp_msg <-- is_valid_msg_in (l_resp_msg);
-                IF l_valid_resp_msg = TRUE    
+                IF l_valid_resp_msg = TRUE
                 THEN
                     l_status <-- read_msg_resp_header_service_status (l_resp_msg_header);
                     cli_service_response (l_resp_msg, l_status)
@@ -550,9 +555,9 @@ OPERATIONS
         dealloc_msg_in_buffer (msg_buffer)
     END
     ;
-    
+
     /* CLIENT APP EVENTS (or internally generated events for async activation) */
-    
+
     buffer_out <-- client_service_create_session (session, channel) =
     VAR
         l_msg_header,
@@ -648,7 +653,7 @@ OPERATIONS
         buffer_out := l_buffer
     END
     ;
-    
+
     ret, channel, buffer_out <-- client_service_activate_session (session, user) =
     VAR
         l_msg_header,
@@ -705,7 +710,7 @@ OPERATIONS
         buffer_out := l_buffer
     END
     ;
-    
+
     ret, channel, buffer_out <-- client_service_close_session (session) =
     VAR
         l_msg_header,
@@ -759,7 +764,7 @@ OPERATIONS
         buffer_out := l_buffer
     END
     ;
-    
+
     ret, channel, buffer_out <-- client_service_request (session, req_msg) =
     VAR
         l_msg_header,
@@ -782,7 +787,8 @@ OPERATIONS
             l_req_typ <-- get_msg_in_type (req_msg);
             CASE l_req_typ OF
                 EITHER e_msg_session_read_req,
-                    e_msg_session_write_req
+                    e_msg_session_write_req,
+                    e_msg_session_browse_req
                 THEN /* s_service_reqs */
                     l_resp_typ <-- get_response_type (l_req_typ);
                     l_msg_header <-- alloc_app_req_msg_header (l_req_typ);

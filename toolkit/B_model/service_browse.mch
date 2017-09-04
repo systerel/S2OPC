@@ -142,5 +142,15 @@ OPERATIONS
     THEN
         ResponseBrowse_ContinuationPoint :: t_BrowseValue +-> t_Reference
     END
+    ;
+
+    /* Promoted */
+    write_BrowseResponse_msg_out(p_msg_out) =
+    PRE
+        p_msg_out : t_msg_i &
+        p_msg_out : t_msg
+    THEN
+        skip
+    END
 
 END
