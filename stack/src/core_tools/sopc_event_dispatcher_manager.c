@@ -35,7 +35,7 @@ typedef struct SOPC_EventDispatcherParams {
     int32_t     event;
     uint32_t    eltId;
     void*       params;
-    int32_t     auxParam;
+    uint32_t    auxParam;
     const char* debugName;
 } SOPC_EventDispatcherParams;
 
@@ -93,7 +93,7 @@ static SOPC_StatusCode SOPC_EventDispatcherManager_AddEventInternal(SOPC_EventDi
                                                                     int32_t                      event,
                                                                     uint32_t                     eltId,
                                                                     void*                        params,
-                                                                    int32_t                      auxParam,
+                                                                    uint32_t                     auxParam,
                                                                     const char*                  debugName,
                                                                     bool                         enqueueAsFirstOut)
 {
@@ -127,7 +127,7 @@ SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager
                                                      int32_t                      event,
                                                      uint32_t                     eltId,
                                                      void*                        params,
-                                                     int32_t                      auxParam,
+                                                     uint32_t                     auxParam,
                                                      const char*                  debugName)
 {
     return SOPC_EventDispatcherManager_AddEventInternal(eventMgr,
@@ -143,7 +143,7 @@ SOPC_StatusCode SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatcherM
                                                            int32_t                      event,
                                                            uint32_t                     eltId,
                                                            void*                        params,
-                                                           int32_t                      auxParam,
+                                                           uint32_t                     auxParam,
                                                            const char*                  debugName)
 {
     return SOPC_EventDispatcherManager_AddEventInternal(eventMgr,
