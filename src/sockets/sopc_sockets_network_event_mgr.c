@@ -149,7 +149,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
                                     SOPC_Sockets_EnqueueEvent(INT_SOCKET_ACCEPTED,
                                                               acceptSock->socketIdx,
                                                               NULL,
-                                                              (int32_t) uaSock->socketIdx);
+                                                              uaSock->socketIdx);
                                 }
                             }
                         }else{

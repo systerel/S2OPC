@@ -936,12 +936,12 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                         SOPC_SecureChannels_EnqueueInternalEventAsNext(scEvent,
                                                                        scConnectionIdx,
                                                                        (void*) chunkCtx->chunkInputBuffer,
-                                                                       (int32_t) requestId);
+                                                                       requestId);
                     }else{
                         SOPC_SecureChannels_EnqueueInternalEvent(scEvent,
                                                                  scConnectionIdx,
                                                                  (void*) chunkCtx->chunkInputBuffer,
-                                                                 (int32_t) requestId);
+                                                                 requestId);
                     }
                     chunkCtx->chunkInputBuffer = NULL;
                 }
@@ -952,7 +952,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                 SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE,
                                                                scConnectionIdx,
                                                                NULL,
-                                                               (int32_t) errorStatus);
+                                                               errorStatus);
                 SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
                 chunkCtx->chunkInputBuffer = NULL;
                 receivedBuffer->length = 0;
@@ -1986,7 +1986,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
 
     if(isSendCase != false){
         result = SC_Chunks_TreatSendBuffer(scConnection,
-                                           (uint32_t) auxParam,
+                                           auxParam,
                                            sendMsgType,
                                            isSendTcpOnly,
                                            isOPN,
@@ -1998,7 +1998,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
             SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FAILURE,
                                                            eltId,
                                                            params,
-                                                           (int32_t) errorStatus);
+                                                           errorStatus);
         }else{
             // Require write of output buffer on socket
             SOPC_Sockets_EnqueueEvent(SOCKET_WRITE,

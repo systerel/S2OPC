@@ -119,6 +119,6 @@ void SOPC_TEMP_ClearEventDispMgr();
 void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                                        uint32_t id,
                                        void*    params,
-                                       int32_t  auxParam);
+                                       uint32_t auxParam);
 
 #endif /* _SOPC_SC_EVENTS_H_ */

@@ -1204,7 +1204,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN,
                                                  scConnectionIdx,
                                                  (void*) opnRespBuffer,
-                                                 (int32_t) requestId);
+                                                 requestId);
     }
 
     OpcUa_ResponseHeader_Clear(&respHeader);
@@ -1379,7 +1379,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
         SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN,
                                                  scConnectionIdx,
                                                  (void*) opnRespBuffer,
-                                                 (int32_t) requestId);
+                                                 requestId);
     }
 
     OpcUa_ResponseHeader_Clear(&respHeader);
@@ -1412,7 +1412,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             if(scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT){
                 result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection,
                                                                      eltId,
-                                                                     (uint32_t) auxParam);
+                                                                     auxParam);
                 if(result == false){
                     // Error case: close the secure connection if invalid state or unexpected error.
                     //  (client case only on SOCKET_CONNECTION event)
@@ -1424,7 +1424,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             }else{
                 // No socket connection expected just close the socket
                 SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE,
-                                          (uint32_t) auxParam,
+                                          auxParam,
                                           NULL,
                                           0);
                 result = true;
@@ -1432,7 +1432,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }else{
             // In case of unidentified secure connection problem, close the socket just connected
             SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE,
-                                      (uint32_t) auxParam,
+                                      auxParam,
                                       NULL,
                                       0);
         }
@@ -1534,20 +1534,20 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
 
             // notify socket that connection is accepted
             SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION,
-                                      (uint32_t) auxParam,
+                                      auxParam,
                                       NULL,
-                                      (int32_t) idx);
+                                      idx);
             // notify secure listener that connection is accepted
             SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED,
                                                      eltId,
                                                      NULL,
-                                                     (int32_t) idx);
+                                                     idx);
 
         }else{
             // Error case: request to close the socket newly created
             //             / nothing to send to SC listener state manager (no record of new connection in it for now)
             SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE,
-                                      (uint32_t) auxParam,
+                                      auxParam,
                                       NULL,
                                       0);
         }
@@ -1655,7 +1655,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                             // transition: Connecting => Connected
                             result = SC_ServerTransition_ScConnecting_To_ScConnected(scConnection,
                                                                                      eltId,
-                                                                                     (uint32_t) auxParam,
+                                                                                     auxParam,
                                                                                      requestHandle);
                             // since security verifications were done before, it should be an internal error
                             // (moreover we cannot detail error statuses before SC established)
@@ -1679,7 +1679,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                             // transition: ConnectedRenew => Connected
                             result = SC_ServerTransition_ScConnectedRenew_To_ScConnected(scConnection,
                                                                                          eltId,
-                                                                                         (uint32_t) auxParam,
+                                                                                         auxParam,
                                                                                          requestHandle,
                                                                                          requestedLifetime);
                             errorStatus = OpcUa_BadTcpInternalError;
@@ -1784,7 +1784,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         if(scConnection != NULL){
              SC_CloseSecureConnection(scConnection,
                                       eltId,
-                                      (uint32_t) auxParam,
+                                      auxParam,
                                       "Failure when receiving a message on the secure connection");
         } // else: nothing to do (=> socket should already be required to close)
         break;
@@ -1793,7 +1793,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         if(scConnection != NULL){
             SC_CloseSecureConnection(scConnection,
                                      eltId,
-                                     (uint32_t) auxParam,
+                                     auxParam,
                                      "Failure when encoding a message to send on the secure connection");
         } // else: nothing to do (=> socket should already be required to close)
         break;

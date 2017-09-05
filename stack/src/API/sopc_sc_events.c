@@ -223,7 +223,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
                                              SE_TO_SC_EP_CLOSE,
                                              *epConfigIdx,
                                              NULL,
-                                             (int32_t) status,
+                                             status,
                                              "Endpoint closed for given reason");
         break;
     case SOPC_EndpointEvent_SecureChannelOpened:
@@ -260,7 +260,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
                                              SC_TO_SE_SC_DISCONNECTED,
                                              *epConfigIdx,
                                              NULL,
-                                             (int32_t) status,
+                                             status,
                                              "Secure channel disconnected from Endpoint");
         break;
     case SOPC_EndpointEvent_UnsupportedServiceRequested:
@@ -318,7 +318,7 @@ SOPC_StatusCode TMP_SecureChannelEvent_CB (SOPC_Channel       channel,
                                              SC_TO_SE_SC_DISCONNECTED, // TODO: cannot differentiate timeout from disconnection here
                                              *configIdx,
                                              NULL,
-                                             (int32_t) status,
+                                             status,
                                              "Secure channel closed for given reason");
         break;
     }
@@ -351,7 +351,7 @@ SOPC_StatusCode TMP_SecureChannelResponse_CB(SOPC_Channel         channel,
 void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                                        uint32_t id,
                                        void*    params,
-                                       int32_t  auxParam){
+                                       uint32_t auxParam){
     //printf("SecureChannel event dispatcher: event='%d', id='%d', params='%p', auxParam='%d'\n", scEvent, id, params, auxParam);
     assert(NULL != tmpToolkitMgr);
     SOPC_Endpoint ep = NULL;
@@ -402,7 +402,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                     SC_TO_SE_EP_CLOSED,
                     id,
                     NULL,
-                    (int32_t) status,
+                    status,
                     "Endpoint opening failed");
         }
         break;
@@ -461,7 +461,7 @@ void SOPC_SecureChannelEventDispatcher(int32_t  scEvent,
                     SC_TO_SE_SC_CONNECTION_TIMEOUT,
                     id,
                     NULL,
-                    (int32_t) status,
+                    status,
                     "Secure channel connection failed");
         }
         break;

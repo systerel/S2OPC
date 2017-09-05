@@ -29,10 +29,10 @@
 
 static SOPC_EventDispatcherManager* secureChannelsEventDispatcherMgr = NULL;
 
-static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t event,
+static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t  event,
                                                    uint32_t eltId,
-                                                   void* params,
-                                                   int32_t auxParam){
+                                                   void*    params,
+                                                   uint32_t auxParam){
     SOPC_SecureChannels_InputEvent scEvent = event;
     switch(scEvent){
     /* Sockets events: */
@@ -133,7 +133,7 @@ static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t event,
 void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       uint32_t                       id,
                                       void*                          params,
-                                      int32_t                        auxParam){
+                                      uint32_t                       auxParam){
     if(NULL != secureChannelsEventDispatcherMgr){
         switch(scEvent){
         /* External events */
@@ -182,7 +182,7 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
 void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scEvent,
                                               uint32_t                       id,
                                               void*                          params,
-                                              int32_t                        auxParam){
+                                              uint32_t                       auxParam){
     if(NULL != secureChannelsEventDispatcherMgr){
         switch(scEvent){
         /* Internal events*/
@@ -231,7 +231,7 @@ void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scE
 void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEvent scEvent,
                                                     uint32_t                       id,
                                                     void*                          params,
-                                                    int32_t                        auxParam){
+                                                    uint32_t                       auxParam){
     if(NULL != secureChannelsEventDispatcherMgr){
         switch(scEvent){
         /* Internal events*/

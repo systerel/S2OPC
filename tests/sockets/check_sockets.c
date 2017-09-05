@@ -60,15 +60,13 @@ START_TEST(test_sockets)
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER,
                               endpointDescConfigId,
                               (void*) uri,
-                              (int32_t) true);
+                              (uint32_t) true);
     // Retrieve event of listener creation
     SOPC_AsyncQueue_BlockingDequeue(secureChannelsEvents, (void**) &scEventParams);
     // Check event
     ck_assert(scEventParams->event == SOCKET_LISTENER_OPENED);
     // Check configuration index is preserved
     ck_assert(scEventParams->eltId == endpointDescConfigId);
-    // Check socket index is an unsigned integer
-    ck_assert(scEventParams->auxParam >= 0);
 
     free(scEventParams);
     scEventParams = NULL;
@@ -86,8 +84,7 @@ START_TEST(test_sockets)
     ck_assert(scEventParams->event == SOCKET_LISTENER_CONNECTION);
     // Check configuration index is preserved
     ck_assert(scEventParams->eltId == endpointDescConfigId);
-    ck_assert(scEventParams->auxParam >= 0);
-    serverSocketIdx = (uint32_t) scEventParams->auxParam;
+    serverSocketIdx = scEventParams->auxParam;
 
     free(scEventParams);
     scEventParams = NULL;
@@ -98,8 +95,7 @@ START_TEST(test_sockets)
     ck_assert(scEventParams->event == SOCKET_CONNECTION);
     // Check configuration index is preserved
     ck_assert(scEventParams->eltId == clientSecureChannelConnectionId);
-    ck_assert(scEventParams->auxParam >= 0);
-    clientSocketIdx = (uint32_t) scEventParams->auxParam;
+    clientSocketIdx = scEventParams->auxParam;
 
     free(scEventParams);
     scEventParams = NULL;
@@ -222,7 +218,7 @@ START_TEST(test_sockets)
     ck_assert(scEventParams->event == SOCKET_FAILURE);
     // Check configuration index is preserved
     ck_assert(scEventParams->eltId == serverSecureChannelConnectionId);
-    ck_assert((uint32_t) scEventParams->auxParam == serverSocketIdx);
+    ck_assert(scEventParams->auxParam == serverSocketIdx);
 
     free(scEventParams);
     scEventParams = NULL;

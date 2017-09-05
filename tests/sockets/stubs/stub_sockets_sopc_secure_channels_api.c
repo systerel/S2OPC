@@ -27,7 +27,7 @@ SOPC_AsyncQueue* secureChannelsEvents = NULL;
 void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       uint32_t                       id,
                                       void*                          params,
-                                      int32_t                        auxParam){
+                                      uint32_t                       auxParam){
 
     SOPC_StubSockets_SecureChannelsEventParams* scParams = calloc(1, sizeof(SOPC_StubSockets_SecureChannelsEventParams));
     assert(scParams != NULL && secureChannelsEvents != NULL);

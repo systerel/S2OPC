@@ -350,7 +350,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* socket){
 void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
                                       uint32_t eltId,
                                       void*    params,
-                                      int32_t  auxParam){
+                                      uint32_t auxParam){
     bool result = false;
     SOPC_Sockets_InputEvent socketEvent = (SOPC_Sockets_InputEvent) event;
     SOPC_Socket* socketElt = NULL;
@@ -386,7 +386,7 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         Mutex_Lock(&socketsMutex);
         socketElt = &socketsArray[eltId];
         if(socketElt->state == SOCKET_STATE_ACCEPTED){
-            socketElt->connectionId = (uint32_t) auxParam;
+            socketElt->connectionId = auxParam;
             socketElt->state = SOCKET_STATE_CONNECTED;
         }else{
             SOPC_SocketsInternalContext_CloseSocketNoLock(eltId);
@@ -456,7 +456,7 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
             SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE,
                                              socketElt->connectionId,
                                              NULL,
-                                             (int32_t) eltId);
+                                             eltId);
             // Definitively close the socket
             SOPC_SocketsInternalContext_CloseSocket(eltId);
         }
@@ -467,15 +467,15 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
 
         // State was set to accepted by network event manager
         assert(socketElt->state == SOCKET_STATE_ACCEPTED);
-        assert(socketsArray[(uint32_t) auxParam].state == SOCKET_STATE_LISTENING);
+        assert(socketsArray[auxParam].state == SOCKET_STATE_LISTENING);
         // Increment number of connections on listener
-        socketsArray[(uint32_t) auxParam].listenerConnections++;
+        socketsArray[auxParam].listenerConnections++;
 
         // Send to the secure channel listener state manager and wait for SOCKET_ACCEPTED_CONNECTION for association with connection index
         SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_CONNECTION,
                                          socketElt->connectionId, // endpoint description config index
                                          NULL,
-                                         (int32_t) eltId);
+                                         eltId);
         break;
     case INT_SOCKET_CONNECTION_ATTEMPT_FAILED:
         socketElt = &socketsArray[eltId];
@@ -510,7 +510,7 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         SOPC_SecureChannels_EnqueueEvent(SOCKET_CONNECTION,
                                          socketElt->connectionId, // secure channel connection index
                                          NULL,
-                                         (int32_t) eltId);
+                                         eltId);
         break;
     case INT_SOCKET_CLOSE:
         socketElt = &socketsArray[eltId];
@@ -519,7 +519,7 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
             SOPC_SecureChannels_EnqueueEvent(SOCKET_LISTENER_FAILURE,
                                              socketElt->connectionId,
                                              NULL,
-                                             (int32_t) eltId);
+                                             eltId);
         }else{
             if(socketElt->isServerConnection != false){
                 // Management of number of connection on a listener
@@ -530,7 +530,7 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
             SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE,
                                              socketElt->connectionId,
                                              NULL,
-                                             (int32_t) eltId);
+                                             eltId);
         }
 
         SOPC_SocketsInternalContext_CloseSocket(eltId);
@@ -549,13 +549,13 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
             SOPC_SecureChannels_EnqueueEvent(SOCKET_RCV_BYTES,
                                              socketElt->connectionId,
                                              (void*) buffer,
-                                             (int32_t) eltId);
+                                             eltId);
         }else{
             // Failure during read operation
             SOPC_SecureChannels_EnqueueEvent(SOCKET_FAILURE,
                                              socketElt->connectionId,
                                              NULL,
-                                             (int32_t) eltId);
+                                             eltId);
             SOPC_SocketsInternalContext_CloseSocket(eltId);
         }
 

@@ -23,6 +23,6 @@
 void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
                                       uint32_t eltId,
                                       void*    params,
-                                      int32_t  auxParam);
+                                      uint32_t auxParam);
 
 #endif /* SOPC_SOCKETS_EVENT_MGR_H_ */
