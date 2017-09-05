@@ -24,6 +24,7 @@
 #include "sopc_toolkit_constants.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_secure_channels_api.h"
+#include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_sockets_api.h"
 #include "sopc_encoder.h"
@@ -123,10 +124,10 @@ static bool SC_CloseConnection(uint32_t connectionIdx){
     return result;
 }
 
-static void SC_Server_SendErrorMsg(uint32_t        scConnectionIdx,
-                                   SOPC_Buffer*    receptionMsgBuffer,
-                                   SOPC_StatusCode errorStatus,
-                                   char*     reason)
+static void SC_Server_SendErrorMsgAndClose(uint32_t        scConnectionIdx,
+                                           SOPC_Buffer*    receptionMsgBuffer,
+                                           SOPC_StatusCode errorStatus,
+                                           char*     reason)
 {
     SOPC_StatusCode status = STATUS_OK;
     SOPC_String tempString;
@@ -148,17 +149,28 @@ static void SC_Server_SendErrorMsg(uint32_t        scConnectionIdx,
     }
 
     if(status == STATUS_OK){
-        SOPC_SecureChannels_EnqueueEvent(INT_SC_SND_ERR,
-                                         scConnectionIdx,
-                                         (void*) receptionMsgBuffer,
-                                         0);
+        // Delay SC closure after ERR message treatment will be done by chunks manager
+        // IMPORTANT NOTE: will be 2nd event to be treated (see ERR below)
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_CLOSE,
+                                                       scConnectionIdx,
+                                                       NULL,
+                                                       0);
+
+        // ERR will be treated before INT_SC_CLOSE since both added as next event
+        // IMPORTANT NOTE: will be 1st event to be treated regarding INT_SC_CLOSE
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_ERR,
+                                                       scConnectionIdx,
+                                                       (void*) receptionMsgBuffer,
+                                                       0);
     }
+
+
 
     SOPC_String_Clear(&tempString);
 }
 
-static bool SC_Client_SendCloseSecureChannelRequest(SOPC_SecureConnection* scConnection,
-                                                    uint32_t               scConnectionIdx){
+static bool SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnection* scConnection,
+                                                            uint32_t               scConnectionIdx){
     assert(scConnection != NULL);
     SOPC_Buffer* msgBuffer;
     bool result = false;
@@ -201,10 +213,19 @@ static bool SC_Client_SendCloseSecureChannelRequest(SOPC_SecureConnection* scCon
 
         if(STATUS_OK == status){
             result = true;
-            SOPC_SecureChannels_EnqueueEvent(INT_SC_SND_CLO,
-                                             scConnectionIdx,
-                                             (void*) msgBuffer,
-                                             -1); // no request Id context in request
+            // Delay SC closure after CLO message treatment will be done by chunks manager
+            // IMPORTANT NOTE: will be 2nd event to be treated (see CLO below)
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_CLOSE,
+                                                           scConnectionIdx,
+                                                           NULL,
+                                                           0);
+
+            // CLO will be treated before INT_SC_CLOSE since both added as next event
+            // IMPORTANT NOTE: will be 1st event to be treated regarding INT_SC_CLOSE
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_CLO,
+                                                           scConnectionIdx,
+                                                           (void*) msgBuffer,
+                                                           -1); // no request Id context in request
         }
     }
 
@@ -229,15 +250,22 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
 
             errBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
             if(errBuffer != NULL){
-                SC_Client_SendCloseSecureChannelRequest(scConnection,
-                                                        scConnectionIdx);
+                SC_Client_SendCloseSecureChannelRequestAndClose(scConnection,
+                                                                scConnectionIdx);
+            }else{
+                // Immediatly close the connection if failed
+                if(SC_CloseConnection(scConnectionIdx) != false){
+                    // Notify services in case of successful closure
+                    SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                                         SC_TO_SE_SC_DISCONNECTED,
+                                                         scConnectionIdx,
+                                                         NULL,
+                                                         0,
+                                                         reason);
+                }
             }
 
-            // Delay SC closure after CLO message treatment by chunks manager
-            SOPC_SecureChannels_EnqueueEvent(INT_SC_CLOSE,
-                                             scConnectionIdx,
-                                             NULL,
-                                             0);
+
         }else if(scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED &&
            SC_CloseConnection(scConnectionIdx) != false){
             // Notify services in case of successful closure
@@ -270,16 +298,22 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
                     // Reason shall not provide more information in this case
                     reason = "";
                 }
-                SC_Server_SendErrorMsg(scConnectionIdx,
-                                       errBuffer,
-                                       errorStatus,
-                                       reason);
+                SC_Server_SendErrorMsgAndClose(scConnectionIdx,
+                                               errBuffer,
+                                               errorStatus,
+                                               reason);
+            }else{
+                // Immediatly close the connection if failed
+                if(SC_CloseConnection(scConnectionIdx) != false){
+                    // Notify services in case of successful closure
+                    SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                                         SC_TO_SE_SC_DISCONNECTED,
+                                                         scConnectionIdx,
+                                                         NULL,
+                                                         0,
+                                                         reason);
+                }
             }
-            // Delay SC closure after ERR message treatment by chunks manager
-            SOPC_SecureChannels_EnqueueEvent(INT_SC_CLOSE,
-                                             scConnectionIdx,
-                                             NULL,
-                                             0);
         }
     }
 }
@@ -360,10 +394,10 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     if(result != false){
         scConnection->socketIndex = socketIdx;
         scConnection->state = SECURE_CONNECTION_STATE_TCP_NEGOTIATE;
-        SOPC_SecureChannels_EnqueueEvent(INT_SC_SND_HEL,
-                                         scConnectionIdx,
-                                         (void*) msgBuffer,
-                                         0);
+        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_HEL,
+                                                 scConnectionIdx,
+                                                 (void*) msgBuffer,
+                                                 0);
     }
 
     return result;
@@ -378,15 +412,20 @@ static bool SC_ClientTransition_Connected_To_Disconnected(SOPC_SecureConnection*
     assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
            scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
 
-    result = SC_Client_SendCloseSecureChannelRequest(scConnection,
-                                                     scConnectionIdx);
+    result = SC_Client_SendCloseSecureChannelRequestAndClose(scConnection,
+                                                             scConnectionIdx);
 
     if(result != false){
-        // Delay SC closure after CLO message treatment by chunks manager
-        SOPC_SecureChannels_EnqueueEvent(INT_SC_CLOSE,
-                                         scConnectionIdx,
-                                         NULL,
-                                         0);
+        // Immediatly close the connection if failed
+        if(SC_CloseConnection(scConnectionIdx) != false){
+            // Notify services in case of successful closure
+            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                                 SC_TO_SE_SC_DISCONNECTED,
+                                                 scConnectionIdx,
+                                                 NULL,
+                                                 0,
+                                                 "Sending CLO request failed");
+        }
     }
 
     return result;
@@ -556,10 +595,10 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 
     if(result != false){
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTING;
-        SOPC_SecureChannels_EnqueueEvent(INT_SC_SND_OPN,
-                                         scConnectionIdx,
-                                         (void*) opnMsgBuffer,
-                                         0);
+        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN,
+                                                 scConnectionIdx,
+                                                 (void*) opnMsgBuffer,
+                                                 0);
     }
 
     return result;
@@ -830,10 +869,10 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
 
     if(result != false){
         scConnection->state = SECURE_CONNECTION_STATE_SC_INIT;
-        SOPC_SecureChannels_EnqueueEvent(INT_SC_SND_ACK,
-                                         scConnectionIdx,
-                                         ackMsgBuffer,
-                                         0);
+        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_ACK,
+                                                 scConnectionIdx,
+                                                 ackMsgBuffer,
+                                                 0);
     }
 
     return result;
@@ -1162,10 +1201,10 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
 
     if(result != false){
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED;
-        SOPC_SecureChannels_EnqueueEvent(INT_SC_SND_OPN,
-                                         scConnectionIdx,
-                                         (void*) opnRespBuffer,
-                                         (int32_t) requestId);
+        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN,
+                                                 scConnectionIdx,
+                                                 (void*) opnRespBuffer,
+                                                 (int32_t) requestId);
     }
 
     OpcUa_ResponseHeader_Clear(&respHeader);
@@ -1337,10 +1376,10 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
         scConnection->currentSecurityToken = newSecuToken;
         // Precedent security token will remain active until expiration or client sent message with new token
         scConnection->serverNewSecuTokenActive = false;
-        SOPC_SecureChannels_EnqueueEvent(INT_SC_SND_OPN,
-                                         scConnectionIdx,
-                                         (void*) opnRespBuffer,
-                                         (int32_t) requestId);
+        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN,
+                                                 scConnectionIdx,
+                                                 (void*) opnRespBuffer,
+                                                 (int32_t) requestId);
     }
 
     OpcUa_ResponseHeader_Clear(&respHeader);
@@ -1475,10 +1514,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             // Error case:
             // TODO: add event to services to notify it
         }else{
-            SOPC_SecureChannels_EnqueueEvent(INT_SC_SND_MSG_CHUNKS,
-                                             eltId,
-                                             params,
-                                             auxParam);
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_MSG_CHUNKS,
+                                                     eltId,
+                                                     params,
+                                                     auxParam);
         }
         break;
     /* Internal events: */
@@ -1499,10 +1538,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                       NULL,
                                       (int32_t) idx);
             // notify secure listener that connection is accepted
-            SOPC_SecureChannels_EnqueueEvent(INT_EP_SC_CREATED,
-                                             eltId,
-                                             NULL,
-                                             (int32_t) idx);
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED,
+                                                     eltId,
+                                                     NULL,
+                                                     (int32_t) idx);
 
         }else{
             // Error case: request to close the socket newly created

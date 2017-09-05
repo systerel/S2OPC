@@ -16,6 +16,7 @@
  */
 
 #include "sopc_secure_channels_api.h"
+#include "sopc_secure_channels_api_internal.h"
 
 #include <stdbool.h>
 #include <assert.h>
@@ -134,12 +135,145 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       void*                          params,
                                       int32_t                        auxParam){
     if(NULL != secureChannelsEventDispatcherMgr){
-        SOPC_EventDispatcherManager_AddEvent(secureChannelsEventDispatcherMgr,
-                                             scEvent,
-                                             id,
-                                             params,
-                                             auxParam,
-                                             NULL);
+        switch(scEvent){
+        /* External events */
+        case SOCKET_LISTENER_OPENED:
+        case SOCKET_LISTENER_CONNECTION:
+        case SOCKET_LISTENER_FAILURE:
+        case SOCKET_CONNECTION:
+        case SOCKET_FAILURE:
+        case SOCKET_RCV_BYTES:
+        case EP_OPEN:
+        case EP_CLOSE:
+        case SC_CONNECT:
+        case SC_DISCONNECT:
+        case SC_SERVICE_SND_MSG:
+            SOPC_EventDispatcherManager_AddEvent(secureChannelsEventDispatcherMgr,
+                                                 scEvent,
+                                                 id,
+                                                 params,
+                                                 auxParam,
+                                                 NULL);
+            break;
+        /* Internal or invalid events*/
+        case INT_EP_SC_CREATE:
+        case INT_EP_SC_CLOSE:
+        case INT_EP_SC_CREATED:
+        case INT_EP_SC_DISCONNECTED:
+        case INT_SC_RCV_HEL:
+        case INT_SC_RCV_ACK:
+        case INT_SC_RCV_ERR:
+        case INT_SC_RCV_OPN:
+        case INT_SC_RCV_CLO:
+        case INT_SC_RCV_MSG_CHUNKS:
+        case INT_SC_RCV_FAILURE:
+        case INT_SC_SND_FAILURE:
+        case INT_SC_SND_HEL:
+        case INT_SC_SND_ACK:
+        case INT_SC_SND_OPN:
+        case INT_SC_SND_CLO:
+        case INT_SC_SND_MSG_CHUNKS:
+        default:
+            assert(false);
+        }
+    }
+}
+
+void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scEvent,
+                                              uint32_t                       id,
+                                              void*                          params,
+                                              int32_t                        auxParam){
+    if(NULL != secureChannelsEventDispatcherMgr){
+        switch(scEvent){
+        /* Internal events*/
+        case INT_EP_SC_CREATE:
+        case INT_EP_SC_CLOSE:
+        case INT_EP_SC_CREATED:
+        case INT_EP_SC_DISCONNECTED:
+        case INT_SC_RCV_HEL:
+        case INT_SC_RCV_ACK:
+        case INT_SC_RCV_ERR:
+        case INT_SC_RCV_OPN:
+        case INT_SC_RCV_CLO:
+        case INT_SC_RCV_MSG_CHUNKS:
+        case INT_SC_RCV_FAILURE:
+        case INT_SC_SND_FAILURE:
+        case INT_SC_SND_HEL:
+        case INT_SC_SND_ACK:
+        case INT_SC_SND_OPN:
+        case INT_SC_SND_CLO:
+        case INT_SC_SND_MSG_CHUNKS:
+            SOPC_EventDispatcherManager_AddEvent(secureChannelsEventDispatcherMgr,
+                                                 scEvent,
+                                                 id,
+                                                 params,
+                                                 auxParam,
+                                                 NULL);
+            break;
+        /* External or invalid events */
+        case SOCKET_LISTENER_OPENED:
+        case SOCKET_LISTENER_CONNECTION:
+        case SOCKET_LISTENER_FAILURE:
+        case SOCKET_CONNECTION:
+        case SOCKET_FAILURE:
+        case SOCKET_RCV_BYTES:
+        case EP_OPEN:
+        case EP_CLOSE:
+        case SC_CONNECT:
+        case SC_DISCONNECT:
+        case SC_SERVICE_SND_MSG:
+        default:
+            assert(false);
+        }
+    }
+}
+
+void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEvent scEvent,
+                                                    uint32_t                       id,
+                                                    void*                          params,
+                                                    int32_t                        auxParam){
+    if(NULL != secureChannelsEventDispatcherMgr){
+        switch(scEvent){
+        /* Internal events*/
+        case INT_EP_SC_CREATE:
+        case INT_EP_SC_CLOSE:
+        case INT_EP_SC_CREATED:
+        case INT_EP_SC_DISCONNECTED:
+        case INT_SC_RCV_HEL:
+        case INT_SC_RCV_ACK:
+        case INT_SC_RCV_ERR:
+        case INT_SC_RCV_OPN:
+        case INT_SC_RCV_CLO:
+        case INT_SC_RCV_MSG_CHUNKS:
+        case INT_SC_RCV_FAILURE:
+        case INT_SC_SND_FAILURE:
+        case INT_SC_SND_HEL:
+        case INT_SC_SND_ACK:
+        case INT_SC_SND_OPN:
+        case INT_SC_SND_CLO:
+        case INT_SC_SND_MSG_CHUNKS:
+            SOPC_EventDispatcherManager_AddEventAsNext(secureChannelsEventDispatcherMgr,
+                                                       scEvent,
+                                                       id,
+                                                       params,
+                                                       auxParam,
+                                                       NULL);
+            break;
+        /* External or invalid events */
+        case SOCKET_LISTENER_OPENED:
+        case SOCKET_LISTENER_CONNECTION:
+        case SOCKET_LISTENER_FAILURE:
+        case SOCKET_CONNECTION:
+        case SOCKET_FAILURE:
+        case SOCKET_RCV_BYTES:
+        case EP_OPEN:
+        case EP_CLOSE:
+        case SC_CONNECT:
+        case SC_DISCONNECT:
+        case SC_SERVICE_SND_MSG:
+        default:
+            assert(false);
+        }
     }
 }
 

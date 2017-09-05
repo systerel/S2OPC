@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-/* Sockets input events */
+/* Secure channel input events */
 typedef enum {
     /* External events */
     /*  Socket events */
@@ -102,7 +102,8 @@ typedef enum {
 
 } SOPC_SecureChannels_InputEvent;
 
-/* Sockets event enqueue function */
+/* Secure channel external event enqueue function
+ * IMPORTANT NOTE: internal events use will cause an assertion error */
 void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
                                       uint32_t                       id,
                                       void*                          params,

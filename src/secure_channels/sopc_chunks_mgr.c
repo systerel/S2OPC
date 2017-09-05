@@ -24,6 +24,7 @@
 #include "sopc_toolkit_constants.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_secure_channels_api.h"
+#include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_sockets_api.h"
 #include "sopc_encoder.h"
@@ -929,19 +930,29 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                 if(STATUS_OK == errorStatus){
                     // Transmit OPC UA message to secure connection state manager
                     SOPC_SecureChannels_InputEvent scEvent = SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType);
-                    SOPC_SecureChannels_EnqueueEvent(scEvent,
-                                                     scConnectionIdx,
-                                                     (void*) chunkCtx->chunkInputBuffer,
-                                                     (int32_t) requestId);
+                    if(scEvent == INT_SC_RCV_ERR ||
+                       scEvent == INT_SC_RCV_CLO){
+                        // Treat as prio events
+                        SOPC_SecureChannels_EnqueueInternalEventAsNext(scEvent,
+                                                                       scConnectionIdx,
+                                                                       (void*) chunkCtx->chunkInputBuffer,
+                                                                       (int32_t) requestId);
+                    }else{
+                        SOPC_SecureChannels_EnqueueInternalEvent(scEvent,
+                                                                 scConnectionIdx,
+                                                                 (void*) chunkCtx->chunkInputBuffer,
+                                                                 (int32_t) requestId);
+                    }
                     chunkCtx->chunkInputBuffer = NULL;
                 }
             }
 
             if(result == false){
-                SOPC_SecureChannels_EnqueueEvent(INT_SC_RCV_FAILURE,
-                                                 scConnectionIdx,
-                                                 NULL,
-                                                 (int32_t) errorStatus);
+                // Treat as prio events
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_FAILURE,
+                                                               scConnectionIdx,
+                                                               NULL,
+                                                               (int32_t) errorStatus);
                 SOPC_Buffer_Delete(chunkCtx->chunkInputBuffer);
                 chunkCtx->chunkInputBuffer = NULL;
                 receivedBuffer->length = 0;
@@ -1983,11 +1994,11 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                            &outputBuffer,
                                            &errorStatus);
         if(result == false){
-            // TODO: prepend !!!!
-            SOPC_SecureChannels_EnqueueEvent(INT_SC_SND_FAILURE,
-                                             eltId,
-                                             params,
-                                             (int32_t) errorStatus);
+            // Treat as prio events
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FAILURE,
+                                                           eltId,
+                                                           params,
+                                                           (int32_t) errorStatus);
         }else{
             // Require write of output buffer on socket
             SOPC_Sockets_EnqueueEvent(SOCKET_WRITE,

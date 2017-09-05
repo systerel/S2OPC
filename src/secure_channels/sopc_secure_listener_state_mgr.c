@@ -24,6 +24,7 @@
 #include "sopc_toolkit_constants.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_secure_channels_api.h"
+#include "sopc_secure_channels_api_internal.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_sockets_api.h"
 
@@ -54,10 +55,10 @@ static bool SOPC_SecureListenerStateMgr_CloseListener(uint32_t endpointConfigIdx
             // Close all active secure connections established on the listener
             for(idx = 0; idx < SOPC_MAX_SOCKETS_CONNECTIONS; idx++){
                 if(scListener->isUsedConnectionIdxArray[idx]){
-                    SOPC_SecureChannels_EnqueueEvent(INT_EP_SC_CLOSE,
-                                                     scListener->connectionIdxArray[idx],
-                                                     NULL,
-                                                     (int32_t) endpointConfigIdx);
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CLOSE,
+                                                                   scListener->connectionIdxArray[idx],
+                                                                   NULL,
+                                                                   (int32_t) endpointConfigIdx);
                 }
             }
             // Close the socket listener
@@ -158,10 +159,10 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                                       0);
         }else{
             // Request creation of a new secure connection with given socket
-            SOPC_SecureChannels_EnqueueEvent(INT_EP_SC_CREATE,
-                                             eltId,
-                                             NULL,
-                                             auxParam);
+            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATE,
+                                                     eltId,
+                                                     NULL,
+                                                     auxParam);
         }
         break;
     case SOCKET_LISTENER_FAILURE:
