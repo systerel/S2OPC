@@ -92,7 +92,7 @@ void session_async_bs__client_gen_activate_orphaned_session_internal_event(
                                        SE_TO_SE_ACTIVATE_ORPHANED_SESSION,
                                        (uint32_t) session_async_bs__session,
                                        NULL,
-                                       (int32_t) session_async_bs__channel_config_idx,
+                                       (uint32_t) session_async_bs__channel_config_idx,
                                        "Services: async orphaned session activation");
 }
 
@@ -104,7 +104,7 @@ void session_async_bs__client_gen_activate_user_session_internal_event(
                                        SE_TO_SE_ACTIVATE_SESSION,
                                        (uint32_t) session_async_bs__session,
                                        NULL,
-                                       (int32_t) session_async_bs__user,
+                                       (uint32_t) session_async_bs__user,
                                        "Services: async session user activation");
 
 }
@@ -117,6 +117,6 @@ void session_async_bs__client_gen_create_session_internal_event(
                                        SE_TO_SE_CREATE_SESSION,
                                        (uint32_t) session_async_bs__session,
                                        NULL,
-                                       (int32_t) session_async_bs__channel_config_idx,
+                                       (uint32_t) session_async_bs__channel_config_idx,
                                        "Services: async orphaned session activation");
 }

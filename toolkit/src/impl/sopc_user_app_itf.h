@@ -125,7 +125,7 @@ typedef void SOPC_AddressSpaceLocalService_Fct(SOPC_App_AddSpace_LocalService_Re
 void SOPC_ApplicationEventDispatcher(int32_t  appEvent, 
                                      uint32_t eventType, 
                                      void*    params, 
-                                     int32_t  auxParam);
+                                     uint32_t auxParam);
 
 int32_t SOPC_AppEvent_ComEvent_Create(SOPC_App_Com_Event event);
 

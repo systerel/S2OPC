@@ -50,12 +50,12 @@ typedef enum SOPC_Services_Event {
 void SOPC_ServicesEventDispatcher(int32_t  scEvent, 
                                   uint32_t id, 
                                   void*    params, 
-                                  int32_t  auxParam);
+                                  uint32_t auxParam);
 
 
 void SOPC_ApplicationEventDispatcher(int32_t  appEvent, 
                                      uint32_t eventType, 
                                      void*    params, 
-                                     int32_t  auxParam);
+                                     uint32_t auxParam);
 
 #endif /* _sopc_services_events_h */

@@ -30,7 +30,7 @@
 void SOPC_ServicesEventDispatcher(int32_t  scEvent, 
                                   uint32_t id, 
                                   void*    params, 
-                                  int32_t  auxParam)
+                                  uint32_t auxParam)
 {
   //printf("Services event dispatcher: event='%d', id='%d', params='%p', auxParam='%d'\n", scEvent, id, params, auxParam);
   SOPC_Services_Event event = (SOPC_Services_Event) scEvent;
