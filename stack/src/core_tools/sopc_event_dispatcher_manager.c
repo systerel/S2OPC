@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #include "sopc_threads.h"
@@ -88,12 +89,13 @@ SOPC_EventDispatcherManager* SOPC_EventDispatcherManager_CreateAndStart(SOPC_Eve
     return pEventMgr;
 }
 
-SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager* eventMgr,
-                                                     int32_t                      event,
-                                                     uint32_t                     eltId,
-                                                     void*                        params,
-                                                     int32_t                      auxParam,
-                                                     const char*                  debugName)
+static SOPC_StatusCode SOPC_EventDispatcherManager_AddEventInternal(SOPC_EventDispatcherManager* eventMgr,
+                                                                    int32_t                      event,
+                                                                    uint32_t                     eltId,
+                                                                    void*                        params,
+                                                                    int32_t                      auxParam,
+                                                                    const char*                  debugName,
+                                                                    bool                         enqueueAsFirstOut)
 {
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     SOPC_EventDispatcherParams* pParams = NULL;
@@ -107,13 +109,50 @@ SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager
                 pParams->params = params;
                 pParams->auxParam = auxParam;
                 pParams->debugName = debugName;
-                status = SOPC_AsyncQueue_BlockingEnqueue(eventMgr->queue, pParams);
+                if(enqueueAsFirstOut == false){
+                    //Nominal case
+                    status = SOPC_AsyncQueue_BlockingEnqueue(eventMgr->queue, pParams);
+                }else{
+                    status = SOPC_AsyncQueue_BlockingEnqueueFirstOut(eventMgr->queue, pParams);
+                }
             }else{
                 status = STATUS_NOK;
             }
         }
     }
     return status;
+}
+
+SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager* eventMgr,
+                                                     int32_t                      event,
+                                                     uint32_t                     eltId,
+                                                     void*                        params,
+                                                     int32_t                      auxParam,
+                                                     const char*                  debugName)
+{
+    return SOPC_EventDispatcherManager_AddEventInternal(eventMgr,
+                                                        event,
+                                                        eltId,
+                                                        params,
+                                                        auxParam,
+                                                        debugName,
+                                                        false);
+}
+
+SOPC_StatusCode SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatcherManager* eventMgr,
+                                                           int32_t                      event,
+                                                           uint32_t                     eltId,
+                                                           void*                        params,
+                                                           int32_t                      auxParam,
+                                                           const char*                  debugName)
+{
+    return SOPC_EventDispatcherManager_AddEventInternal(eventMgr,
+                                                        event,
+                                                        eltId,
+                                                        params,
+                                                        auxParam,
+                                                        debugName,
+                                                        true);
 }
 
 SOPC_StatusCode SOPC_EventDispatcherManager_StopAndDelete(SOPC_EventDispatcherManager** eventMgr){

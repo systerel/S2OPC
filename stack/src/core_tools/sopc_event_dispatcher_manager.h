@@ -56,6 +56,27 @@ SOPC_StatusCode SOPC_EventDispatcherManager_AddEvent(SOPC_EventDispatcherManager
                                                      void*                        params,
                                                      int32_t                      auxParam,
                                                      const char*                  debugName);
+
+/**
+ *  \brief Similar to *_AddEvent but the event will be added to be the next one to be treated
+ *  IMPORTANT NOTE: to be used only when it is really necessary since event order is not kept
+ *
+ *  \param eventMgr  Pointer of the event dispatcher manager in which action will be added
+ *  \param eltId     Identifier of the element on which the event shall be interpreted
+ *  \param params    Generic parameter provided with the event
+ *  \param auxParam  Auxiliary integer parameter provided with the event (e.g.: status code, etc.)
+ *  \param debugName Indicates in a human readable way the event added to the queue
+ *  \return             STATUS_OK if action added successfully,
+ *                      STATUS_INVALID_PARAMETER in case event dispatcher manager pointer is NULL,
+ *                      STATUS_NOK otherwise (event dispatcher manager not started, function pointer and argument both NULL).
+ */
+SOPC_StatusCode SOPC_EventDispatcherManager_AddEventAsNext(SOPC_EventDispatcherManager* eventMgr,
+                                                           int32_t                      event,
+                                                           uint32_t                     eltId,
+                                                           void*                        params,
+                                                           int32_t                      auxParam,
+                                                           const char*                  debugName);
+
 /**
  *  \brief Stops the event dispatcher manager treatment.
  *
