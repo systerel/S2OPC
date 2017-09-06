@@ -277,7 +277,7 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEve
     }
 }
 
-void SOPC_SecureChannels_Inititalize(){
+void SOPC_SecureChannels_Initialize(){
     SOPC_SecureChannelsInternalContext_Initialize();
     secureChannelsEventDispatcherMgr =
             SOPC_EventDispatcherManager_CreateAndStart(SOPC_SecureChannelsEventMgr_Dispatcher,

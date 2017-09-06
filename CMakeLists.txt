@@ -138,7 +138,7 @@ file(GLOB_RECURSE SOCKETS_SRC
     "src/sockets/*.c"
 )
 
-file(GLOB_RECURSE OLD_STACK_DEP_SRC
+file(GLOB_RECURSE OLD_STACK_SOCKETS_DEP_SRC
     ${PLATFORM_SRCS}
     "stack/src/tools/*.c"
     "stack/src/core_tools/sopc_event_dispatcher_manager.c")
@@ -146,10 +146,53 @@ file(GLOB_RECURSE OLD_STACK_DEP_SRC
 file(GLOB_RECURSE SOCKETS_TEST
      "tests/sockets/*.c")
 
-add_executable(check_sockets ${OLD_STACK_DEP_SRC}
+add_executable(check_sockets ${OLD_STACK_SOCKETS_DEP_SRC}
                              ${SOCKETS_SRC}
                              ${SOCKETS_TEST})
 target_include_directories(check_sockets PRIVATE "tests/sockets/stubs" 
                                                  ${INGOPCS_PUBLIC_INCLUDES} 
                                                  ${INGOPCS_PRIVATE_INCLUDES})
 target_link_libraries(check_sockets PRIVATE pthread check)
+
+# Secure channels (stubbed on services side) tests
+file(GLOB_RECURSE OLD_STACK_SECURE_CHANNELS_DEP_SRC
+    "stack/src/API/sopc_encodeable.c"
+    "stack/src/core_types/*.c"
+    "stack/src/crypto/*.c")
+
+
+file(GLOB_RECURSE SECURE_CHANNELS_SRC
+    "src/secure_channels/*.c"
+)
+
+file(GLOB_RECURSE SECURE_CHANNELS_CLIENT_TEST
+     "tests/secure_channels/test_secure_channels_client.c"
+     "tests/secure_channels/stubs/*.c")
+     
+file(GLOB_RECURSE SECURE_CHANNELS_SERVER_TEST
+     "tests/secure_channels/test_secure_channels_server.c"
+     "tests/secure_channels/stubs/*.c")
+
+# Secure channels tests: CLIENT executable
+add_executable(test_secure_channels_client ${OLD_STACK_SOCKETS_DEP_SRC}
+                                           ${SOCKETS_SRC}
+                                           ${OLD_STACK_SECURE_CHANNELS_DEP_SRC}
+                                           ${SECURE_CHANNELS_SRC}
+                                           ${SECURE_CHANNELS_CLIENT_TEST})
+
+target_include_directories(test_secure_channels_client PRIVATE "tests/secure_channels/stubs" 
+                                                               ${INGOPCS_PUBLIC_INCLUDES} 
+                                                               ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(test_secure_channels_client PRIVATE mbedtls pthread check)
+
+# Secure channels tests: SERVER executable
+add_executable(test_secure_channels_server ${OLD_STACK_SOCKETS_DEP_SRC}
+                                           ${SOCKETS_SRC}
+                                           ${OLD_STACK_SECURE_CHANNELS_DEP_SRC}
+                                           ${SECURE_CHANNELS_SRC}
+                                           ${SECURE_CHANNELS_SERVER_TEST})
+
+target_include_directories(test_secure_channels_server PRIVATE "tests/secure_channels/stubs" 
+                                                               ${INGOPCS_PUBLIC_INCLUDES} 
+                                                               ${INGOPCS_PRIVATE_INCLUDES})
+target_link_libraries(test_secure_channels_server PRIVATE mbedtls pthread check)
