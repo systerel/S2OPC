@@ -256,12 +256,11 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
                 // Immediatly close the connection if failed
                 if(SC_CloseConnection(scConnectionIdx) != false){
                     // Notify services in case of successful closure
-                    SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                         SC_TO_SE_SC_DISCONNECTED,
-                                                         scConnectionIdx,
-                                                         NULL,
-                                                         0,
-                                                         reason);
+                    SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
+                                               scConnectionIdx,
+                                               NULL,
+                                               0,
+                                               reason);
                 }
             }
 
@@ -269,12 +268,11 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
         }else if(scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED &&
            SC_CloseConnection(scConnectionIdx) != false){
             // Notify services in case of successful closure
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                 SC_TO_SE_SC_DISCONNECTED,
-                                                 scConnectionIdx,
-                                                 NULL,
-                                                 0,
-                                                 reason);
+            SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
+                                       scConnectionIdx,
+                                       NULL,
+                                       0,
+                                       reason);
         }
     }else{
         // SERVER case
@@ -282,12 +280,11 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
             // No correct hello message received: just close without error message
             if(SC_CloseConnection(scConnectionIdx) != false){
                 // Notify services in case of successful closure
-                SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                     SC_TO_SE_SC_DISCONNECTED,
-                                                     scConnectionIdx,
-                                                     NULL,
-                                                     0,
-                                                     reason);
+                SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
+                                           scConnectionIdx,
+                                           NULL,
+                                           0,
+                                           reason);
             }
         }else if(scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED){
             // Server shall alway send a ERR message before closing socket
@@ -306,12 +303,11 @@ static void SC_CloseSecureConnection(SOPC_SecureConnection* scConnection,
                 // Immediatly close the connection if failed
                 if(SC_CloseConnection(scConnectionIdx) != false){
                     // Notify services in case of successful closure
-                    SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                         SC_TO_SE_SC_DISCONNECTED,
-                                                         scConnectionIdx,
-                                                         NULL,
-                                                         0,
-                                                         reason);
+                    SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
+                                               scConnectionIdx,
+                                               NULL,
+                                               0,
+                                               reason);
                 }
             }
         }
@@ -419,12 +415,11 @@ static bool SC_ClientTransition_Connected_To_Disconnected(SOPC_SecureConnection*
         // Immediatly close the connection if failed
         if(SC_CloseConnection(scConnectionIdx) != false){
             // Notify services in case of successful closure
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                 SC_TO_SE_SC_DISCONNECTED,
-                                                 scConnectionIdx,
-                                                 NULL,
-                                                 0,
-                                                 "Sending CLO request failed");
+            SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
+                                       scConnectionIdx,
+                                       NULL,
+                                       0,
+                                       "Sending CLO request failed");
         }
     }
 
@@ -1444,12 +1439,11 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         // (use simplified close connection since no close/err message can be sent through the socket anymore)
         if(SC_CloseConnection(eltId) != false){
             // Notify services in case of successful closure
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                 SC_TO_SE_SC_DISCONNECTED,
-                                                 eltId,
-                                                 NULL,
-                                                 0,
-                                                 "SecureConnection: disconnected (SOCKET_FAILURE event)");
+            SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
+                                       eltId,
+                                       NULL,
+                                       0,
+                                       "SecureConnection: disconnected (SOCKET_FAILURE event)");
         }
         break;
 
@@ -1470,12 +1464,11 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         if(result == false){
             // Error case: notify services that it failed
             // TODO: add a connection failure ? (with config idx + (optional) connection id)
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                 SC_TO_SE_SC_CONNECTION_TIMEOUT,
-                                                 eltId,
-                                                 NULL,
-                                                 0,
-                                                 "SecureConnection: init failed (invalid index or state)");
+            SOPC_Services_EnqueueEvent(SC_TO_SE_SC_CONNECTION_TIMEOUT,
+                                       eltId,
+                                       NULL,
+                                       0,
+                                       "SecureConnection: init failed (invalid index or state)");
         }else{
             // Require a socket connection for this secure connection
             SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CLIENT,
@@ -1727,12 +1720,11 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                     // Just close the socket without any error (Part 6 §7.1.4)
                     SC_CloseConnection(eltId);
                     // Notify services in case of successful closure
-                    SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                         SC_TO_SE_SC_DISCONNECTED,
-                                                         eltId,
-                                                         NULL,
-                                                         OpcUa_BadSecureChannelClosed,
-                                                         "SecureConnection: closed on CloseSecureChannelRequest");
+                    SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
+                                               eltId,
+                                               NULL,
+                                               OpcUa_BadSecureChannelClosed,
+                                               "SecureConnection: closed on CloseSecureChannelRequest");
                 }else{
                     // Close the socket after reporting an error (Part 6 §7.1.4)
                     // Note: use a security check failure error since it is an incorrect use of protocol
@@ -1759,12 +1751,11 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             if(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
                scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW){
                 // No server / client differentiation at this level
-                SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                     SC_TO_SE_SC_SERVICE_RCV_MSG,
-                                                     eltId, // secure connection id
-                                                     params, // buffer
-                                                     auxParam, // request Id
-                                                     "SecureConnection: OpcUa message received on a secure connection");
+                SOPC_Services_EnqueueEvent(SC_TO_SE_SC_SERVICE_RCV_MSG,
+                                           eltId, // secure connection id
+                                           params, // buffer
+                                           auxParam, // request Id
+                                           "SecureConnection: OpcUa message received on a secure connection");
             }else{
                 // Error case: close the socket with security check failure since SC is not established
                 SC_CloseSecureConnection(scConnection,
@@ -1801,12 +1792,11 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         // TODO: Decode ERR message and use reason/error code (received on client side only ! => guaranteed by chunks manager filtering)
         if(SC_CloseConnection(eltId) != false){
             // Notify services in case of successful closure
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                 SC_TO_SE_SC_DISCONNECTED,
-                                                 eltId,
-                                                 NULL,
-                                                 0,
-                                                 NULL);
+            SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
+                                       eltId,
+                                       NULL,
+                                       0,
+                                       NULL);
         }
         break;
     case INT_EP_SC_CLOSE:
@@ -1822,12 +1812,11 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         // Used to delay secure connection closing on server side (ERR sending prior to close): now just close
         if(SC_CloseConnection(eltId) != false){
             // Notify services in case of successful closure
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                    SC_TO_SE_SC_DISCONNECTED,
-                    eltId,
-                    NULL,
-                    0,
-                    "SecureConnection: closed on error");
+            SOPC_Services_EnqueueEvent(SC_TO_SE_SC_DISCONNECTED,
+                                       eltId,
+                                       NULL,
+                                       0,
+                                       "SecureConnection: closed on error");
         }
         break;
     default:

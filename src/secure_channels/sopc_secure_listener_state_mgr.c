@@ -172,12 +172,11 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             result = SOPC_SecureListenerStateMgr_CloseListener(eltId);
         }
         // Notify Services layer that EP_OPEN failed
-        SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                SC_TO_SE_EP_CLOSED,
-                eltId,
-                NULL,
-                0,
-                "SecureListener: listener closed (failure)");
+        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED,
+                                   eltId,
+                                   NULL,
+                                   0,
+                                   "SecureListener: listener closed (failure)");
         break;
     /* Services events: */
     /* Services manager -> SC listener state manager */
@@ -190,12 +189,11 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         if(result == false){
             // Notify Services layer that EP_OPEN failed
-            SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                                 SC_TO_SE_EP_CLOSED,
-                                                 eltId,
-                                                 NULL,
-                                                 0,
-                                                 "SecureListener: opening failed (invalid index or state)");
+            SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED,
+                                       eltId,
+                                       NULL,
+                                       0,
+                                       "SecureListener: opening failed (invalid index or state)");
         }else{
             // Notify Sockets layer to create the listener
             SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_SERVER,
@@ -211,12 +209,11 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             result = SOPC_SecureListenerStateMgr_CloseListener(eltId);
         }
         // Notify Services layer that EP_OPEN failed
-        SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
-                                             SC_TO_SE_EP_CLOSED,
-                                             eltId,
-                                             NULL,
-                                             result,
-                                             "SecureListener: listener closed on demand");
+        SOPC_Services_EnqueueEvent(SC_TO_SE_EP_CLOSED,
+                                   eltId,
+                                   NULL,
+                                   result,
+                                   "SecureListener: listener closed on demand");
         break;
     /* Internal events: */
     /* SC connection manager -> SC listener state manager */
