@@ -47,6 +47,13 @@ typedef enum SOPC_Services_Event {
   APP_TO_SE_LOCAL_WRITE
 } SOPC_Services_Event;
 
+/* API to enqueue an event for services */
+void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent,
+                                uint32_t            id,
+                                void*               params,
+                                uint32_t            auxParam,
+                                const char*         reason);
+
 void SOPC_ServicesEventDispatcher(int32_t  scEvent, 
                                   uint32_t id, 
                                   void*    params, 

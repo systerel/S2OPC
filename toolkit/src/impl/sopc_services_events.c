@@ -214,3 +214,17 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
   assert(STATUS_OK == status);
 }
 
+void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent,
+                                uint32_t            id,
+                                void*               params,
+                                uint32_t            auxParam,
+                                const char*         reason){
+    if(servicesEventDispatcherMgr != NULL){
+        SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
+                                             seEvent,
+                                             id,
+                                             params,
+                                             auxParam,
+                                             reason);
+    }
+}
