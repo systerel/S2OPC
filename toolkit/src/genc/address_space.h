@@ -2,7 +2,7 @@
 
  File Name            : address_space.h
 
- Date                 : 30/08/2017 19:04:01
+ Date                 : 06/09/2017 19:33:26
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,6 +51,7 @@ extern void address_space__INITIALISATION(void);
 #define address_space__get_Reference_IsForward address_space_bs__get_Reference_IsForward
 #define address_space__get_Reference_ReferenceType address_space_bs__get_Reference_ReferenceType
 #define address_space__get_Reference_TargetNode address_space_bs__get_Reference_TargetNode
+#define address_space__get_TypeDefinition address_space_bs__get_TypeDefinition
 #define address_space__get_Value_StatusCode address_space_bs__get_Value_StatusCode
 #define address_space__read_AddressSpace_free_value address_space_bs__read_AddressSpace_free_value
 #define address_space__readall_AddressSpace_Node address_space_bs__readall_AddressSpace_Node

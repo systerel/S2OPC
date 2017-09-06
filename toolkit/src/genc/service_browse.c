@@ -2,7 +2,7 @@
 
  File Name            : service_browse.c
 
- Date                 : 30/08/2017 19:04:02
+ Date                 : 06/09/2017 19:33:27
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -108,6 +108,7 @@ void service_browse__copy_target_node_browse_result(
       constants__t_QualifiedName_i service_browse__l_BrowseName;
       constants__t_LocalizedText_i service_browse__l_DisplayName;
       constants__t_NodeClass_i service_browse__l_NodeClass;
+      constants__t_ExpandedNodeId_i service_browse__l_TypeDefinition;
       
       *service_browse__p_res = true;
       msg_browse_response_bs__set_ResponseBrowse_Res_ReferenceTypeId(service_browse__p_bvi,
@@ -142,6 +143,11 @@ void service_browse__copy_target_node_browse_result(
             msg_browse_response_bs__set_ResponseBrowse_Res_NodeClass(service_browse__p_bvi,
                service_browse__p_bri,
                service_browse__l_NodeClass);
+            address_space__get_TypeDefinition(service_browse__l_node,
+               &service_browse__l_TypeDefinition);
+            msg_browse_response_bs__set_ResponseBrowse_Res_TypeDefinition(service_browse__p_bvi,
+               service_browse__p_bri,
+               service_browse__l_TypeDefinition);
          }
          else {
             msg_browse_response_bs__reset_ResponseBrowse_Res_BrowseName(service_browse__p_bvi,
@@ -149,6 +155,8 @@ void service_browse__copy_target_node_browse_result(
             msg_browse_response_bs__reset_ResponseBrowse_Res_DisplayName(service_browse__p_bvi,
                service_browse__p_bri);
             msg_browse_response_bs__reset_ResponseBrowse_Res_NodeClass(service_browse__p_bvi,
+               service_browse__p_bri);
+            msg_browse_response_bs__reset_ResponseBrowse_Res_TypeDefinition(service_browse__p_bvi,
                service_browse__p_bri);
          }
       }
@@ -158,6 +166,8 @@ void service_browse__copy_target_node_browse_result(
          msg_browse_response_bs__reset_ResponseBrowse_Res_DisplayName(service_browse__p_bvi,
             service_browse__p_bri);
          msg_browse_response_bs__reset_ResponseBrowse_Res_NodeClass(service_browse__p_bvi,
+            service_browse__p_bri);
+         msg_browse_response_bs__reset_ResponseBrowse_Res_TypeDefinition(service_browse__p_bvi,
             service_browse__p_bri);
       }
    }

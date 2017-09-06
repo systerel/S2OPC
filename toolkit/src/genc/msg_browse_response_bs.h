@@ -2,7 +2,7 @@
 
  File Name            : msg_browse_response_bs.h
 
- Date                 : 30/08/2017 19:04:06
+ Date                 : 06/09/2017 19:33:30
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -45,6 +45,9 @@ extern void msg_browse_response_bs__reset_ResponseBrowse_Res_DisplayName(
 extern void msg_browse_response_bs__reset_ResponseBrowse_Res_NodeClass(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
    const constants__t_BrowseResult_i msg_browse_response_bs__p_bri);
+extern void msg_browse_response_bs__reset_ResponseBrowse_Res_TypeDefinition(
+   const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
+   const constants__t_BrowseResult_i msg_browse_response_bs__p_bri);
 extern void msg_browse_response_bs__set_ResponseBrowse_BrowseStatus(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
    const t_bool msg_browse_response_bs__p_bool);
@@ -75,5 +78,11 @@ extern void msg_browse_response_bs__set_ResponseBrowse_Res_ReferenceTypeId(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
    const constants__t_BrowseResult_i msg_browse_response_bs__p_bri,
    const constants__t_NodeId_i msg_browse_response_bs__p_NodeId);
+extern void msg_browse_response_bs__set_ResponseBrowse_Res_TypeDefinition(
+   const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
+   const constants__t_BrowseResult_i msg_browse_response_bs__p_bri,
+   const constants__t_ExpandedNodeId_i msg_browse_response_bs__p_TypeDefinition);
+extern void msg_browse_response_bs__write_BrowseResponse_msg_out(
+   const constants__t_msg_i msg_browse_response_bs__p_msg_out);
 
 #endif

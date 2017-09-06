@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 30/08/2017 19:04:03
+ Date                 : 06/09/2017 19:33:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -43,6 +43,9 @@ void service_mgr__get_response_type(
       break;
    case constants__e_msg_session_write_req:
       *service_mgr__resp_msg_typ = constants__e_msg_session_write_resp;
+      break;
+   case constants__e_msg_session_browse_req:
+      *service_mgr__resp_msg_typ = constants__e_msg_session_browse_resp;
       break;
    default:
       break;
@@ -313,6 +316,10 @@ void service_mgr__server_receive_session_service_req(
                            &service_mgr__l_ret);
                         address_space__write_WriteResponse_msg_out(service_mgr__l_resp_msg);
                         address_space__dealloc_write_request_responses();
+                        break;
+                     case constants__e_msg_session_browse_req:
+                        service_browse_seq__treat_browse_request_BrowseValues(&service_mgr__l_ret);
+                        service_browse_seq__write_BrowseResponse_msg_out(service_mgr__l_resp_msg);
                         break;
                      default:
                         service_mgr__l_ret = constants__e_sc_bad_unexpected_error;
@@ -839,6 +846,7 @@ void service_mgr__client_service_request(
          switch (service_mgr__l_req_typ) {
          case constants__e_msg_session_read_req:
          case constants__e_msg_session_write_req:
+         case constants__e_msg_session_browse_req:
             service_mgr__get_response_type(service_mgr__l_req_typ,
                &service_mgr__l_resp_typ);
             message_out_bs__alloc_app_req_msg_header(service_mgr__l_req_typ,

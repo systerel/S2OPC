@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 30/08/2017 19:04:04
+ Date                 : 06/09/2017 19:33:28
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -85,6 +85,9 @@ void session_mgr__client_receive_session_resp(
                         session_async_bs__client_gen_activate_user_session_internal_event(session_mgr__l_session,
                            session_mgr__l_session_user);
                      }
+                  }
+                  else {
+                     session_mgr__l_ret = constants__e_sc_bad_out_of_memory;
                   }
                }
                else {
