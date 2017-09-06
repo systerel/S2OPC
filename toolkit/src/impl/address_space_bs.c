@@ -22,6 +22,8 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
 
 #include "b2c.h"
 #include "address_space_bs.h"
@@ -32,14 +34,72 @@
 
 
 /*
+ * TODO: Change the following structs for the newer model
  * Kept the same data-structures, even if these concrete variables became abstract.
  * Changed the name.
- * There index is 0-based.
+ * Their index is 0-based.
  */
 constants__t_NodeId_i a_NodeId[NB_NODES];
 constants__t_NodeClass_i a_NodeClass[NB_NODES];
 constants__t_Variant_i a_Value[NB_NODES];
 constants__t_StatusCode_i a_Value_StatusCode[NB_NODES];
+
+/*
+ * The following are the pointers to arrays containing the nodes the AddressSpace.
+ * There are also variables storing required lengths and offsets.
+ * These pointers and variables must be initialized before address_space_bs__INITIALISATION is called.
+ * Index of the arrays should start at 1, so array[0] is never accessed.
+ *
+ * Attributes are grouped by families.
+ * It is possible to group the 22 attributes in 8 families,
+ * and to order the nodes by their node class,
+ * so that the arrays of the attributes are contiguous.
+ *
+ * NodeClass order: Variable, VariableType, ObjectType, ReferenceType, DataType, Method, Object, View
+ *
+ * Families:
+ *  - All: NodeId, NodeClass, BrowseName, Description, DisplayName, UserWriteMask, WriteMask
+ *  - Vars: AccessLevel, UserAccessLevel, Historizing, MinimumSamplingInterval
+ *  - Vars+Types: ArrayDimensions, DataType, Value, ValueRank
+ *  - Method: Executable, UserExecutable
+ *  - RefType: InverseName, Symmetric
+ *  - View: ContainsNoLoops
+ *  - View+Obj: EventNotifier
+ *  - Types: IsAbstract
+ *
+ * Offsets:
+ *  - All: 0
+ *  - Vars: 0
+ *  - Vars+Types: 0
+ *  - Method: nVariables + nVariableType + nObjectType + nReferenceType + nDataType
+ *  - RefType: nVariables + nVariableType + nObjectType
+ *  - View: nVariables + nVariableType + nObjectType + nReferenceType + nDataType + nMethod + nObject
+ *  - View+Obj: nVariables + nVariableType + nObjectType + nReferenceType + nDataType + nMethod
+ *  - Types: nVariables
+ */
+size_t address_space_bs__nNodeId = 0; /* Required by the hashmap */
+/* Family All */
+constants__t_QualifiedName_i address_space_bs__a_BrowseName = NULL;
+constants__t_LocalizedText_i address_space_bs__a_DisplayName = NULL;
+/* Family Vars */
+
+/* TODO: HasTypeReference is considered "All", but it should not */
+constants__t_ExpandedNodeId_i address_space_bs__HasTypeDefinition = NULL;
+
+
+/*
+ * The following pointers store the references.
+ * Three elements of the references (ReferenceType, TargetNode, IsForward) out of the 4 (SourceNode)
+ * are stored in 3 arrays indexed by a t_ReferenceIndex (starting at 1).
+ * Two more arrays (Node_RefIndexBegin, Node_RefIndexEnd) associates a t_Node to the slice of t_ReferenceIndex.
+ *
+ * These pointers to arrays must be initialized before address_space_bs__INITIALISATION is called.
+ */
+constants__t_NodeId_i address_space_bs__refs_ReferenceType = NULL;
+constants__t_ExpandedNodeId_i address_space_bs__refs_TargetNode = NULL;
+t_bool *address_space_bs__refs_IsForward = NULL;
+size_t *address_space_bs__RefIndexBegin = NULL;
+size_t *address_space_bs__RefIndexEnd = NULL;
 
 
 /*------------------------
@@ -49,6 +109,21 @@ void address_space_bs__INITIALISATION(void)
 {
     if(STATUS_OK != gen_addspace(a_NodeId, a_NodeClass, a_Value, a_Value_StatusCode))
         exit(1);
+
+    /* TODO: handle more correctly the assert, provide log, and adequate exit */
+    assert(0 != address_space_bs__nNodeId);
+    assert(NULL != a_NodeId);
+    assert(NULL != a_NodeClass);
+    assert(NULL != address_space_bs__a_BrowseName);
+    assert(NULL != address_space_bs__a_DisplayName);
+    assert(NULL != a_Value);
+    assert(NULL != a_Value_StatusCode);
+    assert(NULL != address_space_bs__HasTypeDefinition);
+    assert(NULL != address_space_bs__refs_ReferenceType);
+    assert(NULL != address_space_bs__refs_TargetNode);
+    assert(NULL != address_space_bs__refs_IsForward);
+    assert(NULL != address_space_bs__RefIndexBegin);
+    assert(NULL != address_space_bs__RefIndexEnd);
 }
 
 
@@ -167,6 +242,7 @@ void address_space_bs__get_BrowseName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_QualifiedName_i * const address_space_bs__p_browse_name)
 {
+    *address_space_bs__p_browse_name = &((SOPC_QualifiedName *)address_space_bs__a_BrowseName)[address_space_bs__p_node];
 }
 
 
@@ -174,6 +250,7 @@ void address_space_bs__get_DisplayName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_LocalizedText_i * const address_space_bs__p_display_name)
 {
+    *address_space_bs__p_display_name = &((SOPC_LocalizedText *)address_space_bs__a_DisplayName)[address_space_bs__p_node];
 }
 
 
@@ -189,6 +266,7 @@ void address_space_bs__get_TypeDefinition(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_ExpandedNodeId_i * const address_space_bs__p_type_def)
 {
+    *address_space_bs__p_type_def = &((SOPC_ExpandedNodeId *)address_space_bs__HasTypeDefinition)[address_space_bs__p_node];
 }
 
 
@@ -196,6 +274,7 @@ void address_space_bs__get_Reference_ReferenceType(
    const constants__t_Reference_i address_space_bs__p_ref,
    constants__t_NodeId_i * const address_space_bs__p_RefType)
 {
+    *address_space_bs__p_RefType = &((SOPC_ExpandedNodeId *)address_space_bs__refs_ReferenceType)[address_space_bs__p_ref];
 }
 
 
@@ -203,6 +282,7 @@ void address_space_bs__get_Reference_TargetNode(
    const constants__t_Reference_i address_space_bs__p_ref,
    constants__t_ExpandedNodeId_i * const address_space_bs__p_TargetNode)
 {
+    *address_space_bs__p_TargetNode = &((SOPC_NodeId *)address_space_bs__refs_TargetNode)[address_space_bs__p_ref];
 }
 
 
@@ -210,6 +290,7 @@ void address_space_bs__get_Reference_IsForward(
    const constants__t_Reference_i address_space_bs__p_ref,
    t_bool * const address_space_bs__p_IsForward)
 {
+    *address_space_bs__p_IsForward = &((t_bool *)address_space_bs__refs_IsForward)[address_space_bs__p_ref];
 }
 
 
@@ -217,6 +298,7 @@ void address_space_bs__get_Node_RefIndexBegin(
    const constants__t_Node_i address_space_bs__p_node,
    t_entier4 * const address_space_bs__p_ref_index)
 {
+    *address_space_bs__p_ref_index = address_space_bs__RefIndexBegin[address_space_bs__p_node];
 }
 
 
@@ -224,6 +306,7 @@ void address_space_bs__get_Node_RefIndexEnd(
    const constants__t_Node_i address_space_bs__p_node,
    t_entier4 * const address_space_bs__p_ref_index)
 {
+    *address_space_bs__p_ref_index = address_space_bs__RefIndexEnd[address_space_bs__p_node];
 }
 
 
@@ -231,6 +314,7 @@ void address_space_bs__get_RefIndex_Reference(
    const t_entier4 address_space_bs__p_ref_index,
    constants__t_Reference_i * const address_space_bs__p_ref)
 {
+    printf("Not implemented\n"); assert(0);
 }
 
 

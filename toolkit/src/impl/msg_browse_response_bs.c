@@ -121,6 +121,21 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_NodeId(
 }
 
 
+void msg_browse_response_bs__set_ResponseBrowse_Res_TypeDefinition(
+   const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
+   const constants__t_BrowseResult_i msg_browse_response_bs__p_bri,
+   const constants__t_ExpandedNodeId_i msg_browse_response_bs__p_TypeDefinition)
+{
+}
+
+
+void msg_browse_response_bs__reset_ResponseBrowse_Res_TypeDefinition(
+   const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
+   const constants__t_BrowseResult_i msg_browse_response_bs__p_bri)
+{
+}
+
+
 void msg_browse_response_bs__malloc_browse_result(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
    const t_entier4 msg_browse_response_bs__p_nb_bri,

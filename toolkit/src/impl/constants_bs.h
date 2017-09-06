@@ -23,6 +23,8 @@
 #ifndef _constants_bs_h
 #define _constants_bs_h
 
+#include <stdlib.h>
+
 /*--------------------------
    Added by the Translator
   --------------------------*/
@@ -50,7 +52,8 @@ typedef void* constants_bs__t_session_token_i;
 typedef void* constants_bs__t_Nonce_i;
 typedef void* constants_bs__t_SignatureData_i;
 typedef void * constants_bs__t_ExpandedNodeId_i;
-typedef void * constants_bs__t_Reference_i;
+/*typedef void * constants_bs__t_Reference_i; */
+typedef size_t constants_bs__t_Reference_i;
 typedef void * constants_bs__t_LocalizedText_i;
 typedef void * constants_bs__t_QualifiedName_i;
 

@@ -17,13 +17,18 @@
 
 /** \file
  *
- * Defines the structure behind the AddressSpace implementation.
- * These structs and constants bridges C and B models.
+ * \brief Declares initialisable members of the AddressSpace
+ *        and OPC-UA values of B constants.
  */
 
 
 #ifndef address_space_impl_h_
 #define address_space_impl_h_
+
+
+#include "b2c.h"
+#include "constants.h"
+#include "sopc_types.h"
 
 
 /* AttributeIds: they are #defined by the SDK... */
@@ -37,6 +42,24 @@ typedef enum {
 
 #define e_aid_min e_aid_NodeId
 #define e_aid_max e_aid_UserExecutable
+
+
+/* Attributes, and references */
+/* TODO: Today NB_NODES is defined in gen_addspace.h */
+#include "gen_addspace.h"
+extern constants__t_NodeId_i a_NodeId[NB_NODES];
+extern constants__t_NodeClass_i a_NodeClass[NB_NODES];
+extern constants__t_Variant_i a_Value[NB_NODES];
+extern constants__t_StatusCode_i a_Value_StatusCode[NB_NODES];
+extern size_t address_space_bs__nNodeId;
+extern constants__t_QualifiedName_i address_space_bs__a_BrowseName;
+extern constants__t_LocalizedText_i address_space_bs__a_DisplayName;
+extern constants__t_ExpandedNodeId_i address_space_bs__HasTypeDefinition;
+extern constants__t_NodeId_i address_space_bs__refs_ReferenceType;
+extern constants__t_ExpandedNodeId_i address_space_bs__refs_TargetNode;
+extern t_bool *address_space_bs__refs_IsForward;
+extern size_t *address_space_bs__RefIndexBegin;
+extern size_t *address_space_bs__RefIndexEnd;
 
 
 #endif // address_space_impl_h_
