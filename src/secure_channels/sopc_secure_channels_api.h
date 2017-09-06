@@ -49,11 +49,11 @@ typedef enum {
     /* Services events */
     EP_OPEN, /* id = endpoint description configuration index */
     EP_CLOSE, /* id = endpoint description configuration index */
-    SC_CONNECT, /* id = endpoint connection description configuration index */
+    SC_CONNECT, /* id = secure channel connection index */
     SC_DISCONNECT, /* id = secure channel connection index */
     SC_SERVICE_SND_MSG, /* id = secure channel connection index,
-                          params = (SOPC_Buffer*) received buffer,
-                          auxParam = request Id context (optional: defined if  >= 0) */
+                          params = (SOPC_Buffer*) send buffer,
+                          auxParam = request Id context (optional: defined if server) */
 
     /* Internal events */
     /* SC listener manager -> SC connection manager */
@@ -98,7 +98,9 @@ typedef enum {
     INT_SC_SND_MSG_CHUNKS, /* -------------------------< */
 
     /* SC connection manager -> SC connection manager */
-    INT_SC_CLOSE // id = secure channel connection index
+    INT_SC_CLOSE // id = secure channel connection index,
+                 // params = (char*) reason,
+                 // auxParam = (SOPC_StatusCode) errorStatus
 
 } SOPC_SecureChannels_InputEvent;
 

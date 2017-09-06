@@ -54,7 +54,7 @@ void SOPC_SocketsInternalContext_Clear(){
 
 SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocketNoLock(bool isListener){
     SOPC_Socket* result = NULL;
-    uint32_t idx = 0;
+    uint32_t idx = 1; // index 0 is forbidden => reserved for invalid index
     do{
         if(false == socketsArray[idx].isUsed){
             socketsArray[idx].isUsed = true;

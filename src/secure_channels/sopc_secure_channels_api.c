@@ -108,6 +108,7 @@ static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t  event,
     case INT_SC_RCV_MSG_CHUNKS:
     case INT_SC_RCV_FAILURE:
     case INT_SC_SND_FAILURE:
+    case INT_SC_CLOSE:
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent,
                                                  eltId,
                                                  params,
@@ -117,6 +118,7 @@ static void SOPC_SecureChannelsEventMgr_Dispatcher(int32_t  event,
     /* SC connection manager -> OPC UA chunks message manager */
     case INT_SC_SND_HEL:
     case INT_SC_SND_ACK:
+    case INT_SC_SND_ERR:
     case INT_SC_SND_OPN:
     case INT_SC_SND_CLO:
     case INT_SC_SND_MSG_CHUNKS:
@@ -170,9 +172,11 @@ void SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEvent scEvent,
         case INT_SC_SND_FAILURE:
         case INT_SC_SND_HEL:
         case INT_SC_SND_ACK:
+        case INT_SC_SND_ERR:
         case INT_SC_SND_OPN:
         case INT_SC_SND_CLO:
         case INT_SC_SND_MSG_CHUNKS:
+        case INT_SC_CLOSE:
         default:
             assert(false);
         }
@@ -200,9 +204,11 @@ void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InputEvent scE
         case INT_SC_SND_FAILURE:
         case INT_SC_SND_HEL:
         case INT_SC_SND_ACK:
+        case INT_SC_SND_ERR:
         case INT_SC_SND_OPN:
         case INT_SC_SND_CLO:
         case INT_SC_SND_MSG_CHUNKS:
+        case INT_SC_CLOSE:
             SOPC_EventDispatcherManager_AddEvent(secureChannelsEventDispatcherMgr,
                                                  scEvent,
                                                  id,
@@ -249,9 +255,11 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InputEve
         case INT_SC_SND_FAILURE:
         case INT_SC_SND_HEL:
         case INT_SC_SND_ACK:
+        case INT_SC_SND_ERR:
         case INT_SC_SND_OPN:
         case INT_SC_SND_CLO:
         case INT_SC_SND_MSG_CHUNKS:
+        case INT_SC_CLOSE:
             SOPC_EventDispatcherManager_AddEventAsNext(secureChannelsEventDispatcherMgr,
                                                        scEvent,
                                                        id,
