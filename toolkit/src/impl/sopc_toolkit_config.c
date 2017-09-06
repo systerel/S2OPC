@@ -198,7 +198,9 @@ void SOPC_Toolkit_Clear(){
       SOPC_TEMP_ClearEventDispMgr();
       SOPC_StackConfiguration_Clear();
       SLinkedList_Delete(tConfig.scConfigs);
+      tConfig.scConfigs = NULL;
       SLinkedList_Delete(tConfig.epConfigs);
+      tConfig.epConfigs = NULL;
       address_space_bs__UNINITIALISATION();
       appFct = NULL;
       pAddSpaceFct = NULL;
