@@ -176,8 +176,8 @@ static SOPC_SecureChannels_InputEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Type 
     return scEvent;
 }
 
-bool SC_Chunks_IsMsgEncrypted(OpcUa_MessageSecurityMode securityMode,
-                              bool                      isOPN)
+static bool SC_Chunks_IsMsgEncrypted(OpcUa_MessageSecurityMode securityMode,
+                                     bool                      isOPN)
 {
     assert(securityMode != OpcUa_MessageSecurityMode_Invalid);
     bool toEncrypt = true;
@@ -192,7 +192,7 @@ bool SC_Chunks_IsMsgEncrypted(OpcUa_MessageSecurityMode securityMode,
     return toEncrypt;
 }
 
-bool SC_Chunks_IsMsgSigned(OpcUa_MessageSecurityMode securityMode)
+static bool SC_Chunks_IsMsgSigned(OpcUa_MessageSecurityMode securityMode)
 {
     bool toSign = true;
     // Determine if the message must be signed
@@ -603,9 +603,9 @@ static SOPC_StatusCode SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnect
     return status;
 }
 
-SOPC_StatusCode SC_Chunks_CheckSeqNumReceived(SOPC_SecureConnection* scConnection,
-                                              bool                   isOPN,
-                                              uint32_t               seqNumber)
+static SOPC_StatusCode SC_Chunks_CheckSeqNumReceived(SOPC_SecureConnection* scConnection,
+                                                     bool                   isOPN,
+                                                     uint32_t               seqNumber)
 {
     assert(scConnection != NULL);
     SOPC_StatusCode status = STATUS_OK;
@@ -1195,7 +1195,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
     return result;
 }
 
-bool SC_Chunks_Is_ExtraPaddingSizePresent(uint32_t plainTextBlockSize){
+static bool SC_Chunks_Is_ExtraPaddingSizePresent(uint32_t plainTextBlockSize){
     // Extra-padding necessary if padding could be greater 256 bytes (2048 bits)
     // (1 byte for padding size field + 255 bytes of padding).
     // => padding max value is plainTextBlockSize regarding the formula of padding size
@@ -1206,13 +1206,13 @@ bool SC_Chunks_Is_ExtraPaddingSizePresent(uint32_t plainTextBlockSize){
     return false;
 }
 
-uint32_t SC_Chunks_ComputeMaxBodySize(uint32_t nonEncryptedHeadersSize,
-                                      uint32_t chunkSize,
-                                      bool     toEncrypt,
-                                      uint32_t cipherBlockSize,
-                                      uint32_t plainBlockSize,
-                                      bool     toSign,
-                                      uint32_t signatureSize)
+static uint32_t SC_Chunks_ComputeMaxBodySize(uint32_t nonEncryptedHeadersSize,
+                                             uint32_t chunkSize,
+                                             bool     toEncrypt,
+                                             uint32_t cipherBlockSize,
+                                             uint32_t plainBlockSize,
+                                             bool     toSign,
+                                             uint32_t signatureSize)
 {
     uint32_t result = 0;
     uint32_t paddingSizeFields = 0;
@@ -1389,9 +1389,9 @@ static uint32_t SC_Chunks_GetMaxBodySize(SOPC_SecureConnection*     scConnection
     return maxBodySize;
 }
 
-uint16_t SC_Chunks_GetPaddingSize(uint32_t bytesToEncrypt, // called bytesToWrite in spec part 6 but it should not since it includes SN header !
-                                  uint32_t plainBlockSize,
-                                  uint32_t signatureSize){
+static uint16_t SC_Chunks_GetPaddingSize(uint32_t bytesToEncrypt, // called bytesToWrite in spec part 6 but it should not since it includes SN header !
+                                         uint32_t plainBlockSize,
+                                         uint32_t signatureSize){
     // By default only 1 padding size field + 1 if extra padding
     uint8_t paddingSizeFields = 1;
     if(SC_Chunks_Is_ExtraPaddingSizePresent(plainBlockSize)){
@@ -1474,13 +1474,13 @@ static bool SOPC_Chunks_EncodePadding(SOPC_SecureConnection*     scConnection,
     return result;
 }
 
-bool SC_Chunks_CheckMaxSenderCertificateSize(uint32_t senderCertificateSize,
-                                             uint32_t messageChunkSize,
-                                             uint32_t securityPolicyUriLength,
-                                             bool     hasPadding,
-                                             uint32_t realPaddingLength,
-                                             bool     hasExtraPadding,
-                                             uint32_t asymmetricSignatureSize){
+static bool SC_Chunks_CheckMaxSenderCertificateSize(uint32_t senderCertificateSize,
+                                                    uint32_t messageChunkSize,
+                                                    uint32_t securityPolicyUriLength,
+                                                    bool     hasPadding,
+                                                    uint32_t realPaddingLength,
+                                                    bool     hasExtraPadding,
+                                                    uint32_t asymmetricSignatureSize){
     bool result = false;
     int32_t maxSize = // Fit in a single message chunk with at least 1 byte of body
      messageChunkSize -
@@ -1509,11 +1509,11 @@ bool SC_Chunks_CheckMaxSenderCertificateSize(uint32_t senderCertificateSize,
     return result;
 }
 
-bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection*     scConnection,
-                                      SOPC_SecureChannel_Config* scConfig,
-                                      uint32_t                   plainDataLength,
-                                      bool                       isSymmetricAlgo,
-                                      uint32_t*                  cipherDataLength)
+static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection*     scConnection,
+                                             SOPC_SecureChannel_Config* scConfig,
+                                             uint32_t                   plainDataLength,
+                                             bool                       isSymmetricAlgo,
+                                             uint32_t*                  cipherDataLength)
 {
     assert(scConnection != NULL);
     assert(scConfig != NULL);
