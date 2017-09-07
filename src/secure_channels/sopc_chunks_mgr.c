@@ -1050,6 +1050,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
                                                uint32_t*                  senderCertificateSize,
                                                SOPC_StatusCode*           errorStatus){
     assert(scConnection != NULL);
+    assert(scConnection->cryptoProvider != NULL);
     assert(scConfig != NULL);
     assert(scConfig->reqSecuPolicyUri != NULL);
     assert(buffer != NULL);
@@ -1062,15 +1063,6 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
     SOPC_ByteString bsSenderCert;
     SOPC_ByteString_Initialize(&bsSenderCert);
     const Certificate* receiverCertCrypto = NULL;
-
-    if(scConnection->cryptoProvider == NULL){
-        scConnection->cryptoProvider = CryptoProvider_Create(scConfig->reqSecuPolicyUri);
-        if(scConnection->cryptoProvider == NULL){
-            // Rejected by the cryptographic componenent
-            *errorStatus = OpcUa_BadSecurityPolicyRejected;
-            result = false;
-        }
-    }
 
     if(result != false)
     {

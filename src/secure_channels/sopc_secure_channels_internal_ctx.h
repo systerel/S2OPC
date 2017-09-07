@@ -26,6 +26,7 @@
 #include "singly_linked_list.h"
 #include "secret_buffer.h"
 #include "crypto_decl.h"
+#include "key_sets.h"
 #include "sopc_types.h"
 
 typedef enum {
@@ -134,7 +135,9 @@ typedef struct SOPC_SecureConnection {
     SOPC_SecureConnection_TcpProperties         tcpMsgProperties;
     CryptoProvider*                             cryptoProvider; // defined once security policy id define (OPN req)
     SOPC_SecureConnection_SecurityToken         precedentSecurityToken;
+    SC_SecurityKeySets                          precedentSecuKeySets;
     SOPC_SecureConnection_SecurityToken         currentSecurityToken;
+    SC_SecurityKeySets                          currentSecuKeySets;
     // (Server side specific)
     SecretBuffer*                               clientNonce; // client nonce used to create symmetric key  
     // (Server side specific)
