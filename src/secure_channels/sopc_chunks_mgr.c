@@ -882,7 +882,6 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                 // Decode the received OPC UA TCP message header
                 result = SC_Chunks_DecodeTcpMsgHeader(&scConnection->chunksCtx);
                 if(result == false){
-                    // TODO: treat error (invalid header values)
                     errorStatus = OpcUa_BadTcpMessageTypeInvalid;
                 }
             }
