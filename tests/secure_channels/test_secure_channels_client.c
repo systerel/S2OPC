@@ -116,7 +116,7 @@ int main(int argc, char *argv[]){
         if(STATUS_OK != status){
             printf(">>Stub_Client: Failed to load private key\n");
         }else{
-            printf(">>Stub_Client: Server private key loaded\n");
+            printf(">>Stub_Client: Client private key loaded\n");
         }
     }
 
@@ -126,6 +126,16 @@ int main(int argc, char *argv[]){
             printf(">>Stub_Client: Failed to load CA\n");
         }else{
             printf(">>Stub_Client: CA certificate loaded\n");
+        }
+    }
+
+    // Init PKI provider and parse certificate and private key
+    // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
+    if(STATUS_OK == status){
+        if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki)){
+            printf(">>Stub_Client: Failed to create PKI\n");
+        }else{
+            printf(">>Stub_Client: PKI created\n");
         }
     }
 

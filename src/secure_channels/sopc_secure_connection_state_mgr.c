@@ -393,8 +393,8 @@ static bool SC_DeriveSymmetricKeySets(bool                isServer,
                                              &signKeyLength,
                                              &initVectorLength);
 
-    if(STATUS_OK != status){
-        result = false;
+    if(STATUS_OK == status){
+        result = true;
     }
 
     if(result != false){
@@ -2172,6 +2172,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         if(SOPC_DEBUG_PRINTING != false){
             printf("ScStateMgr: INT_SC_RCV_ERR\n");
         }
+        /* id = secure channel connection index,
+           auxParam = params = (SOPC_Buffer*) buffer */
+        scConnection = SC_GetConnection(eltId);
+
         // TODO: Decode ERR message and use reason/error code (received on client side only ! => guaranteed by chunks manager filtering)
         SC_CloseSecureConnection(scConnection,
                                  eltId,

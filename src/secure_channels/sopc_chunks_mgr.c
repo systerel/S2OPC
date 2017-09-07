@@ -214,6 +214,7 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
     assert(scConnection->cryptoProvider != NULL);
     assert(scConnection->chunksCtx.chunkInputBuffer != NULL);
     assert(senderCertificatePresence != NULL && receiverCertificatePresence != NULL);
+    assert(clientSenderCertificate != NULL);
 
     SOPC_StatusCode status = STATUS_OK;
     bool enforceSecuMode = false;
@@ -412,7 +413,8 @@ static SOPC_StatusCode SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_Secu
     return status;
 }
 
-static SOPC_StatusCode SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scConnection){
+static SOPC_StatusCode SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scConnection,
+                                                               bool*                  isSecurityActive){
     assert(scConnection != NULL);
     assert(scConnection->chunksCtx.chunkInputBuffer != NULL);
 
@@ -526,32 +528,38 @@ static SOPC_StatusCode SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnec
         }else{
             status = OpcUa_BadCertificateInvalid;
         }
-    }
 
-    if(STATUS_OK == status &&
-       isSecureModeActive != false){
-        // TODO: implement
-        // Decrypt message content and store complete message in secure connection buffer
-        // status = SC_DecryptMsg
-    }
-
-    if(STATUS_OK == status &&
-       isSecureModeActive != false){
-        // TODO: implement
-        // Check decrypted message signature
-        // status = SC_VerifyMsgSignature
+        // In case secure channel config is already done (RENEW), check it is correct
+        if(clientConfig != NULL){
+            if(isSecureModeActive == false && clientConfig->msgSecurityMode == OpcUa_MessageSecurityMode_None){
+                // OK it is compatible
+            }else if(isSecureModeActive != false &&
+                     (clientConfig->msgSecurityMode == OpcUa_MessageSecurityMode_Sign ||
+                      clientConfig->msgSecurityMode == OpcUa_MessageSecurityMode_SignAndEncrypt)){
+                // OK it is compatible
+            }else{
+                // Incompatible parameters with already configured security mode
+                status = OpcUa_BadSecurityChecksFailed;
+            }
+        }
     }
 
     SOPC_String_Clear(&tmpStr);
     SOPC_String_Clear(&securityPolicy);
 
-    if(STATUS_OK == status &&
-       clientConfig == NULL &&
-       scConnection->isServerConnection != false){
-        // SERVER side (fill temporary secu data necessary to terminate OPN treatment)
-        scConnection->serverAsymmSecuInfo.securityPolicyUri = validSecuPolicy;
-        scConnection->serverAsymmSecuInfo.validSecurityModes = validSecuModes;
-        scConnection->serverAsymmSecuInfo.isSecureModeActive = isSecureModeActive;
+
+    if(STATUS_OK == status){
+        *isSecurityActive = isSecureModeActive;
+        if(clientConfig == NULL &&
+           scConnection->isServerConnection != false){
+           // SERVER side (fill temporary secu data necessary to terminate OPN treatment)
+
+           // TODO: Check if it is the same certificate when connection already established ?
+           scConnection->serverAsymmSecuInfo.clientCertificate = clientCertificate;
+           scConnection->serverAsymmSecuInfo.securityPolicyUri = validSecuPolicy;
+           scConnection->serverAsymmSecuInfo.validSecurityModes = validSecuModes;
+           scConnection->serverAsymmSecuInfo.isSecureModeActive = isSecureModeActive;
+        }
     }
 
     if(STATUS_OK != status &&
@@ -563,7 +571,8 @@ static SOPC_StatusCode SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnec
     return status;
 }
 
-static SOPC_StatusCode SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConnection){
+static SOPC_StatusCode SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConnection,
+                                                              bool*                  isPrecCryptoData){
     assert(scConnection != NULL);
     assert(scConnection->chunksCtx.chunkInputBuffer != NULL);
 
@@ -579,6 +588,8 @@ static SOPC_StatusCode SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnect
             // TODO: manage time and OPN RENEW => do not accept precedent token for now since it cannot be renewed by client anyway
             if(scConnection->currentSecurityToken.tokenId != tokenId){
                 status = OpcUa_BadSecureChannelTokenUnknown;
+            }else{
+                *isPrecCryptoData = false;
             }
         }else{
             // SERVER side: should accept precedent security token until expiration
@@ -587,10 +598,12 @@ static SOPC_StatusCode SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnect
                 if(scConnection->serverNewSecuTokenActive == false){
                     scConnection->serverNewSecuTokenActive = true;
                 }
+                *isPrecCryptoData = false;
             }else if(scConnection->precedentSecurityToken.tokenId == tokenId &&
                      scConnection->precedentSecurityToken.secureChannelId != 0 &&
                      scConnection->precedentSecurityToken.tokenId != 0){
                 // Still valid with old security token => OK
+                *isPrecCryptoData = true;
                 // TODO: control expiration of precedent token
             }else{
                 status = OpcUa_BadSecureChannelTokenUnknown;
@@ -688,6 +701,213 @@ static SOPC_StatusCode SC_Chunks_CheckSequenceHeaderRequestId(SOPC_SecureConnect
     return status;
 }
 
+static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
+                                 bool                   isSymmetric,
+                                 uint32_t               isPrecCryptoData)
+{
+    assert(scConnection != NULL);
+    SOPC_Buffer* encryptedBuffer = scConnection->chunksCtx.chunkInputBuffer;
+    assert(encryptedBuffer != NULL);
+    // Current position is SN position
+    uint32_t sequenceNumberPosition = encryptedBuffer->position;
+
+    bool result = false;
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    uint32_t decryptedTextLength = 0;
+    SOPC_Buffer* plainBuffer = NULL;
+
+    SOPC_Byte* dataToDecrypt = &(encryptedBuffer->data[sequenceNumberPosition]);
+    uint32_t lengthToDecrypt = encryptedBuffer->length - sequenceNumberPosition;
+
+    if(isSymmetric == false){
+        const AsymmetricKey* runningAppPrivateKey = NULL;
+        if(scConnection->isServerConnection == false){
+            SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            assert(scConfig != NULL);
+            runningAppPrivateKey = scConfig->key_priv_cli;
+        }else{
+            SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
+            assert(epConfig != NULL);
+            runningAppPrivateKey = epConfig->serverKey;
+        }
+
+        if(runningAppPrivateKey != NULL){
+            status = CryptoProvider_AsymmetricGetLength_Decryption(scConnection->cryptoProvider,
+                                                                   runningAppPrivateKey,
+                                                                   lengthToDecrypt,
+                                                                   &decryptedTextLength);
+            if(STATUS_OK == status){
+                result = true;
+            }
+        }
+
+        if(result != false && decryptedTextLength <= scConnection->tcpMsgProperties.receiveBufferSize){
+            // Allocate a new plain buffer of the size of the non encrypted length + decryptedTextLength
+            plainBuffer = SOPC_Buffer_Create(sequenceNumberPosition + decryptedTextLength);
+            if(plainBuffer == NULL){
+                result = false;
+            }else{
+                // Copy non encrypted data from original buffer to plain text buffer
+                status = SOPC_Buffer_CopyWithLength(plainBuffer,
+                                                    encryptedBuffer,
+                                                    sequenceNumberPosition);
+            }
+            if(result != false){
+                status = CryptoProvider_AsymmetricDecrypt(scConnection->cryptoProvider,
+                                                          dataToDecrypt,
+                                                          lengthToDecrypt,
+                                                          runningAppPrivateKey,
+                                                          &(plainBuffer->data[sequenceNumberPosition]),
+                                                          decryptedTextLength,
+                                                          &decryptedTextLength);
+                if(status == STATUS_OK){
+                    assert(STATUS_OK == SOPC_Buffer_SetDataLength(plainBuffer, sequenceNumberPosition+decryptedTextLength));
+                    // Set position to sequence header
+                    assert(STATUS_OK == SOPC_Buffer_SetPosition(plainBuffer, sequenceNumberPosition));
+                }else{
+                    result = false;
+                }
+            }
+        }
+    }else{
+
+        SC_SecurityKeySet* receiverKeySet = NULL;
+        if(isPrecCryptoData == false){
+            receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
+        }else{
+            receiverKeySet = scConnection->precedentSecuKeySets.receiverKeySet;
+        }
+
+        status = CryptoProvider_SymmetricGetLength_Decryption(scConnection->cryptoProvider,
+                                                              lengthToDecrypt,
+                                                              &decryptedTextLength);
+
+        if(STATUS_OK == status){
+            result = true;
+        }
+
+        if(result != false && decryptedTextLength <= scConnection->tcpMsgProperties.receiveBufferSize){
+            // Allocate a new plain buffer of the size of the non encrypted length + decryptedTextLength
+            plainBuffer = SOPC_Buffer_Create(sequenceNumberPosition + decryptedTextLength);
+            if(plainBuffer == NULL){
+                result = false;
+            }else{
+                // Copy non encrypted data from original buffer to plain text buffer
+                status = SOPC_Buffer_CopyWithLength(plainBuffer,
+                                                    encryptedBuffer,
+                                                    sequenceNumberPosition);
+            }
+            if(result != false){
+                status = CryptoProvider_SymmetricDecrypt(scConnection->cryptoProvider,
+                                                         dataToDecrypt,
+                                                         lengthToDecrypt,
+                                                         receiverKeySet->encryptKey,
+                                                         receiverKeySet->initVector,
+                                                         &(plainBuffer->data[sequenceNumberPosition]),
+                                                         decryptedTextLength);
+                if(status == STATUS_OK){
+                    assert(STATUS_OK == SOPC_Buffer_SetDataLength(plainBuffer, sequenceNumberPosition+decryptedTextLength));
+                    // Set position to sequence header
+                    assert(STATUS_OK == SOPC_Buffer_SetPosition(plainBuffer, sequenceNumberPosition));
+                }else{
+                    result = false;
+                }
+            }
+        }
+    } // Symmetric algo branch
+
+    if(result == false){
+        if(plainBuffer != NULL){
+            SOPC_Buffer_Delete(plainBuffer);
+        }
+    }else{
+        SOPC_Buffer_Delete(scConnection->chunksCtx.chunkInputBuffer);
+        // Replace input buffer with the plain buffer (position == 0 => SN position)
+        scConnection->chunksCtx.chunkInputBuffer = plainBuffer;
+    }
+
+    return result;
+}
+
+static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
+                                         bool                   isSymmetric,
+                                         uint32_t               isPrecCryptoData)
+{
+    assert(scConnection != NULL);
+    SOPC_Buffer* buffer = scConnection->chunksCtx.chunkInputBuffer;
+    assert(buffer != NULL);
+
+    bool result = false;
+
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+
+    uint32_t signatureSize = 0;
+    uint32_t signaturePosition = 0;
+
+    if(isSymmetric == false){
+        AsymmetricKey* publicKey = NULL;
+        const Certificate* otherAppCertificate = NULL;
+        if(scConnection->isServerConnection == false){
+            // Client side
+            SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+            assert(scConfig != NULL);
+            otherAppCertificate = scConfig->crt_srv;
+        }else{
+            // Server side: we have to use the temporary stored certificate value
+            otherAppCertificate = scConnection->serverAsymmSecuInfo.clientCertificate;
+        }
+
+
+        status = KeyManager_AsymmetricKey_CreateFromCertificate(otherAppCertificate,
+                                                                &publicKey);
+
+        if(status == STATUS_OK){
+            status = CryptoProvider_AsymmetricGetLength_Signature(scConnection->cryptoProvider,
+                                                                  publicKey,
+                                                                  &signatureSize);
+        }
+
+        if(status == STATUS_OK){
+            signaturePosition = buffer->length - signatureSize;
+
+            status = CryptoProvider_AsymmetricVerify(scConnection->cryptoProvider,
+                                                     buffer->data,
+                                                     signaturePosition,
+                                                     publicKey,
+                                                     &(buffer->data[signaturePosition]),
+                                                     signatureSize);
+        }
+
+        KeyManager_AsymmetricKey_Free(publicKey);
+    }else{
+        SC_SecurityKeySet* receiverKeySet = NULL;
+        if(isPrecCryptoData == FALSE){
+            receiverKeySet = scConnection->currentSecuKeySets.receiverKeySet;
+        }else{
+            receiverKeySet = scConnection->precedentSecuKeySets.receiverKeySet;
+        }
+
+        status = CryptoProvider_SymmetricGetLength_Signature(scConnection->cryptoProvider,
+                                                             &signatureSize);
+
+        if(status == STATUS_OK){
+            signaturePosition = buffer->length - signatureSize;
+            status = CryptoProvider_SymmetricVerify(scConnection->cryptoProvider,
+                                                    buffer->data,
+                                                    signaturePosition,
+                                                    receiverKeySet->signKey,
+                                                    &(buffer->data[signaturePosition]),
+                                                    signatureSize);
+        }
+    }
+
+    if(STATUS_OK == status){
+        result = true;
+    }
+
+    return result;
+}
+
 static SOPC_StatusCode SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                                                  uint32_t*              requestId){
     assert(requestId != NULL);
@@ -704,6 +924,10 @@ static SOPC_StatusCode SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnec
     bool isOPN = false;
 
     uint32_t secureChannelId = 0;
+
+    bool toDecrypt = false;
+    bool toCheckSignature = false;
+    bool isPrecCryptoData = false;
 
     // Note: for non secure message we already check those messages are expected
     //       regarding the connection type (client/server)
@@ -788,16 +1012,53 @@ static SOPC_StatusCode SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnec
     }
 
     if(STATUS_OK == status && asymmSecuHeader != false){
-        status = SC_Chunks_CheckAsymmetricSecurityHeader(scConnection);
+        bool isSecurityActive = false;
+        status = SC_Chunks_CheckAsymmetricSecurityHeader(scConnection,
+                                                         &isSecurityActive);
+        if(STATUS_OK == status){
+            toDecrypt = isSecurityActive;
+            toCheckSignature = isSecurityActive;
+            isPrecCryptoData = false; // asymmetric => unused parameter in decrypt / check sign
+        }
     }
 
     if(STATUS_OK == status && symmSecuHeader != false){
-        status = SC_Chunks_CheckSymmetricSecurityHeader(scConnection);
+        // TODO: toDecrypt / toCheckSignature
+        SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
+        // If a symmetric message is received, secure channel should be configured
+        if(scConfig == NULL){
+            status = OpcUa_BadSecurityChecksFailed;
+        }else{
+            status = SC_Chunks_CheckSymmetricSecurityHeader(scConnection,
+                                                            &isPrecCryptoData);
+            if(STATUS_OK == status){
+                toDecrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, isOPN);
+                toCheckSignature = SC_Chunks_IsMsgSigned(scConfig->msgSecurityMode);
+            }
+        }
+    }
+
+    if(STATUS_OK == status && toDecrypt != false){
+        // Decrypt the message
+        bool result = SC_Chunks_DecryptMsg(scConnection,
+                                           isOPN == false, // isSymmetric
+                                           isPrecCryptoData);
+        if(result == false){
+            status = OpcUa_BadSecurityChecksFailed;
+        }
+    }
+
+    if(STATUS_OK == status && toCheckSignature != false){
+        // Check decrypted message signature
+        bool result = SC_Chunks_VerifyMsgSignature(scConnection,
+                                                   isOPN == false, // isSymmetric
+                                                   isPrecCryptoData);
+        if(result == false){
+            status = OpcUa_BadApplicationSignatureInvalid;
+        }
     }
 
     if(STATUS_OK == status && sequenceHeader != false){
-        // TODO: differentiate errors after this point must generate a ServiceFaultMessage whereas precedent errors
-        //       must generate a transport error and close the connection
 
         status = SC_Chunks_CheckSequenceHeaderSN(scConnection,
                                                  isOPN);
@@ -1518,7 +1779,7 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection*     scConnec
     assert(scConnection != NULL);
     assert(scConfig != NULL);
     assert(cipherDataLength != NULL);
-    bool result = false;
+    bool result = true;
 
     if(isSymmetricAlgo == false){
         const Certificate* otherAppCertificate = NULL;
@@ -1683,26 +1944,27 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
         // Check size of encrypted data array
         if(status == STATUS_OK)
         {
+            result = true;
             if(encryptedBuffer->max_size <
                 sequenceNumberPosition + encryptedDataLength)
             {
-                status = STATUS_NOK;
+                result = false;
             }
             encryptedData = encryptedBuffer->data;
             if(encryptedData == NULL)
             {
-                status = STATUS_NOK;
+                result = false;
             }else{
                 // Copy non encrypted headers part
                 memcpy(encryptedData, nonEncryptedBuffer->data, sequenceNumberPosition);
                 // Set correct message size and encrypted buffer length
-                SOPC_Buffer_SetDataLength(encryptedBuffer,
-                                          sequenceNumberPosition + encryptedDataLength);
+                assert(STATUS_OK == SOPC_Buffer_SetDataLength(encryptedBuffer,
+                                                              sequenceNumberPosition + encryptedDataLength));
             }
         }
 
         // Encrypt
-        if(status == STATUS_OK){
+        if(result != false){
             status = CryptoProvider_AsymmetricEncrypt
                       (scConnection->cryptoProvider,
                        dataToEncrypt,
@@ -1710,10 +1972,10 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                        otherAppPublicKey,
                        &encryptedData[sequenceNumberPosition],
                        encryptedDataLength);
-        }
 
-        if(STATUS_OK == status){
-            result = true;
+            if(STATUS_OK != status){
+                result = false;
+            }
         }
 
         KeyManager_AsymmetricKey_Free(otherAppPublicKey);
@@ -1725,6 +1987,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
            scConnection->currentSecuKeySets.receiverKeySet == NULL){
             result = false;
         }else{
+            result = true;
             SOPC_Byte* encryptedData = NULL;
 
             // Check size of encrypted data array
@@ -1738,8 +2001,8 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                 // Copy non encrypted headers part
                 memcpy(encryptedData, nonEncryptedBuffer->data, sequenceNumberPosition);
                 // Set correct message size and encrypted buffer length
-                SOPC_Buffer_SetDataLength(encryptedBuffer,
-                                          sequenceNumberPosition + encryptedDataLength);
+                assert(STATUS_OK == SOPC_Buffer_SetDataLength(encryptedBuffer,
+                                                              sequenceNumberPosition + encryptedDataLength));
 
             }
 
@@ -1753,10 +2016,9 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                            scConnection->currentSecuKeySets.senderKeySet->initVector,
                            &encryptedData[sequenceNumberPosition],
                            encryptedDataLength);
-            }
-
-            if(STATUS_OK == status){
-                result = true;
+                if(STATUS_OK != status){
+                    result = false;
+                }
             }
 
         } // End valid key set
@@ -2093,18 +2355,23 @@ static SOPC_StatusCode SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnec
 
             if(result != false && toSign != false){
                 /* SIGN MESSAGE */
-                status = SC_Chunks_EncodeSignature(scConnection,
+                result = SC_Chunks_EncodeSignature(scConnection,
                                                    nonEncryptedBuffer,
                                                    isOPN == false, // = isSymmetric
                                                    signatureSize);
-                assert(false);
             }
 
             if(result != false){
                 /* ENCRYTP MESSAGE */
                 if(toEncrypt != false){
 
-                    SOPC_Buffer* encryptedBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
+                    SOPC_Buffer* encryptedBuffer = NULL;
+
+                    if(scConnection->tcpMsgProperties.sendBufferSize >= sequenceNumberPosition + encryptedDataLength){
+                        encryptedBuffer = SOPC_Buffer_Create(sequenceNumberPosition + encryptedDataLength);
+                    }else{
+                        // TODO: return status message too large ? => is there any guarantee due to plain buffer size ?
+                    }
 
                     if(encryptedBuffer != NULL){
                         result = SC_Chunks_EncryptMsg(scConnection,
@@ -2172,6 +2439,8 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
     bool isSendTcpOnly = false;
     bool isOPN = false;
     bool result = false;
+    // True if socket will be closed after sending this message (ERR, CLO)
+    bool socketWillClose = false;
     assert(buffer != NULL);
     switch(event){
     /* Sockets events: */
@@ -2211,6 +2480,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
         if(SOPC_DEBUG_PRINTING != false){
             printf("ScChunksMgr: INT_SC_SND_ERR\n");
         }
+        socketWillClose = true;
         isSendCase = true;
         isSendTcpOnly = true;
         sendMsgType = SOPC_MSG_TYPE_ERR;
@@ -2228,6 +2498,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
         if(SOPC_DEBUG_PRINTING != false){
             printf("ScChunksMgr: INT_SC_SND_CLO\n");
         }
+        socketWillClose = true;
         isSendCase = true;
         sendMsgType = SOPC_MSG_TYPE_SC_CLO;
         break;
@@ -2253,11 +2524,17 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                            &outputBuffer,
                                            &errorStatus);
         if(result == false){
-            // Treat as prio events
-            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FAILURE,
-                                                           eltId,
-                                                           params,
-                                                           errorStatus);
+            if(socketWillClose == false){
+                // Treat as prio events
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_FAILURE,
+                                                               eltId,
+                                                               params,
+                                                               errorStatus);
+            }else{
+                if(SOPC_DEBUG_PRINTING){
+                    printf("Failed sending message type '%d' before socket closed\n", sendMsgType);
+                }
+            }
         }else{
             // Require write of output buffer on socket
             SOPC_Sockets_EnqueueEvent(SOCKET_WRITE,
