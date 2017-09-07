@@ -16,6 +16,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
@@ -360,6 +361,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
 
     switch(socketEvent){
     case SOCKET_CREATE_SERVER:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: SOCKET_CREATE_SERVER\n");
+        }
         /*
         id = endpoint description config index,
         params = (const char*) URI,
@@ -381,6 +385,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         }
         break;
     case SOCKET_ACCEPTED_CONNECTION:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: SOCKET_ACCEPTED_CONNECTION\n");
+        }
         /* id = socket index,
          * auxParam = secure channel connection index associated to accepted connection */
         Mutex_Lock(&socketsMutex);
@@ -394,6 +401,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         Mutex_Unlock(&socketsMutex);
         break;
     case SOCKET_CREATE_CLIENT:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: SOCKET_CREATE_CLIENT\n");
+        }
         /*
         id = secure channel connection index,
         params = (const char*) URI
@@ -410,6 +420,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         }
         break;
     case SOCKET_CLOSE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: SOCKET_CLOSE\n");
+        }
         /* id = socket index */
         socketElt = &socketsArray[eltId];
 
@@ -423,6 +436,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         SOPC_SocketsInternalContext_CloseSocket(eltId);
         break;
     case SOCKET_WRITE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: SOCKET_WRITE\n");
+        }
         /*
         id = socket index,
         params = (SOPC_Buffer*) msg buffer
@@ -463,6 +479,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
 
         break;
     case INT_SOCKET_ACCEPTED:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: INT_SOCKET_ACCEPTED\n");
+        }
         socketElt = &socketsArray[eltId];
 
         // State was set to accepted by network event manager
@@ -478,6 +497,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
                                          eltId);
         break;
     case INT_SOCKET_CONNECTION_ATTEMPT_FAILED:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: INT_SOCKET_CONNECTION_ATTEMPT_FAILED\n");
+        }
         socketElt = &socketsArray[eltId];
         // State is connecting
         assert(socketElt->state == SOCKET_STATE_CONNECTING);
@@ -495,6 +517,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         }
         break;
     case INT_SOCKET_CONNECTED:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: INT_SOCKET_CONNECTED\n");
+        }
         socketElt = &socketsArray[eltId];
         // State was set to connected by network manager
         assert(socketElt->state == SOCKET_STATE_CONNECTED);
@@ -513,6 +538,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
                                          eltId);
         break;
     case INT_SOCKET_CLOSE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: INT_SOCKET_CLOSE\n");
+        }
         socketElt = &socketsArray[eltId];
 
         if(socketElt->state == SOCKET_STATE_LISTENING){
@@ -536,6 +564,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
         SOPC_SocketsInternalContext_CloseSocket(eltId);
         break;
     case INT_SOCKET_READY_TO_READ:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: INT_SOCKET_READY_TO_READ\n");
+        }
         socketElt = &socketsArray[eltId];
 
         buffer = SOPC_Buffer_Create(SOPC_MAX_MESSAGE_LENGTH);
@@ -561,6 +592,9 @@ void SOPC_SocketsEventMgr_Dispatcher (int32_t  event,
 
         break;
     case INT_SOCKET_READY_TO_WRITE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("SocketEvent: INT_SOCKET_READY_TO_WRITE\n");
+        }
         socketElt = &socketsArray[eltId];
 
         // Socket is connected

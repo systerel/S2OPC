@@ -18,6 +18,7 @@
 #include "sopc_chunks_mgr.h"
 
 #include <string.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
 
@@ -1952,6 +1953,9 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
     switch(event){
     /* Sockets events: */
     case SOCKET_RCV_BYTES: 
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScChunksMgr: SOCKET_RCV_BYTES\n");
+        }
         /* id = secure channel connection index,
            params = (SOPC_Buffer*) received buffer */
         if(scConnection != NULL){
@@ -1965,31 +1969,49 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
     // params = (SOPC_Buffer*) buffer positioned to message payload
     // auxParam = request Id context if response
     case INT_SC_SND_HEL: 
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScChunksMgr: INT_SC_SND_HEL\n");
+        }
         isSendCase = true;
         isSendTcpOnly = true;
         sendMsgType = SOPC_MSG_TYPE_HEL;
         break;
     case INT_SC_SND_ACK:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScChunksMgr: INT_SC_SND_ACK\n");
+        }
         isSendCase = true;
         isSendTcpOnly = true;
         sendMsgType = SOPC_MSG_TYPE_ACK;
         break;
-    case INT_SC_SND_ERR: 
+    case INT_SC_SND_ERR:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScChunksMgr: INT_SC_SND_ERR\n");
+        }
         isSendCase = true;
         isSendTcpOnly = true;
         sendMsgType = SOPC_MSG_TYPE_ERR;
         break;
-    case INT_SC_SND_OPN: 
+    case INT_SC_SND_OPN:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScChunksMgr: INT_SC_SND_OPN\n");
+        }
         isSendCase = true;
         isOPN = true;
         sendMsgType = SOPC_MSG_TYPE_SC_OPN;
         // Note: only message to be provided without size of header reserved (variable size for asymmetric secu header)
         break;
-    case INT_SC_SND_CLO: 
+    case INT_SC_SND_CLO:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScChunksMgr: INT_SC_SND_CLO\n");
+        }
         isSendCase = true;
         sendMsgType = SOPC_MSG_TYPE_SC_CLO;
         break;
-    case INT_SC_SND_MSG_CHUNKS: 
+    case INT_SC_SND_MSG_CHUNKS:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScChunksMgr: INT_SC_SND_MSG_CHUNKS\n");
+        }
         isSendCase = true;
         sendMsgType = SOPC_MSG_TYPE_SC_MSG;
         break;

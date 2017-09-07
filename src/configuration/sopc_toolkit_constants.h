@@ -91,5 +91,7 @@
 /* Length of an UA secure message chunk sequence header */
 #define SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH 8
 
+/* DEBUG CONFIGURATION */
+#define SOPC_DEBUG_PRINTING false
 
 #endif /* SOPC_TOOLKIT_CONSTANTS_H_ */

@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <assert.h>
 
 #include "sopc_toolkit_constants.h"
@@ -132,6 +133,9 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
     /* Sockets events: */
     /* Sockets manager -> SC listener state manager */
     case SOCKET_LISTENER_OPENED:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScListenerMgr: SOCKET_LISTENER_OPENED\n");
+        }
         /* id = endpoint description config index,
            auxParam = socket index */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
@@ -148,6 +152,9 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         break;
     case SOCKET_LISTENER_CONNECTION:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScListenerMgr: SOCKET_LISTENER_CONNECTION\n");
+        }
         /* id = endpoint description config index,
            auxParam = new connection socket index */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
@@ -166,6 +173,9 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         break;
     case SOCKET_LISTENER_FAILURE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScListenerMgr: SOCKET_LISTENER_FAILURE\n");
+        }
         /* id = endpoint description configuration index */
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if(epConfig != NULL){
@@ -181,6 +191,9 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
     /* Services events: */
     /* Services manager -> SC listener state manager */
     case EP_OPEN:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScListenerMgr: EP_OPEN\n");
+        }
         /* id = endpoint description configuration index */
         // Retrieve EP configuration
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
@@ -203,6 +216,9 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         break;
     case EP_CLOSE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScListenerMgr: EP_CLOSE\n");
+        }
         /* id = endpoint description configuration index */
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if(epConfig != NULL){
@@ -218,6 +234,9 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
     /* Internal events: */
     /* SC connection manager -> SC listener state manager */
     case INT_EP_SC_CREATED:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScListenerMgr: INT_EP_SC_CREATED\n");
+        }
         /* id = endpoint description configuration index,
            auxParam = socket index for connection */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
@@ -241,6 +260,9 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         }
         break;
     case INT_EP_SC_DISCONNECTED:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScListenerMgr: INT_EP_SC_DISCONNECTED\n");
+        }
         /* id = endpoint description configuration index,
            auxParam = secure channel connection index */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);

@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <assert.h>
 
 #include "sopc_toolkit_constants.h"
@@ -1425,7 +1426,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     switch(event){
     /* Sockets events: */
     /* Sockets manager -> SC connection state manager */
-    case SOCKET_CONNECTION: 
+    case SOCKET_CONNECTION:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: SOCKET_CONNECTION\n");
+        }
         // CLIENT side only
         /* id = secure channel connection index,
            auxParam = socket index */
@@ -1461,6 +1465,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         break;
     case SOCKET_FAILURE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: SOCKET_FAILURE\n");
+        }
         /* id = secure channel connection index,
            auxParam = socket index */
         scConnection = SC_GetConnection(eltId);
@@ -1476,6 +1483,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     /* Services events: */
     /* Services manager -> SC connection state manager */
     case SC_CONNECT:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: SC_CONNECT\n");
+        }
         /* id = secure channel connection index */
 
         /* Define INIT state of a client */
@@ -1506,6 +1516,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         break;
     case SC_DISCONNECT:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: SC_DISCONNECT\n");
+        }
         /* id = secure channel connection index */
         scConnection = SC_GetConnection(eltId);
         if(scConnection != NULL){
@@ -1528,6 +1541,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         break;
 
     case SC_SERVICE_SND_MSG:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: SC_SERVICE_SND_MSG\n");
+        }
         /* id = secure channel connection index,
            params = (SOPC_Buffer*) received buffer,
            auxParam = request Id context (optional: defined if  >= 0) */
@@ -1546,6 +1562,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     /* Internal events: */
     /* SC listener manager -> SC connection manager */
     case INT_EP_SC_CREATE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_EP_SC_CREATE\n");
+        }
         /* id = endpoint description configuration index,
            auxParam = socket index */
         result = SC_InitNewConnection(&idx);
@@ -1583,6 +1602,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
 
     /* OPC UA chunks message manager -> SC connection manager */
     case INT_SC_RCV_HEL:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_SC_RCV_HEL\n");
+        }
         scConnection = SC_GetConnection(eltId);
         if(scConnection != NULL){
             if(scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT && scConnection->isServerConnection != false){
@@ -1618,6 +1640,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         break;
     case INT_SC_RCV_ACK:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_SC_RCV_ACK\n");
+        }
         scConnection = SC_GetConnection(eltId);
         if(scConnection != NULL){
             if(scConnection->state == SECURE_CONNECTION_STATE_TCP_NEGOTIATE && scConnection->isServerConnection == false){
@@ -1643,6 +1668,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         SOPC_Buffer_Delete((SOPC_Buffer*) params);
         break;
     case INT_SC_RCV_OPN:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_SC_RCV_OPN\n");
+        }
         scConnection = SC_GetConnection(eltId);
         if(scConnection != NULL){
             if((scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING ||
@@ -1779,6 +1807,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         SOPC_Buffer_Delete((SOPC_Buffer*) params);
         break;
     case INT_SC_RCV_CLO:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_SC_RCV_CLO\n");
+        }
         scConnection = SC_GetConnection(eltId);
         if(scConnection != NULL){
             if((scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
@@ -1818,6 +1849,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         SOPC_Buffer_Delete((SOPC_Buffer*) params);
         break;
     case INT_SC_RCV_MSG_CHUNKS:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_SC_RCV_MSG_CHUNKS\n");
+        }
         scConnection = SC_GetConnection(eltId);
         if(scConnection != NULL){
             if(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
@@ -1851,6 +1885,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         break;
     case INT_SC_RCV_FAILURE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_SC_RCV_FAILURE\n");
+        }
         scConnection = SC_GetConnection(eltId);
         if(scConnection != NULL){
              SC_CloseSecureConnection(scConnection,
@@ -1861,6 +1898,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         } // else: nothing to do (=> socket should already be required to close)
         break;
     case INT_SC_SND_FAILURE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_SC_SND_FAILURE\n");
+        }
         scConnection = SC_GetConnection(eltId);
         if(scConnection != NULL){
             SC_CloseSecureConnection(scConnection,
@@ -1871,6 +1911,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         } // else: nothing to do (=> socket should already be required to close)
         break;
     case INT_SC_RCV_ERR:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_SC_RCV_ERR\n");
+        }
         // TODO: Decode ERR message and use reason/error code (received on client side only ! => guaranteed by chunks manager filtering)
         SC_CloseSecureConnection(scConnection,
                                  eltId,
@@ -1879,6 +1922,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                  "ERR message received");
         break;
     case INT_EP_SC_CLOSE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_EP_SC_CLOSE\n");
+        }
         /* id = secure channel connection index,
            auxParam = endpoint description configuration index */
         scConnection = SC_GetConnection(eltId);
@@ -1892,6 +1938,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         break;
     case INT_SC_CLOSE:
+        if(SOPC_DEBUG_PRINTING != false){
+            printf("ScStateMgr: INT_SC_CLOSE\n");
+        }
         /* id = secure channel connection index */
         scConnection = SC_GetConnection(eltId);
 
