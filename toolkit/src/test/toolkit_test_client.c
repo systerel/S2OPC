@@ -36,6 +36,7 @@
 #include "opcua_statuscodes.h"
 #include "config_toolkit.h"
 #include "crypto_profiles.h"
+#include "pki_stack.h"
 
 #include "wrap_read.h"
 #include "testlib_write.h"
@@ -104,9 +105,9 @@ SOPC_SecureChannel_Config scConfig = {
     .key_priv_cli = NULL,
     .crt_srv = NULL,
     .pki = NULL,
-    .reqSecuPolicyUri = SecurityPolicy_None_URI,
+    .reqSecuPolicyUri = SecurityPolicy_Basic256Sha256_URI,
     .requestedLifetime = 5,
-    .msgSecurityMode = OpcUa_MessageSecurityMode_None
+    .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt
 };
 
 int main(void){
@@ -118,6 +119,11 @@ int main(void){
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
+  PKIProvider *pki = NULL;
+  Certificate *crt_cli = NULL, *crt_srv = NULL;
+  Certificate *crt_ca = NULL;
+  AsymmetricKey *priv_cli = NULL;
+
   constants__t_channel_config_idx_i channel_config_idx = constants__c_channel_config_idx_indet;  
   /* Note: in current version of toolkit user == 1 is considered as anonymous user */
   constants__t_user_i user = 1;
@@ -125,6 +131,67 @@ int main(void){
   SOPC_StatusCode status = STATUS_OK;
 
   OpcUa_WriteRequest *pWriteReq = NULL;
+
+  // Paths to client certificate/key and server certificate
+  // Client certificate name
+  char* certificateLocation = "./client_public/client.der";
+  // Server certificate name
+  char* certificateSrvLocation = "./server_public/server.der";
+  // Client private key
+  char* keyLocation = "./client_private/client.key";
+
+  if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None){
+      // The certificates: load
+      status = KeyManager_Certificate_CreateFromFile(certificateLocation, &crt_cli);
+      if(STATUS_OK != status){
+          printf(">>Stub_Client: Failed to load client certificate\n");
+      }else{
+          printf(">>Stub_Client: Client certificate loaded\n");
+          scConfig.crt_cli = crt_cli;
+      }
+  }
+
+  if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
+      status = KeyManager_Certificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+      if(STATUS_OK != status){
+          printf(">>Stub_Client: Failed to load server certificate\n");
+      }else{
+          printf(">>Stub_Client: Server certificate loaded\n");
+          scConfig.crt_srv = crt_srv;
+      }
+  }
+
+  if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
+      // Private key: load
+      status = KeyManager_AsymmetricKey_CreateFromFile(keyLocation, &priv_cli, NULL, 0);
+      if(STATUS_OK != status){
+          printf(">>Stub_Client: Failed to load private key\n");
+      }else{
+          printf(">>Stub_Client: Client private key loaded\n");
+          scConfig.key_priv_cli = priv_cli;
+      }
+  }
+
+  if(scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && STATUS_OK == status){
+      // Certificate Authority: load
+      if(STATUS_OK != KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &crt_ca)){
+          printf(">>Stub_Client: Failed to load CA\n");
+      }else{
+          printf(">>Stub_Client: CA certificate loaded\n");
+      }
+  }
+
+    // Init PKI provider and parse certificate and private key
+    // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
+  if(STATUS_OK == status){
+      if(STATUS_OK != PKIProviderStack_Create(crt_ca, NULL, &pki)){
+          printf(">>Stub_Client: Failed to create PKI\n");
+      }else{
+          printf(">>Stub_Client: PKI created\n");
+          scConfig.pki = pki;
+      }
+  }
+
 
   /* Init stack configuration */
   if(STATUS_OK == status){

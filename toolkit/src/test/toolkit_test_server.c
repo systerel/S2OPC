@@ -36,6 +36,10 @@
 #include "sopc_sc_events.h"
 #include "add.h"
 
+#include "crypto_profiles.h"
+#include "crypto_provider.h"
+#include "pki_stack.h"
+
 static int endpointClosed = FALSE;
 
 void Test_ComEvent_Fct(SOPC_App_Com_Event event,
@@ -66,16 +70,45 @@ int main(void)
   SOPC_String_Initialize(&secuConfig[0].securityPolicy);
 
   if(STATUS_OK == status){
-    status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
-                                           "http://opcfoundation.org/UA/SecurityPolicy#None");
-    secuConfig[0].securityModes = SECURITY_MODE_NONE_MASK;
+	if (1) {
+		status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
+		                                           SecurityPolicy_Basic256_URI);
+		    secuConfig[0].securityModes = SECURITY_MODE_SIGN_MASK;
+	} else {
+		status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
+		                                           "http://opcfoundation.org/UA/SecurityPolicy#None");
+		    secuConfig[0].securityModes = SECURITY_MODE_NONE_MASK;
+	}
+
   }
 
   // Init unique endpoint structure
   epConfig.endpointURL = ENDPOINT_URL;
-  epConfig.serverCertificate = NULL;
-  epConfig.serverKey = NULL;
-  epConfig.pki = NULL;
+  if (1) {
+	  static Certificate * serverCertificate;
+	  status = KeyManager_Certificate_CreateFromFile("./server_public/server.der", &serverCertificate);
+	  assert(STATUS_OK == status);
+	  epConfig.serverCertificate = serverCertificate;
+
+	  static AsymmetricKey *  asymmetricKey;
+	  status = KeyManager_AsymmetricKey_CreateFromFile("./server_private/server.key", &asymmetricKey, NULL, 0);
+	  assert(STATUS_OK == status);
+	  epConfig.serverKey = asymmetricKey;
+
+//	  CryptoProvider *crypto = NULL;
+//	  crypto = CryptoProvider_Create(SecurityPolicy_Basic256_URI);
+//	  assert(NULL != crypto);
+
+	  static PKIProvider * pkiProvider;
+	  status = PKIProviderStack_Create(serverCertificate, NULL, &pkiProvider);
+	  assert(STATUS_OK == status);
+	  epConfig.pki = pkiProvider;
+  } else {
+	  epConfig.serverCertificate = NULL;
+	  epConfig.serverKey = NULL;
+	  epConfig.pki = NULL;
+  }
+
   epConfig.nbSecuConfigs = 1;
   epConfig.secuConfigurations = secuConfig;
 
