@@ -72,7 +72,7 @@ int main(void)
   if(STATUS_OK == status){
 	if (1) {
 		status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
-		                                           SecurityPolicy_Basic256_URI);
+  		                                       SecurityPolicy_Basic256Sha256_URI);
 		    secuConfig[0].securityModes = SECURITY_MODE_SIGN_MASK;
 	} else {
 		status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
@@ -95,12 +95,12 @@ int main(void)
 	  assert(STATUS_OK == status);
 	  epConfig.serverKey = asymmetricKey;
 
-//	  CryptoProvider *crypto = NULL;
-//	  crypto = CryptoProvider_Create(SecurityPolicy_Basic256_URI);
-//	  assert(NULL != crypto);
+          static Certificate * authCertificate;
+	  status = KeyManager_Certificate_CreateFromFile("./trusted/cacert.der", &authCertificate);
+	  assert(STATUS_OK == status);
 
 	  static PKIProvider * pkiProvider;
-	  status = PKIProviderStack_Create(serverCertificate, NULL, &pkiProvider);
+	  status = PKIProviderStack_Create(authCertificate, NULL, &pkiProvider);
 	  assert(STATUS_OK == status);
 	  epConfig.pki = pkiProvider;
   } else {
