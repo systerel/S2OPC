@@ -282,10 +282,11 @@ OPERATIONS
     END
     ;
 
-    sc <-- write_create_session_msg_crypto(p_msg, p_nonce, p_signature) =
+    sc <-- write_create_session_resp_msg_crypto(p_msg, p_nonce, p_signature) =
     PRE
         p_msg : t_msg_i &
         p_msg = c_msg_out &
+        a_msg_out_type = e_msg_session_create_resp &
         p_nonce : t_Nonce_i &
         p_nonce : t_Nonce &
         p_signature : t_SignatureData_i &
@@ -303,10 +304,42 @@ OPERATIONS
     PRE
         p_req_msg : t_msg_i &
         p_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_create_req &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx &
         p_nonce : t_Nonce_i &
         p_nonce : t_Nonce
+    THEN
+        skip
+    END
+    ;
+    
+    sc <-- write_activate_session_req_msg_crypto(activate_req_msg, signature) =
+    PRE
+        activate_req_msg : t_msg_i &
+        activate_req_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_req &
+        signature : t_SignatureData_i &
+        signature : t_SignatureData
+    THEN
+        sc :(
+            sc : t_StatusCode_i &
+            sc : t_StatusCode
+        )
+    END
+    ;
+    
+    
+    write_activate_session_resp_msg_crypto(activate_resp_msg, nonce) =
+    PRE
+        activate_resp_msg : t_msg_i &
+        activate_resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_session_activate_resp &
+        nonce : t_Nonce_i &
+        nonce : t_Nonce
     THEN
         skip
     END

@@ -21,7 +21,9 @@ MACHINE
 SEES
     constants,
     request_handle_bs,
-    channel_mgr_bs
+    channel_mgr_bs,
+    message_out_bs,
+    message_in_bs
 
 DEFINITIONS
     d_variables ==
@@ -301,8 +303,9 @@ OPERATIONS
         p_session : t_session_i &
         p_session : s_session &
         p_req_msg : t_msg_i &
-        /*p_req_msg = c_msg_out &
-        c_msg_out : t_msg &*/
+        p_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_req &
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx &
         p_channel_config_idx : t_channel_config_idx_i &
@@ -326,7 +329,35 @@ OPERATIONS
         )
     END
     ;
+    
+    valid, signature <-- client_activate_session_req_do_crypto(session, channel_config_idx, server_nonce) = 
+    PRE
+        session : t_session_i &
+        session : s_session &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        server_nonce : t_Nonce_i &
+        server_nonce : t_Nonce &
+        server_nonce = a_NonceServer(session)
+    THEN
+        valid,
+        signature,
+        a_NonceClient
+        :(
+            valid : BOOL &
+            signature : t_SignatureData_i &
 
+            (valid = TRUE
+             =>
+             signature : t_SignatureData)
+            &
+            (valid = FALSE
+             =>
+             signature = c_SignatureData_indet)
+        )
+    END
+    ;
+    
     nonce <-- get_NonceServer(p_session) =
     PRE
         p_session : t_session_i &
@@ -397,11 +428,41 @@ OPERATIONS
         p_session : dom(a_NonceClient) &
         p_channel_config_idx : t_channel_config_idx_i &
         p_channel_config_idx : t_channel_config_idx &
-        p_resp_msg : t_msg_i
-        /*p_resp_msg = c_msg_in &
-        c_msg_in : t_msg &*/
+        p_resp_msg : t_msg_i &
+        p_resp_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_create_resp
     THEN
         valid :: BOOL
+    END
+    ;
+    
+    valid <-- server_activate_session_check_crypto(session, channel, channel_config_idx, activate_req_msg) =
+    PRE
+        session : t_session_i &
+        session : s_session &
+        session : dom(a_NonceClient) &
+        channel : t_channel_i &
+        channel : s_channel_connected &
+        a_SecurityPolicy(channel) /= e_secpol_None &
+        channel_config_idx : t_channel_config_idx_i &
+        channel_config_idx : t_channel_config_idx &
+        activate_req_msg : t_msg_i &
+        activate_req_msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type = e_msg_session_activate_req
+    THEN
+        CHOICE
+            valid := TRUE ||
+            a_NonceServer
+            :(
+                a_NonceServer : s_session +-> t_Nonce &
+                {session} <<| a_NonceServer = {session} <<| a_NonceServer$0 &
+                a_NonceServer(session) : t_Nonce
+            )
+        OR
+            valid := FALSE
+        END
     END
 
 END
