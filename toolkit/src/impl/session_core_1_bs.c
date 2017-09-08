@@ -472,6 +472,101 @@ void session_core_1_bs__server_create_session_req_do_crypto(
 }
 
 
+void session_core_1_bs__client_activate_session_req_do_crypto(
+   const constants__t_session_i session_core_1_bs__session,
+   const constants__t_channel_config_idx_i session_core_1_bs__channel_config_idx,
+   const constants__t_Nonce_i session_core_1_bs__server_nonce,
+   t_bool * const session_core_1_bs__valid,
+   constants__t_SignatureData_i * const session_core_1_bs__signature){
+    CryptoProvider *pProvider = NULL;
+    SOPC_SecureChannel_Config *pSCCfg = NULL;
+    session *pSession = NULL;
+    SOPC_ByteString *serverNonce = NULL;
+    SOPC_ByteString serverCert;
+    SOPC_ByteString_Initialize(&serverCert);
+    OpcUa_SignatureData *pSign = NULL;
+    uint8_t *pToSign = NULL;
+    uint32_t lenToSign = 0;
+
+    *session_core_1_bs__valid = false;
+    *session_core_1_bs__signature = constants__c_SignatureData_indet;
+
+    /* Retrieve the security policy and mode */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) session_core_1_bs__channel_config_idx);
+    if(NULL == pSCCfg)
+        return;
+
+    /* If security policy is not None, generate the signature */
+    if(strncmp(pSCCfg->reqSecuPolicyUri, SecurityPolicy_None_URI, strlen(SecurityPolicy_None_URI)+1) != 0) /* Including the terminating \0 */
+    {
+        /* Retrieve ptr Signature */
+        if(session_core_1_bs__session != unique_session.id)
+            return;
+        pSession = &unique_session;
+        pSign = &pSession->SignatureData;
+
+        /* Create the CryptoProvider */
+        /* TODO: don't create it each time, maybe add it to the session */
+        pProvider = CryptoProvider_Create(pSCCfg->reqSecuPolicyUri);
+
+        /* Use the client certificate to sign the server certificate + server nonce */
+        serverNonce = session_core_1_bs__server_nonce;
+        /* a) Prepare the buffer to sign */
+        if(serverNonce->Length <= 0)
+          // client Nonce is not present
+          return;
+
+        if(pSCCfg->crt_srv != NULL){
+            uint32_t tmpLength;
+            SOPC_StatusCode status;
+            // retrieve expected sender certificate as a ByteString
+            status = KeyManager_Certificate_CopyDER(pSCCfg->crt_srv,
+                                                    &serverCert.Data,
+                                                    &tmpLength);
+            if(tmpLength > 0){
+               serverCert.Length = (int32_t) tmpLength;
+            }else{
+              return;
+            }
+            if(STATUS_OK != status){
+              return;
+            }
+        }
+
+        lenToSign = serverCert.Length + serverNonce->Length;
+        pToSign = malloc(sizeof(uint8_t)*lenToSign);
+        if(NULL == pToSign)
+            return;
+        memcpy(pToSign, serverCert.Data, serverCert.Length);
+        memcpy(pToSign+serverCert.Length, serverNonce->Data, serverNonce->Length);
+        /* b) Sign and store the signature in pSign */
+        SOPC_ByteString_Clear(&pSign->Signature);
+        if(STATUS_OK != CryptoProvider_AsymmetricGetLength_Signature(pProvider, pSCCfg->key_priv_cli, (uint32_t *)&pSign->Signature.Length))
+            return;
+        pSign->Signature.Data = malloc(sizeof(SOPC_Byte)*pSign->Signature.Length); /* TODO: This should not be stored in unique session ? */
+        if(NULL == pSign->Signature.Data)
+            return;
+        if(STATUS_OK != CryptoProvider_AsymmetricSign(pProvider,
+                                                      pToSign, lenToSign,
+                                                      pSCCfg->key_priv_cli,
+                                                      pSign->Signature.Data, pSign->Signature.Length))
+            return;
+        /* c) Prepare the OpcUa_SignatureData */
+        SOPC_String_Clear(&pSign->Algorithm);
+        if(STATUS_OK != SOPC_String_CopyFromCString(&pSign->Algorithm, CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider)))
+            return;
+        *session_core_1_bs__signature = pSign;
+
+        /* Clean */
+        /* TODO: with the many previous returns, you do not always free it */
+        CryptoProvider_Free(pProvider);
+        pProvider = NULL;
+    }
+
+    *session_core_1_bs__valid = true; 
+}
+
+
 void session_core_1_bs__get_NonceServer(
    const constants__t_session_i session_core_1_bs__p_session,
    constants__t_Nonce_i * const session_core_1_bs__nonce)

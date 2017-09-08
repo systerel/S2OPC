@@ -308,7 +308,7 @@ void message_out_bs__write_create_session_msg_server_endpoints(
 }
 
 
-void message_out_bs__write_create_session_msg_crypto(
+void message_out_bs__write_create_session_resp_msg_crypto(
    const constants__t_msg_i message_out_bs__p_msg,
    const constants__t_Nonce_i message_out_bs__p_nonce,
    const constants__t_SignatureData_i message_out_bs__p_signature,
