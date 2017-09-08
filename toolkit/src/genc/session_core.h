@@ -2,7 +2,7 @@
 
  File Name            : session_core.h
 
- Date                 : 27/09/2017 15:30:49
+ Date                 : 28/09/2017 17:24:15
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -56,7 +56,9 @@ extern void session_core__server_internal_activate_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    const constants__t_user_i session_core__user,
-   const constants__t_msg_i session_core__activate_resp_msg);
+   const constants__t_msg_i session_core__activate_req_msg,
+   const constants__t_msg_i session_core__activate_resp_msg,
+   t_bool * const session_core__res_activated);
 
 /*--------------------
    OPERATIONS Clause

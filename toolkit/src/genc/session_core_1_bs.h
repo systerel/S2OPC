@@ -2,7 +2,7 @@
 
  File Name            : session_core_1_bs.h
 
- Date                 : 27/09/2017 15:30:53
+ Date                 : 28/09/2017 17:24:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -21,6 +21,8 @@
   --------------*/
 #include "channel_mgr_bs.h"
 #include "constants.h"
+#include "message_in_bs.h"
+#include "message_out_bs.h"
 #include "request_handle_bs.h"
 
 /*------------------------
@@ -31,6 +33,12 @@ extern void session_core_1_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void session_core_1_bs__client_activate_session_req_do_crypto(
+   const constants__t_session_i session_core_1_bs__session,
+   const constants__t_channel_config_idx_i session_core_1_bs__channel_config_idx,
+   const constants__t_Nonce_i session_core_1_bs__server_nonce,
+   t_bool * const session_core_1_bs__valid,
+   constants__t_SignatureData_i * const session_core_1_bs__signature);
 extern void session_core_1_bs__client_create_session_check_crypto(
    const constants__t_session_i session_core_1_bs__p_session,
    const constants__t_channel_config_idx_i session_core_1_bs__p_channel_config_idx,
@@ -81,6 +89,12 @@ extern void session_core_1_bs__is_valid_session(
 extern void session_core_1_bs__is_valid_user(
    const constants__t_user_i session_core_1_bs__user,
    t_bool * const session_core_1_bs__ret);
+extern void session_core_1_bs__server_activate_session_check_crypto(
+   const constants__t_session_i session_core_1_bs__session,
+   const constants__t_channel_i session_core_1_bs__channel,
+   const constants__t_channel_config_idx_i session_core_1_bs__channel_config_idx,
+   const constants__t_msg_i session_core_1_bs__activate_req_msg,
+   t_bool * const session_core_1_bs__valid);
 extern void session_core_1_bs__server_create_session_req_do_crypto(
    const constants__t_session_i session_core_1_bs__p_session,
    const constants__t_msg_i session_core_1_bs__p_req_msg,
