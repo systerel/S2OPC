@@ -174,6 +174,9 @@ void session_core_1_bs__init_new_session(
     unique_session_init = true;
     unique_session.cli_activated_session = false;
     unique_session.session_core_1_bs__state = constants__e_session_init;
+    SOPC_ByteString_Initialize(&unique_session.NonceServer);
+    SOPC_ByteString_Initialize(&unique_session.NonceClient);
+    OpcUa_SignatureData_Initialize(&unique_session.SignatureData);
   }else{
     *session_core_1_bs__session = constants__c_session_indet;
   }
@@ -432,6 +435,9 @@ void session_core_1_bs__server_create_session_req_do_crypto(
 
         /* Use the server certificate to sign the client certificate ++ client nonce */
         /* a) Prepare the buffer to sign */
+        if(pReq->ClientNonce.Length <= 0)
+          // client Nonce is not present
+          return;
         lenToSign = pReq->ClientCertificate.Length + pReq->ClientNonce.Length;
         pToSign = malloc(sizeof(uint8_t)*lenToSign);
         if(NULL == pToSign)
@@ -451,13 +457,13 @@ void session_core_1_bs__server_create_session_req_do_crypto(
                                                       pSign->Signature.Data, pSign->Signature.Length))
             return;
         /* c) Prepare the OpcUa_SignatureData */
-        SOPC_String_Delete(&pSign->Algorithm);
+        SOPC_String_Clear(&pSign->Algorithm);
         if(STATUS_OK != SOPC_String_CopyFromCString(&pSign->Algorithm, CryptoProvider_AsymmetricGetUri_SignAlgorithm(pProvider)))
             return;
+        *session_core_1_bs__signature = pSign;
 
         /* Clean */
         /* TODO: with the many previous returns, you do not always free it */
-        free(pToSign);
         CryptoProvider_Free(pProvider);
         pProvider = NULL;
     }
@@ -536,7 +542,7 @@ void session_core_1_bs__get_NonceClient(
    const constants__t_session_i session_core_1_bs__p_session,
    constants__t_Nonce_i * const session_core_1_bs__nonce)
 {
-    *session_core_1_bs__nonce = (constants__t_Nonce_i *)(&unique_session.NonceServer);
+    *session_core_1_bs__nonce = (constants__t_Nonce_i *)(&unique_session.NonceClient);
 }
 
 
