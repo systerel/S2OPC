@@ -706,6 +706,8 @@ END_TEST
 static AsymmetricKey *key_pub = NULL, *key_priv = NULL;
 
 // Certificates: these are not the same cert as in setup_certificate. This one was created to also embed the private key in the tests.
+// This key is 1024 bits long, which is the smallest possible.
+// Note: The signature of the key expires on 05/03/2017, which is not a problem, as the key usage is to test asymmetric cryptographic primitives
 #define DER_ASYM_PUB_HEXA "30820286308201efa003020102020900c4d03aaaf2bbde98300d06092a864886f70d01010b0500305c310b3009060355040613024652310f300d06035504080c"\
                           "064672616e6365310c300a06035504070c034169783111300f060355040a0c08537973746572656c311b301906035504030c12494e474f504353205465737420"\
                           "7375697465301e170d3136313132353137353033385a170d3137303330353137353033385a305c310b3009060355040613024652310f300d06035504080c0646"\
