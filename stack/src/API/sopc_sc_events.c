@@ -21,6 +21,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+
 #include "sopc_base_types.h"
 #include "sopc_sc_events.h"
 #include "singly_linked_list.h"
@@ -158,7 +160,7 @@ struct SOPC_ServiceType SOPC_Toolkit_Write_ServiceType =
     NULL
 };
 
-/* Write service provided to the Stack */
+/* GetEndpoints service provided to the Stack */
 struct SOPC_ServiceType SOPC_Toolkit_GetEndpoints_ServiceType =
 {
     OpcUaId_GetEndpointsRequest,
@@ -166,6 +168,16 @@ struct SOPC_ServiceType SOPC_Toolkit_GetEndpoints_ServiceType =
     TMP_BeginService,
     NULL
 };
+
+/* Browse service provided to the Stack */
+struct SOPC_ServiceType SOPC_Toolkit_Browse_ServiceType =
+{
+    OpcUaId_BrowseRequest,
+    &OpcUa_BrowseResponse_EncodeableType,
+    TMP_BeginService,
+    NULL
+};
+
 
 /* List of services provided to the Stack */
 SOPC_ServiceType* SOPC_Toolkit_SupportedServiceTypes[] =
@@ -176,6 +188,7 @@ SOPC_ServiceType* SOPC_Toolkit_SupportedServiceTypes[] =
     &SOPC_Toolkit_Read_ServiceType,
     &SOPC_Toolkit_Write_ServiceType,
     &SOPC_Toolkit_GetEndpoints_ServiceType,
+    &SOPC_Toolkit_Browse_ServiceType,
     NULL
 };
 
@@ -240,6 +253,8 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
                                              "Secure channel disconnected from Endpoint");
         break;
     case SOPC_EndpointEvent_UnsupportedServiceRequested:
+      printf("Unsuported service requested !!!\n");
+      break;
     default:
         assert(FALSE);
     }
