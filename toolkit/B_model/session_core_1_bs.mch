@@ -433,7 +433,17 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type = e_msg_session_create_resp
     THEN
-        valid :: BOOL
+        CHOICE
+            valid := TRUE ||
+            a_NonceServer
+            :(
+                a_NonceServer : s_session +-> t_Nonce &
+                {p_session} <<| a_NonceServer = {p_session} <<| a_NonceServer$0 &
+                a_NonceServer(p_session) : t_Nonce
+            )
+        OR
+            valid := FALSE
+        END
     END
     ;
     
