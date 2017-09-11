@@ -87,6 +87,15 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
     *reqEncType = &OpcUa_GetEndpointsRequest_EncodeableType;
     *respEncType = &OpcUa_GetEndpointsResponse_EncodeableType;
     break;
+  case constants__e_msg_session_browse_req:
+    *reqEncType = &OpcUa_BrowseRequest_EncodeableType;
+    *respEncType = &OpcUa_BrowseResponse_EncodeableType;
+    *isRequest = true;
+    break;
+  case constants__e_msg_session_browse_resp:
+    *reqEncType = &OpcUa_BrowseRequest_EncodeableType;
+    *respEncType = &OpcUa_BrowseResponse_EncodeableType;
+    break;
   default:
     printf("util_message__get_encodeable_type: not implemented message type required\n");
     exit(1);   
@@ -121,11 +130,16 @@ void util_message__get_message_type(SOPC_EncodeableType* encType,
     *message__msg_type = constants__e_msg_get_endpoints_service_req;
   }else if(encType == &OpcUa_GetEndpointsResponse_EncodeableType){
     *message__msg_type = constants__e_msg_get_endpoints_service_resp;
+  }else if(encType == &OpcUa_BrowseRequest_EncodeableType){
+    *message__msg_type = constants__e_msg_session_browse_req;
+  }else if(encType == &OpcUa_BrowseResponse_EncodeableType){
+    *message__msg_type = constants__e_msg_session_browse_resp;
   }else if(encType == &OpcUa_ServiceFault_EncodeableType){
     *message__msg_type = constants__e_msg_service_fault_resp;
   }else{
     printf("util_message__get_message_type\n");
     exit(1);
+
   }
 }
 

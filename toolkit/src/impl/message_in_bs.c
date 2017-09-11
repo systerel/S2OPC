@@ -164,6 +164,8 @@ void message_in_bs__is_valid_msg_in_type(
    case constants__e_msg_session_write_req:
    case constants__e_msg_session_write_resp:
    case constants__e_msg_service_fault_resp:
+   case constants__e_msg_session_browse_req:
+   case constants__e_msg_session_browse_resp:
      break;
    default: 
      *message_in_bs__bres = false;
