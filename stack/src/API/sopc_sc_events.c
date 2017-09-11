@@ -30,6 +30,7 @@
 #include "sopc_secure_channel_client_connection.h"
 #include "opcua_identifiers.h"
 #include "sopc_encodeable.h"
+#include "sopc_secure_channel_server_endpoint.h"
 
 static SOPC_EventDispatcherManager* tmpToolkitMgr = NULL;
 
@@ -222,6 +223,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
         assert(NULL != scConConfig);
         scConConfig->config = malloc(sizeof(SOPC_SecureChannel_Config));
         scConConfig->config->crt_cli = clientCertificate;
+        scConConfig->config->crt_srv = ((SC_ServerEndpoint*)endpoint)->serverCertificate;
         scConConfig->config->msgSecurityMode = securityMode;
         scConConfig->config->reqSecuPolicyUri = SOPC_String_GetCString(securityPolicy);
         scConConfig->connectionId = *epConfigIdx; // TMP: For now we just use the EP config index, but we shall provide the SC connection id corresponding to socket id ...
