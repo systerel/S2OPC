@@ -67,14 +67,20 @@ int main(void)
   uint32_t loopCpt = 0;
 
   // Secu policy configuration: empty
-  SOPC_SecurityPolicy secuConfig[1];
+  SOPC_SecurityPolicy secuConfig[2];
   SOPC_String_Initialize(&secuConfig[0].securityPolicy);
+  SOPC_String_Initialize(&secuConfig[1].securityPolicy);
 
   if(STATUS_OK == status){
 	if (secuActive) {
 		status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
 				SecurityPolicy_Basic256_URI);
 		    secuConfig[0].securityModes = SECURITY_MODE_SIGN_MASK;
+                    if(STATUS_OK == status){
+		        status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy,
+		        		SecurityPolicy_Basic256Sha256_URI);
+		        secuConfig[1].securityModes = SECURITY_MODE_SIGNANDENCRYPT_MASK;                      
+                    }
 	} else {
 		status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
 		                                           "http://opcfoundation.org/UA/SecurityPolicy#None");
@@ -110,7 +116,11 @@ int main(void)
 	  epConfig.pki = NULL;
   }
 
-  epConfig.nbSecuConfigs = 1;
+  if(secuActive){
+    epConfig.nbSecuConfigs = 2; 
+  }else{
+    epConfig.nbSecuConfigs = 1;
+  }
   epConfig.secuConfigurations = secuConfig;
 
   // Init stack configuration
@@ -199,6 +209,9 @@ int main(void)
   }else{
     printf("<Test_Server_Toolkit final result: NOK with status = '%X'\n", status);
   }
+
+  SOPC_String_Clear(&secuConfig[0].securityPolicy);
+  SOPC_String_Clear(&secuConfig[1].securityPolicy);
 
   return status;
 }
