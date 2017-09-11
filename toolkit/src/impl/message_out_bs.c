@@ -336,6 +336,41 @@ void message_out_bs__write_create_session_resp_msg_crypto(
 }
 
 
+void message_out_bs__write_activate_session_req_msg_crypto(
+   const constants__t_msg_i message_out_bs__activate_req_msg,
+   const constants__t_SignatureData_i message_out_bs__signature,
+   constants__t_StatusCode_i * const message_out_bs__sc)
+
+{
+    SOPC_StatusCode sc = STATUS_NOK;
+    OpcUa_ActivateSessionRequest *pReq = (OpcUa_ActivateSessionRequest *) message_out_bs__activate_req_msg;
+    OpcUa_SignatureData *pSig = (OpcUa_SignatureData *)message_out_bs__signature;
+
+    /* Copy Signature, which is not a built-in, so copy its fields */
+    /* TODO: should borrow a reference instead of copy */
+    sc = SOPC_String_Copy(&pReq->ClientSignature.Algorithm, &pSig->Algorithm);
+    
+    if(STATUS_OK == sc)
+        sc = SOPC_ByteString_Copy(&pReq->ClientSignature.Signature, &pSig->Signature);
+
+    if(STATUS_OK == sc)
+        *message_out_bs__sc = constants__e_sc_ok;
+    else
+        *message_out_bs__sc = constants__e_sc_nok;    
+}
+
+void message_out_bs__write_activate_session_resp_msg_crypto(
+   const constants__t_msg_i message_out_bs__activate_resp_msg,
+   const constants__t_Nonce_i message_out_bs__nonce)
+{
+    OpcUa_ActivateSessionResponse *pResp = (OpcUa_ActivateSessionResponse *)message_out_bs__activate_resp_msg;
+
+    /* Write the nonce */
+    /* TODO: this can also fail because of the malloc */
+    if(STATUS_OK != SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString *)message_out_bs__nonce))
+        return;
+}
+
 void message_out_bs__write_msg_out_header_req_handle(
    const constants__t_msg_header_i message_out_bs__msg_header,
    const constants__t_request_handle_i message_out_bs__req_handle) {
