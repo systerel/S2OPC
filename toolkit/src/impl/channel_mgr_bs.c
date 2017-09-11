@@ -275,10 +275,8 @@ void channel_mgr_bs__get_SecurityPolicy(
 {
     SOPC_SecureChannel_Config *pSCCfg = NULL;
 
-    /* TODO: exit is not a solution. Can this really fail? */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(unique_channel.configIdx);
-    if(NULL == pSCCfg)
-        exit(1);
+    assert(pSCCfg != NULL);
 
     /* TODO: The following assert is asserted by the PRE of the operation */
     assert(channel_mgr_bs__channel == (t_entier4) unique_channel.id);
