@@ -107,7 +107,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
                                                         (constants__t_user_i) auxParam,
                                                         &sCode);
     if(sCode != constants__e_sc_ok){
-      status = STATUS_NOK;
+      // TODO: log error
     }
     break;
   case SE_TO_SE_CREATE_SESSION:
@@ -174,7 +174,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
                                                  auxParam,
                                                  &bres);
     if(bres == false){
-      status = STATUS_NOK;
+      // TODO: log
     }
     break;
   case APP_TO_SE_SEND_SESSION_REQUEST:
