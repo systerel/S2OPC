@@ -41,6 +41,7 @@
 #include "pki_stack.h"
 
 static int endpointClosed = FALSE;
+static bool secuActive = !FALSE;
 
 void Test_ComEvent_Fct(SOPC_App_Com_Event event,
                          void*              param,
@@ -70,7 +71,7 @@ int main(void)
   SOPC_String_Initialize(&secuConfig[0].securityPolicy);
 
   if(STATUS_OK == status){
-	if (1) {
+	if (secuActive) {
 		status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
   		                                       SecurityPolicy_Basic256Sha256_URI);
 		    secuConfig[0].securityModes = SECURITY_MODE_SIGN_MASK;
@@ -84,7 +85,7 @@ int main(void)
 
   // Init unique endpoint structure
   epConfig.endpointURL = ENDPOINT_URL;
-  if (1) {
+  if (secuActive) {
 	  static Certificate * serverCertificate;
 	  status = KeyManager_Certificate_CreateFromFile("./server_public/server.der", &serverCertificate);
 	  assert(STATUS_OK == status);
