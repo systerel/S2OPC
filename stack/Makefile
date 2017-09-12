@@ -178,6 +178,7 @@ config_stubs: config
 	 $(EXEC_DIR)/client_public $(EXEC_DIR)/server_public
 	@"cp" $(CERT_DIR)/cacert.der $(EXEC_DIR)/trusted
 	@"cp" $(CERT_DIR)/client.key $(EXEC_DIR)/client_private
+	@"cp" $(CERT_DIR)/client.key $(EXEC_DIR)/client_private/client.pem
 	@"cp" $(CERT_DIR)/client.der $(EXEC_DIR)/client_public
 	@"cp" $(CERT_DIR)/server.key $(EXEC_DIR)/server_private
 	@"cp" $(CERT_DIR)/server.der $(EXEC_DIR)/server_public
