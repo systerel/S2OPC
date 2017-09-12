@@ -25,6 +25,7 @@
 #include <stdlib.h>
 
 #include "msg_read_response_bs.h"
+#include "util_b2c.h"
 
 #include "sopc_types.h"
 
@@ -84,5 +85,5 @@ void msg_read_response_bs__set_read_response(
         SOPC_Variant_InitializeAux((void *)&msg_read_resp->Results[msg_read_response_bs__rvi-1].Value);
 
     /* TODO: Make a util__ that converts the status */
-    msg_read_resp->Results[msg_read_response_bs__rvi-1].Status = msg_read_response_bs__sc;
+    util_status_code__B_to_C(msg_read_response_bs__sc, &msg_read_resp->Results[msg_read_response_bs__rvi-1].Status);
 }

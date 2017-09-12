@@ -191,6 +191,15 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus,
   case constants__e_sc_bad_too_many_ops:
     *status = OpcUa_BadTooManyOperations;
     break;
+  case constants__e_sc_bad_node_id_unknown:
+    *status = OpcUa_BadNodeIdUnknown;
+    break;
+  case constants__e_sc_bad_node_id_invalid:
+    *status = OpcUa_BadNodeIdInvalid;
+    break;
+  case constants__e_sc_bad_attribute_id_invalid:
+    *status = OpcUa_BadAttributeIdInvalid;
+    break;
   default:
     printf("util_message__B_to_C_status_code\n");
     exit(1);
@@ -245,6 +254,15 @@ t_bool util_status_code__C_to_B(SOPC_StatusCode status,
     break;
   case OpcUa_BadTooManyOperations:
     *bstatus = constants__e_sc_bad_too_many_ops;
+    break;
+  case OpcUa_BadNodeIdUnknown:
+    *bstatus = constants__e_sc_bad_node_id_unknown;
+    break;
+  case OpcUa_BadNodeIdInvalid:
+    *bstatus = constants__e_sc_bad_node_id_invalid;
+    break;
+  case OpcUa_BadAttributeIdInvalid:
+    *bstatus = constants__e_sc_bad_attribute_id_invalid;
     break;
   default:
     success = false;
