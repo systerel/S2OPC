@@ -2,7 +2,7 @@
 
  File Name            : message_out_bs.h
 
- Date                 : 28/09/2017 17:28:31
+ Date                 : 28/09/2017 17:30:55
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -93,6 +93,7 @@ extern void message_out_bs__write_create_session_req_msg_endpointUrl(
    const constants__t_channel_config_idx_i message_out_bs__channel_config_idx);
 extern void message_out_bs__write_create_session_resp_msg_crypto(
    const constants__t_msg_i message_out_bs__p_msg,
+   const constants__t_channel_config_idx_i message_out_bs__p_channel_config_idx,
    const constants__t_Nonce_i message_out_bs__p_nonce,
    const constants__t_SignatureData_i message_out_bs__p_signature,
    constants__t_StatusCode_i * const message_out_bs__sc);

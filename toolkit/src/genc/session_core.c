@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 28/09/2017 17:28:29
+ Date                 : 28/09/2017 17:30:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -158,6 +158,7 @@ void session_core__server_create_session_req_and_resp_sm(
                      session_core_1_bs__get_NonceServer(session_core__l_nsession,
                         &session_core__l_nonce);
                      message_out_bs__write_create_session_resp_msg_crypto(session_core__create_resp_msg,
+                        session_core__l_config_idx,
                         session_core__l_nonce,
                         session_core__l_signature,
                         session_core__service_ret);
