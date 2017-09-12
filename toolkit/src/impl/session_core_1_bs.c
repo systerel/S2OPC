@@ -167,6 +167,7 @@ void session_core_1_bs__delete_session(
 }
 
 void session_core_1_bs__init_new_session(
+   const t_bool session_core_1_bs__is_client,
    constants__t_session_i * const session_core_1_bs__session){
   if(false == unique_session_init){
     unique_session.id = 1;
@@ -178,7 +179,16 @@ void session_core_1_bs__init_new_session(
     SOPC_ByteString_Initialize(&unique_session.NonceClient);
     OpcUa_SignatureData_Initialize(&unique_session.SignatureData);
   }else{
-    *session_core_1_bs__session = constants__c_session_indet;
+    // Close any existing session in singleton
+    unique_session_created = false;
+    session_core_1_bs__set_session_state_closed((constants__t_session_i) unique_session.id, session_core_1_bs__is_client);
+    unique_session.id += 1;
+    *session_core_1_bs__session = unique_session.id;
+    unique_session.cli_activated_session = false;
+    unique_session.session_core_1_bs__state = constants__e_session_init;
+    SOPC_ByteString_Initialize(&unique_session.NonceServer);
+    SOPC_ByteString_Initialize(&unique_session.NonceClient);
+    OpcUa_SignatureData_Initialize(&unique_session.SignatureData);
   }
 }
 
