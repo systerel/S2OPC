@@ -87,7 +87,9 @@ OPERATIONS
            p_nid,
            p_aid
            :(p_nid : t_NodeId_i                   &
+             p_nid : t_NodeId                     &
              p_aid : t_AttributeId_i              &
+             p_aid : t_AttributeId                &
              p_nid = ReadValue_NodeId(p_rvi)      &
              p_aid = ReadValue_AttributeId(p_rvi)
             )

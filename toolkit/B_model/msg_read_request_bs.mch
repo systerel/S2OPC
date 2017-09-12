@@ -64,6 +64,7 @@ OPERATIONS
         IF  rvi : dom(ReadValue_NodeId) THEN
             isvalid := TRUE ||
             nid :(nid : t_NodeId_i &
+                  nid : t_NodeId &
                   nid = ReadValue_NodeId(rvi))
         ELSE
             isvalid := FALSE ||

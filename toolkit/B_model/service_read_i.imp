@@ -46,9 +46,7 @@ LOCAL_OPERATIONS
         p_resp_msg : t_msg_i         &
         p_isvalid  : BOOL            &
         p_nid      : t_NodeId_i      &
-        p_nid      : t_NodeId        &
         p_aid      : t_AttributeId_i &
-        p_aid      : t_AttributeId   &
         p_rvi      : t_ReadValue_i
     THEN
         data_Value_Value,
@@ -88,7 +86,8 @@ OPERATIONS
         l_value,
         l_sc
     IN
-        IF  p_isvalid = TRUE THEN
+        IF  p_isvalid = TRUE & p_aid /= c_AttributeId_indet
+        THEN
             l_is_valid, l_node <-- readall_AddressSpace_Node(p_nid);
             IF l_is_valid = TRUE THEN
                 l_ncl, l_value <-- read_NodeClass_Attribute(l_node, p_aid);
@@ -102,10 +101,17 @@ OPERATIONS
                 set_read_response(p_resp_msg, p_rvi, l_value, l_sc);
                 read_AddressSpace_free_value(l_value)
             ELSE
-                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_nok)
+                /* Invalid at this level means the node Id is unknown:
+                   node Id cannot be invalid in case p_is_valid = TRUE */
+                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_node_id_unknown)
             END
         ELSE
-            set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_nok)
+            IF p_nid = c_NodeId_indet THEN
+                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_node_id_invalid)
+            ELSE
+                /* It shall be p_aid = c_AttributeId_indet case */
+                set_read_response(p_resp_msg, p_rvi, c_Variant_indet, e_sc_bad_attribute_id_invalid)
+            END
         END
     END
     ;
