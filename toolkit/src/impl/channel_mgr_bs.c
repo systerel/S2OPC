@@ -146,6 +146,7 @@ void channel_mgr_bs__channel_lost(
      (uint32_t) channel_mgr_bs__channel == unique_channel.id){
     unique_channel.id = constants__c_channel_indet;
     unique_channel.configIdx = constants__c_channel_config_idx_indet;
+    unique_channel.endpointIdx = constants__c_endpoint_config_idx_indet;
     if(unique_channel.disconnecting != false){
       unique_channel.disconnecting = false;
       SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
