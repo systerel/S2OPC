@@ -96,6 +96,16 @@ void util_message__get_encodeable_type(const constants__t_msg_type_i message__ms
     *reqEncType = &OpcUa_BrowseRequest_EncodeableType;
     *respEncType = &OpcUa_BrowseResponse_EncodeableType;
     break;
+  case constants__e_msg_session_create_subscription_req:
+    *reqEncType = &OpcUa_CreateSubscriptionRequest_EncodeableType;
+    *respEncType = &OpcUa_CreateSubscriptionResponse_EncodeableType;
+    *isRequest = true;
+    break;
+  case constants__e_msg_session_create_subscription_resp:
+    *reqEncType = &OpcUa_CreateSubscriptionRequest_EncodeableType;
+    *respEncType = &OpcUa_CreateSubscriptionResponse_EncodeableType;
+    break;
+
   default:
     printf("util_message__get_encodeable_type: not implemented message type required\n");
     exit(1);   
@@ -134,6 +144,10 @@ void util_message__get_message_type(SOPC_EncodeableType* encType,
     *message__msg_type = constants__e_msg_session_browse_req;
   }else if(encType == &OpcUa_BrowseResponse_EncodeableType){
     *message__msg_type = constants__e_msg_session_browse_resp;
+  }else if(encType == &OpcUa_CreateSubscriptionRequest_EncodeableType){
+    *message__msg_type = constants__e_msg_session_create_subscription_req;
+  }else if(encType == &OpcUa_CreateSubscriptionResponse_EncodeableType){
+    *message__msg_type = constants__e_msg_session_create_subscription_resp;
   }else if(encType == &OpcUa_ServiceFault_EncodeableType){
     *message__msg_type = constants__e_msg_service_fault_resp;
   }else{

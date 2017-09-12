@@ -149,27 +149,7 @@ void message_in_bs__is_valid_msg_in_header(
 void message_in_bs__is_valid_msg_in_type(
    const constants__t_msg_type_i message_in_bs__msg_typ,
    t_bool * const message_in_bs__bres){
-  *message_in_bs__bres = true;
-  switch(message_in_bs__msg_typ){
-   case constants__e_msg_get_endpoints_service_req:
-   case constants__e_msg_get_endpoints_service_resp:
-   case constants__e_msg_session_create_req:
-   case constants__e_msg_session_create_resp:
-   case constants__e_msg_session_activate_req:
-   case constants__e_msg_session_activate_resp:
-   case constants__e_msg_session_close_req:
-   case constants__e_msg_session_close_resp:
-   case constants__e_msg_session_read_req:
-   case constants__e_msg_session_read_resp:
-   case constants__e_msg_session_write_req:
-   case constants__e_msg_session_write_resp:
-   case constants__e_msg_service_fault_resp:
-   case constants__e_msg_session_browse_req:
-   case constants__e_msg_session_browse_resp:
-     break;
-   default: 
-     *message_in_bs__bres = false;
-   }
+  *message_in_bs__bres = message_in_bs__msg_typ != constants__c_msg_type_indet;
 }
 
 void message_in_bs__is_valid_request_context(

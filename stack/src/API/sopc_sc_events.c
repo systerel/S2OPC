@@ -179,6 +179,14 @@ struct SOPC_ServiceType SOPC_Toolkit_Browse_ServiceType =
     NULL
 };
 
+/* CreateSubscription service provided to the Stack */
+struct SOPC_ServiceType SOPC_Toolkit_CreateSubscription_ServiceType =
+{
+    OpcUaId_CreateSubscriptionRequest,
+    &OpcUa_CreateSubscriptionResponse_EncodeableType,
+    TMP_BeginService,
+    NULL
+};
 
 /* List of services provided to the Stack */
 SOPC_ServiceType* SOPC_Toolkit_SupportedServiceTypes[] =
@@ -190,6 +198,7 @@ SOPC_ServiceType* SOPC_Toolkit_SupportedServiceTypes[] =
     &SOPC_Toolkit_Write_ServiceType,
     &SOPC_Toolkit_GetEndpoints_ServiceType,
     &SOPC_Toolkit_Browse_ServiceType,
+    &SOPC_Toolkit_CreateSubscription_ServiceType,
     NULL
 };
 
