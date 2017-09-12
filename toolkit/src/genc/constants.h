@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 28/09/2017 17:30:51
+ Date                 : 28/09/2017 17:38:55
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -101,7 +101,10 @@ typedef enum {
    constants__e_sc_bad_unexpected_error,
    constants__e_sc_bad_out_of_memory,
    constants__e_sc_bad_nothing_to_do,
-   constants__e_sc_bad_too_many_ops
+   constants__e_sc_bad_too_many_ops,
+   constants__e_sc_bad_node_id_unknown,
+   constants__e_sc_bad_node_id_invalid,
+   constants__e_sc_bad_attribute_id_invalid
 } constants__t_StatusCode_i;
 typedef enum {
    constants__c_buffer_in_state_indet,

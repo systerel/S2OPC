@@ -2,7 +2,7 @@
 
  File Name            : service_read.c
 
- Date                 : 28/09/2017 17:30:53
+ Date                 : 28/09/2017 17:38:57
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -35,7 +35,8 @@ void service_read__fill_read_response_1(
       constants__t_Variant_i service_read__l_value;
       constants__t_StatusCode_i service_read__l_sc;
       
-      if (service_read__p_isvalid == true) {
+      if ((service_read__p_isvalid == true) &&
+         (service_read__p_aid != constants__c_AttributeId_indet)) {
          address_space__readall_AddressSpace_Node(service_read__p_nid,
             &service_read__l_is_valid,
             &service_read__l_node);
@@ -62,14 +63,22 @@ void service_read__fill_read_response_1(
             msg_read_response_bs__set_read_response(service_read__p_resp_msg,
                service_read__p_rvi,
                constants__c_Variant_indet,
-               constants__e_sc_nok);
+               constants__e_sc_bad_node_id_unknown);
          }
       }
       else {
-         msg_read_response_bs__set_read_response(service_read__p_resp_msg,
-            service_read__p_rvi,
-            constants__c_Variant_indet,
-            constants__e_sc_nok);
+         if (service_read__p_nid == constants__c_NodeId_indet) {
+            msg_read_response_bs__set_read_response(service_read__p_resp_msg,
+               service_read__p_rvi,
+               constants__c_Variant_indet,
+               constants__e_sc_bad_node_id_invalid);
+         }
+         else {
+            msg_read_response_bs__set_read_response(service_read__p_resp_msg,
+               service_read__p_rvi,
+               constants__c_Variant_indet,
+               constants__e_sc_bad_attribute_id_invalid);
+         }
       }
    }
 }
