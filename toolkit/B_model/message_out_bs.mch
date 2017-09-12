@@ -282,11 +282,13 @@ OPERATIONS
     END
     ;
 
-    sc <-- write_create_session_resp_msg_crypto(p_msg, p_nonce, p_signature) =
+    sc <-- write_create_session_resp_msg_crypto(p_msg, p_channel_config_idx, p_nonce, p_signature) =
     PRE
         p_msg : t_msg_i &
         p_msg = c_msg_out &
         a_msg_out_type = e_msg_session_create_resp &
+        p_channel_config_idx : t_channel_config_idx_i &
+        p_channel_config_idx : t_channel_config_idx &
         p_nonce : t_Nonce_i &
         p_nonce : t_Nonce &
         p_signature : t_SignatureData_i &

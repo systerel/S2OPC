@@ -310,17 +310,39 @@ void message_out_bs__write_create_session_msg_server_endpoints(
 
 void message_out_bs__write_create_session_resp_msg_crypto(
    const constants__t_msg_i message_out_bs__p_msg,
+   const constants__t_channel_config_idx_i message_out_bs__p_channel_config_idx,
    const constants__t_Nonce_i message_out_bs__p_nonce,
    const constants__t_SignatureData_i message_out_bs__p_signature,
    constants__t_StatusCode_i * const message_out_bs__sc)
 {
-    SOPC_StatusCode sc = STATUS_NOK;
+    SOPC_SecureChannel_Config *pSCCfg = NULL;
+    const Certificate *pCrtSrv = NULL;
+    SOPC_StatusCode sc = STATUS_OK;
     OpcUa_CreateSessionResponse *pResp = (OpcUa_CreateSessionResponse *) message_out_bs__p_msg;
     OpcUa_SignatureData *pSig = (OpcUa_SignatureData *)message_out_bs__p_signature;
 
+    /* Retrieve the certificate */
+    pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig((uint32_t) message_out_bs__p_channel_config_idx);
+    if(NULL == pSCCfg)
+        sc = STATUS_NOK;
+    if(STATUS_OK == sc) {
+        pCrtSrv = pSCCfg->crt_srv;
+        if(NULL == pCrtSrv)
+            sc = STATUS_NOK;
+    }
+
+    /* Write the Certificate */
+    if(STATUS_OK == sc) {
+        SOPC_ByteString_Clear(&pResp->ServerCertificate);
+        /* TODO: this is a malloc error, this can fail, and the B model should be notified */
+        sc = KeyManager_Certificate_CopyDER(pCrtSrv, &pResp->ServerCertificate.Data,
+                                            (uint32_t *)&pResp->ServerCertificate.Length);
+    }
+
     /* Copy Nonce */
     /* TODO: should borrow a reference instead of copy */
-    sc = SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString *)message_out_bs__p_nonce);
+    if(STATUS_OK == sc)
+        sc = SOPC_ByteString_Copy(&pResp->ServerNonce, (SOPC_ByteString *)message_out_bs__p_nonce);
 
     /* Copy Signature, which is not a built-in, so copy its fields */
     /* TODO: should borrow a reference instead of copy */

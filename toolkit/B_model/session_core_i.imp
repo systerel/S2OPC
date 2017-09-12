@@ -72,7 +72,7 @@ LOCAL_OPERATIONS
             res_activated := FALSE
         END
     END
-    
+
 OPERATIONS
 
     res_activated <-- server_internal_activate_req_and_resp (channel, session, user, activate_req_msg, activate_resp_msg) =
@@ -166,7 +166,7 @@ OPERATIONS
                         l_valid_crypto, l_signature <-- server_create_session_req_do_crypto(l_nsession, create_req_msg, l_endpoint_config_idx, l_config_idx);
                         IF  l_valid_crypto = TRUE THEN
                             l_nonce <-- get_NonceServer(l_nsession);
-                            service_ret <-- write_create_session_resp_msg_crypto(create_resp_msg, l_nonce, l_signature)
+                            service_ret <-- write_create_session_resp_msg_crypto(create_resp_msg, l_config_idx, l_nonce, l_signature)
                         ELSE
                             /* TODO: add bad security check failed error and use it instead */
                             service_ret := e_sc_bad_unexpected_error
