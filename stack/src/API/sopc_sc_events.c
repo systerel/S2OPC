@@ -249,7 +249,7 @@ SOPC_StatusCode TMP_EndpointEvent_CB(SOPC_Endpoint             endpoint,
         }
         SOPC_EventDispatcherManager_AddEvent(tmpToolkitMgr,
                                              SC_TO_SE_SC_DISCONNECTED,
-                                             secureChannelId,
+                                             *epConfigIdx,
                                              NULL,
                                              (int32_t) status,
                                              "Secure channel disconnected from Endpoint");
