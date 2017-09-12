@@ -126,6 +126,8 @@ OPERATIONS
                 resp_msg_typ := e_msg_session_write_resp
             OR e_msg_session_browse_req THEN
                 resp_msg_typ := e_msg_session_browse_resp
+            OR e_msg_session_create_subscription_req THEN
+                resp_msg_typ := e_msg_session_create_subscription_resp
             END
         END
     END

@@ -75,7 +75,8 @@ OPERATIONS
                 e_msg_session_close_req,
                 e_msg_session_read_req,
                 e_msg_session_write_req,
-                e_msg_session_browse_req
+                e_msg_session_browse_req,
+                e_msg_session_create_subscription_req
             THEN
                 header_type := e_msg_request_type
             OR e_msg_get_endpoints_service_resp,
@@ -84,7 +85,8 @@ OPERATIONS
                 e_msg_session_close_resp,
                 e_msg_session_read_resp,
                 e_msg_session_write_resp,
-                e_msg_session_browse_resp
+                e_msg_session_browse_resp,
+                e_msg_session_create_subscription_resp
             THEN
                 header_type := e_msg_response_type
             END
@@ -110,9 +112,11 @@ OPERATIONS
             OR e_msg_session_read_req,
                 e_msg_session_write_req,
                 e_msg_session_browse_req,
+                e_msg_session_create_subscription_req,
                 e_msg_session_read_resp,
                 e_msg_session_write_resp,
-                e_msg_session_browse_resp
+                e_msg_session_browse_resp,
+                e_msg_session_create_subscription_resp
             THEN
                 service_class := e_msg_session_service_class
             END

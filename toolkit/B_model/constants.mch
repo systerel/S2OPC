@@ -129,7 +129,8 @@ SETS
         e_msg_session_close_req, e_msg_session_close_resp,
         e_msg_session_read_req, e_msg_session_read_resp,
         e_msg_session_write_req, e_msg_session_write_resp,
-        e_msg_session_browse_req, e_msg_session_browse_resp};
+        e_msg_session_browse_req, e_msg_session_browse_resp,
+        e_msg_session_create_subscription_req, e_msg_session_create_subscription_resp};
 
     /* OPC UA message header type (request / response) */
     t_msg_header_type = {
@@ -400,11 +401,13 @@ PROPERTIES
 
     s_service_on_session_reqs  = {e_msg_session_read_req,
         e_msg_session_write_req,
-        e_msg_session_browse_req} &
+        e_msg_session_browse_req,
+        e_msg_session_create_subscription_req} &
 
     s_service_on_session_resps = {e_msg_session_read_resp,
         e_msg_session_write_resp,
-        e_msg_session_browse_resp} &
+        e_msg_session_browse_resp,
+        e_msg_session_create_subscription_resp} &
 
     s_discovery_service_reqs = {e_msg_get_endpoints_service_req} &
     s_discovery_service_resps = {e_msg_get_endpoints_service_resp} &
