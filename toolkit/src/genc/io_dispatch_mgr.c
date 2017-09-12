@@ -2,7 +2,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 28/09/2017 17:38:55
+ Date                 : 28/09/2017 17:42:47
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -33,6 +33,7 @@ void io_dispatch_mgr__get_msg_header_type(
    case constants__e_msg_session_read_req:
    case constants__e_msg_session_write_req:
    case constants__e_msg_session_browse_req:
+   case constants__e_msg_session_create_subscription_req:
       *io_dispatch_mgr__header_type = constants__e_msg_request_type;
       break;
    case constants__e_msg_get_endpoints_service_resp:
@@ -42,6 +43,7 @@ void io_dispatch_mgr__get_msg_header_type(
    case constants__e_msg_session_read_resp:
    case constants__e_msg_session_write_resp:
    case constants__e_msg_session_browse_resp:
+   case constants__e_msg_session_create_subscription_resp:
       *io_dispatch_mgr__header_type = constants__e_msg_response_type;
       break;
    default:
@@ -68,9 +70,11 @@ void io_dispatch_mgr__get_msg_service_class(
    case constants__e_msg_session_read_req:
    case constants__e_msg_session_write_req:
    case constants__e_msg_session_browse_req:
+   case constants__e_msg_session_create_subscription_req:
    case constants__e_msg_session_read_resp:
    case constants__e_msg_session_write_resp:
    case constants__e_msg_session_browse_resp:
+   case constants__e_msg_session_create_subscription_resp:
       *io_dispatch_mgr__service_class = constants__e_msg_session_service_class;
       break;
    default:

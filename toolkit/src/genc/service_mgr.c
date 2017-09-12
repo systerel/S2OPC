@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 28/09/2017 17:38:56
+ Date                 : 28/09/2017 17:42:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -46,6 +46,9 @@ void service_mgr__get_response_type(
       break;
    case constants__e_msg_session_browse_req:
       *service_mgr__resp_msg_typ = constants__e_msg_session_browse_resp;
+      break;
+   case constants__e_msg_session_create_subscription_req:
+      *service_mgr__resp_msg_typ = constants__e_msg_session_create_subscription_resp;
       break;
    default:
       break;
