@@ -749,8 +749,8 @@ void session_core_1_bs__server_activate_session_check_crypto(
 {
     CryptoProvider *pProvider = NULL;
     const SOPC_SecureChannel_Config *pSCCfg = NULL;
-    const session *pSession = NULL;
-    const SOPC_ByteString *pNonce = NULL;
+    session *pSession = NULL;
+    SOPC_ByteString *pNonce = NULL;
     const OpcUa_SignatureData *pSignCandid = NULL;
     uint8_t *pDerSrv = NULL;
     uint32_t lenDerSrv = 0;
@@ -815,6 +815,11 @@ void session_core_1_bs__server_activate_session_check_crypto(
                 }
             }
         }
+    }
+
+    if(*session_core_1_bs__valid != false){
+      // renew the server Nonce
+      assert(STATUS_OK == CryptoProvider_GenerateRandomBytes(pProvider, pNonce->Length, &pNonce->Data));
     }
 
     /* Clear */
