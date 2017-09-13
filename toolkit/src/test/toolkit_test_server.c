@@ -67,26 +67,26 @@ int main(void)
   uint32_t loopCpt = 0;
 
   // Secu policy configuration: empty
-  SOPC_SecurityPolicy secuConfig[2];
+  SOPC_SecurityPolicy secuConfig[3];
   SOPC_String_Initialize(&secuConfig[0].securityPolicy);
   SOPC_String_Initialize(&secuConfig[1].securityPolicy);
+  SOPC_String_Initialize(&secuConfig[2].securityPolicy);
 
   if(STATUS_OK == status){
-	if (secuActive) {
-		status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
-				SecurityPolicy_Basic256_URI);
-		    secuConfig[0].securityModes = SECURITY_MODE_SIGN_MASK;
-                    if(STATUS_OK == status){
-		        status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy,
-		        		SecurityPolicy_Basic256Sha256_URI);
-		        secuConfig[1].securityModes = SECURITY_MODE_SIGNANDENCRYPT_MASK;                      
-                    }
-	} else {
-		status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
-		                                           "http://opcfoundation.org/UA/SecurityPolicy#None");
-		    secuConfig[0].securityModes = SECURITY_MODE_NONE_MASK;
-	}
 
+      status = SOPC_String_AttachFromCstring(&secuConfig[0].securityPolicy,
+                                           SecurityPolicy_None_URI);
+      secuConfig[0].securityModes = SECURITY_MODE_NONE_MASK;
+      if(STATUS_OK == status){
+          status = SOPC_String_AttachFromCstring(&secuConfig[1].securityPolicy,
+                                               SecurityPolicy_Basic256_URI);
+          secuConfig[1].securityModes = SECURITY_MODE_SIGN_MASK;
+      }
+      if(STATUS_OK == status){
+        status = SOPC_String_AttachFromCstring(&secuConfig[2].securityPolicy,
+                                             SecurityPolicy_Basic256Sha256_URI);
+        secuConfig[2].securityModes = SECURITY_MODE_SIGNANDENCRYPT_MASK;                      
+      }
   }
 
   // Init unique endpoint structure
@@ -115,13 +115,13 @@ int main(void)
 	  epConfig.serverKey = NULL;
 	  epConfig.pki = NULL;
   }
-
-  if(secuActive){
-    epConfig.nbSecuConfigs = 2; 
-  }else{
-    epConfig.nbSecuConfigs = 1;
-  }
+  
   epConfig.secuConfigurations = secuConfig;
+  if(secuActive){
+    epConfig.nbSecuConfigs = 3; 
+  }else{
+    epConfig.nbSecuConfigs = 1; 
+  }
 
   // Init stack configuration
   if(STATUS_OK == status){
@@ -212,6 +212,7 @@ int main(void)
 
   SOPC_String_Clear(&secuConfig[0].securityPolicy);
   SOPC_String_Clear(&secuConfig[1].securityPolicy);
+  SOPC_String_Clear(&secuConfig[2].securityPolicy);
 
   return status;
 }
