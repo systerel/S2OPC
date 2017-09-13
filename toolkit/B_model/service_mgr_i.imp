@@ -67,7 +67,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    treat_read_request(p_request_msg, p_response_msg) =
+    bres <-- treat_read_request(p_request_msg, p_response_msg) =
     PRE
         p_request_msg  : t_msg_i   &
         p_request_msg  = c_msg_in  &
@@ -78,14 +78,16 @@ LOCAL_OPERATIONS
         ReadValue_NodeId,
         ReadValue_AttributeId,
         data_Value_Value,
-        data_Value_StatusCode
+        data_Value_StatusCode,
+        bres
         :(
           nb_ReadValue          : NAT                           &
           nb_ReadValue         <= k_n_read_resp_max             &
           ReadValue_NodeId      : t_ReadValue +-> t_NodeId      &
           ReadValue_AttributeId : t_ReadValue +-> t_AttributeId &
           data_Value_Value      : t_ReadValue +-> t_Variant     &
-          data_Value_StatusCode : t_ReadValue +-> t_StatusCode
+          data_Value_StatusCode : t_ReadValue +-> t_StatusCode  &
+          bres                  : BOOL
          )
     END
     ;
@@ -133,7 +135,7 @@ OPERATIONS
     END
     ;
 
-    treat_read_request(p_request_msg, p_response_msg) =
+    bres <-- treat_read_request(p_request_msg, p_response_msg) =
     VAR
         l_nb_ReadValue,
         l_is_valid
@@ -144,7 +146,8 @@ OPERATIONS
             IF  l_is_valid = TRUE THEN
                 fill_read_response(p_request_msg, p_response_msg)
             END
-        END
+        END;
+        bres := l_is_valid
     END
     ;
 
@@ -305,6 +308,7 @@ OPERATIONS
         l_valid_resp_header,
         l_session_user,
         l_ret,
+        l_bret,
         l_is_valid_resp,
         l_buffer_out,
         l_valid_buffer,
@@ -340,9 +344,13 @@ OPERATIONS
                         THEN
                             CASE req_typ OF
                                 EITHER e_msg_session_read_req THEN
-                                    treat_read_request (l_req_msg, l_resp_msg);
-                                    /* TODOPAB: set a returned status code result from read request */
-                                    l_ret := e_sc_ok
+                                    l_bret <-- treat_read_request (l_req_msg, l_resp_msg);
+                                    IF l_bret = TRUE
+                                    THEN
+                                        l_ret := e_sc_ok
+                                    ELSE
+                                        l_ret := e_sc_bad_unexpected_error
+                                    END
                                 OR e_msg_session_write_req THEN
                                     // Write request case
                                     l_session_user <-- get_session_user_or_indet (l_session);
