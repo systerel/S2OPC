@@ -51,9 +51,20 @@ if __name__=='__main__':
     safety_secure_channels_test(client)
     print('Connected')
 
+    # node Id 260 to 759 -> status NOK
     try:
-        for nid in [20, 270, 520, 770]:
-            print('  Node {:03d}:'.format(nid), client.get_node(nid).get_data_value())
+        #for nid in [20, 250, 760, 770]:
+        #while(True):
+        for nid in range(20,250):
+            node = client.get_node(nid)
+            original_value = node.get_value()
+            print(' Original value for Node {:03d}:'.format(nid), original_value)
+            new_value = -original_value    
+            node.set_value(ua.Variant(new_value, ua.VariantType.Int64))
+            read_value = node.get_value()
+            print(' New value for Node {:03d}:'.format(nid), new_value)
+            assert (new_value==read_value)
+
     finally:
         client.disconnect()
         print('Disconnected')
