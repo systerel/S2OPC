@@ -22,17 +22,20 @@
 int strncmp_ignore_case(const char *s1, const char *s2, size_t size){
     int lc1, lc2;
     size_t idx;
-    int res = 0;
-    for(idx = 0; idx < size && res == 0; idx ++){
-        lc1 = tolower(s1[idx]);
-        lc2 = tolower(s2[idx]);
-        if(lc1 < lc2){
-            res = -1;
-        }else if(lc1 > lc2){
-            res = +1;
-        }else if(lc1 == '\0'){
-            // In case we reached end of string, stop comparison here
-            return res;
+    int res = -1000;
+    if(NULL != s1 && NULL != s2){
+        res = 0;
+        for(idx = 0; idx < size && res == 0; idx ++){
+            lc1 = tolower(s1[idx]);
+            lc2 = tolower(s2[idx]);
+            if(lc1 < lc2){
+                res = -1;
+            }else if(lc1 > lc2){
+                res = +1;
+            }else if(lc1 == '\0'){
+                // In case we reached end of both strings, stop comparison here
+                return res;
+            }
         }
     }
     return res;
