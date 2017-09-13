@@ -24,7 +24,7 @@ SEES
 DEFINITIONS
     d_variables ==
         nb_BrowseValue,
-        nb_BrowseTargetMax,
+        nb_BrowseTargetMax, /* requestedMaxReferencesPerNode */
         BrowseValue_NodeId,
         BrowseValue_BrowseDirection,
         BrowseValue_ReferenceTypeId,

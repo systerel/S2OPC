@@ -52,8 +52,7 @@ typedef void* constants_bs__t_session_token_i;
 typedef void* constants_bs__t_Nonce_i;
 typedef void* constants_bs__t_SignatureData_i;
 typedef void * constants_bs__t_ExpandedNodeId_i;
-/*typedef void * constants_bs__t_Reference_i; */
-typedef size_t constants_bs__t_Reference_i;
+#define constants_bs__t_Reference_i t_entier4
 typedef void * constants_bs__t_LocalizedText_i;
 typedef void * constants_bs__t_QualifiedName_i;
 

@@ -31,7 +31,8 @@ IMPORTS
     service_browse_decode_bs
 
 PROMOTES
-    write_BrowseResponse_msg_out
+    write_BrowseResponse_msg_out,
+    free_browse_result
 
 LOCAL_OPERATIONS
 

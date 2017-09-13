@@ -243,3 +243,135 @@ bool util_channel__SecurityPolicy_C_to_B(const char *uri,
     return false;
 }
 
+
+bool util_BrowseDirection__B_to_C(constants__t_BrowseDirection_i bdir,
+                                  OpcUa_BrowseDirection *cdir)
+{
+    if(NULL == cdir)
+        return false;
+
+    switch(bdir)
+    {
+    case constants__e_bd_forward:
+        *cdir = OpcUa_BrowseDirection_Forward;
+        break;
+    case constants__e_bd_inverse:
+        *cdir = OpcUa_BrowseDirection_Inverse;
+        break;
+    case constants__e_bd_both:
+        *cdir = OpcUa_BrowseDirection_Both;
+        break;
+    case constants__e_bd_indet:
+    default:
+        return false;
+    }
+
+    return true;
+}
+
+
+bool util_BrowseDirection__C_to_B(OpcUa_BrowseDirection cdir,
+                                  constants__t_BrowseDirection_i *bdir)
+{
+    if(NULL == bdir)
+        return false;
+
+    switch(cdir)
+    {
+    case OpcUa_BrowseDirection_Forward:
+        *bdir = constants__e_bd_forward;
+        break;
+    case OpcUa_BrowseDirection_Inverse:
+        *bdir = constants__e_bd_inverse;
+        break;
+    case OpcUa_BrowseDirection_Both:
+        *bdir = constants__e_bd_both;
+        break;
+    default:
+        return false;
+    }
+
+    return true;
+}
+
+
+bool util_NodeClass__B_to_C(constants__t_NodeClass_i bncl,
+                            OpcUa_NodeClass *cncl)
+{
+    if(NULL == cncl)
+        return false;
+
+    switch(bncl)
+    {
+    case constants__e_ncl_Object:
+        *cncl = OpcUa_NodeClass_Object;
+        break;
+    case constants__e_ncl_Variable:
+        *cncl = OpcUa_NodeClass_Variable;
+        break;
+    case constants__e_ncl_Method:
+        *cncl = OpcUa_NodeClass_Method;
+        break;
+    case constants__e_ncl_ObjectType:
+        *cncl = OpcUa_NodeClass_ObjectType;
+        break;
+    case constants__e_ncl_VariableType:
+        *cncl = OpcUa_NodeClass_VariableType;
+        break;
+    case constants__e_ncl_ReferenceType:
+        *cncl = OpcUa_NodeClass_ReferenceType;
+        break;
+    case constants__e_ncl_DataType:
+        *cncl = OpcUa_NodeClass_DataType;
+        break;
+    case constants__e_ncl_View:
+        *cncl = OpcUa_NodeClass_View;
+        break;
+    case constants__c_NodeClass_indet:
+    default:
+        return false;
+    }
+
+    return true;
+}
+
+
+bool util_NodeClass__C_to_B(OpcUa_NodeClass cncl,
+                            constants__t_NodeClass_i *bncl)
+{
+    if(NULL == bncl)
+        return false;
+
+    switch(cncl)
+    {
+    case OpcUa_NodeClass_Object:
+        *bncl = constants__e_ncl_Object;
+        break;
+    case OpcUa_NodeClass_Variable:
+        *bncl = constants__e_ncl_Variable;
+        break;
+    case OpcUa_NodeClass_Method:
+        *bncl = constants__e_ncl_Method;
+        break;
+    case OpcUa_NodeClass_ObjectType:
+        *bncl = constants__e_ncl_ObjectType;
+        break;
+    case OpcUa_NodeClass_VariableType:
+        *bncl = constants__e_ncl_VariableType;
+        break;
+    case OpcUa_NodeClass_ReferenceType:
+        *bncl = constants__e_ncl_ReferenceType;
+        break;
+    case OpcUa_NodeClass_DataType:
+        *bncl = constants__e_ncl_DataType;
+        break;
+    case OpcUa_NodeClass_View:
+        *bncl = constants__e_ncl_View;
+        break;
+    default:
+        return false;
+    }
+
+    return true;
+}
+

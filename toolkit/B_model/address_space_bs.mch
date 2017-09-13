@@ -37,7 +37,7 @@ DEFINITIONS
         Reference_ReferenceType,
         Reference_TargetNode,
         Reference_IsForward,
-        
+
         Node_RefIndexBegin,
         Node_RefIndexEnd,
         RefIndex_Reference
@@ -246,7 +246,7 @@ OPERATIONS
          )
     END
     ;
-   
+
     p_IsForward <-- get_Reference_IsForward(p_ref) =
     PRE
         p_ref : t_Reference_i &
@@ -261,21 +261,28 @@ OPERATIONS
         p_node : t_Node_i &
         p_node : t_Node
     THEN
-        p_ref_index := Node_RefIndexBegin(p_node)
+        p_ref_index :(
+            p_ref_index : NAT &
+            p_ref_index = Node_RefIndexBegin(p_node)
+        )
     END
     ;
-    
+
     p_ref_index <-- get_Node_RefIndexEnd(p_node) =
     PRE
         p_node : t_Node_i &
         p_node : t_Node
     THEN
-        p_ref_index := Node_RefIndexEnd(p_node)
+        p_ref_index :(
+            p_ref_index : NAT &
+            p_ref_index = Node_RefIndexEnd(p_node)
+        )
     END
     ;
 
     p_ref <-- get_RefIndex_Reference(p_ref_index) =
     PRE
+        p_ref_index : NAT &
         p_ref_index : t_RefIndex
     THEN
         p_ref :(p_ref : t_Reference_i &

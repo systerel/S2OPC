@@ -48,9 +48,7 @@ VALUES
     c_ReadValue_indet = 0;
     c_WriteValue_indet = 0;
     c_BrowseValue_indet = 0;
-    c_BrowseResult_indet = 0;
-
-    t_RefIndex = 0..5000
+    c_BrowseResult_indet = 0
 
 PROMOTES
     get_Is_SubType,

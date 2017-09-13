@@ -17,7 +17,7 @@
 
 /** \file
  *
- * Implements the structures behind the address space.
+ * Implements the getters for the write request.
  */
 
 
@@ -48,11 +48,13 @@ void service_write_decode_bs__decode_write_request(
    const constants__t_msg_i service_write_decode_bs__write_msg,
    constants__t_StatusCode_i * const service_write_decode_bs__StatusCode_service)
 {
+    /* TODO: actually decode something */
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) service_write_decode_bs__write_msg;
     *service_write_decode_bs__StatusCode_service = constants__e_sc_nok;
+
     if(encType == &OpcUa_WriteRequest_EncodeableType){
         OpcUa_WriteRequest *req = (OpcUa_WriteRequest*) service_write_decode_bs__write_msg;
-        
+
         if(0 != req->NoOfNodesToWrite && req->NoOfNodesToWrite <= constants__k_n_WriteResponse_max)
         {
             /* TODO: req shall not be freed before request is null... */

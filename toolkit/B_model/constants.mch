@@ -48,7 +48,9 @@ SETS
                       e_sc_bad_encoding_error,
                       e_sc_bad_invalid_argument,
                       e_sc_bad_unexpected_error,
-                      e_sc_bad_out_of_memory};
+                      e_sc_bad_out_of_memory,
+                      e_sc_bad_nothing_to_do,
+                      e_sc_bad_too_many_ops};
 
     t_BrowseDirection_i = {e_bd_indet,
                            e_bd_forward,
@@ -166,9 +168,7 @@ CONCRETE_CONSTANTS
     c_request_context_indet,
     c_channel_config_idx_indet,
     c_channel_indet,
-    c_request_handle_indet,
-
-    t_RefIndex
+    c_request_handle_indet
 
 ABSTRACT_CONSTANTS
     conv_NodeId_Variant,
@@ -189,6 +189,7 @@ ABSTRACT_CONSTANTS
     t_WriteValue,
     t_BrowseValue,
     t_BrowseResult,
+    t_RefIndex,
     t_byte_buffer,
     t_UserId,
     t_LocalizedText,
@@ -258,7 +259,9 @@ PROPERTIES
                       e_sc_bad_encoding_error,
                       e_sc_bad_invalid_argument,
                       e_sc_bad_unexpected_error,
-                      e_sc_bad_out_of_memory} &
+                      e_sc_bad_out_of_memory,
+                      e_sc_bad_nothing_to_do,
+                      e_sc_bad_too_many_ops} &
 
     t_BrowseDirection = {e_bd_forward,
                          e_bd_inverse,
@@ -306,6 +309,8 @@ PROPERTIES
     c_BrowseResult_indet /: t_BrowseResult &
     cast_t_BrowseResult : NAT +-> t_BrowseResult_i &
     cast_t_BrowseResult : perm(t_BrowseResult) &
+
+    t_RefIndex <: NAT &
 
     t_byte_buffer <: t_byte_buffer_i &
     c_byte_buffer_indet : t_byte_buffer_i &
@@ -375,8 +380,6 @@ PROPERTIES
         e_buffer_in_msg_type_read,
         e_buffer_in_msg_header_read,
         e_buffer_in_msg_read } &
-
-    t_RefIndex <: NAT &
 
     s_service_treatment_reqs = {e_msg_session_create_req,
         e_msg_session_activate_req,

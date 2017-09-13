@@ -225,7 +225,10 @@ OPERATIONS
         p_node : t_Node_i &
         p_node : t_Node
     THEN
-        p_ref_index := Node_RefIndexBegin(p_node)
+        p_ref_index :(
+            p_ref_index : NAT &
+            p_ref_index = Node_RefIndexBegin(p_node)
+        )
     END
     ;
     p_ref_index <-- get_Node_RefIndexEnd(p_node) =
@@ -233,12 +236,16 @@ OPERATIONS
         p_node : t_Node_i &
         p_node : t_Node
     THEN
-        p_ref_index := Node_RefIndexEnd(p_node)
+        p_ref_index :(
+            p_ref_index : NAT &
+            p_ref_index = Node_RefIndexEnd(p_node)
+        )
     END
     ;
 
     p_ref <-- get_RefIndex_Reference(p_ref_index) =
     PRE
+        p_ref_index : NAT &
         p_ref_index : t_RefIndex
     THEN
         p_ref :(p_ref : t_Reference_i &

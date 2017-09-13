@@ -305,7 +305,8 @@ OPERATIONS
         l_ret,
         l_is_valid_resp,
         l_buffer_out,
-        l_valid_buffer
+        l_valid_buffer,
+        l_isvalid_write
     IN
         l_buffer_out := c_byte_buffer_indet;
         l_req_msg_header <-- decode_msg_header (TRUE, msg_buffer);
@@ -349,8 +350,11 @@ OPERATIONS
                                     dealloc_write_request_responses
                                 OR e_msg_session_browse_req THEN
                                     l_ret <-- treat_browse_request_BrowseValues;
-                                    write_BrowseResponse_msg_out(l_resp_msg)
-                                    /* TODOPAB: dealloc the response */
+                                    l_isvalid_write <-- write_BrowseResponse_msg_out(l_resp_msg);
+                                    IF l_isvalid_write /= TRUE THEN
+                                        l_ret := e_sc_bad_out_of_memory
+                                    END;
+                                    free_browse_result
                                 ELSE
                                     /* Cases shall cover all session services req types */
                                     l_ret := e_sc_bad_unexpected_error

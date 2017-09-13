@@ -24,6 +24,9 @@
 #include "b2c.h"
 #include "constants_bs.h"
 
+#include "sopc_types.h"
+
+
 void constants_bs__INITIALISATION(void)
 {
 }
@@ -37,6 +40,7 @@ void constants_bs__get_Is_SubType(
    const constants_bs__t_NodeId_i constants_bs__p_type2,
    t_bool * const constants_bs__p_res)
 {
+    /* TODO: implement a functional subtype query */
     *constants_bs__p_res = true;
 }
 
@@ -46,5 +50,11 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(
    t_bool * const constants_bs__p_isvalid,
    constants_bs__t_NodeId_i * const constants_bs__p_nid)
 {
+    /* Reminder: This is a borrow */
+    *constants_bs__p_nid = (constants_bs__t_NodeId_i) &((SOPC_ExpandedNodeId *)constants_bs__p_expnid)->NodeId;
+    if(NULL == constants_bs__p_nid)
+        *constants_bs__p_isvalid = false;
+    else
+        *constants_bs__p_isvalid = true;
 }
 

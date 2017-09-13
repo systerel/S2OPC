@@ -42,7 +42,9 @@ INVARIANT
     nb_bri : NAT &
     bri_i  : NAT &
 
+    RefIndex    : NAT &
     RefIndex    : t_RefIndex &
+    RefIndexEnd : NAT &
     RefIndexEnd : t_RefIndex
 
 INITIALISATION
@@ -72,7 +74,7 @@ OPERATIONS
         p_continue := bool(bvi_i <= nb_bvi)
     END
     ;
-   
+
     p_continue <-- init_iter_browse_result(p_nb_bri) =
     BEGIN
         nb_bri     := p_nb_bri;
@@ -80,7 +82,7 @@ OPERATIONS
         p_continue := bool(1 <= p_nb_bri)
     END
     ;
-   
+
     p_continue, p_bri <-- continue_iter_browse_result =
     BEGIN
         p_bri <-- get_cast_t_BrowseResult(bri_i);
@@ -88,7 +90,7 @@ OPERATIONS
         p_continue := bool(bri_i <= nb_bri)
     END
     ;
-    
+
     p_continue <-- init_iter_reference(p_node) =
     BEGIN
         RefIndex    <-- get_Node_RefIndexBegin(p_node);
@@ -96,12 +98,12 @@ OPERATIONS
         p_continue := bool(RefIndexEnd >= RefIndex)
     END
     ;
-    
+
     p_continue, p_ref <-- continue_iter_reference =
     BEGIN
        p_ref <-- get_RefIndex_Reference(RefIndex);
        RefIndex := RefIndex + 1;
        p_continue := bool(RefIndex <= RefIndexEnd)
     END
-    
+
 END

@@ -29,7 +29,8 @@ IMPORTS
     msg_browse_response_bs
 
 PROMOTES
-    write_BrowseResponse_msg_out
+    write_BrowseResponse_msg_out,
+    free_browse_result
 
 OPERATIONS
 
@@ -51,7 +52,7 @@ OPERATIONS
         END
     END
     ;
-    
+
     p_isallocated, p_nb_bri <-- alloc_browse_result(p_bvi, p_nb_target_max, p_nb_target) =
     BEGIN
         IF  0 < p_nb_target_max &

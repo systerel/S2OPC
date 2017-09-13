@@ -88,6 +88,7 @@ ABSTRACT_CONSTANTS
     t_endpoint_config_idx,
     t_request_handle,
     t_ExpandedNodeId,
+    t_RefIndex,
     t_Reference,
     t_LocalizedText,
     t_QualifiedName
@@ -167,6 +168,8 @@ PROPERTIES
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet /: t_ExpandedNodeId &
 
+    t_RefIndex <: NAT &
+
     t_Reference <: t_Reference_i &
     c_Reference_indet : t_Reference_i &
     c_Reference_indet /: t_Reference &
@@ -192,7 +195,9 @@ OPERATIONS
     END
     ;
 
-    /* TODOPAB: borrow */
+    /* This "conversion" is a borrow, you shall not clean the given nid */
+    /* The borrow is always valid. */
+    /* TODOPAB: verify the life cycle of this borrow */
     p_isvalid, p_nid <-- getall_conv_ExpandedNodeId_NodeId(p_expnid) =
     PRE
         p_expnid : t_ExpandedNodeId_i &

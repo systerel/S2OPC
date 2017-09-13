@@ -33,35 +33,38 @@ DEFINITIONS
         ResponseBrowse_Res_DisplayName,
         ResponseBrowse_Res_NodeClass,
         ResponseBrowse_Res_TypeDefinition
+    ;
+    d_init ==
+        d_variables
+        :(
+            ResponseBrowse_BrowseStatus        = {}                   &
+            ResponseBrowse_ContinuationPoint   = {}                   &
+            ResponseBrowse_Res_ReferenceTypeId = t_BrowseValue * {{}} &
+            ResponseBrowse_Res_Forwards        = t_BrowseValue * {{}} &
+            ResponseBrowse_Res_NodeId          = t_BrowseValue * {{}} &
+            ResponseBrowse_Res_BrowseName      = t_BrowseValue * {{}} &
+            ResponseBrowse_Res_DisplayName     = t_BrowseValue * {{}} &
+            ResponseBrowse_Res_NodeClass       = t_BrowseValue * {{}} &
+            ResponseBrowse_Res_TypeDefinition  = t_BrowseValue * {{}}
+         )
 
 ABSTRACT_VARIABLES
     d_variables
 
 INVARIANT
-        ResponseBrowse_BrowseStatus        : t_BrowseValue +-> BOOL                                  &
-        ResponseBrowse_ContinuationPoint   : t_BrowseValue +-> t_Reference                           &
-        /* TODOPAB: comment on gère la taille non connue à l'avance de ces tableaux de BrowseResult  ??? */
-        ResponseBrowse_Res_ReferenceTypeId : t_BrowseValue +-> (t_BrowseResult +-> t_NodeId)         &
-        ResponseBrowse_Res_Forwards        : t_BrowseValue +-> (t_BrowseResult +-> BOOL)             &
-        ResponseBrowse_Res_NodeId          : t_BrowseValue +-> (t_BrowseResult +-> t_ExpandedNodeId) &
-        ResponseBrowse_Res_BrowseName      : t_BrowseValue +-> (t_BrowseResult +-> t_QualifiedName)  &
-        ResponseBrowse_Res_DisplayName     : t_BrowseValue +-> (t_BrowseResult +-> t_LocalizedText)  &
-        ResponseBrowse_Res_NodeClass       : t_BrowseValue +-> (t_BrowseResult +-> t_NodeClass)      &
-        ResponseBrowse_Res_TypeDefinition  : t_BrowseValue +-> (t_BrowseResult +-> t_ExpandedNodeId)
+    ResponseBrowse_BrowseStatus        : t_BrowseValue +-> BOOL                                  &
+    ResponseBrowse_ContinuationPoint   : t_BrowseValue +-> t_Reference                           &
+    /* TODOPAB: comment on gère la taille non connue à l'avance de ces tableaux de BrowseResult  ??? */
+    ResponseBrowse_Res_ReferenceTypeId : t_BrowseValue +-> (t_BrowseResult +-> t_NodeId)         &
+    ResponseBrowse_Res_Forwards        : t_BrowseValue +-> (t_BrowseResult +-> BOOL)             &
+    ResponseBrowse_Res_NodeId          : t_BrowseValue +-> (t_BrowseResult +-> t_ExpandedNodeId) &
+    ResponseBrowse_Res_BrowseName      : t_BrowseValue +-> (t_BrowseResult +-> t_QualifiedName)  &
+    ResponseBrowse_Res_DisplayName     : t_BrowseValue +-> (t_BrowseResult +-> t_LocalizedText)  &
+    ResponseBrowse_Res_NodeClass       : t_BrowseValue +-> (t_BrowseResult +-> t_NodeClass)      &
+    ResponseBrowse_Res_TypeDefinition  : t_BrowseValue +-> (t_BrowseResult +-> t_ExpandedNodeId)
 
 INITIALISATION
-    d_variables
-    :(
-        ResponseBrowse_BrowseStatus        = {}                   &
-        ResponseBrowse_ContinuationPoint   = {}                   &
-        ResponseBrowse_Res_ReferenceTypeId = t_BrowseValue * {{}} &
-        ResponseBrowse_Res_Forwards        = t_BrowseValue * {{}} &
-        ResponseBrowse_Res_NodeId          = t_BrowseValue * {{}} &
-        ResponseBrowse_Res_BrowseName      = t_BrowseValue * {{}} &
-        ResponseBrowse_Res_DisplayName     = t_BrowseValue * {{}} &
-        ResponseBrowse_Res_NodeClass       = t_BrowseValue * {{}} &
-        ResponseBrowse_Res_TypeDefinition  = t_BrowseValue * {{}}
-     )
+    d_init
 
 OPERATIONS
 
@@ -239,12 +242,19 @@ OPERATIONS
     END
     ;
 
-    write_BrowseResponse_msg_out(p_msg_out) =
+    free_browse_result =
+    BEGIN
+        d_init
+    END
+    ;
+
+    /* Even if p_isvalid is false, you should recursive-clear p_msg_out */
+    p_isvalid <-- write_BrowseResponse_msg_out(p_msg_out) =
     PRE
         p_msg_out : t_msg_i &
         p_msg_out : t_msg
     THEN
-        skip
+        p_isvalid :: BOOL
     END
 
 END

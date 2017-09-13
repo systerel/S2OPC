@@ -314,7 +314,7 @@ void address_space_bs__get_RefIndex_Reference(
    const t_entier4 address_space_bs__p_ref_index,
    constants__t_Reference_i * const address_space_bs__p_ref)
 {
-    printf("Not implemented\n"); assert(0);
+    *address_space_bs__p_ref = address_space_bs__p_ref_index;
 }
 
 

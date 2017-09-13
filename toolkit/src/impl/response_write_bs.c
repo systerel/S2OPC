@@ -31,6 +31,7 @@
 #include "sopc_types.h"
 #include "sopc_sc_events.h"
 
+
 /* Globals */
 static SOPC_StatusCode *arr_StatusCode; /* Indexed from 1, first element is never used. */
 static t_entier4 nb_req;

@@ -263,6 +263,7 @@ void service_mgr__server_receive_session_service_req(
       constants__t_StatusCode_i service_mgr__l_ret;
       t_bool service_mgr__l_is_valid_resp;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
+      t_bool service_mgr__l_isvalid_write;
       
       service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
@@ -319,7 +320,11 @@ void service_mgr__server_receive_session_service_req(
                         break;
                      case constants__e_msg_session_browse_req:
                         service_browse_seq__treat_browse_request_BrowseValues(&service_mgr__l_ret);
-                        service_browse_seq__write_BrowseResponse_msg_out(service_mgr__l_resp_msg);
+                        service_browse_seq__write_BrowseResponse_msg_out(service_mgr__l_resp_msg,
+                           &service_mgr__l_isvalid_write);
+                        if (service_mgr__l_isvalid_write != true) {
+                           service_mgr__l_ret = constants__e_sc_bad_out_of_memory;
+                        }
                         break;
                      default:
                         service_mgr__l_ret = constants__e_sc_bad_unexpected_error;
