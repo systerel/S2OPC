@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 28/09/2017 17:42:49
+ Date                 : 28/09/2017 17:45:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -63,7 +63,8 @@ extern void service_mgr__get_response_type(
    constants__t_msg_type_i * const service_mgr__resp_msg_typ);
 extern void service_mgr__treat_read_request(
    const constants__t_msg_i service_mgr__p_request_msg,
-   const constants__t_msg_i service_mgr__p_response_msg);
+   const constants__t_msg_i service_mgr__p_response_msg,
+   t_bool * const service_mgr__bres);
 extern void service_mgr__treat_write_request(
    const constants__t_msg_i service_mgr__write_msg,
    const constants__t_user_i service_mgr__userid,

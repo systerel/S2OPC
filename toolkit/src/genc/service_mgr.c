@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 28/09/2017 17:42:49
+ Date                 : 28/09/2017 17:45:20
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -57,7 +57,8 @@ void service_mgr__get_response_type(
 
 void service_mgr__treat_read_request(
    const constants__t_msg_i service_mgr__p_request_msg,
-   const constants__t_msg_i service_mgr__p_response_msg) {
+   const constants__t_msg_i service_mgr__p_response_msg,
+   t_bool * const service_mgr__bres) {
    {
       t_entier4 service_mgr__l_nb_ReadValue;
       t_bool service_mgr__l_is_valid;
@@ -74,6 +75,7 @@ void service_mgr__treat_read_request(
                service_mgr__p_response_msg);
          }
       }
+      *service_mgr__bres = service_mgr__l_is_valid;
    }
 }
 
@@ -264,6 +266,7 @@ void service_mgr__server_receive_session_service_req(
       t_bool service_mgr__l_valid_resp_header;
       constants__t_user_i service_mgr__l_session_user;
       constants__t_StatusCode_i service_mgr__l_ret;
+      t_bool service_mgr__l_bret;
       t_bool service_mgr__l_is_valid_resp;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
       t_bool service_mgr__l_isvalid_write;
@@ -309,8 +312,14 @@ void service_mgr__server_receive_session_service_req(
                      switch (service_mgr__req_typ) {
                      case constants__e_msg_session_read_req:
                         service_mgr__treat_read_request(service_mgr__l_req_msg,
-                           service_mgr__l_resp_msg);
-                        service_mgr__l_ret = constants__e_sc_ok;
+                           service_mgr__l_resp_msg,
+                           &service_mgr__l_bret);
+                        if (service_mgr__l_bret == true) {
+                           service_mgr__l_ret = constants__e_sc_ok;
+                        }
+                        else {
+                           service_mgr__l_ret = constants__e_sc_bad_unexpected_error;
+                        }
                         break;
                      case constants__e_msg_session_write_req:
                         session_mgr__get_session_user_or_indet(service_mgr__l_session,
