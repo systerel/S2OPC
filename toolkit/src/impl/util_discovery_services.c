@@ -31,7 +31,9 @@ constants__t_StatusCode_i  build_endPoints_Descriptions(const constants__t_endpo
 	SOPC_Endpoint_Config* sopcEndpointConfig = SOPC_ToolkitServer_GetEndpointConfig(endpoint_config_idx);
 	SOPC_StatusCode status;
 	SOPC_String configEndPointURL;
+        uint32_t tmpLength;
 	SOPC_String_Initialize (&configEndPointURL);
+
 
 	status = SOPC_String_AttachFromCstring(&configEndPointURL, sopcEndpointConfig->endpointURL);
 	assert(STATUS_OK == status);
@@ -73,22 +75,38 @@ constants__t_StatusCode_i  build_endPoints_Descriptions(const constants__t_endpo
 		// Add an endPoint description per security mode
 		if((SECURITY_MODE_NONE_MASK & securityModes) != 0){
 			newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_None;
-			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
 			newEndPointDescription.SecurityLevel = 0;
+			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
 			nbEndpointDescription++;
 		}
 
 		if((SECURITY_MODE_SIGN_MASK & securityModes) != 0){
 			newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_Sign;
-			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
 			newEndPointDescription.SecurityLevel = 1;
+                        /* Copy server certificate */
+                        if(sopcEndpointConfig->serverCertificate != NULL){
+                            status = KeyManager_Certificate_CopyDER(sopcEndpointConfig->serverCertificate,
+                                                                    &newEndPointDescription.ServerCertificate.Data,
+                                                                    &tmpLength);
+                            assert(STATUS_OK == status && tmpLength <= INT32_MAX);
+                            newEndPointDescription.ServerCertificate.Length = (int32_t) tmpLength;
+                        }
+			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
 			nbEndpointDescription++;
 		}
 
 		if((SECURITY_MODE_SIGNANDENCRYPT_MASK & securityModes) != 0){
 			newEndPointDescription.SecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt;
-			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
 			newEndPointDescription.SecurityLevel = 1;
+                        /* Copy server certificate */
+                        if(sopcEndpointConfig->serverCertificate != NULL){
+                            status = KeyManager_Certificate_CopyDER(sopcEndpointConfig->serverCertificate,
+                                                                    &newEndPointDescription.ServerCertificate.Data,
+                                                                    &tmpLength);
+                            assert(STATUS_OK == status && tmpLength <= INT32_MAX);
+                            newEndPointDescription.ServerCertificate.Length = (int32_t) tmpLength;
+                        }
+			My_OpcUa_EndpointDescription[nbEndpointDescription] = newEndPointDescription;
 			nbEndpointDescription++;
 		}
 
