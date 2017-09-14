@@ -60,6 +60,9 @@ int main(void)
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
+  /* Init toolkit */
+  Toolkit_Server_Initialize();
+
   // Secu policy configuration: empty
   SOPC_SecurityPolicy secuConfig[1];
   SOPC_String_Initialize(&secuConfig[0].securityPolicy);

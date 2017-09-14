@@ -6,6 +6,7 @@ PATHGENTRAD=./B_model/tradc
 PATHTRAD=./src/genc
 PATHIMPL=./src/impl
 PATHTEST=./src/test
+PATHADDS=./address_space_generation
 
 ifndef STACK_INSTALL
     STACK_INSTALL=../install_stack
@@ -18,7 +19,7 @@ CC=gcc
 C99FLAGS=-std=c99 -pedantic
 CFLAGS  =-g3 -c -Wall -Wextra -O0 -Wno-unused-parameter $(C99FLAGS)
 LFLAGS  =-g
-INCLUDES=-I$(PATHTRAD) -I. -I$(STACK_H) -I$(PATHIMPL) -I$(PATHTEST)
+INCLUDES=-I$(PATHTRAD) -I. -I$(STACK_H) -I$(PATHIMPL) -I$(PATHTEST) -I$(PATHADDS)
 LIBS    =-L$(STACK_LIB) -L$(CRYPTO_LIB) -lm -lingopcs -lmbedcrypto -lmbedx509 -lpthread -lrt
 
 OBJS        =toolkit_header_init.o \
@@ -46,6 +47,7 @@ CLIENT_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(CLIENT_OBJS))
 SERVER_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(SERVER_OBJS))
 READ_EXEC   :=$(patsubst %.o,$(PATHEXEC)/%,$(READ_OBJS))
 WRITE_EXEC  :=$(patsubst %.o,$(PATHEXEC)/%,$(WRITE_OBJS))
+SERVER_OBJS += add.o config_toolkit_server.o
 OBJS        :=$(patsubst %,$(PATHOBJ)/%,$(OBJS))
 CLIENT_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(CLIENT_OBJS))
 SERVER_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(SERVER_OBJS))
@@ -91,6 +93,10 @@ $(PATHOBJ)/%.o: $(PATHIMPL)/%.c
 	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
 
 $(PATHOBJ)/%.o: $(PATHTEST)/%.c
+	@echo "  CC $@"
+	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
+
+$(PATHOBJ)/%.o: $(PATHADDS)/%.c
 	@echo "  CC $@"
 	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
 

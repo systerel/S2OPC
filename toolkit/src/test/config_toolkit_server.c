@@ -15,17 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _config_toolkit_h
-#define _config_toolkit_h
+
+#include "config_toolkit.h"
+#include "add.h"
+#include "address_space_impl.h"
 
 
-#include <stdbool.h>
+bool Toolkit_Server_Initialize()
+{
+    /* Glue everyone together */
+    address_space_bs__a_BrowseName = BrowseName;
+}
 
-
-#define ENDPOINT_URL "opc.tcp://localhost:4841"
-
-
-bool Toolkit_Server_Initialize();
-
-
-#endif

@@ -32,7 +32,8 @@
 #include "crypto_profiles.h"
 
 
-SOPC_StatusCode gen_addspace(constants__t_NodeId_i     *pnids,
+/* Shall not be called anymore */
+SOPC_StatusCode gen_addspace_old(constants__t_NodeId_i     *pnids,
                              constants__t_NodeClass_i  *pncls,
                              constants__t_Variant_i    *pvars,
                              constants__t_StatusCode_i *pscs)
