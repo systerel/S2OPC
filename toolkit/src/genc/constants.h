@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 06/09/2017 19:33:26
+ Date                 : 14/09/2017 18:06:44
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -96,7 +96,9 @@ typedef enum {
    constants__e_sc_bad_encoding_error,
    constants__e_sc_bad_invalid_argument,
    constants__e_sc_bad_unexpected_error,
-   constants__e_sc_bad_out_of_memory
+   constants__e_sc_bad_out_of_memory,
+   constants__e_sc_bad_nothing_to_do,
+   constants__e_sc_bad_too_many_ops
 } constants__t_StatusCode_i;
 typedef enum {
    constants__c_buffer_in_state_indet,
@@ -176,7 +178,6 @@ typedef enum {
 #define constants__t_WriteValue_i_max constants__k_n_WriteResponse_max
 #define constants__t_BrowseValue_i_max constants__k_n_BrowseResponse_max
 #define constants__t_BrowseResult_i_max constants__k_n_BrowseTarget_max
-#define constants__t_RefIndex_max 5000
 
 /*------------------------------------------------
    CONCRETE_CONSTANTS Clause: scalars and arrays

@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 06/09/2017 19:33:28
+ Date                 : 14/09/2017 18:06:46
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -325,6 +325,7 @@ void service_mgr__server_receive_session_service_req(
                         if (service_mgr__l_isvalid_write != true) {
                            service_mgr__l_ret = constants__e_sc_bad_out_of_memory;
                         }
+                        service_browse_seq__free_browse_result();
                         break;
                      default:
                         service_mgr__l_ret = constants__e_sc_bad_unexpected_error;

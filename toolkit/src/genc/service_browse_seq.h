@@ -2,7 +2,7 @@
 
  File Name            : service_browse_seq.h
 
- Date                 : 06/09/2017 19:33:27
+ Date                 : 14/09/2017 18:06:45
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -37,6 +37,7 @@ extern void service_browse_seq__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define service_browse_seq__free_browse_result service_browse__free_browse_result
 #define service_browse_seq__write_BrowseResponse_msg_out service_browse__write_BrowseResponse_msg_out
 
 /*--------------------------
