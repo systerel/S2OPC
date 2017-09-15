@@ -46,4 +46,5 @@ void SOPC_Services_Initialize(){
 
 void SOPC_Services_Clear(){
     SOPC_AsyncQueue_Free(&servicesEvents);
+    servicesEvents = NULL;
 }

@@ -59,9 +59,9 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
 }
 
 void SOPC_Toolkit_Clear(){
-      SOPC_Services_Clear();
-      SOPC_SecureChannels_Clear();
       SOPC_Sockets_Clear();
+      SOPC_SecureChannels_Clear();
+      SOPC_Services_Clear();
       SLinkedList_Delete(scConfigs);
       scConfigs = NULL;
       SLinkedList_Delete(epConfigs);

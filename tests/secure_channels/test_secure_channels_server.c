@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -186,6 +187,7 @@ int main(void){
                 printf("<Stub_Server: Unexpected client connection parameters values\n");
                 status = OpcUa_BadUnexpectedError;
             }
+            free(serviceEvent);
             serviceEvent = NULL;
         }else{
             printf("<Stub_Server: Unexpected event received '%d'\n", serviceEvent->event);
@@ -260,6 +262,7 @@ int main(void){
             printf("<Stub_Server: Unexpected event received '%d'\n", serviceEvent->event);
             status = OpcUa_BadUnexpectedError;
         }
+        free(serviceEvent);
         serviceEvent = NULL;
     }
 
@@ -294,6 +297,7 @@ int main(void){
             printf("<Stub_Server: Unexpected event received '%d'\n", serviceEvent->event);
             status = OpcUa_BadUnexpectedError;
         }
+        free(serviceEvent);
         serviceEvent = NULL;
     }
 
@@ -305,7 +309,7 @@ int main(void){
                                      0);
 
     SOPC_StatusCode closeStatus = STATUS_OK;
-    while ((STATUS_OK == closeStatus || OpcUa_BadWouldBlock == status) && serviceEvent == NULL && loopCpt * sleepTimeout <= loopTimeout){
+    while ((STATUS_OK == closeStatus || OpcUa_BadWouldBlock == closeStatus) && serviceEvent == NULL && loopCpt * sleepTimeout <= loopTimeout){
         closeStatus = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
         if(STATUS_OK != status){
             loopCpt++;
@@ -334,6 +338,7 @@ int main(void){
             printf("<Stub_Server: Unexpected event received '%d'\n", serviceEvent->event);
             status = OpcUa_BadUnexpectedError;
         }
+        free(serviceEvent);
         serviceEvent = NULL;
     }
 

@@ -198,6 +198,7 @@ int main(int argc, char *argv[]){
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
             status = OpcUa_BadSecureChannelClosed;
         }
+        free(serviceEvent);
         serviceEvent = NULL;
     }
     if(STATUS_OK != status){
@@ -287,6 +288,7 @@ int main(int argc, char *argv[]){
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
             status = OpcUa_BadUnexpectedError;
         }
+        free(serviceEvent);
         serviceEvent = NULL;
     }
     if(STATUS_OK != status){
@@ -326,6 +328,7 @@ int main(int argc, char *argv[]){
             printf(">>Stub_Client: Unexpected event received '%d'\n", serviceEvent->event);
             status = OpcUa_BadSecureChannelClosed;
         }
+        free(serviceEvent);
         serviceEvent = NULL;
         if(STATUS_OK != status){
             printf(">>Stub_Client: close secure connection failed\n");
