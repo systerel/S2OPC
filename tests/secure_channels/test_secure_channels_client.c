@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 1000000;
+    const uint32_t loopTimeout = 10000;
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
@@ -272,7 +272,10 @@ int main(int argc, char *argv[]){
                     serviceEvent->auxParam == 0){
                 SOPC_EncodeableType* encType = NULL;
                 SOPC_MsgBodyType_Read((SOPC_Buffer*) serviceEvent->params,
-                        &encType);
+                                      &encType);
+                SOPC_Buffer_Delete((SOPC_Buffer*) serviceEvent->params);
+                serviceEvent->params = NULL;
+
                 if(encType == &OpcUa_ServiceFault_EncodeableType){
                     printf(">>Stub_Client: GetEndpoint service call failed with a service fault => OK\n");
                 }else if(encType == &OpcUa_GetEndpointsResponse_EncodeableType){
@@ -280,6 +283,7 @@ int main(int argc, char *argv[]){
                 }else{
                     status = OpcUa_BadUnknownResponse;
                 }
+
             }else{
                 printf(">>Stub_Client: Unexpected service received message parameters values\n");
                 status = OpcUa_BadUnexpectedError;

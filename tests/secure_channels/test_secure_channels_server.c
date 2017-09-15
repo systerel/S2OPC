@@ -43,7 +43,7 @@ int main(void){
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 200000;
+    const uint32_t loopTimeout = 10000;
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
@@ -222,6 +222,8 @@ int main(void){
                 SOPC_EncodeableType* encType = NULL;
                 assert(STATUS_OK == SOPC_MsgBodyType_Read((SOPC_Buffer*) serviceEvent->params,
                                                           &encType));
+                SOPC_Buffer_Delete((SOPC_Buffer*) serviceEvent->params);
+                serviceEvent->params = NULL;
                 if(encType == &OpcUa_GetEndpointsRequest_EncodeableType){
                     printf("<Stub_Server: Received a GetEndpoint service request => OK\n");
 
