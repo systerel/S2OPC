@@ -115,7 +115,8 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
     // READ message size
     if(result != false){
         status = SOPC_UInt32_Read(&chunkCtx->currentMsgSize, chunkCtx->chunkInputBuffer);
-        if(STATUS_OK != status){
+        if(STATUS_OK != status || chunkCtx->currentMsgSize <= SOPC_TCP_UA_HEADER_LENGTH){
+            // Message size cannot be less or equal to the TCP UA header length
             result = false;
         }
     }
@@ -914,7 +915,7 @@ static SOPC_StatusCode SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnec
 
     SOPC_StatusCode status = STATUS_OK;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
-    // Note: we do not treat multiple chunks => guaranteed by HEL/ACK exchanged
+    // Note: we do not treat multiple chunks => guaranteed by HEL/ACK exchanged (chunk config)
     assert(chunkCtx->currentMsgIsFinal == SOPC_MSG_ISFINAL_FINAL);
 
     bool asymmSecuHeader = false;
@@ -1153,38 +1154,47 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
 
             bool completePayload = false;
             if(chunkCtx->chunkInputBuffer->length >= SOPC_TCP_UA_HEADER_LENGTH){
-                // Message header is decode but message payload not (completly) retrieved
+                // Message header is decoded but message payload not (completly) retrieved
                 //  => attempt to retrieve complete message payload
-                assert(chunkCtx->currentMsgSize > 0);
+                assert(chunkCtx->currentMsgSize > 0); // message size was decoded
                 assert(chunkCtx->currentMsgType != SOPC_MSG_TYPE_INVALID);
                 assert(chunkCtx->currentMsgIsFinal != SOPC_MSG_ISFINAL_INVALID);
 
                 sizeAvailable = receivedBuffer->length - receivedBuffer->position;
                 // Incomplete message payload data size already retrieved in input buffer
                 sizeAlreadyRead = chunkCtx->chunkInputBuffer->length - chunkCtx->chunkInputBuffer->position;
-                sizeToRead = chunkCtx->currentMsgSize - SOPC_TCP_UA_HEADER_LENGTH - sizeAlreadyRead;
 
-                if(sizeAvailable >= sizeToRead){
-                    // Complete payload available: retrieve payload data from received buffer
-                    result = SC_Chunks_ReadDataFromReceivedBuffer(chunkCtx->chunkInputBuffer,
-                                                                  receivedBuffer,
-                                                                  sizeToRead);
-                    if(result == false){
-                        errorStatus = OpcUa_BadTcpMessageTooLarge;
-                    }
-
-                    // Enough data to read complete message
-                    completePayload = true;
+                if(chunkCtx->currentMsgSize > SOPC_TCP_UA_HEADER_LENGTH + sizeAlreadyRead){
+                    sizeToRead = chunkCtx->currentMsgSize - SOPC_TCP_UA_HEADER_LENGTH - sizeAlreadyRead;
                 }else{
+                    // Size provided by message seems invalid
+                    result = false;
+                    errorStatus = OpcUa_BadTcpInternalError; // not really internal no error corresponding
+                }
 
-                    result = SC_Chunks_ReadDataFromReceivedBuffer(chunkCtx->chunkInputBuffer,
-                                                                  receivedBuffer,
-                                                                  sizeAvailable);
+                if(result != false){
+                    if(sizeAvailable >= sizeToRead){
+                        // Complete payload available: retrieve payload data from received buffer
+                        result = SC_Chunks_ReadDataFromReceivedBuffer(chunkCtx->chunkInputBuffer,
+                                                                      receivedBuffer,
+                                                                      sizeToRead);
+                        if(result == false){
+                            errorStatus = OpcUa_BadTcpMessageTooLarge;
+                        }
 
-                    if(result == false){
-                        errorStatus = OpcUa_BadTcpMessageTooLarge;
+                        // Enough data to read complete message
+                        completePayload = true;
+                    }else{
+
+                        result = SC_Chunks_ReadDataFromReceivedBuffer(chunkCtx->chunkInputBuffer,
+                                                                      receivedBuffer,
+                                                                      sizeAvailable);
+
+                        if(result == false){
+                            errorStatus = OpcUa_BadTcpMessageTooLarge;
+                        }
+
                     }
-
                 }
 
             }
@@ -1372,12 +1382,12 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
         }
     }
     if(result != false){
-        if(toSign != false && bsSenderCert.Length>0){ // Field shall be null if message not signed
+        if(toSign != false && bsSenderCert.Length > 0){
             if(STATUS_OK != SOPC_ByteString_Write(&bsSenderCert, buffer)){
                 result = false;
                 *errorStatus = OpcUa_BadTcpInternalError;
             }
-        }else if(toSign == false){
+        }else if(toSign == false){ // Field shall be null if message not signed
             // Note: foundation stack expects -1 value whereas 0 is also valid:
             const int32_t minusOne = -1;
             if(STATUS_OK != SOPC_Int32_Write(&minusOne, buffer)){
@@ -1386,7 +1396,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
             }
             // NULL string: nothing to write
         }else{
-            // Certificate shall be defined in configuration if necessary
+            // Certificate shall be defined in configuration if necessary (configuration constraint)
             assert(false);
         }
     }
@@ -1446,7 +1456,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(SOPC_SecureConnection*     scConn
             }
             // NULL string: nothing to write
         }else{
-            // Certificate shall be defined in configuration if necessary
+            // Certificate shall be defined in configuration if necessary (configuration constraint)
             assert(false);
         }
     }
@@ -1924,7 +1934,7 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
         /* ASYMMETRIC CASE */
 
         SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
-        assert(scConfig != NULL);
+        assert(scConfig != NULL); // Even on server side it is guaranteed by secure connection state manager (no sending in wrong state)
         const Certificate* otherAppCertificate = NULL;
         if(scConnection->isServerConnection == false){
             // Client side
@@ -2079,7 +2089,7 @@ static SOPC_StatusCode SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnec
 
             // Note: when sending a secure conversation message, the secure connection configuration shall be defined
             scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->endpointConnectionConfigIdx);
-            assert(scConfig != NULL);
+            assert(scConfig != NULL); // Even on server side guaranteed by the secure connection state manager
 
             bool toEncrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, isOPN);
             bool toSign = SC_Chunks_IsMsgSigned(scConfig->msgSecurityMode);
@@ -2199,7 +2209,7 @@ static SOPC_StatusCode SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnec
                 if(result != false){
                     assert(nonEncryptedBuffer->length < nonEncryptedBuffer->position + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
                     if(STATUS_OK != SOPC_Buffer_SetDataLength(nonEncryptedBuffer, nonEncryptedBuffer->position + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH) ||
-                            STATUS_OK != SOPC_Buffer_SetPosition(nonEncryptedBuffer, nonEncryptedBuffer->position + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH)){
+                       STATUS_OK != SOPC_Buffer_SetPosition(nonEncryptedBuffer, nonEncryptedBuffer->position + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH)){
                         result = false;
                         *errorStatus = OpcUa_BadTcpInternalError;
                     }
