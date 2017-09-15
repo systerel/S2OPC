@@ -2411,17 +2411,31 @@ static SOPC_StatusCode SC_Chunks_TreatSendBuffer(SOPC_SecureConnection* scConnec
             }
 
             if(result != false && scConnection->isServerConnection == false){
-                /* CLIENT SIDE: RECORD REQUEST SENT */
-                SOPC_Msg_Type* msgType = calloc(1, sizeof(SOPC_Msg_Type));
-                if(msgType != NULL){
-                    *msgType = sendMsgType;
-                    if(msgType != SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, requestId, (void*) msgType)){
+                SOPC_Msg_Type* msgType = NULL;
+                switch(sendMsgType){
+                case SOPC_MSG_TYPE_SC_OPN:
+                case SOPC_MSG_TYPE_SC_MSG:
+                    /* CLIENT SIDE: RECORD REQUEST SENT (response expected)*/
+                    msgType = calloc(1, sizeof(SOPC_Msg_Type));
+                    if(msgType != NULL){
+                        *msgType = sendMsgType;
+                        if(msgType != SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, requestId, (void*) msgType)){
+                            result = false;
+                        }
+                    }else{
                         result = false;
                     }
-                }else{
-                    result = false;
+                    break;
+                case SOPC_MSG_TYPE_SC_CLO:
+                    // No response expected
+                    break;
+                case SOPC_MSG_TYPE_HEL:
+                case SOPC_MSG_TYPE_ACK:
+                case SOPC_MSG_TYPE_ERR:
+                case SOPC_MSG_TYPE_INVALID:
+                default:
+                    assert(false);
                 }
-
             }
 
         }else{

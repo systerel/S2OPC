@@ -106,10 +106,46 @@ static bool SC_CloseConnection(uint32_t connectionIdx){
             // Clear TCP sequence properties
             assert(scConnection->tcpSeqProperties.sentRequestIds != NULL);
             SLinkedList_Delete(scConnection->tcpSeqProperties.sentRequestIds);
+            scConnection->tcpSeqProperties.sentRequestIds = NULL;
+
+            // Clear TCP asymmetric security properties
+            if(scConnection->serverAsymmSecuInfo.clientCertificate){
+                KeyManager_Certificate_Free(scConnection->serverAsymmSecuInfo.clientCertificate);
+                scConnection->serverAsymmSecuInfo.clientCertificate = NULL;
+            }
+            // scConnection->serverAsymmSecuInfo.securityPolicyUri => do not free (pointer to config data)
+            scConnection->serverAsymmSecuInfo.securityPolicyUri = NULL;
+
+            if(scConnection->cryptoProvider != NULL){
+                CryptoProvider_Free(scConnection->cryptoProvider);
+                scConnection->cryptoProvider = NULL;
+            }
+
+            // Clear security sets
+            if(scConnection->precedentSecuKeySets.receiverKeySet != NULL){
+                KeySet_Delete(scConnection->precedentSecuKeySets.receiverKeySet);
+                scConnection->precedentSecuKeySets.receiverKeySet = NULL;
+            }
+
+            if(scConnection->precedentSecuKeySets.senderKeySet != NULL){
+                KeySet_Delete(scConnection->precedentSecuKeySets.senderKeySet);
+                scConnection->precedentSecuKeySets.senderKeySet = NULL;
+            }
+
+            if(scConnection->currentSecuKeySets.receiverKeySet != NULL){
+                KeySet_Delete(scConnection->currentSecuKeySets.receiverKeySet);
+                scConnection->currentSecuKeySets.receiverKeySet = NULL;
+            }
+
+            if(scConnection->currentSecuKeySets.senderKeySet != NULL){
+                KeySet_Delete(scConnection->currentSecuKeySets.senderKeySet);
+                scConnection->currentSecuKeySets.senderKeySet = NULL;
+            }
 
             // Clear nonce
             if(scConnection->clientNonce != NULL){
                 SecretBuffer_DeleteClear(scConnection->clientNonce);
+                scConnection->clientNonce = NULL;
             }
 
             if(scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT){
@@ -721,6 +757,9 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
                                                  0);
     }
 
+    OpcUa_RequestHeader_Clear(&reqHeader);
+    OpcUa_OpenSecureChannelRequest_Clear(&opnReq);
+
     return result;
 }
 
@@ -794,11 +833,17 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
             }
 
             if(result != false){
-                result = SC_DeriveSymmetricKeySets(false,
-                                                   scConnection->cryptoProvider,
-                                                   scConnection->clientNonce,
-                                                   SecretBuffer_NewFromExposedBuffer(opnResp->ServerNonce.Data, opnResp->ServerNonce.Length),
-                                                   &scConnection->currentSecuKeySets);
+                SecretBuffer* secretServerNonce = SecretBuffer_NewFromExposedBuffer(opnResp->ServerNonce.Data, opnResp->ServerNonce.Length);
+                if(secretServerNonce != NULL){
+                    result = SC_DeriveSymmetricKeySets(false,
+                                                       scConnection->cryptoProvider,
+                                                       scConnection->clientNonce,
+                                                       secretServerNonce,
+                                                       &scConnection->currentSecuKeySets);
+                    SecretBuffer_DeleteClear(secretServerNonce);
+                }else{
+                    result = false;
+                }
             }
 
             SecretBuffer_DeleteClear(scConnection->clientNonce);
