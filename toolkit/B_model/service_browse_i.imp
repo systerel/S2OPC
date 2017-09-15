@@ -125,6 +125,9 @@ OPERATIONS
 
     fill_continuation_point(p_bvi, p_continue_ref, p_ref) =
     BEGIN
+        /* Spec specifies "Good" when there is a continuation point,
+         * but the existing servers say that a valid "Good" is STATUS_OK... */
+        set_ResponseBrowse_BrowseStatus(p_bvi, e_sc_ok);
         IF  p_continue_ref = TRUE THEN
             set_ResponseBrowse_ContinuationPoint(p_bvi, p_ref)
         ELSE

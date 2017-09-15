@@ -71,11 +71,10 @@ void msg_browse_response_bs__INITIALISATION(void)
   --------------------*/
 void msg_browse_response_bs__set_ResponseBrowse_BrowseStatus(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
-   const t_bool msg_browse_response_bs__p_bool)
+   const constants__t_StatusCode_i msg_browse_response_bs__p_sc)
 {
     assert(NULL != pBrowseStatus);
-    /* TODO: this should raise a warning until type is changed */
-    pBrowseStatus[msg_browse_response_bs__p_bvi] = !msg_browse_response_bs__p_bool;
+    util_status_code__B_to_C(msg_browse_response_bs__p_sc, &pBrowseStatus[msg_browse_response_bs__p_bvi]);
 }
 
 

@@ -36,7 +36,7 @@ DEFINITIONS
     ;
 
     d_inv ==
-        ResponseBrowse_BrowseStatus        : t_BrowseValue +-> BOOL                                  &
+        ResponseBrowse_BrowseStatus        : t_BrowseValue +-> t_StatusCode                          &
         ResponseBrowse_ContinuationPoint   : t_BrowseValue +-> t_Reference                           &
         ResponseBrowse_Res_ReferenceTypeId : t_BrowseValue --> (t_BrowseResult +-> t_NodeId)         &
         ResponseBrowse_Res_Forwards        : t_BrowseValue --> (t_BrowseResult +-> BOOL)             &

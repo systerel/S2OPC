@@ -52,7 +52,7 @@ ABSTRACT_VARIABLES
     d_variables
 
 INVARIANT
-    ResponseBrowse_BrowseStatus        : t_BrowseValue +-> BOOL                                  &
+    ResponseBrowse_BrowseStatus        : t_BrowseValue +-> t_StatusCode                          &
     ResponseBrowse_ContinuationPoint   : t_BrowseValue +-> t_Reference                           &
     /* TODOPAB: comment on gère la taille non connue à l'avance de ces tableaux de BrowseResult  ??? */
     ResponseBrowse_Res_ReferenceTypeId : t_BrowseValue +-> (t_BrowseResult +-> t_NodeId)         &
@@ -68,13 +68,14 @@ INITIALISATION
 
 OPERATIONS
 
-    set_ResponseBrowse_BrowseStatus(p_bvi, p_bool) =
+    set_ResponseBrowse_BrowseStatus(p_bvi, p_sc) =
     PRE
         p_bvi  : t_BrowseValue_i &
         p_bvi  : t_BrowseValue   &
-        p_bool : BOOL
+        p_sc : t_StatusCode_i &
+        p_sc : t_StatusCode
     THEN
-        ResponseBrowse_BrowseStatus(p_bvi) := p_bool
+        ResponseBrowse_BrowseStatus(p_bvi) := p_sc
     END
     ;
 
