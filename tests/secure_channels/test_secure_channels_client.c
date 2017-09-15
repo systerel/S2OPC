@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 10000;
+    const uint32_t loopTimeout = 1000000;
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
@@ -333,14 +333,14 @@ int main(int argc, char *argv[]){
     }
 
     printf(">>Stub_Client: Final status: %x\n", status);
+    SOPC_Toolkit_Clear();
+
     PKIProviderStack_Free(pki);
     SOPC_String_Clear(&stEndpointUrl);
     KeyManager_Certificate_Free(crt_cli);
     KeyManager_Certificate_Free(crt_srv);
     KeyManager_Certificate_Free(crt_ca);
     KeyManager_AsymmetricKey_Free(priv_cli);
-
-    SOPC_Toolkit_Clear();
 
     if(STATUS_OK == status){
         printf(">>Stub_Client: Stub_Client test: OK\n");

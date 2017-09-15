@@ -33,7 +33,7 @@
 #include "sopc_encoder.h"
 #include "sopc_secure_channels_api.h"
 
-static bool cryptoDeactivated = true;
+static bool cryptoDeactivated = false;
 
 int main(void){
     SOPC_StatusCode status = STATUS_OK;
@@ -42,7 +42,7 @@ int main(void){
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 500;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 20000;
+    const uint32_t loopTimeout = 200000;
     // Counter to stop waiting responses after 5 seconds
     uint32_t loopCpt = 0;
 
@@ -304,23 +304,24 @@ int main(void){
                                      NULL,
                                      0);
 
-    while ((STATUS_OK == status || OpcUa_BadWouldBlock == status) && serviceEvent == NULL && loopCpt * sleepTimeout <= loopTimeout){
-        status = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
+    SOPC_StatusCode closeStatus = STATUS_OK;
+    while ((STATUS_OK == closeStatus || OpcUa_BadWouldBlock == status) && serviceEvent == NULL && loopCpt * sleepTimeout <= loopTimeout){
+        closeStatus = SOPC_AsyncQueue_NonBlockingDequeue(servicesEvents, (void**) &serviceEvent);
         if(STATUS_OK != status){
             loopCpt++;
             SOPC_Sleep(sleepTimeout);
         }
     }
 
-    if(STATUS_OK != status && loopCpt * sleepTimeout > loopTimeout){
+    if(STATUS_OK != closeStatus && loopCpt * sleepTimeout > loopTimeout){
         status = OpcUa_BadTimeout;
         printf("<Stub_Server: Timeout before server closed listener\n");
-    }else if(STATUS_OK == status && serviceEvent == NULL){
+    }else if(STATUS_OK == closeStatus && serviceEvent == NULL){
         status = OpcUa_BadUnexpectedError;
     }
     loopCpt = 0;
 
-    if(STATUS_OK == status){
+    if(STATUS_OK == closeStatus){
         if(serviceEvent->event == SC_TO_SE_EP_CLOSED){
             if(serviceEvent->eltId == epConfigIdx)
             {
@@ -337,11 +338,11 @@ int main(void){
     }
 
     printf ("<Stub_Server: Final status: %x\n", status);
+    SOPC_Toolkit_Clear();
     PKIProviderStack_Free(pki);
     KeyManager_Certificate_Free(crt_srv);
     KeyManager_Certificate_Free(crt_ca);
     KeyManager_AsymmetricKey_Free(priv_srv);
-    SOPC_Toolkit_Clear();
     if(STATUS_OK == status){
         printf("<Stub_Server: Stub_Server test: OK\n");
     }else{
