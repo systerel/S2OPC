@@ -197,7 +197,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(uint32_t msecTimeout)
 static void* SOPC_SocketsNetworkEventMgr_CyclicThreadLoop(void* nullData){
     (void) nullData;
     while(receptionThread.stopFlag == false){
-        assert(false != SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(CYCLE_TIMEOUT_MS));
+        SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(CYCLE_TIMEOUT_MS);
         SOPC_Sleep(1);
     }
     return NULL;
