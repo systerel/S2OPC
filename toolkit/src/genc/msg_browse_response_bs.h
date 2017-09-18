@@ -2,7 +2,7 @@
 
  File Name            : msg_browse_response_bs.h
 
- Date                 : 14/09/2017 18:06:49
+ Date                 : 15/09/2017 14:19:11
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -51,7 +51,7 @@ extern void msg_browse_response_bs__reset_ResponseBrowse_Res_TypeDefinition(
    const constants__t_BrowseResult_i msg_browse_response_bs__p_bri);
 extern void msg_browse_response_bs__set_ResponseBrowse_BrowseStatus(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
-   const t_bool msg_browse_response_bs__p_bool);
+   const constants__t_StatusCode_i msg_browse_response_bs__p_sc);
 extern void msg_browse_response_bs__set_ResponseBrowse_ContinuationPoint(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
    const constants__t_Reference_i msg_browse_response_bs__p_ref);
