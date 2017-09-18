@@ -34,26 +34,18 @@
 
 
 /*
- * TODO: Change the following structs for the newer model
- * Kept the same data-structures, even if these concrete variables became abstract.
- * Changed the name.
- * Their index is 0-based.
- */
-constants__t_NodeId_i a_NodeId[NB_NODES];
-constants__t_NodeClass_i a_NodeClass[NB_NODES];
-constants__t_Variant_i a_Value[NB_NODES];
-constants__t_StatusCode_i a_Value_StatusCode[NB_NODES];
-
-/*
  * The following are the pointers to arrays containing the nodes the AddressSpace.
  * There are also variables storing required lengths and offsets.
  * These pointers and variables must be initialized before address_space_bs__INITIALISATION is called.
  * Index of the arrays should start at 1, so array[0] is never accessed.
  *
  * Attributes are grouped by families.
- * It is possible to group the 22 attributes in 8 families,
+ * It is possible to group the 22 attributes + 1 pseudo-attribute in 9 families,
  * and to order the nodes by their node class,
  * so that the arrays of the attributes are contiguous.
+ * The pseudo-attribute is HasTypeDefinition,
+ * which has the same properties as an attribute of Object and Variable:
+ * a unique and mandatory field.
  *
  * NodeClass order: Variable, VariableType, ObjectType, ReferenceType, DataType, Method, Object, View
  *
@@ -66,25 +58,53 @@ constants__t_StatusCode_i a_Value_StatusCode[NB_NODES];
  *  - View: ContainsNoLoops
  *  - View+Obj: EventNotifier
  *  - Types: IsAbstract
+ *  - HasTypeDef
  *
  * Offsets:
  *  - All: 0
- *  - Vars: 0
- *  - Vars+Types: 0
- *  - Method: nVariables + nVariableType + nObjectType + nReferenceType + nDataType
- *  - RefType: nVariables + nVariableType + nObjectType
- *  - View: nVariables + nVariableType + nObjectType + nReferenceType + nDataType + nMethod + nObject
- *  - View+Obj: nVariables + nVariableType + nObjectType + nReferenceType + nDataType + nMethod
- *  - Types: nVariables
+ *  - Vars: nViews + nObjects
+ *  - Vars+Types: nViews + nObjects
+ *  - Method: nViews + nObjects + nVariables + nVariableTypes + nObjectTypes + nReferenceTypes + nDataTypes
+ *  - RefType: nViews + nObjects + nVariables + nVariableTypes + nObjectTypes
+ *  - View: 0
+ *  - View+Obj: 0
+ *  - Types: nViews + nObjects + nVariables
+ *  - HasTypeDef: nViews
+ *
+ * Supplementary notes on C types: some of the types are constants__t_type_i *address_space_bs__array;
+ * other types are constants__t_type_i address_space_bs__array.
+ * The choice of which form is used depends on:
+ *  - how the data are generated
+ *  - the used B-type, whether it typedefs to a void * or not
  */
-size_t address_space_bs__nNodeId = 0; /* Required by the hashmap */
+/* Sizes */
+int32_t address_space_bs__nNodeIds = 0; /* Required by the hashmap */
+int32_t address_space_bs__nVariables = 0;
+int32_t address_space_bs__nVariableTypes = 0;
+int32_t address_space_bs__nObjectTypes = 0;
+int32_t address_space_bs__nReferenceTypes = 0;
+int32_t address_space_bs__nDataTypes = 0;
+int32_t address_space_bs__nMethods = 0; /* May be useless */
+int32_t address_space_bs__nObjects = 0;
+int32_t address_space_bs__nViews = 0;
+/* Offsets. These are filled in INITIALISATION(), and are not public */
+int32_t offVars = 0;
+int32_t offVarsTypes = 0;
+int32_t offMethods = 0;
+int32_t offRefTypes = 0;
+int32_t offTypes = 0;
+int32_t offHasTypeDefs = 0;
 /* Family All */
-constants__t_QualifiedName_i address_space_bs__a_BrowseName = NULL;
-constants__t_LocalizedText_i address_space_bs__a_DisplayName = NULL;
+constants__t_NodeId_i           *address_space_bs__a_NodeId = NULL;
+constants__t_NodeClass_i        *address_space_bs__a_NodeClass = NULL;
+constants__t_QualifiedName_i    address_space_bs__a_BrowseName = NULL;
+constants__t_LocalizedText_i    address_space_bs__a_DisplayName = NULL;
 /* Family Vars */
+constants__t_Variant_i          *address_space_bs__a_Value = NULL;
+constants__t_StatusCode_i       *address_space_bs__a_Value_StatusCode = NULL;
 
-/* TODO: HasTypeReference is considered "All", but it should not */
-constants__t_ExpandedNodeId_i address_space_bs__HasTypeDefinition = NULL;
+/* Family HasTypeDefinition */
+constants__t_ExpandedNodeId_i   *address_space_bs__HasTypeDefinition = NULL;
 
 
 /*
@@ -95,11 +115,11 @@ constants__t_ExpandedNodeId_i address_space_bs__HasTypeDefinition = NULL;
  *
  * These pointers to arrays must be initialized before address_space_bs__INITIALISATION is called.
  */
-constants__t_NodeId_i address_space_bs__refs_ReferenceType = NULL;
-constants__t_ExpandedNodeId_i address_space_bs__refs_TargetNode = NULL;
-t_bool *address_space_bs__refs_IsForward = NULL;
-size_t *address_space_bs__RefIndexBegin = NULL;
-size_t *address_space_bs__RefIndexEnd = NULL;
+constants__t_NodeId_i           *address_space_bs__refs_ReferenceType = NULL;
+constants__t_ExpandedNodeId_i   *address_space_bs__refs_TargetNode = NULL;
+bool                            *address_space_bs__refs_IsForward = NULL;
+int32_t                         *address_space_bs__RefIndexBegin = NULL;
+int32_t                         *address_space_bs__RefIndexEnd = NULL;
 
 
 /*------------------------
@@ -107,23 +127,29 @@ size_t *address_space_bs__RefIndexEnd = NULL;
   ------------------------*/
 void address_space_bs__INITIALISATION(void)
 {
-    if(STATUS_OK != gen_addspace(a_NodeId, a_NodeClass, a_Value, a_Value_StatusCode))
-        exit(1);
-
     /* TODO: handle more correctly the assert, provide log, and adequate exit */
-    assert(0 != address_space_bs__nNodeId);
-    assert(NULL != a_NodeId);
-    assert(NULL != a_NodeClass);
+    /* TODO: cleints must be able to not fail here */
+    assert(0 != address_space_bs__nNodeIds);
+    assert(NULL != address_space_bs__a_NodeId);
+    assert(NULL != address_space_bs__a_NodeClass);
     assert(NULL != address_space_bs__a_BrowseName);
     assert(NULL != address_space_bs__a_DisplayName);
-    assert(NULL != a_Value);
-    assert(NULL != a_Value_StatusCode);
-    assert(NULL != address_space_bs__HasTypeDefinition);
+    assert(NULL != address_space_bs__a_Value);
+    assert(NULL != address_space_bs__a_Value_StatusCode);
+    /*assert(NULL != address_space_bs__HasTypeDefinition);*/
     assert(NULL != address_space_bs__refs_ReferenceType);
     assert(NULL != address_space_bs__refs_TargetNode);
     assert(NULL != address_space_bs__refs_IsForward);
     assert(NULL != address_space_bs__RefIndexBegin);
     assert(NULL != address_space_bs__RefIndexEnd);
+
+    /* Compute offsets */
+    offHasTypeDefs = address_space_bs__nViews;
+    offVars = offHasTypeDefs + address_space_bs__nObjects;
+    offVarsTypes = offVars;
+    offTypes = offVars + address_space_bs__nVariables;
+    offRefTypes = offTypes + address_space_bs__nVariableTypes + address_space_bs__nObjectTypes;
+    offMethods = offRefTypes + address_space_bs__nReferenceTypes + address_space_bs__nDataTypes;
 }
 
 
@@ -134,7 +160,6 @@ void address_space_bs__INITIALISATION(void)
 /* As INITIALISATION may use mallocs, needs an UNINIT */
 void address_space_bs__UNINITIALISATION(void)
 {
-    free_addspace(a_NodeId, a_NodeClass, a_Value, a_Value_StatusCode);
 }
 
 
@@ -157,7 +182,7 @@ void address_space_bs__readall_AddressSpace_Node(
     /* Very impressive hashmap with a single entry, and time to compute hash is 0! */
     for(i=0; i<NB_NODES; ++i)
     {
-        pnid = (SOPC_NodeId *)a_NodeId[i];
+        pnid = (SOPC_NodeId *)address_space_bs__a_NodeId[i];
         if(NULL == pnid)
             continue;
 
@@ -185,13 +210,13 @@ void address_space_bs__read_AddressSpace_Attribute_value(
     switch(address_space_bs__aid)
     {
     case constants__e_aid_NodeId:
-        *address_space_bs__variant = util_variant__new_Variant_from_NodeId(a_NodeId[address_space_bs__node-1]);
+        *address_space_bs__variant = util_variant__new_Variant_from_NodeId(address_space_bs__a_NodeId[address_space_bs__node]);
         break;
     case constants__e_aid_NodeClass:
-        *address_space_bs__variant = util_variant__new_Variant_from_NodeClass(a_NodeClass[address_space_bs__node-1]);
+        *address_space_bs__variant = util_variant__new_Variant_from_NodeClass(address_space_bs__a_NodeClass[address_space_bs__node]);
         break;
     case constants__e_aid_Value:
-        *address_space_bs__variant = util_variant__new_Variant_from_Variant(a_Value[address_space_bs__node-1]);
+        *address_space_bs__variant = util_variant__new_Variant_from_Variant(address_space_bs__a_Value[address_space_bs__node-offVarsTypes]);
         break;
     default:
         /* TODO: maybe return NULL here, to be consistent with msg_read_response_bs__write_read_response_iter and service_read__treat_read_request behavior. */
@@ -206,8 +231,9 @@ void address_space_bs__set_Value(
    const constants__t_Variant_i address_space_bs__value)
 {
     /* TODO: the value is not encoded yet. */
-    /* TODO: this may FAIL! But the operation is not specified to be able to fail */
+    /* TODO: this may fail, but the operation is not specified to be able to fail */
     SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
+    constants__t_Variant_i poldvar = NULL;
 
     /* Deep-copy the value */
     if(NULL != pvar)
@@ -215,9 +241,10 @@ void address_space_bs__set_Value(
         SOPC_Variant_Initialize(pvar);
         if(STATUS_OK == SOPC_Variant_Copy(pvar, (SOPC_Variant *)address_space_bs__value))
         {
-            SOPC_Variant_Clear((SOPC_Variant *)a_Value[address_space_bs__node-1]);
-            free((void *)a_Value[address_space_bs__node-1]);
-            a_Value[address_space_bs__node-1] = (constants__t_Variant_i)pvar;
+            poldvar = address_space_bs__a_Value[address_space_bs__node-offVarsTypes];
+            SOPC_Variant_Clear((SOPC_Variant *)poldvar);
+            free((void *)poldvar);
+            poldvar = (constants__t_Variant_i)pvar;
         }
     }
 }
@@ -227,7 +254,7 @@ void address_space_bs__get_Value_StatusCode(
    const constants__t_Node_i address_space_bs__node,
    constants__t_StatusCode_i * const address_space_bs__sc)
 {
-    *address_space_bs__sc = a_Value_StatusCode[address_space_bs__node-1];
+    *address_space_bs__sc = address_space_bs__a_Value_StatusCode[address_space_bs__node-offVarsTypes];
 }
 
 
@@ -258,7 +285,7 @@ void address_space_bs__get_NodeClass(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_NodeClass_i * const address_space_bs__p_node_class)
 {
-    *address_space_bs__p_node_class = a_NodeClass[address_space_bs__p_node-1];
+    *address_space_bs__p_node_class = address_space_bs__a_NodeClass[address_space_bs__p_node];
 }
 
 
@@ -266,7 +293,12 @@ void address_space_bs__get_TypeDefinition(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_ExpandedNodeId_i * const address_space_bs__p_type_def)
 {
-    *address_space_bs__p_type_def = &((SOPC_ExpandedNodeId *)address_space_bs__HasTypeDefinition)[address_space_bs__p_node];
+    /* TODO: Temporary check. HasTypeDefinition is defined by PRE but current implentation does not populate it.
+     *  Also uncomment the assert in address_space_bs__INITIALISATION */
+    if(NULL == address_space_bs__HasTypeDefinition)
+        *address_space_bs__p_type_def = constants__c_ExpandedNodeId_indet;
+    else
+        *address_space_bs__p_type_def = &((SOPC_ExpandedNodeId *)address_space_bs__HasTypeDefinition)[address_space_bs__p_node - offHasTypeDefs];
 }
 
 

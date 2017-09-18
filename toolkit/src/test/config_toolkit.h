@@ -19,13 +19,7 @@
 #define _config_toolkit_h
 
 
-#include <stdbool.h>
-
-
 #define ENDPOINT_URL "opc.tcp://localhost:4841"
-
-
-bool Toolkit_Server_Initialize();
 
 
 #endif

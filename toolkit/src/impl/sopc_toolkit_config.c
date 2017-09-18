@@ -34,6 +34,7 @@
 #include "io_dispatch_mgr.h"
 #include "toolkit_header_init.h"
 
+
 static struct {
     uint8_t     initDone;
     uint8_t     locked;
@@ -57,6 +58,7 @@ static struct {
   .flag = false
 };
 
+
 static uint32_t scConfigIdxMax = 0;
 static uint32_t epConfigIdxMax = 0;
 
@@ -66,9 +68,10 @@ SOPC_EventDispatcherManager* applicationEventDispatcherMgr = NULL;
 static SOPC_ComEvent_Fct* appFct = NULL;
 static SOPC_AddressSpaceNotif_Fct* pAddSpaceFct = NULL;
 
-void SOPC_ApplicationEventDispatcher(int32_t  eventAndType, 
-                                     uint32_t id, 
-                                     void*    params, 
+
+void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
+                                     uint32_t id,
+                                     void*    params,
                                      int32_t  auxParam){
   switch(SOPC_AppEvent_AppEventType_Get(eventAndType)){
   case APP_COM_EVENT:
@@ -94,7 +97,7 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
     if(NULL != pAddSpaceFct){
       pAddSpaceFct(SOPC_AppEvent_AddSpaceEvent_Get(eventAndType),
                    params, // TBD
-                   (SOPC_StatusCode) auxParam); // TBD             
+                   (SOPC_StatusCode) auxParam); // TBD
     }
     break;
   default:
@@ -102,7 +105,7 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
   }
 }
 
-SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
+SOPC_StatusCode SOPC_Internal_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != pAppFct){
       appFct = pAppFct;
@@ -119,7 +122,7 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
           tConfig.epConfigs = SLinkedList_Create(0);
         }
         if(STATUS_OK == status && NULL != tConfig.epConfigs){
-          servicesEventDispatcherMgr = 
+          servicesEventDispatcherMgr =
             SOPC_EventDispatcherManager_CreateAndStart(SOPC_ServicesEventDispatcher,
                                                        "Services event dispatcher manager");
         }
@@ -137,6 +140,13 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
     }
     return status;
 }
+
+
+SOPC_StatusCode SOPC_ToolkitClient_Initialize(SOPC_ComEvent_Fct* pAppFct)
+{
+    return SOPC_Internal_Toolkit_Initialize(pAppFct);
+}
+
 
 void SOPC_Internal_AllClientSecureChannelsDisconnected(){
   Mutex_Lock(&closeAllConnectionsSync.mutex);
@@ -178,7 +188,7 @@ void SOPC_Toolkit_Clear(){
         Mutex_UnlockAndWaitCond(&closeAllConnectionsSync.cond, &closeAllConnectionsSync.mutex);
       }
       Mutex_Unlock(&closeAllConnectionsSync.mutex);
-      
+
       Mutex_Lock(&tConfig.mut);
       status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
       (void) status; // log
@@ -187,7 +197,7 @@ void SOPC_Toolkit_Clear(){
       SOPC_TEMP_ClearEventDispMgr();
       SOPC_StackConfiguration_Clear();
       SLinkedList_Delete(tConfig.scConfigs);
-      SLinkedList_Delete(tConfig.epConfigs);       
+      SLinkedList_Delete(tConfig.epConfigs);
       appFct = NULL;
       pAddSpaceFct = NULL;
       tConfig.locked = false;

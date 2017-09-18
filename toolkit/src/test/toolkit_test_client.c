@@ -62,10 +62,11 @@ void Test_ComEvent_Fct(SOPC_App_Com_Event event,
        OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) param;
        cptReadResps++;
        if(cptReadResps <= 1){
-         test_results_set_service_result(test_read_request_response(readResp,
+         test_results_set_service_result(/* test_read_request_response(readResp,
                                                                     status,
                                                                     0)
-                                         ? (!FALSE):FALSE);
+                                         ? (!FALSE): */ FALSE);
+         printf(" Test_ComEvent_Fct: test_read_request_response unavailable for now\n");
        }else{
          // Second read response is to test write effect (through read result)
          test_results_set_service_result(
@@ -87,9 +88,9 @@ void Test_ComEvent_Fct(SOPC_App_Com_Event event,
 }
 
 /* Function to build the read service request message */
-void* getReadRequest_message(){
+/*void* getReadRequest_message(){
   return read_new_read_request();
-}
+}*/
 
 /* Function to build the verification read request */
 void* getReadRequest_verif_message() {
@@ -127,7 +128,7 @@ int main(void){
 
   /* Init stack configuration */
   if(STATUS_OK == status){
-    status = SOPC_Toolkit_Initialize(Test_ComEvent_Fct);
+    status = SOPC_ToolkitClient_Initialize(Test_ComEvent_Fct);
     if(STATUS_OK != status){
       printf(">>Test_Client_Toolkit: Failed initializing\n");
     }else{
@@ -193,6 +194,7 @@ int main(void){
     printf(">>Test_Client_Toolkit: Session activated: NOK'\n");
   }
 
+#if 0
   if(STATUS_OK == status){
     /* Create a service request message and send it through session (read service)*/
     // msg freed when sent
@@ -300,6 +302,7 @@ int main(void){
   /* Now the request can be freed */
   test_results_set_WriteRequest(NULL);
   tlibw_free_WriteRequest((OpcUa_WriteRequest **) &pWriteReq);
+#endif
 
   /* Close the session */
   if(constants__c_session_indet != session){

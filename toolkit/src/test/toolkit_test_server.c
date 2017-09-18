@@ -60,9 +60,6 @@ int main(void)
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
-  /* Init toolkit */
-  Toolkit_Server_Initialize();
-
   // Secu policy configuration: empty
   SOPC_SecurityPolicy secuConfig[1];
   SOPC_String_Initialize(&secuConfig[0].securityPolicy);
@@ -83,7 +80,7 @@ int main(void)
 
   // Init stack configuration
   if(STATUS_OK == status){
-    status = SOPC_Toolkit_Initialize(Test_ComEvent_Fct);
+    status = SOPC_ToolkitServer_Initialize(Test_ComEvent_Fct);
     if(STATUS_OK != status){
       printf("<Test_Server_Toolkit: Failed initializing\n");
     }else{

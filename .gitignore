@@ -3,8 +3,8 @@
 stack/.settings/
 .*.sw?
 *~
-stack/build/
-stack/out/
+build/
+out/
 stack/apidoc/
 stack/fbuild/
 stack/build_platform/
@@ -16,8 +16,6 @@ stack/.pdepend
 stack/.tdepend
 stack/.tdepend.tmp
 stack/install
-toolkit/build
-toolkit/out
 bdp/
 tradc/
 depand/

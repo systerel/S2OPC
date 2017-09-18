@@ -30,7 +30,7 @@
 extern SOPC_EventDispatcherManager* servicesEventDispatcherMgr;
 
 /**
- *  \brief  Initialize the toolkit configuration, libraries and threads
+ *  \brief  Initialize the toolkit configuration, libraries and threads, server side
  *
  *  \param pAppFct  Pointer to applicative code function in charge of toolkit communication events
  *
@@ -39,7 +39,19 @@ extern SOPC_EventDispatcherManager* servicesEventDispatcherMgr;
  *  OpcUa_BadInvalidState if toolkit already initialized and
  *  STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct);
+SOPC_StatusCode SOPC_ToolkitServer_Initialize(SOPC_ComEvent_Fct* pAppFct);
+
+/**
+ *  \brief  Initialize the toolkit configuration, libraries and threads, server side
+ *
+ *  \param pAppFct  Pointer to applicative code function in charge of toolkit communication events
+ *
+ *  \return STATUS_OK if initialization succeeded,
+ *  STATUS_INVALID_PARAMETER if \p pAppFct == NULL or
+ *  OpcUa_BadInvalidState if toolkit already initialized and
+ *  STATUS_NOK otherwise
+ */
+SOPC_StatusCode SOPC_ToolkitClient_Initialize(SOPC_ComEvent_Fct* pAppFct);
 
 /**
  *  \brief  Define toolkit configuration as configured and lock its state until toolkit clear operation
@@ -57,7 +69,7 @@ void SOPC_Toolkit_Clear();
 
 /**
  *  \brief Set the given Address Space for the current toolkit server
- *  (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required).
+ *  (SOPC_ToolkitServer_Initialize required, !SOPC_Toolkit_Configured required).
  *  Note: only one address space can be set, further call will be refused.
  *
  *  \param adressSpace  The address space definition
@@ -67,13 +79,13 @@ void SOPC_Toolkit_Clear();
  *  configured or address space is already set, STATUS_NOK otherwise
  */
 // TODO: implement address space configuration
-SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(void*                              addressSpace,
+/*SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(void*                              addressSpace,
                                                          SOPC_AddressSpaceNotif_Fct*        pAddSpaceAccessFct,
-                                                         SOPC_AddressSpaceLocalService_Fct* pLocalServiceFct);
+                                                         SOPC_AddressSpaceLocalService_Fct* pLocalServiceFct); */
 
 /**
  *  \brief Record the given secure channel configuration in given index
- *  (SOPC_Toolkit_Initialize required, !SOPC_Toolkit_Configured required)
+ *  (SOPC_ToolkitClient_Initialize required, !SOPC_Toolkit_Configured required)
  *
  *  \return secure channel configuration index if configuration succeeded,
  *  0 if toolkit is not initialized, already

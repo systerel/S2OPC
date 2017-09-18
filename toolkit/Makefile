@@ -7,6 +7,7 @@ PATHTRAD=./src/genc
 PATHIMPL=./src/impl
 PATHTEST=./src/test
 PATHADDS=./address_space_generation
+PATHADDC=$(PATHADDS)/genc
 
 ifndef STACK_INSTALL
     STACK_INSTALL=../install_stack
@@ -19,7 +20,7 @@ CC=gcc
 C99FLAGS=-std=c99 -pedantic
 CFLAGS  =-g3 -c -Wall -Wextra -O0 -Wno-unused-parameter $(C99FLAGS)
 LFLAGS  =-g
-INCLUDES=-I$(PATHTRAD) -I. -I$(STACK_H) -I$(PATHIMPL) -I$(PATHTEST) -I$(PATHADDS)
+INCLUDES=-I$(PATHTRAD) -I. -I$(STACK_H) -I$(PATHIMPL) -I$(PATHTEST) -I$(PATHADDS) -I$(PATHADDC)
 LIBS    =-L$(STACK_LIB) -L$(CRYPTO_LIB) -lm -lingopcs -lmbedcrypto -lmbedx509 -lpthread -lrt
 
 OBJS        =toolkit_header_init.o \
@@ -28,9 +29,10 @@ OBJS        =toolkit_header_init.o \
              service_write_decode_bs.o response_write_bs.o \
              service_get_endpoints_bs.o \
              gen_addspace.o util_variant.o \
-             testlib_read_response.o wrap_read.o testlib_write.o \
+             testlib_write.o \
              service_browse.o service_browse_seq.o service_browse_seq_it.o \
              msg_browse_response_bs.o service_browse_decode_bs.o
+             #testlib_read_response.o wrap_read.o
 OBJS        += toolkit_header.o io_dispatch_mgr.o service_mgr.o session_mgr.o session_core.o session_core_1_bs.o \
                session_async_bs.o session_request_handle_bs.o \
                channel_mgr_bs.o request_handle_bs.o message_in_bs.o message_out_bs.o \
@@ -40,21 +42,21 @@ OBJS        += toolkit_header.o io_dispatch_mgr.o service_mgr.o session_mgr.o se
 OBJS        += sopc_services_events.o sopc_toolkit_config.o
 CLIENT_OBJS =toolkit_test_client.o
 SERVER_OBJS =toolkit_test_server.o
-READ_OBJS   =toolkit_test_read.o
-WRITE_OBJS  =toolkit_test_write.o
+#READ_OBJS   =toolkit_test_read.o
+#WRITE_OBJS  =toolkit_test_write.o
 
 CLIENT_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(CLIENT_OBJS))
 SERVER_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(SERVER_OBJS))
 READ_EXEC   :=$(patsubst %.o,$(PATHEXEC)/%,$(READ_OBJS))
 WRITE_EXEC  :=$(patsubst %.o,$(PATHEXEC)/%,$(WRITE_OBJS))
-SERVER_OBJS += add.o config_toolkit_server.o
+SERVER_OBJS += add.o sopc_toolkitserver_config.o
 OBJS        :=$(patsubst %,$(PATHOBJ)/%,$(OBJS))
 CLIENT_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(CLIENT_OBJS))
 SERVER_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(SERVER_OBJS))
 READ_OBJS   :=$(patsubst %,$(PATHOBJ)/%,$(READ_OBJS))
 WRITE_OBJS  :=$(patsubst %,$(PATHOBJ)/%,$(WRITE_OBJS))
 
-.PHONY: all config clean trad client_server_test
+.PHONY: all config clean trad asg client_server_test
 
 default: all
 
@@ -84,6 +86,9 @@ trad:
 	    mv $(PATHTRAD)/"$$i" $(PATHTRAD)/"$$i"_; \
 	done
 
+asg:
+	@make -C address_space_generation genc/add.c
+
 $(PATHOBJ)/%.o: $(PATHTRAD)/%.c
 	@echo "  CC $@"
 	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
@@ -96,7 +101,7 @@ $(PATHOBJ)/%.o: $(PATHTEST)/%.c
 	@echo "  CC $@"
 	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
 
-$(PATHOBJ)/%.o: $(PATHADDS)/%.c
+$(PATHOBJ)/%.o: $(PATHADDC)/%.c
 	@echo "  CC $@"
 	@$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
 
