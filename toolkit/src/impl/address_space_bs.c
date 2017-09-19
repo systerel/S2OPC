@@ -99,6 +99,8 @@ constants__t_NodeId_i           *address_space_bs__a_NodeId = NULL;
 constants__t_NodeClass_i        *address_space_bs__a_NodeClass = NULL;
 constants__t_QualifiedName_i    address_space_bs__a_BrowseName = NULL;
 constants__t_LocalizedText_i    address_space_bs__a_DisplayName = NULL;
+int32_t                         *address_space_bs__a_DisplayName_begin = NULL;
+int32_t                         *address_space_bs__a_DisplayName_end = NULL;
 /* Family Vars */
 constants__t_Variant_i          *address_space_bs__a_Value = NULL;
 constants__t_StatusCode_i       *address_space_bs__a_Value_StatusCode = NULL;
@@ -134,6 +136,8 @@ void address_space_bs__INITIALISATION(void)
     assert(NULL != address_space_bs__a_NodeClass);
     assert(NULL != address_space_bs__a_BrowseName);
     assert(NULL != address_space_bs__a_DisplayName);
+    assert(NULL != address_space_bs__a_DisplayName_begin);
+    assert(NULL != address_space_bs__a_DisplayName_end);
     assert(NULL != address_space_bs__a_Value);
     assert(NULL != address_space_bs__a_Value_StatusCode);
     /*assert(NULL != address_space_bs__HasTypeDefinition);*/
@@ -277,7 +281,11 @@ void address_space_bs__get_DisplayName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_LocalizedText_i * const address_space_bs__p_display_name)
 {
-    *address_space_bs__p_display_name = &((SOPC_LocalizedText *)address_space_bs__a_DisplayName)[address_space_bs__p_node];
+    int32_t i = address_space_bs__a_DisplayName_begin[address_space_bs__p_node];
+
+    /* TODO: this constraint should be pushed to dataprep */
+    assert(address_space_bs__a_DisplayName_end[address_space_bs__p_node] >= i);
+    *address_space_bs__p_display_name = &((SOPC_LocalizedText *)address_space_bs__a_DisplayName)[i];
 }
 
 

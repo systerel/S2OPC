@@ -49,6 +49,8 @@ SOPC_StatusCode _ToolkitServer_Initialize_AddressSpace()
         assert(util_NodeClass__C_to_B(NodeClass[i], &address_space_bs__a_NodeClass[i]));
     address_space_bs__a_BrowseName = BrowseName;
     address_space_bs__a_DisplayName = DisplayName;
+    address_space_bs__a_DisplayName_begin = DisplayName_begin;
+    address_space_bs__a_DisplayName_end = DisplayName_end;
     address_space_bs__a_Value = (constants__t_Variant_i *)Value;
     /* Converts status codes */
     address_space_bs__a_Value_StatusCode = status_code;
