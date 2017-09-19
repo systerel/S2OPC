@@ -171,6 +171,12 @@ void util_status_code__B_to_C(constants__t_StatusCode_i bstatus,
   case constants__e_sc_bad_out_of_memory:
     *status = OpcUa_BadOutOfMemory;
     break;
+  case constants__e_sc_bad_nothing_to_do:
+    *status = OpcUa_BadNothingToDo;
+    break;
+  case constants__e_sc_bad_too_many_ops:
+    *status = OpcUa_BadTooManyOperations;
+    break;
   default:
     printf("util_message__B_to_C_status_code\n");
     exit(1);
@@ -184,8 +190,14 @@ t_bool util_status_code__C_to_B(SOPC_StatusCode status,
   case STATUS_OK:
     *bstatus = constants__e_sc_ok;
     break;
+  case STATUS_NOK:
+    *bstatus = constants__e_sc_nok;
+    break;
   case OpcUa_BadSecureChannelClosed:
     *bstatus = constants__e_sc_bad_secure_channel_closed;
+    break;
+  case OpcUa_BadSecureChannelIdInvalid:
+    *bstatus = constants__e_sc_bad_secure_channel_id_invalid;
     break;
   case OpcUa_BadConnectionClosed:
     *bstatus = constants__e_sc_bad_connection_closed;
@@ -213,6 +225,12 @@ t_bool util_status_code__C_to_B(SOPC_StatusCode status,
     break;
   case OpcUa_BadOutOfMemory:
     *bstatus = constants__e_sc_bad_out_of_memory;
+    break;
+  case OpcUa_BadNothingToDo:
+    *bstatus = constants__e_sc_bad_nothing_to_do;
+    break;
+  case OpcUa_BadTooManyOperations:
+    *bstatus = constants__e_sc_bad_too_many_ops;
     break;
   default:
     success = false;
