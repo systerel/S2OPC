@@ -26,7 +26,7 @@ extern int DisplayName_end[];
 extern int reference_begin[];
 extern int reference_end[];
 extern SOPC_NodeId* reference_type[];
-extern SOPC_NodeId* reference_target[];
+extern SOPC_ExpandedNodeId* reference_target[];
 extern bool reference_isForward[];
 extern SOPC_NodeId* NodeId[];
 extern OpcUa_NodeClass NodeClass[];

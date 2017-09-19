@@ -20,13 +20,13 @@ Les templates de productions sont ensuites appliqués à partir de cette variabl
 
 Alias
 ======
-Le reference type d'une reference peut être aliasé. 
+Le reference type d'une reference peut être aliasé.
 Par exemple, l'alias suivant est défini :
      <Alias Alias="HasComponent">i=47</Alias>
 
 Et une référence peut être donnée à l'aide de cet alias par exemple :
      <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objec ...
-      
+
 Lors de la recopie des noeuds, les templates de recopie permettent de remplacer les alias par leur valeur.
 
 
@@ -44,7 +44,7 @@ Indice à 1
 La valeur à l'indice zéro d'un tableau, zéro étant utilisé pour le codage des valeurs indet, est non significative.
 Les valeurs significatives commence à l'indice 1.
 
-Fonction 
+Fonction
 ========
 Le codage des fonctions consiste à produire un tableau des valeurs sont crées dans l'ordre des noeuds.
 Soit la valeur est directe, soit il y a une résolution par exemple dans le cas de la fonction NodeId où la valeur est un pointeur sur la variable correspondante.
@@ -53,7 +53,7 @@ Relation
 ==========
 Les relations sont codées par trois tableaux :
 Un tableau qui est constitué de la liste des listes des valeurs des éléments.
-Par exemple pour la relation 
+Par exemple pour la relation
     - {1|-> 2, 1|->3, 3|->2}
 
 Le tableau est :
@@ -61,7 +61,7 @@ Le tableau est :
 
 Deux tableau qui donnent l'indice de début, et de fin, des éléments associés à l'élément.
 
-Dans le cas précédent on a 
+Dans le cas précédent on a
     - deb = {0, 1, 1, 3}
     - fin = {0, 2, 0, 3}
 
@@ -110,10 +110,11 @@ classes = ('Variable', 'VariableType', 'ObjectType', 'ReferenceType', 'DataType'
 <!-- Création des variables pour les node id -->
 <xsl:for-each select="$nodeid_var_name/*">
 static SOPC_NodeId <xsl:value-of select="@vn"/> = <xsl:apply-templates select="@id" mode="nodeId"/>;<xsl:text/>
+static SOPC_ExpandedNodeId ex_<xsl:value-of select="@vn"/> = {<xsl:apply-templates select="@id" mode="nodeId"/>, NULL, 0};<xsl:text/>
 </xsl:for-each>
 
 <!-- BrowseName -->
-SOPC_QualifiedName BrowseName[NB + 1] = {{0,0,NULL} 
+SOPC_QualifiedName BrowseName[NB + 1] = {{0,0,NULL}
 <xsl:apply-templates select = "$ua_nodes/*/@BrowseName" mode="qName"/>
 };
 
@@ -128,15 +129,15 @@ int ${s}_end[] = {-1, <xsl:value-of select = "for $n in $ua_nodes/* return count
 % endfor
 
 
-<!-- Reference --> 
+<!-- Reference -->
 int reference_begin[] = {0, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:References/*) + 1" separator=", "/>};
-int reference_end[] = {-1, <xsl:value-of select = "for $n in $ua_nodes/* return concat(count($n/preceding-sibling::*/ua:References/*), '+',  count($n/ua:References/*), ' /* ', $n/@NodeId, ' */')" separator=", &#10;"/>};
+int reference_end[] = {-1,&#10;<xsl:value-of select = "for $n in $ua_nodes/* return concat(count($n/preceding-sibling::*/ua:References/*), '+',  count($n/ua:References/*), ' /* ', $n/@NodeId, ' */')" separator=",&#10;"/>};
 SOPC_NodeId* reference_type[] = {NULL,  <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;', $nodeid_var_name/*[@id = $n/@ReferenceType]/@vn)" separator=", "/>};
-SOPC_NodeId* reference_target[] = {NULL,  <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;', $nodeid_var_name/*[@id = $n/text()]/@vn)" separator=", "/>};
+SOPC_ExpandedNodeId* reference_target[] = {{NULL, NULL, 0},  <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;ex_', $nodeid_var_name/*[@id = $n/text()]/@vn)" separator=", "/>};
 bool reference_isForward[]={false, <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return if ($n/@IsForward = 'false') then 'false' else 'true' " separator=", "/>};
 
 <!-- NodeId -->
-SOPC_NodeId* NodeId[NB+1] = {NULL, <xsl:value-of select="for $n in $ua_nodes/* return concat('&amp;', $nodeid_var_name/*[@id = $n/@NodeId]/@vn)" separator=","/>};
+SOPC_NodeId* NodeId[NB+1] = {NULL,&#10;<xsl:value-of select="for $n in $ua_nodes/* return concat('&amp;', $nodeid_var_name/*[@id = $n/@NodeId]/@vn)" separator=",&#10;"/>};
 
 
 <!-- NodeClass -->
@@ -167,7 +168,7 @@ SOPC_SByte AccessLevel[] = {0, <xsl:value-of select = "for $n in $ua_nodes/ua:UA
             <xsl:when test="starts-with($ident, 's')">IdentifierType_String, <xsl:value-of select="$nsIndex"/>, .Data.String = ${write_string("substring-after($ident,'=')")}</xsl:when>
             <xsl:when test="starts-with($ident, 'g')">IdentifierType_Guid, <xsl:value-of select="$nsIndex"/>, <xsl:value-of select="substring-after($ident,'=')"/></xsl:when>
             <xsl:when test="starts-with($ident, 'b')">IdentifierType_ByteString,  <xsl:value-of select="$nsIndex"/>, <xsl:value-of select="substring-after($ident,'=')"/></xsl:when>
-            <xsl:otherwise>	
+            <xsl:otherwise>
                 <xsl:message terminate="yes">Unknown identifier type : '<xsl:value-of select="$ident"/>'.</xsl:message>
             </xsl:otherwise>
         </xsl:choose>
@@ -207,26 +208,26 @@ ${print_value(',{%s,{},{%s,0,toSOPC_String("%s")}}/* %s*/',"regex-group(1)", "st
 </xsl:template>
 
 <xsl:template match="@* | node()" mode="copy">
-	<xsl:copy>
-		<xsl:apply-templates select="@* | node()" mode="copy"/>
-	</xsl:copy>
+    <xsl:copy>
+        <xsl:apply-templates select="@* | node()" mode="copy"/>
+    </xsl:copy>
 </xsl:template>
 
 <!-- génération de deux fonction sur le domaine des classes de noeud:
 La première 'ord_class' associe à une classe un entier permettant d'ordonner les noeuds par class.
-La deuxième 'get_enum_value' retourne l'énuméré C correspondant à une classe. --> 
+La deuxième 'get_enum_value' retourne l'énuméré C correspondant à une classe. -->
 % for (n, f, type) in [('ord_class', lambda x: x, 'integer'), ('get_enum_value', lambda x : 'OpcUa_NodeClass_'+ classes[x-1], 'string')]:
-  <xsl:function name="sys:${n}" as="xsd:${type}"> 
-     <xsl:param name="e"/>
+  <xsl:function name="sys:${n}" as="xsd:${type}">
+    <xsl:param name="e"/>
     <xsl:variable name='ln' select="local-name($e)"/>
-     <xsl:choose>
+    <xsl:choose>
 %   for i in range(1, 9):
-	<xsl:when test="$ln='UA${classes[i-1]}'">${f(i)}</xsl:when>
+    <xsl:when test="$ln='UA${classes[i-1]}'">${f(i)}</xsl:when>
 %   endfor
-	<xsl:otherwise>	
-	   <xsl:message terminate="yes">Unknown class : '<xsl:value-of select="$ln"/>'.</xsl:message>
-	</xsl:otherwise>
-     </xsl:choose>
+    <xsl:otherwise>
+        <xsl:message terminate="yes">Unknown class : '<xsl:value-of select="$ln"/>'.</xsl:message>
+    </xsl:otherwise>
+    </xsl:choose>
   </xsl:function>
 % endfor
 
@@ -234,7 +235,7 @@ La deuxième 'get_enum_value' retourne l'énuméré C correspondant à une class
 
 <%def name="print_value(patt, *args)">
     <%doc>
-    Function that apply the given template string to the 
+    Function that apply the given template string to the
     result of the XPath queries and returns an output formatted string.
     @patt str: a format string
     @args str: a set of XPath expressions
