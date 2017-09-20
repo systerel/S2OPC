@@ -277,7 +277,7 @@ void msg_browse_response_bs__malloc_browse_result(
         *msg_browse_response_bs__p_isallocated = false;
     else {
         ppResRefTypeId[0] = NULL;
-        for(i=1; i<=nAllocReferenceDescription; ++i) {
+        for(i=1; i<=nBrowseResult; ++i) {
             ppResRefTypeId[i] = malloc(sizeof(SOPC_NodeId)*(nAllocReferenceDescription+1));
             if(NULL == ppResRefTypeId[i])
                 *msg_browse_response_bs__p_isallocated = false;
@@ -292,7 +292,7 @@ void msg_browse_response_bs__malloc_browse_result(
         *msg_browse_response_bs__p_isallocated = false;
     else {
         ppResForwards[0] = NULL;
-        for(i=1; i<=nAllocReferenceDescription; ++i) {
+        for(i=1; i<=nBrowseResult; ++i) {
             ppResForwards[i] = malloc(sizeof(bool)*(nAllocReferenceDescription+1));
             if(NULL == ppResForwards[i])
                 *msg_browse_response_bs__p_isallocated = false;
@@ -305,7 +305,7 @@ void msg_browse_response_bs__malloc_browse_result(
         *msg_browse_response_bs__p_isallocated = false;
     else {
         ppResNodeId[0] = NULL;
-        for(i=1; i<=nAllocReferenceDescription; ++i) {
+        for(i=1; i<=nBrowseResult; ++i) {
             ppResNodeId[i] = malloc(sizeof(SOPC_ExpandedNodeId)*(nAllocReferenceDescription+1));
             if(NULL == ppResNodeId[i])
                 *msg_browse_response_bs__p_isallocated = false;
@@ -320,7 +320,7 @@ void msg_browse_response_bs__malloc_browse_result(
         *msg_browse_response_bs__p_isallocated = false;
     else {
         ppResBrowseName[0] = NULL;
-        for(i=1; i<=nAllocReferenceDescription; ++i) {
+        for(i=1; i<=nBrowseResult; ++i) {
             ppResBrowseName[i] = malloc(sizeof(SOPC_QualifiedName)*(nAllocReferenceDescription+1));
             if(NULL == ppResBrowseName[i])
                 *msg_browse_response_bs__p_isallocated = false;
@@ -335,7 +335,7 @@ void msg_browse_response_bs__malloc_browse_result(
         *msg_browse_response_bs__p_isallocated = false;
     else {
         ppResDisplayName[0] = NULL;
-        for(i=1; i<=nAllocReferenceDescription; ++i) {
+        for(i=1; i<=nBrowseResult; ++i) {
             ppResDisplayName[i] = malloc(sizeof(SOPC_LocalizedText)*(nAllocReferenceDescription+1));
             if(NULL == ppResDisplayName[i])
                 *msg_browse_response_bs__p_isallocated = false;
@@ -350,7 +350,7 @@ void msg_browse_response_bs__malloc_browse_result(
         *msg_browse_response_bs__p_isallocated = false;
     else {
         ppResNodeClass[0] = NULL;
-        for(i=1; i<=nAllocReferenceDescription; ++i) {
+        for(i=1; i<=nBrowseResult; ++i) {
             ppResNodeClass[i] = malloc(sizeof(OpcUa_NodeClass)*(nAllocReferenceDescription+1));
             if(NULL == ppResNodeClass[i])
                 *msg_browse_response_bs__p_isallocated = false;
@@ -363,7 +363,7 @@ void msg_browse_response_bs__malloc_browse_result(
         *msg_browse_response_bs__p_isallocated = false;
     else {
         ppResTypeDefinition[0] = NULL;
-        for(i=1; i<=nAllocReferenceDescription; ++i) {
+        for(i=1; i<=nBrowseResult; ++i) {
             ppResTypeDefinition[i] = malloc(sizeof(SOPC_ExpandedNodeId)*(nAllocReferenceDescription+1));
             if(NULL == ppResTypeDefinition[i])
                 *msg_browse_response_bs__p_isallocated = false;
