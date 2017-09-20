@@ -184,9 +184,9 @@ void address_space_bs__readall_AddressSpace_Node(
         return;
 
     /* Very impressive hashmap with a single entry, and time to compute hash is 0! */
-    for(i=0; i<NB_NODES; ++i)
+    for(i=1; i<=address_space_bs__nNodeIds; ++i)
     {
-        pnid = (SOPC_NodeId *)address_space_bs__a_NodeId[i];
+        pnid = ((SOPC_NodeId **)address_space_bs__a_NodeId)[i];
         if(NULL == pnid)
             continue;
 
@@ -195,7 +195,7 @@ void address_space_bs__readall_AddressSpace_Node(
 
         if(nid_cmp == 0) {
             *address_space_bs__nid_valid = true;
-            *address_space_bs__node = i+1;
+            *address_space_bs__node = i;
             return;
         }
     }
@@ -214,7 +214,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(
     switch(address_space_bs__aid)
     {
     case constants__e_aid_NodeId:
-        *address_space_bs__variant = util_variant__new_Variant_from_NodeId(address_space_bs__a_NodeId[address_space_bs__node]);
+        *address_space_bs__variant = util_variant__new_Variant_from_NodeId(((SOPC_NodeId **)address_space_bs__a_NodeId)[address_space_bs__node]);
         break;
     case constants__e_aid_NodeClass:
         *address_space_bs__variant = util_variant__new_Variant_from_NodeClass(address_space_bs__a_NodeClass[address_space_bs__node]);
@@ -306,6 +306,7 @@ void address_space_bs__get_TypeDefinition(
     if(NULL == address_space_bs__HasTypeDefinition)
         *address_space_bs__p_type_def = constants__c_ExpandedNodeId_indet;
     else
+        /* TODO: Verify implementation of HasTypeDefinition in generated AddressSpace before using this code */
         *address_space_bs__p_type_def = &((SOPC_ExpandedNodeId *)address_space_bs__HasTypeDefinition)[address_space_bs__p_node - offHasTypeDefs];
 }
 
@@ -314,7 +315,7 @@ void address_space_bs__get_Reference_ReferenceType(
    const constants__t_Reference_i address_space_bs__p_ref,
    constants__t_NodeId_i * const address_space_bs__p_RefType)
 {
-    *address_space_bs__p_RefType = &((SOPC_ExpandedNodeId *)address_space_bs__refs_ReferenceType)[address_space_bs__p_ref];
+    *address_space_bs__p_RefType = ((SOPC_NodeId **)address_space_bs__refs_ReferenceType)[address_space_bs__p_ref];
 }
 
 
@@ -322,7 +323,7 @@ void address_space_bs__get_Reference_TargetNode(
    const constants__t_Reference_i address_space_bs__p_ref,
    constants__t_ExpandedNodeId_i * const address_space_bs__p_TargetNode)
 {
-    *address_space_bs__p_TargetNode = &((SOPC_NodeId *)address_space_bs__refs_TargetNode)[address_space_bs__p_ref];
+    *address_space_bs__p_TargetNode = ((SOPC_ExpandedNodeId **)address_space_bs__refs_TargetNode)[address_space_bs__p_ref];
 }
 
 

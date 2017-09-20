@@ -47,10 +47,5 @@ SOPC_StatusCode free_addspace(constants__t_NodeId_i     *pnids,
                               constants__t_Variant_i    *pvars,
                               constants__t_StatusCode_i *pscs);
 
-/* Helpers, which shows that this code is ill-organised */
-#ifndef NB_NODES
-#define NB_NODES    1008
-#endif
-
 
 #endif /* _gen_addspace_h */
