@@ -45,7 +45,7 @@ void service_browse_decode_bs__INITIALISATION(void)
    OPERATIONS Clause
   --------------------*/
 void service_browse_decode_bs__decode_browse_request(
-   const constants__t_byte_buffer_i service_browse_decode_bs__req_payload,
+   const constants__t_msg_i service_browse_decode_bs__req_payload,
    constants__t_StatusCode_i * const service_browse_decode_bs__StatusCode_service)
 {
     /* TODO: actually decode something */
