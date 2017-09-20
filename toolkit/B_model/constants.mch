@@ -36,7 +36,13 @@ SETS
                      e_ncl_ObjectType, e_ncl_VariableType, e_ncl_ReferenceType, e_ncl_DataType,
                      e_ncl_View};
     t_Variant_i;
-    t_AttributeId_i = {c_AttributeId_indet, e_aid_NodeId, e_aid_NodeClass, e_aid_Value};
+    t_AttributeId_i = {c_AttributeId_indet,
+                       e_aid_NodeId,
+                       e_aid_NodeClass,
+                       e_aid_BrowseName,
+                       e_aid_DisplayName,
+                       e_aid_Description,
+                       e_aid_Value};
     t_StatusCode_i = {c_StatusCode_indet, e_sc_ok, e_sc_nok,
                       e_sc_bad_secure_channel_closed,
                       e_sc_bad_secure_channel_id_invalid,

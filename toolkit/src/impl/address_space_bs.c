@@ -219,6 +219,12 @@ void address_space_bs__read_AddressSpace_Attribute_value(
     case constants__e_aid_NodeClass:
         *address_space_bs__variant = util_variant__new_Variant_from_NodeClass(address_space_bs__a_NodeClass[address_space_bs__node]);
         break;
+    case constants__e_aid_BrowseName:
+        *address_space_bs__variant = util_variant__new_Variant_from_(address_space_bs__a_[address_space_bs__node-off]);
+        break;
+    case constants__e_aid_DisplayName:
+        *address_space_bs__variant = util_variant__new_Variant_from_(address_space_bs__a_[address_space_bs__node-off]);
+        break;
     case constants__e_aid_Value:
         *address_space_bs__variant = util_variant__new_Variant_from_Variant(address_space_bs__a_Value[address_space_bs__node-offVarsTypes]);
         break;

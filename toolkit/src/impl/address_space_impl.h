@@ -37,6 +37,9 @@ typedef enum {
     c_aid_indet = 0,
     e_aid_NodeId,
     e_aid_NodeClass,
+    e_aid_BrowseName,
+    e_aid_DisplayName,
+    e_aid_Description,
     e_aid_Value = 13,
     e_aid_UserExecutable = 22
 } AttributeId;

@@ -22,6 +22,7 @@
 
 
 #include <stdint.h>
+#include <stdio.h>
 
 #include "msg_read_request_bs.h"
 
@@ -68,10 +69,17 @@ void msg_read_request_bs__getall_req_ReadValue_AttributeId(
     case e_aid_NodeClass:
         *msg_read_request_bs__aid = constants__e_aid_NodeClass;
         break;
+    case e_aid_BrowseName:
+        *msg_read_request_bs__aid = constants__e_aid_BrowseName;
+        break;
+    case e_aid_DisplayName:
+        *msg_read_request_bs__aid = constants__e_aid_DisplayName;
+        break;
     case e_aid_Value:
         *msg_read_request_bs__aid = constants__e_aid_Value;
         break;
     default:
+        printf("msg_read_request_bs__getall_req_ReadValue_AttributeId: unsupported attribute id\n");
         *msg_read_request_bs__isvalid = false;
         break;
     }
