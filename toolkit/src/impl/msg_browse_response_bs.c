@@ -33,11 +33,11 @@
 
 /* Message elements */
 /* All arrays start at 1, to be directly compatible with B operations */
-static int32_t               nBrowseResult;
+static int32_t              nBrowseResult;
 static SOPC_StatusCode      *pBrowseStatus;
 /*static  *pContinuationPoint;*/
-static int32_t               nAllocReferenceDescription; /** Number of usable RefDescr per BrowseResult (number of allocation is nAlloc + 1 so that indices are B-compatible) */
-static int32_t               *pnReferenceDescription; /** Number of used RefDescr by each BrowseResult */
+static int32_t              *pnAllocReferenceDescription; /** Number of usable RefDescr per BrowseResult (number of allocation is nAlloc + 1 so that indices are B-compatible) */
+static int32_t              *pnReferenceDescription; /** Number of used RefDescr by each BrowseResult */
 static SOPC_NodeId          **ppResRefTypeId;
 static bool                 **ppResForwards;
 static SOPC_ExpandedNodeId  **ppResNodeId;
@@ -54,7 +54,7 @@ void msg_browse_response_bs__INITIALISATION(void)
 {
     nBrowseResult               = 0;
     pBrowseStatus               = NULL;
-    nAllocReferenceDescription  = 0;
+    pnAllocReferenceDescription = NULL;
     pnReferenceDescription      = NULL;
     ppResRefTypeId              = NULL;
     ppResForwards               = NULL;
@@ -101,7 +101,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_ReferenceTypeId(
     assert(NULL != ppResRefTypeId);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResRefTypeId[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     assert(STATUS_OK ==
            SOPC_NodeId_Copy(&ppResRefTypeId[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
                             (SOPC_NodeId *)msg_browse_response_bs__p_NodeId));
@@ -116,7 +116,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_Forwards(
     assert(NULL != ppResForwards);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResForwards[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     ppResForwards[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri] = msg_browse_response_bs__p_bool;
 }
 
@@ -129,7 +129,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_BrowseName(
     assert(NULL != ppResBrowseName);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResBrowseName[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     assert(STATUS_OK ==
            SOPC_QualifiedName_Copy(&ppResBrowseName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
                                    (SOPC_QualifiedName *)msg_browse_response_bs__p_BrowseName));
@@ -143,7 +143,7 @@ void msg_browse_response_bs__reset_ResponseBrowse_Res_BrowseName(
     assert(NULL != ppResBrowseName);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResBrowseName[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     SOPC_QualifiedName_Clear(&ppResBrowseName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri]);
 }
 
@@ -156,7 +156,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_DisplayName(
     assert(NULL != ppResDisplayName);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResDisplayName[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     assert(STATUS_OK ==
            SOPC_LocalizedText_Copy(&ppResDisplayName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
                                    (SOPC_LocalizedText *)msg_browse_response_bs__p_DisplayName));
@@ -170,7 +170,7 @@ void msg_browse_response_bs__reset_ResponseBrowse_Res_DisplayName(
     assert(NULL != ppResDisplayName);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResDisplayName[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     SOPC_LocalizedText_Clear(&ppResDisplayName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri]);
 }
 
@@ -183,7 +183,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_NodeClass(
     assert(NULL != ppResNodeClass);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResNodeClass[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     assert(true ==
            util_NodeClass__B_to_C(msg_browse_response_bs__p_NodeClass,
                                   &ppResNodeClass[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri]));
@@ -197,7 +197,7 @@ void msg_browse_response_bs__reset_ResponseBrowse_Res_NodeClass(
     assert(NULL != ppResNodeClass);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResNodeClass[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     ppResNodeClass[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri] = OpcUa_NodeClass_Unspecified;
 }
 
@@ -210,10 +210,14 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_NodeId(
     assert(NULL != ppResNodeId);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResNodeId[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     assert(STATUS_OK ==
            SOPC_ExpandedNodeId_Copy(&ppResNodeId[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
                                     (SOPC_ExpandedNodeId *)msg_browse_response_bs__p_ExpandedNodeId));
+    /* Also update the current number of references recorded for this BrowseResult */
+    /* TODO: this implementation counts on the order of the iterator, which must be increasing */
+    assert(NULL != pnReferenceDescription);
+    pnReferenceDescription[msg_browse_response_bs__p_bvi] = msg_browse_response_bs__p_bri;
 }
 
 
@@ -225,7 +229,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_TypeDefinition(
     assert(NULL != ppResTypeDefinition);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResTypeDefinition[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     /* TODO: Temporary check. HasTypeDefinition shall not be NULL by PRE here. */
     if(NULL == msg_browse_response_bs__p_TypeDefinition)
         SOPC_ExpandedNodeId_Initialize(&ppResTypeDefinition[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri]);
@@ -243,26 +247,29 @@ void msg_browse_response_bs__reset_ResponseBrowse_Res_TypeDefinition(
     assert(NULL != ppResTypeDefinition);
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResTypeDefinition[msg_browse_response_bs__p_bvi]);
-    assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
+    assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     SOPC_ExpandedNodeId_Clear(&ppResTypeDefinition[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri]);
 }
 
 
-void msg_browse_response_bs__malloc_browse_result(
-   const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
-   const t_entier4 msg_browse_response_bs__p_nb_bri,
+void msg_browse_response_bs__malloc_browse_response(
+   const t_entier4 msg_browse_response_bs__p_nb_bvi,
    t_bool * const msg_browse_response_bs__p_isallocated)
 {
-    int32_t i, j;
-
     *msg_browse_response_bs__p_isallocated = true;
-    nBrowseResult               = msg_browse_response_bs__p_bvi;
-    nAllocReferenceDescription  = msg_browse_response_bs__p_nb_bri;
+
+    /* Initialize first dimension of the arrays required by the BrowseResponse */
+    nBrowseResult               = msg_browse_response_bs__p_nb_bvi;
 
     /* 1D arrays */
     /* pBrowseStatus */
     pBrowseStatus               = malloc(sizeof(SOPC_StatusCode)*(nBrowseResult+1));
     if(NULL == pBrowseStatus)
+        *msg_browse_response_bs__p_isallocated = false;
+
+    /* pnAllocReferenceDescription */
+    pnAllocReferenceDescription = calloc(nBrowseResult+1, sizeof(int32_t));
+    if(NULL == pnAllocReferenceDescription)
         *msg_browse_response_bs__p_isallocated = false;
 
     /* pnReferenceDescription */
@@ -271,106 +278,109 @@ void msg_browse_response_bs__malloc_browse_result(
         *msg_browse_response_bs__p_isallocated = false;
 
     /* 2D arrays */
+    /* 2D arrays are calloced, so that free is doable after partly failed alloc */
     /* ppResRefTypeId */
-    ppResRefTypeId              = malloc(sizeof(SOPC_NodeId *)*(nBrowseResult+1));
+    ppResRefTypeId              = calloc(nBrowseResult+1, sizeof(SOPC_NodeId *));
     if(NULL == ppResRefTypeId)
         *msg_browse_response_bs__p_isallocated = false;
-    else {
-        ppResRefTypeId[0] = NULL;
-        for(i=1; i<=nBrowseResult; ++i) {
-            ppResRefTypeId[i] = malloc(sizeof(SOPC_NodeId)*(nAllocReferenceDescription+1));
-            if(NULL == ppResRefTypeId[i])
-                *msg_browse_response_bs__p_isallocated = false;
-            for(j=0; NULL != ppResRefTypeId[i] && j <= nAllocReferenceDescription; ++j)
-                SOPC_NodeId_Initialize(&ppResRefTypeId[i][j]);
-        }
-    }
 
     /* ppResForwards */
-    ppResForwards               = malloc(sizeof(bool *)*(nBrowseResult+1));
+    ppResForwards               = calloc(nBrowseResult+1, sizeof(bool *));
     if(NULL == ppResForwards)
         *msg_browse_response_bs__p_isallocated = false;
-    else {
-        ppResForwards[0] = NULL;
-        for(i=1; i<=nBrowseResult; ++i) {
-            ppResForwards[i] = malloc(sizeof(bool)*(nAllocReferenceDescription+1));
-            if(NULL == ppResForwards[i])
-                *msg_browse_response_bs__p_isallocated = false;
-        }
-    }
 
     /* ppResNodeId */
-    ppResNodeId                 = malloc(sizeof(SOPC_ExpandedNodeId *)*(nBrowseResult+1));
+    ppResNodeId                 = calloc(nBrowseResult+1, sizeof(SOPC_ExpandedNodeId *));
     if(NULL == ppResNodeId)
         *msg_browse_response_bs__p_isallocated = false;
-    else {
-        ppResNodeId[0] = NULL;
-        for(i=1; i<=nBrowseResult; ++i) {
-            ppResNodeId[i] = malloc(sizeof(SOPC_ExpandedNodeId)*(nAllocReferenceDescription+1));
-            if(NULL == ppResNodeId[i])
-                *msg_browse_response_bs__p_isallocated = false;
-            for(j=0; NULL != ppResNodeId[i] && j <= nAllocReferenceDescription; ++j)
-                SOPC_ExpandedNodeId_Initialize(&ppResNodeId[i][j]);
-        }
-    }
 
     /* ppResBrowseName */
-    ppResBrowseName             = malloc(sizeof(SOPC_QualifiedName *)*(nBrowseResult+1));
+    ppResBrowseName             = calloc(nBrowseResult+1, sizeof(SOPC_QualifiedName *));
     if(NULL == ppResBrowseName)
         *msg_browse_response_bs__p_isallocated = false;
-    else {
-        ppResBrowseName[0] = NULL;
-        for(i=1; i<=nBrowseResult; ++i) {
-            ppResBrowseName[i] = malloc(sizeof(SOPC_QualifiedName)*(nAllocReferenceDescription+1));
-            if(NULL == ppResBrowseName[i])
-                *msg_browse_response_bs__p_isallocated = false;
-            for(j=0; NULL != ppResBrowseName[i] && j <= nAllocReferenceDescription; ++j)
-                SOPC_QualifiedName_Initialize(&ppResBrowseName[i][j]);
-        }
-    }
 
     /* ppResDisplayName */
-    ppResDisplayName            = malloc(sizeof(SOPC_LocalizedText *)*(nBrowseResult+1));
+    ppResDisplayName            = calloc(nBrowseResult+1, sizeof(SOPC_LocalizedText *));
     if(NULL == ppResDisplayName)
         *msg_browse_response_bs__p_isallocated = false;
-    else {
-        ppResDisplayName[0] = NULL;
-        for(i=1; i<=nBrowseResult; ++i) {
-            ppResDisplayName[i] = malloc(sizeof(SOPC_LocalizedText)*(nAllocReferenceDescription+1));
-            if(NULL == ppResDisplayName[i])
-                *msg_browse_response_bs__p_isallocated = false;
-            for(j=0; NULL != ppResDisplayName[i] && j <= nAllocReferenceDescription; ++j)
-                SOPC_LocalizedText_Initialize(&ppResDisplayName[i][j]);
-        }
-    }
 
     /* ppResNodeClass */
-    ppResNodeClass              = malloc(sizeof(OpcUa_NodeClass *)*(nBrowseResult+1));
+    ppResNodeClass              = calloc(nBrowseResult+1, sizeof(OpcUa_NodeClass *));
     if(NULL == ppResNodeClass)
         *msg_browse_response_bs__p_isallocated = false;
-    else {
-        ppResNodeClass[0] = NULL;
-        for(i=1; i<=nBrowseResult; ++i) {
-            ppResNodeClass[i] = malloc(sizeof(OpcUa_NodeClass)*(nAllocReferenceDescription+1));
-            if(NULL == ppResNodeClass[i])
-                *msg_browse_response_bs__p_isallocated = false;
-        }
-    }
 
     /* ppResTypeDefinition */
-    ppResTypeDefinition         = malloc(sizeof(SOPC_ExpandedNodeId *)*(nBrowseResult+1));
+    ppResTypeDefinition         = calloc(nBrowseResult+1, sizeof(SOPC_ExpandedNodeId *));
     if(NULL == ppResTypeDefinition)
         *msg_browse_response_bs__p_isallocated = false;
-    else {
-        ppResTypeDefinition[0] = NULL;
-        for(i=1; i<=nBrowseResult; ++i) {
-            ppResTypeDefinition[i] = malloc(sizeof(SOPC_ExpandedNodeId)*(nAllocReferenceDescription+1));
-            if(NULL == ppResTypeDefinition[i])
-                *msg_browse_response_bs__p_isallocated = false;
-            for(j=0; NULL != ppResTypeDefinition[i] && j <= nAllocReferenceDescription; ++j)
-                SOPC_ExpandedNodeId_Initialize(&ppResTypeDefinition[i][j]);
-        }
-    }
+
+    /* Clean half-done mallocation */
+    if(! msg_browse_response_bs__p_isallocated)
+        msg_browse_response_bs__free_browse_result();
+}
+
+
+void msg_browse_response_bs__malloc_browse_result(
+   const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
+   const t_entier4 msg_browse_response_bs__p_nb_bri,
+   t_bool * const msg_browse_response_bs__p_isallocated)
+{
+    int32_t j, bvi, nbri;
+
+    bvi = msg_browse_response_bs__p_bvi;
+    nbri = msg_browse_response_bs__p_nb_bri;
+    *msg_browse_response_bs__p_isallocated = true;
+
+    /* Initialize the ith BrowseResult of the BrowseResponse */
+    /* 1D arrays */
+    pnAllocReferenceDescription[bvi] = nbri;
+    pnReferenceDescription[bvi] = 0;
+
+    /* 2D arrays */
+    /* ppResRefTypeId */
+    ppResRefTypeId[bvi] = malloc(sizeof(SOPC_NodeId)*(nbri+1));
+    if(NULL == ppResRefTypeId[bvi])
+        *msg_browse_response_bs__p_isallocated = false;
+    for(j=0; NULL != ppResRefTypeId[bvi] && j <= nbri; ++j)
+        SOPC_NodeId_Initialize(&ppResRefTypeId[bvi][j]);
+
+    /* ppResForwards */
+    ppResForwards[bvi] = malloc(sizeof(bool)*(nbri+1));
+    if(NULL == ppResForwards[bvi])
+        *msg_browse_response_bs__p_isallocated = false;
+
+    /* ppResNodeId */
+    ppResNodeId[bvi] = malloc(sizeof(SOPC_ExpandedNodeId)*(nbri+1));
+    if(NULL == ppResNodeId[bvi])
+        *msg_browse_response_bs__p_isallocated = false;
+    for(j=0; NULL != ppResNodeId[bvi] && j <= nbri; ++j)
+        SOPC_ExpandedNodeId_Initialize(&ppResNodeId[bvi][j]);
+
+    /* ppResBrowseName */
+    ppResBrowseName[bvi] = malloc(sizeof(SOPC_QualifiedName)*(nbri+1));
+    if(NULL == ppResBrowseName[bvi])
+        *msg_browse_response_bs__p_isallocated = false;
+    for(j=0; NULL != ppResBrowseName[bvi] && j <= nbri; ++j)
+        SOPC_QualifiedName_Initialize(&ppResBrowseName[bvi][j]);
+
+    /* ppResDisplayName */
+    ppResDisplayName[bvi] = malloc(sizeof(SOPC_LocalizedText)*(nbri+1));
+    if(NULL == ppResDisplayName[bvi])
+        *msg_browse_response_bs__p_isallocated = false;
+    for(j=0; NULL != ppResDisplayName[bvi] && j <= nbri; ++j)
+        SOPC_LocalizedText_Initialize(&ppResDisplayName[bvi][j]);
+
+    /* ppResNodeClass */
+    ppResNodeClass[bvi] = malloc(sizeof(OpcUa_NodeClass)*(nbri+1));
+    if(NULL == ppResNodeClass[bvi])
+        *msg_browse_response_bs__p_isallocated = false;
+
+    /* ppResTypeDefinition */
+    ppResTypeDefinition[bvi] = malloc(sizeof(SOPC_ExpandedNodeId)*(nbri+1));
+    if(NULL == ppResTypeDefinition[bvi])
+        *msg_browse_response_bs__p_isallocated = false;
+    for(j=0; NULL != ppResTypeDefinition[bvi] && j <= nbri; ++j)
+        SOPC_ExpandedNodeId_Initialize(&ppResTypeDefinition[bvi][j]);
 
     /* Clean half-done mallocation */
     if(! msg_browse_response_bs__p_isallocated)
@@ -380,34 +390,54 @@ void msg_browse_response_bs__malloc_browse_result(
 
 void msg_browse_response_bs__free_browse_result(void)
 {
-    int32_t i;
+    int32_t i, j;
+
+    if(nBrowseResult <= 0)
+        return;
+
+    /* 2D arrays */
+    for(i=0; i<=nBrowseResult; ++i)
+    {
+        for(j=0; NULL != pnAllocReferenceDescription && j<=pnAllocReferenceDescription[i]; ++j)
+        {
+            if(NULL != ppResRefTypeId && NULL != ppResRefTypeId[i])
+                SOPC_NodeId_Clear(&ppResRefTypeId[i][j]);
+            if(NULL != ppResNodeId&& NULL != ppResNodeId[i])
+                SOPC_ExpandedNodeId_Clear(&ppResNodeId[i][j]);
+            if(NULL != ppResBrowseName&& NULL != ppResBrowseName[i])
+                SOPC_QualifiedName_Clear(&ppResBrowseName[i][j]);
+            if(NULL != ppResDisplayName&& NULL != ppResDisplayName[i])
+                SOPC_LocalizedText_Clear(&ppResDisplayName[i][j]);
+            if(NULL != ppResTypeDefinition&& NULL != ppResTypeDefinition[i])
+                SOPC_ExpandedNodeId_Clear(&ppResTypeDefinition[i][j]);
+        }
+        if(NULL != ppResRefTypeId)
+            free(ppResRefTypeId[i]);
+        if(NULL != ppResForwards)
+            free(ppResForwards[i]);
+        if(NULL != ppResNodeId)
+            free(ppResNodeId[i]);
+        if(NULL != ppResBrowseName)
+            free(ppResBrowseName[i]);
+        if(NULL != ppResDisplayName)
+            free(ppResDisplayName[i]);
+        if(NULL != ppResNodeClass)
+            free(ppResNodeClass[i]);
+        if(NULL != ppResTypeDefinition)
+            free(ppResTypeDefinition[i]);
+    }
+    free(ppResRefTypeId);
+    free(ppResForwards);
+    free(ppResNodeId);
+    free(ppResBrowseName);
+    free(ppResDisplayName);
+    free(ppResNodeClass);
+    free(ppResTypeDefinition);
 
     /* 1D arrays */
     free(pBrowseStatus);
+    free(pnAllocReferenceDescription);
     free(pnReferenceDescription);
-
-    /* 2D arrays */
-    for(i=0; NULL != ppResRefTypeId && i<=nAllocReferenceDescription; ++i)
-        free(ppResRefTypeId[i]);
-    free(ppResRefTypeId);
-    for(i=0; NULL != ppResForwards && i<=nAllocReferenceDescription; ++i)
-        free(ppResForwards[i]);
-    free(ppResForwards);
-    for(i=0; NULL != ppResNodeId && i<=nAllocReferenceDescription; ++i)
-        free(ppResNodeId[i]);
-    free(ppResNodeId);
-    for(i=0; NULL != ppResBrowseName && i<=nAllocReferenceDescription; ++i)
-        free(ppResBrowseName[i]);
-    free(ppResBrowseName);
-    for(i=0; NULL != ppResDisplayName && i<=nAllocReferenceDescription; ++i)
-        free(ppResDisplayName[i]);
-    free(ppResDisplayName);
-    for(i=0; NULL != ppResNodeClass && i<=nAllocReferenceDescription; ++i)
-        free(ppResNodeClass[i]);
-    free(ppResNodeClass);
-    for(i=0; NULL != ppResTypeDefinition && i<=nAllocReferenceDescription; ++i)
-        free(ppResTypeDefinition[i]);
-    free(ppResTypeDefinition);
 
     /* Clear the pointers */
     msg_browse_response_bs__INITIALISATION();
