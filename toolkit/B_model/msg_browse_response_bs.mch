@@ -233,6 +233,14 @@ OPERATIONS
     END
     ;
 
+    p_isallocated <-- malloc_browse_response(p_nb_bvi) =
+    PRE
+        p_nb_bvi : NAT
+    THEN
+        p_isallocated :: BOOL
+    END
+    ;
+
     p_isallocated <-- malloc_browse_result(p_bvi, p_nb_bri) =
     PRE
         p_bvi    : t_BrowseValue_i &

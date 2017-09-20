@@ -86,6 +86,16 @@ OPERATIONS
     ;
 
 
+    /* Allocate memory for the first dimension of the BrowseResponse: the BrowseResult array
+    */
+    p_isallocated <-- alloc_browse_response(p_nb_bvi) =
+    PRE
+        p_nb_bvi : NAT
+    THEN
+        p_isallocated :: BOOL
+    END
+    ;
+
     /* Allocate memory to store the response to a browse request for a given starting node and
        compute the maximum number of target nodes in the response.
        p_bvi           : browse value index of the starting node
