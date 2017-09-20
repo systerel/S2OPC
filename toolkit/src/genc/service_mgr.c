@@ -2,7 +2,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 15/09/2017 14:19:09
+ Date                 : 20/09/2017 11:36:51
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -319,13 +319,16 @@ void service_mgr__server_receive_session_service_req(
                         address_space__dealloc_write_request_responses();
                         break;
                      case constants__e_msg_session_browse_req:
-                        service_browse_seq__treat_browse_request_BrowseValues(&service_mgr__l_ret);
-                        service_browse_seq__write_BrowseResponse_msg_out(service_mgr__l_resp_msg,
-                           &service_mgr__l_isvalid_write);
-                        if (service_mgr__l_isvalid_write != true) {
-                           service_mgr__l_ret = constants__e_sc_bad_out_of_memory;
+                        service_browse_seq__decode_browse_request(service_mgr__l_req_msg,
+                           &service_mgr__l_ret);
+                        if (service_mgr__l_ret == constants__e_sc_ok) {
+                           service_browse_seq__treat_browse_request_BrowseValues(&service_mgr__l_ret);
+                           service_browse_seq__write_BrowseResponse_msg_out(service_mgr__l_resp_msg,
+                              &service_mgr__l_isvalid_write);
+                           if (service_mgr__l_isvalid_write != true) {
+                              service_mgr__l_ret = constants__e_sc_bad_out_of_memory;
+                           }
                         }
-                        service_browse_seq__free_browse_result();
                         break;
                      default:
                         service_mgr__l_ret = constants__e_sc_bad_unexpected_error;

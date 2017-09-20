@@ -2,7 +2,7 @@
 
  File Name            : service_browse_decode_bs.h
 
- Date                 : 15/09/2017 14:19:13
+ Date                 : 20/09/2017 11:36:56
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -20,6 +20,7 @@
    SEES Clause
   --------------*/
 #include "constants.h"
+#include "message_in_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -30,7 +31,7 @@ extern void service_browse_decode_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void service_browse_decode_bs__decode_browse_request(
-   const constants__t_byte_buffer_i service_browse_decode_bs__req_payload,
+   const constants__t_msg_i service_browse_decode_bs__req_payload,
    constants__t_StatusCode_i * const service_browse_decode_bs__StatusCode_service);
 extern void service_browse_decode_bs__free_browse_request(void);
 extern void service_browse_decode_bs__get_nb_BrowseTargetMax(
