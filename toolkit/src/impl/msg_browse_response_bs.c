@@ -226,9 +226,13 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_TypeDefinition(
     assert(msg_browse_response_bs__p_bvi <= nBrowseResult);
     assert(NULL != ppResTypeDefinition[msg_browse_response_bs__p_bvi]);
     assert(msg_browse_response_bs__p_bri <= nAllocReferenceDescription);
-    assert(STATUS_OK ==
-           SOPC_ExpandedNodeId_Copy(&ppResTypeDefinition[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                    (SOPC_ExpandedNodeId *)msg_browse_response_bs__p_TypeDefinition));
+    /* TODO: Temporary check. HasTypeDefinition shall not be NULL by PRE here. */
+    if(NULL == msg_browse_response_bs__p_TypeDefinition)
+        SOPC_ExpandedNodeId_Initialize(&ppResTypeDefinition[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri]);
+    else
+        assert(STATUS_OK ==
+               SOPC_ExpandedNodeId_Copy(&ppResTypeDefinition[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
+                                        (SOPC_ExpandedNodeId *)msg_browse_response_bs__p_TypeDefinition));
 }
 
 
