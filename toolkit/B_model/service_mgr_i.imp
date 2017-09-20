@@ -349,10 +349,14 @@ OPERATIONS
                                     write_WriteResponse_msg_out(l_resp_msg);
                                     dealloc_write_request_responses
                                 OR e_msg_session_browse_req THEN
-                                    l_ret <-- treat_browse_request_BrowseValues;
-                                    l_isvalid_write <-- write_BrowseResponse_msg_out(l_resp_msg);
-                                    IF l_isvalid_write /= TRUE THEN
-                                        l_ret := e_sc_bad_out_of_memory
+                                    /* TODO: l_req_msg is the decoded struct */
+                                    l_ret <-- decode_browse_request(l_req_msg);
+                                    IF l_ret = e_sc_ok THEN
+                                        l_ret <-- treat_browse_request_BrowseValues;
+                                        l_isvalid_write <-- write_BrowseResponse_msg_out(l_resp_msg);
+                                        IF l_isvalid_write /= TRUE THEN
+                                            l_ret := e_sc_bad_out_of_memory
+                                        END
                                     END;
                                     free_browse_result
                                 ELSE

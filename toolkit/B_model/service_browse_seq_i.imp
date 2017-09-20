@@ -23,7 +23,8 @@ REFINES
 
 SEES
     constants,
-    address_space
+    address_space,
+    message_in_bs
 
 IMPORTS
     service_browse,
@@ -31,6 +32,7 @@ IMPORTS
     service_browse_decode_bs
 
 PROMOTES
+    decode_browse_request,
     write_BrowseResponse_msg_out,
     free_browse_result
 

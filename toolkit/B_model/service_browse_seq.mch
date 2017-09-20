@@ -19,7 +19,8 @@ MACHINE
     service_browse_seq
 
 SEES
-    constants
+    constants,
+    message_in_bs
 
 OPERATIONS
 
@@ -28,6 +29,20 @@ OPERATIONS
     /* ... and resets the variable at the end of the op */
     BEGIN
         StatusCode_service :: t_StatusCode_i
+    END
+    ;
+
+    /* Promoted from service_browse_decode_bs */
+    StatusCode_service <-- decode_browse_request(req_payload) =
+    PRE
+        req_payload : t_msg_i &
+        req_payload = c_msg_in
+    THEN
+        StatusCode_service
+        :(
+            StatusCode_service : t_StatusCode_i &
+            StatusCode_service : t_StatusCode
+        )
     END
     ;
 

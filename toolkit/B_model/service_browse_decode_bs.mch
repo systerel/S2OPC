@@ -19,7 +19,8 @@ MACHINE
     service_browse_decode_bs
 
 SEES
-    constants
+    constants,
+    message_in_bs
 
 DEFINITIONS
     d_variables ==
@@ -62,8 +63,10 @@ INITIALISATION
 OPERATIONS
     StatusCode_service <-- decode_browse_request(req_payload) =
     PRE
-        req_payload : t_byte_buffer_i &
-        req_payload : t_byte_buffer
+        /*req_payload : t_byte_buffer_i &
+        req_payload : t_byte_buffer*/
+        req_payload : t_msg_i &
+        req_payload = c_msg_in
     THEN
         StatusCode_service,
         d_variables
