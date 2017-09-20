@@ -2,7 +2,7 @@
 
  File Name            : service_browse.h
 
- Date                 : 20/09/2017 11:36:50
+ Date                 : 20/09/2017 19:38:22
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -47,6 +47,9 @@ extern void service_browse__Is_RefTypes_Compatible(
    const t_bool service_browse__p_inc_subtypes,
    const constants__t_NodeId_i service_browse__p_ref_type2,
    t_bool * const service_browse__p_ref_types_compat);
+extern void service_browse__alloc_browse_response(
+   const t_entier4 service_browse__p_nb_bvi,
+   t_bool * const service_browse__p_isallocated);
 extern void service_browse__alloc_browse_result(
    const constants__t_BrowseValue_i service_browse__p_bvi,
    const t_entier4 service_browse__p_nb_target_max,

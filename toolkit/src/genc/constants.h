@@ -2,7 +2,7 @@
 
  File Name            : constants.h
 
- Date                 : 20/09/2017 11:36:49
+ Date                 : 20/09/2017 19:38:22
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -58,6 +58,9 @@ typedef enum {
    constants__c_AttributeId_indet,
    constants__e_aid_NodeId,
    constants__e_aid_NodeClass,
+   constants__e_aid_BrowseName,
+   constants__e_aid_DisplayName,
+   constants__e_aid_Description,
    constants__e_aid_Value
 } constants__t_AttributeId_i;
 typedef enum {

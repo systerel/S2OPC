@@ -2,7 +2,7 @@
 
  File Name            : service_browse_seq.c
 
- Date                 : 20/09/2017 11:36:51
+ Date                 : 20/09/2017 19:38:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -168,17 +168,25 @@ void service_browse_seq__treat_browse_request_BrowseValues(
       t_entier4 service_browse_seq__l_nb_bvi;
       t_bool service_browse_seq__l_continue;
       constants__t_BrowseValue_i service_browse_seq__l_bvi;
+      t_bool service_browse_seq__l_isallocated;
       
       service_browse_decode_bs__get_nb_BrowseTargetMax(&service_browse_seq__l_nb_target_max);
-      *service_browse_seq__StatusCode_service = constants__e_sc_ok;
       service_browse_decode_bs__get_nb_BrowseValue(&service_browse_seq__l_nb_bvi);
-      service_browse_seq_it__init_iter_browse_request(service_browse_seq__l_nb_bvi,
-         &service_browse_seq__l_continue);
-      while (service_browse_seq__l_continue == true) {
-         service_browse_seq_it__continue_iter_browse_request(&service_browse_seq__l_continue,
-            &service_browse_seq__l_bvi);
-         service_browse_seq__treat_browse_request_BrowseValue_1(service_browse_seq__l_bvi,
-            service_browse_seq__l_nb_target_max);
+      service_browse__alloc_browse_response(service_browse_seq__l_nb_bvi,
+         &service_browse_seq__l_isallocated);
+      if (service_browse_seq__l_isallocated == true) {
+         *service_browse_seq__StatusCode_service = constants__e_sc_ok;
+         service_browse_seq_it__init_iter_browse_request(service_browse_seq__l_nb_bvi,
+            &service_browse_seq__l_continue);
+         while (service_browse_seq__l_continue == true) {
+            service_browse_seq_it__continue_iter_browse_request(&service_browse_seq__l_continue,
+               &service_browse_seq__l_bvi);
+            service_browse_seq__treat_browse_request_BrowseValue_1(service_browse_seq__l_bvi,
+               service_browse_seq__l_nb_target_max);
+         }
+      }
+      else {
+         *service_browse_seq__StatusCode_service = constants__e_sc_bad_out_of_memory;
       }
    }
 }

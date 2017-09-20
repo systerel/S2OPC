@@ -2,7 +2,7 @@
 
  File Name            : msg_browse_response_bs.h
 
- Date                 : 20/09/2017 11:36:55
+ Date                 : 20/09/2017 19:38:27
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -31,6 +31,9 @@ extern void msg_browse_response_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void msg_browse_response_bs__free_browse_result(void);
+extern void msg_browse_response_bs__malloc_browse_response(
+   const t_entier4 msg_browse_response_bs__p_nb_bvi,
+   t_bool * const msg_browse_response_bs__p_isallocated);
 extern void msg_browse_response_bs__malloc_browse_result(
    const constants__t_BrowseValue_i msg_browse_response_bs__p_bvi,
    const t_entier4 msg_browse_response_bs__p_nb_bri,

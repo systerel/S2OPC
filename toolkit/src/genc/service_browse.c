@@ -2,7 +2,7 @@
 
  File Name            : service_browse.c
 
- Date                 : 20/09/2017 11:36:50
+ Date                 : 20/09/2017 19:38:23
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -50,6 +50,13 @@ void service_browse__get_SourceNode_NbRef(
          *service_browse__p_nb_ref = 0;
       }
    }
+}
+
+void service_browse__alloc_browse_response(
+   const t_entier4 service_browse__p_nb_bvi,
+   t_bool * const service_browse__p_isallocated) {
+   msg_browse_response_bs__malloc_browse_response(service_browse__p_nb_bvi,
+      service_browse__p_isallocated);
 }
 
 void service_browse__alloc_browse_result(
