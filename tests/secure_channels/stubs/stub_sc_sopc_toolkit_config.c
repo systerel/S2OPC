@@ -17,6 +17,8 @@
 
 #include "sopc_toolkit_config.h"
 
+#include <stdbool.h>
+
 #include "sopc_sockets_api.h"
 #include "sopc_secure_channels_api.h"
 #include "singly_linked_list.h"
@@ -58,12 +60,30 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
     return STATUS_OK;
 }
 
+void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
+{
+    (void)(id);
+    SOPC_SecureChannel_Config* scConfig = val;
+    if(scConfig != NULL && scConfig->isClientSc == false){
+        // In case of server it is an internally created config
+        // => only client certificate was specifically allocated
+        KeyManager_Certificate_Free((Certificate*) scConfig->crt_cli);
+        free(scConfig);
+    }
+}
+
+// Deallocate fields allocated on server side only and free all the SC configs
+static void SOPC_Toolkit_ClearScConfigs(){
+    SLinkedList_Apply(scConfigs, SOPC_Toolkit_ClearScConfigElt);
+    SLinkedList_Delete(scConfigs);
+    scConfigs = NULL;
+}
+
 void SOPC_Toolkit_Clear(){
       SOPC_Sockets_Clear();
       SOPC_SecureChannels_Clear();
       SOPC_Services_Clear();
-      SLinkedList_Delete(scConfigs);
-      scConfigs = NULL;
+      SOPC_Toolkit_ClearScConfigs();
       SLinkedList_Delete(epConfigs);
       epConfigs = NULL;
       SOPC_StackConfiguration_Clear();

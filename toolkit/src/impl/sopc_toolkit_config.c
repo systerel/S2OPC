@@ -172,6 +172,25 @@ SOPC_StatusCode SOPC_Toolkit_Configured(){
     return status;
 }
 
+void SOPC_Toolkit_ClearScConfigElt(uint32_t id, void *val)
+{
+    (void)(id);
+    SOPC_SecureChannel_Config* scConfig = val;
+    if(scConfig != NULL && scConfig->isClientSc == false){
+        // In case of server it is an internally created config
+        // => only client certificate was specifically allocated
+        KeyManager_Certificate_Free((Certificate*) scConfig->crt_cli);
+        free(scConfig);
+    }
+}
+
+// Deallocate fields allocated on server side only and free all the SC configs
+static void SOPC_Toolkit_ClearScConfigs(){
+    SLinkedList_Apply(tConfig.scConfigs, SOPC_Toolkit_ClearScConfigElt);
+    SLinkedList_Delete(tConfig.scConfigs);
+    tConfig.scConfigs = NULL;
+}
+
 void SOPC_Toolkit_Clear(){
     SOPC_StatusCode status = STATUS_OK;
     if(tConfig.initDone != false){
@@ -197,8 +216,7 @@ void SOPC_Toolkit_Clear(){
       (void) status; // log
       SOPC_TEMP_ClearEventDispMgr();
       SOPC_StackConfiguration_Clear();
-      SLinkedList_Delete(tConfig.scConfigs);
-      tConfig.scConfigs = NULL;
+      SOPC_Toolkit_ClearScConfigs();
       SLinkedList_Delete(tConfig.epConfigs);
       tConfig.epConfigs = NULL;
       address_space_bs__UNINITIALISATION();
