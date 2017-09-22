@@ -30,16 +30,18 @@
   --------------------------*/
 #include "b2c.h"
 
+#include "sopc_builtintypes.h"
+
 /*-----------------------------
    SETS Clause: deferred sets
   -----------------------------*/
 
 typedef void * constants_bs__t_ExpandedNodeId_i;
-typedef void * constants_bs__t_LocalizedText_i;
+typedef SOPC_LocalizedText constants_bs__t_LocalizedText_i;
 typedef void * constants_bs__t_NodeId_i;
 #define constants_bs__t_Node_i t_entier4
 typedef void * constants_bs__t_Nonce_i;
-typedef void * constants_bs__t_QualifiedName_i;
+typedef SOPC_QualifiedName constants_bs__t_QualifiedName_i;
 #define constants_bs__t_Reference_i t_entier4
 typedef void * constants_bs__t_SignatureData_i;
 #define constants_bs__t_UserId_i t_entier4

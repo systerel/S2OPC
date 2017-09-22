@@ -132,7 +132,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_BrowseName(
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     assert(STATUS_OK ==
            SOPC_QualifiedName_Copy(&ppResBrowseName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                   (SOPC_QualifiedName *)msg_browse_response_bs__p_BrowseName));
+                                   (SOPC_QualifiedName*) &msg_browse_response_bs__p_BrowseName));
 }
 
 
@@ -159,7 +159,7 @@ void msg_browse_response_bs__set_ResponseBrowse_Res_DisplayName(
     assert(msg_browse_response_bs__p_bri <= pnAllocReferenceDescription[msg_browse_response_bs__p_bvi]);
     assert(STATUS_OK ==
            SOPC_LocalizedText_Copy(&ppResDisplayName[msg_browse_response_bs__p_bvi][msg_browse_response_bs__p_bri],
-                                   (SOPC_LocalizedText *)msg_browse_response_bs__p_DisplayName));
+                                   (SOPC_LocalizedText *) &msg_browse_response_bs__p_DisplayName));
 }
 
 

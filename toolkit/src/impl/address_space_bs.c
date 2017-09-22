@@ -29,7 +29,6 @@
 #include "address_space_bs.h"
 
 #include "address_space_impl.h"
-#include "gen_addspace.h"
 #include "util_variant.h"
 
 
@@ -71,11 +70,6 @@
  *  - Types: nViews + nObjects + nVariables
  *  - HasTypeDef: nViews
  *
- * Supplementary notes on C types: some of the types are constants__t_type_i *address_space_bs__array;
- * other types are constants__t_type_i address_space_bs__array.
- * The choice of which form is used depends on:
- *  - how the data are generated
- *  - the used B-type, whether it typedefs to a void * or not
  */
 /* Sizes */
 int32_t address_space_bs__nNodeIds = 0; /* Required by the hashmap */
@@ -97,8 +91,10 @@ int32_t offHasTypeDefs = 0;
 /* Family All */
 constants__t_NodeId_i           *address_space_bs__a_NodeId = NULL;
 constants__t_NodeClass_i        *address_space_bs__a_NodeClass = NULL;
-constants__t_QualifiedName_i    address_space_bs__a_BrowseName = NULL;
-constants__t_LocalizedText_i    address_space_bs__a_DisplayName = NULL;
+// CAUTION: next two arrays contain data instead of pointer on data which means there are not correctly typed here
+//  => &(array[i]) == constants__t_QualifiedName_i instead of array[i] == constants__t_QualifiedName_i 
+constants__t_QualifiedName_i    *address_space_bs__a_BrowseName = NULL;
+constants__t_LocalizedText_i    *address_space_bs__a_DisplayName = NULL;
 int32_t                         *address_space_bs__a_DisplayName_begin = NULL;
 int32_t                         *address_space_bs__a_DisplayName_end = NULL;
 /* Family Vars */
@@ -214,19 +210,19 @@ void address_space_bs__read_AddressSpace_Attribute_value(
     switch(address_space_bs__aid)
     {
     case constants__e_aid_NodeId:
-        *address_space_bs__variant = util_variant__new_Variant_from_NodeId(((SOPC_NodeId **)address_space_bs__a_NodeId)[address_space_bs__node]);
+        *address_space_bs__variant = util_variant__new_Variant_from_NodeId(address_space_bs__a_NodeId[address_space_bs__node]);
         break;
     case constants__e_aid_NodeClass:
         *address_space_bs__variant = util_variant__new_Variant_from_NodeClass(address_space_bs__a_NodeClass[address_space_bs__node]);
         break;
     case constants__e_aid_BrowseName:
-        *address_space_bs__variant = util_variant__new_Variant_from_(address_space_bs__a_[address_space_bs__node-off]);
+        *address_space_bs__variant = util_variant__new_Variant_from_QualifiedName(&address_space_bs__a_BrowseName[address_space_bs__node]);
         break;
     case constants__e_aid_DisplayName:
-        *address_space_bs__variant = util_variant__new_Variant_from_(address_space_bs__a_[address_space_bs__node-off]);
+        *address_space_bs__variant = util_variant__new_Variant_from_LocalizedText(&address_space_bs__a_DisplayName[address_space_bs__node]);
         break;
     case constants__e_aid_Value:
-        *address_space_bs__variant = util_variant__new_Variant_from_Variant(address_space_bs__a_Value[address_space_bs__node-offVarsTypes]);
+        *address_space_bs__variant = util_variant__new_Variant_from_Variant(address_space_bs__a_Value[address_space_bs__node - offVarsTypes]);
         break;
     default:
         /* TODO: maybe return NULL here, to be consistent with msg_read_response_bs__write_read_response_iter and service_read__treat_read_request behavior. */
@@ -251,7 +247,7 @@ void address_space_bs__set_Value(
         SOPC_Variant_Initialize(pvar);
         if(STATUS_OK == SOPC_Variant_Copy(pvar, (SOPC_Variant *)address_space_bs__value))
         {
-            poldvar = address_space_bs__a_Value[address_space_bs__node-offVarsTypes];
+            poldvar = address_space_bs__a_Value[address_space_bs__node - offVarsTypes];
             SOPC_Variant_Clear((SOPC_Variant *)poldvar);
             free((void *)poldvar);
             poldvar = (constants__t_Variant_i)pvar;
@@ -264,7 +260,7 @@ void address_space_bs__get_Value_StatusCode(
    const constants__t_Node_i address_space_bs__node,
    constants__t_StatusCode_i * const address_space_bs__sc)
 {
-    *address_space_bs__sc = address_space_bs__a_Value_StatusCode[address_space_bs__node-offVarsTypes];
+    *address_space_bs__sc = address_space_bs__a_Value_StatusCode[address_space_bs__node - offVarsTypes];
 }
 
 
@@ -279,7 +275,7 @@ void address_space_bs__get_BrowseName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_QualifiedName_i * const address_space_bs__p_browse_name)
 {
-    *address_space_bs__p_browse_name = &((SOPC_QualifiedName *)address_space_bs__a_BrowseName)[address_space_bs__p_node];
+  *address_space_bs__p_browse_name = *(SOPC_QualifiedName*) &(address_space_bs__a_BrowseName[address_space_bs__p_node]);
 }
 
 
@@ -291,7 +287,7 @@ void address_space_bs__get_DisplayName(
 
     /* TODO: this constraint should be pushed to dataprep */
     assert(address_space_bs__a_DisplayName_end[address_space_bs__p_node] >= i);
-    *address_space_bs__p_display_name = &((SOPC_LocalizedText *)address_space_bs__a_DisplayName)[i];
+    *address_space_bs__p_display_name = *(SOPC_LocalizedText *) &(address_space_bs__a_DisplayName[i]);
 }
 
 

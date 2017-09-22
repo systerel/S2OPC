@@ -41,6 +41,10 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeId(constants__t_NodeId
  */
 constants__t_Variant_i util_variant__new_Variant_from_NodeClass(constants__t_NodeClass_i ncl);
 
+constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(constants__t_QualifiedName_i* qn);
+
+constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(constants__t_LocalizedText_i* lt);
+
 /**
  * The returned Variant is malloced and shall be freed by the consumer.
  */

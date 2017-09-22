@@ -49,8 +49,6 @@ typedef enum {
 
 
 /* Attributes, and references */
-/* TODO: Today NB_NODES is defined in gen_addspace.h */
-#include "gen_addspace.h"
 extern int32_t address_space_bs__nNodeIds;
 extern int32_t address_space_bs__nVariables;
 extern int32_t address_space_bs__nVariableTypes;
@@ -62,8 +60,8 @@ extern int32_t address_space_bs__nObjects;
 extern int32_t address_space_bs__nViews;
 extern constants__t_NodeId_i            *address_space_bs__a_NodeId;
 extern constants__t_NodeClass_i         *address_space_bs__a_NodeClass;
-extern constants__t_QualifiedName_i     address_space_bs__a_BrowseName;
-extern constants__t_LocalizedText_i     address_space_bs__a_DisplayName;
+extern constants__t_QualifiedName_i     *address_space_bs__a_BrowseName;
+extern constants__t_LocalizedText_i     *address_space_bs__a_DisplayName;
 extern int32_t                          *address_space_bs__a_DisplayName_begin;
 extern int32_t                          *address_space_bs__a_DisplayName_end;
 extern constants__t_Variant_i           *address_space_bs__a_Value;

@@ -52,6 +52,33 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeClass(constants__t_Nod
     return pvar;
 }
 
+constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(constants__t_QualifiedName_i* qn) {
+    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
+
+    if(NULL == pvar)
+        return NULL;
+
+    SOPC_Variant_Initialize(pvar);
+    pvar->BuiltInTypeId = SOPC_QualifiedName_Id;
+    pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pvar->Value.Qname = qn;
+
+    return pvar;
+}
+
+constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(constants__t_LocalizedText_i* lt) {
+    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
+
+    if(NULL == pvar)
+        return NULL;
+
+    SOPC_Variant_Initialize(pvar);
+    pvar->BuiltInTypeId = SOPC_LocalizedText_Id;
+    pvar->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pvar->Value.LocalizedText = lt;
+
+    return pvar;  
+}
 
 constants__t_Variant_i util_variant__new_Variant_from_Indet(void) {
     SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
