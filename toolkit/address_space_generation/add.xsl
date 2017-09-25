@@ -157,7 +157,7 @@ OpcUa_NodeClass NodeClass[NB+1] = {OpcUa_NodeClass_Unspecified,
 };
 
 <!-- Value -->
-SOPC_ByteString *Value[NB_1 + NB_2 +1] = {NULL};
+static SOPC_ByteString *Value[NB_3 + NB_4 +1] = {NULL};
 
 <!-- StatusCode -->
 SOPC_StatusCode status_code[] = {STATUS_NOK, <xsl:value-of select = "for $n in $var_vartype return if ($n/ua:Value) then 'STATUS_OK' else 'STATUS_NOK'" separator=", "/>};

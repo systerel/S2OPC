@@ -4,7 +4,7 @@ version="2.0" xmlns:ua="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd"  xmln
     <xsl:output method="text"  encoding="UTF-8" />
 
 <%
-classes = ['Variable', 'VariableType', 'ObjectType', 'ReferenceType', 'DataType', 'Method', 'Object', 'View']
+classes = ['View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'ReferenceType', 'DataType', 'Method']
 %>
 
 <!-- create the constants for each class -->
@@ -94,7 +94,7 @@ void test_${s}(){
     int res;
     int exp;
     const char* nodeid;
-    <xsl:apply-templates select="$ua_nodes/*" mode="${s}"/>    
+    <xsl:apply-templates select="$ua_nodes/*" mode="${s}"/>
 }
 
 % endfor
@@ -104,7 +104,7 @@ int main (){
     test_reference();
     test_Description();
     test_DisplayName();
-    printf("%d %s\n", strlen(Description[1].Text.Data), Description[1].Text.Data);
+    printf("%zu %s\n", strlen((char *)Description[1].Text.Data), Description[1].Text.Data);
     return 0;
 }
 
@@ -163,7 +163,7 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
     if (res-> IdentifierType != IdentifierType_ByteString ||
         res-> Namespace != nsIndex ) {printf ("Invalid nodeId %s", nodeid);}
             </xsl:when>
-            <xsl:otherwise>	
+            <xsl:otherwise>
                 <xsl:message terminate="yes">Unknown identifier type : '<xsl:value-of select="$ident"/>'.</xsl:message>
             </xsl:otherwise>
         </xsl:choose>
@@ -202,8 +202,8 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
     res = reference_end[pos] - reference_begin[pos] + 1 ;
     if (res != exp) {
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
-    } 
-    else{ 
+    }
+    else{
         <xsl:for-each select="./ua:References/*">
             printf("test reference %d node %d nodeid %s\n",   <xsl:value-of select="position()"/>, pos, nodeid);
             <xsl:call-template name="cmp_nodeId">
@@ -253,18 +253,18 @@ ${print_value('if (strcmp((char*)BrowseName[%s].Name.Data, var)) {printf("invali
 	</xsl:copy>
 </xsl:template>
 
-<!-- generate two xsl functions. 
+<!-- generate two xsl functions.
 First map a uanode xml element to a number allowing the sort of elements
 Second map a uanode xml element to the enum node class. -->
 % for (n, f, type) in [('ord_class', lambda x: x, 'integer'), ('get_enum_value', lambda x : 'OpcUa_NodeClass_'+ classes[x-1], 'string')]:
-  <xsl:function name="sys:${n}" as="xsd:${type}"> 
+  <xsl:function name="sys:${n}" as="xsd:${type}">
      <xsl:param name="e"/>
     <xsl:variable name='ln' select="local-name($e)"/>
      <xsl:choose>
 %   for i in range(1, 9):
 	<xsl:when test="$ln='UA${classes[i-1]}'">${f(i)}</xsl:when>
 %   endfor
-	<xsl:otherwise>	
+	<xsl:otherwise>
 	   <xsl:message terminate="yes">Unknown class : '<xsl:value-of select="$ln"/>'.</xsl:message>
 	</xsl:otherwise>
      </xsl:choose>
@@ -275,7 +275,7 @@ Second map a uanode xml element to the enum node class. -->
 
 <%def name="print_value(patt, *args)">
     <%doc>
-    Function that apply the given template string to the 
+    Function that apply the given template string to the
     result of the XPath queries and returns an output formatted string.
     @patt str: a format string
     @args str: a set of XPath expressions
