@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "b2c.h"
+#include "util_b2c.h"
 #include "response_write_bs.h"
 
 #include "sopc_base_types.h"
@@ -84,7 +85,8 @@ void response_write_bs__getall_ResponseWrite_StatusCode(
     if(response_write_bs__wvi <= nb_req) /* It is not necessary to test arr_StatusCode */
     {
         *response_write_bs__isvalid = true;
-        *response_write_bs__sc = arr_StatusCode[response_write_bs__wvi];
+        util_status_code__C_to_B(arr_StatusCode[response_write_bs__wvi],
+                                 response_write_bs__sc);
     }
 }
 
@@ -93,7 +95,8 @@ void response_write_bs__set_ResponseWrite_StatusCode(
    const constants__t_WriteValue_i response_write_bs__wvi,
    const constants__t_StatusCode_i response_write_bs__sc)
 {
-    arr_StatusCode[response_write_bs__wvi] = response_write_bs__sc;
+    util_status_code__B_to_C(response_write_bs__sc,
+                             &arr_StatusCode[response_write_bs__wvi]);
 }
 
 
