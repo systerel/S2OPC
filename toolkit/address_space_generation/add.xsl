@@ -117,18 +117,18 @@ const uint32_t NB_NODES_TOTAL = <xsl:value-of select="count(//ua:UA${classes[0]}
 <!-- Création des variables pour les node id -->
 <xsl:for-each select="$nodeid_var_name/*">
 static SOPC_NodeId <xsl:value-of select="@vn"/> = <xsl:apply-templates select="@id" mode="nodeId"/>;<xsl:text/>
-static SOPC_ExpandedNodeId ex_<xsl:value-of select="@vn"/> = {<xsl:apply-templates select="@id" mode="nodeId"/>, NULL, 0};<xsl:text/>
+static SOPC_ExpandedNodeId ex_<xsl:value-of select="@vn"/> = {<xsl:apply-templates select="@id" mode="nodeId"/>, {0,0, NULL}, 0};<xsl:text/>
 </xsl:for-each>
 
 <!-- BrowseName -->
-SOPC_QualifiedName BrowseName[NB + 1] = {{0,0,NULL}
+SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
 <xsl:apply-templates select = "$ua_nodes/*/@BrowseName" mode="qName"/>
 };
 
 <!-- Description, DisplayName-->
 
 % for s in ['Description', 'DisplayName']:
-SOPC_LocalizedText ${s}[] = {{}
+SOPC_LocalizedText ${s}[] = {{{0, 0, NULL}, {0, 0, NULL}}
 <xsl:apply-templates select = "$ua_nodes/*/ua:${s}" mode="localized_text"/>
 };
 int ${s}_begin[] = {0, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:${s}) + 1" separator=", "/>};
@@ -140,7 +140,7 @@ int ${s}_end[] = {-1, <xsl:value-of select = "for $n in $ua_nodes/* return count
 int reference_begin[] = {0, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:References/*) + 1" separator=", "/>};
 int reference_end[] = {-1,&#10;<xsl:value-of select = "for $n in $ua_nodes/* return concat(count($n/preceding-sibling::*/ua:References/*), '+',  count($n/ua:References/*), ' /* ', $n/@NodeId, ' */')" separator=",&#10;"/>};
 SOPC_NodeId* reference_type[] = {NULL,  <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;', $nodeid_var_name/*[@id = $n/@ReferenceType]/@vn)" separator=", "/>};
-SOPC_ExpandedNodeId* reference_target[] = {{NULL, NULL, 0},  <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;ex_', $nodeid_var_name/*[@id = $n/text()]/@vn)" separator=", "/>};
+SOPC_ExpandedNodeId* reference_target[] = {NULL, <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;ex_', $nodeid_var_name/*[@id = $n/text()]/@vn)" separator=", "/>};
 bool reference_isForward[]={false, <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return if ($n/@IsForward = 'false') then 'false' else 'true' " separator=", "/>};
 
 <!-- NodeId -->
@@ -192,7 +192,7 @@ SOPC_SByte AccessLevel[] = {0, <xsl:value-of select = "for $n in $ua_nodes/ua:UA
     <xsl:variable name="NodeId" select="../@NodeId"/>
     <xsl:analyze-string select="$bn" regex="(\d*):(.*)">
         <xsl:matching-substring>
-${print_value(',{%s,{},{%s,0,toSOPC_String("%s")}}/* %s*/',"regex-group(1)", "string-length(regex-group(2))", "regex-group(2)", "$NodeId")}<xsl:text>
+${print_value(',{%s,{%s,0,toSOPC_String("%s")}}/* %s*/',"regex-group(1)", "string-length(regex-group(2))", "regex-group(2)", "$NodeId")}<xsl:text>
 </xsl:text>
         </xsl:matching-substring>
         <xsl:non-matching-substring>
