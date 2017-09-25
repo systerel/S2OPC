@@ -114,11 +114,15 @@ const uint32_t NB_NODES_TOTAL = <xsl:value-of select="count(//ua:UA${classes[0]}
 
 #define toSOPC_String(s) ((SOPC_Byte*)s)
 
-<!-- Création des variables pour les node id -->
+<!-- Create variables for each node id -->
 <xsl:for-each select="$nodeid_var_name/*">
 static SOPC_NodeId <xsl:value-of select="@vn"/> = <xsl:apply-templates select="@id" mode="nodeId"/>;<xsl:text/>
 static SOPC_ExpandedNodeId ex_<xsl:value-of select="@vn"/> = {<xsl:apply-templates select="@id" mode="nodeId"/>, {0,0, NULL}, 0};<xsl:text/>
 </xsl:for-each>
+
+<!-- Avoid unused variable warning -->
+void* avoid_unused_nodes_var[] = {<xsl:for-each select="$nodeid_var_name/*">&amp;<xsl:value-of select="@vn"/>,
+&amp;ex_<xsl:value-of select="@vn"/>,</xsl:for-each>};
 
 <!-- BrowseName -->
 SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
