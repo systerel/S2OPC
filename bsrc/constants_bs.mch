@@ -76,6 +76,7 @@ ABSTRACT_CONSTANTS
     t_UserId,
 
     t_channel,
+    cast_t_channel,    
     t_session,
     t_session_token,
     t_user,
@@ -119,6 +120,8 @@ PROPERTIES
     t_channel <: t_channel_i &
     c_channel_indet : t_channel_i &
     c_channel_indet /: t_channel &
+    cast_t_channel : NAT +-> t_channel_i &
+    cast_t_channel : perm(t_channel) &
 
     t_session <: t_session_i &
     c_session_indet : t_session_i &
@@ -183,6 +186,45 @@ PROPERTIES
     c_QualifiedName_indet /: t_QualifiedName
 
 OPERATIONS
+
+    p_res <-- is_t_channel_config_idx(p_config_idx) =
+    PRE
+        p_config_idx : t_channel_config_idx_i
+    THEN
+        p_res := bool(p_config_idx : t_channel_config_idx)
+    END
+    ;
+        
+    p_res <-- is_t_endpoint_config_idx(p_endpoint_config_idx) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i
+    THEN
+        p_res := bool(p_endpoint_config_idx : t_endpoint_config_idx)
+    END
+    ;
+    
+    p_res <-- is_t_channel(p_channel) =
+    PRE
+        p_channel : t_channel_i
+    THEN
+        p_res := bool(p_channel : t_channel)
+    END
+    ;
+
+    p_card_channel <-- get_card_t_channel =
+    BEGIN
+        p_card_channel := card(t_channel)
+    END
+    ;
+
+    p_channel <-- get_cast_t_channel(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_channel)
+    THEN
+        p_channel := cast_t_channel(p_ind)
+    END
+    ;
 
     p_res <-- get_Is_SubType(p_type1, p_type2) =
     PRE

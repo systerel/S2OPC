@@ -21,9 +21,9 @@ MACHINE
 SEES
     constants,
     request_handle_bs,
-    channel_mgr_bs,
     message_out_bs,
-    message_in_bs
+    message_in_bs,
+    channel_mgr
 
 DEFINITIONS
     d_variables ==

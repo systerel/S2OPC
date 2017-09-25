@@ -21,7 +21,7 @@ SEES
     constants,
     message_in_bs,
     message_out_bs,
-    channel_mgr_bs,
+    channel_mgr,
     request_handle_bs
 
 DEFINITIONS

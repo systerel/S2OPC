@@ -1,0 +1,258 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    channel_mgr_i
+
+REFINES
+    channel_mgr_r
+
+SEES
+    constants
+
+IMPORTS
+    channel_mgr_1,
+    channel_mgr_it,
+    channel_mgr_bs
+
+CONCRETE_VARIABLES
+    all_channel_closing
+
+INVARIANT
+    all_channel_closing : BOOL
+
+INITIALISATION
+    all_channel_closing := FALSE
+
+PROMOTES
+    send_channel_msg_buffer,
+    server_get_endpoint_config,
+    is_client_channel,
+    get_channel_info,
+    get_connected_channel,
+    is_disconnecting_channel,
+    is_connected_channel,
+    get_SecurityPolicy
+
+LOCAL_OPERATIONS
+
+    l_close_secure_channel(p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : t_channel
+    THEN
+        IF  p_channel : s_channel_connected THEN
+            s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {a_config(p_channel)}
+        END
+    END
+    ;
+
+    l_check_all_channel_lost =
+    BEGIN
+        channels_to_iterate,
+        channels_iterated
+        :(  channels_to_iterate <: t_channel &
+            channels_iterated   <: t_channel &
+            channels_to_iterate /\ channels_iterated = {}
+         )
+    END
+    
+OPERATIONS
+
+    /* Local operations */
+
+    l_close_secure_channel(p_channel) =
+    VAR
+        l_res,
+        l_channel_conf
+    IN
+        l_res, l_channel_conf <-- getall_channel_connected(p_channel);
+        IF  l_res = TRUE THEN
+            add_cli_channel_disconnecting(l_channel_conf);
+            finalize_close_secure_channel(p_channel)
+        END
+    END
+    ;
+
+    l_check_all_channel_lost =
+    VAR
+        l_con,
+        l_continue,
+        l_channel
+    IN
+        IF  all_channel_closing = TRUE THEN
+            l_con := FALSE;
+            l_continue <-- init_iter_channel;
+            WHILE
+                l_continue = TRUE &
+                l_con      = FALSE
+            DO
+                l_continue, l_channel <-- continue_iter_channel;
+                l_con <-- is_channel_connected(l_channel)
+            INVARIANT
+               channels_to_iterate <: t_channel &
+               channels_iterated   <: t_channel &
+               channels_to_iterate /\ channels_iterated = {} &
+               channels_to_iterate \/ channels_iterated = t_channel
+            VARIANT
+               card(channels_to_iterate)
+            END;
+            IF  l_con = FALSE THEN
+                last_connected_channel_lost
+            END
+        END
+    END
+    ;
+
+
+    /* Global operations */
+
+    bres <-- cli_open_secure_channel (config_idx) =
+    VAR
+        l_dom,
+        l_channel,
+        l_card_connecting,
+        l_card_connected,
+        l_sum,
+        l_card_channel
+    IN
+        prepare_cli_open_secure_channel(config_idx);
+        l_dom, l_channel <-- getall_config_inv(config_idx);
+        IF  l_dom = FALSE THEN
+            l_card_connecting <-- get_card_cli_channel_connecting;
+            l_card_connected  <-- get_card_channel_connected;
+            l_sum := l_card_connecting + l_card_connected;
+            l_card_channel <-- get_card_t_channel;
+            IF  l_sum /= l_card_channel THEN
+                add_cli_channel_connecting(config_idx);
+                bres := TRUE
+            ELSE
+                bres := FALSE
+            END
+        ELSE
+           bres := FALSE
+        END
+    END
+    ;
+
+    bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel) =
+    VAR
+        l_con,
+        l_dom,
+        l_channel
+    IN
+        l_con <-- is_channel_connected(channel);
+        l_dom, l_channel <-- getall_config_inv(channel_config_idx);
+        IF  l_con = FALSE &
+            l_dom = FALSE
+        THEN
+            add_channel_connected(channel);
+            set_config(channel, channel_config_idx);
+            set_endpoint(channel, endpoint_config_idx);
+            define_SecurityPolicy(channel);
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END
+    END
+    ;
+
+    close_secure_channel(channel) =
+    BEGIN
+        l_close_secure_channel(channel)
+    END
+    ;
+    
+    bres <-- close_all_channel =
+    VAR
+        l_continue,
+        l_channel,
+        l_con
+    IN
+        all_channel_closing := FALSE;
+        l_continue <-- init_iter_channel;
+        WHILE l_continue = TRUE DO
+            l_continue, l_channel <-- continue_iter_channel;
+            l_con <-- is_channel_connected(l_channel);
+            IF  l_con = TRUE THEN
+                all_channel_closing := TRUE;
+                l_close_secure_channel(l_channel)
+            END
+        INVARIANT
+            channels_to_iterate <: t_channel &
+            channels_iterated   <: t_channel &
+            channels_to_iterate /\ channels_iterated = {} &
+            channels_to_iterate \/ channels_iterated = t_channel
+        VARIANT
+            card(channels_to_iterate)
+        END;
+        bres := all_channel_closing
+    END
+    ;
+
+    channel_lost (channel) =
+    VAR
+        l_res,
+        l_channel_conf
+    IN
+        l_res, l_channel_conf <-- getall_channel_connected(channel);
+        IF  l_res = TRUE THEN
+            remove_channel_connected(channel);
+            remove_cli_channel_disconnecting(l_channel_conf);
+            reset_config(channel);
+            reset_endpoint(channel);
+            reset_SecurityPolicy(channel);
+            l_check_all_channel_lost
+        END
+    END
+    ;
+
+    bres <-- cli_set_connected_channel (config_idx, channel) =
+    VAR
+        l_is_channel_connecting,
+        l_is_channel_connected
+    IN
+        l_is_channel_connecting <-- is_cli_channel_connecting(config_idx);
+        l_is_channel_connected  <-- is_channel_connected(channel);
+        IF  l_is_channel_connecting = TRUE &
+            l_is_channel_connected = FALSE
+        THEN
+            remove_cli_channel_connecting(config_idx);
+            add_channel_connected(channel);
+            set_config(channel, config_idx);
+            define_SecurityPolicy(channel);
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END
+    END
+    ;
+
+    bres <-- cli_set_connection_timeout_channel (config_idx) =
+    VAR
+        l_res
+    IN
+        l_res <-- is_cli_channel_connecting(config_idx);
+        IF  l_res = TRUE THEN
+            remove_cli_channel_connecting(config_idx);
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END
+    END
+
+END

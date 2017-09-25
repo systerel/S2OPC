@@ -19,7 +19,7 @@ MACHINE
     service_mgr
 
 SEES
-    channel_mgr_bs,
+    channel_mgr,
     constants
 
 DEFINITIONS

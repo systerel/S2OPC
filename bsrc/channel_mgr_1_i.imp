@@ -1,0 +1,262 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+IMPLEMENTATION
+    channel_mgr_1_i
+
+REFINES
+    channel_mgr_1
+    
+SEES
+    constants
+
+CONCRETE_VARIABLES
+    s_cli_channel_connecting_i,
+    card_cli_channel_connecting_i,
+    s_cli_channel_disconnecting_i,
+    s_channel_connected_i,
+    card_channel_connected_i,
+    a_config_i,
+    a_config_inv_i,
+    a_endpoint_i
+
+INVARIANT
+    s_cli_channel_connecting_i    : t_channel_config_idx_i --> BOOL         &
+    card_cli_channel_connecting_i : NAT                                     &
+    s_cli_channel_disconnecting_i : t_channel_config_idx_i --> BOOL         &
+    s_channel_connected_i         : t_channel_i            --> BOOL         &
+    card_channel_connected_i      : NAT                                     &
+    a_config_i                    : t_channel_i --> t_channel_config_idx_i  &
+    a_config_inv_i                : t_channel_config_idx_i --> t_channel_i  &
+    a_endpoint_i                  : t_channel_i --> t_endpoint_config_idx_i &
+
+    s_cli_channel_connecting      = s_cli_channel_connecting_i~[{TRUE}] /\ t_channel_config_idx    &
+    card_cli_channel_connecting_i = card(s_cli_channel_connecting)                                 &
+    s_cli_channel_disconnecting   = s_cli_channel_disconnecting_i~[{TRUE}] /\ t_channel_config_idx &
+    s_channel_connected           = s_channel_connected_i~[{TRUE}] /\ t_channel                    &
+    card_channel_connected_i      = card(s_channel_connected)                                      &
+    a_config                      = t_channel            <| a_config_i     |> t_channel_config_idx &
+    a_config~                     = t_channel_config_idx <| a_config_inv_i |> t_channel
+
+INITIALISATION
+    s_cli_channel_connecting_i    := t_channel_config_idx_i * {FALSE};
+    card_cli_channel_connecting_i := 0;
+    s_cli_channel_disconnecting_i := t_channel_config_idx_i * {FALSE};
+    s_channel_connected_i         := t_channel_i            * {FALSE};
+    card_channel_connected_i      := 0;
+    a_config_i                    := t_channel_i            * {c_channel_config_idx_indet};
+    a_config_inv_i                := t_channel_config_idx_i * {c_channel_indet};
+    a_endpoint_i                  := t_channel_i            * {c_endpoint_config_idx_indet}
+
+OPERATIONS
+
+    bres <-- is_connected_channel(channel) =
+    BEGIN
+        bres := s_channel_connected_i(channel)
+    END
+    ;
+
+    bres <-- is_disconnecting_channel(config_idx) =
+    BEGIN
+        bres := s_cli_channel_disconnecting_i(config_idx)
+    END
+    ;
+
+    channel <-- get_connected_channel(config_idx) =
+    VAR
+        l_res
+    IN
+        channel := a_config_inv_i(config_idx);
+        l_res <-- is_t_channel(channel);
+        IF  l_res = FALSE THEN
+            channel := c_channel_indet
+        END
+    END
+    ;
+
+    config_idx <-- get_channel_info(channel) =
+    VAR
+        l_res
+    IN
+        config_idx := a_config_i(channel);
+        l_res <-- is_t_channel_config_idx(config_idx);
+        IF  l_res = FALSE THEN
+            config_idx := c_channel_config_idx_indet
+        END
+    END
+    ;
+
+    bres <-- is_client_channel(channel) =
+    VAR
+        l_endpoint,
+        l_bres
+    IN
+        l_endpoint := a_endpoint_i(channel);
+        l_bres <-- is_t_endpoint_config_idx(l_endpoint);
+        IF l_bres = TRUE THEN
+            bres := FALSE /* Endpoint config presence => server */
+        ELSE
+            bres := TRUE
+        END
+    END
+    ;
+
+    endpoint_config_idx <-- server_get_endpoint_config (channel) =
+    VAR
+        l_res
+    IN
+        endpoint_config_idx := a_endpoint_i(channel);
+        l_res <-- is_t_endpoint_config_idx(endpoint_config_idx);
+        IF  l_res = FALSE THEN
+            endpoint_config_idx := c_endpoint_config_idx_indet
+        END
+    END
+    ;
+
+    p_dom, p_channel <-- getall_config_inv(p_config_idx) =
+    BEGIN
+        p_channel := a_config_inv_i(p_config_idx);
+        p_dom <-- is_t_channel(p_channel);
+        IF  p_dom = FALSE THEN
+            p_channel := c_channel_indet
+        END
+    END
+    ;
+
+    p_card_connecting <-- get_card_cli_channel_connecting =
+    BEGIN
+        p_card_connecting := card_cli_channel_connecting_i
+    END
+    ;
+    
+    p_card_connected <-- get_card_channel_connected =
+    BEGIN
+        p_card_connected := card_channel_connected_i
+    END
+    ;
+    
+    add_cli_channel_connecting(p_config_idx) =
+    VAR
+        l_res
+    IN
+        l_res := s_cli_channel_connecting_i(p_config_idx);
+        IF  l_res = FALSE THEN
+            s_cli_channel_connecting_i(p_config_idx) := TRUE;
+            card_cli_channel_connecting_i := card_cli_channel_connecting_i + 1
+        END
+    END
+    ;
+
+    p_con <-- is_channel_connected(p_channel) =
+    BEGIN
+        p_con := s_channel_connected_i(p_channel)
+    END
+    ;
+
+    add_channel_connected(p_channel) =
+    VAR
+        l_res
+    IN
+        l_res := s_channel_connected_i(p_channel);
+        IF  l_res = FALSE THEN
+            s_channel_connected_i(p_channel) := TRUE;
+            card_channel_connected_i := card_channel_connected_i + 1
+        END
+    END
+    ;
+
+    set_config(p_channel, p_channel_config_idx) =
+    BEGIN
+        a_config_i    (p_channel)            := p_channel_config_idx;
+        a_config_inv_i(p_channel_config_idx) := p_channel
+    END
+    ;
+
+    set_endpoint(p_channel, p_endpoint_config_idx) =
+    BEGIN
+        a_endpoint_i(p_channel) := p_endpoint_config_idx
+    END
+    ;
+
+    p_dom, p_config_idx <-- getall_channel_connected(p_channel) =
+    BEGIN
+        p_config_idx := a_config_i(p_channel);
+        p_dom <-- is_t_channel_config_idx(p_config_idx);
+        IF  p_dom = FALSE THEN
+            p_config_idx := c_channel_config_idx_indet
+        END
+    END
+    ;
+
+    p_is_channel_connecting <-- is_cli_channel_connecting(p_config_idx) =
+    BEGIN
+        p_is_channel_connecting := s_cli_channel_connecting_i(p_config_idx)
+    END
+    ;
+
+    add_cli_channel_disconnecting(p_config_idx) =
+    BEGIN
+        s_cli_channel_disconnecting_i(p_config_idx) := TRUE
+    END
+    ;
+    
+    remove_channel_connected(p_channel) =
+    VAR
+        l_res
+    IN
+        l_res := s_channel_connected_i(p_channel);
+        IF  l_res = TRUE THEN
+            s_channel_connected_i(p_channel) := FALSE;
+            card_channel_connected_i := card_channel_connected_i - 1
+        END
+    END
+    ;
+
+    remove_cli_channel_disconnecting(p_config_idx) =
+    BEGIN
+       s_cli_channel_disconnecting_i(p_config_idx) := FALSE
+    END
+    ;
+    
+    reset_config(p_channel) =
+    VAR
+        l_config_idx
+    IN
+        l_config_idx                 := a_config_i(p_channel);
+        a_config_inv_i(l_config_idx) := c_channel_indet;
+        a_config_i    (p_channel)    := c_channel_config_idx_indet
+    END
+    ;
+    
+    reset_endpoint(p_channel) =
+    BEGIN
+        a_endpoint_i(p_channel) := c_endpoint_config_idx_indet
+    END
+    ;
+    
+    remove_cli_channel_connecting(p_config_idx) =
+    VAR
+        l_res
+    IN
+        l_res := s_cli_channel_connecting_i(p_config_idx);
+        IF  l_res = TRUE THEN
+            s_cli_channel_connecting_i(p_config_idx) := FALSE;
+            card_cli_channel_connecting_i := card_cli_channel_connecting_i - 1
+        END
+    END
+
+END

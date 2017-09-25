@@ -51,10 +51,16 @@ VALUES
     c_BrowseResult_indet = 0
 
 PROMOTES
+    is_t_channel_config_idx,
+    is_t_endpoint_config_idx,
+    is_t_channel,
+    get_card_t_channel,
+    get_cast_t_channel,
     get_Is_SubType,
     getall_conv_ExpandedNodeId_NodeId
 
 OPERATIONS
+
     rvi <-- read_cast_t_ReadValue(ii) =
     BEGIN
         rvi := ii

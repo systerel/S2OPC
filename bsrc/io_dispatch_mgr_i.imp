@@ -23,7 +23,7 @@ SEES
 
 IMPORTS
     service_mgr,
-    channel_mgr_bs
+    channel_mgr
 
 LOCAL_OPERATIONS
 

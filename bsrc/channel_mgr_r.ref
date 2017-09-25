@@ -1,0 +1,140 @@
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+REFINEMENT
+    channel_mgr_r
+
+REFINES
+    channel_mgr
+
+SEES
+    constants
+
+DEFINITIONS
+    d_variables ==
+    s_cli_channel_connecting,
+    s_cli_channel_disconnecting,
+    s_channel_connected,
+    a_config,
+    a_endpoint,
+    a_SecurityPolicy
+
+ABSTRACT_VARIABLES
+    d_variables
+
+INITIALISATION
+    s_cli_channel_connecting    := {} ||
+    s_cli_channel_disconnecting := {} ||
+    s_channel_connected         := {} ||
+    a_config                    := {} ||
+    a_endpoint                  := {} ||
+    a_SecurityPolicy            := {}
+
+OPERATIONS
+
+    bres <-- cli_open_secure_channel (config_idx) =
+    BEGIN
+       IF  config_idx /: dom(a_config~) &
+           card(s_cli_channel_connecting) + card(s_channel_connected) /= card(t_channel)
+       THEN
+           s_cli_channel_connecting := s_cli_channel_connecting \/ {config_idx} ||
+           bres := TRUE
+       ELSE
+           bres := FALSE
+       END
+    END
+    ;
+
+    bres <-- srv_new_secure_channel (endpoint_config_idx, channel_config_idx, channel) =
+    BEGIN
+        IF channel /: s_channel_connected &
+           channel_config_idx /: ran(a_config)
+        THEN
+            s_channel_connected := s_channel_connected \/ {channel} ||
+            a_config(channel)   := channel_config_idx ||
+            a_endpoint(channel) := endpoint_config_idx ||
+            /* a_SecurityPolicy(channel) :: t_SecurityPolicy */
+            a_SecurityPolicy
+            :(
+                a_SecurityPolicy : s_channel_connected --> t_SecurityPolicy &
+                {channel} <<| a_SecurityPolicy = {channel} <<| a_SecurityPolicy$0 &
+                channel : dom(a_SecurityPolicy)
+             ) ||
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END
+    END;
+
+    close_secure_channel (channel) =
+    PRE
+        channel : t_channel_i &
+        channel : t_channel
+    THEN
+        IF channel : s_channel_connected
+        THEN
+            s_cli_channel_disconnecting := s_cli_channel_disconnecting \/ {a_config(channel)}
+        END
+    END;
+
+    channel_lost (channel) =
+    BEGIN
+        IF channel : s_channel_connected
+        THEN
+            s_channel_connected         := s_channel_connected - {channel}                   ||
+            s_cli_channel_disconnecting := s_cli_channel_disconnecting - {a_config(channel)} ||
+            a_config                    := {channel} <<| a_config                            ||
+            a_endpoint                  := {channel} <<| a_endpoint                          ||
+            a_SecurityPolicy            := {channel} <<| a_SecurityPolicy
+        END
+    END
+    ;
+
+    bres <-- cli_set_connected_channel (config_idx, channel) =
+    BEGIN
+        IF  config_idx : s_cli_channel_connecting &
+            channel /: s_channel_connected
+        THEN
+            s_cli_channel_connecting := s_cli_channel_connecting - {config_idx} ||
+            s_channel_connected      := s_channel_connected \/ {channel}        ||
+            a_config(channel)        := config_idx                              ||
+            /* a_SecurityPolicy(channel) :: t_SecurityPolicy */
+            a_SecurityPolicy
+            :(
+                a_SecurityPolicy : s_channel_connected --> t_SecurityPolicy       &
+                {channel} <<| a_SecurityPolicy = {channel} <<| a_SecurityPolicy$0 &
+                channel : dom(a_SecurityPolicy)
+             ) ||
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END
+    END
+    ;
+
+    bres <-- cli_set_connection_timeout_channel (config_idx) =
+    BEGIN
+        IF config_idx : s_cli_channel_connecting
+        THEN
+            s_cli_channel_connecting := s_cli_channel_connecting - {config_idx} ||
+            bres := TRUE
+        ELSE
+            bres := FALSE
+        END
+    END
+
+END
