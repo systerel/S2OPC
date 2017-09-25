@@ -70,7 +70,7 @@ A noté que pour un élément qui n'a pas d'image, l'indice de fin est stricteme
 -->
 
 <%
-classes = ('Variable', 'VariableType', 'ObjectType', 'ReferenceType', 'DataType', 'Method', 'Object', 'View')
+classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'ReferenceType', 'DataType', 'Method')
 %>
 
 <!-- variable contenant les alias -->
