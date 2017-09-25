@@ -132,7 +132,6 @@ typedef struct SOPC_DiagnosticInfo {
 
 typedef struct SOPC_QualifiedName {
     uint16_t    NamespaceIndex;
-    SOPC_Byte   Padding[2]; // For type binary compatibility
     SOPC_String Name;
 } SOPC_QualifiedName;
 
@@ -249,7 +248,6 @@ typedef union SOPC_VariantValue {
 typedef struct SOPC_Variant {
     SOPC_Byte         BuiltInTypeId;
     SOPC_Byte         ArrayType;
-    SOPC_Byte         Padding[2];
     SOPC_VariantValue Value;
 } SOPC_Variant;
 
