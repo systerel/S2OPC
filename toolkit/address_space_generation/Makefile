@@ -1,16 +1,20 @@
 # Old makefile, ct.py moved to tooling
 
+empty:=
+space:= $(empty) $(empty)
 CC=gcc
-CFLAGS=-W -Wall -ansi -pedantic -std=c11 -I./install/include/
+CFLAGS=-W -Wall -ansi -pedantic -std=c11 -I../../install_stack/include/
 LDFLAGS=
 EXEC=test
-XSL=test.xsl add.xsl
+XSL=add.xsl test.xsl
 SRC=$(XSL:.xsl=.c)
 OBJ=$(SRC:.c=.o)
-
+OBJ_WITH_PATH=$(PATHBUILD)/$(subst $(space), $(PATHBUILD)/,$(OBJ))
+SRC_WITH_PATH=$(PATHGENC)/$(subst $(space), $(PATHGENC)/,$(SRC))
 PATHBUILD=./build
 PATHGENC=./genc
 
+.SECONDARY:$(SRC_WITH_PATH)
 .PHONY: all config clean
 
 all: config $(EXEC)
@@ -20,8 +24,9 @@ config:
 	@mkdir -p $(PATHGENC)
 
 clean:
-	@rm -r ./$(PATHBUILD)
-	@rm -r ./$(PATHGENC)
+	@echo "clean directory"
+	@rm -rf $(PATHBUILD)
+	@rm -rf $(PATHGENC)
 
 $(PATHGENC)/%.c : %.xsl
 	ct.py $< $(PATHBUILD)/$<
@@ -30,7 +35,7 @@ $(PATHGENC)/%.c : %.xsl
 $(PATHBUILD)/%.o: $(PATHGENC)/%.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-$(EXEC): $(PATHBUILD)/$(OBJ)
+$(EXEC): $(OBJ_WITH_PATH)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 
