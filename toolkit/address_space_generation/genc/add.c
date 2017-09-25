@@ -5,15 +5,25 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+const uint32_t NB_Variable = 33;
 #define NB_1 33    /* Variable */
+const uint32_t NB_VariableType = 0;
 #define NB_2 0    /* VariableType */
+const uint32_t NB_ObjectType = 0;
 #define NB_3 0    /* ObjectType */
+const uint32_t NB_ReferenceType = 0;
 #define NB_4 0    /* ReferenceType */
+const uint32_t NB_DataType = 0;
 #define NB_5 0    /* DataType */
+const uint32_t NB_Method = 0;
 #define NB_6 0    /* Method */
+const uint32_t NB_Object = 22;
 #define NB_7 22    /* Object */
+const uint32_t NB_View = 0;
 #define NB_8 0    /* View */
-#define NB  (NB_1 + NB_2 + NB_3 + NB_4 + NB_5 + NB_6 + NB_7 + NB_8)
+
+const uint32_t NB_NODES_TOTAL = 33 + 0 + 0 + 0 + 0 + 0 + 22 + 0;
+#define NB (NB_1 + NB_2 + NB_3 + NB_4 + NB_5 + NB_6 + NB_7 + NB_8)
 
 #define toSOPC_String(s) ((SOPC_Byte*)s)
 

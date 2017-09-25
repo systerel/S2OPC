@@ -12,9 +12,20 @@
 
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "sopc_builtintypes.h"
 
+
+extern const uint32_t NB_Variable;
+extern const uint32_t NB_VariableType;
+extern const uint32_t NB_ObjectType;
+extern const uint32_t NB_ReferenceType;
+extern const uint32_t NB_DataType;
+extern const uint32_t NB_Method;
+extern const uint32_t NB_Object;
+extern const uint32_t NB_View;
+extern const uint32_t NB_NODES_TOTAL;
 
 extern SOPC_QualifiedName BrowseName[];
 extern SOPC_LocalizedText Description[];

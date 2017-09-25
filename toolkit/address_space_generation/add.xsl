@@ -101,9 +101,16 @@ classes = ('Variable', 'VariableType', 'ObjectType', 'ReferenceType', 'DataType'
 #include &lt;stdbool.h>
 
 % for i in range(1, 9):
+const uint32_t NB_${classes[i-1]} = <xsl:value-of select="count(//ua:UA${classes[i-1]})"/>;
 #define NB_${i} <xsl:value-of select="count(//ua:UA${classes[i-1]})"/><xsl:text>    /* ${classes[i-1]} */</xsl:text>
 % endfor
-#define NB  (${' + '.join( [ 'NB_%d' % i for i in range(1,9)])})
+
+const uint32_t NB_NODES_TOTAL = <xsl:value-of select="count(//ua:UA${classes[0]})"/>\
+% for i in range(2, 9):
+ + <xsl:value-of select="count(//ua:UA${classes[i-1]})"/>\
+% endfor
+;
+#define NB (${' + '.join( [ 'NB_%d' % i for i in range(1,9)])})
 
 #define toSOPC_String(s) ((SOPC_Byte*)s)
 
