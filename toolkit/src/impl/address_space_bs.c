@@ -182,7 +182,7 @@ void address_space_bs__readall_AddressSpace_Node(
     /* Very impressive hashmap with a single entry, and time to compute hash is 0! */
     for(i=1; i<=address_space_bs__nNodeIds; ++i)
     {
-        pnid = ((SOPC_NodeId **)address_space_bs__a_NodeId)[i];
+        pnid = (SOPC_NodeId *) address_space_bs__a_NodeId[i];
         if(NULL == pnid)
             continue;
 
@@ -250,7 +250,7 @@ void address_space_bs__set_Value(
             poldvar = address_space_bs__a_Value[address_space_bs__node - offVarsTypes];
             SOPC_Variant_Clear((SOPC_Variant *)poldvar);
             free((void *)poldvar);
-            poldvar = (constants__t_Variant_i)pvar;
+            address_space_bs__a_Value[address_space_bs__node - offVarsTypes] = (constants__t_Variant_i)pvar;
         }
     }
 }
