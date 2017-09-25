@@ -30,16 +30,15 @@ SOPC_StatusCode _ToolkitServer_Initialize_AddressSpace()
     int32_t i;
 
     /* Number of nodes by nodeclass */
-     /* TODO: fixme when defines are available */
-    address_space_bs__nNodeIds = 55;
-    address_space_bs__nVariables = 33;
-    address_space_bs__nVariableTypes = 0;
-    address_space_bs__nObjectTypes = 0;
-    address_space_bs__nReferenceTypes = 0;
-    address_space_bs__nDataTypes = 0;
-    address_space_bs__nMethods = 0;
-    address_space_bs__nObjects = 22;
-    address_space_bs__nViews = 0;
+    address_space_bs__nNodeIds = NB_NODES_TOTAL;
+    address_space_bs__nVariables = NB_Variable;
+    address_space_bs__nVariableTypes = NB_VariableType;
+    address_space_bs__nObjectTypes = NB_ObjectType;
+    address_space_bs__nReferenceTypes = NB_ReferenceType;
+    address_space_bs__nDataTypes = NB_DataType;
+    address_space_bs__nMethods = NB_Method;
+    address_space_bs__nObjects = NB_Object;
+    address_space_bs__nViews = NB_View;
 
     /* Attributes */
     address_space_bs__a_NodeId = (constants__t_NodeId_i *)NodeId;
