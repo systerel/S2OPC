@@ -34,6 +34,7 @@
 #include "wrap_read.h"
 
 #include "sopc_sc_events.h"
+#include "add.h"
 
 static int endpointClosed = FALSE;
 
@@ -80,7 +81,7 @@ int main(void)
 
   // Init stack configuration
   if(STATUS_OK == status){
-    status = SOPC_ToolkitServer_Initialize(Test_ComEvent_Fct);
+    status = SOPC_Toolkit_Initialize(Test_ComEvent_Fct);
     if(STATUS_OK != status){
       printf("<Test_Server_Toolkit: Failed initializing\n");
     }else{
@@ -88,6 +89,14 @@ int main(void)
     }
   }
 
+  if(STATUS_OK == status){
+    status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);    
+    if(STATUS_OK != status){
+      printf("<Test_Server_Toolkit: Failed to configure the @ space\n");
+    }else{
+      printf("<Test_Server_Toolkit: @ space configured\n");
+    }
+  }
 
   if(STATUS_OK == status){
     epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);    

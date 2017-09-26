@@ -1,11 +1,19 @@
-/* Maybe temp */
-/* Declares the variables produced by the AddS generator */
-/* This is not easy, because the #defines are in the same file
- * Maybe you should #include "add.c" but ... Meh.
- * Maybe arrays should be defined with [] instead of [NB]
- * But the problem still applies to number of variables...
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 
 #ifndef _add_h
 #define _add_h
@@ -15,35 +23,9 @@
 #include <stdint.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_user_app_itf.h"
 
-
-extern const uint32_t NB_Variable;
-extern const uint32_t NB_VariableType;
-extern const uint32_t NB_ObjectType;
-extern const uint32_t NB_ReferenceType;
-extern const uint32_t NB_DataType;
-extern const uint32_t NB_Method;
-extern const uint32_t NB_Object;
-extern const uint32_t NB_View;
-extern const uint32_t NB_NODES_TOTAL;
-
-extern SOPC_QualifiedName BrowseName[];
-extern SOPC_LocalizedText Description[];
-extern int Description_begin[];
-extern int Description_end[];
-extern SOPC_LocalizedText DisplayName[];
-extern int DisplayName_begin[];
-extern int DisplayName_end[];
-extern int reference_begin[];
-extern int reference_end[];
-extern SOPC_NodeId* reference_type[];
-extern SOPC_ExpandedNodeId* reference_target[];
-extern bool reference_isForward[];
-extern SOPC_NodeId* NodeId[];
-extern OpcUa_NodeClass NodeClass[];
-extern SOPC_ByteString *Value[];
-extern SOPC_StatusCode status_code[];
-extern SOPC_SByte AccessLevel[];
+extern SOPC_AddressSpace addressSpace;
 
 
 #endif /* _add_h */

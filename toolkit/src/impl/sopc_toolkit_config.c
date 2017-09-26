@@ -33,7 +33,8 @@
 
 #include "io_dispatch_mgr.h"
 #include "toolkit_header_init.h"
-
+#include "address_space_impl.h"
+#include "util_b2c.h"
 
 static struct {
     uint8_t     initDone;
@@ -105,7 +106,7 @@ void SOPC_ApplicationEventDispatcher(int32_t  eventAndType,
   }
 }
 
-SOPC_StatusCode SOPC_Internal_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
+SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
     SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
     if(NULL != pAppFct){
       appFct = pAppFct;
@@ -139,12 +140,6 @@ SOPC_StatusCode SOPC_Internal_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
       }
     }
     return status;
-}
-
-
-SOPC_StatusCode SOPC_ToolkitClient_Initialize(SOPC_ComEvent_Fct* pAppFct)
-{
-    return SOPC_Internal_Toolkit_Initialize(pAppFct);
 }
 
 
@@ -357,4 +352,56 @@ SOPC_App_Com_Event SOPC_AppEvent_ComEvent_Get(int32_t iEvent){
 
 SOPC_App_AddSpace_Event SOPC_AppEvent_AddSpaceEvent_Get(int32_t iEvent){
     return (iEvent >> 8);
+}
+
+SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace){
+    SOPC_StatusCode status = STATUS_INVALID_PARAMETERS;
+    if(addressSpace != NULL){
+        status = STATUS_INVALID_STATE;
+        if(tConfig.initDone != false){
+            Mutex_Lock(&tConfig.mut);
+            if(false == tConfig.locked){
+                status = STATUS_OK;
+                /* Glue the address_space_bs machine content to the generated address space content */
+                int32_t i;
+                
+                /* Number of nodes by nodeclass */
+                address_space_bs__nNodeIds = addressSpace->nbNodesTotal;
+                address_space_bs__nVariables = addressSpace->nbVariables;
+                address_space_bs__nVariableTypes = addressSpace->nbVariableTypes;
+                address_space_bs__nObjectTypes = addressSpace->nbObjectTypes;
+                address_space_bs__nReferenceTypes = addressSpace->nbReferenceTypes;
+                address_space_bs__nDataTypes = addressSpace->nbDataTypes;
+                address_space_bs__nMethods = addressSpace->nbMethods;
+                address_space_bs__nObjects = addressSpace->nbObjects;
+                address_space_bs__nViews = addressSpace->nbViews;
+                
+                /* Attributes */
+                address_space_bs__a_NodeId = (constants__t_NodeId_i *) addressSpace->nodeIdArray;
+                /* Converts NodeClasses */
+                address_space_bs__a_NodeClass = (constants__t_NodeClass_i *) addressSpace->nodeClassArray;
+                for(i=1; i<=address_space_bs__nNodeIds; ++i)
+                    assert(util_NodeClass__C_to_B(address_space_bs__a_NodeClass[i], &address_space_bs__a_NodeClass[i]));
+                address_space_bs__a_BrowseName = (constants__t_QualifiedName_i *) addressSpace->browseNameArray;
+                address_space_bs__a_DisplayName = (constants__t_LocalizedText_i *) addressSpace->displayNameArray;
+                address_space_bs__a_DisplayName_begin = addressSpace->displayNameIdxArray_begin;
+                address_space_bs__a_DisplayName_end = addressSpace->displayNameIdxArray_end;
+                address_space_bs__a_Value = (constants__t_Variant_i *) addressSpace->valueArray;
+                /* Converts status codes */
+                address_space_bs__a_Value_StatusCode = addressSpace->valueStatusArray;
+                for(i=1; i<=address_space_bs__nVariables; ++i)
+                    assert(util_status_code__C_to_B(address_space_bs__a_Value_StatusCode[i], &address_space_bs__a_Value_StatusCode[i]));
+                address_space_bs__HasTypeDefinition = NULL;
+                
+                /* References */
+                address_space_bs__refs_ReferenceType = (constants__t_NodeId_i *) addressSpace->referenceTypeArray;
+                address_space_bs__refs_TargetNode = (constants__t_ExpandedNodeId_i *) addressSpace->referenceTargetArray;
+                address_space_bs__refs_IsForward = addressSpace->referenceIsForwardArray;
+                address_space_bs__RefIndexBegin = addressSpace->referenceIdxArray_begin;
+                address_space_bs__RefIndexEnd = addressSpace->referenceIdxArray_end;
+            }
+            Mutex_Unlock(&tConfig.mut);
+        }
+    }
+    return status;
 }

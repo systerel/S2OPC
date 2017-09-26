@@ -1,28 +1,39 @@
 
-#include "sopc_builtintypes.h"
-#include "sopc_types.h"
-#include "sopc_base_types.h"
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "add.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 
-const uint32_t NB_View = 0;
+#include "sopc_builtintypes.h"
+#include "sopc_types.h"
+#include "sopc_base_types.h"
+
 #define NB_1 0    /* View */
-const uint32_t NB_Object = 22;
 #define NB_2 22    /* Object */
-const uint32_t NB_Variable = 33;
 #define NB_3 33    /* Variable */
-const uint32_t NB_VariableType = 0;
 #define NB_4 0    /* VariableType */
-const uint32_t NB_ObjectType = 0;
 #define NB_5 0    /* ObjectType */
-const uint32_t NB_ReferenceType = 0;
 #define NB_6 0    /* ReferenceType */
-const uint32_t NB_DataType = 0;
 #define NB_7 0    /* DataType */
-const uint32_t NB_Method = 0;
 #define NB_8 0    /* Method */
 
-const uint32_t NB_NODES_TOTAL = 0 + 22 + 33 + 0 + 0 + 0 + 0 + 0;
 #define NB (NB_1 + NB_2 + NB_3 + NB_4 + NB_5 + NB_6 + NB_7 + NB_8)
 
 #define toSOPC_String(s) ((SOPC_Byte*)s)
@@ -220,7 +231,7 @@ void* avoid_unused_nodes_var[] = {&nodeid_1,
 &ex_nodeid_62,};
 
 
-SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
+static SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
 ,{261,{5,0,toSOPC_String("15361")}}/* ns=261;i=15361*/
 ,{0,{7,0,toSOPC_String("SIGNALs")}}/* ns=261;s=Objects.15361.SIGNALs*/
 ,{0,{7,0,toSOPC_String("SWITCHs")}}/* ns=261;s=Objects.15361.SWITCHs*/
@@ -281,7 +292,7 @@ SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
 
 
 
-SOPC_LocalizedText Description[] = {{{0, 0, NULL}, {0, 0, NULL}}
+static SOPC_LocalizedText Description[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,0,toSOPC_String("")},{6,0,toSOPC_String("NoName")}}
 , {{2,0,toSOPC_String("en")},{6,0,toSOPC_String("NoName")}}
 , {{2,0,toSOPC_String("en")},{6,0,toSOPC_String("NoName")}}
@@ -331,9 +342,9 @@ SOPC_LocalizedText Description[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,0,toSOPC_String("")},{26,0,toSOPC_String("Secondary Detection Status")}}
 
 };
-int Description_begin[] = {0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 30, 30, 30, 31, 32, 33, 34, 35, 36, 37, 37, 37, 37, 38, 39, 40, 41, 42, 43, 43, 43, 43, 44, 45, 46, 47};
-int Description_end[] = {-1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 29, 29, 29, 30, 31, 32, 33, 34, 35, 36, 36, 36, 36, 37, 38, 39, 40, 41, 42, 42, 42, 42, 43, 44, 45, 46, 47};
-SOPC_LocalizedText DisplayName[] = {{{0, 0, NULL}, {0, 0, NULL}}
+static int Description_begin[] = {0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 30, 30, 30, 31, 32, 33, 34, 35, 36, 37, 37, 37, 37, 38, 39, 40, 41, 42, 43, 43, 43, 43, 44, 45, 46, 47};
+static int Description_end[] = {-1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 29, 29, 29, 30, 31, 32, 33, 34, 35, 36, 36, 36, 36, 37, 38, 39, 40, 41, 42, 42, 42, 42, 43, 44, 45, 46, 47};
+static SOPC_LocalizedText DisplayName[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,0,toSOPC_String("")},{5,0,toSOPC_String("15361")}}
 , {{0,0,toSOPC_String("")},{7,0,toSOPC_String("SIGNALs")}}
 , {{0,0,toSOPC_String("")},{7,0,toSOPC_String("SWITCHs")}}
@@ -391,13 +402,13 @@ SOPC_LocalizedText DisplayName[] = {{{0, 0, NULL}, {0, 0, NULL}}
 , {{0,0,toSOPC_String("")},{2,0,toSOPC_String("TK")}}
 
 };
-int DisplayName_begin[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55};
-int DisplayName_end[] = {-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55};
+static int DisplayName_begin[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55};
+static int DisplayName_end[] = {-1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55};
 
 
 
-int reference_begin[] = {0, 1, 6, 11, 14, 20, 27, 35, 42, 49, 53, 57, 60, 63, 70, 75, 79, 82, 85, 88, 91, 93, 96, 99, 101, 103, 105, 107, 109, 111, 113, 115, 117, 119, 121, 123, 125, 127, 129, 131, 133, 135, 137, 139, 141, 143, 145, 147, 149, 151, 153, 155, 157, 159, 161, 163};
-int reference_end[] = {-1,
+static int reference_begin[] = {0, 1, 6, 11, 14, 20, 27, 35, 42, 49, 53, 57, 60, 63, 70, 75, 79, 82, 85, 88, 91, 93, 96, 99, 101, 103, 105, 107, 109, 111, 113, 115, 117, 119, 121, 123, 125, 127, 129, 131, 133, 135, 137, 139, 141, 143, 145, 147, 149, 151, 153, 155, 157, 159, 161, 163};
+static int reference_end[] = {-1,
 0+5 /* ns=261;i=15361 */,
 5+5 /* ns=261;s=Objects.15361.SIGNALs */,
 10+3 /* ns=261;s=Objects.15361.SWITCHs */,
@@ -453,12 +464,12 @@ int reference_end[] = {-1,
 158+2 /* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK */,
 160+2 /* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK */,
 162+2 /* ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK */};
-SOPC_NodeId* reference_type[] = {NULL,  &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4};
-SOPC_ExpandedNodeId* reference_target[] = {NULL, &ex_nodeid_3, &ex_nodeid_5, &ex_nodeid_6, &ex_nodeid_7, &ex_nodeid_8, &ex_nodeid_1, &ex_nodeid_5, &ex_nodeid_9, &ex_nodeid_10, &ex_nodeid_11, &ex_nodeid_1, &ex_nodeid_5, &ex_nodeid_12, &ex_nodeid_1, &ex_nodeid_5, &ex_nodeid_13, &ex_nodeid_14, &ex_nodeid_15, &ex_nodeid_16, &ex_nodeid_6, &ex_nodeid_5, &ex_nodeid_17, &ex_nodeid_18, &ex_nodeid_20, &ex_nodeid_21, &ex_nodeid_22, &ex_nodeid_9, &ex_nodeid_5, &ex_nodeid_23, &ex_nodeid_24, &ex_nodeid_25, &ex_nodeid_26, &ex_nodeid_27, &ex_nodeid_28, &ex_nodeid_9, &ex_nodeid_5, &ex_nodeid_29, &ex_nodeid_30, &ex_nodeid_31, &ex_nodeid_32, &ex_nodeid_33, &ex_nodeid_6, &ex_nodeid_5, &ex_nodeid_34, &ex_nodeid_35, &ex_nodeid_36, &ex_nodeid_37, &ex_nodeid_38, &ex_nodeid_10, &ex_nodeid_5, &ex_nodeid_39, &ex_nodeid_40, &ex_nodeid_10, &ex_nodeid_5, &ex_nodeid_41, &ex_nodeid_42, &ex_nodeid_6, &ex_nodeid_5, &ex_nodeid_43, &ex_nodeid_11, &ex_nodeid_5, &ex_nodeid_44, &ex_nodeid_7, &ex_nodeid_5, &ex_nodeid_45, &ex_nodeid_46, &ex_nodeid_47, &ex_nodeid_48, &ex_nodeid_49, &ex_nodeid_12, &ex_nodeid_5, &ex_nodeid_50, &ex_nodeid_51, &ex_nodeid_52, &ex_nodeid_12, &ex_nodeid_5, &ex_nodeid_53, &ex_nodeid_54, &ex_nodeid_8, &ex_nodeid_5, &ex_nodeid_55, &ex_nodeid_13, &ex_nodeid_5, &ex_nodeid_56, &ex_nodeid_8, &ex_nodeid_5, &ex_nodeid_57, &ex_nodeid_14, &ex_nodeid_5, &ex_nodeid_58, &ex_nodeid_8, &ex_nodeid_5, &ex_nodeid_8, &ex_nodeid_5, &ex_nodeid_59, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_60, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_9, &ex_nodeid_62, &ex_nodeid_9, &ex_nodeid_62, &ex_nodeid_9, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_34, &ex_nodeid_62, &ex_nodeid_34, &ex_nodeid_62, &ex_nodeid_10, &ex_nodeid_62, &ex_nodeid_10, &ex_nodeid_62, &ex_nodeid_10, &ex_nodeid_62, &ex_nodeid_35, &ex_nodeid_62, &ex_nodeid_35, &ex_nodeid_62, &ex_nodeid_43, &ex_nodeid_62, &ex_nodeid_45, &ex_nodeid_62, &ex_nodeid_45, &ex_nodeid_62, &ex_nodeid_45, &ex_nodeid_62, &ex_nodeid_12, &ex_nodeid_62, &ex_nodeid_12, &ex_nodeid_62, &ex_nodeid_12, &ex_nodeid_62, &ex_nodeid_46, &ex_nodeid_62, &ex_nodeid_46, &ex_nodeid_62, &ex_nodeid_55, &ex_nodeid_62, &ex_nodeid_57, &ex_nodeid_62, &ex_nodeid_59, &ex_nodeid_62};
-bool reference_isForward[]={false, false, true, true, true, true, false, true, true, true, true, false, true, true, false, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, false, true, true, true, false, true, true, false, true, true, false, true, true, true, true, true, true, false, true, true, true, true, false, true, true, true, false, true, true, false, true, true, false, true, true, false, true, true, false, true, false, true, true, false, true, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true};
+static SOPC_NodeId* reference_type[] = {NULL,  &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_4, &nodeid_2, &nodeid_2, &nodeid_4, &nodeid_19, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4, &nodeid_19, &nodeid_4};
+static SOPC_ExpandedNodeId* reference_target[] = {NULL, &ex_nodeid_3, &ex_nodeid_5, &ex_nodeid_6, &ex_nodeid_7, &ex_nodeid_8, &ex_nodeid_1, &ex_nodeid_5, &ex_nodeid_9, &ex_nodeid_10, &ex_nodeid_11, &ex_nodeid_1, &ex_nodeid_5, &ex_nodeid_12, &ex_nodeid_1, &ex_nodeid_5, &ex_nodeid_13, &ex_nodeid_14, &ex_nodeid_15, &ex_nodeid_16, &ex_nodeid_6, &ex_nodeid_5, &ex_nodeid_17, &ex_nodeid_18, &ex_nodeid_20, &ex_nodeid_21, &ex_nodeid_22, &ex_nodeid_9, &ex_nodeid_5, &ex_nodeid_23, &ex_nodeid_24, &ex_nodeid_25, &ex_nodeid_26, &ex_nodeid_27, &ex_nodeid_28, &ex_nodeid_9, &ex_nodeid_5, &ex_nodeid_29, &ex_nodeid_30, &ex_nodeid_31, &ex_nodeid_32, &ex_nodeid_33, &ex_nodeid_6, &ex_nodeid_5, &ex_nodeid_34, &ex_nodeid_35, &ex_nodeid_36, &ex_nodeid_37, &ex_nodeid_38, &ex_nodeid_10, &ex_nodeid_5, &ex_nodeid_39, &ex_nodeid_40, &ex_nodeid_10, &ex_nodeid_5, &ex_nodeid_41, &ex_nodeid_42, &ex_nodeid_6, &ex_nodeid_5, &ex_nodeid_43, &ex_nodeid_11, &ex_nodeid_5, &ex_nodeid_44, &ex_nodeid_7, &ex_nodeid_5, &ex_nodeid_45, &ex_nodeid_46, &ex_nodeid_47, &ex_nodeid_48, &ex_nodeid_49, &ex_nodeid_12, &ex_nodeid_5, &ex_nodeid_50, &ex_nodeid_51, &ex_nodeid_52, &ex_nodeid_12, &ex_nodeid_5, &ex_nodeid_53, &ex_nodeid_54, &ex_nodeid_8, &ex_nodeid_5, &ex_nodeid_55, &ex_nodeid_13, &ex_nodeid_5, &ex_nodeid_56, &ex_nodeid_8, &ex_nodeid_5, &ex_nodeid_57, &ex_nodeid_14, &ex_nodeid_5, &ex_nodeid_58, &ex_nodeid_8, &ex_nodeid_5, &ex_nodeid_8, &ex_nodeid_5, &ex_nodeid_59, &ex_nodeid_16, &ex_nodeid_5, &ex_nodeid_60, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_17, &ex_nodeid_62, &ex_nodeid_9, &ex_nodeid_62, &ex_nodeid_9, &ex_nodeid_62, &ex_nodeid_9, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_18, &ex_nodeid_62, &ex_nodeid_34, &ex_nodeid_62, &ex_nodeid_34, &ex_nodeid_62, &ex_nodeid_10, &ex_nodeid_62, &ex_nodeid_10, &ex_nodeid_62, &ex_nodeid_10, &ex_nodeid_62, &ex_nodeid_35, &ex_nodeid_62, &ex_nodeid_35, &ex_nodeid_62, &ex_nodeid_43, &ex_nodeid_62, &ex_nodeid_45, &ex_nodeid_62, &ex_nodeid_45, &ex_nodeid_62, &ex_nodeid_45, &ex_nodeid_62, &ex_nodeid_12, &ex_nodeid_62, &ex_nodeid_12, &ex_nodeid_62, &ex_nodeid_12, &ex_nodeid_62, &ex_nodeid_46, &ex_nodeid_62, &ex_nodeid_46, &ex_nodeid_62, &ex_nodeid_55, &ex_nodeid_62, &ex_nodeid_57, &ex_nodeid_62, &ex_nodeid_59, &ex_nodeid_62};
+static bool reference_isForward[]={false, false, true, true, true, true, false, true, true, true, true, false, true, true, false, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, true, false, true, true, true, false, true, true, false, true, true, false, true, true, true, true, true, true, false, true, true, true, true, false, true, true, true, false, true, true, false, true, true, false, true, true, false, true, true, false, true, false, true, true, false, true, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true};
 
 
-SOPC_NodeId* NodeId[NB+1] = {NULL,
+static SOPC_NodeId* NodeId[NB+1] = {NULL,
 &nodeid_1,
 &nodeid_6,
 &nodeid_7,
@@ -517,16 +528,46 @@ SOPC_NodeId* NodeId[NB+1] = {NULL,
 
 
 
-OpcUa_NodeClass NodeClass[NB+1] = {OpcUa_NodeClass_Unspecified,
+static OpcUa_NodeClass NodeClass[NB+1] = {OpcUa_NodeClass_Unspecified,
     OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Object, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable, OpcUa_NodeClass_Variable
 };
 
 
-SOPC_ByteString *Value[NB_1 + NB_2 +1] = {NULL};
+static SOPC_ByteString *Value[NB_1 + NB_2 +1] = {NULL};
 
 
-SOPC_StatusCode status_code[] = {STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK};
+static SOPC_StatusCode status_code[] = {STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_NOK, STATUS_NOK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK, STATUS_OK};
 
 
-SOPC_SByte AccessLevel[] = {0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+static SOPC_SByte AccessLevel[] = {0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+SOPC_AddressSpace addressSpace = {
+    .nbVariables = NB_3,
+    .nbVariableTypes = NB_4,  
+    .nbObjectTypes = NB_5,
+    .nbReferenceTypes = NB_6,
+    .nbDataTypes = NB_7,
+    .nbMethods = NB_8,  
+    .nbObjects = NB_2,    
+    .nbViews = NB_1,    
+    .nbNodesTotal = NB,
+
+    .browseNameArray = BrowseName,
+    .descriptionIdxArray_begin = Description_begin,
+    .descriptionIdxArray_end = Description_end,
+    .descriptionArray = Description,
+    .displayNameIdxArray_begin = DisplayName_begin,
+    .displayNameIdxArray_end = DisplayName_end,
+    .displayNameArray = DisplayName,
+    .nodeClassArray = NodeClass,
+    .nodeIdArray = NodeId,
+    .referenceIdxArray_begin = reference_begin,
+    .referenceIdxArray_end = reference_end,
+    .referenceTypeArray = reference_type,
+    .referenceTargetArray = reference_target,
+    .referenceIsForwardArray = reference_isForward,
+    .valueArray = (SOPC_Variant*) Value,
+    .valueStatusArray = status_code,
+    .accessLevelArray = AccessLevel,
+};
 

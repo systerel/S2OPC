@@ -210,18 +210,24 @@ void address_space_bs__read_AddressSpace_Attribute_value(
     switch(address_space_bs__aid)
     {
     case constants__e_aid_NodeId:
+        assert(address_space_bs__node <= address_space_bs__nNodeIds);
         *address_space_bs__variant = util_variant__new_Variant_from_NodeId(address_space_bs__a_NodeId[address_space_bs__node]);
         break;
     case constants__e_aid_NodeClass:
+        assert(address_space_bs__node <= address_space_bs__nNodeIds);
         *address_space_bs__variant = util_variant__new_Variant_from_NodeClass(address_space_bs__a_NodeClass[address_space_bs__node]);
         break;
     case constants__e_aid_BrowseName:
+        assert(address_space_bs__node <= address_space_bs__nNodeIds);
         *address_space_bs__variant = util_variant__new_Variant_from_QualifiedName(&address_space_bs__a_BrowseName[address_space_bs__node]);
         break;
     case constants__e_aid_DisplayName:
+        assert(address_space_bs__node <= address_space_bs__nNodeIds);
         *address_space_bs__variant = util_variant__new_Variant_from_LocalizedText(&address_space_bs__a_DisplayName[address_space_bs__node]);
         break;
     case constants__e_aid_Value:
+        assert(address_space_bs__node >= offVarsTypes);
+        assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
         *address_space_bs__variant = util_variant__new_Variant_from_Variant(address_space_bs__a_Value[address_space_bs__node - offVarsTypes]);
         break;
     default:
@@ -247,6 +253,8 @@ void address_space_bs__set_Value(
         SOPC_Variant_Initialize(pvar);
         if(STATUS_OK == SOPC_Variant_Copy(pvar, (SOPC_Variant *)address_space_bs__value))
         {
+            assert(address_space_bs__node >= offVarsTypes);
+            assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
             poldvar = address_space_bs__a_Value[address_space_bs__node - offVarsTypes];
             SOPC_Variant_Clear((SOPC_Variant *)poldvar);
             free((void *)poldvar);
@@ -260,6 +268,8 @@ void address_space_bs__get_Value_StatusCode(
    const constants__t_Node_i address_space_bs__node,
    constants__t_StatusCode_i * const address_space_bs__sc)
 {
+    assert(address_space_bs__node >= offVarsTypes);
+    assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
     *address_space_bs__sc = address_space_bs__a_Value_StatusCode[address_space_bs__node - offVarsTypes];
 }
 
@@ -275,6 +285,7 @@ void address_space_bs__get_BrowseName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_QualifiedName_i * const address_space_bs__p_browse_name)
 {
+  assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
   *address_space_bs__p_browse_name = *(SOPC_QualifiedName*) &(address_space_bs__a_BrowseName[address_space_bs__p_node]);
 }
 
@@ -283,10 +294,12 @@ void address_space_bs__get_DisplayName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_LocalizedText_i * const address_space_bs__p_display_name)
 {
+    assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
     int32_t i = address_space_bs__a_DisplayName_begin[address_space_bs__p_node];
 
     /* TODO: this constraint should be pushed to dataprep */
     assert(address_space_bs__a_DisplayName_end[address_space_bs__p_node] >= i);
+    /* TODO: what to do with other display names ([begin + 1, end]) ? */
     *address_space_bs__p_display_name = *(SOPC_LocalizedText *) &(address_space_bs__a_DisplayName[i]);
 }
 
@@ -295,6 +308,7 @@ void address_space_bs__get_NodeClass(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_NodeClass_i * const address_space_bs__p_node_class)
 {
+    assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
     *address_space_bs__p_node_class = address_space_bs__a_NodeClass[address_space_bs__p_node];
 }
 
@@ -305,11 +319,14 @@ void address_space_bs__get_TypeDefinition(
 {
     /* TODO: Temporary check. HasTypeDefinition is defined by PRE but current implentation does not populate it.
      *  Also uncomment the assert in address_space_bs__INITIALISATION */
-    if(NULL == address_space_bs__HasTypeDefinition)
+    if(NULL == address_space_bs__HasTypeDefinition){
         *address_space_bs__p_type_def = constants__c_ExpandedNodeId_indet;
-    else
+    }else{
+        assert(address_space_bs__p_node >= offHasTypeDefs);
+        assert(address_space_bs__p_node - offHasTypeDefs <= address_space_bs__nObjects + address_space_bs__nVariables);
         /* TODO: Verify implementation of HasTypeDefinition in generated AddressSpace before using this code */
         *address_space_bs__p_type_def = &((SOPC_ExpandedNodeId *)address_space_bs__HasTypeDefinition)[address_space_bs__p_node - offHasTypeDefs];
+    }
 }
 
 
@@ -341,6 +358,7 @@ void address_space_bs__get_Node_RefIndexBegin(
    const constants__t_Node_i address_space_bs__p_node,
    t_entier4 * const address_space_bs__p_ref_index)
 {
+    assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
     *address_space_bs__p_ref_index = address_space_bs__RefIndexBegin[address_space_bs__p_node];
 }
 
@@ -349,6 +367,7 @@ void address_space_bs__get_Node_RefIndexEnd(
    const constants__t_Node_i address_space_bs__p_node,
    t_entier4 * const address_space_bs__p_ref_index)
 {
+    assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
     *address_space_bs__p_ref_index = address_space_bs__RefIndexEnd[address_space_bs__p_node];
 }
 

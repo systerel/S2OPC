@@ -20,7 +20,5 @@
 
 
 void SOPC_Internal_AllClientSecureChannelsDisconnected();
-SOPC_StatusCode SOPC_Internal_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct);
-
 
 #endif /* SOPC_TOOLKIT_CONFIG_INTERNAL_H_ */

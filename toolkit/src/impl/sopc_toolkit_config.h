@@ -30,7 +30,7 @@
 extern SOPC_EventDispatcherManager* servicesEventDispatcherMgr;
 
 /**
- *  \brief  Initialize the toolkit configuration, libraries and threads, server side
+ *  \brief  Initialize the toolkit configuration, libraries and threads
  *
  *  \param pAppFct  Pointer to applicative code function in charge of toolkit communication events
  *
@@ -39,19 +39,7 @@ extern SOPC_EventDispatcherManager* servicesEventDispatcherMgr;
  *  OpcUa_BadInvalidState if toolkit already initialized and
  *  STATUS_NOK otherwise
  */
-SOPC_StatusCode SOPC_ToolkitServer_Initialize(SOPC_ComEvent_Fct* pAppFct);
-
-/**
- *  \brief  Initialize the toolkit configuration, libraries and threads, server side
- *
- *  \param pAppFct  Pointer to applicative code function in charge of toolkit communication events
- *
- *  \return STATUS_OK if initialization succeeded,
- *  STATUS_INVALID_PARAMETER if \p pAppFct == NULL or
- *  OpcUa_BadInvalidState if toolkit already initialized and
- *  STATUS_NOK otherwise
- */
-SOPC_StatusCode SOPC_ToolkitClient_Initialize(SOPC_ComEvent_Fct* pAppFct);
+SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct);
 
 /**
  *  \brief  Define toolkit configuration as configured and lock its state until toolkit clear operation
@@ -82,6 +70,9 @@ void SOPC_Toolkit_Clear();
 /*SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(void*                              addressSpace,
                                                          SOPC_AddressSpaceNotif_Fct*        pAddSpaceAccessFct,
                                                          SOPC_AddressSpaceLocalService_Fct* pLocalServiceFct); */
+
+SOPC_StatusCode SOPC_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
+
 
 /**
  *  \brief Record the given secure channel configuration in given index

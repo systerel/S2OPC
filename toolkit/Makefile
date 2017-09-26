@@ -40,7 +40,7 @@ OBJS        += toolkit_header.o io_dispatch_mgr.o service_mgr.o session_mgr.o se
                util_b2c.o test_results.o util_discovery_services.o
 OBJS        += sopc_services_events.o sopc_toolkit_config.o
 #CLIENT_OBJS =toolkit_test_client.o
-SERVER_OBJS =toolkit_test_server.o
+SERVER_OBJS = toolkit_test_server.o
 #READ_OBJS   =toolkit_test_read.o
 #WRITE_OBJS  =toolkit_test_write.o
 
@@ -48,7 +48,7 @@ CLIENT_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(CLIENT_OBJS))
 SERVER_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(SERVER_OBJS))
 READ_EXEC   :=$(patsubst %.o,$(PATHEXEC)/%,$(READ_OBJS))
 WRITE_EXEC  :=$(patsubst %.o,$(PATHEXEC)/%,$(WRITE_OBJS))
-SERVER_OBJS += add.o sopc_toolkitserver_config.o
+SERVER_OBJS += add.o
 OBJS        :=$(patsubst %,$(PATHOBJ)/%,$(OBJS))
 CLIENT_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(CLIENT_OBJS))
 SERVER_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(SERVER_OBJS))

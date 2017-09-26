@@ -94,22 +94,36 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 <xsl:variable name="var_vartype" select="$ua_nodes/ua:UAVariable|$ua_nodes/ua:UAVariableType"/>
 
 <xsl:template match="/">
-#include "sopc_builtintypes.h"
-#include "sopc_types.h"
-#include "sopc_base_types.h"
+/*
+ *  Copyright (C) 2017 Systerel and others.
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see &lt;http://www.gnu.org/licenses/>.
+ */
+
+#include "add.h"
+
 #include &lt;stdio.h>
 #include &lt;stdbool.h>
 
+#include "sopc_builtintypes.h"
+#include "sopc_types.h"
+#include "sopc_base_types.h"
+
 % for i in range(1, 9):
-const uint32_t NB_${classes[i-1]} = <xsl:value-of select="count(//ua:UA${classes[i-1]})"/>;
 #define NB_${i} <xsl:value-of select="count(//ua:UA${classes[i-1]})"/><xsl:text>    /* ${classes[i-1]} */</xsl:text>
 % endfor
 
-const uint32_t NB_NODES_TOTAL = <xsl:value-of select="count(//ua:UA${classes[0]})"/>\
-% for i in range(2, 9):
- + <xsl:value-of select="count(//ua:UA${classes[i-1]})"/>\
-% endfor
-;
 #define NB (${' + '.join( [ 'NB_%d' % i for i in range(1,9)])})
 
 #define toSOPC_String(s) ((SOPC_Byte*)s)
@@ -125,34 +139,34 @@ void* avoid_unused_nodes_var[] = {<xsl:for-each select="$nodeid_var_name/*">&amp
 &amp;ex_<xsl:value-of select="@vn"/>,</xsl:for-each>};
 
 <!-- BrowseName -->
-SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
+static SOPC_QualifiedName BrowseName[NB + 1] = {{0, {0, 0, NULL}}
 <xsl:apply-templates select = "$ua_nodes/*/@BrowseName" mode="qName"/>
 };
 
 <!-- Description, DisplayName-->
 
 % for s in ['Description', 'DisplayName']:
-SOPC_LocalizedText ${s}[] = {{{0, 0, NULL}, {0, 0, NULL}}
+static SOPC_LocalizedText ${s}[] = {{{0, 0, NULL}, {0, 0, NULL}}
 <xsl:apply-templates select = "$ua_nodes/*/ua:${s}" mode="localized_text"/>
 };
-int ${s}_begin[] = {0, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:${s}) + 1" separator=", "/>};
-int ${s}_end[] = {-1, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:${s}) +  count($n/ua:${s})" separator=", "/>};
+static int ${s}_begin[] = {0, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:${s}) + 1" separator=", "/>};
+static int ${s}_end[] = {-1, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:${s}) +  count($n/ua:${s})" separator=", "/>};
 % endfor
 
 
 <!-- Reference -->
-int reference_begin[] = {0, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:References/*) + 1" separator=", "/>};
-int reference_end[] = {-1,&#10;<xsl:value-of select = "for $n in $ua_nodes/* return concat(count($n/preceding-sibling::*/ua:References/*), '+',  count($n/ua:References/*), ' /* ', $n/@NodeId, ' */')" separator=",&#10;"/>};
-SOPC_NodeId* reference_type[] = {NULL,  <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;', $nodeid_var_name/*[@id = $n/@ReferenceType]/@vn)" separator=", "/>};
-SOPC_ExpandedNodeId* reference_target[] = {NULL, <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;ex_', $nodeid_var_name/*[@id = $n/text()]/@vn)" separator=", "/>};
-bool reference_isForward[]={false, <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return if ($n/@IsForward = 'false') then 'false' else 'true' " separator=", "/>};
+static int reference_begin[] = {0, <xsl:value-of select = "for $n in $ua_nodes/* return count($n/preceding-sibling::*/ua:References/*) + 1" separator=", "/>};
+static int reference_end[] = {-1,&#10;<xsl:value-of select = "for $n in $ua_nodes/* return concat(count($n/preceding-sibling::*/ua:References/*), '+',  count($n/ua:References/*), ' /* ', $n/@NodeId, ' */')" separator=",&#10;"/>};
+static SOPC_NodeId* reference_type[] = {NULL,  <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;', $nodeid_var_name/*[@id = $n/@ReferenceType]/@vn)" separator=", "/>};
+static SOPC_ExpandedNodeId* reference_target[] = {NULL, <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return concat('&amp;ex_', $nodeid_var_name/*[@id = $n/text()]/@vn)" separator=", "/>};
+static bool reference_isForward[]={false, <xsl:value-of select="for $n in $ua_nodes/*/ua:References/* return if ($n/@IsForward = 'false') then 'false' else 'true' " separator=", "/>};
 
 <!-- NodeId -->
-SOPC_NodeId* NodeId[NB+1] = {NULL,&#10;<xsl:value-of select="for $n in $ua_nodes/* return concat('&amp;', $nodeid_var_name/*[@id = $n/@NodeId]/@vn)" separator=",&#10;"/>};
+static SOPC_NodeId* NodeId[NB+1] = {NULL,&#10;<xsl:value-of select="for $n in $ua_nodes/* return concat('&amp;', $nodeid_var_name/*[@id = $n/@NodeId]/@vn)" separator=",&#10;"/>};
 
 
 <!-- NodeClass -->
-OpcUa_NodeClass NodeClass[NB+1] = {OpcUa_NodeClass_Unspecified,
+static OpcUa_NodeClass NodeClass[NB+1] = {OpcUa_NodeClass_Unspecified,
     <xsl:value-of select="for $n in $ua_nodes/* return sys:get_enum_value($n)" separator=", "/>
 };
 
@@ -160,10 +174,40 @@ OpcUa_NodeClass NodeClass[NB+1] = {OpcUa_NodeClass_Unspecified,
 static SOPC_ByteString *Value[NB_3 + NB_4 +1] = {NULL};
 
 <!-- StatusCode -->
-SOPC_StatusCode status_code[] = {STATUS_NOK, <xsl:value-of select = "for $n in $var_vartype return if ($n/ua:Value) then 'STATUS_OK' else 'STATUS_NOK'" separator=", "/>};
+static SOPC_StatusCode status_code[] = {STATUS_NOK, <xsl:value-of select = "for $n in $var_vartype return if ($n/ua:Value) then 'STATUS_OK' else 'STATUS_NOK'" separator=", "/>};
 
 <!-- Access level -->
-SOPC_SByte AccessLevel[] = {0, <xsl:value-of select = "for $n in $ua_nodes/ua:UAVariable return if ($n/@AccessLevel) then $n/@AccessLevel else 1" separator=", "/>};
+static SOPC_SByte AccessLevel[] = {0, <xsl:value-of select = "for $n in $ua_nodes/ua:UAVariable return if ($n/@AccessLevel) then $n/@AccessLevel else 1" separator=", "/>};
+
+SOPC_AddressSpace addressSpace = {
+    .nbVariables = NB_3,
+    .nbVariableTypes = NB_4,  
+    .nbObjectTypes = NB_5,
+    .nbReferenceTypes = NB_6,
+    .nbDataTypes = NB_7,
+    .nbMethods = NB_8,  
+    .nbObjects = NB_2,    
+    .nbViews = NB_1,    
+    .nbNodesTotal = NB,
+
+    .browseNameArray = BrowseName,
+    .descriptionIdxArray_begin = Description_begin,
+    .descriptionIdxArray_end = Description_end,
+    .descriptionArray = Description,
+    .displayNameIdxArray_begin = DisplayName_begin,
+    .displayNameIdxArray_end = DisplayName_end,
+    .displayNameArray = DisplayName,
+    .nodeClassArray = NodeClass,
+    .nodeIdArray = NodeId,
+    .referenceIdxArray_begin = reference_begin,
+    .referenceIdxArray_end = reference_end,
+    .referenceTypeArray = reference_type,
+    .referenceTargetArray = reference_target,
+    .referenceIsForwardArray = reference_isForward,
+    .valueArray = (SOPC_Variant*) Value,
+    .valueStatusArray = status_code,
+    .accessLevelArray = AccessLevel,
+};
 
 </xsl:template>
 
