@@ -73,71 +73,75 @@ var = "Double";if (strcmp((char*)addressSpace.browseNameArray[26].Name.Data, var
 if (addressSpace.browseNameArray[27].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
 var = "String";if (strcmp((char*)addressSpace.browseNameArray[27].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[28].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "GK";if (strcmp((char*)addressSpace.browseNameArray[28].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "ByteString";if (strcmp((char*)addressSpace.browseNameArray[28].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[29].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[29].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XmlElement";if (strcmp((char*)addressSpace.browseNameArray[29].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[30].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "XBKK";if (strcmp((char*)addressSpace.browseNameArray[30].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "GK";if (strcmp((char*)addressSpace.browseNameArray[30].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[31].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "XBZCRQ";if (strcmp((char*)addressSpace.browseNameArray[31].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[31].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[32].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "XBZ-AK";if (strcmp((char*)addressSpace.browseNameArray[32].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBKK";if (strcmp((char*)addressSpace.browseNameArray[32].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[33].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "XBZCRQ-AK";if (strcmp((char*)addressSpace.browseNameArray[33].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZCRQ";if (strcmp((char*)addressSpace.browseNameArray[33].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[34].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[34].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZ-AK";if (strcmp((char*)addressSpace.browseNameArray[34].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[35].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[35].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZCRQ-AK";if (strcmp((char*)addressSpace.browseNameArray[35].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[36].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[36].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[36].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[37].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[37].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[37].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[38].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[38].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[38].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[39].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "XBZ-CC";if (strcmp((char*)addressSpace.browseNameArray[39].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[39].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[40].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "XBZCRQ-CC";if (strcmp((char*)addressSpace.browseNameArray[40].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[40].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[41].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "XBZC-CC";if (strcmp((char*)addressSpace.browseNameArray[41].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZ-CC";if (strcmp((char*)addressSpace.browseNameArray[41].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[42].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "GK";if (strcmp((char*)addressSpace.browseNameArray[42].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZCRQ-CC";if (strcmp((char*)addressSpace.browseNameArray[42].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[43].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[43].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "XBZC-CC";if (strcmp((char*)addressSpace.browseNameArray[43].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[44].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[44].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "GK";if (strcmp((char*)addressSpace.browseNameArray[44].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[45].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[45].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "ASK";if (strcmp((char*)addressSpace.browseNameArray[45].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[46].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[46].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[46].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[47].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[47].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[47].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[48].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[48].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[48].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[49].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "GK";if (strcmp((char*)addressSpace.browseNameArray[49].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SZ";if (strcmp((char*)addressSpace.browseNameArray[49].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[50].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "NWK";if (strcmp((char*)addressSpace.browseNameArray[50].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "GZ";if (strcmp((char*)addressSpace.browseNameArray[50].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[51].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "RWK";if (strcmp((char*)addressSpace.browseNameArray[51].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "GK";if (strcmp((char*)addressSpace.browseNameArray[51].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[52].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "LK";if (strcmp((char*)addressSpace.browseNameArray[52].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "NWK";if (strcmp((char*)addressSpace.browseNameArray[52].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[53].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[53].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RWK";if (strcmp((char*)addressSpace.browseNameArray[53].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[54].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[54].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "LK";if (strcmp((char*)addressSpace.browseNameArray[54].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[55].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[55].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "SendCommand";if (strcmp((char*)addressSpace.browseNameArray[55].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[56].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "NWZ";if (strcmp((char*)addressSpace.browseNameArray[56].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-K";if (strcmp((char*)addressSpace.browseNameArray[56].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[57].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "RWZ";if (strcmp((char*)addressSpace.browseNameArray[57].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "OffBlocking-CC";if (strcmp((char*)addressSpace.browseNameArray[57].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[58].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "TK";if (strcmp((char*)addressSpace.browseNameArray[58].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "NWZ";if (strcmp((char*)addressSpace.browseNameArray[58].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[59].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
-var = "TK";if (strcmp((char*)addressSpace.browseNameArray[59].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+var = "RWZ";if (strcmp((char*)addressSpace.browseNameArray[59].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 if (addressSpace.browseNameArray[60].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
 var = "TK";if (strcmp((char*)addressSpace.browseNameArray[60].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[61].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
+var = "TK";if (strcmp((char*)addressSpace.browseNameArray[61].Name.Data, var)) {printf("invalid BrowseName ") ;}  
+if (addressSpace.browseNameArray[62].NamespaceIndex != 0) {printf("invalid BrowseName ") ;}  
+var = "TK";if (strcmp((char*)addressSpace.browseNameArray[62].Name.Data, var)) {printf("invalid BrowseName ") ;}  
 
     return 0;
 }
@@ -152,7 +156,7 @@ void test_reference(){
     
     nodeid = "i=1000";
     pos = 1;
-    exp = 6;
+    exp = 8;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
@@ -312,6 +316,58 @@ int nsIndex = 0;
     if (res-> IdentifierType != IdentifierType_Numeric ||
         res-> Namespace != nsIndex ||
         res-> Data.Numeric != 1004){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1004, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   7, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 7 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1005){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1005, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   8, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 8 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 8 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 1006){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1006, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
             
 }
 
@@ -3386,7 +3442,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+    nodeid = "i=1005";
     pos = 28;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3413,11 +3469,11 @@ int nsIndex = 0;
 SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
 
     
-int nsIndex = 261;
+int nsIndex = 0;
         
-    if (res-> IdentifierType != IdentifierType_String ||
+    if (res-> IdentifierType != IdentifierType_Numeric ||
         res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
+        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
             
 }
 
@@ -3450,7 +3506,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
+    nodeid = "i=1006";
     pos = 29;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3477,11 +3533,11 @@ int nsIndex = 0;
 SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
 
     
-int nsIndex = 261;
+int nsIndex = 0;
         
-    if (res-> IdentifierType != IdentifierType_String ||
+    if (res-> IdentifierType != IdentifierType_Numeric ||
         res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
+        res-> Data.Numeric != 1000){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 1000, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
             
 }
 
@@ -3514,7 +3570,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
+    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
     pos = 30;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3578,7 +3634,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
     pos = 31;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3642,7 +3698,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
     pos = 32;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3706,7 +3762,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
     pos = 33;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3770,7 +3826,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
     pos = 34;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3801,7 +3857,7 @@ int nsIndex = 261;
         
     if (res-> IdentifierType != IdentifierType_String ||
         res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
             
 }
 
@@ -3834,7 +3890,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
     pos = 35;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3865,7 +3921,7 @@ int nsIndex = 261;
         
     if (res-> IdentifierType != IdentifierType_String ||
         res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RM for %s \n" , nodeid);}
             
 }
 
@@ -3898,7 +3954,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
     pos = 36;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3962,7 +4018,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
     pos = 37;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -3993,7 +4049,7 @@ int nsIndex = 261;
         
     if (res-> IdentifierType != IdentifierType_String ||
         res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
             
 }
 
@@ -4026,7 +4082,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
     pos = 38;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -4057,7 +4113,7 @@ int nsIndex = 261;
         
     if (res-> IdentifierType != IdentifierType_String ||
         res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019 for %s \n" , nodeid);}
             
 }
 
@@ -4090,7 +4146,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
     pos = 39;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -4154,7 +4210,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
     pos = 40;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -4218,7 +4274,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
     pos = 41;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -4282,8 +4338,136 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
     pos = 42;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
+    pos = 43;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G019.RC")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G019.RC for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
+    pos = 44;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -4347,7 +4531,7 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
-    pos = 43;
+    pos = 45;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -4411,134 +4595,6 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
-    pos = 44;
-    exp = 2;
-    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
-    if (res != exp) {
-        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
-    }
-    else{
-        
-            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
-
-    
-int nsIndex = 261;
-        
-    if (res-> IdentifierType != IdentifierType_String ||
-        res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
-            
-}
-
-            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
-    pos = 45;
-    exp = 2;
-    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
-    if (res != exp) {
-        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
-    }
-    else{
-        
-            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
-
-    
-int nsIndex = 261;
-        
-    if (res-> IdentifierType != IdentifierType_String ||
-        res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
-            
-}
-
-            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
     pos = 46;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -4602,8 +4658,136 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
     pos = 47;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
+    pos = 48;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SIGNALs.BALA_RDLS_G025")!=0) {printf ("Invalid nodeId expected Objects.15361.SIGNALs.BALA_RDLS_G025 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
+    pos = 49;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -4667,7 +4851,7 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
-    pos = 48;
+    pos = 50;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -4731,7 +4915,7 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
-    pos = 49;
+    pos = 51;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -4795,134 +4979,6 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
-    pos = 50;
-    exp = 2;
-    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
-    if (res != exp) {
-        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
-    }
-    else{
-        
-            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
-
-    
-int nsIndex = 261;
-        
-    if (res-> IdentifierType != IdentifierType_String ||
-        res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM for %s \n" , nodeid);}
-            
-}
-
-            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
-    pos = 51;
-    exp = 2;
-    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
-    if (res != exp) {
-        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
-    }
-    else{
-        
-            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
-
-    
-int nsIndex = 261;
-        
-    if (res-> IdentifierType != IdentifierType_String ||
-        res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM for %s \n" , nodeid);}
-            
-}
-
-            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
-            
-{
-SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-{
-SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
-
-    
-int nsIndex = 0;
-        
-    if (res-> IdentifierType != IdentifierType_Numeric ||
-        res-> Namespace != nsIndex ||
-        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
-            
-}
-
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
     pos = 52;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -4986,7 +5042,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
     pos = 53;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -5017,7 +5073,7 @@ int nsIndex = 261;
         
     if (res-> IdentifierType != IdentifierType_String ||
         res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM for %s \n" , nodeid);}
             
 }
 
@@ -5050,7 +5106,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
     pos = 54;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -5081,7 +5137,7 @@ int nsIndex = 261;
         
     if (res-> IdentifierType != IdentifierType_String ||
         res-> Namespace != nsIndex ||
-        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1.RM")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1.RM for %s \n" , nodeid);}
             
 }
 
@@ -5114,7 +5170,7 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
     pos = 55;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
@@ -5178,8 +5234,136 @@ int nsIndex = 0;
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
     pos = 56;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
+    pos = 57;
+    exp = 2;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
+    if (res != exp) {
+        printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
+    }
+    else{
+        
+            printf("test reference %d node %d nodeid %s\n",   1, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 47){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 47, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 1 -1 ])->NodeId;
+
+    
+int nsIndex = 261;
+        
+    if (res-> IdentifierType != IdentifierType_String ||
+        res-> Namespace != nsIndex ||
+        strcmp((char*)res-> Data.String.Data, "Objects.15361.SWITCHs.BALA_RDLS_W1")!=0) {printf ("Invalid nodeId expected Objects.15361.SWITCHs.BALA_RDLS_W1 for %s \n" , nodeid);}
+            
+}
+
+            printf("test reference %d node %d nodeid %s\n",   2, pos, nodeid);
+            
+{
+SOPC_NodeId* res = addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ];
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 40){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 40, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+{
+SOPC_NodeId* res = &(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + 2 -1 ])->NodeId;
+
+    
+int nsIndex = 0;
+        
+    if (res-> IdentifierType != IdentifierType_Numeric ||
+        res-> Namespace != nsIndex ||
+        res-> Data.Numeric != 63){printf ("Invalid nodeId expected (%d, i, %d) result (%d,%d,%d) for %s \n", nsIndex, 63, res-> Namespace, res-> IdentifierType, res-> Data.Numeric, nodeid);}
+            
+}
+
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
+    pos = 58;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -5243,7 +5427,7 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
-    pos = 57;
+    pos = 59;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -5307,7 +5491,7 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
-    pos = 58;
+    pos = 60;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -5371,7 +5555,7 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
-    pos = 59;
+    pos = 61;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -5435,7 +5619,7 @@ int nsIndex = 0;
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
-    pos = 60;
+    pos = 62;
     exp = 2;
     res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
@@ -5963,8 +6147,40 @@ void test_Description(){
     }
 
 
-    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+    nodeid = "i=1005";
     pos = 28;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "ByteString_1d", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1006";
+    pos = 29;
+    exp = 1;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test Description %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(Description[Description_begin[pos] + 1 -1], "XmlElement_1d", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+    pos = 30;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -5980,7 +6196,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
-    pos = 29;
+    pos = 31;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -5996,7 +6212,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
-    pos = 30;
+    pos = 32;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6012,7 +6228,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
-    pos = 31;
+    pos = 33;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6028,7 +6244,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
-    pos = 32;
+    pos = 34;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6044,7 +6260,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
-    pos = 33;
+    pos = 35;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6060,30 +6276,6 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
-    pos = 34;
-    exp = 0;
-    res = Description_end[pos] - Description_begin[pos] + 1;
-    if (res != exp){
-        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
-    }
-    else{
-        
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
-    pos = 35;
-    exp = 0;
-    res = Description_end[pos] - Description_begin[pos] + 1;
-    if (res != exp){
-        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
-    }
-    else{
-        
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
     pos = 36;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
@@ -6095,8 +6287,32 @@ void test_Description(){
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
     pos = 37;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
+    pos = 38;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
+    pos = 39;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6112,7 +6328,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
-    pos = 38;
+    pos = 40;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6128,7 +6344,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
-    pos = 39;
+    pos = 41;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6144,7 +6360,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
-    pos = 40;
+    pos = 42;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6160,7 +6376,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
-    pos = 41;
+    pos = 43;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6176,7 +6392,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
-    pos = 42;
+    pos = 44;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6192,7 +6408,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
-    pos = 43;
+    pos = 45;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6208,30 +6424,6 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
-    pos = 44;
-    exp = 0;
-    res = Description_end[pos] - Description_begin[pos] + 1;
-    if (res != exp){
-        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
-    }
-    else{
-        
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
-    pos = 45;
-    exp = 0;
-    res = Description_end[pos] - Description_begin[pos] + 1;
-    if (res != exp){
-        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
-    }
-    else{
-        
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
     pos = 46;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
@@ -6243,8 +6435,32 @@ void test_Description(){
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
     pos = 47;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
+    pos = 48;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
+    pos = 49;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6260,7 +6476,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
-    pos = 48;
+    pos = 50;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6276,7 +6492,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
-    pos = 49;
+    pos = 51;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6292,7 +6508,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
-    pos = 50;
+    pos = 52;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6308,7 +6524,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
-    pos = 51;
+    pos = 53;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6324,7 +6540,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
-    pos = 52;
+    pos = 54;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6340,30 +6556,6 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
-    pos = 53;
-    exp = 0;
-    res = Description_end[pos] - Description_begin[pos] + 1;
-    if (res != exp){
-        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
-    }
-    else{
-        
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
-    pos = 54;
-    exp = 0;
-    res = Description_end[pos] - Description_begin[pos] + 1;
-    if (res != exp){
-        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
-    }
-    else{
-        
-    }
-
-
-    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
     pos = 55;
     exp = 0;
     res = Description_end[pos] - Description_begin[pos] + 1;
@@ -6375,8 +6567,32 @@ void test_Description(){
     }
 
 
-    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
     pos = 56;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
+    pos = 57;
+    exp = 0;
+    res = Description_end[pos] - Description_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of Description expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+    }
+
+
+    nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
+    pos = 58;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6392,7 +6608,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
-    pos = 57;
+    pos = 59;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6408,7 +6624,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
-    pos = 58;
+    pos = 60;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6424,7 +6640,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
-    pos = 59;
+    pos = 61;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6440,7 +6656,7 @@ void test_Description(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
-    pos = 60;
+    pos = 62;
     exp = 1;
     res = Description_end[pos] - Description_begin[pos] + 1;
     if (res != exp){
@@ -6897,8 +7113,40 @@ void test_DisplayName(){
     }
 
 
-    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+    nodeid = "i=1005";
     pos = 28;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "ByteString_1dn", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "i=1006";
+    pos = 29;
+    exp = 1;
+    res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
+    if (res != exp){
+        printf("Invalid number of DisplayName expected %d result %d : pos %d nodeid %s\n", exp, res, pos, nodeid);
+    }
+    else{
+        
+            printf("test DisplayName %d node %d nodeid %s : ", 1, pos, nodeid);
+            compareLocalizedText(DisplayName[DisplayName_begin[pos] + 1 -1], "XmlElement_1dn", "");
+            printf("\n");
+        
+    }
+
+
+    nodeid = "s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.GK";
+    pos = 30;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -6914,7 +7162,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK";
-    pos = 29;
+    pos = 31;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -6930,7 +7178,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBKK";
-    pos = 30;
+    pos = 32;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -6946,7 +7194,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ";
-    pos = 31;
+    pos = 33;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -6962,7 +7210,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZ-AK";
-    pos = 32;
+    pos = 34;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -6978,7 +7226,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.XBZCRQ-AK";
-    pos = 33;
+    pos = 35;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -6994,7 +7242,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.SendCommand";
-    pos = 34;
+    pos = 36;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7010,7 +7258,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-K";
-    pos = 35;
+    pos = 37;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7026,7 +7274,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.OffBlocking-CC";
-    pos = 36;
+    pos = 38;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7042,7 +7290,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.GZ";
-    pos = 37;
+    pos = 39;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7058,7 +7306,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.SZ";
-    pos = 38;
+    pos = 40;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7074,7 +7322,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZ-CC";
-    pos = 39;
+    pos = 41;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7090,7 +7338,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZCRQ-CC";
-    pos = 40;
+    pos = 42;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7106,7 +7354,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RC.XBZC-CC";
-    pos = 41;
+    pos = 43;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7122,7 +7370,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.GK";
-    pos = 42;
+    pos = 44;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7138,7 +7386,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RM.ASK";
-    pos = 43;
+    pos = 45;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7154,7 +7402,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.SendCommand";
-    pos = 44;
+    pos = 46;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7170,7 +7418,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-K";
-    pos = 45;
+    pos = 47;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7186,7 +7434,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.OffBlocking-CC";
-    pos = 46;
+    pos = 48;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7202,7 +7450,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.SZ";
-    pos = 47;
+    pos = 49;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7218,7 +7466,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G025.RC.GZ";
-    pos = 48;
+    pos = 50;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7234,7 +7482,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G026.RM.GK";
-    pos = 49;
+    pos = 51;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7250,7 +7498,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.NWK";
-    pos = 50;
+    pos = 52;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7266,7 +7514,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.RWK";
-    pos = 51;
+    pos = 53;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7282,7 +7530,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RM.LK";
-    pos = 52;
+    pos = 54;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7298,7 +7546,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.SendCommand";
-    pos = 53;
+    pos = 55;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7314,7 +7562,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-K";
-    pos = 54;
+    pos = 56;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7330,7 +7578,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.OffBlocking-CC";
-    pos = 55;
+    pos = 57;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7346,7 +7594,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.NWZ";
-    pos = 56;
+    pos = 58;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7362,7 +7610,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.SWITCHs.BALA_RDLS_W1.RC.RWZ";
-    pos = 57;
+    pos = 59;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7378,7 +7626,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK";
-    pos = 58;
+    pos = 60;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7394,7 +7642,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK";
-    pos = 59;
+    pos = 61;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){
@@ -7410,7 +7658,7 @@ void test_DisplayName(){
 
 
     nodeid = "ns=261;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK";
-    pos = 60;
+    pos = 62;
     exp = 1;
     res = DisplayName_end[pos] - DisplayName_begin[pos] + 1;
     if (res != exp){

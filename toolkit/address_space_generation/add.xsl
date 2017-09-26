@@ -128,6 +128,8 @@ classes = ('View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 
 #define toSOPC_String(s) ((SOPC_Byte*)s)
 
+#define DEFAULT_VARIANT  {SOPC_Null_Id, SOPC_VariantArrayType_SingleValue,{0}}
+
 <!-- Create variables for each node id -->
 <xsl:for-each select="$nodeid_var_name/*">
 static SOPC_NodeId <xsl:value-of select="@vn"/> = <xsl:apply-templates select="@id" mode="nodeId"/>;<xsl:text/>
@@ -171,7 +173,7 @@ static OpcUa_NodeClass NodeClass[NB+1] = {OpcUa_NodeClass_Unspecified,
 };
 
 <!-- Value -->
-static SOPC_ByteString *Value[NB_3 + NB_4 +1] = {NULL};
+SOPC_Variant Value[NB_3+NB_4+1] = {DEFAULT_VARIANT<xsl:apply-templates select="$var_vartype" mode="value"/>};
 
 <!-- StatusCode -->
 static SOPC_StatusCode status_code[] = {STATUS_NOK, <xsl:value-of select = "for $n in $var_vartype return if ($n/ua:Value) then 'STATUS_OK' else 'STATUS_NOK'" separator=", "/>};
@@ -181,13 +183,13 @@ static SOPC_SByte AccessLevel[] = {0, <xsl:value-of select = "for $n in $ua_node
 
 SOPC_AddressSpace addressSpace = {
     .nbVariables = NB_3,
-    .nbVariableTypes = NB_4,  
+    .nbVariableTypes = NB_4,
     .nbObjectTypes = NB_5,
     .nbReferenceTypes = NB_6,
     .nbDataTypes = NB_7,
-    .nbMethods = NB_8,  
-    .nbObjects = NB_2,    
-    .nbViews = NB_1,    
+    .nbMethods = NB_8,
+    .nbObjects = NB_2,
+    .nbViews = NB_1,
     .nbNodesTotal = NB,
 
     .browseNameArray = BrowseName,
@@ -204,11 +206,37 @@ SOPC_AddressSpace addressSpace = {
     .referenceTypeArray = reference_type,
     .referenceTargetArray = reference_target,
     .referenceIsForwardArray = reference_isForward,
-    .valueArray = (SOPC_Variant*) Value,
+    .valueArray = Value,
     .valueStatusArray = status_code,
     .accessLevelArray = AccessLevel,
 };
+</xsl:template>
 
+<!-- Create variant for each variable -->
+
+<xsl:template match="ua:UAVariable[ua:Value]|ua:UAVariableType[ua:Value]" mode="value"><xsl:apply-templates select="ua:Value/*" mode="value"/></xsl:template>
+<xsl:template match="ua:UAVariable[not(ua:Value)]|ua:UAVariableType[not(ua:Value)]" mode="value">, DEFAULT_VARIANT</xsl:template>
+
+<xsl:template match="uax:Boolean" mode="value">,{SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:SByte" mode="value">,{SOPC_SByte_Id, SOPC_VariantArrayType_SingleValue, {.SByte=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Byte" mode="value">,{SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Int16" mode="value">,{SOPC_Int16_Id, SOPC_VariantArrayType_SingleValue, {.Int16=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Uint16" mode="value">,{SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Int32" mode="value">,{SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:UInt32" mode="value">,{SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Int64" mode="value">,{SOPC_Int64_Id, SOPC_VariantArrayType_SingleValue, {.Int64=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:UInt64" mode="value">,{SOPC_UInt64_Id, SOPC_VariantArrayType_SingleValue, {.Uint64=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Float" mode="value">,{SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Double" mode="value">,{SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:String" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_String_Id, SOPC_VariantArrayType_SingleValue, {.String=${write_string("$st")}}}</xsl:template>
+<xsl:template match="uax:BString" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_ByteString_Id, SOPC_VariantArrayType_SingleValue, {.Bstring=${write_string("$st")}}}</xsl:template>
+<xsl:template match="uax:XmlElt" mode="value"><xsl:variable name="st" select="translate(.,'&quot;','')"/>,{SOPC_XmlElement_Id, SOPC_VariantArrayType_SingleValue, {.XmlElt=${write_string("$st")}}}</xsl:template>
+<xsl:template match="uax:NodeId" mode="value">,{SOPC_NodeId_Id, SOPC_VariantArrayType_SingleValue, {.NodeId=<xsl:value-of select="."/>}}</xsl:template>
+<xsl:template match="uax:Status" mode="value">,{SOPC_StatusCode_Id, SOPC_VariantArrayType_SingleValue, {.Status=<xsl:value-of select="."/>}}</xsl:template>
+
+<xsl:template match="*" mode="value">
+<xsl:message > unknown type <xsl:value-of select="local-name(.)"/>
+</xsl:message>
 </xsl:template>
 
 <!-- generation of node id -->
@@ -240,7 +268,7 @@ SOPC_AddressSpace addressSpace = {
     <xsl:variable name="NodeId" select="../@NodeId"/>
     <xsl:analyze-string select="$bn" regex="(\d*):(.*)">
         <xsl:matching-substring>
-${print_value(',{%s,{%s,0,toSOPC_String("%s")}}/* %s*/',"regex-group(1)", "string-length(regex-group(2))", "regex-group(2)", "$NodeId")}<xsl:text>
+${print_value(',{%s,{%s,1,toSOPC_String("%s")}}/* %s*/',"regex-group(1)", "string-length(regex-group(2))", "regex-group(2)", "$NodeId")}<xsl:text>
 </xsl:text>
         </xsl:matching-substring>
         <xsl:non-matching-substring>
@@ -253,7 +281,7 @@ ${print_value(',{%s,{%s,0,toSOPC_String("%s")}}/* %s*/',"regex-group(1)", "strin
 </xsl:template>
 
 <xsl:template name="write-string">
-    <xsl:param name="value"/>${print_value('{%s,0,toSOPC_String("%s")}',"string-length($value)","$value")}
+    <xsl:param name="value"/>${print_value('{%s,1,toSOPC_String("%s")}',"string-length($value)","$value")}
 </xsl:template>
 
 <!-- templates de recopie des noeuds -->

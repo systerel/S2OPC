@@ -20,6 +20,8 @@
       <Reference ReferenceType="HasComponent">i=1002</Reference>
       <Reference ReferenceType="HasComponent">i=1003</Reference>
       <Reference ReferenceType="HasComponent">i=1004</Reference>
+      <Reference ReferenceType="HasComponent">i=1005</Reference>
+      <Reference ReferenceType="HasComponent">i=1006</Reference>
     </References>
   </UAObject>
   <UAVariable BrowseName="0:Int64" DataType="Int64" NodeId="i=1001" ParentNodeId="i=1000">
@@ -63,7 +65,29 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:String>"INGOPCS"</uax:String>
+      <uax:String>"String:INGOPCS"</uax:String>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:ByteString" DataType="ByteString" NodeId="i=1005" ParentNodeId="i=1000">
+    <DisplayName>ByteString_1dn</DisplayName>
+    <Description>ByteString_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:BString>"ByteString:INGOPCS"</uax:BString>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:XmlElement" DataType="XmlElement" NodeId="i=1006" ParentNodeId="i=1000">
+    <DisplayName>XmlElement_1dn</DisplayName>
+    <Description>XmlElement_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:XmlElt>"XmlElement:INGOPCS"</uax:XmlElt>
     </Value>
   </UAVariable>
   <!-- END OF COMMON PART WITH READ/WRITE TEST -->
@@ -145,7 +169,9 @@
       <Reference IsForward="false" ReferenceType="HasComponent">ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
-    <Value>{1,{0x01,0x00}}</Value>
+    <Value>
+      <uax:Boolean>false</uax:Boolean>
+    </Value>
   </UAVariable>
   <UAVariable BrowseName="0:ASK" DataType="Boolean" NodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM.ASK" ParentNodeId="ns=261;s=Objects.15361.SIGNALs.BALA_RDLS_G019.RM">
     <DisplayName>ASK</DisplayName>

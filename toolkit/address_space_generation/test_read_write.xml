@@ -20,6 +20,8 @@
       <Reference ReferenceType="HasComponent">i=1002</Reference>
       <Reference ReferenceType="HasComponent">i=1003</Reference>
       <Reference ReferenceType="HasComponent">i=1004</Reference>
+      <Reference ReferenceType="HasComponent">i=1005</Reference>
+      <Reference ReferenceType="HasComponent">i=1006</Reference>
     </References>
   </UAObject>
   <UAVariable BrowseName="0:Int64" DataType="Int64" NodeId="i=1001" ParentNodeId="i=1000">
@@ -63,7 +65,29 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-      <uax:String>"INGOPCS"</uax:String>
+      <uax:String>"String:INGOPCS"</uax:String>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:ByteString" DataType="ByteString" NodeId="i=1005" ParentNodeId="i=1000">
+    <DisplayName>ByteString_1dn</DisplayName>
+    <Description>ByteString_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:BString>"ByteString:INGOPCS"</uax:BString>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="0:XmlElement" DataType="XmlElement" NodeId="i=1006" ParentNodeId="i=1000">
+    <DisplayName>XmlElement_1dn</DisplayName>
+    <Description>XmlElement_1d</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">i=1000</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:XmlElt>"XmlElement:INGOPCS"</uax:XmlElt>
     </Value>
   </UAVariable>
 </UANodeSet>
