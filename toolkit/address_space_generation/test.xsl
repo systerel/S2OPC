@@ -35,24 +35,28 @@ classes = ['View', 'Object', 'Variable', 'VariableType', 'ObjectType', 'Referenc
 <xsl:variable name="var_vartype" select="$ua_nodes/ua:UAVariable|$ua_nodes/ua:UAVariableType"/>
 
 <xsl:template match="/">
-#include "sopc_builtintypes.h"
-#include "sopc_types.h"
-#include "sopc_base_types.h"
 #include &lt;stdio.h>
 #include &lt;string.h>
 
-extern SOPC_QualifiedName BrowseName[];
+#include "sopc_builtintypes.h"
+#include "sopc_types.h"
+#include "sopc_base_types.h"
+#include "sopc_user_app_itf.h"
+
+extern SOPC_AddressSpace addressSpace;
+#define DisplayName addressSpace.displayNameArray
+#define DisplayName_begin addressSpace.displayNameIdxArray_begin
+#define DisplayName_end addressSpace.displayNameIdxArray_end
+#define Description addressSpace.descriptionArray
+#define Description_begin addressSpace.descriptionIdxArray_begin
+#define Description_end addressSpace.descriptionIdxArray_end
+
 int test_browsename(){
     printf ("test BrowseName\n");
     const char *var;
     <xsl:apply-templates select = "$ua_nodes/*/@BrowseName" mode="qName"/>
     return 0;
 }
-
-extern int reference_begin[];
-extern int reference_end[];
-extern SOPC_NodeId* reference_type[];
-extern SOPC_NodeId* reference_target[];
 
 void test_reference(){
     printf("test reference");
@@ -84,9 +88,6 @@ int compareLocalizedText(SOPC_LocalizedText LText, const char *text, const char 
 }
 
 % for s in ['Description', 'DisplayName']:
-extern SOPC_LocalizedText ${s}[];
-extern int ${s}_begin[];
-extern int ${s}_end[];
 
 void test_${s}(){
     printf("test ${s}\n");
@@ -109,6 +110,7 @@ int main (){
 }
 
 </xsl:template>
+
 
 % for s in ['Description', 'DisplayName']:
 <xsl:template match="*" mode="${s}">
@@ -180,14 +182,14 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
     nodeid = "<xsl:value-of select="@NodeId"/>";
     pos = <xsl:value-of select="position()"/>;
     exp = <xsl:value-of select="count(./ua:Description)"/>;
-    res = Description_end[pos] - Description_begin[pos] + 1;
+    res = addressSpace.descriptionIdxArray_end[pos] - addressSpace.descriptionIdxArray_begin[pos] + 1;
     if (res != exp){
         printf("Invalid number of description expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
     else{
         <xsl:for-each select="./ua:Description">
             printf("test description %d node %d nodeid %s : ", <xsl:value-of select="position()"/>, pos, nodeid);
-            compareLocalizedText(Description[Description_begin[pos] + <xsl:value-of select="position()"/> -1], "<xsl:value-of select="./text()"/>", "<xsl:value-of select='@Locale'/>");
+            compareLocalizedText(addressSpace.descriptionArray[addressSpace.descriptionIdxArray_begin[pos] + <xsl:value-of select="position()"/> -1], "<xsl:value-of select="./text()"/>", "<xsl:value-of select='@Locale'/>");
             printf("\n");
         </xsl:for-each>
     }
@@ -199,7 +201,7 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
     nodeid = "<xsl:value-of select="@NodeId"/>";
     pos = <xsl:value-of select="position()"/>;
     exp = <xsl:value-of select="count(./ua:References/*)"/>;
-    res = reference_end[pos] - reference_begin[pos] + 1 ;
+    res = addressSpace.referenceIdxArray_end[pos] - addressSpace.referenceIdxArray_begin[pos] + 1 ;
     if (res != exp) {
         printf("Invalid number of reference expected %d result %d : nodeid %s\n", exp, res, nodeid);
     }
@@ -208,11 +210,11 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
             printf("test reference %d node %d nodeid %s\n",   <xsl:value-of select="position()"/>, pos, nodeid);
             <xsl:call-template name="cmp_nodeId">
                 <xsl:with-param name="expected" select="@ReferenceType"/>
-                <xsl:with-param name="result">reference_type[reference_begin[pos] + <xsl:value-of select="position()"/> -1 ]</xsl:with-param>
+                <xsl:with-param name="result">addressSpace.referenceTypeArray[addressSpace.referenceIdxArray_begin[pos] + <xsl:value-of select="position()"/> -1 ]</xsl:with-param>
             </xsl:call-template>
             <xsl:call-template name="cmp_nodeId">
                 <xsl:with-param name="expected" select="./text()"/>
-                <xsl:with-param name="result">reference_target[reference_begin[pos] + <xsl:value-of select="position()"/> -1 ]</xsl:with-param>
+                <xsl:with-param name="result">&amp;(addressSpace.referenceTargetArray[addressSpace.referenceIdxArray_begin[pos] + <xsl:value-of select="position()"/> -1 ])->NodeId</xsl:with-param>
             </xsl:call-template>
         </xsl:for-each>
     }
@@ -225,10 +227,10 @@ int nsIndex = <xsl:value-of select="if (regex-group(1)) then substring-after(sub
     <xsl:variable name="NodeId" select="../@NodeId"/>
     <xsl:analyze-string select="$bn" regex="(\d*):(.*)">
         <xsl:matching-substring>
-${print_value('if (BrowseName[%s].NamespaceIndex != %s) {printf("invalid BrowseName ") ;}  ',"$pos", "regex-group(1)")}<xsl:text>
+${print_value('if (addressSpace.browseNameArray[%s].NamespaceIndex != %s) {printf("invalid BrowseName ") ;}  ',"$pos", "regex-group(1)")}<xsl:text>
 </xsl:text>
 ${print_value('var = "%s";', "regex-group(2)")}
-${print_value('if (strcmp((char*)BrowseName[%s].Name.Data, var)) {printf("invalid BrowseName ") ;}  ',"$pos")}<xsl:text>
+${print_value('if (strcmp((char*)addressSpace.browseNameArray[%s].Name.Data, var)) {printf("invalid BrowseName ") ;}  ',"$pos")}<xsl:text>
 </xsl:text>
         </xsl:matching-substring>
         <xsl:non-matching-substring>

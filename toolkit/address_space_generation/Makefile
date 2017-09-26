@@ -3,7 +3,7 @@
 empty:=
 space:= $(empty) $(empty)
 CC=gcc
-CFLAGS=-W -Wall -ansi -pedantic -std=c11 -I../../install_stack/include/
+CFLAGS=-W -Wall -ansi -pedantic -std=c99 -I./ -I../src/impl -I../../install_stack/include/
 LDFLAGS=
 EXEC=test
 XSL=add.xsl test.xsl
@@ -15,7 +15,7 @@ PATHBUILD=./build
 PATHGENC=./genc
 
 .SECONDARY:$(SRC_WITH_PATH)
-.PHONY: all config clean
+.PHONY: all config clean cleangen
 
 all: config $(EXEC)
 
@@ -25,7 +25,10 @@ config:
 
 clean:
 	@echo "clean directory"
+	@rm -f $(EXEC)
 	@rm -rf $(PATHBUILD)
+
+cleangen:
 	@rm -rf $(PATHGENC)
 
 $(PATHGENC)/%.c : %.xsl
