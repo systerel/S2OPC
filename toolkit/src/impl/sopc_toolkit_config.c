@@ -54,9 +54,11 @@ static struct {
 static struct {
     Mutex           mutex;
     Condition       cond;
-    uint8_t         flag;
+    bool            allDisconnectedFlag;
+    bool            requestedFlag;
 } closeAllConnectionsSync = {
-  .flag = false
+  .requestedFlag = false,
+  .allDisconnectedFlag = false
 };
 
 
@@ -134,6 +136,10 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
         }
         SOPC_TEMP_InitEventDispMgr(servicesEventDispatcherMgr);
         Mutex_Unlock(&tConfig.mut);
+        // Init async close management flag
+        Mutex_Initialization(&closeAllConnectionsSync.mutex);
+        Condition_Init(&closeAllConnectionsSync.cond);
+
         if(STATUS_OK != status){
           SOPC_Toolkit_Clear();
         }
@@ -145,8 +151,10 @@ SOPC_StatusCode SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct){
 
 void SOPC_Internal_AllClientSecureChannelsDisconnected(){
   Mutex_Lock(&closeAllConnectionsSync.mutex);
-  closeAllConnectionsSync.flag = true;
-  Condition_SignalAll(&closeAllConnectionsSync.cond);
+  if(closeAllConnectionsSync.requestedFlag != false){
+    closeAllConnectionsSync.allDisconnectedFlag = true;
+    Condition_SignalAll(&closeAllConnectionsSync.cond);
+  }
   Mutex_Unlock(&closeAllConnectionsSync.mutex);
 }
 
@@ -169,9 +177,8 @@ void SOPC_Toolkit_Clear(){
     SOPC_StatusCode status = STATUS_OK;
     // Do a synchronous connections closed (effective on client only)
     if(tConfig.initDone != false){
-      Mutex_Initialization(&closeAllConnectionsSync.mutex);
-      Condition_Init(&closeAllConnectionsSync.cond);
       Mutex_Lock(&closeAllConnectionsSync.mutex);
+      closeAllConnectionsSync.requestedFlag = true;
 
       SOPC_EventDispatcherManager_AddEvent(servicesEventDispatcherMgr,
                                            APP_TO_SE_CLOSE_ALL_CONNECTIONS,
@@ -179,11 +186,12 @@ void SOPC_Toolkit_Clear(){
                                            NULL,
                                            0,
                                            "Services: Close all channel !");
-      while(closeAllConnectionsSync.flag == false){
+      while(closeAllConnectionsSync.allDisconnectedFlag == false){
         Mutex_UnlockAndWaitCond(&closeAllConnectionsSync.cond, &closeAllConnectionsSync.mutex);
       }
       Mutex_Unlock(&closeAllConnectionsSync.mutex);
-
+      Mutex_Clear(&closeAllConnectionsSync.mutex);
+      Condition_Clear(&closeAllConnectionsSync.cond);
       Mutex_Lock(&tConfig.mut);
       status = SOPC_EventDispatcherManager_StopAndDelete(&servicesEventDispatcherMgr);
       (void) status; // log
