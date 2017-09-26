@@ -18,7 +18,9 @@
 #ifndef SOPC_TOOLKIT_CONFIG_INTERNAL_H_
 #define SOPC_TOOLKIT_CONFIG_INTERNAL_H_
 
+#include "sopc_user_app_itf.h"
 
 void SOPC_Internal_AllClientSecureChannelsDisconnected();
+void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace);
 
 #endif /* SOPC_TOOLKIT_CONFIG_INTERNAL_H_ */

@@ -44,6 +44,7 @@
 #include "testlib_read_response.h"
 
 #include "sopc_sc_events.h"
+#include "add.h"
 
 static bool sessionActivated = false;
 static bool sessionClosed = false;
@@ -62,11 +63,10 @@ void Test_ComEvent_Fct(SOPC_App_Com_Event event,
        OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) param;
        cptReadResps++;
        if(cptReadResps <= 1){
-         test_results_set_service_result(/* test_read_request_response(readResp,
+         test_results_set_service_result(test_read_request_response(readResp,
                                                                     status,
                                                                     0)
-                                         ? (!FALSE): */ FALSE);
-         printf(" Test_ComEvent_Fct: test_read_request_response unavailable for now\n");
+                                         ? true : false);
        }else{
          // Second read response is to test write effect (through read result)
          test_results_set_service_result(
@@ -88,9 +88,9 @@ void Test_ComEvent_Fct(SOPC_App_Com_Event event,
 }
 
 /* Function to build the read service request message */
-/*void* getReadRequest_message(){
+void* getReadRequest_message(){
   return read_new_read_request();
-}*/
+}
 
 /* Function to build the verification read request */
 void* getReadRequest_verif_message() {
@@ -98,7 +98,7 @@ void* getReadRequest_verif_message() {
 }
 
 SOPC_SecureChannel_Config scConfig = {
-    .isClientSc = !FALSE,
+    .isClientSc = true,
     .url= ENDPOINT_URL,
     .crt_cli = NULL,
     .key_priv_cli = NULL,
@@ -114,7 +114,7 @@ int main(void){
   // Sleep timeout in milliseconds
   const uint32_t sleepTimeout = 500;
   // Loop timeout in milliseconds
-  const uint32_t loopTimeout = 20000;
+  const uint32_t loopTimeout = 2000;
   // Counter to stop waiting on timeout
   uint32_t loopCpt = 0;
 
@@ -128,11 +128,21 @@ int main(void){
 
   /* Init stack configuration */
   if(STATUS_OK == status){
-    status = SOPC_ToolkitClient_Initialize(Test_ComEvent_Fct);
+    status = SOPC_Toolkit_Initialize(Test_ComEvent_Fct);
     if(STATUS_OK != status){
       printf(">>Test_Client_Toolkit: Failed initializing\n");
     }else{
       printf(">>Test_Client_Toolkit: Stack initialized\n");
+    }
+  }
+
+  if(STATUS_OK == status){
+    // NECESSARY ONLY FOR TEST PURPOSES: a client should not define an @ space in a nominal case
+    status = SOPC_ToolkitServer_SetAddressSpaceConfig(&addressSpace);    
+    if(STATUS_OK != status){
+      printf(">>Test_Client_Toolkit: Failed to configure the @ space\n");
+    }else{
+      printf(">>Test_Client_Toolkit: @ space configured\n");
     }
   }
 
@@ -194,7 +204,6 @@ int main(void){
     printf(">>Test_Client_Toolkit: Session activated: NOK'\n");
   }
 
-#if 0
   if(STATUS_OK == status){
     /* Create a service request message and send it through session (read service)*/
     // msg freed when sent
@@ -215,7 +224,7 @@ int main(void){
   /* Wait until service response is received */
   loopCpt = 0;
   while(STATUS_OK == status &&
-        test_results_get_service_result() == FALSE &&
+        test_results_get_service_result() == false &&
         loopCpt * sleepTimeout <= loopTimeout){
     loopCpt++;
     SOPC_Sleep(100);
@@ -228,7 +237,7 @@ int main(void){
   if(STATUS_OK == status)
   {
     // Reset expected result
-    test_results_set_service_result(FALSE);
+    test_results_set_service_result(false);
     /* Sends a WriteRequest */
     pWriteReq = tlibw_new_WriteRequest();
     test_results_set_WriteRequest(pWriteReq);
@@ -255,7 +264,7 @@ int main(void){
   /* Wait until service response is received */
   loopCpt = 0;
   while(STATUS_OK == status &&
-        test_results_get_service_result() == FALSE &&
+        test_results_get_service_result() == false &&
         loopCpt * sleepTimeout <= loopTimeout){
     loopCpt++;
     SOPC_Sleep(100);
@@ -268,7 +277,7 @@ int main(void){
   if(STATUS_OK == status)
   {
     // Reset expected result
-    test_results_set_service_result(FALSE);
+    test_results_set_service_result(false);
     /* Sends another ReadRequest, to verify that the AddS has changed */
     /* The callback will call the verification */
     // msg freed when sent
@@ -289,7 +298,7 @@ int main(void){
   /* Wait until service response is received */
   loopCpt = 0;
   while(STATUS_OK == status &&
-        test_results_get_service_result() == FALSE &&
+        test_results_get_service_result() == false &&
         loopCpt * sleepTimeout <= loopTimeout){
     loopCpt++;
     SOPC_Sleep(100);
@@ -302,7 +311,6 @@ int main(void){
   /* Now the request can be freed */
   test_results_set_WriteRequest(NULL);
   tlibw_free_WriteRequest((OpcUa_WriteRequest **) &pWriteReq);
-#endif
 
   /* Close the session */
   if(constants__c_session_indet != session){
@@ -327,7 +335,7 @@ int main(void){
 
   SOPC_Toolkit_Clear();
 
-  if(STATUS_OK == status && test_results_get_service_result() == (!FALSE)){
+  if(STATUS_OK == status && test_results_get_service_result() != false){
     printf(">>Test_Client_Toolkit: read request received ! \n");
     printf(">>Test_Client_Toolkit final result: OK\n");
     return 0;

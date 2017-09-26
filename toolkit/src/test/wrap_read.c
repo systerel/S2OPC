@@ -48,81 +48,54 @@
          sizeof(T))
 
 
-#define N_REQUESTS_VARS  120
-#define N_REQUESTS_OTHERS 8
-#define OFFSET_REQUESTS_OTHERS  (3*N_REQUESTS_VARS)
-#define OFFSET_REQUESTS_LAST    (OFFSET_REQUESTS_OTHERS + 2*N_REQUESTS_OTHERS)
-#define N_REQUESTS (OFFSET_REQUESTS_LAST + 1)
-
 /**
  * Creates a request of length N_REQUEST
  */
 OpcUa_ReadRequest *read_new_read_request(void)
 {
+
+    const uint32_t N_REQUESTS = address_space_bs__nNodeIds * 2 + address_space_bs__nVariables;
+
     OpcUa_ReadValueId *lrv = (OpcUa_ReadValueId *)malloc(N_REQUESTS*sizeof(OpcUa_ReadValueId));
-    size_t i;
+    int32_t i;
 
     if(NULL == lrv)
         exit(1);
 
-    /* First batch: variables */
-    for(i=0; i<N_REQUESTS_VARS; ++i)
+    /* All nodes Ids and classes */
+    for(i=0; i < address_space_bs__nNodeIds; ++i)
     {
         /* Request for the NodeId (...) */
-        lrv[3*i+0] = (OpcUa_ReadValueId) {
+        lrv[2*i+0] = (OpcUa_ReadValueId) {
             .NodeId = {
                 .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+i*(NB_NODES-8)/N_REQUESTS_VARS },
+                .Data.Numeric = i+1000 },
             .AttributeId = e_aid_NodeId,
             .IndexRange = {.Length = 0},
             .DataEncoding = {.Name.Length = 0} };
         /* Request for the NodeClass */
-        lrv[3*i+1] = (OpcUa_ReadValueId) {
+        lrv[2*i+1] = (OpcUa_ReadValueId) {
             .NodeId = {
                 .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+i*(NB_NODES-8)/N_REQUESTS_VARS },
+                .Data.Numeric = i+1000 },
             .AttributeId = e_aid_NodeClass,
             .IndexRange = {.Length = 0},
             .DataEncoding = {.Name.Length = 0} };
+    }
+
+    /* Note: variables have the last numeric node ids in the @space used for this test*/
+    /* All variables */
+    for(i=0; i < address_space_bs__nVariables; ++i)
+    {
         /* Request for the Value */
-        lrv[3*i+2] = (OpcUa_ReadValueId) {
+        lrv[2 * address_space_bs__nNodeIds + i] = (OpcUa_ReadValueId) {
             .NodeId = {
                 .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+i*(NB_NODES-8)/N_REQUESTS_VARS },
+                .Data.Numeric = (address_space_bs__nNodeIds-1-i)+1000},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
             .DataEncoding = {.Name.Length = 0} };
     }
-
-    /* Second batch: other classes */
-    for(i=0; i<N_REQUESTS_OTHERS; ++i)
-    {
-        /* Request for the NodeId (...) */
-        lrv[OFFSET_REQUESTS_OTHERS+2*i+0] = (OpcUa_ReadValueId) {
-            .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+1000+i },
-            .AttributeId = e_aid_NodeId,
-            .IndexRange = {.Length = 0},
-            .DataEncoding = {.Name.Length = 0} };
-        /* Request for the NodeClass */
-        lrv[OFFSET_REQUESTS_OTHERS+2*i+1] = (OpcUa_ReadValueId) {
-            .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+1000+i },
-            .AttributeId = e_aid_NodeClass,
-            .IndexRange = {.Length = 0},
-            .DataEncoding = {.Name.Length = 0} };
-    }
-
-    /* Third batch: a variable without value <-- that should not exist */
-    lrv[OFFSET_REQUESTS_LAST] = (OpcUa_ReadValueId) {
-            .NodeId = {
-                .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+1002 },
-            .AttributeId = e_aid_Value,
-            .IndexRange = {.Length = 0},
-            .DataEncoding = {.Name.Length = 0} };
 
     OpcUa_ReadRequest *pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest,
             .encodeableType = &OpcUa_ReadRequest_EncodeableType,

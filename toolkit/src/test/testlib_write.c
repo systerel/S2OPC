@@ -43,15 +43,18 @@
          &(T const){ __VA_ARGS__ }, \
          sizeof(T))
 
-
-#define N_REQUESTS_VALS     20
-#define N_REQUESTS_OTHERS   1
-#define OFFSET_REQUESTS_OTHERS  N_REQUESTS_VALS
-#define N_REQUESTS  (N_REQUESTS_VALS + N_REQUESTS_OTHERS)
+const uint32_t N_GROUPS = 4;
 
 OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
 {
-    OpcUa_WriteValue *lwv = (OpcUa_WriteValue *)malloc(N_REQUESTS*sizeof(OpcUa_WriteValue));
+    const uint32_t N_VARS = address_space_bs__nVariables;
+
+    // Only variables in this address space (+1 object folder containing variables)
+    assert(address_space_bs__nVariables == address_space_bs__nNodeIds - 1);
+    // Multiple of number of groups
+    assert(N_VARS % N_GROUPS == 0);
+
+    OpcUa_WriteValue *lwv = (OpcUa_WriteValue *)malloc(N_VARS*sizeof(OpcUa_WriteValue));
     size_t i;
     SOPC_ByteString buf;
     uint32_t j;
@@ -59,16 +62,16 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
     if(NULL == lwv)
         exit(1);
 
-    /* First batch: N_REQUESTS_VALS is divided in n groups,
+    /* First batch: variables are divided in n groups,
      * where n is the current number of supported types in the Address Space */
 
     /* int64 */
-    for(i=0; i<N_REQUESTS_VALS/4; ++i)
+    for(i=0; i<N_VARS/N_GROUPS; ++i)
     {
-        lwv[4*i+0] = (OpcUa_WriteValue) {
+        lwv[i] = (OpcUa_WriteValue) {
             .NodeId = {
                 .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+i+0*(NB_NODES-8)/4},
+                .Data.Numeric = i+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
             .Value = {
@@ -80,29 +83,29 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
     }
 
     /* uint32 */
-    for(i=0; i<N_REQUESTS_VALS/4; ++i)
+    for(i=0; i<N_VARS/N_GROUPS; ++i)
     {
-        lwv[4*i+1] = (OpcUa_WriteValue) {
+      lwv[i+(N_VARS/N_GROUPS)] = (OpcUa_WriteValue) {
             .NodeId = {
                 .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+i+1*(NB_NODES-8)/4},
+                .Data.Numeric = i+(N_VARS/N_GROUPS)+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
             .Value = {
                 .Value = {
                     .BuiltInTypeId = SOPC_UInt32_Id,
                     .ArrayType = SOPC_VariantArrayType_SingleValue,
-                    .Value.Uint32 = i}}
+                    .Value.Uint32 = 1000+i}}
             };
     }
 
     /* double */
-    for(i=0; i<N_REQUESTS_VALS/4; ++i)
+    for(i=0; i<N_VARS/N_GROUPS; ++i)
     {
-        lwv[4*i+2] = (OpcUa_WriteValue) {
+        lwv[i+(N_VARS/N_GROUPS)*2] = (OpcUa_WriteValue) {
             .NodeId = {
                 .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+i+2*(NB_NODES-8)/4},
+                .Data.Numeric = i+2*(N_VARS/N_GROUPS)+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
             .Value = {
@@ -113,8 +116,8 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
             };
     }
 
-    /* ByteString. There MIGHT be mem leaks when writting ByteString in the AddS... */
-    for(i=0; i<N_REQUESTS_VALS/4; ++i)
+    /* String */
+    for(i=0; i<N_VARS/N_GROUPS; ++i)
     {
         buf.Length = 8;
         buf.Data = (SOPC_Byte *)malloc(8);
@@ -124,37 +127,23 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
         memcpy((void *)(buf.Data  ), "FOO ", 4);
         memcpy((void *)(buf.Data+4), (void *)&j, 4);
 
-        lwv[4*i+3] = (OpcUa_WriteValue) {
+        lwv[i+3*(N_VARS/N_GROUPS)] = (OpcUa_WriteValue) {
             .NodeId = {
                 .IdentifierType = IdentifierType_Numeric,
-                .Data.Numeric = 10+i+3*(NB_NODES-8)/4},
+                .Data.Numeric = i+3*(N_VARS/N_GROUPS)+1000+1},
             .AttributeId = e_aid_Value,
             .IndexRange = {.Length = 0},
             .Value = {
                 .Value = {
-                    .BuiltInTypeId = SOPC_ByteString_Id,
+                    .BuiltInTypeId = SOPC_String_Id,
                     .ArrayType = SOPC_VariantArrayType_SingleValue,
                     .Value.Bstring = buf}}
             };
     }
 
-    /* Second batch: redundant request */
-    lwv[OFFSET_REQUESTS_OTHERS] = (OpcUa_WriteValue) {
-        .NodeId = {
-            .IdentifierType = IdentifierType_Numeric,
-            .Data.Numeric = 10},
-        .AttributeId = e_aid_Value,
-        .IndexRange = {.Length = 0},
-        .Value = {
-            .Value = {
-                .BuiltInTypeId = SOPC_Int64_Id,
-                .ArrayType = SOPC_VariantArrayType_SingleValue,
-                .Value.Int64 = 100}}
-    };
-
     OpcUa_WriteRequest *pReq = DESIGNATE_NEW(OpcUa_WriteRequest,
             .encodeableType = &OpcUa_WriteRequest_EncodeableType,                                             
-            .NoOfNodesToWrite = N_REQUESTS,
+            .NoOfNodesToWrite = N_VARS,
             .NodesToWrite = lwv
         );
     if(NULL == pReq)
@@ -168,6 +157,7 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq)
 {
     size_t i;
     OpcUa_WriteRequest *pReq;
+    const uint32_t N_VARS = address_space_bs__nVariables;
 
     if(NULL == ppWriteReq || NULL == *ppWriteReq)
         return;
@@ -175,8 +165,8 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq)
     pReq = *ppWriteReq;
 
     /* Free the ByteStrings */
-    for(i=0; i<N_REQUESTS_VALS/4; ++i)
-        free(pReq->NodesToWrite[4*i+3].Value.Value.Value.Bstring.Data);
+    for(i=0; i<N_VARS/4; ++i)
+        free(pReq->NodesToWrite[i+(N_GROUPS-1)+1].Value.Value.Value.Bstring.Data);
     /* Free the lwv */
     free(pReq->NodesToWrite);
     /* Free the request */
@@ -239,7 +229,7 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq)
 
         ssc = SOPC_Variant_Compare(pVariant, &lwv[i].Value.Value, &cmp);
         /* The last request is redundant with the first, and because of the way our iterators are coded, it should be ignored. So its test is different. The request shall not be taken into account. */
-        if(i < OFFSET_REQUESTS_OTHERS && (ssc != STATUS_OK || cmp != 0))
+        if(ssc != STATUS_OK || cmp != 0)
         {
             printf("Request[wvi = %zd] did not change the address space (Compare sc = %d, cmp = %d)\n+ Expected value:\n", i, ssc, cmp);
             util_variant__print_SOPC_Variant(&lwv[i].Value.Value);
@@ -247,14 +237,6 @@ bool tlibw_verify_effects_local(OpcUa_WriteRequest *pWriteReq)
             util_variant__print_SOPC_Variant(pVariant);
             bVerif = false;
         }
-        else if(i >= OFFSET_REQUESTS_OTHERS && (ssc != STATUS_OK || cmp == 0))
-        {
-            printf("Request[wvi = %zd] was not ignored and changed the address space (Compare sc = %d, cmp = %d)\n+ Read value:\n", i, ssc, cmp);
-            util_variant__print_SOPC_Variant(pVariant);
-            bVerif = false;
-        }
-        /* else it is ok */
-
         free(pVariant);
     }
 
@@ -285,7 +267,7 @@ bool tlibw_verify_response(OpcUa_WriteRequest *pWriteReq, OpcUa_WriteResponse *p
     /* Verify the vector of StatusCode, should all be OK */
     for(i=0; i<pWriteReq->NoOfNodesToWrite; ++i)
     {
-        if(pWriteResp->Results[i] != constants__e_sc_ok)
+        if(pWriteResp->Results[i] != STATUS_OK)
         {
             printf("Response[wvi = %d] is not OK (%d)\n", i, pWriteResp->Results[i]);
             bVerif = false;
@@ -306,8 +288,9 @@ bool tlibw_verify_response(OpcUa_WriteRequest *pWriteReq, OpcUa_WriteResponse *p
 
 OpcUa_ReadRequest *tlibw_new_ReadRequest_check(void)
 {
-    OpcUa_ReadValueId *lrv = (OpcUa_ReadValueId *)malloc(N_REQUESTS_VALS*sizeof(OpcUa_ReadValueId));
-    size_t i, j;
+    const uint32_t N_VARS = address_space_bs__nVariables;
+    OpcUa_ReadValueId *lrv = (OpcUa_ReadValueId *)malloc(N_VARS*sizeof(OpcUa_ReadValueId));
+    size_t i;
 
     if(NULL == lrv)
         exit(1);
@@ -315,25 +298,22 @@ OpcUa_ReadRequest *tlibw_new_ReadRequest_check(void)
     /* We only check that the values of the variables that were modified.
      * For the duplicate WriteRequest, there is a single request.
      * It should match (in the current implementation) the first of the two WriteValue. */
-    for(i=0; i<N_REQUESTS_VALS/4; ++i)
+    for(i=0; i<N_VARS; ++i)
     {
-        for(j=0; j<4; ++j)
-        {
-            lrv[4*i+j] = (OpcUa_ReadValueId) {
-                .NodeId = {
-                    .IdentifierType = IdentifierType_Numeric,
-                    .Data.Numeric = 10+i+j*(NB_NODES-8)/4 },
-                .AttributeId = e_aid_Value,
-                .IndexRange = {.Length = 0},
-                .DataEncoding = {.Name.Length = 0} };
-        }
+        lrv[i] = (OpcUa_ReadValueId) {
+            .NodeId = {
+                .IdentifierType = IdentifierType_Numeric,
+                .Data.Numeric = i+1000+1},
+            .AttributeId = e_aid_Value,
+            .IndexRange = {.Length = 0},
+            .DataEncoding = {.Name.Length = 0} };
     }
 
     OpcUa_ReadRequest *pReadReq = DESIGNATE_NEW(OpcUa_ReadRequest,
             .encodeableType = &OpcUa_ReadRequest_EncodeableType,                                             
             .MaxAge = 0.,
             .TimestampsToReturn = OpcUa_TimestampsToReturn_Neither,
-            .NoOfNodesToRead = N_REQUESTS_VALS,
+            .NoOfNodesToRead = N_VARS,
             .NodesToRead = lrv
         );
 

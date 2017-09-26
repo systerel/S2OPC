@@ -15,25 +15,33 @@ PATHBUILD=./build
 PATHGENC=./genc
 
 .SECONDARY:$(SRC_WITH_PATH)
-.PHONY: all config clean cleangen
+.PHONY: all config clean cleangen cleanall
 
-all: config $(EXEC)
+all: config $(EXEC) $(PATHGENC)/test_read_write_addspace.c
 
 config:
+	@echo "configure directories"
 	@mkdir -p $(PATHBUILD)
 	@mkdir -p $(PATHGENC)
 
 clean:
-	@echo "clean directory"
+	@echo "clean build directory and execs"
 	@rm -f $(EXEC)
 	@rm -rf $(PATHBUILD)
 
 cleangen:
+	@echo "clean generated C files directory"
 	@rm -rf $(PATHGENC)
+
+cleanall: clean cleangen
 
 $(PATHGENC)/%.c : %.xsl
 	ct.py $< $(PATHBUILD)/$<
 	saxonb-xslt -xsl:$(PATHBUILD)/$< -s:testView.xml -o:$@
+
+$(PATHGENC)/test_%_addspace.c : test_%.xml
+	ct.py add.xsl $(PATHBUILD)/add.xsl
+	saxonb-xslt -xsl:$(PATHBUILD)/add.xsl -s:$< -o:$@
 
 $(PATHBUILD)/%.o: $(PATHGENC)/%.c
 	$(CC) -o $@ -c $< $(CFLAGS)

@@ -22,9 +22,11 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "constants.h"
 
+#include "address_space_impl.h"
 #include "testlib_read_response.h"
 #include "address_space_impl.h"
 #include "gen_addspace.h"
@@ -52,7 +54,11 @@ constants__t_Variant_i *new_variant_rvi(constants__t_NodeId_i     *pnids,
     case e_aid_NodeClass:
         return util_variant__new_Variant_from_NodeClass(pncls[rvi]);
     case e_aid_Value:
-        return util_variant__new_Variant_from_Variant(pvars[rvi]);
+        assert(address_space_bs__nViews >= 0);
+        assert(address_space_bs__nObjects >= 0);
+        assert(rvi >= (uint32_t) address_space_bs__nViews + address_space_bs__nObjects);
+        return util_variant__new_Variant_from_Variant
+                 (pvars[rvi - (uint32_t) (address_space_bs__nViews + address_space_bs__nObjects)]);
     default:
         return NULL;
     }
@@ -69,10 +75,10 @@ SOPC_StatusCode get_rvi(constants__t_NodeId_i *pnids,
        NULL == prvi)
         return STATUS_INVALID_PARAMETERS;
 
-    size_t i;
+    int32_t i;
     int32_t comp;
 
-    for(i=0; i<NB_NODES; ++i)
+    for(i=1; i <= address_space_bs__nNodeIds; i++)
     {
         if(STATUS_OK != SOPC_NodeId_Compare((SOPC_NodeId *)pnids[i], target_nid, &comp))
             return STATUS_NOK;
@@ -95,19 +101,9 @@ bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
         printf("\n");
 
     bool bTestOk = false;
-    constants__t_NodeId_i     a_nids[NB_NODES];
-    constants__t_NodeClass_i  a_ncls[NB_NODES];
-    constants__t_Variant_i    a_vars[NB_NODES];
-    constants__t_StatusCode_i a_scs[NB_NODES];
     int32_t comp = 0;
     SOPC_Variant *pvar;
     size_t i, rvi = 0;
-
-    /* Protects against free_addspace on non initialized address space */
-    memset(a_nids, 0, sizeof(a_nids));
-    memset(a_ncls, 0, sizeof(a_ncls));
-    memset(a_vars, 0, sizeof(a_vars));
-    memset(a_scs, 0, sizeof(a_scs));
 
     /* Check the service StatusCode */
     if(verbose > 0)
@@ -132,19 +128,21 @@ bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
     if(bTestOk)
         bTestOk = pReadReq->NoOfNodesToRead == pReadResp->NoOfResults;
 
-    /* Generates the Address Space */
-    if(bTestOk)
-        bTestOk = STATUS_OK == gen_addspace(a_nids, a_ncls, a_vars, a_scs);
-
     /* Analyze each response element */
     for(i=0; bTestOk && i<(size_t)pReadReq->NoOfNodesToRead; ++i) {
         /* Find NodeId's rvi */
-        bTestOk = STATUS_OK == get_rvi(a_nids, &pReadReq->NodesToRead[i].NodeId, &rvi);
+        bTestOk = STATUS_OK == get_rvi(address_space_bs__a_NodeId, &pReadReq->NodesToRead[i].NodeId, &rvi);
         /* Find desired attribute and wrap it in a new SOPC_Variant* */
-        if(bTestOk)
-            pvar = (SOPC_Variant *)new_variant_rvi(a_nids, a_ncls, a_vars, a_scs, pReadReq->NodesToRead[i].AttributeId, rvi);
-        else
+        if(bTestOk){
+            pvar = (SOPC_Variant *)new_variant_rvi(address_space_bs__a_NodeId, 
+                                                   address_space_bs__a_NodeClass, 
+                                                   address_space_bs__a_Value, 
+                                                   address_space_bs__a_Value_StatusCode,
+                                                   pReadReq->NodesToRead[i].AttributeId, 
+                                                   rvi);
+        }else{
             pvar = NULL;
+        }
         /* Compares the wrapped value with the response to the request */
         bTestOk = bTestOk && STATUS_OK == SOPC_Variant_Compare(&pReadResp->Results[i].Value,
                                                                pvar,
@@ -163,9 +161,6 @@ bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
         }
         free(pvar); /* It's ok to free a NULL */
     }
-
-    /* Don't forget to uninit the locally generated Address Space (this is ok even when gen_addspace failed)*/
-    free_addspace(a_nids, a_ncls, a_vars, a_scs);
 
     /* Free the Request */
     free(pReadReq->NodesToRead);

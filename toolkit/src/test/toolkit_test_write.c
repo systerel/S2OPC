@@ -29,7 +29,8 @@
 #include "address_space_bs.h"
 #include "testlib_write.h"
 #include "sopc_sc_events.h"
-
+#include "sopc_toolkit_config_internal.h"
+#include "add.h"
 
 int main ()
 {
@@ -37,6 +38,9 @@ int main ()
     int retCode;
 
     /* This test is offline, local, "server-side". */
+
+    /* Set address space */
+    SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(&addressSpace);
 
     /* Init */
     INITIALISATION();

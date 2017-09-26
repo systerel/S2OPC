@@ -28,11 +28,15 @@
 #include "address_space_bs.h"
 
 #include "wrap_read.h"
-
+#include "add.h"
+#include "sopc_toolkit_config_internal.h"
 
 int main()
 {
     bool bTest;
+
+    /* Set address space */
+    SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(&addressSpace);
 
     /* Init */
     INITIALISATION();

@@ -31,7 +31,8 @@ OBJS        =toolkit_header_init.o \
              util_variant.o \
              service_browse.o service_browse_seq.o service_browse_seq_it.o \
              msg_browse_response_bs.o service_browse_decode_bs.o
-             #testlib_read_response.o wrap_read.o testlib_write.o
+OBJS        += testlib_read_response.o wrap_read.o 
+OBJS        += testlib_write.o
 OBJS        += toolkit_header.o io_dispatch_mgr.o service_mgr.o session_mgr.o session_core.o session_core_1_bs.o \
                session_async_bs.o session_request_handle_bs.o \
                channel_mgr_bs.o request_handle_bs.o message_in_bs.o message_out_bs.o \
@@ -39,15 +40,18 @@ OBJS        += toolkit_header.o io_dispatch_mgr.o service_mgr.o session_mgr.o se
                session_core_channel_lost_it_bs.o session_core_orphaned_it_bs.o \
                util_b2c.o test_results.o util_discovery_services.o
 OBJS        += sopc_services_events.o sopc_toolkit_config.o
-#CLIENT_OBJS =toolkit_test_client.o
+CLIENT_OBJS = toolkit_test_client.o
 SERVER_OBJS = toolkit_test_server.o
-#READ_OBJS   =toolkit_test_read.o
-#WRITE_OBJS  =toolkit_test_write.o
+READ_OBJS   = toolkit_test_read.o
+WRITE_OBJS  = toolkit_test_write.o
 
 CLIENT_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(CLIENT_OBJS))
 SERVER_EXEC :=$(patsubst %.o,$(PATHEXEC)/%,$(SERVER_OBJS))
 READ_EXEC   :=$(patsubst %.o,$(PATHEXEC)/%,$(READ_OBJS))
 WRITE_EXEC  :=$(patsubst %.o,$(PATHEXEC)/%,$(WRITE_OBJS))
+READ_OBJS   += test_read_write_addspace.o
+WRITE_OBJS  += test_read_write_addspace.o
+CLIENT_OBJS += test_read_write_addspace.o
 SERVER_OBJS += add.o
 OBJS        :=$(patsubst %,$(PATHOBJ)/%,$(OBJS))
 CLIENT_OBJS :=$(patsubst %,$(PATHOBJ)/%,$(CLIENT_OBJS))
@@ -86,7 +90,7 @@ trad:
 	done
 
 asg:
-	@make -C address_space_generation genc/add.c
+	@make -C address_space_generation
 
 $(PATHOBJ)/%.o: $(PATHTRAD)/%.c
 	@echo "  CC $@"
