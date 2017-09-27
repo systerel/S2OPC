@@ -1,0 +1,46 @@
+HOME            = .
+RANDFILE        = $ENV::HOME/.rnd
+
+####################################################################
+[ req ]
+default_bits        = 2048
+default_keyfile     = client.key
+distinguished_name  = client_distinguished_name
+req_extensions      = client_extensions
+string_mask         = utf8only
+
+####################################################################
+[ client_distinguished_name ]
+countryName         = Country Name (2 letter code)
+countryName_default     = FR
+
+stateOrProvinceName     = State or Province Name (full name)
+stateOrProvinceName_default = IDF
+
+localityName            = Locality Name (eg, city)
+localityName_default        = PARIS
+
+organizationName            = Organization Name (eg, company)
+organizationName_default    = INGOPCS
+
+organizationalUnitName  = Organizational Unit (eg, division)
+organizationalUnitName_default  = INGOPCS
+
+commonName          = Common Name (e.g. server FQDN or YOUR name)
+commonName_default      = INGOPCS CLIENT
+
+emailAddress            = Email Address
+emailAddress_default        = ingopcs@systerel.fr
+
+####################################################################
+[ client_extensions ]
+subjectKeyIdentifier = hash
+basicConstraints     = CA:FALSE
+keyUsage             = digitalSignature, keyEncipherment
+subjectAltName       = @alternate_names
+nsComment            = "OpenSSL Generated Certificate"
+
+####################################################################
+
+[ alternate_names ]
+DNS.1 = localhost
