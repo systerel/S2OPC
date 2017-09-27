@@ -2,7 +2,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 20/09/2017 19:38:25
+ Date                 : 27/09/2017 15:30:49
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -519,7 +519,6 @@ void session_mgr__client_user_activate_session_req(
    {
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
-      t_bool session_mgr__l_connected_channel;
       constants__t_StatusCode_i session_mgr__l_ret;
       
       session_core__is_valid_session(session_mgr__session,
@@ -535,9 +534,7 @@ void session_mgr__client_user_activate_session_req(
                &session_mgr__l_ret,
                session_mgr__channel,
                session_mgr__session_token);
-            channel_mgr_bs__is_connected_channel(*session_mgr__channel,
-               &session_mgr__l_connected_channel);
-            if (session_mgr__l_connected_channel == false) {
+            if (session_mgr__l_ret != constants__e_sc_ok) {
                session_core__client_close_session_sm(session_mgr__session);
                session_mgr__l_ret = constants__e_sc_bad_unexpected_error;
             }
@@ -633,7 +630,6 @@ void session_mgr__client_close_session_req(
    {
       t_bool session_mgr__l_valid_session;
       constants__t_sessionState session_mgr__l_session_state;
-      t_bool session_mgr__l_connected_channel;
       constants__t_StatusCode_i session_mgr__l_ret;
       
       session_core__is_valid_session(session_mgr__session,
@@ -649,9 +645,7 @@ void session_mgr__client_close_session_req(
                &session_mgr__l_ret,
                session_mgr__channel,
                session_mgr__session_token);
-            channel_mgr_bs__is_connected_channel(*session_mgr__channel,
-               &session_mgr__l_connected_channel);
-            if (session_mgr__l_connected_channel == false) {
+            if (session_mgr__l_ret != constants__e_sc_ok) {
                session_core__client_close_session_sm(session_mgr__session);
                session_mgr__l_ret = constants__e_sc_bad_unexpected_error;
             }

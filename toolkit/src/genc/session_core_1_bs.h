@@ -2,7 +2,7 @@
 
  File Name            : session_core_1_bs.h
 
- Date                 : 20/09/2017 19:38:29
+ Date                 : 27/09/2017 15:30:53
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -108,7 +108,8 @@ extern void session_core_1_bs__set_session_state(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_sessionState session_core_1_bs__state);
 extern void session_core_1_bs__set_session_state_closed(
-   const constants__t_session_i session_core_1_bs__session);
+   const constants__t_session_i session_core_1_bs__session,
+   const t_bool session_core_1_bs__is_client);
 extern void session_core_1_bs__set_session_user(
    const constants__t_session_i session_core_1_bs__session,
    const constants__t_user_i session_core_1_bs__user);
