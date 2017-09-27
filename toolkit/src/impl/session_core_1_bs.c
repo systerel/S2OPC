@@ -264,11 +264,11 @@ void session_core_1_bs__set_session_state(
   }
 }
 
-void session_core_1_bs__set_session_state_closed(const constants__t_session_i session_core_1_bs__session) {
+void session_core_1_bs__set_session_state_closed(const constants__t_session_i session_core_1_bs__session,
+                                                 const t_bool session_core_1_bs__is_client) {
   if(session_core_1_bs__session == unique_session.id){
     // Manage notification on client side
     constants__t_channel_i channel = constants__c_channel_indet;
-    t_bool bres = false;
     session_core_1_bs__get_session_channel(session_core_1_bs__session,
                                            &channel);
     if(channel == constants__c_channel_indet){
@@ -280,8 +280,7 @@ void session_core_1_bs__set_session_state_closed(const constants__t_session_i se
                                            0, // TBD: status
                                            "Session activation failure notification");
     }else{
-      channel_mgr_bs__is_client_channel(channel, &bres);
-      if(bres != false){
+      if(session_core_1_bs__is_client != false){
         if(unique_session.cli_activated_session == false){
           SOPC_EventDispatcherManager_AddEvent(applicationEventDispatcherMgr,
                                                SOPC_AppEvent_ComEvent_Create(SE_SESSION_ACTIVATION_FAILURE),

@@ -194,7 +194,7 @@ void SOPC_ServicesEventDispatcher(int32_t  scEvent,
     io_dispatch_mgr__client_send_close_session_request(id,
                                                        &sCode);
     if(sCode != constants__e_sc_ok){
-      status = STATUS_NOK;
+      printf("WARNING: Problem while closing the session on client demand\n");
     }
     break;
   case APP_TO_SE_CLOSE_ALL_CONNECTIONS:
