@@ -192,16 +192,25 @@ OPERATIONS
     ;
 
     ret, channel, session_token <-- client_user_activate_session_req_sm (session, user, activate_req_msg) =
-    BEGIN
+    VAR
+        l_is_connected_channel
+    IN
         channel <-- get_session_channel (session);
-        session_token <-- client_get_token_from_session (session);
-        /* TODO: check validity of user */
-        /* TODO: populate msg with parameters */
-        write_activate_msg_user(activate_req_msg, user);
-        /* TODO: crypto steps */
-        set_session_user(session, user);
-        set_session_state(session, e_session_userActivating);
-        ret := e_sc_ok
+        l_is_connected_channel <-- is_connected_channel(channel);
+        IF l_is_connected_channel = TRUE THEN
+            session_token <-- client_get_token_from_session (session);
+            /* TODO: check validity of user */
+            /* TODO: populate msg with parameters */
+            write_activate_msg_user(activate_req_msg, user);
+            /* TODO: crypto steps */
+            set_session_user(session, user);
+            set_session_state(session, e_session_userActivating);
+            ret := e_sc_ok
+        ELSE
+            channel := c_channel_indet;
+            session_token := c_session_token_indet;
+            ret := e_sc_bad_unexpected_error
+        END
     END
     ;
 
@@ -301,7 +310,7 @@ OPERATIONS
                     set_session_state (l_session, e_session_scOrphaned)
                 ELSE
                     // Inactive sessions or all orphaned sessions (if no new channel can be associated)
-                    set_session_state_closed (l_session)
+                    set_session_state_closed (l_session, TRUE)
                 END
             END
         INVARIANT
@@ -333,7 +342,7 @@ OPERATIONS
                     set_session_orphaned (l_session, channel, c_channel_config_idx_indet);
                     set_session_state (l_session, e_session_scOrphaned)
                 ELSE
-                    set_session_state_closed (l_session)
+                    set_session_state_closed (l_session, FALSE)
                 END
             END
         INVARIANT
@@ -347,12 +356,23 @@ OPERATIONS
     ;
 
     ret, channel, session_token <-- client_close_session_req_sm (session, close_req_msg) =
-    BEGIN
+    VAR
+        l_is_connected_channel
+    IN
         channel <-- get_session_channel (session);
-        session_token <-- client_get_token_from_session (session);
-        /* TODO: populate msg with parameters */
-        set_session_state (session, e_session_closing);
-        ret := e_sc_ok
+        l_is_connected_channel <-- is_connected_channel(channel);
+        IF l_is_connected_channel = TRUE
+        THEN
+            session_token <-- client_get_token_from_session (session);
+            /* TODO: populate msg with parameters */
+            set_session_state (session, e_session_closing);
+            ret := e_sc_ok
+        ELSE
+            channel := c_channel_indet;
+            session_token := c_session_token_indet;
+            ret := e_sc_bad_unexpected_error
+        END
+        
     END
     ;
 
@@ -361,7 +381,7 @@ OPERATIONS
         /* TODO: actions on pending requests or current subscriptions to manage (see request) */
         /* No need to store the handle since we will send response in same step */
         /* TODO: populate msg body with parameters */
-        set_session_state_closed (session);
+        set_session_state_closed (session, FALSE);
         ret := e_sc_ok
     END
     ;
@@ -369,19 +389,19 @@ OPERATIONS
     client_close_session_resp_sm (channel, session, close_resp_msg) =
     BEGIN
         /* In any case we close the session: correct channel or not  */
-        set_session_state_closed (session)
+        set_session_state_closed (session, TRUE)
     END
     ;
 
     client_close_session_sm (session) =
     BEGIN
-        set_session_state_closed (session)
+        set_session_state_closed (session, TRUE)
     END
     ;
 
     server_close_session_sm (session) =
     BEGIN
-        set_session_state_closed (session)
+        set_session_state_closed (session, FALSE)
     END
     ;
 

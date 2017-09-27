@@ -209,10 +209,11 @@ OPERATIONS
     END
     ;
 
-    set_session_state_closed (session) =
+    set_session_state_closed (session, is_client) =
     PRE
         session : t_session_i &
-        session : s_session
+        session : s_session &
+        is_client : BOOL
     THEN
         a_channel := {session} <<| a_channel               || // If session had a channel, remove this relation
         a_orphaned := {session} <<| a_orphaned             || // If session was orphaned, remove this relation

@@ -455,8 +455,7 @@ OPERATIONS
                 l_session_state = e_session_userActivated
             THEN
                 l_ret, channel, session_token <-- client_user_activate_session_req_sm (session, user, activate_req_msg);
-                l_connected_channel <-- is_connected_channel (channel); 
-                IF l_connected_channel = FALSE
+                IF l_ret /= e_sc_ok
                 THEN
                     /* Unexpected case: associated channel shall be connected for those session states */
                     client_close_session_sm (session);
@@ -542,8 +541,7 @@ OPERATIONS
                 l_session_state = e_session_userActivated
             THEN
                 l_ret, channel, session_token <-- client_close_session_req_sm (session, close_req_msg);
-                l_connected_channel <-- is_connected_channel (channel); 
-                IF l_connected_channel = FALSE
+                IF l_ret /= e_sc_ok
                 THEN
                     /* Unexpected case: associated channel shall be connected for those session states */
                     client_close_session_sm (session);

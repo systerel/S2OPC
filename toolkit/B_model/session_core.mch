@@ -275,7 +275,7 @@ OPERATIONS
             a_state(session) := e_session_userActivating ||
             a_user(session) := user              ||
             ret := e_sc_ok                          ||
-            channel :(channel : t_channel_i & channel : t_channel) ||
+            channel :(channel : t_channel_i & channel : s_channel_connected) ||
             session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
         OR
             // applicative code provided invalid user: no change
@@ -453,7 +453,7 @@ OPERATIONS
         CHOICE
             a_state(session) := e_session_closing ||
             ret := e_sc_ok ||
-            channel :(channel : t_channel_i & channel : t_channel) ||
+            channel :(channel : t_channel_i & channel : s_channel_connected) ||
             session_token :(session_token : t_session_token_i & session_token = a_client_token(session))
         OR
             ret :: {e_sc_bad_out_of_memory,
