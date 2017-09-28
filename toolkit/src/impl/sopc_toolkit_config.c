@@ -364,8 +364,7 @@ SOPC_App_AddSpace_Event SOPC_AppEvent_AddSpaceEvent_Get(int32_t iEvent){
 
 void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addressSpace){
     /* Glue the address_space_bs machine content to the generated address space content */
-    int32_t i;
-    
+   
     /* Number of nodes by nodeclass */
     assert(addressSpace->nbNodesTotal <= INT32_MAX);
     address_space_bs__nNodeIds = addressSpace->nbNodesTotal;
@@ -379,25 +378,21 @@ void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addres
     address_space_bs__nViews = addressSpace->nbViews;
     
     /* Attributes */
-    address_space_bs__a_NodeId = (constants__t_NodeId_i *) addressSpace->nodeIdArray;
+    address_space_bs__a_NodeId = addressSpace->nodeIdArray;
     /* Converts NodeClasses */
-    address_space_bs__a_NodeClass = (constants__t_NodeClass_i *) addressSpace->nodeClassArray;
-    for(i=1; i<=address_space_bs__nNodeIds; ++i)
-        assert(util_NodeClass__C_to_B(address_space_bs__a_NodeClass[i], &address_space_bs__a_NodeClass[i]));
-    address_space_bs__a_BrowseName = (constants__t_QualifiedName_i *) addressSpace->browseNameArray;
-    address_space_bs__a_DisplayName = (constants__t_LocalizedText_i *) addressSpace->displayNameArray;
+    address_space_bs__a_NodeClass = addressSpace->nodeClassArray;
+    address_space_bs__a_BrowseName = addressSpace->browseNameArray;
+    address_space_bs__a_DisplayName = addressSpace->displayNameArray;
     address_space_bs__a_DisplayName_begin = addressSpace->displayNameIdxArray_begin;
     address_space_bs__a_DisplayName_end = addressSpace->displayNameIdxArray_end;
-    address_space_bs__a_Value = (constants__t_Variant_i) addressSpace->valueArray;
+    address_space_bs__a_Value = addressSpace->valueArray;
     /* Converts status codes */
     address_space_bs__a_Value_StatusCode = addressSpace->valueStatusArray;
-    for(i=1; i<=address_space_bs__nVariables; ++i)
-        assert(util_status_code__C_to_B(address_space_bs__a_Value_StatusCode[i], &address_space_bs__a_Value_StatusCode[i]));
     address_space_bs__HasTypeDefinition = NULL;
     
     /* References */
-    address_space_bs__refs_ReferenceType = (constants__t_NodeId_i *) addressSpace->referenceTypeArray;
-    address_space_bs__refs_TargetNode = (constants__t_ExpandedNodeId_i *) addressSpace->referenceTargetArray;
+    address_space_bs__refs_ReferenceType = addressSpace->referenceTypeArray;
+    address_space_bs__refs_TargetNode = addressSpace->referenceTargetArray;
     address_space_bs__refs_IsForward = addressSpace->referenceIsForwardArray;
     address_space_bs__RefIndexBegin = addressSpace->referenceIdxArray_begin;
     address_space_bs__RefIndexEnd = addressSpace->referenceIdxArray_end;   

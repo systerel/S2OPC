@@ -23,7 +23,7 @@
 #include "util_variant.h"
 
 
-constants__t_Variant_i util_variant__new_Variant_from_NodeId(constants__t_NodeId_i pnid) {
+constants__t_Variant_i util_variant__new_Variant_from_NodeId(SOPC_NodeId* pnid) {
     SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
 
     if(NULL == pvar)
@@ -38,7 +38,7 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeId(constants__t_NodeId
 }
 
 
-constants__t_Variant_i util_variant__new_Variant_from_NodeClass(constants__t_NodeClass_i ncl) {
+constants__t_Variant_i util_variant__new_Variant_from_NodeClass(OpcUa_NodeClass ncl) {
     SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
 
     if(NULL == pvar)
@@ -52,7 +52,7 @@ constants__t_Variant_i util_variant__new_Variant_from_NodeClass(constants__t_Nod
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(constants__t_QualifiedName_i* qn) {
+constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(SOPC_QualifiedName* qn) {
     SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
 
     if(NULL == pvar)
@@ -66,7 +66,7 @@ constants__t_Variant_i util_variant__new_Variant_from_QualifiedName(constants__t
     return pvar;
 }
 
-constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(constants__t_LocalizedText_i* lt) {
+constants__t_Variant_i util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* lt) {
     SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
 
     if(NULL == pvar)

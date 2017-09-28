@@ -58,20 +58,20 @@ extern int32_t address_space_bs__nDataTypes;
 extern int32_t address_space_bs__nMethods;
 extern int32_t address_space_bs__nObjects;
 extern int32_t address_space_bs__nViews;
-extern constants__t_NodeId_i            *address_space_bs__a_NodeId;
-extern constants__t_NodeClass_i         *address_space_bs__a_NodeClass;
-extern constants__t_QualifiedName_i     *address_space_bs__a_BrowseName;
-extern constants__t_LocalizedText_i     *address_space_bs__a_DisplayName;
-extern int32_t                          *address_space_bs__a_DisplayName_begin;
-extern int32_t                          *address_space_bs__a_DisplayName_end;
-extern constants__t_Variant_i           address_space_bs__a_Value;
-extern constants__t_StatusCode_i        *address_space_bs__a_Value_StatusCode;
-extern constants__t_ExpandedNodeId_i    *address_space_bs__HasTypeDefinition;
-extern constants__t_NodeId_i            *address_space_bs__refs_ReferenceType;
-extern constants__t_ExpandedNodeId_i    *address_space_bs__refs_TargetNode;
-extern bool                             *address_space_bs__refs_IsForward;
-extern int32_t                          *address_space_bs__RefIndexBegin;
-extern int32_t                          *address_space_bs__RefIndexEnd;
+extern SOPC_NodeId         **address_space_bs__a_NodeId;
+extern OpcUa_NodeClass     *address_space_bs__a_NodeClass;
+extern SOPC_QualifiedName  *address_space_bs__a_BrowseName;
+extern SOPC_LocalizedText  *address_space_bs__a_DisplayName;
+extern int32_t             *address_space_bs__a_DisplayName_begin;
+extern int32_t             *address_space_bs__a_DisplayName_end;
+extern SOPC_Variant        *address_space_bs__a_Value;
+extern SOPC_StatusCode     *address_space_bs__a_Value_StatusCode;
+extern SOPC_ExpandedNodeId **address_space_bs__HasTypeDefinition;
+extern SOPC_NodeId         **address_space_bs__refs_ReferenceType;
+extern SOPC_ExpandedNodeId **address_space_bs__refs_TargetNode;
+extern bool                *address_space_bs__refs_IsForward;
+extern int32_t             *address_space_bs__RefIndexBegin;
+extern int32_t             *address_space_bs__RefIndexEnd;
 
 
 #endif // address_space_impl_h_

@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #include "b2c.h"
@@ -30,6 +31,7 @@
 
 #include "address_space_impl.h"
 #include "util_variant.h"
+#include "util_b2c.h"
 
 
 /*
@@ -89,21 +91,18 @@ int32_t offRefTypes = 0;
 int32_t offTypes = 0;
 int32_t offHasTypeDefs = 0;
 /* Family All */
-constants__t_NodeId_i           *address_space_bs__a_NodeId = NULL;
-constants__t_NodeClass_i        *address_space_bs__a_NodeClass = NULL;
-// CAUTION: next two arrays contain data instead of pointer on data which means there are not correctly typed here
-//  => &(array[i]) == constants__t_QualifiedName_i instead of array[i] == constants__t_QualifiedName_i 
-constants__t_QualifiedName_i    *address_space_bs__a_BrowseName = NULL;
-constants__t_LocalizedText_i    *address_space_bs__a_DisplayName = NULL;
-int32_t                         *address_space_bs__a_DisplayName_begin = NULL;
-int32_t                         *address_space_bs__a_DisplayName_end = NULL;
+SOPC_NodeId         **address_space_bs__a_NodeId = NULL;
+OpcUa_NodeClass     *address_space_bs__a_NodeClass = NULL;
+SOPC_QualifiedName  *address_space_bs__a_BrowseName = NULL;
+SOPC_LocalizedText  *address_space_bs__a_DisplayName = NULL;
+int32_t             *address_space_bs__a_DisplayName_begin = NULL;
+int32_t             *address_space_bs__a_DisplayName_end = NULL;
 /* Family Vars */
-constants__t_Variant_i          address_space_bs__a_Value = NULL; // <=> SOPC_Variant* => array of variants
-constants__t_StatusCode_i       *address_space_bs__a_Value_StatusCode = NULL;
+SOPC_Variant        *address_space_bs__a_Value = NULL;
+SOPC_StatusCode     *address_space_bs__a_Value_StatusCode = NULL;
 
 /* Family HasTypeDefinition */
-constants__t_ExpandedNodeId_i   *address_space_bs__HasTypeDefinition = NULL;
-
+SOPC_ExpandedNodeId **address_space_bs__HasTypeDefinition = NULL;
 
 /*
  * The following pointers store the references.
@@ -113,12 +112,11 @@ constants__t_ExpandedNodeId_i   *address_space_bs__HasTypeDefinition = NULL;
  *
  * These pointers to arrays must be initialized before address_space_bs__INITIALISATION is called.
  */
-constants__t_NodeId_i           *address_space_bs__refs_ReferenceType = NULL;
-constants__t_ExpandedNodeId_i   *address_space_bs__refs_TargetNode = NULL;
-bool                            *address_space_bs__refs_IsForward = NULL;
-int32_t                         *address_space_bs__RefIndexBegin = NULL;
-int32_t                         *address_space_bs__RefIndexEnd = NULL;
-
+SOPC_NodeId         **address_space_bs__refs_ReferenceType = NULL;
+SOPC_ExpandedNodeId **address_space_bs__refs_TargetNode = NULL;
+bool                *address_space_bs__refs_IsForward = NULL;
+int32_t             *address_space_bs__RefIndexBegin = NULL;
+int32_t             *address_space_bs__RefIndexEnd = NULL;
 
 /*------------------------
    INITIALISATION Clause
@@ -219,16 +217,16 @@ void address_space_bs__read_AddressSpace_Attribute_value(
         break;
     case constants__e_aid_BrowseName:
         assert(address_space_bs__node <= address_space_bs__nNodeIds);
-        *address_space_bs__variant = util_variant__new_Variant_from_QualifiedName(&address_space_bs__a_BrowseName[address_space_bs__node]);
+        *address_space_bs__variant = util_variant__new_Variant_from_QualifiedName(&(address_space_bs__a_BrowseName[address_space_bs__node]));
         break;
     case constants__e_aid_DisplayName:
         assert(address_space_bs__node <= address_space_bs__nNodeIds);
-        *address_space_bs__variant = util_variant__new_Variant_from_LocalizedText(&address_space_bs__a_DisplayName[address_space_bs__node]);
+        *address_space_bs__variant = util_variant__new_Variant_from_LocalizedText(&(address_space_bs__a_DisplayName)[address_space_bs__node]);
         break;
     case constants__e_aid_Value:
         assert(address_space_bs__node >= offVarsTypes);
         assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
-        *address_space_bs__variant = util_variant__new_Variant_from_Variant(&address_space_bs__a_Value[address_space_bs__node - offVarsTypes]);
+        *address_space_bs__variant = util_variant__new_Variant_from_Variant(&(address_space_bs__a_Value[address_space_bs__node - offVarsTypes]));
         break;
     default:
         /* TODO: maybe return NULL here, to be consistent with msg_read_response_bs__write_read_response_iter and service_read__treat_read_request behavior. */
@@ -258,7 +256,10 @@ void address_space_bs__get_Value_StatusCode(
 {
     assert(address_space_bs__node >= offVarsTypes);
     assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
-    *address_space_bs__sc = address_space_bs__a_Value_StatusCode[address_space_bs__node - offVarsTypes];
+    bool res = util_status_code__C_to_B(address_space_bs__a_Value_StatusCode[address_space_bs__node - offVarsTypes],                                        address_space_bs__sc);
+    if(false == res){
+        *address_space_bs__sc = constants__c_StatusCode_indet;
+    }
 }
 
 
@@ -274,7 +275,7 @@ void address_space_bs__get_BrowseName(
    constants__t_QualifiedName_i * const address_space_bs__p_browse_name)
 {
   assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
-  *address_space_bs__p_browse_name = *(SOPC_QualifiedName*) &(address_space_bs__a_BrowseName[address_space_bs__p_node]);
+  *address_space_bs__p_browse_name = &(address_space_bs__a_BrowseName[address_space_bs__p_node]);
 }
 
 
@@ -288,7 +289,7 @@ void address_space_bs__get_DisplayName(
     /* TODO: this constraint should be pushed to dataprep */
     assert(address_space_bs__a_DisplayName_end[address_space_bs__p_node] >= i);
     /* TODO: what to do with other display names ([begin + 1, end]) ? */
-    *address_space_bs__p_display_name = *(SOPC_LocalizedText *) &(address_space_bs__a_DisplayName[i]);
+    *address_space_bs__p_display_name = &(address_space_bs__a_DisplayName[i]);
 }
 
 
@@ -297,7 +298,12 @@ void address_space_bs__get_NodeClass(
    constants__t_NodeClass_i * const address_space_bs__p_node_class)
 {
     assert(address_space_bs__p_node <= address_space_bs__nNodeIds);
-    *address_space_bs__p_node_class = address_space_bs__a_NodeClass[address_space_bs__p_node];
+
+    bool res = util_NodeClass__C_to_B(address_space_bs__a_NodeClass[address_space_bs__p_node],
+                                      address_space_bs__p_node_class);
+    if(res == false){
+      *address_space_bs__p_node_class = constants__c_NodeClass_indet;
+    }
 }
 
 
