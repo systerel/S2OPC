@@ -103,7 +103,7 @@ OPERATIONS
     /* END OF LOCAL OPERATIONS */
     nsession <-- client_init_session_sm =
     BEGIN
-        nsession <-- init_new_session
+        nsession <-- init_new_session (TRUE)
     END;
 
     valid <-- client_create_session_req_sm (session, channel, create_req_msg) =
@@ -142,7 +142,7 @@ OPERATIONS
         l_nonce,
         l_secpol
     IN
-        l_nsession <-- init_new_session;
+        l_nsession <-- init_new_session (FALSE);
         l_valid_session <-- is_valid_session (l_nsession);
         IF l_valid_session = TRUE THEN
             create_session(l_nsession, channel, e_session_created);

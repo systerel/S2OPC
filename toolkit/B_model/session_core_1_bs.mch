@@ -140,8 +140,10 @@ OPERATIONS
         a_orphaned := {session} <<| a_orphaned
     END;
 
-    session <-- init_new_session =
-    BEGIN
+    session <-- init_new_session (is_client) =
+    PRE
+        is_client : BOOL
+    THEN
         IF s_session = t_session
         THEN
             session := c_session_indet
