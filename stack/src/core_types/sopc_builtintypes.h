@@ -19,6 +19,7 @@
 #define SOPC_BUILTINTYPES_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "sopc_base_types.h"
 #include "sopc_encodeabletype.h"
@@ -70,18 +71,14 @@ typedef SOPC_Byte SOPC_Boolean;
 
 typedef int8_t SOPC_SByte;
 
-typedef struct SOPC_ByteString {
-    int32_t    Length;
-    SOPC_Byte* Data;
-} SOPC_ByteString;
-
-typedef SOPC_ByteString SOPC_XmlElement;
-
 typedef struct SOPC_String {
     int32_t    Length;
-    uint8_t    DoNotClear; // flag indicating if bytes must be freed
+    bool       DoNotClear; // flag indicating if bytes must be freed
     SOPC_Byte* Data;
 } SOPC_String;
+
+typedef SOPC_String SOPC_XmlElement;
+typedef SOPC_String SOPC_ByteString;
 
 typedef struct SOPC_DateTime {
     uint32_t Low32;
@@ -358,9 +355,8 @@ SOPC_StatusCode SOPC_ByteString_Compare(const SOPC_ByteString* left,
                                         int32_t*               comparison);
 SOPC_StatusCode SOPC_ByteString_CompareAux(const void* left, const void* right, int32_t* comparison);
 
-// Returns 0 if false
-uint8_t SOPC_ByteString_Equal(const SOPC_ByteString* left,
-                              const SOPC_ByteString* right);
+bool SOPC_ByteString_Equal(const SOPC_ByteString* left,
+                           const SOPC_ByteString* right);
 
 void SOPC_String_Initialize(SOPC_String* string);
 void SOPC_String_InitializeAux(void* value);
@@ -381,12 +377,12 @@ void SOPC_String_Delete(SOPC_String* bstring);
 
 SOPC_StatusCode SOPC_String_Compare(const SOPC_String* left,
                                     const SOPC_String* right,
-                                    uint8_t            ignoreCase,
+                                    bool               ignoreCase,
                                     int32_t*           comparison);
 SOPC_StatusCode SOPC_String_CompareAux(const void* left, const void* right, int32_t* comparison);
 
-uint32_t SOPC_String_Equal(const SOPC_String* left,
-                      const SOPC_String* right);
+bool SOPC_String_Equal(const SOPC_String* left,
+                       const SOPC_String* right);
 
 void SOPC_XmlElement_Initialize(SOPC_XmlElement* xmlElt);
 void SOPC_XmlElement_InitializeAux(void* value);

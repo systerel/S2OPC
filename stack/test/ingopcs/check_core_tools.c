@@ -709,46 +709,46 @@ START_TEST(test_ua_encoder_basic_types)
     // Test Boolean nominal and degraded cases
     SOPC_Buffer_Reset(buffer);
     //// Nominal write
-    SOPC_Boolean bool = FALSE;
-    status = SOPC_Boolean_Write(&bool, buffer);
+    SOPC_Boolean boolv = false;
+    status = SOPC_Boolean_Write(&boolv, buffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(buffer->data[0] == FALSE);
-    bool = 1; // not FALSE
-    status = SOPC_Boolean_Write(&bool, buffer);
+    ck_assert(buffer->data[0] == false);
+    boolv = 1; // not FALSE
+    status = SOPC_Boolean_Write(&boolv, buffer);
     ck_assert(status == STATUS_OK);
     ck_assert(buffer->data[1] == 1);
-    bool = 2; // not FALSE
-    status = SOPC_Boolean_Write(&bool, buffer);
+    boolv = 2; // not FALSE
+    status = SOPC_Boolean_Write(&boolv, buffer);
     ck_assert(status == STATUS_OK);
     ck_assert(buffer->data[2] == 1); // True value always encoded as 1
 
     //// Degraded write
     status = SOPC_Boolean_Write(NULL, buffer);
     ck_assert(status != STATUS_OK);
-    status = SOPC_Boolean_Write(&bool, NULL);
+    status = SOPC_Boolean_Write(&boolv, NULL);
     ck_assert(status != STATUS_OK);
-    status = SOPC_Boolean_Write(&bool, bufferFull); // Test with full buffer
+    status = SOPC_Boolean_Write(&boolv, bufferFull); // Test with full buffer
     ck_assert(status != STATUS_OK);
 
     //// Nominal read
-    bool = 4;
+    boolv = 4;
     SOPC_Buffer_SetPosition(buffer, 0); // Reset position for reading
     buffer->data[2] = 2; // Simulates a true value received as 2
-    status = SOPC_Boolean_Read(&bool, buffer);
+    status = SOPC_Boolean_Read(&boolv, buffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(bool == FALSE);
-    status = SOPC_Boolean_Read(&bool, buffer);
+    ck_assert(boolv == false);
+    status = SOPC_Boolean_Read(&boolv, buffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(bool == 1);
-    status = SOPC_Boolean_Read(&bool, buffer);
+    ck_assert(boolv == 1);
+    status = SOPC_Boolean_Read(&boolv, buffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(bool == 1); // True value always decoded as 1
+    ck_assert(boolv == 1); // True value always decoded as 1
     //// Degraded read
     status = SOPC_Boolean_Read(NULL, buffer);
     ck_assert(status != STATUS_OK);
-    status = SOPC_Boolean_Read(&bool, NULL);
+    status = SOPC_Boolean_Read(&boolv, NULL);
     ck_assert(status != STATUS_OK);
-    status = SOPC_Boolean_Read(&bool, buffer); // Nothing to read anymore
+    status = SOPC_Boolean_Read(&boolv, buffer); // Nothing to read anymore
     ck_assert(status != STATUS_OK);
 
     // Test SByteuv16nal and degraded cases
@@ -1189,7 +1189,7 @@ START_TEST(test_ua_encoder_other_types)
     SOPC_ByteString_Initialize(bs2);
     status = SOPC_ByteString_Read(bs2, buffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(SOPC_ByteString_Equal(bs, bs2) != FALSE);
+    ck_assert(SOPC_ByteString_Equal(bs, bs2) != false);
     ck_assert(bs2->Length == 3);
     ck_assert(bs2->Data[0] == 0x42);
     ck_assert(bs2->Data[1] == 0x6F);
@@ -1312,7 +1312,7 @@ START_TEST(test_ua_encoder_other_types)
     SOPC_String_Initialize(&str2);
     status = SOPC_String_Read(&str2, buffer);
     ck_assert(status == STATUS_OK);
-    ck_assert(SOPC_String_Equal(&str, &str2) != FALSE);
+    ck_assert(SOPC_String_Equal(&str, &str2) != false);
     ck_assert(memcmp(SOPC_String_GetRawCString(&str2), "Boy", 3) == 0);
 
     ////// Read 0 length bytestring
