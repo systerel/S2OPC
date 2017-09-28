@@ -235,7 +235,7 @@ SOPC_AddressSpace addressSpace = {
 <xsl:template match="uax:Status" mode="value">,{SOPC_StatusCode_Id, SOPC_VariantArrayType_SingleValue, {.Status=<xsl:value-of select="."/>}}</xsl:template>
 
 <xsl:template match="*" mode="value">
-<xsl:message > unknown type <xsl:value-of select="local-name(.)"/>
+<xsl:message terminate="yes"> unknown type <xsl:value-of select="local-name(.)"/>
 </xsl:message>
 </xsl:template>
 
