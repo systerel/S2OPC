@@ -2,7 +2,7 @@
 
  File Name            : session_core.c
 
- Date                 : 28/09/2017 17:45:21
+ Date                 : 28/09/2017 17:52:24
 
  C Translator Version : tradc Java V1.0 (14/03/2012)
 
@@ -67,7 +67,8 @@ void session_core__server_internal_activate_req_and_resp(
 
 void session_core__client_init_session_sm(
    constants__t_session_i * const session_core__nsession) {
-   session_core_1_bs__init_new_session(session_core__nsession);
+   session_core_1_bs__init_new_session(true,
+      session_core__nsession);
 }
 
 void session_core__client_create_session_req_sm(
@@ -122,7 +123,8 @@ void session_core__server_create_session_req_and_resp_sm(
       constants__t_Nonce_i session_core__l_nonce;
       constants__t_SecurityPolicy session_core__l_secpol;
       
-      session_core_1_bs__init_new_session(&session_core__l_nsession);
+      session_core_1_bs__init_new_session(false,
+         &session_core__l_nsession);
       session_core_1_bs__is_valid_session(session_core__l_nsession,
          &session_core__l_valid_session);
       if (session_core__l_valid_session == true) {
