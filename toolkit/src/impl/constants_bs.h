@@ -45,7 +45,7 @@ typedef SOPC_QualifiedName constants_bs__t_QualifiedName_i;
 #define constants_bs__t_Reference_i t_entier4
 typedef void * constants_bs__t_SignatureData_i;
 #define constants_bs__t_UserId_i t_entier4
-typedef void * constants_bs__t_Variant_i;
+typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef void * constants_bs__t_byte_buffer_i;
 #define constants_bs__t_channel_config_idx_i t_entier4
 #define constants_bs__t_channel_i t_entier4

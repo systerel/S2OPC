@@ -43,7 +43,7 @@
          &(T const){ __VA_ARGS__ }, \
          sizeof(T))
 
-const uint32_t N_GROUPS = 4;
+const uint32_t N_GROUPS = 6;
 
 OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
 {
@@ -137,7 +137,57 @@ OpcUa_WriteRequest *tlibw_new_WriteRequest(void)
                 .Value = {
                     .BuiltInTypeId = SOPC_String_Id,
                     .ArrayType = SOPC_VariantArrayType_SingleValue,
+                    .Value.String = buf}}
+            };
+    }
+
+    /* ByteString */
+    for(i=0; i<N_VARS/N_GROUPS; ++i)
+    {
+        buf.Length = 8;
+        buf.Data = (SOPC_Byte *)malloc(8);
+        if(NULL == buf.Data)
+            exit(1);
+        j = (uint32_t)i;
+        memcpy((void *)(buf.Data  ), "BySt", 4);
+        memcpy((void *)(buf.Data+4), (void *)&j, 4);
+
+        lwv[i+4*(N_VARS/N_GROUPS)] = (OpcUa_WriteValue) {
+            .NodeId = {
+                .IdentifierType = IdentifierType_Numeric,
+                .Data.Numeric = i+4*(N_VARS/N_GROUPS)+1000+1},
+            .AttributeId = e_aid_Value,
+            .IndexRange = {.Length = 0},
+            .Value = {
+                .Value = {
+                    .BuiltInTypeId = SOPC_ByteString_Id,
+                    .ArrayType = SOPC_VariantArrayType_SingleValue,
                     .Value.Bstring = buf}}
+            };
+    }
+
+    /* XmlElt */
+    for(i=0; i<N_VARS/N_GROUPS; ++i)
+    {
+        buf.Length = 8;
+        buf.Data = (SOPC_Byte *)malloc(8);
+        if(NULL == buf.Data)
+            exit(1);
+        j = (uint32_t)i;
+        memcpy((void *)(buf.Data  ), "XML ", 4);
+        memcpy((void *)(buf.Data+4), (void *)&j, 4);
+
+        lwv[i+5*(N_VARS/N_GROUPS)] = (OpcUa_WriteValue) {
+            .NodeId = {
+                .IdentifierType = IdentifierType_Numeric,
+                .Data.Numeric = i+5*(N_VARS/N_GROUPS)+1000+1},
+            .AttributeId = e_aid_Value,
+            .IndexRange = {.Length = 0},
+            .Value = {
+                .Value = {
+                    .BuiltInTypeId = SOPC_XmlElement_Id,
+                    .ArrayType = SOPC_VariantArrayType_SingleValue,
+                    .Value.XmlElt = buf}}
             };
     }
 
@@ -165,8 +215,11 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest **ppWriteReq)
     pReq = *ppWriteReq;
 
     /* Free the ByteStrings */
-    for(i=0; i<N_VARS/4; ++i)
-        free(pReq->NodesToWrite[i+(N_GROUPS-1)+1].Value.Value.Value.Bstring.Data);
+    for(i=0; i<N_VARS/N_GROUPS; ++i){
+        free(pReq->NodesToWrite[i+3*(N_VARS/N_GROUPS)].Value.Value.Value.String.Data);
+        free(pReq->NodesToWrite[i+4*(N_VARS/N_GROUPS)].Value.Value.Value.Bstring.Data);
+        free(pReq->NodesToWrite[i+5*(N_VARS/N_GROUPS)].Value.Value.Value.XmlElt.Data);
+    }
     /* Free the lwv */
     free(pReq->NodesToWrite);
     /* Free the request */

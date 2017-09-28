@@ -98,7 +98,7 @@ constants__t_LocalizedText_i    *address_space_bs__a_DisplayName = NULL;
 int32_t                         *address_space_bs__a_DisplayName_begin = NULL;
 int32_t                         *address_space_bs__a_DisplayName_end = NULL;
 /* Family Vars */
-constants__t_Variant_i          *address_space_bs__a_Value = NULL;
+constants__t_Variant_i          address_space_bs__a_Value = NULL; // <=> SOPC_Variant* => array of variants
 constants__t_StatusCode_i       *address_space_bs__a_Value_StatusCode = NULL;
 
 /* Family HasTypeDefinition */
@@ -228,7 +228,7 @@ void address_space_bs__read_AddressSpace_Attribute_value(
     case constants__e_aid_Value:
         assert(address_space_bs__node >= offVarsTypes);
         assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
-        *address_space_bs__variant = util_variant__new_Variant_from_Variant(address_space_bs__a_Value[address_space_bs__node - offVarsTypes]);
+        *address_space_bs__variant = util_variant__new_Variant_from_Variant(&address_space_bs__a_Value[address_space_bs__node - offVarsTypes]);
         break;
     default:
         /* TODO: maybe return NULL here, to be consistent with msg_read_response_bs__write_read_response_iter and service_read__treat_read_request behavior. */
@@ -242,25 +242,13 @@ void address_space_bs__set_Value(
    const constants__t_Node_i address_space_bs__node,
    const constants__t_Variant_i address_space_bs__value)
 {
-    /* TODO: the value is not encoded yet. */
-    /* TODO: this may fail, but the operation is not specified to be able to fail */
-    SOPC_Variant *pvar = malloc(sizeof(SOPC_Variant));
-    constants__t_Variant_i poldvar = NULL;
-
-    /* Deep-copy the value */
-    if(NULL != pvar)
-    {
-        SOPC_Variant_Initialize(pvar);
-        if(STATUS_OK == SOPC_Variant_Copy(pvar, (SOPC_Variant *)address_space_bs__value))
-        {
-            assert(address_space_bs__node >= offVarsTypes);
-            assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
-            poldvar = address_space_bs__a_Value[address_space_bs__node - offVarsTypes];
-            SOPC_Variant_Clear((SOPC_Variant *)poldvar);
-            free((void *)poldvar);
-            address_space_bs__a_Value[address_space_bs__node - offVarsTypes] = (constants__t_Variant_i)pvar;
-        }
-    }
+    assert(address_space_bs__node >= offVarsTypes);
+    assert(address_space_bs__node - offVarsTypes <= address_space_bs__nVariables + address_space_bs__nVariableTypes);
+    SOPC_Variant* pvar = &address_space_bs__a_Value[address_space_bs__node - offVarsTypes];
+    // Clear old value
+    SOPC_Variant_Clear(pvar);
+    /* Deep-copy the new value */   
+    assert(STATUS_OK == SOPC_Variant_Copy(pvar, (SOPC_Variant *) address_space_bs__value));
 }
 
 

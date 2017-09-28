@@ -53,7 +53,7 @@ constants__t_Variant_i util_variant__new_Variant_from_Indet(void);
 /**
  * The returned Variant is malloced and shall be freed by the consumer.
  */
-constants__t_Variant_i util_variant__new_Variant_from_Variant(void *pvara);
+constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvara);
 
 /**
  * The returned Variant is malloced and shall be freed by the consumer.

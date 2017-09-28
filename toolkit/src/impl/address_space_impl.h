@@ -64,7 +64,7 @@ extern constants__t_QualifiedName_i     *address_space_bs__a_BrowseName;
 extern constants__t_LocalizedText_i     *address_space_bs__a_DisplayName;
 extern int32_t                          *address_space_bs__a_DisplayName_begin;
 extern int32_t                          *address_space_bs__a_DisplayName_end;
-extern constants__t_Variant_i           *address_space_bs__a_Value;
+extern constants__t_Variant_i           address_space_bs__a_Value;
 extern constants__t_StatusCode_i        *address_space_bs__a_Value_StatusCode;
 extern constants__t_ExpandedNodeId_i    *address_space_bs__HasTypeDefinition;
 extern constants__t_NodeId_i            *address_space_bs__refs_ReferenceType;

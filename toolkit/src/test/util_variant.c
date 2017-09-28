@@ -94,7 +94,7 @@ constants__t_Variant_i util_variant__new_Variant_from_Indet(void) {
 }
 
 
-constants__t_Variant_i util_variant__new_Variant_from_Variant(void *pvara){
+constants__t_Variant_i util_variant__new_Variant_from_Variant(SOPC_Variant* pvara){
     SOPC_Variant *pvar;
     if(NULL == pvara)
         return util_variant__new_Variant_from_Indet();
@@ -223,6 +223,21 @@ void util_variant__print_SOPC_Variant(SOPC_Variant *pvar)
         }
         printf("\"\n");
         break;
+    case SOPC_XmlElement_Id:
+      printf("XmlElement\n  Length: %d\n  Value: \"", pvar->Value.XmlElt.Length);
+      /* Pretty print */
+      for(i=0; i<(size_t)pvar->Value.XmlElt.Length; ++i)
+      {
+          c = pvar->Value.XmlElt.Data[i];
+          if(0x20 <= c && c < 0x80)
+              /* Displayable ascii range */
+              printf("%c", c);
+          else
+              /* Special char */
+              printf("\\x%02X", c);
+      }
+      printf("\"\n");
+      break;
     case SOPC_NodeId_Id:
         switch(pvar->Value.NodeId->IdentifierType)
         {
@@ -244,7 +259,6 @@ void util_variant__print_SOPC_Variant(SOPC_Variant *pvar)
     case SOPC_UInt64_Id:
     case SOPC_DateTime_Id:
     case SOPC_Guid_Id:
-    case SOPC_XmlElement_Id:
     case SOPC_ExpandedNodeId_Id:
     case SOPC_QualifiedName_Id:
     case SOPC_LocalizedText_Id:

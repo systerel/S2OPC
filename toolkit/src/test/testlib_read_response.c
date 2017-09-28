@@ -34,12 +34,12 @@
 /**
  * You should free() the returned Variant* afterwards.
  */
-constants__t_Variant_i *new_variant_rvi(constants__t_NodeId_i     *pnids,
-                                        constants__t_NodeClass_i  *pncls,
-                                        constants__t_Variant_i    *pvars,
-                                        constants__t_StatusCode_i *pscs,
-                                        uint32_t                  attr_id,
-                                        size_t                    rvi)
+SOPC_Variant* new_variant_rvi(constants__t_NodeId_i     *pnids,
+                              constants__t_NodeClass_i  *pncls,
+                              constants__t_Variant_i    pvars,
+                              constants__t_StatusCode_i *pscs,
+                              uint32_t                  attr_id,
+                              size_t                    rvi)
 {
     if(NULL == pnids ||
        NULL == pncls ||
@@ -57,8 +57,9 @@ constants__t_Variant_i *new_variant_rvi(constants__t_NodeId_i     *pnids,
         assert(address_space_bs__nViews >= 0);
         assert(address_space_bs__nObjects >= 0);
         assert(rvi >= (uint32_t) address_space_bs__nViews + address_space_bs__nObjects);
+        assert(rvi - (uint32_t) (address_space_bs__nViews + address_space_bs__nObjects) <= (uint32_t) address_space_bs__nVariables + address_space_bs__nVariableTypes);
         return util_variant__new_Variant_from_Variant
-                 (pvars[rvi - (uint32_t) (address_space_bs__nViews + address_space_bs__nObjects)]);
+                ((SOPC_Variant*) &pvars[rvi - (uint32_t) (address_space_bs__nViews + address_space_bs__nObjects)]);
     default:
         return NULL;
     }
@@ -134,12 +135,12 @@ bool test_read_request_response(OpcUa_ReadResponse *pReadResp,
         bTestOk = STATUS_OK == get_rvi(address_space_bs__a_NodeId, &pReadReq->NodesToRead[i].NodeId, &rvi);
         /* Find desired attribute and wrap it in a new SOPC_Variant* */
         if(bTestOk){
-            pvar = (SOPC_Variant *)new_variant_rvi(address_space_bs__a_NodeId, 
-                                                   address_space_bs__a_NodeClass, 
-                                                   address_space_bs__a_Value, 
-                                                   address_space_bs__a_Value_StatusCode,
-                                                   pReadReq->NodesToRead[i].AttributeId, 
-                                                   rvi);
+            pvar = new_variant_rvi(address_space_bs__a_NodeId, 
+                                   address_space_bs__a_NodeClass, 
+                                   address_space_bs__a_Value, 
+                                   address_space_bs__a_Value_StatusCode,
+                                   pReadReq->NodesToRead[i].AttributeId, 
+                                   rvi);
         }else{
             pvar = NULL;
         }

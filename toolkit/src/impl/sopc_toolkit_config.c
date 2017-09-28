@@ -388,7 +388,7 @@ void SOPC_Internal_ToolkitServer_SetAddressSpaceConfig(SOPC_AddressSpace* addres
     address_space_bs__a_DisplayName = (constants__t_LocalizedText_i *) addressSpace->displayNameArray;
     address_space_bs__a_DisplayName_begin = addressSpace->displayNameIdxArray_begin;
     address_space_bs__a_DisplayName_end = addressSpace->displayNameIdxArray_end;
-    address_space_bs__a_Value = (constants__t_Variant_i *) addressSpace->valueArray;
+    address_space_bs__a_Value = (constants__t_Variant_i) addressSpace->valueArray;
     /* Converts status codes */
     address_space_bs__a_Value_StatusCode = addressSpace->valueStatusArray;
     for(i=1; i<=address_space_bs__nVariables; ++i)
